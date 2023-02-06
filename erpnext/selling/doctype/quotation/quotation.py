@@ -28,13 +28,15 @@ class Quotation(SellingController):
 		self.validate_valid_till()
 		self.validate_shopping_cart_items()
 		self.set_customer_name()
-		self.validate_alternative_items()
 		if self.items:
 			self.with_items = 1
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
+
+	def before_submit(self):
+		self.set_has_alternative_item()
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
@@ -59,6 +61,16 @@ class Quotation(SellingController):
 					),
 					title=_("Unpublished Item"),
 				)
+
+	def set_has_alternative_item(self):
+		"""Mark 'Has Alternative Item' for rows."""
+		if not any(row.is_alternative for row in self.get("items")):
+			return
+
+		items_with_alternatives = self.get_rows_with_alternatives()
+		for row in self.get("items"):
+			if not row.is_alternative and row.name in items_with_alternatives:
+				row.has_alternative_item = 1
 
 	def get_ordered_status(self):
 		status = "Open"
@@ -98,10 +110,8 @@ class Quotation(SellingController):
 			)
 			return in_sales_order
 
-		items_with_alternatives = self.get_items_having_alternatives()
-
 		def can_map(row) -> bool:
-			if row.is_alternative or (row.item_code in items_with_alternatives):
+			if row.is_alternative or row.has_alternative_item:
 				return is_in_sales_order(row)
 
 			return True
@@ -126,24 +136,6 @@ class Quotation(SellingController):
 				"Lead", self.party_name, ["lead_name", "company_name"]
 			)
 			self.customer_name = company_name or lead_name
-
-	def validate_alternative_items(self):
-		if not any(row.is_alternative for row in self.get("items")):
-			return
-
-		non_alternative_items = filter(lambda item: not item.is_alternative, self.get("items"))
-		non_alternative_items = list(map(lambda item: item.item_code, non_alternative_items))
-
-		alternative_items = filter(lambda item: item.is_alternative, self.get("items"))
-
-		for row in alternative_items:
-			if row.alternative_to not in non_alternative_items:
-				frappe.throw(
-					_("Row #{0}: {1} is not a valid non-alternative Item from the table").format(
-						row.idx, frappe.bold(row.alternative_to)
-					),
-					title=_("Invalid Item"),
-				)
 
 	def update_opportunity(self, status):
 		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
@@ -222,10 +214,21 @@ class Quotation(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.valid_till = None
 
-	def get_items_having_alternatives(self):
-		alternative_items = filter(lambda item: item.is_alternative, self.get("items"))
-		items_with_alternatives = set((map(lambda item: item.alternative_to, alternative_items)))
-		return items_with_alternatives
+	def get_rows_with_alternatives(self):
+		rows_with_alternatives = []
+		table_length = len(self.get("items"))
+
+		for idx, row in enumerate(self.get("items")):
+			if row.is_alternative:
+				continue
+
+			if idx == (table_length - 1):
+				break
+
+			if self.get("items")[idx + 1].is_alternative:
+				rows_with_alternatives.append(row.name)
+
+		return rows_with_alternatives
 
 
 def get_list_context(context=None):
@@ -261,10 +264,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		)
 	)
 
-	alternative_map = {
-		x.get("original_item"): x.get("alternative_item")
-		for x in frappe.flags.get("args", {}).get("mapping", [])
-	}
+	selected_rows = [x.get("name") for x in frappe.flags.get("args", {}).get("selected_items", [])]
 
 	def set_missing_values(source, target):
 		if customer:
@@ -297,19 +297,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		3. Is Alternative Item: Map if alternative was selected against original item and #1
 		"""
 		has_qty = item.qty > 0
-
-		has_alternative = item.item_code in alternative_map
-		is_alternative = item.is_alternative
-
-		if not alternative_map or not (is_alternative or has_alternative):
+		if not (item.is_alternative or item.has_alternative_item):
 			# No alternative items in doc or current row is a simple item (without alternatives)
 			return has_qty
 
-		if is_alternative:
-			is_selected = alternative_map.get(item.alternative_to) == item.item_code
-		else:
-			is_selected = alternative_map.get(item.item_code) is None
-		return is_selected and has_qty
+		return (item.name in selected_rows) and has_qty
 
 	doclist = get_mapped_doc(
 		"Quotation",
