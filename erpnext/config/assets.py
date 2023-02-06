@@ -90,5 +90,24 @@ def get_data():
 					"dependencies": ["Asset Maintenance"]
 				},
 			]
+		},
+  		{
+			"label": _("Assets Log Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vehicle"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Log"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Expenses",
+					"doctype": "Vehicle"
+				},
+			]
 		}
 	]

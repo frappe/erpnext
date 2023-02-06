@@ -40,7 +40,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "HR-VLOG-.YYYY.-",
+   "options": "AT-VLOG-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -166,7 +166,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-12 15:10:17.153809",
+ "modified": "2023-02-06 17:40:34.312406",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",

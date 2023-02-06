@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt, cstr
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
+import json
 
 class VehicleLog(Document):
 	# def validate(self):
@@ -16,6 +17,11 @@ class VehicleLog(Document):
 
 	def on_submit(self):
 		frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", self.odometer)
+		if self.maintenance_type =="Internal":
+			make_material_request(self)
+		else:
+			make_expense_claim(self)
+		
 
 	def on_cancel(self):
 		distance_travelled = self.odometer - self.last_odometer
@@ -46,3 +52,32 @@ def make_expense_claim(docname):
 		"amount": claim_amount
 	})
 	return exp_claim.as_dict()
+def make_material_request(data):  
+    data =json.loads(data)
+    mr = frappe.new_doc("Material Request")
+    mr.material_request_type = "Material Issue"
+    mr.cost_association=data['cost_association']
+    mr.company = data['company']
+    mr.title="Issue Request for Vehicle Log"
+    # mr.customer = data['customer'] or '_Test Customer'
+    mr.vehicle_log=data['name']
+    mr.sub_branch=data['sub_branch']
+    mr.transaction_date=data['date']
+    mr.schedule_date=data['date']
+    mr.naming_series="MAT-MR-.YYYY.-"
+    mr.request_from="RMS"
+    for item in data['service_detail']:
+        warehouse=get_warehouse(item['item_code'],data['company'])
+        i={}
+        i['item_code']= item['item_code']
+        i["qty"]= item['qty']
+        i["uom"]= item['uom'] 
+        i["conversion_factor"]= 1
+        i["schedule_date"]= data['date'] 
+        i["cost_center"]= data['cost_center']
+        i["warehouse"]=warehouse[1]
+        mr.append("items", i)
+    # mr.items=items
+    mr.insert(ignore_permissions=True)
+    mr.submit()
+    return mr
