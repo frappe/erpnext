@@ -155,14 +155,21 @@ class Analytics(object):
 
 	def get_sales_transactions_based_on_order_type(self):
 		# if self.filters["value_quantity"] == "Value":
-		value_field = "base_net_total"
+		# value_field = "base_net_total"
 		# else:
-		qty_field = "total_qty"
-
+		# qty_field = "total_qty"
+		value_field = """(select ifnull(sum(dni.base_amount),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss_amt),0) - ifnull(sum(i.abnormal_loss_amt),0) + ifnull(sum(i.excess_amt),0) as value"""
+		qty_field = """
+						(select ifnull(sum(dni.qty),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss),0) - ifnull(sum(i.abnormal_loss),0) + ifnull(sum(i.excess_qty),0) as qty
+		"""
 		self.entries = frappe.db.sql(
 			""" select s.order_type as entity, s.{value_field} as value, s.{qty_field} as qty, s.{date_field}
-			from `tab{doctype}` s where s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
-			and ifnull(s.order_type, '') != '' order by s.order_type
+			from `tab{doctype}` s, `tab{doctype} Item` i where s.name = i.parent and s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
+			and ifnull(s.order_type, '') != '' group by s.name order by s.order_type
 		""".format(
 				date_field=self.date_field, value_field=value_field, qty_field = qty_field, doctype=self.filters.doc_type
 			),
@@ -178,9 +185,18 @@ class Analytics(object):
 		# 	value_field = "base_net_total as value_field"
 		# else:
 		# 	value_field = "total_qty as value_field"
-		value_field = "base_net_total-total_normal_loss-total_abnormal_loss+total_excess_amount as value"
-		qty_field = "total_qty as qty"
-
+		# value_field = "base_net_total-total_normal_loss-total_abnormal_loss+total_excess_amount as value"
+		# qty_field = "total_qty as qty"
+		value_field = """(select ifnull(sum(dni.base_amount),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss_amt),0) - ifnull(sum(i.abnormal_loss_amt),0) + ifnull(sum(i.excess_amt),0) as value"""
+		# else:
+		# qty_field = "total_qty as qty"
+		qty_field = """
+						(select ifnull(sum(dni.qty),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss),0) - ifnull(sum(i.abnormal_loss),0) + ifnull(sum(i.excess_qty),0) as qty
+		"""
 		if self.filters.tree_type == "Customer":
 			entity = "customer as entity"
 			entity_name = "customer_name as entity_name"
@@ -205,13 +221,26 @@ class Analytics(object):
 		# 		self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
 		# 	},
 		# )
-		self.entries = frappe.db.sql("""
-			select a.{}, a.{}, b.{}, b.{}, b.{}, a.{}, a.{}, a.{} from `tab{}` a, `tabCustomer` b where
-			a.docstatus = 1
-			and a.customer = b.name
-			and a.company = '{}'
-			and a.{} between '{}' and '{}' {}
-		""".format(entity, entity_name, country, territory, customer_type, value_field, qty_field, self.date_field, self.filters.doc_type, self.filters.company, self.date_field, self.filters.from_date, self.filters.to_date, cond), as_dict=1)
+		self.entries = frappe.db.sql(
+		"""
+			select s.name, s.{entity}, s.{entity_name}, b.{country}, b.{territory}, b.{customer_type}, {value_field}, {qty_field}, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s, `tabCustomer` b
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.customer = b.name
+			and s.{date_field} between %s and %s group by s.name
+		""".format(
+				entity = entity, entity_name = entity_name, country = country, territory = territory, customer_type = customer_type, date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, qty_field=qty_field
+			),
+			(self.filters.company, self.filters.from_date, self.filters.to_date),
+			as_dict=1,
+		)
+		# self.entries = frappe.db.sql("""
+		# 	select a.{}, a.{}, b.{}, b.{}, b.{}, a.{}, a.{}, a.{} from `tab{}` s, `tab  `tabCustomer` b where
+		# 	a.docstatus = 1
+		# 	and a.customer = b.name
+		# 	and a.company = '{}'
+		# 	and a.{} between '{}' and '{}' {}
+		# """.format(entity, entity_name, country, territory, customer_type, value_field, qty_field, self.date_field, self.filters.doc_type, self.filters.company, self.date_field, self.filters.from_date, self.filters.to_date, cond), as_dict=1)
 		self.entity_names = {}
 		for d in self.entries:
 			self.entity_names.setdefault(d.entity, {"entity_name":d.entity_name, "country":d.country, 'territory': d.territory, 'customer_type': d.customer_type})
@@ -222,15 +251,23 @@ class Analytics(object):
 
 		# if self.filters["value_quantity"] == "Value":
 		# else:
-		value_field = "base_amount as value"
-		qty_field = "stock_qty as qty"
-
+		# value_field = "i.base_net_amount-i.normal_loss_amt-i.abnormal_loss_amt+i.excess_amt as value"
+		value_field = """(select ifnull(sum(dni.billed_amt),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1 and dni.item_code = i.item_code) - ifnull(sum(i.normal_loss_amt),0) - ifnull(sum(i.abnormal_loss_amt),0) + ifnull(sum(i.excess_amt),0) as value
+		"""
+		# qty_field = "i.stock_qty-i.normal_loss-i.abnormal_loss+i.excess_qty as qty"
+		qty_field = """
+						(select ifnull(sum(dni.qty),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1 and dni.item_code = i.item_code) - ifnull(sum(i.normal_loss),0) - ifnull(sum(i.abnormal_loss),0) + ifnull(sum(i.excess_qty),0) as qty
+		"""
 		self.entries = frappe.db.sql(
 			"""
-			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field}, i.{qty_field}, s.{date_field}
+			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, {value_field}, {qty_field}, s.{date_field}
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
+			and s.{date_field} between %s and %s group by s.name, i.item_code
 		""".format(
 				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, qty_field=qty_field
 			),
@@ -244,9 +281,17 @@ class Analytics(object):
 
 	def get_sales_transactions_based_on_customer_or_territory_group(self):
 		# if self.filters["value_quantity"] == "Value":
-		value_field = "base_net_total as value"
+		# value_field= "base_net_total as value"
+		value_field = """(select ifnull(sum(dni.base_amount),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss_amt),0) - ifnull(sum(i.abnormal_loss_amt),0) + ifnull(sum(i.excess_amt),0) as value"""
 		# else:
-		qty_field = "total_qty as qty"
+		# qty_field = "total_qty as qty"
+		qty_field = """
+						(select ifnull(sum(dni.qty),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss),0) - ifnull(sum(i.abnormal_loss),0) + ifnull(sum(i.excess_qty),0) as qty
+		"""
 
 		if self.filters.tree_type == "Customer Group":
 			entity_field = "customer_group as entity"
@@ -256,29 +301,60 @@ class Analytics(object):
 		else:
 			entity_field = "territory as entity"
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type,
-			fields=[entity_field, value_field, qty_field, self.date_field],
-			filters={
-				"docstatus": 1,
-				"company": self.filters.company,
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+		# self.entries = frappe.get_all(
+		# 	self.filters.doc_type,
+		# 	fields=["name", entity_field, value_field, qty_field, self.date_field],
+		# 	filters={
+		# 		"docstatus": 1,
+		# 		"company": self.filters.company,
+		# 		self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		# 	},
+		# )
+		self.entries = frappe.db.sql(
+		"""
+			select s.name, s.{entity_field}, {value_field}, {qty_field}, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.{date_field} between %s and %s group by s.name
+		""".format(
+				entity_field = entity_field, date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, qty_field=qty_field
+			),
+			(self.filters.company, self.filters.from_date, self.filters.to_date),
+			as_dict=1,
 		)
+		# frappe.msgprint(
+		# 	"""
+		# 	select s.{entity_field}, {value_field}, {qty_field}, s.{date_field}
+		# 	from `tab{doctype} Item` i , `tab{doctype}` s
+		# 	where s.name = i.parent and i.docstatus = 1 and s.company = '{company}'
+		# 	and s.{date_field} between '{from_date}' and '{to_date}'
+		# """.format(
+		# 		entity_field = entity_field, date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, qty_field=qty_field, from_date = self.filters.from_date, to_date = self.filters.to_date, company = self.filters.company
+		# 	)
+		# )
 		self.get_groups()
 
 	def get_sales_transactions_based_on_item_group(self):
 		# if self.filters["value_quantity"] == "Value":
-		value_field = "base_amount"
+		# value_field = "base_amount"
+		value_field = """(select ifnull(sum(dni.base_amount),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1 and dni.item_group = i.item_group) - ifnull(sum(i.normal_loss_amt),0) - ifnull(sum(i.abnormal_loss_amt),0) + ifnull(sum(i.excess_amt),0) as value
+		"""
 		# else:
-		qty_field = "qty"
+		# qty_field = "qty"
+		qty_field = """
+						(select ifnull(sum(dni.qty),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss),0) - ifnull(sum(i.abnormal_loss),0) + ifnull(sum(i.excess_qty),0) as qty
+		"""
 
 		self.entries = frappe.db.sql(
 			"""
-			select i.item_group as entity, i.{value_field} as value, i.{qty_field} as qty, s.{date_field}
+			select i.item_group as entity, {value_field}, {qty_field}, s.{date_field}
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
+			and s.{date_field} between %s and %s group by s.name, i.item_group
 		""".format(
 				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, qty_field=qty_field
 			),
@@ -290,21 +366,42 @@ class Analytics(object):
 
 	def get_sales_transactions_based_on_project(self):
 		# if self.filters["value_quantity"] == "Value":
-		value_field = "base_net_total as value_field"
+		# value_field = "base_net_total as value_field"
+		value_field = """(select ifnull(sum(dni.base_amount),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss_amt),0) - ifnull(sum(i.abnormal_loss_amt),0) + ifnull(sum(i.excess_amt),0) as value
+		"""
 		# else:
-		qty_field = "total_qty as value_field"
+		# qty_field = "total_qty as value_field"
+		qty_field = """
+						(select ifnull(sum(dni.qty),0) from `tabDelivery Note Item` dni
+						where dni.parent = i.delivery_note
+						and dni.docstatus = 1) - ifnull(sum(i.normal_loss),0) - ifnull(sum(i.abnormal_loss),0) + ifnull(sum(i.excess_qty),0) as qty
+		"""
 
 		entity = "project as entity"
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type,
-			fields=[entity, value_field, qty_field, self.date_field],
-			filters={
-				"docstatus": 1,
-				"company": self.filters.company,
-				"project": ["!=", ""],
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
+		# self.entries = frappe.get_all(
+		# 	self.filters.doc_type,
+		# 	fields=[entity, value_field, qty_field, self.date_field],
+		# 	filters={
+		# 		"docstatus": 1,
+		# 		"company": self.filters.company,
+		# 		"project": ["!=", ""],
+		# 		self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		# 	},
+		# )
+		self.entries = frappe.db.sql(
+			"""
+			select s.project as entity, {value_field}, {qty_field}, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.{date_field} between %s and %s and (s.project is not NULL and s.project != '') group by s.name
+		""".format(
+				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, qty_field=qty_field
+			),
+			(self.filters.company, self.filters.from_date, self.filters.to_date),
+			as_dict=1,
 		)
 
 	def get_rows(self):
