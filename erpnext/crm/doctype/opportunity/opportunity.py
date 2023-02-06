@@ -55,6 +55,7 @@ class Opportunity(TransactionBase):
 		self.set_missing_values()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_financer()
+		self.validate_contact_no()
 		self.validate_follow_up()
 		self.validate_maintenance_schedule()
 		self.set_sales_person()
@@ -145,6 +146,11 @@ class Opportunity(TransactionBase):
 		elif self.meta.has_field('financer'):
 			self.financer_name = None
 			self.finance_type = None
+
+	def validate_contact_no(self):
+		contact_no_mandotory = cint(frappe.db.get_value("CRM Settings", None, "opportunity_contact_no_mandatory"))
+		if contact_no_mandotory and not (self.contact_phone or self.contact_mobile):
+			frappe.throw(_("Contact No is mandatory"))
 
 	def validate_follow_up(self):
 		self.next_follow_up = self.get_next_follow_up_date()
