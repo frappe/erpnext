@@ -54,10 +54,10 @@ def get_data(filters):
 	
 	and 
 		cc.name = pe.cost_center {1} {2} {3}""".format(total_qty, conditions, group_by, order_by)
-	
 	abbr = " - " + str(frappe.db.get_value("Company", filters.company, "abbr"))
 
 	total_qty = 0
+
 	for a in frappe.db.sql(query, as_dict=1):
 		if filters.show_aggregate:
 			a.qty = a.total_qty
@@ -78,17 +78,17 @@ def get_order_by(filters):
 	return " order by region, pe.location, pe.item_group, pe.item_code"
 
 def get_conditions(filters):
-	if not filters.cost_center:
-		return " and pe.docstatus = 1"
+	condition = ''
 	all_ccs = get_child_cost_centers(filters.cost_center)
-	if not all_ccs:
-		return " and pe.docstatus = 1"
- 
-	all_branch = [str("DUMMY")]
-	for a in all_ccs:
-		all_branch.append(str(a))
+	if len(all_ccs) > 1:
+		all_branch = []
+		for a in all_ccs:
+			all_branch.append(str(a))
+		if all_branch:
+			condition += " and pe.cost_center in {0} ".format(tuple(all_branch))
+	elif filters.cost_center:
+		condition += " and pe.cost_center = '{0}' ".format(filters.cost_center)
 
-	condition = " and pe.cost_center in {0} ".format(tuple(all_branch))
 	if filters.production_type != "All":
 		condition += " and pe.production_type = '{0}'".format(filters.production_type)
 
@@ -104,7 +104,7 @@ def get_conditions(filters):
 	if filters.item:
 		condition += " and pe.item_code = '{0}'".format(filters.item)
 
-	if filters.from_date and filters.to_date:
+	if filters.get("from_date") and filters.get("to_date"):
 		condition += " and DATE(pe.posting_date) between '{0}' and '{1}'".format(filters.from_date, filters.to_date)
 
 	if filters.warehouse:
