@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
@@ -293,7 +294,7 @@
    "print_hide": 1
   },
   {
-   "depends_on": "from_bom",
+   "depends_on": "eval:doc.from_bom && doc.docstatus == 0",
    "fieldname": "get_items",
    "fieldtype": "Button",
    "label": "Get Items",
@@ -714,10 +715,12 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2022-08-05 15:04:29.154512",
+ "links": [],
+ "modified": "2023-02-06 14:56:21.299871",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -807,6 +810,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
