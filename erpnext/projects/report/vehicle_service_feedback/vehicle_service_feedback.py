@@ -105,9 +105,9 @@ class VehicleServiceFeedback:
 		elif self.filters.get('feedback_filter') == "Pending Feedback":
 			conditions.append("ifnull(ro.customer_feedback, '') = ''")
 
-		if self.filters.get('reference_ro') == "Has Reference":
+		if self.filters.get('reference_ro') == "has_reference":
 			conditions.append("ifnull(ro.reference_no, '') != ''")
-		elif self.filters.get('reference_ro') == "Has No Reference":
+		elif self.filters.get('reference_ro') == "has_no_reference":
 			conditions.append("ifnull(ro.reference_no, '') = ''")
 
 		return " AND ".join(conditions) if conditions else ""
