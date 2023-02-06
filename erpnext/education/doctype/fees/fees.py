@@ -73,7 +73,7 @@ class Fees(AccountsController):
 	def on_submit(self):
 
 		#self.make_gl_entries()
-		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
 		if self.send_payment_request and self.student_email:
 			pr = make_payment_request(party_type="Student", party=self.student, dt="Fees",
 					dn=self.name, recipient_id=self.student_email,
