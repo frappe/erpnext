@@ -56,6 +56,7 @@ class Production(StockController):
 					"actual_qty": flt(d.qty),
 					"incoming_rate": flt(d.cop, 2)
 				}))
+				frappe.throw(str(sl_entries))
 
 		if self.transfer:
 			if not self.to_warehouse:
