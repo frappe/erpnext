@@ -159,13 +159,6 @@ class POLReceive(StockController):
 						& (pol_exp.fuel_book == self.fuelbook))
 					.orderby( pol_exp.entry_date,order=qb.desc)
 					).run(as_dict=True)
-			data += (
-					qb.from_(pol_exp)
-					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-					.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1) 
-						& ( pol_exp.party == self.supplier) & (pol_exp.fuel_book == self.fuelbook))
-					.orderby( pol_exp.entry_date,order=qb.desc)
-					).run(as_dict=True)
 		else:
 			data = (
 					qb.from_(pol_exp)
@@ -173,14 +166,6 @@ class POLReceive(StockController):
 					.where((pol_exp.docstatus == 1)  & (pol_exp.balance_amount > 0) 
 						& (pol_exp.party == self.supplier)
 						& (pol_exp.fuel_book == self.fuelbook) 
-						& (pol_exp.use_common_fuelbook == 1))
-					.orderby( pol_exp.entry_date,order=qb.desc)
-					).run(as_dict=True)
-			data += (
-					qb.from_(pol_exp)
-					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-					.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1) 
-						& (pol_exp.fuel_book == self.fuelbook)
 						& (pol_exp.use_common_fuelbook == 1))
 					.orderby( pol_exp.entry_date,order=qb.desc)
 					).run(as_dict=True)
