@@ -75,8 +75,6 @@ class TransporterInvoice(AccountsController):
 		self.deduction_gl_entries(gl_entries)
 		self.make_pol_gl_entry(gl_entries)
 		gl_entries = merge_similar_entries(gl_entries)
-		if frappe.session.user == "Administrator":
-			frappe.throw(str(gl_entries))
 		make_gl_entries(gl_entries,update_outstanding="No",cancel=self.docstatus == 2)
 	def make_supplier_gl_entry(self, gl_entries):
 		if flt(self.amount_payable) > 0:
@@ -315,6 +313,8 @@ class TransporterInvoice(AccountsController):
 			"company": self.company,
 			"total_amount_in_words": money_in_words(self.amount_payable),
 			"branch": self.branch,
+			"reference_type":self.doctype,
+			"referece_doctype":self.name
 		})
 		je.append("accounts",{
 			"account": credit_account,

@@ -45,6 +45,8 @@
   "reference",
   "clearance_date",
   "remark",
+  "reference_type",
+  "referece_doctype",
   "paid_loan",
   "inter_company_journal_entry_reference",
   "column_break98",
@@ -588,6 +590,19 @@
    "label": "Bank Payment",
    "options": "Bank Payment",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "referece_doctype",
+   "fieldtype": "Dynamic Link",
+   "label": "Referece Doctype",
+   "options": "reference_type"
   }
  ],
  "icon": "fa fa-file-text",
@@ -599,7 +614,7 @@
    "link_fieldname": "journal_entry"
   }
  ],
- "modified": "2023-01-10 10:51:20.220220",
+ "modified": "2023-02-07 11:23:15.700506",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
