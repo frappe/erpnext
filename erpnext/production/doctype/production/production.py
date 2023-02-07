@@ -75,14 +75,15 @@ class Production(StockController):
 						"actual_qty": flt(d.qty),
 						"incoming_rate": flt(d.cop, 2)
 					}))
-	
+		if frappe.session.user == "Administrator":
+			frappe.throw(str(sl_entries))
 		if self.docstatus == 2:
 			sl_entries.reverse()
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 	def get_gl_entries(self, warehouse_account):
-			gl_entries = super(Production, self).get_gl_entries(
-				warehouse_account)
-			return gl_entries
+		gl_entries = super(Production, self).get_gl_entries(
+			warehouse_account)
+		return gl_entries
 	""" ++++++++++ Ver 1.0.190401 Ends ++++++++++++ """
 
 	def assign_default_dummy(self):
