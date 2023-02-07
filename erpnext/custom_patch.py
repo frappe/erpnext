@@ -18,8 +18,8 @@ def change_account_name():
     # print('here')
     for d in        [
                     {
-                    "old_name": "Tshophhangma Consumable Warehouse - SMCL",
-                    "new_name": "Tshophhangma Consumable Warehouse"
+                    "old_name": "Tshophhangma Consumable Warehouse",
+                    "new_name": "Tshophangma Consumable Warehouse - SMCL"
                     }
                     ]:
         if frappe.db.exists("Account",{"account_name":d.get("old_name")}):
