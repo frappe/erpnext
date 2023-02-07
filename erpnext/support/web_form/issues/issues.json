@@ -1,13 +1,11 @@
 {
- "accept_payment": 0,
  "allow_comments": 1,
  "allow_delete": 1,
  "allow_edit": 1,
  "allow_incomplete": 0,
  "allow_multiple": 1,
  "allow_print": 0,
- "amount": 0.0,
- "amount_based_on_field": 0,
+ "apply_document_permissions": 0,
  "breadcrumbs": "[{\"label\":_(\"Issues\"), \"route\":\"issues\"}]",
  "creation": "2016-06-24 15:50:33.186483",
  "doc_type": "Issue",
@@ -16,20 +14,46 @@
  "idx": 0,
  "introduction_text": "",
  "is_standard": 1,
+ "list_columns": [
+  {
+   "fieldname": "opening_date",
+   "fieldtype": "Date",
+   "label": "Opening Date"
+  },
+  {
+   "fieldname": "opening_time",
+   "fieldtype": "Time",
+   "label": "Opening Time"
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status"
+  },
+  {
+   "fieldname": "resolution_date",
+   "fieldtype": "Datetime",
+   "label": "Resolution Date"
+  }
+ ],
+ "list_title": "Issues",
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2020-05-19 15:08:45.361878",
+ "modified": "2022-12-28 16:41:21.259050",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "issues",
  "owner": "Administrator",
  "published": 1,
  "route": "issues",
- "route_to_success_link": 0,
  "show_attachments": 0,
- "show_in_grid": 0,
+ "show_list": 1,
  "show_sidebar": 1,
- "sidebar_items": [],
  "success_message": "",
  "success_url": "/issues",
  "title": "Issue",
@@ -44,7 +68,7 @@
    "max_value": 0,
    "read_only": 0,
    "reqd": 1,
-   "show_in_filter": 0
+   "show_in_filter": 1
   },
   {
    "allow_read_on_all_link_options": 0,
