@@ -50,14 +50,14 @@ class Production(StockController):
 				}))
 
 		for d in self.get('items'):
+			if not d.warehouse:
+				frappe.msgprint('warehouse missing in product table at row {}'.format(frappe.bold(d.idx)), raise_exeception=True)
 			if cstr(d.warehouse):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.warehouse),
 					"actual_qty": flt(d.qty),
 					"incoming_rate": flt(d.cop, 2)
 				}))
-				if frappe.session.user == "Administrator":
-					frappe.throw(str(sl_entries))
 
 		if self.transfer:
 			if not self.to_warehouse:
@@ -77,9 +77,6 @@ class Production(StockController):
 						"actual_qty": flt(d.qty),
 						"incoming_rate": flt(d.cop, 2)
 					}))
-		if frappe.session.user == "Administrator":
-			frappe.throw(str(len(self.items)))
-			frappe.throw(str(sl_entries))
 		if self.docstatus == 2:
 			sl_entries.reverse()
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
