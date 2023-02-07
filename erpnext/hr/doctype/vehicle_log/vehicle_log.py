@@ -52,28 +52,28 @@ def make_expense_claim(docname):
 		"amount": claim_amount
 	})
 	return exp_claim.as_dict()
-def make_material_request(data):  
+def make_material_request(self):  
     mr = frappe.new_doc("Material Request")
     mr.material_request_type = "Material Issue"
-    mr.cost_association=data.cost_association
-    mr.company = data.company
+    mr.cost_association=self.cost_association
+    mr.company = self.company
     mr.title="Issue Request for Vehicle Log"
-    # mr.customer = data['customer'] or '_Test Customer'
-    mr.vehicle_log=data.name
-    mr.sub_branch=data.sub_branch
-    mr.transaction_date=data.date
-    mr.schedule_date=data.date
+    # mr.customer = self['customer'] or '_Test Customer'
+    mr.vehicle_log=self.name
+    mr.sub_branch=self.sub_branch
+    mr.transaction_date=self.date
+    mr.schedule_date=self.date
     mr.naming_series="MAT-MR-.YYYY.-"
     mr.request_from="RMS"
-    for item in data.service_detail:
-        warehouse=get_warehouse(item.item_code,data.company)
+    for item in self.service_detail:
+        warehouse=get_warehouse(item.item_code,self.company)
         i={}
         i['item_code']= item.item_code
         i["qty"]= item.qty
         i["uom"]= item.uom 
         i["conversion_factor"]= 1
-        i["schedule_date"]= data.date 
-        i["cost_center"]= data.cost_center
+        i["schedule_date"]= self.date 
+        i["cost_center"]= self.cost_center
         i["warehouse"]=warehouse[1]
         mr.append("items", i)
     # mr.items=items
