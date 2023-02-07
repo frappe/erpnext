@@ -14,6 +14,7 @@
   "column_break_3",
   "from_date",
   "to_date",
+  "disable_rounded_total",
   "column_break_6",
   "equipment",
   "registration_no",
@@ -26,6 +27,7 @@
   "section_break_17",
   "total_trip",
   "gross_amount",
+  "pol_amount",
   "outstanding_amount",
   "column_break_19",
   "other_deductions",
@@ -44,7 +46,6 @@
   "within_warehouse_amount",
   "production_transport_amount",
   "production_trip_count",
-  "pol_amount",
   "section_break_017",
   "deduction_amount",
   "columb_break_017",
@@ -292,7 +293,6 @@
   {
    "fieldname": "pol_amount",
    "fieldtype": "Currency",
-   "hidden": 1,
    "label": "POL Amount",
    "read_only": 1
   },
@@ -553,12 +553,18 @@
    "fieldtype": "Data",
    "label": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-20 13:57:15.272725",
+ "modified": "2023-02-07 10:27:30.363870",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice",

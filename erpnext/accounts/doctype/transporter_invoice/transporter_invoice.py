@@ -73,7 +73,10 @@ class TransporterInvoice(AccountsController):
 		self.make_item_gl_entries(gl_entries)
 		self.unloading_gl_entries(gl_entries)
 		self.deduction_gl_entries(gl_entries)
+		self.make_pol_gl_entry(gl_entries)
 		gl_entries = merge_similar_entries(gl_entries)
+		if frappe.session.user == "Administrator":
+			frappe.throw(str(gl_entries))
 		make_gl_entries(gl_entries,update_outstanding="No",cancel=self.docstatus == 2)
 	def make_supplier_gl_entry(self, gl_entries):
 		if flt(self.amount_payable) > 0:
@@ -93,28 +96,37 @@ class TransporterInvoice(AccountsController):
 				}, self.currency))
 
 	def make_item_gl_entries(self, gl_entries):
-		items = self.get_expense_gl()
-
-		for k,v in items.items():
-			party_type = party = ''
-			if  get_account_type( k, self.company) in ["Receivable","Payable"]:
-				party_type = "Supplier"
-				party = self.supplier
-
+		for d in self.items:
 			gl_entries.append(
 				self.get_gl_dict({
-						"account":  k,
-						"debit": flt(v,2),
-						"debit_in_account_currency": flt(v,2),
+						"account":  d.expense_account,
+						"debit": flt(d.transportation_amount,2),
+						"debit_in_account_currency": flt(d.transportation_amount,2),
 						"against_voucher": self.name,
 						"against_voucher_type": self.doctype,
-						"party_type": party_type,
-						"party": party,
+						"party_type": "Supplier",
+						"party": self.supplier,
 						"cost_center": self.cost_center,
 						"voucher_type":self.doctype,
 						"voucher_no":self.name
 				}, self.currency)
 			)
+	def make_pol_gl_entry(self, gl_entries):
+		expense_account = frappe.db.get_value("Company", self.company,'pol_expense_account')
+		gl_entries.append(
+			self.get_gl_dict({
+				"account":  expense_account,
+				"credit": flt(self.pol_amount,2),
+				"credit_in_account_currency": flt(self.pol_amount,2),
+				"against_voucher": self.name,
+				"against_voucher_type": self.doctype,
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"cost_center": self.cost_center,
+				"voucher_type":self.doctype,
+				"voucher_no":self.name
+			}, self.currency)
+		)
 
 	def unloading_gl_entries(self,gl_entries):
 		if flt(self.unloading_amount):
@@ -141,10 +153,6 @@ class TransporterInvoice(AccountsController):
 			)
 	def deduction_gl_entries(self,gl_entries):
 		for d in self.deductions:
-			party_type = party = ''
-			if  get_account_type( d.account, self.company) in ["Receivable","Payable"]:
-				party_type = "Supplier"
-				party = self.supplier
 			gl_entries.append(
 				self.get_gl_dict({
 					"account":  d.account,
@@ -152,8 +160,8 @@ class TransporterInvoice(AccountsController):
 					"credit_in_account_currency": flt(d.amount,2),
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
-					"party_type": party_type,
-					"party": party,
+					"party_type": "Supplier",
+					"party": self.supplier,
 					"cost_center": self.cost_center,
 					"voucher_type":self.doctype,
 					"voucher_no":self.name
@@ -163,29 +171,33 @@ class TransporterInvoice(AccountsController):
 	def get_expense_gl(self):
 		items = {}
 		total_transportation_amount = 0
+		expense_account = None
 		for i in self.get("items"): 
 			if str(i.expense_account) in items:
 				items[str(i.expense_account)] = flt(items[str(i.expense_account)],2) + flt(i.transportation_amount,2)
 			else:
 				items.setdefault(str(i.expense_account),flt(i.transportation_amount,2))
 			total_transportation_amount += flt(i.transportation_amount,2)
-
 		# pro-rate POL expenses against each expense GL
 		if flt(total_transportation_amount) and flt(self.pol_amount):
-				deduct_pct  = 0
-				deduct_amt  = 0
-				balance_amt = flt(self.pol_amount)
-				counter     = 0
-				for k,v in sorted(items.items(), key=operator.itemgetter(1)):
-					counter += 1
-					if counter == len(items):
-						deduct_amt = balance_amt
-					else:
-						deduct_pct = math.floor((flt(v,2)/flt(total_transportation_amount,2))*0.01)
-						deduct_amt = math.floor(flt(self.pol_amount)*deduct_pct*0.01)
-						balance_amt= balance_amt - deduct_amt
+			deduct_pct  = 0
+			deduct_amt  = 0
+			balance_amt = flt(self.pol_amount)
+			counter     = 0
+			for k,v in sorted(items.items(), key=operator.itemgetter(1)):
+				expense_account = k
+				counter += 1
+				if counter == len(items):
+					deduct_amt = balance_amt
+					balance_amt = 0
+				else:
+					deduct_pct = math.floor((flt(v,2)/flt(total_transportation_amount,2))*0.01)
+					deduct_amt = math.floor(flt(self.pol_amount)*deduct_pct*0.01)
+					balance_amt= balance_amt - deduct_amt
 
-					items[k] -= flt(deduct_amt,2)
+				items[k] -= flt(deduct_amt,2)
+			items[expense_account] -= flt(balance_amt,2)
+			
 		return items
 
 	@frappe.whitelist()

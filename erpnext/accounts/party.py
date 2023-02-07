@@ -348,7 +348,7 @@ def set_account_and_due_date(
 
 
 @frappe.whitelist()
-def get_party_account(party_type, party=None, company=None,is_advance=None):
+def get_party_account(party_type, party=None, company=None,is_advance=False):
 	"""Returns the account for the given `party`.
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
@@ -390,7 +390,6 @@ def get_party_account(party_type, party=None, company=None,is_advance=None):
 				{"parenttype": party_group_doctype, "parent": group, "company": company},
 				"account",
 			)
-
 	if not account and party_type in ["Customer", "Supplier","Employee"]:
 		if party_type == "Employee":
 			default_account_name = "employee_payable_account"
