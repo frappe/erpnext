@@ -34,7 +34,7 @@ def get_columns(filters):
 			("Item")+":Link/Item:100",
 			("Item Name")+":Data:100",
 			("Rate")+":Currency:100",
-			("Qty") +":Data:80",
+			("Qty") +":Float:80",
 			("Amount") +":Currency:100",
 			("Last Service Date") +":Date:100",
 			("Repair & Services Type") + ":Data:130"
@@ -49,7 +49,7 @@ def get_data(filters):
 			SELECT 
 				rs.equipment, rs.equipment_type,
 				rsi.item_code, rsi.item_name,
-				SUM(rsi.rate), SUM(rsi.qty), SUM(rsi.charge_amount)
+				ROUND(SUM(rsi.rate * rsi.qty)/ SUM(rsi.qty),2), SUM(rsi.qty), SUM(rsi.charge_amount)
 			FROM `tabRepair And Services` rs 
 			INNER JOIN `tabRepair And Services Item` rsi ON rs.name = rsi.parent
 			WHERE rs.docstatus = 1

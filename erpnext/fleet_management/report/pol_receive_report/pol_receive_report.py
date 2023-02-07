@@ -14,10 +14,10 @@ def get_columns(filters):
 		return [
 				("Equipment") + ":Link/Equipment:130",
 				("Equipment Type") + ":Data:200",
-				("Quantity") + ":Data:100",
-				("Rate Per Unit") + ":Data:130",
+				("Quantity") + ":Float:100",
+				("Rate Per Unit") + ":Currency:130",
 				("Amount") + ":Currency:150",
-				("Mileage") + ":Data:100"
+				("Mileage") + ":Float:100"
 				]
 	return [
 		("POL Receive") + ":Link/POL Receive:120",
@@ -30,9 +30,9 @@ def get_columns(filters):
 		("Item Name")+ ":Data:130",
 		("Posting Date") + ":Date:120",
 		("Quantity") + ":Data:100",
-		("Rate Per Unit") + ":Data:100",
+		("Rate Per Unit") + ":Currency:100",
 		("Amount") + ":Currency:120",
-		("Mileage") + ":Data:100",
+		("Mileage") + ":Float:100",
 		("Cash Memo Number") + ":Data:120",
 		("POL Slip No.") + ":Data:120",
 	]
@@ -44,9 +44,9 @@ def get_data(filters):
 									p.equipment, 
 									p.equipment_type,
 									SUM(p.qty) as qty,  
-									p.rate, 
+									ROUND(SUM(p.rate * p.qty)/ SUM(p.qty),2) as rate, 
 									SUM(ifnull(p.total_amount,0)),
-									p.mileage
+									ROUND(AVG(p.mileage),2) as mileage
 								from 
 									`tabPOL Receive` p 
 								where docstatus = 1 {} 
