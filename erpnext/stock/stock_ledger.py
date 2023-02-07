@@ -1043,9 +1043,6 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and warehouse = %(warehouse)s
 			and is_cancelled = 0
 			{voucher_condition}
-<<<<<<< HEAD
-			and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
-=======
 			and (
 				posting_date < %(posting_date)s or
 				(
@@ -1053,7 +1050,6 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 					time_format(posting_time, %(time_format)s) {operator} time_format(%(posting_time)s, %(time_format)s)
 				)
 			)
->>>>>>> 6d513e2519 (fix: negative stock error)
 		order by timestamp(posting_date, posting_time) desc, creation desc
 		limit 1
 		for update""".format(
