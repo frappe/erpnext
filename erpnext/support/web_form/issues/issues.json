@@ -21,11 +21,6 @@
    "label": "Opening Date"
   },
   {
-   "fieldname": "opening_time",
-   "fieldtype": "Time",
-   "label": "Opening Time"
-  },
-  {
    "fieldname": "subject",
    "fieldtype": "Data",
    "label": "Subject"
@@ -44,7 +39,7 @@
  "list_title": "Issues",
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2022-12-28 16:41:21.259050",
+ "modified": "2023-02-07 12:12:29.819416",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "issues",

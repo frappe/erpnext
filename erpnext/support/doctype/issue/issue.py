@@ -351,7 +351,8 @@ def get_list_context(context=None):
 	}
 
 
-def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
+def get_issue_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20,
+		ignore_permissions=False, fields=None, order_by="creation desc"):
 	from frappe.www.list import get_list
 
 	user = frappe.session.user
@@ -373,7 +374,8 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 		ignore_permissions = True
 
-	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
+	return get_list(doctype, txt, filters, limit_start, limit_page_length,
+		ignore_permissions=ignore_permissions, fields=fields, order_by=order_by)
 
 
 @frappe.whitelist()
