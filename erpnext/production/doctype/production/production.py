@@ -76,6 +76,7 @@ class Production(StockController):
 						"incoming_rate": flt(d.cop, 2)
 					}))
 		if frappe.session.user == "Administrator":
+			frappe.throw(str(len(self.items)))
 			frappe.throw(str(sl_entries))
 		if self.docstatus == 2:
 			sl_entries.reverse()
