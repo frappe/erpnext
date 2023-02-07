@@ -63,7 +63,7 @@ class TransporterRate(Document):
 						.select(tr.name)
 						.where((tr.name != self.name)
 							& (tr.from_warehouse == self.from_warehouse)
-							& (( self.from_date >= tr.from_date ) | (self.to_date <= tr.to_date))
+							& ((tr.from_date[self.from_date:self.to_date]) |(tr.to_date[self.from_date:self.to_date]) | ((self.from_date <= tr.to_date) & (self.to_date >= tr.from_date))) 
 							& (tdr.location == a.location)
 							& (tdr.distance == a.distance))
 						.limit(1)
