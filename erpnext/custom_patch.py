@@ -16,41 +16,10 @@ import pandas as pd
 
 def change_account_name():
     # print('here')
-    for d in [{
-                    "old_name": "CDM Warehouse 3 - MC Lhamokhola Stockyard",
-                    "new_name": "CDM Warehouse 4 - Lhamokhola Stockyard - SMCL"
-                    },
-                    {
-                    "old_name": "Dzongthong Warehouse Plant 1",
-                    "new_name": "DSQ Warehouse 1 - Dzongthung Crusher - SMCL"
-                    },
-                    {
-                    "old_name": "Dzungdi Warehouse Plant 2",
-                    "new_name": "DSQ Warehouse 2 - Dzungdi Crusher - SMCL"
-                    },
-                    {
-                    "old_name": "KHP Consumable Warehouse ",
-                    "new_name": "Dzongthung Consumable Warehouse - SMCL"
-                    },
-                    {
-                    "old_name": "Habrang Coal Warehouse",
-                    "new_name": "Habrang Coal Stockyard - SMCL"
-                    },
-                    {
-                    "old_name": "Khothagpa Gypsum Mines",
-                    "new_name": "Khothakpa Gypsum Mine - SMCL"
-                    },
-                    {
-                    "old_name": "SJ Consumable Warehouse",
-                    "new_name": "RSLO Samdrupjongkhar Consumable Warehouse - SMCL"
-                    },
-                    {
-                    "old_name": "Reshore Consumable Warehouse ",
-                    "new_name": "Rishore Consumable Warehouse - SMCL"
-                    },
+    for d in        [
                     {
                     "old_name": "Tshophhangma Consumable Warehouse - SMCL",
-                    "new_name": "Tshophangma Consumable Warehouse - SMCL"
+                    "new_name": "Tshophhangma Consumable Warehouse"
                     }
                     ]:
         if frappe.db.exists("Account",{"account_name":d.get("old_name")}):
