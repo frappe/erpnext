@@ -17,6 +17,11 @@
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
+<<<<<<< HEAD
+=======
+  "disable_last_purchase_rate",
+  "show_pay_button",
+>>>>>>> d7ef5ad955 (chore: add field `show_pay_button` in Buying Settings)
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -116,6 +121,39 @@
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for Rejected Quantity in Purchase Invoice"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "supplier_and_price_defaults_section",
+   "fieldtype": "Tab Break",
+   "label": "Naming Series and Price Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_settings_section",
+   "fieldtype": "Tab Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_last_purchase_rate",
+   "fieldtype": "Check",
+   "label": "Disable Last Purchase Rate"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_pay_button",
+   "fieldtype": "Check",
+   "label": "Show Pay Button in Purchase Order Portal"
+>>>>>>> d7ef5ad955 (chore: add field `show_pay_button` in Buying Settings)
   }
  ],
  "icon": "fa fa-cog",
@@ -123,7 +161,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-09-08 19:26:23.548837",
+=======
+ "modified": "2023-02-15 14:42:10.200679",
+>>>>>>> d7ef5ad955 (chore: add field `show_pay_button` in Buying Settings)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
