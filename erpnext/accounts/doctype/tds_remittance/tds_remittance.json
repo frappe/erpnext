@@ -45,12 +45,12 @@
  ],
  "fields": [
   {
+   "default": "Other Invoice",
    "fieldname": "purpose",
    "fieldtype": "Select",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Purpose",
-   "options": "\nOther Invoice",
-   "reqd": 1
+   "options": "\nOther Invoice"
   },
   {
    "fieldname": "amended_from",
@@ -81,6 +81,7 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Cost Center",
    "options": "Cost Center",
    "read_only": 1
@@ -100,6 +101,7 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Branch",
    "options": "Branch",
    "reqd": 1
@@ -107,6 +109,7 @@
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "To Date",
    "reqd": 1
   },
@@ -127,6 +130,7 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
   },
@@ -262,7 +266,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-28 17:49:33.118154",
+ "modified": "2023-02-08 16:09:08.841695",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "TDS Remittance",
