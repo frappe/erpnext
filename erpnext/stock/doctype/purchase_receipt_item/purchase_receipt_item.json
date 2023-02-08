@@ -141,7 +141,6 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "print_width": "100px",
-   "reqd": 1,
    "search_index": 1,
    "width": "100px"
   },
@@ -179,7 +178,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -268,6 +266,7 @@
    "width": "100px"
   },
   {
+   "default": "1.00",
    "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
