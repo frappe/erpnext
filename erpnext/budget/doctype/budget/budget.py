@@ -51,15 +51,13 @@ class Budget(Document):
 				b.fiscal_year=%s and b.name != %s and ba.account in (%s) """
 			% ("%s", budget_against_field, "%s", "%s", "%s", ",".join(["%s"] * len(accounts))),
 			(self.company, budget_against, self.fiscal_year, self.name) + tuple(accounts),
-			as_dict=1,
-		)
+			as_dict=1)
 		if existing_budget:
 			for d in existing_budget:
 				frappe.msgprint(
 					_(
 						"Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' for fiscal year {4}"
-					).format(d.name, self.budget_against, budget_against, d.account, self.fiscal_year),
-					DuplicateBudgetError,raise_exception=True
+					).format(d.name, self.budget_against, budget_against, d.account, self.fiscal_year),raise_exception=True
 				)
 
 	def validate_accounts(self):
