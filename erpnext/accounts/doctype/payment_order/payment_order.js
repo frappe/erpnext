@@ -124,7 +124,7 @@ frappe.ui.form.on('Payment Order', {
 				args: {
 					"name": me.frm.doc.name,
 					"supplier": args.supplier,
-					"mode_of_payment": args.mode_of_payment
+					"mode_of_payment": me.mode_of_payment
 				},
 				freeze: true,
 				callback: function(r) {
