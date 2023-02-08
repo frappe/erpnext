@@ -65,8 +65,10 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je.party_type = 'Supplier'
 	je.company = doc.company
 	je.payment_type = 'Pay'
+	
 
 	je.reference_date = nowdate()
+	je.reference_no = ''
 	# bank or cash
 	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=None,account=None)
@@ -80,10 +82,12 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	# je.paid_to = party_account if payment_type=="Pay" else bank.account
 
 	# Cheque Book Changes
-	if doc.references[0].mode_of_payment == 'BANK' or doc.references[0].mode_of_payment == 'Cheque':
+	# doc.references[0].mode_of_payment == 'BANK' or 
+	je.mode_of_payment = doc.references[0].mode_of_payment
+	if doc.references[0].mode_of_payment == 'Cheque':
 		cheque_no = frappe.db.sql("""
 		SELECT
-			name
+			cheque_number
 			From
 			`tabCheque Book Series`
 			WHERE
@@ -104,6 +108,8 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	""".format(doc.company_bank_account))
 		if cheque_no:
 			je.reference_no = cheque_no[0][0]
+		else:
+			frappe.throw("No Check Book Avaiable for this Bank"+doc.company_bank_account)
 
 	mode_of_payment_type = frappe._dict(frappe.get_all('Mode of Payment',
 		fields = ["name", "type"], as_list=1))
@@ -142,9 +148,10 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je.received_amount = paid_amt
 	je.flags.ignore_mandatory = True
 	je.save()
-	if doc.references[0].mode_of_payment == 'BANK' or doc.references[0].mode_of_payment == 'Cheque':
+	# doc.references[0].mode_of_payment == 'BANK' or 
+	if doc.references[0].mode_of_payment == 'Cheque':
 		if cheque_no:
-			frappe.db.sql("""update `tabCheque Book Series` set status='Used',refrence='{0}' WHERE parent = (
+			frappe.db.sql("""update `tabCheque Book Series` set status='Used',refrence='{0}',ref_doctype='Payment Entry',ref_doc_status='{3}' WHERE parent = (
 					SELECT
 					name
 					FROM
@@ -154,5 +161,5 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 					and docstatus = 1
 					and is_active = 1
 					)
-				and name = '{2}'""".format(je.name,doc.company_bank_account,cheque_no[0][0]),debug=True)
+				and cheque_number = '{2}'""".format(je.name,doc.company_bank_account,cheque_no[0][0],je.workflow_state))
 	frappe.msgprint(_("{0} {1} created").format(je.doctype, je.name))
