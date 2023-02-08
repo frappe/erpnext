@@ -2,42 +2,48 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
- "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "field:customer_name",
  "creation": "2013-06-11 14:26:44",
- "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "basic_info",
   "naming_series",
-  "salutation",
   "customer_name",
-  "gender",
-  "customer_type",
-  "pan",
-  "tax_withholding_category",
-  "default_bank_account",
-  "lead_name",
-  "opportunity_name",
-  "image",
-  "column_break0",
-  "account_manager",
+  "type_of_client",
+  "column_break_0",
+  "industry",
+  "existing_customer",
   "customer_group",
   "territory",
-  "tax_id",
-  "tax_category",
-  "so_required",
-  "dn_required",
+  "section_break_1",
+  "column_break_1",
+  "section_break_2",
+  "region",
+  "city",
+  "address_line1",
+  "column_break_2",
+  "country",
+  "landline",
+  "address_line2",
+  "column_break_3",
+  "state",
+  "pincode",
+  "section_break_3",
+  "customer_contact_person_details",
+  "image",
+  "lead_name",
   "disabled",
+  "default_bank_account",
+  "tax_id",
+  "customer_type",
+  "salutation",
   "is_internal_customer",
+  "account_manager",
   "represents_company",
-  "allowed_to_transact_section",
-  "companies",
+  "section_break_26",
   "currency_and_price_list",
   "default_currency",
-  "column_break_14",
   "default_price_list",
   "address_contacts",
   "address_html",
@@ -60,7 +66,6 @@
   "customer_details",
   "column_break_45",
   "market_segment",
-  "industry",
   "language",
   "is_frozen",
   "column_break_38",
@@ -75,13 +80,6 @@
  ],
  "fields": [
   {
-   "fieldname": "basic_info",
-   "fieldtype": "Section Break",
-   "label": "Name and Type",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-user"
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -93,6 +91,7 @@
    "depends_on": "eval:doc.customer_type!='Company'",
    "fieldname": "salutation",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salutation",
    "options": "Salutation"
   },
@@ -101,39 +100,35 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Full Name",
+   "in_list_view": 1,
+   "label": "Customer Name",
    "no_copy": 1,
    "oldfieldname": "customer_name",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "search_index": 1
-  },
-  {
-   "depends_on": "eval:doc.customer_type != 'Company'",
-   "fieldname": "gender",
-   "fieldtype": "Link",
-   "label": "Gender",
-   "options": "Gender"
+   "unique": 1
   },
   {
    "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual",
-   "reqd": 1
+   "options": "Company\nIndividual"
   },
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
    "fieldname": "lead_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "From Lead",
    "no_copy": 1,
    "oldfieldname": "lead_name",
@@ -150,61 +145,49 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
    "fieldname": "account_manager",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account Manager",
    "options": "User"
   },
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
+   "hidden": 1,
    "label": "Customer Group",
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
-   "options": "Customer Group",
-   "reqd": 1,
-   "search_index": 1
+   "options": "Customer Group"
   },
   {
    "fieldname": "territory",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
+   "hidden": 1,
    "label": "Territory",
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
    "options": "Territory",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax ID"
-  },
-  {
-   "fieldname": "tax_category",
-   "fieldtype": "Link",
-   "label": "Tax Category",
-   "options": "Tax Category"
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Disabled"
   },
   {
    "default": "0",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Internal Customer"
   },
   {
@@ -217,23 +200,10 @@
    "unique": 1
   },
   {
-   "depends_on": "represents_company",
-   "fieldname": "allowed_to_transact_section",
-   "fieldtype": "Section Break",
-   "label": "Allowed To Transact With"
-  },
-  {
-   "depends_on": "represents_company",
-   "fieldname": "companies",
-   "fieldtype": "Table",
-   "label": "Allowed To Transact With",
-   "options": "Allowed To Transact With"
-  },
-  {
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
-   "label": "Currency and Price List"
+   "hidden": 1
   },
   {
    "fieldname": "default_currency",
@@ -251,12 +221,9 @@
    "options": "Price List"
   },
   {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "language",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Print Language",
    "options": "Language"
   },
@@ -264,6 +231,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address and Contact",
    "options": "fa fa-map-marker"
   },
@@ -296,6 +264,7 @@
    "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact Detail"
   },
   {
@@ -309,12 +278,14 @@
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No"
   },
   {
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email Id"
   },
   {
@@ -338,6 +309,7 @@
    "collapsible": 1,
    "fieldname": "default_receivable_accounts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting"
   },
   {
@@ -351,6 +323,7 @@
    "collapsible": 1,
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Credit Limit and Payment Terms"
   },
   {
@@ -364,6 +337,7 @@
    "collapsible_depends_on": "customer_details",
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
@@ -388,14 +362,15 @@
   },
   {
    "fieldname": "industry",
-   "fieldtype": "Link",
+   "fieldtype": "Table MultiSelect",
    "label": "Industry",
-   "options": "Industry Type"
+   "options": "Industry Type Table"
   },
   {
    "default": "0",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Frozen"
   },
   {
@@ -407,6 +382,7 @@
   {
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Loyalty Program",
    "no_copy": 1,
    "options": "Loyalty Program"
@@ -414,6 +390,7 @@
   {
    "fieldname": "loyalty_program_tier",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Loyalty Program Tier",
    "no_copy": 1,
    "read_only": 1
@@ -423,6 +400,7 @@
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Partner and Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group"
@@ -430,6 +408,7 @@
   {
    "fieldname": "default_sales_partner",
    "fieldtype": "Link",
+   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Sales Partner",
    "oldfieldname": "default_sales_partner",
@@ -439,6 +418,7 @@
   {
    "fieldname": "default_commission_rate",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Commission Rate",
    "oldfieldname": "default_commission_rate",
    "oldfieldtype": "Currency"
@@ -448,11 +428,13 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "sales_team_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Team"
   },
   {
    "fieldname": "sales_team",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Sales Team Details",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
@@ -461,6 +443,7 @@
   {
    "fieldname": "customer_pos_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Customer POS id",
    "no_copy": 1,
    "print_hide": 1,
@@ -475,37 +458,112 @@
    "options": "Customer Credit Limit"
   },
   {
-   "default": "0",
-   "fieldname": "so_required",
-   "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Sales Order"
+   "fieldname": "type_of_client",
+   "fieldtype": "Table MultiSelect",
+   "label": "Type of Client",
+   "options": "Client Type Table"
   },
   {
    "default": "0",
-   "fieldname": "dn_required",
+   "fieldname": "existing_customer",
    "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Delivery Note"
+   "hidden": 1,
+   "label": "Existing Customer"
   },
   {
-   "fieldname": "pan",
-   "fieldtype": "Data",
-   "label": "PAN"
+   "depends_on": "represents_company",
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break"
   },
   {
-   "fieldname": "tax_withholding_category",
+   "fieldname": "column_break_0",
+   "fieldtype": "Column Break",
+   "hidden": 1,
+   "width": "50%"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Select",
+   "label": "Region",
+   "options": "\nSouth\nNorth\nWest\nEast\nMEA\nSEA\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "country",
    "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category"
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
   },
   {
-   "fieldname": "opportunity_name",
-   "fieldtype": "Link",
-   "label": "From Opportunity",
+   "fieldname": "state",
+   "fieldtype": "Select",
+   "label": "State",
    "no_copy": 1,
-   "options": "Opportunity",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "landline",
+   "fieldtype": "Data",
+   "label": "Landline/FTC"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pincode",
+   "fieldtype": "Int",
+   "label": "Pincode"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "customer_contact_person_details",
+   "fieldtype": "Table",
+   "label": "Customer Contact Person Details",
+   "options": "Customer Contact Person Details"
+  },
+  {
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
@@ -517,7 +575,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:38:54.196663",
+ "modified": "2023-02-08 16:38:33.465882",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
