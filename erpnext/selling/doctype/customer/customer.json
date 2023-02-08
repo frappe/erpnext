@@ -467,6 +467,7 @@
    "default": "0",
    "fieldname": "existing_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Existing Customer"
   },
   {
@@ -497,25 +498,29 @@
    "fieldname": "region",
    "fieldtype": "Select",
    "label": "Region",
-   "options": "\nSouth\nNorth\nWest\nEast\nMEA\nSEA\nOther"
+   "options": "\nSouth\nNorth\nWest\nEast\nMEA\nSEA\nOther",
+   "reqd": 1
   },
   {
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
-   "options": "Country"
+   "options": "Country",
+   "reqd": 1
   },
   {
    "fieldname": "state",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "State",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "city",
    "fieldtype": "Data",
-   "label": "City"
+   "label": "City",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_2",
@@ -570,7 +575,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-02-08 14:07:52.430307",
+ "modified": "2023-02-08 16:38:33.465882",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

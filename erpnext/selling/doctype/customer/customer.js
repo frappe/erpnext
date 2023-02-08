@@ -496,6 +496,18 @@ frappe.ui.form.on('Customer',  {
 			}
 		})
 	},
+	country(frm){
+        frappe.call({
+            method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
+            args: {
+              country: frm.doc.country
+            }, 
+            
+            callback: function(r) {
+              frm.set_df_property("state", "options", r.message)
+            }
+          })
+    },
 })
 
 
