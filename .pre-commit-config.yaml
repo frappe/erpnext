@@ -32,8 +32,8 @@ repos:
       - id: black
         additional_dependencies: ['click==8.0.4']
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.9.1
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
     hooks:
       - id: isort
         exclude: ".*setup.py$"

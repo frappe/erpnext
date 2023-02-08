@@ -894,6 +894,12 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.uom = frm.doc.stock_uom;
 		new_child_doc.description = frm.doc.description;
 
-		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+		frappe.run_serially([
+			() => frappe.ui.form.make_quick_entry(doctype, null, null, new_doc),
+			() => {
+				frappe.flags.ignore_company_party_validation = true;
+				frappe.model.trigger("item_code", frm.doc.name, new_child_doc);
+			}
+		])
 	});
 }
