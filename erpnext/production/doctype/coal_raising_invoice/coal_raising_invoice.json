@@ -37,8 +37,10 @@
   "company",
   "workflow_state",
   "column_break_29",
-  "status",
-  "currency"
+  "currency",
+  "journal_entry",
+  "section_break_34",
+  "remarks"
  ],
  "fields": [
   {
@@ -126,7 +128,6 @@
   {
    "fieldname": "grand_total",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Grand Total",
    "read_only": 1
   },
@@ -188,6 +189,7 @@
   {
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Outstanding Amount",
    "read_only": 1
   },
@@ -198,15 +200,6 @@
    "label": "Group Leader",
    "options": "Supplier",
    "reqd": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled",
-   "read_only": 1
   },
   {
    "fieldname": "mineral_raising_group",
@@ -247,12 +240,27 @@
    "label": "Warehouse",
    "options": "Warehouse",
    "reqd": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Data",
+   "label": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_34",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-28 15:03:47.500788",
+ "modified": "2023-02-08 16:59:44.940604",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Coal Raising Invoice",

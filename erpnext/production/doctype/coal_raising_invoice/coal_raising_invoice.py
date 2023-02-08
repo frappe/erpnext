@@ -8,6 +8,7 @@ from erpnext.custom_utils import check_future_date
 from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 from erpnext.accounts.doctype.business_activity.business_activity import get_default_ba
 from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import flt, cint, money_in_words
 
 class CoalRaisingInvoice(AccountsController):
 	def validate(self):
@@ -18,34 +19,13 @@ class CoalRaisingInvoice(AccountsController):
 
 	def on_submit(self):
 		self.make_gl_entry()
+		self.post_journal_entry()
+
 	def on_cancel(self):
 		self.make_gl_entry()
 
 	def set_status(self, update=False, status=None, update_modified=True):
-		if self.is_new():
-			if self.get("amended_from"):
-				self.status = "Draft"
-			return
-
-		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
-		if not status:
-			if self.docstatus == 2:
-				status = "Cancelled"
-			elif self.docstatus == 1:
-				if outstanding_amount > 0 and self.total_amount > outstanding_amount:
-					self.status = "Partly Paid"
-				elif outstanding_amount > 0 :
-					self.status = "Unpaid"
-				elif outstanding_amount <= 0:
-					self.status = "Paid"
-				else:
-					self.status = "Submitted"
-			else:
-				self.status = "Draft"
-
-		if update:
-			self.db_set("status", self.status, update_modified=update_modified)
-
+		return
 	def validate_data(self):
 		if self.from_date > self.to_date:
 			frappe.throw('From Date cannot be after To Date')
@@ -133,6 +113,64 @@ class CoalRaisingInvoice(AccountsController):
 		self.total_cost = flt(total_amount) / flt(total_production)
 		self.grand_total = grand_total
 		self.total_penalty = total_penalty
+
+	@frappe.whitelist()
+	def post_journal_entry(self):
+		if self.journal_entry and frappe.db.exists("Journal Entry",{"name":self.journal_entry,"docstatus":("!=",2)}):
+			frappe.msgprint(_("Journal Entry Already Exists {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry))))
+		if not self.total_amount:
+			frappe.throw(_("Payable Amount should be greater than zero"))
+			
+		# default_ba = get_default_ba()
+
+		credit_account = self.credit_account
+	
+		if not credit_account:
+			frappe.throw("Expense Account is mandatory")
+		r = []
+		if self.remarks:
+			r.append(_("Note: {0}").format(self.remarks))
+
+		remarks = ("").join(r) #User Remarks is not mandatory
+		bank_account = frappe.db.get_value("Company",self.company, "default_bank_account")
+		if not bank_account:
+			frappe.throw(_("Default bank account is not set in company {}".format(frappe.bold(self.company))))
+		# Posting Journal Entry
+		je = frappe.new_doc("Journal Entry")
+		je.flags.ignore_permissions=1
+		je.update({
+			"doctype": "Journal Entry",
+			"voucher_type": "Bank Entry",
+			"naming_series": "Bank Payment Voucher",
+			"title": "Coal Raising Payment "+ self.supplier,
+			"user_remark": "Note: " + "Transporter Payment - " + self.supplier,
+			"posting_date": self.posting_date,
+			"company": self.company,
+			"total_amount_in_words": money_in_words(self.total_amount),
+			"branch": self.branch,
+			"reference_type":self.doctype,
+			"referece_doctype":self.name
+		})
+		je.append("accounts",{
+			"account": credit_account,
+			"debit_in_account_currency": self.total_amount,
+			"cost_center": self.cost_center,
+			"party_check": 1,
+			"party_type": "Supplier",
+			"party": self.supplier,
+			"reference_type": self.doctype,
+			"reference_name": self.name
+		})
+		je.append("accounts",{
+			"account": bank_account,
+			"credit_in_account_currency": self.total_amount,
+			"cost_center": self.cost_center
+		})
+
+		je.insert()
+		#Set a reference to the claim journal entry
+		self.db_set("journal_entry",je.name)
+		frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
 
 	def make_gl_entry(self):
 		from erpnext.accounts.general_ledger import make_gl_entries

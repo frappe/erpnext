@@ -14,12 +14,21 @@ frappe.ui.form.on('Coal Raising Invoice', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			})
-			if (self.status != "Paid"){
-				cur_frm.add_custom_button(__('Pay'), function(doc) {
-					frm.events.make_payment_entry(frm)
-				})
+			if (frm.doc.outstanding_amount > 0){
+				cur_frm.add_custom_button(__('Journal Entry'), function(doc) {
+					frm.events.make_journal_entry(frm)
+				},__('Create'))
 			}			
 		}
+	},
+	make_journal_entry:function(frm){
+		frappe.call({
+			method:"post_journal_entry",
+			doc : frm.doc,
+			callback: function (r) {
+				
+			},
+		});
 	},
 	branch:function(frm){
         cur_frm.set_query("warehouse", function() {
