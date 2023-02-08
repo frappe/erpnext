@@ -12,7 +12,8 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	},
 
 	get_variant_fields: function() {
-		var variant_fields = [{
+		var variant_fields = [
+		/* {
 			fieldtype: "Section Break",
 			label: __("Primary Contact Details"),
 			collapsible: 1
@@ -68,7 +69,7 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			fieldname: "country",
 			fieldtype: "Link",
 			options: "Country"
-		},
+		}, */
 		{
 			label: __("Customer POS Id"),
 			fieldname: "customer_pos_id",

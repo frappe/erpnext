@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-12-14 16:45:17.385655",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "person_name",
+  "designation",
+  "department",
+  "column_break_4",
+  "primary_mobile_number",
+  "primary_email_id",
+  "contact_name"
+ ],
+ "fields": [
+  {
+   "columns": 5,
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Person Name"
+  },
+  {
+   "columns": 3,
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Division / Department",
+   "options": "Person Department"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "primary_mobile_number",
+   "fieldtype": "Data",
+   "label": "Primary Mobile Number"
+  },
+  {
+   "fieldname": "primary_email_id",
+   "fieldtype": "Data",
+   "label": "Primary Email Id"
+  },
+  {
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Contact Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-02-08 16:30:47.733285",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer Contact Person Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

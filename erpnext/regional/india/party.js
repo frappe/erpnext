@@ -1,5 +1,8 @@
 erpnext.setup_gst_reminder_button = (doctype) => {
-	frappe.ui.form.on(doctype, {
+	refresh: (frm) => {
+		
+	}
+/* 	frappe.ui.form.on(doctype, {
 		refresh: (frm) => {
 			if(!frm.is_new()) {
 				var missing = false;
@@ -8,7 +11,7 @@ erpnext.setup_gst_reminder_button = (doctype) => {
 				});
 				if (!missing) return;
 
-				frm.add_custom_button('Send GST Update Reminder', () => {
+				/* frm.add_custom_button('Send GST Update Reminder', () => {
 					return new Promise((resolve) => {
 						return frappe.call({
 							method: 'erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder',
@@ -18,8 +21,8 @@ erpnext.setup_gst_reminder_button = (doctype) => {
 							}
 						}).always(() => { resolve(); });
 					});
-				});
-			}
-		}
-	});
+				}); */
+	// 		}
+	// 	}
+	// }); */
 };
