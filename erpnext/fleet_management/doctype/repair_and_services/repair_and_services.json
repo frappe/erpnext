@@ -14,11 +14,14 @@
   "set_warehouse",
   "column_break_2",
   "posting_date",
-  "completion_status",
+  "posting_time",
+  "other_details_section",
   "start_date",
+  "completion_status",
+  "recent_maintenance_date",
+  "column_break_13",
   "end_date",
   "total_hrs",
-  "recent_maintenance_date",
   "column_break_4",
   "equipment",
   "equipment_type",
@@ -172,8 +175,7 @@
    "depends_on": "eval:doc.equipment",
    "fieldname": "current_km",
    "fieldtype": "Float",
-   "label": "Current KM/HR",
-   "reqd": 1
+   "label": "Current KM/HR"
   },
   {
    "fieldname": "km_difference",
@@ -386,12 +388,27 @@
    "fieldname": "status",
    "fieldtype": "Data",
    "label": "Status"
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_details_section",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-04 15:57:55.349097",
+ "modified": "2023-02-08 15:32:12.790373",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Services",

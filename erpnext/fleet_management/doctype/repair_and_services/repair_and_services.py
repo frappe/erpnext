@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 from erpnext.custom_utils import check_future_date
 from erpnext.controllers.stock_controller import StockController
-from frappe.utils import flt, cint, nowdate,time_diff_in_hours
+from frappe.utils import flt, cint, nowdate,time_diff_in_hours, nowtime
 from frappe import _, qb, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.custom_workflow import validate_workflow_states
@@ -20,6 +20,8 @@ class RepairAndServices(StockController):
 		if flt(self.out_source) == 1:
 			validate_workflow_states(self)
 		check_future_date(self.posting_date)
+		if not self.posting_time:
+			self.posting_time = nowtime()
 		self.update_items()
 		self.calculate_total_amount()
 		self.calculate_km_diff()
@@ -79,11 +81,13 @@ class RepairAndServices(StockController):
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 	
 	def calculate_km_diff(self):
+		if flt(self.current_km) <= 0:
+			return
 		doc = qb.DocType("Repair And Services")
 		previous_km_reading = (
 								qb.from_(doc)
 								.select(doc.current_km)
-								.where((doc.equipment == self.equipment) & (doc.docstatus==1))
+								.where((doc.equipment == self.equipment) & (doc.docstatus==1) & (doc.posting_date < self.posting_date) & (doc.posting_time < self.posting_time))
 								.orderby( doc.posting_date,order=qb.desc)
 								.limit(1)
 								.run()

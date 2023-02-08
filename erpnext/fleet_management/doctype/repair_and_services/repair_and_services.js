@@ -2,6 +2,18 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Repair And Services', {
+	setup:function(frm){
+		if(frm.doc.__islocal){
+			frm.set_value("posting_time",frappe.datetime.now_time())
+			frm.refresh_field("posting_time")
+		}
+	},
+	onload:function(frm){
+		if(frm.doc.__islocal){
+			frm.set_value("posting_time",frappe.datetime.now_time())
+			frm.refresh_field("posting_time")
+		}
+	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1) {
 			cur_frm.add_custom_button(__("Stock Ledger"), function() {
