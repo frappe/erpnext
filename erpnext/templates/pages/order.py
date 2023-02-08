@@ -53,8 +53,21 @@ def get_context(context):
 		)
 		context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
 
+<<<<<<< HEAD
 	# show Make Purchase Invoice button based on permission
 	context.show_make_pi_button = frappe.has_permission("Purchase Invoice", "create")
+=======
+			loyalty_program_details = get_loyalty_program_details_with_points(
+				context.doc.customer, customer_loyalty_program
+			)
+			context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
+
+	context.show_pay_button = frappe.db.get_single_value("Buying Settings", "show_pay_button")
+	context.show_make_pi_button = False
+	if context.doc.get("supplier"):
+		# show Make Purchase Invoice button based on permission
+		context.show_make_pi_button = frappe.has_permission("Purchase Invoice", "create")
+>>>>>>> 20bdc63b03 (fix: show Purchase Order Portal `Pay` button based on configuration)
 
 
 def get_attachments(dt, dn):
