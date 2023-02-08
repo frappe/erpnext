@@ -121,7 +121,6 @@
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -180,7 +179,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -249,6 +247,7 @@
    "reqd": 1
   },
   {
+   "default": "1.00",
    "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
@@ -902,7 +901,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-29 16:47:41.364387",
+ "modified": "2023-02-08 19:23:43.438844",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

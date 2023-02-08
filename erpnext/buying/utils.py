@@ -51,10 +51,11 @@ def validate_for_items(doc) -> None:
 
 		set_stock_levels(row=d)  # update with latest quantities
 		item = validate_item_and_get_basic_data(row=d)
-		validate_stock_item_warehouse(row=d, item=item)
-		validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
-
-		items.append(cstr(d.item_code))
+		# businesses may wish to buy arbitrary items and not set up an item_code
+		if item:
+			validate_stock_item_warehouse(row=d, item=item)
+			validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
+			items.append(cstr(d.item_code))
 
 	if (
 		items
@@ -94,10 +95,8 @@ def validate_item_and_get_basic_data(row) -> Dict:
 		fieldname=["is_stock_item", "is_sub_contracted_item", "end_of_life", "disabled"],
 		as_dict=1,
 	)
-	if not item:
-		frappe.throw(_("Row #{0}: Item {1} does not exist").format(row.idx, frappe.bold(row.item_code)))
-
-	return item[0]
+	if item:
+		return item[0]
 
 
 def validate_stock_item_warehouse(row, item) -> None:

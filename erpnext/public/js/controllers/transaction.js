@@ -416,7 +416,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		item.weight_per_unit = 0;
 		item.weight_uom = '';
-		item.conversion_factor = 0;
+		item.conversion_factor = 1;
 
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
