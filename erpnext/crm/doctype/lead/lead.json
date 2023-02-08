@@ -18,7 +18,7 @@
   "description",
   "email_id",
   "col_break123",
-  "company_name",
+  "customer_name",
   "lead_owner",
   "status",
   "sub_status",
@@ -68,9 +68,11 @@
   "blog_subscriber",
   "title",
   "section_break_59",
-  "lead_person_details",
+  "lead_contact_person_details",
   "lead_transfer_to_section",
-  "lead_transfer"
+  "lead_transfer",
+  "lead_transfer_user_full_name",
+  "lead_assign_to_user"
  ],
  "fields": [
   {
@@ -101,17 +103,8 @@
    "label": "Lead Name",
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"",
    "search_index": 1
-  },
-  {
-   "fieldname": "company_name",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Company Name",
-   "oldfieldname": "company_name",
-   "oldfieldtype": "Data",
-   "options": "Company Details"
   },
   {
    "fieldname": "email_id",
@@ -148,7 +141,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nOpen\nContacted\nClose",
+   "options": "\nOpen\nContacted\nSuccess\nClose",
    "search_index": 1
   },
   {
@@ -172,7 +165,8 @@
    "label": "Source",
    "oldfieldname": "source",
    "oldfieldtype": "Select",
-   "options": "Lead Source"
+   "options": "Lead Source",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
   },
   {
    "depends_on": "eval:doc.source == 'Existing Customer'",
@@ -482,7 +476,8 @@
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Description"
+   "label": "Description",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
   },
   {
    "fieldname": "lead_transfer_to_section",
@@ -491,20 +486,15 @@
   },
   {
    "fieldname": "section_break_59",
-   "fieldtype": "Section Break",
-   "label": "Person Details"
-  },
-  {
-   "fieldname": "lead_person_details",
-   "fieldtype": "Table",
-   "options": "Lead Person Details"
+   "fieldtype": "Section Break"
   },
   {
    "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date"
+   "label": "Date",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
   },
   {
    "fieldname": "lead_number",
@@ -519,13 +509,49 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Sub Status",
-   "options": "\nOn Call Discussion\nTechnical Visit\nQuotation\nFollow Up\nBudgetary  Discussion\nNegotiation\nExisting Customer",
+   "options": "\nOn Call Discussion\nTechnical Visit\nQuotation\nFollow Up\nBudgetary  Discussion\nNegotiation",
    "read_only": 1
   },
   {
    "fieldname": "lead_transfer",
    "fieldtype": "Link",
-   "options": "User"
+   "in_standard_filter": 1,
+   "label": "Lead Transfer",
+   "options": "User",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
+  },
+  {
+   "depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"||doc.status == \"Open\"|| doc.status == \"Contacted\"||doc.__islocal",
+   "fieldname": "lead_contact_person_details",
+   "fieldtype": "Table",
+   "label": "Lead Contact Person Details",
+   "options": "Lead Contact Person Details",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
+  },
+  {
+   "fetch_from": "lead_transfer.full_name",
+   "fieldname": "lead_transfer_user_full_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Lead Transfer User Full Name"
+  },
+  {
+   "fieldname": "lead_assign_to_user",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Lead Assign To User",
+   "options": "Lead Assign To User"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Name",
+   "oldfieldname": "company_name",
+   "oldfieldtype": "Data",
+   "options": "Customer",
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
   }
  ],
  "hide_toolbar": 1,
@@ -533,7 +559,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-01-10 18:42:07.962121",
+ "modified": "2023-02-08 16:13:21.579087",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -590,6 +616,13 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
+  },
+  {
+   "create": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "Lead User",
+   "write": 1
   }
  ],
  "search_fields": "lead_name,lead_owner,status",

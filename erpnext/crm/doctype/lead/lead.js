@@ -33,15 +33,21 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		let doc = this.frm.doc;
 		erpnext.toggle_naming_series();
 		frappe.dynamic_link = { doc: doc, fieldname: 'name', doctype: 'Lead' }
-
+		
+		// on open status show contatced,close,Success Button 
 		if (doc.status==="Open") {
 			if (doc.status != "Contacted") {
 				this.frm.add_custom_button(__('Contacted'), () => this.contacted_lead(), __("Status"));
 			}		
 		}
+		if (doc.status==="Open" || doc.status == "Contacted" ){
+			this.frm.add_custom_button(__('Success'), () => this.success_lead(), __("Status"));
+		}
 		if ( doc.status==="Open" || doc.status == "Contacted") {
 			this.frm.add_custom_button(__('Close'), () => this.close_lead(), __("Status"));
 		}
+		
+		//if status is contacted substatus button created[Note if sub-status On Call Discussion then after save On Call Discussion option remove from sub-status list]
 		if (doc.status == "Contacted"){
 			if (doc.sub_status == "" ){
 				this.frm.add_custom_button(__("On Call Discussion"), () => this.on_call_discussion_lead(), __("Sub-Status"));
@@ -60,9 +66,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			}	
 			if ((!in_list(["Negotiation"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion","Quotation","Follow Up","Budgetary  Discussion"],doc.sub_status))||doc.sub_status == "" ){
 				this.frm.add_custom_button(__("Negotiation"), () => this.negotiation_lead(), __("Sub-Status"));
-			}	
-			if ((!in_list(["Existing Customer"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion","Quotation","Follow Up","Budgetary  Discussion","Negotiation"],doc.sub_status))||doc.sub_status == "" ){
-				this.frm.add_custom_button(__("Existing Customer"), () => this.existing_customer_lead(), __("Sub-Status"));
 			}	
 		}
 
@@ -107,8 +110,8 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		cur_frm.set_value("sub_status","Negotiation");
 		cur_frm.save();
 	},
-	existing_customer_lead: function(){
-		cur_frm.set_value("sub_status","Existing Customer");
+	success_lead: function(){
+		cur_frm.set_value("status","Success");
 		cur_frm.save();
 	},
 	close_lead: function(){
@@ -160,29 +163,105 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
 
-//Hide Connection section 
 frappe.ui.form.on('Lead', {
+	//In company base person will filter show in child table
 	setup: (frm) => {
-		frm.fields_dict["lead_person_details"].grid.get_field("person_name").get_query = function(doc, cdt, cdn) {
+		frm.fields_dict["lead_contact_person_details"].grid.get_field("person_name").get_query = function(doc, cdt, cdn) {
 			return {
-				filters: {'company_name': doc.company_name}
+				filters: {'customer_name': doc.customer_name}
 			}
 		};
+		frm.set_query('customer_name', function(doc) {
+			return {
+				filters: {
+					"region"  : getCurrentUserRegion()
+				}
+
+			}
+			
+		});
+		function getCurrentUserRegion()
+		{  
+			var ret_value = "";
+			frappe.call({                        
+				method: "frappe.client.get_value", 
+				async:false,
+				args: { 
+					    doctype: "User",
+					    name:frappe.session.user,
+					    fieldname:"region",
+					  },
+				callback: function(r) {
+                    ret_value=r.message.region;
+				}	 
+		 	});
+			return ret_value;
+		}
 	},
+	
+	// hide connection section, doc name set in lead number,if status is Success/Close then disable save button from form
 	refresh(frm) {
 		frm.dashboard.links_area.hide();
 		if(frm.doc.name  && !frm.doc.__islocal && (frm.doc.lead_number == null || frm.doc.lead_number == undefined)){
 			cur_frm.set_value("lead_number",frm.doc.name);
 			frm.save();
 		}
-		if (frm.doc.sub_status == "Existing Customer"){
-			frappe.db.set_value("Company Details", frm.doc.company_name, "existing_customer", 1)
+		if (frm.doc.status === "Success" || frm.doc.status === "Close" ){
+			frm. disable_save()
 		}
 	},
+	//form is save then set status Open, if company name mention then person child table set Mandatory 
 	before_save :function(frm){
 		if (frm.doc.__islocal)
 		{
 			cur_frm.set_value("status","Open");
 		}
+	/* 	if (frm.doc.company_name !=""){
+			frm.set_df_property('lead_contact_person_details', 'reqd', 1);
+		} */
 	},
+	//if status is Success then in company details doctype Existing customer set check
+	after_save :function(frm){
+		if (frm.doc.status === "Success"){
+			frappe.db.set_value("Customer", frm.doc.customer_name, "existing_customer", 1)
+		}
+	},
+	//on lead transfer create 1 Dialog box for Reason in lead_assing_to_user child table add user name,assing to mail, lead transfer Reason,today date time  
+/* 	lead_transfer:function(frm){
+		if (frm.doc.lead_assign_to_user.length !=0){
+			var Test;
+			let lead_assign_to_user  = frm.add_child("lead_assign_to_user");
+			if(frm.doc.lead_assign_to_use !=1){// add here len of child table if it 1 not show following message after that shown
+				var d = new frappe.ui.Dialog({
+				
+					title: __('Reason for Transfer Lead Other User'),
+					fields: [
+						{
+							"fieldname": "reason_lead_transfer",
+							"fieldtype": "Text",
+							"reqd": 1,
+						}
+					],
+					primary_action_label: 'Submit',
+					primary_action(value) {
+						console.log(value["reason_lead_transfer"]);
+						lead_assign_to_user.lead_transfer_reason = (value["reason_lead_transfer"]);
+						refresh_field("lead_assign_to_user");
+						frm.save();
+						d.hide();
+					}
+				})
+				d.show();
+				console.log(d);
+			}
+			
+			var date = frappe.datetime.now_datetime();
+			lead_assign_to_user.assign_email = frm.doc.lead_transfer
+			lead_assign_to_user.date = date
+			lead_assign_to_user.user_name = frm.doc.lead_transfer_user_full_name
+			
+			refresh_field("lead_assign_to_user")
+		}
+	} */
+
 });				
