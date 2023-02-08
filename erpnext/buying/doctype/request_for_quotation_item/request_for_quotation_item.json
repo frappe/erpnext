@@ -47,7 +47,6 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "print_hide": 1,
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -84,7 +83,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -236,6 +234,7 @@
    "reqd": 1
   },
   {
+   "default": "1.00",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
@@ -261,13 +260,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-24 17:26:46.276934",
+ "modified": "2023-02-08 20:11:56.099929",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
