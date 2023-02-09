@@ -4,7 +4,7 @@ import pandas as pd
 
 def create_leave_ledger_entry():
     for e in frappe.db.sql('''select name from `tabEmployee` where status = "Active"''',as_dict=1):
-        leave_allocation = frappe.get_doc("Leave Allocation",{"employee":e.name,"leave_type":"Earned Leave"})
+        leave_allocation = frappe.get_doc("Leave Allocation",{"employee":e.name,"leave_type":"Earned Leave","docstatus":1})
         print(leave_allocation.employee, ' : ', leave_allocation.name, ' : ', leave_allocation.leave_type)
         leave_ledger_entry = frappe.new_doc("Leave Ledger Entry")
         leave_ledger_entry.flags.ignore_permissions=1
