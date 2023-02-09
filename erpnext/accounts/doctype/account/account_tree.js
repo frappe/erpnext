@@ -122,7 +122,7 @@ frappe.treeview_settings["Account"] = {
 			} else {
 				treeview.new_node();
 			}
-		}, "octicon octicon-plus");
+		}, "add");
 	},
 	onrender: function(node) {
 		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
