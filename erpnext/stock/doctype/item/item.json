@@ -314,7 +314,8 @@
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
-   "label": "Default Valuation Rate"
+   "label": "Default Valuation Rate",
+   "read_only_depends_on": "eval: doc.is_customer_provided_item"
   },
   {
    "bold": 1,
@@ -403,7 +404,8 @@
    "fieldname": "default_material_request_type",
    "fieldtype": "Select",
    "label": "Default Material Request Type",
-   "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided"
+   "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
+   "read_only_depends_on": "eval: doc.is_customer_provided_item"
   },
   {
    "depends_on": "is_stock_item",
@@ -1367,7 +1369,7 @@
  "idx": 2,
  "image_field": "image",
  "links": [],
- "modified": "2023-01-12 14:22:29.722134",
+ "modified": "2023-02-09 17:00:56.456101",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

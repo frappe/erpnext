@@ -163,10 +163,8 @@ class Item(WebsiteGenerator):
 
 	def validate_customer_provided_part(self):
 		if self.is_customer_provided_item:
-			if self.is_purchase_item:
-				frappe.throw(_('"Customer Provided Item" cannot be Purchase Item also'))
-			if self.valuation_rate:
-				frappe.throw(_('"Customer Provided Item" cannot have Valuation Rate'))
+			self.is_purchase_item = 0
+			self.valuation_rate = 0
 			self.default_material_request_type = "Customer Provided"
 
 	def add_price(self, price_list=None):
