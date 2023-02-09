@@ -4,23 +4,24 @@ import pandas as pd
 
 def create_leave_ledger_entry():
     for e in frappe.db.sql('''select name from `tabEmployee` where status = "Active"''',as_dict=1):
-        leave_allocation = frappe.get_doc("Leave Allocation",{"employee":e.name,"leave_type":"Earned Leave","docstatus":1})
-        print(leave_allocation.employee, ' : ', leave_allocation.name, ' : ', leave_allocation.leave_type)
-        leave_ledger_entry = frappe.new_doc("Leave Ledger Entry")
-        leave_ledger_entry.flags.ignore_permissions=1
-        leave_ledger_entry.update({
-            "employee":leave_allocation.employee,
-            "employee_name":leave_allocation.employee_name,
-            "leave_type":leave_allocation.leave_type,
-            "transaction_type":"Leave Allocation",
-            "transaction_name":leave_allocation.name,
-            "leaves":2.5,
-            "company":leave_allocation.company,
-            "from_date":"2023-01-01",
-            "to_date":'2023-12-31'
-        })
-        leave_ledger_entry.insert()
-        leave_ledger_entry.submit()
+        if frappe.db.exists("Leave Allocation",{"employee":e.name,"leave_type":"Earned Leave","docstatus":1}):
+            leave_allocation = frappe.get_doc("Leave Allocation",{"employee":e.name,"leave_type":"Earned Leave","docstatus":1})
+            print(leave_allocation.employee, ' : ', leave_allocation.name, ' : ', leave_allocation.leave_type)
+            leave_ledger_entry = frappe.new_doc("Leave Ledger Entry")
+            leave_ledger_entry.flags.ignore_permissions=1
+            leave_ledger_entry.update({
+                "employee":leave_allocation.employee,
+                "employee_name":leave_allocation.employee_name,
+                "leave_type":leave_allocation.leave_type,
+                "transaction_type":"Leave Allocation",
+                "transaction_name":leave_allocation.name,
+                "leaves":2.5,
+                "company":leave_allocation.company,
+                "from_date":"2023-01-01",
+                "to_date":'2023-12-31'
+            })
+            leave_ledger_entry.insert()
+            leave_ledger_entry.submit()
 
 # def post_payment_je_leave_encashment():
 #     le = frappe.db.sql("""
