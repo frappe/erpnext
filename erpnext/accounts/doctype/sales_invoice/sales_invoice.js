@@ -64,6 +64,25 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
+		if (this.frm.doc.repost_required && this.frm.doc.docstatus===1) {
+			this.frm.set_intro(__("Accounting entries for this invoice needs to be reposted. Please click on 'Repost' button to update."));
+			this.frm.add_custom_button(__('Repost Accounting Entries'),
+				() => {
+					this.frm.call({
+						doc: this.frm.doc,
+						method: 'repost_accounting_entries',
+						freeze: true,
+						freeze_message: __('Reposting...'),
+						callback: (r) => {
+							if (!r.exc) {
+								frappe.msgprint(__('Accounting Entries are reposted'));
+								me.frm.refresh();
+							}
+						}
+					});
+				}).removeClass('btn-default').addClass('btn-warning');
+		}
+
 		if (this.frm.doc.is_return) {
 			this.frm.return_print_format = "Sales Invoice Return";
 		}
@@ -476,6 +495,17 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
+
+	is_cash_or_non_trade_discount() {
+		this.frm.set_df_property("additional_discount_account", "hidden", 1 - this.frm.doc.is_cash_or_non_trade_discount);
+		this.frm.set_df_property("additional_discount_account", "reqd", this.frm.doc.is_cash_or_non_trade_discount);
+
+		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.set_value("additional_discount_account", "");
+		}
+
+		this.calculate_taxes_and_totals();
+	}
 };
 
 // for backward compatibility: combine new and previous states
@@ -783,10 +813,6 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		}
 
-		// India related fields
-		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
-		else hide_field(['c_form_applicable', 'c_form_no']);
-
 		frm.refresh_fields();
 	},
 
@@ -1021,7 +1047,7 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 		]
 	});
 
-	dialog.set_primary_action(__("Set"), function() {
+	dialog.set_primary_action(__("Set Loyalty Program"), function() {
 		dialog.hide();
 		return frappe.call({
 			method: "frappe.client.set_value",

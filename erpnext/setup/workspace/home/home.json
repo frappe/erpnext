@@ -128,47 +128,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Human Resources",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Attendance Tool",
-   "link_count": 0,
-   "link_to": "Employee Attendance Tool",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Salary Structure",
-   "link_count": 0,
-   "link_to": "Salary Structure",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "CRM",
    "link_count": 0,
    "onboard": 0,
@@ -271,13 +230,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:24:17.002665",
+ "modified": "2022-06-27 16:54:35.462176",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 1.0,

@@ -7,7 +7,7 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "items_section",
+  "stock_entry_details_tab",
   "naming_series",
   "stock_entry_type",
   "outgoing_stock_entry",
@@ -15,6 +15,7 @@
   "add_to_transit",
   "work_order",
   "purchase_order",
+  "subcontracting_order",
   "delivery_note_no",
   "sales_invoice_no",
   "pick_list",
@@ -25,15 +26,20 @@
   "posting_time",
   "set_posting_time",
   "inspection_required",
-  "from_bom",
   "apply_putaway_rule",
-  "sb1",
-  "bom_no",
-  "fg_completed_qty",
-  "cb1",
+  "items_tab",
+  "bom_info_section",
+  "from_bom",
   "use_multi_level_bom",
+  "bom_no",
+  "cb1",
+  "fg_completed_qty",
   "get_items",
-  "section_break_12",
+  "section_break_7qsm",
+  "process_loss_percentage",
+  "column_break_e92r",
+  "process_loss_qty",
+  "section_break_jwgn",
   "from_warehouse",
   "source_warehouse_address",
   "source_address_display",
@@ -43,6 +49,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "items_section",
   "items",
   "get_stock_and_rate",
   "section_break_19",
@@ -53,6 +60,7 @@
   "additional_costs_section",
   "additional_costs",
   "total_additional_costs",
+  "supplier_info_tab",
   "contact_section",
   "supplier",
   "supplier_name",
@@ -60,7 +68,7 @@
   "address_display",
   "accounting_dimensions_section",
   "project",
-  "dimension_col_break",
+  "other_info_tab",
   "printing_settings",
   "select_print_heading",
   "print_settings_col_break",
@@ -77,11 +85,6 @@
   "is_return"
  ],
  "fields": [
-  {
-   "fieldname": "items_section",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break"
-  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -152,6 +155,13 @@
    "fieldtype": "Link",
    "label": "Purchase Order",
    "options": "Purchase Order"
+  },
+  {
+   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Order",
+   "options": "Subcontracting Order"
   },
   {
    "depends_on": "eval:doc.purpose==\"Sales Return\"",
@@ -228,16 +238,11 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:in_list([\"Material Issue\", \"Material Transfer\", \"Manufacture\", \"Repack\", \t\t\t\t\t\"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\"], doc.purpose)",
+   "depends_on": "eval:in_list([\"Material Issue\", \"Material Transfer\", \"Manufacture\", \"Repack\", \"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\"], doc.purpose)",
    "fieldname": "from_bom",
    "fieldtype": "Check",
    "label": "From BOM",
    "print_hide": 1
-  },
-  {
-   "depends_on": "eval: doc.from_bom && (doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")",
-   "fieldname": "sb1",
-   "fieldtype": "Section Break"
   },
   {
    "depends_on": "from_bom",
@@ -276,10 +281,6 @@
    "label": "Get Items",
    "oldfieldtype": "Button",
    "print_hide": 1
-  },
-  {
-   "fieldname": "section_break_12",
-   "fieldtype": "Section Break"
   },
   {
    "description": "Sets 'Source Warehouse' in each row of the items table.",
@@ -403,7 +404,7 @@
    "collapsible": 1,
    "collapsible_depends_on": "total_additional_costs",
    "fieldname": "additional_costs_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Additional Costs"
   },
   {
@@ -568,12 +569,8 @@
   {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "pick_list",
@@ -608,10 +605,71 @@
    "fieldname": "is_return",
    "fieldtype": "Check",
    "hidden": 1,
+   "in_list_view": 1,
    "label": "Is Return",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "bom_info_section",
+   "fieldtype": "Section Break",
+   "label": "BOM Info"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_jwgn",
+   "fieldtype": "Section Break",
+   "label": "Default Warehouse"
+  },
+  {
+   "fieldname": "other_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Other Info"
+  },
+  {
+   "fieldname": "supplier_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Supplier Info"
+  },
+  {
+   "fieldname": "stock_entry_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_7qsm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "process_loss_percentage",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_e92r",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.from_bom && doc.fg_completed_qty",
+   "fetch_from": "bom_no.process_loss_percentage",
+   "fetch_if_empty": 1,
+   "fieldname": "process_loss_percentage",
+   "fieldtype": "Percent",
+   "label": "% Process Loss"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
   }
  ],
  "icon": "fa fa-file-text",
@@ -619,7 +677,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-02 05:21:39.060501",
+ "modified": "2023-01-03 16:02:50.741816",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

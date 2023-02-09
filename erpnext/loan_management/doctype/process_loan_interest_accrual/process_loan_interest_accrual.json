@@ -54,17 +54,18 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Accrual Type",
-   "options": "Regular\nRepayment\nDisbursement",
+   "options": "Regular\nRepayment\nDisbursement\nCredit Adjustment\nDebit Adjustment\nRefund",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-06 13:28:51.478909",
+ "modified": "2022-06-29 11:19:33.203088",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -98,5 +99,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

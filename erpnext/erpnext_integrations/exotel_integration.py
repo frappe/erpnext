@@ -26,6 +26,7 @@ def handle_incoming_call(**kwargs):
 	except Exception as e:
 		frappe.db.rollback()
 		exotel_settings.log_error("Error in Exotel incoming call")
+		frappe.db.commit()
 
 
 @frappe.whitelist(allow_guest=True)
@@ -71,6 +72,24 @@ def get_call_log(call_payload):
 		return frappe.get_doc("Call Log", call_log_id)
 
 
+def map_custom_field(call_payload, call_log):
+	field_value = call_payload.get("CustomField")
+
+	if not field_value:
+		return call_log
+
+	settings = get_exotel_settings()
+	target_doctype = settings.target_doctype
+	mapping_enabled = settings.map_custom_field_to_doctype
+
+	if not mapping_enabled or not target_doctype:
+		return call_log
+
+	call_log.append("links", {"link_doctype": target_doctype, "link_name": field_value})
+
+	return call_log
+
+
 def create_call_log(call_payload):
 	call_log = frappe.new_doc("Call Log")
 	call_log.id = call_payload.get("CallSid")
@@ -78,6 +97,7 @@ def create_call_log(call_payload):
 	call_log.medium = call_payload.get("To")
 	call_log.status = "Ringing"
 	setattr(call_log, "from", call_payload.get("CallFrom"))
+	map_custom_field(call_payload, call_log)
 	call_log.save(ignore_permissions=True)
 	frappe.db.commit()
 	return call_log
@@ -92,10 +112,10 @@ def get_call_status(call_id):
 
 
 @frappe.whitelist()
-def make_a_call(from_number, to_number, caller_id):
+def make_a_call(from_number, to_number, caller_id, **kwargs):
 	endpoint = get_exotel_endpoint("Calls/connect.json?details=true")
 	response = requests.post(
-		endpoint, data={"From": from_number, "To": to_number, "CallerId": caller_id}
+		endpoint, data={"From": from_number, "To": to_number, "CallerId": caller_id, **kwargs}
 	)
 
 	return response.json()

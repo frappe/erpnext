@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 
@@ -12,8 +13,7 @@ def execute(filters=None):
 		filters = {}
 
 	columns = get_columns(filters)
-	conditions = get_condition(filters)
-	item_map = get_item_details(conditions)
+	item_map = get_item_details(filters)
 	pl = get_price_list()
 	last_purchase_rate = get_last_purchase_rate()
 	bom_rate = get_item_bom_rate()
@@ -63,18 +63,24 @@ def get_columns(filters):
 	return columns
 
 
-def get_item_details(conditions):
+def get_item_details(filters):
 	"""returns all items details"""
 
 	item_map = {}
 
-	for i in frappe.db.sql(
-		"""select name, item_group, item_name, description,
-		brand, stock_uom from tabItem %s
-		order by item_code, item_group"""
-		% (conditions),
-		as_dict=1,
-	):
+	item = frappe.qb.DocType("Item")
+	query = (
+		frappe.qb.from_(item)
+		.select(item.name, item.item_group, item.item_name, item.description, item.brand, item.stock_uom)
+		.orderby(item.item_code, item.item_group)
+	)
+
+	if filters.get("items") == "Enabled Items only":
+		query = query.where(item.disabled == 0)
+	elif filters.get("items") == "Disabled Items only":
+		query = query.where(item.disabled == 1)
+
+	for i in query.run(as_dict=True):
 		item_map.setdefault(i.name, i)
 
 	return item_map
@@ -85,19 +91,38 @@ def get_price_list():
 
 	rate = {}
 
-	price_list = frappe.db.sql(
-		"""select ip.item_code, ip.buying, ip.selling,
-		concat(ifnull(cu.symbol,ip.currency), " ", round(ip.price_list_rate,2), " - ", ip.price_list) as price
-		from `tabItem Price` ip, `tabPrice List` pl, `tabCurrency` cu
-		where ip.price_list=pl.name and pl.currency=cu.name and pl.enabled=1""",
-		as_dict=1,
-	)
+	ip = frappe.qb.DocType("Item Price")
+	pl = frappe.qb.DocType("Price List")
+	cu = frappe.qb.DocType("Currency")
 
-	for j in price_list:
-		if j.price:
-			rate.setdefault(j.item_code, {}).setdefault("Buying" if j.buying else "Selling", []).append(
-				j.price
+	price_list = (
+		frappe.qb.from_(ip)
+		.from_(pl)
+		.from_(cu)
+		.select(
+			ip.item_code,
+			ip.buying,
+			ip.selling,
+			(IfNull(cu.symbol, ip.currency)).as_("currency"),
+			ip.price_list_rate,
+			ip.price_list,
+		)
+		.where((ip.price_list == pl.name) & (pl.currency == cu.name) & (pl.enabled == 1))
+	).run(as_dict=True)
+
+	for d in price_list:
+		d.update(
+			{"price": "{0} {1} - {2}".format(d.currency, round(d.price_list_rate, 2), d.price_list)}
+		)
+		d.pop("currency")
+		d.pop("price_list_rate")
+		d.pop("price_list")
+
+		if d.price:
+			rate.setdefault(d.item_code, {}).setdefault("Buying" if d.buying else "Selling", []).append(
+				d.price
 			)
+
 	item_rate_map = {}
 
 	for item in rate:
@@ -112,30 +137,39 @@ def get_price_list():
 def get_last_purchase_rate():
 	item_last_purchase_rate_map = {}
 
-	query = """select * from (
-				(select
-					po_item.item_code,
-					po.transaction_date as posting_date,
-					po_item.base_rate
-				from `tabPurchase Order` po, `tabPurchase Order Item` po_item
-					where po.name = po_item.parent and po.docstatus = 1)
-				union
-				(select
-					pr_item.item_code,
-					pr.posting_date,
-					pr_item.base_rate
-				from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
-					where pr.name = pr_item.parent and pr.docstatus = 1)
-				union
-				(select
-					pi_item.item_code,
-					pi.posting_date,
-					pi_item.base_rate
-				from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
-					where pi.name = pi_item.parent and pi.docstatus = 1 and pi.update_stock = 1)
-				) result order by result.item_code asc, result.posting_date asc"""
+	po = frappe.qb.DocType("Purchase Order")
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pi = frappe.qb.DocType("Purchase Invoice")
+	po_item = frappe.qb.DocType("Purchase Order Item")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
-	for d in frappe.db.sql(query, as_dict=1):
+	query = (
+		frappe.qb.from_(
+			(
+				frappe.qb.from_(po)
+				.from_(po_item)
+				.select(po_item.item_code, po.transaction_date.as_("posting_date"), po_item.base_rate)
+				.where((po.name == po_item.parent) & (po.docstatus == 1))
+			)
+			+ (
+				frappe.qb.from_(pr)
+				.from_(pr_item)
+				.select(pr_item.item_code, pr.posting_date, pr_item.base_rate)
+				.where((pr.name == pr_item.parent) & (pr.docstatus == 1))
+			)
+			+ (
+				frappe.qb.from_(pi)
+				.from_(pi_item)
+				.select(pi_item.item_code, pi.posting_date, pi_item.base_rate)
+				.where((pi.name == pi_item.parent) & (pi.docstatus == 1) & (pi.update_stock == 1))
+			)
+		)
+		.select("*")
+		.orderby("item_code", "posting_date")
+	)
+
+	for d in query.run(as_dict=True):
 		item_last_purchase_rate_map[d.item_code] = d.base_rate
 
 	return item_last_purchase_rate_map
@@ -146,12 +180,15 @@ def get_item_bom_rate():
 
 	item_bom_map = {}
 
-	for b in frappe.db.sql(
-		"""select item, (total_cost/quantity) as bom_rate
-		from `tabBOM` where is_active=1 and is_default=1""",
-		as_dict=1,
-	):
-		item_bom_map.setdefault(b.item, flt(b.bom_rate))
+	bom = frappe.qb.DocType("BOM")
+	bom_data = (
+		frappe.qb.from_(bom)
+		.select(bom.item, (bom.total_cost / bom.quantity).as_("bom_rate"))
+		.where((bom.is_active == 1) & (bom.is_default == 1))
+	).run(as_dict=True)
+
+	for d in bom_data:
+		item_bom_map.setdefault(d.item, flt(d.bom_rate))
 
 	return item_bom_map
 
@@ -161,25 +198,17 @@ def get_valuation_rate():
 
 	item_val_rate_map = {}
 
-	for d in frappe.db.sql(
-		"""select item_code,
-		sum(actual_qty*valuation_rate)/sum(actual_qty) as val_rate
-		from tabBin where actual_qty > 0 group by item_code""",
-		as_dict=1,
-	):
+	bin = frappe.qb.DocType("Bin")
+	bin_data = (
+		frappe.qb.from_(bin)
+		.select(
+			bin.item_code, Sum(bin.actual_qty * bin.valuation_rate) / Sum(bin.actual_qty).as_("val_rate")
+		)
+		.where(bin.actual_qty > 0)
+		.groupby(bin.item_code)
+	).run(as_dict=True)
+
+	for d in bin_data:
 		item_val_rate_map.setdefault(d.item_code, d.val_rate)
 
 	return item_val_rate_map
-
-
-def get_condition(filters):
-	"""Get Filter Items"""
-
-	if filters.get("items") == "Enabled Items only":
-		conditions = " where disabled=0 "
-	elif filters.get("items") == "Disabled Items only":
-		conditions = " where disabled=1 "
-	else:
-		conditions = ""
-
-	return conditions

@@ -31,7 +31,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		super.onload();
 
 		// Ignore linked advances
-		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry'];
+		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice'];
 
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
@@ -81,7 +81,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		if(doc.docstatus == 1 && doc.outstanding_amount != 0
-			&& !(doc.is_return && doc.return_against)) {
+			&& !(doc.is_return && doc.return_against) && !doc.on_hold) {
 			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
@@ -99,7 +99,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.outstanding_amount > 0 && !cint(doc.is_return)) {
+		if (doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
 			cur_frm.add_custom_button(__('Payment Request'), function() {
 				me.make_payment_request()
 			}, __('Create'));
@@ -539,7 +539,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function(frm) {
-		if (frm.doc.per_received < 100) {
+		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100) {
 			frm.add_custom_button(__('Purchase Receipt'), () => {
 				frm.events.make_purchase_receipt(frm);
 			}, __('Create'));
@@ -569,12 +569,17 @@ frappe.ui.form.on("Purchase Invoice", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		if (frm.is_new()) {
+			frm.clear_table("tax_withheld_vouchers");
+		}
 	},
 
 	is_subcontracted: function(frm) {
-		if (frm.doc.is_subcontracted) {
+		if (frm.doc.is_old_subcontracting_flow) {
 			erpnext.buying.get_default_bom(frm);
 		}
+
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
 	},
 

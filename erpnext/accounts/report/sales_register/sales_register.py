@@ -370,7 +370,7 @@ def get_conditions(filters):
 				where parent=`tabSales Invoice`.name
 					and ifnull(`tab{table}`.{field}, '') = %({field})s)"""
 
-	conditions += get_sales_invoice_item_field_condition("mode_of_payments", "Sales Invoice Payment")
+	conditions += get_sales_invoice_item_field_condition("mode_of_payment", "Sales Invoice Payment")
 	conditions += get_sales_invoice_item_field_condition("cost_center")
 	conditions += get_sales_invoice_item_field_condition("warehouse")
 	conditions += get_sales_invoice_item_field_condition("brand")
@@ -390,12 +390,12 @@ def get_conditions(filters):
 
 					conditions += (
 						common_condition
-						+ "and ifnull(`tabSales Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+						+ "and ifnull(`tabSales Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
 					)
 				else:
 					conditions += (
 						common_condition
-						+ "and ifnull(`tabSales Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+						+ "and ifnull(`tabSales Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
 					)
 
 	return conditions

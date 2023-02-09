@@ -64,4 +64,8 @@ def delete_and_patch_duplicate_bins():
 		bin.update(qty_dict)
 		bin.update_reserved_qty_for_production()
 		bin.update_reserved_qty_for_sub_contracting()
+		if frappe.db.count(
+			"Purchase Order", {"status": ["!=", "Completed"], "is_old_subcontracting_flow": 1}
+		):
+			bin.update_reserved_qty_for_sub_contracting(subcontract_doctype="Purchase Order")
 		bin.db_update()

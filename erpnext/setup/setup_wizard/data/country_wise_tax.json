@@ -481,136 +481,461 @@
 	},
 
 	"Germany": {
-		"tax_categories": [
-			"Umsatzsteuer",
-			"Vorsteuer"
-		],
+		"tax_categories": [],
 		"chart_of_accounts": {
 			"SKR04 mit Kontonummern": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
+						"title": "Lieferung oder sonstige Leistung im Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
 									"account_number": "3806",
 									"tax_rate": 19.00
 								},
+								"description": "Umsatzsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 7%",
+									"account_name": "Umsatzsteuer 7 %",
 									"account_number": "3801",
 									"tax_rate": 7.00
 								},
-								"rate": 0.00
-							}
-						]
-					}
-				],
-				"purchase_tax_templates": [
-					{
-						"title": "Vorsteuer",
-						"tax_category": "Vorsteuer",
-						"is_default": 1,
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 19%",
-									"account_number": "1406",
-									"root_type": "Asset",
-									"tax_rate": 19.00
-								},
-								"rate": 0.00
-							},
-							{
-								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 7%",
-									"account_number": "1401",
-									"root_type": "Asset",
-									"tax_rate": 7.00
-								},
+								"description": "Umsatzsteuer 7 %",
 								"rate": 0.00
 							}
 						]
 					},
 					{
-						"title": "Innergemeinschaftlicher Erwerb 19% Umsatzsteuer und 19% Vorsteuer",
+						"title": "Lieferung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Lieferung oder sonstige Leistung an nicht-Unternehmen in der EU",
+						"is_default": 0,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
-									"account_number": "1407",
-									"root_type": "Asset",
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "3806",
 									"tax_rate": 19.00
 								},
-								"add_deduct_tax": "Add"
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "3801",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an nicht-Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "3806",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "3801",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": []
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Lieferung aus dem Inland",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1406",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1401",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus dem Inland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1406",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1401",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1404",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1402",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "3804",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "3802",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
 									"account_number": "3837",
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
-								"add_deduct_tax": "Deduct"
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "3835",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "3837",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "3835",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1406",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1401",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1433",
+									"root_type": "Asset"
+								},
+								"description": "Entstandene Einfuhrumsatzsteuer",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "3837",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "3835",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
 							}
 						]
 					}
 				],
 				"item_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "19 %",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
 									"account_number": "3806",
+									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
 								"tax_rate": 19.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
+									"account_name": "Umsatzsteuer 7 %",
 									"account_number": "3801",
+									"root_type": "Liability",
 									"tax_rate": 7.00
-								},
-								"tax_rate": 0.00
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
-									"account_number": "3806",
-									"tax_rate": 19.00
 								},
 								"tax_rate": 0.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
-									"account_number": "3801",
-									"tax_rate": 7.00
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "3804",
+									"root_type": "Liability",
+									"tax_rate": 19.00
 								},
-								"tax_rate": 7.00
-							}
-						]
-					},
-					{
-						"title": "Vorsteuer 19%",
-						"taxes": [
+								"tax_rate": 19.00
+							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "3802",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "3837",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "3835",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"account_number": "1406",
 									"root_type": "Asset",
 									"tax_rate": 19.00
@@ -619,21 +944,119 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"account_number": "1401",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1404",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1402",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1433",
+									"root_type": "Asset"
+								},
+								"tax_rate": 19.00
 							}
 						]
 					},
 					{
-						"title": "Vorsteuer 7%",
+						"title": "7 %",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "3806",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "3801",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "3804",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "3802",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "3837",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "3835",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"account_number": "1406",
 									"root_type": "Asset",
 									"tax_rate": 19.00
@@ -642,12 +1065,177 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"account_number": "1401",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1404",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1402",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1433",
+									"root_type": "Asset"
+								},
+								"tax_rate": 7.00
+							}
+						]
+					},
+					{
+						"title": "0 %",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "3806",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "3801",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "3804",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "3802",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "3837",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "3835",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1406",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1401",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1404",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1402",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1433",
+									"root_type": "Asset"
+								},
+								"tax_rate": 0.00
 							}
 						]
 					}
@@ -656,51 +1244,390 @@
 			"SKR03 mit Kontonummern": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
+						"title": "Lieferung oder sonstige Leistung im Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
 									"account_number": "1776",
 									"tax_rate": 19.00
 								},
+								"description": "Umsatzsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 7%",
+									"account_name": "Umsatzsteuer 7 %",
 									"account_number": "1771",
 									"tax_rate": 7.00
 								},
+								"description": "Umsatzsteuer 7 %",
 								"rate": 0.00
 							}
 						]
+					},
+					{
+						"title": "Lieferung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Lieferung oder sonstige Leistung an nicht-Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "1776",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "1771",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an nicht-Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "1776",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "1771",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": []
 					}
 				],
 				"purchase_tax_templates": [
 					{
-						"title": "Vorsteuer",
-						"tax_category": "Vorsteuer",
+						"title": "Lieferung aus dem Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"account_number": "1576",
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"description": "Abziehbare Vorsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"account_number": "1571",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus dem Inland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1576",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1571",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1574",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1572",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1774",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1772",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "1787",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "1785",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "1787",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "1785",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1576",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1571",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1588",
+									"root_type": "Asset"
+								},
+								"description": "Entstandene Einfuhrumsatzsteuer",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "1787",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "1785",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
 								"rate": 0.00
 							}
 						]
@@ -708,53 +1635,65 @@
 				],
 				"item_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "19 %",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
 									"account_number": "1776",
+									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
 								"tax_rate": 19.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
+									"account_name": "Umsatzsteuer 7 %",
 									"account_number": "1771",
+									"root_type": "Liability",
 									"tax_rate": 7.00
-								},
-								"tax_rate": 0.00
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
-									"account_number": "1776",
-									"tax_rate": 19.00
 								},
 								"tax_rate": 0.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
-									"account_number": "1771",
-									"tax_rate": 7.00
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1774",
+									"root_type": "Liability",
+									"tax_rate": 19.00
 								},
-								"tax_rate": 7.00
-							}
-						]
-					},
-					{
-						"title": "Vorsteuer 19%",
-						"taxes": [
+								"tax_rate": 19.00
+							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1772",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "1787",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "1785",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"account_number": "1576",
 									"root_type": "Asset",
 									"tax_rate": 19.00
@@ -763,21 +1702,119 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"account_number": "1571",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1574",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1572",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1588",
+									"root_type": "Asset"
+								},
+								"tax_rate": 19.00
 							}
 						]
 					},
 					{
-						"title": "Vorsteuer 7%",
+						"title": "7 %",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "1776",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "1771",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1774",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1772",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "1787",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "1785",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"account_number": "1576",
 									"root_type": "Asset",
 									"tax_rate": 19.00
@@ -786,12 +1823,177 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"account_number": "1571",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1574",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1572",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1588",
+									"root_type": "Asset"
+								},
+								"tax_rate": 7.00
+							}
+						]
+					},
+					{
+						"title": "0 %",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "1776",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "1771",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1774",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1772",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"account_number": "1787",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"account_number": "1785",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1576",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1571",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"account_number": "1574",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1572",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1588",
+									"root_type": "Asset"
+								},
+								"tax_rate": 0.00
 							}
 						]
 					}
@@ -800,51 +2002,390 @@
 			"Standard with Numbers": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
+						"title": "Lieferung oder sonstige Leistung im Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 19%",
-									"account_number": "2301",
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "2320",
 									"tax_rate": 19.00
 								},
+								"description": "Umsatzsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 7%",
-									"account_number": "2302",
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "2321",
 									"tax_rate": 7.00
 								},
+								"description": "Umsatzsteuer 7 %",
 								"rate": 0.00
 							}
 						]
+					},
+					{
+						"title": "Lieferung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Lieferung oder sonstige Leistung an nicht-Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "2320",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "2321",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an nicht-Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "2320",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "2321",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": []
 					}
 				],
 				"purchase_tax_templates": [
 					{
-						"title": "Vorsteuer",
-						"tax_category": "Vorsteuer",
+						"title": "Lieferung aus dem Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 19%",
-									"account_number": "1501",
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1520",
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"description": "Abziehbare Vorsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 7%",
-									"account_number": "1502",
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1521",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus dem Inland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1520",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1521",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "1530",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "1531",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "2330",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "2331",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_number": "2340",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19%",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 7%",
+									"account_number": "2341",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 7%",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_number": "2340",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19%",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 7%",
+									"account_number": "2341",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 7%",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1520",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1521",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1550",
+									"root_type": "Asset"
+								},
+								"description": "Entstandene Einfuhrumsatzsteuer",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_number": "2340",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19%",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 7%",
+									"account_number": "2341",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 7%",
+								"add_deduct_tax": "Deduct",
 								"rate": 0.00
 							}
 						]
@@ -852,54 +2393,66 @@
 				],
 				"item_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "19%",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
-									"account_number": "2301",
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "2320",
+									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
 								"tax_rate": 19.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
-									"account_number": "2302",
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "2321",
+									"root_type": "Liability",
 									"tax_rate": 7.00
-								},
-								"tax_rate": 0.00
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
-									"account_number": "2301",
-									"tax_rate": 19.00
 								},
 								"tax_rate": 0.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
-									"account_number": "2302",
-									"tax_rate": 7.00
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "2330",
+									"root_type": "Liability",
+									"tax_rate": 19.00
 								},
-								"tax_rate": 7.00
-							}
-						]
-					},
-					{
-						"title": "Vorsteuer 19%",
-						"taxes": [
+								"tax_rate": 19.00
+							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
-									"account_number": "1501",
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "2331",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_number": "2340",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 7%",
+									"account_number": "2341",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1520",
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
@@ -907,22 +2460,120 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
-									"account_number": "1502",
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1521",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "1530",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "1531",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1550",
+									"root_type": "Asset"
+								},
+								"tax_rate": 19.00
 							}
 						]
 					},
 					{
-						"title": "Vorsteuer 7%",
+						"title": "7%",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
-									"account_number": "1501",
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "2320",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "2321",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "2330",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "2331",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_number": "2340",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 7%",
+									"account_number": "2341",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1520",
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
@@ -930,12 +2581,177 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
-									"account_number": "1502",
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1521",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "1530",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "1531",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1550",
+									"root_type": "Asset"
+								},
+								"tax_rate": 7.00
+							}
+						]
+					},
+					{
+						"title": "0 %",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19 %",
+									"account_number": "2320",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"account_number": "2321",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "2330",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "2331",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19%",
+									"account_number": "2340",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 7%",
+									"account_number": "2341",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"account_number": "1520",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"account_number": "1521",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 19 %",
+									"account_number": "1530",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichen Erwerb 7 %",
+									"account_number": "1531",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19%",
+									"account_number": "1540",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 7%",
+									"account_number": "1541",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"account_number": "1550",
+									"root_type": "Asset"
+								},
+								"tax_rate": 0.00
 							}
 						]
 					}
@@ -944,47 +2760,361 @@
 			"*": {
 				"sales_tax_templates": [
 					{
-						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
+						"title": "Lieferung oder sonstige Leistung im Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
 									"tax_rate": 19.00
 								},
+								"description": "Umsatzsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Umsatzsteuer 7%",
+									"account_name": "Umsatzsteuer 7 %",
 									"tax_rate": 7.00
 								},
+								"description": "Umsatzsteuer 7 %",
 								"rate": 0.00
 							}
 						]
+					},
+					{
+						"title": "Lieferung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Lieferung oder sonstige Leistung an nicht-Unternehmen in der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Sonstige Leistung an nicht-Unternehmen in Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 19 %",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 7 %",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": []
 					}
 				],
 				"purchase_tax_templates": [
 					{
-						"title": "Vorsteuer 19%",
-						"tax_category": "Vorsteuer",
+						"title": "Lieferung aus dem Inland",
 						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 19%",
-									"tax_rate": 19.00,
-									"root_type": "Asset"
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
 								},
+								"description": "Abziehbare Vorsteuer 19 %",
 								"rate": 0.00
 							},
 							{
 								"account_head": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus dem Inland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus der EU",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Sonstige Leistung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Lieferung aus Drittland",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer 7 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"root_type": "Asset"
+								},
+								"description": "Entstandene Einfuhrumsatzsteuer",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"description": "Abziehbare Vorsteuer nach § 13b UStG",
+								"add_deduct_tax": "Add",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG 19 %",
+								"add_deduct_tax": "Deduct",
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"description": "Umsatzsteuer nach § 13b UStG",
+								"add_deduct_tax": "Deduct",
 								"rate": 0.00
 							}
 						]
@@ -992,49 +3122,59 @@
 				],
 				"item_tax_templates": [
 					{
-						"title": "Umsatzsteuer 19%",
+						"title": "19 %",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
+									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
 								"tax_rate": 19.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
+									"account_name": "Umsatzsteuer 7 %",
+									"root_type": "Liability",
 									"tax_rate": 7.00
-								},
-								"tax_rate": 0.00
-							}
-						]
-					},
-					{
-						"title": "Umsatzsteuer 7%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Umsatzsteuer 19%",
-									"tax_rate": 19.00
 								},
 								"tax_rate": 0.00
 							},
 							{
 								"tax_type": {
-									"account_name": "Umsatzsteuer 7%",
-									"tax_rate": 7.00
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
 								},
-								"tax_rate": 7.00
-							}
-						]
-					},
-					{
-						"title": "Vorsteuer 19%",
-						"taxes": [
+								"tax_rate": 19.00
+							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
@@ -1042,20 +3182,107 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 19.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"root_type": "Asset"
+								},
+								"tax_rate": 19.00
 							}
 						]
 					},
 					{
-						"title": "Vorsteuer 7%",
+						"title": "7 %",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 19%",
+									"account_name": "Umsatzsteuer 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
@@ -1063,11 +3290,158 @@
 							},
 							{
 								"tax_type": {
-									"account_name": "Abziehbare Vorsteuer 7%",
+									"account_name": "Abziehbare Vorsteuer 7 %",
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
 								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 7.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"root_type": "Asset"
+								},
+								"tax_rate": 7.00
+							}
+						]
+					},
+					{
+						"title": "0%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 7 %",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG 19 %",
+									"root_type": "Liability",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer nach § 13b UStG",
+									"root_type": "Liability",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer 7 %",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG 19 %",
+									"root_type": "Asset",
+									"tax_rate": 19.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Abziehbare Vorsteuer nach § 13b UStG",
+									"root_type": "Asset",
+									"tax_rate": 7.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Entstandene Einfuhrumsatzsteuer",
+									"root_type": "Asset"
+								},
+								"tax_rate": 0.00
 							}
 						]
 					}
@@ -1160,481 +3534,6 @@
 		"Iceland VAT 7.5%": {
 			"account_name": "VAT 7.5%",
 			"tax_rate": 7.5
-		}
-	},
-
-	"India": {
-		"tax_categories": [
-			{
-				"title": "In-State",
-				"is_inter_state": 0,
-				"gst_state": ""
-			},
-			{
-				"title": "Out-State",
-				"is_inter_state": 1,
-				"gst_state": ""
-			},
-			{
-				"title": "Reverse Charge In-State",
-				"is_inter_state": 0,
-				"is_reverse_charge": 1,
-				"gst_state": ""
-			},
-			{
-				"title": "Reverse Charge Out-State",
-				"is_inter_state": 1,
-				"is_reverse_charge": 1,
-				"gst_state": ""
-			},
-			{
-				"title": "Registered Composition",
-				"is_inter_state": 0,
-				"gst_state": ""
-			}
-		],
-		"chart_of_accounts": {
-			"*": {
-				"item_tax_templates": [
-					{
-						"title": "GST 18%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Output Tax SGST",
-									"tax_rate": 9.00
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax CGST",
-									"tax_rate": 9.00
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax IGST",
-									"tax_rate": 18.00
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST",
-									"tax_rate": 9.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST",
-									"tax_rate": 9.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST",
-									"tax_rate": 18.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST RCM",
-									"tax_rate": 9.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST RCM",
-									"tax_rate": 9.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST RCM",
-									"tax_rate": 18.00,
-									"root_type": "Asset"
-								}
-							}
-						]
-					},
-					{
-						"title": "GST 5%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Output Tax SGST",
-									"tax_rate": 2.5
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax CGST",
-									"tax_rate": 2.5
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax IGST",
-									"tax_rate": 5.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST",
-									"tax_rate": 2.5,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST",
-									"tax_rate": 2.5,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST",
-									"tax_rate": 5.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST RCM",
-									"tax_rate": 2.50,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST RCM",
-									"tax_rate": 2.50,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST RCM",
-									"tax_rate": 5.00,
-									"root_type": "Asset"
-								}
-							}
-						]
-					},
-					{
-						"title": "GST 12%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Output Tax SGST",
-									"tax_rate": 6.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax CGST",
-									"tax_rate": 6.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax IGST",
-									"tax_rate": 12.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST",
-									"tax_rate": 6.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST",
-									"tax_rate": 6.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST",
-									"tax_rate": 12.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST RCM",
-									"tax_rate": 6.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST RCM",
-									"tax_rate": 6.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST RCM",
-									"tax_rate": 12.00,
-									"root_type": "Asset"
-								}
-							}
-						]
-					},
-					{
-						"title": "GST 28%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "Output Tax SGST",
-									"tax_rate": 14.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax CGST",
-									"tax_rate": 14.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Output Tax IGST",
-									"tax_rate": 28.0
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST",
-									"tax_rate": 14.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST",
-									"tax_rate": 14.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST",
-									"tax_rate": 28.0,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax SGST RCM",
-									"tax_rate": 14.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax CGST RCM",
-									"tax_rate": 14.00,
-									"root_type": "Asset"
-								}
-							},
-							{
-								"tax_type": {
-									"account_name": "Input Tax IGST RCM",
-									"tax_rate": 28.00,
-									"root_type": "Asset"
-								}
-							}
-						]
-					},
-					{
-						"title": "VAT 5%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "VAT 5%",
-									"tax_rate": 5.00
-								}
-							}
-						]
-					},
-					{
-						"title": "VAT 4%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "VAT 4%",
-									"tax_rate": 4.00
-								}
-							}
-						]
-					},
-					{
-						"title": "VAT 14%",
-						"taxes": [
-							{
-								"tax_type": {
-									"account_name": "VAT 14%",
-									"tax_rate": 14.00
-								}
-							}
-						]
-					}
-				],
-				"sales_tax_templates": [
-					{
-						"title": "Output GST In-state",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Output Tax SGST",
-									"tax_rate": 9.00,
-									"account_type": "Tax"
-								}
-							},
-							{
-								"account_head": {
-									"account_name": "Output Tax CGST",
-									"tax_rate": 9.00,
-									"account_type": "Tax"
-								}
-							}
-						],
-						"tax_category": "In-State"
-					},
-					{
-						"title": "Output GST Out-state",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Output Tax IGST",
-									"tax_rate": 18.00,
-									"account_type": "Tax"
-								}
-							}
-						],
-						"tax_category": "Out-State"
-					}
-				],
-				"purchase_tax_templates": [
-					{
-						"title": "Input GST In-state",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Input Tax SGST",
-									"tax_rate": 9.00,
-									"root_type": "Asset",
-									"account_type": "Tax"
-								}
-							},
-							{
-								"account_head": {
-									"account_name": "Input Tax CGST",
-									"tax_rate": 9.00,
-									"root_type": "Asset",
-									"account_type": "Tax"
-								}
-							}
-						],
-						"tax_category": "In-State"
-					},
-					{
-						"title": "Input GST Out-state",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Input Tax IGST",
-									"tax_rate": 18.00,
-									"root_type": "Asset",
-									"account_type": "Tax"
-								}
-							}
-						],
-						"tax_category": "Out-State"
-					},
-					{
-						"title": "Input GST RCM In-state",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Input Tax SGST RCM",
-									"tax_rate": 9.00,
-									"root_type": "Asset",
-									"account_type": "Tax"
-								}
-							},
-							{
-								"account_head": {
-									"account_name": "Input Tax CGST RCM",
-									"tax_rate": 9.00,
-									"root_type": "Asset",
-									"account_type": "Tax"
-								}
-							}
-						],
-						"tax_category": "Reverse Charge In-State"
-					},
-					{
-						"title": "Input GST RCM Out-state",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "Input Tax IGST RCM",
-									"tax_rate": 18.00,
-									"root_type": "Asset",
-									"account_type": "Tax"
-								}
-							}
-						],
-						"tax_category": "Reverse Charge Out-State"
-					}
-				],
-				"*": [
-					{
-						"title": "VAT 5%",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "VAT 5%",
-									"tax_rate": 5.00
-								}
-							}
-						]
-					},
-					{
-						"title": "VAT 4%",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "VAT 4%",
-									"tax_rate": 4.00
-								}
-							}
-						]
-					},
-					{
-						"title": "VAT 14%",
-						"taxes": [
-							{
-								"account_head": {
-									"account_name": "VAT 14%",
-									"tax_rate": 14.00
-								}
-							}
-						]
-					}
-				]
-			}
 		}
 	},
 

@@ -5,7 +5,7 @@
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cint, cstr, flt, get_time, now_datetime
+from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -29,64 +29,6 @@ class TransactionBase(StatusUpdater):
 				get_time(self.posting_time)
 			except ValueError:
 				frappe.throw(_("Invalid Posting Time"))
-
-	def add_calendar_event(self, opts, force=False):
-		if (
-			cstr(self.contact_by) != cstr(self._prev.contact_by)
-			or cstr(self.contact_date) != cstr(self._prev.contact_date)
-			or force
-			or (hasattr(self, "ends_on") and cstr(self.ends_on) != cstr(self._prev.ends_on))
-		):
-
-			self.delete_events()
-			self._add_calendar_event(opts)
-
-	def delete_events(self):
-		participations = frappe.get_all(
-			"Event Participants",
-			filters={
-				"reference_doctype": self.doctype,
-				"reference_docname": self.name,
-				"parenttype": "Event",
-			},
-			fields=["name", "parent"],
-		)
-
-		if participations:
-			for participation in participations:
-				total_participants = frappe.get_all(
-					"Event Participants", filters={"parenttype": "Event", "parent": participation.parent}
-				)
-
-				if len(total_participants) <= 1:
-					frappe.db.sql("delete from `tabEvent` where name='%s'" % participation.parent)
-
-				frappe.db.sql("delete from `tabEvent Participants` where name='%s'" % participation.name)
-
-	def _add_calendar_event(self, opts):
-		opts = frappe._dict(opts)
-
-		if self.contact_date:
-			event = frappe.get_doc(
-				{
-					"doctype": "Event",
-					"owner": opts.owner or self.owner,
-					"subject": opts.subject,
-					"description": opts.description,
-					"starts_on": self.contact_date,
-					"ends_on": opts.ends_on,
-					"event_type": "Private",
-				}
-			)
-
-			event.append(
-				"event_participants", {"reference_doctype": self.doctype, "reference_docname": self.name}
-			)
-
-			event.insert(ignore_permissions=True)
-
-			if frappe.db.exists("User", self.contact_by):
-				frappe.share.add("Event", event.name, self.contact_by, flags={"ignore_share_permission": True})
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
@@ -129,6 +71,9 @@ class TransactionBase(StatusUpdater):
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 	def validate_rate_with_reference_doc(self, ref_details):
+		if self.get("is_internal_supplier"):
+			return
+
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 
 		if self.doctype in buying_doctypes:

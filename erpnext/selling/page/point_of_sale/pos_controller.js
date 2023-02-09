@@ -67,7 +67,7 @@ erpnext.PointOfSale.Controller = class {
 				{
 					fieldtype: 'Link', label: __('POS Profile'),
 					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
-					get_query: () => pos_profile_query,
+					get_query: () => pos_profile_query(),
 					onchange: () => fetch_pos_payment_methods()
 				},
 				{
@@ -101,9 +101,11 @@ erpnext.PointOfSale.Controller = class {
 			primary_action_label: __('Submit')
 		});
 		dialog.show();
-		const pos_profile_query = {
-			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-			filters: { company: dialog.fields_dict.company.get_value() }
+		const pos_profile_query = () => {
+			return {
+				query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+				filters: { company: dialog.fields_dict.company.get_value() }
+			}
 		};
 	}
 
@@ -497,7 +499,10 @@ erpnext.PointOfSale.Controller = class {
 
 	set_pos_profile_data() {
 		if (this.company && !this.frm.doc.company) this.frm.doc.company = this.company;
-		if (this.pos_profile && !this.frm.doc.pos_profile) this.frm.doc.pos_profile = this.pos_profile;
+		if ((this.pos_profile && !this.frm.doc.pos_profile) | (this.frm.doc.is_return && this.pos_profile != this.frm.doc.pos_profile)) {
+			this.frm.doc.pos_profile = this.pos_profile;
+		}
+
 		if (!this.frm.doc.company) return;
 
 		return this.frm.trigger("set_pos_data");
@@ -537,12 +542,12 @@ erpnext.PointOfSale.Controller = class {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
-				const { item_code, batch_no, serial_no, rate } = item;
+				const { item_code, batch_no, serial_no, rate, uom } = item;
 
 				if (!item_code)
 					return;
 
-				const new_item = { item_code, batch_no, rate, [field]: value };
+				const new_item = { item_code, batch_no, rate, uom, [field]: value };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
@@ -644,6 +649,7 @@ erpnext.PointOfSale.Controller = class {
 		const is_stock_item = resp[1];
 
 		frappe.dom.unfreeze();
+		const bold_uom = item_row.stock_uom.bold();
 		const bold_item_code = item_row.item_code.bold();
 		const bold_warehouse = warehouse.bold();
 		const bold_available_qty = available_qty.toString().bold()
@@ -657,9 +663,9 @@ erpnext.PointOfSale.Controller = class {
 			} else {
 				return;
 			}
-		} else if (available_qty < qty_needed) {
+		} else if (is_stock_item && available_qty < qty_needed) {
 			frappe.throw({
-				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
+				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2} {3}.', [bold_item_code, bold_warehouse, bold_available_qty, bold_uom]),
 				indicator: 'orange'
 			});
 			frappe.utils.play_sound("error");
@@ -691,7 +697,7 @@ erpnext.PointOfSale.Controller = class {
 			callback(res) {
 				if (!me.item_stock_map[item_code])
 					me.item_stock_map[item_code] = {};
-				me.item_stock_map[item_code][warehouse] = res.message[0];
+				me.item_stock_map[item_code][warehouse] = res.message;
 			}
 		});
 	}

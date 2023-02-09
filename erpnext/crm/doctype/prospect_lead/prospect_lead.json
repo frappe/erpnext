@@ -7,12 +7,15 @@
  "field_order": [
   "lead",
   "lead_name",
-  "status",
   "email",
-  "mobile_no"
+  "column_break_4",
+  "mobile_no",
+  "lead_owner",
+  "status"
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "lead",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -21,6 +24,8 @@
    "reqd": 1
   },
   {
+   "columns": 2,
+   "fetch_from": "lead.lead_name",
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -28,14 +33,17 @@
    "read_only": 1
   },
   {
+   "columns": 1,
+   "fetch_from": "lead.status",
    "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Lead\nOpen\nReplied\nOpportunity\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact",
    "read_only": 1
   },
   {
+   "columns": 2,
+   "fetch_from": "lead.email_id",
    "fieldname": "email",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -44,18 +52,32 @@
    "read_only": 1
   },
   {
+   "columns": 2,
+   "fetch_from": "lead.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Mobile No",
    "options": "Phone",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "lead.lead_owner",
+   "fieldname": "lead_owner",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Lead Owner"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-25 12:58:24.638054",
+ "modified": "2022-04-28 20:27:58.805970",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect Lead",
@@ -63,5 +85,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

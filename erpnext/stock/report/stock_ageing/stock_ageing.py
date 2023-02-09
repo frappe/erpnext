@@ -34,6 +34,9 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
 	for item, item_dict in item_details.items():
+		if not flt(item_dict.get("total_qty"), precision):
+			continue
+
 		earliest_age, latest_age = 0, 0
 		details = item_dict["details"]
 
@@ -195,11 +198,11 @@ def setup_ageing_columns(filters: Filters, range_columns: List):
 		f"0 - {filters['range1']}",
 		f"{cint(filters['range1']) + 1} - {cint(filters['range2'])}",
 		f"{cint(filters['range2']) + 1} - {cint(filters['range3'])}",
-		f"{cint(filters['range3']) + 1} - {_('Above')}",
+		_("{0} - Above").format(cint(filters["range3"]) + 1),
 	]
 	for i, label in enumerate(ranges):
 		fieldname = "range" + str(i + 1)
-		add_column(range_columns, label=f"Age ({label})", fieldname=fieldname)
+		add_column(range_columns, label=_("Age ({0})").format(label), fieldname=fieldname)
 
 
 def add_column(

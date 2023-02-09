@@ -14,7 +14,6 @@
   "applicable_modules_section",
   "selling",
   "buying",
-  "hr",
   "section_break_7",
   "terms",
   "terms_and_conditions_help"
@@ -70,12 +69,6 @@
    "label": "Buying"
   },
   {
-   "default": "1",
-   "fieldname": "hr",
-   "fieldtype": "Check",
-   "label": "HR"
-  },
-  {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
   }
@@ -83,7 +76,7 @@
  "icon": "icon-legal",
  "idx": 1,
  "links": [],
- "modified": "2020-06-16 22:54:38.094844",
+ "modified": "2022-06-16 15:07:38.094844",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Terms and Conditions",

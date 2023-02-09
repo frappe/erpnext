@@ -87,17 +87,6 @@ $.extend(erpnext, {
 	route_to_pending_reposts: (args) => {
 		frappe.set_route('List', 'Repost Item Valuation', args);
 	},
-
-	proceed_save_with_reminders_frequency_change: () => {
-		frappe.ui.hide_open_dialog();
-
-		frappe.call({
-			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
-			callback: () => {
-				cur_frm.save();
-			}
-		});
-	}
 });
 
 
@@ -224,6 +213,32 @@ $.extend(erpnext.utils, {
 		});
 	},
 
+	add_inventory_dimensions: function(report_name, index) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		frappe.call({
+			method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			callback: function(r) {
+				if (r.message && r.message.length) {
+					r.message.forEach((dimension) => {
+						let found = filters.some(el => el.fieldname === dimension['fieldname']);
+
+						if (!found) {
+							filters.splice(index, 0, {
+								"fieldname": dimension["fieldname"],
+								"label": __(dimension["doctype"]),
+								"fieldtype": "MultiSelectList",
+								get_data: function(txt) {
+									return frappe.db.get_link_options(dimension["doctype"], txt);
+								},
+							});
+						}
+					});
+				}
+			}
+		});
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
@@ -318,8 +333,18 @@ $.extend(erpnext.utils, {
 			}
 			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 		});
-	}
+	},
 
+	// check if payments app is installed on site, if not warn user.
+	check_payments_app: () => {
+		if (frappe.boot.versions && !frappe.boot.versions.payments) {
+			const marketplace_link = '<a href="https://frappecloud.com/marketplace/apps/payments">Marketplace</a>'
+			const github_link = '<a href="https://github.com/frappe/payments/">GitHub</a>'
+			const msg = __("payments app is not installed. Please install it from {0} or {1}", [marketplace_link, github_link])
+			frappe.msgprint(msg);
+		}
+
+	},
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
@@ -466,7 +491,20 @@ erpnext.utils.update_child_items = function(opts) {
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
 
-	this.data = [];
+	this.data = frm.doc[opts.child_docname].map((d) => {
+		return {
+			"docname": d.name,
+			"name": d.name,
+			"item_code": d.item_code,
+			"delivery_date": d.delivery_date,
+			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
+			"qty": d.qty,
+			"rate": d.rate,
+			"uom": d.uom
+		}
+	});
+
 	const fields = [{
 		fieldtype:'Data',
 		fieldname:"docname",
@@ -486,7 +524,11 @@ erpnext.utils.update_child_items = function(opts) {
 				filters = {"is_sales_item": 1};
 			} else if (frm.doc.doctype == 'Purchase Order') {
 				if (frm.doc.is_subcontracted) {
-					filters = {"is_sub_contracted_item": 1};
+					if (frm.doc.is_old_subcontracting_flow) {
+						filters = {"is_sub_contracted_item": 1};
+					} else {
+						filters = {"is_stock_item": 0};
+					}
 				} else {
 					filters = {"is_purchase_item": 1};
 				}
@@ -559,7 +601,7 @@ erpnext.utils.update_child_items = function(opts) {
 		})
 	}
 
-	const dialog = new frappe.ui.Dialog({
+	new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
 			{
@@ -595,24 +637,7 @@ erpnext.utils.update_child_items = function(opts) {
 			refresh_field("items");
 		},
 		primary_action_label: __('Update')
-	});
-
-	frm.doc[opts.child_docname].forEach(d => {
-		dialog.fields_dict.trans_items.df.data.push({
-			"docname": d.name,
-			"name": d.name,
-			"item_code": d.item_code,
-			"delivery_date": d.delivery_date,
-			"schedule_date": d.schedule_date,
-			"conversion_factor": d.conversion_factor,
-			"qty": d.qty,
-			"rate": d.rate,
-			"uom": d.uom
-		});
-		this.data = dialog.fields_dict.trans_items.df.data;
-		dialog.fields_dict.trans_items.grid.refresh();
-	})
-	dialog.show();
+	}).show();
 }
 
 erpnext.utils.map_current_doc = function(opts) {
@@ -713,7 +738,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
-			child_fieldname: opts.child_fielname,
+			child_fieldname: opts.child_fieldname,
 			child_columns: opts.child_columns,
 			size: opts.size,
 			action: function(selections, args) {

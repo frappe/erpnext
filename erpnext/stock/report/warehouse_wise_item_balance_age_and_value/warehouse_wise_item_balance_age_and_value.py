@@ -7,6 +7,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Count
 from frappe.utils import flt
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
@@ -61,7 +62,7 @@ def execute(filters=None):
 			continue
 
 		total_stock_value = sum(item_value[(item, item_group)])
-		row = [item, item_group, total_stock_value]
+		row = [item, item_map[item]["item_name"], item_group, total_stock_value]
 
 		fifo_queue = item_ageing[item]["fifo_queue"]
 		average_age = 0.00
@@ -88,17 +89,18 @@ def get_columns(filters):
 	"""return columns"""
 
 	columns = [
-		_("Item") + ":Link/Item:180",
-		_("Item Group") + "::100",
-		_("Value") + ":Currency:100",
-		_("Age") + ":Float:60",
+		_("Item") + ":Link/Item:150",
+		_("Item Name") + ":Link/Item:150",
+		_("Item Group") + "::120",
+		_("Value") + ":Currency:120",
+		_("Age") + ":Float:120",
 	]
 	return columns
 
 
 def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
+		sle_count = flt(frappe.qb.from_("Stock Ledger Entry").select(Count("name")).run()[0][0])
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
 	if not filters.get("company"):
@@ -108,30 +110,21 @@ def validate_filters(filters):
 def get_warehouse_list(filters):
 	from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 
-	condition = ""
-	user_permitted_warehouse = get_permitted_documents("Warehouse")
-	value = ()
-	if user_permitted_warehouse:
-		condition = "and name in %s"
-		value = set(user_permitted_warehouse)
-	elif not user_permitted_warehouse and filters.get("warehouse"):
-		condition = "and name = %s"
-		value = filters.get("warehouse")
+	wh = frappe.qb.DocType("Warehouse")
+	query = frappe.qb.from_(wh).select(wh.name).where(wh.is_group == 0)
 
-	return frappe.db.sql(
-		"""select name
-		from `tabWarehouse` where is_group = 0
-		{condition}""".format(
-			condition=condition
-		),
-		value,
-		as_dict=1,
-	)
+	user_permitted_warehouse = get_permitted_documents("Warehouse")
+	if user_permitted_warehouse:
+		query = query.where(wh.name.isin(set(user_permitted_warehouse)))
+	elif filters.get("warehouse"):
+		query = query.where(wh.name == filters.get("warehouse"))
+
+	return query.run(as_dict=True)
 
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-		columns += [_("Total Qty") + ":Int:50"]
+		columns += [_("Total Qty") + ":Int:120"]
 
 	for wh in warehouse_list:
-		columns += [_(wh.name) + ":Int:54"]
+		columns += [_(wh.name) + ":Int:100"]

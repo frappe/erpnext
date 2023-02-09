@@ -16,7 +16,7 @@ class Homepage(Document):
 	def setup_items(self):
 		for d in frappe.get_all(
 			"Website Item",
-			fields=["name", "item_name", "description", "image", "route"],
+			fields=["name", "item_name", "description", "website_image", "route"],
 			filters={"published": 1},
 			limit=3,
 		):
@@ -31,7 +31,7 @@ class Homepage(Document):
 					item_code=d.name,
 					item_name=d.item_name,
 					description=d.description,
-					image=d.image,
+					image=d.website_image,
 					route=d.route,
 				),
 			)

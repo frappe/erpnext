@@ -149,6 +149,9 @@ class LoanRepayment(AccountsController):
 				"status",
 				"is_secured_loan",
 				"total_payment",
+				"debit_adjustment_amount",
+				"credit_adjustment_amount",
+				"refund_amount",
 				"loan_amount",
 				"disbursed_amount",
 				"total_interest_payable",
@@ -386,17 +389,21 @@ class LoanRepayment(AccountsController):
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
-
 		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}.<br>Repayment against Loan: {1}").format(
+			remarks = "Shortfall repayment of {0}.<br>Repayment against loan {1}".format(
 				self.shortfall_amount, self.against_loan
 			)
 		elif self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
+			remarks = "Shortfall repayment of {0} against loan {1}".format(
+				self.shortfall_amount, self.against_loan
+			)
 		else:
-			remarks = _("Repayment against Loan:") + " " + self.against_loan
+			remarks = "Repayment against loan " + self.against_loan
 
-		if self.repay_from_salary:
+		if self.reference_number:
+			remarks += " with reference no. {}".format(self.reference_number)
+
+		if hasattr(self, "repay_from_salary") and self.repay_from_salary:
 			payment_account = self.payroll_payable_account
 		else:
 			payment_account = self.payment_account
@@ -445,7 +452,7 @@ class LoanRepayment(AccountsController):
 					"debit_in_account_currency": self.amount_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
 				}
@@ -463,7 +470,7 @@ class LoanRepayment(AccountsController):
 					"credit_in_account_currency": self.amount_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
 				}
@@ -512,6 +519,8 @@ def get_accrued_interest_entries(against_loan, posting_date=None):
 	if not posting_date:
 		posting_date = getdate()
 
+	precision = cint(frappe.db.get_default("currency_precision")) or 2
+
 	unpaid_accrued_entries = frappe.db.sql(
 		"""
 			SELECT name, posting_date, interest_amount - paid_interest_amount as interest_amount,
@@ -531,6 +540,13 @@ def get_accrued_interest_entries(against_loan, posting_date=None):
 		(against_loan, posting_date),
 		as_dict=1,
 	)
+
+	# Skip entries with zero interest amount & payable principal amount
+	unpaid_accrued_entries = [
+		d
+		for d in unpaid_accrued_entries
+		if flt(d.interest_amount, precision) > 0 or flt(d.payable_principal_amount, precision) > 0
+	]
 
 	return unpaid_accrued_entries
 
@@ -560,8 +576,8 @@ def regenerate_repayment_schedule(loan, cancel=0):
 	loan_doc = frappe.get_doc("Loan", loan)
 	next_accrual_date = None
 	accrued_entries = 0
-	last_repayment_amount = 0
-	last_balance_amount = 0
+	last_repayment_amount = None
+	last_balance_amount = None
 
 	for term in reversed(loan_doc.get("repayment_schedule")):
 		if not term.is_accrued:
@@ -569,9 +585,9 @@ def regenerate_repayment_schedule(loan, cancel=0):
 			loan_doc.remove(term)
 		else:
 			accrued_entries += 1
-			if not last_repayment_amount:
+			if last_repayment_amount is None:
 				last_repayment_amount = term.total_payment
-			if not last_balance_amount:
+			if last_balance_amount is None:
 				last_balance_amount = term.balance_loan_amount
 
 	loan_doc.save()
@@ -623,16 +639,22 @@ def get_pending_principal_amount(loan):
 	if loan.status in ("Disbursed", "Closed") or loan.disbursed_amount >= loan.loan_amount:
 		pending_principal_amount = (
 			flt(loan.total_payment)
+			+ flt(loan.debit_adjustment_amount)
+			- flt(loan.credit_adjustment_amount)
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
+			+ flt(loan.refund_amount)
 		)
 	else:
 		pending_principal_amount = (
 			flt(loan.disbursed_amount)
+			+ flt(loan.debit_adjustment_amount)
+			- flt(loan.credit_adjustment_amount)
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
+			+ flt(loan.refund_amount)
 		)
 
 	return pending_principal_amount
@@ -674,7 +696,9 @@ def get_amounts(amounts, against_loan, posting_date):
 
 		if (
 			no_of_late_days > 0
-			and (not against_loan_doc.repay_from_salary)
+			and (
+				not (hasattr(against_loan_doc, "repay_from_salary") and against_loan_doc.repay_from_salary)
+			)
 			and entry.accrual_type == "Regular"
 		):
 			penalty_amount += (
@@ -720,6 +744,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	)
 	amounts["pending_accrual_entries"] = pending_accrual_entries
 	amounts["unaccrued_interest"] = flt(unaccrued_interest, precision)
+	amounts["written_off_amount"] = flt(against_loan_doc.written_off_amount, precision)
 
 	if final_due_date:
 		amounts["due_date"] = final_due_date

@@ -207,11 +207,17 @@ def set_address_details(
 			)
 
 	if company_address:
-		party_details.update({"company_address": company_address})
+		party_details.company_address = company_address
 	else:
 		party_details.update(get_company_address(company))
 
-	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order", "Quotation"]:
+	if doctype and doctype in [
+		"Delivery Note",
+		"Sales Invoice",
+		"Sales Order",
+		"Quotation",
+		"POS Invoice",
+	]:
 		if party_details.company_address:
 			party_details.update(
 				get_fetch_values(doctype, "company_address", party_details.company_address)
@@ -219,12 +225,31 @@ def set_address_details(
 		get_regional_address_details(party_details, doctype, company)
 
 	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
-		if party_details.company_address:
-			party_details["shipping_address"] = shipping_address or party_details["company_address"]
-			party_details.shipping_address_display = get_address_display(party_details["shipping_address"])
+		if shipping_address:
 			party_details.update(
-				get_fetch_values(doctype, "shipping_address", party_details.shipping_address)
+				shipping_address=shipping_address,
+				shipping_address_display=get_address_display(shipping_address),
+				**get_fetch_values(doctype, "shipping_address", shipping_address)
 			)
+
+		if party_details.company_address:
+			# billing address
+			party_details.update(
+				billing_address=party_details.company_address,
+				billing_address_display=(
+					party_details.company_address_display or get_address_display(party_details.company_address)
+				),
+				**get_fetch_values(doctype, "billing_address", party_details.company_address)
+			)
+
+			# shipping address - if not already set
+			if not party_details.shipping_address:
+				party_details.update(
+					shipping_address=party_details.billing_address,
+					shipping_address_display=party_details.billing_address_display,
+					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
+				)
+
 		get_regional_address_details(party_details, doctype, company)
 
 	return party_details.get(billing_address_field), party_details.shipping_address_name
@@ -277,7 +302,7 @@ def get_default_price_list(party):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
-		return frappe.db.get_value("Customer Group", party.customer_group, "default_price_list")
+		return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
 
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
@@ -366,7 +391,7 @@ def get_party_account(party_type, party=None, company=None):
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
 		if account:
-			account_currency = frappe.db.get_value("Account", account, "account_currency", cache=True)
+			account_currency = frappe.get_cached_value("Account", account, "account_currency")
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
@@ -383,7 +408,7 @@ def get_party_bank_account(party_type, party):
 def get_party_account_currency(party_type, party, company):
 	def generator():
 		party_account = get_party_account(party_type, party, company)
-		return frappe.db.get_value("Account", party_account, "account_currency", cache=True)
+		return frappe.get_cached_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
 
@@ -455,15 +480,15 @@ def validate_party_accounts(doc):
 		else:
 			companies.append(account.company)
 
-		party_account_currency = frappe.db.get_value(
-			"Account", account.account, "account_currency", cache=True
-		)
+		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value(
 				"Company", frappe.db.get_default("Company"), "default_currency"
 			)
 		else:
-			company_default_currency = frappe.db.get_value("Company", account.company, "default_currency")
+			company_default_currency = frappe.get_cached_value(
+				"Company", account.company, "default_currency"
+			)
 
 		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 
@@ -525,7 +550,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 		elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
 		else:
-			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
+			due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
 	return due_date
 
 
@@ -782,7 +807,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 	)
 
 	for d in companies:
-		company_default_currency = frappe.db.get_value("Company", d.company, "default_currency")
+		company_default_currency = frappe.get_cached_value("Company", d.company, "default_currency")
 		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
 		if party_account_currency == company_default_currency:

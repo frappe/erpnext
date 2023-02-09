@@ -5,7 +5,12 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 		Object.assign(this, opts);
 		this.dialog_manager = new erpnext.accounts.bank_reconciliation.DialogManager(
 			this.company,
-			this.bank_account
+			this.bank_account,
+			this.bank_statement_from_date,
+			this.bank_statement_to_date,
+			this.filter_by_reference_date,
+			this.from_reference_date,
+			this.to_reference_date
 		);
 		this.make_dt();
 	}
@@ -17,6 +22,8 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions",
 			args: {
 				bank_account: this.bank_account,
+				from_date: this.bank_statement_from_date,
+				to_date: this.bank_statement_to_date
 			},
 			callback: function (response) {
 				me.format_data(response.message);
@@ -30,28 +37,28 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	get_dt_columns() {
 		this.columns = [
 			{
-				name: "Date",
+				name: __("Date"),
 				editable: false,
 				width: 100,
 			},
 
 			{
-				name: "Party Type",
+				name: __("Party Type"),
 				editable: false,
 				width: 95,
 			},
 			{
-				name: "Party",
+				name: __("Party"),
 				editable: false,
 				width: 100,
 			},
 			{
-				name: "Description",
+				name: __("Description"),
 				editable: false,
 				width: 350,
 			},
 			{
-				name: "Deposit",
+				name: __("Deposit"),
 				editable: false,
 				width: 100,
 				format: (value) =>
@@ -60,7 +67,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 					"</span>",
 			},
 			{
-				name: "Withdrawal",
+				name: __("Withdrawal"),
 				editable: false,
 				width: 100,
 				format: (value) =>
@@ -69,26 +76,26 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 					"</span>",
 			},
 			{
-				name: "Unallocated Amount",
+				name: __("Unallocated Amount"),
 				editable: false,
 				width: 100,
 				format: (value) =>
-					"<span style='color:blue;'>" +
+					"<span style='color:var(--blue-500);'>" +
 					format_currency(value, this.currency) +
 					"</span>",
 			},
 			{
-				name: "Reference Number",
+				name: __("Reference Number"),
 				editable: false,
 				width: 140,
 			},
 			{
-				name: "Actions",
+				name: __("Actions"),
 				editable: false,
 				sortable: false,
 				focusable: false,
 				dropdown: false,
-				width: 80,
+				width: 100,
 			},
 		];
 	}
@@ -118,7 +125,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			row["reference_number"],
 			`
 			<Button class="btn btn-primary btn-xs center"  data-name = ${row["name"]} >
-				Actions
+				${__("Actions")}
 			</a>
 			`,
 		];

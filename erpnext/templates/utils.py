@@ -34,7 +34,6 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 			status="Open",
 			title=subject,
 			contact_email=sender,
-			to_discuss=message,
 		)
 	)
 

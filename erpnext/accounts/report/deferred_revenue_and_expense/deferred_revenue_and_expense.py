@@ -378,15 +378,14 @@ class Deferred_Revenue_and_Expense_Report(object):
 		ret += [{}]
 
 		# add total row
-		if ret is not []:
-			if self.filters.type == "Revenue":
-				total_row = frappe._dict({"name": "Total Deferred Income"})
-			elif self.filters.type == "Expense":
-				total_row = frappe._dict({"name": "Total Deferred Expense"})
+		if self.filters.type == "Revenue":
+			total_row = frappe._dict({"name": "Total Deferred Income"})
+		elif self.filters.type == "Expense":
+			total_row = frappe._dict({"name": "Total Deferred Expense"})
 
-			for idx, period in enumerate(self.period_list, 0):
-				total_row[period.key] = self.period_total[idx].total
-			ret.append(total_row)
+		for idx, period in enumerate(self.period_list, 0):
+			total_row[period.key] = self.period_total[idx].total
+		ret.append(total_row)
 
 		return ret
 
@@ -396,7 +395,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 				"labels": [period.label for period in self.period_list],
 				"datasets": [
 					{
-						"name": "Actual Posting",
+						"name": _("Actual Posting"),
 						"chartType": "bar",
 						"values": [x.actual for x in self.period_total],
 					}
@@ -410,7 +409,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 
 		if self.filters.with_upcoming_postings:
 			chart["data"]["datasets"].append(
-				{"name": "Expected", "chartType": "line", "values": [x.total for x in self.period_total]}
+				{"name": _("Expected"), "chartType": "line", "values": [x.total for x in self.period_total]}
 			)
 
 		return chart

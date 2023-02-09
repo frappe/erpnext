@@ -32,13 +32,41 @@ class OverlapError(frappe.ValidationError):
 
 
 class Workstation(Document):
-	def validate(self):
+	def before_save(self):
+		self.set_data_based_on_workstation_type()
+		self.set_hour_rate()
+
+	def set_hour_rate(self):
 		self.hour_rate = (
 			flt(self.hour_rate_labour)
 			+ flt(self.hour_rate_electricity)
 			+ flt(self.hour_rate_consumable)
 			+ flt(self.hour_rate_rent)
 		)
+
+	@frappe.whitelist()
+	def set_data_based_on_workstation_type(self):
+		if self.workstation_type:
+			fields = [
+				"hour_rate_labour",
+				"hour_rate_electricity",
+				"hour_rate_consumable",
+				"hour_rate_rent",
+				"hour_rate",
+				"description",
+			]
+
+			data = frappe.get_cached_value("Workstation Type", self.workstation_type, fields, as_dict=True)
+
+			if not data:
+				return
+
+			for field in fields:
+				if self.get(field):
+					continue
+
+				if value := data.get(field):
+					self.set(field, value)
 
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
@@ -100,9 +128,7 @@ def get_default_holiday_list():
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	if from_datetime and to_datetime:
-		if not cint(
-			frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")
-		):
+		if not frappe.db.get_single_value("Manufacturing Settings", "allow_production_on_holidays"):
 			check_workstation_for_holiday(workstation, from_datetime, to_datetime)
 
 		if not cint(frappe.db.get_value("Manufacturing Settings", None, "allow_overtime")):

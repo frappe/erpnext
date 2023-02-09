@@ -9,7 +9,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.controllers.tests.test_subcontracting_controller import (
+	make_stock_in_entry,
+	set_backflush_based_on,
+)
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
@@ -18,7 +21,6 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.tests.test_subcontracting import set_backflush_based_on
 
 test_records = frappe.get_test_records("BOM")
 test_dependencies = ["Item", "Quality Inspection Template"]
@@ -200,6 +202,33 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(bom.items[0].rate, 20)
 
+	def test_bom_cost_with_fg_based_operating_cost(self):
+		bom = frappe.copy_doc(test_records[4])
+		bom.insert()
+
+		raw_material_cost = 0.0
+		op_cost = 0.0
+
+		op_cost = bom.quantity * bom.operating_cost_per_bom_quantity
+
+		for row in bom.items:
+			raw_material_cost += row.amount
+
+		base_raw_material_cost = raw_material_cost * flt(
+			bom.conversion_rate, bom.precision("conversion_rate")
+		)
+		base_op_cost = op_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
+
+		# test amounts in selected currency, almostEqual checks for 7 digits by default
+		self.assertAlmostEqual(bom.operating_cost, op_cost)
+		self.assertAlmostEqual(bom.raw_material_cost, raw_material_cost)
+		self.assertAlmostEqual(bom.total_cost, raw_material_cost + op_cost)
+
+		# test amounts in selected currency
+		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
+		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
+		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+
 	def test_subcontractor_sourced_item(self):
 		item_code = "_Test Subcontracted FG Item 1"
 		set_backflush_based_on("Material Transferred for Subcontract")
@@ -256,12 +285,29 @@ class TestBOM(FrappeTestCase):
 		bom.submit()
 		# test that sourced_by_supplier rate is zero even after updating cost
 		self.assertEqual(bom.items[2].rate, 0)
-		# test in Purchase Order sourced_by_supplier is not added to Supplied Item
-		po = create_purchase_order(
-			item_code=item_code, qty=1, is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC"
+
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_subcontracting_order,
+			make_service_item,
+		)
+
+		make_service_item("Subcontracted Service Item 1")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": item_code,
+				"fg_item_qty": 1,
+			},
+		]
+		# test in Subcontracting Order sourced_by_supplier is not added to Supplied Item
+		sco = get_subcontracting_order(
+			service_items=service_items, supplier_warehouse="_Test Warehouse 1 - _TC"
 		)
 		bom_items = sorted([d.item_code for d in bom.items if d.sourced_by_supplier != 1])
-		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
+		supplied_items = sorted([d.rm_item_code for d in sco.supplied_items])
 		self.assertEqual(bom_items, supplied_items)
 
 	def test_bom_tree_representation(self):
@@ -365,34 +411,14 @@ class TestBOM(FrappeTestCase):
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 
-		if not frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001"):
-			bom_doc = create_bom_with_process_loss_item(
-				fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, fg_qty=1
-			)
-			bom_doc.submit()
-
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0
+			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0, process_loss_percentage=110
 		)
-		#  PL Item qty can't be >= FG Item qty
+		#  PL can't be > 100
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
-		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=1, scrap_rate=100
-		)
-		# PL Item rate has to be 0
-		self.assertRaises(frappe.ValidationError, bom_doc.submit)
-
-		bom_doc = create_bom_with_process_loss_item(
-			fg_item_whole, bom_item, scrap_qty=0.25, scrap_rate=0
-		)
+		bom_doc = create_bom_with_process_loss_item(fg_item_whole, bom_item, process_loss_percentage=20)
 		#  Items with whole UOMs can't be PL Items
-		self.assertRaises(frappe.ValidationError, bom_doc.submit)
-
-		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, is_process_loss=0
-		)
-		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 	def test_bom_item_query(self):
@@ -595,6 +621,56 @@ class TestBOM(FrappeTestCase):
 		bom.reload()
 		self.assertEqual(frappe.get_value("Item", fg_item.item_code, "default_bom"), bom.name)
 
+	def test_exploded_items_rate(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 99, "last_purchase_rate": 89}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+
+		bom.rm_cost_as_per = "Last Purchase Rate"
+		bom.save()
+		self.assertEqual(bom.items[0].base_rate, 89)
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+		bom.rm_cost_as_per = "Price List"
+		bom.save()
+		self.assertEqual(bom.items[0].base_rate, 0.0)
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+		bom.rm_cost_as_per = "Valuation Rate"
+		bom.save()
+		self.assertEqual(bom.items[0].base_rate, 99)
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+		bom.submit()
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+	def test_bom_cost_update_flag(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 99, "last_purchase_rate": 89}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item])
+
+		create_stock_reconciliation(
+			item_code=rm_item, warehouse="_Test Warehouse - _TC", qty=100, rate=600
+		)
+
+		bom.load_from_db()
+		bom.update_cost()
+		self.assertTrue(bom.flags.cost_updated)
+
+		bom.load_from_db()
+		bom.update_cost()
+		self.assertFalse(bom.flags.cost_updated)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -675,7 +751,7 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 
 
 def create_bom_with_process_loss_item(
-	fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2, is_process_loss=1
+	fg_item, bom_item, scrap_qty=0, scrap_rate=0, fg_qty=2, process_loss_percentage=0
 ):
 	bom_doc = frappe.new_doc("BOM")
 	bom_doc.item = fg_item.item_code
@@ -690,19 +766,22 @@ def create_bom_with_process_loss_item(
 			"rate": 100.0,
 		},
 	)
-	bom_doc.append(
-		"scrap_items",
-		{
-			"item_code": fg_item.item_code,
-			"qty": scrap_qty,
-			"stock_qty": scrap_qty,
-			"uom": fg_item.stock_uom,
-			"stock_uom": fg_item.stock_uom,
-			"rate": scrap_rate,
-			"is_process_loss": is_process_loss,
-		},
-	)
+
+	if scrap_qty:
+		bom_doc.append(
+			"scrap_items",
+			{
+				"item_code": fg_item.item_code,
+				"qty": scrap_qty,
+				"stock_qty": scrap_qty,
+				"uom": fg_item.stock_uom,
+				"stock_uom": fg_item.stock_uom,
+				"rate": scrap_rate,
+			},
+		)
+
 	bom_doc.currency = "INR"
+	bom_doc.process_loss_percentage = process_loss_percentage
 	return bom_doc
 
 

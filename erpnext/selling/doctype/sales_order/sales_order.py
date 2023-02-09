@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
+from erpnext.accounts.party import get_party_account
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
@@ -25,7 +26,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.get_item_details import get_default_bom
+from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -192,6 +193,9 @@ class SalesOrder(SellingController):
 			{"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
 		)
 
+		if cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")):
+			self.validate_rate_with_reference_doc([["Quotation", "prevdoc_docname", "quotation_item"]])
+
 	def update_enquiry_status(self, prevdoc, flag):
 		enq = frappe.db.sql(
 			"select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s",
@@ -204,7 +208,7 @@ class SalesOrder(SellingController):
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
-				if doc.docstatus == 2:
+				if doc.docstatus.is_cancelled():
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
@@ -245,7 +249,7 @@ class SalesOrder(SellingController):
 		self.update_project()
 		self.update_prevdoc_status("cancel")
 
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		self.update_blanket_order()
 
@@ -586,6 +590,23 @@ def make_material_request(source_name, target_doc=None):
 		target.qty = qty - requested_item_qty.get(source.name, 0)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
+		args = target.as_dict().copy()
+		args.update(
+			{
+				"company": source_parent.get("company"),
+				"price_list": frappe.db.get_single_value("Buying Settings", "buying_price_list"),
+				"currency": source_parent.get("currency"),
+				"conversion_rate": source_parent.get("conversion_rate"),
+			}
+		)
+
+		target.rate = flt(
+			get_price_list_rate(args=args, item_doc=frappe.get_cached_doc("Item", target.item_code)).get(
+				"price_list_rate"
+			)
+		)
+		target.amount = target.qty * target.rate
+
 	doc = get_mapped_doc(
 		"Sales Order",
 		source_name,
@@ -626,6 +647,7 @@ def make_project(source_name, target_doc=None):
 				"field_map": {
 					"name": "sales_order",
 					"base_grand_total": "estimated_costing",
+					"net_total": "total_sales_amount",
 				},
 			},
 		},
@@ -726,6 +748,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
+
+		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
@@ -880,6 +904,9 @@ def get_events(start, end, filters=None):
 @frappe.whitelist()
 def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
+
+	from erpnext.setup.utils import get_exchange_rate
+
 	if not selected_items:
 		return
 
@@ -888,10 +915,20 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 
 	def set_missing_values(source, target):
 		target.supplier = supplier
+		target.currency = frappe.db.get_value(
+			"Supplier", filters={"name": supplier}, fieldname=["default_currency"]
+		)
+		company_currency = frappe.db.get_value(
+			"Company", filters={"name": target.company}, fieldname=["default_currency"]
+		)
+
+		target.conversion_rate = get_exchange_rate(target.currency, company_currency, args="for_buying")
+
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
+		target.shipping_rule = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
@@ -1004,14 +1041,30 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	]
 	items_to_map = list(set(items_to_map))
 
+	def is_drop_ship_order(target):
+		drop_ship = True
+		for item in target.items:
+			if not item.delivered_by_supplier:
+				drop_ship = False
+				break
+
+		return drop_ship
+
 	def set_missing_values(source, target):
 		target.supplier = ""
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
-		target.customer = ""
-		target.customer_name = ""
+		target.shipping_rule = ""
+
+		if is_drop_ship_order(target):
+			target.customer = source.customer
+			target.customer_name = source.customer_name
+			target.shipping_address = source.shipping_address_name
+		else:
+			target.customer = target.customer_name = target.shipping_address = None
+
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 

@@ -10,6 +10,9 @@
   "column_break_1",
   "bank_statement_from_date",
   "bank_statement_to_date",
+  "from_reference_date",
+  "to_reference_date",
+  "filter_by_reference_date",
   "column_break_2",
   "account_opening_balance",
   "bank_statement_closing_balance",
@@ -36,13 +39,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval: doc.bank_account",
+   "depends_on": "eval: doc.bank_account && !doc.filter_by_reference_date",
    "fieldname": "bank_statement_from_date",
    "fieldtype": "Date",
    "label": "From Date"
   },
   {
-   "depends_on": "eval: doc.bank_statement_from_date",
+   "depends_on": "eval: doc.bank_account && !doc.filter_by_reference_date",
    "fieldname": "bank_statement_to_date",
    "fieldtype": "Date",
    "label": "To Date"
@@ -83,13 +86,31 @@
    "fieldname": "no_bank_transactions",
    "fieldtype": "HTML",
    "options": "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
+  },
+  {
+   "depends_on": "eval:doc.filter_by_reference_date",
+   "fieldname": "from_reference_date",
+   "fieldtype": "Date",
+   "label": "From Reference Date"
+  },
+  {
+   "depends_on": "eval:doc.filter_by_reference_date",
+   "fieldname": "to_reference_date",
+   "fieldtype": "Date",
+   "label": "To Reference Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "filter_by_reference_date",
+   "fieldtype": "Check",
+   "label": "Filter by Reference Date"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-21 11:13:49.831769",
+ "modified": "2023-01-13 13:00:02.022919",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Reconciliation Tool",
@@ -108,5 +129,6 @@
  ],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

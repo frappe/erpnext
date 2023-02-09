@@ -16,7 +16,6 @@
   "exchange_rate",
   "sales_invoice",
   "column_break_3",
-  "salary_slip",
   "status",
   "parent_project",
   "employee_detail",
@@ -86,15 +85,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "salary_slip",
-   "fieldtype": "Link",
-   "label": "Salary Slip",
-   "no_copy": 1,
-   "options": "Salary Slip",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -120,6 +110,7 @@
   },
   {
    "depends_on": "employee",
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -320,7 +311,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-09 12:08:53.930200",
+ "modified": "2022-06-15 22:08:53.930200",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",

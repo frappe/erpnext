@@ -6,7 +6,9 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cint, flt, getdate, nowdate
+from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -123,6 +125,7 @@ class PurchaseReceipt(BuyingController):
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 
+		self.get_current_stock()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
@@ -170,7 +173,9 @@ class PurchaseReceipt(BuyingController):
 		)
 
 		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return
+			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
+			and not self.is_return
+			and not self.is_internal_supplier
 		):
 			self.validate_rate_with_reference_doc(
 				[["Purchase Order", "purchase_order", "purchase_order_item"]]
@@ -234,7 +239,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
-		self.set_consumed_qty_in_po()
+		self.set_consumed_qty_in_subcontract_order()
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
@@ -270,18 +275,7 @@ class PurchaseReceipt(BuyingController):
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
 		self.delete_auto_created_batches()
-		self.set_consumed_qty_in_po()
-
-	@frappe.whitelist()
-	def get_current_stock(self):
-		for d in self.get("supplied_items"):
-			if self.supplier_warehouse:
-				bin = frappe.db.sql(
-					"select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
-					(d.rm_item_code, self.supplier_warehouse),
-					as_dict=1,
-				)
-				d.current_stock = bin and flt(bin[0]["actual_qty"]) or 0
+		self.set_consumed_qty_in_subcontract_order()
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
@@ -372,6 +366,12 @@ class PurchaseReceipt(BuyingController):
 						if credit_currency == self.company_currency
 						else flt(d.net_amount, d.precision("net_amount"))
 					)
+
+					outgoing_amount = d.base_net_amount
+					if self.is_internal_supplier and d.valuation_rate:
+						outgoing_amount = d.valuation_rate * d.stock_qty
+						credit_amount = outgoing_amount
+
 					if credit_amount:
 						account = warehouse_account[d.from_warehouse]["account"] if d.from_warehouse else stock_rbnb
 
@@ -379,7 +379,7 @@ class PurchaseReceipt(BuyingController):
 							gl_entries=gl_entries,
 							account=account,
 							cost_center=d.cost_center,
-							debit=-1 * flt(d.base_net_amount, d.precision("base_net_amount")),
+							debit=-1 * flt(outgoing_amount, d.precision("base_net_amount")),
 							credit=0.0,
 							remarks=remarks,
 							against_account=warehouse_account_name,
@@ -466,7 +466,7 @@ class PurchaseReceipt(BuyingController):
 
 					# divisional loss adjustment
 					valuation_amount_as_per_doc = (
-						flt(d.base_net_amount, d.precision("base_net_amount"))
+						flt(outgoing_amount, d.precision("base_net_amount"))
 						+ flt(d.landed_cost_voucher_amount)
 						+ flt(d.rm_supp_cost)
 						+ flt(d.item_tax_amount)
@@ -511,6 +511,7 @@ class PurchaseReceipt(BuyingController):
 				and not d.is_fixed_asset
 				and flt(d.qty)
 				and provisional_accounting_for_non_stock_items
+				and d.get("provisional_expense_account")
 			):
 				self.add_provisional_gl_entry(
 					d, gl_entries, self.posting_date, d.get("provisional_expense_account")
@@ -640,47 +641,6 @@ class PurchaseReceipt(BuyingController):
 
 					i += 1
 
-	def add_gl_entry(
-		self,
-		gl_entries,
-		account,
-		cost_center,
-		debit,
-		credit,
-		remarks,
-		against_account,
-		debit_in_account_currency=None,
-		credit_in_account_currency=None,
-		account_currency=None,
-		project=None,
-		voucher_detail_no=None,
-		item=None,
-		posting_date=None,
-	):
-
-		gl_entry = {
-			"account": account,
-			"cost_center": cost_center,
-			"debit": debit,
-			"credit": credit,
-			"against": against_account,
-			"remarks": remarks,
-		}
-
-		if voucher_detail_no:
-			gl_entry.update({"voucher_detail_no": voucher_detail_no})
-
-		if debit_in_account_currency:
-			gl_entry.update({"debit_in_account_currency": debit_in_account_currency})
-
-		if credit_in_account_currency:
-			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
-
-		if posting_date:
-			gl_entry.update({"posting_date": posting_date})
-
-		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
-
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
 			if item.is_fixed_asset:
@@ -794,48 +754,38 @@ class PurchaseReceipt(BuyingController):
 
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
+		po_details = []
 		for d in self.get("items"):
 			if d.get("purchase_invoice") and d.get("purchase_invoice_item"):
 				d.db_set("billed_amt", d.amount, update_modified=update_modified)
 			elif d.purchase_order_item:
-				updated_pr += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
+				po_details.append(d.purchase_order_item)
+
+		if po_details:
+			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
 		for pr in set(updated_pr):
-			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
+			pr_doc = self if (pr == self.name) else frappe.get_cached_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 		self.load_from_db()
 
 
-def update_billed_amount_based_on_po(po_detail, update_modified=True):
-	# Billed against Sales Order directly
-	billed_against_po = frappe.db.sql(
-		"""select sum(amount) from `tabPurchase Invoice Item`
-		where po_detail=%s and (pr_detail is null or pr_detail = '') and docstatus=1""",
-		po_detail,
-	)
-	billed_against_po = billed_against_po and billed_against_po[0][0] or 0
+def update_billed_amount_based_on_po(po_details, update_modified=True):
+	po_billed_amt_details = get_billed_amount_against_po(po_details)
 
-	# Get all Purchase Receipt Item rows against the Purchase Order Item row
-	pr_details = frappe.db.sql(
-		"""select pr_item.name, pr_item.amount, pr_item.parent
-		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-		where pr.name=pr_item.parent and pr_item.purchase_order_item=%s
-			and pr.docstatus=1 and pr.is_return = 0
-		order by pr.posting_date asc, pr.posting_time asc, pr.name asc""",
-		po_detail,
-		as_dict=1,
-	)
+	# Get all Purchase Receipt Item rows against the Purchase Order Items
+	pr_details = get_purchase_receipts_against_po_details(po_details)
+
+	pr_items = [pr_detail.name for pr_detail in pr_details]
+	pr_items_billed_amount = get_billed_amount_against_pr(pr_items)
 
 	updated_pr = []
 	for pr_item in pr_details:
+		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
+
 		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = frappe.db.sql(
-			"""select sum(amount) from `tabPurchase Invoice Item`
-			where pr_detail=%s and docstatus=1""",
-			pr_item.name,
-		)
-		billed_amt_agianst_pr = billed_amt_agianst_pr and billed_amt_agianst_pr[0][0] or 0
+		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
 		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
@@ -847,17 +797,88 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 				billed_amt_agianst_pr += billed_against_po
 				billed_against_po = 0
 
-		frappe.db.set_value(
-			"Purchase Receipt Item",
-			pr_item.name,
-			"billed_amt",
-			billed_amt_agianst_pr,
-			update_modified=update_modified,
-		)
+		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
 
-		updated_pr.append(pr_item.parent)
+		if pr_item.billed_amt != billed_amt_agianst_pr:
+			frappe.db.set_value(
+				"Purchase Receipt Item",
+				pr_item.name,
+				"billed_amt",
+				billed_amt_agianst_pr,
+				update_modified=update_modified,
+			)
+
+			updated_pr.append(pr_item.parent)
 
 	return updated_pr
+
+
+def get_purchase_receipts_against_po_details(po_details):
+	# Get Purchase Receipts against Purchase Order Items
+
+	purchase_receipt = frappe.qb.DocType("Purchase Receipt")
+	purchase_receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+
+	query = (
+		frappe.qb.from_(purchase_receipt)
+		.inner_join(purchase_receipt_item)
+		.on(purchase_receipt.name == purchase_receipt_item.parent)
+		.select(
+			purchase_receipt_item.name,
+			purchase_receipt_item.parent,
+			purchase_receipt_item.amount,
+			purchase_receipt_item.billed_amt,
+			purchase_receipt_item.purchase_order_item,
+		)
+		.where(
+			(purchase_receipt_item.purchase_order_item.isin(po_details))
+			& (purchase_receipt.docstatus == 1)
+			& (purchase_receipt.is_return == 0)
+		)
+		.orderby(CombineDatetime(purchase_receipt.posting_date, purchase_receipt.posting_time))
+		.orderby(purchase_receipt.name)
+	)
+
+	return query.run(as_dict=True)
+
+
+def get_billed_amount_against_pr(pr_items):
+	# Get billed amount directly against Purchase Receipt
+
+	if not pr_items:
+		return {}
+
+	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(purchase_invoice_item)
+		.select(fn.Sum(purchase_invoice_item.amount).as_("billed_amt"), purchase_invoice_item.pr_detail)
+		.where((purchase_invoice_item.pr_detail.isin(pr_items)) & (purchase_invoice_item.docstatus == 1))
+		.groupby(purchase_invoice_item.pr_detail)
+	).run(as_dict=1)
+
+	return {d.pr_detail: flt(d.billed_amt) for d in query}
+
+
+def get_billed_amount_against_po(po_items):
+	# Get billed amount directly against Purchase Order
+	if not po_items:
+		return {}
+
+	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(purchase_invoice_item)
+		.select(fn.Sum(purchase_invoice_item.amount).as_("billed_amt"), purchase_invoice_item.po_detail)
+		.where(
+			(purchase_invoice_item.po_detail.isin(po_items))
+			& (purchase_invoice_item.docstatus == 1)
+			& (purchase_invoice_item.pr_detail.isnull())
+		)
+		.groupby(purchase_invoice_item.po_detail)
+	).run(as_dict=1)
+
+	return {d.po_detail: flt(d.billed_amt) for d in query}
 
 
 def update_billing_percentage(pr_doc, update_modified=True):
@@ -867,7 +888,7 @@ def update_billing_percentage(pr_doc, update_modified=True):
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
 	for item in pr_doc.items:
-		return_data = frappe.db.get_list(
+		return_data = frappe.get_all(
 			"Purchase Receipt",
 			fields=["sum(abs(`tabPurchase Receipt Item`.qty)) as qty"],
 			filters=[

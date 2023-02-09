@@ -57,3 +57,16 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-10")
+
+	def test_pda_submission_and_cancellation(self):
+		pda = frappe.get_doc(
+			dict(
+				doctype="Process Deferred Accounting",
+				posting_date="2019-01-01",
+				start_date="2019-01-01",
+				end_date="2019-01-31",
+				type="Income",
+			)
+		)
+		pda.submit()
+		pda.cancel()

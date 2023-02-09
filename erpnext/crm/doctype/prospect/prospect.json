@@ -1,33 +1,42 @@
 {
  "actions": [],
+ "allow_events_in_timeline": 1,
  "autoname": "field:company_name",
  "creation": "2021-08-19 00:21:06.995448",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
   "company_name",
-  "industry",
-  "market_segment",
   "customer_group",
+  "no_of_employees",
+  "annual_revenue",
+  "column_break_4",
+  "market_segment",
+  "industry",
   "territory",
   "column_break_6",
-  "no_of_employees",
-  "currency",
-  "annual_revenue",
-  "more_details_section",
-  "fax",
-  "website",
-  "column_break_13",
   "prospect_owner",
+  "website",
+  "fax",
   "company",
-  "leads_section",
-  "prospect_lead",
   "address_and_contact_section",
+  "column_break_16",
+  "contacts_tab",
   "address_html",
-  "column_break_17",
+  "column_break_18",
   "contact_html",
+  "leads_section",
+  "leads",
+  "opportunities_tab",
+  "opportunities",
+  "activities_tab",
+  "open_activities_html",
+  "all_activities_section",
+  "all_activities_html",
   "notes_section",
+  "notes_html",
   "notes"
  ],
  "fields": [
@@ -71,15 +80,9 @@
   },
   {
    "fieldname": "no_of_employees",
-   "fieldtype": "Int",
-   "label": "No. of Employees"
-  },
-  {
-   "fieldname": "currency",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Currency",
-   "options": "Currency"
+   "fieldtype": "Select",
+   "label": "No. of Employees",
+   "options": "1-10\n11-50\n51-200\n201-500\n501-1000\n1000+"
   },
   {
    "fieldname": "annual_revenue",
@@ -97,8 +100,7 @@
   {
    "fieldname": "website",
    "fieldtype": "Data",
-   "label": "Website",
-   "options": "URL"
+   "label": "Website"
   },
   {
    "fieldname": "prospect_owner",
@@ -108,22 +110,13 @@
   },
   {
    "fieldname": "leads_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Leads"
-  },
-  {
-   "fieldname": "prospect_lead",
-   "fieldtype": "Table",
-   "options": "Prospect Lead"
   },
   {
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address HTML"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "contact_html",
@@ -132,28 +125,16 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "notes_section",
-   "fieldtype": "Section Break",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Text Editor"
-  },
-  {
-   "fieldname": "more_details_section",
-   "fieldtype": "Section Break",
-   "label": "More Details"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
+   "fieldtype": "Tab Break",
+   "label": "Comments"
   },
   {
    "depends_on": "eval: !doc.__islocal",
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
-   "label": "Address and Contact"
+   "label": "Address"
   },
   {
    "fieldname": "company",
@@ -161,11 +142,83 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opportunities_tab",
+   "fieldtype": "Tab Break",
+   "label": "Opportunities"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "activities_tab",
+   "fieldtype": "Tab Break",
+   "label": "Activities"
+  },
+  {
+   "fieldname": "notes_html",
+   "fieldtype": "HTML",
+   "label": "Notes HTML"
+  },
+  {
+   "fieldname": "opportunities",
+   "fieldtype": "Table",
+   "label": "Opportunities",
+   "options": "Prospect Opportunity"
+  },
+  {
+   "fieldname": "contacts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leads",
+   "fieldtype": "Table",
+   "options": "Prospect Lead"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "open_activities_html",
+   "fieldtype": "HTML",
+   "label": "Open Activities HTML"
+  },
+  {
+   "fieldname": "all_activities_section",
+   "fieldtype": "Section Break",
+   "label": "All Activities"
+  },
+  {
+   "fieldname": "all_activities_html",
+   "fieldtype": "HTML",
+   "label": "All Activities HTML"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Notes",
+   "no_copy": 1,
+   "options": "CRM Note"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-01 13:10:36.759249",
+ "modified": "2022-10-13 12:29:33.674561",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
@@ -207,6 +260,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "company_name",
  "track_changes": 1
 }

@@ -100,6 +100,7 @@ def execute():
 					"mode_of_payment": loan.mode_of_payment,
 					"loan_account": loan.loan_account,
 					"payment_account": loan.payment_account,
+					"disbursement_account": loan.payment_account,
 					"interest_income_account": loan.interest_income_account,
 					"penalty_income_account": loan.penalty_income_account,
 				},
@@ -190,6 +191,7 @@ def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc.company = loan.company
 	loan_type_doc.mode_of_payment = loan.mode_of_payment
 	loan_type_doc.payment_account = loan.payment_account
+	loan_type_doc.disbursement_account = loan.payment_account
 	loan_type_doc.loan_account = loan.loan_account
 	loan_type_doc.interest_income_account = loan.interest_income_account
 	loan_type_doc.penalty_income_account = penalty_account

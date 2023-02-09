@@ -99,12 +99,12 @@ class BankClearance(Document):
 			.where(loan_disbursement.clearance_date.isnull())
 			.where(loan_disbursement.disbursement_account.isin([self.bank_account, self.account]))
 			.orderby(loan_disbursement.disbursement_date)
-			.orderby(loan_disbursement.name, frappe.qb.desc)
+			.orderby(loan_disbursement.name, order=frappe.qb.desc)
 		).run(as_dict=1)
 
 		loan_repayment = frappe.qb.DocType("Loan Repayment")
 
-		loan_repayments = (
+		query = (
 			frappe.qb.from_(loan_repayment)
 			.select(
 				ConstantColumn("Loan Repayment").as_("payment_document"),
@@ -118,13 +118,19 @@ class BankClearance(Document):
 			)
 			.where(loan_repayment.docstatus == 1)
 			.where(loan_repayment.clearance_date.isnull())
-			.where(loan_repayment.repay_from_salary == 0)
 			.where(loan_repayment.posting_date >= self.from_date)
 			.where(loan_repayment.posting_date <= self.to_date)
 			.where(loan_repayment.payment_account.isin([self.bank_account, self.account]))
-			.orderby(loan_repayment.posting_date)
-			.orderby(loan_repayment.name, frappe.qb.desc)
-		).run(as_dict=1)
+		)
+
+		if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
+			query = query.where((loan_repayment.repay_from_salary == 0))
+
+		query = query.orderby(loan_repayment.posting_date).orderby(
+			loan_repayment.name, order=frappe.qb.desc
+		)
+
+		loan_repayments = query.run(as_dict=True)
 
 		pos_sales_invoices, pos_purchase_invoices = [], []
 		if self.include_pos_transactions:
@@ -173,7 +179,6 @@ class BankClearance(Document):
 		)
 
 		self.set("payment_entries", [])
-		self.total_amount = 0.0
 		default_currency = erpnext.get_default_currency()
 
 		for d in entries:
@@ -192,7 +197,6 @@ class BankClearance(Document):
 			d.pop("debit")
 			d.pop("account_currency")
 			row.update(d)
-			self.total_amount += flt(amount)
 
 	@frappe.whitelist()
 	def update_clearance_date(self):

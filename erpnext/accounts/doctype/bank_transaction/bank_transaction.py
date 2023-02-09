@@ -58,18 +58,10 @@ class BankTransaction(StatusUpdater):
 
 	def clear_linked_payment_entries(self, for_cancel=False):
 		for payment_entry in self.payment_entries:
-			if payment_entry.payment_document in [
-				"Payment Entry",
-				"Journal Entry",
-				"Purchase Invoice",
-				"Expense Claim",
-				"Loan Repayment",
-				"Loan Disbursement",
-			]:
-				self.clear_simple_entry(payment_entry, for_cancel=for_cancel)
-
-			elif payment_entry.payment_document == "Sales Invoice":
+			if payment_entry.payment_document == "Sales Invoice":
 				self.clear_sales_invoice(payment_entry, for_cancel=for_cancel)
+			elif payment_entry.payment_document in get_doctypes_for_bank_reconciliation():
+				self.clear_simple_entry(payment_entry, for_cancel=for_cancel)
 
 	def clear_simple_entry(self, payment_entry, for_cancel=False):
 		if payment_entry.payment_document == "Payment Entry":
@@ -93,6 +85,12 @@ class BankTransaction(StatusUpdater):
 			"clearance_date",
 			clearance_date,
 		)
+
+
+@frappe.whitelist()
+def get_doctypes_for_bank_reconciliation():
+	"""Get Bank Reconciliation doctypes from all the apps"""
+	return frappe.get_hooks("bank_reconciliation_doctypes")
 
 
 def get_reconciled_bank_transactions(payment_entry):
@@ -139,7 +137,7 @@ def get_paid_amount(payment_entry, currency, bank_account):
 				)
 			elif doc.payment_type == "Pay":
 				paid_amount_field = (
-					"paid_amount" if doc.paid_to_account_currency == currency else "base_paid_amount"
+					"paid_amount" if doc.paid_from_account_currency == currency else "base_paid_amount"
 				)
 
 		return frappe.db.get_value(

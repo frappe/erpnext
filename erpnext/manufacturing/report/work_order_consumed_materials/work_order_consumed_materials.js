@@ -50,7 +50,7 @@ frappe.query_reports["Work Order Consumed Materials"] = {
 			label: __("Status"),
 			fieldname: "status",
 			fieldtype: "Select",
-			options: ["In Process", "Completed", "Stopped"]
+			options: ["", "In Process", "Completed", "Stopped"]
 		},
 		{
 			label: __("Excess Materials Consumed"),

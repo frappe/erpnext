@@ -8,8 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
-	conditions = get_conditions(filters)
-	data = get_data(conditions, filters)
+	data = get_data(filters)
 
 	if not data:
 		return [], [], None, []
@@ -19,49 +18,39 @@ def execute(filters=None):
 	return columns, data, None, chart_data
 
 
-def get_conditions(filters):
-	conditions = ""
+def get_data(filters):
+	bin = frappe.qb.DocType("Bin")
+	wh = frappe.qb.DocType("Warehouse")
+	item = frappe.qb.DocType("Item")
 
-	if filters.get("warehouse"):
-		conditions += "AND warehouse in %(warehouse)s"
-	if filters.get("company"):
-		conditions += "AND company = %(company)s"
-
-	return conditions
-
-
-def get_data(conditions, filters):
-	data = frappe.db.sql(
-		"""
-		SELECT
+	query = (
+		frappe.qb.from_(bin)
+		.from_(wh)
+		.from_(item)
+		.select(
 			bin.warehouse,
 			bin.item_code,
-			bin.actual_qty ,
-			bin.ordered_qty ,
-			bin.planned_qty ,
-			bin.reserved_qty ,
+			bin.actual_qty,
+			bin.ordered_qty,
+			bin.planned_qty,
+			bin.reserved_qty,
 			bin.reserved_qty_for_production,
-			bin.projected_qty ,
-			warehouse.company,
-			item.item_name ,
-			item.description
-		FROM
-			`tabBin` bin,
-			`tabWarehouse` warehouse,
-			`tabItem` item
-		WHERE
-			bin.projected_qty<0
-			AND warehouse.name = bin.warehouse
-			AND bin.item_code=item.name
-			{0}
-		ORDER BY bin.projected_qty;""".format(
-			conditions
-		),
-		filters,
-		as_dict=1,
+			bin.projected_qty,
+			wh.company,
+			item.item_name,
+			item.description,
+		)
+		.where((bin.projected_qty < 0) & (wh.name == bin.warehouse) & (bin.item_code == item.name))
+		.orderby(bin.projected_qty)
 	)
 
-	return data
+	if filters.get("warehouse"):
+		query = query.where(bin.warehouse.isin(filters.get("warehouse")))
+
+	if filters.get("company"):
+		query = query.where(wh.company == filters.get("company"))
+
+	return query.run(as_dict=True)
 
 
 def get_chart_data(data):

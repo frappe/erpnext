@@ -52,7 +52,10 @@
   "free_item_rate",
   "column_break_42",
   "free_item_uom",
+  "round_free_qty",
   "is_recursive",
+  "recurse_for",
+  "apply_recursion_over",
   "section_break_23",
   "valid_from",
   "valid_upto",
@@ -176,7 +179,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:doc.apply_on != 'Transaction'",
+   "depends_on": "eval:doc.apply_on != 'Transaction' && !doc.mixed_conditions",
    "fieldname": "section_break_18",
    "fieldtype": "Section Break",
    "label": "Discount on Other Item"
@@ -297,12 +300,12 @@
   {
    "fieldname": "min_qty",
    "fieldtype": "Float",
-   "label": "Min Qty"
+   "label": "Min Qty (As Per Stock UOM)"
   },
   {
    "fieldname": "max_qty",
    "fieldtype": "Float",
-   "label": "Max Qty"
+   "label": "Max Qty (As Per Stock UOM)"
   },
   {
    "fieldname": "column_break_21",
@@ -481,7 +484,7 @@
    "description": "System will notify to increase or decrease quantity or amount ",
    "fieldname": "threshold_percentage",
    "fieldtype": "Percent",
-   "label": "Threshold for Suggestion"
+   "label": "Threshold for Suggestion (In Percentage)"
   },
   {
    "description": "Higher the number, higher the priority",
@@ -578,15 +581,38 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "PRLE-.####"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_free_qty",
+   "fieldtype": "Check",
+   "label": "Round Free Qty"
+  },
+  {
+   "depends_on": "is_recursive",
+   "description": "Give free item for every N quantity",
+   "fieldname": "recurse_for",
+   "fieldtype": "Float",
+   "label": "Recurse Every (As Per Transaction UOM)",
+   "mandatory_depends_on": "is_recursive"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_recursive",
+   "description": "Qty for which recursion isn't applicable.",
+   "fieldname": "apply_recursion_over",
+   "fieldtype": "Float",
+   "label": "Apply Recursion Over (As Per Transaction UOM)"
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2021-08-06 15:10:04.219321",
+ "modified": "2022-10-13 19:05:35.056304",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -642,5 +668,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title"
 }

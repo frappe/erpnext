@@ -8,7 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry'];
 	},
 
 	refresh: function(frm) {
@@ -149,22 +149,6 @@ frappe.ui.form.on("Journal Entry", {
 					}
 				});
 			}
-			else if(frm.doc.voucher_type=="Opening Entry") {
-				return frappe.call({
-					type:"GET",
-					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
-					args: {
-						"company": frm.doc.company
-					},
-					callback: function(r) {
-						frappe.model.clear_table(frm.doc, "accounts");
-						if(r.message) {
-							update_jv_details(frm.doc, r.message);
-						}
-						cur_frm.set_value("is_opening", "Yes");
-					}
-				});
-			}
 		}
 	},
 
@@ -189,8 +173,8 @@ frappe.ui.form.on("Journal Entry", {
 var update_jv_details = function(doc, r) {
 	$.each(r, function(i, d) {
 		var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
-		row.account = d.account;
-		row.balance = d.balance;
+		frappe.model.set_value(row.doctype, row.name, "account", d.account)
+		frappe.model.set_value(row.doctype, row.name, "balance", d.balance)
 	});
 	refresh_field("accounts");
 }
@@ -240,25 +224,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 
-			// expense claim
-			if(jvd.reference_type==="Expense Claim") {
-				return {
-					filters: {
-						'total_sanctioned_amount': ['>', 0],
-						'status': ['!=', 'Paid'],
-						'docstatus': 1
-					}
-				};
-			}
-
-			if(jvd.reference_type==="Employee Advance") {
-				return {
-					filters: {
-						'docstatus': 1
-					}
-				};
-			}
-
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
@@ -268,13 +233,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 						account: jvd.account,
 						party: jvd.party
 					}
-				};
-			}
-
-			// payroll entry
-			if(jvd.reference_type==="Payroll Entry") {
-				return {
-					query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
 				};
 			}
 
@@ -295,9 +253,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 
-				if (in_list(['Debit Note', 'Credit Note'], doc.voucher_type)) {
-					out.filters.push([jvd.reference_type, "is_return", "=", 1]);
-				}
 			}
 
 			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
@@ -354,8 +309,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		}
 	}
 
-	get_outstanding(doctype, docname, company, child, due_date) {
-		var me = this;
+	get_outstanding(doctype, docname, company, child) {
 		var args = {
 			"doctype": doctype,
 			"docname": docname,

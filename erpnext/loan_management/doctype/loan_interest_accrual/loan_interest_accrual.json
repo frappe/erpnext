@@ -35,12 +35,15 @@
   {
    "fieldname": "loan",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Loan",
    "options": "Loan"
   },
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Posting Date"
   },
   {
@@ -75,6 +78,8 @@
    "fetch_from": "loan.applicant",
    "fieldname": "applicant",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Applicant",
    "options": "applicant_type"
   },
@@ -158,8 +163,11 @@
   {
    "fieldname": "accrual_type",
    "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Accrual Type",
-   "options": "Regular\nRepayment\nDisbursement"
+   "options": "Regular\nRepayment\nDisbursement\nCredit Adjustment\nDebit Adjustment\nRefund"
   },
   {
    "fieldname": "penalty_amount",
@@ -185,10 +193,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:26:38.871889",
+ "modified": "2022-06-30 11:51:31.911794",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -225,5 +234,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -97,7 +97,7 @@ class PaymentLedgerEntry(Document):
 						)
 
 	def validate_dimensions_for_pl_and_bs(self):
-		account_type = frappe.db.get_value("Account", self.account, "report_type")
+		account_type = frappe.get_cached_value("Account", self.account, "report_type")
 
 		for dimension in get_checks_for_pl_and_bs_accounts():
 			if (
@@ -147,3 +147,8 @@ class PaymentLedgerEntry(Document):
 			update_voucher_outstanding(
 				self.against_voucher_type, self.against_voucher_no, self.account, self.party_type, self.party
 			)
+
+
+def on_doctype_update():
+	frappe.db.add_index("Payment Ledger Entry", ["against_voucher_no", "against_voucher_type"])
+	frappe.db.add_index("Payment Ledger Entry", ["voucher_no", "voucher_type"])

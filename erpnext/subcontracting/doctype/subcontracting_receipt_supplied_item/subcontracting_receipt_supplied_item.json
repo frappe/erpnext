@@ -1,0 +1,208 @@
+{
+ "actions": [],
+ "creation": "2022-04-18 10:45:16.538479",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "main_item_code",
+  "rm_item_code",
+  "item_name",
+  "bom_detail_no",
+  "col_break1",
+  "description",
+  "stock_uom",
+  "conversion_factor",
+  "reference_name",
+  "secbreak_1",
+  "rate",
+  "col_break2",
+  "amount",
+  "secbreak_2",
+  "available_qty_for_consumption",
+  "required_qty",
+  "col_break3",
+  "consumed_qty",
+  "current_stock",
+  "secbreak_3",
+  "batch_no",
+  "col_break4",
+  "serial_no",
+  "subcontracting_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "main_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Raw Material Item Code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_global_search": 1,
+   "label": "Description",
+   "print_width": "300px",
+   "read_only": 1,
+   "width": "300px"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "no_copy": 1,
+   "options": "Batch"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Text",
+   "label": "Serial No",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "required_qty",
+   "fieldtype": "Float",
+   "label": "Required Qty",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "consumed_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Consumed Qty",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock Uom",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_stock",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Current Stock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_detail_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "BOM Detail No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "secbreak_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secbreak_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secbreak_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Subcontracting Order",
+   "no_copy": 1,
+   "options": "Subcontracting Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "available_qty_for_consumption",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Available Qty For Consumption",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-07 17:17:21.670761",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting Receipt Supplied Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

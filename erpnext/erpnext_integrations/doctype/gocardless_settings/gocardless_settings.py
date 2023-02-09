@@ -7,9 +7,11 @@ from urllib.parse import urlencode
 import frappe
 import gocardless_pro
 from frappe import _
-from frappe.integrations.utils import create_payment_gateway, create_request_log
+from frappe.integrations.utils import create_request_log
 from frappe.model.document import Document
 from frappe.utils import call_hook_method, cint, flt, get_url
+
+from erpnext.utilities import payment_app_import_guard
 
 
 class GoCardlessSettings(Document):
@@ -29,6 +31,9 @@ class GoCardlessSettings(Document):
 			frappe.throw(e)
 
 	def on_update(self):
+		with payment_app_import_guard():
+			from payments.utils import create_payment_gateway
+
 		create_payment_gateway(
 			"GoCardless-" + self.gateway_name, settings="GoCardLess Settings", controller=self.gateway_name
 		)

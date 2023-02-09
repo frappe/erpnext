@@ -7,7 +7,16 @@ import math
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, flt, get_last_day, getdate, now_datetime, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	date_diff,
+	flt,
+	get_last_day,
+	getdate,
+	now_datetime,
+	nowdate,
+)
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry
@@ -20,15 +29,12 @@ from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpled
 
 class Loan(AccountsController):
 	def validate(self):
-		if self.applicant_type == "Employee" and self.repay_from_salary:
-			validate_employee_currency_with_company_currency(self.applicant, self.company)
 		self.set_loan_amount()
 		self.validate_loan_amount()
 		self.set_missing_fields()
 		self.validate_cost_center()
 		self.validate_accounts()
 		self.check_sanctioned_amount_limit()
-		self.validate_repay_from_salary()
 
 		if self.is_term_loan:
 			validate_repayment_method(
@@ -106,38 +112,85 @@ class Loan(AccountsController):
 				)
 			)
 
-	def validate_repay_from_salary(self):
-		if not self.is_term_loan and self.repay_from_salary:
-			frappe.throw(_("Repay From Salary can be selected only for term loans"))
-
 	def make_repayment_schedule(self):
 		if not self.repayment_start_date:
 			frappe.throw(_("Repayment Start Date is mandatory for term loans"))
 
+		schedule_type_details = frappe.db.get_value(
+			"Loan Type", self.loan_type, ["repayment_schedule_type", "repayment_date_on"], as_dict=1
+		)
+
 		self.repayment_schedule = []
 		payment_date = self.repayment_start_date
 		balance_amount = self.loan_amount
-		while balance_amount > 0:
-			interest_amount = flt(balance_amount * flt(self.rate_of_interest) / (12 * 100))
-			principal_amount = self.monthly_repayment_amount - interest_amount
-			balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
-			if balance_amount < 0:
-				principal_amount += balance_amount
-				balance_amount = 0.0
 
-			total_payment = principal_amount + interest_amount
-			self.append(
-				"repayment_schedule",
-				{
-					"payment_date": payment_date,
-					"principal_amount": principal_amount,
-					"interest_amount": interest_amount,
-					"total_payment": total_payment,
-					"balance_loan_amount": balance_amount,
-				},
+		while balance_amount > 0:
+			interest_amount, principal_amount, balance_amount, total_payment = self.get_amounts(
+				payment_date,
+				balance_amount,
+				schedule_type_details.repayment_schedule_type,
+				schedule_type_details.repayment_date_on,
 			)
-			next_payment_date = add_single_month(payment_date)
-			payment_date = next_payment_date
+
+			if schedule_type_details.repayment_schedule_type == "Pro-rated calendar months":
+				next_payment_date = get_last_day(payment_date)
+				if schedule_type_details.repayment_date_on == "Start of the next month":
+					next_payment_date = add_days(next_payment_date, 1)
+
+				payment_date = next_payment_date
+
+			self.add_repayment_schedule_row(
+				payment_date, principal_amount, interest_amount, total_payment, balance_amount
+			)
+
+			if (
+				schedule_type_details.repayment_schedule_type == "Monthly as per repayment start date"
+				or schedule_type_details.repayment_date_on == "End of the current month"
+			):
+				next_payment_date = add_single_month(payment_date)
+				payment_date = next_payment_date
+
+	def get_amounts(self, payment_date, balance_amount, schedule_type, repayment_date_on):
+		if schedule_type == "Monthly as per repayment start date":
+			days = 1
+			months = 12
+		else:
+			expected_payment_date = get_last_day(payment_date)
+			if repayment_date_on == "Start of the next month":
+				expected_payment_date = add_days(expected_payment_date, 1)
+
+			if expected_payment_date == payment_date:
+				# using 30 days for calculating interest for all full months
+				days = 30
+				months = 365
+			else:
+				days = date_diff(get_last_day(payment_date), payment_date)
+				months = 365
+
+		interest_amount = flt(balance_amount * flt(self.rate_of_interest) * days / (months * 100))
+		principal_amount = self.monthly_repayment_amount - interest_amount
+		balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
+		if balance_amount < 0:
+			principal_amount += balance_amount
+			balance_amount = 0.0
+
+		total_payment = principal_amount + interest_amount
+
+		return interest_amount, principal_amount, balance_amount, total_payment
+
+	def add_repayment_schedule_row(
+		self, payment_date, principal_amount, interest_amount, total_payment, balance_loan_amount
+	):
+		self.append(
+			"repayment_schedule",
+			{
+				"payment_date": payment_date,
+				"principal_amount": principal_amount,
+				"interest_amount": interest_amount,
+				"total_payment": total_payment,
+				"balance_loan_amount": balance_loan_amount,
+			},
+		)
 
 	def set_repayment_period(self):
 		if self.repayment_method == "Repay Fixed Amount per Period":
@@ -489,25 +542,6 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 			unpledge_request.append("securities", {"loan_security": security, "qty": qty})
 
 	return unpledge_request
-
-
-def validate_employee_currency_with_company_currency(applicant, company):
-	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
-		get_employee_currency,
-	)
-
-	if not applicant:
-		frappe.throw(_("Please select Applicant"))
-	if not company:
-		frappe.throw(_("Please select Company"))
-	employee_currency = get_employee_currency(applicant)
-	company_currency = erpnext.get_company_currency(company)
-	if employee_currency != company_currency:
-		frappe.throw(
-			_(
-				"Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}"
-			).format(applicant, employee_currency)
-		)
 
 
 @frappe.whitelist()

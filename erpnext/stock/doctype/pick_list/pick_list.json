@@ -10,6 +10,7 @@
   "company",
   "purpose",
   "customer",
+  "customer_name",
   "work_order",
   "material_request",
   "for_qty",
@@ -25,7 +26,8 @@
   "locations",
   "amended_from",
   "print_settings_section",
-  "group_same_items"
+  "group_same_items",
+  "status"
  ],
  "fields": [
   {
@@ -159,11 +161,34 @@
    "fieldname": "prompt_qty",
    "fieldtype": "Check",
    "label": "Prompt Qty"
+  },
+  {
+   "depends_on": "eval:doc.purpose==='Delivery' && doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nOpen\nCompleted\nCancelled",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-11 09:09:53.029312",
+ "modified": "2023-01-24 10:33:43.244476",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

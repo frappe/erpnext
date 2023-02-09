@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, getdate
 
 
@@ -11,8 +12,6 @@ def execute(filters=None):
 		filters = {}
 	float_precision = frappe.db.get_default("float_precision")
 
-	condition = get_condition(filters)
-
 	avg_daily_outgoing = 0
 	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
 	if diff <= 0:
@@ -20,8 +19,8 @@ def execute(filters=None):
 
 	columns = get_columns()
 	items = get_item_info(filters)
-	consumed_item_map = get_consumed_items(condition)
-	delivered_item_map = get_delivered_items(condition)
+	consumed_item_map = get_consumed_items(filters)
+	delivered_item_map = get_delivered_items(filters)
 
 	data = []
 	for item in items:
@@ -71,76 +70,86 @@ def get_columns():
 def get_item_info(filters):
 	from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
-	conditions = [get_item_group_condition(filters.get("item_group"))]
-	if filters.get("brand"):
-		conditions.append("item.brand=%(brand)s")
-	conditions.append("is_stock_item = 1")
-
-	return frappe.db.sql(
-		"""select name, item_name, description, brand, item_group,
-		safety_stock, lead_time_days from `tabItem` item where {}""".format(
-			" and ".join(conditions)
-		),
-		filters,
-		as_dict=1,
+	item = frappe.qb.DocType("Item")
+	query = (
+		frappe.qb.from_(item)
+		.select(
+			item.name,
+			item.item_name,
+			item.description,
+			item.brand,
+			item.item_group,
+			item.safety_stock,
+			item.lead_time_days,
+		)
+		.where((item.is_stock_item == 1) & (item.disabled == 0))
 	)
 
+	if brand := filters.get("brand"):
+		query = query.where(item.brand == brand)
 
-def get_consumed_items(condition):
+	if conditions := get_item_group_condition(filters.get("item_group"), item):
+		query = query.where(conditions)
+
+	return query.run(as_dict=True)
+
+
+def get_consumed_items(filters):
 	purpose_to_exclude = [
 		"Material Transfer for Manufacture",
 		"Material Transfer",
 		"Send to Subcontractor",
 	]
 
-	condition += """
-		and (
-			purpose is NULL
-			or purpose not in ({})
+	se = frappe.qb.DocType("Stock Entry")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.left_join(se)
+		.on(sle.voucher_no == se.name)
+		.select(sle.item_code, Abs(Sum(sle.actual_qty)).as_("consumed_qty"))
+		.where(
+			(sle.actual_qty < 0)
+			& (sle.is_cancelled == 0)
+			& (sle.voucher_type.notin(["Delivery Note", "Sales Invoice"]))
+			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))
 		)
-	""".format(
-		", ".join(f"'{p}'" for p in purpose_to_exclude)
+		.groupby(sle.item_code)
 	)
-	condition = condition.replace("posting_date", "sle.posting_date")
+	query = get_filtered_query(filters, sle, query)
 
-	consumed_items = frappe.db.sql(
-		"""
-		select item_code, abs(sum(actual_qty)) as consumed_qty
-		from `tabStock Ledger Entry` as sle left join `tabStock Entry` as se
-			on sle.voucher_no = se.name
-		where
-			actual_qty < 0
-			and is_cancelled = 0
-			and voucher_type not in ('Delivery Note', 'Sales Invoice')
-			%s
-		group by item_code"""
-		% condition,
-		as_dict=1,
-	)
+	consumed_items = query.run(as_dict=True)
 
 	consumed_items_map = {item.item_code: item.consumed_qty for item in consumed_items}
 	return consumed_items_map
 
 
-def get_delivered_items(condition):
-	dn_items = frappe.db.sql(
-		"""select dn_item.item_code, sum(dn_item.stock_qty) as dn_qty
-		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where dn.name = dn_item.parent and dn.docstatus = 1 %s
-		group by dn_item.item_code"""
-		% (condition),
-		as_dict=1,
+def get_delivered_items(filters):
+	parent = frappe.qb.DocType("Delivery Note")
+	child = frappe.qb.DocType("Delivery Note Item")
+	query = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(child.item_code, Sum(child.stock_qty).as_("dn_qty"))
+		.where((parent.name == child.parent) & (parent.docstatus == 1))
+		.groupby(child.item_code)
 	)
+	query = get_filtered_query(filters, parent, query)
 
-	si_items = frappe.db.sql(
-		"""select si_item.item_code, sum(si_item.stock_qty) as si_qty
-		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
-		where si.name = si_item.parent and si.docstatus = 1 and
-		si.update_stock = 1 %s
-		group by si_item.item_code"""
-		% (condition),
-		as_dict=1,
+	dn_items = query.run(as_dict=True)
+
+	parent = frappe.qb.DocType("Sales Invoice")
+	child = frappe.qb.DocType("Sales Invoice Item")
+	query = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(child.item_code, Sum(child.stock_qty).as_("si_qty"))
+		.where((parent.name == child.parent) & (parent.docstatus == 1) & (parent.update_stock == 1))
+		.groupby(child.item_code)
 	)
+	query = get_filtered_query(filters, parent, query)
+
+	si_items = query.run(as_dict=True)
 
 	dn_item_map = {}
 	for item in dn_items:
@@ -152,13 +161,10 @@ def get_delivered_items(condition):
 	return dn_item_map
 
 
-def get_condition(filters):
-	conditions = ""
+def get_filtered_query(filters, table, query):
 	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " and posting_date between '%s' and '%s'" % (
-			filters["from_date"],
-			filters["to_date"],
-		)
+		query = query.where(table.posting_date.between(filters["from_date"], filters["to_date"]))
 	else:
-		frappe.throw(_("From and To dates required"))
-	return conditions
+		frappe.throw(_("From and To dates are required"))
+
+	return query

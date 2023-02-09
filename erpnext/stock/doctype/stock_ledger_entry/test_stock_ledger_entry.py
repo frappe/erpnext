@@ -409,61 +409,6 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		lcv.cancel()
 		pr.cancel()
 
-	def test_sub_contracted_item_costing(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		company = "_Test Company"
-		rm_item_code = "_Test Item for Reposting"
-		subcontracted_item = "_Test Subcontracted Item for Reposting"
-
-		frappe.db.set_value(
-			"Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM"
-		)
-		make_bom(item=subcontracted_item, raw_materials=[rm_item_code], currency="INR")
-
-		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
-		pr = make_purchase_receipt(
-			company=company,
-			posting_date="2020-04-10",
-			warehouse="Stores - _TC",
-			item_code=rm_item_code,
-			qty=10,
-			rate=100,
-		)
-
-		# Purchase Receipt for subcontracted item
-		pr1 = make_purchase_receipt(
-			company=company,
-			posting_date="2020-04-20",
-			warehouse="Finished Goods - _TC",
-			supplier_warehouse="Stores - _TC",
-			item_code=subcontracted_item,
-			qty=10,
-			rate=20,
-			is_subcontracted=1,
-		)
-
-		self.assertEqual(pr1.items[0].valuation_rate, 120)
-
-		# Update raw material's valuation via LCV, Additional cost = 50
-		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-
-		pr1.reload()
-		self.assertEqual(pr1.items[0].valuation_rate, 125)
-
-		# check outgoing_rate for DN after reposting
-		incoming_rate = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_type": "Purchase Receipt", "voucher_no": pr1.name, "item_code": subcontracted_item},
-			"incoming_rate",
-		)
-		self.assertEqual(incoming_rate, 125)
-
-		# cleanup data
-		pr1.cancel()
-		lcv.cancel()
-		pr.cancel()
-
 	def test_back_dated_entry_not_allowed(self):
 		# Back dated stock transactions are only allowed to stock managers
 		frappe.db.set_value(
@@ -1378,13 +1323,15 @@ def create_product_bundle_item(new_item_code, packed_items):
 		item.save()
 
 
-def create_items():
-	items = [
-		"_Test Item for Reposting",
-		"_Test Finished Item for Reposting",
-		"_Test Subcontracted Item for Reposting",
-		"_Test Bundled Item for Reposting",
-	]
+def create_items(items=None, uoms=None):
+	if not items:
+		items = [
+			"_Test Item for Reposting",
+			"_Test Finished Item for Reposting",
+			"_Test Subcontracted Item for Reposting",
+			"_Test Bundled Item for Reposting",
+		]
+
 	for d in items:
 		properties = {"valuation_method": "FIFO"}
 		if d == "_Test Bundled Item for Reposting":
@@ -1392,7 +1339,7 @@ def create_items():
 		elif d == "_Test Subcontracted Item for Reposting":
 			properties.update({"is_sub_contracted_item": 1})
 
-		make_item(d, properties=properties)
+		make_item(d, properties=properties, uoms=uoms)
 
 	return items
 

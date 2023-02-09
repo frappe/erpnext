@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
+  "has_item_scanned",
   "section_break_2",
   "item_code",
   "product_bundle",
@@ -645,12 +646,15 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
    "no_copy": 1,
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
   },
   {
    "default": "0",
@@ -741,6 +745,7 @@
    "oldfieldname": "valuation_rate",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
+   "precision": "6",
    "print_hide": 1,
    "print_width": "80px",
    "read_only": 1,
@@ -789,10 +794,8 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Expense Account",
-   "options": "Account",
-   "read_only": 1
+   "options": "Account"
   },
   {
    "fieldname": "accounting_dimensions_section",
@@ -917,6 +920,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
    "fieldname": "discount_and_margin_section",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -993,12 +997,20 @@
   {
    "fieldname": "column_break_102",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Check",
+   "label": "Has Item Scanned",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-17 05:32:16.483178",
+ "modified": "2022-11-02 12:49:28.746701",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

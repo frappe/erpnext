@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _, scrub
+from frappe.model.document import Document
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 
 import erpnext
@@ -20,7 +21,7 @@ from erpnext.stock.get_item_details import _get_item_tax_template
 
 
 class calculate_taxes_and_totals(object):
-	def __init__(self, doc):
+	def __init__(self, doc: Document):
 		self.doc = doc
 		frappe.flags.round_off_applicable_accounts = []
 		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
@@ -37,6 +38,12 @@ class calculate_taxes_and_totals(object):
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
+		# Update grand total as per cash and non trade discount
+		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
+			self.doc.grand_total -= self.doc.discount_amount
+			self.doc.base_grand_total -= self.doc.base_discount_amount
+			self.set_rounded_total()
+
 		self.calculate_shipping_charges()
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
@@ -52,11 +59,24 @@ class calculate_taxes_and_totals(object):
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
+		self.calculate_tax_withholding_net_total()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
 		self.calculate_total_net_weight()
+
+	def calculate_tax_withholding_net_total(self):
+		if hasattr(self.doc, "tax_withholding_net_total"):
+			sum_net_amount = 0
+			sum_base_net_amount = 0
+			for item in self.doc.get("items"):
+				if hasattr(item, "apply_tds") and item.apply_tds:
+					sum_net_amount += item.net_amount
+					sum_base_net_amount += item.base_net_amount
+
+			self.doc.tax_withholding_net_total = sum_net_amount
+			self.doc.base_tax_withholding_net_total = sum_base_net_amount
 
 	def validate_item_tax_template(self):
 		for item in self.doc.get("items"):
@@ -598,6 +618,12 @@ class calculate_taxes_and_totals(object):
 				self.doc.discount_amount * self.doc.conversion_rate, self.doc.precision("base_discount_amount")
 			)
 
+			if self.doc.apply_discount_on == "Grand Total" and self.doc.get(
+				"is_cash_or_non_trade_discount"
+			):
+				self.discount_amount_applied = True
+				return
+
 			total_for_discount_amount = self.get_total_for_discount_amount()
 			taxes = self.doc.get("taxes")
 			net_total = 0
@@ -652,7 +678,7 @@ class calculate_taxes_and_totals(object):
 			)
 
 	def calculate_total_advance(self):
-		if self.doc.docstatus < 2:
+		if not self.doc.docstatus.is_cancelled():
 			total_allocated_amount = sum(
 				flt(adv.allocated_amount, adv.precision("allocated_amount"))
 				for adv in self.doc.get("advances")
@@ -683,7 +709,7 @@ class calculate_taxes_and_totals(object):
 					)
 				)
 
-			if self.doc.docstatus == 0:
+			if self.doc.docstatus.is_draft():
 				if self.doc.get("write_off_outstanding_amount_automatically"):
 					self.doc.write_off_amount = 0
 
@@ -757,6 +783,18 @@ class calculate_taxes_and_totals(object):
 				total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"),
 			)
+
+			if (
+				self.doc.doctype == "Sales Invoice"
+				and self.doc.get("is_pos")
+				and self.doc.get("pos_profile")
+				and self.doc.get("is_consolidated")
+			):
+				write_off_limit = flt(
+					frappe.db.get_value("POS Profile", self.doc.pos_profile, "write_off_limit")
+				)
+				if write_off_limit and abs(self.doc.outstanding_amount) <= write_off_limit:
+					self.doc.write_off_outstanding_amount_automatically = 1
 
 			if (
 				self.doc.doctype == "Sales Invoice"
@@ -865,23 +903,32 @@ class calculate_taxes_and_totals(object):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
 	def set_total_amount_to_default_mop(self, total_amount_to_pay):
-		default_mode_of_payment = frappe.db.get_value(
-			"POS Payment Method",
-			{"parent": self.doc.pos_profile, "default": 1},
-			["mode_of_payment"],
-			as_dict=1,
-		)
-
-		if default_mode_of_payment:
-			self.doc.payments = []
-			self.doc.append(
-				"payments",
-				{
-					"mode_of_payment": default_mode_of_payment.mode_of_payment,
-					"amount": total_amount_to_pay,
-					"default": 1,
-				},
+		total_paid_amount = 0
+		for payment in self.doc.get("payments"):
+			total_paid_amount += (
+				payment.amount if self.doc.party_account_currency == self.doc.currency else payment.base_amount
 			)
+
+		pending_amount = total_amount_to_pay - total_paid_amount
+
+		if pending_amount > 0:
+			default_mode_of_payment = frappe.db.get_value(
+				"POS Payment Method",
+				{"parent": self.doc.pos_profile, "default": 1},
+				["mode_of_payment"],
+				as_dict=1,
+			)
+
+			if default_mode_of_payment:
+				self.doc.payments = []
+				self.doc.append(
+					"payments",
+					{
+						"mode_of_payment": default_mode_of_payment.mode_of_payment,
+						"amount": pending_amount,
+						"default": 1,
+					},
+				)
 
 
 def get_itemised_tax_breakup_html(doc):
@@ -1010,7 +1057,7 @@ class init_landed_taxes_and_totals(object):
 		company_currency = erpnext.get_company_currency(self.doc.company)
 		for d in self.doc.get(self.tax_field):
 			if not d.account_currency:
-				account_currency = frappe.db.get_value("Account", d.expense_account, "account_currency")
+				account_currency = frappe.get_cached_value("Account", d.expense_account, "account_currency")
 				d.account_currency = account_currency or company_currency
 
 	def set_exchange_rate(self):

@@ -440,7 +440,7 @@ def set_gl_entries_by_account(
 		}
 
 		if filters.get("include_default_book_entries"):
-			gl_filters["company_fb"] = frappe.db.get_value("Company", company, "default_finance_book")
+			gl_filters["company_fb"] = frappe.get_cached_value("Company", company, "default_finance_book")
 
 		for key, value in filters.items():
 			if value:
