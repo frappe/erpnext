@@ -8,6 +8,7 @@ from erpnext.accounts.utils import get_stock_and_account_balance
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from collections import OrderedDict
 
 
 class ClosedAccountingPeriod(frappe.ValidationError): pass
@@ -85,53 +86,47 @@ def process_gl_map(gl_map, merge_entries=True):
 def merge_similar_entries(gl_map):
 	from erpnext.accounts.doctype.gl_entry.gl_entry import remove_dimensions_not_allowed_for_bs_account
 
-	merged_gl_map = []
+	merged_gl_map = OrderedDict()
 	accounting_dimensions = get_accounting_dimensions()
+	account_head_key_fields = get_account_head_key_fields(accounting_dimensions)
+
 	for entry in gl_map:
 		remove_dimensions_not_allowed_for_bs_account(entry)
 
 		# if there is already an entry in this account then just add it
 		# to that entry
-		same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions)
+		gle_key = tuple(entry.get(f) or "" for f in account_head_key_fields)
+		same_head = merged_gl_map.get(gle_key)
 		if same_head:
-			same_head.debit	= flt(same_head.debit) + flt(entry.debit)
-			same_head.debit_in_account_currency	= \
-				flt(same_head.debit_in_account_currency) + flt(entry.debit_in_account_currency)
+			same_head.debit = flt(same_head.debit) + flt(entry.debit)
+			same_head.debit_in_account_currency = flt(same_head.debit_in_account_currency) + flt(entry.debit_in_account_currency)
 			same_head.credit = flt(same_head.credit) + flt(entry.credit)
-			same_head.credit_in_account_currency = \
-				flt(same_head.credit_in_account_currency) + flt(entry.credit_in_account_currency)
+			same_head.credit_in_account_currency = flt(same_head.credit_in_account_currency) + flt(entry.credit_in_account_currency)
 		else:
-			merged_gl_map.append(entry)
+			merged_gl_map[gle_key] = entry
 
 	company = gl_map[0].company if gl_map else erpnext.get_default_company()
 	company_currency = erpnext.get_company_currency(company)
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
 
 	# filter zero debit and credit entries
-	merged_gl_map = filter(lambda x: flt(x.debit, precision)!=0 or flt(x.credit, precision)!=0, merged_gl_map)
-	merged_gl_map = list(merged_gl_map)
-
-	return merged_gl_map
+	merged_gle_list = [e for e in merged_gl_map.values() if flt(e.debit, precision) != 0 or flt(e.credit, precision) != 0]
+	return merged_gle_list
 
 
-def check_if_in_list(gle, gl_map, dimensions=None):
-	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
-		'cost_center', 'project', 'remarks', 'reference_no', 'reference_date']
+def get_account_head_key_fields(dimensions=None):
+	account_head_fieldnames = [
+		'account', 'party_type', 'party',
+		'against_voucher_type', 'against_voucher',
+		'cost_center', 'project',
+		'remarks', 'reference_no', 'reference_date'
+	]
 
+	account_head_key_fields = account_head_fieldnames
 	if dimensions:
-		account_head_fieldnames = account_head_fieldnames + dimensions
+		account_head_key_fields += dimensions
 
-	for e in gl_map:
-		same_head = True
-		if e.account != gle.account:
-			same_head = False
-
-		for fieldname in account_head_fieldnames:
-			if cstr(e.get(fieldname)) != cstr(gle.get(fieldname)):
-				same_head = False
-
-		if same_head:
-			return e
+	return account_head_key_fields
 
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):

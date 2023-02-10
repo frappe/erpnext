@@ -143,7 +143,7 @@ class GLEntry(Document):
 
 		def _get_cost_center_company():
 			if not self.cost_center_company.get(self.cost_center):
-				self.cost_center_company[self.cost_center] = frappe.db.get_value("Cost Center", self.cost_center, "company")
+				self.cost_center_company[self.cost_center] = frappe.db.get_value("Cost Center", self.cost_center, "company", cache=1)
 
 			return self.cost_center_company[self.cost_center]
 
