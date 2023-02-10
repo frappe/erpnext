@@ -56,7 +56,9 @@
   "acc_frozen_upto",
   "column_break_25",
   "frozen_accounts_modifier",
-  "report_settings_sb"
+  "report_settings_sb",
+  "tab_break_dpet",
+  "show_balance_in_coa"
  ],
  "fields": [
   {
@@ -347,6 +349,17 @@
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
    "fieldtype": "Check",
    "label": "Allow multi-currency invoices against single party account "
+  },
+  {
+   "fieldname": "tab_break_dpet",
+   "fieldtype": "Tab Break",
+   "label": "Chart Of Accounts"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_balance_in_coa",
+   "fieldtype": "Check",
+   "label": "Show Balances in Chart Of Accounts"
   }
  ],
  "icon": "icon-cog",
@@ -354,7 +367,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-11-27 21:49:52.538655",
+ "modified": "2023-01-02 12:07:42.434214",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
