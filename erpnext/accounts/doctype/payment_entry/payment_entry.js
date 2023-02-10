@@ -8,6 +8,20 @@ frappe.ui.form.on('Payment Entry', {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
 			if (!frm.doc.paid_to) frm.set_value("paid_to_account_currency", null);
 		}
+
+		if(frm.doc.mode_of_payment=='Cheque'){
+			frm.set_df_property('cheque_number', 'reqd', 1);
+			frm.set_query("cheque_number", function() {
+				return{
+					filters: {
+						"status": 'Not Used',
+						"company_account": frm.doc.paid_from
+					}								
+				}
+			});
+		}else{
+			frm.set_df_property('cheque_number', 'reqd', 0);
+		}
 	},
 
 	setup: function(frm) {

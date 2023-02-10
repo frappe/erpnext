@@ -57,6 +57,10 @@ def make_payment_records(name, supplier, mode_of_payment=None):
 	make_journal_entry(doc, supplier, mode_of_payment)
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
+
+	#check payemnt already exit or not
+	if frappe.db.exists("Payment Entry", {"company": doc.company, "party": supplier,'payment_order':doc.name}):
+		frappe.throw("Payment Already Created.")
 	# je = frappe.new_doc('Journal Entry')
 	je = frappe.new_doc('Payment Entry')
 	je.payment_order = doc.name
@@ -68,7 +72,7 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	
 
 	je.reference_date = nowdate()
-	je.reference_no = ''
+	je.reference_no = '00'
 	# bank or cash
 	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=None,account=None)
@@ -85,31 +89,10 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	# doc.references[0].mode_of_payment == 'BANK' or 
 	je.mode_of_payment = doc.references[0].mode_of_payment
 	if doc.references[0].mode_of_payment == 'Cheque':
-		cheque_no = frappe.db.sql("""
-		SELECT
-			cheque_number
-			From
-			`tabCheque Book Series`
-			WHERE
-		parent = (
-			SELECT
-			name
-			FROM
-			`tabCheque Book Enrollment`
-			WHERE
-			account_name = '{0}'
-			and docstatus = 1
-			and is_active = 1
-			)
-		and status = 'Not Used'
-		ORDER BY cast(cheque_number as UNSIGNED) asc 
-		LIMIT 1 
-		FOR UPDATE
-	""".format(doc.company_bank_account))
-		if cheque_no:
-			je.reference_no = cheque_no[0][0]
-		else:
-			frappe.throw("No Check Book Avaiable for this Bank"+doc.company_bank_account)
+		cq_number = get_next_cheque_number(doc,1)
+		if cq_number[0][0] != None:
+			je.cheque_number = cq_number[0][1]
+			je.reference_no = cq_number[0][0]
 
 	mode_of_payment_type = frappe._dict(frappe.get_all('Mode of Payment',
 		fields = ["name", "type"], as_list=1))
@@ -149,17 +132,48 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je.flags.ignore_mandatory = True
 	je.save()
 	# doc.references[0].mode_of_payment == 'BANK' or 
-	if doc.references[0].mode_of_payment == 'Cheque':
-		if cheque_no:
-			frappe.db.sql("""update `tabCheque Book Series` set status='Used',refrence='{0}',ref_doctype='Payment Entry',ref_doc_status='{3}' WHERE parent = (
+	# if doc.references[0].mode_of_payment == 'Cheque':
+	# 	from  nrp_manufacturing.utils import update_cheque_number
+	# 	update_cheque_number(je)
+	# 	if cheque_no:
+	# 		frappe.db.sql("""update `tabCheque Book Series` set status='Used',refrence='{0}',ref_doctype='Payment Entry',ref_doc_status='{3}' WHERE parent = (
+	# 				SELECT
+	# 				name
+	# 				FROM
+	# 				`tabCheque Book Enrollment`
+	# 				WHERE
+	# 				account_name = '{1}'
+	# 				and docstatus = 1
+	# 				and is_active = 1
+	# 				)
+	# 			and cheque_number = '{2}'""".format(je.name,doc.company_bank_account,cheque_no[0][0],je.workflow_state))
+	frappe.msgprint(_("{0} {1} created").format(je.doctype, je.name))
+
+
+def get_next_cheque_number(doc,count):
+			cheque_no = frappe.db.sql("""
+				SELECT
+					cheque_number,
+					name
+					From
+					`tabCheque Book Series`
+					WHERE
+				parent = (
 					SELECT
 					name
 					FROM
 					`tabCheque Book Enrollment`
 					WHERE
-					account_name = '{1}'
+					account_name = '{0}'
 					and docstatus = 1
 					and is_active = 1
 					)
-				and cheque_number = '{2}'""".format(je.name,doc.company_bank_account,cheque_no[0][0],je.workflow_state))
-	frappe.msgprint(_("{0} {1} created").format(je.doctype, je.name))
+				and status = 'Not Used'
+				ORDER BY cast(cheque_number as UNSIGNED) asc 
+				LIMIT {1} 
+				FOR UPDATE
+			""".format(doc.company_bank_account,count))
+			if not cheque_no:				
+				frappe.throw("No Check Book Avaiable for this Bank"+doc.company_bank_account)
+			else:
+				return cheque_no
