@@ -9,8 +9,11 @@ frappe.listview_settings['Customer'] = {
 frappe.listview_settings["Customer"] = {
 	add_fields: [],
 	onload: function(listview) {
-	    frappe.route_options = {
-	    "region"  : getCurrentUserRegion(),
+		var reg_user = getCurrentUserRegion()
+		if (reg_user != "HO"){
+			frappe.route_options = {
+				"region"  : getCurrentUserRegion(),
+				}
 		}
 	},
 }
