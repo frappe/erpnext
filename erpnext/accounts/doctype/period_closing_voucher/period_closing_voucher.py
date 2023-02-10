@@ -19,6 +19,21 @@ class PeriodClosingVoucher(AccountsController):
 	def on_submit(self):
 		self.make_gl_entries()
 
+	def submit(self):
+		accounting_dimensions, default_dimensions = self.get_accounting_dimensions()
+		dimension_fields = self.get_dimension_fields(accounting_dimensions)
+		pl_account = self.get_pl_balances(dimension_fields)
+
+		if len(pl_account) > 1000:
+			frappe.msgprint(_(
+				"The task has been enqueued as a background job. "
+				"In case there is any issue on processing in background, "
+				"the system will add a comment about the error on this Period Closing Voucher and revert to the Draft stage"
+			))
+			self.queue_action('submit')
+		else:
+			self._submit()
+
 	def on_cancel(self):
 		frappe.db.sql("""
 			delete from `tabGL Entry`
@@ -114,6 +129,8 @@ class PeriodClosingVoucher(AccountsController):
 		return dimension_fields
 
 	def get_pl_balances(self, dimension_fields):
+		self.validate_posting_date()
+
 		"""Get balance for pl accounts"""
 		return frappe.db.sql("""
 			select
