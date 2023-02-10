@@ -10,6 +10,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (get_accounting_dimensions,
 	get_dimension_filters)
 
+
 class PeriodClosingVoucher(AccountsController):
 	def validate(self):
 		self.validate_account_head()
@@ -19,8 +20,10 @@ class PeriodClosingVoucher(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		frappe.db.sql("""delete from `tabGL Entry`
-			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.name)
+		frappe.db.sql("""
+			delete from `tabGL Entry`
+			where voucher_type = 'Period Closing Voucher' and voucher_no=%s
+		""", self.name)
 
 	def validate_account_head(self):
 		closing_account_type = frappe.db.get_value("Account", self.closing_account_head, "root_type")
@@ -41,9 +44,11 @@ class PeriodClosingVoucher(AccountsController):
 
 		self.year_start_date = get_fiscal_year(self.posting_date, self.fiscal_year, company=self.company)[1]
 
-		pce = frappe.db.sql("""select name from `tabPeriod Closing Voucher`
-			where posting_date > %s and fiscal_year = %s and docstatus = 1""",
-			(self.posting_date, self.fiscal_year))
+		pce = frappe.db.sql("""
+			select name from `tabPeriod Closing Voucher`
+			where posting_date > %s and fiscal_year = %s and docstatus = 1
+		""", (self.posting_date, self.fiscal_year))
+
 		if pce and pce[0][0]:
 			frappe.throw(_("Another Period Closing Entry {0} has been made after {1}")
 				.format(pce[0][0], self.posting_date))
@@ -51,14 +56,9 @@ class PeriodClosingVoucher(AccountsController):
 	def make_gl_entries(self):
 		gl_entries = []
 		net_pl_balance = 0
-		dimension_fields = ['t1.cost_center']
 
-		accounting_dimensions = get_accounting_dimensions()
-		for dimension in accounting_dimensions:
-			dimension_fields.append('t1.{0}'.format(dimension))
-
-		dimension_filters, default_dimensions = get_dimension_filters()
-
+		accounting_dimensions, default_dimensions = self.get_accounting_dimensions()
+		dimension_fields = self.get_dimension_fields(accounting_dimensions)
 		pl_accounts = self.get_pl_balances(dimension_fields)
 
 		for acc in pl_accounts:
@@ -66,6 +66,7 @@ class PeriodClosingVoucher(AccountsController):
 				gl_entries.append(self.get_gl_dict({
 					"account": acc.account,
 					"cost_center": acc.cost_center,
+					"project": acc.project,
 					"account_currency": acc.account_currency,
 					"debit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
 						if flt(acc.balance_in_account_currency) < 0 else 0,
@@ -100,6 +101,18 @@ class PeriodClosingVoucher(AccountsController):
 		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries(gl_entries)
 
+	def get_accounting_dimensions(self):
+		accounting_dimensions = get_accounting_dimensions()
+		dimension_filters, default_dimensions = get_dimension_filters()
+		return accounting_dimensions, default_dimensions
+
+	def get_dimension_fields(self, accounting_dimensions):
+		dimension_fields = ['t1.cost_center', 't1.project']
+		for dimension in accounting_dimensions:
+			dimension_fields.append('t1.{0}'.format(dimension))
+
+		return dimension_fields
+
 	def get_pl_balances(self, dimension_fields):
 		"""Get balance for pl accounts"""
 		return frappe.db.sql("""
@@ -112,4 +125,5 @@ class PeriodClosingVoucher(AccountsController):
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
 			group by t1.account, {dimension_fields}
-		""".format(dimension_fields = ', '.join(dimension_fields)), (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
+		""".format(dimension_fields=', '.join(dimension_fields)),
+			(self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
