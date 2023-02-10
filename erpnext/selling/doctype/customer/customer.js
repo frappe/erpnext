@@ -357,12 +357,11 @@ frappe.ui.form.on('Customer',  {
 		})
 		
 	},
-	onload: function(frm){
-		frm.events.country(frm);
-		frm.events.state(frm);
+	setup: function(frm){
+		frm.events.get_country(frm);
     },
 	country: function(frm){
-		frm.set_value("city", null)
+
         frappe.call({
             method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
             args: {
@@ -370,9 +369,24 @@ frappe.ui.form.on('Customer',  {
             }, 
             
             callback: function(r) {
-              frm.set_df_property("state", "options", r.message) 
+              frm.set_df_property("state", "options", r.message)
+				frm.set_value("city", null)
+		
             }
-          })
+        })
+    },
+	get_country: function(frm){
+
+        frappe.call({
+            method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
+            args: {
+              country: frm.doc.country
+            }, 
+            
+            callback: function(r) {
+              frm.set_df_property("state", "options", r.message)
+            }
+        })
     },
 	state:function(frm){
 		frm.set_value("city", null)
