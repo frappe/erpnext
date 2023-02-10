@@ -797,7 +797,6 @@ def last_document():
 
 @frappe.whitelist()
 def remove_person(name):
-	frappe.msgprint("name",name)
 	frappe.delete_doc("Customer Contact Person", name)	
 
 @frappe.whitelist()

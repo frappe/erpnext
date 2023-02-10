@@ -517,8 +517,9 @@
   },
   {
    "fieldname": "city",
-   "fieldtype": "Data",
-   "label": "City"
+   "fieldtype": "Link",
+   "label": "City",
+   "options": "City"
   },
   {
    "fieldname": "column_break_2",
@@ -573,7 +574,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-02-09 14:27:49.490958",
+ "modified": "2023-02-10 11:27:22.329240",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

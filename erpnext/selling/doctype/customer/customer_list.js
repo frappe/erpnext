@@ -6,16 +6,15 @@ frappe.listview_settings['Customer'] = {
     },
 };
 
-frappe.listview_settings['Company Details'] = {
+frappe.listview_settings["Customer"] = {
 	add_fields: [],
 	onload: function(listview) {
-		me.$page.find(`div[data-fieldname='name']`).addClass('hide');
 	    frappe.route_options = {
-	    "region"  : getCurrentAcid(),
-	}
+	    "region"  : getCurrentUserRegion(),
+		}
+	},
 }
-}
-function getCurrentAcid()
+function getCurrentUserRegion()
 	{   var ret_value = "";
 		frappe.call({                        
 				method: "frappe.client.get_value", 
