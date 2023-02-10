@@ -101,7 +101,7 @@ frappe.ui.form.on('POL Expense', {
 		}
 	},
 	get_previous:function(frm){
-		if ( (frm.doc.equipment && frm.doc.fuel_book) || frm.doc.use_common_fuelbook == 1){
+		if ( (frm.doc.equipment && frm.doc.fuel_book) || (frm.doc.use_common_fuelbook == 1 && frm.doc.fuel_book)){
 			frappe.call({
 				method:"pull_previous_expense",
 				doc:frm.doc,
