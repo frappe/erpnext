@@ -425,8 +425,7 @@
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "mandatory_depends_on": "eval:doc.is_opening == 0",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_opening == 0"
   },
   {
    "fieldname": "column_break_35",
@@ -436,8 +435,7 @@
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
-   "mandatory_depends_on": "eval:doc.is_opening == 0",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_opening == 0"
   },
   {
    "fieldname": "pol_received_item",
@@ -507,7 +505,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-10 14:43:23.464796",
+ "modified": "2023-02-10 16:16:34.751838",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",
