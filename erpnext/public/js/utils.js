@@ -509,9 +509,11 @@ $.extend(erpnext.utils, {
 							frm.set_df_property(fieldname, 'read_only', r.message.values.hasOwnProperty(fieldname) ? 1 : default_read_only);
 						});
 					}
-					$.each(r.message.values || {}, function (fieldname, value) {
-						frm.get_field(fieldname).set_value(value);
-					});
+
+					frappe.run_serially([
+						() => frm.set_value(r.message.values || {}),
+						() => frm.layout.refresh_section_collapse(),
+					]);
 				}
 			}
 		});
