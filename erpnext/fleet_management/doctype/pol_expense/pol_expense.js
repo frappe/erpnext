@@ -101,7 +101,7 @@ frappe.ui.form.on('POL Expense', {
 		}
 	},
 	get_previous:function(frm){
-		if ( frm.doc.equipment && frm.doc.fuel_book){
+		if ( (frm.doc.equipment && frm.doc.fuel_book) || frm.doc.use_common_fuelbook == 1){
 			frappe.call({
 				method:"pull_previous_expense",
 				doc:frm.doc,
@@ -109,6 +109,7 @@ frappe.ui.form.on('POL Expense', {
 					frm.refresh_field("items")
 					frm.refresh_field("previous_balance_amount")
 					frm.refresh_field("amount")
+					frm.refresh_field("expense_limit")
 					frm.refresh_field("previous_km_reading")
 					frm.refresh_field("present_km_reading")
 					frm.dirty()

@@ -14,6 +14,7 @@
   "column_break_3",
   "supplier",
   "security_deposit",
+  "expense_limit",
   "disabled"
  ],
  "fields": [
@@ -71,11 +72,18 @@
    "label": "Equipment",
    "mandatory_depends_on": "eval:doc.type == \"Own\"",
    "options": "Equipment"
+  },
+  {
+   "depends_on": "eval:doc.type == \"Common\"",
+   "fieldname": "expense_limit",
+   "fieldtype": "Currency",
+   "label": "Expense Limit",
+   "mandatory_depends_on": "eval:doc.type == \"Common\""
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-16 10:04:36.146976",
+ "modified": "2023-02-10 13:41:25.800875",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fuelbook",

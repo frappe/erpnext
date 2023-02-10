@@ -1677,7 +1677,9 @@ def get_payment_entry(
 		# advance payment are made from SO or PO
 		is_advance = True
 	doc = frappe.get_doc(dt, dn)
-	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
+	if dt in ("Purchase Order") and flt(doc.per_billed, 2) > 0:
+		frappe.msgprint(_("Can only make payment against unbilled {0}").format(dt), raise_exception=True)
+	if dt in ("Sales Order") and flt(doc.per_billed, 2) >= 100:
 		frappe.msgprint(_("Can only make payment against unbilled {0}").format(dt), raise_exception=True)
 
 	if not party_type:

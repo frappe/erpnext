@@ -1465,7 +1465,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 	# on cancellation outstanding can be an empty list
 	voucher_outstanding = ple_query.get_voucher_outstandings(vouchers, common_filter=common_filter)
 
-	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice", "POL Expense"] and voucher_outstanding:
+	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice", "POL Expense","Coal Raising Invoice"] and voucher_outstanding:
 		outstanding = voucher_outstanding[0]
 		ref_doc = frappe.get_doc(voucher_type, voucher_no)
 		# Didn't use db_set for optimisation purpose

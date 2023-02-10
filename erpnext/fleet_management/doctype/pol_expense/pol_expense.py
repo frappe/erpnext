@@ -254,7 +254,13 @@ class POLExpense(AccountsController):
 
 	@frappe.whitelist()
 	def pull_previous_expense(self):
+		pol_exp = qb.DocType(self.doctype)
+		total_amount = 0
 		if cint(self.use_common_fuelbook) == 1:
+			if not self.fuel_book:
+				frappe.throw("Fuel book is missing")
+			if flt(self.expense_limit) <= 0 :
+				self.expense_limit = frappe.db.get_value("Fuelbook", self.fuel_book,"expense_limit")
 			for d in (qb.from_(pol_exp).select(pol_exp.name.as_("reference"), pol_exp.amount,pol_exp.adjusted_amount, pol_exp.balance_amount)
 						.where( (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) 
 							& (pol_exp.name != self.name) & (pol_exp.fuel_book == self.fuel_book))
@@ -265,13 +271,11 @@ class POLExpense(AccountsController):
 		else:
 			if not self.equipment or not self.fuel_book:
 				frappe.throw("Equipment or Fuel book is missing")
-			pol_exp = qb.DocType(self.doctype)
 			self.set('items',[])
 
 			if flt(self.expense_limit) <= 0 and self.equipment_type:
 				self.expense_limit = frappe.db.get_value("Equipment Type",self.equipment_type,"pol_expense_limit")
 				
-			total_amount = 0
 			for d in (qb.from_(pol_exp).select(pol_exp.name.as_("reference"), pol_exp.amount,pol_exp.adjusted_amount, pol_exp.balance_amount)
 							.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) 
 								& (pol_exp.name != self.name) & (pol_exp.fuel_book == self.fuel_book))

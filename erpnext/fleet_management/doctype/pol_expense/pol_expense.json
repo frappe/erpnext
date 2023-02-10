@@ -296,7 +296,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "equipment_type.pol_expense_limit",
    "fieldname": "expense_limit",
    "fieldtype": "Currency",
    "label": "Expense Limit",
@@ -509,7 +508,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-02 10:45:00.227580",
+ "modified": "2023-02-10 13:42:28.962950",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",
