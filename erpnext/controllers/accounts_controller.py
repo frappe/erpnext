@@ -796,7 +796,10 @@ class AccountsController(TransactionBase):
 		advance_allocated = total_advance = 0
 		for d in res:
 			if d.against_order:
-				allocated_amount = flt(d.amount)
+				if self.doctype == "Sales Invoice":
+					allocated_amount = flt(self.base_grand_total)
+				else:
+					allocated_amount = flt(d.amount)
 			else:
 				if self.get("party_account_currency") == self.company_currency:
 					amount = self.get("base_rounded_total") or self.base_grand_total
