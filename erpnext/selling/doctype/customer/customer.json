@@ -540,7 +540,6 @@
    "label": "Pincode"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
    "label": "Contact"
@@ -574,7 +573,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-02-10 11:27:22.329240",
+ "modified": "2023-02-10 16:56:37.321077",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -652,7 +651,6 @@
    "role": "Accounts Manager"
   }
  ],
- "quick_entry": 1,
  "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
