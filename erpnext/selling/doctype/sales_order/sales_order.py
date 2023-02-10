@@ -258,9 +258,9 @@ class SalesOrder(SellingController):
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
 		# then we need not to check credit limit and vise versa
-		
-		if self.primary_company :
-			cust_primary_company =  self.primary_company 
+		customer = frappe.get_doc('Customer',self.customer)
+		if customer.primary_company :
+			cust_primary_company =  customer.primary_company 
 		else: 
 			cust_primary_company = 	self.company
 
