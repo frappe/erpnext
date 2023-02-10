@@ -42,7 +42,7 @@ status_map = {
 	"Customer Order": [
 		["Open", None],
 		[
-			"Open",
+			"Submitted",
 			"eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1",
 		],
 		[
