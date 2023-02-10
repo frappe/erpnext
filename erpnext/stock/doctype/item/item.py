@@ -1333,6 +1333,10 @@ def get_item_override_values(args, validate=False):
 		'is_customer_provided_item': 'YesNo',
 	}
 
+	hooks = frappe.get_hooks('update_item_override_fields')
+	for method in hooks:
+		frappe.get_attr(method)(item_fields, args, validate)
+
 	def throw_override_must_be(doc, target_fieldname, source_value):
 		df = frappe.get_meta("Item").get_field(target_fieldname)
 		if df:
