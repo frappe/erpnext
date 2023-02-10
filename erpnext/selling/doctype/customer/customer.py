@@ -382,26 +382,39 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	# if credit limit check is bypassed at sales order level,
 	# we should not consider outstanding Sales Orders, when customer credit balance report is run
 	if not ignore_outstanding_sales_order:
+		# outstanding_based_on_so = frappe.db.sql("""
+		# 	select sum(base_grand_total*(100 - per_billed)/100)
+		# 	from `tabSales Order`
+		# 	where customer=%s and docstatus = 1 and company=%s
+		# 	and per_billed < 100 and status != 'Closed'""", (customer, company),debug=True)
 		outstanding_based_on_so = frappe.db.sql("""
 			select sum(base_grand_total*(100 - per_billed)/100)
 			from `tabSales Order`
-			where customer=%s and docstatus = 1 and company=%s
-			and per_billed < 100 and status != 'Closed'""", (customer, company))
-
+			where customer=%s and docstatus = 1 
+			and per_billed < 100 and status != 'Closed'""", (customer),debug=True)
 		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
 	# Outstanding based on Delivery Note, which are not created against Sales Order
+	# unmarked_delivery_note_items = frappe.db.sql("""select
+	# 		dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
+	# 	from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
+	# 	where
+	# 		dn.name = dn_item.parent
+	# 		and dn.customer=%s and dn.company=%s
+	# 		and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
+	# 		and ifnull(dn_item.against_sales_order, '') = ''
+	# 		and ifnull(dn_item.against_sales_invoice, '') = ''
+	# 	""", (customer, company), as_dict=True)
 	unmarked_delivery_note_items = frappe.db.sql("""select
 			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where
 			dn.name = dn_item.parent
-			and dn.customer=%s and dn.company=%s
+			and dn.customer=%s 
 			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
 			and ifnull(dn_item.against_sales_order, '') = ''
 			and ifnull(dn_item.against_sales_invoice, '') = ''
-		""", (customer, company), as_dict=True)
-
+		""", (customer), as_dict=True)
 	outstanding_based_on_dn = 0.0
 
 	for dn_item in unmarked_delivery_note_items:
