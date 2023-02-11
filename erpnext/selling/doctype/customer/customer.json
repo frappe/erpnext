@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -13,6 +14,7 @@
   "naming_series",
   "customer_type",
   "customer_name",
+  "reference",
   "lead_name",
   "column_break0",
   "customer_group",
@@ -660,16 +662,25 @@
    "label": "Linked Supplier",
    "no_copy": 1,
    "options": "Supplier"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Reference"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2022-12-07 13:25:41.900571",
+ "links": [],
+ "modified": "2023-02-10 16:14:39.819201",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -768,11 +779,12 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory,mobile_no, mobile_no_2, phone_no, email_id, tax_id, tax_cnic, tax_strn",
+ "search_fields": "customer_name, reference, mobile_no, mobile_no_2, phone_no, email_id, tax_id, tax_cnic, tax_strn",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1
