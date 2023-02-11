@@ -323,7 +323,7 @@ class TransporterInvoice(AccountsController):
 			"party_check": 1,
 			"party_type": "Supplier",
 			"party": self.supplier,
-			"reference_type": "Transporter Invoice",
+			"reference_type": self.doctype,
 			"reference_name": self.name
 		})
 		je.append("accounts",{
