@@ -29,7 +29,7 @@ class PeriodClosingVoucher(AccountsController):
 				"In case there is any issue on processing in background, "
 				"the system will add a comment about the error on this Period Closing Voucher and revert to the Draft stage"
 			))
-			self.queue_action('submit')
+			self.queue_action('submit', timeout=600)
 		else:
 			self._submit()
 
