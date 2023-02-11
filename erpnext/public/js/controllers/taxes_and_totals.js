@@ -126,7 +126,16 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				frappe.model.round_floats_in(item);
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
-				item.net_amount = item.amount = flt(item.rate * item.qty, precision("amount", item));
+
+				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
+					item.net_amount = item.amount = flt(item.rate * item.qty, precision("amount", item));
+				}
+				else {
+					let qty = item.qty || 1;
+					qty = me.frm.doc.is_return ? -1 * qty : qty;
+					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
+				}
+
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 
