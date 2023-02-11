@@ -598,7 +598,7 @@ class PurchaseInvoice(BuyingController):
 
 	def make_supplier_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
-		# because rounded_total had value even before introcution of posting GLE based on rounded total
+		# because rounded_total had value even before introduction of posting GLE based on rounded total
 		grand_total = (
 			self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		)
@@ -799,10 +799,7 @@ class PurchaseInvoice(BuyingController):
 						else item.deferred_expense_account
 					)
 
-					if not item.is_fixed_asset:
-						dummy, amount = self.get_amount_and_base_amount(item, None)
-					else:
-						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
+					dummy, amount = self.get_amount_and_base_amount(item, None)
 
 					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
