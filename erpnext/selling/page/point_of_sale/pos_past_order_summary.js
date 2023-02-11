@@ -94,7 +94,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_item_html(doc, item_data) {
 		return `<div class="item-row-wrapper">
 					<div class="item-name">${item_data.item_name}</div>
-					<div class="item-qty">${item_data.qty || 0}</div>
+					<div class="item-qty">${item_data.qty || 0} ${item_data.uom}</div>
 					<div class="item-rate-disc">${get_rate_discount_html()}</div>
 				</div>`;
 
