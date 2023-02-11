@@ -221,34 +221,45 @@ frappe.ui.form.on('Asset', {
 			asset_values.push(flt(frm.doc.gross_purchase_amount) -
 				flt(frm.doc.opening_accumulated_depreciation));
 		}
+		if(frm.doc.calculate_depreciation) {
+			if (frm.doc.finance_books.length == 1) {
+				let depr_schedule = (await frappe.call(
+					"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule",
+					{
+						asset_name: frm.doc.name,
+						status: frm.doc.docstatus ? "Active" : "Draft",
+						finance_book: frm.doc.finance_books[0].finance_book || null
+					}
+				)).message;
 
-		let depr_schedule = [];
-
-		if (frm.doc.finance_books.length == 1) {
-			depr_schedule = (await frappe.call(
-				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule",
-				{
-					asset_name: frm.doc.name,
-					status: frm.doc.docstatus ? "Active" : "Draft",
-					finance_book: frm.doc.finance_books[0].finance_book || null
-				}
-			)).message;
-		}
-
-		$.each(depr_schedule || [], function(i, v) {
-			x_intervals.push(v.schedule_date);
-			var asset_value = flt(frm.doc.gross_purchase_amount) - flt(v.accumulated_depreciation_amount);
-			if(v.journal_entry) {
-				last_depreciation_date = v.schedule_date;
-				asset_values.push(asset_value);
-			} else {
-				if (in_list(["Scrapped", "Sold"], frm.doc.status)) {
-					asset_values.push(null);
-				} else {
-					asset_values.push(asset_value)
-				}
+				$.each(depr_schedule || [], function(i, v) {
+					x_intervals.push(v.schedule_date);
+					var asset_value = flt(frm.doc.gross_purchase_amount) - flt(v.accumulated_depreciation_amount);
+					if(v.journal_entry) {
+						last_depreciation_date = v.schedule_date;
+						asset_values.push(asset_value);
+					} else {
+						if (in_list(["Scrapped", "Sold"], frm.doc.status)) {
+							asset_values.push(null);
+						} else {
+							asset_values.push(asset_value)
+						}
+					}
+				});
 			}
-		});
+		} else {
+			let depr_entries = (await frappe.call({
+				method: "get_manual_depreciation_entries",
+				doc: frm.doc,
+			})).message;
+
+			$.each(depr_entries || [], function(i, v) {
+				x_intervals.push(v.posting_date);
+				last_depreciation_date = v.posting_date;
+				let last_asset_value = asset_values[asset_values.length - 1]
+				asset_values.push(last_asset_value - v.value);
+			});
+		}
 
 		if(in_list(["Scrapped", "Sold"], frm.doc.status)) {
 			x_intervals.push(frm.doc.disposal_date);

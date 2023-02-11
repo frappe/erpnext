@@ -509,9 +509,15 @@
    "group": "Depreciation",
    "link_doctype": "Asset Depreciation Schedule",
    "link_fieldname": "asset"
+  },
+  {
+   "group": "Journal Entry",
+   "link_doctype": "Journal Entry",
+   "link_fieldname": "reference_name",
+   "table_fieldname": "accounts"
   }
  ],
- "modified": "2023-01-17 00:25:30.387242",
+ "modified": "2023-02-02 00:03:11.706427",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
