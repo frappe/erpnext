@@ -36,7 +36,6 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_depr_schedule,
 	make_draft_asset_depr_schedules,
 	make_draft_asset_depr_schedules_if_not_present,
-	set_draft_asset_depr_schedule_details,
 	update_draft_asset_depr_schedules,
 )
 from erpnext.controllers.accounts_controller import AccountsController
@@ -240,17 +239,6 @@ class Asset(AccountsController):
 				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
 			)
 
-	def _get_value_after_depreciation(self, finance_book):
-		# value_after_depreciation - current Asset value
-		if self.docstatus == 1 and finance_book.value_after_depreciation:
-			value_after_depreciation = flt(finance_book.value_after_depreciation)
-		else:
-			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
-				self.opening_accumulated_depreciation
-			)
-
-		return value_after_depreciation
-
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
@@ -392,18 +380,23 @@ class Asset(AccountsController):
 			movement.cancel()
 
 	def delete_depreciation_entries(self):
-		for row in self.get("finance_books"):
-			depr_schedule = get_depr_schedule(self.name, "Active", row.finance_book)
+		if self.calculate_depreciation:
+			for row in self.get("finance_books"):
+				depr_schedule = get_depr_schedule(self.name, "Active", row.finance_book)
 
-			for d in depr_schedule or []:
-				if d.journal_entry:
-					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
-					d.db_set("journal_entry", None)
+				for d in depr_schedule or []:
+					if d.journal_entry:
+						frappe.get_doc("Journal Entry", d.journal_entry).cancel()
+		else:
+			depr_entries = self.get_manual_depreciation_entries()
 
-		self.db_set(
-			"value_after_depreciation",
-			(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)),
-		)
+			for depr_entry in depr_entries or []:
+				frappe.get_doc("Journal Entry", depr_entry.name).cancel()
+
+			self.db_set(
+				"value_after_depreciation",
+				(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)),
+			)
 
 	def set_status(self, status=None):
 		"""Get and update status"""
@@ -434,6 +427,28 @@ class Asset(AccountsController):
 			status = "Cancelled"
 		return status
 
+	def get_value_after_depreciation(self, finance_book=None):
+		if not self.calculate_depreciation:
+			return self.value_after_depreciation
+
+		if not finance_book:
+			return self.get("finance_books")[0].value_after_depreciation
+
+		for row in self.get("finance_books"):
+			if finance_book == row.finance_book:
+				return row.value_after_depreciation
+
+	def _get_value_after_depreciation_for_making_schedule(self, fb_row):
+		# value_after_depreciation - current Asset value
+		if self.docstatus == 1 and fb_row.value_after_depreciation:
+			value_after_depreciation = flt(fb_row.value_after_depreciation)
+		else:
+			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
+				self.opening_accumulated_depreciation
+			)
+
+		return value_after_depreciation
+
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
 			self.default_finance_book = erpnext.get_default_finance_book(self.company)
@@ -442,6 +457,43 @@ class Asset(AccountsController):
 			for d in self.get("finance_books"):
 				if d.finance_book == self.default_finance_book:
 					return cint(d.idx) - 1
+
+	@frappe.whitelist()
+	def get_manual_depreciation_entries(self):
+		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
+
+		gle = frappe.qb.DocType("GL Entry")
+
+		records = (
+			frappe.qb.from_(gle)
+			.select(gle.voucher_no.as_("name"), gle.debit.as_("value"), gle.posting_date)
+			.where(gle.against_voucher == self.name)
+			.where(gle.account == depreciation_expense_account)
+			.where(gle.debit != 0)
+			.where(gle.is_cancelled == 0)
+			.orderby(gle.posting_date)
+		).run(as_dict=True)
+
+		return records
+
+	@erpnext.allow_regional
+	def get_depreciation_amount(self, depreciable_value, fb_row):
+		if fb_row.depreciation_method in ("Straight Line", "Manual"):
+			# if the Depreciation Schedule is being prepared for the first time
+			if not self.flags.increase_in_asset_life:
+				depreciation_amount = (
+					flt(self.gross_purchase_amount) - flt(fb_row.expected_value_after_useful_life)
+				) / flt(fb_row.total_number_of_depreciations)
+
+			# if the Depreciation Schedule is being modified after Asset Repair
+			else:
+				depreciation_amount = (
+					flt(fb_row.value_after_depreciation) - flt(fb_row.expected_value_after_useful_life)
+				) / (date_diff(self.to_date, self.available_for_use_date) / 365)
+		else:
+			depreciation_amount = flt(depreciable_value * (flt(fb_row.rate_of_depreciation) / 100))
+
+		return depreciation_amount
 
 	def validate_make_gl_entry(self):
 		purchase_document = self.get_purchase_document()
@@ -603,7 +655,6 @@ def update_maintenance_status():
 
 
 def make_post_gl_entry():
-
 	asset_categories = frappe.db.get_all("Asset Category", fields=["name", "enable_cwip_accounting"])
 
 	for asset_category in asset_categories:
@@ -756,7 +807,7 @@ def make_journal_entry(asset_name):
 		depreciation_expense_account,
 	) = get_depreciation_accounts(asset)
 
-	depreciation_cost_center, depreciation_series = frappe.db.get_value(
+	depreciation_cost_center, depreciation_series = frappe.get_cached_value(
 		"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
 	)
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
@@ -819,6 +870,13 @@ def make_asset_movement(assets, purpose=None):
 
 def is_cwip_accounting_enabled(asset_category):
 	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
+
+
+@frappe.whitelist()
+def get_asset_value_after_depreciation(asset_name, finance_book=None):
+	asset = frappe.get_doc("Asset", asset_name)
+
+	return asset.get_value_after_depreciation(finance_book)
 
 
 def get_total_days(date, frequency):
@@ -886,7 +944,7 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 		)
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
-		set_draft_asset_depr_schedule_details(new_asset_depr_schedule_doc, asset, row)
+		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(asset, row)
 
 		accumulated_depreciation = 0
 
@@ -938,7 +996,7 @@ def create_new_asset_after_split(asset, split_qty):
 		)
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
-		set_draft_asset_depr_schedule_details(new_asset_depr_schedule_doc, new_asset, row)
+		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(new_asset, row)
 
 		accumulated_depreciation = 0
 
