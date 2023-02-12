@@ -335,16 +335,11 @@ def install(country=None):
 	make_default_records()
 	make_records(records)
 	set_up_address_templates(default_country=country)
-	set_more_defaults()
-	update_global_search_doctypes()
-
-
-def set_more_defaults():
-	# Do more setup stuff that can be done here with no dependencies
 	update_selling_defaults()
 	update_buying_defaults()
 	add_uom_data()
 	update_item_variant_settings()
+	update_global_search_doctypes()
 
 
 def update_selling_defaults():
@@ -381,7 +376,7 @@ def add_uom_data():
 	)
 	for d in uoms:
 		if not frappe.db.exists("UOM", _(d.get("uom_name"))):
-			uom_doc = frappe.get_doc(
+			frappe.get_doc(
 				{
 					"doctype": "UOM",
 					"uom_name": _(d.get("uom_name")),
@@ -404,7 +399,7 @@ def add_uom_data():
 		if not frappe.db.exists(
 			"UOM Conversion Factor", {"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))}
 		):
-			uom_conversion = frappe.get_doc(
+			frappe.get_doc(
 				{
 					"doctype": "UOM Conversion Factor",
 					"category": _(d.get("category")),
@@ -412,7 +407,7 @@ def add_uom_data():
 					"to_uom": _(d.get("to_uom")),
 					"value": d.get("value"),
 				}
-			).insert(ignore_permissions=True)
+			).db_insert()
 
 
 def add_market_segments():
@@ -468,7 +463,7 @@ def install_company(args):
 	make_records(records)
 
 
-def install_defaults(args=None):
+def install_defaults(args=None):  # nosemgrep
 	records = [
 		# Price Lists
 		{
@@ -493,7 +488,7 @@ def install_defaults(args=None):
 
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
-	frappe.db.set_value("Stock Settings", None, "email_footer_address", args.get("company_name"))
+	frappe.db.set_single_value("Stock Settings", "email_footer_address", args.get("company_name"))
 
 	set_global_defaults(args)
 	update_stock_settings()
