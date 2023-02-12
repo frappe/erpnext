@@ -144,8 +144,8 @@ class TestQuotation(FrappeTestCase):
 	def test_so_from_expired_quotation(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
-		frappe.db.set_value(
-			"Selling Settings", None, "allow_sales_order_creation_for_expired_quotation", 0
+		frappe.db.set_single_value(
+			"Selling Settings", "allow_sales_order_creation_for_expired_quotation", 0
 		)
 
 		quotation = frappe.copy_doc(test_records[0])
@@ -155,8 +155,8 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 
-		frappe.db.set_value(
-			"Selling Settings", None, "allow_sales_order_creation_for_expired_quotation", 1
+		frappe.db.set_single_value(
+			"Selling Settings", "allow_sales_order_creation_for_expired_quotation", 1
 		)
 
 		make_sales_order(quotation.name)
