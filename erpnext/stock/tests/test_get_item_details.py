@@ -41,7 +41,7 @@ class TestGetItemDetail(FrappeTestCase):
 				"conversion_rate": 1.0,
 				"buying_price_list": "_Test Buying Price List",
 				"is_subcontracted": 0,
-				"ignore_pricing_rule": 0,
+				"ignore_pricing_rule": 1,
 			}
 		)
 		details = get_item_details(args)
