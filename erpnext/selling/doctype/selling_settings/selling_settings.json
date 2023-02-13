@@ -32,7 +32,8 @@
   "sales_update_frequency",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "hide_tax_id"
+  "hide_tax_id",
+  "allow_sales_order_creation_for_expired_quotation"
  ],
  "fields": [
   {
@@ -199,6 +200,12 @@
    "fieldtype": "Select",
    "label": "Contract Naming By",
    "options": "Party Name\nNaming Series"
+  },
+  {
+    "default": "0",
+    "fieldname": "allow_sales_order_creation_for_expired_quotation",
+    "fieldtype": "Check",
+    "label": "Allow Sales Order Creation For Expired Quotation"
   }
  ],
  "icon": "fa fa-cog",
@@ -206,7 +213,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-03-28 12:18:06.768403",
+ "modified": "2023-02-04 12:37:53.380857",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
