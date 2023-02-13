@@ -16,6 +16,11 @@ frappe.ui.form.on('EME Invoice Entry', {
 				frm.events.post_to_account(frm)
 			},__("Create"))
 		}
+		if (frm.doc.docstatus == 0){
+			frm.add_custom_button(__('Get Supplier'),(doc)=>{
+				fetch_supplier(frm)
+			}).addClass("btn-primary")
+		}
 	},
 	setup: (frm) => {
 		if( frm.doc.__islocal===1 ){
@@ -40,9 +45,9 @@ frappe.ui.form.on('EME Invoice Entry', {
 			}
 		});
 	},
-	get_supplier: function(frm) {
-		fetch_supplier(frm)
-	},
+	// get_supplier: function(frm) {
+	// 	fetch_supplier(frm)
+	// },
 	from_date:function(frm){
 		frm.events.clear_child_table(frm)
 	},

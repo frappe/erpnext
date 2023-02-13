@@ -140,7 +140,7 @@ class EMEInvoice(AccountsController):
 	def deduction_gl_entries(self,gl_entries):
 		for d in self.deduct_items:
 			party_type = party = ''
-			if  get_account_type( d.account, self.company) in ["Receivable","Payable"]:
+			if  get_account_type( d.account, self.company) in ["Receivable","Payable","Expense Account","Income Account"]:
 				party_type = "Supplier"
 				party = self.supplier
 			gl_entries.append(
@@ -160,7 +160,7 @@ class EMEInvoice(AccountsController):
 	def make_item_gl_entries(self, gl_entries):
 		for item in self.items:
 			party_type = party = ''
-			if  get_account_type( item.expense_account, self.company) in ["Receivable","Payable"]:
+			if  get_account_type( item.expense_account, self.company) in ["Receivable","Payable","Expense Account","Income Account"]:
 				party_type = "Supplier"
 				party = self.supplier
 
@@ -181,7 +181,7 @@ class EMEInvoice(AccountsController):
 	def make_tds_gl_entries(self,gl_entries):
 		if flt(self.tds_amount)> 0:
 			party_type = party = ''
-			if  get_account_type(self.tds_account, self.company) in ["Receivable","Payable"]:
+			if  get_account_type(self.tds_account, self.company) in ["Receivable","Payable","Expense Account","Income Account"]:
 				party_type = "Supplier"
 				party = self.supplier
 
@@ -295,6 +295,8 @@ class EMEInvoice(AccountsController):
 			"company": self.company,
 			"total_amount_in_words": money_in_words(self.payable_amount),
 			"branch": self.branch,
+			"reference_type":self.doctype,
+			"referece_doctype":self.name,
 		})
 		je.append("accounts",{
 			"account": credit_account,

@@ -899,13 +899,17 @@ class JournalEntry(AccountsController):
 
 							tax_amount_dr = tax_amount if flt(d.credit) else 0
 							tax_amount_cr = tax_amount if flt(d.debit) else 0
+					party_type = party = ''
+					if  get_account_type( acc, self.company) in ["Receivable","Payable","Expense Account","Income Account"]:
+						party_type = d.party_type
+						party = d.party
 					gl_map.append(
 						self.get_gl_dict(
 							{
 								"account": acc,
-								"party_type": d.party_type,
+								"party_type": party_type,
 								"due_date": self.due_date,
-								"party": d.party,
+								"party": party,
 								"against": d.against_account,
 								"debit": flt(abs(tax_amount_dr), d.precision("tax_amount")) if tax_account \
 									else flt(d.debit, d.precision("debit")),

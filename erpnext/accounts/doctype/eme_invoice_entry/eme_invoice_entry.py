@@ -27,7 +27,7 @@ class EMEInvoiceEntry(Document):
 				"eme_invoice_entry":self.name,
 				"branch":self.branch,
 				"cost_center":self.cost_center,
-				"posting_date":nowdate(),
+				"posting_date":self.posting_date,
 				"from_date":self.from_date,
 				"to_date":self.to_date,
 				"tds_percent":self.tds_percent,
@@ -58,7 +58,7 @@ class EMEInvoiceEntry(Document):
 						`tabEquipment Hiring Form` ehf
 					where 
 					'{0}' between start_date and end_date
-					and '{1}' between start_date and end_date
+					and '{1}' between start_date and end_date 
 					and docstatus = 1
 					and cost_center = '{2}'
 					and exists(select 1 from `tabSupplier` where name = ehf.supplier and supplier_group = '{3}')
@@ -80,7 +80,8 @@ class EMEInvoiceEntry(Document):
 			eme_invoice = frappe.get_doc("EME Invoice",e.eme_invoice)
 			if eme_invoice.docstatus != 1:
 				frappe.throw(_("EME Invoice is not submitted {}".format(frappe.get_desk_link("EME Invoice", eme_invoice.name))))
-		frappe.enqueue(post_accounting_entries, doc = self, timeout=600)
+		# frappe.enqueue(post_accounting_entries, doc = self, timeout=600)
+		post_accounting_entries(doc = self)
 
 @frappe.whitelist()
 def post_accounting_entries(doc,  publish_progress = True):
@@ -113,10 +114,10 @@ def post_accounting_entries(doc,  publish_progress = True):
 		"company":doc.company,
 		"branch": doc.branch,
 	})
-	for e in doc.successful_transaction:
+	for e in frappe.db.sql("select name as reference from `tabEME Invoice` where docstatus = 0 and workflow_state = 'Approved' and eme_invoice_entry = '{}'".format(doc.name)):
 		if e.eme_invoice:
 			error = None
-			eme_invoice = frappe.get_doc("EME Invoice",e.eme_invoice)
+			eme_invoice = frappe.get_doc("EME Invoice",e.reference)
 			credit_account = eme_invoice.credit_account
 			if not credit_account:
 				credit_account = get_party_account("Supplier", eme_invoice.supplier, eme_invoice.company)
@@ -134,8 +135,8 @@ def post_accounting_entries(doc,  publish_progress = True):
 				payable_amount += flt(eme_invoice.payable_amount,2)
 				#Set a reference to the claim journal entry
 				successful += 1
-			except Exception as e:
-				error = str(e)
+			except Exception as er:
+				error = str(er)
 				failed += 1
 			if error:
 				doc.append("failed_transaction",{

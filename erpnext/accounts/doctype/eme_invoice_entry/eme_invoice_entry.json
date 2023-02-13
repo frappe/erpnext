@@ -23,7 +23,6 @@
   "tds_account",
   "payable_amount",
   "section_break_10",
-  "get_supplier",
   "items",
   "deductions",
   "section_break_19",
@@ -109,11 +108,6 @@
    "fieldtype": "Table",
    "label": "Owners & Equipments",
    "options": "EME Invoice Entry Item"
-  },
-  {
-   "fieldname": "get_supplier",
-   "fieldtype": "Button",
-   "label": "Get Supplier"
   },
   {
    "default": "Today",
@@ -250,7 +244,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-18 11:31:49.212604",
+ "modified": "2023-02-13 14:43:59.223490",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice Entry",
