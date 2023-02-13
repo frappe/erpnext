@@ -174,6 +174,6 @@ def get_next_cheque_number(doc,count):
 				FOR UPDATE
 			""".format(doc.company_bank_account,count))
 			if not cheque_no:				
-				frappe.throw("No Check Book Avaiable for this Bank"+doc.company_bank_account)
+				frappe.throw("No Checque Book Avaiable for this Bank "+doc.company_bank_account)
 			else:
 				return cheque_no
