@@ -111,6 +111,7 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 
 		const dialog = new frappe.ui.Dialog({
 			title: __('Submit Remarks'),
+			doc: {},
 			fields: [
 				{
 					fieldname: "remarks",
@@ -157,31 +158,31 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 					options: 'Lost Reason Detail',
 				},
 			],
-			doc: {},
-			primary_action: () => {
+			primary_action: (dialog_data) => {
 				this.datatable.cellmanager.deactivateEditing(false);
 				dialog.hide();
 
-				const dialog_data = dialog.get_values();
-
 				return frappe.call({
-					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
+					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication_with_action",
 					args: {
-						remarks: dialog.get_value("remarks"),
+						remarks: dialog_data.remarks,
+						action: dialog_data.action,
+						follow_up_date: dialog_data.schedule_date,
+						lost_reason: dialog_data.lost_reason,
 						opportunity: row_data.opportunity,
 						maintenance_schedule: row_data.schedule,
 						maintenance_schedule_row: row_data.schedule_row,
-						contact_date: frappe.datetime.get_today()
 					},
 					callback: function(r) {
-						if (cstr(row_data['remarks']) === cstr(dialog_data['remarks'])) {
-							return
-						}
-
 						frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = r.message.contact_date;
 						frappe.query_report.datatable.datamanager.data[rowIndex].remarks = r.message.remarks;
 						frappe.query_report.datatable.datamanager.data[rowIndex].opportunity = r.message.opportunity;
 						erpnext.utils.query_report_local_refresh();
+
+						if (r.message.appointment_doc) {
+							frappe.model.sync(r.message.appointment_doc);
+							frappe.set_route("Form", r.message.appointment_doc.doctype, r.message.appointment_doc.name);
+						}
 					},
 					error: function() {
 						erpnext.utils.query_report_local_refresh();
