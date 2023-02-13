@@ -263,7 +263,7 @@ class MaterialRequest(BuyingController):
 				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
 					d.ordered_qty = flt(
 						frappe.db.sql(
-							"""select sum(transferred_qty)
+							"""select sum(transfer_qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 							(self.name, d.name),
@@ -350,7 +350,6 @@ def update_completed_and_requested_qty(stock_entry, method):
 		for d in stock_entry.get("items"):
 			if d.material_request:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
-
 		for mr, mr_item_rows in material_request_map.items():
 			if mr and mr_item_rows:
 				mr_obj = frappe.get_doc("Material Request", mr)
