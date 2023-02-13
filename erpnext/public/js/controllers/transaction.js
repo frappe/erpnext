@@ -118,6 +118,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, 'items');
 			}
 		});
+		
+		frappe.ui.form.on(this.frm.doctype + " Item", {
+			items_remove: function(frm, cdt, cdn) {
+				cur_frm.cscript.calculate_taxes_and_totals()
+			}
+		});
 
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
