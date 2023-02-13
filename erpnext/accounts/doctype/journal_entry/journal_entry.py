@@ -336,6 +336,8 @@ class JournalEntry(AccountsController):
 							finance_books.db_update()
 
 							asset.set_status()
+
+							break
 				else:
 					depr_value = d.debit or d.credit
 
