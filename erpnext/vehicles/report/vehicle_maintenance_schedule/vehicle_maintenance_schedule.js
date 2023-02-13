@@ -100,31 +100,112 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 		},
 	],
 
-	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "remarks") {
-			if (cstr(data['remarks']) === cstr(new_value)) {
-				return
-			}
-
-			return frappe.call({
-				method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
-				args: {
-					remarks: new_value,
-					opportunity: data.opportunity,
-					maintenance_schedule: data.schedule,
-					maintenance_schedule_row: data.schedule_row,
-					contact_date: frappe.datetime.get_today()
-				},
-				callback: function(r) {
-					frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = r.message.contact_date;
-					frappe.query_report.datatable.datamanager.data[rowIndex].remarks = r.message.remarks;
-					frappe.query_report.datatable.datamanager.data[rowIndex].opportunity = r.message.opportunity;
-					erpnext.utils.query_report_local_refresh()
-				},
-				error: function() {
-					erpnext.utils.query_report_local_refresh()
-				},
-			});
+	prepare_column: function (column) {
+		if (column && column.fieldname == "remarks") {
+			column.custom_editor = frappe.query_reports["Vehicle Maintenance Schedule"].get_remarks_editor;
 		}
 	},
+
+	get_remarks_editor: function (column, current_value, rowIndex) {
+		const row_data = this.datatable.datamanager.getData(rowIndex);
+
+		const dialog = new frappe.ui.Dialog({
+			title: __('Submit Remarks'),
+			fields: [
+				{
+					fieldname: "remarks",
+					fieldtype: "Small Text",
+					label: __("Remarks"),
+					reqd: 1
+				},
+				{
+					fieldname: "action",
+					fieldtype: "Select",
+					label: __("Action"),
+					reqd: 1,
+					options: ["", "Schedule Follow Up", "Set As Lost", "Create Appointment"],
+				},
+				{fieldtype: "Section Break", depends_on: "eval:doc.action == 'Schedule Follow Up'"},
+				{
+					label : "Follow Up in Days",
+					fieldname: "follow_up_days",
+					fieldtype: "Int",
+					default: 0,
+					onchange: () => {
+						let today = frappe.datetime.nowdate();
+						let contact_date = frappe.datetime.add_days(today, dialog.get_value('follow_up_days'));
+						dialog.set_value('schedule_date', contact_date);
+					}
+				},
+				{fieldtype: "Column Break"},
+				{
+					label : "Schedule Date",
+					fieldname: "schedule_date",
+					fieldtype: "Date",
+					onchange: () => {
+						var today = frappe.datetime.get_today();
+						var schedule_date = dialog.get_value('schedule_date');
+						dialog.doc.follow_up_days = frappe.datetime.get_diff(schedule_date, today);
+						dialog.get_field('follow_up_days').refresh();
+					}
+				},
+				{fieldtype: "Section Break", depends_on: "eval:doc.action == 'Set As Lost'"},
+				{
+					fieldtype: "Table MultiSelect",
+					label: __("Lost Reasons"),
+					fieldname: "lost_reason",
+					options: 'Lost Reason Detail',
+				},
+			],
+			doc: {},
+			primary_action: () => {
+				this.datatable.cellmanager.deactivateEditing(false);
+				dialog.hide();
+
+				const dialog_data = dialog.get_values();
+
+				return frappe.call({
+					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
+					args: {
+						remarks: dialog.get_value("remarks"),
+						opportunity: row_data.opportunity,
+						maintenance_schedule: row_data.schedule,
+						maintenance_schedule_row: row_data.schedule_row,
+						contact_date: frappe.datetime.get_today()
+					},
+					callback: function(r) {
+						if (cstr(row_data['remarks']) === cstr(dialog_data['remarks'])) {
+							return
+						}
+
+						frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = r.message.contact_date;
+						frappe.query_report.datatable.datamanager.data[rowIndex].remarks = r.message.remarks;
+						frappe.query_report.datatable.datamanager.data[rowIndex].opportunity = r.message.opportunity;
+						erpnext.utils.query_report_local_refresh();
+					},
+					error: function() {
+						erpnext.utils.query_report_local_refresh();
+					},
+				});
+			},
+			secondary_action: () => {
+				this.datatable.cellmanager.deactivateEditing(false);
+			}
+		});
+		dialog.show();
+	},
+
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (column.fieldname == "contact_date") {
+			style['font-weight'] = 'bold';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
+
+	onload: function () {
+		frappe.model.with_doctype("Lost Reason Detail");
+	}
 };
