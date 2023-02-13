@@ -378,10 +378,10 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		from `tabGL Entry` where party_type = 'Customer'
 		and party = %s  {0}""".format(cond), (customer))
 
-	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
+		outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
 	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0.0
+		outstanding_based_on_so = 0.0
 
 	# if credit limit check is bypassed at sales order level,
 	# we should not consider outstanding Sales Orders, when customer credit balance report is run
