@@ -77,7 +77,8 @@ class POLExpense(AccountsController):
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
 					"voucher_type":self.doctype,
-					"voucher_no":self.name
+					"voucher_no":self.name,
+					"posting_date":self.entry_date
 				}, self.currency))
 	def make_expense_gl_entry(self, gl_entries):
 		if flt(self.amount) > 0:
@@ -93,7 +94,8 @@ class POLExpense(AccountsController):
 						"against_voucher_type": self.doctype,
 						"cost_center": self.cost_center,
 						"voucher_type":self.doctype,
-						"voucher_no":self.name
+						"voucher_no":self.name,
+						"posting_date":self.entry_date
 					}, self.currency))
 
 	def calculate_pol(self):
