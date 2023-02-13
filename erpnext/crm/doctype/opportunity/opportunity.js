@@ -421,7 +421,6 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 						opportunity: me.frm.doc.name,
 						contact_date: data.contact_date,
 						remarks: data.remarks,
-						submit_follow_up: 1,
 					},
 					callback: function (r) {
 						if (!r.exc) {

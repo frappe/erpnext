@@ -175,6 +175,29 @@ class Opportunity(TransactionBase):
 
 		return getdate(next_follow_up.schedule_date) if next_follow_up else None
 
+	def add_next_follow_up(self, schedule_date, to_discuss=None):
+		schedule_date = getdate(schedule_date)
+
+		dup = [d for d in self.get('contact_schedule') if getdate(d.get('schedule_date')) == schedule_date]
+
+		if dup:
+			dup = dup[0]
+			if (dup.to_discuss and to_discuss != dup.to_discuss) or (not dup.to_discuss and not to_discuss):
+				frappe.throw(_("Row #{0}: Follow Up already scheduled for {1}".format(dup.idx, frappe.format(dup.schedule_date))))
+			else:
+				dup.to_discuss = to_discuss
+		else:
+			self.append('contact_schedule', {
+				'schedule_date': schedule_date,
+				'to_discuss': to_discuss
+			})
+
+	def set_follow_up_contact_date(self, contact_date):
+		follow_up = [f for f in self.get("contact_schedule") if not f.contact_date]
+		if follow_up:
+			follow_up[0].contact_date = getdate(contact_date)
+			return follow_up[0]
+
 	def get_sms_args(self, notification_type=None):
 		return frappe._dict({
 			'receiver_list': [self.contact_mobile or self.contact_phone],
@@ -645,36 +668,21 @@ def schedule_follow_up(name, schedule_date, to_discuss=None):
 		frappe.throw(_("Schedule Date is mandatory"))
 
 	schedule_date = getdate(schedule_date)
-
 	if schedule_date < getdate():
 		frappe.throw(_("Can't schedule a follow up for past dates"))
 
 	opp = frappe.get_doc("Opportunity", name)
-	dup = [d for d in opp.get('contact_schedule') if d.get('schedule_date') == schedule_date]
-
-	if dup:
-		dup = dup[0]
-		if (dup.to_discuss and to_discuss != dup.to_discuss) or (not dup.to_discuss and not to_discuss):
-			frappe.throw(_("Row #{0}: Follow Up already scheduled for {1}".format(dup.idx, frappe.format(dup.schedule_date))))
-		else:
-			dup.to_discuss = to_discuss
-	else:
-		opp.append('contact_schedule', {
-			'schedule_date': schedule_date,
-			'to_discuss': to_discuss
-		})
-
+	opp.add_next_follow_up(schedule_date, to_discuss)
 	opp.save()
 
 
 @frappe.whitelist()
-def submit_communication(opportunity, contact_date, remarks, submit_follow_up=False,
+def submit_communication_with_action(remarks, action, opportunity=None, follow_up_date=None, lost_reason=None,
 		maintenance_schedule=None, maintenance_schedule_row=None):
-	if not remarks:
-		frappe.throw(_('Remarks are mandatory for Communication'))
-
+	contact_date = getdate()
 	remarks = clean_whitespace(remarks)
 
+	# Get Opportunity
 	if frappe.db.exists('Opportunity', opportunity):
 		opp = frappe.get_doc('Opportunity', opportunity)
 	elif maintenance_schedule and maintenance_schedule_row:
@@ -682,14 +690,57 @@ def submit_communication(opportunity, contact_date, remarks, submit_follow_up=Fa
 	else:
 		frappe.throw(_('Opportunity/Maintenance Schedule not provided'))
 
-	if cint(submit_follow_up):
-		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
-		if follow_up:
-			follow_up[0].contact_date = getdate(contact_date)
+	if opp.status in ['Lost', 'Converted']:
+		frappe.throw(_("Opportunity is already {0}").format(opp.status))
 
-	if opp.is_new() or cint(submit_follow_up):
-		opp.flags.ignore_mandatory = True
-		opp.save()
+	opp.set_follow_up_contact_date(contact_date)
+
+	out = {
+		"opportunity": opp.name,
+		"contact_date": contact_date,
+		"remarks": remarks
+	}
+
+	if action == "Schedule Follow Up":
+		follow_up_date = getdate(follow_up_date)
+		opp.add_next_follow_up(follow_up_date, to_discuss=remarks)
+
+	opp.flags.ignore_mandatory = True
+	opp.save()
+
+	if action == "Set As Lost":
+		lost_reason_list = json.loads(lost_reason or "[]")
+		opp.set_is_lost(True, lost_reasons_list=lost_reason_list, detailed_reason=remarks)
+
+	elif action == "Create Appointment":
+		appointment_doc = make_appointment(opportunity)
+		out['appointment_doc'] = appointment_doc
+
+	submit_communication(opportunity, contact_date, remarks, update_follow_up=False)
+
+	return out
+
+
+@frappe.whitelist()
+def submit_communication(opportunity, contact_date, remarks, update_follow_up=True):
+	from frappe.model.document import Document
+
+	if not remarks:
+		frappe.throw(_('Remarks are mandatory for Communication'))
+
+	remarks = clean_whitespace(remarks)
+
+	if not opportunity:
+		frappe.throw(_('Opportunity not provided'))
+
+	if isinstance(opportunity, Document):
+		opp = opportunity
+	else:
+		opp = frappe.get_doc("Opportunity", opportunity)
+
+	if cint(update_follow_up):
+		if opp.set_follow_up_contact_date(contact_date):
+			opp.save()
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
@@ -709,11 +760,6 @@ def submit_communication(opportunity, contact_date, remarks, submit_follow_up=Fa
 
 	comm.insert(ignore_permissions=True)
 
-	return {
-		"opportunity": opp.name,
-		"contact_date": contact_date,
-		"remarks": remarks
-	}
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
