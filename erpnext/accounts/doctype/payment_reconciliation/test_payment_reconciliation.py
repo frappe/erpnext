@@ -473,6 +473,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		invoices = [x.as_dict() for x in pr.get("invoices")]
 		payments = [x.as_dict() for x in pr.get("payments")]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Cr Note and Invoice are of the same currency. There shouldn't any difference amount.
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
 		pr.reconcile()
 
 		pr.get_unreconciled_entries()
@@ -506,6 +511,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		payments = [x.as_dict() for x in pr.get("payments")]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
 		pr.allocation[0].allocated_amount = allocated_amount
+
+		# Cr Note and Invoice are of the same currency. There shouldn't any difference amount.
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
 		pr.reconcile()
 
 		# assert outstanding
