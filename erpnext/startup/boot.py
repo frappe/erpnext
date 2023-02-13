@@ -25,6 +25,12 @@ def boot_session(bootinfo):
 			frappe.db.get_single_value("CRM Settings", "default_valid_till")
 		)
 
+		bootinfo.sysdefaults.allow_sales_order_creation_for_expired_quotation = cint(
+			frappe.db.get_single_value(
+				"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
+			)
+		)
+
 		# if no company, show a dialog box to create a new company
 		bootinfo.customer_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")[0][0]
 
