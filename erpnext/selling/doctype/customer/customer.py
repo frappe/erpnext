@@ -360,7 +360,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
-
+	outstanding_based_on_gle=0.0
 	cond = ""
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center",
