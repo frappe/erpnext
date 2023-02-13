@@ -1172,6 +1172,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						frappe.model.set_value(cdt, cdn, 'conversion_factor', r.message.conversion_factor);
+						// reset discount applied on uom change
+						frappe.model.set_value(cdt, cdn, 'discount_percentage', 0.0);
+						frappe.model.set_value(cdt, cdn, 'discount_amount', 0.0);
 					}
 				}
 			});
