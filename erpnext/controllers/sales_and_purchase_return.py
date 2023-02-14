@@ -252,6 +252,7 @@ def get_already_returned_items(doc):
 			child.parent = par.name and par.docstatus = 1
 			and par.is_return = 1 and par.return_against = %s
 		group by item_code
+		for update
 	""".format(
 			column, doc.doctype, doc.doctype
 		),

@@ -40,7 +40,7 @@ class Dunning(AccountsController):
 
 	def on_cancel(self):
 		if self.dunning_amount:
-			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def make_gl_entries(self):

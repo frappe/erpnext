@@ -31,7 +31,7 @@
  "icon": "fa fa-bookmark",
  "idx": 1,
  "links": [],
- "modified": "2022-06-28 17:10:26.853753",
+ "modified": "2023-02-10 01:53:41.319386",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Designation",
@@ -58,5 +58,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
- "states": []
+ "states": [],
+ "translated_doctype": 1
 }
