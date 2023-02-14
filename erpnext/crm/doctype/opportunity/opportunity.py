@@ -696,28 +696,30 @@ def submit_communication_with_action(remarks, action, opportunity=None, follow_u
 
 	opp.set_follow_up_contact_date(contact_date)
 
-	out = {
-		"opportunity": opp.name,
-		"contact_date": contact_date,
-		"remarks": remarks
-	}
-
 	if action == "Schedule Follow Up":
 		follow_up_date = getdate(follow_up_date)
 		opp.add_next_follow_up(follow_up_date, to_discuss=remarks)
 
 	opp.flags.ignore_mandatory = True
 	opp.save()
+	opportunity = opp.name
 
-	if action == "Set As Lost":
+	out = frappe._dict({
+		"opportunity": opp.name,
+	})
+
+	if action == "Mark As Lost":
 		lost_reason_list = json.loads(lost_reason or "[]")
 		opp.set_is_lost(True, lost_reasons_list=lost_reason_list, detailed_reason=remarks)
 
+	elif action == "Mark As Closed":
+		opp.set_status(status="Closed", update=True)
+
 	elif action == "Create Appointment":
-		appointment_doc = make_appointment(opportunity)
+		appointment_doc = make_appointment(opp.name)
 		out['appointment_doc'] = appointment_doc
 
-	submit_communication(opportunity, contact_date, remarks, update_follow_up=False)
+	submit_communication(opp.name, contact_date, remarks, update_follow_up=False)
 
 	return out
 
