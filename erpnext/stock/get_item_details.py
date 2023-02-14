@@ -88,7 +88,14 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
+	# Never try to find a customer price if customer is set in these Doctype
+	current_customer = args.customer
+	if args.get("doctype") in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+		args.customer = None
+
 	out.update(get_price_list_rate(args, item))
+
+	args.customer = current_customer
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
