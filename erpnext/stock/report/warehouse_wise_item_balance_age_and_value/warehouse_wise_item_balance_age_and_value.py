@@ -62,7 +62,7 @@ def execute(filters=None):
 			continue
 
 		total_stock_value = sum(item_value[(item, item_group)])
-		row = [item, item_group, total_stock_value]
+		row = [item, item_map[item]["item_name"], item_group, total_stock_value]
 
 		fifo_queue = item_ageing[item]["fifo_queue"]
 		average_age = 0.00
@@ -89,10 +89,11 @@ def get_columns(filters):
 	"""return columns"""
 
 	columns = [
-		_("Item") + ":Link/Item:180",
-		_("Item Group") + "::100",
-		_("Value") + ":Currency:100",
-		_("Age") + ":Float:60",
+		_("Item") + ":Link/Item:150",
+		_("Item Name") + ":Link/Item:150",
+		_("Item Group") + "::120",
+		_("Value") + ":Currency:120",
+		_("Age") + ":Float:120",
 	]
 	return columns
 
@@ -132,7 +133,7 @@ def get_warehouse_list(filters):
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-		columns += [_("Total Qty") + ":Int:50"]
+		columns += [_("Total Qty") + ":Int:120"]
 
 	for wh in warehouse_list:
-		columns += [_(wh.name) + ":Int:54"]
+		columns += [_(wh.name) + ":Int:100"]
