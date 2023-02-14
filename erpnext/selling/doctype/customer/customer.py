@@ -758,26 +758,6 @@ def contact_person(**args):
 	contact_person_detail.insert(ignore_mandatory=True, ignore_permissions = True)
 
 @frappe.whitelist()
-def create_address(**args):
-  if frappe.db.exists({"doctype": "Address", "address_title": args.get("customer_name")}):
-      pass
-  else:
-      frappe.msgprint("hell")
-      address_data = frappe.new_doc("Address")
-      address_data.address_title = args.get("customer_name")
-      address_data.address_line1 = args.get("address_line1")
-      address_data.address_line2 = args.get("address_line2")
-      address_data.city = args.get("city")
-      address_data.state = args.get("state")
-      address_data.pincode = args.get("pincode")
-      address_data.country = args.get("country")
-      address_data.phone = args.get("phone")
-      address_data.address_type = "Company"
-      address_data.append("links", {"link_doctype": "Customer", "link_name": args.get("customer_name")})
-      address_data.insert(ignore_mandatory=True)
-
-
-@frappe.whitelist()
 def last_document():
 	doc1=frappe.get_last_doc("Customer Contact Person")
 	return doc1.name

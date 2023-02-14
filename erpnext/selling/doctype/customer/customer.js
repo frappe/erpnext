@@ -208,21 +208,6 @@ frappe.ui.form.on("Customer", {
 
 frappe.ui.form.on('Customer',  {
 	after_save : function(frm) {
-		frappe.call({
-			async:false,
-			method:"erpnext.selling.doctype.customer.customer.create_address",
-			args: {
-				customer_name: frm.doc.customer_name,
-				phone: frm.doc.landline,
-				country: frm.doc.country,
-				city: frm.doc.city,    
-				state: frm.doc.state,
-				pincode: frm.doc.pincode,
-				address_line1: frm.doc.address_line1,      
-				address_line2: frm.doc.address_line2,      
-			},     
-		})
- 
 		// update customer Address  automatiicaly that details update in Address
 		var phone,country,city,state,pincode,address_line1,address_line2;
 		frappe.call({
