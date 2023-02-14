@@ -161,7 +161,7 @@ class POSInvoice(SalesInvoice):
 
 		bold_item_name = frappe.bold(item.item_name)
 		bold_extra_batch_qty_needed = frappe.bold(
-			abs(available_batch_qty - reserved_batch_qty - item.qty)
+			abs(available_batch_qty - reserved_batch_qty - item.qty * item.conversion_factor)
 		)
 		bold_invalid_batch_no = frappe.bold(item.batch_no)
 
@@ -172,7 +172,7 @@ class POSInvoice(SalesInvoice):
 				).format(item.idx, bold_invalid_batch_no, bold_item_name),
 				title=_("Item Unavailable"),
 			)
-		elif (available_batch_qty - reserved_batch_qty - item.qty) < 0:
+		elif (available_batch_qty - reserved_batch_qty - item.qty * item.conversion_factor) < 0:
 			frappe.throw(
 				_(
 					"Row #{}: Batch No. {} of item {} has less than required stock available, {} more required"
@@ -246,7 +246,7 @@ class POSInvoice(SalesInvoice):
 						),
 						title=_("Item Unavailable"),
 					)
-				elif is_stock_item and flt(available_stock) < flt(d.qty):
+				elif is_stock_item and flt(available_stock) < flt(d.qty * d.conversion_factor):
 					frappe.throw(
 						_(
 							"Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}."
