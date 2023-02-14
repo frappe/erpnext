@@ -58,6 +58,8 @@ class Timesheet(Document):
 		self.per_billed = 0
 		if self.total_billed_amount > 0 and self.total_billable_amount > 0:
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
+		elif self.total_billed_hours > 0 and self.total_billable_hours > 0:
+			self.per_billed = (self.total_billed_hours * 100) / self.total_billable_hours
 
 	def update_billing_hours(self, args):
 		if args.is_billable:

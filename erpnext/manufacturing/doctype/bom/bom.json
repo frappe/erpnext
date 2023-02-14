@@ -289,7 +289,7 @@
   {
    "fieldname": "scrap_items",
    "fieldtype": "Table",
-   "label": "Items",
+   "label": "Scrap Items",
    "options": "BOM Scrap Item"
   },
   {
@@ -605,7 +605,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-10 07:47:08.652616",
+ "modified": "2023-02-13 17:31:37.504565",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
