@@ -124,7 +124,6 @@ frappe.ui.form.on("Request for Quotation",{
 								frappe.urllib.get_full_url(
 									"/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?" +
 									new URLSearchParams({
-										doctype: frm.doc.doctype,
 										name: frm.doc.name,
 										supplier: data.supplier,
 										print_format: data.print_format || "Standard",
