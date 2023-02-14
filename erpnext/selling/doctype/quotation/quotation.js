@@ -87,7 +87,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		if(me.frm.doc.docstatus == 1 && me.frm.doc.status !== 'Lost') {
 			if (me.frm.doc.status !== "Ordered") {
-				me.frm.add_custom_button(__('Set as Lost'), () => {
+				me.frm.add_custom_button(__('Mark As Lost'), () => {
 					me.frm.events.set_as_lost_dialog(me.frm);
 				}, __("Status"));
 			}

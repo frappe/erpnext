@@ -34,7 +34,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 
 	set_as_lost_dialog: function(frm) {
 		var dialog = new frappe.ui.Dialog({
-			title: __("Set as Lost"),
+			title: __("Mark As Lost"),
 			fields: [
 				{
 					"fieldtype": "Table MultiSelect",

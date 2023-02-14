@@ -376,7 +376,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		var row = this.frm.doc.contact_schedule.find(element => !element.contact_date);
 
 		var d = new frappe.ui.Dialog({
-			title: __('Submit Follow Up'),
+			title: __('Submit Communication'),
 			fields: [
 				{
 					"label" : "Schedule Date",
