@@ -14,6 +14,7 @@
   "bank_account",
   "party_type",
   "party",
+  "party_name",
   "party_balance",
   "accounting_dimensions_section",
   "cost_center",
@@ -391,12 +392,18 @@
    "ignore_user_permissions": 1,
    "label": "Beneficiary",
    "options": "beneficiary_type"
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "label": "Party Name",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-08 16:48:30.420216",
+ "modified": "2023-02-14 16:59:51.466037",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
