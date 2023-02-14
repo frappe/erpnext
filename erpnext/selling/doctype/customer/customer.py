@@ -369,14 +369,14 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		cond = """ and cost_center in (select name from `tabCost Center` where
 			lft >= {0} and rgt <= {1})""".format(lft, rgt)
 
+	# outstanding_based_on_gle = frappe.db.sql("""
+	# 	select sum(debit) - sum(credit)
+	# 	from `tabGL Entry` where party_type = 'Customer'
+	# 	and party = %s and company=%s {0}""".format(cond), (customer, company))
 	outstanding_based_on_gle = frappe.db.sql("""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer'
-		and party = %s and company=%s {0}""".format(cond), (customer, company))
-		# outstanding_based_on_gle = frappe.db.sql("""
-		# select sum(debit) - sum(credit)
-		# from `tabGL Entry` where party_type = 'Customer'
-		# and party = %s  {0}""".format(cond), (customer))
+		and party = %s  {0}""".format(cond), (customer))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
@@ -386,16 +386,16 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	# if credit limit check is bypassed at sales order level,
 	# we should not consider outstanding Sales Orders, when customer credit balance report is run
 	if not ignore_outstanding_sales_order:
-		outstanding_based_on_so = frappe.db.sql("""
-			select sum(base_grand_total*(100 - per_billed)/100)
-			from `tabSales Order`
-			where customer=%s and docstatus = 1 and company=%s
-			and per_billed < 100 and status != 'Closed'""", (customer, company),debug=True)
 		# outstanding_based_on_so = frappe.db.sql("""
 		# 	select sum(base_grand_total*(100 - per_billed)/100)
 		# 	from `tabSales Order`
-		# 	where customer=%s and docstatus = 1 
-		# 	and per_billed < 100 and status != 'Closed'""", (customer),debug=True)
+		# 	where customer=%s and docstatus = 1 and company=%s
+		# 	and per_billed < 100 and status != 'Closed'""", (customer, company),debug=True)
+		outstanding_based_on_so = frappe.db.sql("""
+			select sum(base_grand_total*(100 - per_billed)/100)
+			from `tabSales Order`
+			where customer=%s and docstatus = 1 
+			and per_billed < 100 and status != 'Closed'""", (customer),debug=True)
 		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
 	# Outstanding based on Delivery Note, which are not created against Sales Order
