@@ -11,7 +11,8 @@
   "col_break1",
   "amount",
   "outstanding_amount",
-  "currency"
+  "currency",
+  "exchange_rate"
  ],
  "fields": [
   {
@@ -62,11 +63,17 @@
    "hidden": 1,
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Exchange Rate"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-08-24 22:42:40.923179",
+ "modified": "2022-11-08 18:18:02.502149",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Invoice",
@@ -75,5 +82,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -26,7 +26,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.get_item_details import get_default_bom
+from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -194,7 +194,7 @@ class SalesOrder(SellingController):
 		)
 
 		if cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")):
-			self.validate_rate_with_reference_doc([["Quotation", "prev_docname", "quotation_item"]])
+			self.validate_rate_with_reference_doc([["Quotation", "prevdoc_docname", "quotation_item"]])
 
 	def update_enquiry_status(self, prevdoc, flag):
 		enq = frappe.db.sql(
@@ -208,7 +208,7 @@ class SalesOrder(SellingController):
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
-				if doc.docstatus == 2:
+				if doc.docstatus.is_cancelled():
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
@@ -589,6 +589,23 @@ def make_material_request(source_name, target_doc=None):
 		target.project = source_parent.project
 		target.qty = qty - requested_item_qty.get(source.name, 0)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
+
+		args = target.as_dict().copy()
+		args.update(
+			{
+				"company": source_parent.get("company"),
+				"price_list": frappe.db.get_single_value("Buying Settings", "buying_price_list"),
+				"currency": source_parent.get("currency"),
+				"conversion_rate": source_parent.get("conversion_rate"),
+			}
+		)
+
+		target.rate = flt(
+			get_price_list_rate(args=args, item_doc=frappe.get_cached_doc("Item", target.item_code)).get(
+				"price_list_rate"
+			)
+		)
+		target.amount = target.qty * target.rate
 
 	doc = get_mapped_doc(
 		"Sales Order",
@@ -1024,6 +1041,15 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	]
 	items_to_map = list(set(items_to_map))
 
+	def is_drop_ship_order(target):
+		drop_ship = True
+		for item in target.items:
+			if not item.delivered_by_supplier:
+				drop_ship = False
+				break
+
+		return drop_ship
+
 	def set_missing_values(source, target):
 		target.supplier = ""
 		target.apply_discount_on = ""
@@ -1031,8 +1057,14 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
-		target.customer = ""
-		target.customer_name = ""
+
+		if is_drop_ship_order(target):
+			target.customer = source.customer
+			target.customer_name = source.customer_name
+			target.shipping_address = source.shipping_address_name
+		else:
+			target.customer = target.customer_name = target.shipping_address = None
+
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 

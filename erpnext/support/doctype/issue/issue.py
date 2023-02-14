@@ -18,9 +18,6 @@ from frappe.utils.user import is_website_user
 
 
 class Issue(Document):
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), self.subject)
-
 	def validate(self):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True

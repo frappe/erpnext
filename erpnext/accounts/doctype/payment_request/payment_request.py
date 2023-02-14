@@ -10,6 +10,9 @@ from frappe.model.document import Document
 from frappe.utils import flt, get_url, nowdate
 from frappe.utils.background_jobs import enqueue
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_company_defaults,
 	get_payment_entry,
@@ -42,21 +45,20 @@ class PaymentRequest(Document):
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request_amount(self):
-		existing_payment_request_amount = get_existing_payment_request_amount(
-			self.reference_doctype, self.reference_name
+		existing_payment_request_amount = flt(
+			get_existing_payment_request_amount(self.reference_doctype, self.reference_name)
 		)
 
-		if existing_payment_request_amount:
-			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-			if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") != "Shopping Cart":
-				ref_amount = get_amount(ref_doc, self.payment_account)
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		if not hasattr(ref_doc, "order_type") or getattr(ref_doc, "order_type") != "Shopping Cart":
+			ref_amount = get_amount(ref_doc, self.payment_account)
 
-				if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
-					frappe.throw(
-						_("Total Payment Request amount cannot be greater than {0} amount").format(
-							self.reference_doctype
-						)
+			if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
+				frappe.throw(
+					_("Total Payment Request amount cannot be greater than {0} amount").format(
+						self.reference_doctype
 					)
+				)
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -261,6 +263,7 @@ class PaymentRequest(Document):
 
 		payment_entry.update(
 			{
+				"mode_of_payment": self.mode_of_payment,
 				"reference_no": self.name,
 				"reference_date": nowdate(),
 				"remarks": "Payment Entry against {0} {1} via Payment Request {2}".format(
@@ -268,6 +271,17 @@ class PaymentRequest(Document):
 				),
 			}
 		)
+
+		# Update dimensions
+		payment_entry.update(
+			{
+				"cost_center": self.get("cost_center"),
+				"project": self.get("project"),
+			}
+		)
+
+		for dimension in get_accounting_dimensions():
+			payment_entry.update({dimension: self.get(dimension)})
 
 		if payment_entry.difference_amount:
 			company_details = get_company_defaults(ref_doc.company)
@@ -410,25 +424,22 @@ def make_payment_request(**args):
 		else ""
 	)
 
-	existing_payment_request = None
-	if args.order_type == "Shopping Cart":
-		existing_payment_request = frappe.db.get_value(
-			"Payment Request",
-			{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ("!=", 2)},
-		)
+	draft_payment_request = frappe.db.get_value(
+		"Payment Request",
+		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": 0},
+	)
 
-	if existing_payment_request:
+	existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
+
+	if existing_payment_request_amount:
+		grand_total -= existing_payment_request_amount
+
+	if draft_payment_request:
 		frappe.db.set_value(
-			"Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False
+			"Payment Request", draft_payment_request, "grand_total", grand_total, update_modified=False
 		)
-		pr = frappe.get_doc("Payment Request", existing_payment_request)
+		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
-		if args.order_type != "Shopping Cart":
-			existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
-
-			if existing_payment_request_amount:
-				grand_total -= existing_payment_request_amount
-
 		pr = frappe.new_doc("Payment Request")
 		pr.update(
 			{
@@ -450,6 +461,17 @@ def make_payment_request(**args):
 				"bank_account": bank_account,
 			}
 		)
+
+		# Update dimensions
+		pr.update(
+			{
+				"cost_center": ref_doc.get("cost_center"),
+				"project": ref_doc.get("project"),
+			}
+		)
+
+		for dimension in get_accounting_dimensions():
+			pr.update({dimension: ref_doc.get(dimension)})
 
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True

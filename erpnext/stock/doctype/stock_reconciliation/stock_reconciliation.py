@@ -715,8 +715,8 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 def get_stock_balance_for(
 	item_code: str,
 	warehouse: str,
-	posting_date: str,
-	posting_time: str,
+	posting_date,
+	posting_time,
 	batch_no: Optional[str] = None,
 	with_valuation_rate: bool = True,
 ):

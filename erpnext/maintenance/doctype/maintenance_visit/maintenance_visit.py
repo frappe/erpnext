@@ -10,9 +10,6 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class MaintenanceVisit(TransactionBase):
-	def get_feed(self):
-		return _("To {0}").format(self.customer_name)
-
 	def validate_serial_no(self):
 		for d in self.get("purposes"):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):

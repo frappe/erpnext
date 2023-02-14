@@ -470,8 +470,10 @@ class update_entries_after(object):
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and is_cancelled = 0
-				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
-
+				and (
+					posting_date = %(posting_date)s and
+					time_format(posting_time, %(time_format)s) = time_format(%(posting_time)s, %(time_format)s)
+				)
 			order by
 				creation ASC
 			for update
@@ -1048,7 +1050,7 @@ class update_entries_after(object):
 			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
 
 
-def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
+def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_voucher=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 
 	args["time_format"] = "%H:%i:%s"
@@ -1070,11 +1072,17 @@ def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
 			and warehouse = %(warehouse)s
 			and is_cancelled = 0
 			{voucher_condition}
-			and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+			and (
+				posting_date < %(posting_date)s or
+				(
+					posting_date = %(posting_date)s and
+					time_format(posting_time, %(time_format)s) {operator} time_format(%(posting_time)s, %(time_format)s)
+				)
+			)
 		order by timestamp(posting_date, posting_time) desc, creation desc
 		limit 1
 		for update""".format(
-			voucher_condition=voucher_condition
+			operator=operator, voucher_condition=voucher_condition
 		),
 		args,
 		as_dict=1,
@@ -1171,7 +1179,7 @@ def get_stock_ledger_entries(
 def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 	return frappe.db.get_value(
 		"Stock Ledger Entry",
-		{"voucher_detail_no": voucher_detail_no, "name": ["!=", excluded_sle]},
+		{"voucher_detail_no": voucher_detail_no, "name": ["!=", excluded_sle], "is_cancelled": 0},
 		[
 			"item_code",
 			"warehouse",
@@ -1262,20 +1270,6 @@ def get_valuation_rate(
 			(item_code, warehouse, voucher_no, voucher_type),
 		)
 
-	if not last_valuation_rate:
-		# Get valuation rate from last sle for the item against any warehouse
-		last_valuation_rate = frappe.db.sql(
-			"""select valuation_rate
-			from `tabStock Ledger Entry` force index (item_code)
-			where
-				item_code = %s
-				AND valuation_rate > 0
-				AND is_cancelled = 0
-				AND NOT(voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""",
-			(item_code, voucher_no, voucher_type),
-		)
-
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0])
 
@@ -1355,8 +1349,13 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
-			and timestamp(posting_date, time_format(posting_time, %(time_format)s))
-				> timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+			and (
+				posting_date > %(posting_date)s or
+				(
+					posting_date = %(posting_date)s and
+					time_format(posting_time, %(time_format)s) > time_format(%(posting_time)s, %(time_format)s)
+				)
+			)
 		{datetime_limit_condition}
 		""",
 		args,
@@ -1376,7 +1375,7 @@ def get_stock_reco_qty_shift(args):
 			stock_reco_qty_shift = flt(args.actual_qty)
 	else:
 		# reco is being submitted
-		last_balance = get_previous_sle_of_current_voucher(args, exclude_current_voucher=True).get(
+		last_balance = get_previous_sle_of_current_voucher(args, "<=", exclude_current_voucher=True).get(
 			"qty_after_transaction"
 		)
 

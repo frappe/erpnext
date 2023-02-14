@@ -20,9 +20,6 @@ class CircularReferenceError(frappe.ValidationError):
 class Task(NestedSet):
 	nsm_parent_field = "parent_task"
 
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), self.subject)
-
 	def get_customer_details(self):
 		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
 		if cust:
@@ -83,7 +80,7 @@ class Task(NestedSet):
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
 					frappe.throw(
 						_(
-							"Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled."
+							"Cannot complete task {0} as its dependant task {1} are not completed / cancelled."
 						).format(frappe.bold(self.name), frappe.bold(d.task))
 					)
 

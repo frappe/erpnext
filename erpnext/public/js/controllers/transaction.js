@@ -272,7 +272,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function(row) {
-			if(me.frm.is_new()) return;
+			if(me.frm.is_new()) return {};
 			return {
 				"inspection_type": inspection_type,
 				"reference_type": me.frm.doc.doctype,
@@ -298,7 +298,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	make_payment_request() {
-		var me = this;
+		let me = this;
 		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
@@ -314,7 +314,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 			callback: function(r) {
 				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
+					frappe.model.sync(r.message);
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
@@ -1473,6 +1473,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rules": d.pricing_rules,
+					"is_free_item": d.is_free_item,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
 					"batch_no": d.batch_no,
@@ -1690,8 +1691,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var valid = true;
 
+		if (frappe.flags.ignore_company_party_validation) {
+			return valid;
+		}
+
 		$.each(["company", "customer"], function(i, fieldname) {
-			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) && me.frm.doc.doctype != "Purchase Order") {
+			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) &&  !["Purchase Order","Purchase Invoice"].includes(me.frm.doc.doctype)) {
 				if (!me.frm.doc[fieldname]) {
 					frappe.msgprint(__("Please specify") + ": " +
 						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +

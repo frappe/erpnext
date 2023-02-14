@@ -2,8 +2,6 @@ frappe.ready(async () => {
     initialise_select_date();
 })
 
-window.holiday_list = [];
-
 async function initialise_select_date() {
     navigate_to_page(1);
     await get_global_variables();
@@ -20,7 +18,6 @@ async function get_global_variables() {
     window.timezones = (await frappe.call({
         method:'erpnext.www.book_appointment.index.get_timezones'
     })).message;
-    window.holiday_list = window.appointment_settings.holiday_list;
 }
 
 function setup_timezone_selector() {

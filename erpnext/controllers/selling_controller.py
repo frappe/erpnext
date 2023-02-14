@@ -19,14 +19,11 @@ class SellingController(StockController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["selling_price_list", "price_list_currency"]
 
-	def get_feed(self):
-		return _("To {0} | {1} {2}").format(self.customer_name, self.currency, self.grand_total)
-
 	def onload(self):
 		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
-			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code, item.warehouse))
+			for item in self.get("items") + (self.get("packed_items") or []):
+				item.update(get_bin_details(item.item_code, item.warehouse, include_child_warehouses=True))
 
 	def validate(self):
 		super(SellingController, self).validate()

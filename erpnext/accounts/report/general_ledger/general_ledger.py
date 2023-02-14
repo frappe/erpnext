@@ -239,7 +239,7 @@ def get_conditions(filters):
 	):
 		conditions.append("(posting_date >=%(from_date)s or is_opening = 'Yes')")
 
-	conditions.append("(posting_date <=%(to_date)s)")
+	conditions.append("(posting_date <=%(to_date)s or is_opening = 'Yes')")
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
@@ -526,7 +526,7 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 90},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
 		{
 			"label": _("Account"),
 			"fieldname": "account",
@@ -538,13 +538,13 @@ def get_columns(filters):
 			"label": _("Debit ({0})").format(currency),
 			"fieldname": "debit",
 			"fieldtype": "Float",
-			"width": 100,
+			"width": 130,
 		},
 		{
 			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
 			"fieldtype": "Float",
-			"width": 100,
+			"width": 130,
 		},
 		{
 			"label": _("Balance ({0})").format(currency),

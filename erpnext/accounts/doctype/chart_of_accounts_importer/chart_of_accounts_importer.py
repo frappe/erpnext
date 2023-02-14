@@ -485,6 +485,10 @@ def set_default_accounts(company):
 			"default_payable_account": frappe.db.get_value(
 				"Account", {"company": company.name, "account_type": "Payable", "is_group": 0}
 			),
+			"default_provisional_account": frappe.db.get_value(
+				"Account",
+				{"company": company.name, "account_type": "Service Received But Not Billed", "is_group": 0},
+			),
 		}
 	)
 

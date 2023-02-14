@@ -16,12 +16,12 @@ on:
   workflow_dispatch:
     inputs:
       user:
-        description: 'user'
+        description: 'Frappe Framework repository user (add your username for forks)'
         required: true
         default: 'frappe'
         type: string
       branch:
-        description: 'Branch name'
+        description: 'Frappe Framework branch'
         default: 'develop'
         required: false
         type: string

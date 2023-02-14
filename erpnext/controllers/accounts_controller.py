@@ -394,7 +394,7 @@ class AccountsController(TransactionBase):
 				self.get("inter_company_reference")
 				or self.get("inter_company_invoice_reference")
 				or self.get("inter_company_order_reference")
-			):
+			) and not self.get("is_return"):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
@@ -584,7 +584,12 @@ class AccountsController(TransactionBase):
 					if bool(uom) != bool(stock_uom):  # xor
 						item.stock_uom = item.uom = uom or stock_uom
 
-					item.conversion_factor = get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+					# UOM cannot be zero so substitute as 1
+					item.conversion_factor = (
+						get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+						or item.get("conversion_factor")
+						or 1
+					)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)

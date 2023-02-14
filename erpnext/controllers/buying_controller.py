@@ -25,10 +25,6 @@ class BuyingController(SubcontractingController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
-	def get_feed(self):
-		if self.get("supplier_name"):
-			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency, self.grand_total)
-
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
@@ -276,6 +272,9 @@ class BuyingController(SubcontractingController):
 
 	def set_incoming_rate(self):
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
+			return
+
+		if not self.is_internal_transfer():
 			return
 
 		ref_doctype_map = {
@@ -548,7 +547,9 @@ class BuyingController(SubcontractingController):
 			self.process_fixed_asset()
 			self.update_fixed_asset(field)
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
+			"Buying Settings", "disable_last_purchase_rate"
+		):
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
@@ -557,7 +558,9 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
+			"Buying Settings", "disable_last_purchase_rate"
+		):
 			update_last_purchase_rate(self, is_submit=0)
 
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
@@ -709,6 +712,8 @@ class BuyingController(SubcontractingController):
 						asset.purchase_date = self.posting_date
 						asset.supplier = self.supplier
 					elif self.docstatus == 2:
+						if asset.docstatus == 2:
+							continue
 						if asset.docstatus == 0:
 							asset.set(field, None)
 							asset.supplier = None
