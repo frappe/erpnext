@@ -302,6 +302,7 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 
 	formatter: function(value, row, column, data, default_formatter) {
 		let style = {};
+		let link;
 
 		if (column.is_communication == "communcation_date") {
 			style['font-weight'] = 'bold';
@@ -322,9 +323,13 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			} else if (value == "Converted") {
 				style['color'] = "green";
 			}
+
+			if (data.appointment) {
+				link = frappe.utils.get_form_link("Appointment", data.appointment);
+			}
 		}
 
-		return default_formatter(value, row, column, data, {css: style});
+		return default_formatter(value, row, column, data, {css: style, link_href: link, link_target: "_blank"});
 	},
 
 	onload: function () {

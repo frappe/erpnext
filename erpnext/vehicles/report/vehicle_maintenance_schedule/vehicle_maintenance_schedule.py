@@ -34,6 +34,7 @@ class VehicleMaintenanceSchedule:
 		self.get_data()
 		self.get_communication_map()
 		self.get_follow_up_map()
+		self.get_appointment_map()
 		self.process_data()
 		self.get_columns()
 		return self.columns, self.data
@@ -136,6 +137,22 @@ class VehicleMaintenanceSchedule:
 			for d in follow_ups:
 				self.follow_up_map.setdefault(d.opportunity, []).append(d)
 
+	def get_appointment_map(self):
+		self.appointment_map = {}
+
+		opportunities = [d.opportunity for d in self.data if d.get("opportunity")]
+		if opportunities:
+			appointments = frappe.db.sql("""
+				SELECT name as appointment, opportunity
+				FROM `tabAppointment`
+				WHERE opportunity in %s AND docstatus = 1
+				ORDER BY scheduled_dt
+			""", [opportunities], as_dict=1)
+
+			for d in appointments:
+				if not self.appointment_map.get(d.opportunity):
+					self.appointment_map[d.opportunity] = d.appointment
+
 	def process_data(self):
 		for d in self.data:
 			d.disable_item_formatter = 1
@@ -159,6 +176,8 @@ class VehicleMaintenanceSchedule:
 				d.license_plate = 'Unreg'
 
 			if d.opportunity:
+				d.appointment = self.appointment_map.get(d.opportunity)
+
 				contact_list = []
 
 				if self.communication_map.get(d.opportunity):
@@ -335,7 +354,14 @@ class VehicleMaintenanceSchedule:
 				"fieldname": "opportunity",
 				"fieldtype": "Link",
 				"options": "Opportunity",
-				"width": 80
+				"width": 90
+			},
+			{
+				"label": _("Appointment"),
+				"fieldname": "appointment",
+				"fieldtype": "Link",
+				"options": "Appointment",
+				"width": 90
 			},
 		]
 
