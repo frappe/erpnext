@@ -2494,7 +2494,7 @@ def get_uom_details(item_code, uom, qty):
 
 	if not conversion_factor:
 		frappe.msgprint(
-			_("UOM coversion factor required for UOM: {0} in Item: {1}").format(uom, item_code)
+			_("UOM conversion factor required for UOM: {0} in Item: {1}").format(uom, item_code)
 		)
 		ret = {"uom": ""}
 	else:
