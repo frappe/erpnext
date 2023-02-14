@@ -172,13 +172,14 @@ frappe.ui.form.on('Lead', {
 			}
 		};
 		frm.set_query('customer_name', function(doc) {
-			return {
-				filters: {
-					"region"  : getCurrentUserRegion()
+			var reg_user = getCurrentUserRegion()
+			if (reg_user != "HO"){
+				return {
+					filters: {
+						"region"  : getCurrentUserRegion()
+					}
 				}
-
-			}
-			
+			}	
 		});
 		function getCurrentUserRegion()
 		{  
