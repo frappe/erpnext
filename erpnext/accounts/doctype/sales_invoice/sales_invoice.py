@@ -397,6 +397,8 @@ class SalesInvoice(SellingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
 			"Payment Ledger Entry",
 		)
 
