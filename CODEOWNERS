@@ -4,12 +4,8 @@
 # the repo. Unless a later match takes precedence,
 
 erpnext/accounts/               @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
-<<<<<<< HEAD
-erpnext/assets/                 @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
-erpnext/erpnext_integrations/   @nextchamp-saqib
-=======
 erpnext/assets/                 @anandbaburajan @deepeshgarg007
->>>>>>> d003370f61 (chore: add anand to asset's codeowner)
+erpnext/erpnext_integrations/   @nextchamp-saqib
 erpnext/loan_management/        @nextchamp-saqib @deepeshgarg007
 erpnext/regional                @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
 erpnext/selling                 @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
