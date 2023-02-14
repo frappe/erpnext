@@ -53,7 +53,7 @@ erpnext.vehicles.VehicleQuotation = class VehicleQuotation extends erpnext.vehic
 
 		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
 			if(this.frm.doc.status !== "Ordered") {
-				this.frm.add_custom_button(__('Set as Lost'), () => {
+				this.frm.add_custom_button(__('Mark As Lost'), () => {
 					this.frm.events.set_as_lost_dialog(this.frm);
 				}, __("Status"));
 			}

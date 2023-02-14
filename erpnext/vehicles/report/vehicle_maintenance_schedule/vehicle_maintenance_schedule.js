@@ -16,35 +16,35 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			fieldname: "date_type",
 			label: __("Date Type"),
 			fieldtype: "Select",
-			options: ["Reminder Date", "Service Due Date"],
-			default: "Reminder Date",
+			options: ["Follow Up Date", "Service Due Date"],
+			default: "Follow Up Date",
 			reqd: 1,
 		},
 		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
-			"reqd": 1
+			fieldname:"from_date",
+			label: __("From Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
+			reqd: 1
 		},
 		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
-			"reqd": 1
+			fieldname:"to_date",
+			label: __("To Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
+			reqd: 1
 		},
 		{
-			"fieldname":"project_template",
-			"label": __("Project Template"),
-			"fieldtype": "Link",
-			"options": "Project Template"
+			fieldname:"project_template",
+			label: __("Project Template"),
+			fieldtype: "Link",
+			options: "Project Template"
 		},
 		{
-			"fieldname":"project_template_category",
-			"label": __("Project Template Category"),
-			"fieldtype": "Link",
-			"options": "Project Template Category"
+			fieldname: "project_template_category",
+			label: __("Project Template Category"),
+			fieldtype: "Link",
+			options: "Project Template Category"
 		},
 		{
 			fieldname: "customer",
@@ -98,19 +98,31 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			fieldtype: "Link",
 			options: "Item Group"
 		},
+		{
+			fieldname: "opportunity",
+			label: __("Opportunity"),
+			fieldtype: "Link",
+			options: "Opportunity"
+		},
 	],
 
 	prepare_column: function (column) {
-		if (column && column.fieldname == "remarks") {
+		if (column && column.is_communication) {
 			column.custom_editor = frappe.query_reports["Vehicle Maintenance Schedule"].get_remarks_editor;
 		}
 	},
 
 	get_remarks_editor: function (column, current_value, rowIndex) {
 		const row_data = this.datatable.datamanager.getData(rowIndex);
+		this.datatable.cellmanager.deactivateEditing(false);
+
+		if (["Lost", "Closed"].includes(row_data.status)) {
+			frappe.msgprint(__("Cannot submit communication because Opportunity is {0}", [row_data.status]));
+			return;
+		}
 
 		const dialog = new frappe.ui.Dialog({
-			title: __('Submit Remarks'),
+			title: __('Submit Communication'),
 			doc: {},
 			fields: [
 				{
@@ -124,14 +136,22 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 					fieldtype: "Select",
 					label: __("Action"),
 					reqd: 1,
-					options: ["", "Schedule Follow Up", "Set As Lost", "Create Appointment"],
+					options: ["", "Submit Remarks Only", "Schedule Follow Up", "Mark As Lost", "Mark As Closed", "Create Appointment"],
+					onchange: () => {
+						let is_followup = dialog.get_value("action") == "Schedule Follow Up";
+						let is_lost = dialog.get_value("action") == "Mark As Lost";
+
+						dialog.set_df_property("schedule_date", "reqd", is_followup ? 1 : 0);
+						dialog.set_df_property("follow_up_days", "reqd", is_followup ? 1 : 0);
+
+						dialog.set_df_property("lost_reason", "reqd", is_lost ? 1 : 0);
+					}
 				},
 				{fieldtype: "Section Break", depends_on: "eval:doc.action == 'Schedule Follow Up'"},
 				{
 					label : "Follow Up in Days",
 					fieldname: "follow_up_days",
 					fieldtype: "Int",
-					default: 0,
 					onchange: () => {
 						let today = frappe.datetime.nowdate();
 						let contact_date = frappe.datetime.add_days(today, dialog.get_value('follow_up_days'));
@@ -150,57 +170,158 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 						dialog.get_field('follow_up_days').refresh();
 					}
 				},
-				{fieldtype: "Section Break", depends_on: "eval:doc.action == 'Set As Lost'"},
+				{fieldtype: "Section Break", depends_on: "eval:doc.action == 'Mark As Lost'"},
 				{
 					fieldtype: "Table MultiSelect",
 					label: __("Lost Reasons"),
 					fieldname: "lost_reason",
 					options: 'Lost Reason Detail',
 				},
+				{fieldtype: "Section Break"},
+				{
+					fieldname: "customer",
+					fieldtype: "Link",
+					options: "Customer",
+					label: __("Customer"),
+					read_only: 1,
+					default: row_data.customer,
+				},
+				{
+					fieldname: "contact_no",
+					fieldtype: "Data",
+					label: __("Contact No"),
+					read_only: 1,
+					default: row_data.contact_no,
+				},
+				{fieldtype: "Column Break"},
+				{
+					fieldname: "customer_name",
+					fieldtype: "Data",
+					label: __("Customer Name"),
+					read_only: 1,
+					default: row_data.customer_name,
+				},
+				{fieldtype: "Section Break"},
+				{
+					fieldname: "template_name",
+					fieldtype: "Data",
+					label: __("Maintenance Type"),
+					read_only: 1,
+					default: row_data.project_template_name,
+				},
+				{fieldtype: "Column Break"},
+				{
+					fieldname: "due_date",
+					fieldtype: "Date",
+					label: __("Due Date"),
+					read_only: 1,
+					default: row_data.due_date,
+				},
+				{fieldtype: "Section Break"},
+				{
+					fieldname: "vehicle",
+					fieldtype: "Link",
+					options: "Vehicle",
+					label: __("Vehicle"),
+					read_only: 1,
+					default: row_data.vehicle,
+				},
+				{
+					fieldname: "license_plate",
+					fieldtype: "Data",
+					label: __("Registration #"),
+					read_only: 1,
+					default: row_data.license_plate,
+				},
+				{
+					fieldname: "delivery_date",
+					fieldtype: "Date",
+					label: __("Delivery Date"),
+					read_only: 1,
+					default: row_data.delivery_date,
+				},
+				{fieldtype: "Column Break"},
+				{
+					fieldname: "item_code",
+					fieldtype: "Data",
+					label: __("Variant Code"),
+					read_only: 1,
+					default: row_data.item_code,
+				},
+				{
+					fieldname: "chassis_no",
+					fieldtype: "Data",
+					label: __("Chassis #"),
+					read_only: 1,
+					default: row_data.chassis_no,
+				},
+				{
+					fieldname: "age",
+					fieldtype: "Data",
+					label: __("Age"),
+					read_only: 1,
+					default: row_data.age,
+				},
 			],
 			primary_action: (dialog_data) => {
-				this.datatable.cellmanager.deactivateEditing(false);
 				dialog.hide();
 
 				return frappe.call({
-					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication_with_action",
+					method: "erpnext.vehicles.report.vehicle_maintenance_schedule.vehicle_maintenance_schedule.submit_communication_with_action",
 					args: {
 						remarks: dialog_data.remarks,
 						action: dialog_data.action,
 						follow_up_date: dialog_data.schedule_date,
 						lost_reason: dialog_data.lost_reason,
 						opportunity: row_data.opportunity,
-						maintenance_schedule: row_data.schedule,
-						maintenance_schedule_row: row_data.schedule_row,
+						maintenance_schedule: row_data.maintenance_schedule,
+						maintenance_schedule_row: row_data.maintenance_schedule_row,
+						filters: frappe.query_report.get_filter_values(),
 					},
 					callback: function(r) {
-						frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = r.message.contact_date;
-						frappe.query_report.datatable.datamanager.data[rowIndex].remarks = r.message.remarks;
-						frappe.query_report.datatable.datamanager.data[rowIndex].opportunity = r.message.opportunity;
-						erpnext.utils.query_report_local_refresh();
+						if (r.message && !r.exc) {
+							if (r.message.updated_row) {
+								frappe.query_report.datatable.datamanager.data[rowIndex] = r.message.updated_row;
+								erpnext.utils.query_report_local_refresh();
+							}
 
-						if (r.message.appointment_doc) {
-							frappe.model.sync(r.message.appointment_doc);
-							frappe.set_route("Form", r.message.appointment_doc.doctype, r.message.appointment_doc.name);
+							if (r.message.appointment_doc) {
+								frappe.model.sync(r.message.appointment_doc);
+								frappe.set_route("Form", r.message.appointment_doc.doctype, r.message.appointment_doc.name);
+							}
 						}
 					},
 					error: function() {
 						erpnext.utils.query_report_local_refresh();
 					},
 				});
-			},
-			secondary_action: () => {
-				this.datatable.cellmanager.deactivateEditing(false);
 			}
 		});
 		dialog.show();
 	},
 
 	formatter: function(value, row, column, data, default_formatter) {
-		var style = {};
+		let style = {};
 
-		if (column.fieldname == "contact_date") {
+		if (column.is_communication == "communcation_date") {
 			style['font-weight'] = 'bold';
+		}
+
+		if (["Lost", "Closed"].includes(data.status)) {
+			style['color'] = "#858585";
+		}
+
+		if (column.fieldname == 'status') {
+			style['font-weight'] = 'bold';
+			if (value == "Open") {
+				style['color'] = "orange";
+			} else if (value == "To Follow Up") {
+				style['color'] = "blue";
+			} else if (value == "Replied") {
+				style['color'] = "purple";
+			} else if (value == "Converted") {
+				style['color'] = "green";
+			}
 		}
 
 		return default_formatter(value, row, column, data, {css: style});
