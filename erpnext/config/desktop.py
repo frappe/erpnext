@@ -107,7 +107,15 @@ def get_data():
 			"type": "module",
 			"description": "Quality goals, procedures, reviews and action."
 		},
-
+		{
+			"module_name": "Management Reports",
+			"category": "Modules",
+			"label": _("Management Reports"),
+			"color": "#1abc9c",
+			"icon": "fa fa-file",
+			"type": "module",
+			"description": "Management Report Bakery CSD Dairy"
+		},
 
 		# Category: "Domains"
 		{
