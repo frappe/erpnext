@@ -388,7 +388,7 @@ def create_rfq_items(sq_doc, supplier, data):
 
 
 @frappe.whitelist()
-def get_pdf(doctype, name, supplier, print_format=None, language=None, letter_head=None):
+def get_pdf(doctype, name, supplier, print_format=None, language=None, letterhead=None):
 	# permissions get checked in `download_pdf`
 	if doc := get_rfq_doc(doctype, name, supplier):
 		download_pdf(
@@ -397,7 +397,7 @@ def get_pdf(doctype, name, supplier, print_format=None, language=None, letter_he
 			print_format,
 			doc=doc,
 			language=language,
-			letter_head=letter_head or None,
+			letterhead=letterhead or None,
 		)
 
 
