@@ -17,6 +17,8 @@
   "customer_name",
   "tax_id",
   "order_type",
+  "col_breaktest123",
+  "test_my_field",
   "column_break_7",
   "transaction_date",
   "delivery_date",
@@ -247,6 +249,15 @@
    "options": "\nSales\nMaintenance\nShopping Cart",
    "print_hide": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "col_breaktest123",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "test_my_field",
+   "fieldtype": "Data",
+   "label": "Test My Field"
   },
   {
    "fieldname": "column_break1",
@@ -1643,7 +1654,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:34:00.681780",
+ "modified": "2023-02-13 11:59:00.681780",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

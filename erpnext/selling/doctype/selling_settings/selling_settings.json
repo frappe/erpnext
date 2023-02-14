@@ -27,6 +27,7 @@
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
+  "allow_sales_order_creation_for_expired_quotation",
   "dont_reserve_sales_order_qty_on_sales_return",
   "hide_tax_id",
   "enable_discount_accounting"
@@ -176,6 +177,12 @@
   },
   {
    "default": "0",
+   "fieldname": "allow_sales_order_creation_for_expired_quotation",
+   "fieldtype": "Check",
+   "label": "Allow Sales Order Creation For Expired Quotation"
+  },
+  {
+   "default": "0",
    "fieldname": "dont_reserve_sales_order_qty_on_sales_return",
    "fieldtype": "Check",
    "label": "Don't Reserve Sales Order Qty on Sales Return"
@@ -186,7 +193,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-06-17 15:50:43.968334",
+ "modified": "2023-02-04 12:37:53.380857",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

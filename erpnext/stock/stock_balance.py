@@ -103,7 +103,7 @@ def get_reserved_qty(item_code, warehouse):
 			q.inner_join(SalesOrder)
 			.on(SalesOrder.name == child_table.parent)
 			.where(SalesOrder.docstatus == 1)
-			.where(SalesOrder.status != "Closed")
+			.where(SalesOrder.status.notin(["On Hold", "Closed"]))
 		)
 
 	SalesOrder = DocType("Sales Order")
