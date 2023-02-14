@@ -275,7 +275,7 @@
    "hidden": 1,
    "label": "Price List Rate",
    "options": "currency",
-   "precision": "2",
+   "precision": "3",
    "print_hide": 1
   },
   {
@@ -334,6 +334,7 @@
    "oldfieldtype": "Currency",
    "options": "currency",
    "precision": "3",
+   "read_only": 1,
    "print_hide_if_no_value": 1
   },
   {
