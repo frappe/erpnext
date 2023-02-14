@@ -5,6 +5,7 @@
 import json
 
 
+
 import frappe
 from frappe.model.document import Document
 import frappe
@@ -20,6 +21,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
+from erpnext.utilities.transaction_base import delete_events
 
 from erpnext.accounts.party import (  # noqa
 	get_dashboard_info,
@@ -30,26 +32,14 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
-	def before_save(self):
-		#Create new address form
-		# if self.customer_name != self.customer_name:
+
+
+	def on_update(self):
 		if frappe.db.exists({"doctype": "Address", "address_title": self.customer_name}):
 			pass
 		else:
-			address_data = frappe.new_doc("Address")
-			address_data.address_title = self.customer_name
-			address_data.country = self.country
-			address_data.city = self.city
-			address_data.state = self.state
-			address_data.address_type = "Company"
-			address_data.pincode = self.pincode
-			address_data.phone = self.landline
-			address_data.address_line1 = self.address_line1
-			address_data.address_line2 = self.address_line2
-			address_data.insert(ignore_mandatory=True)
-	
-		# if self.address_title != self.customer_name:
-			
+			make_address(self)
+				
 	def get_feed(self):
 		return self.customer_name
 
@@ -296,24 +286,24 @@ class Customer(TransactionBase):
 					).format(outstanding_amt)
 				)
 
-	def on_trash(self):
-		if self.customer_primary_contact:
-			frappe.db.sql(
-				"""
-				UPDATE `tabCustomer`
-				SET
-					customer_primary_contact=null,
-					customer_primary_address=null,
-					mobile_no=null,
-					email_id=null,
-					primary_address=null
-				WHERE name=%(name)s""",
-				{"name": self.name},
-			)
+	# def on_trash(self):
+	# 	if self.customer_primary_contact:
+	# 		frappe.db.sql(
+	# 			"""
+	# 			UPDATE `tabCustomer`
+	# 			SET
+	# 				customer_primary_contact=null,
+	# 				customer_primary_address=null,
+	# 				mobile_no=null,
+	# 				email_id=null,
+	# 				primary_address=null
+	# 			WHERE name=%(name)s""",
+	# 			{"name": self.name},
+	# 		)
 
-		delete_contact_and_address("Customer", self.name)
-		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
+	# 	delete_contact_and_address("Customer", self.name)
+	# 	if self.lead_name:
+	# 		frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default("cust_master_name") == "Customer Name":
@@ -335,28 +325,6 @@ class Customer(TransactionBase):
 					frappe.bold(self.customer_name)
 				)
 			)
-
-# class Customer(Document):
-
-
-		#Create new address form
-		# if self.address_title != self.company_name:
-		# 	if frappe.db.exists({"doctype": "Address", "address_title": self.company_name}):
-		# 		pass
-		# 	else:
-		# 		address_data = frappe.new_doc("Address")
-		# 		address_data.address_title = self.company_name
-		# 		frappe.msgprint(address_data.address_title)
-		# 		address_data.country = self.country
-		# 		address_data.city = self.city
-		# 		address_data.state = self.state
-		# 		address_data.address_type = "Company"
-		# 		address_data.pincode = self.pincode
-		# 		address_data.phone = self.landline
-		# 		address_data.address_line1 = self.address_line_1
-		# 		address_data.address_line2 = self.address_line_2
-		# 		address_data.insert(ignore_mandatory=True)
-
 
 
 def create_contact(contact, party_type, party, email):
@@ -741,36 +709,36 @@ def make_contact(args, is_primary_contact=1):
 
 
 
-# def make_address(args, is_primary_address=1):
-# 	reqd_fields = []
-# 	for field in ["city", "country"]:
-# 		if not args.get(field):
-# 			reqd_fields.append("<li>" + field.title() + "</li>")
+def make_address(args, is_primary_address=1):
+	reqd_fields = []
+	for field in ["city", "country"]:
+		if not args.get(field):
+			reqd_fields.append("<li>" + field.title() + "</li>")
 
-# 	if reqd_fields:
-# 		msg = _("Following fields are mandatory to create address:")
-# 		frappe.throw(
-# 			"{0} <br><br> <ul>{1}</ul>".format(msg, "\n".join(reqd_fields)),
-# 			title=_("Missing Values Required"),
-# 		)
+	if reqd_fields:
+		msg = _("Following fields are mandatory to create address:")
+		frappe.throw(
+			"{0} <br><br> <ul>{1}</ul>".format(msg, "\n".join(reqd_fields)),
+			title=_("Missing Values Required"),
+		)
 
-# 	address = frappe.get_doc(
-# 		{
-# 			"doctype": "Address",
-# 			"address_title": args.get("name"),
-# 			"address_line1": args.get("address_line1"),
-# 			"address_line2": args.get("address_line2"),
-# 			"city": args.get("city"),
-# 			"state": args.get("state"),
-# 			"pincode": args.get("pincode"),
-# 			"country": args.get("country"),
-# 			"phone":args.get("landline"),
+	address = frappe.get_doc(
+		{
+			"doctype": "Address",
+			"address_title": args.get("name"),
+			"address_line1": args.get("address_line1"),
+			"address_line2": args.get("address_line2"),
+			"city": args.get("city"),
+			"state": args.get("state"),
+			"pincode": args.get("pincode"),
+			"country": args.get("country"),
+			"phone":args.get("landline"),
 
-# 			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
-# 		}
-# 	).insert()
+			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
+		}
+	).insert()
 
-# 	return address
+	return address
 
 @frappe.whitelist()
 def add_address(**args):
@@ -789,16 +757,48 @@ def contact_person(**args):
 	contact_person_detail.primary_email_id = args.get('primary_email_id')
 	contact_person_detail.insert(ignore_mandatory=True, ignore_permissions = True)
 
-	
+@frappe.whitelist()
+def create_address(**args):
+  if frappe.db.exists({"doctype": "Address", "address_title": args.get("customer_name")}):
+      pass
+  else:
+      frappe.msgprint("hell")
+      address_data = frappe.new_doc("Address")
+      address_data.address_title = args.get("customer_name")
+      address_data.address_line1 = args.get("address_line1")
+      address_data.address_line2 = args.get("address_line2")
+      address_data.city = args.get("city")
+      address_data.state = args.get("state")
+      address_data.pincode = args.get("pincode")
+      address_data.country = args.get("country")
+      address_data.phone = args.get("phone")
+      address_data.address_type = "Company"
+      address_data.append("links", {"link_doctype": "Customer", "link_name": args.get("customer_name")})
+      address_data.insert(ignore_mandatory=True)
+
+
 @frappe.whitelist()
 def last_document():
 	doc1=frappe.get_last_doc("Customer Contact Person")
 	return doc1.name
 
 @frappe.whitelist()
-def remove_person(name):
+def delete_customer_contact_person(name):
 	frappe.delete_doc("Customer Contact Person", name)	
 
+@frappe.whitelist()
+def remove_customer_address(name,address_name):
+	to_remove = []
+	address = frappe.get_doc("Address", address_name)
+	for add_details in address.get("links"):
+		#remove rows with condition ,  you can drop the if checking and append to the list right away to remove them all 
+		if add_details.link_name == name:        
+			to_remove.append(add_details)
+	[address.remove(add_details) for add_details in to_remove]
+	address.save()
+	frappe.delete_doc("Address", address_name)	
+
+	
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):

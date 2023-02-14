@@ -206,9 +206,23 @@ frappe.ui.form.on("Customer", {
 	},
 });
 
-
 frappe.ui.form.on('Customer',  {
 	after_save : function(frm) {
+		frappe.call({
+			async:false,
+			method:"erpnext.selling.doctype.customer.customer.create_address",
+			args: {
+				customer_name: frm.doc.customer_name,
+				phone: frm.doc.landline,
+				country: frm.doc.country,
+				city: frm.doc.city,    
+				state: frm.doc.state,
+				pincode: frm.doc.pincode,
+				address_line1: frm.doc.address_line1,      
+				address_line2: frm.doc.address_line2,      
+			},     
+		})
+ 
 		// update customer Address  automatiicaly that details update in Address
 		var phone,country,city,state,pincode,address_line1,address_line2;
 		frappe.call({
@@ -261,6 +275,7 @@ frappe.ui.form.on('Customer',  {
 				}
 			}
 		});
+
 		var last_row;
 		//create new entry in contact person 
 		var arr =[];
@@ -276,11 +291,10 @@ frappe.ui.form.on('Customer',  {
 			arr2.push(row.primary_email_id)
 			arr3.push(row.department)
 			arr4.push(row.primary_mobile_number)
-			console.log(arr);
+
 		})
 		last_row = doc2[arr.length-1]
 
-		console.log("last_row",last_row);
 		if (!last_row.contact_name){
 			frappe.call({
 				async:false,
@@ -296,7 +310,7 @@ frappe.ui.form.on('Customer',  {
 			
 				},		
 			})
-
+			//get last created contact name
 			frappe.call({
 				method:"erpnext.selling.doctype.customer.customer.last_document",
 				async:false,
@@ -305,7 +319,6 @@ frappe.ui.form.on('Customer',  {
 						last_row.contact_name = r.message;
 						console.log("last_row.person_name",last_row.person_name);
 				}
-
 			})
 		}
 // update customer contact person details  automatiicaly that details update in customer contact person
@@ -335,7 +348,6 @@ frappe.ui.form.on('Customer',  {
 						primary_email_id = (r.message[0].primary_email_id);
 						person_name = r.message[0].name
 
-
 						if ((primary_email_id && primary_email_id != v.primary_email_id || (primary_email_id == "" || primary_email_id == undefined)) || (designation && designation != v.designation|| (designation == "" || designation == undefined)) || (department && department != v.department|| (department == "" || department == undefined)) || (primary_mobile_number && primary_mobile_number != v.primary_mobile_number|| (primary_mobile_number == "" || primary_mobile_number == undefined))){
 							frappe.call({
 								"method": "frappe.client.set_value",
@@ -361,28 +373,23 @@ frappe.ui.form.on('Customer',  {
 		frm.events.get_country(frm);
     },
 	country: function(frm){
-
         frappe.call({
             method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
             args: {
               country: frm.doc.country
             }, 
-            
             callback: function(r) {
               frm.set_df_property("state", "options", r.message)
 				frm.set_value("city", null)
-		
             }
         })
     },
 	get_country: function(frm){
-
         frappe.call({
             method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
             args: {
               country: frm.doc.country
             }, 
-            
             callback: function(r) {
               frm.set_df_property("state", "options", r.message)
             }
@@ -398,10 +405,45 @@ frappe.ui.form.on('Customer',  {
 			}
 		});
 	},
+	refresh: function (frm) {
+		//once delete customer then delete there address,delete customer child table and customer form also delete
+		const customer_name = frm.doc.name +"-" + "Company"
+		if (!frm.doc.__islocal) {
+			if(frm.doc.name && frm.doc.docstatus !=1 ){
+				if(frm.has_perm('delete')) {
+					frm.add_custom_button(__("Delete"), function(){
+						//1'st delete Customer Contact Person Details 
+						$.each(frm.doc.customer_contact_person_details || [], function (i, v) {
+							frappe.call({
+								method: "erpnext.selling.doctype.customer.customer.delete_customer_contact_person",
+								async:false,
+								args: {
+									name: v.contact_name,
+								}
+							})
+						})
+						//2'nd delete customer address
+						frappe.call({
+							method: "erpnext.selling.doctype.customer.customer.remove_customer_address",
+							args: {
+								name: frm.doc.name,
+								address_name : customer_name,	
+							},
+							async: false,
+							callback: function (r) {
+							console.log(r.message)
+						}
+						})
+						// 3'rd delete customer form itself 
+						frappe.model.delete_doc(frm.doc.doctype, frm.doc.name, function() {
+							window.history.back();
+						});
+					})		
+				}
+			}
+		}
+	},
 })
-
-
-	
 frappe.ui.form.on("Customer Contact Person Details",{
 //if customer_contact_person_delect then delect that person in customer contact person
 	before_customer_contact_person_details_remove:function(frm,cdt,cdn){

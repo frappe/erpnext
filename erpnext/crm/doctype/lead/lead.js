@@ -227,41 +227,35 @@ frappe.ui.form.on('Lead', {
 		}
 	},
 	//on lead transfer create 1 Dialog box for Reason in lead_assing_to_user child table add user name,assing to mail, lead transfer Reason,today date time  
-/* 	lead_transfer:function(frm){
-		if (frm.doc.lead_assign_to_user.length !=0){
-			var Test;
-			let lead_assign_to_user  = frm.add_child("lead_assign_to_user");
-			if(frm.doc.lead_assign_to_use !=1){// add here len of child table if it 1 not show following message after that shown
-				var d = new frappe.ui.Dialog({
-				
-					title: __('Reason for Transfer Lead Other User'),
-					fields: [
-						{
-							"fieldname": "reason_lead_transfer",
-							"fieldtype": "Text",
-							"reqd": 1,
-						}
-					],
-					primary_action_label: 'Submit',
-					primary_action(value) {
-						console.log(value["reason_lead_transfer"]);
-						lead_assign_to_user.lead_transfer_reason = (value["reason_lead_transfer"]);
-						refresh_field("lead_assign_to_user");
-						frm.save();
-						d.hide();
+ 	lead_transfer:function(frm){
+		if(!frm.doc.__islocal){// add here len of child table if it 1 not show following message after that shown
+			var d = new frappe.ui.Dialog({
+			
+				title: __('Reason for Transfer Lead Other User'),
+				fields: [
+					{
+						"fieldname": "reason_lead_transfer",
+						"fieldtype": "Text",
+						"reqd": 1,
 					}
-				})
-				d.show();
-				console.log(d);
-			}
-			
-			var date = frappe.datetime.now_datetime();
-			lead_assign_to_user.assign_email = frm.doc.lead_transfer
-			lead_assign_to_user.date = date
-			lead_assign_to_user.user_name = frm.doc.lead_transfer_user_full_name
-			
-			refresh_field("lead_assign_to_user")
+				],
+				primary_action_label: 'Submit',
+				primary_action(value) {
+					console.log(value["reason_lead_transfer"]);
+					lead_assign_to_user.lead_transfer_reason = (value["reason_lead_transfer"]);
+					refresh_field("lead_assign_to_user");
+					frm.save();
+					d.hide();
+				}
+			})
+			d.show();
+			console.log(d);
 		}
-	} */
+		var date = frappe.datetime.now_datetime();
+		lead_assign_to_user.assign_email = frm.doc.lead_transfer
+		lead_assign_to_user.date = date
+		lead_assign_to_user.user_name = frm.doc.lead_transfer_user_full_name
+		refresh_field("lead_assign_to_user")
+	}
 
 });				
