@@ -326,6 +326,8 @@ class SalarySlip(TransactionBase):
 
 		if not cint(include_holidays_in_total_working_days):
 			working_days -= len(holidays)
+			working_days_list = [cstr(day) for day in working_days_list if cstr(day) not in holidays]
+
 			if working_days < 0:
 				frappe.throw(_("There are more holidays than working days this month."))
 
