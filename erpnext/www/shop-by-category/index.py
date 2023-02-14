@@ -53,21 +53,6 @@ def get_tabs(categories):
 
 def get_category_records(categories: list):
 	categorical_data = {}
-<<<<<<< HEAD
-	for category in categories:
-		if category == "item_group":
-			categorical_data["item_group"] = frappe.db.sql(
-				"""
-				Select
-					name, parent_item_group, is_group, image, route
-				from
-					`tabItem Group`
-				where
-					parent_item_group = 'All Item Groups'
-					and show_in_website = 1
-				""",
-				as_dict=1,
-=======
 
 	for c in categories:
 		if c == "item_group":
@@ -75,7 +60,6 @@ def get_category_records(categories: list):
 				"Item Group",
 				filters={"parent_item_group": "All Item Groups", "show_in_website": 1},
 				fields=["name", "parent_item_group", "is_group", "image", "route"],
->>>>>>> 0df28c7174 (fix(ecommerce): throw invalid doctype error in shop by category (#33901))
 			)
 
 			continue
@@ -88,22 +72,10 @@ def get_category_records(categories: list):
 			if meta.get_field("image"):
 				fields += ["image"]
 
-<<<<<<< HEAD
-			categorical_data[category] = frappe.db.sql(
-				f"""
-					Select
-						{",".join(fields)}
-					from
-						`tab{doctype}`
-				""",
-				as_dict=1,
-			)
-=======
 			data = frappe.db.get_all(doctype, fields=fields)
 			categorical_data[c] = data
 		except BaseException:
 			frappe.throw(_("DocType {} not found").format(doctype))
 			continue
->>>>>>> 0df28c7174 (fix(ecommerce): throw invalid doctype error in shop by category (#33901))
 
 	return categorical_data
