@@ -7,12 +7,12 @@ def get_data():
 	if vehicle_domain_active:
 		vehicle_domain_sections = [
 			{
-				'label': ['Stock'],
+				'label': ['Booking'],
 				'items': ['Vehicle Booking Order', 'Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Movement']
 			},
 			{
 				'label': ['Service'],
-				'items': ['Project', 'Vehicle Service Receipt', 'Vehicle Gate Pass', 'Maintenance Schedule']
+				'items': ['Project', 'Appointment', 'Vehicle Service Receipt', 'Vehicle Gate Pass']
 			},
 			{
 				'label': ['Invoice'],
@@ -36,7 +36,7 @@ def get_data():
 			},
 			{
 				'label': ['Reference'],
-				'items': ['Vehicle Log']
+				'items': ['Vehicle Log', 'Maintenance Schedule', 'Customer Feedback']
 			},
 		]
 
@@ -54,6 +54,8 @@ def get_data():
 			'Purchase Order': 'applies_to_vehicle',
 			'Purchase Receipt': 'applies_to_vehicle',
 			'Purchase Invoice': 'applies_to_vehicle',
+			'Appointment': 'applies_to_vehicle',
+			'Customer Feedback': 'applies_to_vehicle',
 			'Maintenance Schedule': 'serial_no'
 		},
 		'transactions': vehicle_domain_sections
