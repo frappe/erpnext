@@ -134,7 +134,7 @@ class AssetDepreciationSchedule(Document):
 	):
 		asset_doc.validate_asset_finance_books(row)
 
-		value_after_depreciation = asset_doc._get_value_after_depreciation_for_making_schedule(row)
+		value_after_depreciation = _get_value_after_depreciation_for_making_schedule(asset_doc, row)
 		row.value_after_depreciation = value_after_depreciation
 
 		if update_asset_finance_book_row:
@@ -323,6 +323,17 @@ class AssetDepreciationSchedule(Document):
 			d.accumulated_depreciation_amount = flt(
 				accumulated_depreciation, d.precision("accumulated_depreciation_amount")
 			)
+
+
+def _get_value_after_depreciation_for_making_schedule(asset_doc, fb_row):
+	if asset_doc.docstatus == 1 and fb_row.value_after_depreciation:
+		value_after_depreciation = flt(fb_row.value_after_depreciation)
+	else:
+		value_after_depreciation = flt(asset_doc.gross_purchase_amount) - flt(
+			asset_doc.opening_accumulated_depreciation
+		)
+
+	return value_after_depreciation
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
