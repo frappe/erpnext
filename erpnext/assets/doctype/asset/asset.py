@@ -693,14 +693,16 @@ class Asset(AccountsController):
 
 	def get_value_after_depreciation(self, finance_book=None):
 		if not self.calculate_depreciation:
-			return self.value_after_depreciation
+			return flt(self.value_after_depreciation, self.precision("gross_purchase_amount"))
 
 		if not finance_book:
-			return self.get("finance_books")[0].value_after_depreciation
+			return flt(
+				self.get("finance_books")[0].value_after_depreciation, self.precision("gross_purchase_amount")
+			)
 
 		for row in self.get("finance_books"):
 			if finance_book == row.finance_book:
-				return row.value_after_depreciation
+				return flt(row.value_after_depreciation, self.precision("gross_purchase_amount"))
 
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
