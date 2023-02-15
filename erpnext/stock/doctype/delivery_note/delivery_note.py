@@ -189,14 +189,14 @@ class DeliveryNote(SellingController):
 				if bin_qty:
 					d.actual_qty = flt(bin_qty.actual_qty)
 					d.projected_qty = flt(bin_qty.projected_qty)
-	# def submit(self):
-	# 	time.sleep(1)
-	# 	if(self.is_return==1):
-	# 		self.queue_action('submit',queue_name="return")
-	# 	elif(self.section in get_config_by_name('dn_queue_section',[])):
-	# 		self.queue_action('submit',queue_name="dn_primary")
-	# 	else:
-	# 		self.queue_action('submit',queue_name="dn_secondary")
+	def submit(self):
+		time.sleep(1)
+		if(self.is_return==1):
+			self.queue_action('submit',queue_name="return")
+		elif(self.section in get_config_by_name('dn_queue_section',[])):
+			self.queue_action('submit',queue_name="dn_primary")
+		else:
+			self.queue_action('submit',queue_name="dn_secondary")
 
 	def before_save(self):
 		## id returnable
@@ -306,13 +306,13 @@ class DeliveryNote(SellingController):
 		from nrp_manufacturing.modules.gourmet.delivery_note.delivery_note import update_stock_ledger
 		DeliveryNote.update_stock_ledger = update_stock_ledger
 		self.update_stock_ledger()
-		stock_gl = frappe.new_doc('Stock GL Queue')
-		stock_gl.stock_entry = self.name
-		stock_gl.save(ignore_permissions=True)
-		# time.sleep(1)
-		# frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
-		# #self.make_gl_entries()
-		# frappe.db.sql("UPDATE `tabDelivery Note` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
+		# stock_gl = frappe.new_doc('Stock GL Queue')
+		# stock_gl.stock_entry = self.name
+		# stock_gl.save(ignore_permissions=True)
+		time.sleep(1)
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
+		#self.make_gl_entries()
+		frappe.db.sql("UPDATE `tabDelivery Note` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
 			
 
 	def on_cancel(self):
