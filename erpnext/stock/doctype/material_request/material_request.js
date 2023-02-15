@@ -108,12 +108,12 @@ frappe.ui.form.on('Material Request', {
 						() => frm.events.create_pick_list(frm), __('Create'));
 				}
 
-				if (frm.doc.material_request_type === "Material Transfer") {
+				if (frm.doc.material_request_type === 'Material Transfer') {
 					add_create_pick_list_button();
-					frm.add_custom_button(__("Material Transfer"),
+					frm.add_custom_button(__('Material Transfer'),
 						() => frm.events.make_stock_entry(frm), __('Create'));
 
-					frm.add_custom_button(__("Material Transfer (In Transit)"),
+					frm.add_custom_button(__('Material Transfer (In Transit)'),
 						() => frm.events.make_in_transit_stock_entry(frm), __('Create'));
 				}
 
@@ -372,7 +372,7 @@ frappe.ui.form.on('Material Request', {
 				})
 			},
 			__('In Transit Transfer'),
-			__("Create Stock Entry")
+			__('Create Stock Entry')
 		)
 	},
 
