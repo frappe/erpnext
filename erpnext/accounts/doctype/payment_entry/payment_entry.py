@@ -1149,8 +1149,10 @@ def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, p
 	})
 
 @frappe.whitelist()
-def Update_payment_entry_status(name):
-	
+def Update_payment_entry_status(payment_entry_no):
+	update_status = frappe.db.sql("""UPDATE `tabPayment Entry` SET `status`='Paid' WHERE NAME={payment_entry_no}'""".format(payment_entry_no=payment_entry_no), as_dict=True)
+	frappe.db.commit();
+	return True;
 
 @frappe.whitelist()
 def make_payment_order(source_name, target_doc=None):
