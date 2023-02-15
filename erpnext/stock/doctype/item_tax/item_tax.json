@@ -5,8 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "item_tax_template",
-  "tax_category",
-  "valid_from"
+  "tax_category"
  ],
  "fields": [
   {
@@ -27,17 +26,11 @@
    "oldfieldname": "tax_rate",
    "oldfieldtype": "Currency",
    "options": "Tax Category"
-  },
-  {
-   "fieldname": "valid_from",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Valid From"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:34:52.516863",
+ "modified": "2023-02-16 00:19:34.741056",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Tax",

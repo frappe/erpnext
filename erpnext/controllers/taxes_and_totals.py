@@ -9,7 +9,6 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 from six import iteritems
-from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 
 

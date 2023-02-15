@@ -63,9 +63,9 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		args['posting_date'] = doc.get('posting_date')
 		args['transaction_date'] = doc.get('transaction_date') or doc.get('posting_date')
 
-	get_item_tax_template(args, item, out)
-	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
-		else out.get("item_tax_template"), as_json=True)
+	out["item_tax_template"] = get_item_tax_template(args, item)
+	out["item_tax_rate"] = get_item_tax_map(out.get("item_tax_template"), args.company,
+		transaction_date=args.bill_date or args.transaction_date, as_json=True)
 
 	get_party_item_code(args, item, out)
 
@@ -400,23 +400,31 @@ def update_barcode_value(out):
 
 
 @frappe.whitelist()
-def get_item_tax_info(company, tax_category, item_codes):
+def get_multiple_item_tax_templates(args, item_codes):
 	out = {}
-	if isinstance(item_codes, string_types):
+
+	if isinstance(args, str):
+		args = json.loads(args)
+	if isinstance(item_codes, str):
 		item_codes = json.loads(item_codes)
+
+	args = frappe._dict(args)
 
 	for item_code in item_codes:
 		if not item_code or item_code in out:
 			continue
-		out[item_code] = {}
+
 		item = frappe.get_cached_doc("Item", item_code)
-		get_item_tax_template({"tax_category": tax_category}, item, out[item_code])
-		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
+
+		out[item_code] = {}
+		out[item_code]["item_tax_template"] = get_item_tax_template(args, item)
+		out[item_code]["item_tax_rate"] = get_item_tax_map(out[item_code].get("item_tax_template"), args.company,
+			transaction_date=args.bill_date or args.transaction_date or args.posting_date, as_json=True)
 
 	return out
 
 
-def get_item_tax_template(args, item, out):
+def get_item_tax_template(args, item):
 	"""
 		args = {
 			"tax_category": None
@@ -427,58 +435,52 @@ def get_item_tax_template(args, item, out):
 
 	if not item_tax_template and item.customs_tariff_number:
 		customs_tariff_no_doc = frappe.get_cached_doc("Customs Tariff Number", item.customs_tariff_number)
-		item_tax_template = _get_item_tax_template(args, customs_tariff_no_doc.taxes, out)
+		item_tax_template = _get_item_tax_template(args, customs_tariff_no_doc.taxes)
 
 	if not item_tax_template:
 		default_values = get_item_default_values(item, args)
-		item_tax_template = _get_item_tax_template(args, default_values.taxes or [], out)
+		item_tax_template = _get_item_tax_template(args, default_values.taxes or [])
+
+	return item_tax_template
 
 
-def _get_item_tax_template(args, taxes, out={}, for_validate=False):
-	taxes_with_validity = []
-	taxes_with_no_validity = []
-
-	for tax in taxes:
-		if tax.valid_from:
-			# In purchase Invoice first preference will be given to supplier invoice date
-			# if supplier date is not present then posting date
-			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
-
-			if getdate(tax.valid_from) <= getdate(validation_date):
-				taxes_with_validity.append(tax)
-		else:
-			taxes_with_no_validity.append(tax)
-
-	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
-	else:
-		taxes = taxes_with_no_validity
-
-	if for_validate:
-		return [tax.item_tax_template for tax in taxes if (cstr(tax.tax_category) == cstr(args.get('tax_category')) \
-			and (tax.item_tax_template not in taxes))]
-
-	# all templates have validity and no template is valid
-	if not taxes_with_validity and (not taxes_with_no_validity):
-		return None
-
+def _get_item_tax_template(args, taxes):
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
-			out["item_tax_template"] = tax.item_tax_template
 			return tax.item_tax_template
-	return None
 
 
 @frappe.whitelist()
-def get_item_tax_map(company, item_tax_template, as_json=True):
+def get_multiple_item_tax_maps(item_tax_templates, company, transaction_date=None, as_json=True):
+	out = {}
+
+	if isinstance(item_tax_templates, str):
+		item_tax_templates = json.loads(item_tax_templates)
+
+	for item_tax_template in item_tax_templates:
+		out[item_tax_template] = get_item_tax_map(item_tax_template, company,
+			transaction_date=transaction_date, as_json=as_json)
+
+	return out
+
+
+@frappe.whitelist()
+def get_item_tax_map(item_tax_template, company, transaction_date=None, as_json=True):
 	item_tax_map = {}
+
 	if item_tax_template:
 		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
-		for d in template.taxes:
-			if frappe.get_cached_value("Account", d.tax_type, "company") == company:
-				item_tax_map[d.tax_type] = d.tax_rate
 
-	return json.dumps(item_tax_map) if as_json else item_tax_map
+		sorted_taxes = sorted(template.get("taxes"), key=lambda t: (bool(t.valid_from), getdate(t.valid_from)))
+		for d in sorted_taxes:
+			if frappe.get_cached_value("Account", d.tax_type, "company") != company:
+				continue
+			if d.valid_from and getdate(d.valid_from) > getdate(transaction_date):
+				continue
+
+			item_tax_map[d.tax_type] = d.tax_rate
+
+	return json.dumps(item_tax_map) if cint(as_json) else item_tax_map
 
 
 @frappe.whitelist()

@@ -5,9 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint
+from frappe.utils import cint, cstr
 from frappe.model.document import Document
-import json
 from six import string_types
 
 item_filter_fields = ['item_code', 'item_group', 'brand', 'item_source']
@@ -48,10 +47,11 @@ class ItemDefaultRule(Document):
 		check_list = []
 		for d in self.get('taxes'):
 			if d.item_tax_template:
-				if d.item_tax_template in check_list:
+				key = (d.item_tax_template, cstr(d.tax_category))
+				if key in check_list:
 					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
 				else:
-					check_list.append(d.item_tax_template)
+					check_list.append(key)
 
 	def get_applicable_rule_dict(self, filters):
 		required_filters = self.get_required_filters()

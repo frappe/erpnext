@@ -1129,38 +1129,51 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	transaction_date: function() {
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
-			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
+
+			return frappe.run_serially([
+				() => this.frm.trigger("currency"),
+				() => this.update_item_tax_map(),
+			]);
 		}
 	},
 
 	posting_date: function() {
-		var me = this;
 		if (this.frm.doc.posting_date) {
 			this.frm.posting_date = this.frm.doc.posting_date;
 
-			if ((this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) ||
-				(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.supplier)) {
-				return frappe.call({
-					method: "erpnext.accounts.party.get_due_date",
-					args: {
-						"posting_date": me.frm.doc.posting_date,
-						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
-						"bill_date": me.frm.doc.bill_date,
-						"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
-						"company": me.frm.doc.company
-					},
-					callback: function(r, rt) {
-						if(r.message) {
-							me.frm.doc.due_date = r.message;
-							refresh_field("due_date");
-							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
-							me.recalculate_terms();
-						}
+			return frappe.run_serially([
+				() => this.get_due_date(),
+				() => this.frm.trigger("currency"),
+				() => this.update_item_tax_map(),
+			]);
+		}
+	},
+
+	get_due_date: function () {
+		let me = this;
+
+		if (
+			(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer)
+			|| (this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.supplier)
+		) {
+			return frappe.call({
+				method: "erpnext.accounts.party.get_due_date",
+				args: {
+					"posting_date": me.frm.doc.posting_date,
+					"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
+					"bill_date": me.frm.doc.bill_date,
+					"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
+					"company": me.frm.doc.company
+				},
+				callback: function (r, rt) {
+					if (r.message) {
+						me.frm.doc.due_date = r.message;
+						refresh_field("due_date");
+
+						return me.recalculate_terms();
 					}
-				})
-			} else {
-				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
-			}
+				}
+			});
 		}
 	},
 
@@ -1190,7 +1203,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	bill_date: function() {
-		this.posting_date();
+		return this.posting_date();
 	},
 
 	recalculate_terms: function() {
@@ -2099,31 +2112,36 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	tax_category: function() {
-		var me = this;
-		if(me.frm.updating_party_details) return;
+		let me = this;
+		if (me.frm.updating_party_details) {
+			return;
+		}
 
-		frappe.run_serially([
-			() => this.update_item_tax_map(),
+		return frappe.run_serially([
+			() => this.update_item_tax_templates(true),
 			() => erpnext.utils.set_taxes(this.frm, "tax_category"),
 		]);
 	},
 
 	item_tax_template: function(doc, cdt, cdn) {
-		var me = this;
-		if(me.frm.updating_party_details) return;
+		let item = frappe.get_doc(cdt, cdn);
+		return this.get_item_tax_template(item);
+	},
 
-		var item = frappe.get_doc(cdt, cdn);
+	get_item_tax_template: function (item) {
+		let me = this;
 
-		if(item.item_tax_template) {
+		if (item.item_tax_template) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_item_tax_map",
 				args: {
-					company: me.frm.doc.company,
 					item_tax_template: item.item_tax_template,
-					as_json: true
+					company: me.frm.doc.company,
+					transaction_date: me.frm.doc.bill_date || me.frm.doc.transaction_date || me.frm.doc.posting_date,
+					as_json: 1
 				},
 				callback: function(r) {
-					if(!r.exc) {
+					if (!r.exc) {
 						item.item_tax_rate = r.message;
 						me.add_taxes_from_item_tax_template(item.item_tax_rate);
 						me.calculate_taxes_and_totals();
@@ -2136,34 +2154,60 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	update_item_tax_map: function() {
-		var me = this;
-		var item_codes = [];
-		$.each(this.frm.doc.items || [], function(i, item) {
-			if(item.item_code) {
-				item_codes.push(item.item_code);
-			}
-		});
+	update_item_tax_map: function () {
+		let me = this;
+		let item_tax_templates = (this.frm.doc.items || []).map(d => d.item_tax_template).filter(d => d);
 
-		if(item_codes.length) {
+		if (me.frm.doc.company && item_tax_templates.length) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_item_tax_info",
+				method: "erpnext.stock.get_item_details.get_multiple_item_tax_maps",
 				args: {
+					item_tax_templates: item_tax_templates,
 					company: me.frm.doc.company,
-					tax_category: cstr(me.frm.doc.tax_category),
+					transaction_date: me.frm.doc.bill_date || me.frm.doc.transaction_date || me.frm.doc.posting_date,
+					as_json: 1
+				},
+				callback: function(r) {
+					if (!r.exc) {
+						$.each(me.frm.doc.items || [], function(i, item) {
+							if (item.item_tax_template && r.message.hasOwnProperty(item.item_tax_template)) {
+								item.item_tax_rate = r.message[item.item_tax_template];
+								me.add_taxes_from_item_tax_template(item.item_tax_rate);
+							}
+						});
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
+		}
+	},
+
+	update_item_tax_templates: function() {
+		let me = this;
+		let item_codes = (this.frm.doc.items || []).map(d => d.item_code).filter(d => d);
+
+		if (me.frm.doc.company && item_codes.length) {
+			return this.frm.call({
+				method: "erpnext.stock.get_item_details.get_multiple_item_tax_templates",
+				args: {
+					args: {
+						company: me.frm.doc.company,
+						tax_category: cstr(me.frm.doc.tax_category),
+						transaction_date: me.frm.doc.transaction_date,
+						posting_date: me.frm.doc.posting_date,
+						bill_date: me.frm.doc.bill_date,
+					},
 					item_codes: item_codes
 				},
 				callback: function(r) {
-					if(!r.exc) {
+					if (!r.exc) {
 						$.each(me.frm.doc.items || [], function(i, item) {
 							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
-								if (!item.item_tax_template) {
-									item.item_tax_template = r.message[item.item_code].item_tax_template;
-									item.item_tax_rate = r.message[item.item_code].item_tax_rate;
-								}
+								item.item_tax_template = r.message[item.item_code].item_tax_template;
+								item.item_tax_rate = r.message[item.item_code].item_tax_rate;
 								me.add_taxes_from_item_tax_template(item.item_tax_rate);
 							} else {
-								item.item_tax_template = "";
+								item.item_tax_template = null;
 								item.item_tax_rate = "{}";
 							}
 						});
@@ -2414,7 +2458,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		const doc = this.frm.doc;
 		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
 			var posting_date = doc.posting_date || doc.transaction_date;
-			frappe.call({
+			return frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
 					terms_template: doc.payment_terms_template,
