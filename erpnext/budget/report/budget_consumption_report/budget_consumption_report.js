@@ -58,7 +58,8 @@ frappe.query_reports["Budget Consumption Report"] = {
 				}
 				query_report.trigger_refresh();	
 			},
-			"reqd":1
+			"reqd":1,
+			"default":"Cost Center"
 		},
 		{
 			"fieldname": "project",

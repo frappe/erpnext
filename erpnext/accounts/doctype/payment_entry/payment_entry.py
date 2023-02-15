@@ -23,7 +23,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
+from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices,check_clearance_date
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
 	get_supplier_block_status,
@@ -97,6 +97,7 @@ class PaymentEntry(AccountsController):
 		self.update_expense_claim(submit=1)
 
 	def on_cancel(self):
+		check_clearance_date(self.doctype, self.name)
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
@@ -106,7 +107,6 @@ class PaymentEntry(AccountsController):
 		self.set_payment_req_status()
 		self.set_status()
 		self.update_expense_claim(cancel=1)
-
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
 

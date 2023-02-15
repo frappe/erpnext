@@ -4,7 +4,6 @@
 
 from json import loads
 from typing import TYPE_CHECKING, List, Optional, Tuple
-
 import frappe
 import frappe.defaults
 from frappe import _, qb, throw
@@ -363,7 +362,11 @@ def get_count_on(account, fieldname, date):
 
 		return count
 
-
+@frappe.whitelist()
+def check_clearance_date(dt, dn):
+	doc = frappe.get_doc(dt, dn)
+	if doc.clearance_date:
+		frappe.msgprint("Cannot cancel this document as <b>Bank Reconciliation</b> has already done on {}".format(doc.clearance_date), raise_exception= True)
 @frappe.whitelist()
 def add_ac(args=None):
 	from frappe.desk.treeview import make_tree_args

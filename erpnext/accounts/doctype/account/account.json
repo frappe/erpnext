@@ -10,7 +10,6 @@
  "engine": "InnoDB",
  "field_order": [
   "properties",
-  "column_break0",
   "disabled",
   "account_name",
   "account_number",
@@ -53,11 +52,6 @@
    "fieldname": "properties",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "fieldname": "account_name",
@@ -315,7 +309,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-01-05 11:10:17.470922",
+ "modified": "2023-02-07 11:02:13.841312",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -371,7 +365,7 @@
    "write": 1
   }
  ],
- "search_fields": "account_number",
+ "search_fields": "account_number, account_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
