@@ -456,7 +456,7 @@ class PaymentEntry(AccountsController):
 		bank_account = self.paid_to if self.payment_type == "Receive" else self.paid_from
 		bank_account_type = frappe.db.get_value("Account", bank_account, "account_type")
 
-		if bank_account_type == "Bank":
+		if bank_account_type == "Bank" and self.mode_of_payment != 'Cheque':
 			if not self.reference_no or not self.reference_date:
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
