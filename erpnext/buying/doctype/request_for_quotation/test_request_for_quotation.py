@@ -8,6 +8,7 @@ from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 	create_supplier_quotation,
+	get_pdf,
 	make_supplier_quotation_from_rfq,
 )
 from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
@@ -123,6 +124,11 @@ class TestRequestforQuotation(FrappeTestCase):
 
 		rfq.status = "Draft"
 		rfq.submit()
+
+	def test_get_pdf(self):
+		rfq = make_request_for_quotation()
+		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
+		self.assertEqual(frappe.local.response.type, "pdf")
 
 
 def make_request_for_quotation(**args):
