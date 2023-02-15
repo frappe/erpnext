@@ -169,6 +169,22 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+		if (frm.doc.status == 'Submitted' && frm.doc.docstatus == 1 && frm.doc.payment_type == "Pay") {
+			frm.add_custom_button(__('Is Paid'), function () {
+				frappe.call({
+					method: "erpnext.accounts.doctype.payment_entry.payment_entry.Update_payment_entry_status",
+					args: {
+						payment_entry_no: frm.doc.name,
+					},
+					freeze: true,
+					callback: function(r) {
+						console.log(r)
+						if(r.message) {
+						}
+					}
+				});
+			});
+		}
 	},
 
 	validate_company: (frm) => {
