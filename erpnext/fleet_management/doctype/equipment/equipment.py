@@ -3,16 +3,19 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, getdate
+from frappe.utils import nowdate, getdate, cint
 
 class Equipment(Document):
 	def validate(self):
-		pass
+		self.update_equipment_hiring_form()
 		# self.validate_asset_fuelbook()
 	
 	# def validate_asset_fuelbook(self):
 	# 	if self.asset_code:
-
+	def update_equipment_hiring_form(self):
+		if self.supplier != frappe.db.get_value(self.doctype, self.name,"supplier") and cint(self.hired_equipment) == 1:
+			frappe.db.sql("update `tabEquipment Hiring Form` set supplier = '{}' where equipment = '{}'".format(self.supplier, self.name))
+		
 	@frappe.whitelist()
 	def create_equipment_history(self, branch, on_date, ref_doc, purpose):
 		from_date = on_date
