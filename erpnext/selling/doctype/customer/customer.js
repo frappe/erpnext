@@ -148,7 +148,6 @@ frappe.ui.form.on("Customer", {
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
-
 		var grid = cur_frm.get_field("sales_team").grid;
 		grid.set_column_disp("allocated_amount", false);
 		grid.set_column_disp("incentives", false);
@@ -165,7 +164,6 @@ frappe.ui.form.on("Customer", {
 				frm.refresh();
 			}
 		});
-
 	},
 	show_party_link_dialog: function(frm) {
 		const dialog = new frappe.ui.Dialog({
@@ -261,51 +259,31 @@ frappe.ui.form.on('Customer',  {
 			}
 		});
 
-		var last_row;
-		//create new entry in contact person 
-		var arr =[];
-		var arr1 =[];
-		var arr2 =[];
-		var arr3 =[];
-		var arr4=[];
-		var doc2 = cur_frm.doc.customer_contact_person_details;
 		$.each(cur_frm.doc.customer_contact_person_details || [], function (i, row) {
-			
-			arr.push(row.person_name)
-			arr1.push(row.designation)
-			arr2.push(row.primary_email_id)
-			arr3.push(row.department)
-			arr4.push(row.primary_mobile_number)
 
-		})
-		last_row = doc2[arr.length-1]
-
-		if (!last_row.contact_name){
-			frappe.call({
-				async:false,
-				method:"erpnext.selling.doctype.customer.customer.contact_person",
-				args: {
-					customer_name: frm.doc.customer_name,
-					
-					person_name:arr[arr.length-1],
-					designation:arr1[arr1.length-1],
-					primary_email_id:arr2[arr2.length-1],
-					department:arr3[arr3.length-1],
-					primary_mobile_number:arr4[arr4.length-1]
-			
-				},		
-			})
-			//get last created contact name
-			frappe.call({
-				method:"erpnext.selling.doctype.customer.customer.last_document",
-				async:false,
-				callback: function (r) {
+			if (!row.contact_name){
+				frappe.call({
+					async:false,
+					method:"erpnext.selling.doctype.customer.customer.contact_person",
+					args: {
+						customer_name: frm.doc.customer_name,
+						person_name:row.person_name,
+						designation:row.designation,
+						primary_email_id:row.primary_email_id,
+						department:row.department,
+						primary_mobile_number:row.primary_mobile_number,
+						name:row.name,
+					},	
+					callback: function (r) {
 						console.log(r)
-						last_row.contact_name = r.message;
-						console.log("last_row.person_name",last_row.person_name);
-				}
-			})
-		}
+					}	
+				})
+			}
+		})
+		setTimeout(function(){
+			window.location.reload(1);
+		}, 200);
+
 // update customer contact person details  automatiicaly that details update in customer contact person
 		$.each(cur_frm.doc.customer_contact_person_details || [], function (i, v) {
 			if(v.contact_name){
@@ -333,7 +311,7 @@ frappe.ui.form.on('Customer',  {
 						primary_email_id = (r.message[0].primary_email_id);
 						person_name = r.message[0].name
 
-						if ((primary_email_id && primary_email_id != v.primary_email_id || (primary_email_id == "" || primary_email_id == undefined)) || (designation && designation != v.designation|| (designation == "" || designation == undefined)) || (department && department != v.department|| (department == "" || department == undefined)) || (primary_mobile_number && primary_mobile_number != v.primary_mobile_number|| (primary_mobile_number == "" || primary_mobile_number == undefined))){
+						if ((primary_email_id && primary_email_id != v.primary_email_id ||(city != frm.doc.city) || (primary_email_id == "" || primary_email_id == undefined)) || (designation && designation != v.designation|| (designation == "" || designation == undefined)) || (department && department != v.department|| (department == "" || department == undefined)) || (primary_mobile_number && primary_mobile_number != v.primary_mobile_number|| (primary_mobile_number == "" || primary_mobile_number == undefined))){
 							frappe.call({
 								"method": "frappe.client.set_value",
 								"args": {
@@ -351,44 +329,46 @@ frappe.ui.form.on('Customer',  {
 					}
 				});
 			}
-		})
-		
+		})	
 	},
-	setup: function(frm){
-		frm.events.get_country(frm);
-    },
 	country: function(frm){
-        frappe.call({
-            method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
-            args: {
-              country: frm.doc.country
-            }, 
-            callback: function(r) {
-              frm.set_df_property("state", "options", r.message)
-				frm.set_value("city", null)
-            }
-        })
+        frm.set_value("city", null)
+		frm.set_value('state', null)
+		return {
+			filters: {
+				'country': frm.doc.country,
+			}
+		}
     },
-	get_country: function(frm){
-        frappe.call({
-            method: "axis_india_app.Countrydata.countrydata.cities_in_country", 
-            args: {
-              country: frm.doc.country
-            }, 
-            callback: function(r) {
-              frm.set_df_property("state", "options", r.message)
-            }
-        })
-    },
+	city :function(frm){
+		frm.set_query('city', function() {
+			return {
+				filters: {
+					'country': frm.doc.country,
+				}
+			}
+		});
+	},
 	state:function(frm){
 		frm.set_value("city", null)
 		frm.set_query('city', function() {
 			return {
 				filters: {
-				  'state': frm.doc.state
+					'state': frm.doc.state,
 				}
 			}
 		});
+	},
+	region: function(frm) {
+		frm.set_value('state', null)
+		frm.set_query('state', function(){
+			return {
+				filters: {
+					'country': frm.doc.country,
+					'region': frm.doc.region
+				}
+			}
+		})
 	},
 	refresh: function (frm) {
 		//once delete customer then delete there address,delete customer child table and customer form also delete
@@ -430,7 +410,7 @@ frappe.ui.form.on('Customer',  {
 	},
 })
 frappe.ui.form.on("Customer Contact Person Details",{
-//if customer_contact_person_delect then delect that person in customer contact person
+// if customer_contact_person_delect then delect that person in customer contact person
 	before_customer_contact_person_details_remove:function(frm,cdt,cdn){
 		var row = locals[cdt][cdn];
 		if (row.person_name== "" || row.contact_name == ""){
@@ -445,5 +425,30 @@ frappe.ui.form.on("Customer Contact Person Details",{
 				}
 			})
 		}
-	}
+		frm.save();
+	},
+	primary_email_id: function(frm,cdt,cdn)
+	{	var row = locals[cdt][cdn];
+		if (row.primary_email_id){
+			frappe.call({
+				method: "erpnext.selling.doctype.customer.customer.validate_mail",
+				async:false,
+				args: {
+					primary_email_id: row.primary_email_id,
+				}
+			})
+		}
+	},
+	primary_mobile_number: function(frm,cdt,cdn)
+	{	var row = locals[cdt][cdn];
+		if (row.primary_mobile_number){
+			frappe.call({
+				method: "erpnext.selling.doctype.customer.customer.validate_phone",
+				async:false,
+				args: {
+					primary_mobile_number: row.primary_mobile_number,
+				}
+			})
+		}
+	},
  });

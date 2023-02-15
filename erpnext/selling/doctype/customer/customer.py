@@ -5,7 +5,6 @@
 import json
 
 
-
 import frappe
 from frappe.model.document import Document
 import frappe
@@ -756,15 +755,38 @@ def contact_person(**args):
 	contact_person_detail.primary_mobile_number = args.get('primary_mobile_number')
 	contact_person_detail.primary_email_id = args.get('primary_email_id')
 	contact_person_detail.insert(ignore_mandatory=True, ignore_permissions = True)
-
-@frappe.whitelist()
-def last_document():
 	doc1=frappe.get_last_doc("Customer Contact Person")
+	doc2 = frappe.get_doc("Customer",args.get('customer_name'))
+
+	for d in doc2.get('customer_contact_person_details'):
+		frappe.db.set_value("Customer Contact Person Details",{"name": args.get('name')} ,"contact_name",doc1.name)	
 	return doc1.name
+
+
 
 @frappe.whitelist()
 def delete_customer_contact_person(name):
 	frappe.delete_doc("Customer Contact Person", name)	
+
+
+
+@frappe.whitelist()
+def validate_mail(primary_email_id):
+	frappe.utils.validate_email_address(primary_email_id, throw=True)
+
+
+
+@frappe.whitelist()
+def validate_phone(primary_mobile_number):
+	frappe.utils.validate_phone_number(primary_mobile_number, throw=True)
+
+
+
+@frappe.whitelist()
+def remove_person(name):
+	frappe.delete_doc("Customer Contact Person", name)	
+
+
 
 @frappe.whitelist()
 def remove_customer_address(name,address_name):

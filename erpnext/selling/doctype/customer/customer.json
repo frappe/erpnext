@@ -498,7 +498,7 @@
    "fieldname": "region",
    "fieldtype": "Select",
    "label": "Region",
-   "options": "\nSouth\nNorth\nWest\nEast\nMEA\nSEA\nOther",
+   "options": "\nSouth\nNorth\nWest\nEast\nCenter\nMEA\nSEA\nOther",
    "reqd": 1
   },
   {
@@ -507,13 +507,6 @@
    "label": "Country",
    "options": "Country",
    "reqd": 1
-  },
-  {
-   "fieldname": "state",
-   "fieldtype": "Select",
-   "label": "State",
-   "no_copy": 1,
-   "print_hide": 1
   },
   {
    "fieldname": "city",
@@ -559,6 +552,12 @@
    "fieldname": "address_line2",
    "fieldtype": "Data",
    "label": "Address Line 2"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Link",
+   "label": "State",
+   "options": "State"
   }
  ],
  "hide_toolbar": 1,
@@ -573,7 +572,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-02-14 15:49:49.216025",
+ "modified": "2023-02-15 17:38:14.922103",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
