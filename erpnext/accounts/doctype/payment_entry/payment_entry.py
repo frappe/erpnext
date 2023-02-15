@@ -1149,6 +1149,10 @@ def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, p
 	})
 
 @frappe.whitelist()
+def Update_payment_entry_status(name):
+	
+
+@frappe.whitelist()
 def make_payment_order(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
