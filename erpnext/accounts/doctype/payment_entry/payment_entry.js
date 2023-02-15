@@ -422,7 +422,7 @@ frappe.ui.form.on('Payment Entry', {
 										(r.message['account_type'] == "Bank" ? 1 : 0));
 									if(!frm.doc.received_amount && frm.doc.paid_amount)
 										frm.events.paid_amount(frm);
-								} else if(frm.doc.payment_type=="Pay" && currency_field=="paid_from_account_currency") {
+								} else if(frm.doc.payment_type=="Pay" && frm.doc.payment_type=="Cheque" && currency_field=="paid_from_account_currency") {
 									frm.toggle_reqd(["reference_no", "reference_date"],
 										(r.message['account_type'] == "Bank" ? 1 : 0));
 

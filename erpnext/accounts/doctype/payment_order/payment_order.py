@@ -151,29 +151,29 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 
 
 def get_next_cheque_number(doc,count):
-			cheque_no = frappe.db.sql("""
+		cheque_no = frappe.db.sql("""
+			SELECT
+				cheque_number,
+				name
+				From
+				`tabCheque Book Series`
+				WHERE
+			parent = (
 				SELECT
-					cheque_number,
-					name
-					From
-					`tabCheque Book Series`
-					WHERE
-				parent = (
-					SELECT
-					name
-					FROM
-					`tabCheque Book Enrollment`
-					WHERE
-					account_name = '{0}'
-					and docstatus = 1
-					and is_active = 1
-					)
-				and status = 'Not Used'
-				ORDER BY cast(cheque_number as UNSIGNED) asc 
-				LIMIT {1} 
-				FOR UPDATE
-			""".format(doc.company_bank_account,count))
-			if not cheque_no:				
-				frappe.throw("No Checque Book Avaiable for this Bank "+doc.company_bank_account)
-			else:
-				return cheque_no
+				name
+				FROM
+				`tabCheque Book Enrollment`
+				WHERE
+				account_name = '{0}'
+				and docstatus = 1
+				and is_active = 1
+				)
+			and status = 'Not Used'
+			ORDER BY cast(cheque_number as UNSIGNED) asc 
+			LIMIT {1} 
+			FOR UPDATE
+		""".format(doc.company_bank_account,count))
+		if not cheque_no:				
+			frappe.throw("No Checque Book Avaiable for this Bank "+doc.company_bank_account)
+		else:
+			return cheque_no
