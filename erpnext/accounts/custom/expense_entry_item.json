@@ -1,0 +1,31 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Expense Entry Item",
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2021-11-01 17:36:04.509927",
+   "default_value": null,
+   "doc_type": "Expense Entry Item",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "cost_center",
+   "idx": 0,
+   "modified": "2021-11-01 17:36:04.509927",
+   "modified_by": "rameez.jamil@gourmetpakistan.com",
+   "name": "Expense Entry Item-cost_center-reqd",
+   "owner": "rameez.jamil@gourmetpakistan.com",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "reqd",
+   "property_type": "Check",
+   "value": "1"
+  }
+ ],
+ "sync_on_migrate": 1
+}
