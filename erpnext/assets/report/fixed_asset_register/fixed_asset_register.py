@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, formatdate, getdate
+from frappe.utils import cstr, flt, formatdate, getdate
 
 from erpnext.accounts.report.financial_statements import (
 	get_fiscal_year_data,
@@ -102,13 +102,9 @@ def get_data(filters):
 		]
 		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
-	finance_book_filter = ("is", "not set")
-	if filters.finance_book:
-		finance_book_filter = ("=", filters.finance_book)
-
 	assets_linked_to_fb = frappe.db.get_all(
 		doctype="Asset Finance Book",
-		filters={"finance_book": finance_book_filter},
+		filters={"finance_book": filters.finance_book or ("is", "not set")},
 		pluck="parent",
 	)
 
@@ -194,7 +190,7 @@ def get_depreciation_amount_of_asset(asset, depreciation_amount_map, filters):
 	else:
 		depr_amount = get_manual_depreciation_amount_of_asset(asset, filters)
 
-	return depr_amount
+	return flt(depr_amount, 2)
 
 
 def get_finance_book_value_map(filters):
