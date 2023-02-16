@@ -2,6 +2,7 @@
 # See license.txt
 
 import copy
+from collections import defaultdict
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -185,6 +186,40 @@ class TestSubcontractingOrder(FrappeTestCase):
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
 		self.assertEqual(len(ste.items), len(rm_items))
+
+	def test_make_rm_stock_entry_for_batch_items_with_less_transfer(self):
+		set_backflush_based_on("BOM")
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 5,
+			}
+		]
+
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		itemwise_transfer_qty = defaultdict(int)
+		for item in rm_items:
+			item["qty"] -= 1
+			itemwise_transfer_qty[item["item_code"]] += item["qty"]
+
+		ste = make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+
+		for row in scr.supplied_items:
+			self.assertEqual(row.consumed_qty, itemwise_transfer_qty.get(row.rm_item_code) + 1)
 
 	def test_update_reserved_qty_for_subcontracting(self):
 		# Create RM Material Receipt
