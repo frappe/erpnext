@@ -32,7 +32,7 @@ class POLReceive(StockController):
 
 	def on_cancel(self):
 		self.update_pol_expense()
-		self.make_pol_entry()
+		self.delete_pol_entry()
 		self.make_gl_entries()
 	def balance_check(self):
 		total_balance = 0
