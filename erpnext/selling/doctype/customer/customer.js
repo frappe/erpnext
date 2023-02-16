@@ -332,23 +332,16 @@ frappe.ui.form.on('Customer',  {
 		})	
 	},
 	country: function(frm){
-        frm.set_value("city", null)
-		frm.set_value('state', null)
-		return {
-			filters: {
-				'country': frm.doc.country,
-			}
-		}
-    },
-	city :function(frm){
-		frm.set_query('city', function() {
+        frm.set_value('city', null)
+		frm.set_value('state',null)
+		frm.set_query('city',function(){
 			return {
 				filters: {
 					'country': frm.doc.country,
 				}
 			}
-		});
-	},
+		})
+    },
 	state:function(frm){
 		frm.set_value("city", null)
 		frm.set_query('city', function() {
