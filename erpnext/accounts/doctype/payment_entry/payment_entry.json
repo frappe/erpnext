@@ -239,7 +239,7 @@
    "depends_on": "paid_from",
    "fieldname": "paid_from_account_currency",
    "fieldtype": "Link",
-   "label": "Account Currency",
+   "label": "Account Currency (From)",
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1,
@@ -249,7 +249,7 @@
    "depends_on": "paid_from",
    "fieldname": "paid_from_account_balance",
    "fieldtype": "Currency",
-   "label": "Account Balance",
+   "label": "Account Balance (From)",
    "options": "paid_from_account_currency",
    "print_hide": 1,
    "read_only": 1
@@ -272,7 +272,7 @@
    "depends_on": "paid_to",
    "fieldname": "paid_to_account_currency",
    "fieldtype": "Link",
-   "label": "Account Currency",
+   "label": "Account Currency (To)",
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1,
@@ -282,7 +282,7 @@
    "depends_on": "paid_to",
    "fieldname": "paid_to_account_balance",
    "fieldtype": "Currency",
-   "label": "Account Balance",
+   "label": "Account Balance (To)",
    "options": "paid_to_account_currency",
    "print_hide": 1,
    "read_only": 1
@@ -304,7 +304,7 @@
   {
    "fieldname": "source_exchange_rate",
    "fieldtype": "Float",
-   "label": "Exchange Rate",
+   "label": "Source Exchange Rate",
    "precision": "9",
    "print_hide": 1,
    "reqd": 1
@@ -334,7 +334,7 @@
   {
    "fieldname": "target_exchange_rate",
    "fieldtype": "Float",
-   "label": "Exchange Rate",
+   "label": "Target Exchange Rate",
    "precision": "9",
    "print_hide": 1,
    "reqd": 1
@@ -633,14 +633,14 @@
    "depends_on": "eval:doc.party_type == 'Supplier'",
    "fieldname": "purchase_taxes_and_charges_template",
    "fieldtype": "Link",
-   "label": "Taxes and Charges Template",
+   "label": "Purchase Taxes and Charges Template",
    "options": "Purchase Taxes and Charges Template"
   },
   {
    "depends_on": "eval: doc.party_type == 'Customer'",
    "fieldname": "sales_taxes_and_charges_template",
    "fieldtype": "Link",
-   "label": "Taxes and Charges Template",
+   "label": "Sales Taxes and Charges Template",
    "options": "Sales Taxes and Charges Template"
   },
   {
@@ -733,7 +733,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-08 16:25:43.824051",
+ "modified": "2023-02-14 04:52:30.478523",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
