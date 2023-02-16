@@ -706,7 +706,7 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "no_of_months_exp",
    "fieldtype": "Int",
-   "label": "No of Months (expense)"
+   "label": "No of Months (Expense)"
   },
   {
    "collapsible": 1,
