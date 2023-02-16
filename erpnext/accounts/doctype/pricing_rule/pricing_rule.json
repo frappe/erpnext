@@ -472,7 +472,7 @@
    "description": "If rate is zero them item will be treated as \"Free Item\"",
    "fieldname": "free_item_rate",
    "fieldtype": "Currency",
-   "label": "Rate of Free Item"
+   "label": "Free Item Rate"
   },
   {
    "collapsible": 1,
