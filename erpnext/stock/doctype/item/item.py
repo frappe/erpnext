@@ -849,7 +849,11 @@ class Item(Document):
 		update_description = False
 		strip_item_name = False
 		template = ""
-		if self.is_new() and self.variant_of and cint(frappe.db.get_single_value("Item Variant Settings", "use_extended_description")):
+		if (
+			self.is_new()
+			and self.variant_of
+			and cint(frappe.db.get_single_value("Item Variant Settings", "use_extended_description"))
+		):
 			if cint(frappe.db.get_single_value("Item Variant Settings", "stript_item_name")):
 				template = frappe.get_cached_doc("Item", self.variant_of).item_name
 			update_description = True
@@ -866,7 +870,9 @@ class Item(Document):
 				else:
 					attributes.append(d.attribute)
 					if update_description:
-						self.description = self.description + _("</br>&nbsp;{0}: {1}").format(d.attribute.removeprefix(template), d.attribute_value)
+						self.description = self.description + _("</br>&nbsp;{0}: {1}").format(
+							d.attribute.removeprefix(template), d.attribute_value
+						)
 
 	def validate_variant_attributes(self):
 		if self.is_new() and self.variant_of and self.variant_based_on == "Item Attribute":
