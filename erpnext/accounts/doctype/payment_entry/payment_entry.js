@@ -8,7 +8,14 @@ frappe.ui.form.on('Payment Entry', {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
 			if (!frm.doc.paid_to) frm.set_value("paid_to_account_currency", null);
 		}
-
+		if(frm.doc.payment_order){
+			frm.set_df_property("party", "read_only", 1);
+			frm.set_df_property("party_name", "read_only", 1);
+			var doc_ref = frappe.meta.get_docfield("Payment Entry Reference","reference_doctype", frm.doc.name);
+			doc_ref.read_only = 1;
+			var ref_name = frappe.meta.get_docfield("Payment Entry Reference","reference_name", frm.doc.name);
+			ref_name.read_only = 1;
+		}
 		if(frm.doc.mode_of_payment=='Cheque'){
 			frm.set_df_property('cheque_number', 'reqd', 1);
 			frm.set_query("cheque_number", function() {
