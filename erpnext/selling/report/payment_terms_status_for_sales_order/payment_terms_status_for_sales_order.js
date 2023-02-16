@@ -103,6 +103,11 @@ function get_filters() {
 				return options
 			}
 		},
+		{
+			"fieldname":"only_immediate_upcoming_term",
+			"label": __("Show only the Immediate Upcoming Term"),
+			"fieldtype": "Check",
+		},
 	]
 	return filters;
 }
