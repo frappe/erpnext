@@ -5,10 +5,12 @@
  "engine": "InnoDB",
  "field_order": [
   "tax_type",
-  "tax_rate"
+  "tax_rate",
+  "valid_from"
  ],
  "fields": [
   {
+   "columns": 6,
    "fieldname": "tax_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -17,14 +19,23 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "tax_rate",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "in_list_view": 1,
    "label": "Tax Rate"
+  },
+  {
+   "columns": 2,
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Valid From"
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:38:00.893123",
+ "modified": "2023-02-16 00:21:08.901531",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Item Tax Template Detail",

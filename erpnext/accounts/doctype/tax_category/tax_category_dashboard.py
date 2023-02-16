@@ -7,6 +7,10 @@ def get_data():
 		'fieldname': 'tax_category',
 		'transactions': [
 			{
+				'label': _('Applied On'),
+				'items': ['Item Default Rule', 'Tax Rule', 'Customs Tariff Number']
+			},
+			{
 				'label': _('Pre Sales'),
 				'items': ['Quotation', 'Supplier Quotation']
 			},
@@ -16,15 +20,11 @@ def get_data():
 			},
 			{
 				'label': _('Purchase'),
-				'items': ['Purchase Invoice', 'Purchase Receipt']
+				'items': ['Purchase Invoice', 'Purchase Receipt', 'Purchase Order']
 			},
 			{
 				'label': _('Party'),
 				'items': ['Customer', 'Supplier']
 			},
-			{
-				'label': _('Taxes'),
-				'items': ['Item', 'Tax Rule']
-			}
 		]
 	}

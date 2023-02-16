@@ -22,6 +22,7 @@ def get_data():
 			'Journal Entry': 'party',
 			'Sales Invoice': 'bill_to',
 			'Quotation': 'party_name',
+			'Appointment': 'party_name',
 			'Opportunity': 'party_name',
 			'Vehicle Quotation': 'party_name',
 		},
@@ -29,10 +30,6 @@ def get_data():
 			'party_name': ['Customer', 'quotation_to']
 		},
 		'transactions': vehicle_domain_links + [
-			{
-				'label': _('Pre Sales'),
-				'items': vehicle_quotation + ['Quotation', 'Opportunity']
-			},
 			{
 				'label': _('Orders'),
 				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
@@ -42,7 +39,15 @@ def get_data():
 				'items': ['Payment Entry', 'Journal Entry', 'Subscription']
 			},
 			{
-				'label': _('Support & Projects'),
+				'label': _('Pre Sales'),
+				'items': vehicle_quotation + ['Quotation', 'Opportunity']
+			},
+			{
+				'label': _('Events'),
+				'items': ['Appointment', 'Customer Feedback']
+			},
+			{
+				'label': _('Services'),
 				'items': ['Project', 'Issue']
 			},
 			{
