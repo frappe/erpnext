@@ -291,21 +291,21 @@
   {
    "fieldname": "base_total_costing_amount",
    "fieldtype": "Currency",
-   "label": "Total Costing Amount",
+   "label": "Base Total Costing Amount",
    "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "base_total_billable_amount",
    "fieldtype": "Currency",
-   "label": "Total Billable Amount",
+   "label": "Base Total Billable Amount",
    "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "base_total_billed_amount",
    "fieldtype": "Currency",
-   "label": "Total Billed Amount",
+   "label": "Base Total Billed Amount",
    "print_hide": 1,
    "read_only": 1
   },
@@ -320,10 +320,15 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-06-09 12:08:53.930200",
+=======
+ "modified": "2023-02-14 04:55:41.735991",
+>>>>>>> 4d79ffe3c6 (fix: rename duplicate field name with same type into a DocType to avoid import Error (#34053))
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -397,5 +402,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "title"
 }
