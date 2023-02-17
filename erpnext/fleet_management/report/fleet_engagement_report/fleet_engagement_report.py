@@ -46,7 +46,7 @@ def get_data(filters):
 	
 def get_cond(filters):
 	cond = ""
-	if getdate(filters.form_date) > getdate(filters.to_date):
+	if getdate(filters.from_date) > getdate(filters.to_date):
 		frappe.throw("From Date cannot be greater than to date")
 	if filters.from_date and filters.to_date:
 		cond += " AND e.posting_date BETWEEN '{}' AND '{}' ".format(filters.from_date, filters.to_date)
