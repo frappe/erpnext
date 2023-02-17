@@ -250,7 +250,7 @@ frappe.ui.form.on('Asset', {
 			$.each(depr_entries || [], function(i, v) {
 				x_intervals.push(frappe.format(v.posting_date, { fieldtype: 'Date' }));
 				let last_asset_value = asset_values[asset_values.length - 1]
-				asset_values.push(last_asset_value - v.value);
+				asset_values.push(flt(last_asset_value - v.value, precision('gross_purchase_amount')));
 			});
 		}
 

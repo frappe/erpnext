@@ -137,7 +137,7 @@ def make_depreciation_entry(asset_name, date=None):
 			finance_books.value_after_depreciation -= d.depreciation_amount
 			finance_books.db_update()
 
-	frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Successful")
+	asset.db_set("depr_entry_posting_status", "Successful")
 
 	asset.set_status()
 
