@@ -226,9 +226,21 @@ frappe.ui.form.on('Lead', {
 		if (frm.doc.status === "Success"){
 			frappe.db.set_value("Customer", frm.doc.customer_name, "existing_customer", 1)
 		}
+		if(!frm.doc.__islocal){
+			frappe.call({                        
+				method: "erpnext.crm.doctype.lead.lead.user_created", 
+				async:false,
+				args: { 
+					name:frm.docname,
+					user_created_by : frm.doc.users,
+					lead_transfer : frm.doc.lead_transfer
+					},	 
+		 	});
+		}
 	},
 	//on lead transfer create 1 Dialog box for Reason in lead_assing_to_user child table add user name,assing to mail, lead transfer Reason,today date time  
- 	lead_transfer:function(frm){
+	lead_transfer:function(frm){
+		let lead_assign_to_user  = frm.add_child("lead_assign_to_user");
 		if(!frm.doc.__islocal){// add here len of child table if it 1 not show following message after that shown
 			var d = new frappe.ui.Dialog({
 			

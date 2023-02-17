@@ -769,19 +769,6 @@ def delete_customer_contact_person(name):
 	frappe.delete_doc("Customer Contact Person", name)	
 
 
-
-@frappe.whitelist()
-def validate_mail(primary_email_id):
-	frappe.utils.validate_email_address(primary_email_id, throw=True)
-
-
-
-@frappe.whitelist()
-def validate_phone(primary_mobile_number):
-	frappe.utils.validate_phone_number(primary_mobile_number, throw=True)
-
-
-
 @frappe.whitelist()
 def remove_person(name):
 	frappe.delete_doc("Customer Contact Person", name)	

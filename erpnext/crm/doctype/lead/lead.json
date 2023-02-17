@@ -13,6 +13,7 @@
   "organization_lead",
   "naming_series",
   "lead_details",
+  "users",
   "lead_number",
   "lead_name",
   "description",
@@ -532,13 +533,11 @@
    "fetch_from": "lead_transfer.full_name",
    "fieldname": "lead_transfer_user_full_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Lead Transfer User Full Name"
   },
   {
    "fieldname": "lead_assign_to_user",
    "fieldtype": "Table",
-   "hidden": 1,
    "label": "Lead Assign To User",
    "options": "Lead Assign To User"
   },
@@ -552,6 +551,13 @@
    "oldfieldtype": "Data",
    "options": "Customer",
    "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
+  },
+  {
+   "default": "__user",
+   "fieldname": "users",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User"
   }
  ],
  "hide_toolbar": 1,
@@ -559,7 +565,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-02-08 16:13:21.579087",
+ "modified": "2023-02-17 11:22:49.943179",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

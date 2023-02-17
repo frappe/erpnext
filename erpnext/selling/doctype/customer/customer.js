@@ -420,28 +420,4 @@ frappe.ui.form.on("Customer Contact Person Details",{
 		}
 		frm.save();
 	},
-	primary_email_id: function(frm,cdt,cdn)
-	{	var row = locals[cdt][cdn];
-		if (row.primary_email_id){
-			frappe.call({
-				method: "erpnext.selling.doctype.customer.customer.validate_mail",
-				async:false,
-				args: {
-					primary_email_id: row.primary_email_id,
-				}
-			})
-		}
-	},
-	primary_mobile_number: function(frm,cdt,cdn)
-	{	var row = locals[cdt][cdn];
-		if (row.primary_mobile_number){
-			frappe.call({
-				method: "erpnext.selling.doctype.customer.customer.validate_phone",
-				async:false,
-				args: {
-					primary_mobile_number: row.primary_mobile_number,
-				}
-			})
-		}
-	},
  });
