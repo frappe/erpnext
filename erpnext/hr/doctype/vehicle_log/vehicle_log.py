@@ -15,12 +15,12 @@ class VehicleLog(Document):
 	# 	if flt(self.odometer) < flt(self.last_odometer):
 	# 		frappe.throw(_("Current Odometer Value should be greater than Last Odometer Value {0}").format(self.last_odometer))
 
-	def on_submit(self):
-		frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", self.odometer)
-		if self.maintenance_type =="Internal":
-			make_material_request(self)
-		else:
-			make_expense_claim(self)
+	def on_submit(self):pass
+		# frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", self.odometer)
+		# if self.maintenance_type =="Internal":
+		# 	make_material_request(self)
+		# else:
+		# 	make_expense_claim(self)
 		
 
 	def on_cancel(self):
@@ -31,13 +31,12 @@ class VehicleLog(Document):
 
 @frappe.whitelist()
 def make_expense_claim(docname):
-	expense_claim = frappe.db.exists("Expense Claim", {"vehicle_log": docname.name})
+	expense_claim = frappe.db.exists("Expense Claim", {"vehicle_log": docname})
 	if expense_claim:
 		frappe.throw(_("Expense Claim {0} already exists for the Vehicle Log").format(expense_claim))
 
-	vehicle_log = frappe.get_doc("Vehicle Log", docname.name)
+	vehicle_log = frappe.get_doc("Vehicle Log", docname)
 	service_expense = sum([flt(d.expense_amount) for d in vehicle_log.service_detail])
-
 	claim_amount = service_expense + (flt(vehicle_log.price) * flt(vehicle_log.fuel_qty) or 1)
 	if not claim_amount:
 		frappe.throw(_("No additional expenses has been added"))
@@ -51,6 +50,7 @@ def make_expense_claim(docname):
 		"description": _("Vehicle Expenses"),
 		"amount": claim_amount
 	})
+    
 	return exp_claim.as_dict()
 def make_material_request(self):  
     mr = frappe.new_doc("Material Request")
@@ -90,3 +90,20 @@ def get_warehouse(item,company):
     as_list=True
     )
     return warehouse[0]
+def make_expense_claim_auto(docname):
+    expense_claim = frappe.db.exists("Expense Claim", {"vehicle_log": docname.name})
+    if expense_claim:
+        frappe.throw(_("Expense Claim {0} already exists for the Vehicle Log").format(expense_claim))
+    vehicle_log = frappe.get_doc("Vehicle Log", docname.name)
+    service_expense = sum([flt(d.expense_amount) for d in vehicle_log.service_detail])
+    claim_amount = service_expense + (flt(vehicle_log.price) * flt(vehicle_log.fuel_qty) or 1)
+    if not claim_amount:
+        frappe.throw(_("No additional expenses has been added"))
+    exp_claim = frappe.new_doc("Expense Claim")
+    exp_claim.employee = vehicle_log.employee
+    exp_claim.vehicle_log = vehicle_log.name
+    exp_claim.remark = _("Expense Claim for Vehicle Log {0}").format(vehicle_log.name)
+    exp_claim.append("expenses", {"expense_date": vehicle_log.date,"description": _("Vehicle Expenses"),"amount": claim_amount})
+    exp_claim.insert(ignore_permissions=True)
+    exp_claim.submit()
+    return exp_claim
