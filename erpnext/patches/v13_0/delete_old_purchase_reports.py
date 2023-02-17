@@ -30,6 +30,7 @@ def delete_auto_email_reports(report):
 	for auto_email_report in auto_email_reports:
 		frappe.delete_doc("Auto Email Report", auto_email_report[0])
 
+
 def delete_links_from_desktop_icons(report):
 	"""Check for one or multiple Desktop Icons and delete"""
 	desktop_icons = frappe.db.get_values("Desktop Icon", {"_report": report}, ["name"])
