@@ -667,11 +667,15 @@ class Asset(AccountsController):
 
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
-			elif self.finance_books:
-				idx = self.get_default_finance_book_idx() or 0
+			else:
+				expected_value_after_useful_life = 0
+				value_after_depreciation = self.value_after_depreciation
 
-				expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
-				value_after_depreciation = self.finance_books[idx].value_after_depreciation
+				if self.calculate_depreciation:
+					idx = self.get_default_finance_book_idx() or 0
+
+					expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
+					value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
 				if flt(value_after_depreciation) <= expected_value_after_useful_life:
 					status = "Fully Depreciated"
@@ -702,24 +706,6 @@ class Asset(AccountsController):
 			for d in self.get("finance_books"):
 				if d.finance_book == self.default_finance_book:
 					return cint(d.idx) - 1
-
-	@frappe.whitelist()
-	def get_manual_depreciation_entries(self):
-		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
-
-		gle = frappe.qb.DocType("GL Entry")
-
-		records = (
-			frappe.qb.from_(gle)
-			.select(gle.voucher_no.as_("name"), gle.debit.as_("value"), gle.posting_date)
-			.where(gle.against_voucher == self.name)
-			.where(gle.account == depreciation_expense_account)
-			.where(gle.debit != 0)
-			.where(gle.is_cancelled == 0)
-			.orderby(gle.posting_date)
-		).run(as_dict=True)
-
-		return records
 
 	def validate_make_gl_entry(self):
 		purchase_document = self.get_purchase_document()
@@ -836,6 +822,25 @@ class Asset(AccountsController):
 
 			make_gl_entries(gl_entries)
 			self.db_set("booked_fixed_asset", 1)
+
+	@frappe.whitelist()
+	def get_manual_depreciation_entries(self):
+		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
+
+		gle = frappe.qb.DocType("GL Entry")
+
+		records = (
+			frappe.qb.from_(gle)
+			.select(gle.voucher_no.as_("name"), gle.debit.as_("value"), gle.posting_date)
+			.where(gle.against_voucher == self.name)
+			.where(gle.account == depreciation_expense_account)
+			.where(gle.debit != 0)
+			.where(gle.is_cancelled == 0)
+			.orderby(gle.posting_date)
+			.orderby(gle.creation)
+		).run(as_dict=True)
+
+		return records
 
 	@frappe.whitelist()
 	def get_depreciation_rate(self, args, on_validate=False):
