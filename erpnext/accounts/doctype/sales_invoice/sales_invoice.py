@@ -1027,12 +1027,12 @@ class SalesInvoice(SellingController):
 		grand_total = (
 			self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		)
-		base_grand_total = flt(
+		base_grand_total = flt(flt(
 			self.base_rounded_total
 			if (self.base_rounding_adjustment and self.base_rounded_total)
 			else self.base_grand_total,
 			self.precision("base_grand_total"),
-		) - flt(self.total_advance)
+		) - flt(self.total_advance) - flt(self.total_normal_loss) - flt(self.total_abnormal_loss),2)
 		if grand_total and not self.is_internal_transfer():
 			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
@@ -1185,23 +1185,7 @@ class SalesInvoice(SellingController):
 										if account_currency==self.company_currency else (item.normal_loss_amt * self.conversion_rate, self.precision("grand_total")) ,
 									"cost_center": item.cost_center,
 								}, account_currency)
-							)
-						
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": self.debit_to,
-									"against": self.against_income_account,
-									"party_type": "Customer",
-									"party": self.customer,
-									"credit": item.normal_loss_amt,
-									"credit_in_account_currency": item.normal_loss_amt \
-										if account_currency==self.company_currency else (item.normal_loss_amt * self.conversion_rate, self.precision("grand_total")) ,
-									#"cost_center": item.cost_center
-									"against_voucher": self.return_against if cint(self.is_return) else self.name,
-									"against_voucher_type": self.doctype
-								}, account_currency)
-							)
-						
+							)						
 					if item.abnormal_loss_amt:
 						abnormal_account = frappe.db.get_value('Company', self.company, 'abnormal_loss_account') 
 						account_currency = get_account_currency(abnormal_account)
@@ -1216,21 +1200,6 @@ class SalesInvoice(SellingController):
 							}, account_currency)
 						)
 					
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": self.debit_to,
-								"against": self.against_income_account,
-								"party_type": "Customer",
-								"party": self.customer,
-								"credit": item.abnormal_loss_amt,
-								"credit_in_account_currency": item.abnormal_loss_amt \
-									if account_currency==self.company_currency else (item.abnormal_loss_amt * self.conversion_rate, self.precision("grand_total")) ,
-								#"cost_center": item.cost_center
-								"against_voucher": self.return_against if cint(self.is_return) else self.name,
-								"against_voucher_type": self.doctype,
-								"cost_center": item.cost_center
-							}, account_currency)
-						)
 					if item.excess_qty:
 						excess_account = item.income_account
 						excess_amount = flt(item.excess_qty) * flt(item.rate)
