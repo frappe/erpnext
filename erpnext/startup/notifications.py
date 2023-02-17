@@ -39,8 +39,10 @@ def get_notification_config():
 	if frappe.session.user != 'zubair@gourmetpakistan.com':
 		role_doctype = frappe.db.sql(f"""SELECT NAME FROM `tabDocType` WHERE NAME IN (SELECT parent FROM `tabDocPerm` WHERE ROLE IN (SELECT role FROM `tabHas Role` WHERE parent = '{frappe.session.user}'))""",as_dict=True)
 		doctype = [d.NAME for d in role_doctype]
+		doctyps_workflow = ['Journal Entry','Payment Entry','Purchase Invoice','Sales Invoice','Payment Order','Purchase Order','Supplier Quotation','Request for Quotation','Leave Application','Attendance','Loan','Payroll Entry','Shift Assignment','Additional Salary','Attendance Request','Loan Application','Shift Request','BOM','Production Plan','Work Order','Annual Increments','Payment Advice','Manual Disbursement','Item Daily Rate','Gate Pass','Expense Entry','Batch Payment Request','Sales Order','Stock Entry','Purchase Receipt','Stock Reconciliation','Material Request']
 		for doc in frappe.get_all('DocType',fields= ["name"], filters = {"name": ("in", doctype), 'is_submittable': 1}):
-			notifications["for_doctype"][doc.name] = {"docstatus": 0}
-
-
+			if doc.name in doctyps_workflow:
+				notifications["for_doctype"][doc.name] = {"docstatus": 0,"workflow_state":("not like","Rejected%")}
+			else:
+				notifications["for_doctype"][doc.name] = {"docstatus": 0}
 	return notifications
