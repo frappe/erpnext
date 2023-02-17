@@ -13,7 +13,9 @@ class TransporterInvoiceEntry(Document):
 
 	def on_update_after_submit(self):
 		self.allocate_deductions()
-
+	def before_cancel(self):
+		if frappe.db.exists("Transporter Invoice",{"transporter_invoice_entry":self.name,"doctstaus":("!=",2)}):
+			frappe.throw("Cannot cancel this document as it is linked with Transporter Invoice")
 	def valid_account_for_other_charges(self):
 		if len(self.items) == 0:
 			frappe.msgprint(_("No equipments pulled"), raise_exception = True)
