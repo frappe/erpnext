@@ -519,7 +519,8 @@
    "in_standard_filter": 1,
    "label": "Lead Transfer",
    "options": "User",
-   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"||doc.status == \"Open\"|| doc.status == \"Contacted\"||doc.__islocal",
@@ -533,11 +534,13 @@
    "fetch_from": "lead_transfer.full_name",
    "fieldname": "lead_transfer_user_full_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Lead Transfer User Full Name"
   },
   {
    "fieldname": "lead_assign_to_user",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Lead Assign To User",
    "options": "Lead Assign To User"
   },
@@ -565,7 +568,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-02-17 11:22:49.943179",
+ "modified": "2023-02-17 15:07:40.858168",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
