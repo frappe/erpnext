@@ -707,24 +707,6 @@ class Asset(AccountsController):
 				if d.finance_book == self.default_finance_book:
 					return cint(d.idx) - 1
 
-	@frappe.whitelist()
-	def get_manual_depreciation_entries(self):
-		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
-
-		gle = frappe.qb.DocType("GL Entry")
-
-		records = (
-			frappe.qb.from_(gle)
-			.select(gle.voucher_no.as_("name"), gle.debit.as_("value"), gle.posting_date)
-			.where(gle.against_voucher == self.name)
-			.where(gle.account == depreciation_expense_account)
-			.where(gle.debit != 0)
-			.where(gle.is_cancelled == 0)
-			.orderby(gle.posting_date)
-		).run(as_dict=True)
-
-		return records
-
 	def validate_make_gl_entry(self):
 		purchase_document = self.get_purchase_document()
 		if not purchase_document:
@@ -842,8 +824,6 @@ class Asset(AccountsController):
 			self.db_set("booked_fixed_asset", 1)
 
 	@frappe.whitelist()
-<<<<<<< HEAD
-=======
 	def get_manual_depreciation_entries(self):
 		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
 
@@ -863,7 +843,6 @@ class Asset(AccountsController):
 		return records
 
 	@frappe.whitelist()
->>>>>>> 03f07a20e7 (fix: asset repair status after deletion and asset status after manual depr entry)
 	def get_depreciation_rate(self, args, on_validate=False):
 		if isinstance(args, string_types):
 			args = json.loads(args)
