@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Optional
 
 import frappe
 from frappe import _
@@ -388,24 +389,26 @@ def create_rfq_items(sq_doc, supplier, data):
 
 
 @frappe.whitelist()
-def get_pdf(doctype, name, supplier, print_format=None, language=None, letter_head=None):
-	# permissions get checked in `download_pdf`
-	if doc := get_rfq_doc(doctype, name, supplier):
-		download_pdf(
-			doctype,
-			name,
-			print_format,
-			doc=doc,
-			language=language,
-			letter_head=letter_head or None,
-		)
-
-
-def get_rfq_doc(doctype, name, supplier):
+def get_pdf(
+	name: str,
+	supplier: str,
+	print_format: Optional[str] = None,
+	language: Optional[str] = None,
+	letterhead: Optional[str] = None,
+):
+	doc = frappe.get_doc("Request for Quotation", name)
 	if supplier:
-		doc = frappe.get_doc(doctype, name)
 		doc.update_supplier_part_no(supplier)
-		return doc
+
+	# permissions get checked in `download_pdf`
+	download_pdf(
+		doc.doctype,
+		doc.name,
+		print_format,
+		doc=doc,
+		language=language,
+		letterhead=letterhead or None,
+	)
 
 
 @frappe.whitelist()

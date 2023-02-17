@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, getdate, nowdate
 from frappe.utils.data import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.party import get_due_date_from_template
 from erpnext.buying.doctype.purchase_order.purchase_order import make_inter_company_sales_order
 from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
@@ -684,6 +685,12 @@ class TestPurchaseOrder(FrappeTestCase):
 				pass
 			else:
 				raise Exception
+
+	def test_default_payment_terms(self):
+		due_date = get_due_date_from_template(
+			"_Test Payment Term Template 1", "2023-02-03", None
+		).strftime("%Y-%m-%d")
+		self.assertEqual(due_date, "2023-03-31")
 
 	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
 		po = create_purchase_order(do_not_save=1)

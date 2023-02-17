@@ -526,7 +526,7 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 90},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
 		{
 			"label": _("Account"),
 			"fieldname": "account",
@@ -538,13 +538,13 @@ def get_columns(filters):
 			"label": _("Debit ({0})").format(currency),
 			"fieldname": "debit",
 			"fieldtype": "Float",
-			"width": 100,
+			"width": 130,
 		},
 		{
 			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
 			"fieldtype": "Float",
-			"width": 100,
+			"width": 130,
 		},
 		{
 			"label": _("Balance ({0})").format(currency),
