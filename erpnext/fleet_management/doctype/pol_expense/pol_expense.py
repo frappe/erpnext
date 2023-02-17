@@ -122,7 +122,7 @@ class POLExpense(AccountsController):
 		
 		previous_km_reading = (
 								qb.from_(pol_exp)
-								.select(pol_exp.present_km_reading, pol_exp.name)
+								.select(pol_exp.present_km_reading, pol_exp.closing_pol_tank_balance)
 								.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus==1) & (pol_exp.uom == self.uom) & (pol_exp.name != self.name))
 								.orderby( pol_exp.entry_date,order=qb.desc)
 								.orderby( pol_exp.name, order=qb.desc)
@@ -134,6 +134,8 @@ class POLExpense(AccountsController):
 			pv_km = frappe.db.get_value("Equipment",self.equipment,"initial_km_reading")
 		else:
 			pv_km = previous_km_reading[0][0]
+		if previous_km_reading[0][1]:
+			self.opening_pol_tank_balance = previous_km_reading[0][1]
 		self.previous_km_reading = pv_km
 		
 	def post_journal_entry(self):
