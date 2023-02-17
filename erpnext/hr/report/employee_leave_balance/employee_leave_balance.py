@@ -278,6 +278,9 @@ def get_chart_data(data: List, filters: Filters) -> Dict:
 	datasets = []
 	employee_data = data
 
+	if not data:
+		return None
+
 	if data and filters.employee:
 		get_dataset_for_chart(employee_data, datasets, labels)
 
