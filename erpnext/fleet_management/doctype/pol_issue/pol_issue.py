@@ -33,7 +33,18 @@ class POLIssue(StockController):
 				order by p.posting_date desc, p.posting_time desc
 				limit 1
 			'''.format(self.name, a.equipment, a.uom))
+			previous_pol_rev_km_reading = frappe.db.sql('''
+				select cur_km_reading from `tabPOL Receive` where equipment = '{}' and docstatus = 1 and uom = '{}'
+				order by posting_date desc, posting_time desc
+				limit 1
+			'''.format(a.equipment,a.uom))
 			pv_km = 0
+			if not previous_km_reading and previous_pol_rev_km_reading:
+				previous_km_reading = previous_pol_rev_km_reading
+			elif previous_km_reading and previous_pol_rev_km_reading:
+				if flt(previous_km_reading[0][0]) < previous_pol_rev_km_reading[0][0]:
+					previous_km_reading = previous_pol_rev_km_reading
+
 			if not previous_km_reading:
 				pv_km = frappe.db.get_value("Equipment",a.equipment,"initial_km_reading")
 			else:
