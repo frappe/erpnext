@@ -478,7 +478,7 @@ $.extend(erpnext.utils, {
 	add_payment_reconciliation_button: function(party_type, page, get_values) {
 		page.add_inner_button(__("Payment Reconciliation"), function() {
 			var values = get_values();
-			frappe.set_route('Form', 'Payment Reconciliation').then(() => {
+			frappe.new_doc("Payment Reconciliation").then(() => {
 				cur_frm.set_value({
 					company: values.company,
 					party_type: party_type,
