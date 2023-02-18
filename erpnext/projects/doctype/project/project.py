@@ -1063,6 +1063,7 @@ def get_stock_items(project, get_sales_invoice=True):
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
+			i.base_taxable_amount as taxable_amount,
 			i.item_tax_detail, i.claim_customer, p.conversion_rate
 		from `tabDelivery Note Item` i
 		inner join `tabDelivery Note` p on p.name = i.parent
@@ -1081,6 +1082,7 @@ def get_stock_items(project, get_sales_invoice=True):
 			i.uom,
 			if(i.is_stock_item = 1, i.base_net_amount * (i.qty - i.delivered_qty) / i.qty, i.base_net_amount) as net_amount,
 			i.base_net_rate as net_rate,
+			if(i.is_stock_item = 1, i.base_taxable_amount * (i.qty - i.delivered_qty) / i.qty, i.base_taxable_amount) as taxable_amount,
 			i.item_tax_detail, i.claim_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
@@ -1103,6 +1105,7 @@ def get_stock_items(project, get_sales_invoice=True):
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
+			i.base_taxable_amount as taxable_amount,
 			i.item_tax_detail, p.conversion_rate
 		from `tabSales Invoice Item` i
 		inner join `tabSales Invoice` p on p.name = i.parent
@@ -1154,6 +1157,7 @@ def get_service_items(project, get_sales_invoice=True):
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
+			i.base_taxable_amount as taxable_amount,
 			i.item_tax_detail, i.claim_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
@@ -1172,6 +1176,7 @@ def get_service_items(project, get_sales_invoice=True):
 				i.qty, i.uom,
 				i.base_net_amount as net_amount,
 				i.base_net_rate as net_rate,
+				i.base_taxable_amount as taxable_amount,
 				i.item_tax_detail, p.conversion_rate
 			from `tabSales Invoice Item` i
 			inner join `tabSales Invoice` p on p.name = i.parent
@@ -1213,9 +1218,13 @@ def get_items_data_template():
 		'net_total': 0,
 		'customer_net_total': 0,
 
+		'taxable_total': 0,
+
+		'sales_taxable_total': 0,
 		'sales_tax_total': 0,
 		'customer_sales_tax_total': 0,
 
+		'service_taxable_total': 0,
 		'service_tax_total': 0,
 		'customer_service_tax_total': 0,
 
@@ -1314,6 +1323,12 @@ def post_process_items_data(data):
 		data.net_total += flt(d.net_amount)
 		data.customer_net_total += flt(d.customer_net_amount)
 
+		data.taxable_total += flt(d.taxable_amount)
+		if flt(d.sales_tax_amount):
+			data.sales_taxable_total += flt(d.taxable_amount)
+		if flt(d.service_tax_amount):
+			data.service_taxable_total += flt(d.taxable_amount)
+
 		data.sales_tax_total += flt(d.sales_tax_amount)
 		data.customer_sales_tax_total += flt(d.customer_sales_tax_amount)
 
@@ -1329,6 +1344,9 @@ def post_process_items_data(data):
 		for tax_account, tax_amount in d.customer_taxes.items():
 			data.customer_taxes.setdefault(tax_account, 0)
 			data.customer_taxes[tax_account] += tax_amount
+
+	data.sales_tax_rate = data.sales_tax_total / data.sales_taxable_total * 100 if data.sales_taxable_total else 0
+	data.service_tax_rate = data.service_tax_total / data.service_taxable_total * 100 if data.service_taxable_total else 0
 
 
 def get_totals_data(items_dataset, company):
@@ -1351,12 +1369,23 @@ def get_totals_data(items_dataset, company):
 		'net_total': 0,
 		'customer_net_total': 0,
 
+		'taxable_total': 0,
+		'sales_taxable_total': 0,
+		'service_taxable_total': 0,
+
+		'sales_tax_rate': 0,
+		'service_tax_rate': 0,
+
 		'grand_total': 0,
 		'customer_grand_total': 0,
 	})
 	for data in items_dataset:
 		totals_data.net_total += flt(data.net_total)
 		totals_data.customer_net_total += flt(data.customer_net_total)
+
+		totals_data.taxable_total += flt(data.taxable_total)
+		totals_data.sales_taxable_total += flt(data.sales_taxable_total)
+		totals_data.service_taxable_total += flt(data.service_taxable_total)
 
 		totals_data.sales_tax_total += flt(data.sales_tax_total)
 		totals_data.customer_sales_tax_total += flt(data.customer_sales_tax_total)
@@ -1379,6 +1408,11 @@ def get_totals_data(items_dataset, company):
 
 	totals_data.grand_total += totals_data.net_total + totals_data.total_taxes_and_charges
 	totals_data.customer_grand_total += totals_data.customer_net_total + totals_data.customer_total_taxes_and_charges
+
+	totals_data.sales_tax_rate = totals_data.sales_tax_total / totals_data.sales_taxable_total * 100\
+		if totals_data.sales_taxable_total else 0
+	totals_data.service_tax_rate = totals_data.service_tax_total / totals_data.service_taxable_total * 100\
+		if totals_data.service_taxable_total else 0
 
 	# Round Grand Totals
 	grand_total_precision = get_field_precision(frappe.get_meta("Sales Invoice").get_field("grand_total"),

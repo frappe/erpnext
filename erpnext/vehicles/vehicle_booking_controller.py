@@ -38,7 +38,7 @@ force_fields += address_fields
 dont_update_if_missing = [
 	'quotation_validity_days', 'valid_till',
 	'lead_time_days', 'delivery_date', 'delivery_period',
-	'tc_name', 'image'
+	'tc_name'
 ]
 
 
