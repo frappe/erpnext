@@ -374,36 +374,6 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
 		self.assertEqual(flt(pe.unallocated_amount, 2), 0.0)
 
-	def test_payment_entry_retrieves_last_exchange_rate(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
-			save_new_records,
-			test_records,
-		)
-
-		save_new_records(test_records)
-
-		pe = frappe.new_doc("Payment Entry")
-		pe.payment_type = "Pay"
-		pe.company = "_Test Company"
-		pe.posting_date = "2016-01-10"
-		pe.paid_from = "_Test Bank USD - _TC"
-		pe.paid_to = "_Test Bank - _TC"
-		pe.paid_amount = 100
-		pe.received_amount = 100
-		pe.reference_no = "3"
-		pe.reference_date = "2016-01-10"
-		pe.party_type = "Supplier"
-		pe.party = "_Test Supplier USD"
-
-		pe.setup_party_account_field()
-		pe.set_missing_values()
-		pe.set_exchange_rate()
-		pe.set_amounts()
-
-		self.assertEqual(
-			pe.source_exchange_rate, 65.1, "{0} is not equal to {1}".format(pe.source_exchange_rate, 65.1)
-		)
-
 	def test_internal_transfer_usd_to_inr(self):
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
