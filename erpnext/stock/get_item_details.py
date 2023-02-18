@@ -1131,26 +1131,6 @@ def get_serial_nos_by_fifo(args, sales_order=None):
 
 		if sales_order:
 			query = query.where(sn.sales_order == sales_order)
-
-		serial_nos = query.run(as_list=True)
-		serial_nos = [s[0] for s in serial_nos]
-
-		return "\n".join(serial_nos)
-
-
-def get_serial_no_batchwise(args, sales_order=None):
-	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
-		sn = frappe.qb.DocType("Serial No")
-		query = (
-			frappe.qb.from_(sn)
-			.select(sn.name)
-			.where((sn.item_code == args.item_code) & (sn.warehouse == args.warehouse))
-			.orderby(CombineDatetime(sn.purchase_date, sn.purchase_time))
-			.limit(abs(cint(args.stock_qty)))
-		)
-
-		if sales_order:
-			query = query.where(sn.sales_order == sales_order)
 		if args.batch_no:
 			query = query.where(sn.batch_no == args.batch_no)
 
@@ -1455,7 +1435,7 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 	if args.get("warehouse") and args.get("stock_qty") and args.get("item_code"):
 		has_serial_no = frappe.get_value("Item", {"item_code": args.item_code}, "has_serial_no")
 		if args.get("batch_no") and has_serial_no == 1:
-			return get_serial_no_batchwise(args, sales_order)
+			return get_serial_nos_by_fifo(args, sales_order)
 		elif has_serial_no == 1:
 			args = json.dumps(
 				{
