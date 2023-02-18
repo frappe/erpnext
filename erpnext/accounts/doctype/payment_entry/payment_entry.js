@@ -504,18 +504,15 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_current_exchange_rate: function(frm, exchange_rate_field, from_currency, to_currency) {
-		frappe.call({
-			method: "erpnext.setup.utils.get_exchange_rate",
-			args: {
-				transaction_date: frm.doc.posting_date,
-				from_currency: from_currency,
-				to_currency: to_currency
-			},
-			callback: function(r, rt) {
-				const ex_rate = flt(r.message, frm.get_field(exchange_rate_field).get_precision());
-				frm.set_value(exchange_rate_field, ex_rate);
+		if (frm.doc.paid_amount && frm.doc.received_amount && from_currency !== to_currency) {
+			if (exchange_rate_field === "target_exchange_rate") {
+				frm.set_value(exchange_rate_field, frm.doc.paid_amount / frm.doc.received_amount);
+			} else {
+				frm.set_value(exchange_rate_field, frm.doc.received_amount / frm.doc.paid_amount);
 			}
-		})
+		} else {
+			frm.set_value(exchange_rate_field, 0);
+		}
 	},
 
 	posting_date: function(frm) {
@@ -560,13 +557,24 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_amount: function(frm) {
+		const company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 		frm.trigger("reset_received_amount");
+		frm.events.set_current_exchange_rate(frm, "source_exchange_rate",
+			frm.doc.paid_from_account_currency, company_currency);
+		frm.events.set_current_exchange_rate(frm, "target_exchange_rate",
+				frm.doc.paid_to_account_currency, company_currency);
 		frm.events.hide_unhide_fields(frm);
 	},
 
 	received_amount: function(frm) {
+		const company_currency = frappe
 		frm.set_paid_amount_based_on_received_amount = true;
+		frm.events.set_current_exchange_rate(frm, "source_exchange_rate",
+			frm.doc.paid_from_account_currency, company_currency);
+		frm.events.set_current_exchange_rate(frm, "target_exchange_rate",
+				frm.doc.paid_to_account_currency, company_currency);
 
 		if(!frm.doc.paid_amount && frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
 			frm.set_value("paid_amount", frm.doc.received_amount);
