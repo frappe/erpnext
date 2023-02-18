@@ -255,6 +255,14 @@ class PaymentEntry(AccountsController):
 					if self.paid_from_account_currency == ref_doc.currency:
 						self.source_exchange_rate = ref_doc.get("exchange_rate")
 
+			if (
+				not self.source_exchange_rate
+				and self.paid_amount
+				and self.received_amount
+				and self.paid_from_account_currency != self.company_currency
+			):
+				self.source_exchange_rate = self.received_amount / self.paid_amount
+
 			if not self.source_exchange_rate:
 				self.source_exchange_rate = get_exchange_rate(
 					self.paid_from_account_currency, self.company_currency, self.posting_date
@@ -267,6 +275,14 @@ class PaymentEntry(AccountsController):
 			if ref_doc:
 				if self.paid_to_account_currency == ref_doc.currency:
 					self.target_exchange_rate = ref_doc.get("exchange_rate")
+
+			if (
+				not self.target_exchange_rate
+				and self.paid_amount
+				and self.received_amount
+				and self.paid_to_account_currency != self.company_currency
+			):
+				self.target_exchange_rate = self.paid_amount / self.received_amount
 
 			if not self.target_exchange_rate:
 				self.target_exchange_rate = get_exchange_rate(
