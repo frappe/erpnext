@@ -485,17 +485,9 @@ frappe.ui.form.on('Payment Entry', {
 		} else if (frm.doc.paid_from){
 			if (in_list(["Internal Transfer", "Pay"], frm.doc.payment_type)) {
 				let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: frm.doc.paid_from_account_currency,
-						to_currency: company_currency,
-						transaction_date: frm.doc.posting_date
-					},
-					callback: function(r, rt) {
-						frm.set_value("source_exchange_rate", r.message);
-					}
-				})
+				frm.events.set_current_exchange_rate(frm,
+					"source_exchange_rate",
+					frm.doc.paid_from_account_currency, company_currency);
 			} else {
 				frm.events.set_current_exchange_rate(frm, "source_exchange_rate",
 					frm.doc.paid_from_account_currency, company_currency);
