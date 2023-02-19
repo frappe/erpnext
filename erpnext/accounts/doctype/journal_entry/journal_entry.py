@@ -89,7 +89,13 @@ class JournalEntry(AccountsController):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		unlink_ref_doc_from_payment_entries(self)
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.unlink_advance_entry_reference()

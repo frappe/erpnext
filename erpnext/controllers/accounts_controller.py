@@ -204,6 +204,12 @@ class AccountsController(TransactionBase):
 		validate_einvoice_fields(self)
 
 	def on_trash(self):
+		# delete references in 'Repost Payment Ledger'
+		rpi = frappe.qb.DocType("Repost Payment Ledger Items")
+		frappe.qb.from_(rpi).delete().where(
+			(rpi.voucher_type == self.doctype) & (rpi.voucher_no == self.name)
+		).run()
+
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
 			ple = frappe.qb.DocType("Payment Ledger Entry")
