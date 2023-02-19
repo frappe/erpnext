@@ -20,9 +20,11 @@
   "currency",
   "section_break_10",
   "description",
-  "section_break_14",
   "reference_number",
+  "column_break_10",
   "transaction_id",
+  "transaction_type",
+  "section_break_14",
   "payment_entries",
   "section_break_18",
   "allocated_amount",
@@ -190,11 +192,21 @@
    "label": "Withdrawal",
    "oldfieldname": "credit",
    "options": "currency"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Data",
+   "label": "Transaction Type",
+   "length": 50
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-21 19:05:04.208222",
+ "modified": "2022-05-29 18:36:50.475964",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

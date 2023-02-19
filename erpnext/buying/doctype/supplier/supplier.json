@@ -23,7 +23,6 @@
   "default_bank_account",
   "column_break_10",
   "default_price_list",
-  "payment_terms",
   "internal_supplier_section",
   "is_internal_supplier",
   "represents_company",
@@ -53,6 +52,7 @@
   "supplier_primary_address",
   "primary_address",
   "accounting_tab",
+  "payment_terms",
   "accounts",
   "settings_tab",
   "allow_purchase_invoice_creation_without_purchase_order",
@@ -457,11 +457,10 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-09 18:02:59.075203",
+ "modified": "2023-02-18 11:05:50.592270",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

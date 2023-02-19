@@ -91,6 +91,9 @@ class AssetRepair(AccountsController):
 		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 		self.asset_doc.save()
 
+	def after_delete(self):
+		frappe.get_doc("Asset", self.asset).set_status()
+
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))
