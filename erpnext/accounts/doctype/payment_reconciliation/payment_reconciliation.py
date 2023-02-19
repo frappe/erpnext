@@ -368,6 +368,7 @@ class PaymentReconciliation(Document):
 				"exchange_rate": 1,
 				"cost_center": erpnext.get_default_cost_center(self.company),
 				reverse_dr_or_cr + "_in_account_currency": flt(row.difference_amount),
+				reverse_dr_or_cr: flt(row.difference_amount),
 			}
 		)
 
