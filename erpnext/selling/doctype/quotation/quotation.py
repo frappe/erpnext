@@ -303,16 +303,20 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	def can_map_row(item) -> bool:
 		"""
 		Row mapping from Quotation to Sales order:
-		1. Simple row: Map if adequate qty
-		2. Has Alternative Item: Map if no alternative was selected against original item and #1
-		3. Is Alternative Item: Map if alternative was selected against original item and #1
+		1. If no selections, map all non-alternative rows (that sum up to the grand total)
+		2. If selections: Is Alternative Item/Has Alternative Item: Map if selected and adequate qty
+		3. If selections: Simple row: Map if adequate qty
 		"""
 		has_qty = item.qty > 0
-		if not (item.is_alternative or item.has_alternative_item):
-			# No alternative items in doc or current row is a simple item (without alternatives)
-			return has_qty
 
-		return (item.name in selected_rows) and has_qty
+		if not selected_rows:
+			return not item.is_alternative
+
+		if selected_rows and (item.is_alternative or item.has_alternative_item):
+			return (item.name in selected_rows) and has_qty
+
+		# Simple row
+		return has_qty
 
 	doclist = get_mapped_doc(
 		"Quotation",
