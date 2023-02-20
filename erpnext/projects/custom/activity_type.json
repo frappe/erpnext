@@ -1,0 +1,24 @@
+{
+  "custom_fields": [],
+  "custom_perms": [
+    {
+      "parent": "Activity Type",
+      "create": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Projects User",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Activity Type",
+      "read": 1,
+      "role": "Employee"
+    }
+  ],
+  "doctype": "Activity Type",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

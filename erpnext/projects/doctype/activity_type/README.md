@@ -1,1 +1,0 @@
-Type of Activity (set in Task, Time Log)
