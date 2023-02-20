@@ -396,7 +396,11 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		source_name,
 		{
 			"Quotation": {"doctype": "Sales Invoice", "validation": {"docstatus": ["=", 1]}},
-			"Quotation Item": {"doctype": "Sales Invoice Item", "postprocess": update_item},
+			"Quotation Item": {
+				"doctype": "Sales Invoice Item",
+				"postprocess": update_item,
+				"condition": lambda row: not row.is_alternative,
+			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},
