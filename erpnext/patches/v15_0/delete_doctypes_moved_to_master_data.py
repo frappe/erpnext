@@ -2,6 +2,6 @@ import frappe
 
 
 def execute():
-	doctypes = ["Supplier", "Activity Type"]
+	doctypes = ["Supplier", "Activity Type", "Bank Transaction Mapping"]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
