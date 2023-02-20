@@ -236,7 +236,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 
 	show_alternative_items_dialog() {
-		var me = this;
+		let me = this;
 
 		const table_fields = [
 		{
