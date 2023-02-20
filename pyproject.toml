@@ -10,7 +10,6 @@ dynamic = ["version"]
 dependencies = [
     # Core dependencies
     "pycountry~=20.7.3",
-    "python-stdnum~=1.16",
     "Unidecode~=1.2.0",
     "barcodenumber~=0.5.0",
 
