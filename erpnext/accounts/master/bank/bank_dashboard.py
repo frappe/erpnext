@@ -1,7 +1,7 @@
 from frappe import _
 
 
-def get_data():
+def get_data(data):
 	return {
 		"fieldname": "bank",
 		"transactions": [{"label": _("Bank Details"), "items": ["Bank Account", "Bank Guarantee"]}],

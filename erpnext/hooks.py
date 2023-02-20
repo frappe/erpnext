@@ -27,6 +27,7 @@ doctype_js = {
 	"Contact": "public/js/contact.js",
 	"Supplier": "public/js/master/supplier.js",
 	"Activity Type": "public/js/master/activity_type.js",
+	"Bank": "public/js/master/bank.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
@@ -37,7 +38,8 @@ override_doctype_class = {
 }
 
 override_doctype_dashboards = {
-	"Supplier": "erpnext.buying.master.supplier.supplier_dashboard.get_data"
+	"Supplier": "erpnext.buying.master.supplier.supplier_dashboard.get_data",
+	"Bank": "erpnext.accounts.master.bank.bank_dashboard.get_data",
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
