@@ -102,7 +102,7 @@ frappe.ui.form.on("Delivery Note", {
 				let button_label = (frm.doc.company === frm.doc.represents_company) ? "Internal Purchase Receipt" :
 					"Inter Company Purchase Receipt";
 
-				frm.add_custom_button(button_label, function() {
+				frm.add_custom_button(__(button_label), function() {
 					frappe.model.open_mapped_doc({
 						method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt',
 						frm: frm,
