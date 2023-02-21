@@ -311,15 +311,10 @@ doc_events = {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
-			"erpnext.regional.saudi_arabia.utils.create_qr_code",
 		],
-		"on_cancel": [
-			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file",
-		],
+		"on_cancel": ["erpnext.regional.italy.utils.sales_invoice_on_cancel"],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
-	"POS Invoice": {"on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]},
 	"Purchase Invoice": {
 		"validate": [
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
@@ -347,7 +342,6 @@ doc_events = {
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
 	},
-	"Company": {"on_trash": ["erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]},
 	"Integration Request": {
 		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
 	},
