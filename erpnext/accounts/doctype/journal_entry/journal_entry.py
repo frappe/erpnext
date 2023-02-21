@@ -89,7 +89,13 @@ class JournalEntry(AccountsController):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		unlink_ref_doc_from_payment_entries(self)
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.unlink_advance_entry_reference()
@@ -238,21 +244,16 @@ class JournalEntry(AccountsController):
 			):
 				processed_assets.append(d.reference_name)
 
-				asset = frappe.db.get_value(
-					"Asset", d.reference_name, ["calculate_depreciation", "value_after_depreciation"], as_dict=1
-				)
+				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
 					continue
 
 				depr_value = d.debit or d.credit
 
-				frappe.db.set_value(
-					"Asset",
-					d.reference_name,
-					"value_after_depreciation",
-					asset.value_after_depreciation - depr_value,
-				)
+				asset.db_set("value_after_depreciation", asset.value_after_depreciation - depr_value)
+
+				asset.set_status()
 
 	def update_inter_company_jv(self):
 		if (
@@ -341,12 +342,9 @@ class JournalEntry(AccountsController):
 				else:
 					depr_value = d.debit or d.credit
 
-					frappe.db.set_value(
-						"Asset",
-						d.reference_name,
-						"value_after_depreciation",
-						asset.value_after_depreciation + depr_value,
-					)
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation + depr_value)
+
+					asset.set_status()
 
 	def unlink_inter_company_jv(self):
 		if (

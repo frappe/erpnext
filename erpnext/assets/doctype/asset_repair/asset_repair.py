@@ -77,6 +77,9 @@ class AssetRepair(AccountsController):
 		self.asset_doc.prepare_depreciation_data()
 		self.asset_doc.save()
 
+	def after_delete(self):
+		frappe.get_doc("Asset", self.asset).set_status()
+
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))

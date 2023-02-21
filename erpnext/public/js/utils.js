@@ -221,9 +221,9 @@ $.extend(erpnext.utils, {
 			callback: function(r) {
 				if (r.message && r.message.length) {
 					r.message.forEach((dimension) => {
-						let found = filters.some(el => el.fieldname === dimension['fieldname']);
+						let existing_filter = filters.filter(el => el.fieldname === dimension['fieldname']);
 
-						if (!found) {
+						if (!existing_filter.length) {
 							filters.splice(index, 0, {
 								"fieldname": dimension["fieldname"],
 								"label": __(dimension["doctype"]),
@@ -232,6 +232,11 @@ $.extend(erpnext.utils, {
 									return frappe.db.get_link_options(dimension["doctype"], txt);
 								},
 							});
+						} else {
+							existing_filter[0]['fieldtype'] = "MultiSelectList";
+							existing_filter[0]['get_data'] = function(txt) {
+								return frappe.db.get_link_options(dimension["doctype"], txt);
+							}
 						}
 					});
 				}

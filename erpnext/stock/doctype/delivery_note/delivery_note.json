@@ -521,6 +521,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Delivery Note Item",
    "oldfieldname": "delivery_note_details",
    "oldfieldtype": "Table",
    "options": "Delivery Note Item",
@@ -666,6 +667,7 @@
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
+   "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
    "options": "Sales Taxes and Charges"
@@ -1401,7 +1403,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:38:53.067799",
+ "modified": "2023-02-14 04:45:44.179670",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
