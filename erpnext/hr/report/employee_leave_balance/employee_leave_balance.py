@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, getdate
+from frappe.utils import add_days, cint, getdate
 
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_previous_allocation
 from erpnext.hr.doctype.leave_application.leave_application import (
@@ -24,7 +24,7 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 
 	columns = get_columns()
 	data = get_data(filters)
-	charts = get_chart_data(data)
+	charts = get_chart_data(data, filters)
 	return columns, data, None, charts
 
 
@@ -89,7 +89,7 @@ def get_data(filters: Filters) -> List:
 	conditions = get_conditions(filters)
 
 	user = frappe.session.user
-	department_approver_map = get_department_leave_approver_map(filters.get("department"))
+	department_approver_map = get_department_leave_approver_map(filters.department)
 
 	active_employees = frappe.get_list(
 		"Employee",
@@ -97,22 +97,27 @@ def get_data(filters: Filters) -> List:
 		fields=["name", "employee_name", "department", "user_id", "leave_approver"],
 	)
 
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
+	consolidate_leave_types = len(active_employees) > 1 and filters.consolidate_leave_types
+	row = None
+
 	data = []
 
 	for leave_type in leave_types:
-		if len(active_employees) > 1:
+		if consolidate_leave_types:
 			data.append({"leave_type": leave_type})
 		else:
 			row = frappe._dict({"leave_type": leave_type})
 
 		for employee in active_employees:
-
 			leave_approvers = department_approver_map.get(employee.department_name, []).append(
 				employee.leave_approver
 			)
 
-			if len(active_employees) > 1:
+			if consolidate_leave_types:
 				row = frappe._dict()
+			else:
+				row = frappe._dict({"leave_type": leave_type})
 
 			row.employee = employee.name
 			row.employee_name = employee.employee_name
@@ -166,17 +171,17 @@ def get_opening_balance(
 def get_conditions(filters: Filters) -> Dict:
 	conditions = {}
 
-	if filters.get("employee"):
-		conditions["name"] = filters.get("employee")
+	if filters.employee:
+		conditions["name"] = filters.employee
 
-	if filters.get("company"):
-		conditions["company"] = filters.get("company")
+	if filters.company:
+		conditions["company"] = filters.company
 
-	if filters.get("department"):
-		conditions["department"] = filters.get("department")
+	if filters.department:
+		conditions["department"] = filters.department
 
-	if filters.get("employee_status"):
-		conditions["status"] = filters.get("employee_status")
+	if filters.employee_status:
+		conditions["status"] = filters.employee_status
 
 	return conditions
 
@@ -268,12 +273,15 @@ def get_leave_ledger_entries(
 	return records
 
 
-def get_chart_data(data: List) -> Dict:
+def get_chart_data(data: List, filters: Filters) -> Dict:
 	labels = []
 	datasets = []
 	employee_data = data
 
-	if data and data[0].get("employee_name"):
+	if not data:
+		return None
+
+	if data and filters.employee:
 		get_dataset_for_chart(employee_data, datasets, labels)
 
 	chart = {
