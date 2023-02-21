@@ -234,7 +234,7 @@ class PaymentReconciliation(Document):
 	def allocate_entries(self, args):
 		self.validate_entries()
 
-		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"))
+		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
 		default_exchange_gain_loss_account = frappe.get_cached_value(
 			"Company", self.company, "exchange_gain_loss_account"
 		)
@@ -253,6 +253,9 @@ class PaymentReconciliation(Document):
 					pay["amount"] = 0
 
 				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
+				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
+					pay["exchange_rate"] = invoice_exchange_map.get(pay.get("reference_name"))
+
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
 				res.difference_account = default_exchange_gain_loss_account
 				res.exchange_rate = inv.get("exchange_rate")
@@ -365,6 +368,7 @@ class PaymentReconciliation(Document):
 				"exchange_rate": 1,
 				"cost_center": erpnext.get_default_cost_center(self.company),
 				reverse_dr_or_cr + "_in_account_currency": flt(row.difference_amount),
+				reverse_dr_or_cr: flt(row.difference_amount),
 			}
 		)
 
@@ -407,13 +411,21 @@ class PaymentReconciliation(Document):
 		if not self.get("payments"):
 			frappe.throw(_("No records found in the Payments table"))
 
-	def get_invoice_exchange_map(self, invoices):
+	def get_invoice_exchange_map(self, invoices, payments):
 		sales_invoices = [
 			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Sales Invoice"
 		]
+
+		sales_invoices.extend(
+			[d.get("reference_name") for d in payments if d.get("reference_type") == "Sales Invoice"]
+		)
 		purchase_invoices = [
 			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Purchase Invoice"
 		]
+		purchase_invoices.extend(
+			[d.get("reference_name") for d in payments if d.get("reference_type") == "Purchase Invoice"]
+		)
+
 		invoice_exchange_map = frappe._dict()
 
 		if sales_invoices:

@@ -81,6 +81,7 @@ class JournalEntry(AccountsController):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
+		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 
@@ -88,7 +89,13 @@ class JournalEntry(AccountsController):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		unlink_ref_doc_from_payment_entries(self)
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.unlink_advance_entry_reference()
@@ -225,6 +232,29 @@ class JournalEntry(AccountsController):
 		for d in to_remove:
 			self.remove(d)
 
+	def update_asset_value(self):
+		if self.voucher_type != "Depreciation Entry":
+			return
+
+		processed_assets = []
+
+		for d in self.get("accounts"):
+			if (
+				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+			):
+				processed_assets.append(d.reference_name)
+
+				asset = frappe.get_doc("Asset", d.reference_name)
+
+				if asset.calculate_depreciation:
+					continue
+
+				depr_value = d.debit or d.credit
+
+				asset.db_set("value_after_depreciation", asset.value_after_depreciation - depr_value)
+
+				asset.set_status()
+
 	def update_inter_company_jv(self):
 		if (
 			self.voucher_type == "Inter Company Journal Entry"
@@ -283,20 +313,45 @@ class JournalEntry(AccountsController):
 				d.db_update()
 
 	def unlink_asset_reference(self):
+		if self.voucher_type != "Depreciation Entry":
+			return
+
+		processed_assets = []
+
 		for d in self.get("accounts"):
-			if d.reference_type == "Asset" and d.reference_name:
+			if (
+				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+			):
+				processed_assets.append(d.reference_name)
+
 				asset = frappe.get_doc("Asset", d.reference_name)
-				for row in asset.get("finance_books"):
-					depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
 
-					for s in depr_schedule or []:
-						if s.journal_entry == self.name:
-							s.db_set("journal_entry", None)
+				if asset.calculate_depreciation:
+					je_found = False
 
-							row.value_after_depreciation += s.depreciation_amount
-							row.db_update()
+					for row in asset.get("finance_books"):
+						if je_found:
+							break
 
-							asset.set_status()
+						depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
+
+						for s in depr_schedule or []:
+							if s.journal_entry == self.name:
+								s.db_set("journal_entry", None)
+
+								row.value_after_depreciation += s.depreciation_amount
+								row.db_update()
+
+								asset.set_status()
+
+								je_found = True
+								break
+				else:
+					depr_value = d.debit or d.credit
+
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation + depr_value)
+
+					asset.set_status()
 
 	def unlink_inter_company_jv(self):
 		if (
