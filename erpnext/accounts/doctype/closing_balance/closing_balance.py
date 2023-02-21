@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class OpeningEntry(Document):
+class ClosingBalance(Document):
 	pass
