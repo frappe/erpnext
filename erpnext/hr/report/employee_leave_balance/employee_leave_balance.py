@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, getdate
+from frappe.utils import add_days, cint, getdate
 
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_previous_allocation
 from erpnext.hr.doctype.leave_application.leave_application import (
