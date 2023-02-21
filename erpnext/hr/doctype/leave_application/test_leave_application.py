@@ -698,8 +698,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		)
-		leave_type.insert()
+		).insert()
 
 		create_carry_forwarded_allocation(employee, leave_type)
 		details = get_leave_balance_on(
