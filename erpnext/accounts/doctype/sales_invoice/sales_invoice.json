@@ -2112,7 +2112,6 @@
    "width": "50%"
   },
   {
-<<<<<<< HEAD
    "fieldname": "incoterm",
    "fieldtype": "Link",
    "label": "Incoterm",
@@ -2123,7 +2122,8 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
-=======
+  },
+  {
    "default": "0",
    "fieldname": "repost_required",
    "fieldtype": "Check",
@@ -2131,7 +2131,6 @@
    "label": "Repost Required",
    "no_copy": 1,
    "read_only": 1
->>>>>>> 30da6ab2c1 (feat: Editable Sales Invoice)
   }
  ],
  "icon": "fa fa-file-text",
@@ -2144,19 +2143,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2023-01-28 19:45:47.538163",
-=======
- "modified": "2022-10-15 19:15:49.526529",
->>>>>>> 30da6ab2c1 (feat: Editable Sales Invoice)
-=======
- "modified": "2022-10-23 10:52:47.416251",
->>>>>>> 1105e52031 (chore: Update allow on submit fields)
-=======
  "modified": "2022-11-07 16:02:07.972258",
->>>>>>> 5fe55176ec (chore: Enable no-copy for repost required field)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
