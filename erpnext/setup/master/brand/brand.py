@@ -5,11 +5,6 @@
 import copy
 
 import frappe
-from frappe.model.document import Document
-
-
-class Brand(Document):
-	pass
 
 
 def get_brand_defaults(item, company):

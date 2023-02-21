@@ -3,4 +3,6 @@
 
 import frappe
 
-test_records = frappe.get_test_records("Brand")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Setup", "master", "brand", "test_records.json")
+)

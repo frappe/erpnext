@@ -25,8 +25,8 @@ from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import
 	get_current_asset_value,
 )
 from erpnext.controllers.stock_controller import StockController
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.master.brand.brand import get_brand_defaults
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import (

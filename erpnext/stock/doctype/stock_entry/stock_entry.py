@@ -15,8 +15,8 @@ import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, validate_bom_no
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.master.brand.brand import get_brand_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import (

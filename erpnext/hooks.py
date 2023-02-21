@@ -28,6 +28,7 @@ doctype_js = {
 	"Supplier": "public/js/master/supplier.js",
 	"Activity Type": "public/js/master/activity_type.js",
 	"Bank": "public/js/master/bank.js",
+	"Brand": "public/js/master/brand.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
