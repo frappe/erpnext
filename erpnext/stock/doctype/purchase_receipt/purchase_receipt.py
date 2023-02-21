@@ -887,18 +887,10 @@ def update_billing_percentage(pr_doc, update_modified=True):
 
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
-	for item in pr_doc.items:
-		return_data = frappe.db.get_list(
-			"Purchase Receipt",
-			fields=["sum(abs(`tabPurchase Receipt Item`.qty)) as qty"],
-			filters=[
-				["Purchase Receipt", "docstatus", "=", 1],
-				["Purchase Receipt", "is_return", "=", 1],
-				["Purchase Receipt Item", "purchase_receipt_item", "=", item.name],
-			],
-		)
+	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
 
-		returned_qty = return_data[0].qty if return_data else 0
+	for item in pr_doc.items:
+		returned_qty = flt(item_wise_returned_qty.get(item.name))
 		returned_amount = flt(returned_qty) * flt(item.rate)
 		pending_amount = flt(item.amount) - returned_amount
 		total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
@@ -913,6 +905,27 @@ def update_billing_percentage(pr_doc, update_modified=True):
 	if update_modified:
 		pr_doc.set_status(update=True)
 		pr_doc.notify_update()
+
+
+def get_item_wise_returned_qty(pr_doc):
+	items = [d.name for d in pr_doc.items]
+
+	return frappe._dict(
+		frappe.get_all(
+			"Purchase Receipt",
+			fields=[
+				"`tabPurchase Receipt Item`.purchase_receipt_item",
+				"sum(abs(`tabPurchase Receipt Item`.qty)) as qty",
+			],
+			filters=[
+				["Purchase Receipt", "docstatus", "=", 1],
+				["Purchase Receipt", "is_return", "=", 1],
+				["Purchase Receipt Item", "purchase_receipt_item", "in", items],
+			],
+			group_by="`tabPurchase Receipt Item`.purchase_receipt_item",
+			as_list=1,
+		)
+	)
 
 
 @frappe.whitelist()

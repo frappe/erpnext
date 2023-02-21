@@ -4,7 +4,7 @@
 # the repo. Unless a later match takes precedence,
 
 erpnext/accounts/               @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
-erpnext/assets/                 @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
+erpnext/assets/                 @anandbaburajan @deepeshgarg007
 erpnext/loan_management/        @nextchamp-saqib @deepeshgarg007
 erpnext/regional                @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
 erpnext/selling                 @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
@@ -16,6 +16,7 @@ erpnext/maintenance/            @rohitwaghchaure @s-aga-r
 erpnext/manufacturing/          @rohitwaghchaure @s-aga-r
 erpnext/quality_management/     @rohitwaghchaure @s-aga-r
 erpnext/stock/                  @rohitwaghchaure @s-aga-r
+erpnext/subcontracting          @rohitwaghchaure @s-aga-r
 
 erpnext/crm/                    @NagariaHussain
 erpnext/education/              @rutwikhdev

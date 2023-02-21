@@ -1,9 +1,5 @@
 import frappe
 
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	set_draft_asset_depr_schedule_details,
-)
-
 
 def execute():
 	frappe.reload_doc("assets", "doctype", "Asset Depreciation Schedule")
@@ -16,7 +12,7 @@ def execute():
 		for fb_row in finance_book_rows:
 			asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
 
-			set_draft_asset_depr_schedule_details(asset_depr_schedule_doc, asset, fb_row)
+			asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(asset, fb_row)
 
 			asset_depr_schedule_doc.insert()
 
