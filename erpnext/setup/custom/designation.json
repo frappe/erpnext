@@ -1,0 +1,25 @@
+{
+  "custom_fields": [],
+  "custom_perms": [
+    {
+      "parent": "Designation",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "HR User",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Designation",
+      "read": 1,
+      "role": "Sales User"
+    }
+  ],
+  "doctype": "Designation",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}
