@@ -312,9 +312,7 @@ doc_events = {
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 		],
-		"on_cancel": [
-			"erpnext.regional.italy.utils.sales_invoice_on_cancel"
-		],
+		"on_cancel": ["erpnext.regional.italy.utils.sales_invoice_on_cancel"],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Purchase Invoice": {

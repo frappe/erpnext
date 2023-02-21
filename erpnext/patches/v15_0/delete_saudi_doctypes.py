@@ -10,7 +10,7 @@ def execute():
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
-	print_formats = ["KSA POS Invoice","KSA VAT Invoice"]
+	print_formats = ["KSA POS Invoice", "KSA VAT Invoice"]
 	for print_format in print_formats:
 		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
 
