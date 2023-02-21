@@ -832,6 +832,7 @@ def get_leave_balance_on(
 def get_leave_allocation_records(employee, date, leave_type=None):
 	"""Returns the total allocated leaves and carry forwarded leaves based on ledger entries"""
 	Ledger = frappe.qb.DocType("Leave Ledger Entry")
+	LeaveAllocation = frappe.qb.DocType("Leave Allocation")
 
 	cf_leave_case = (
 		frappe.qb.terms.Case().when(Ledger.is_carry_forward == "1", Ledger.leaves).else_(0)
@@ -845,6 +846,8 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 
 	query = (
 		frappe.qb.from_(Ledger)
+		.inner_join(LeaveAllocation)
+		.on(Ledger.transaction_name == LeaveAllocation.name)
 		.select(
 			sum_cf_leaves,
 			sum_new_leaves,
@@ -854,12 +857,21 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 		)
 		.where(
 			(Ledger.from_date <= date)
-			& (Ledger.to_date >= date)
 			& (Ledger.docstatus == 1)
 			& (Ledger.transaction_type == "Leave Allocation")
 			& (Ledger.employee == employee)
 			& (Ledger.is_expired == 0)
 			& (Ledger.is_lwp == 0)
+			& (
+				# newly allocated leave's end date is same as the leave allocation's to date
+				((Ledger.is_carry_forward == 0) & (Ledger.to_date >= date))
+				# carry forwarded leave's end date won't be same as the leave allocation's to date
+				# it's between the leave allocation's from and to date
+				| (
+					(Ledger.is_carry_forward == 1)
+					& (Ledger.to_date.between(LeaveAllocation.from_date, LeaveAllocation.to_date))
+				)
+			)
 		)
 	)
 
