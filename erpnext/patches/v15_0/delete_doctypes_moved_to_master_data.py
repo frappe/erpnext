@@ -12,6 +12,7 @@ def execute():
 		"Designation",
 		"Driving License Category",
 		"Employee Education",
+		"Employee External Work History",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
