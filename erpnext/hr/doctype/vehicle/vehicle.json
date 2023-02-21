@@ -72,7 +72,6 @@
    "in_list_view": 1,
    "label": "Odometer Value (Last)",
    "no_copy": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -193,7 +192,7 @@
    "read_only": 1
   }
  ],
- "modified": "2023-02-06 16:20:03.155637",
+ "modified": "2023-02-20 14:30:26.462353",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle",

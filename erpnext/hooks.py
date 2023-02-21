@@ -332,8 +332,8 @@ email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
 default_mail_footer = """
 	<span>
 		Sent via
-		<a class="text-muted" href="https://erpnext.com?source=via_email_footer" target="_blank">
-			ERPNext
+		<a class="text-muted" href="https://gicoh.com/" target="_blank">
+			Gicoh
 		</a>
 	</span>
 """
