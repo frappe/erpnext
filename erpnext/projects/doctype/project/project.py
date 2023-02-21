@@ -10,10 +10,10 @@ from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
+from master.master.doctype.holiday_list.holiday_list import is_holiday
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
-from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
