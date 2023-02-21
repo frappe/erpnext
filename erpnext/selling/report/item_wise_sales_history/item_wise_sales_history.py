@@ -216,7 +216,7 @@ def get_sales_order_details(company_list, filters):
 	)
 
 	if filters.get("item_group"):
-		query = query.where(db_so_item.item_group == frappe.db.escape(filters.item_group))
+		query = query.where(db_so_item.item_group == filters.item_group)
 
 	if filters.get("from_date"):
 		query = query.where(db_so.transaction_date >= filters.from_date)
@@ -225,7 +225,7 @@ def get_sales_order_details(company_list, filters):
 		query = query.where(db_so.transaction_date <= filters.to_date)
 
 	if filters.get("item_code"):
-		query = query.where(db_so_item.item_group == frappe.db.escape(filters.item_code))
+		query = query.where(db_so_item.item_code == filters.item_code)
 
 	if filters.get("customer"):
 		query = query.where(db_so.customer == filters.customer)
