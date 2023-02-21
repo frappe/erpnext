@@ -732,6 +732,7 @@ def make_address(args, is_primary_address=1):
 			"pincode": args.get("pincode"),
 			"country": args.get("country"),
 			"phone":args.get("landline"),
+			"address_type":"Company",
 
 			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 		}
