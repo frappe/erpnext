@@ -993,16 +993,21 @@ class TestLeaveApplication(unittest.TestCase):
 
 	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
 	def test_get_leave_allocation_records(self):
+		"""Tests if total leaves allocated before and after carry forwarded leave expiry is same"""
 		employee = get_employee()
 		leave_type = create_leave_type(
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		)
-		leave_type.insert()
+		).insert()
 
 		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
-		details = get_leave_allocation_records(employee.name, getdate(), leave_type.name)
+		cf_expiry = frappe.db.get_value(
+			"Leave Ledger Entry", {"transaction_name": leave_alloc.name, "is_carry_forward": 1}, "to_date"
+		)
+
+		# test total leaves allocated before cf leave expiry
+		details = get_leave_allocation_records(employee.name, add_days(cf_expiry, -1), leave_type.name)
 		expected_data = {
 			"from_date": getdate(leave_alloc.from_date),
 			"to_date": getdate(leave_alloc.to_date),
@@ -1011,6 +1016,11 @@ class TestLeaveApplication(unittest.TestCase):
 			"new_leaves_allocated": 15.0,
 			"leave_type": leave_type.name,
 		}
+		self.assertEqual(details.get(leave_type.name), expected_data)
+
+		# test leaves allocated after carry forwarded leaves expiry, should be same thoroughout allocation period
+		# cf leaves should show up under expired or taken leaves later
+		details = get_leave_allocation_records(employee.name, add_days(cf_expiry, 1), leave_type.name)
 		self.assertEqual(details.get(leave_type.name), expected_data)
 
 
