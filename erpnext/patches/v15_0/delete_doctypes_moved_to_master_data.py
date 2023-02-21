@@ -10,6 +10,7 @@ def execute():
 		"Branch",
 		"Brand",
 		"Designation",
+		"Driving License Category",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
