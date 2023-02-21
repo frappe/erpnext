@@ -209,6 +209,7 @@
   "is_internal_customer",
   "is_discounted",
   "remarks",
+  "repost_required",
   "connections_tab"
  ],
  "fields": [
@@ -1038,6 +1039,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_redemption_account",
    "fieldtype": "Link",
@@ -1336,6 +1338,7 @@
    "options": "fa fa-money"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "is_pos",
    "fieldname": "cash_bank_account",
    "fieldtype": "Link",
@@ -1435,6 +1438,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "is_pos",
    "fieldname": "account_for_change_amount",
    "fieldtype": "Link",
@@ -1483,6 +1487,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1706,6 +1711,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
@@ -1922,6 +1928,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.is_internal_customer",
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
@@ -1964,6 +1971,7 @@
    "label": "Disable Rounded Total"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
    "label": "Discount Account",
@@ -2114,6 +2122,15 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "fieldname": "repost_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Repost Required",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2126,7 +2143,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-01-28 19:45:47.538163",
+ "modified": "2022-11-07 16:02:07.972258",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
