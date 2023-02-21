@@ -278,7 +278,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 			tax_amount = get_tcs_amount(parties, inv, tax_details, vouchers, advance_vouchers)
 
 	if cint(tax_details.round_off_tax_amount):
-		tax_amount = round(tax_amount)
+		tax_amount = normal_round(tax_amount)
 
 	return tax_amount, tax_deducted, tax_deducted_on_advances, voucher_wise_amount
 
@@ -603,3 +603,20 @@ def is_valid_certificate(
 		valid = True
 
 	return valid
+
+
+def normal_round(number):
+	"""
+	Rounds a number to the nearest integer.
+	:param number: The number to round.
+	"""
+	decimal_part = number - int(number)
+
+	if decimal_part >= 0.5:
+		decimal_part = 1
+	else:
+		decimal_part = 0
+
+	number = int(number) + decimal_part
+
+	return number
