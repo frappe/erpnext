@@ -235,7 +235,7 @@
  "modified": "2023-02-21 15:20:59.586811",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Opening Entry",
+ "name": "Closing Balance",
  "owner": "Administrator",
  "permissions": [
   {
