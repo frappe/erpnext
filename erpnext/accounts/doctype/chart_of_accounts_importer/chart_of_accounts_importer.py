@@ -318,7 +318,7 @@ def get_template(template_type):
 		"Is Group",
 		"Account Type",
 		"Root Type",
-		"account_currency",
+		"Account Currency",
 	]
 	writer = UnicodeWriter()
 	writer.writerow(fields)
