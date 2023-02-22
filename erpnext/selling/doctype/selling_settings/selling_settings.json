@@ -19,7 +19,9 @@
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "validate_selling_price",
-  "hide_tax_id"
+  "hide_tax_id",
+  "validate_duplicate_customer_cnic",
+  "validate_duplicate_customer_ntn"
  ],
  "fields": [
   {
@@ -116,12 +118,24 @@
    "fieldname": "hide_tax_id",
    "fieldtype": "Check",
    "label": "Hide Customer's Tax Id from Sales Transactions"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_duplicate_customer_cnic",
+   "fieldtype": "Check",
+   "label": "Validate Duplicate Customer CNIC"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_duplicate_customer_ntn",
+   "fieldtype": "Check",
+   "label": "Validate Duplicate Customer NTN"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2022-12-26 12:22:05.256037",
+ "modified": "2023-02-22 16:29:26.905834",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
