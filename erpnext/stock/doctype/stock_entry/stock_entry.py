@@ -144,7 +144,9 @@ class StockEntry(StockController):
 			self.validate_work_order_status()
 
 		self.update_work_order()
+		entries_slu = frappe.db.sql(f"""SELECT creation,item_code,warehouse,batch_no FROM `tabStock Ledger Entry` WHERE voucher_no = '{self.name}' GROUP BY item_code,warehouse,batch_no""",as_dict=True)
 		self.update_stock_ledger()
+		self.update_stock_ledger_on_delete(entries_slu)
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
 		self.update_transferred_qty()
@@ -152,6 +154,9 @@ class StockEntry(StockController):
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
+	def update_stock_ledger_on_delete(self,entries_slu):
+		for entry in entries_slu:
+			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_update_on_delete",creation=entry.creation,item_code=entry.item_code,warehouse=entry.warehouse,batch_no=entry.batch_no,queue="slu_secondary",enqueue_after_commit=True)
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
