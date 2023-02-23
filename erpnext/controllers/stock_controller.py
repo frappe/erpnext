@@ -240,7 +240,7 @@ class StockController(AccountsController):
 						item=d.item_code,
 						supplier=getattr(self, 'supplier', None),
 						company=getattr(self, 'company', None),
-						valuation_rate=getattr(self, 'valuation_rate', None),
+						valuation_rate=d.valuation_rate,
 						reference_doctype=self.doctype,
 						reference_name=self.name)).insert().name
 
