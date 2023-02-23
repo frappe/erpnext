@@ -177,3 +177,153 @@ def get_next_cheque_number(doc,count):
 			frappe.throw("No Checque Book Avaiable for this Bank "+doc.company_bank_account)
 		else:
 			return cheque_no
+
+
+@frappe.whitelist()
+def make_payment_with_single_cheque(name, mode_of_payment=None):
+	query_data = frappe.db.sql("""
+		SELECT
+			supplier as name
+		FROM
+			`tabPayment Order Detail`
+		WHERE
+			parent = '{0}'
+	""".format(name),as_dict=True)
+	if query_data:
+		is_unique_cheque_number = True
+		cheque_number = 0
+		cheque_refrence =  0
+		for supplier in query_data:
+			doc = frappe.get_doc('Payment Order', name)
+			je = frappe.new_doc('Payment Entry')
+			je.payment_order = doc.name
+			je.posting_date = nowdate()
+			je.party = supplier.name
+			je.party_type = 'Supplier'
+			je.company = doc.company
+			je.payment_type = 'Pay'
+			
+
+			je.reference_date = nowdate()
+			je.reference_no = '00'
+			# bank or cash
+			from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+			bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=None,account=None)
+
+			if not bank:
+				bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=None,account=None)
+			party_account = get_party_account('Supplier', supplier.name, doc.company)
+			je.paid_from = party_account if je.payment_type=="Receive" else doc.references[0].account
+			je.paid_to = party_account if je.payment_type=="Pay" else bank.account
+
+			je.mode_of_payment = doc.references[0].mode_of_payment
+			if doc.references[0].mode_of_payment == 'Cheque' and is_unique_cheque_number:
+				cq_number = get_next_cheque_number(doc,1)
+				if cq_number[0][0] != None:
+					cheque_number = cq_number[0][1]
+					cheque_refrence = cq_number[0][0]
+					je.cheque_number = cq_number[0][1]
+					je.reference_no = cq_number[0][0]
+					is_unique_cheque_number = False
+			elif doc.references[0].mode_of_payment == 'Cheque':
+					je.cheque_number = cheque_number
+					je.reference_no = cheque_refrence
+			mode_of_payment_type = frappe._dict(frappe.get_all('Mode of Payment',
+				fields = ["name", "type"], as_list=1))
+
+			je.voucher_type = 'Bank Entry'
+			if mode_of_payment and mode_of_payment_type.get(mode_of_payment) == 'Cash':
+				je.voucher_type = "Cash Entry"
+
+			paid_amt = 0
+			
+			for d in doc.references:
+				if (d.supplier == supplier.name
+					and (not mode_of_payment or mode_of_payment == d.mode_of_payment)):
+					je.append('references', {
+						'total_amount': d.amount,
+						'reference_doctype': d.reference_doctype,
+						'reference_name': d.reference_name,
+						'outstanding_amount': d.amount,
+						'allocated_amount': d.amount
+					})
+
+					paid_amt += d.amount
+
+			je.paid_amount = paid_amt
+			je.received_amount = paid_amt
+			je.flags.ignore_mandatory = True
+			je.save()
+		
+		frappe.msgprint(_("Payment Entries created."))
+
+
+@frappe.whitelist()
+def make_payment_entry_on_single_click(name, mode_of_payment=None):
+	query_data = frappe.db.sql("""
+		SELECT
+			supplier as name
+		FROM
+			`tabPayment Order Detail`
+		WHERE
+			parent = '{0}'
+	""".format(name),as_dict=True)
+	if query_data:
+		for supplier in query_data:
+			doc = frappe.get_doc('Payment Order', name)
+			je = frappe.new_doc('Payment Entry')
+			je.payment_order = doc.name
+			je.posting_date = nowdate()
+			je.party = supplier.name
+			je.party_type = 'Supplier'
+			je.company = doc.company
+			je.payment_type = 'Pay'
+			
+
+			je.reference_date = nowdate()
+			je.reference_no = '00'
+			# bank or cash
+			from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+			bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=None,account=None)
+
+			if not bank:
+				bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=None,account=None)
+			party_account = get_party_account('Supplier', supplier.name, doc.company)
+			je.paid_from = party_account if je.payment_type=="Receive" else doc.references[0].account
+			je.paid_to = party_account if je.payment_type=="Pay" else bank.account
+
+			je.mode_of_payment = doc.references[0].mode_of_payment
+			if doc.references[0].mode_of_payment == 'Cheque':
+				cq_number = get_next_cheque_number(doc,1)
+				if cq_number[0][0] != None:
+					je.cheque_number = cq_number[0][1]
+					je.reference_no = cq_number[0][0]
+			
+			mode_of_payment_type = frappe._dict(frappe.get_all('Mode of Payment',
+				fields = ["name", "type"], as_list=1))
+
+			je.voucher_type = 'Bank Entry'
+			if mode_of_payment and mode_of_payment_type.get(mode_of_payment) == 'Cash':
+				je.voucher_type = "Cash Entry"
+
+			paid_amt = 0
+			
+			for d in doc.references:
+				if (d.supplier == supplier.name
+					and (not mode_of_payment or mode_of_payment == d.mode_of_payment)):
+					je.append('references', {
+						'total_amount': d.amount,
+						'reference_doctype': d.reference_doctype,
+						'reference_name': d.reference_name,
+						'outstanding_amount': d.amount,
+						'allocated_amount': d.amount
+					})
+
+					paid_amt += d.amount
+
+			je.paid_amount = paid_amt
+			je.received_amount = paid_amt
+			je.flags.ignore_mandatory = True
+			je.save()
+		
+		frappe.msgprint(_("Payment Entries created."))
