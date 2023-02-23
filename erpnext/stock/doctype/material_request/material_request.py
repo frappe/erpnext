@@ -594,6 +594,9 @@ def make_stock_entry(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
+		target.from_warehouse = source.set_from_warehouse
+		target.to_warehouse = source.set_warehouse
+
 		if source.job_card:
 			target.purpose = "Material Transfer for Manufacture"
 
@@ -721,3 +724,18 @@ def create_pick_list(source_name, target_doc=None):
 	doc.set_item_locations()
 
 	return doc
+<<<<<<< HEAD
+=======
+
+
+@frappe.whitelist()
+def make_in_transit_stock_entry(source_name, in_transit_warehouse):
+	ste_doc = make_stock_entry(source_name)
+	ste_doc.add_to_transit = 1
+	ste_doc.to_warehouse = in_transit_warehouse
+
+	for row in ste_doc.items:
+		row.t_warehouse = in_transit_warehouse
+
+	return ste_doc
+>>>>>>> c09a61f360 (fix: set `from_warehouse` and `to_warehouse` while mapping SE)
