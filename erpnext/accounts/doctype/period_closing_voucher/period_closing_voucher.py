@@ -21,6 +21,7 @@ class PeriodClosingVoucher(AccountsController):
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")
 		self.make_gl_entries()
+		self.make_closing_entries()
 
 	def on_cancel(self):
 		self.db_set("gle_processing_status", "In Progress")
@@ -91,16 +92,37 @@ class PeriodClosingVoucher(AccountsController):
 			else:
 				process_gl_entries(gl_entries)
 
+	def make_closing_entries(self):
+		closing_entries = self.get_grouped_gl_entries()
+		if closing_entries:
+			if len(closing_entries) > 5000:
+				frappe.enqueue(process_closing_entries, gl_entries=closing_entries, queue="long")
+				frappe.msgprint(
+					_("The Opening Entries will be processed in the background, it can take a few minutes."),
+					alert=True,
+				)
+			else:
+				process_closing_entries(closing_entries)
+
+	def get_grouped_gl_entries(self):
+		closing_entries = []
+		for acc in self.get_balances_based_on_dimensions(
+			group_by_account=True, report_type=["Profit and Loss", "Balance Sheet"], for_aggregation=True
+		):
+			closing_entries.append(self.get_closing_entries(acc))
+
+		return closing_entries
+
 	def get_gl_entries(self):
 		gl_entries = []
 
 		# pl account
-		for acc in self.get_pl_balances_based_on_dimensions(group_by_account=True):
+		for acc in self.get_balances_based_on_dimensions(group_by_account=True):
 			if flt(acc.bal_in_company_currency):
 				gl_entries.append(self.get_gle_for_pl_account(acc))
 
 		# closing liability account
-		for acc in self.get_pl_balances_based_on_dimensions(group_by_account=False):
+		for acc in self.get_balances_based_on_dimensions(group_by_account=False):
 			if flt(acc.bal_in_company_currency):
 				gl_entries.append(self.get_gle_for_closing_account(acc))
 
@@ -148,6 +170,25 @@ class PeriodClosingVoucher(AccountsController):
 		self.update_default_dimensions(gl_entry, acc)
 		return gl_entry
 
+	def get_closing_entries(self, acc):
+		closing_entry = self.get_gl_dict(
+			{
+				"closing_date": self.posting_date,
+				"period_closing_voucher": self.name,
+				"account": acc.account,
+				"cost_center": acc.cost_center,
+				"finance_book": acc.finance_book,
+				"account_currency": acc.account_currency,
+				"debit_in_account_currency": flt(acc.debit_in_account_currency),
+				"debit": flt(acc.debit),
+				"credit_in_account_currency": flt(acc.credit_in_account_currency),
+				"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) < 0 else 0,
+			},
+			item=acc,
+		)
+
+		return closing_entry
+
 	def update_default_dimensions(self, gl_entry, acc):
 		if not self.accounting_dimensions:
 			self.accounting_dimensions = get_accounting_dimensions()
@@ -155,8 +196,23 @@ class PeriodClosingVoucher(AccountsController):
 		for dimension in self.accounting_dimensions:
 			gl_entry.update({dimension: acc.get(dimension)})
 
-	def get_pl_balances_based_on_dimensions(self, group_by_account=False):
+	def get_balances_based_on_dimensions(
+		self, group_by_account=False, report_type=["Profit and Loss"], for_aggregation=False
+	):
 		"""Get balance for dimension-wise pl accounts"""
+
+		if for_aggregation:
+			balance_fields = [
+				"sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as bal_in_account_currency",
+				"sum(t1.debit) - sum(t1.credit) as bal_in_company_currency",
+			]
+		else:
+			balance_fields = [
+				"sum(t1.debit_in_account_currency) as debit_in_account_currency",
+				"sum(t1.credit_in_account_currency) as credit_in_account_currency",
+				"sum(t1.debit) as debit",
+				"sum(t1.credit) as credit",
+			]
 
 		dimension_fields = ["t1.cost_center", "t1.finance_book"]
 
@@ -170,6 +226,7 @@ class PeriodClosingVoucher(AccountsController):
 		return frappe.db.sql(
 			"""
 			select
+<<<<<<< HEAD
 				t1.account_currency,
 				{dimension_fields},
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as bal_in_account_currency,
@@ -178,14 +235,42 @@ class PeriodClosingVoucher(AccountsController):
 			where
 				t1.is_cancelled = 0
 				and t1.account in (select name from `tabAccount` where report_type = 'Profit and Loss' and docstatus < 2 and company = %s)
+=======
+				t1.account,
+				t2.account_currency,
+				{dimension_fields},
+				{balance_fields}
+			from `tabGL Entry` t1, `tabAccount` t2
+			where
+				t1.is_cancelled = 0
+				and t1.account = t2.name
+				and t2.report_type in ("{report_type}")
+				and t2.docstatus < 2
+				and t2.company = %s
+>>>>>>> c3f39c3f32 (feat: Cascade closing balances on PCV submit)
 				and t1.posting_date between %s and %s
 			group by {dimension_fields}
 		""".format(
 				dimension_fields=", ".join(dimension_fields),
+<<<<<<< HEAD
+=======
+				balance_fields=", ".join(balance_fields),
+				report_type='", "'.join(report_type),
+>>>>>>> c3f39c3f32 (feat: Cascade closing balances on PCV submit)
 			),
 			(self.company, self.get("year_start_date"), self.posting_date),
 			as_dict=1,
 		)
+
+
+def process_closing_entries(closing_entries):
+	from erpnext.accounts.doctype.closing_balance.closing_balance import make_closing_entries
+
+	try:
+		make_closing_entries(closing_entries)
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error(e)
 
 
 def process_gl_entries(gl_entries):
