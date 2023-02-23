@@ -35,11 +35,13 @@ def make_claim_sales_invoice(data, customer):
 	target_doc.bill_to = customer
 	target_doc.claim_billing = 1
 
-	frappe.flags.selected_children = delivery_note_rows
+	frappe.flags.selected_children = {}
+
+	frappe.flags.selected_children['items'] = delivery_note_rows
 	for name in delivery_notes:
 		target_doc = invoice_from_delivery_note(name, target_doc, only_items=True, skip_postprocess=True)
 
-	frappe.flags.selected_children = sales_order_rows
+	frappe.flags.selected_children['items'] = sales_order_rows
 	for name in sales_orders:
 		target_doc = invoice_from_sales_order(name, target_doc, only_items=True, skip_postprocess=True)
 
