@@ -667,15 +667,12 @@ class GrossProfitGenerator(object):
 	def get_buying_amount_from_so_dn(self, sales_order, so_detail, item_code):
 		from frappe.query_builder.functions import Sum
 
-		delivery_note = frappe.qb.DocType("Delivery Note")
 		delivery_note_item = frappe.qb.DocType("Delivery Note Item")
 
 		query = (
-			frappe.qb.from_(delivery_note)
-			.inner_join(delivery_note_item)
-			.on(delivery_note.name == delivery_note_item.parent)
+			frappe.qb.from_(delivery_note_item)
 			.select(Sum(delivery_note_item.incoming_rate * delivery_note_item.stock_qty))
-			.where(delivery_note.docstatus == 1)
+			.where(delivery_note_item.docstatus == 1)
 			.where(delivery_note_item.item_code == item_code)
 			.where(delivery_note_item.against_sales_order == sales_order)
 			.where(delivery_note_item.so_detail == so_detail)
