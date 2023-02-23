@@ -306,7 +306,7 @@ def get_stock_ledger_entries(filters, items):
 		query = query.where(sle.item_code.isin(items))
 
 	for field in ["voucher_no", "batch_no", "project", "company"]:
-		if filters.get(field):
+		if filters.get(field) and field not in inventory_dimension_fields:
 			query = query.where(sle[field] == filters.get(field))
 
 	query = apply_warehouse_filter(query, sle, filters)
