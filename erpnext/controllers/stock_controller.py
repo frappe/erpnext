@@ -237,6 +237,7 @@ class StockController(AccountsController):
 				v_rate=d.valuation_rate 
 			else: 
 				v_rate=d.rate
+				
 			if d.get(warehouse_field) and not d.batch_no:
 				has_batch_no, create_new_batch = frappe.db.get_value('Item', d.item_code, ['has_batch_no', 'create_new_batch'])
 				if has_batch_no and create_new_batch:
