@@ -418,8 +418,6 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			callback: function(r) {
 				if(r.message) {
 					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
-				} else {
-				    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
 				}
 			}
 		});
