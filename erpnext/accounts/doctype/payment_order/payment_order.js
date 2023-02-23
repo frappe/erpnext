@@ -29,6 +29,30 @@ frappe.ui.form.on('Payment Order', {
 			frm.add_custom_button(__('Create Payment Entries'), function() {
 				frm.trigger("make_payment_records");
 			});
+			frm.add_custom_button(__('Create Payment Entry With Single Cheque'), function() {
+				frappe.call({
+					method: "erpnext.accounts.doctype.payment_order.payment_order.make_payment_with_single_cheque",
+					args: {
+						"name": frm.doc.name,
+					},
+					freeze: true,
+					callback: function(r) {
+						frm.refresh();
+					}
+				})
+			},('Create'));
+			frm.add_custom_button(__('Create Payment Entry For All Suppliers'), function() {
+				frappe.call({
+					method: "erpnext.accounts.doctype.payment_order.payment_order.make_payment_entry_on_single_click",
+					args: {
+						"name": frm.doc.name,
+					},
+					freeze: true,
+					callback: function(r) {
+						frm.refresh();
+					}
+				})
+			},('Create'));
 		}
 	},
 
