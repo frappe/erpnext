@@ -13,6 +13,7 @@
  "hide_custom": 0,
  "icon": "accounting",
  "idx": 0,
+ "is_hidden": 0,
  "label": "Accounting",
  "links": [
   {
@@ -497,35 +498,12 @@
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Tax Detail",
-   "link_count": 0,
-   "link_to": "Tax Detail",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "GL Entry",
-   "hidden": 0,
-   "is_query_report": 1,
    "label": "UAE VAT 201",
    "link_count": 0,
    "link_to": "UAE VAT 201",
    "link_type": "Report",
    "onboard": 0,
    "only_for": "United Arab Emirates",
-   "type": "Link"
-  },
-  {
-   "dependencies": "GL Entry",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "KSA VAT Report",
-   "link_count": 0,
-   "link_to": "KSA VAT",
-   "link_type": "Report",
-   "onboard": 0,
-   "only_for": "Saudi Arabia",
    "type": "Link"
   },
   {
@@ -1032,17 +1010,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "KSA VAT Setting",
-   "link_count": 0,
-   "link_to": "KSA VAT Setting",
-   "link_type": "DocType",
-   "onboard": 0,
-   "only_for": "Saudi Arabia",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Profitability",
    "link_count": 0,
    "onboard": 0,
@@ -1093,7 +1060,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-06-24 05:41:09.236458",
+ "modified": "2023-02-23 15:32:12.135355",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
