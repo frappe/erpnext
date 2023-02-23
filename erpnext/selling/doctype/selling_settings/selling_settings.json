@@ -10,6 +10,7 @@
   "territory",
   "selling_price_list",
   "default_valid_till",
+  "role_allowed_to_duplicate_customer_ntn",
   "column_break_5",
   "so_required",
   "dn_required",
@@ -130,12 +131,18 @@
    "fieldname": "validate_duplicate_customer_ntn",
    "fieldtype": "Check",
    "label": "Validate Duplicate Customer NTN"
+  },
+  {
+   "fieldname": "role_allowed_to_duplicate_customer_ntn",
+   "fieldtype": "Link",
+   "label": "Role Allowed To Create Customer With Duplicate NTN",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2023-02-22 16:29:26.905834",
+ "modified": "2023-02-23 18:53:23.135929",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

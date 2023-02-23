@@ -1512,7 +1512,7 @@ class SalesInvoice(SellingController):
 					.format(self.debit_to, frappe.get_desk_link("Vehicle Registration Order", self.vehicle_registration_order)))
 
 	def validate_zero_amount_invoice(self):
-		if self.get('grand_total'):
+		if self.get("rounded_total") or self.get("grand_total"):
 			return
 
 		restrict_zero_amount = frappe.db.get_single_value('Accounts Settings', 'restrict_zero_amount_sales_invoice')
@@ -1521,7 +1521,7 @@ class SalesInvoice(SellingController):
 		if not restrict_zero_amount or role_allowed_for_zero_amount in frappe.get_roles():
 			return
 		else:
-			throw(_("Sales Invoice amount cannot be 0 (Zero)."))
+			frappe.throw(_("Sales Invoice Grand Total cannot be 0"))
 
 	def update_vehicle_registration_order(self):
 		if self.get('vehicle_registration_order'):
