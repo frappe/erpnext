@@ -230,14 +230,8 @@ class StockController(AccountsController):
 		return stock_ledger
 
 	def make_batches(self, warehouse_field):
-		v_rate = 0.00
 		'''Create batches if required. Called before submit'''
 		for d in self.items:
-			if d.valuation_rate: 
-				v_rate=d.valuation_rate 
-			else: 
-				v_rate=d.rate
-				
 			if d.get(warehouse_field) and not d.batch_no:
 				has_batch_no, create_new_batch = frappe.db.get_value('Item', d.item_code, ['has_batch_no', 'create_new_batch'])
 				if has_batch_no and create_new_batch:
@@ -246,7 +240,7 @@ class StockController(AccountsController):
 						item=d.item_code,
 						supplier=getattr(self, 'supplier', None),
 						company=getattr(self, 'company', None),
-						valuation_rate= v_rate,
+						valuation_rate= d.rate,
 						reference_doctype=self.doctype,
 						reference_name=self.name)).insert().name
 
