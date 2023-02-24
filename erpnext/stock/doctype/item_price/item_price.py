@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import getdate
 
@@ -19,6 +19,7 @@ class ItemPrice(Document):
 		self.update_price_list_details()
 		self.update_item_details()
 		self.check_duplicates()
+		self.validate_item_template()
 
 	def validate_item(self):
 		if not frappe.db.exists("Item", self.item_code):
@@ -46,6 +47,12 @@ class ItemPrice(Document):
 			self.item_name, self.item_description = frappe.db.get_value(
 				"Item", self.item_code, ["item_name", "description"]
 			)
+
+	def validate_item_template(self):
+		if frappe.get_cached_value("Item", self.item_code, "has_variants"):
+			msg = f"Item Price cannot be created for the template item {bold(self.item_code)}"
+
+			frappe.throw(_(msg))
 
 	def check_duplicates(self):
 		conditions = (
