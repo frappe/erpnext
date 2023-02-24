@@ -32,6 +32,9 @@
   "column_break_22",
   "add_taxes_from_item_tax_template",
   "restrict_sales_tax_invoice_without_tax_id",
+  "permissions_section",
+  "restrict_zero_amount_sales_invoice",
+  "role_allowed_to_create_zero_amount_sales_invoice",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -271,12 +274,29 @@
    "fieldname": "purchase_invoice_receipt_same_fy",
    "fieldtype": "Check",
    "label": "Purchase Invoice must be in same Fiscal Year as Purchase Receipts"
+  },
+  {
+   "fieldname": "permissions_section",
+   "fieldtype": "Section Break",
+   "label": "Permissions"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_zero_amount_sales_invoice",
+   "fieldtype": "Check",
+   "label": "Restrict Zero-Amount Sales Invoice"
+  },
+  {
+   "fieldname": "role_allowed_to_create_zero_amount_sales_invoice",
+   "fieldtype": "Link",
+   "label": "Role Allowed To Create Zero-Amount Sales Invoice",
+   "options": "Role"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2022-12-26 12:22:37.618218",
+ "modified": "2023-02-23 13:16:04.812053",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

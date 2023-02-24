@@ -23,6 +23,7 @@ class AppointmentSheetReport(object):
 
 	def run(self):
 		self.get_data()
+		self.get_project_data()
 		self.get_reminder_data()
 		self.process_data()
 		columns = self.get_columns()
@@ -50,6 +51,21 @@ class AppointmentSheetReport(object):
 			group by a.name
 			order by a.scheduled_dt, a.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
+
+	def get_project_data(self):
+		appointment_list = [d.appointment for d in self.data]
+
+		if appointment_list:
+			project_data = frappe.db.sql("""
+				SELECT name as project, appointment
+				FROM tabProject
+				WHERE appointment in %s
+			""", [appointment_list], as_dict=1)
+
+			project_map = {d.appointment: d.project for d in project_data}
+
+			for d in self.data:
+				d.project = project_map.get(d.appointment)
 
 	def get_reminder_data(self):
 		if automated_reminder_enabled():
@@ -129,6 +145,7 @@ class AppointmentSheetReport(object):
 			{"label": _("Voice of Customer"), "fieldname": "voice_of_customer", "fieldtype": "Data", "width": 200},
 			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 200, "editable": 1},
 			{'label': _("Status"), 'fieldname': 'status', 'fieldtype': 'Data', 'width': 70},
+			{'label': _("Project"), 'fieldname': 'project', 'fieldtype': 'Link', 'width': 100, 'options': 'Project'},
 			{"label": _("Reminder"), "fieldname": "reminder", "fieldtype": "Data", "width": 200},
 			{"label": _("Confirmation Time"), "fieldname": "confirmation_dt_fmt", "fieldtype": "Data", "width": 140},
 		]
