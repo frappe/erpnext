@@ -10,6 +10,17 @@ from erpnext.accounts.party import get_party_account
 from frappe.model.document import Document
 
 class PaymentOrder(Document):
+	def before_save(self):
+		suppliers = frappe.db.sql("""
+		SELECT
+			  GROUP_CONCAT(supplier_name,"(",supplier, " )")
+		FROM
+			`tabPayment Order Detail`
+		WHERE
+			parent = '{0}'
+		""".format(self.name))
+		if suppliers:
+			self.suppliers = suppliers[0][0]
 	def on_submit(self):
 		self.update_payment_status()
 
@@ -59,8 +70,8 @@ def make_payment_records(name, supplier, mode_of_payment=None):
 def make_journal_entry(doc, supplier, mode_of_payment=None):
 
 	#check payemnt already exit or not
-	if frappe.db.exists("Payment Entry", {"company": doc.company, "party": supplier,'payment_order':doc.name}):
-		frappe.throw("Payment Already Created.")
+	# if frappe.db.exists("Payment Entry", {"company": doc.company, "party": supplier,'payment_order':doc.name}):
+	# 	frappe.throw("Payment Already Created.")
 	# je = frappe.new_doc('Journal Entry')
 	je = frappe.new_doc('Payment Entry')
 	je.payment_order = doc.name
