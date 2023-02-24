@@ -24,6 +24,7 @@ def get_columns(data):
 		{ "label": _("SO Date"), "fieldtype": "Date", "fieldname": "sales_date", "width": 100, },
 		{ "label": _("Customer"), "fieldtype": "Link", "fieldname": "customer", "options": "Customer", "width": 180, },
 		{ "label": _("Territory"), "fieldtype": "Data", "fieldname": "territory", "width": 120, },
+		{ "label": _("Country"), "fieldtype": "Link", "fieldname": "country", "options": "Country", "width": 120, },
 		{ "label": _("Dispatch"), "fieldname": "dispatch", "fieldtype": "Data", "width": 100 },
 		{ "label": _("SO Qty"), "fieldtype": "Data", "fieldname": "qty", "width": 100, },
 		{ "label": _("Sales Price"), "fieldtype": "Currency", "fieldname": "so_rate", "width": 120, },
@@ -86,7 +87,7 @@ def get_data(filters):
 		.left_join(cu)
 		.on(si.customer == cu.name)
 		.select(
-			so.name, so.transaction_date, so.customer, cu.territory, so.dispatch, so_item.qty, (so_item.rate.as_("so_rate")), (so_item.base_net_amount).as_("so_amount"), so_item.item_code, so_item.item_name, dn_item.item_type, so_item.uom, so_item.warehouse, (dn.name).as_("dn_name"), (dn.posting_date.as_("dn_date")), (dn_item.qty).as_("delivered_qty"), dn_item.others_equipment, dn_item.vehicle_number, dn_item.equipment, equip.supplier, dn_item.location, (si.name).as_("si_no"), (si.posting_date).as_("si_date"), (si.reference_date_for_payment).as_("ref_date"), si.due_date, si.total_advance, (si_item.accepted_qty).as_("accepted_qty"), (si_item.base_net_amount).as_("si_amount"), si_item.normal_loss, si_item.normal_loss_amt, si_item.abnormal_loss, si_item.abnormal_loss_amt, si_item.excess_qty, si_item.excess_amt, si.total_charges, si.grand_total
+			so.name, so.transaction_date, so.customer, cu.territory, cu.country, so.dispatch, so_item.qty, (so_item.rate.as_("so_rate")), (so_item.base_net_amount).as_("so_amount"), so_item.item_code, so_item.item_name, dn_item.item_type, so_item.uom, so_item.warehouse, (dn.name).as_("dn_name"), (dn.posting_date.as_("dn_date")), (dn_item.qty).as_("delivered_qty"), dn_item.others_equipment, dn_item.vehicle_number, dn_item.equipment, equip.supplier, dn_item.location, (si.name).as_("si_no"), (si.posting_date).as_("si_date"), (si.reference_date_for_payment).as_("ref_date"), si.due_date, si.total_advance, (si_item.accepted_qty).as_("accepted_qty"), (si_item.base_net_amount).as_("si_amount"), si_item.normal_loss, si_item.normal_loss_amt, si_item.abnormal_loss, si_item.abnormal_loss_amt, si_item.excess_qty, si_item.excess_amt, si.total_charges, si.grand_total
 		)
 		.where((so.docstatus == 1) & (dn.docstatus == 1) & (si.docstatus == 1))
 	)
@@ -111,6 +112,7 @@ def get_data(filters):
 				"sales_date": a.transaction_date,
 				"customer": a.customer,
 				"territory": a.territory,
+				"country": a.country,
 				"dispatch": a.dispatch,
 				"qty": a.qty,
 				"so_rate": a.so_rate,
