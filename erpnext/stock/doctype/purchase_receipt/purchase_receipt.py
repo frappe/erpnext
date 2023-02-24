@@ -436,7 +436,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					divisional_loss = flt(
-						valuation_amount_as_per_doc - stock_value_diff, d.precision("base_net_amount")
+						valuation_amount_as_per_doc - flt(stock_value_diff), d.precision("base_net_amount")
 					)
 
 					if divisional_loss:
