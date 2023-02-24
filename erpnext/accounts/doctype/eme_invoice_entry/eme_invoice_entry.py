@@ -114,7 +114,7 @@ def post_accounting_entries(doc,  publish_progress = True):
 		"company":doc.company,
 		"branch": doc.branch,
 	})
-	for e in frappe.db.sql("select name as reference from `tabEME Invoice` where docstatus = 1 and workflow_state = 'Approved' and eme_invoice_entry = '{}'".format(doc.name)):
+	for e in frappe.db.sql("select name as reference from `tabEME Invoice` where docstatus = 1 and workflow_state = 'Approved' and eme_invoice_entry = '{}'".format(doc.name), as_dict=1):
 		if e.eme_invoice:
 			error = None
 			eme_invoice = frappe.get_doc("EME Invoice",e.reference)
