@@ -70,8 +70,8 @@ def make_payment_records(name, supplier, mode_of_payment=None):
 def make_journal_entry(doc, supplier, mode_of_payment=None):
 
 	#check payemnt already exit or not
-	if frappe.db.exists("Payment Entry", {"company": doc.company, "party": supplier,'payment_order':doc.name}):
-		frappe.throw("Payment Already Created.")
+	# if frappe.db.exists("Payment Entry", {"company": doc.company, "party": supplier,'payment_order':doc.name}):
+	# 	frappe.throw("Payment Already Created.")
 	# je = frappe.new_doc('Journal Entry')
 	je = frappe.new_doc('Payment Entry')
 	je.payment_order = doc.name
