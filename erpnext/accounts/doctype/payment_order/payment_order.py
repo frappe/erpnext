@@ -183,9 +183,9 @@ def get_next_cheque_number(doc,count):
 			ORDER BY cast(cheque_number as UNSIGNED) asc 
 			LIMIT {1} 
 			FOR UPDATE
-		""".format(doc.company_bank_account,count))
+		""".format(doc.references[0].bank_account,count))
 		if not cheque_no:				
-			frappe.throw("No Checque Book Avaiable for this Bank "+doc.company_bank_account)
+			frappe.throw("No Checque Book Avaiable for this Bank "+doc.references[0].bank_account)
 		else:
 			return cheque_no
 
