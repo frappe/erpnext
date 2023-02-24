@@ -29,9 +29,12 @@ doctype_js = {
 	"Activity Type": "public/js/master/activity_type.js",
 	"Bank": "public/js/master/bank.js",
 	"Brand": "public/js/master/brand.js",
+	"Supplier Group": "public/js/master/supplier_group.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
+
+doctype_tree_js = {"Supplier Group": "public/js/master/supplier_group_tree.js"}
 
 override_doctype_class = {
 	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
