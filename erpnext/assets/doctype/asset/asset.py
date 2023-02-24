@@ -85,7 +85,10 @@ class Asset(AccountsController):
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
 			if not (
-				self.get("schedules") and "Manual" in [d.depreciation_method for d in self.finance_books]
+				self.get("schedules")
+				and "Manual" in [d.depreciation_method for d in self.finance_books]
+				and self.get_doc_before_save().opening_accumulated_depreciation
+				== self.opening_accumulated_depreciation
 			):
 				self.make_depreciation_schedule(date_of_disposal)
 				self.set_accumulated_depreciation(date_of_disposal, date_of_return)

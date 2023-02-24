@@ -302,10 +302,6 @@ frappe.ui.form.on('Asset', {
 		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
 	},
 
-	opening_accumulated_depreciation: function(frm) {
-		erpnext.asset.set_accumulated_depreciation(frm);
-	},
-
 	make_schedules_editable: function(frm) {
 		if (frm.doc.finance_books) {
 			var is_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
