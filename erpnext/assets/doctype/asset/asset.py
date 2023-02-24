@@ -84,8 +84,11 @@ class Asset(AccountsController):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
-			self.make_depreciation_schedule(date_of_disposal)
-			self.set_accumulated_depreciation(date_of_disposal, date_of_return)
+			if not (
+				self.get("schedules") and "Manual" in [d.depreciation_method for d in self.finance_books]
+			):
+				self.make_depreciation_schedule(date_of_disposal)
+				self.set_accumulated_depreciation(date_of_disposal, date_of_return)
 		else:
 			self.finance_books = []
 			self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(
@@ -225,9 +228,7 @@ class Asset(AccountsController):
 			)
 
 	def make_depreciation_schedule(self, date_of_disposal):
-		if "Manual" not in [d.depreciation_method for d in self.finance_books] and not self.get(
-			"schedules"
-		):
+		if not self.get("schedules"):
 			self.schedules = []
 
 		if not self.available_for_use_date:
@@ -556,7 +557,9 @@ class Asset(AccountsController):
 		self, date_of_disposal=None, date_of_return=None, ignore_booked_entry=False
 	):
 		straight_line_idx = [
-			d.idx for d in self.get("schedules") if d.depreciation_method == "Straight Line"
+			d.idx
+			for d in self.get("schedules")
+			if d.depreciation_method == "Straight Line" or d.depreciation_method == "Manual"
 		]
 		finance_books = []
 
