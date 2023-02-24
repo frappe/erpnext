@@ -15,6 +15,7 @@ def execute():
 		"Employee External Work History",
 		"Holiday",
 		"Holiday List",
+		"Item Website Specification",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
