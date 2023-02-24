@@ -1,1 +1,0 @@
-Custom title for print main heading. e.g. "Pro Forma Invoice"

@@ -16,6 +16,7 @@ def execute():
 		"Holiday",
 		"Holiday List",
 		"Item Website Specification",
+		"Print Heading",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
