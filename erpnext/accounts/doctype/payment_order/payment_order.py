@@ -10,6 +10,17 @@ from erpnext.accounts.party import get_party_account
 from frappe.model.document import Document
 
 class PaymentOrder(Document):
+	def before_save(self):
+		suppliers = frappe.db.sql("""
+		SELECT
+			  GROUP_CONCAT(supplier_name,"(",supplier, " )")
+		FROM
+			`tabPayment Order Detail`
+		WHERE
+			parent = '{0}'
+		""".format(self.name))
+		if suppliers:
+			self.suppliers = suppliers[0][0]
 	def on_submit(self):
 		self.update_payment_status()
 
