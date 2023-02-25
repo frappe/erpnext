@@ -27,6 +27,7 @@ def execute():
 		"Item Attribute",
 		"Item Barcode",
 		"Item Group",
+		"Item Supplier",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
