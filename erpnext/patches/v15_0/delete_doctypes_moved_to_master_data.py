@@ -21,6 +21,7 @@ def execute():
 		"Terms and Conditions",
 		"UOM",
 		"UOM Conversion Detail",
+		"Customs Tariff Number",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
