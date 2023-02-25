@@ -25,7 +25,7 @@
 	</div>
 	<br>
 
-	<table class="table table-bordered">
+	<table class="table table-bordered" style="font-size: 10px">
 		<thead>
 			<tr>
 				<th style="width: 12%">{{ _("Date") }}</th>
@@ -49,7 +49,6 @@
 						<br>
 					{% endif %}
 
-					{{ _("Against") }}: {{ row.against }}
 					<br>{{ _("Remarks") }}: {{ row.remarks }}
 					{% if row.bill_no %}
 						<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}

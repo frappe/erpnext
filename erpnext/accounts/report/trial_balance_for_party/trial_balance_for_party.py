@@ -104,12 +104,17 @@ def get_opening_balances(filters):
 		where company=%(company)s
 			and is_cancelled=0
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
-			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
+			and (posting_date < %(from_date)s or (ifnull(is_opening, 'No') = 'Yes' and posting_date <= %(to_date)s))
 			{account_filter}
 		group by party""".format(
 			account_filter=account_filter
 		),
-		{"company": filters.company, "from_date": filters.from_date, "party_type": filters.party_type},
+		{
+			"company": filters.company,
+			"from_date": filters.from_date,
+			"to_date": filters.to_date,
+			"party_type": filters.party_type,
+		},
 		as_dict=True,
 	)
 

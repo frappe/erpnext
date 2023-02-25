@@ -5,7 +5,7 @@
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, nowdate, nowtime
+from frappe.utils import add_days, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
@@ -17,6 +17,7 @@ from erpnext.stock.doctype.item.test_item import (
 from erpnext.stock.doctype.serial_no.serial_no import *  # noqa
 from erpnext.stock.doctype.stock_entry.stock_entry import (
 	FinishedGoodError,
+	make_stock_in_entry,
 	move_sample_to_retention_warehouse,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -159,6 +160,53 @@ class TestStockEntry(FrappeTestCase):
 				items.append(d.item_code)
 
 		self.assertTrue(item_code in items)
+
+	def test_add_to_transit_entry(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item_code = "_Test Transit Item"
+		company = "_Test Company"
+
+		create_warehouse("Test From Warehouse")
+		create_warehouse("Test Transit Warehouse")
+		create_warehouse("Test To Warehouse")
+
+		create_item(
+			item_code=item_code,
+			is_stock_item=1,
+			is_purchase_item=1,
+			company=company,
+		)
+
+		# create inward stock entry
+		make_stock_entry(
+			item_code=item_code,
+			target="Test From Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			expense_account="Stock Adjustment - _TC",
+			cost_center="Main - _TC",
+		)
+
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source="Test From Warehouse - _TC",
+			target="Test Transit Warehouse - _TC",
+			add_to_transit=1,
+			stock_entry_type="Material Transfer",
+			purpose="Material Transfer",
+			qty=10,
+			basic_rate=100,
+			expense_account="Stock Adjustment - _TC",
+			cost_center="Main - _TC",
+		)
+
+		end_transit_entry = make_stock_in_entry(transit_entry.name)
+		self.assertEqual(transit_entry.name, end_transit_entry.outgoing_stock_entry)
+		self.assertEqual(transit_entry.name, end_transit_entry.items[0].against_stock_entry)
+		self.assertEqual(transit_entry.items[0].name, end_transit_entry.items[0].ste_detail)
+
+		# create add to transit
 
 	def test_material_receipt_gl_entry(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -1588,6 +1636,73 @@ class TestStockEntry(FrappeTestCase):
 			index = 1 if obj.purpose == "Repack" else 0
 			self.assertEqual(obj.items[index].basic_rate, 200)
 			self.assertEqual(obj.items[index].basic_amount, 2000)
+
+	def test_batch_expiry(self):
+		from erpnext.controllers.stock_controller import BatchExpiredError
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+
+		item_code = "Test Batch Expiry Test Item - 001"
+		item_doc = create_item(item_code=item_code, is_stock_item=1, valuation_rate=10)
+
+		item_doc.has_batch_no = 1
+		item_doc.save()
+
+		batch = make_new_batch(
+			batch_id=frappe.generate_hash("", 5), item_code=item_doc.name, expiry_date=add_days(today(), -1)
+		)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			purpose="Material Receipt",
+			qty=4,
+			to_warehouse="_Test Warehouse - _TC",
+			batch_no=batch.name,
+			do_not_save=True,
+		)
+
+		self.assertRaises(BatchExpiredError, se.save)
+
+	def test_negative_stock_reco(self):
+		from erpnext.controllers.stock_controller import BatchExpiredError
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+
+		item_code = "Test Negative Item - 001"
+		item_doc = create_item(item_code=item_code, is_stock_item=1, valuation_rate=10)
+
+		make_stock_entry(
+			item_code=item_code,
+			posting_date=add_days(today(), -3),
+			posting_time="00:00:00",
+			purpose="Material Receipt",
+			qty=10,
+			to_warehouse="_Test Warehouse - _TC",
+			do_not_save=True,
+		)
+
+		make_stock_entry(
+			item_code=item_code,
+			posting_date=today(),
+			posting_time="00:00:00",
+			purpose="Material Receipt",
+			qty=8,
+			from_warehouse="_Test Warehouse - _TC",
+			do_not_save=True,
+		)
+
+		sr_doc = create_stock_reconciliation(
+			purpose="Stock Reconciliation",
+			posting_date=add_days(today(), -3),
+			posting_time="00:00:00",
+			item_code=item_code,
+			warehouse="_Test Warehouse - _TC",
+			valuation_rate=10,
+			qty=7,
+			do_not_submit=True,
+		)
+
+		self.assertRaises(frappe.ValidationError, sr_doc.submit)
 
 
 def make_serialized_item(**args):

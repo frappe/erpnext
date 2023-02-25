@@ -51,6 +51,8 @@ frappe.query_reports["Accounts Payable"] = {
 				} else {
 					frappe.query_report.set_filter_value('tax_id', "");
 				}
+
+				frappe.query_report.refresh();
 			}
 		},
 		{

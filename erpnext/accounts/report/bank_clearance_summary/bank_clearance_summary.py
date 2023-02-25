@@ -22,8 +22,7 @@ def get_columns():
 		{
 			"label": _("Payment Document Type"),
 			"fieldname": "payment_document_type",
-			"fieldtype": "Link",
-			"options": "Doctype",
+			"fieldtype": "Data",
 			"width": 130,
 		},
 		{
@@ -33,15 +32,15 @@ def get_columns():
 			"options": "payment_document_type",
 			"width": 140,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		{"label": _("Cheque/Reference No"), "fieldname": "cheque_no", "width": 120},
-		{"label": _("Clearance Date"), "fieldname": "clearance_date", "fieldtype": "Date", "width": 100},
+		{"label": _("Clearance Date"), "fieldname": "clearance_date", "fieldtype": "Date", "width": 120},
 		{
 			"label": _("Against Account"),
 			"fieldname": "against",
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 170,
+			"width": 200,
 		},
 		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 120},
 	]

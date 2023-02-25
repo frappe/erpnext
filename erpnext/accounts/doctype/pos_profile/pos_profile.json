@@ -43,6 +43,7 @@
   "currency",
   "write_off_account",
   "write_off_cost_center",
+  "write_off_limit",
   "account_for_change_amount",
   "disable_rounded_total",
   "column_break_23",
@@ -361,6 +362,14 @@
    "label": "Validate Stock on Save"
   },
   {
+   "default": "1",
+   "description": "Auto write off precision loss while consolidation",
+   "fieldname": "write_off_limit",
+   "fieldtype": "Currency",
+   "label": "Write Off Limit",
+   "reqd": 1
+  },
+  {
    "default": "0",
    "description": "If enabled, the consolidated invoices will have rounded total disabled",
    "fieldname": "disable_rounded_total",
@@ -393,7 +402,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2022-07-21 11:16:46.911173",
+ "modified": "2022-08-10 12:57:06.241439",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

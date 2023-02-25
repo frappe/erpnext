@@ -8,6 +8,8 @@ from typing import Dict, List, Optional
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import (
 	cint,
 	cstr,
@@ -164,10 +166,7 @@ class Item(Document):
 		if not self.is_stock_item or self.has_serial_no or self.has_batch_no:
 			return
 
-		if not self.valuation_rate and self.standard_rate:
-			self.valuation_rate = self.standard_rate
-
-		if not self.valuation_rate and not self.is_customer_provided_item:
+		if not self.valuation_rate and not self.standard_rate and not self.is_customer_provided_item:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -192,7 +191,7 @@ class Item(Document):
 					item_code=self.name,
 					target=default_warehouse,
 					qty=self.opening_stock,
-					rate=self.valuation_rate,
+					rate=self.valuation_rate or self.standard_rate,
 					company=default.company,
 					posting_date=getdate(),
 					posting_time=nowtime(),
@@ -232,10 +231,10 @@ class Item(Document):
 
 	def clear_retain_sample(self):
 		if not self.has_batch_no:
-			self.retain_sample = None
+			self.retain_sample = False
 
 		if not self.retain_sample:
-			self.sample_quantity = None
+			self.sample_quantity = 0
 
 	def add_default_uom_in_conversion_factor_table(self):
 		if not self.is_new() and self.has_value_changed("stock_uom"):
@@ -279,7 +278,7 @@ class Item(Document):
 				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
 
 	def update_template_tables(self):
-		template = frappe.get_doc("Item", self.variant_of)
+		template = frappe.get_cached_doc("Item", self.variant_of)
 
 		# add item taxes from template
 		for d in template.get("taxes"):
@@ -359,7 +358,7 @@ class Item(Document):
 					check_list.append(d.item_tax_template)
 
 	def validate_barcode(self):
-		from stdnum import ean
+		import barcodenumber
 
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
@@ -377,19 +376,16 @@ class Item(Document):
 					item_barcode.barcode_type = (
 						"" if item_barcode.barcode_type not in options else item_barcode.barcode_type
 					)
-					if item_barcode.barcode_type and item_barcode.barcode_type.upper() in (
-						"EAN",
-						"UPC-A",
-						"EAN-13",
-						"EAN-8",
-					):
-						if not ean.is_valid(item_barcode.barcode):
-							frappe.throw(
-								_("Barcode {0} is not a valid {1} code").format(
-									item_barcode.barcode, item_barcode.barcode_type
-								),
-								InvalidBarcode,
-							)
+					if item_barcode.barcode_type:
+						barcode_type = convert_erpnext_to_barcodenumber(item_barcode.barcode_type.upper())
+						if barcode_type in barcodenumber.barcodes():
+							if not barcodenumber.check_code(barcode_type, item_barcode.barcode):
+								frappe.throw(
+									_("Barcode {0} is not a valid {1} code").format(
+										item_barcode.barcode, item_barcode.barcode_type
+									),
+									InvalidBarcode,
+								)
 
 	def validate_warehouse_for_reorder(self):
 		"""Validate Reorder level table for duplicate and conditional mandatory"""
@@ -937,15 +933,24 @@ class Item(Document):
 				"Purchase Order Item",
 				"Material Request Item",
 				"Product Bundle",
+				"BOM",
 			]
 
 		for doctype in linked_doctypes:
 			filters = {"item_code": self.name, "docstatus": 1}
 
-			if doctype == "Product Bundle":
-				filters = {"new_item_code": self.name}
+			if doctype in ("Product Bundle", "BOM"):
+				if doctype == "Product Bundle":
+					filters = {"new_item_code": self.name}
+					fieldname = "new_item_code as docname"
+				else:
+					filters = {"item": self.name, "docstatus": 1}
+					fieldname = "name as docname"
 
-			if doctype in (
+				if linked_doc := frappe.db.get_value(doctype, filters, fieldname, as_dict=True):
+					return linked_doc.update({"doctype": doctype})
+
+			elif doctype in (
 				"Purchase Invoice Item",
 				"Sales Invoice Item",
 			):
@@ -977,6 +982,22 @@ class Item(Document):
 				)
 
 
+def convert_erpnext_to_barcodenumber(erpnext_number):
+	convert = {
+		"UPC-A": "UPCA",
+		"CODE-39": "CODE39",
+		"EAN": "EAN13",
+		"EAN-12": "EAN",
+		"EAN-8": "EAN8",
+		"ISBN-10": "ISBN10",
+		"ISBN-13": "ISBN13",
+	}
+	if erpnext_number in convert:
+		return convert[erpnext_number]
+	else:
+		return erpnext_number
+
+
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc(
 		{
@@ -988,18 +1009,19 @@ def make_item_price(item, price_list_name, item_price):
 	).insert()
 
 
-def get_timeline_data(doctype, name):
+def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
 
-	items = frappe.db.sql(
-		"""select unix_timestamp(posting_date), count(*)
-							from `tabStock Ledger Entry`
-							where item_code=%s and posting_date > date_sub(curdate(), interval 1 year)
-							group by posting_date""",
-		name,
-	)
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	return dict(items)
+	return dict(
+		frappe.qb.from_(sle)
+		.select(UnixTimestamp(sle.posting_date), Count("*"))
+		.where(sle.item_code == name)
+		.where(sle.posting_date > CurDate() - Interval(years=1))
+		.groupby(sle.posting_date)
+		.run()
+	)
 
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None):

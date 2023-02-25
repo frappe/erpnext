@@ -19,14 +19,11 @@ class SellingController(StockController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["selling_price_list", "price_list_currency"]
 
-	def get_feed(self):
-		return _("To {0} | {1} {2}").format(self.customer_name, self.currency, self.grand_total)
-
 	def onload(self):
 		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
-			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code, item.warehouse))
+			for item in self.get("items") + (self.get("packed_items") or []):
+				item.update(get_bin_details(item.item_code, item.warehouse, include_child_warehouses=True))
 
 	def validate(self):
 		super(SellingController, self).validate()
@@ -40,6 +37,7 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.validate_auto_repeat_subscription_dates()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -311,6 +309,7 @@ class SellingController(StockController):
 									"sales_invoice_item": d.get("sales_invoice_item"),
 									"dn_detail": d.get("dn_detail"),
 									"incoming_rate": p.get("incoming_rate"),
+									"item_row": p,
 								}
 							)
 						)
@@ -334,6 +333,7 @@ class SellingController(StockController):
 							"sales_invoice_item": d.get("sales_invoice_item"),
 							"dn_detail": d.get("dn_detail"),
 							"incoming_rate": d.get("incoming_rate"),
+							"item_row": d,
 						}
 					)
 				)
@@ -439,24 +439,31 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					if d.doctype == "Packed Item":
-						incoming_rate = flt(d.incoming_rate * d.conversion_factor, d.precision("incoming_rate"))
-						if d.incoming_rate != incoming_rate:
-							d.incoming_rate = incoming_rate
-					else:
-						rate = flt(d.incoming_rate * d.conversion_factor, d.precision("rate"))
-						if d.rate != rate:
-							d.rate = rate
-							frappe.msgprint(
-								_(
-									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-								).format(d.idx),
-								alert=1,
+					if self.doctype == "Delivery Note" or self.get("update_stock"):
+						if d.doctype == "Packed Item":
+							incoming_rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("incoming_rate"),
 							)
+							if d.incoming_rate != incoming_rate:
+								d.incoming_rate = incoming_rate
+						else:
+							rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("rate"),
+							)
+							if d.rate != rate:
+								d.rate = rate
+								frappe.msgprint(
+									_(
+										"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+									).format(d.idx),
+									alert=1,
+								)
 
-						d.discount_percentage = 0.0
-						d.discount_amount = 0.0
-						d.margin_rate_or_amount = 0.0
+							d.discount_percentage = 0.0
+							d.discount_amount = 0.0
+							d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
@@ -573,6 +580,7 @@ class SellingController(StockController):
 			"customer_address": "address_display",
 			"shipping_address_name": "shipping_address",
 			"company_address": "company_address_display",
+			"dispatch_address_name": "dispatch_address",
 		}
 
 		for address_field, address_display_field in address_dict.items():

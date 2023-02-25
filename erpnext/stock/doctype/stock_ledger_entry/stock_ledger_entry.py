@@ -153,6 +153,11 @@ class StockLedgerEntry(Document):
 
 	def validate_batch(self):
 		if self.batch_no and self.voucher_type != "Stock Entry":
+			if (self.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and self.actual_qty < 0) or (
+				self.voucher_type in ["Delivery Note", "Sales Invoice"] and self.actual_qty > 0
+			):
+				return
+
 			expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):
@@ -216,14 +221,9 @@ class StockLedgerEntry(Document):
 
 
 def on_doctype_update():
-	if not frappe.db.has_index("tabStock Ledger Entry", "posting_sort_index"):
-		frappe.db.commit()
-		frappe.db.add_index(
-			"Stock Ledger Entry",
-			fields=["posting_date", "posting_time", "name"],
-			index_name="posting_sort_index",
-		)
-
+	frappe.db.add_index(
+		"Stock Ledger Entry", fields=["posting_date", "posting_time"], index_name="posting_sort_index"
+	)
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")

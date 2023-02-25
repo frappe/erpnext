@@ -338,59 +338,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
-	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
-	def test_purchase_invoice_with_discount_accounting_enabled(self):
-
-		discount_account = create_account(
-			account_name="Discount Account",
-			parent_account="Indirect Expenses - _TC",
-			company="_Test Company",
-		)
-		pi = make_purchase_invoice(discount_account=discount_account, rate=45)
-
-		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 225.0, nowdate()],
-			["Discount Account - _TC", 0.0, 25.0, nowdate()],
-		]
-
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
-
-	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
-	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-
-		additional_discount_account = create_account(
-			account_name="Discount Account",
-			parent_account="Indirect Expenses - _TC",
-			company="_Test Company",
-		)
-
-		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
-		pi.apply_discount_on = "Grand Total"
-		pi.additional_discount_account = additional_discount_account
-		pi.additional_discount_percentage = 10
-		pi.disable_rounded_total = 1
-		pi.append(
-			"taxes",
-			{
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account VAT - _TC",
-				"cost_center": "Main - _TC",
-				"description": "Test",
-				"rate": 10,
-			},
-		)
-		pi.submit()
-
-		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
-			["_Test Account VAT - _TC", 25.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 247.5, nowdate()],
-			["Discount Account - _TC", 0.0, 27.5, nowdate()],
-		]
-
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
-
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
@@ -1595,6 +1542,37 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		pi.save()
 		self.assertEqual(pi.items[0].conversion_factor, 1000)
+
+	def test_batch_expiry_for_purchase_invoice(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item(
+			"_Test Batch Item For Return Check",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBIRC.#####",
+			},
+		)
+
+		pi = make_purchase_invoice(
+			qty=1,
+			item_code=item.name,
+			update_stock=True,
+		)
+
+		pi.load_from_db()
+		batch_no = pi.items[0].batch_no
+		self.assertTrue(batch_no)
+
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(nowdate(), -1))
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.save().submit()
+
+		self.assertTrue(return_pi.docstatus == 1)
 
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):

@@ -10,79 +10,89 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "basic_details_tab",
   "basic_information",
   "employee",
   "naming_series",
   "first_name",
   "middle_name",
   "last_name",
-  "salutation",
   "employee_name",
-  "image",
-  "column_break1",
-  "company",
-  "status",
+  "column_break_9",
   "gender",
   "date_of_birth",
+  "salutation",
+  "column_break1",
   "date_of_joining",
-  "employee_number",
-  "emergency_contact_details",
-  "person_to_be_contacted",
-  "relation",
-  "column_break_19",
-  "emergency_phone_number",
+  "image",
+  "status",
   "erpnext_user",
   "user_id",
   "create_user",
   "create_user_permission",
-  "employment_details",
-  "scheduled_confirmation_date",
-  "final_confirmation_date",
-  "col_break_22",
-  "contract_end_date",
-  "notice_number_of_days",
-  "date_of_retirement",
-  "job_profile",
+  "company_details_section",
+  "company",
   "department",
+  "employee_number",
+  "column_break_25",
   "designation",
   "reports_to",
-  "column_break_31",
+  "column_break_18",
   "branch",
+  "employment_details",
+  "scheduled_confirmation_date",
+  "column_break_32",
+  "final_confirmation_date",
+  "contract_end_date",
+  "col_break_22",
+  "notice_number_of_days",
+  "date_of_retirement",
+  "contact_details",
+  "cell_number",
+  "column_break_40",
+  "personal_email",
+  "company_email",
+  "column_break4",
+  "prefered_contact_email",
+  "prefered_email",
+  "unsubscribed",
+  "address_section",
+  "current_address",
+  "current_accommodation_type",
+  "column_break_46",
+  "permanent_address",
+  "permanent_accommodation_type",
+  "emergency_contact_details",
+  "person_to_be_contacted",
+  "column_break_55",
+  "emergency_phone_number",
+  "column_break_19",
+  "relation",
   "attendance_and_leave_details",
   "attendance_device_id",
   "column_break_44",
   "holiday_list",
   "salary_information",
-  "salary_currency",
   "ctc",
-  "payroll_cost_center",
-  "column_break_52",
+  "salary_currency",
+  "salary_mode",
+  "bank_details_section",
   "bank_name",
   "bank_ac_no",
-  "contact_details",
-  "cell_number",
-  "prefered_email",
-  "personal_email",
-  "unsubscribed",
-  "permanent_accommodation_type",
-  "permanent_address",
-  "column_break4",
-  "prefered_contact_email",
-  "company_email",
-  "current_accommodation_type",
-  "current_address",
-  "sb53",
-  "bio",
   "personal_details",
-  "passport_number",
-  "date_of_issue",
-  "valid_upto",
-  "place_of_issue",
   "marital_status",
-  "blood_group",
-  "column_break6",
   "family_background",
+  "column_break6",
+  "blood_group",
   "health_details",
+  "passport_details_section",
+  "passport_number",
+  "valid_upto",
+  "column_break_73",
+  "date_of_issue",
+  "place_of_issue",
+  "profile_tab",
+  "bio",
   "educational_qualification",
   "education",
   "previous_work_experience",
@@ -92,16 +102,20 @@
   "exit",
   "resignation_letter_date",
   "relieving_date",
-  "reason_for_leaving",
-  "leave_encashed",
-  "encashment_date",
   "exit_interview_details",
   "held_on",
   "new_workplace",
+  "column_break_99",
+  "leave_encashed",
+  "encashment_date",
+  "feedback_section",
+  "reason_for_leaving",
+  "column_break_104",
   "feedback",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -261,7 +275,7 @@
    "collapsible": 1,
    "fieldname": "erpnext_user",
    "fieldtype": "Section Break",
-   "label": "ERPNext User"
+   "label": "User Details"
   },
   {
    "description": "System User (login) ID. If set, it will become default for all HR forms.",
@@ -289,8 +303,8 @@
    "allow_in_quick_entry": 1,
    "collapsible": 1,
    "fieldname": "employment_details",
-   "fieldtype": "Section Break",
-   "label": "Joining Details"
+   "fieldtype": "Tab Break",
+   "label": "Joining"
   },
   {
    "fieldname": "scheduled_confirmation_date",
@@ -332,12 +346,6 @@
    "oldfieldtype": "Date"
   },
   {
-   "collapsible": 1,
-   "fieldname": "job_profile",
-   "fieldtype": "Section Break",
-   "label": "Department"
-  },
-  {
    "fieldname": "department",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -367,10 +375,6 @@
    "options": "Employee"
   },
   {
-   "fieldname": "column_break_31",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "branch",
    "fieldtype": "Link",
    "label": "Branch",
@@ -391,8 +395,8 @@
   {
    "collapsible": 1,
    "fieldname": "salary_information",
-   "fieldtype": "Section Break",
-   "label": "Salary Details",
+   "fieldtype": "Tab Break",
+   "label": "Salary",
    "oldfieldtype": "Section Break",
    "width": "50%"
   },
@@ -423,8 +427,8 @@
   {
    "collapsible": 1,
    "fieldname": "contact_details",
-   "fieldtype": "Section Break",
-   "label": "Contact Details"
+   "fieldtype": "Tab Break",
+   "label": "Address & Contacts"
   },
   {
    "fieldname": "cell_number",
@@ -494,12 +498,6 @@
    "label": "Current Address"
   },
   {
-   "collapsible": 1,
-   "fieldname": "sb53",
-   "fieldtype": "Section Break",
-   "label": "Personal Bio"
-  },
-  {
    "description": "Short biography for website and other publications.",
    "fieldname": "bio",
    "fieldtype": "Text Editor",
@@ -508,8 +506,8 @@
   {
    "collapsible": 1,
    "fieldname": "personal_details",
-   "fieldtype": "Section Break",
-   "label": "Personal Details"
+   "fieldtype": "Tab Break",
+   "label": "Personal"
   },
   {
    "fieldname": "passport_number",
@@ -601,7 +599,7 @@
   {
    "collapsible": 1,
    "fieldname": "exit",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Exit",
    "oldfieldtype": "Section Break"
   },
@@ -702,8 +700,8 @@
   {
    "collapsible": 1,
    "fieldname": "attendance_and_leave_details",
-   "fieldtype": "Section Break",
-   "label": "Attendance and Leave Details"
+   "fieldtype": "Tab Break",
+   "label": "Attendance & Leaves"
   },
   {
    "fieldname": "column_break_44",
@@ -711,10 +709,6 @@
   },
   {
    "fieldname": "column_break_19",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_52",
    "fieldtype": "Column Break"
   },
   {
@@ -728,13 +722,95 @@
    "fieldtype": "Currency",
    "label": "Cost to Company (CTC)",
    "options": "salary_currency"
+  },
+  {
+   "fieldname": "basic_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "company_details_section",
+   "fieldtype": "Section Break",
+   "label": "Company Details"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "column_break_46",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "profile_tab",
+   "fieldtype": "Tab Break",
+   "label": "Profile"
+  },
+  {
+   "fieldname": "passport_details_section",
+   "fieldtype": "Section Break",
+   "label": "Passport Details"
+  },
+  {
+   "fieldname": "column_break_73",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_40",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_99",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "feedback_section",
+   "fieldtype": "Section Break",
+   "label": "Feedback"
+  },
+  {
+   "fieldname": "column_break_104",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-06-27 01:29:32.952091",
+ "modified": "2022-09-13 10:27:14.579197",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

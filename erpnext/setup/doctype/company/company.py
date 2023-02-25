@@ -70,9 +70,6 @@ class Company(NestedSet):
 
 		self.abbr = self.abbr.strip()
 
-		# if self.get('__islocal') and len(self.abbr) > 5:
-		# 	frappe.throw(_("Abbreviation cannot have more than 5 characters"))
-
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
@@ -207,15 +204,14 @@ class Company(NestedSet):
 		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
-		frappe.db.set(
-			self,
+		self.db_set(
 			"default_receivable_account",
 			frappe.db.get_value(
 				"Account", {"company": self.name, "account_type": "Receivable", "is_group": 0}
 			),
 		)
-		frappe.db.set(
-			self,
+
+		self.db_set(
 			"default_payable_account",
 			frappe.db.get_value(
 				"Account", {"company": self.name, "account_type": "Payable", "is_group": 0}
@@ -389,6 +385,7 @@ class Company(NestedSet):
 			"capital_work_in_progress_account": "Capital Work in Progress",
 			"asset_received_but_not_billed": "Asset Received But Not Billed",
 			"expenses_included_in_asset_valuation": "Expenses Included In Asset Valuation",
+			"default_expense_account": "Cost of Goods Sold",
 		}
 
 		if self.enable_perpetual_inventory:
@@ -398,7 +395,6 @@ class Company(NestedSet):
 					"default_inventory_account": "Stock",
 					"stock_adjustment_account": "Stock Adjustment",
 					"expenses_included_in_valuation": "Expenses Included In Valuation",
-					"default_expense_account": "Cost of Goods Sold",
 				}
 			)
 
@@ -491,12 +487,12 @@ class Company(NestedSet):
 				cc_doc.flags.ignore_mandatory = True
 			cc_doc.insert()
 
-		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
-		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
-		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
+		self.db_set("cost_center", _("Main") + " - " + self.abbr)
+		self.db_set("round_off_cost_center", _("Main") + " - " + self.abbr)
+		self.db_set("depreciation_cost_center", _("Main") + " - " + self.abbr)
 
 	def after_rename(self, olddn, newdn, merge=False):
-		frappe.db.set(self, "company_name", newdn)
+		self.db_set("company_name", newdn)
 
 		frappe.db.sql(
 			"""update `tabDefaultValue` set defvalue=%s
@@ -690,11 +686,11 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 			name as value,
 			is_group as expandable
 		from
-			`tab{doctype}` comp
+			`tabCompany` comp
 		where
 			ifnull(parent_company, "")={parent}
 		""".format(
-			doctype=doctype, parent=frappe.db.escape(parent)
+			parent=frappe.db.escape(parent)
 		),
 		as_dict=1,
 	)

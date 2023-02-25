@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
+  "has_item_scanned",
   "item_code",
   "col_break1",
   "item_name",
@@ -808,11 +809,19 @@
    "fieldtype": "Check",
    "label": "Grant Commission",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Check",
+   "label": "Has Item Scanned",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:23:47.506290",
+ "modified": "2022-11-02 12:52:39.125295",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Item",
@@ -820,5 +829,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

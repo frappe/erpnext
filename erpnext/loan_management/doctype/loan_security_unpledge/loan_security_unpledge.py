@@ -57,6 +57,9 @@ class LoanSecurityUnpledge(Document):
 			self.loan,
 			[
 				"total_payment",
+				"debit_adjustment_amount",
+				"credit_adjustment_amount",
+				"refund_amount",
 				"total_principal_paid",
 				"loan_amount",
 				"total_interest_payable",

@@ -65,7 +65,7 @@ New passwords will be created for the ERPNext "Administrator" user, the MariaDB 
 1. [Frappe School](https://frappe.school) - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.
 2. [Official documentation](https://docs.erpnext.com/) - Extensive documentation for ERPNext.
 3. [Discussion Forum](https://discuss.erpnext.com/) - Engage with community of ERPNext users and service providers.
-4. [Telegram Group](https://t.me/erpnexthelp) - Get instant help from huge community of users.
+4. [Telegram Group](https://erpnext_public.t.me) - Get instant help from huge community of users.
 
 
 ## Contributing
@@ -81,6 +81,8 @@ New passwords will be created for the ERPNext "Administrator" user, the MariaDB 
 GNU/General Public License (see [license.txt](license.txt))
 
 The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Frappe Technologies Pvt Ltd (Frappe) and Contributors.
+
+By contributing to ERPNext, you agree that your contributions will be licensed under its GNU General Public License (v3).
 
 ## Logo and Trademark Policy
 

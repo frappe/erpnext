@@ -64,22 +64,21 @@ def get_columns(filters):
 
 
 def get_data(filters):
-	cond = "1=1"
+	wo = frappe.qb.DocType("Work Order")
+	query = (
+		frappe.qb.from_(wo)
+		.select(wo.name.as_("work_order"), wo.qty, wo.produced_qty, wo.production_item, wo.bom_no)
+		.where((wo.produced_qty > wo.qty) & (wo.docstatus == 1))
+	)
 
 	if filters.get("bom_no") and not filters.get("work_order"):
-		cond += " and bom_no = '%s'" % filters.get("bom_no")
+		query = query.where(wo.bom_no == filters.get("bom_no"))
 
 	if filters.get("work_order"):
-		cond += " and name = '%s'" % filters.get("work_order")
+		query = query.where(wo.name == filters.get("work_order"))
 
 	results = []
-	for d in frappe.db.sql(
-		""" select name as work_order, qty, produced_qty, production_item, bom_no
-		from `tabWork Order` where produced_qty > qty and docstatus = 1 and {0}""".format(
-			cond
-		),
-		as_dict=1,
-	):
+	for d in query.run(as_dict=True):
 		results.append(d)
 
 		for data in frappe.get_all(
@@ -95,16 +94,17 @@ def get_data(filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
-	cond = "1=1"
-	if filters.get("bom_no"):
-		cond += " and bom_no = '%s'" % filters.get("bom_no")
-
-	return frappe.db.sql(
-		"""select name from `tabWork Order`
-		where name like %(name)s and {0} and produced_qty > qty and docstatus = 1
-		order by name limit {2} offset {1}""".format(
-			cond, start, page_len
-		),
-		{"name": "%%%s%%" % txt},
-		as_list=1,
+	wo = frappe.qb.DocType("Work Order")
+	query = (
+		frappe.qb.from_(wo)
+		.select(wo.name)
+		.where((wo.name.like(f"{txt}%")) & (wo.produced_qty > wo.qty) & (wo.docstatus == 1))
+		.orderby(wo.name)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	if filters.get("bom_no"):
+		query = query.where(wo.bom_no == filters.get("bom_no"))
+
+	return query.run(as_list=True)

@@ -74,7 +74,40 @@ function get_filters() {
 					]
 				}
 			}
-		}
+		},
+		{
+			"fieldname":"from_due_date",
+			"label": __("From Due Date"),
+			"fieldtype": "Date",
+		},
+		{
+			"fieldname":"to_due_date",
+			"label": __("To Due Date"),
+			"fieldtype": "Date",
+		},
+		{
+			"fieldname":"status",
+			"label": __("Status"),
+			"fieldtype": "MultiSelectList",
+			"width": 100,
+			get_data: function(txt) {
+				let status = ["Overdue", "Unpaid", "Completed", "Partly Paid"]
+				let options = []
+				for (let option of status){
+					options.push({
+						"value": option,
+						"label": __(option),
+						"description": ""
+					})
+				}
+				return options
+			}
+		},
+		{
+			"fieldname":"only_immediate_upcoming_term",
+			"label": __("Show only the Immediate Upcoming Term"),
+			"fieldtype": "Check",
+		},
 	]
 	return filters;
 }

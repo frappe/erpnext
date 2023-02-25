@@ -123,6 +123,7 @@
    "fieldname": "route",
    "fieldtype": "Data",
    "label": "Route",
+   "no_copy": 1,
    "unique": 1
   },
   {
@@ -232,11 +233,10 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2022-03-09 12:27:11.055782",
+ "modified": "2023-01-05 12:21:30.458628",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
- "name_case": "Title Case",
  "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_item_group",
  "owner": "Administrator",

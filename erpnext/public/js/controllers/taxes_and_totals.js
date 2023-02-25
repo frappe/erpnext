@@ -39,31 +39,44 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
 
+		// # Update grand total as per cash and non trade discount
+		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
+			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
+		}
+
 		await this.calculate_shipping_charges();
 
-		// Advance calculation applicable to Sales /Purchase Invoice
-		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)
-			&& this.frm.doc.docstatus < 2 && !this.frm.doc.is_return) {
+		// Advance calculation applicable to Sales/Purchase Invoice
+		if (
+			in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)
+			&& this.frm.doc.docstatus < 2
+			&& !this.frm.doc.is_return
+		) {
 			this.calculate_total_advance(update_paid_amount);
 		}
 
-		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
-			this.frm.doc.is_return) {
-			if (this.frm.doc.doctype == "Sales Invoice") {
-				this.set_total_amount_to_default_mop();
-			}
+		if (
+			in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
+			&& this.frm.doc.is_pos
+			&& this.frm.doc.is_return
+		) {
+			this.set_total_amount_to_default_mop();
 			this.calculate_paid_amount();
 		}
 
 		// Sales person's commission
-		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
+		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.calculate_commission();
 			this.calculate_contribution();
 		}
 
 		// Update paid amount on return/debit note creation
-		if(this.frm.doc.doctype === "Purchase Invoice" && this.frm.doc.is_return
-			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)) {
+		if (
+			this.frm.doc.doctype === "Purchase Invoice"
+			&& this.frm.doc.is_return
+			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)
+		) {
 			this.frm.doc.paid_amount = flt(this.frm.doc.grand_total, precision("grand_total"));
 		}
 
@@ -109,24 +122,25 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
-			$.each(this.frm.doc["items"] || [], function(i, item) {
+			for (const item of this.frm.doc.items || []) {
 				frappe.model.round_floats_in(item);
 				item.net_rate = item.rate;
+				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
-				if ((!item.qty) && me.frm.doc.is_return) {
-					item.amount = flt(item.rate * -1, precision("amount", item));
-				} else if ((!item.qty) && me.frm.doc.is_debit_note) {
-					item.amount = flt(item.rate, precision("amount", item));
-				} else {
-					item.amount = flt(item.rate * item.qty, precision("amount", item));
+				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
+					item.net_amount = item.amount = flt(item.rate * item.qty, precision("amount", item));
+				}
+				else {
+					let qty = item.qty || 1;
+					qty = me.frm.doc.is_return ? -1 * qty : qty;
+					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
 				}
 
-				item.net_amount = item.amount;
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 
 				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
-			});
+			}
 		}
 	}
 
@@ -633,6 +647,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.frm.doc.base_discount_amount = flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate,
 				precision("base_discount_amount"));
 
+			if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
+				return;
+			}
+
 			var total_for_discount_amount = this.get_total_for_discount_amount();
 			var net_total = 0;
 			// calculate item amount after Discount Amount
@@ -765,21 +783,30 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 
-		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
-			var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
-				- this.frm.doc.write_off_amount), precision("grand_total"));
+		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			var total_amount_to_pay = flt(
+				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
+				precision("grand_total")
+			);
 		} else {
 			var total_amount_to_pay = flt(
-				(flt(base_grand_total, precision("base_grand_total"))
-					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+				(
+					flt(
+						base_grand_total,
+						precision("base_grand_total")
+					)
+					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount
+				),
 				precision("base_grand_total")
 			);
 		}
+
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
 			}
 		});
+
 		this.frm.refresh_fields();
 	}
 

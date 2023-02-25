@@ -4,7 +4,16 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, add_months, add_to_date, date_diff, flt, get_datetime, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	add_to_date,
+	date_diff,
+	flt,
+	format_date,
+	get_datetime,
+	nowdate,
+)
 
 from erpnext.loan_management.doctype.loan.loan import (
 	make_loan_write_off,
@@ -47,6 +56,51 @@ class TestLoan(unittest.TestCase):
 			loan_account="Loan Account - _TC",
 			interest_income_account="Interest Income Account - _TC",
 			penalty_income_account="Penalty Income Account - _TC",
+			repayment_schedule_type="Monthly as per repayment start date",
+		)
+
+		create_loan_type(
+			"Term Loan Type 1",
+			12000,
+			7.5,
+			is_term_loan=1,
+			mode_of_payment="Cash",
+			disbursement_account="Disbursement Account - _TC",
+			payment_account="Payment Account - _TC",
+			loan_account="Loan Account - _TC",
+			interest_income_account="Interest Income Account - _TC",
+			penalty_income_account="Penalty Income Account - _TC",
+			repayment_schedule_type="Monthly as per repayment start date",
+		)
+
+		create_loan_type(
+			"Term Loan Type 2",
+			12000,
+			7.5,
+			is_term_loan=1,
+			mode_of_payment="Cash",
+			disbursement_account="Disbursement Account - _TC",
+			payment_account="Payment Account - _TC",
+			loan_account="Loan Account - _TC",
+			interest_income_account="Interest Income Account - _TC",
+			penalty_income_account="Penalty Income Account - _TC",
+			repayment_schedule_type="Pro-rated calendar months",
+			repayment_date_on="Start of the next month",
+		)
+
+		create_loan_type(
+			"Term Loan Type 3",
+			12000,
+			7.5,
+			is_term_loan=1,
+			mode_of_payment="Cash",
+			disbursement_account="Disbursement Account - _TC",
+			payment_account="Payment Account - _TC",
+			loan_account="Loan Account - _TC",
+			interest_income_account="Interest Income Account - _TC",
+			penalty_income_account="Penalty Income Account - _TC",
+			repayment_schedule_type="Pro-rated calendar months",
+			repayment_date_on="End of the current month",
 		)
 
 		create_loan_type(
@@ -62,6 +116,7 @@ class TestLoan(unittest.TestCase):
 			"Loan Account - _TC",
 			"Interest Income Account - _TC",
 			"Penalty Income Account - _TC",
+			repayment_schedule_type="Monthly as per repayment start date",
 		)
 
 		create_loan_type(
@@ -902,6 +957,69 @@ class TestLoan(unittest.TestCase):
 		amounts = calculate_amounts(loan.name, add_days(last_date, 5))
 		self.assertEqual(flt(amounts["pending_principal_amount"], 0), 0)
 
+	def test_term_loan_schedule_types(self):
+		loan = create_loan(
+			self.applicant1,
+			"Term Loan Type 1",
+			12000,
+			"Repay Over Number of Periods",
+			12,
+			repayment_start_date="2022-10-17",
+		)
+
+		# Check for first, second and last installment date
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "17-10-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "17-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "17-09-2023"
+		)
+
+		loan.loan_type = "Term Loan Type 2"
+		loan.save()
+
+		# Check for first, second and last installment date
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "01-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "01-12-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "01-10-2023"
+		)
+
+		loan.loan_type = "Term Loan Type 3"
+		loan.save()
+
+		# Check for first, second and last installment date
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "31-10-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "30-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "30-09-2023"
+		)
+
+		loan.repayment_method = "Repay Fixed Amount per Period"
+		loan.monthly_repayment_amount = 1042
+		loan.save()
+
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "31-10-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "30-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "30-09-2023"
+		)
+
 
 def create_loan_scenario_for_penalty(doc):
 	pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
@@ -1033,6 +1151,8 @@ def create_loan_type(
 	penalty_income_account=None,
 	repayment_method=None,
 	repayment_periods=None,
+	repayment_schedule_type=None,
+	repayment_date_on=None,
 ):
 
 	if not frappe.db.exists("Loan Type", loan_name):
@@ -1042,6 +1162,7 @@ def create_loan_type(
 				"company": "_Test Company",
 				"loan_name": loan_name,
 				"is_term_loan": is_term_loan,
+				"repayment_schedule_type": "Monthly as per repayment start date",
 				"maximum_loan_amount": maximum_loan_amount,
 				"rate_of_interest": rate_of_interest,
 				"penalty_interest_rate": penalty_interest_rate,
@@ -1056,8 +1177,14 @@ def create_loan_type(
 				"repayment_periods": repayment_periods,
 				"write_off_amount": 100,
 			}
-		).insert()
+		)
 
+		if loan_type.is_term_loan:
+			loan_type.repayment_schedule_type = repayment_schedule_type
+			if loan_type.repayment_schedule_type != "Monthly as per repayment start date":
+				loan_type.repayment_date_on = repayment_date_on
+
+		loan_type.insert()
 		loan_type.submit()
 
 

@@ -3,6 +3,8 @@
 
 frappe.provide('erpnext.buying');
 
+{% include 'erpnext/stock/landed_taxes_and_charges_common.js' %};
+
 frappe.ui.form.on('Subcontracting Order', {
 	setup: (frm) => {
 		frm.get_field("items").grid.cannot_add_rows = true;
@@ -105,9 +107,9 @@ frappe.ui.form.on('Subcontracting Order', {
 	get_materials_from_supplier: function (frm) {
 		let sco_rm_details = [];
 
-		if (frm.doc.supplied_items && (frm.doc.per_received == 100)) {
+		if (frm.doc.status != "Closed" && frm.doc.supplied_items && frm.doc.per_received > 0) {
 			frm.doc.supplied_items.forEach(d => {
-				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
+				if (d.total_supplied_qty > 0 && d.total_supplied_qty != d.consumed_qty) {
 					sco_rm_details.push(d.name);
 				}
 			});
@@ -136,6 +138,16 @@ frappe.ui.form.on('Subcontracting Order', {
 	}
 });
 
+frappe.ui.form.on('Landed Cost Taxes and Charges', {
+	amount: function (frm, cdt, cdn) {
+		frm.events.set_base_amount(frm, cdt, cdn);
+	},
+
+	expense_account: function (frm, cdt, cdn) {
+		frm.events.set_account_currency(frm, cdt, cdn);
+	}
+});
+
 erpnext.buying.SubcontractingOrderController = class SubcontractingOrderController {
 	setup() {
 		this.frm.custom_make_buttons = {
@@ -148,14 +160,11 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		var me = this;
 
 		if (doc.docstatus == 1) {
-			if (doc.status != 'Completed') {
+			if (!['Closed', 'Completed'].includes(doc.status)) {
 				if (flt(doc.per_received) < 100) {
 					cur_frm.add_custom_button(__('Subcontracting Receipt'), this.make_subcontracting_receipt, __('Create'));
 					if (me.has_unsupplied_items()) {
-						cur_frm.add_custom_button(__('Material to Supplier'),
-							() => {
-								me.make_stock_entry();
-							}, __('Transfer'));
+						cur_frm.add_custom_button(__('Material to Supplier'), this.make_stock_entry, __('Transfer'));
 					}
 				}
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
@@ -183,120 +192,6 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
 	}
 
-	make_stock_entry() {
-		var items = $.map(cur_frm.doc.items, (d) => d.bom ? d.item_code : false);
-		var me = this;
-
-		if (items.length >= 1) {
-			me.raw_material_data = [];
-			me.show_dialog = 1;
-			let title = __('Transfer Material to Supplier');
-			let fields = [
-				{ fieldtype: 'Section Break', label: __('Raw Materials') },
-				{
-					fieldname: 'sub_con_rm_items', fieldtype: 'Table', label: __('Items'),
-					fields: [
-						{
-							fieldtype: 'Data',
-							fieldname: 'item_code',
-							label: __('Item'),
-							read_only: 1,
-							in_list_view: 1
-						},
-						{
-							fieldtype: 'Data',
-							fieldname: 'rm_item_code',
-							label: __('Raw Material'),
-							read_only: 1,
-							in_list_view: 1
-						},
-						{
-							fieldtype: 'Float',
-							read_only: 1,
-							fieldname: 'qty',
-							label: __('Quantity'),
-							in_list_view: 1
-						},
-						{
-							fieldtype: 'Data',
-							read_only: 1,
-							fieldname: 'warehouse',
-							label: __('Reserve Warehouse'),
-							in_list_view: 1
-						},
-						{
-							fieldtype: 'Float',
-							read_only: 1,
-							fieldname: 'rate',
-							label: __('Rate'),
-							hidden: 1
-						},
-						{
-							fieldtype: 'Float',
-							read_only: 1,
-							fieldname: 'amount',
-							label: __('Amount'),
-							hidden: 1
-						},
-						{
-							fieldtype: 'Link',
-							read_only: 1,
-							fieldname: 'uom',
-							label: __('UOM'),
-							hidden: 1
-						}
-					],
-					data: me.raw_material_data,
-					get_data: () => me.raw_material_data
-				}
-			];
-
-			me.dialog = new frappe.ui.Dialog({
-				title: title, fields: fields
-			});
-
-			if (me.frm.doc['supplied_items']) {
-				me.frm.doc['supplied_items'].forEach((item) => {
-					if (item.rm_item_code && item.main_item_code && item.required_qty - item.supplied_qty != 0) {
-						me.raw_material_data.push({
-							'name': item.name,
-							'item_code': item.main_item_code,
-							'rm_item_code': item.rm_item_code,
-							'item_name': item.rm_item_code,
-							'qty': item.required_qty - item.supplied_qty,
-							'warehouse': item.reserve_warehouse,
-							'rate': item.rate,
-							'amount': item.amount,
-							'stock_uom': item.stock_uom
-						});
-						me.dialog.fields_dict.sub_con_rm_items.grid.refresh();
-					}
-				});
-			}
-
-			me.dialog.get_field('sub_con_rm_items').check_all_rows();
-
-			me.dialog.show();
-			this.dialog.set_primary_action(__('Transfer'), () => {
-				me.values = me.dialog.get_values();
-				if (me.values) {
-					me.values.sub_con_rm_items.map((row, i) => {
-						if (!row.item_code || !row.rm_item_code || !row.warehouse || !row.qty || row.qty === 0) {
-							let row_id = i + 1;
-							frappe.throw(__('Item Code, warehouse and quantity are required on row {0}', [row_id]));
-						}
-					});
-					me.make_rm_stock_entry(me.dialog.fields_dict.sub_con_rm_items.grid.get_selected_children());
-					me.dialog.hide();
-				}
-			});
-		}
-
-		me.dialog.get_close_btn().on('click', () => {
-			me.dialog.hide();
-		});
-	}
-
 	has_unsupplied_items() {
 		return this.frm.doc['supplied_items'].some(item => item.required_qty > item.supplied_qty);
 	}
@@ -309,12 +204,11 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		});
 	}
 
-	make_rm_stock_entry(rm_items) {
+	make_stock_entry() {
 		frappe.call({
 			method: 'erpnext.controllers.subcontracting_controller.make_rm_stock_entry',
 			args: {
 				subcontract_order: cur_frm.doc.name,
-				rm_items: rm_items,
 				order_doctype: cur_frm.doc.doctype
 			},
 			callback: (r) => {

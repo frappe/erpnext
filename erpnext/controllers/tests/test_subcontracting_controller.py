@@ -36,6 +36,36 @@ class TestSubcontractingController(FrappeTestCase):
 		sco.remove_empty_rows()
 		self.assertEqual((len_before - 1), len(sco.service_items))
 
+	def test_set_missing_values_in_additional_costs(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+
+		rate_without_additional_cost = sco.items[0].rate
+		amount_without_additional_cost = sco.items[0].amount
+
+		additional_amount = 120
+		sco.append(
+			"additional_costs",
+			{
+				"expense_account": "Cost of Goods Sold - _TC",
+				"description": "Test",
+				"amount": additional_amount,
+			},
+		)
+		sco.save()
+
+		additional_cost_per_qty = additional_amount / sco.items[0].qty
+
+		self.assertEqual(sco.items[0].additional_cost_per_qty, additional_cost_per_qty)
+		self.assertEqual(rate_without_additional_cost + additional_cost_per_qty, sco.items[0].rate)
+		self.assertEqual(amount_without_additional_cost + additional_amount, sco.items[0].amount)
+
+		sco.additional_costs = []
+		sco.save()
+
+		self.assertEqual(sco.items[0].additional_cost_per_qty, 0)
+		self.assertEqual(rate_without_additional_cost, sco.items[0].rate)
+		self.assertEqual(amount_without_additional_cost, sco.items[0].amount)
+
 	def test_create_raw_materials_supplied(self):
 		sco = get_subcontracting_order()
 		sco.supplied_items = None
@@ -785,6 +815,7 @@ def add_second_row_in_scr(scr):
 		"item_name",
 		"qty",
 		"uom",
+		"bom",
 		"warehouse",
 		"stock_uom",
 		"subcontracting_order",
@@ -867,7 +898,7 @@ def make_stock_transfer_entry(**args):
 			"item_name": row.item_code,
 			"rate": row.rate or 100,
 			"stock_uom": row.stock_uom or "Nos",
-			"warehouse": row.warehuose or "_Test Warehouse - _TC",
+			"warehouse": row.warehouse or "_Test Warehouse - _TC",
 		}
 
 		item_details = args.itemwise_details.get(row.item_code)
@@ -1001,9 +1032,9 @@ def get_subcontracting_order(**args):
 	if not args.service_items:
 		service_items = [
 			{
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"item_code": "Subcontracted Service Item 7",
-				"qty": 5,
+				"qty": 10,
 				"rate": 100,
 				"fg_item": "Subcontracted Item SA7",
 				"fg_item_qty": 10,
@@ -1016,6 +1047,7 @@ def get_subcontracting_order(**args):
 		rm_items=service_items,
 		is_subcontracted=1,
 		supplier_warehouse=args.supplier_warehouse or "_Test Warehouse 1 - _TC",
+		company=args.company,
 	)
 
 	return create_subcontracting_order(po_name=po.name, **args)

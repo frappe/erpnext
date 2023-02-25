@@ -1,0 +1,128 @@
+{
+ "actions": [],
+ "creation": "2021-09-05 15:52:10.124538",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asset",
+  "asset_name",
+  "finance_book",
+  "column_break_3",
+  "item_code",
+  "item_name",
+  "section_break_6",
+  "current_asset_value",
+  "asset_value",
+  "column_break_9",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "fixed_asset_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "asset.asset_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Asset Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "asset.item_code",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Value"
+  },
+  {
+   "default": "0",
+   "fieldname": "asset_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Asset Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fixed_asset_account",
+   "fieldtype": "Link",
+   "label": "Fixed Asset Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "fieldname": "current_asset_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Current Asset Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-09-12 14:30:02.915132",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Capitalization Asset Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

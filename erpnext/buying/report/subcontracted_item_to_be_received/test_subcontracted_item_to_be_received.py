@@ -4,6 +4,8 @@
 # Decompiled by https://python-decompiler.com
 
 
+import copy
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -11,10 +13,12 @@ from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_
 	execute,
 )
 from erpnext.controllers.tests.test_subcontracting_controller import (
+	get_rm_items,
 	get_subcontracting_order,
 	make_service_item,
+	make_stock_in_entry,
+	make_stock_transfer_entry,
 )
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
@@ -36,15 +40,18 @@ class TestSubcontractedItemToBeReceived(FrappeTestCase):
 		sco = get_subcontracting_order(
 			service_items=service_items, supplier_warehouse="_Test Warehouse 1 - _TC"
 		)
-		make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		for item in rm_items:
+			item["sco_rm_detail"] = sco.items[0].name
+
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
 		)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse 1 - _TC",
-			qty=100,
-			basic_rate=100,
-		)
+
 		make_subcontracting_receipt_against_sco(sco.name)
 		sco.reload()
 		col, data = execute(

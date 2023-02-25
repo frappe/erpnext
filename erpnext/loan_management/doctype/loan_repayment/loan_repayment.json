@@ -264,11 +264,11 @@
   },
   {
    "fetch_from": "against_loan.payment_account",
+   "fetch_if_empty": 1,
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Repayment Account",
-   "options": "Account",
-   "read_only": 1
+   "options": "Account"
   },
   {
    "fieldname": "column_break_36",
@@ -294,7 +294,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-21 10:10:07.742298",
+ "modified": "2022-08-04 17:13:51.964203",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

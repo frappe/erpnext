@@ -16,7 +16,7 @@ class CostCenter(NestedSet):
 		from erpnext.accounts.utils import get_autoname_with_number
 
 		self.name = get_autoname_with_number(
-			self.cost_center_number, self.cost_center_name, None, self.company
+			self.cost_center_number, self.cost_center_name, self.company
 		)
 
 	def validate(self):

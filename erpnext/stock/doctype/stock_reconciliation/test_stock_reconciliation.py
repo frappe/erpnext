@@ -644,6 +644,38 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertEqual(len(active_sr_no), 0)
 
+	def test_serial_no_batch_no_item(self):
+		item = self.make_item(
+			"Test Serial No Batch No Item",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"serial_no_series": "SRS9.####",
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=1,
+			rate=100,
+		)
+
+		sl_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name},
+			["actual_qty", "qty_after_transaction"],
+			as_dict=1,
+		)
+
+		self.assertEqual(flt(sl_entry.actual_qty), 1.0)
+		self.assertEqual(flt(sl_entry.qty_after_transaction), 1.0)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
@@ -727,12 +759,21 @@ def create_stock_reconciliation(**args):
 	sr.set_posting_time = 1
 	sr.company = args.company or "_Test Company"
 	sr.expense_account = args.expense_account or (
-		"Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC"
+		(
+			frappe.get_cached_value("Company", sr.company, "stock_adjustment_account")
+			or frappe.get_cached_value(
+				"Account", {"account_type": "Stock Adjustment", "company": sr.company}, "name"
+			)
+		)
+		if frappe.get_all("Stock Ledger Entry", {"company": sr.company})
+		else frappe.get_cached_value(
+			"Account", {"account_type": "Temporary", "company": sr.company}, "name"
+		)
 	)
 	sr.cost_center = (
 		args.cost_center
 		or frappe.get_cached_value("Company", sr.company, "cost_center")
-		or "_Test Cost Center - _TC"
+		or frappe.get_cached_value("Cost Center", filters={"is_group": 0, "company": sr.company})
 	)
 
 	sr.append(

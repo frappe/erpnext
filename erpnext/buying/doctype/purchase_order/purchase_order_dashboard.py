@@ -23,5 +23,6 @@ def get_data():
 				"items": ["Material Request", "Supplier Quotation", "Project", "Auto Repeat"],
 			},
 			{"label": _("Sub-contracting"), "items": ["Subcontracting Order", "Stock Entry"]},
+			{"label": _("Internal"), "items": ["Sales Order"]},
 		],
 	}

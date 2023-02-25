@@ -188,7 +188,8 @@
    "in_list_view": 1,
    "label": "Item Group",
    "options": "Item Group",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "1",
@@ -234,7 +235,8 @@
    "fieldname": "brand",
    "fieldtype": "Link",
    "label": "Brand",
-   "options": "Brand"
+   "options": "Brand",
+   "search_index": 1
   },
   {
    "collapsible": 1,
@@ -345,7 +347,8 @@
  "image_field": "website_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-28 17:10:30.613251",
+ "make_attachments_public": 1,
+ "modified": "2022-09-30 04:01:52.090732",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",

@@ -268,10 +268,12 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	data = {}
 	total = 0
+	filters.account_type = account_type
+	filters.start_date = fiscal_year.year_start_date
+	filters.end_date = fiscal_year.year_end_date
+
 	for company in companies:
-		amount = get_account_type_based_gl_data(
-			company, fiscal_year.year_start_date, fiscal_year.year_end_date, account_type, filters
-		)
+		amount = get_account_type_based_gl_data(company, filters)
 
 		if amount and account_type == "Depreciation":
 			amount *= -1
@@ -533,9 +535,14 @@ def get_accounts(root_type, companies):
 			],
 			filters={"company": company, "root_type": root_type},
 		):
-			if account.account_name not in added_accounts:
+			if account.account_number:
+				account_key = account.account_number + "-" + account.account_name
+			else:
+				account_key = account.account_name
+
+			if account_key not in added_accounts:
 				accounts.append(account)
-				added_accounts.append(account.account_name)
+				added_accounts.append(account_key)
 
 	return accounts
 
@@ -637,7 +644,7 @@ def set_gl_entries_by_account(
 				"rgt": root_rgt,
 				"company": d.name,
 				"finance_book": filters.get("finance_book"),
-				"company_fb": frappe.db.get_value("Company", d.name, "default_finance_book"),
+				"company_fb": frappe.get_cached_value("Company", d.name, "default_finance_book"),
 			},
 			as_dict=True,
 		)

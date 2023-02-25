@@ -94,7 +94,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_item_html(doc, item_data) {
 		return `<div class="item-row-wrapper">
 					<div class="item-name">${item_data.item_name}</div>
-					<div class="item-qty">${item_data.qty || 0}</div>
+					<div class="item-qty">${item_data.qty || 0} ${item_data.uom}</div>
 					<div class="item-rate-disc">${get_rate_discount_html()}</div>
 				</div>`;
 
@@ -130,7 +130,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		if (!doc.taxes.length) return '';
 
 		let taxes_html = doc.taxes.map(t => {
-			const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+			// if tax rate is 0, don't print it.
+			const description = /[0-9]+/.test(t.description) ? t.description : ((t.rate != 0) ? `${t.description} @ ${t.rate}%`: t.description);
 			return `
 				<div class="tax-row">
 					<div class="tax-label">${description}</div>

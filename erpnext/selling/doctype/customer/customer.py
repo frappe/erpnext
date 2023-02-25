@@ -6,7 +6,7 @@ import json
 
 import frappe
 import frappe.defaults
-from frappe import _, msgprint
+from frappe import _, msgprint, qb
 from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
@@ -27,9 +27,6 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
-	def get_feed(self):
-		return self.customer_name
-
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
@@ -294,7 +291,7 @@ class Customer(TransactionBase):
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default("cust_master_name") == "Customer Name":
-			frappe.db.set(self, "customer_name", newdn)
+			self.db_set("customer_name", newdn)
 
 	def set_loyalty_program(self):
 		if self.loyalty_program:
@@ -732,12 +729,15 @@ def make_address(args, is_primary_address=1):
 @frappe.validate_and_sanitize_search_inputs
 def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get("customer")
-	return frappe.db.sql(
-		"""
-		select `tabContact`.name from `tabContact`, `tabDynamic Link`
-			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer'
-			and `tabContact`.name like %(txt)s
-		""",
-		{"customer": customer, "txt": "%%%s%%" % txt},
+
+	con = qb.DocType("Contact")
+	dlink = qb.DocType("Dynamic Link")
+
+	return (
+		qb.from_(con)
+		.join(dlink)
+		.on(con.name == dlink.parent)
+		.select(con.name, con.email_id)
+		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
+		.run()
 	)

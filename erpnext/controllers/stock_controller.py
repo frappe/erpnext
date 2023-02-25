@@ -36,6 +36,10 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError):
 	pass
 
 
+class BatchExpiredError(frappe.ValidationError):
+	pass
+
+
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
@@ -53,7 +57,7 @@ class StockController(AccountsController):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 		provisional_accounting_for_non_stock_items = cint(
-			frappe.db.get_value(
+			frappe.get_cached_value(
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
 			)
 		)
@@ -77,6 +81,10 @@ class StockController(AccountsController):
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+		is_material_issue = False
+		if self.doctype == "Stock Entry" and self.purpose == "Material Issue":
+			is_material_issue = True
+
 		for d in self.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
 				serial_nos = frappe.get_all(
@@ -93,6 +101,9 @@ class StockController(AccountsController):
 							)
 						)
 
+			if is_material_issue:
+				continue
+
 			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
 
@@ -100,7 +111,8 @@ class StockController(AccountsController):
 					frappe.throw(
 						_("Row #{0}: The batch {1} has already expired.").format(
 							d.idx, get_link_to_form("Batch", d.get("batch_no"))
-						)
+						),
+						BatchExpiredError,
 					)
 
 	def clean_serial_nos(self):
@@ -130,12 +142,14 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		precision = self.get_debit_field_precision()
 		for item_row in voucher_details:
-
 			sle_list = sle_map.get(item_row.name)
+			sle_rounding_diff = 0.0
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
+
+						sle_rounding_diff += flt(sle.stock_value_difference)
 
 						self.check_expense_account(item_row)
 
@@ -179,9 +193,49 @@ class StockController(AccountsController):
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
+			if abs(sle_rounding_diff) > (1.0 / (10**precision)) and self.is_internal_transfer():
+				warehouse_asset_account = ""
+				if self.get("is_internal_customer"):
+					warehouse_asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+				elif self.get("is_internal_supplier"):
+					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
+
+				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
+
+				gl_list.append(
+					self.get_gl_dict(
+						{
+							"account": expense_account,
+							"against": warehouse_asset_account,
+							"cost_center": item_row.cost_center,
+							"project": item_row.project or self.get("project"),
+							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
+							"debit": sle_rounding_diff,
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+						},
+						warehouse_account[sle.warehouse]["account_currency"],
+						item=item_row,
+					)
+				)
+
+				gl_list.append(
+					self.get_gl_dict(
+						{
+							"account": warehouse_asset_account,
+							"against": expense_account,
+							"cost_center": item_row.cost_center,
+							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
+							"credit": sle_rounding_diff,
+							"project": item_row.get("project") or self.get("project"),
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+						},
+						item=item_row,
+					)
+				)
+
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
-				if frappe.db.get_value("Warehouse", wh, "company"):
+				if frappe.get_cached_value("Warehouse", wh, "company"):
 					frappe.throw(
 						_(
 							"Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}."
@@ -310,7 +364,13 @@ class StockController(AccountsController):
 			)
 			if (
 				self.doctype
-				not in ("Purchase Receipt", "Purchase Invoice", "Stock Reconciliation", "Stock Entry")
+				not in (
+					"Purchase Receipt",
+					"Purchase Invoice",
+					"Stock Reconciliation",
+					"Stock Entry",
+					"Subcontracting Receipt",
+				)
 				and not is_expense_account
 			):
 				frappe.throw(
@@ -372,10 +432,37 @@ class StockController(AccountsController):
 		return sl_dict
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
+		# To handle delivery note and sales invoice
+		if row.get("item_row"):
+			row = row.get("item_row")
+
 		dimensions = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
 		for dimension in dimensions:
-			if dimension and row.get(dimension.source_fieldname):
+			if not dimension:
+				continue
+
+			if row.get(dimension.source_fieldname):
 				sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
+
+			if not sl_dict.get(dimension.target_fieldname) and dimension.fetch_from_parent:
+				sl_dict[dimension.target_fieldname] = self.get(dimension.fetch_from_parent)
+
+				# Get value based on doctype name
+				if not sl_dict.get(dimension.target_fieldname):
+					fieldname = next(
+						(
+							field.fieldname
+							for field in frappe.get_meta(self.doctype).fields
+							if field.options == dimension.fetch_from_parent
+						),
+						None,
+					)
+
+					if fieldname and self.get(fieldname):
+						sl_dict[dimension.target_fieldname] = self.get(fieldname)
+
+				if sl_dict[dimension.target_fieldname] and self.docstatus == 1:
+					row.db_set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
@@ -654,6 +741,47 @@ class StockController(AccountsController):
 				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
 			else:
 				create_repost_item_valuation_entry(args)
+
+	def add_gl_entry(
+		self,
+		gl_entries,
+		account,
+		cost_center,
+		debit,
+		credit,
+		remarks,
+		against_account,
+		debit_in_account_currency=None,
+		credit_in_account_currency=None,
+		account_currency=None,
+		project=None,
+		voucher_detail_no=None,
+		item=None,
+		posting_date=None,
+	):
+
+		gl_entry = {
+			"account": account,
+			"cost_center": cost_center,
+			"debit": debit,
+			"credit": credit,
+			"against": against_account,
+			"remarks": remarks,
+		}
+
+		if voucher_detail_no:
+			gl_entry.update({"voucher_detail_no": voucher_detail_no})
+
+		if debit_in_account_currency:
+			gl_entry.update({"debit_in_account_currency": debit_in_account_currency})
+
+		if credit_in_account_currency:
+			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
+
+		if posting_date:
+			gl_entry.update({"posting_date": posting_date})
+
+		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
 
 def repost_required_for_queue(doc: StockController) -> bool:

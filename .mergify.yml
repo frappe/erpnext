@@ -9,6 +9,7 @@ pull_request_rules:
           - author!=nabinhait
           - author!=ankush
           - author!=deepeshgarg007
+          - author!=frappe-pr-bot
           - author!=mergify[bot]
 
         - or:
