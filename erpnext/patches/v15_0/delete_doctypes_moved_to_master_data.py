@@ -31,6 +31,7 @@ def execute():
 		"Location",
 		"Manufacturer",
 		"Market Segment",
+		"Monthly Distribution Percentage",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
