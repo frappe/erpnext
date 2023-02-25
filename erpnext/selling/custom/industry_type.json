@@ -1,0 +1,38 @@
+{
+  "custom_fields": [],
+  "custom_perms": [
+    {
+      "parent": "Industry Type",
+      "create": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Industry Type",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales User"
+    },
+    {
+      "parent": "Industry Type",
+      "create": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales Master Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "doctype": "Industry Type",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}
