@@ -23,11 +23,11 @@ from frappe.utils import (
 	time_diff_in_hours,
 	time_diff_in_seconds,
 )
+from master.master.doctype.workstation_type.workstation_type import get_workstations
 
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
 
 class OverlapError(frappe.ValidationError):
