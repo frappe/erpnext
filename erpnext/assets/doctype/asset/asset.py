@@ -84,12 +84,7 @@ class Asset(AccountsController):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
-			if not (
-				self.get("schedules")
-				and "Manual" in [d.depreciation_method for d in self.finance_books]
-				and self.get_doc_before_save().opening_accumulated_depreciation
-				== self.opening_accumulated_depreciation
-			):
+			if self.should_prepare_depreciation_schedule():
 				self.make_depreciation_schedule(date_of_disposal)
 				self.set_accumulated_depreciation(date_of_disposal, date_of_return)
 		else:
@@ -97,6 +92,39 @@ class Asset(AccountsController):
 			self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(
 				self.opening_accumulated_depreciation
 			)
+
+	def should_prepare_depreciation_schedule(self):
+		if not self.get("schedules"):
+			return True
+
+		old_asset_doc = self.get_doc_before_save()
+
+		if (
+			old_asset_doc.gross_purchase_amount != self.gross_purchase_amount
+			or old_asset_doc.opening_accumulated_depreciation != self.opening_accumulated_depreciation
+			or old_asset_doc.number_of_depreciations_booked != self.number_of_depreciations_booked
+		):
+			return True
+
+		manual_fb_idx = -1
+		for d in self.finance_books:
+			if d.depreciation_method == "Manual":
+				manual_fb_idx = d.idx
+
+		if (
+			manual_fb_idx == -1
+			or old_asset_doc.finance_books[manual_fb_idx - 1].total_number_of_depreciations
+			!= self.finance_books[manual_fb_idx - 1].total_number_of_depreciations
+			or old_asset_doc.finance_books[manual_fb_idx - 1].frequency_of_depreciation
+			!= self.finance_books[manual_fb_idx - 1].frequency_of_depreciation
+			or old_asset_doc.finance_books[manual_fb_idx - 1].depreciation_start_date
+			!= getdate(self.finance_books[manual_fb_idx - 1].depreciation_start_date)
+			or old_asset_doc.finance_books[manual_fb_idx - 1].expected_value_after_useful_life
+			!= self.finance_books[manual_fb_idx - 1].expected_value_after_useful_life
+		):
+			return True
+
+		return False
 
 	def validate_item(self):
 		item = frappe.get_cached_value(
@@ -549,11 +577,7 @@ class Asset(AccountsController):
 	def set_accumulated_depreciation(
 		self, date_of_disposal=None, date_of_return=None, ignore_booked_entry=False
 	):
-		straight_line_idx = [
-			d.idx
-			for d in self.get("schedules")
-			if d.depreciation_method == "Straight Line" or d.depreciation_method == "Manual"
-		]
+		straight_line_idx = []
 		finance_books = []
 
 		for i, d in enumerate(self.get("schedules")):
@@ -561,6 +585,12 @@ class Asset(AccountsController):
 				continue
 
 			if int(d.finance_book_id) not in finance_books:
+				straight_line_idx = [
+					s.idx
+					for s in self.get("schedules")
+					if s.finance_book_id == d.finance_book_id
+					and (s.depreciation_method == "Straight Line" or s.depreciation_method == "Manual")
+				]
 				accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 				value_after_depreciation = flt(
 					self.get("finance_books")[cint(d.finance_book_id) - 1].value_after_depreciation
