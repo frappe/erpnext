@@ -20,7 +20,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
-from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+from erpnext.manufacturing.master.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 

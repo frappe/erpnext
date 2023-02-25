@@ -4,106 +4,36 @@
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import (
-	add_days,
-	cint,
-	comma_and,
-	flt,
-	formatdate,
-	getdate,
-	time_diff_in_seconds,
-	to_timedelta,
+from frappe.utils import add_days, cint, formatdate, time_diff_in_seconds, to_timedelta
+from master.master.doctype.workstation.workstation import (
+	NotInWorkingHoursError,
+	Workstation,
+	WorkstationHolidayError,
 )
 
 from erpnext.support.doctype.issue.issue import get_holidays
 
 
-class WorkstationHolidayError(frappe.ValidationError):
-	pass
-
-
-class NotInWorkingHoursError(frappe.ValidationError):
-	pass
-
-
-class OverlapError(frappe.ValidationError):
-	pass
-
-
-class Workstation(Document):
-	def before_save(self):
-		self.set_data_based_on_workstation_type()
-		self.set_hour_rate()
-
-	def set_hour_rate(self):
-		self.hour_rate = (
-			flt(self.hour_rate_labour)
-			+ flt(self.hour_rate_electricity)
-			+ flt(self.hour_rate_consumable)
-			+ flt(self.hour_rate_rent)
-		)
-
-	@frappe.whitelist()
-	def set_data_based_on_workstation_type(self):
-		if self.workstation_type:
-			fields = [
-				"hour_rate_labour",
-				"hour_rate_electricity",
-				"hour_rate_consumable",
-				"hour_rate_rent",
-				"hour_rate",
-				"description",
-			]
-
-			data = frappe.get_cached_value("Workstation Type", self.workstation_type, fields, as_dict=True)
-
-			if not data:
-				return
-
-			for field in fields:
-				if self.get(field):
-					continue
-
-				if value := data.get(field):
-					self.set(field, value)
-
+class ERPNextWorkstation(Workstation):
 	def on_update(self):
-		self.validate_overlap_for_operation_timings()
+		super(ERPNextWorkstation, self).on_update()
 		self.update_bom_operation()
 
-	def validate_overlap_for_operation_timings(self):
-		"""Check if there is no overlap in setting Workstation Operating Hours"""
-		for d in self.get("working_hours"):
-			existing = frappe.db.sql_list(
-				"""select idx from `tabWorkstation Working Hour`
-				where parent = %s and name != %s
-					and (
-						(start_time between %s and %s) or
-						(end_time between %s and %s) or
-						(%s between start_time and end_time))
-				""",
-				(self.name, d.name, d.start_time, d.end_time, d.start_time, d.end_time, d.start_time),
-			)
-
-			if existing:
-				frappe.throw(
-					_("Row #{0}: Timings conflicts with row {1}").format(d.idx, comma_and(existing)), OverlapError
-				)
-
 	def update_bom_operation(self):
-		bom_list = frappe.db.sql(
-			"""select DISTINCT parent from `tabBOM Operation`
-			where workstation = %s and parenttype = 'routing' """,
-			self.name,
-		)
+		bo = frappe.qb.DocType("BOM Operation")
+		bom_list = (
+			frappe.qb.from_(bo)
+			.select(bo.parent)
+			.where((bo.workstation == self.name) & (bo.parenttype == "routing"))
+			.distinct()
+		).run()
 
 		for bom_no in bom_list:
-			frappe.db.sql(
-				"""update `tabBOM Operation` set hour_rate = %s
-				where parent = %s and workstation = %s""",
-				(self.hour_rate, bom_no[0], self.name),
-			)
+			(
+				frappe.qb.update(bo)
+				.set(bo.hour_rate, self.hour_rate)
+				.where((bo.parent == bom_no[0]) & (bo.workstation == self.name))
+			).run()
 
 	def validate_workstation_holiday(self, schedule_date, skip_holiday_list_check=False):
 		if not skip_holiday_list_check and (
@@ -162,11 +92,15 @@ def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 	holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")
 	if holiday_list and from_datetime and to_datetime:
 		applicable_holidays = []
-		for d in frappe.db.sql(
-			"""select holiday_date from `tabHoliday` where parent = %s
-			and holiday_date between %s and %s """,
-			(holiday_list, getdate(from_datetime), getdate(to_datetime)),
-		):
+
+		holiday = frappe.qb.DocType("Holiday")
+		for d in (
+			frappe.qb.from_(holiday)
+			.select(holiday.holiday_date)
+			.where(
+				(holiday.parent == holiday_list) & (holiday.holiday_date.between(from_datetime, to_datetime))
+			)
+		).run():
 			applicable_holidays.append(formatdate(d[0]))
 
 		if applicable_holidays:

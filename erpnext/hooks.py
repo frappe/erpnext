@@ -31,6 +31,7 @@ doctype_js = {
 	"Brand": "public/js/master/brand.js",
 	"Supplier Group": "public/js/master/supplier_group.js",
 	"Item Group": "public/js/master/item_group.js",
+	"Workstation": "public/js/master/workstation.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
@@ -41,12 +42,14 @@ override_doctype_class = {
 	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
 	"Supplier": "erpnext.buying.master.supplier.supplier.ERPNextSupplier",
 	"Item Attribute": "erpnext.stock.master.item_attribute.item_attribute.ERPNextItemAttribute",
-    "Item Group": "erpnext.setup.master.item_group.item_group.ERPNextItemGroup",
+	"Item Group": "erpnext.setup.master.item_group.item_group.ERPNextItemGroup",
+	"Workstation": "erpnext.manufacturing.master.workstation.workstation.ERPNextWorkstation",
 }
 
 override_doctype_dashboards = {
 	"Supplier": "erpnext.buying.master.supplier.supplier_dashboard.get_data",
 	"Bank": "erpnext.accounts.master.bank.bank_dashboard.get_data",
+	"Workstation": "erpnext.manufacturing.master.workstation.workstation_dashboard.get_data",
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"

@@ -1601,10 +1601,10 @@ class TestWorkOrder(FrappeTestCase):
 
 def prepare_data_for_workstation_type_check():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 	from erpnext.manufacturing.doctype.workstation_type.test_workstation_type import (
 		create_workstation_type,
 	)
+	from erpnext.manufacturing.master.workstation.test_workstation import make_workstation
 
 	workstation_types = ["Workstation Type 1", "Workstation Type 2", "Workstation Type 3"]
 	for workstation_type in workstation_types:

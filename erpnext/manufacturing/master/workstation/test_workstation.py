@@ -3,17 +3,19 @@
 import frappe
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
+from master.master.doctype.workstation.workstation import (
+	NotInWorkingHoursError,
+	WorkstationHolidayError,
+)
 
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
-from erpnext.manufacturing.doctype.workstation.workstation import (
-	NotInWorkingHoursError,
-	WorkstationHolidayError,
-	check_if_within_operating_hours,
-)
+from erpnext.manufacturing.master.workstation.workstation import check_if_within_operating_hours
 
 test_dependencies = ["Warehouse"]
-test_records = frappe.get_test_records("Workstation")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Manufacturing", "master", "workstation", "test_records.json")
+)
 make_test_records("Workstation")
 
 
