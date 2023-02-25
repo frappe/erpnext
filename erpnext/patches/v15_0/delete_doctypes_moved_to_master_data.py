@@ -39,6 +39,7 @@ def execute():
 		"Pricing Rule Brand",
 		"Pricing Rule Item Group",
 		"Sales Partner Type",
+		"Warehouse Type",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
