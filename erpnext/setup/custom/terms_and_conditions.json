@@ -1,0 +1,61 @@
+{
+  "custom_fields": [],
+  "custom_perms": [
+    {
+      "parent": "Terms and Conditions",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "import": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales Master Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Terms and Conditions",
+      "read": 1,
+      "role": "Sales User"
+    },
+    {
+      "parent": "Terms and Conditions",
+      "read": 1,
+      "role": "Purchase User"
+    },
+    {
+      "parent": "Terms and Conditions",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Terms and Conditions",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Accounts User",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Terms and Conditions",
+      "read": 1,
+      "role": "Stock User"
+    }
+  ],
+  "doctype": "Terms and Conditions",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}
