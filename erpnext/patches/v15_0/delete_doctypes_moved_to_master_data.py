@@ -23,6 +23,7 @@ def execute():
 		"UOM Conversion Detail",
 		"Customs Tariff Number",
 		"Industry Type",
+		"Item Attribute Value",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
