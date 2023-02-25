@@ -99,6 +99,9 @@ class Asset(AccountsController):
 
 		old_asset_doc = self.get_doc_before_save()
 
+		if not old_asset_doc:
+			return True
+
 		if (
 			old_asset_doc.gross_purchase_amount != self.gross_purchase_amount
 			or old_asset_doc.opening_accumulated_depreciation != self.opening_accumulated_depreciation
