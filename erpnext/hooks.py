@@ -39,6 +39,7 @@ doctype_tree_js = {"Supplier Group": "public/js/master/supplier_group_tree.js"}
 override_doctype_class = {
 	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
 	"Supplier": "erpnext.buying.master.supplier.supplier.ERPNextSupplier",
+	"Item Attribute": "erpnext.stock.master.item_attribute.item_attribute.ERPNextItemAttribute",
 }
 
 override_doctype_dashboards = {

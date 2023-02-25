@@ -24,6 +24,7 @@ def execute():
 		"Customs Tariff Number",
 		"Industry Type",
 		"Item Attribute Value",
+		"Item Attribute",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)

@@ -1,0 +1,18 @@
+{
+  "custom_fields": [],
+  "custom_perms": [
+    {
+      "parent": "Item Attribute",
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Item Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "doctype": "Item Attribute",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}
