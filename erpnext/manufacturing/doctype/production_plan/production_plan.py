@@ -26,7 +26,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.master.item_group.item_group import get_item_group_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 

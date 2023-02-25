@@ -14,7 +14,7 @@ from erpnext.e_commerce.redisearch_utils import (
 	is_redisearch_enabled,
 )
 from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
-from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
+from erpnext.setup.master.item_group.item_group import get_item_for_list_in_html
 
 no_cache = 1
 

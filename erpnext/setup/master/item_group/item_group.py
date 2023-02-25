@@ -7,16 +7,14 @@ from urllib.parse import quote
 import frappe
 from frappe import _
 from frappe.utils import cint
-from frappe.utils.nestedset import NestedSet
 from frappe.website.utils import clear_cache
-from frappe.website.website_generator import WebsiteGenerator
+from master.master.doctype.item_group.item_group import ItemGroup
 
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import ECommerceSettings
 from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 
 
-class ItemGroup(NestedSet, WebsiteGenerator):
-	nsm_parent_field = "parent_item_group"
+class ERPNextItemGroup(ItemGroup):
 	website = frappe._dict(
 		condition_field="show_in_website",
 		template="templates/generators/item_group.html",
@@ -24,45 +22,15 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		no_breadcrumbs=1,
 	)
 
-	def autoname(self):
-		self.name = self.item_group_name
-
 	def validate(self):
-		super(ItemGroup, self).validate()
+		super(ERPNextItemGroup, self).validate()
 
-		if not self.parent_item_group and not frappe.flags.in_test:
-			if frappe.db.exists("Item Group", _("All Item Groups")):
-				self.parent_item_group = _("All Item Groups")
-
-		self.make_route()
 		self.validate_item_group_defaults()
 		ECommerceSettings.validate_field_filters(self.filter_fields, enable_field_filters=True)
 
 	def on_update(self):
-		NestedSet.on_update(self)
+		super(ERPNextItemGroup, self).on_update()
 		invalidate_cache_for(self)
-		self.validate_one_root()
-		self.delete_child_item_groups_key()
-
-	def make_route(self):
-		"""Make website route"""
-		if not self.route:
-			self.route = ""
-			if self.parent_item_group:
-				parent_item_group = frappe.get_doc("Item Group", self.parent_item_group)
-
-				# make parent route only if not root
-				if parent_item_group.parent_item_group and parent_item_group.route:
-					self.route = parent_item_group.route + "/"
-
-			self.route += self.scrub(self.item_group_name)
-
-			return self.route
-
-	def on_trash(self):
-		NestedSet.on_trash(self)
-		WebsiteGenerator.on_trash(self)
-		self.delete_child_item_groups_key()
 
 	def get_context(self, context):
 		context.show_search = True
@@ -99,9 +67,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.item_group_name = self.item_group_name
 
 		return context
-
-	def delete_child_item_groups_key(self):
-		frappe.cache().hdel("child_item_groups", self.name)
 
 	def validate_item_group_defaults(self):
 		from erpnext.stock.doctype.item.item import validate_item_default_company_links
@@ -147,6 +112,19 @@ def get_item_for_list_in_html(context):
 	return frappe.get_template(products_template).render(context)
 
 
+def get_item_group_defaults(item, company):
+	item = frappe.get_cached_doc("Item", item)
+	item_group = frappe.get_cached_doc("Item Group", item.item_group)
+
+	for d in item_group.item_group_defaults or []:
+		if d.company == company:
+			row = copy.deepcopy(d.as_dict())
+			row.pop("name")
+			return row
+
+	return frappe._dict()
+
+
 def get_parent_item_groups(item_group_name, from_item=False):
 	base_nav_page = {"name": _("All Products"), "route": "/all-products"}
 
@@ -165,18 +143,6 @@ def get_parent_item_groups(item_group_name, from_item=False):
 	if not item_group_name:
 		return base_parents
 
-	item_group = frappe.db.get_value("Item Group", item_group_name, ["lft", "rgt"], as_dict=1)
-	parent_groups = frappe.db.sql(
-		"""select name, route from `tabItem Group`
-		where lft <= %s and rgt >= %s
-		and show_in_website=1
-		order by lft asc""",
-		(item_group.lft, item_group.rgt),
-		as_dict=True,
-	)
-
-	return base_parents + parent_groups
-
 
 def invalidate_cache_for(doc, item_group=None):
 	if not item_group:
@@ -186,16 +152,3 @@ def invalidate_cache_for(doc, item_group=None):
 		item_group_name = frappe.db.get_value("Item Group", d.get("name"))
 		if item_group_name:
 			clear_cache(frappe.db.get_value("Item Group", item_group_name, "route"))
-
-
-def get_item_group_defaults(item, company):
-	item = frappe.get_cached_doc("Item", item)
-	item_group = frappe.get_cached_doc("Item Group", item.item_group)
-
-	for d in item_group.item_group_defaults or []:
-		if d.company == company:
-			row = copy.deepcopy(d.as_dict())
-			row.pop("name")
-			return row
-
-	return frappe._dict()

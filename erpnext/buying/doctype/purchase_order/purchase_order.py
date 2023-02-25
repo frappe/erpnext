@@ -21,7 +21,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.master.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin

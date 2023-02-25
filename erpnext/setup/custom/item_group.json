@@ -1,0 +1,158 @@
+{
+  "custom_fields": [
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "defaults",
+      "fieldtype": "Section Break",
+      "insert_after": "column_break_5",
+      "label": "Defaults",
+      "module": "Setup",
+      "name": "Item Group-defaults"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "item_group_defaults",
+      "fieldtype": "Table",
+      "insert_after": "defaults",
+      "label": "Item Group Defaults",
+      "module": "Setup",
+      "name": "Item Group-item_group_defaults",
+      "options": "Item Default"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "sec_break_taxes",
+      "fieldtype": "Section Break",
+      "insert_after": "item_group_defaults",
+      "label": "Item Tax",
+      "module": "Setup",
+      "name": "Item Group-sec_break_taxes"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "taxes",
+      "fieldtype": "Table",
+      "insert_after": "sec_break_taxes",
+      "label": "Taxes",
+      "module": "Setup",
+      "name": "Item Group-taxes",
+      "options": "Item Tax"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "website_filters_section",
+      "fieldtype": "Section Break",
+      "insert_after": "website_specifications",
+      "collapsible": 1,
+      "label": "Website Filters",
+      "depends_on": "show_in_website",
+      "module": "Setup",
+      "name": "Item Group-website_filters_section"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "filter_fields",
+      "fieldtype": "Table",
+      "insert_after": "website_filters_section",
+      "label": "Item Fields",
+      "module": "Setup",
+      "name": "Item Group-filter_fields",
+      "options": "Website Filter Field"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Item Group",
+      "is_system_generated": 1,
+      "fieldname": "filter_attributes",
+      "fieldtype": "Table",
+      "insert_after": "filter_fields",
+      "label": "Attributes",
+      "module": "Setup",
+      "name": "Item Group-filter_attributes",
+      "options": "Website Attribute"
+    }
+  ],
+  "custom_perms": [
+    {
+      "parent": "Item Group",
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Stock Manager"
+    },
+    {
+      "parent": "Item Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Stock User"
+    },
+    {
+      "parent": "Item Group",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "import": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Item Manager",
+      "set_user_permissions": 1,
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Item Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales User"
+    },
+    {
+      "parent": "Item Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Purchase User"
+    },
+    {
+      "parent": "Item Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Accounts User"
+    },
+    {
+      "parent": "Item Group",
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "report": 1,
+      "role": "All",
+      "select": 1,
+      "share": 1
+    }
+  ],
+  "doctype": "Item Group",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

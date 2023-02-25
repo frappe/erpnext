@@ -14,7 +14,7 @@ class ProductFiltersBuilder:
 		self.item_group = item_group
 
 	def get_field_filters(self):
-		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+		from erpnext.setup.master.item_group.item_group import get_child_groups_for_website
 
 		if not self.item_group and not self.doc.enable_field_filters:
 			return

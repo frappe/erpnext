@@ -32,7 +32,7 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
-from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
+from erpnext.setup.master.item_group.item_group import invalidate_cache_for
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 
 

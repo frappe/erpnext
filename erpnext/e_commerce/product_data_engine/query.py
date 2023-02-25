@@ -178,7 +178,7 @@ class ProductQuery:
 
 	def build_item_group_filters(self, item_group):
 		"Add filters for Item group page and include Website Item Groups."
-		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+		from erpnext.setup.master.item_group.item_group import get_child_groups_for_website
 
 		item_group_filters = []
 

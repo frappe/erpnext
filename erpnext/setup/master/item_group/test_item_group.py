@@ -14,7 +14,9 @@ from frappe.utils.nestedset import (
 	rebuild_tree,
 )
 
-test_records = frappe.get_test_records("Item Group")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Setup", "master", "item_group", "test_records.json")
+)
 
 
 class TestItem(unittest.TestCase):

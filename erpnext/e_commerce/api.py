@@ -9,7 +9,7 @@ from frappe.utils import cint
 
 from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 from erpnext.e_commerce.product_data_engine.query import ProductQuery
-from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+from erpnext.setup.master.item_group.item_group import get_child_groups_for_website
 
 
 @frappe.whitelist(allow_guest=True)

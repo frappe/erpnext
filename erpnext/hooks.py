@@ -30,6 +30,7 @@ doctype_js = {
 	"Bank": "public/js/master/bank.js",
 	"Brand": "public/js/master/brand.js",
 	"Supplier Group": "public/js/master/supplier_group.js",
+	"Item Group": "public/js/master/item_group.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
@@ -40,6 +41,7 @@ override_doctype_class = {
 	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
 	"Supplier": "erpnext.buying.master.supplier.supplier.ERPNextSupplier",
 	"Item Attribute": "erpnext.stock.master.item_attribute.item_attribute.ERPNextItemAttribute",
+    "Item Group": "erpnext.setup.master.item_group.item_group.ERPNextItemGroup",
 }
 
 override_doctype_dashboards = {

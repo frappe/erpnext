@@ -178,7 +178,7 @@ class TestWebsiteItem(unittest.TestCase):
 		Check if breadcrumbs include homepage, product listing navigation page,
 		parent item group(s) and item group
 		"""
-		from erpnext.setup.doctype.item_group.item_group import get_parent_item_groups
+		from erpnext.setup.master.item_group.item_group import get_parent_item_groups
 
 		item_code = "Test Breadcrumb Item"
 		item = make_item(

@@ -24,7 +24,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
 from erpnext.selling.doctype.customer.customer import check_credit_limit
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.master.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_bom
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
