@@ -19,6 +19,7 @@ def execute():
 		"Print Heading",
 		"Supplier Group",
 		"Terms and Conditions",
+		"UOM",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
