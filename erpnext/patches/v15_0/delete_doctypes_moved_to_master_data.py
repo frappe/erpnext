@@ -36,6 +36,7 @@ def execute():
 		"Workstation Type",
 		"Workstation",
 		"Price List Country",
+		"Pricing Rule Brand",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
