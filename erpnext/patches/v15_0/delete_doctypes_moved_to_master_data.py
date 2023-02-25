@@ -20,6 +20,7 @@ def execute():
 		"Supplier Group",
 		"Terms and Conditions",
 		"UOM",
+		"UOM Conversion Detail",
 	]
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
