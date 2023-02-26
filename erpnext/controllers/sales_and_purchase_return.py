@@ -372,6 +372,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt_item = source_doc.name
 			target_doc.purchase_order_item = source_doc.purchase_order_item
+			target_doc.delivery_note_item = source_doc.delivery_note_item
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 
 		elif doctype == "Purchase Invoice":
@@ -385,6 +386,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.purchase_receipt_item = source_doc.purchase_receipt_item
 			target_doc.purchase_invoice_item = source_doc.name
+			target_doc.sales_invoice_item = source_doc.sales_invoice_item
 
 		elif doctype == "Delivery Note":
 			target_doc.qty = -1 * flt(source_doc.qty - source_doc.billed_qty - source_doc.returned_qty,
