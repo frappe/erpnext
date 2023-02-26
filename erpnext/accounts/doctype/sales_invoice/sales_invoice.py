@@ -1600,7 +1600,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 
 	if inter_company_reference:
 		doc = frappe.get_doc(ref_doctype, inter_company_reference)
-		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
+		ref_party = doc.supplier if doctype in ["Sales Invoice", "Delivery Note", "Sales Order"] else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
 			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(partytype))
 		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
@@ -1817,35 +1817,91 @@ def make_inter_company_purchase_invoice(source_name, target_doc=None):
 
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	source_doc = frappe.get_doc(doctype, source_name)
 	target_doctype = get_intercompany_ref_doctype(doctype)
 
-	validate_inter_company_transaction(source_doc, doctype)
-	details = get_inter_company_details(source_doc, doctype)
+	def update_details(source, target, source_parent, target_parent):
+		validate_inter_company_transaction(source, doctype)
+		inter_company_details = get_inter_company_details(source, doctype)
+
+		target.inter_company_reference = source.name
+		if target.meta.has_field("set_posting_time"):
+			target.set_posting_time = 1
+
+		if target.doctype in ["Purchase Invoice", "Purchase Receipt", "Purchase Order"]:
+			target.company = inter_company_details.get("company")
+			target.supplier = inter_company_details.get("party")
+			target.buying_price_list = source.selling_price_list
+		else:
+			target.company = inter_company_details.get("company")
+			target.customer = inter_company_details.get("party")
+			target.selling_price_list = source.buying_price_list
+
+		# Set delivery note return against reference for intercompany return
+		if target.doctype == "Delivery Note" and target.is_return and source.doctype == "Purchase Receipt" and source.return_against:
+			original_delivery_note = frappe.db.get_value("Purchase Receipt", source.return_against, "inter_company_reference")
+			target.return_against = original_delivery_note
+
+		# Set sales invoice return against reference for intercompany return
+		if target.doctype == "Sales Invoice" and target.is_return and source.doctype == "Purchase Invoice" and source.return_against:
+			original_sales_invoice = frappe.db.get_value("Purchase Invoice", source.return_against, "inter_company_reference")
+			target.return_against = original_sales_invoice
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_items(source_doc, target_doc, source_parent, target_parent):
+	def update_items(source, target, source_parent, target_parent):
 		if target_parent.doctype in ["Purchase Receipt", "Purchase Invoice"]:
-			target_doc.received_qty = target_doc.qty
+			target.received_qty = target.qty
 
-	def update_details(source_doc, target_doc, source_parent, target_parent):
-		target_doc.inter_company_reference = source_doc.name
-		if target_doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Purchase Order"]:
-			target_doc.company = details.get("company")
-			target_doc.supplier = details.get("party")
-			target_doc.buying_price_list = source_doc.selling_price_list
-		else:
-			target_doc.company = details.get("company")
-			target_doc.customer = details.get("party")
-			target_doc.selling_price_list = source_doc.buying_price_list
+		if target_parent.doctype == "Purchase Receipt" and source_parent.doctype == "Delivery Note":
+			# Set delivery note reference in Purchase Receipt from Delivery Note
+			target.delivery_note_item = source.name
+
+		if target_parent.doctype == "Purchase Invoice" and source_parent.doctype == "Sales Invoice":
+			# Set sales invoice reference in Purchase Invoice from Sales Invoice
+			target.sales_invoice_item = source.name
+
+			# Set purchase receipt reference in Purchase Invoice from Delivery Notes of Sales Invoice
+			purchase_receipt_details = get_purchase_receipt_details_from_delivery_note(source)
+			if purchase_receipt_details:
+				target.purchase_receipt = purchase_receipt_details.purchase_receipt
+				target.purchase_receipt_item = purchase_receipt_details.purchase_receipt_item
+				target.warehouse = purchase_receipt_details.warehouse
+
+		if target_parent.doctype == "Delivery Note" and target_parent.return_against\
+				and source_parent.doctype == "Purchase Receipt" and source_parent.return_against:
+			# Set delivery note return against reference for intercompany return
+			target.delivery_note_item = source.get("delivery_note_item")
+
+		if target_parent.doctype == "Sales Invoice" and target_parent.return_against\
+				and source_parent.doctype == "Purchase Invoice" and source_parent.return_against:
+			# Set sales invoice return against reference for intercompany return
+			target.sales_invoice_item = source.get("sales_invoice_item")
+
+	def get_purchase_receipt_details_from_delivery_note(source):
+		if source.get("delivery_note") and source.get("delivery_note_item"):
+			purchase_receipt_details = frappe.db.sql("""
+				select p.name as purchase_receipt, i.name as purchase_receipt_item, i.warehouse
+				from `tabPurchase Receipt Item` i
+				inner join `tabPurchase Receipt` p on p.name = i.parent
+				where p.docstatus = 1 and p.inter_company_reference = %s and i.delivery_note_item = %s
+			""", (source.delivery_note, source.delivery_note_item), as_dict=1)
+
+			if purchase_receipt_details:
+				return purchase_receipt_details[0]
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
+			"field_map": {
+				"posting_date": "posting_date",
+				"posting_time": "posting_time",
+				"transaction_date": "transaction_date",
+				"is_return": "is_return",
+				"update_stock": "update_stock",
+			},
 			"field_no_map": [
 				"taxes_and_charges",
 				"cost_center",

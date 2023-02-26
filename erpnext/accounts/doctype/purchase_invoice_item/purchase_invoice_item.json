@@ -139,6 +139,7 @@
   "purchase_receipt",
   "purchase_receipt_item",
   "purchase_invoice_item",
+  "sales_invoice_item",
   "debit_note_amount",
   "returned_qty",
   "asset_category",
@@ -1233,12 +1234,20 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2023-01-12 01:06:01.776457",
+ "modified": "2023-02-26 18:52:05.550773",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

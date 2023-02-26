@@ -107,6 +107,9 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 
 		if (me.frm.doc.docstatus == 0) {
 			me.add_get_latest_price_button();
+			if (erpnext.utils.has_valuation_read_permission()) {
+				me.add_set_rate_as_cost_button();
+			}
 		}
 		if (me.frm.doc.docstatus == 1) {
 			me.add_update_price_list_button();
