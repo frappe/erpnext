@@ -34,7 +34,7 @@ class StockSettings(Document):
 
 	def make_property_setters(self):
 		# show/hide barcode field
-		for name in ["barcode", "barcodes", "scan_barcode"]:
+		for name in ["scan_barcode"]:
 			frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
 				'value': 0 if self.show_barcode_field else 1})
 
