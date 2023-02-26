@@ -3,15 +3,13 @@
 
 
 import frappe
-from frappe import _, throw
-from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import cint, now
+from master.master.doctype.price_list.price_list import PriceList
 
 
-class PriceList(Document):
+class ERPNextPriceList(PriceList):
 	def validate(self):
-		if not cint(self.buying) and not cint(self.selling):
-			throw(_("Price List must be applicable for Buying or Selling"))
+		super(ERPNextPriceList, self).validate()
 
 		if not self.is_new():
 			self.check_impact_on_shopping_cart()
@@ -19,7 +17,18 @@ class PriceList(Document):
 	def on_update(self):
 		self.set_default_if_missing()
 		self.update_item_price()
-		self.delete_price_list_details_key()
+		super(ERPNextPriceList, self).on_update()
+
+	def update_item_price(self):
+		it = frappe.qb.DocType("Item Price")
+		(
+            frappe.qb.update(it)
+            .set(it.currency, self.currency)
+            .set(it.buying, cint(self.buying))
+            .set(it.selling, cint(self.selling))
+            .set(it.modified, now())
+            .where(it.price_list == self.name)
+        ).run()
 
 	def set_default_if_missing(self):
 		if cint(self.selling):
@@ -29,13 +38,6 @@ class PriceList(Document):
 		elif cint(self.buying):
 			if not frappe.db.get_value("Buying Settings", None, "buying_price_list"):
 				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.name)
-
-	def update_item_price(self):
-		frappe.db.sql(
-			"""update `tabItem Price` set currency=%s,
-			buying=%s, selling=%s, modified=NOW() where price_list=%s""",
-			(self.currency, cint(self.buying), cint(self.selling), self.name),
-		)
 
 	def check_impact_on_shopping_cart(self):
 		"Check if Price List currency change impacts E Commerce Cart."
@@ -51,7 +53,7 @@ class PriceList(Document):
 			validate_cart_settings()
 
 	def on_trash(self):
-		self.delete_price_list_details_key()
+		super(ERPNextPriceList, self).on_trash()
 
 		def _update_default_price_list(module):
 			b = frappe.get_doc(module + " Settings")
@@ -64,22 +66,3 @@ class PriceList(Document):
 
 		for module in ["Selling", "Buying"]:
 			_update_default_price_list(module)
-
-	def delete_price_list_details_key(self):
-		frappe.cache().hdel("price_list_details", self.name)
-
-
-def get_price_list_details(price_list):
-	price_list_details = frappe.cache().hget("price_list_details", price_list)
-
-	if not price_list_details:
-		price_list_details = frappe.get_cached_value(
-			"Price List", price_list, ["currency", "price_not_uom_dependent", "enabled"], as_dict=1
-		)
-
-		if not price_list_details or not price_list_details.get("enabled"):
-			throw(_("Price List {0} is disabled or does not exist").format(price_list))
-
-		frappe.cache().hset("price_list_details", price_list, price_list_details)
-
-	return price_list_details or {}

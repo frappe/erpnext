@@ -9,6 +9,7 @@ from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
 from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
+from master.master.doctype.price_list.price_list import get_price_list_details
 
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
@@ -21,7 +22,6 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
-from erpnext.stock.doctype.price_list.price_list import get_price_list_details
 
 sales_doctypes = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"]
 purchase_doctypes = [

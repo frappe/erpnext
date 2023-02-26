@@ -32,6 +32,7 @@ doctype_js = {
 	"Supplier Group": "public/js/master/supplier_group.js",
 	"Item Group": "public/js/master/item_group.js",
 	"Workstation": "public/js/master/workstation.js",
+	"Price List": "public/js/master/price_list.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
@@ -44,6 +45,7 @@ override_doctype_class = {
 	"Item Attribute": "erpnext.stock.master.item_attribute.item_attribute.ERPNextItemAttribute",
 	"Item Group": "erpnext.setup.master.item_group.item_group.ERPNextItemGroup",
 	"Workstation": "erpnext.manufacturing.master.workstation.workstation.ERPNextWorkstation",
+	"Price List": "erpnext.stock.master.price_list.price_list.ERPNextPriceList",
 }
 
 override_doctype_dashboards = {
