@@ -1799,30 +1799,52 @@ def make_inter_company_purchase_invoice(source_name, target_doc=None):
 
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	source_doc = frappe.get_doc(doctype, source_name)
 	target_doctype = get_intercompany_ref_doctype(doctype)
 
-	validate_inter_company_transaction(source_doc, doctype)
-	details = get_inter_company_details(source_doc, doctype)
+	def update_details(source, target, source_parent, target_parent):
+		validate_inter_company_transaction(source, doctype)
+		inter_company_details = get_inter_company_details(source, doctype)
+
+		target.inter_company_reference = source.name
+		if target.doctype in ["Purchase Invoice", "Purchase Receipt", "Purchase Order"]:
+			target.company = inter_company_details.get("company")
+			target.supplier = inter_company_details.get("party")
+			target.buying_price_list = source.selling_price_list
+		else:
+			target.company = inter_company_details.get("company")
+			target.customer = inter_company_details.get("party")
+			target.selling_price_list = source.buying_price_list
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_items(source_doc, target_doc, source_parent, target_parent):
+	def update_items(source, target, source_parent, target_parent):
 		if target_parent.doctype in ["Purchase Receipt", "Purchase Invoice"]:
-			target_doc.received_qty = target_doc.qty
+			target.received_qty = target.qty
 
-	def update_details(source_doc, target_doc, source_parent, target_parent):
-		target_doc.inter_company_reference = source_doc.name
-		if target_doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Purchase Order"]:
-			target_doc.company = details.get("company")
-			target_doc.supplier = details.get("party")
-			target_doc.buying_price_list = source_doc.selling_price_list
-		else:
-			target_doc.company = details.get("company")
-			target_doc.customer = details.get("party")
-			target_doc.selling_price_list = source_doc.buying_price_list
+		# Set delivery note reference in Purchase Receipt from Delivery Note
+		if target_parent.doctype == "Purchase Receipt" and source_parent.doctype == "Delivery Note":
+			target.delivery_note_item = target.name
+
+		# Set purchase receipt reference in Purchase Invoice from Delivery Notes of Sales Invoice
+		if target_parent.doctype == "Purchase Invoice" and source_parent.doctype == "Sales Invoice":
+			purchase_receipt_details = get_purchase_receipt_details_from_delivery_note(source)
+			if purchase_receipt_details:
+				target.purchase_receipt = purchase_receipt_details.purchase_receipt
+				target.purchase_receipt_item = purchase_receipt_details.purchase_receipt_item
+
+	def get_purchase_receipt_details_from_delivery_note(source):
+		if source.get("delivery_note") and source.get("delivery_note_item"):
+			purchase_receipt_details = frappe.db.sql("""
+				select p.name as purchase_receipt, i.name as purchase_receipt_item
+				from `tabPurchase Receipt Item` i
+				inner join `tabPurchase Receipt` p on p.name = i.parent
+				where p.docstatus = 1 and p.inter_company_reference = %s and i.delivery_note_item = %s
+			""", (source.delivery_note, source.delivery_note_item), as_dict=1)
+
+			if purchase_receipt_details:
+				return purchase_receipt_details[0]
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {

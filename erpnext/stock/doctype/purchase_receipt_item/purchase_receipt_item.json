@@ -124,6 +124,7 @@
   "material_request_item",
   "purchase_order",
   "purchase_order_item",
+  "delivery_note_item",
   "column_break_40",
   "quality_inspection",
   "asset_location",
@@ -1351,11 +1352,22 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "delivery_note_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Delivery Note Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-10-12 21:53:29.341187",
+ "modified": "2023-02-26 16:52:20.576397",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
