@@ -919,12 +919,17 @@ class Item(WebsiteGenerator):
 			self.net_weight_per_unit = 0
 			self.gross_weight_per_unit = 0
 		else:
-			if flt(self.net_weight_per_unit):
-				self.gross_weight_per_unit = flt(flt(self.net_weight_per_unit) + flt(self.tare_weight_per_unit),
-					self.precision("gross_weight_per_unit"))
-			elif flt(self.gross_weight_per_unit) and flt(self.tare_weight_per_unit):
+			if self.net_weight_per_unit and self.gross_weight_per_unit and not self.tare_weight_per_unit:
+				self.tare_weight_per_unit = flt(self.gross_weight_per_unit - self.net_weight_per_unit,
+					self.precision("tare_weight_per_unit"))
+
+			if self.gross_weight_per_unit and self.tare_weight_per_unit and not self.net_weight_per_unit:
 				self.net_weight_per_unit = flt(flt(self.gross_weight_per_unit) - flt(self.tare_weight_per_unit),
 					self.precision("net_weight_per_unit"))
+
+			if flt(self.net_weight_per_unit):
+				self.gross_weight_per_unit = flt(self.net_weight_per_unit + self.tare_weight_per_unit,
+					self.precision("gross_weight_per_unit"))
 
 		for weight_field in weight_fields:
 			weight_label = self.meta.get_label(weight_field)
