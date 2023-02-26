@@ -560,7 +560,7 @@ class SellingController(StockController):
 	def get_item_cost_rate(self, item):
 		transaction_qty = flt(item.qty)
 
-		if item.delivery_note and item.delivery_note_item:
+		if item.get("delivery_note") and item.get("delivery_note_item"):
 			sle_totals = frappe.db.sql("""
 				SELECT SUM(stock_value_difference) as stock_value_difference, SUM(actual_qty) as actual_qty
 				FROM `tabStock Ledger Entry` 
