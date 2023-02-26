@@ -121,10 +121,32 @@ class Customer(TransactionBase):
 		from erpnext.accounts.party import validate_ntn_cnic_strn, validate_duplicate_tax_id
 		validate_ntn_cnic_strn(self.tax_id, self.tax_cnic, self.tax_strn)
 
+		cnic_throw = frappe.db.get_single_value('Selling Settings', 'validate_duplicate_customer_cnic')
+		ntn_throw = frappe.db.get_single_value('Selling Settings', 'validate_duplicate_customer_ntn')
+		role_allowed_to_duplicate_customer_ntn = frappe.db.get_single_value('Selling Settings', 'role_allowed_to_duplicate_customer_ntn')
+
+		if cnic_throw:
+			cnic_throw = self.restrict_duplicate_field('tax_cnic')
+
+		if ntn_throw:
+			ntn_throw = self.restrict_duplicate_field('tax_id')
+
+		if role_allowed_to_duplicate_customer_ntn in frappe.get_roles():
+			ntn_throw = False
+
 		exclude = None if self.is_new() else self.name
-		validate_duplicate_tax_id("Customer", "tax_id", self.tax_id, exclude=exclude, throw=False)
-		validate_duplicate_tax_id("Customer", "tax_cnic", self.tax_cnic, exclude=exclude, throw=False)
+		validate_duplicate_tax_id("Customer", "tax_id", self.tax_id, exclude=exclude, throw=ntn_throw)
+		validate_duplicate_tax_id("Customer", "tax_cnic", self.tax_cnic, exclude=exclude, throw=cnic_throw)
 		validate_duplicate_tax_id("Customer", "tax_strn", self.tax_strn, exclude=exclude, throw=False)
+
+	def restrict_duplicate_field(self, fieldname):
+		if self.is_new():
+			return True
+
+		old_value = frappe.db.get_value("Customer", self.name, fieldname)
+
+		if self.get(fieldname) != old_value:
+			return True
 
 	def validate_mobile_no(self):
 		from erpnext.accounts.party import validate_mobile_pakistan
