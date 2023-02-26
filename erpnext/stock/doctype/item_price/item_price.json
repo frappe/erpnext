@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
@@ -171,7 +172,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "Today",
    "fieldname": "valid_from",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -219,7 +219,8 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-10-03 14:12:24.801156",
+ "links": [],
+ "modified": "2023-02-27 02:07:58.654698",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -289,6 +290,7 @@
  "quick_entry": 1,
  "sort_field": "valid_from",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "item_name",
  "track_changes": 1
 }
