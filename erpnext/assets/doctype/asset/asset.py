@@ -102,29 +102,33 @@ class Asset(AccountsController):
 		if not old_asset_doc:
 			return True
 
-		if (
+		have_asset_details_been_modified = (
 			old_asset_doc.gross_purchase_amount != self.gross_purchase_amount
 			or old_asset_doc.opening_accumulated_depreciation != self.opening_accumulated_depreciation
 			or old_asset_doc.number_of_depreciations_booked != self.number_of_depreciations_booked
-		):
+		)
+
+		if have_asset_details_been_modified:
 			return True
 
 		manual_fb_idx = -1
 		for d in self.finance_books:
 			if d.depreciation_method == "Manual":
-				manual_fb_idx = d.idx
+				manual_fb_idx = d.idx - 1
 
-		if (
+		no_manual_depr_or_have_manual_depr_details_been_modified = (
 			manual_fb_idx == -1
-			or old_asset_doc.finance_books[manual_fb_idx - 1].total_number_of_depreciations
-			!= self.finance_books[manual_fb_idx - 1].total_number_of_depreciations
-			or old_asset_doc.finance_books[manual_fb_idx - 1].frequency_of_depreciation
-			!= self.finance_books[manual_fb_idx - 1].frequency_of_depreciation
-			or old_asset_doc.finance_books[manual_fb_idx - 1].depreciation_start_date
-			!= getdate(self.finance_books[manual_fb_idx - 1].depreciation_start_date)
-			or old_asset_doc.finance_books[manual_fb_idx - 1].expected_value_after_useful_life
-			!= self.finance_books[manual_fb_idx - 1].expected_value_after_useful_life
-		):
+			or old_asset_doc.finance_books[manual_fb_idx].total_number_of_depreciations
+			!= self.finance_books[manual_fb_idx].total_number_of_depreciations
+			or old_asset_doc.finance_books[manual_fb_idx].frequency_of_depreciation
+			!= self.finance_books[manual_fb_idx].frequency_of_depreciation
+			or old_asset_doc.finance_books[manual_fb_idx].depreciation_start_date
+			!= getdate(self.finance_books[manual_fb_idx].depreciation_start_date)
+			or old_asset_doc.finance_books[manual_fb_idx].expected_value_after_useful_life
+			!= self.finance_books[manual_fb_idx].expected_value_after_useful_life
+		)
+
+		if no_manual_depr_or_have_manual_depr_details_been_modified:
 			return True
 
 		return False
