@@ -41,6 +41,8 @@ def execute():
 		"Sales Partner Type",
 		"Warehouse Type",
 		"Price List",
+		"Sub Operation",
 	]
+
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
