@@ -52,6 +52,7 @@ override_doctype_dashboards = {
 	"Supplier": "erpnext.buying.master.supplier.supplier_dashboard.get_data",
 	"Bank": "erpnext.accounts.master.bank.bank_dashboard.get_data",
 	"Workstation": "erpnext.manufacturing.master.workstation.workstation_dashboard.get_data",
+	"Operation": "erpnext.manufacturing.master.operation.operation_dashboard.get_data",
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"

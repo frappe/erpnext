@@ -86,7 +86,7 @@ class TestRouting(FrappeTestCase):
 
 
 def setup_operations(rows):
-	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.manufacturing.master.operation.test_operation import make_operation
 	from erpnext.manufacturing.master.workstation.test_workstation import make_workstation
 
 	for row in rows:

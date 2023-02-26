@@ -8,8 +8,8 @@ from master.master.doctype.workstation.workstation import (
 	WorkstationHolidayError,
 )
 
-from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
+from erpnext.manufacturing.master.operation.test_operation import make_operation
 from erpnext.manufacturing.master.workstation.workstation import check_if_within_operating_hours
 
 test_dependencies = ["Warehouse"]

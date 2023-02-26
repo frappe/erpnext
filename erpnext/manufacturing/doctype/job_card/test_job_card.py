@@ -410,7 +410,7 @@ class TestJobCard(FrappeTestCase):
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
-	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.manufacturing.master.operation.test_operation import make_operation
 
 	test_record = frappe.get_test_records("BOM")[2]
 	bom_doc = frappe.get_doc(test_record)

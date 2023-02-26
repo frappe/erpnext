@@ -42,6 +42,7 @@ def execute():
 		"Warehouse Type",
 		"Price List",
 		"Sub Operation",
+		"Operation",
 	]
 
 	for doctype in doctypes:

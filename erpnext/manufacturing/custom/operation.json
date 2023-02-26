@@ -1,0 +1,44 @@
+{
+  "custom_fields": [
+    {
+      "doctype": "Custom Field",
+      "dt": "Operation",
+      "is_system_generated": 1,
+      "fieldname": "quality_inspection_template",
+      "fieldtype": "Link",
+      "insert_after": "create_job_card_based_on_batch_size",
+      "label": "Quality Inspection Template",
+      "module": "Manufacturing",
+      "name": "Operation-quality_inspection_template",
+      "options": "Quality Inspection Template"
+    }
+  ],
+  "custom_perms": [
+    {
+      "parent": "Operation",
+      "create": 1,
+      "delete": 1,
+      "export": 1,
+      "import": 1,
+      "read": 1,
+      "role": "Manufacturing User",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Operation",
+      "create": 1,
+      "delete": 1,
+      "export": 1,
+      "import": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Manufacturing Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "doctype": "Operation",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}
