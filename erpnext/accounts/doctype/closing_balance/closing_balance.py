@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import List
+
 import frappe
 from frappe.model.document import Document
 
@@ -10,7 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 
 
 class ClosingBalance(Document):
-	def aggregate_with_last_closing_balance(self, accounting_dimensions):
+	def aggregate_with_last_closing_balance(self, accounting_dimensions: List[str]):
 		closing_balance = frappe.qb.DocType("Closing Balance")
 
 		query = (
@@ -24,7 +26,7 @@ class ClosingBalance(Document):
 		for dimension in accounting_dimensions:
 			query = query.where(closing_balance[dimension] == self.get(dimension))
 
-		query.orderby(closing_balance.closing_date, order=frappe.qb.desc).limit(1)
+		query = query.orderby(closing_balance.closing_date, order=frappe.qb.desc).limit(1)
 
 		last_closing_balance = query.run(as_dict=1)
 
