@@ -300,6 +300,9 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 	if gl_map:
 		check_freezing_date(gl_map[0]["posting_date"], adv_adj)
+		is_opening = any(d.get("is_opening") == "Yes" for d in gl_map)
+		if gl_map[0]["voucher_type"] != "Period Closing Voucher":
+			validate_against_pcv(is_opening, gl_map[0]["posting_date"], gl_map[0]["company"])
 
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
@@ -521,6 +524,9 @@ def make_reverse_gl_entries(
 		)
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+
+		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
+		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
 		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
@@ -566,6 +572,28 @@ def check_freezing_date(posting_date, adv_adj=False):
 						formatdate(acc_frozen_upto)
 					)
 				)
+
+
+def validate_against_pcv(is_opening, posting_date, company):
+	if is_opening and frappe.db.exists(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}
+	):
+		frappe.throw(
+			_("Opening Entry can not be created after Period Closing Voucher is created."),
+			title=_("Invalid Opening Entry"),
+		)
+
+	last_pcv_date = frappe.db.get_value(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, "max(posting_date)"
+	)
+
+	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):
+		message = _("Books have been closed till the period ending on {0}").format(
+			formatdate(last_pcv_date)
+		)
+		message += "</br >"
+		message += _("You cannot create any new accounting entries till this date.")
+		frappe.throw(message, title=_("Period Closed"))
 
 
 def set_as_cancel(voucher_type, voucher_no):
