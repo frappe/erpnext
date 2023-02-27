@@ -104,7 +104,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				me.make_payment_request()
 			}, __('Create'));
 		}
-
+		console.log(doc.docstatus)
 		if(doc.docstatus===0) {
 			this.frm.add_custom_button(__('Purchase Order'), function() {
 				erpnext.utils.map_current_doc({
