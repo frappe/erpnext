@@ -21,7 +21,7 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 	setup_posting_date_time_check() {
 		// make posting date default and read only unless explictly checked
 		frappe.ui.form.on(this.frm.doctype, 'set_posting_date_and_time_read_only', function(frm) {
-			if(frm.doc.docstatus == 0 && frm.doc.set_posting_time) {
+			if(frm.doc.docstatus == 0 && frm.doc.set_posting_time == 1) {
 				frm.set_df_property('posting_date', 'read_only', 0);
 				frm.set_df_property('posting_time', 'read_only', 0);
 			} else {

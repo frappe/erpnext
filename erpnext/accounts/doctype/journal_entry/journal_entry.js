@@ -396,7 +396,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				row.party_type = d.party_type;
 			}
 		});
-
 		// set difference
 		if(doc.difference) {
 			if(doc.difference > 0) {
@@ -407,6 +406,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				row.debit = -doc.difference;
 			}
 		}
+		cur_frm.refresh_field("accounts")
 		cur_frm.cscript.update_totals(doc);
 
 		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, 'accounts');
