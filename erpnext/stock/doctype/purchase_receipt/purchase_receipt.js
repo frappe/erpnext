@@ -242,7 +242,6 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	}
 
 	make_asset_issue_entry() {
-		console.log("HAHAHA")
 		var doc = cur_frm.doc;
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Issuing Asset"),
@@ -268,7 +267,8 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 					'doctype':'Item',
 					fieldname:"is_fixed_asset",
 					filters: {
-						"item_name": args.item_name
+						"item_name": args.item_name,
+						"is_fixed_asset":1
 					}
 				},
 				callback:(r)=>{

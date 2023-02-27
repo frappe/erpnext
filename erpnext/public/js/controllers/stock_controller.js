@@ -35,7 +35,7 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 		});
 
 		frappe.ui.form.on(this.frm.doctype, 'refresh', function(frm) {
-		// 	// set default posting date / time
+			// set default posting date / time
 			if(frm.doc.docstatus==0 && this.frm.doctype != "Sales Invoice") {
 				if(!frm.doc.posting_date) {
 					frm.set_value('posting_date', frappe.datetime.nowdate());
