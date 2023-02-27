@@ -737,7 +737,7 @@ class SalesInvoice(SellingController):
 		if self.is_new() and self.amended_from:
 			self.set_posting_time = 1
 
-		self.validate_posting_time()
+		# self.validate_posting_time()
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""

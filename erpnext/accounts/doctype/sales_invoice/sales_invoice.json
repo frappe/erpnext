@@ -338,7 +338,6 @@
   },
   {
    "bold": 1,
-   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "hide_days": 1,
@@ -2114,7 +2113,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-01-03 17:38:14.241096",
+ "modified": "2023-02-24 15:30:34.710806",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
