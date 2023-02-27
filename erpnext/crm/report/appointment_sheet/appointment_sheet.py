@@ -46,7 +46,7 @@ class AppointmentSheetReport(object):
 			from `tabAppointment` a
 			left join `tabNotification Count` n on n.reference_doctype = 'Appointment' and n.reference_name = a.name
 				and n.notification_type = 'Appointment Reminder' and n.notification_medium = 'SMS'
-			where a.docstatus = 1 and a.status != 'Rescheduled' {1}
+			where a.docstatus = 1 {1}
 			group by a.name
 			order by a.scheduled_dt, a.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
