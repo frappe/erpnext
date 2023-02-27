@@ -1217,6 +1217,8 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertTrue(si.get("payment_schedule"))
 
 	def test_make_work_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
 		# Make a new Sales Order
 		so = make_sales_order(
 			**{
@@ -1230,7 +1232,7 @@ class TestSalesOrder(FrappeTestCase):
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
-		for item in so.get_work_order_items():
+		for item in get_work_order_items(so.name):
 			po_items.append(
 				{
 					"warehouse": item.get("warehouse"),
@@ -1448,6 +1450,7 @@ class TestSalesOrder(FrappeTestCase):
 
 		from erpnext.controllers.item_variant import create_variant
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
 
 		make_item(  # template item
 			"Test-WO-Tshirt",
@@ -1487,7 +1490,7 @@ class TestSalesOrder(FrappeTestCase):
 				]
 			}
 		)
-		wo_items = so.get_work_order_items()
+		wo_items = get_work_order_items(so.name)
 
 		self.assertEqual(wo_items[0].get("item_code"), "Test-WO-Tshirt-R")
 		self.assertEqual(wo_items[0].get("bom"), red_var_bom.name)
@@ -1497,6 +1500,8 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(wo_items[1].get("bom"), template_bom.name)
 
 	def test_request_for_raw_materials(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
 		item = make_item(
 			"_Test Finished Item",
 			{
@@ -1529,7 +1534,7 @@ class TestSalesOrder(FrappeTestCase):
 		so = make_sales_order(**{"item_list": [{"item_code": item.item_code, "qty": 1, "rate": 1000}]})
 		so.submit()
 		mr_dict = frappe._dict()
-		items = so.get_work_order_items(1)
+		items = get_work_order_items(so.name, 1)
 		mr_dict["items"] = items
 		mr_dict["include_exploded_items"] = 0
 		mr_dict["ignore_existing_ordered_qty"] = 1
