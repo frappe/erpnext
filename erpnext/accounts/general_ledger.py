@@ -136,15 +136,24 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
-	gle = frappe.new_doc("GL Entry")
-	gle.update(args)
-	gle.flags.ignore_permissions = 1
-	gle.flags.from_repost = from_repost
-	gle.validate()
-	gle.db_insert()
-	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
-	gle.flags.ignore_validate = True
-	gle.submit()
+	try:
+		gle = frappe.new_doc("GL Entry")
+		gle.update(args)
+		gle.flags.ignore_permissions = 1
+		gle.flags.from_repost = from_repost
+		gle.validate()
+		gle.db_insert()
+		gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
+		gle.flags.ignore_validate = True
+		gle.submit()
+	# Exception handling
+	except frappe.PermissionError as error:
+		traceback = frappe.get_traceback()
+		frappe.log_error(message=traceback, title='GL entry')
+	except Exception as error:
+		traceback = frappe.get_traceback()
+		frappe.log_error(message=traceback, title='GL entry')
+
 
 def validate_account_for_perpetual_inventory(gl_map):
 	#if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
