@@ -612,7 +612,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		{
 			"Delivery Note": {
 				"doctype": "Sales Invoice",
-				"field_map": {"is_return": "is_return"},
+				"field_map": {"is_return": "is_return","posting_date":"posting_date"},
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Delivery Note Item": {
