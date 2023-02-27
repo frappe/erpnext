@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 
-cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
+frm.fields_dict['accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
 	var d  = locals[cdt][cdn];
 	return {
 		filters: {

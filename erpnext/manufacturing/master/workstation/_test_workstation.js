@@ -15,7 +15,7 @@ QUnit.test("test: Workstation", function (assert) {
 			{key: 'value'}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(frm.doc.key, 'value');
 		},
 		() => done()
 	]);

@@ -22,21 +22,21 @@ class ERPNextPriceList(PriceList):
 	def update_item_price(self):
 		it = frappe.qb.DocType("Item Price")
 		(
-            frappe.qb.update(it)
-            .set(it.currency, self.currency)
-            .set(it.buying, cint(self.buying))
-            .set(it.selling, cint(self.selling))
-            .set(it.modified, now())
-            .where(it.price_list == self.name)
-        ).run()
+			frappe.qb.update(it)
+			.set(it.currency, self.currency)
+			.set(it.buying, cint(self.buying))
+			.set(it.selling, cint(self.selling))
+			.set(it.modified, now())
+			.where(it.price_list == self.name)
+		).run()
 
 	def set_default_if_missing(self):
 		if cint(self.selling):
-			if not frappe.db.get_value("Selling Settings", None, "selling_price_list"):
+			if not frappe.db.get_single_value("Selling Settings", "selling_price_list"):
 				frappe.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.name)
 
 		elif cint(self.buying):
-			if not frappe.db.get_value("Buying Settings", None, "buying_price_list"):
+			if not frappe.db.get_single_value("Buying Settings", "buying_price_list"):
 				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.name)
 
 	def check_impact_on_shopping_cart(self):

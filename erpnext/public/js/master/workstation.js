@@ -10,7 +10,7 @@ frappe.ui.form.on("Workstation", {
 				method:"erpnext.manufacturing.master.workstation.workstation.get_default_holiday_list",
 				callback: function(r) {
 					if(!r.exe && r.message){
-						cur_frm.set_value("holiday_list", r.message);
+						frm.set_value("holiday_list", r.message);
 					}
 				}
 			})
