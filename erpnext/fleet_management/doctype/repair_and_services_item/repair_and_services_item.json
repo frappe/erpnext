@@ -45,11 +45,12 @@
   },
   {
    "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Item Name",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "depends_on": "eval:parent.out_source && doc.maintain_stock == 0",
@@ -111,8 +112,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "project",
@@ -189,7 +189,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-30 12:54:42.104903",
+ "modified": "2023-02-27 15:03:45.301238",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Services Item",
