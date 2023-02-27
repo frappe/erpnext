@@ -35,6 +35,10 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def validate(self):
+		if len(self.taxes)>0 and self._action=='save' and self.request_from=='GSSM':
+			frappe.db.sql(f"""DELETE FROM `tabSales Taxes and Charges` WHERE parent='{self.name}'""");
+			frappe.db.commit();
+			self.taxes=[]	
 		super(SalesOrder, self).validate()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
@@ -168,7 +172,7 @@ class SalesOrder(SellingController):
 			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
     
-	def before_save(self):	
+	def before_save(self):
 		from nrp_manufacturing.utils import returnable_items
 		returnables = returnable_items(self.items,self.company)
 		self.returnable_items = {} # reset		

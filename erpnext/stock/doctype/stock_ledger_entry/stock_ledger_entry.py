@@ -16,12 +16,6 @@ from nrp_manufacturing.utils import get_config_by_name
 exclude_from_linked_with = True
 
 class StockLedgerEntry(Document):
-	def autoname(self):
-		"""
-		Temporarily name doc for fast insertion
-		name will be changed using autoname options (in a scheduled job)
-		"""
-		self.name = frappe.generate_hash(txt="", length=10)
 
 	def validate(self):
 		self.flags.ignore_submit_comment = True
