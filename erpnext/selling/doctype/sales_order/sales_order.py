@@ -6,11 +6,12 @@ import json
 
 import frappe
 import frappe.utils
-from frappe import _
+from frappe import _, qb
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -26,7 +27,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.master.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.get_item_details import get_default_bom
+from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -414,51 +415,6 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	@frappe.whitelist()
-	def get_work_order_items(self, for_raw_material_request=0):
-		"""Returns items with BOM that already do not have a linked work order"""
-		items = []
-		item_codes = [i.item_code for i in self.items]
-		product_bundle_parents = [
-			pb.new_item_code
-			for pb in frappe.get_all(
-				"Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"]
-			)
-		]
-
-		for table in [self.items, self.packed_items]:
-			for i in table:
-				bom = get_default_bom(i.item_code)
-				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
-
-				if not for_raw_material_request:
-					total_work_order_qty = flt(
-						frappe.db.sql(
-							"""select sum(qty) from `tabWork Order`
-						where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2""",
-							(i.item_code, self.name, i.name),
-						)[0][0]
-					)
-					pending_qty = stock_qty - total_work_order_qty
-				else:
-					pending_qty = stock_qty
-
-				if pending_qty and i.item_code not in product_bundle_parents:
-					items.append(
-						dict(
-							name=i.name,
-							item_code=i.item_code,
-							description=i.description,
-							bom=bom or "",
-							warehouse=i.warehouse,
-							pending_qty=pending_qty,
-							required_qty=pending_qty if for_raw_material_request else 0,
-							sales_order_item=i.name,
-						)
-					)
-
-		return items
-
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
 			delivery_date = auto_repeat_doc.get_next_schedule_date(schedule_date=ref_doc_delivery_date)
@@ -589,6 +545,23 @@ def make_material_request(source_name, target_doc=None):
 		target.project = source_parent.project
 		target.qty = qty - requested_item_qty.get(source.name, 0)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
+
+		args = target.as_dict().copy()
+		args.update(
+			{
+				"company": source_parent.get("company"),
+				"price_list": frappe.db.get_single_value("Buying Settings", "buying_price_list"),
+				"currency": source_parent.get("currency"),
+				"conversion_rate": source_parent.get("conversion_rate"),
+			}
+		)
+
+		target.rate = flt(
+			get_price_list_rate(args=args, item_doc=frappe.get_cached_doc("Item", target.item_code)).get(
+				"price_list_rate"
+			)
+		)
+		target.amount = target.qty * target.rate
 
 	doc = get_mapped_doc(
 		"Sales Order",
@@ -1333,3 +1306,57 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 		return
 
 	frappe.db.set_value("Sales Order Item", sales_order_item, "produced_qty", total_produced_qty)
+
+
+@frappe.whitelist()
+def get_work_order_items(sales_order, for_raw_material_request=0):
+	"""Returns items with BOM that already do not have a linked work order"""
+	if sales_order:
+		so = frappe.get_doc("Sales Order", sales_order)
+
+		wo = qb.DocType("Work Order")
+
+		items = []
+		item_codes = [i.item_code for i in so.items]
+		product_bundle_parents = [
+			pb.new_item_code
+			for pb in frappe.get_all(
+				"Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"]
+			)
+		]
+
+		for table in [so.items, so.packed_items]:
+			for i in table:
+				bom = get_default_bom(i.item_code)
+				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
+
+				if not for_raw_material_request:
+					total_work_order_qty = flt(
+						qb.from_(wo)
+						.select(Sum(wo.qty))
+						.where(
+							(wo.production_item == i.item_code)
+							& (wo.sales_order == so.name) * (wo.sales_order_item == i.name)
+							& (wo.docstatus.lte(2))
+						)
+						.run()[0][0]
+					)
+					pending_qty = stock_qty - total_work_order_qty
+				else:
+					pending_qty = stock_qty
+
+				if pending_qty and i.item_code not in product_bundle_parents:
+					items.append(
+						dict(
+							name=i.name,
+							item_code=i.item_code,
+							description=i.description,
+							bom=bom or "",
+							warehouse=i.warehouse,
+							pending_qty=pending_qty,
+							required_qty=pending_qty if for_raw_material_request else 0,
+							sales_order_item=i.name,
+						)
+					)
+
+		return items

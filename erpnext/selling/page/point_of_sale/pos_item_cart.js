@@ -609,7 +609,7 @@ erpnext.PointOfSale.ItemCart = class {
 			if (item_data.rate && item_data.amount && item_data.rate !== item_data.amount) {
 				return `
 					<div class="item-qty-rate">
-						<div class="item-qty"><span>${item_data.qty || 0}</span></div>
+						<div class="item-qty"><span>${item_data.qty || 0} ${item_data.uom}</span></div>
 						<div class="item-rate-amount">
 							<div class="item-rate">${format_currency(item_data.amount, currency)}</div>
 							<div class="item-amount">${format_currency(item_data.rate, currency)}</div>
@@ -618,7 +618,7 @@ erpnext.PointOfSale.ItemCart = class {
 			} else {
 				return `
 					<div class="item-qty-rate">
-						<div class="item-qty"><span>${item_data.qty || 0}</span></div>
+						<div class="item-qty"><span>${item_data.qty || 0} ${item_data.uom}</span></div>
 						<div class="item-rate-amount">
 							<div class="item-rate">${format_currency(item_data.rate, currency)}</div>
 						</div>

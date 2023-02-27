@@ -221,9 +221,9 @@ $.extend(erpnext.utils, {
 			callback: function(r) {
 				if (r.message && r.message.length) {
 					r.message.forEach((dimension) => {
-						let found = filters.some(el => el.fieldname === dimension['fieldname']);
+						let existing_filter = filters.filter(el => el.fieldname === dimension['fieldname']);
 
-						if (!found) {
+						if (!existing_filter.length) {
 							filters.splice(index, 0, {
 								"fieldname": dimension["fieldname"],
 								"label": __(dimension["doctype"]),
@@ -232,6 +232,11 @@ $.extend(erpnext.utils, {
 									return frappe.db.get_link_options(dimension["doctype"], txt);
 								},
 							});
+						} else {
+							existing_filter[0]['fieldtype'] = "MultiSelectList";
+							existing_filter[0]['get_data'] = function(txt) {
+								return frappe.db.get_link_options(dimension["doctype"], txt);
+							}
 						}
 					});
 				}
@@ -491,7 +496,20 @@ erpnext.utils.update_child_items = function(opts) {
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
 
-	this.data = [];
+	this.data = frm.doc[opts.child_docname].map((d) => {
+		return {
+			"docname": d.name,
+			"name": d.name,
+			"item_code": d.item_code,
+			"delivery_date": d.delivery_date,
+			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
+			"qty": d.qty,
+			"rate": d.rate,
+			"uom": d.uom
+		}
+	});
+
 	const fields = [{
 		fieldtype:'Data',
 		fieldname:"docname",
@@ -588,7 +606,7 @@ erpnext.utils.update_child_items = function(opts) {
 		})
 	}
 
-	const dialog = new frappe.ui.Dialog({
+	new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
 			{
@@ -624,24 +642,7 @@ erpnext.utils.update_child_items = function(opts) {
 			refresh_field("items");
 		},
 		primary_action_label: __('Update')
-	});
-
-	frm.doc[opts.child_docname].forEach(d => {
-		dialog.fields_dict.trans_items.df.data.push({
-			"docname": d.name,
-			"name": d.name,
-			"item_code": d.item_code,
-			"delivery_date": d.delivery_date,
-			"schedule_date": d.schedule_date,
-			"conversion_factor": d.conversion_factor,
-			"qty": d.qty,
-			"rate": d.rate,
-			"uom": d.uom
-		});
-		this.data = dialog.fields_dict.trans_items.df.data;
-		dialog.fields_dict.trans_items.grid.refresh();
-	})
-	dialog.show();
+	}).show();
 }
 
 erpnext.utils.map_current_doc = function(opts) {

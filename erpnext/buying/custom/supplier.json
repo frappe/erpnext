@@ -8,7 +8,6 @@
       "fieldtype": "Link",
       "insert_after": "default_currency",
       "label": "Default Company Bank Account",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-default_bank_account",
       "options": "Bank Account"
@@ -21,7 +20,6 @@
       "fieldtype": "Link",
       "insert_after": "column_break_27",
       "label": "Tax Category",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-tax_category",
       "options": "Tax Category"
@@ -34,7 +32,6 @@
       "fieldtype": "Link",
       "insert_after": "tax_category",
       "label": "Tax Withholding Category",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-tax_withholding_category",
       "options": "Tax Withholding Category"
@@ -49,7 +46,6 @@
       "ignore_user_permissions": 1,
       "insert_after": "is_internal_supplier",
       "label": "Represents Company",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-represents_company",
       "options": "Company"
@@ -64,7 +60,6 @@
       "in_standard_filter": 1,
       "insert_after": "column_break0",
       "label": "Supplier Group",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-supplier_group",
       "options": "Supplier Group",
@@ -79,7 +74,6 @@
       "fieldtype": "Table",
       "insert_after": "column_break_16",
       "label": "Allowed To Transact With",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-companies",
       "options": "Allowed To Transact With"
@@ -93,7 +87,6 @@
       "ignore_user_permissions": 1,
       "insert_after": "column_break_10",
       "label": "Price List",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-default_price_list",
       "options": "Price List"
@@ -104,9 +97,8 @@
       "is_system_generated": 1,
       "fieldname": "payment_terms",
       "fieldtype": "Link",
-      "insert_after": "default_price_list",
+      "insert_after": "accounting_tab",
       "label": "Default Payment Terms Template",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-payment_terms",
       "options": "Payment Terms Template"
@@ -120,7 +112,6 @@
       "fieldtype": "Table",
       "insert_after": "accounting_tab",
       "label": "Accounts",
-      "modified": "2023-01-26 22:10:22.461678",
       "module": "Buying",
       "name": "Supplier-accounts",
       "options": "Party Account"

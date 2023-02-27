@@ -211,7 +211,13 @@ def set_address_details(
 	else:
 		party_details.update(get_company_address(company))
 
-	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order", "Quotation"]:
+	if doctype and doctype in [
+		"Delivery Note",
+		"Sales Invoice",
+		"Sales Order",
+		"Quotation",
+		"POS Invoice",
+	]:
 		if party_details.company_address:
 			party_details.update(
 				get_fetch_values(doctype, "company_address", party_details.company_address)
@@ -544,7 +550,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 		elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
 		else:
-			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
+			due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
 	return due_date
 
 

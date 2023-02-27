@@ -4,7 +4,17 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, nowdate, today
+from frappe.utils import (
+	add_months,
+	cint,
+	flt,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	is_last_day_of_the_month,
+	nowdate,
+	today,
+)
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -158,7 +168,7 @@ def make_depreciation_entry(asset_depr_schedule_name, date=None):
 			row.value_after_depreciation -= d.depreciation_amount
 			row.db_update()
 
-	frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Successful")
+	asset.db_set("depr_entry_posting_status", "Successful")
 
 	asset.set_status()
 
@@ -400,6 +410,9 @@ def disposal_was_made_on_original_schedule_date(schedule_idx, row, posting_date_
 		row.depreciation_start_date, schedule_idx * cint(row.frequency_of_depreciation)
 	)
 
+	if is_last_day_of_the_month(row.depreciation_start_date):
+		orginal_schedule_date = get_last_day(orginal_schedule_date)
+
 	if orginal_schedule_date == posting_date_of_disposal:
 		return True
 
@@ -520,18 +533,8 @@ def get_asset_details(asset, finance_book=None):
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
-	idx = 1
-	if finance_book:
-		for d in asset.finance_books:
-			if d.finance_book == finance_book:
-				idx = d.idx
-				break
+	value_after_depreciation = asset.get_value_after_depreciation(finance_book)
 
-	value_after_depreciation = (
-		asset.finance_books[idx - 1].value_after_depreciation
-		if asset.calculate_depreciation
-		else asset.value_after_depreciation
-	)
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(value_after_depreciation)
 
 	return (

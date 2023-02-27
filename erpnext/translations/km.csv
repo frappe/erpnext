@@ -3537,7 +3537,7 @@ Quality Feedback Template,គំរូមតិយោបល់គុណភាព
 Rules for applying different promotional schemes.,វិធានសម្រាប់អនុវត្តគម្រោងផ្សព្វផ្សាយផ្សេងៗគ្នា។,
 Shift,ប្តូរ។,
 Show {0},បង្ហាញ {0},
-"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","តួអក្សរពិសេសលើកលែងតែ &quot;-&quot;, &quot;#&quot;, &quot;។ &quot;, &quot;/&quot;, &quot;{&quot; និង &quot;}&quot; មិនត្រូវបានអនុញ្ញាតក្នុងស៊េរីដាក់ឈ្មោះ",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","តួអក្សរពិសេសលើកលែងតែ &quot;-&quot;, &quot;#&quot;, &quot;។ &quot;, &quot;/&quot;, &quot;{{&quot; និង &quot;}}&quot; មិនត្រូវបានអនុញ្ញាតក្នុងស៊េរីដាក់ឈ្មោះ {0}",
 Target Details,ព័ត៌មានលម្អិតគោលដៅ។,
 {0} already has a Parent Procedure {1}.,{0} មាននីតិវិធីឪពុកម្តាយរួចហើយ {1} ។,
 API,API,

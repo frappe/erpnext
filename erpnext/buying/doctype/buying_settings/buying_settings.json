@@ -21,6 +21,7 @@
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
   "disable_last_purchase_rate",
+  "show_pay_button",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -140,6 +141,12 @@
    "fieldname": "disable_last_purchase_rate",
    "fieldtype": "Check",
    "label": "Disable Last Purchase Rate"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_pay_button",
+   "fieldtype": "Check",
+   "label": "Show Pay Button in Purchase Order Portal"
   }
  ],
  "icon": "fa fa-cog",
@@ -147,7 +154,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-01-09 17:08:28.828173",
+ "modified": "2023-02-15 14:42:10.200679",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
