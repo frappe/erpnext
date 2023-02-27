@@ -22,6 +22,10 @@ form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
+
+force_fields = ["stock_uom"]
+
+
 class BOM(WebsiteGenerator):
 	website = frappe._dict(
 		# page_title_field = "item_name",
@@ -138,7 +142,7 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currecny(item)
 
-			ret = self.get_bom_material_detail({
+			material_details = self.get_bom_material_detail({
 				"item_code": item.item_code,
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
@@ -149,9 +153,9 @@ class BOM(WebsiteGenerator):
 				"stock_uom": item.stock_uom,
 				"conversion_factor": item.conversion_factor
 			})
-			for r in ret:
-				if not item.get(r):
-					item.set(r, ret[r])
+			for key in material_details:
+				if not item.get(key) or key in force_fields:
+					item.set(key, material_details[key])
 
 	@frappe.whitelist()
 	def get_bom_material_detail(self, args=None):
