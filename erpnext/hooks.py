@@ -33,11 +33,15 @@ doctype_js = {
 	"Item Group": "public/js/master/item_group.js",
 	"Workstation": "public/js/master/workstation.js",
 	"Price List": "public/js/master/price_list.js",
+	"Warehouse": "public/js/master/warehouse.js",
 }
 
 doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
 
-doctype_tree_js = {"Supplier Group": "public/js/master/supplier_group_tree.js"}
+doctype_tree_js = {
+	"Supplier Group": "public/js/master/supplier_group_tree.js",
+	"Warehouse": "public/js/master/warehouse_tree.js",
+}
 
 override_doctype_class = {
 	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
@@ -46,6 +50,7 @@ override_doctype_class = {
 	"Item Group": "erpnext.setup.master.item_group.item_group.ERPNextItemGroup",
 	"Workstation": "erpnext.manufacturing.master.workstation.workstation.ERPNextWorkstation",
 	"Price List": "erpnext.stock.master.price_list.price_list.ERPNextPriceList",
+	"Warehouse": "erpnext.stock.master.warehouse.warehouse.ERPNextWarehouse",
 }
 
 override_doctype_dashboards = {

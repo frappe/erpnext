@@ -17,7 +17,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	get_items,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method

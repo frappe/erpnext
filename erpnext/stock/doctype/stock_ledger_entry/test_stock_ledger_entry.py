@@ -1349,7 +1349,7 @@ def setup_item_valuation_test(
 ):
 	from erpnext.stock.doctype.batch.batch import make_batch
 	from erpnext.stock.doctype.item.test_item import make_item
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 	if not suffix:
 		suffix = get_unique_suffix()

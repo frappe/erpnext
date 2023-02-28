@@ -906,7 +906,7 @@ def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
 	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
 

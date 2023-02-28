@@ -162,7 +162,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertTrue(item_code in items)
 
 	def test_add_to_transit_entry(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 		item_code = "_Test Transit Item"
 		company = "_Test Company"
@@ -1032,7 +1032,7 @@ class TestStockEntry(FrappeTestCase):
 
 	def test_retain_sample(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 		create_warehouse("Test Warehouse for Sample Retention")
 		frappe.db.set_value(
@@ -1507,7 +1507,7 @@ class TestStockEntry(FrappeTestCase):
 
 	def test_reposting_for_depedent_warehouse(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 		# Inward at WH1 warehouse (Component)
 		# 1st Repack (Component (WH1) - Subcomponent (WH2))
@@ -1789,7 +1789,7 @@ def initialize_records_for_future_negative_sle_test(
 	from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 		create_stock_reconciliation,
 	)
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 	TestBatch.make_batch_item(item_code)
 	make_new_batch(item_code=item_code, batch_id=batch_no)

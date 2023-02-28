@@ -1194,8 +1194,7 @@ def get_bin_details(item_code, warehouse, company=None, include_child_warehouses
 
 	if warehouse:
 		from frappe.query_builder.functions import Coalesce, Sum
-
-		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+		from master.master.doctype.warehouse.warehouse import get_child_warehouses
 
 		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
 

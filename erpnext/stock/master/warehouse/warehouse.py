@@ -4,26 +4,14 @@
 
 import frappe
 from frappe import _, throw
-from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils import cint
-from frappe.utils.nestedset import NestedSet
+from master.master.doctype.warehouse.warehouse import Warehouse, get_child_warehouses
 from pypika.terms import ExistsCriterion
 
 from erpnext.stock import get_warehouse_account
 
 
-class Warehouse(NestedSet):
-	nsm_parent_field = "parent_warehouse"
-
-	def autoname(self):
-		if self.company:
-			suffix = " - " + frappe.get_cached_value("Company", self.company, "abbr")
-			if not self.warehouse_name.endswith(suffix):
-				self.name = self.warehouse_name + suffix
-				return
-
-		self.name = self.warehouse_name
-
+class ERPNextWarehouse(Warehouse):
 	def onload(self):
 		"""load account name for General Ledger Report"""
 		if self.company and cint(
@@ -33,16 +21,11 @@ class Warehouse(NestedSet):
 
 			if account:
 				self.set_onload("account", account)
-		load_address_and_contact(self)
+
+		super(ERPNextWarehouse, self).onload()
 
 	def validate(self):
 		self.warn_about_multiple_warehouse_account()
-
-	def on_update(self):
-		self.update_nsm_model()
-
-	def update_nsm_model(self):
-		frappe.utils.nestedset.update_nsm(self)
 
 	def on_trash(self):
 		# delete bin
@@ -122,9 +105,6 @@ class Warehouse(NestedSet):
 	def check_if_sle_exists(self):
 		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})
 
-	def check_if_child_exists(self):
-		return frappe.db.exists("Warehouse", {"parent_warehouse": self.name})
-
 	def convert_to_group_or_ledger(self):
 		if self.is_group:
 			self.convert_to_ledger()
@@ -154,43 +134,10 @@ class Warehouse(NestedSet):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False):
-	if is_root:
-		parent = ""
-
-	fields = ["name as value", "is_group as expandable"]
-	filters = [
-		["ifnull(`parent_warehouse`, '')", "=", parent],
-		["company", "in", (company, None, "")],
-	]
-
-	return frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
-
-
-@frappe.whitelist()
-def add_node():
-	from frappe.desk.treeview import make_tree_args
-
-	args = make_tree_args(**frappe.form_dict)
-
-	if cint(args.is_root):
-		args.parent_warehouse = None
-
-	frappe.get_doc(args).insert()
-
-
-@frappe.whitelist()
 def convert_to_group_or_ledger(docname=None):
 	if not docname:
 		docname = frappe.form_dict.docname
 	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
-
-
-def get_child_warehouses(warehouse):
-	from frappe.utils.nestedset import get_descendants_of
-
-	children = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
-	return children + [warehouse]  # append self for backward compatibility
 
 
 def get_warehouses_based_on_account(account, company=None):
@@ -217,17 +164,13 @@ def get_warehouses_based_on_account(account, company=None):
 # Will be use for frappe.qb
 def apply_warehouse_filter(query, sle, filters):
 	if warehouse := filters.get("warehouse"):
-		warehouse_table = frappe.qb.DocType("Warehouse")
+		w = frappe.qb.DocType("Warehouse")
 
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 		chilren_subquery = (
-			frappe.qb.from_(warehouse_table)
-			.select(warehouse_table.name)
-			.where(
-				(warehouse_table.lft >= lft)
-				& (warehouse_table.rgt <= rgt)
-				& (warehouse_table.name == sle.warehouse)
-			)
+			frappe.qb.from_(w)
+			.select(w.name)
+			.where((w.lft >= lft) & (w.rgt <= rgt) & (w.name == sle.warehouse))
 		)
 		query = query.where(ExistsCriterion(chilren_subquery))
 

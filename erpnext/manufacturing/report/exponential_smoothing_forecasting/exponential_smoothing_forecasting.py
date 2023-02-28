@@ -5,10 +5,10 @@
 import frappe
 from frappe import _
 from frappe.utils import add_years, cint, flt, getdate
+from master.master.doctype.warehouse.warehouse import get_child_warehouses
 
 import erpnext
 from erpnext.accounts.report.financial_statements import get_period_list
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):

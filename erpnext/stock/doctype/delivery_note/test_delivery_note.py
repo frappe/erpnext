@@ -33,7 +33,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 	set_valuation_method,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+from erpnext.stock.master.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
 
 

@@ -15,7 +15,7 @@ from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 test_dependencies = ["Item"]
 test_records = frappe.get_test_records("Serial No")

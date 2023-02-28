@@ -1,0 +1,73 @@
+{
+  "custom_fields": [
+    {
+      "doctype": "Custom Field",
+      "dt": "Warehouse",
+      "is_system_generated": 1,
+      "fieldname": "account",
+      "fieldtype": "Link",
+      "insert_after": "column_break_4",
+      "label": "Account",
+      "description": "If blank, parent Warehouse Account or company default will be considered in transactions",
+      "module": "Stock",
+      "name": "Warehouse-account",
+      "options": "Account"
+    }
+  ],
+  "custom_perms": [
+    {
+      "parent": "Warehouse",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "import": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Item Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Warehouse",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Stock User"
+    },
+    {
+      "parent": "Warehouse",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales User"
+    },
+    {
+      "parent": "Warehouse",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Purchase User"
+    },
+    {
+      "parent": "Warehouse",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Accounts User"
+    },
+    {
+      "parent": "Warehouse",
+      "read": 1,
+      "role": "Manufacturing User"
+    }
+  ],
+  "doctype": "Warehouse",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

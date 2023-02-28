@@ -4,14 +4,17 @@
 import frappe
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
+from master.master.doctype.warehouse.warehouse import get_children
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
+from erpnext.stock.master.warehouse.warehouse import convert_to_group_or_ledger
 
-test_records = frappe.get_test_records("Warehouse")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Stock", "master", "warehouse", "test_records.json")
+)
 
 
 class TestWarehouse(FrappeTestCase):

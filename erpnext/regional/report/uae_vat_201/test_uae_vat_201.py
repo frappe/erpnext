@@ -14,7 +14,7 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	get_tourist_tax_return_total,
 	get_zero_rated_total,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
+from erpnext.stock.master.warehouse.test_warehouse import get_warehouse_account
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 

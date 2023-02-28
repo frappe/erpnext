@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import cint, flt, getdate
 from pypika import functions as fn
 
-from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.master.warehouse.warehouse import apply_warehouse_filter
 
 
 def execute(filters=None):

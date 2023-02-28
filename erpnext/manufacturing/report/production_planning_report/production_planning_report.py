@@ -4,9 +4,8 @@
 
 import frappe
 from frappe import _
+from master.master.doctype.warehouse.warehouse import get_child_warehouses
 from pypika import Order
-
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):

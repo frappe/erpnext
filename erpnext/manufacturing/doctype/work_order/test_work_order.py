@@ -24,7 +24,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 
 test_dependencies = ["BOM"]

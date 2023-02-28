@@ -265,7 +265,7 @@ def num_of_depreciations(asset):
 
 def create_asset_repair(**args):
 	from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 	args = frappe._dict(args)
 

@@ -7,7 +7,7 @@ from frappe import _
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
-from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
+from erpnext.stock.master.warehouse.warehouse import get_warehouses_based_on_account
 
 
 def execute(filters=None):

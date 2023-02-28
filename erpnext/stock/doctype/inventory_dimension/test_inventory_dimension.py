@@ -14,7 +14,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 
 class TestInventoryDimension(FrappeTestCase):

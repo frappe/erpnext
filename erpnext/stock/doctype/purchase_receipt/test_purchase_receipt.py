@@ -12,7 +12,7 @@ from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 
 
@@ -462,7 +462,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_purchase_return_for_rejected_qty(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+		from erpnext.stock.master.warehouse.test_warehouse import get_warehouse
 
 		rejected_warehouse = "_Test Rejected Warehouse - TCP1"
 		if not frappe.db.exists("Warehouse", rejected_warehouse):
@@ -508,7 +508,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_purchase_receipt_for_rejected_gle_without_accepted_warehouse(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+		from erpnext.stock.master.warehouse.test_warehouse import get_warehouse
 
 		rejected_warehouse = "_Test Rejected Warehouse - TCP1"
 		if not frappe.db.exists("Warehouse", rejected_warehouse):

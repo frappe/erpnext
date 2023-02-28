@@ -338,7 +338,7 @@ def create_asset_capitalization_data():
 
 
 def create_asset_capitalization(**args):
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from erpnext.stock.master.warehouse.test_warehouse import create_warehouse
 
 	args = frappe._dict(args)
 
