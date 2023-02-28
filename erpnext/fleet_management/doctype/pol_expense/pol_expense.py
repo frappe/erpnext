@@ -119,6 +119,7 @@ class POLExpense(AccountsController):
 		pol_exp = qb.DocType("POL Expense")
 		if not self.uom:
 			self.uom = frappe.db.get_value("Equipment", self.equipment,"reading_uom")
+		pol_rev = qb.DocType("POL Receive")
 		previous_km_reading = (
 						qb.from_(pol_rev)
 						.select(pol_rev.cur_km_reading)
