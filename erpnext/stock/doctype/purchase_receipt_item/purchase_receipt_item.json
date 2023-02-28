@@ -69,7 +69,7 @@
   "item_tax_amount",
   "rm_supp_cost",
   "landed_cost_voucher_amount",
-  "adjust_incoming_rate",
+  "rate_difference_with_purchase_invoice",
   "billed_amt",
   "warehouse_and_reference",
   "warehouse",
@@ -1010,9 +1010,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "adjust_incoming_rate",
+   "fieldname": "rate_difference_with_purchase_invoice",
    "fieldtype": "Currency",
-   "label": "Adjust Incoming Rate (Purchase Invoice)",
+   "label": "Rate Difference with Purchase Invoice",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -1021,7 +1021,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 12:05:59.732266",
+ "modified": "2023-02-28 15:43:04.470104",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

@@ -27,4 +27,4 @@ class BuyingSettings(Document):
 
 	def check_maintain_same_rate(self):
 		if self.maintain_same_rate:
-			self.adjust_incoming_rate_based_on_purchase_invoice_rate = 0
+			self.set_landed_cost_based_on_purchase_invoice_rate = 0
