@@ -1527,7 +1527,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
 
 		frappe.db.set_single_value(
-			"Buying Settings", "adjust_incoming_rate_based_on_purchase_invoice_rate", 1
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1
 		)
 
 		# Increase the cost of the item
@@ -1581,7 +1581,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		self.assertEqual(stock_value_difference, 50)
 
 		frappe.db.set_single_value(
-			"Buying Settings", "adjust_incoming_rate_based_on_purchase_invoice_rate", 0
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0
 		)
 
 		# Don't adjust incoming rate

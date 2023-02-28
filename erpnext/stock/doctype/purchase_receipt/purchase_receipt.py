@@ -451,14 +451,14 @@ class PurchaseReceipt(BuyingController):
 								item=d,
 							)
 
-					if d.adjust_incoming_rate and stock_rbnb:
+					if d.rate_difference_with_purchase_invoice and stock_rbnb:
 						account_currency = get_account_currency(stock_rbnb)
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=stock_rbnb,
 							cost_center=d.cost_center,
 							debit=0.0,
-							credit=flt(d.adjust_incoming_rate),
+							credit=flt(d.rate_difference_with_purchase_invoice),
 							remarks=_("Adjustment based on Purchase Invoice rate"),
 							against_account=warehouse_account_name,
 							account_currency=account_currency,
@@ -486,7 +486,7 @@ class PurchaseReceipt(BuyingController):
 						+ flt(d.landed_cost_voucher_amount)
 						+ flt(d.rm_supp_cost)
 						+ flt(d.item_tax_amount)
-						+ flt(d.adjust_incoming_rate)
+						+ flt(d.rate_difference_with_purchase_invoice)
 					)
 
 					divisional_loss = flt(
@@ -919,7 +919,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			if item.billed_amt and item.amount:
 				adjusted_amt = flt(item.billed_amt) - flt(item.amount)
 
-			item.db_set("adjust_incoming_rate", adjusted_amt, update_modified=False)
+			item.db_set("rate_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)

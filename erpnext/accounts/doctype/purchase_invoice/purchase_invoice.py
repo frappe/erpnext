@@ -1486,7 +1486,7 @@ class PurchaseInvoice(BuyingController):
 			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
 		adjust_incoming_rate = frappe.db.get_single_value(
-			"Buying Settings", "adjust_incoming_rate_based_on_purchase_invoice_rate"
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
 		)
 
 		for pr in set(updated_pr):
