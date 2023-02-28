@@ -473,7 +473,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					divisional_loss = flt(
-						valuation_amount_as_per_doc - stock_value_diff, d.precision("base_net_amount")
+						valuation_amount_as_per_doc - flt(stock_value_diff), d.precision("base_net_amount")
 					)
 
 					if divisional_loss:
@@ -1134,13 +1134,25 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.expense_account, {"amount": 0.0, "base_amount": 0.0}
 					)
 
-					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account][
-						"amount"
-					] += (account.amount * item.get(based_on_field) / total_item_cost)
+					if total_item_cost > 0:
+						item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][
+							account.expense_account
+						]["amount"] += (
+							account.amount * item.get(based_on_field) / total_item_cost
+						)
 
-					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account][
-						"base_amount"
-					] += (account.base_amount * item.get(based_on_field) / total_item_cost)
+						item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][
+							account.expense_account
+						]["base_amount"] += (
+							account.base_amount * item.get(based_on_field) / total_item_cost
+						)
+					else:
+						item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][
+							account.expense_account
+						]["amount"] += item.applicable_charges
+						item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][
+							account.expense_account
+						]["base_amount"] += item.applicable_charges
 
 	return item_account_wise_cost
 
