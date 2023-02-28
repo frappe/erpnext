@@ -130,27 +130,13 @@ class CustomWorkflow:
 			if section == "Chunaikhola Dolomite Mines - SMCL":
 				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 					"Department Approver",
-					{"parent": "Chunaikhola Dolomite Mines - SMCL", "parentfield": "expense_approvers", "idx": 1},
-					"approver",
-				)},self.field_list)
-
-			elif department == "CORPORATE SERVICES DEPARTMENT - SMCL":
-				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
-					"Department Approver",
-					{"parent": "CORPORATE SERVICES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
-					"approver",
-				)},self.field_list)
-			
-			elif department == "SALES & LOGISTICS DEPARTMENT - SMCL":
-				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
-					"Department Approver",
-					{"parent": "Samdrup Jongkhar - SMCL", "parentfield": "expense_approvers", "idx": 1},
+					{"parent": section, "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
 			else:
 				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 					"Department Approver",
-					{"parent": "PROJECTS & MINES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
+					{"parent": department, "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
 			
@@ -169,16 +155,6 @@ class CustomWorkflow:
 				if not self.imprest_verifier:
 					frappe.throw("Please Set Expense Approver for the Department <b>{}</b>".format(department))
 
-				# employee_unit = frappe.db.get_value("Employee", self.doc.employee, "unit")
-				# if employee_unit:
-				# 	employee_section = frappe.db.get_value("Employee", self.doc.employee, "section")
-				# 	if not employee_section:
-				# 		frappe.throw("Set section for {}".format(self.doc.employee))
-				# 	else:
-				# 		self.imprest_approver = frappe.db.get_value("Employee",{"name":frappe.db.get_value("Department", employee_section ,"approver")},self.field_list)
-				# 	if not self.imprest_verifier:
-				# 		frappe.throw("Set expense approver for CORPORATE SERVICES DEPARTMENT - SMCL department")
-
 				employee_section = frappe.db.get_value("Employee", self.doc.employee, "section")
 				employee_branch = frappe.db.get_value("Employee", self.doc.employee, "branch")
 				if employee_section and employee_section in ("Chunaikhola Dolomite Mines - SMCL", "Samdrup Jongkhar - SMCL"):
@@ -189,50 +165,10 @@ class CustomWorkflow:
 						self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", "Chunaikhola Dolomite Mines - SMCL" ,"approver")}, self.field_list)
 					else:
 						self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", "Samdrup Jongkhar - SMCL" ,"approver")}, self.field_list)
-					
-				elif department == "CORPORATE SERVICES DEPARTMENT - SMCL":
-					# self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
-					# 	"Department Approver",
-					# 	{"parent": "CORPORATE SERVICES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
-					# 	"approver",
-					# )},self.field_list)
-					self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", department ,"approver")}, self.field_list)
-
-					if not self.imprest_verifier:
-						frappe.throw("Set expense approver for CORPORATE SERVICES DEPARTMENT - SMCL department")
-				
-				elif department == "PROJECTS & MINES DEPARTMENT - SMCL":
-					# self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
-					# 	"Department Approver",
-					# 	{"parent": "PROJECTS & MINES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
-					# 	"approver",
-					# )},self.field_list)
-					self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", department ,"approver")}, self.field_list)
-
-					if not self.imprest_approver:
-						frappe.throw("Set expense approver for PROJECTS & MINES DEPARTMENT - SMCL department")
-
-				elif department == "Office of the CEO - SMCL":
-					# self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
-					# 	"Department Approver",
-					# 	{"parent": "Office of the CEO - SMCL", "parentfield": "expense_approvers", "idx": 1},
-					# 	"approver",
-					# )},self.field_list)
-					self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", department ,"approver")}, self.field_list)
-
-					if not self.imprest_verifier:
-						frappe.throw("Set expense approver for Office of the CEO - SMCL department")
 				else:
-					# self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
-					# 	"Department Approver",
-					# 	{"parent": "SALES & LOGISTICS DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
-					# 	"approver",
-					# )},self.field_list)
 					self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", department ,"approver")}, self.field_list)
-
 					if not self.imprest_verifier:
 						frappe.throw("Set expense approver for SALES & LOGISTICS DEPARTMENT - SMCL department")
-
 
 		if self.doc.doctype == "Material Request":
 			self.expense_approver = frappe.db.get_value("Employee", {"user_id":frappe.db.get_value("Employee", {"user_id":self.doc.owner}, "expense_approver")}, self.field_list)
@@ -876,6 +812,7 @@ class CustomWorkflow:
 			if "HR User" not in frappe.get_roles(frappe.session.user):
 				if self.doc.approver != frappe.session.user:
 					frappe.throw("Only {} can edit/submit this document".format(self.doc.approver))
+					
 	def coal_raising_payment(self):
 		if self.new_state.lower() in ("Draft".lower(), "Waiting Supervisor Approval".lower()):
 			if self.new_state.lower() == "Waiting Supervisor Approval".lower() and self.doc.owner != frappe.session.user:

@@ -18,13 +18,6 @@ frappe.ui.form.on('POL Issue', {
 	},
 	branch:function(frm){
 		set_equipment_filter(frm)
-		frm.set_query('equipment', 'items', function (doc, cdt, cdn) {
-			return {
-				filters: {
-					"branch": frm.doc.branch
-				}
-			}
-		});
 	},
 });
 
@@ -41,9 +34,7 @@ var set_equipment_filter=function(frm){
 	frm.set_query("tanker", function() {
 		return {
 			query: "erpnext.fleet_management.fleet_utils.get_container_filtered",
-			filters:{
-				"branch":frm.doc.branch
-			}
+			filters:{}
 		};
 	});
 }
