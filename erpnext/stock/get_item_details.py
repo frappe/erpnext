@@ -1144,7 +1144,7 @@ def get_serial_nos_by_fifo(args, sales_order=None):
 def get_conversion_factor(item_code, uom):
 	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
 	filters = {"parent": item_code, "uom": uom}
-	
+
 	if variant_of:
 		filters["parent"] = ("in", (item_code, variant_of))
 	conversion_factor = frappe.db.get_value("UOM Conversion Detail", filters, "conversion_factor")
@@ -1170,6 +1170,7 @@ def get_bin_details(item_code, warehouse, company=None, include_child_warehouses
 
 	if warehouse:
 		from frappe.query_builder.functions import Coalesce, Sum
+
 		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
@@ -1245,7 +1246,7 @@ def get_batch_qty_and_serial_no(batch_no, stock_qty, warehouse, item_code, has_s
 		)
 		serial_no = get_serial_no(args)
 		batch_qty_and_serial_no.update({"serial_no": serial_no})
-	
+
 	return batch_qty_and_serial_no
 
 
@@ -1405,10 +1406,7 @@ def get_valuation_rate(item_code, company, warehouse=None):
 		valuation_rate = (
 			frappe.qb.from_(pi_item)
 			.select((Sum(pi_item.base_net_amount) / Sum(pi_item.qty * pi_item.conversion_factor)))
-			.where(
-				(pi_item.docstatus == 1)
-				& (pi_item.item_code == item_code)
-			)
+			.where((pi_item.docstatus == 1) & (pi_item.item_code == item_code))
 		).run()
 
 		if valuation_rate:
