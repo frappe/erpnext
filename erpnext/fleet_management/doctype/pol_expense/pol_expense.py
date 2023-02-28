@@ -119,16 +119,15 @@ class POLExpense(AccountsController):
 		pol_exp = qb.DocType("POL Expense")
 		if not self.uom:
 			self.uom = frappe.db.get_value("Equipment", self.equipment,"reading_uom")
-		
 		previous_km_reading = (
-								qb.from_(pol_exp)
-								.select(pol_exp.present_km_reading, pol_exp.closing_pol_tank_balance)
-								.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus==1) & (pol_exp.uom == self.uom) & (pol_exp.name != self.name))
-								.orderby( pol_exp.entry_date,order=qb.desc)
-								.orderby( pol_exp.name, order=qb.desc)
-								.limit(1)
-								.run()
-								)
+						qb.from_(pol_rev)
+						.select(pol_rev.cur_km_reading)
+						.where((pol_rev.equipment == self.equipment) & (pol_rev.docstatus==1) & (pol_rev.uom == self.uom))
+						.orderby( pol_rev.posting_date,order=qb.desc)
+						.orderby( pol_rev.posting_time,order=qb.desc)
+						.limit(1)
+						.run()
+						)
 		pv_km = 0
 		previous_km_reading_pol_issue = frappe.db.sql('''
 				select cur_km_reading
@@ -148,8 +147,18 @@ class POLExpense(AccountsController):
 			pv_km = frappe.db.get_value("Equipment",self.equipment,"initial_km_reading")
 		else:
 			pv_km = previous_km_reading[0][0]
-		if previous_km_reading[0][1]:
-			self.opening_pol_tank_balance = previous_km_reading[0][1]
+		
+		closing_pol_tank_balance = (
+								qb.from_(pol_exp)
+								.select(pol_exp.closing_pol_tank_balance)
+								.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus==1) & (pol_exp.uom == self.uom) & (pol_exp.name != self.name))
+								.orderby( pol_exp.entry_date,order=qb.desc)
+								.orderby( pol_exp.name, order=qb.desc)
+								.limit(1)
+								.run()
+								)
+		if closing_pol_tank_balance[0][0]:
+			self.opening_pol_tank_balance = closing_pol_tank_balance[0][0]
 		self.previous_km_reading = pv_km
 		
 	def post_journal_entry(self):
