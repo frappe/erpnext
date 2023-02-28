@@ -110,9 +110,6 @@ frappe.ui.form.on('POL Expense', {
 					frm.refresh_field("previous_balance_amount")
 					frm.refresh_field("amount")
 					frm.refresh_field("expense_limit")
-					frm.refresh_field("previous_km_reading")
-					frm.refresh_field("opening_pol_tank_balance")
-					frm.refresh_field("present_km_reading")
 					frm.dirty()
 				}
 			})
@@ -136,6 +133,9 @@ frappe.ui.form.on('POL Expense', {
 					frm.refresh_field("total_qty_received")
 					frm.refresh_field("total_bill_amount")
 					frm.refresh_field("pol_issue_during_the_period")
+					frm.refresh_field("previous_km_reading")
+					frm.refresh_field("opening_pol_tank_balance")
+					frm.refresh_field("present_km_reading")
 					frm.dirty()
 				}
 			})
