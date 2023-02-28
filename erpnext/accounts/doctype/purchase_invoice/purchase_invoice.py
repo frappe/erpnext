@@ -528,32 +528,6 @@ class PurchaseInvoice(BuyingController):
 		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
-		self.adjust_incoming_rate_of_purchase_receipt()
-
-	def adjust_incoming_rate_of_purchase_receipt(self):
-		if (
-			not frappe.db.get_single_value(
-				"Buying Settings", "adjust_incoming_rate_based_on_purchase_invoice_rate"
-			)
-			and self.is_subcontracted
-		):
-			return
-
-		purchase_receipts = []
-		for item in self.items:
-			if item.purchase_receipt and item.purchase_receipt not in purchase_receipts:
-				purchase_receipts.append(item.purchase_receipt)
-
-		for purchase_receipt in purchase_receipts:
-			doc = frappe.get_doc("Purchase Receipt", purchase_receipt)
-			doc.docstatus = 2
-			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			doc.make_gl_entries_on_cancel()
-
-			doc.docstatus = 1
-			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			doc.make_gl_entries()
-			doc.repost_future_sle_and_gle()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
@@ -1449,7 +1423,6 @@ class PurchaseInvoice(BuyingController):
 			"Tax Withheld Vouchers",
 		)
 		self.update_advance_tax_references(cancel=1)
-		self.adjust_incoming_rate_of_purchase_receipt()
 
 	def update_project(self):
 		project_list = []
