@@ -817,7 +817,9 @@ def get_leave_balance_on(
 	allocation = allocation_records.get(leave_type, frappe._dict())
 
 	end_date = allocation.to_date if cint(consider_all_leaves_in_the_allocation_period) else date
-	cf_expiry = get_allocation_expiry_for_cf_leaves(employee, leave_type, to_date, date)
+	cf_expiry = get_allocation_expiry_for_cf_leaves(
+		employee, leave_type, to_date, allocation.from_date
+	)
 
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, end_date)
 
@@ -832,6 +834,7 @@ def get_leave_balance_on(
 def get_leave_allocation_records(employee, date, leave_type=None):
 	"""Returns the total allocated leaves and carry forwarded leaves based on ledger entries"""
 	Ledger = frappe.qb.DocType("Leave Ledger Entry")
+	LeaveAllocation = frappe.qb.DocType("Leave Allocation")
 
 	cf_leave_case = (
 		frappe.qb.terms.Case().when(Ledger.is_carry_forward == "1", Ledger.leaves).else_(0)
@@ -845,6 +848,8 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 
 	query = (
 		frappe.qb.from_(Ledger)
+		.inner_join(LeaveAllocation)
+		.on(Ledger.transaction_name == LeaveAllocation.name)
 		.select(
 			sum_cf_leaves,
 			sum_new_leaves,
@@ -854,12 +859,21 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 		)
 		.where(
 			(Ledger.from_date <= date)
-			& (Ledger.to_date >= date)
 			& (Ledger.docstatus == 1)
 			& (Ledger.transaction_type == "Leave Allocation")
 			& (Ledger.employee == employee)
 			& (Ledger.is_expired == 0)
 			& (Ledger.is_lwp == 0)
+			& (
+				# newly allocated leave's end date is same as the leave allocation's to date
+				((Ledger.is_carry_forward == 0) & (Ledger.to_date >= date))
+				# carry forwarded leave's end date won't be same as the leave allocation's to date
+				# it's between the leave allocation's from and to date
+				| (
+					(Ledger.is_carry_forward == 1)
+					& (Ledger.to_date.between(LeaveAllocation.from_date, LeaveAllocation.to_date))
+				)
+			)
 		)
 	)
 
@@ -925,8 +939,12 @@ def get_remaining_leaves(
 
 	# balance for carry forwarded leaves
 	if cf_expiry and allocation.unused_leaves:
-		cf_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
-		remaining_cf_leaves = _get_remaining_leaves(cf_leaves, cf_expiry)
+		if getdate(date) > getdate(cf_expiry):
+			# carry forwarded leave expiry date passed
+			cf_leaves = remaining_cf_leaves = 0
+		else:
+			cf_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
+			remaining_cf_leaves = _get_remaining_leaves(cf_leaves, cf_expiry)
 
 		leave_balance = flt(allocation.new_leaves_allocated) + flt(cf_leaves)
 		leave_balance_for_consumption = flt(allocation.new_leaves_allocated) + flt(remaining_cf_leaves)
