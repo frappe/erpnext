@@ -266,6 +266,19 @@ def get_default_price_list(party):
 	return None
 
 
+def get_retail_price_list(party):
+	"""Return default price list for party (Document object)"""
+	if party.get("retail_price_list"):
+		return party.retail_price_list
+
+	if party.doctype == "Customer":
+		price_list = frappe.get_cached_value("Selling Settings", None, "retail_price_list")
+		if price_list:
+			return price_list
+
+	return None
+
+
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
 	price_list = get_permitted_documents('Price List')
@@ -288,6 +301,8 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 		party_details.price_list_currency = frappe.get_cached_value("Price List", price_list, "currency")
 
 	party_details["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
+
+	party_details["retail_price_list"] = get_retail_price_list(party)
 
 
 def set_due_date(party, party_type, company, posting_date, bill_date, doctype):

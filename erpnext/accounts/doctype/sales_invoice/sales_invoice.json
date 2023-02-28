@@ -76,6 +76,7 @@
   "price_list_currency",
   "plc_conversion_rate",
   "column_break_75",
+  "retail_price_list",
   "ignore_pricing_rule",
   "sec_warehouse",
   "update_stock",
@@ -138,6 +139,9 @@
   "net_totals_section",
   "net_total",
   "base_net_total",
+  "column_break_tfm8m",
+  "retail_total",
+  "base_retail_total",
   "column_break_117",
   "taxable_total",
   "base_taxable_total",
@@ -2222,13 +2226,44 @@
    "fieldname": "fbr_pos_details_tab",
    "fieldtype": "Tab Break",
    "label": "FBR POS Details"
+  },
+  {
+   "fieldname": "retail_price_list",
+   "fieldtype": "Link",
+   "label": "Retail Price List",
+   "options": "Price List",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tfm8m",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "retail_total",
+   "fieldname": "retail_total",
+   "fieldtype": "Currency",
+   "label": "Retail Total",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "retail_total",
+   "fieldname": "base_retail_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Retail Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-11 17:43:48.663734",
+ "modified": "2023-02-27 23:08:59.508586",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

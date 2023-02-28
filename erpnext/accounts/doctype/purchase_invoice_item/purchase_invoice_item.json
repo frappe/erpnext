@@ -41,13 +41,19 @@
   "net_weight_per_unit",
   "net_weight",
   "weight_uom",
+  "retail_price_section",
+  "retail_rate",
+  "base_retail_rate",
+  "column_break_k8fjg",
+  "retail_amount",
+  "base_retail_amount",
   "sec_break1",
   "price_list_rate",
   "base_price_list_rate",
   "column_break_39",
   "discount_percentage",
   "discount_amount",
-  "apply_discount_after_taxes",
+  "apply_taxes_on_retail",
   "pricing_rules",
   "is_free_item",
   "is_fixed_asset",
@@ -826,10 +832,10 @@
   },
   {
    "default": "0",
-   "depends_on": "price_list_rate",
-   "fieldname": "apply_discount_after_taxes",
+   "depends_on": "eval:doc.price_list_rate || doc.retail_rate",
+   "fieldname": "apply_taxes_on_retail",
    "fieldtype": "Check",
-   "label": "Apply Discount After Taxes"
+   "label": "Apply Taxes on Retail Price"
   },
   {
    "fieldname": "column_break_49",
@@ -1243,11 +1249,54 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "retail_rate",
+   "fieldname": "retail_price_section",
+   "fieldtype": "Section Break",
+   "label": "Retail Price"
+  },
+  {
+   "fieldname": "retail_rate",
+   "fieldtype": "Currency",
+   "label": "Retail Rate",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_retail_rate",
+   "fieldtype": "Float",
+   "label": "Retail Rate (Company Currency)",
+   "options": "Company:company_default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_k8fjg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "retail_amount",
+   "fieldtype": "Currency",
+   "label": "Retail Amount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_retail_amount",
+   "fieldtype": "Currency",
+   "label": "Retail Amount (Company Currency)",
+   "options": "Company:company_default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2023-02-26 18:52:05.550773",
+ "modified": "2023-02-28 14:23:15.584604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

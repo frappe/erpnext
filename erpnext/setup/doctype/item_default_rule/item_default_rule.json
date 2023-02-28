@@ -25,8 +25,8 @@
   "selling_cost_center",
   "buying_cost_center",
   "column_break_15",
-  "selling_apply_discount_after_taxes",
-  "buying_apply_discount_after_taxes",
+  "selling_apply_taxes_on_retail",
+  "buying_apply_taxes_on_retail",
   "stock_defaults_section",
   "default_warehouse",
   "column_break_14",
@@ -133,11 +133,11 @@
    "options": "Account"
   },
   {
-   "fieldname": "buying_apply_discount_after_taxes",
+   "fieldname": "buying_apply_taxes_on_retail",
    "fieldtype": "Select",
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
-   "label": "Apply Discount After Taxes For Purchase",
+   "label": "Apply Taxes on Retail Price For Purchase",
    "options": "\nNo\nYes"
   },
   {
@@ -157,11 +157,11 @@
    "options": "Account"
   },
   {
-   "fieldname": "selling_apply_discount_after_taxes",
+   "fieldname": "selling_apply_taxes_on_retail",
    "fieldtype": "Select",
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
-   "label": "Apply Discount After Taxes For Sales",
+   "label": "Apply Taxes on Retail Price For Sales",
    "options": "\nNo\nYes"
   },
   {
@@ -346,7 +346,7 @@
    "read_only": 1
   }
  ],
- "modified": "2022-10-08 14:23:15.584604",
+ "modified": "2023-02-28 14:23:15.584604",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Default Rule",

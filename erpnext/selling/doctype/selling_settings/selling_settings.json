@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-06-25 10:25:16",
  "description": "Settings for Selling Module",
  "doctype": "DocType",
@@ -9,6 +10,7 @@
   "customer_group",
   "territory",
   "selling_price_list",
+  "retail_price_list",
   "default_valid_till",
   "role_allowed_to_duplicate_customer_ntn",
   "column_break_5",
@@ -51,7 +53,7 @@
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Default Price List",
+   "label": "Default Selling Price List",
    "options": "Price List"
   },
   {
@@ -137,12 +139,19 @@
    "fieldtype": "Link",
    "label": "Role Allowed To Create Customer With Duplicate NTN",
    "options": "Role"
+  },
+  {
+   "fieldname": "retail_price_list",
+   "fieldtype": "Link",
+   "label": "Retail Price List",
+   "options": "Price List"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2023-02-23 18:53:23.135929",
+ "links": [],
+ "modified": "2023-02-27 23:13:01.959409",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -169,5 +178,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

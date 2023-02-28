@@ -47,6 +47,12 @@
   "weight_uom",
   "sample_quantity",
   "retain_sample",
+  "retail_price_section",
+  "retail_rate",
+  "base_retail_rate",
+  "column_break_k8fjg",
+  "retail_amount",
+  "base_retail_amount",
   "rate_and_amount",
   "price_list_rate",
   "base_price_list_rate",
@@ -56,7 +62,7 @@
   "col_break3",
   "pricing_rules",
   "is_free_item",
-  "apply_discount_after_taxes",
+  "apply_taxes_on_retail",
   "is_fixed_asset",
   "sec_break1",
   "rate",
@@ -942,10 +948,10 @@
   },
   {
    "default": "0",
-   "depends_on": "price_list_rate",
-   "fieldname": "apply_discount_after_taxes",
+   "depends_on": "eval:doc.price_list_rate || doc.retail_rate",
+   "fieldname": "apply_taxes_on_retail",
    "fieldtype": "Check",
-   "label": "Apply Discount After Taxes",
+   "label": "Apply Taxes on Retail Price",
    "print_hide": 1
   },
   {
@@ -1364,11 +1370,54 @@
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "retail_rate",
+   "fieldname": "retail_price_section",
+   "fieldtype": "Section Break",
+   "label": "Retail Price"
+  },
+  {
+   "fieldname": "retail_rate",
+   "fieldtype": "Currency",
+   "label": "Retail Rate",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_retail_rate",
+   "fieldtype": "Float",
+   "label": "Retail Rate (Company Currency)",
+   "options": "Company:company_default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_k8fjg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "retail_amount",
+   "fieldtype": "Currency",
+   "label": "Retail Amount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_retail_amount",
+   "fieldtype": "Currency",
+   "label": "Retail Amount (Company Currency)",
+   "options": "Company:company_default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2023-02-26 16:52:20.576397",
+ "modified": "2023-02-28 14:23:15.584604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

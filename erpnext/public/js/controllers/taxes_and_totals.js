@@ -128,9 +128,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 
 				if ((!item.qty) && me.frm.doc.is_return) {
+					item.retail_amount = flt(item.retail_rate * -1, precision("retail_amount", item));
 					item.amount_before_discount = flt(rate_before_discount * -1, precision("amount_before_discount", item));
 					item.amount = flt(item.rate * -1, precision("amount", item));
 				} else {
+					item.retail_amount = flt(item.retail_rate * item.qty, precision("retail_amount", item));
 					item.amount_before_discount = flt(rate_before_discount * item.qty, precision("amount_before_discount", item));
 					item.amount = flt(item.rate * item.qty, precision("amount", item));
 				}
@@ -168,8 +170,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					item.tax_exclusive_amount_before_depreciation = item.amount_before_depreciation;
 				}
 
-				item.taxable_rate = cint(item.apply_discount_after_taxes) ? rate_before_discount : item.rate;
-				item.taxable_amount = cint(item.apply_discount_after_taxes) ? item.amount_before_discount : item.amount;
+				if (cint(item.apply_taxes_on_retail)) {
+					item.taxable_rate = item.retail_rate ? item.retail_rate : rate_before_discount;
+					item.taxable_amount = item.retail_rate ? item.retail_amount : item.amount_before_discount;
+				} else {
+					item.taxable_rate = item.rate;
+					item.taxable_amount = item.amount;
+				}
+
 				item.taxable_rate = item.qty ? flt(item.taxable_amount / item.qty, precision("taxable_rate", item)) : item.taxable_rate;
 
 				item.net_rate = item.rate;
@@ -205,7 +213,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount",
 					"taxable_rate", "taxable_amount", "net_rate", "net_amount",
 					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
-					"amount_before_discount", "total_discount", "tax_exclusive_amount_before_discount", "tax_exclusive_total_discount"]);
+					"amount_before_discount", "total_discount",
+					"tax_exclusive_amount_before_discount", "tax_exclusive_total_discount",
+					"retail_rate", "retail_amount"]);
 			});
 		}
 	}
@@ -372,6 +382,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var me = this;
 		this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = 0.0;
 		this.frm.doc.taxable_total = this.frm.doc.base_taxable_total = 0.0;
+		this.frm.doc.retail_total = this.frm.doc.base_retail_total = 0.0;
 		this.frm.doc.total_alt_uom_qty = 0;
 		this.frm.doc.base_tax_exclusive_total = this.frm.doc.tax_exclusive_total = 0.0;
 		this.frm.doc.base_total_discount = this.frm.doc.total_discount = 0.0;
@@ -421,6 +432,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			me.frm.doc.taxable_total += item.taxable_amount;
 			me.frm.doc.base_taxable_total += item.base_taxable_amount;
 
+			me.frm.doc.retail_total += item.retail_amount;
+			me.frm.doc.base_retail_total += item.base_retail_amount;
+
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 
@@ -445,7 +459,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		frappe.model.round_floats_in(this.frm.doc, [
 			"total", "base_total", "net_total", "base_net_total",
-			"taxable_total", "base_taxable_total",
+			"taxable_total", "base_taxable_total", "retail_total", "base_retail_total",
 			"total_discount_after_taxes", "base_total_discount_after_taxes",
 			"tax_exclusive_total", "base_tax_exclusive_total",
 			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount",
@@ -886,7 +900,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
-					if (!cint(item.apply_discount_after_taxes)) {
+					if (!cint(item.apply_taxes_on_retail)) {
 						item.taxable_amount = item.net_amount;
 						item.taxable_rate = item.net_rate;
 					}
@@ -926,7 +940,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	get_item_amount_for_discount_amount(item) {
-		if(this.frm.doc.apply_discount_on == "Net Total" || !cint(item.apply_discount_after_taxes)) {
+		if(this.frm.doc.apply_discount_on == "Net Total" || !cint(item.apply_taxes_on_retail)) {
 			return item.net_amount;
 		} else {
 			var item_tax_detail = JSON.parse(item.item_tax_detail || '{}');

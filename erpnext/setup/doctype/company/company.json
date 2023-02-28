@@ -79,8 +79,8 @@
   "further_tax_account",
   "extra_tax_account",
   "column_break_64",
-  "selling_apply_discount_after_taxes",
-  "buying_apply_discount_after_taxes",
+  "selling_apply_taxes_on_retail",
+  "buying_apply_taxes_on_retail",
   "advance_tax_section",
   "advance_tax_accounts",
   "default_accounts_section",
@@ -738,15 +738,15 @@
    "options": "Terms and Conditions"
   },
   {
-   "fieldname": "buying_apply_discount_after_taxes",
+   "fieldname": "buying_apply_taxes_on_retail",
    "fieldtype": "Select",
-   "label": "Apply Discount After Taxes For Purchase",
+   "label": "Apply Taxes on Retail Price For Purchase",
    "options": "\nNo\nYes"
   },
   {
-   "fieldname": "selling_apply_discount_after_taxes",
+   "fieldname": "selling_apply_taxes_on_retail",
    "fieldtype": "Select",
-   "label": "Apply Discount After Taxes For Sales",
+   "label": "Apply Taxes on Retail Price For Sales",
    "options": "\nNo\nYes"
   },
   {
@@ -945,7 +945,7 @@
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2022-12-15 18:03:01.680143",
+ "modified": "2023-02-28 14:23:15.584604",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

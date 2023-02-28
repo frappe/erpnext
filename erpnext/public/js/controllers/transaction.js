@@ -124,7 +124,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			item.tax_inclusive_rate = flt(item.tax_inclusive_rate);
 
 			var rate;
-			if (cint(item.apply_discount_after_taxes)) {
+			if (cint(item.apply_taxes_on_retail)) {
 				rate = item.tax_inclusive_rate - flt(item.taxable_rate) * tax_fraction;
 			} else {
 				rate = item.tax_inclusive_rate / (1 + tax_fraction);
@@ -821,6 +821,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							currency: me.frm.doc.currency,
 							update_stock: update_stock,
 							conversion_rate: me.frm.doc.conversion_rate,
+							retail_price_list: me.frm.doc.retail_price_list,
 							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
@@ -841,7 +842,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 							cost_center: item.cost_center,
-							apply_discount_after_taxes: item.apply_discount_after_taxes,
+							apply_taxes_on_retail: item.apply_taxes_on_retail,
 							allow_zero_valuation_rate: item.allow_zero_valuation_rate,
 							tax_category: me.frm.doc.tax_category,
 							child_docname: item.name,
@@ -1002,7 +1003,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	apply_discount_after_taxes() {
+	apply_taxes_on_retail() {
 		this.set_dynamic_labels();
 		this.calculate_taxes_and_totals();
 	}
@@ -1529,7 +1530,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	change_form_labels(company_currency) {
 		var me = this;
 
-		this.frm.set_currency_labels(["base_total", "base_net_total", "base_taxable_total",
+		this.frm.set_currency_labels(["base_total", "base_net_total", "base_taxable_total", "base_retail_total",
 			"base_total_taxes_and_charges", "base_total_discount_after_taxes", "base_total_after_taxes",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
@@ -1542,7 +1543,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"base_total_depreciation", "base_tax_exclusive_total_depreciation",
 			"base_total_before_depreciation", "base_tax_exclusive_total_before_depreciation"], company_currency);
 
-		this.frm.set_currency_labels(["total", "net_total", "taxable_total", "total_taxes_and_charges",
+		this.frm.set_currency_labels(["total", "net_total", "taxable_total", "retail_total", "total_taxes_and_charges",
 			"discount_amount", "grand_total", "total_discount_after_taxes", "total_after_taxes",
 			"taxes_and_charges_added", "taxes_and_charges_deducted",
 			"rounded_total", "in_words", "paid_amount", "write_off_amount", "change_amount", "operating_cost",
@@ -1574,7 +1575,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		// toggle fields
-		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_taxable_total",
+		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_taxable_total", "base_retail_total",
 			"base_total_discount_after_taxes", "base_total_after_taxes",
 			"base_total_taxes_and_charges", "base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words",
@@ -1604,9 +1605,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				cur_frm.toggle_display(fname, show_exclusive && (me.frm.doc.currency != company_currency), true);
 		});
 
-		var apply_discount_after_taxes = (cur_frm.doc.items || []).filter(d => cint(d.apply_discount_after_taxes)).length
+		var apply_taxes_on_retail = (cur_frm.doc.items || []).filter(d => cint(d.apply_taxes_on_retail)).length
 			&& (cur_frm.doc.taxes || []).filter(d => d.tax_amount).length;
-		var show_net = cint(cur_frm.doc.discount_amount) || apply_discount_after_taxes || show_exclusive;
+		var show_net = cint(cur_frm.doc.discount_amount) || apply_taxes_on_retail || show_exclusive;
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
 			cur_frm.toggle_display("net_total", show_net, true);
@@ -1632,7 +1633,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"base_total_discount", "base_tax_exclusive_total_discount",
 				"base_depreciation_amount", "base_amount_before_depreciation",
 				"base_tax_exclusive_depreciation_amount", "base_tax_exclusive_amount_before_depreciation",
-				"base_returned_amount"],
+				"base_returned_amount",
+				"base_retail_rate", "base_retail_amount"],
 			company_currency, "items");
 
 		this.frm.set_currency_labels(["price_list_rate", "rate", "net_rate", "taxable_rate",
@@ -1642,7 +1644,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				"amount_before_discount", "tax_exclusive_amount_before_discount",
 				"total_discount", "tax_exclusive_total_discount",
 				"depreciation_amount", "amount_before_depreciation",
-				"tax_exclusive_depreciation_amount", "tax_exclusive_amount_before_depreciation"],
+				"tax_exclusive_depreciation_amount", "tax_exclusive_amount_before_depreciation",
+				"retail_rate", "retail_amount"],
 			this.frm.doc.currency, "items");
 
 		if(this.frm.fields_dict["operations"]) {
@@ -1704,7 +1707,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item_grid = this.frm.fields_dict["items"].grid;
 		$.each(["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin",
 		"base_amount_before_discount", "base_total_discount", "base_depreciation_amount", "base_amount_before_depreciation",
-		"base_item_taxes_and_charges", "base_tax_inclusive_amount", "base_tax_inclusive_rate"], function(i, fname) {
+		"base_item_taxes_and_charges", "base_tax_inclusive_amount", "base_tax_inclusive_rate",
+		"base_retail_rate", "base_retail_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency, true);
 		});
@@ -1727,8 +1731,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item_grid.set_column_disp(fname, (show_exclusive && (me.frm.doc.currency != company_currency)), true);
 		});
 
-		var apply_discount_after_taxes = (cur_frm.doc.items || []).filter(d => cint(d.apply_discount_after_taxes)).length;
-		var show_net = cint(cur_frm.doc.discount_amount) || apply_discount_after_taxes || show_exclusive;
+		var apply_taxes_on_retail = (cur_frm.doc.items || []).filter(d => cint(d.apply_taxes_on_retail)).length;
+		var show_net = cint(cur_frm.doc.discount_amount) || apply_taxes_on_retail || show_exclusive;
 
 		$.each(["taxable_rate", "taxable_amount", "net_rate", "net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
@@ -1830,6 +1834,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"supplier_group": me.frm.doc.supplier_group,
 			"currency": me.frm.doc.currency,
 			"conversion_rate": me.frm.doc.conversion_rate,
+			"retail_price_list": me.frm.doc.retail_price_list,
 			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 			"price_list_currency": me.frm.doc.price_list_currency,
 			"plc_conversion_rate": me.frm.doc.plc_conversion_rate,
@@ -1875,7 +1880,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"discount_percentage": d.discount_percentage || 0.0,
 					"price_list_rate": d.price_list_rate,
 					"conversion_factor": d.conversion_factor || 1.0,
-					"apply_discount_after_taxes": d.apply_discount_after_taxes,
+					"apply_taxes_on_retail": d.apply_taxes_on_retail,
 					"allow_zero_valuation_rate": d.allow_zero_valuation_rate
 				});
 
@@ -2236,7 +2241,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					cost_center: item.cost_center,
 					income_account: item.income_account,
 					expense_account: item.expense_account,
-					apply_discount_after_taxes: item.apply_discount_after_taxes,
+					apply_taxes_on_retail: item.apply_taxes_on_retail,
 					allow_zero_valuation_rate: me.allow_zero_valuation_rate,
 					project: item.project || me.frm.doc.project,
 					warehouse: item.warehouse

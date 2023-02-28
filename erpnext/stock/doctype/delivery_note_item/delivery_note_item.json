@@ -38,6 +38,12 @@
   "net_weight_per_unit",
   "net_weight",
   "weight_uom",
+  "retail_price_section",
+  "retail_rate",
+  "base_retail_rate",
+  "column_break_k8fjg",
+  "retail_amount",
+  "base_retail_amount",
   "section_break_17",
   "price_list_rate",
   "base_price_list_rate",
@@ -51,7 +57,7 @@
   "column_break_53",
   "discount_percentage",
   "discount_amount",
-  "apply_discount_after_taxes",
+  "apply_taxes_on_retail",
   "pricing_rules",
   "section_break_1",
   "rate",
@@ -775,10 +781,10 @@
   },
   {
    "default": "0",
-   "depends_on": "price_list_rate",
-   "fieldname": "apply_discount_after_taxes",
+   "depends_on": "eval:doc.price_list_rate || doc.retail_rate",
+   "fieldname": "apply_taxes_on_retail",
    "fieldtype": "Check",
-   "label": "Apply Discount After Taxes",
+   "label": "Apply Taxes on Retail Price",
    "print_hide": 1
   },
   {
@@ -1282,12 +1288,55 @@
    "oldfieldtype": "Link",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "retail_rate",
+   "fieldname": "retail_price_section",
+   "fieldtype": "Section Break",
+   "label": "Retail Price"
+  },
+  {
+   "fieldname": "retail_rate",
+   "fieldtype": "Currency",
+   "label": "Retail Rate",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_retail_rate",
+   "fieldtype": "Float",
+   "label": "Retail Rate (Company Currency)",
+   "options": "Company:company_default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_k8fjg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "retail_amount",
+   "fieldtype": "Currency",
+   "label": "Retail Amount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_retail_amount",
+   "fieldtype": "Currency",
+   "label": "Retail Amount (Company Currency)",
+   "options": "Company:company_default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-12 21:51:42.889560",
+ "modified": "2023-02-28 14:23:15.584604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

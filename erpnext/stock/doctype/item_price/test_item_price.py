@@ -48,7 +48,7 @@ class TestItemPrice(unittest.TestCase):
             "qty": 10
 		}
 
-		price = get_price_list_rate_for(process_args(args), doc.item_code)
+		price = get_price_list_rate_for(doc.item_code, args.get("price_list"), process_args(args))
 		self.assertEqual(price, 20.0)
 
 	def test_price_with_no_qty(self):
@@ -61,7 +61,7 @@ class TestItemPrice(unittest.TestCase):
             "transaction_date": '2017-04-18',
 		}
 
-		price = get_price_list_rate_for(args, doc.item_code)
+		price = get_price_list_rate_for(doc.item_code, args.get("price_list"), args)
 		self.assertEqual(price, None)
 
 
@@ -77,7 +77,7 @@ class TestItemPrice(unittest.TestCase):
 			"qty": 7
 		}
 
-		price = get_price_list_rate_for(args, doc.item_code)
+		price = get_price_list_rate_for(doc.item_code, args.get("price_list"), args)
 		self.assertEqual(price, 20)
 
 	def test_prices_at_invalid_date(self):
@@ -91,7 +91,7 @@ class TestItemPrice(unittest.TestCase):
 			"transaction_date": "01-15-2019"
 		}
 
-		price = get_price_list_rate_for(args, doc.item_code)
+		price = get_price_list_rate_for(doc.item_code, args.get("price_list"), args)
 		self.assertEqual(price, None)
 
 	def test_prices_outside_of_date(self):
@@ -106,7 +106,7 @@ class TestItemPrice(unittest.TestCase):
 			"qty": 7,
 		}
 
-		price = get_price_list_rate_for(args, doc.item_code)
+		price = get_price_list_rate_for(doc.item_code, args.get("price_list"), args)
 		self.assertEqual(price, None)
 
 	def test_lowest_price_when_no_date_provided(self):
@@ -119,7 +119,7 @@ class TestItemPrice(unittest.TestCase):
 			"qty": 7,
 		}
 
-		price = get_price_list_rate_for(args, doc.item_code)
+		price = get_price_list_rate_for(doc.item_code, args.get("price_list"), args)
 		self.assertEqual(price, 10)
 
 

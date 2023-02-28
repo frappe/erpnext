@@ -26,14 +26,15 @@ from collections import OrderedDict
 force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "alt_uom_size",
 	"item_tax_rate", "pricing_rules", "allow_zero_valuation_rate", "force_default_warehouse",
 	"is_stock_item", "is_fixed_asset" "has_batch_no", "has_serial_no", "is_vehicle",
-	"claim_customer", "sales_commission_category", "commission_rate")
+	"claim_customer", "sales_commission_category", "commission_rate", "retail_rate")
 
 force_party_fields = ("customer_name", "bill_to_name", "supplier_name",
 	"customer_group", "supplier_group",
 	"contact_display", "contact_mobile", "contact_phone", "contact_email",
 	"address_display", "company_address_display",
 	"customer_credit_limit", "customer_credit_balance", "customer_outstanding_amount", "previous_outstanding_amount",
-	"tax_id", "tax_cnic", "tax_strn")
+	"tax_id", "tax_cnic", "tax_strn",
+	"retail_price_list")
 
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
 	"vehicle_color", "vehicle_last_odometer", "applies_to_item", "vehicle_owner_name", "vehicle_warranty_no")
