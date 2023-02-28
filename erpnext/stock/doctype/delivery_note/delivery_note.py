@@ -124,7 +124,7 @@ class DeliveryNote(SellingController):
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
-		self.validate_posting_time()
+		# self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.calculate_qty_and_fetch_transporter_rate()
 		self.set_status()
