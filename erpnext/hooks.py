@@ -34,9 +34,13 @@ doctype_js = {
 	"Workstation": "public/js/master/workstation.js",
 	"Price List": "public/js/master/price_list.js",
 	"Warehouse": "public/js/master/warehouse.js",
+	"Company": "public/js/master/company.js",
 }
 
-doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
+doctype_list_js = {
+	"Supplier": "public/js/master/supplier_list.js",
+	"Company": "public/js/master/company_list.js",
+}
 
 doctype_tree_js = {
 	"Supplier Group": "public/js/master/supplier_group_tree.js",
@@ -51,6 +55,7 @@ override_doctype_class = {
 	"Workstation": "erpnext.manufacturing.master.workstation.workstation.ERPNextWorkstation",
 	"Price List": "erpnext.stock.master.price_list.price_list.ERPNextPriceList",
 	"Warehouse": "erpnext.stock.master.warehouse.warehouse.ERPNextWarehouse",
+	"Company": "erpnext.setup.master.company.company.ERPNextCompany",
 }
 
 override_doctype_dashboards = {
@@ -58,6 +63,7 @@ override_doctype_dashboards = {
 	"Bank": "erpnext.accounts.master.bank.bank_dashboard.get_data",
 	"Workstation": "erpnext.manufacturing.master.workstation.workstation_dashboard.get_data",
 	"Operation": "erpnext.manufacturing.master.operation.operation_dashboard.get_data",
+	"Company": "erpnext.setup.master.company.company_dashboard.get_data",
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -426,7 +432,7 @@ scheduler_events = {
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
-		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
+		"erpnext.setup.master.company.company.cache_companies_monthly_sales_history",
 		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",
 		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",

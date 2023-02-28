@@ -478,7 +478,7 @@ def unset_existing_data(company):
 
 
 def set_default_accounts(company):
-	from erpnext.setup.doctype.company.company import install_country_fixtures
+	from erpnext.setup.master.company.company import install_country_fixtures
 
 	company = frappe.get_doc("Company", company)
 	company.update(

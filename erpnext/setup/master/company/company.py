@@ -7,23 +7,17 @@ import json
 import frappe
 import frappe.defaults
 from frappe import _
-from frappe.cache_manager import clear_defaults_cache
-from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.desk.page.setup_wizard.setup_wizard import make_records
+from frappe.query_builder import Field
 from frappe.utils import cint, formatdate, get_timestamp, today
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet
+from master.master.doctype.company.company import Company
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 
-class Company(NestedSet):
-	nsm_parent_field = "parent_company"
-
-	def onload(self):
-		load_address_and_contact(self, "company")
-
+class ERPNextCompany(Company):
 	@frappe.whitelist()
 	def check_if_transactions_exist(self):
 		exists = False
@@ -37,12 +31,12 @@ class Company(NestedSet):
 			"Purchase Order",
 			"Supplier Quotation",
 		]:
-			if frappe.db.sql(
-				"""select name from `tab%s` where company=%s and docstatus=1
-					limit 1"""
-				% (doctype, "%s"),
-				self.name,
-			):
+			if (
+				frappe.qb.from_(doctype)
+				.select("name")
+				.where((Field("company") == self.name) & (Field("docstatus") == 1))
+				.limit(1)
+			).run():
 				exists = True
 				break
 
@@ -53,30 +47,13 @@ class Company(NestedSet):
 		if self.is_new():
 			self.update_default_account = True
 
-		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.validate_provisional_account_for_non_stock_items()
-		self.check_country_change()
-		self.check_parent_changed()
-		self.set_chart_of_accounts()
-		self.validate_parent_company()
 
-	def validate_abbr(self):
-		if not self.abbr:
-			self.abbr = "".join(c[0] for c in self.company_name.split()).upper()
-
-		self.abbr = self.abbr.strip()
-
-		if not self.abbr.strip():
-			frappe.throw(_("Abbreviation is mandatory"))
-
-		if frappe.db.sql(
-			"select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)
-		):
-			frappe.throw(_("Abbreviation already used for another company"))
+		super(ERPNextCompany, self).validate()
 
 	@frappe.whitelist()
 	def create_default_tax_template(self):
@@ -112,9 +89,11 @@ class Company(NestedSet):
 	def validate_currency(self):
 		if self.is_new():
 			return
+
 		self.previous_default_currency = frappe.get_cached_value(
 			"Company", self.name, "default_currency"
 		)
+
 		if (
 			self.default_currency
 			and self.previous_default_currency
@@ -129,11 +108,12 @@ class Company(NestedSet):
 
 	def on_update(self):
 		NestedSet.on_update(self)
-		if not frappe.db.sql(
-			"""select name from tabAccount
-				where company=%s and docstatus<2 limit 1""",
-			self.name,
-		):
+
+		if not (
+			frappe.qb.from_("Account")
+			.select("name")
+			.where((Field("company") == self.name) & (Field("docstatus") < 2))
+		).run():
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				frappe.flags.country_change = True
 				self.create_default_accounts()
@@ -154,49 +134,13 @@ class Company(NestedSet):
 			if self.default_cash_account:
 				self.set_mode_of_payment_account()
 
-		if self.default_currency:
-			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
-
 		if (
 			hasattr(frappe.local, "enable_perpetual_inventory")
 			and self.name in frappe.local.enable_perpetual_inventory
 		):
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
-		if frappe.flags.parent_company_changed:
-			from frappe.utils.nestedset import rebuild_tree
-
-			rebuild_tree("Company", "parent_company")
-
-		frappe.clear_cache()
-
-	def create_default_warehouses(self):
-		for wh_detail in [
-			{"warehouse_name": _("All Warehouses"), "is_group": 1},
-			{"warehouse_name": _("Stores"), "is_group": 0},
-			{"warehouse_name": _("Work In Progress"), "is_group": 0},
-			{"warehouse_name": _("Finished Goods"), "is_group": 0},
-			{"warehouse_name": _("Goods In Transit"), "is_group": 0, "warehouse_type": "Transit"},
-		]:
-
-			if not frappe.db.exists(
-				"Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)
-			):
-				warehouse = frappe.get_doc(
-					{
-						"doctype": "Warehouse",
-						"warehouse_name": wh_detail["warehouse_name"],
-						"is_group": wh_detail["is_group"],
-						"company": self.name,
-						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr)
-						if not wh_detail["is_group"]
-						else "",
-						"warehouse_type": wh_detail["warehouse_type"] if "warehouse_type" in wh_detail else None,
-					}
-				)
-				warehouse.flags.ignore_permissions = True
-				warehouse.flags.ignore_mandatory = True
-				warehouse.insert()
+		super(ERPNextCompany, self).on_update()
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -217,104 +161,6 @@ class Company(NestedSet):
 				"Account", {"company": self.name, "account_type": "Payable", "is_group": 0}
 			),
 		)
-
-	def create_default_departments(self):
-		records = [
-			# Department
-			{
-				"doctype": "Department",
-				"department_name": _("All Departments"),
-				"is_group": 1,
-				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-			{
-				"doctype": "Department",
-				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
-			},
-		]
-
-		# Make root department with NSM updation
-		make_records(records[:1])
-
-		frappe.local.flags.ignore_update_nsm = True
-		make_records(records)
-		frappe.local.flags.ignore_update_nsm = False
-		rebuild_tree("Department", "parent_department")
 
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":
@@ -353,27 +199,6 @@ class Company(NestedSet):
 				"Check",
 				validate_fields_for_doctype=False,
 			)
-
-	def check_country_change(self):
-		frappe.flags.country_change = False
-
-		if not self.is_new() and self.country != frappe.get_cached_value(
-			"Company", self.name, "country"
-		):
-			frappe.flags.country_change = True
-
-	def set_chart_of_accounts(self):
-		"""If parent company is set, chart of accounts will be based on that company"""
-		if self.parent_company:
-			self.create_chart_of_accounts_based_on = "Existing Company"
-			self.existing_company = self.parent_company
-
-	def validate_parent_company(self):
-		if self.parent_company:
-			is_group = frappe.get_value("Company", self.parent_company, "is_group")
-
-			if not is_group:
-				frappe.throw(_("Parent Company must be a group company"))
 
 	def set_default_accounts(self):
 		default_accounts = {
@@ -491,20 +316,6 @@ class Company(NestedSet):
 		self.db_set("round_off_cost_center", _("Main") + " - " + self.abbr)
 		self.db_set("depreciation_cost_center", _("Main") + " - " + self.abbr)
 
-	def after_rename(self, olddn, newdn, merge=False):
-		self.db_set("company_name", newdn)
-
-		frappe.db.sql(
-			"""update `tabDefaultValue` set defvalue=%s
-			where defkey='Company' and defvalue=%s""",
-			(newdn, olddn),
-		)
-
-		clear_defaults_cache()
-
-	def abbreviate(self):
-		self.abbr = "".join(c[0].upper() for c in self.company_name.split())
-
 	def on_trash(self):
 		"""
 		Trash accounts and cost centers for this company if no gl entry exists
@@ -579,24 +390,6 @@ class Company(NestedSet):
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value("GL Entry", {"company": self.name}):
 			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
-
-	def check_parent_changed(self):
-		frappe.flags.parent_company_changed = False
-
-		if not self.is_new() and self.parent_company != frappe.db.get_value(
-			"Company", self.name, "parent_company"
-		):
-			frappe.flags.parent_company_changed = True
-
-
-def get_name_with_abbr(name, company):
-	company_abbr = frappe.get_cached_value("Company", company, "abbr")
-	parts = name.split(" - ")
-
-	if parts[-1].lower() != company_abbr.lower():
-		parts.append(company_abbr)
-
-	return " - ".join(parts)
 
 
 def install_country_fixtures(company, country):
@@ -675,40 +468,6 @@ def cache_companies_monthly_sales_history():
 	frappe.db.commit()
 
 
-@frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False):
-	if parent == None or parent == "All Companies":
-		parent = ""
-
-	return frappe.db.sql(
-		"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabCompany` comp
-		where
-			ifnull(parent_company, "")={parent}
-		""".format(
-			parent=frappe.db.escape(parent)
-		),
-		as_dict=1,
-	)
-
-
-@frappe.whitelist()
-def add_node():
-	from frappe.desk.treeview import make_tree_args
-
-	args = frappe.form_dict
-	args = make_tree_args(**args)
-
-	if args.parent_company == "All Companies":
-		args.parent_company = None
-
-	frappe.get_doc(args).insert()
-
-
 def get_all_transactions_annual_history(company):
 	out = {}
 
@@ -783,34 +542,6 @@ def get_timeline_data(doctype, name):
 		return json.loads(history) if history and "{" in history else {}
 
 	return date_to_value_dict
-
-
-@frappe.whitelist()
-def get_default_company_address(name, sort_key="is_primary_address", existing_address=None):
-	if sort_key not in ["is_shipping_address", "is_primary_address"]:
-		return None
-
-	out = frappe.db.sql(
-		""" SELECT
-			addr.name, addr.%s
-		FROM
-			`tabAddress` addr, `tabDynamic Link` dl
-		WHERE
-			dl.parent = addr.name and dl.link_doctype = 'Company' and
-			dl.link_name = %s and ifnull(addr.disabled, 0) = 0
-		"""
-		% (sort_key, "%s"),
-		(name),
-	)  # nosec
-
-	if existing_address:
-		if existing_address in [d[0] for d in out]:
-			return existing_address
-
-	if out:
-		return min(out, key=lambda x: x[1])[0]  # find min by sort_key
-	else:
-		return None
 
 
 @frappe.whitelist()

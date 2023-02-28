@@ -1,7 +1,7 @@
 from frappe import _
 
 
-def get_data():
+def get_data(data):
 	return {
 		"graph": True,
 		"graph_method": "frappe.utils.goal.get_monthly_goal_graph_data",

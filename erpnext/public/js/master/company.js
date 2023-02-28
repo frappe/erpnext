@@ -5,84 +5,18 @@ frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
 	onload: function(frm) {
-		if (frm.doc.__islocal && frm.doc.parent_company) {
-			frappe.db.get_value('Company', frm.doc.parent_company, 'is_group', (r) => {
-				if (!r.is_group) {
-					frm.set_value('parent_company', '');
-				}
-			});
-		}
-
 		frm.call('check_if_transactions_exist').then(r => {
 			frm.toggle_enable("default_currency", (!r.message));
 		});
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
-
-		frm.set_query("parent_company", function() {
-			return {
-				filters: {"is_group": 1}
-			}
-		});
-
-		frm.set_query("default_selling_terms", function() {
-			return { filters: { selling: 1 } };
-		});
-
-		frm.set_query("default_buying_terms", function() {
-			return { filters: { buying: 1 } };
-		});
-
-		frm.set_query("default_in_transit_warehouse", function() {
-			return {
-				filters:{
-					'warehouse_type' : 'Transit',
-					'is_group': 0,
-					'company': frm.doc.company
-				}
-			};
-		});
-	},
-
-	company_name: function(frm) {
-		if(frm.doc.__islocal) {
-			// add missing " " arg in split method
-			let parts = frm.doc.company_name.split(" ");
-			let abbr = $.map(parts, function (p) {
-				return p? p.substr(0, 1) : null;
-			}).join("");
-			frm.set_value("abbr", abbr);
-		}
-	},
-
-	parent_company: function(frm) {
-		var bool = frm.doc.parent_company ? true : false;
-		frm.set_value('create_chart_of_accounts_based_on', bool ? "Existing Company" : "");
-		frm.set_value('existing_company', bool ? frm.doc.parent_company : "");
-		disbale_coa_fields(frm, bool);
-	},
-
-	date_of_commencement: function(frm) {
-		if(frm.doc.date_of_commencement<frm.doc.date_of_incorporation)
-		{
-			frappe.throw(__("Date of Commencement should be greater than Date of Incorporation"));
-		}
-		if(!frm.doc.date_of_commencement){
-			frm.doc.date_of_incorporation = ""
-		}
 	},
 
 	refresh: function(frm) {
 		frm.toggle_display('address_html', !frm.is_new());
 
 		if (!frm.is_new()) {
-			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
-			disbale_coa_fields(frm);
-			frappe.contacts.render_address_and_contact(frm);
-
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
-
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
 					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
@@ -155,7 +89,7 @@ frappe.ui.form.on("Company", {
 					return;
 				}
 				frappe.call({
-					method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
+					method: "erpnext.setup.master.company.company.create_transaction_deletion_request",
 					args: {
 						company: data.company_name
 					},
@@ -263,10 +197,4 @@ erpnext.company.set_custom_query = function(frm, v) {
 			filters: filters
 		}
 	});
-}
-
-var disbale_coa_fields = function(frm, bool=true) {
-	frm.set_df_property("create_chart_of_accounts_based_on", "read_only", bool);
-	frm.set_df_property("chart_of_accounts", "read_only", bool);
-	frm.set_df_property("existing_company", "read_only", bool);
 }

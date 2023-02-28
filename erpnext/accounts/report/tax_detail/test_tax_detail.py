@@ -88,7 +88,7 @@ class TestTaxDetail(unittest.TestCase):
 
 	def rm_testdocs(self):
 		"Remove the Company and all data"
-		from erpnext.setup.doctype.company.company import create_transaction_deletion_request
+		from erpnext.setup.master.company.company import create_transaction_deletion_request
 
 		create_transaction_deletion_request(self.company.name)
 

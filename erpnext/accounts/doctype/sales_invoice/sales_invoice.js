@@ -751,7 +751,7 @@ frappe.ui.form.on('Sales Invoice', {
 	company: function(frm){
 		if (frm.doc.company) {
 			frappe.call({
-				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				method: "master.master.doctype.company.company.get_default_company_address",
 				args: {name:frm.doc.company, existing_address: frm.doc.company_address || ""},
 				debounce: 2000,
 				callback: function(r){

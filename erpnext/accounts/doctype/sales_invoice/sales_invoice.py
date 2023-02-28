@@ -35,7 +35,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
-from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.setup.master.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import (

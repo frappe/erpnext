@@ -44,6 +44,7 @@ def execute():
 		"Sub Operation",
 		"Operation",
 		"Warehouse",
+		"Company",
 	]
 
 	for doctype in doctypes:

@@ -14,7 +14,9 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 
 test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component", "Warehouse"]
 test_dependencies = ["Fiscal Year"]
-test_records = frappe.get_test_records("Company")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Setup", "master", "company", "test_records.json")
+)
 
 
 class TestCompany(unittest.TestCase):
