@@ -64,6 +64,7 @@
   "price_list_currency",
   "plc_conversion_rate",
   "column_break_36",
+  "retail_price_list",
   "ignore_pricing_rule",
   "items_section",
   "items",
@@ -107,6 +108,9 @@
   "section_break_65",
   "net_total",
   "base_net_total",
+  "column_break_tfm8m",
+  "retail_total",
+  "base_retail_total",
   "column_break_68",
   "taxable_total",
   "base_taxable_total",
@@ -1411,6 +1415,37 @@
    "fieldname": "section_break_15",
    "fieldtype": "Section Break",
    "label": "Lost Reason"
+  },
+  {
+   "fieldname": "retail_price_list",
+   "fieldtype": "Link",
+   "label": "Retail Price List",
+   "options": "Price List",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tfm8m",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "retail_total",
+   "fieldname": "retail_total",
+   "fieldtype": "Currency",
+   "label": "Retail Total",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "retail_total",
+   "fieldname": "base_retail_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Retail Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -1418,7 +1453,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2023-01-10 18:22:54.338928",
+ "modified": "2023-02-27 23:08:59.508586",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

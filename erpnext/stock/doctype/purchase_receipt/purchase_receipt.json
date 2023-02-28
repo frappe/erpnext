@@ -51,6 +51,7 @@
   "price_list_currency",
   "plc_conversion_rate",
   "col_break_44",
+  "retail_price_list",
   "ignore_pricing_rule",
   "calculate_tax_on_company_currency",
   "sec_warehouse",
@@ -105,6 +106,9 @@
   "totals",
   "net_total",
   "base_net_total",
+  "column_break_tfm8m",
+  "retail_total",
+  "base_retail_total",
   "column_break_27",
   "taxable_total",
   "base_taxable_total",
@@ -1543,13 +1547,44 @@
    "fieldtype": "Link",
    "label": "Applies to Serial No",
    "options": "Serial No"
+  },
+  {
+   "fieldname": "retail_price_list",
+   "fieldtype": "Link",
+   "label": "Retail Price List",
+   "options": "Price List",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tfm8m",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "retail_total",
+   "fieldname": "retail_total",
+   "fieldtype": "Currency",
+   "label": "Retail Total",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "retail_total",
+   "fieldname": "base_retail_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Retail Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-02 15:18:22.061533",
+ "modified": "2023-02-27 23:08:59.508586",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

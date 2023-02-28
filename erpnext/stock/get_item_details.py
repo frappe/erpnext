@@ -592,17 +592,17 @@ def get_default_terms(item, args):
 	return default_values.get("default_terms")
 
 
-def get_default_apply_discount_after_taxes(item, args):
+def get_default_apply_taxes_on_retail(item, args):
 	default_values = get_item_default_values(item, args)
-	fieldname = "selling_apply_discount_after_taxes" if args.get('doctype') in sales_doctypes or args.get('customer') \
-		else "buying_apply_discount_after_taxes"
+	fieldname = "selling_apply_taxes_on_retail" if args.get('doctype') in sales_doctypes or args.get('customer') \
+		else "buying_apply_taxes_on_retail"
 
-	apply_discount_after_taxes = default_values.get(fieldname)
+	apply_taxes_on_retail = default_values.get(fieldname)
 
-	if not apply_discount_after_taxes:
-		apply_discount_after_taxes = frappe.get_cached_value("Company", args.company, fieldname)
+	if not apply_taxes_on_retail:
+		apply_taxes_on_retail = frappe.get_cached_value("Company", args.company, fieldname)
 
-	return cint(apply_discount_after_taxes == "Yes" if apply_discount_after_taxes else args.get('apply_discount_after_taxes'))
+	return cint(apply_taxes_on_retail == "Yes" if apply_taxes_on_retail else args.get('apply_taxes_on_retail'))
 
 
 def get_default_allow_zero_valuation_rate(item, args):
@@ -699,7 +699,7 @@ def get_item_defaults_details(args, set_warehouse=False):
 		"income_account": get_default_income_account(item, args),
 		"expense_account": get_default_expense_account(item, args),
 		"cost_center": get_default_cost_center(item, args),
-		"apply_discount_after_taxes": get_default_apply_discount_after_taxes(item, args),
+		"apply_taxes_on_retail": get_default_apply_taxes_on_retail(item, args),
 		"allow_zero_valuation_rate": get_default_allow_zero_valuation_rate(item, args),
 	}
 
@@ -718,11 +718,10 @@ def get_price_list_rate(args, item_doc, out):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
-		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
-
-		# variant
+		# price from variant or template
+		price_list_rate = get_price_list_rate_for(item_doc.name, args.get("price_list"), args) or 0
 		if not price_list_rate and item_doc.variant_of:
-			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+			price_list_rate = get_price_list_rate_for(item_doc.variant_of, args.get("price_list"), args)
 
 		# insert in database
 		if not price_list_rate:
@@ -732,6 +731,16 @@ def get_price_list_rate(args, item_doc, out):
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
+
+		if "retail_price_list" in args:
+			retail_rate = 0
+			if args.get("retail_price_list") and args.get("currency"):
+				if frappe.db.get_value("Price List", args.get("retail_price_list"), "currency", cache=True) == args.get("currency"):
+					retail_rate = get_price_list_rate_for(item_doc.name, args.get("retail_price_list"), args) or 0
+					if not retail_rate and item_doc.variant_of:
+						retail_rate = get_price_list_rate_for(item_doc.variant_of, args.get("retail_price_list"), args)
+
+			out.retail_rate = flt(retail_rate)
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -860,7 +869,7 @@ def get_item_price(args, item_code, ignore_party=False):
 	return out
 
 
-def get_price_list_rate_for(args, item_code):
+def get_price_list_rate_for(item_code, price_list, args):
 	"""
 		:param customer: link to Customer DocType
 		:param supplier: link to Supplier DocType
@@ -871,7 +880,7 @@ def get_price_list_rate_for(args, item_code):
 	"""
 	item_price_args = {
 		"item_code": item_code,
-		"price_list": args.get('price_list'),
+		"price_list": price_list or args.get('price_list'),
 		"customer": args.get('customer'),
 		"supplier": args.get('supplier'),
 		"uom": args.get('uom'),

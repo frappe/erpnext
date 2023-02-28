@@ -377,9 +377,9 @@ def get_item_invoice_type(item, invoice, as_str=False):
 	})
 
 	if cint(invoice.is_return):
-		key = 'CREDIT_3RD' if cint(item.apply_discount_after_taxes) else 'CREDIT'
+		key = 'CREDIT_3RD' if cint(item.apply_taxes_on_retail) else 'CREDIT'
 	else:
-		key = 'NEW_3RD' if cint(item.apply_discount_after_taxes) else 'NEW'
+		key = 'NEW_3RD' if cint(item.apply_taxes_on_retail) else 'NEW'
 
 	if as_str:
 		return key

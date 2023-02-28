@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:price_list_name",
@@ -53,14 +54,16 @@
    "fieldname": "buying",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Buying"
+   "in_standard_filter": 1,
+   "label": "Is Buying Price List"
   },
   {
    "default": "0",
    "fieldname": "selling",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Selling"
+   "in_standard_filter": 1,
+   "label": "Is Selling Price List"
   },
   {
    "default": "0",
@@ -81,11 +84,13 @@
  ],
  "icon": "fa fa-tags",
  "idx": 1,
+ "links": [],
  "max_attachments": 1,
- "modified": "2021-01-20 18:50:09.739428",
+ "modified": "2023-02-27 23:10:54.236044",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -147,5 +152,6 @@
  "search_fields": "currency",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

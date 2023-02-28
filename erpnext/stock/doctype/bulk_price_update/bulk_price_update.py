@@ -93,7 +93,7 @@ class BulkPriceUpdate(Document):
 			'price_list': price_list
 		})
 
-		price_list_rate = get_price_list_rate_for(price_args, d.get('item_code'))
+		price_list_rate = get_price_list_rate_for(d.item_code, price_list, price_args)
 		return price_list_rate
 
 	def get_price_list(self, d):
