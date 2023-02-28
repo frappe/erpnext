@@ -525,7 +525,6 @@
   {
    "fieldname": "appointment_source",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Appointment Source",
@@ -533,7 +532,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2023-02-28 17:41:17.594812",
+ "modified": "2023-02-28 18:54:34.546283",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

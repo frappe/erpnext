@@ -47,6 +47,10 @@ frappe.query_reports["Appointment Sheet"] = {
 		var style = {};
 		var link;
 
+		if (data.status == "Rescheduled") {
+			style['color'] = 'grey';
+		}
+
 		if (column.fieldname == 'reminder') {
 			if (data.last_sent_dt) {
 				style['color'] = 'green';
