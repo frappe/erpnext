@@ -1,6 +1,6 @@
 {
  "autoname": "field:source_name",
- "creation": "2023-02-28 17:28:02.257353",
+ "creation": "2023-02-28 18:52:10.240779",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -23,9 +23,9 @@
    "label": "Details "
   }
  ],
- "modified": "2023-02-28 17:32:43.534766",
+ "modified": "2023-02-28 18:52:10.240779",
  "modified_by": "Administrator",
- "module": "Vehicles",
+ "module": "CRM",
  "name": "Appointment Source",
  "owner": "Administrator",
  "permissions": [

@@ -123,7 +123,6 @@ class AppointmentSheetReport(object):
 	def get_columns(self):
 		columns = [
 			{'label': _("Appointment"), 'fieldname': 'appointment', 'fieldtype': 'Link', 'options': 'Appointment', 'width': 100},
-			{'label': _("Appointment Source"), 'fieldname': 'appointment_source', 'fieldtype': 'Data', 'width': 100},
 			{'label': _("Date"), 'fieldname': 'scheduled_date', 'fieldtype': 'Date', 'width': 80},
 			{'label': _("Time"), 'fieldname': 'scheduled_time_fmt', 'fieldtype': 'Data', 'width': 70},
 			{'label': _("Party"), 'fieldname': 'party_name', 'fieldtype': 'Dynamic Link', 'options': 'appointment_for', 'width': 100},
@@ -146,6 +145,7 @@ class AppointmentSheetReport(object):
 			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 200, "editable": 1},
 			{'label': _("Status"), 'fieldname': 'status', 'fieldtype': 'Data', 'width': 70},
 			{'label': _("Project"), 'fieldname': 'project', 'fieldtype': 'Link', 'width': 100, 'options': 'Project'},
+			{'label': _("Appointment Source"), 'fieldname': 'appointment_source', 'fieldtype': 'Data', 'width': 100},
 			{"label": _("Reminder"), "fieldname": "reminder", "fieldtype": "Data", "width": 200},
 			{"label": _("Confirmation Time"), "fieldname": "confirmation_dt_fmt", "fieldtype": "Data", "width": 140},
 		]
