@@ -37,7 +37,7 @@ class AppointmentSheetReport(object):
 			extra_rows = ", a.vehicle_license_plate, a.vehicle_unregistered, a.vehicle_chassis_no, a.vehicle_engine_no"
 
 		self.data = frappe.db.sql("""
-			select a.name as appointment, a.appointment_type, a.voice_of_customer, a.remarks,
+			select a.name as appointment, a.appointment_type, a.appointment_source, a.voice_of_customer, a.remarks,
 				a.scheduled_dt, a.scheduled_date, a.scheduled_time, a.appointment_duration, a.end_dt,
 				a.appointment_for, a.party_name, a.customer_name,
 				a.contact_display, a.contact_mobile, a.contact_phone, a.contact_email,
@@ -47,7 +47,7 @@ class AppointmentSheetReport(object):
 			from `tabAppointment` a
 			left join `tabNotification Count` n on n.reference_doctype = 'Appointment' and n.reference_name = a.name
 				and n.notification_type = 'Appointment Reminder' and n.notification_medium = 'SMS'
-			where a.docstatus = 1 and a.status != 'Rescheduled' {1}
+			where a.docstatus = 1 {1}
 			group by a.name
 			order by a.scheduled_dt, a.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
@@ -146,6 +146,7 @@ class AppointmentSheetReport(object):
 			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 200, "editable": 1},
 			{'label': _("Status"), 'fieldname': 'status', 'fieldtype': 'Data', 'width': 70},
 			{'label': _("Project"), 'fieldname': 'project', 'fieldtype': 'Link', 'width': 100, 'options': 'Project'},
+			{'label': _("Appointment Source"), 'fieldname': 'appointment_source', 'fieldtype': 'Data', 'width': 100},
 			{"label": _("Reminder"), "fieldname": "reminder", "fieldtype": "Data", "width": 200},
 			{"label": _("Confirmation Time"), "fieldname": "confirmation_dt_fmt", "fieldtype": "Data", "width": 140},
 		]

@@ -59,7 +59,7 @@
 
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
-			<tr>
+			<tr class="{{ data[i].status == 'Rescheduled' ? 'strike' : '' }}">
 				<td class="text-center">{%= i+1 %}</td>
 
 				<td class="text-center">{%= data[i].appointment %}</td>
@@ -90,8 +90,14 @@
 
 				<td>{%= data[i].voice_of_customer %}</td>
 
-				<td>{%= data[i].remarks || "&nbsp;" %}</td>
+				<td>{%= data[i].remarks || "" %}</td>
 			</tr>
 		{% } %}
 	</tbody>
 </table>
+
+<style>
+	.strike {
+		text-decoration: line-through;
+	}
+</style>
