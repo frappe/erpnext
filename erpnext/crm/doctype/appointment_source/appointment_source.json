@@ -20,10 +20,10 @@
   {
    "fieldname": "details",
    "fieldtype": "Text Editor",
-   "label": "Details "
+   "label": "Details"
   }
  ],
- "modified": "2023-02-28 18:52:10.240779",
+ "modified": "2023-02-28 19:43:41.661765",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Source",
@@ -87,7 +87,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "idx",
  "sort_order": "DESC",
  "track_changes": 1
 }
