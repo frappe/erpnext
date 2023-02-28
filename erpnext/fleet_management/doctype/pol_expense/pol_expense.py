@@ -130,6 +130,20 @@ class POLExpense(AccountsController):
 								.run()
 								)
 		pv_km = 0
+		previous_km_reading_pol_issue = frappe.db.sql('''
+				select cur_km_reading
+				from `tabPOL Issue` p inner join `tabPOL Issue Items` pi on p.name = pi.parent	
+				where p.docstatus = 1 and pi.equipment = '{}'
+				and pi.uom = '{}' 
+				order by p.posting_date desc, p.posting_time desc
+				limit 1
+			'''.format(self.equipment, self.uom))
+		if not previous_km_reading and previous_km_reading_pol_issue:
+			previous_km_reading = previous_km_reading_pol_issue
+		elif previous_km_reading and previous_km_reading_pol_issue:
+			if flt(previous_km_reading[0][0]) < previous_km_reading_pol_issue[0][0]:
+				previous_km_reading = previous_km_reading_pol_issue
+
 		if not previous_km_reading:
 			pv_km = frappe.db.get_value("Equipment",self.equipment,"initial_km_reading")
 		else:
