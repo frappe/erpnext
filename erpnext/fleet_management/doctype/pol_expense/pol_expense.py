@@ -123,7 +123,7 @@ class POLExpense(AccountsController):
 		previous_km_reading = (
 						qb.from_(pol_rev)
 						.select(pol_rev.cur_km_reading)
-						.where((pol_rev.equipment == self.equipment) & (pol_rev.docstatus==1) & (pol_rev.uom == self.uom))
+						.where((pol_rev.equipment == self.equipment) & (pol_rev.docstatus==1) & (pol_rev.uom == self.uom) & (pol_rev.posting_date<self.from_date))
 						.orderby( pol_rev.posting_date,order=qb.desc)
 						.orderby( pol_rev.posting_time,order=qb.desc)
 						.limit(1)
@@ -134,10 +134,11 @@ class POLExpense(AccountsController):
 				select cur_km_reading
 				from `tabPOL Issue` p inner join `tabPOL Issue Items` pi on p.name = pi.parent	
 				where p.docstatus = 1 and pi.equipment = '{}'
-				and pi.uom = '{}' 
+				and pi.uom = '{}' and p.posting_date < '{}'
 				order by p.posting_date desc, p.posting_time desc
 				limit 1
-			'''.format(self.equipment, self.uom))
+			'''.format(self.equipment, self.uom, self.from_date))
+
 		if not previous_km_reading and previous_km_reading_pol_issue:
 			previous_km_reading = previous_km_reading_pol_issue
 		elif previous_km_reading and previous_km_reading_pol_issue:
@@ -152,7 +153,7 @@ class POLExpense(AccountsController):
 		closing_pol_tank_balance = (
 								qb.from_(pol_exp)
 								.select(pol_exp.closing_pol_tank_balance)
-								.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus==1) & (pol_exp.uom == self.uom) & (pol_exp.name != self.name))
+								.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus==1) & (pol_exp.uom == self.uom) & (pol_exp.name != self.name) & (pol_exp.entry_date< self.from_date))
 								.orderby( pol_exp.entry_date,order=qb.desc)
 								.orderby( pol_exp.name, order=qb.desc)
 								.limit(1)
@@ -247,7 +248,7 @@ class POLExpense(AccountsController):
 		self.pol_issue_during_the_period = total_qty
 		if not self.pol_received_item:
 			frappe.msgprint("No pol receive found within Date {} to {}".format(self.from_date, self.to_date))
-
+		self.calculate_km_diff()
 	def validate_amount(self):
 		if cint(self.use_common_fuelbook) == 0 and flt(self.amount) > flt(self.expense_limit):
 			frappe.throw("Amount cannot be greater than expense limit")
@@ -311,7 +312,6 @@ class POLExpense(AccountsController):
 				total_amount += flt(d.balance_amount)
 				self.append("items", d)
 			self.previous_balance_amount = total_amount
-			self.calculate_km_diff()
 
 		if flt(self.expense_limit) > 0 :
 			self.amount = flt(self.expense_limit) - flt(self.previous_balance_amount)
