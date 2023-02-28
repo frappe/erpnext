@@ -36,7 +36,7 @@ class AppointmentSheetReport(object):
 			extra_rows = ", a.vehicle_license_plate, a.vehicle_unregistered, a.vehicle_chassis_no, a.vehicle_engine_no"
 
 		self.data = frappe.db.sql("""
-			select a.name as appointment, a.appointment_type, a.voice_of_customer, a.remarks,
+			select a.name as appointment, a.appointment_type, a.appointment_source, a.voice_of_customer, a.remarks,
 				a.scheduled_dt, a.scheduled_date, a.scheduled_time, a.appointment_duration, a.end_dt,
 				a.appointment_for, a.party_name, a.customer_name,
 				a.contact_display, a.contact_mobile, a.contact_phone, a.contact_email,
@@ -123,6 +123,7 @@ class AppointmentSheetReport(object):
 	def get_columns(self):
 		columns = [
 			{'label': _("Appointment"), 'fieldname': 'appointment', 'fieldtype': 'Link', 'options': 'Appointment', 'width': 100},
+			{'label': _("Appointment Source"), 'fieldname': 'appointment_source', 'fieldtype': 'Data', 'width': 100},
 			{'label': _("Date"), 'fieldname': 'scheduled_date', 'fieldtype': 'Date', 'width': 80},
 			{'label': _("Time"), 'fieldname': 'scheduled_time_fmt', 'fieldtype': 'Data', 'width': 70},
 			{'label': _("Party"), 'fieldname': 'party_name', 'fieldtype': 'Dynamic Link', 'options': 'appointment_for', 'width': 100},
