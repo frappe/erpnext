@@ -7,6 +7,7 @@
  "field_order": [
   "naming_series",
   "appointment_type",
+  "appointment_source",
   "column_break_3",
   "opportunity",
   "previous_appointment",
@@ -520,10 +521,19 @@
    "no_copy": 1,
    "options": "Opportunity",
    "read_only": 1
+  },
+  {
+   "fieldname": "appointment_source",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Appointment Source",
+   "options": "Appointment Source"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-01-13 18:44:46.185437",
+ "modified": "2023-02-28 17:41:17.594812",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
