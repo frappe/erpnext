@@ -293,6 +293,7 @@ class PurchaseReceipt(BuyingController):
 			get_purchase_document_details,
 		)
 
+		stock_rbnb = None
 		if erpnext.is_perpetual_inventory_enabled(self.company):
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			landed_cost_entries = get_item_account_wise_additional_cost(self.name)
@@ -450,6 +451,21 @@ class PurchaseReceipt(BuyingController):
 								item=d,
 							)
 
+					if d.rate_difference_with_purchase_invoice and stock_rbnb:
+						account_currency = get_account_currency(stock_rbnb)
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=stock_rbnb,
+							cost_center=d.cost_center,
+							debit=0.0,
+							credit=flt(d.rate_difference_with_purchase_invoice),
+							remarks=_("Adjustment based on Purchase Invoice rate"),
+							against_account=warehouse_account_name,
+							account_currency=account_currency,
+							project=d.project,
+							item=d,
+						)
+
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
 						self.add_gl_entry(
@@ -470,6 +486,7 @@ class PurchaseReceipt(BuyingController):
 						+ flt(d.landed_cost_voucher_amount)
 						+ flt(d.rm_supp_cost)
 						+ flt(d.item_tax_amount)
+						+ flt(d.rate_difference_with_purchase_invoice)
 					)
 
 					divisional_loss = flt(
@@ -765,7 +782,7 @@ class PurchaseReceipt(BuyingController):
 			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
 		for pr in set(updated_pr):
-			pr_doc = self if (pr == self.name) else frappe.get_cached_doc("Purchase Receipt", pr)
+			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 		self.load_from_db()
@@ -881,7 +898,7 @@ def get_billed_amount_against_po(po_items):
 	return {d.po_detail: flt(d.billed_amt) for d in query}
 
 
-def update_billing_percentage(pr_doc, update_modified=True):
+def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
 	# Reload as billed amount was set in db directly
 	pr_doc.load_from_db()
 
@@ -897,6 +914,12 @@ def update_billing_percentage(pr_doc, update_modified=True):
 
 		total_amount += total_billable_amount
 		total_billed_amount += flt(item.billed_amt)
+		if adjust_incoming_rate:
+			adjusted_amt = 0.0
+			if item.billed_amt and item.amount:
+				adjusted_amt = flt(item.billed_amt) - flt(item.amount)
+
+			item.db_set("rate_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
@@ -905,6 +928,26 @@ def update_billing_percentage(pr_doc, update_modified=True):
 	if update_modified:
 		pr_doc.set_status(update=True)
 		pr_doc.notify_update()
+
+	if adjust_incoming_rate:
+		adjust_incoming_rate_for_pr(pr_doc)
+
+
+def adjust_incoming_rate_for_pr(doc):
+	doc.update_valuation_rate(reset_outgoing_rate=False)
+
+	for item in doc.get("items"):
+		item.db_update()
+
+	doc.docstatus = 2
+	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+	doc.make_gl_entries_on_cancel()
+
+	# update stock & gl entries for submit state of PR
+	doc.docstatus = 1
+	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+	doc.make_gl_entries()
+	doc.repost_future_sle_and_gle()
 
 
 def get_item_wise_returned_qty(pr_doc):
