@@ -57,6 +57,7 @@ override_doctype_class = {
 	"Price List": "erpnext.stock.master.price_list.price_list.ERPNextPriceList",
 	"Warehouse": "erpnext.stock.master.warehouse.warehouse.ERPNextWarehouse",
 	"Company": "erpnext.setup.master.company.company.ERPNextCompany",
+	"Department": "erpnext.setup.master.department.department.ERPNextDepartment",
 }
 
 override_doctype_dashboards = {

@@ -28,4 +28,6 @@ def create_department(department_name, parent_department=None):
 	return doc
 
 
-test_records = frappe.get_test_records("Department")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Setup", "master", "department", "test_records.json")
+)
