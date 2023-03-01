@@ -103,20 +103,16 @@ class POLReceive(StockController):
 			return
 		if cint(self.direct_consumption) == 0:
 			return
-		pol_rev = qb.DocType("POL Receive")
 		if not self.uom:
 			self.uom = frappe.db.get_value("Equipment", self.equipment,"reading_uom")
 		if not self.uom:
 			self.uom = frappe.db.get_value("Equipment Type",self.equipment_type,"reading_uom")
-		previous_km_reading = (
-								qb.from_(pol_rev)
-								.select(pol_rev.cur_km_reading)
-								.where((pol_rev.equipment == self.equipment) & (pol_rev.docstatus==1) & (pol_rev.uom == self.uom))
-								.orderby( pol_rev.posting_date,order=qb.desc)
-								.orderby( pol_rev.posting_time,order=qb.desc)
-								.limit(1)
-								.run()
-								)
+		previous_km_reading = frappe.db.sql('''
+						select cur_km_reading from `tabPOL Receive` where docstatus = 1 
+						and equipment = '{}' and uom = '{}'
+						order by p.posting_date desc, p.posting_time desc
+						limit 1
+						'''.format(self.equipment, self.uom))
 		previous_km_reading_pol_issue = frappe.db.sql('''
 				select cur_km_reading
 				from `tabPOL Issue` p inner join `tabPOL Issue Items` pi on p.name = pi.parent	
