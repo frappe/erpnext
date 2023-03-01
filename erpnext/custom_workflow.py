@@ -1094,7 +1094,7 @@ class CustomWorkflow:
 			self.doc.document_status = "Cancelled"
 
 	def employee_advance(self):
-		if self.new_state.lower() == self.old_state.lower():
+		if self.new_state and self.old_state and self.new_state.lower() == self.old_state.lower():
 			return
 		if self.new_state.lower() in ("Waiting Hr Approval".lower()):
 			if self.doc.owner != frappe.session.user:
