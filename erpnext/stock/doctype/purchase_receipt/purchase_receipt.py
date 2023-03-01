@@ -101,8 +101,9 @@ class PurchaseReceipt(BuyingController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
+		if not self.is_return:
+			from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
+			unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def set_title(self):
 		if self.letter_of_credit:

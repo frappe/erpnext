@@ -94,8 +94,9 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
+		if self.is_return:
+			from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
+			unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def before_print(self, print_settings=None):
 		def toggle_print_hide(meta, fieldname):

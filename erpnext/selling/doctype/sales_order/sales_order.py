@@ -15,8 +15,7 @@ from erpnext.controllers.accounts_controller import get_default_taxes_and_charge
 from erpnext.vehicles.doctype.vehicle.vehicle import split_vehicle_items_by_qty, set_reserved_vehicles_from_so
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc
 
 
 form_grid_templates = {
@@ -104,7 +103,6 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code, 'cancelled')
