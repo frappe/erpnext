@@ -35,10 +35,22 @@ class ClosingBalance(Document):
 			self.credit += last_closing_balance[0].credit
 
 
-def make_closing_entries(closing_entries):
+def make_closing_entries(
+	closing_entries, is_period_closing_voucher_entry=False, voucher_name=None
+):
 	accounting_dimensions = get_accounting_dimensions()
 	for entry in closing_entries:
 		cle = frappe.new_doc("Closing Balance")
 		cle.update(entry)
+
+		if is_period_closing_voucher_entry:
+			cle.update(
+				{
+					"closing_date": entry.get("posting_date"),
+					"is_period_closing_voucher_entry": 1,
+					"period_closing_voucher": voucher_name,
+				}
+			)
+
 		cle.aggregate_with_last_closing_balance(accounting_dimensions)
 		cle.submit()
