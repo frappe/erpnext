@@ -212,7 +212,8 @@ class SalesInvoice(SellingController):
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
+		if self.is_return:
+			unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 		# Healthcare Service Invoice.
 		if "Healthcare" in frappe.get_active_domains():
@@ -1604,8 +1605,7 @@ def update_linked_doc(doctype, name, inter_company_reference):
 def unlink_inter_company_doc(doctype, name, inter_company_reference):
 	ref_doctype = get_intercompany_ref_doctype(doctype)
 	if inter_company_reference:
-		frappe.db.set_value(doctype, name, "inter_company_reference", "")
-		frappe.db.set_value(ref_doctype, inter_company_reference, "inter_company_reference", "", notify=1)
+		frappe.db.set_value(ref_doctype, inter_company_reference, "inter_company_reference", None, notify=1)
 
 
 def get_intercompany_ref_doctype(doctype):

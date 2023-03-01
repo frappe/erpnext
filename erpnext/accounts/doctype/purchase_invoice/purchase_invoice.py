@@ -143,7 +143,8 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		self.db_set('status', 'Cancelled')
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
+		if not self.is_return:
+			unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def set_title(self):
 		if self.letter_of_credit:
