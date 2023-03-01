@@ -1094,24 +1094,26 @@ class CustomWorkflow:
 			self.doc.document_status = "Cancelled"
 
 	def employee_advance(self):
+		if self.new_state.lower() == self.old_state.lower():
+			return
 		if self.new_state.lower() in ("Waiting Hr Approval".lower()):
 			if self.doc.owner != frappe.session.user:
-				frappe.throw("Only {} can Apply this material request".format(self.doc.owner))
+				frappe.throw("Only {} can Apply this document".format(self.doc.owner))
 			self.set_approver("HR")
 
 		if self.new_state.lower() in ("Waiting Supervisor Approval".lower()):
 			if self.doc.owner != frappe.session.user:
-				frappe.throw("Only {} can Apply this request".format(self.doc.owner))
+				frappe.throw("Only {} can Apply this document".format(self.doc.owner))
 			self.set_approver("Imprest Verifier")
 
 		if self.new_state.lower() in ("Waiting Approval".lower()):
 			if self.doc.advance_approver_name != frappe.session.user:
-				frappe.throw("Only {} can Forward this request".format(self.doc.advance_approver_name))
+				frappe.throw("Only {} can Forward this document".format(self.doc.advance_approver_name))
 			self.set_approver("Imprest Approver")
 
 		if self.new_state.lower() in ("Approved".lower()):
 			if self.doc.advance_approver_name != frappe.session.user:
-				frappe.throw("Only {} can Approve this request".format(self.doc.advance_approver_name))
+				frappe.throw("Only {} can Approve this document".format(self.doc.advance_approver_name))
 
 	def vehicle_request(self):
 		if self.new_state.lower() in ("Draft".lower()):
