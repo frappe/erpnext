@@ -4,6 +4,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.closing_balance.closing_balance import make_closing_entries
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -23,4 +24,6 @@ def execute():
 				pcv.posting_date, pcv.fiscal_year, company=pcv.company
 			)[1]
 			pcv_doc.make_closing_entries()
+			gl_entries = pcv_doc.get_gl_entries()
+			make_closing_entries(gl_entries, is_period_closing_voucher_entry=True)
 			company_wise_order[pcv.company].append(pcv.posting_date)
