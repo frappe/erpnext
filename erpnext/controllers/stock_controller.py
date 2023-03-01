@@ -221,7 +221,9 @@ class StockController(AccountsController):
 				)
 			return details
 		else:
-			details = self.get("items")
+			details = self.get("items").copy()
+			if self.doctype == "Production":
+				details.extend(self.get("raw_materials").copy())
 			if default_expense_account or default_cost_center:
 				for d in details:
 					if default_expense_account and not d.get("expense_account"):

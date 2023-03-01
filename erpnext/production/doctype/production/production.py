@@ -28,8 +28,8 @@ class Production(StockController):
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
-		self.make_production_entry()
 		# make_auto_production(self)
+		self.make_production_entry()
 		frappe.enqueue(make_auto_production(self), queue="long")
 
 	def on_cancel(self):
@@ -399,6 +399,7 @@ class Production(StockController):
 		else:
 			return frappe.db.get_value('Mineral Raising Group',self.mineral_raising_group,['default_oms'])
 	def make_production_entry(self):
+		# frappe.throw(str(len(self.items)))
 		for a in self.items:
 			doc = frappe.new_doc("Production Entry")
 			doc.flags.ignore_permissions = 1
