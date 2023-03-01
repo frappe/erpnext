@@ -1,7 +1,7 @@
 from frappe import _
 
 
-def get_data():
+def get_data(data):
 	return {
 		"fieldname": "fiscal_year",
 		"transactions": [

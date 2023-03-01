@@ -58,6 +58,7 @@ override_doctype_class = {
 	"Warehouse": "erpnext.stock.master.warehouse.warehouse.ERPNextWarehouse",
 	"Company": "erpnext.setup.master.company.company.ERPNextCompany",
 	"Department": "erpnext.setup.master.department.department.ERPNextDepartment",
+	"Fiscal Year": "erpnext.accounts.master.fiscal_year.fiscal_year.ERPNextFiscalYear",
 }
 
 override_doctype_dashboards = {
@@ -66,6 +67,7 @@ override_doctype_dashboards = {
 	"Workstation": "erpnext.manufacturing.master.workstation.workstation_dashboard.get_data",
 	"Operation": "erpnext.manufacturing.master.operation.operation_dashboard.get_data",
 	"Company": "erpnext.setup.master.company.company_dashboard.get_data",
+	"Fiscal Year": "erpnext.accounts.master.fiscal_year.fiscal_year_dashboard.get_data",
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -429,7 +431,6 @@ scheduler_events = {
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
-		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
