@@ -6,4 +6,6 @@ test_ignore = ["Price List"]
 
 import frappe
 
-test_records = frappe.get_test_records("Customer Group")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Setup", "master", "customer_group", "test_records.json")
+)

@@ -47,6 +47,7 @@ def execute():
 		"Company",
 		"Allowed To Transact With",
 		"Customer Credit Limit",
+		"Customer Group",
 	]
 
 	for doctype in doctypes:

@@ -1,0 +1,113 @@
+{
+  "custom_fields": [
+    {
+      "doctype": "Custom Field",
+      "dt": "Customer Group",
+      "is_system_generated": 1,
+      "fieldname": "payment_terms",
+      "fieldtype": "Link",
+      "insert_after": "default_price_list",
+      "label": "Default Payment Terms Template",
+      "module": "Setup",
+      "name": "Customer Group-payment_terms",
+      "options": "Payment Terms Template"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Customer Group",
+      "is_system_generated": 1,
+      "fieldname": "default_receivable_account",
+      "fieldtype": "Section Break",
+      "insert_after": "old_parent",
+      "label": "Default Receivable Account",
+      "module": "Setup",
+      "name": "Customer Group-default_receivable_account"
+    },
+    {
+      "doctype": "Custom Field",
+      "dt": "Customer Group",
+      "is_system_generated": 1,
+      "fieldname": "accounts",
+      "fieldtype": "Table",
+      "insert_after": "default_receivable_account",
+      "label": "Accounts",
+      "module": "Setup",
+      "name": "Customer Group-accounts",
+      "options": "Party Account"
+    }
+  ],
+  "custom_perms": [
+    {
+      "parent": "Customer Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales Manager"
+    },
+    {
+      "parent": "Customer Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales User"
+    },
+    {
+      "parent": "Customer Group",
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "import": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Sales Master Manager",
+      "set_user_permissions": 1,
+      "share": 1,
+      "write": 1
+    },
+    {
+      "parent": "Customer Group",
+      "permlevel": 1,
+      "read": 1,
+      "role": "Sales Master Manager",
+      "write": 1
+    },
+    {
+      "parent": "Customer Group",
+      "permlevel": 1,
+      "read": 1,
+      "role": "Sales User"
+    },
+    {
+      "parent": "Customer Group",
+      "permlevel": 1,
+      "read": 1,
+      "role": "Sales Manager"
+    },
+    {
+      "parent": "Customer Group",
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "report": 1,
+      "role": "Customer",
+      "select": 1,
+      "share": 1
+    },
+    {
+      "parent": "Customer Group",
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Accounts User",
+      "share": 1
+    }
+  ],
+  "doctype": "Customer Group",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

@@ -10,8 +10,7 @@ from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.nestedset import get_root_of
-
-from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+from master.master.doctype.customer_group.customer_group import get_parent_customer_groups
 
 
 class IncorrectCustomerGroup(frappe.ValidationError):

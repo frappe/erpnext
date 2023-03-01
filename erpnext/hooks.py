@@ -35,6 +35,7 @@ doctype_js = {
 	"Price List": "public/js/master/price_list.js",
 	"Warehouse": "public/js/master/warehouse.js",
 	"Company": "public/js/master/company.js",
+	"Customer Group": "public/js/master/customer_group.js",
 }
 
 doctype_list_js = {
