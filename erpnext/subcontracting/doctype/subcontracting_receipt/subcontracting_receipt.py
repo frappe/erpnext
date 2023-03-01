@@ -191,14 +191,17 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_available_qty_for_consumption(self):
 		for item in self.get("supplied_items"):
+			precision = item.precision("consumed_qty")
 			if (
-				item.available_qty_for_consumption and item.available_qty_for_consumption < item.consumed_qty
+				item.available_qty_for_consumption
+				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
 			):
-				frappe.throw(
-					_(
-						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
-					).format(item.idx)
-				)
+				msg = f"""Row {item.idx}: Consumed Qty {flt(item.consumed_qty, precision)}
+					must be less than or equal to Available Qty For Consumption
+					{flt(item.available_qty_for_consumption, precision)}
+					in Consumed Items Table."""
+
+				frappe.throw(_(msg))
 
 	def validate_items_qty(self):
 		for item in self.items:
