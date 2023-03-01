@@ -179,7 +179,7 @@
    "fieldname": "item_naming_by",
    "fieldtype": "Select",
    "label": "Item Naming By",
-   "options": "\nItem Code\nItem Name\nNaming Series"
+   "options": "\nItem Code\nItem Name\nNaming Series\nSystem Generated"
   },
   {
    "depends_on": "eval:doc.item_naming_by == \"Naming Series\"",
@@ -286,7 +286,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-01-12 14:35:13.118085",
+ "modified": "2023-03-01 14:20:07.269063",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

@@ -59,7 +59,7 @@
    "fieldname": "item_naming_by",
    "fieldtype": "Select",
    "label": "Item Naming By",
-   "options": "\nItem Code\nItem Name\nNaming Series"
+   "options": "\nItem Code\nItem Name\nNaming Series\nSystem Generated"
   },
   {
    "depends_on": "eval:doc.item_naming_by == \"Naming Series\"",
@@ -164,7 +164,7 @@
  "icon": "fa fa-certificate",
  "idx": 1,
  "links": [],
- "modified": "2023-01-12 14:44:03.542275",
+ "modified": "2023-03-01 14:19:55.734117",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",
