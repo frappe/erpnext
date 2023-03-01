@@ -488,7 +488,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
-									if (d.free_item_data) {
+									if (d.free_item_data && d.free_item_data.length > 0) {
 										me.apply_product_discount(d);
 									}
 								},
