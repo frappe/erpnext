@@ -68,6 +68,7 @@ override_doctype_dashboards = {
 	"Operation": "erpnext.manufacturing.master.operation.operation_dashboard.get_data",
 	"Company": "erpnext.setup.master.company.company_dashboard.get_data",
 	"Fiscal Year": "erpnext.accounts.master.fiscal_year.fiscal_year_dashboard.get_data",
+	"Monthly Distribution": "erpnext.accounts.master.monthly_distribution.monthly_distribution_dashboard.get_data",
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
