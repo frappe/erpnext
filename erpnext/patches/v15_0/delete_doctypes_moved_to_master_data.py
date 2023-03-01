@@ -45,6 +45,7 @@ def execute():
 		"Operation",
 		"Warehouse",
 		"Company",
+		"Allowed To Transact With",
 	]
 
 	for doctype in doctypes:
