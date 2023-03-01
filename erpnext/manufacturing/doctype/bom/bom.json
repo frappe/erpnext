@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
@@ -97,7 +98,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Item Name",
+   "label": "Production Item Name",
    "read_only": 1
   },
   {
@@ -115,7 +116,7 @@
    "fetch_from": "item.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
-   "label": "Item UOM",
+   "label": "Production UOM",
    "options": "UOM",
    "read_only": 1
   },
@@ -123,7 +124,7 @@
    "default": "1",
    "fieldname": "quantity",
    "fieldtype": "Float",
-   "label": "Quantity",
+   "label": "Production Qty",
    "oldfieldname": "quantity",
    "oldfieldtype": "Currency",
    "reqd": 1
@@ -597,7 +598,8 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-10-21 17:35:04.812919",
+ "links": [],
+ "modified": "2023-03-01 02:13:58.493826",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -636,6 +638,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "item",
  "title_field": "item_name",
  "track_changes": 1

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:49",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -44,7 +45,8 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "in_list_view": 1,
-   "label": "Item Code",
+   "in_standard_filter": 1,
+   "label": "Material Item",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -55,12 +57,12 @@
    "columns": 3,
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Material Item Name"
   },
   {
    "fieldname": "operation",
    "fieldtype": "Link",
-   "label": "Item operation",
+   "label": "Item Operation",
    "options": "Operation"
   },
   {
@@ -71,7 +73,8 @@
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_filter": 1,
-   "label": "BOM No",
+   "in_standard_filter": 1,
+   "label": "Child BOM",
    "oldfieldname": "bom_no",
    "oldfieldtype": "Link",
    "options": "BOM",
@@ -268,12 +271,14 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-05-27 22:31:28.386908",
+ "links": [],
+ "modified": "2023-03-01 01:50:57.124779",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }
