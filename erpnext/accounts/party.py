@@ -654,15 +654,15 @@ def validate_party_frozen_disabled(party_type, party_name):
 		if party_type in ("Customer", "Supplier", "Letter of Credit"):
 			party = frappe.get_cached_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
 			if party.disabled:
-				frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
+				frappe.throw(_("{0} is disabled").format(frappe.get_desk_link(party_type, party_name)), PartyDisabled)
 			elif party.get("is_frozen"):
 				frozen_accounts_modifier = frappe.db.get_single_value( 'Accounts Settings', 'frozen_accounts_modifier')
 				if not frozen_accounts_modifier in frappe.get_roles():
-					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
+					frappe.throw(_("{0} is frozen").format(frappe.get_desk_link(party_type, party_name)), PartyFrozen)
 
 		elif party_type == "Employee":
 			if frappe.db.get_value("Employee", party_name, "status") == "Left":
-				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
+				frappe.msgprint(_("{0} is not active").format(frappe.get_desk_link(party_type, party_name)), alert=True)
 
 
 def validate_ntn_cnic_strn(ntn=None, cnic=None, strn=None):
