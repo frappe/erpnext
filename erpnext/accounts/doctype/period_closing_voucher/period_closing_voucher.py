@@ -93,13 +93,13 @@ class PeriodClosingVoucher(AccountsController):
 		gl_entries = self.get_gl_entries()
 		if gl_entries:
 			if len(gl_entries) > 5000:
-				frappe.enqueue(process_gl_entries, gl_entries=gl_entries, queue="long")
+				frappe.enqueue(process_gl_entries, gl_entries=gl_entries, voucher_name=self.name, queue="long")
 				frappe.msgprint(
 					_("The GL Entries will be processed in the background, it can take a few minutes."),
 					alert=True,
 				)
 			else:
-				process_gl_entries(gl_entries)
+				process_gl_entries(gl_entries, voucher_name=self.name)
 
 	def make_closing_entries(self):
 		closing_entries = self.get_grouped_gl_entries()
@@ -326,11 +326,13 @@ def process_closing_entries(closing_entries):
 		frappe.log_error(e)
 
 
-def process_gl_entries(gl_entries):
+def process_gl_entries(gl_entries, voucher_name=None):
+	from erpnext.accounts.doctype.closing_balance.closing_balance import make_closing_entries
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	try:
 		make_gl_entries(gl_entries, merge_entries=False)
+		make_closing_entries(gl_entries, is_period_closing_voucher_entry=True, voucher_name=voucher_name)
 		frappe.db.set_value(
 			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "gle_processing_status", "Completed"
 		)

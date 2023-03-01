@@ -15,11 +15,10 @@
   "debit_in_account_currency",
   "credit_in_account_currency",
   "project",
-  "is_opening",
-  "fiscal_year",
   "company",
   "finance_book",
-  "period_closing_voucher"
+  "period_closing_voucher",
+  "is_period_closing_voucher_entry"
  ],
  "fields": [
   {
@@ -95,24 +94,6 @@
    "options": "Project"
   },
   {
-   "fieldname": "is_opening",
-   "fieldtype": "Select",
-   "in_filter": 1,
-   "label": "Is Opening",
-   "oldfieldname": "is_opening",
-   "oldfieldtype": "Select",
-   "options": "No\nYes"
-  },
-  {
-   "fieldname": "fiscal_year",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "label": "Fiscal Year",
-   "oldfieldname": "fiscal_year",
-   "oldfieldtype": "Select",
-   "options": "Fiscal Year"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -136,12 +117,18 @@
    "in_standard_filter": 1,
    "label": "Period Closing Voucher",
    "options": "Period Closing Voucher"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_period_closing_voucher_entry",
+   "fieldtype": "Check",
+   "label": "Is Period Closing Voucher Entry"
   }
  ],
  "icon": "fa fa-list",
  "in_create": 1,
  "links": [],
- "modified": "2023-02-24 18:11:11.612395",
+ "modified": "2023-02-27 19:47:36.658224",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Closing Balance",

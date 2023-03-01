@@ -16,6 +16,7 @@ from erpnext.accounts.utils import get_fiscal_year, now
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
 
 		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
@@ -65,6 +66,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 	def test_cost_center_wise_posting(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
 
 		company = create_company()
 		surplus_account = create_account()
@@ -128,6 +130,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 	def test_period_closing_with_finance_book_entries(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
 
 		company = create_company()
 		surplus_account = create_account()
