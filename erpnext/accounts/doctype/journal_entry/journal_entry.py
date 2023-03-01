@@ -1062,3 +1062,11 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist 
+@frappe.whitelist()
+def settlement_reference(doctype, txt, searchfield, start, page_len, filters):
+	# cond = ''
+	# if filters and filters.get('account'):
+	# 	account_type = frappe.db.get_value('Account', filters.get('account'), 'account_type')
+	# 	cond = "and account_type = '%s'" % account_type
+
+	return frappe.db.sql("""SELECT name from `tabJournal Entry` WHERE provision_type = 'Booking' and voucher_type = 'Provisions Booking & Settlement' and settlement_reference is null """)

@@ -149,6 +149,13 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	setup_queries: function() {
 		var me = this;
 
+		me.frm.set_query("settlement_reference", function(doc, cdt, cdn) {
+			return {
+				query: "erpnext.accounts.doctype.journal_entry.journal_entry.settlement_reference",
+			};
+		});
+
+
 		me.frm.set_query("account", "accounts", function(doc, cdt, cdn) {
 			return erpnext.journal_entry.account_query(me.frm);
 		});
