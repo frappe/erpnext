@@ -49,6 +49,7 @@ def execute():
 		"Customer Credit Limit",
 		"Customer Group",
 		"Department",
+		"Employee Internal Work History",
 	]
 
 	for doctype in doctypes:

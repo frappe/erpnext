@@ -1,1 +1,0 @@
-Work history details of parent Employee within the organization.
