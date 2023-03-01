@@ -52,13 +52,6 @@
 					{% if(data[i].bill_no) { %}
 						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
 					{% } %}
-<<<<<<< HEAD
-					</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].debit, filters.presentation_currency || data[i].account_currency) %}</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].credit, filters.presentation_currency || data[i].account_currency) %}</td>
-=======
 					</span>
 				</td>
 				<td style="text-align: right">
@@ -67,7 +60,6 @@
 				<td style="text-align: right">
 					{%= format_currency(data[i].credit, filters.presentation_currency) %}
 				</td>
->>>>>>> ba66a6714c (fix: Wrap unexpectedly long text in remark)
 			{% } else { %}
 				<td></td>
 				<td></td>
