@@ -50,6 +50,7 @@ def execute():
 		"Customer Group",
 		"Department",
 		"Employee Internal Work History",
+		"Fiscal Year Company",
 	]
 
 	for doctype in doctypes:
