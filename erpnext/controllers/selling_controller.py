@@ -136,7 +136,7 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if not self.meta.get_field("commission_rate"):
+		if not self.meta.get_field("commission_rate") or self.docstatus.is_submitted():
 			return
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
