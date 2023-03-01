@@ -1863,11 +1863,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target.sales_invoice_item = source.name
 
 			# Set purchase receipt reference in Purchase Invoice from Delivery Notes of Sales Invoice
-			purchase_receipt_details = get_purchase_receipt_details_from_delivery_note(source)
-			if purchase_receipt_details:
-				target.purchase_receipt = purchase_receipt_details.purchase_receipt
-				target.purchase_receipt_item = purchase_receipt_details.purchase_receipt_item
-				target.warehouse = purchase_receipt_details.warehouse
+			purchase_reference = get_purchase_reference_from_delivery_note(source)
+			if purchase_reference:
+				target.warehouse = purchase_reference.warehouse
+				target.purchase_receipt = purchase_reference.purchase_receipt
+				target.purchase_receipt_item = purchase_reference.purchase_receipt_item
+				target.purchase_order = purchase_reference.purchase_order
+				target.purchase_order_item = purchase_reference.purchase_order_item
 
 		if target_parent.doctype == "Delivery Note" and target_parent.return_against\
 				and source_parent.doctype == "Purchase Receipt" and source_parent.return_against:
@@ -1879,17 +1881,46 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			# Set sales invoice return against reference for intercompany return
 			target.sales_invoice_item = source.get("sales_invoice_item")
 
-	def get_purchase_receipt_details_from_delivery_note(source):
-		if source.get("delivery_note") and source.get("delivery_note_item"):
+			# Set delivery note reference in Sales Invoice from Purchase Receipts of Purchase Invoice
+			delivery_reference = get_delivery_reference_from_credit_note(source, source_parent)
+			if delivery_reference:
+				target.warehouse = delivery_reference.warehouse
+				target.delivery_note = delivery_reference.delivery_note
+				target.delivery_note_item = delivery_reference.delivery_note_item
+				target.sales_order = delivery_reference.sales_order
+				target.sales_order_item = delivery_reference.sales_order_item
+
+	def get_purchase_reference_from_delivery_note(sales_invoice_item):
+		if sales_invoice_item.get("delivery_note") and sales_invoice_item.get("delivery_note_item"):
 			purchase_receipt_details = frappe.db.sql("""
-				select p.name as purchase_receipt, i.name as purchase_receipt_item, i.warehouse
+				select i.warehouse,
+					p.name as purchase_receipt, i.name as purchase_receipt_item,
+					i.purchase_order, i.purchase_order_item
 				from `tabPurchase Receipt Item` i
 				inner join `tabPurchase Receipt` p on p.name = i.parent
 				where p.docstatus = 1 and p.inter_company_reference = %s and i.delivery_note_item = %s
-			""", (source.delivery_note, source.delivery_note_item), as_dict=1)
+			""", (sales_invoice_item.delivery_note, sales_invoice_item.delivery_note_item), as_dict=1)
 
 			if purchase_receipt_details:
 				return purchase_receipt_details[0]
+
+	def get_delivery_reference_from_credit_note(debit_note_item, debit_note):
+		sales_invoice = None
+		if debit_note.get("return_against"):
+			sales_invoice = frappe.db.get_value("Purchase Invoice", debit_note.return_against, "inter_company_reference")
+
+		if sales_invoice and debit_note_item.get("sales_invoice_item"):
+			delivery_note_details = frappe.db.sql("""
+				select i.warehouse,
+					i.delivery_note, i.delivery_note_item,
+					i.sales_order, i.sales_order_item
+				from `tabSales Invoice Item` i
+				inner join `tabSales Invoice` p on p.name = i.parent
+				where p.docstatus = 1 and p.name = %s and i.name = %s
+			""", (sales_invoice, debit_note_item.sales_invoice_item), as_dict=1)
+
+			if delivery_note_details:
+				return delivery_note_details[0]
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
