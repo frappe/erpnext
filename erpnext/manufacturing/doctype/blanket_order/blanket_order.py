@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -29,21 +30,23 @@ class BlanketOrder(Document):
 
 	def update_ordered_qty(self):
 		ref_doctype = "Sales Order" if self.blanket_order_type == "Selling" else "Purchase Order"
+
+		trans = frappe.qb.DocType(ref_doctype)
+		trans_item = frappe.qb.DocType(f"{ref_doctype} Item")
+
 		item_ordered_qty = frappe._dict(
-			frappe.db.sql(
-				"""
-			select trans_item.item_code, sum(trans_item.stock_qty) as qty
-			from `tab{0} Item` trans_item, `tab{0}` trans
-			where trans.name = trans_item.parent
-				and trans_item.blanket_order=%s
-				and trans.docstatus=1
-				and trans.status not in ('Closed', 'Stopped')
-			group by trans_item.item_code
-		""".format(
-					ref_doctype
-				),
-				self.name,
-			)
+			(
+				frappe.qb.from_(trans_item)
+				.from_(trans)
+				.select(trans_item.item_code, Sum(trans_item.stock_qty).as_("qty"))
+				.where(
+					(trans.name == trans_item.parent)
+					& (trans_item.blanket_order == self.name)
+					& (trans.docstatus == 1)
+					& (trans.status.notin(["Stopped", "Closed"]))
+				)
+				.groupby(trans_item.item_code)
+			).run()
 		)
 
 		for d in self.items:
