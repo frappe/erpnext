@@ -139,16 +139,31 @@ def get_opening_balances(filters):
 
 def get_rootwise_opening_balances(filters, report_type):
 	gle = []
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	gle = get_opening_balance("Closing Balance", filters, report_type, accounting_dimensions)
 
-	last_period_closing_voucher_date = frappe.db.get_value(
-		"Period Closing Voucher", {"docstatus": 1, "company": filters.company}, "max(posting_date)"
+	last_period_closing_voucher = frappe.db.get_all(
+		"Period Closing Voucher",
+		filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", filters.from_date)},
+		fields=["posting_date", "name"],
+		order_by="posting_date desc",
+		limit=1,
 	)
 
-	# Check If need to get opening balance from GL Entry
-	if getdate(last_period_closing_voucher_date) < getdate(add_days(filters.from_date, -1)):
-		filters.from_date = add_days(last_period_closing_voucher_date, 1)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+	if last_period_closing_voucher:
+		gle = get_opening_balance(
+			"Closing Balance",
+			filters,
+			report_type,
+			accounting_dimensions,
+			period_closing_voucher=last_period_closing_voucher[0].name,
+		)
+		if getdate(last_period_closing_voucher[0].posting_date) < getdate(
+			add_days(filters.from_date, -1)
+		):
+			filters.from_date = add_days(last_period_closing_voucher, 1)
+			gle = get_opening_balance("GL Entry", filters, report_type, accounting_dimensions)
+	else:
 		gle = get_opening_balance("GL Entry", filters, report_type, accounting_dimensions)
 
 	opening = frappe._dict()
@@ -158,7 +173,9 @@ def get_rootwise_opening_balances(filters, report_type):
 	return opening
 
 
-def get_opening_balance(doctype, filters, report_type, accounting_dimensions):
+def get_opening_balance(
+	doctype, filters, report_type, accounting_dimensions, period_closing_voucher=None
+):
 	closing_balance = frappe.qb.DocType(doctype)
 	account = frappe.qb.DocType("Account")
 
@@ -182,6 +199,10 @@ def get_opening_balance(doctype, filters, report_type, accounting_dimensions):
 
 	if doctype == "Closing Balance":
 		opening_balance = opening_balance.where(closing_balance.closing_date < filters.from_date)
+		if period_closing_voucher:
+			opening_balance = opening_balance.where(
+				closing_balance.period_closing_voucher == period_closing_voucher
+			)
 	else:
 		opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
 
