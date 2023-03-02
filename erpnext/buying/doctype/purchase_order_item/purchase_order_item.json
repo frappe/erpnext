@@ -146,7 +146,6 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -186,7 +185,6 @@
    "columns": 2,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Reqd By Date",
    "no_copy": 1,
    "oldfieldname": "schedule_date",
@@ -266,8 +264,10 @@
    "print_hide": 1
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
@@ -339,7 +339,7 @@
   },
   {
    "bold": 1,
-   "columns": 2,
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -462,6 +462,7 @@
    "label": "Warehouse and Reference"
   },
   {
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -1172,10 +1173,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 14:23:15.584604",
+ "modified": "2023-03-02 17:50:00.068938",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

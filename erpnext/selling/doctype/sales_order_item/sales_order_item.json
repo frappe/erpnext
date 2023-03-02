@@ -162,7 +162,6 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -226,7 +225,6 @@
    "depends_on": "eval: !parent.skip_delivery_note",
    "fieldname": "delivery_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Delivery Date",
    "no_copy": 1,
    "print_hide": 1
@@ -277,8 +275,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
    "reqd": 1
@@ -393,8 +393,7 @@
    "precision": "2"
   },
   {
-   "columns": 2,
-   "depends_on": "eval: doc.type != \"\"",
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -546,6 +545,7 @@
    "label": "Warehouse and Reference"
   },
   {
+   "columns": 2,
    "depends_on": "eval:doc.delivered_by_supplier!=1",
    "fieldname": "warehouse",
    "fieldtype": "Link",
@@ -1359,7 +1359,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 14:23:15.584604",
+ "modified": "2023-03-02 17:59:56.554791",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

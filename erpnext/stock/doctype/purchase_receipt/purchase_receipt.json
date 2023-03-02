@@ -1349,7 +1349,8 @@
   {
    "fieldname": "per_completed",
    "fieldtype": "Percent",
-   "label": "% Completed",
+   "in_list_view": 1,
+   "label": "% Billed + Returned",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -1585,7 +1586,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-02 17:21:29.736137",
+ "modified": "2023-03-02 17:55:30.516406",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

@@ -180,7 +180,6 @@
   },
   {
    "bold": 1,
-   "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -257,7 +256,7 @@
    "width": "100px"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -278,8 +277,10 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
@@ -373,7 +374,7 @@
   },
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -385,6 +386,7 @@
    "width": "100px"
   },
   {
+   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -458,7 +460,6 @@
    "columns": 2,
    "fieldname": "net_amount",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Net Amount",
    "options": "currency",
    "print_hide": 1,
@@ -519,6 +520,7 @@
   },
   {
    "bold": 1,
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -610,7 +612,6 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Serial No",
    "no_copy": 1,
@@ -621,7 +622,6 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "batch_no",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Batch No",
    "no_copy": 1,
@@ -1417,7 +1417,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2023-02-28 14:23:15.584604",
+ "links": [],
+ "modified": "2023-03-02 17:51:09.313187",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

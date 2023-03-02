@@ -236,6 +236,7 @@
    "label": "Quantity and Rate"
   },
   {
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -264,6 +265,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -379,6 +381,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -390,6 +393,7 @@
    "width": "150px"
   },
   {
+   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -518,6 +522,7 @@
    "label": "Warehouse and Reference"
   },
   {
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -557,7 +562,6 @@
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Batch No",
    "oldfieldname": "batch_no",
@@ -593,7 +597,6 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Serial No",
    "no_copy": 1,
@@ -1336,7 +1339,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 14:23:15.584604",
+ "modified": "2023-03-02 17:39:41.481666",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

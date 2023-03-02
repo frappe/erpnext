@@ -130,7 +130,6 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 4,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -200,7 +199,7 @@
   },
   {
    "bold": 1,
-   "columns": 2,
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -228,8 +227,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
    "reqd": 1
@@ -257,9 +258,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "columns": 1,
    "fieldname": "price_list_rate",
    "fieldtype": "Currency",
-   "label": "Price List Rate",
+   "in_list_view": 1,
+   "label": "List Rate",
    "oldfieldname": "ref_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
@@ -306,10 +309,12 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
    "fieldtype": "Percent",
-   "label": "Discount (%) on Price List Rate with Margin",
+   "in_list_view": 1,
+   "label": "Discount (%)",
    "oldfieldname": "adj_rate",
    "oldfieldtype": "Float",
    "print_hide": 1,
@@ -339,7 +344,7 @@
   },
   {
    "bold": 1,
-   "columns": 2,
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -1055,7 +1060,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 14:23:15.584604",
+ "modified": "2023-03-02 17:57:19.280086",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

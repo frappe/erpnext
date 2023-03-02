@@ -894,7 +894,8 @@
    "fieldtype": "Small Text",
    "label": "Detailed Lost Reason",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -1454,7 +1455,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2023-03-02 17:29:21.209151",
+ "modified": "2023-03-02 17:57:49.206569",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
