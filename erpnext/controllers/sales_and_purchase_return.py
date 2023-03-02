@@ -131,7 +131,7 @@ def validate_returned_items(doc):
 					)
 
 				elif ref.serial_no:
-					if not d.serial_no:
+					if d.qty and not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
 					else:
 						serial_nos = get_serial_nos(d.serial_no)
