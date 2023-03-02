@@ -81,7 +81,7 @@ class CustomWorkflow:
 			self.gmcsd			= frappe.db.get_value("Employee", frappe.db.get_value("Department", {"department_name": "Corporate Support Services Division"},"approver"), self.field_list)
 			self.dept_approver	= frappe.db.get_value("Employee", frappe.db.get_value("Department", str(frappe.db.get_value("Employee", self.doc.employee, "department")), "approver"), self.field_list)
 			self.gm_approver	= frappe.db.get_value("Employee", frappe.db.get_value("Department",{"department_name":str(frappe.db.get_value("Employee", self.doc.employee, "division"))}, "approver"),self.field_list)
-			if self.doc.doctype in ["Employee Separation Clearance","Leave Encashment","POL","Leave Application","Travel Authorization","Travel Claim","Vehicle Request"]:
+			if self.doc.doctype in ["Employee Separation Clearance","Leave Encashment","POL","Leave Application","Travel Authorization","Vehicle Request"]:
 				self.inventory_manager = frappe.db.get_value("Employee", frappe.db.get_value("Department", "Inventory Section - BTL","approver"), self.field_list)
 				# self.tswf_manager = frappe.db.get_value("Employee", frappe.db.get_single_value("HR Settings","tswf_manager"),self.field_list)
 				self.ccs_manager = frappe.db.get_value("Employee", frappe.db.get_value("Department","Customer Care Section - BTL","approver"),self.field_list)
@@ -92,19 +92,6 @@ class CustomWorkflow:
 					{"parent": "Administration Section - SMCL", "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
-				self.internal_audit = frappe.db.get_value("Employee", frappe.db.get_value("Department","Internal Audit - BTL","approver"),self.field_list)
-				self.gm_itd = frappe.db.get_value("Employee", frappe.db.get_value("Department","Internet & IT Division - BTL","approver"),self.field_list)
-				self.gm_marketing = frappe.db.get_value("Employee", frappe.db.get_value("Department","Marketing Division - BTL","approver"),self.field_list)
-				self.gm_cpsd = frappe.db.get_value("Employee", frappe.db.get_value("Department","Corporate Planning & Strategy Division - BTL","approver"),self.field_list)
-				self.gm_fid = frappe.db.get_value("Employee", frappe.db.get_value("Department","Finance Division - BTL","approver"),self.field_list)
-				self.gmo = frappe.db.get_value("Employee", frappe.db.get_value("Department","Operations Division - BTL","approver"),self.field_list)
-				self.director_t = frappe.db.get_value("Employee", frappe.db.get_value("Department","Technical Department - BTL","approver"),self.field_list)
-				self.director_b = frappe.db.get_value("Employee", frappe.db.get_value("Department","Business Department - BTL","approver"),self.field_list)
-
-			if frappe.db.get_value("Employee",self.doc.employee,"region") not in (None,'Corporate Head Quarter'):
-				self.regional_director = frappe.db.get_value("Employee", frappe.db.get_value("Department",str(frappe.db.get_value("Employee",self.doc.employee,"region"))+" - BTL","approver"),self.field_list)
-			else:
-				self.regional_director = None
 
 		if self.doc.doctype == "Performance Evaluation":
 			self.employee		= frappe.db.get_value("Employee", self.doc.employee, self.field_list)
@@ -180,7 +167,9 @@ class CustomWorkflow:
 			
 			self.reports_to	= frappe.db.get_value("Employee", frappe.db.get_value("Employee", {'user_id':self.doc.owner}, "reports_to"), self.field_list)
 			self.general_manager = frappe.db.get_value("Employee", frappe.db.get_value("Department",{"department_name":str(frappe.db.get_value("Employee",{"user_id":self.doc.owner},"division")).split(" - ")[0]},"approver"),self.field_list)
-			
+		
+		if self.doc.doctype == "Employee Benefits":
+			self.hrgm = frappe.db.get_value("Employee",frappe.db.get_single_value("HR Settings","hrgm"), self.field_list)	
 
 		if self.doc.doctype == "Repair And Services":
 			self.expense_approver = frappe.db.get_value("Employee", {"user_id":frappe.db.get_value("Employee", {"user_id":self.doc.owner}, "expense_approver")}, self.field_list)
@@ -596,6 +585,8 @@ class CustomWorkflow:
 			self.employee_separation()
 		elif self.doc.doctype == "Employee Separation Clearance":
 			self.employee_separation_clearance()
+		elif self.doc.doctype == "Employee Benefits":
+			self.employee_benefits()
 		elif self.doc.doctype == "Coal Raising Payment":
 			self.coal_raising_payment()
 		elif self.doc.doctype == "POL":
@@ -812,6 +803,17 @@ class CustomWorkflow:
 			if "HR User" not in frappe.get_roles(frappe.session.user):
 				if self.doc.approver != frappe.session.user:
 					frappe.throw("Only {} can edit/submit this document".format(self.doc.approver))
+	
+	def employee_benefits(self):
+		if self.new_state.lower() in ("Draft".lower(), "Waiting GM Approval".lower()):
+			if self.new_state.lower() == "Waiting GM Approval".lower():
+				if "HR User" not in frappe.get_roles(frappe.session.user):
+					frappe.throw("Only HR can Apply this Appeal")
+			self.set_approver("HRGM")
+
+		elif self.new_state.lower() in ("Approved".lower()):
+			if self.doc.benefit_approver != frappe.session.user:
+				frappe.throw("Only {} can edit/submit this document".format(self.doc.benefit_approver_name))
 					
 	def coal_raising_payment(self):
 		if self.new_state.lower() in ("Draft".lower(), "Waiting Supervisor Approval".lower()):

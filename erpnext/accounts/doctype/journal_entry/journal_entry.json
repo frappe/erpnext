@@ -601,7 +601,7 @@
   {
    "fieldname": "referece_doctype",
    "fieldtype": "Dynamic Link",
-   "label": "Referece Doctype",
+   "label": "Reference Doctype",
    "options": "reference_type"
   }
  ],
@@ -614,7 +614,7 @@
    "link_fieldname": "journal_entry"
   }
  ],
- "modified": "2023-02-07 11:23:15.700506",
+ "modified": "2023-03-02 16:55:56.443128",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

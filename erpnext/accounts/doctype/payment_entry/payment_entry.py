@@ -2053,6 +2053,7 @@ def make_bank_payment(source_name, target_doc=None):
 		target.posting_date = get_datetime()
 		target.from_date = None
 		target.to_date = None
+		target.get_entries()
 
 	doc = get_mapped_doc("Payment Entry", source_name, {
 			"Payment Entry": {

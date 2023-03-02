@@ -1574,21 +1574,23 @@ def get_permission_query_conditions(user):
 # ePayment Begins
 @frappe.whitelist()
 def make_bank_payment(source_name, target_doc=None):
-    def set_missing_values(obj, target, source_parent):
-        target.payment_type = "One-One Payment"
-        target.transaction_type = "Journal Entry"
-        target.posting_date = get_datetime()
-        target.from_date = None
-        target.to_date = None
+	def set_missing_values(obj, target, source_parent):
+		target.payment_type = "One-One Payment"
+		target.transaction_type = "Journal Entry"
+		target.posting_date = get_datetime()
+		target.from_date = None
+		target.to_date = None
+		target.paid_from = frappe.db.get_value("Branch", target.branch,"expense_bank_account")
+		target.get_entries()
 
-    doc = get_mapped_doc("Journal Entry", source_name, {
-            "Journal Entry": {
-                "doctype": "Bank Payment",
-                "field_map": {
-                    "name": "transaction_no",
-                },
-                "postprocess": set_missing_values,
-            },
-    }, target_doc, ignore_permissions=True)
-    return doc
+	doc = get_mapped_doc("Journal Entry", source_name, {
+			"Journal Entry": {
+				"doctype": "Bank Payment",
+				"field_map": {
+					"name": "transaction_no",
+				},
+				"postprocess": set_missing_values,
+			},
+	}, target_doc, ignore_permissions=True)
+	return doc
 # ePayment Ends

@@ -2,6 +2,15 @@ import frappe
 from erpnext.setup.doctype.employee.employee import create_user
 import pandas as pd
 
+def create_gl_for_previous_production():
+    for p in frappe.db.get_list("Production",filters={"creation":["<=","2023-03-02"],"docstatus":1}, fields=["name","creation"]):
+        doc = frappe.get_doc("Production",p.name)
+        if len(doc.raw_materials) > 0:
+            frappe.db.sql("delete from `tabGL Entry` where voucher_no = '{}' and voucher_type = 'Production'".format(doc.name))
+            doc.make_gl_entries()
+            print(doc.name)
+    frappe.db.commit()
+    print('done')
 def create_leave_ledger_entry():
     for e in frappe.db.sql('''select name from `tabEmployee` where status = "Active"''',as_dict=1):
         if frappe.db.exists("Leave Allocation",{"employee":e.name,"leave_type":"Earned Leave","docstatus":1}):
