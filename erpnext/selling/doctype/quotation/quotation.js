@@ -90,7 +90,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				|| frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
 					this.frm.add_custom_button(
 						__("Sales Order"),
-						this.frm.cscript["Make Sales Order"],
+						() => this.make_sales_order(),
 						__("Create")
 					);
 				}
@@ -143,6 +143,20 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		this.toggle_reqd_lead_customer();
 
+	}
+
+	make_sales_order() {
+		var me = this;
+
+		let has_alternative_item = this.frm.doc.items.some((item) => item.is_alternative);
+		if (has_alternative_item) {
+			this.show_alternative_items_dialog();
+		} else {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+				frm: me.frm
+			});
+		}
 	}
 
 	set_dynamic_field_label(){
@@ -220,16 +234,110 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			}
 		})
 	}
+
+	show_alternative_items_dialog() {
+		let me = this;
+
+		const table_fields = [
+		{
+			fieldtype:"Data",
+			fieldname:"name",
+			label: __("Name"),
+			read_only: 1,
+		},
+		{
+			fieldtype:"Link",
+			fieldname:"item_code",
+			options: "Item",
+			label: __("Item Code"),
+			read_only: 1,
+			in_list_view: 1,
+			columns: 2,
+			formatter: (value, df, options, doc) => {
+				return doc.is_alternative ? `<span class="indicator yellow">${value}</span>` : value;
+			}
+		},
+		{
+			fieldtype:"Data",
+			fieldname:"description",
+			label: __("Description"),
+			in_list_view: 1,
+			read_only: 1,
+		},
+		{
+			fieldtype:"Currency",
+			fieldname:"amount",
+			label: __("Amount"),
+			options: "currency",
+			in_list_view: 1,
+			read_only: 1,
+		},
+		{
+			fieldtype:"Check",
+			fieldname:"is_alternative",
+			label: __("Is Alternative"),
+			read_only: 1,
+		}];
+
+
+		this.data = this.frm.doc.items.filter(
+			(item) => item.is_alternative || item.has_alternative_item
+		).map((item) => {
+			return {
+				"name": item.name,
+				"item_code": item.item_code,
+				"description": item.description,
+				"amount": item.amount,
+				"is_alternative": item.is_alternative,
+			}
+		});
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Alternative Items for Sales Order"),
+			fields: [
+				{
+					fieldname: "info",
+					fieldtype: "HTML",
+					read_only: 1
+				},
+				{
+					fieldname: "alternative_items",
+					fieldtype: "Table",
+					cannot_add_rows: true,
+					in_place_edit: true,
+					reqd: 1,
+					data: this.data,
+					description: __("Select an item from each set to be used in the Sales Order."),
+					get_data: () => {
+						return this.data;
+					},
+					fields: table_fields
+				},
+			],
+			primary_action: function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+					frm: me.frm,
+					args: {
+						selected_items: dialog.fields_dict.alternative_items.grid.get_selected_children()
+					}
+				});
+				dialog.hide();
+			},
+			primary_action_label: __('Continue')
+		});
+
+		dialog.fields_dict.info.$wrapper.html(
+			`<p class="small text-muted">
+				<span class="indicator yellow"></span>
+				Alternative Items
+			</p>`
+		)
+		dialog.show();
+	}
 };
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
-
-cur_frm.cscript['Make Sales Order'] = function() {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
-		frm: cur_frm
-	})
-}
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", "packed_items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
