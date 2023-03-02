@@ -574,6 +574,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency != erpnext.get_currency(doc.company)",
    "depends_on": "customer",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
@@ -2263,7 +2264,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-27 23:08:59.508586",
+ "modified": "2023-03-02 17:29:18.197045",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
