@@ -1,105 +1,30 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from six import text_type
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint, get_link_to_form, cstr
 from frappe.utils.data import add_days
-from six import string_types
-import json
 import math
+
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
-
-
-def get_name_from_hash():
-	"""
-	Get a name for a Batch by generating a unique hash.
-	:return: The hash that was generated.
-	"""
-	temp = None
-	while not temp:
-		temp = frappe.generate_hash()[:7].upper()
-		if frappe.db.exists('Batch', temp):
-			temp = None
-
-	return temp
-
-
-def batch_uses_naming_series():
-	"""
-	Verify if the Batch is to be named using a naming series
-	:return: bool
-	"""
-	use_naming_series = cint(frappe.db.get_single_value('Stock Settings', 'use_naming_series'))
-	return bool(use_naming_series)
-
-
-def _get_batch_prefix():
-	"""
-	Get the naming series prefix set in Stock Settings.
-
-	It does not do any sanity checks so make sure to use it after checking if the Batch
-	is set to use naming series.
-	:return: The naming series.
-	"""
-	naming_series_prefix = frappe.db.get_single_value('Stock Settings', 'naming_series_prefix')
-	if not naming_series_prefix:
-		naming_series_prefix = 'BATCH-'
-
-	return naming_series_prefix
-
-
-def _make_naming_series_key(prefix):
-	"""
-	Make naming series key for a Batch.
-
-	Naming series key is in the format [prefix].[#####]
-	:param prefix: Naming series prefix gotten from Stock Settings
-	:return: The derived key. If no prefix is given, an empty string is returned
-	"""
-	if not text_type(prefix):
-		return ''
-	elif not prefix.find('#'):
-		return prefix.upper() + '.#####'
-	else:
-		return prefix.upper()
-
-
-def get_batch_naming_series():
-	"""
-	Get naming series key for a Batch.
-
-	Naming series key is in the format [prefix].[#####]
-	:return: The naming series or empty string if not available
-	"""
-	series = ''
-	if batch_uses_naming_series():
-		prefix = _get_batch_prefix()
-		key = _make_naming_series_key(prefix)
-		series = key
-
-	return series
 
 
 class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
 		if not self.batch_id:
-			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item,
-				['create_new_batch', 'batch_number_series'])
-
+			create_new_batch = frappe.get_cached_value("Item", self.item, "create_new_batch")
 			if create_new_batch:
-				if batch_number_series:
-					self.batch_id = make_autoname(batch_number_series)
-				elif batch_uses_naming_series():
-					self.batch_id = self.get_name_from_naming_series()
+				batch_no_series = get_batch_naming_series(self.item)
+				if batch_no_series:
+					self.batch_id = make_autoname(batch_no_series, self.doctype, self)
 				else:
-					self.batch_id = get_name_from_hash()
+					self.batch_id = generate_batch_no_hash()
 			else:
 				frappe.throw(_('Batch ID is mandatory'), frappe.MandatoryError)
 
@@ -109,13 +34,15 @@ class Batch(Document):
 		self.image = frappe.db.get_value('Item', self.item, 'image')
 
 	def after_delete(self):
-		revert_series_if_last(get_batch_naming_series(), self.name, self)
+		series = get_batch_naming_series(self.item)
+		if series:
+			revert_series_if_last(series, self.name, self)
 
 	def validate(self):
 		self.item_has_batch_enabled()
 
 	def item_has_batch_enabled(self):
-		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
+		if frappe.db.get_value("Item", self.item, "has_batch_no", cache=1) == 0:
 			frappe.throw(_("The selected item cannot have Batch"))
 
 	def before_save(self):
@@ -130,16 +57,62 @@ class Batch(Document):
 					frappe.bold("Batch Expiry Date")),
 				title=_("Expiry Date Mandatory"))
 
-	def get_name_from_naming_series(self):
-		"""
-		Get a name generated for a Batch from the Batch's naming series.
-		:return: The string that was generated.
-		"""
-		naming_series_prefix = _get_batch_prefix()
-		# validate_template(naming_series_prefix)
-		name = make_autoname(naming_series_prefix, self.doctype, self)
 
-		return name
+def get_batch_naming_series(item_code):
+	item_details = None
+	if item_code:
+		item_details = frappe.get_cached_value("Item", item_code, ["create_new_batch", "batch_number_series"], as_dict=True)
+
+	if item_details and item_details.create_new_batch and item_details.batch_number_series:
+		return format_batch_series(item_details.batch_number_series)
+	elif batches_use_naming_series():
+		return get_default_batch_series()
+
+
+def get_default_batch_series():
+	prefix = get_default_batch_prefix()
+	return format_batch_series(prefix)
+
+
+def get_default_batch_prefix():
+	naming_series_prefix = frappe.db.get_single_value("Stock Settings", "naming_series_prefix")
+	if not naming_series_prefix:
+		naming_series_prefix = "BATCH-"
+
+	return naming_series_prefix
+
+
+def format_batch_series(prefix):
+	"""
+	Make naming series key for a Batch.
+
+	Naming series key is in the format [prefix].[#####]
+	:param prefix: Naming series prefix gotten from Stock Settings
+	:return: The derived key. If no prefix is given, an empty string is returned
+	"""
+	prefix = cstr(prefix)
+	if not prefix:
+		return ""
+
+	if not prefix.find('#'):
+		prefix = prefix + '.#####'
+
+	return prefix
+
+
+def generate_batch_no_hash():
+	hash_name = None
+	while not hash_name:
+		hash_name = frappe.generate_hash(length=7).upper()
+		if frappe.db.exists('Batch', hash_name):
+			hash_name = None
+
+	return hash_name
+
+
+def batches_use_naming_series():
+	use_naming_series = cint(frappe.db.get_single_value('Stock Settings', 'use_naming_series'))
+	return bool(use_naming_series)
 
 
 @frappe.whitelist()
@@ -323,7 +296,6 @@ def auto_select_and_split_batches(doc, warehouse_field, additional_group_fields=
 		doc.run_method("calculate_taxes_and_totals")
 
 
-
 @frappe.whitelist()
 def get_batch_no(item_code, warehouse, qty=1, throw=False, sales_order_item=None, serial_no=None):
 	"""
@@ -419,6 +391,7 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1.0, conversion_facto
 
 	return selected_batches
 
+
 def get_batch_received_date(batch_no, warehouse):
 	date = frappe.db.sql("""
 		select min(timestamp(posting_date, posting_time))
@@ -427,6 +400,7 @@ def get_batch_received_date(batch_no, warehouse):
 	""", [batch_no, warehouse])
 
 	return date[0][0] if date else None
+
 
 def get_batches(item_code, warehouse, posting_date=None, posting_time=None, qty_condition="positive", sales_order_item=None):
 	if qty_condition == "both":
@@ -476,6 +450,7 @@ def get_batches(item_code, warehouse, posting_date=None, posting_time=None, qty_
 		batches = available_preferred_batches + unpreferred_batches
 
 	return batches
+
 
 def validate_serial_no_with_batch(serial_nos, item_code):
 	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:

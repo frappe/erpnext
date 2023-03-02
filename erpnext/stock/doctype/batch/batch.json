@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "field:batch_id",
  "creation": "2013-03-05 14:50:38",
@@ -6,19 +7,22 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "image",
   "batch_id",
   "item",
-  "image",
+  "item_name",
   "parent_batch",
   "column_break_3",
-  "disabled",
   "manufacturing_date",
   "expiry_date",
+  "disabled",
   "source",
-  "supplier",
-  "column_break_9",
   "reference_doctype",
+  "auto_created",
+  "column_break_vmqof",
   "reference_name",
+  "column_break_9",
+  "supplier",
   "section_break_7",
   "description"
  ],
@@ -27,8 +31,7 @@
    "depends_on": "eval:doc.__islocal",
    "fieldname": "batch_id",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Batch ID",
+   "label": "Batch No",
    "no_copy": 1,
    "oldfieldname": "batch_id",
    "oldfieldtype": "Data",
@@ -40,17 +43,18 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Item",
+   "label": "Item Code",
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
-   "label": "image"
+   "label": "Image"
   },
   {
    "depends_on": "eval:doc.parent_batch",
@@ -90,6 +94,8 @@
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Supplier",
    "options": "Supplier",
    "read_only": 1
@@ -110,7 +116,8 @@
    "fieldtype": "Dynamic Link",
    "label": "Source Document Name",
    "options": "reference_doctype",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "section_break_7",
@@ -123,16 +130,38 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "width": "300px"
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vmqof",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_created",
+   "fieldtype": "Check",
+   "label": "Auto Created",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-archive",
  "idx": 1,
  "image_field": "image",
- "max_attachments": 5,
- "modified": "2021-11-26 16:46:17.516787",
+ "links": [],
+ "modified": "2023-03-02 13:12:57.161699",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
+ "naming_rule": "By fieldname",
  "owner": "harshada@webnotestech.com",
  "permissions": [
   {
@@ -192,5 +221,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "item"
+ "states": [],
+ "track_changes": 1
 }
