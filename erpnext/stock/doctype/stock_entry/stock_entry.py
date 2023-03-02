@@ -98,20 +98,20 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
-	# def submit(self):
-	# 	import time
-	# 	from nrp_manufacturing.utils import get_config_by_name
-	# 	time.sleep(1)
-	# 	se_type = frappe.db.sql(f"""SELECT wo.item_section FROM `tabWork Order` as wo WHERE wo.name ='{self.work_order}' """)
-	# 	if se_type:
-	# 		se_type_section = se_type[0][0]+self.stock_entry_type
-	# 	else:
-	# 		se_type_section = self.stock_entry_type
-	# 	se_bifurcations = get_config_by_name('stock_entry_queues')
-	# 	for queue in se_bifurcations:
-	# 		if se_type_section in se_bifurcations.get(queue):
-	# 			break
-	# 	self.queue_action('submit',queue_name="se_"+queue)
+	def submit(self):
+		import time
+		from nrp_manufacturing.utils import get_config_by_name
+		time.sleep(1)
+		se_type = frappe.db.sql(f"""SELECT wo.item_section FROM `tabWork Order` as wo WHERE wo.name ='{self.work_order}' """)
+		if se_type:
+			se_type_section = se_type[0][0]+self.stock_entry_type
+		else:
+			se_type_section = self.stock_entry_type
+		se_bifurcations = get_config_by_name('stock_entry_queues')
+		for queue in se_bifurcations:
+			if se_type_section in se_bifurcations.get(queue):
+				break
+		self.queue_action('submit',queue_name="se_"+queue)
 
 	def on_submit(self):
 
@@ -130,13 +130,13 @@ class StockEntry(StockController):
 		# stock_gl = frappe.new_doc('Stock GL Queue')
 		# stock_gl.stock_entry = self.name
 		# stock_gl.save(ignore_permissions=True)
-		# try:
-		# 	frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
-		# except Exception as e:
-		# 	traceback = frappe.get_traceback()
-		# 	frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+		try:
+			frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
+		except Exception as e:
+			traceback = frappe.get_traceback()
+			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
 		# #enqueue(StockEntry.make_gl_entries, self=self, queue='short')
-		self.make_gl_entries()
+		# self.make_gl_entries()
 		frappe.db.sql("UPDATE `tabStock Entry` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
 
 
