@@ -25,5 +25,5 @@ def execute():
 			)[1]
 			pcv_doc.make_closing_entries()
 			gl_entries = pcv_doc.get_gl_entries()
-			make_closing_entries(gl_entries, is_period_closing_voucher_entry=True)
+			make_closing_entries(gl_entries, is_period_closing_voucher_entry=True, voucher_name=pcv.name)
 			company_wise_order[pcv.company].append(pcv.posting_date)
