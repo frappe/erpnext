@@ -16,6 +16,7 @@
   "transaction_settings_section",
   "po_required",
   "pr_required",
+  "over_order_allowance",
   "column_break_12",
   "maintain_same_rate",
   "set_landed_cost_based_on_purchase_invoice_rate",
@@ -156,6 +157,13 @@
    "fieldname": "set_landed_cost_based_on_purchase_invoice_rate",
    "fieldtype": "Check",
    "label": "Set Landed Cost Based on Purchase Invoice Rate"
+  },
+  {
+   "default": "0",
+   "description": "Percentage you are allowed to order more against the Blanket Order Quantity. For example: If you have a Blanket Order of Quantity 100 units. and your Allowance is 10% then you are allowed to order 110 units.",
+   "fieldname": "over_order_allowance",
+   "fieldtype": "Float",
+   "label": "Over Order Allowance (%)"
   }
  ],
  "icon": "fa fa-cog",
@@ -163,7 +171,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-02-28 15:41:32.686805",
+ "modified": "2023-03-02 17:02:14.404622",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
