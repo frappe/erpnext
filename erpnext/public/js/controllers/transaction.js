@@ -2442,10 +2442,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var item = frappe.get_doc(cdt, cdn);
 
 		if(!item.item_code) {
-			frappe.throw(__("Please enter Item Code to get batch no"));
-		} else if (doc.doctype == "Purchase Receipt" ||
-			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
-
+			frappe.throw(__("Please enter Item Code to get Batch Nos"));
+		} else if (doc.doctype == "Purchase Receipt" || doc.doctype == "Purchase Invoice") {
 			return {
 				filters: {'item': item.item_code}
 			}
