@@ -42,7 +42,7 @@ def get_segment_gl_data(account_title,account,date,unit):
 	SELECT SUM(`credit_in_account_currency`-`debit_in_account_currency`) AS account_value 
 FROM `tabGL Entry` WHERE account IN {1}  AND company='{3}' 
 AND DATE(creation) BETWEEN '{2}' AND '{2}'
-	""".format(account_title,tuple(account),date,unit),debug=True)
+	""".format(account_title,tuple(account),date,unit))
 	save_doc = {
 		'doctype':'Account Segment Data',
 		'segment':'CSD',
