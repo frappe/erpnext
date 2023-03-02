@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "type",
-  "paid_to",
+  "party",
   "receipt_date",
   "receipt_number",
   "valid_upto",
@@ -27,14 +27,6 @@
    "in_list_view": 1,
    "label": "Type",
    "options": "\nBluebook\nFitness\nEmission",
-   "reqd": 1
-  },
-  {
-   "fieldname": "paid_to",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Paid To",
-   "options": "Supplier",
    "reqd": 1
   },
   {
@@ -110,12 +102,20 @@
    "label": "Journal Entry",
    "options": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Paid To",
+   "options": "Supplier",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-02 15:51:12.953389",
+ "modified": "2023-03-02 13:44:11.918496",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Bluebook Fitness and Emission Details",

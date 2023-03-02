@@ -679,7 +679,7 @@ class BankPayment(Document):
                         pe.name transaction_reference, pe.posting_date transaction_date, 
                         pe.party as supplier, pe.party as beneficiary_name, 
                         s.bank_name as bank_name, s.bank_branch, fib.financial_system_code, s.bank_account_type, s.account_number as bank_account_no,
-                        round((pe.paid_amount + (select ifnull(sum(ped.amount),0)
+                        round(( pe.paid_amount_after_tax + (select ifnull(sum(ped.amount),0)
                                             from `tabPayment Entry Deduction` ped
                                             where ped.parent = pe.name
                                             )

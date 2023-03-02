@@ -8,6 +8,15 @@ frappe.ui.form.on('Insurance and Registration', {
 		}	
 	},
 	refresh:function(frm){
+		frm.set_query("equipment",function(doc) {
+			return {
+				filters: {
+					"hired_equipment": 0,
+					"company": doc.company,
+					"enabled":1
+				}
+			}
+		})
 		frm.add_custom_button(
 			__("Journal Entry"),
 			function () {
@@ -20,6 +29,41 @@ frappe.ui.form.on('Insurance and Registration', {
 			},
 			__("View")
 		  );
+	},
+});
+frappe.ui.form.on("Insurance Details", {	
+	"post_bank_entry":function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		frappe.call({
+			method:"create_je",
+			doc:frm.doc,
+			args:row,
+			callback:function(r){
+				if (r.message){
+					frappe.model.set_value(cdt, cdn, "journal_entry", r.message);
+					frm.refresh_field("items")
+					frm.dirty()
+				}
+			}
+		})
+	},
+	before_insurance_item_remove:function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		if (row.journal_entry){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Journal Entry",
+					fieldname: ["docstatus"],
+					filters: {
+						"name": row.journal_entry
+					}
+				},
+				callback: function(r){
+					console.log(r.message.docstatus)
+					if (flt(r.message.docstatus) != 2) frappe.throw("You cannot delete row " + row.idx +" of "+ row.doctype+" as there exist accounting entry")
+				}})
+		}
 	}
 });
 frappe.ui.form.on("Bluebook Fitness and Emission Details", {	
@@ -43,6 +87,24 @@ frappe.ui.form.on("Bluebook Fitness and Emission Details", {
 				}
 			}
 		})
+	},
+	before_items_remove:function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		if (row.journal_entry){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Journal Entry",
+					fieldname: ["docstatus"],
+					filters: {
+						"name": row.journal_entry
+					}
+				},
+				callback: function(r){
+					console.log(r.message.docstatus)
+					if (flt(r.message.docstatus) != 2) frappe.throw("You cannot delete row " + row.idx +" of "+ row.doctype+ " as there exist accounting entry")
+				}})
+		}
 	}
 }); 
 var set_total_amount = function(frm, cdt, cdn){
