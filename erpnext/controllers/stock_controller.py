@@ -191,21 +191,13 @@ class StockController(AccountsController):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
-	def delete_auto_created_batches(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-		for d in self.items:
-			if not d.batch_no: continue
+	def unlink_auto_created_batches(self):
+		auto_created_batches = frappe.get_all("Batch", filters={
+			"reference_doctype": self.doctype, "reference_name": self.name
+		}, pluck="name")
 
-			serial_nos = get_serial_nos(d.serial_no)
-			if serial_nos:
-				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
-
-			d.batch_no = None
-			d.db_set("batch_no", None)
-
-		for data in frappe.get_all("Batch",
-			{'reference_name': self.name, 'reference_doctype': self.doctype}):
-			frappe.delete_doc("Batch", data.name)
+		for batch_no in auto_created_batches:
+			frappe.db.set_value("Batch", batch_no, {"reference_doctype": None, "reference_name": None}, notify=1)
 
 	def get_sl_entries(self, d, args):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos

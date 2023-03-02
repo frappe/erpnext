@@ -100,6 +100,7 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.unlink_auto_created_batches()
 
 		if not self.is_return:
 			from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc

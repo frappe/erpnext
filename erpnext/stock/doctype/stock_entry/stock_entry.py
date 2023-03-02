@@ -114,6 +114,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_previous_doc_status()
 		self.update_quality_inspection()
+		self.unlink_auto_created_batches()
 
 	def update_previous_doc_status(self):
 		material_requests = set()

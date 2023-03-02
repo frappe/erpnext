@@ -134,6 +134,7 @@ class PurchaseInvoice(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+			self.unlink_auto_created_batches()
 
 		if not self.is_return or not self.update_stock:
 			self.update_receipts_valuation()
