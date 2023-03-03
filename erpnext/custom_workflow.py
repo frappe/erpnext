@@ -114,7 +114,7 @@ class CustomWorkflow:
 		if self.doc.doctype == "POL Expense":
 			department = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"department")
 			section = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"section")
-			if section == "Chunaikhola Dolomite Mines - SMCL":
+			if section in ("Chunaikhola Dolomite Mines - SMCL","Samdrup Jongkhar - SMCL"):
 				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 					"Department Approver",
 					{"parent": section, "parentfield": "expense_approvers", "idx": 1},
