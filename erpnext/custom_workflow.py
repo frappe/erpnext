@@ -679,7 +679,7 @@ class CustomWorkflow:
 				self.doc.workflow_state = "Waiting Chief, PCD Approval"
 
 	def pol_expenses(self):
-		if self.new_state and self.old_state and self.new_state.lower() == self.old_state():
+		if self.new_state and self.old_state and self.new_state.lower() == self.old_state.lower():
 			return
 		if self.new_state.lower() in ("Waiting GM Approval".lower()):
 			if self.doc.owner != frappe.session.user:
