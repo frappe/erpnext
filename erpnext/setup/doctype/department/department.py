@@ -91,13 +91,10 @@ def get_employee_count(department):
 		cond = ' and unit ="{}"'.format(dep.department_name)
 	if cint(dep.is_section): 
 		cond = ' and section ="{}"'.format(dep.department_name)
-	
-	# frappe.msgprint(str(cond))
 	data = {}
-	if department != 'Regions - BTL':
-		res = frappe.db.sql("""select count(*) employee_count from `tabEmployee`
-						where status = "Active" {} """.format(cond))
-		data['count'] = res[0][0]
+	res = frappe.db.sql("""select count(*) employee_count from `tabEmployee`
+					where status = "Active" {} """.format(cond))
+	data['count'] = res[0][0] if res[0][0] else 0
 	data['approver_name'] = dep.approver_name
 	data['approver_level'] = dep.approver_level
 	return data

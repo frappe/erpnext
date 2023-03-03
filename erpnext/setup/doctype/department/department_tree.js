@@ -48,7 +48,6 @@ function get_identifier(node){
 			let format_string3 = ""
 			let border1 = "3px 0px 0px 3px"
 			let border2 = "3px 3px 3px 3px"
-			console.log(r.message)
 			if (r.message.approver_level) {
 				format_string1 = `<span class="badge badge-light" style="font-size:xx-small; margin-left: 5px; border-right: 1px solid grey; border-radius: 3px 0px 0px 3px; background-color: #f68446">${r.message.approver_level}</span>`;
 				border1 = "0px 0px 0px 0px"
@@ -57,10 +56,7 @@ function get_identifier(node){
 				format_string2 = `<span class="badge badge-light" style="font-size:xx-small; border-right: 1px solid grey; border-radius: ${border1}; background-color: #e5c9f7">${r.message.approver_name}</span>`;
 				border2 = "0px 3px 3px 0px"
 			}
-			if (r.message.count) {
-				format_string3 = `<span class="badge badge-light" style="font-size:xx-small; border-radius: ${border2}; background-color: gold">${r.message.count}</span>`;
-				console.log("here"+String(node.data.value)+String(r.message.count))
-			}
+			format_string3 = `<span class="badge badge-light" style="font-size:xx-small; border-radius: ${border2}; background-color: gold">${r.message.count}</span>`;
 			node.$tree_link.after(format_string1+format_string2+format_string3)
 
 		}
