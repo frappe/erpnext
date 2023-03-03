@@ -69,6 +69,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
+		self.validate_against_blanket_order()
 
 		if self.is_old_subcontracting_flow:
 			self.validate_bom_for_subcontracting_items()
@@ -196,6 +197,33 @@ class PurchaseOrder(BuyingController):
 						"Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
 				)
+
+	def validate_against_blanket_order(self):
+		po_data = {}
+		for item in self.get("items"):
+			if item.against_blanket_order and item.blanket_order:
+				if item.blanket_order in po_data:
+					if item.item_code in po_data[item.blanket_order]:
+						po_data[item.blanket_order][item.item_code] += item.qty
+					else:
+						po_data[item.blanket_order][item.item_code] = item.qty
+				else:
+					po_data[item.blanket_order] = {item.item_code: item.qty}
+
+		if po_data:
+			allowance = flt(frappe.db.get_single_value("Buying Settings", "over_order_allowance"))
+			for bo_name, item_data in po_data.items():
+				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+				for item in bo_doc.get("items"):
+					if item.item_code in item_data:
+						remaining_qty = item.qty - item.ordered_qty
+						allowed_qty = remaining_qty + (remaining_qty * (allowance / 100))
+						if allowed_qty < item_data[item.item_code]:
+							frappe.throw(
+								_(
+									f"Item {item.item_code} cannot be ordered more than {allowed_qty} against Blanket Order {bo_name}."
+								)
+							)
 
 	def validate_bom_for_subcontracting_items(self):
 		for item in self.items:
