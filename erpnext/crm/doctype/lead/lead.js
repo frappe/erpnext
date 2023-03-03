@@ -401,7 +401,7 @@ frappe.ui.form.on('Lead', {
 				let lead_contact_person_details  = frm.add_child("lead_contact_person_details");
 				lead_contact_person_details.person_name = new_customer_contact_person
 				lead_contact_person_details.department = (values["department"])
-				lead_contact_person_details.destination = (values["destination"])
+				lead_contact_person_details.designation = (values["designation"])
 				lead_contact_person_details.primary_mobile_number = (values["primary_mobile_number"])
 				lead_contact_person_details.primary_email_id = (values["primary_email_id"])
 				lead_contact_person_details.primary_email_id = (values["primary_email_id"])
