@@ -1925,6 +1925,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 		discount_amount = set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount)
 		if discount_amount > 0:
+			# Set pending discount amount in deductions
 			pe.set_gain_or_loss(
 				account_details={
 					"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
@@ -1933,7 +1934,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 					"amount": discount_amount * (-1 if payment_type == "Pay" else 1),
 				}
 			)
-			pe.set_difference_amount()
+
+		pe.set_difference_amount()
 
 	return pe
 
