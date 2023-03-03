@@ -30,6 +30,11 @@
   "so_required",
   "dn_required",
   "sales_update_frequency",
+<<<<<<< HEAD
+=======
+  "over_order_allowance",
+  "column_break_5",
+>>>>>>> d7da8928ac (feat: add field `Over Order Allowance (%)` in `Selling Settings`)
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "hide_tax_id",
@@ -202,10 +207,30 @@
    "options": "Party Name\nNaming Series"
   },
   {
+<<<<<<< HEAD
     "default": "0",
     "fieldname": "allow_sales_order_creation_for_expired_quotation",
     "fieldtype": "Check",
     "label": "Allow Sales Order Creation For Expired Quotation"
+=======
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_sales_order_creation_for_expired_quotation",
+   "fieldtype": "Check",
+   "label": "Allow Sales Order Creation For Expired Quotation"
+  },
+  {
+   "description": "Percentage you are allowed to order more against the Blanket Order Quantity. For example: If you have a Blanket Order of Quantity 100 units. and your Allowance is 10% then you are allowed to order 110 units.",
+   "fieldname": "over_order_allowance",
+   "fieldtype": "Float",
+   "label": "Over Order Allowance (%)"
+>>>>>>> d7da8928ac (feat: add field `Over Order Allowance (%)` in `Selling Settings`)
   }
  ],
  "icon": "fa fa-cog",
@@ -213,7 +238,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-02-04 12:37:53.380857",
+ "modified": "2023-03-03 11:16:54.333615",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
