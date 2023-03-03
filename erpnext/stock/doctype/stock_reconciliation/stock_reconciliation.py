@@ -405,6 +405,8 @@ class StockReconciliation(StockController):
 			}
 		)
 
+		self.update_inventory_dimensions(row, data)
+
 		if not row.batch_no:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
