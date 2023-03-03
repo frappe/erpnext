@@ -250,6 +250,8 @@ class POLExpense(AccountsController):
 			frappe.msgprint("No pol receive found within Date {} to {}".format(self.from_date, self.to_date))
 		self.calculate_km_diff()
 	def validate_amount(self):
+		if flt(self.amount) <= 0:
+			frappe.throw("Amount cannot be less than or equal to Zero")
 		if cint(self.use_common_fuelbook) == 0 and flt(self.amount) > flt(self.expense_limit):
 			frappe.throw("Amount cannot be greater than expense limit")
 		if cint(self.is_opening) == 0 :
