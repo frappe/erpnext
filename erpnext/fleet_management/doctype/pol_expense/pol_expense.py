@@ -159,7 +159,7 @@ class POLExpense(AccountsController):
 								.limit(1)
 								.run()
 								)
-		if closing_pol_tank_balance[0][0]:
+		if closing_pol_tank_balance and closing_pol_tank_balance[0][0]:
 			self.opening_pol_tank_balance = closing_pol_tank_balance[0][0]
 		self.previous_km_reading = pv_km
 		
