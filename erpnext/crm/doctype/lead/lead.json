@@ -105,6 +105,7 @@
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
    "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -553,14 +554,16 @@
    "oldfieldname": "company_name",
    "oldfieldtype": "Data",
    "options": "Customer",
-   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
+   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"",
+   "reqd": 1
   },
   {
    "default": "__user",
    "fieldname": "users",
    "fieldtype": "Link",
    "label": "User",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -568,7 +571,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-02-17 15:07:40.858168",
+ "modified": "2023-03-03 14:44:15.989220",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

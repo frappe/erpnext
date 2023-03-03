@@ -440,3 +440,25 @@ def user_created(name,user_created_by,lead_transfer):
 	doc2 = frappe.get_doc("Lead",name)
 	share_doc_with_approver(doc2, user_created_by)
 	share_doc_with_approver(doc2, lead_transfer)
+
+
+@frappe.whitelist()
+def get_customer_name_details(customer_name):
+	customer= frappe.get_doc("Customer",customer_name)
+	person_data = []
+	for person in customer.get("customer_contact_person_details"):
+		person_data.append(person.contact_name)
+	return person_data	
+ 
+@frappe.whitelist()
+def contact_person(**args):
+	contact_person_detail = frappe.new_doc("Customer Contact Person")
+	contact_person_detail.customer_name = args.get('customer_name')
+	contact_person_detail.person_name = args.get('person_name')
+	contact_person_detail.designation = args.get('designation')
+	contact_person_detail.department = args.get('department')
+	contact_person_detail.primary_mobile_number = args.get('primary_mobile_number')
+	contact_person_detail.primary_email_id = args.get('primary_email_id')
+	contact_person_detail.insert(ignore_mandatory=True, ignore_permissions = True)
+	doc1=frappe.get_last_doc("Customer Contact Person")
+	return doc1.name

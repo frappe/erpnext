@@ -113,6 +113,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	success_lead: function(){
 		cur_frm.set_value("status","Success");
 		cur_frm.save();
+		setTimeout(function(){
+			window.location.reload(1);
+		}, 500);
 	},
 	close_lead: function(){
 		cur_frm.set_value("status","Close");
@@ -199,18 +202,6 @@ frappe.ui.form.on('Lead', {
 			return ret_value;
 		}
 	},
-	
-	// hide connection section, doc name set in lead number,if status is Success/Close then disable save button from form
-	refresh(frm) {
-		frm.dashboard.links_area.hide();
-		if(frm.doc.name  && !frm.doc.__islocal && (frm.doc.lead_number == null || frm.doc.lead_number == undefined)){
-			cur_frm.set_value("lead_number",frm.doc.name);
-			frm.save();
-		}
-		if (frm.doc.status === "Success" || frm.doc.status === "Close" ){
-			frm. disable_save()
-		}
-	},
 	//form is save then set status Open, if company name mention then person child table set Mandatory 
 	before_save :function(frm){
 		if (frm.doc.__islocal)
@@ -237,6 +228,9 @@ frappe.ui.form.on('Lead', {
 					},	 
 		 	});
 		}
+	},
+	setup: (frm) => {
+		frm.events.get_customer_contact_person_list(frm);
 	},
 	//on lead transfer create 1 Dialog box for Reason in lead_assing_to_user child table add user name,assing to mail, lead transfer Reason,today date time  
 	lead_transfer:function(frm){
@@ -269,6 +263,185 @@ frappe.ui.form.on('Lead', {
 		lead_assign_to_user.date = date
 		lead_assign_to_user.user_name = frm.doc.lead_transfer_user_full_name
 		refresh_field("lead_assign_to_user")
+	},
+	customer_name: function(frm) {
+		if (frm.doc.customer_name === "" || frm.doc.customer_name != "") {
+			frm.clear_table("lead_contact_person_details");
+			frm.refresh_fields();
+		}
+		frm.events.get_customer_contact_person_list(frm);
+	},
+	// get selected customer table list
+	get_customer_contact_person_list:function(frm){
+		if(frm.doc.customer_name){
+			frappe.call({
+				method: "erpnext.crm.doctype.lead.lead.get_customer_name_details",
+				async:false,
+				args: {customer_name:frm.doc.customer_name},
+				callback: function(r) {
+					console.log(r.message);
+					var df = frappe.meta.get_docfield("Lead Contact Person Details","person_name", cur_frm.doc.name);
+					df.options = r.message;
+				}
+			})
+		}
+	},
+		//if row is empty and try to add row they now allow after fill that empty row then they allow to add new row
+	add_person: function (frm) {
+		var arr=[];
+		if(frm.doc.lead_contact_person_details.length !=1){
+			$.each(frm.doc.lead_contact_person_details || [], function (i, row) {
+				arr.push(row.person_name)
+			});		
+			if(arr[arr.length-2] === undefined || arr[arr.length-2] === "" || arr[arr.length-2] === null){
+				console.log("arr length 2 is",arr[arr.length-2]);
+					$.each(frm.doc.lead_contact_person_details || [], function (i, row) {
+
+						if (i === arr.length-2){
+							cur_frm.fields_dict["lead_contact_person_details"].grid.grid_rows[i].remove();		
+					
+						}
+					});	
+			} 
+		}
+	},
+	//Create New Contact Person also create button on button click Dialog form will be pop after submit that form create new Contact Person and also add that Contact Person in visit table
+	refresh: function(frm)  {
+
+		frm.dashboard.links_area.hide();
+		if(frm.doc.name  && !frm.doc.__islocal && (frm.doc.lead_number == null || frm.doc.lead_number == undefined)){
+			cur_frm.set_value("lead_number",frm.doc.name);
+			frm.save();
+		}
+		if (frm.doc.status === "Success" || frm.doc.status === "Close" ){
+			frm. disable_save()
+		}
+		// hide connection section, doc name set in lead number,if status is Success/Close then disable save button from form
+
+		frm.events.get_customer_contact_person_list(frm);
+
+		if(frm.doc.status=== "Open" || frm.doc.status=== "Contacted"|| frm.doc.__islocal){
+			
+			frm.fields_dict["lead_contact_person_details"].grid.add_custom_button(__('Create Contact Person Details'),
+	
+		function() {
+			var d = new frappe.ui.Dialog({
+			
+			title: __('Create New Contact Person'),
+			fields: [	
+				{
+					label: 'Customer Name',
+					fieldname: 'customer_name',
+					fieldtype: 'Data',
+					default: frm.doc.customer_name,
+					read_only: 1,
+					reqd: 1
+				},
+				{
+					label: 'Person Name',
+					fieldname: 'Person_name',
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					label: "Designation",
+					fieldname: "designation",
+					fieldtype: "Link",
+					options: "Designation"
+				},
+				
+				{
+					fieldname: "column_break1",
+					fieldtype: "Column Break",
+				},
+			
+			
+				{	
+					label: "Division / Department",
+					fieldname: "department",
+					fieldtype: "Link",
+					options: "Person Department"
+				},
+				{
+					label: "Primary Email Id",
+					fieldname: "primary_email_id",
+					fieldtype: "Data",
+					options: "Email",
+					reqd: 1
+				},
+				{
+					label: "Primary Mobile Number",
+					fieldname: "primary_mobile_number",
+					fieldtype: "Data",
+					options: "phone",
+					reqd: 1,
+					
+				},
+			],
+			primary_action_label: 'Submit',
+			primary_action(values) {
+				var new_customer_contact_person;
+				console.log(values);
+				frappe.call({
+					async:false,
+					method:"axis_india_app.visit_module.doctype.visit.visit.contact_person",
+					args: {
+						customer_name: frm.doc.customer_name,
+						person_name:(values["Person_name"]),
+						designation:(values["designation"]),
+						department:(values["department"]),
+						primary_mobile_number:(values["primary_mobile_number"]),
+						primary_email_id:(values["primary_email_id"]),
+					},
+					callback:function(r){
+						new_customer_contact_person = r.message;
+					}
+				})
+				frm.events.get_customer_contact_person_list(frm);
+				let lead_contact_person_details  = frm.add_child("lead_contact_person_details");
+				lead_contact_person_details.person_name = new_customer_contact_person
+				lead_contact_person_details.department = (values["department"])
+				lead_contact_person_details.destination = (values["destination"])
+				lead_contact_person_details.primary_mobile_number = (values["primary_mobile_number"])
+				lead_contact_person_details.primary_email_id = (values["primary_email_id"])
+				lead_contact_person_details.primary_email_id = (values["primary_email_id"])
+				refresh_field("lead_contact_person_details")
+				d.hide();
+			}
+		    })
+		    d.show();  
+		    } );
+		    frm.fields_dict["lead_contact_person_details"].grid.grid_buttons.find('.btn-custom').removeClass('btn-default').addClass('btn-primary new-custom-btn');
+		}
+		
 	}
 
 });				
+
+frappe.ui.form.on("Lead Contact Person Details", {
+	lead_contact_person_details_add:function(frm) {
+		frm.events.add_person(frm);
+	},
+	//fetch select person name details
+	person_name:function(frm,cdt,cdn) {
+		var d = locals[cdt][cdn];
+		console.log("person_name",d.person_name);
+		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "designation", function (value){
+			frappe.model.set_value(d.doctype, d.name, "designation", value.designation)
+			refresh_field('designation')
+		});
+		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "department", function (value){
+			frappe.model.set_value(d.doctype, d.name, "department", value.department)
+			refresh_field('department')
+		});
+		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "primary_mobile_number", function (value){
+			frappe.model.set_value(d.doctype, d.name, "primary_mobile_number", value.primary_mobile_number)
+			refresh_field('primary_mobile_number')
+		});
+		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "primary_email_id", function (value){
+			frappe.model.set_value(d.doctype, d.name, "primary_email_id", value.primary_email_id)
+			refresh_field('primary_email_id')
+		});
+	},
+});
+ 

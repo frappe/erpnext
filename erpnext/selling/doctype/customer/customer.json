@@ -96,6 +96,7 @@
    "options": "Salutation"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -361,6 +362,7 @@
    "options": "Market Segment"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "industry",
    "fieldtype": "Table MultiSelect",
    "label": "Industry",
@@ -458,6 +460,7 @@
    "options": "Customer Credit Limit"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "type_of_client",
    "fieldtype": "Table MultiSelect",
    "label": "Type of Client",
@@ -495,6 +498,7 @@
    "label": "Address"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "region",
    "fieldtype": "Select",
    "label": "Region",
@@ -502,6 +506,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
@@ -509,10 +514,12 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "city",
    "fieldtype": "Link",
    "label": "City",
-   "options": "City"
+   "options": "City",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_2",
@@ -554,10 +561,12 @@
    "label": "Address Line 2"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "state",
    "fieldtype": "Link",
    "label": "State",
-   "options": "State"
+   "options": "State",
+   "reqd": 1
   }
  ],
  "hide_toolbar": 1,
@@ -572,7 +581,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-02-15 17:38:14.922103",
+ "modified": "2023-03-01 09:57:10.715099",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -650,6 +659,7 @@
    "role": "Accounts Manager"
   }
  ],
+ "quick_entry": 1,
  "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
