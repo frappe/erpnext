@@ -594,6 +594,9 @@ def make_stock_entry(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
+		target.from_warehouse = source.set_from_warehouse
+		target.to_warehouse = source.set_warehouse
+
 		if source.job_card:
 			target.purpose = "Material Transfer for Manufacture"
 
