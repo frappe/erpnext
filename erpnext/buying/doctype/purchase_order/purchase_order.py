@@ -21,6 +21,9 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+	validate_against_blanket_order,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
@@ -70,10 +73,14 @@ class PurchaseOrder(BuyingController):
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
 <<<<<<< HEAD
+<<<<<<< HEAD
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 =======
 		self.validate_against_blanket_order()
+=======
+		validate_against_blanket_order(self)
+>>>>>>> 53701c37b1 (feat: consider `over_order_allowance` while validating sales order qty)
 
 		if self.is_old_subcontracting_flow:
 			self.validate_bom_for_subcontracting_items()
@@ -202,33 +209,6 @@ class PurchaseOrder(BuyingController):
 						"Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
 				)
-
-	def validate_against_blanket_order(self):
-		po_data = {}
-		for item in self.get("items"):
-			if item.against_blanket_order and item.blanket_order:
-				if item.blanket_order in po_data:
-					if item.item_code in po_data[item.blanket_order]:
-						po_data[item.blanket_order][item.item_code] += item.qty
-					else:
-						po_data[item.blanket_order][item.item_code] = item.qty
-				else:
-					po_data[item.blanket_order] = {item.item_code: item.qty}
-
-		if po_data:
-			allowance = flt(frappe.db.get_single_value("Buying Settings", "over_order_allowance"))
-			for bo_name, item_data in po_data.items():
-				bo_doc = frappe.get_doc("Blanket Order", bo_name)
-				for item in bo_doc.get("items"):
-					if item.item_code in item_data:
-						remaining_qty = item.qty - item.ordered_qty
-						allowed_qty = remaining_qty + (remaining_qty * (allowance / 100))
-						if allowed_qty < item_data[item.item_code]:
-							frappe.throw(
-								_(
-									f"Item {item.item_code} cannot be ordered more than {allowed_qty} against Blanket Order {bo_name}."
-								)
-							)
 
 	def validate_bom_for_subcontracting_items(self):
 		if self.is_subcontracted == "Yes":
