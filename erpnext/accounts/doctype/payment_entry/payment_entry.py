@@ -1772,13 +1772,14 @@ def get_payment_entry(
 
 		discount_amount = set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount)
 		if discount_amount > 0:
-			# Set pending discount amount in deductions
+			# Set pending base discount amount in deductions
+			positive_negative = -1 if payment_type == "Pay" else 1
 			pe.set_gain_or_loss(
 				account_details={
 					"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
 					"cost_center": pe.cost_center
 					or frappe.get_cached_value("Company", pe.company, "cost_center"),
-					"amount": discount_amount * (-1 if payment_type == "Pay" else 1),
+					"amount": discount_amount * positive_negative * doc.get("conversion_rate", 1),
 				}
 			)
 
@@ -1966,19 +1967,22 @@ def get_total_discount_percent(doc, valid_discounts) -> float:
 
 
 def add_income_discount_loss(pe, doc, total_discount_percent) -> float:
-	loss_on_income = flt(doc.get("total") * (total_discount_percent / 100), doc.precision("total"))
+	"""Add loss on income discount in base currency."""
+	precision = doc.precision("total")
+	loss_on_income = flt(doc.get("total") * (total_discount_percent / 100), precision)
 	pe.append(
 		"deductions",
 		{
 			"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
 			"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
-			"amount": loss_on_income,
+			"amount": flt(loss_on_income * doc.get("conversion_rate", 1), precision),
 		},
 	)
 	return loss_on_income
 
 
 def add_tax_discount_loss(pe, doc, total_discount_percenatage) -> float:
+	"""Add loss on tax discount in base currency."""
 	tax_discount_loss = {}
 	total_tax_loss = 0
 	precision = doc.precision("tax_amount_after_discount_amount", "taxes")
@@ -2001,7 +2005,7 @@ def add_tax_discount_loss(pe, doc, total_discount_percenatage) -> float:
 			{
 				"account": account,
 				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
-				"amount": loss,
+				"amount": flt(loss * doc.get("conversion_rate", 1), precision),
 			},
 		)
 
