@@ -126,7 +126,8 @@ class CustomWorkflow:
 					{"parent": department, "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
-			
+			if self.doc.owner == 'sangay.choden0100@smcl.bt':
+				frappe.throw('Department :{} \n Approver:{}')
 
 		if self.doc.doctype == "Employee Advance":
 			if self.doc.advance_type != "Imprest Advance":
