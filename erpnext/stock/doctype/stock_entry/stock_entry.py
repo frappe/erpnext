@@ -18,6 +18,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
 from frappe.model.mapper import get_mapped_doc
+from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 
@@ -413,9 +414,11 @@ class StockEntry(StockController):
 	def set_incoming_rate(self):
 		if self.purpose == "Repack":
 			self.set_basic_rate_for_finished_goods()
-
+		if self.bom_no:
+			self.scrap_items = get_bom_items_as_dict(self.bom_no, self.company, qty=None,
+					fetch_exploded = 0, fetch_scrap_items = 1)
 		for d in self.items:
-			if d.item_code.startswith('WS'):
+			if d.item_code in self.scrap_items:
 				d.basic_rate = 0.0
 				d.basic_amount= 0.0
 			else:
@@ -471,6 +474,9 @@ class StockEntry(StockController):
 
 	def calculate_rate_and_amount(self, force=False,
 			update_finished_item_rate=True, raise_error_if_no_rate=True):
+		if self.bom_no:
+			self.scrap_items = get_bom_items_as_dict(self.bom_no, self.company, qty=None,
+				fetch_exploded = 0, fetch_scrap_items = 1)
 		self.set_basic_rate(force, update_finished_item_rate, raise_error_if_no_rate)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
@@ -484,7 +490,7 @@ class StockEntry(StockController):
 		fg_basic_rate = 0.0
 
 		for d in self.get('items'):
-			if d.item_code.startswith('WS'):
+			if d.item_code in self.scrap_items:
 				d.basic_rate = 0.0
 				d.basic_amount= 0.0
 			else:
@@ -583,15 +589,19 @@ class StockEntry(StockController):
 
 	def update_valuation_rate(self):
 		for d in self.get("items"):
-			if d.transfer_qty:
-				d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
-				d.valuation_rate = flt(flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty)),
-					d.precision("valuation_rate"))
+			if d.item_code in self.scrap_items:
+				d.amount = 0.0
+				d.valuation_rate= 0.0
+			else:
+				if d.transfer_qty:
+					d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
+					d.valuation_rate = flt(flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty)),
+						d.precision("valuation_rate"))
 
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
 		for d in self.get("items"):
-			if not d.item_code.startswith('WS'):
+			if not d.item_code.startswith('WS') or d.include_item_in_manufacturing ==1:
 				if d.t_warehouse:
 					self.total_incoming_value += flt(d.amount)
 				if d.s_warehouse:
@@ -1040,7 +1050,6 @@ class StockEntry(StockController):
 		}, bom_no = self.bom_no)
 
 	def get_bom_raw_materials(self, qty):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
@@ -1066,7 +1075,6 @@ class StockEntry(StockController):
 		return item_dict
 
 	def get_bom_scrap_material(self, qty):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
@@ -1286,6 +1294,7 @@ class StockEntry(StockController):
 			se_child = self.append('items')
 			se_child.s_warehouse = item_dict[d].get("from_warehouse")
 			se_child.t_warehouse = item_dict[d].get("to_warehouse")
+			se_child.include_item_in_manufacturing =item_dict[d].get("include_item_in_manufacturing")
 			se_child.item_code = item_dict[d].get('item_code') or cstr(d)
 			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
