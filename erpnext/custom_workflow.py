@@ -127,7 +127,7 @@ class CustomWorkflow:
 					"approver",
 				)},self.field_list)
 			if self.doc.owner == 'sangay.choden0100@smcl.bt':
-				frappe.throw('Department :{} \n Approver:{}')
+				frappe.throw('Department :{} \n Approver:{}'.format(department, self.pol_approver))
 
 		if self.doc.doctype == "Employee Advance":
 			if self.doc.advance_type != "Imprest Advance":
