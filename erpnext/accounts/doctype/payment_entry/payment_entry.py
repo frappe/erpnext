@@ -1822,7 +1822,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 	)
 
-	paid_amount, received_amount, discount_amount = apply_early_payment_discount(
+	paid_amount, received_amount, discount_amount, valid_discounts = apply_early_payment_discount(
 		paid_amount, received_amount, doc
 	)
 
@@ -1922,7 +1922,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			reference_doc = doc
 		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
-		if discount_amount:
+
+		discount_amount = set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount)
+		if discount_amount > 0:
 			pe.set_gain_or_loss(
 				account_details={
 					"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
@@ -2069,6 +2071,7 @@ def set_paid_amount_and_received_amount(
 
 def apply_early_payment_discount(paid_amount, received_amount, doc):
 	total_discount = 0
+	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
 	has_payment_schedule = hasattr(doc, "payment_schedule") and doc.payment_schedule
 
@@ -2089,13 +2092,96 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 					received_amount -= discount_amount
 					paid_amount -= discount_amount_in_foreign_currency
 
+				valid_discounts.append({"type": term.discount_type, "discount": term.discount})
 				total_discount += discount_amount
 
 		if total_discount:
 			money = frappe.utils.fmt_money(total_discount, currency=doc.get("currency"))
 			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(money), alert=1)
 
-	return paid_amount, received_amount, total_discount
+	return paid_amount, received_amount, total_discount, valid_discounts
+
+
+def set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount):
+	"""Split early bird discount deductions into Income Loss & Tax Loss."""
+	if not (discount_amount and valid_discounts):
+		return discount_amount
+
+	total_discount_percent = get_total_discount_percent(doc, valid_discounts)
+
+	if not total_discount_percent:
+		return discount_amount
+
+	loss_on_income = add_income_discount_loss(pe, doc, total_discount_percent)
+	loss_on_taxes = add_tax_discount_loss(pe, doc, total_discount_percent)
+
+	return flt(discount_amount - (loss_on_income + loss_on_taxes))
+
+
+def get_total_discount_percent(doc, valid_discounts) -> float:
+	"""Get total percentage and amount discount applied as a percentage."""
+	total_discount_percent = (
+		sum(
+			discount.get("discount") for discount in valid_discounts if discount.get("type") == "Percentage"
+		)
+		or 0.0
+	)
+
+	# Operate in percentages only as it makes the income & tax split easier
+	total_discount_amount = (
+		sum(discount.get("discount") for discount in valid_discounts if discount.get("type") == "Amount")
+		or 0.0
+	)
+
+	if total_discount_amount:
+		discount_percentage = (total_discount_amount / doc.get("grand_total")) * 100
+		total_discount_percent += discount_percentage
+		return total_discount_percent
+
+	return total_discount_percent
+
+
+def add_income_discount_loss(pe, doc, total_discount_percent) -> float:
+	loss_on_income = flt(doc.get("total") * (total_discount_percent / 100), doc.precision("total"))
+	pe.append(
+		"deductions",
+		{
+			"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
+			"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
+			"amount": loss_on_income,
+		},
+	)
+	return loss_on_income
+
+
+def add_tax_discount_loss(pe, doc, total_discount_percenatage) -> float:
+	tax_discount_loss = {}
+	total_tax_loss = 0
+	precision = doc.precision("tax_amount_after_discount_amount", "taxes")
+
+	# The same account head could be used more than once
+	for tax in doc.get("taxes", []):
+		tax_loss = flt(
+			tax.get("tax_amount_after_discount_amount") * (total_discount_percenatage / 100), precision
+		)
+		account = tax.get("account_head")
+		if not tax_discount_loss.get(account):
+			tax_discount_loss[account] = tax_loss
+		else:
+			tax_discount_loss[account] += tax_loss
+
+	for account, loss in tax_discount_loss.items():
+		total_tax_loss += loss
+		pe.append(
+			"deductions",
+			{
+				"account": account,
+				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
+				"amount": loss,
+			},
+		)
+
+	return total_tax_loss
 
 
 def get_reference_as_per_payment_terms(
