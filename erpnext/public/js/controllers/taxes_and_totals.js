@@ -205,10 +205,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					item.stock_qty = item.qty * flt(item.conversion_factor);
 				}
 
+				let stock_qty = frappe.meta.has_field(item.doctype, "stock_qty") ? item.stock_qty : item.qty;
+
 				if (frappe.meta.has_field(item.doctype, "net_weight") && frappe.meta.has_field(item.doctype, "net_weight_per_unit")) {
-					let stock_qty = frappe.meta.has_field(item.doctype, "stock_qty") ? item.stock_qty : item.qty
 					item.net_weight = flt(flt(item.net_weight_per_unit) * flt(stock_qty), precision("net_weight", item));
 				}
+
+				item.alt_uom_size = item.alt_uom ? item.alt_uom_size : 1.0;
+				item.alt_uom_qty = flt(stock_qty * item.alt_uom_size, precision('alt_uom_qty', item));
 
 				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount",
 					"taxable_rate", "taxable_amount", "net_rate", "net_amount",

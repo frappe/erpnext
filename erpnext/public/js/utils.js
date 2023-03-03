@@ -57,27 +57,26 @@ $.extend(erpnext, {
 		return cint(frappe.boot.sysdefaults.allow_stale);
 	},
 
-	setup_serial_no: function() {
-		var grid_row = cur_frm.open_grid_row();
-		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
-			grid_row.grid_form.fields_dict.serial_no.get_status()!=="Write") return;
+	setup_serial_no: function(on_click) {
+		let grid_row = cur_frm.open_grid_row();
+		if(!grid_row
+			|| !grid_row.grid_form.fields_dict.serial_no
+			|| grid_row.grid_form.fields_dict.serial_no.get_status() !== "Write"
+		) {
+			return;
+		}
 
-		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
-			.appendTo($("<div>")
-				.css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
+		let $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>').appendTo(
+			$("<div>").css({"margin-bottom": "5px", "margin-top": "5px"})
+				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper)
+		);
 
-		var me = this;
 		$btn.on("click", function() {
-			let callback = '';
-			let on_close = '';
-
-			if (grid_row.doc.serial_no) {
-				grid_row.doc.has_serial_no = true;
+			if (on_click) {
+				on_click();
+			} else {
+				new erpnext.stock.SerialBatchSelector(grid_row.frm, grid_row.doc);
 			}
-
-			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-				callback, on_close, 'serial_no');
 		});
 	},
 

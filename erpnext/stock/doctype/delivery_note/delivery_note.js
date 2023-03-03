@@ -333,11 +333,11 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 		this.get_terms();
 	}
 
-	items_on_form_rendered(doc, grid_row) {
+	items_on_form_rendered() {
 		erpnext.setup_serial_no();
 	}
 
-	packed_items_on_form_rendered(doc, grid_row) {
+	packed_items_on_form_rendered() {
 		erpnext.setup_serial_no();
 	}
 

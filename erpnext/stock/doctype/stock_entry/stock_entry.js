@@ -29,28 +29,22 @@ frappe.ui.form.on('Stock Entry', {
 			if(!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
-				// Receipt case
-				if (doc.purpose !== 'Material Issue' && (doc.purpose === "Material Receipt" || (item.t_warehouse && !item.s_warehouse))) {
+				if (item.s_warehouse || frm.doc.purpose == "Material Receipt") {
+					return {
+						query : "erpnext.controllers.queries.get_batch_no",
+						filters: {
+							item_code: item.item_code,
+							warehouse: item.s_warehouse || item.t_warehouse,
+							posting_date: frm.doc.posting_date || frappe.datetime.nowdate()
+						}
+					};
+				} else {
 					return {
 						filters: {
 							item: item.item_code
 						}
 					}
 				}
-
-				var filters = {
-					item_code: item.item_code,
-					warehouse: item.s_warehouse || item.t_warehouse
-				}
-
-				if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor"], doc.purpose)) {
-					filters['posting_date'] = frm.doc.posting_date || frappe.datetime.nowdate();
-				}
-
-				return {
-					query : "erpnext.controllers.queries.get_batch_no",
-					filters: filters
-				};
 			}
 		});
 
@@ -790,15 +784,15 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	create_select_batch_button(doc, cdt, cdn) {
+		let me = this;
 
-		var me = this;
-		this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
+		me.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
 			if (me.frm.focused_item_dn) {
 				var row = frappe.get_doc("Stock Entry Detail", me.frm.focused_item_dn);
 				erpnext.stock.select_batch_and_serial_no(me.frm, row);
 			}
 		});
-		this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
+		me.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
 	}
 
 	items_row_focused(doc, cdt, cdn) {
@@ -1023,8 +1017,11 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.autofill_warehouse(child_table, warehouse_field, warehouse);
 	}
 
-	items_on_form_rendered(doc, grid_row) {
-		erpnext.setup_serial_no();
+	items_on_form_rendered(doc, cdt, cdn) {
+		let row = frappe.get_doc(cdt, cdn);
+		erpnext.setup_serial_no(() => {
+			erpnext.stock.select_batch_and_serial_no(this.frm, row);
+		});
 	}
 
 	toggle_related_fields(doc) {
@@ -1128,14 +1125,17 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 		return;
 	}
 
-	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchSelector({
-			frm: frm,
-			item: item,
-			warehouse_details: get_warehouse_type_and_name(item),
-		});
-	});
+	let warehouse_details = get_warehouse_type_and_name(item);
+	let warehouse_field;
+	if (warehouse_details.type == "Source Warehouse") {
+		warehouse_field = "s_warehouse";
+	} else if (warehouse_details.type == "Target Warehouse") {
+		warehouse_field = "t_warehouse";
+	}
 
+	new erpnext.stock.SerialBatchSelector(frm, item, {
+		warehouse_field: warehouse_field,
+	});
 }
 
 extend_cscript(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));

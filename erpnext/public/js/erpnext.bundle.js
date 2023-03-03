@@ -18,6 +18,7 @@ import "./controllers/applies_to_common.js"
 // Item Selector
 import "./templates/item_selector.html"
 import "./utils/item_selector.js"
+import "./utils/serial_batch_selector.js"
 
 // Quick Entries
 import "./utils/item_quick_entry.js"

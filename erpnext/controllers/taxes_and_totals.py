@@ -73,8 +73,7 @@ class calculate_taxes_and_totals(object):
 					item.rate = 0.0
 				elif item.price_list_rate:
 					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
-						item.rate = flt(item.price_list_rate *
-							(1.0 - (item.discount_percentage / 100.0)))
+						item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)))
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 					elif item.discount_amount and item.pricing_rules:
 						item.rate = item.price_list_rate - item.discount_amount
@@ -166,9 +165,13 @@ class calculate_taxes_and_totals(object):
 				if item.meta.has_field("stock_qty") and item.meta.has_field("conversion_factor"):
 					item.stock_qty = item.qty * flt(item.conversion_factor)
 
+				stock_qty = item.stock_qty if item.meta.has_field("stock_qty") else item.qty
+
 				if item.meta.has_field("net_weight") and item.meta.has_field("net_weight_per_unit"):
-					stock_qty = item.stock_qty if item.meta.has_field("stock_qty") else item.qty
 					item.net_weight = flt(flt(item.net_weight_per_unit) * flt(stock_qty), item.precision("net_weight"))
+
+				item.alt_uom_size = item.alt_uom_size if item.alt_uom else 1.0
+				item.alt_uom_qty = flt(stock_qty * item.alt_uom_size, item.precision('alt_uom_qty'))
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "amount",
 					"taxable_rate", "taxable_amount", "net_rate", "net_amount",

@@ -513,29 +513,31 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		}
 	}
 
-	_set_batch_number(doc, show_dialog) {
-		var me = this;
+	_set_batch_number(row, show_dialog) {
+		let me = this;
 
-		if (doc.has_batch_no && frappe.meta.get_docfield(doc.doctype, "batch_no", doc.name)) {
+		if (row.has_batch_no && frappe.meta.get_docfield(row.doctype, "batch_no", row.name)) {
 			return frappe.call({
 				method: 'erpnext.stock.doctype.batch.batch.get_sufficient_batch_or_fifo',
 				args: {
-					'item_code': doc.item_code,
-					'warehouse': doc.s_warehouse || doc.warehouse,
-					'qty': flt(doc.qty),
-					'conversion_factor': flt(doc.conversion_factor),
-					'sales_order_item': doc.sales_order_item
+					'item_code': row.item_code,
+					'warehouse': row.s_warehouse || row.warehouse,
+					'qty': flt(row.qty),
+					'conversion_factor': flt(row.conversion_factor),
+					'sales_order_item': row.sales_order_item
 				},
 				callback: function (r) {
 					if (r.message) {
 						if (r.message.length === 1 && !show_dialog) {
-							frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message[0].batch_no);
+							frappe.model.set_value(row.doctype, row.name, 'batch_no', r.message[0].batch_no);
 						} else {
-							erpnext.show_serial_batch_selector(me.frm, doc, (item) => {
-								me.qty(item, item.doctype, item.name, true);
-							}, null, 'batch_no', (obj) => {
-								obj.set_batch_nos(r.message);
-								obj.update_total_qty(doc.qty);
+							new erpnext.stock.SerialBatchSelector(me.frm, row, {
+								on_make_dialog: (selector) => {
+									selector.set_batch_nos(r.message);
+								},
+								callback: () => {
+									me.calculate_taxes_and_totals();
+								}
 							});
 						}
 					}
@@ -545,18 +547,22 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	create_select_batch_button() {
-		var me = this;
-		this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
+		let me = this;
+
+		me.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
 			if (me.frm.focused_item_dn) {
 				const item = frappe.get_doc(me.frm.doc.doctype + " Item", me.frm.focused_item_dn);
 				if (item && !item.delivery_note && (me.frm.doc.update_stock || me.frm.doc.doctype != 'Sales Invoice') && !me.frm.doc.is_return) {
-					erpnext.show_serial_batch_selector(me.frm, item, (item) => {
-						me.qty(item, item.doctype, item.name);
-					}, null, 'batch_no');
+					new erpnext.stock.SerialBatchSelector(me.frm, item, {
+						callback: () => {
+							me.calculate_taxes_and_totals();
+						}
+					});
 				}
 			}
 		});
-		this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
+
+		me.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
 	}
 
 	auto_select_batches() {

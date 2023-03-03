@@ -1386,14 +1386,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			this.toggle_conversion_factor(item);
 
-			if(frappe.meta.get_docfield(cdt, "alt_uom_size", cdn)) {
-				if (!item.alt_uom) {
-					item.alt_uom_size = 1.0
-				}
-				item.alt_uom_qty = flt(item.qty * item.conversion_factor * item.alt_uom_size, precision("alt_uom_qty", item));
-				refresh_field("alt_uom_qty", item.name, item.parentfield);
-			}
-
 			if(doc.doctype != "Material Request") {
 				this.frm.trigger("net_weight_per_unit", cdt, cdn);
 			} else {
@@ -2573,19 +2565,3 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}, __("Prices"));
 	}
 };
-
-erpnext.show_serial_batch_selector = function(frm, d, callback, on_close, show_dialog, on_make_dialog) {
-	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchSelector({
-			frm: frm,
-			item: d,
-			warehouse_details: {
-				type: "Warehouse",
-				name: d.warehouse
-			},
-			callback: callback,
-			on_close: on_close,
-			on_make_dialog: on_make_dialog
-		}, show_dialog);
-	});
-}

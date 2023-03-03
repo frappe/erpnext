@@ -345,25 +345,28 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	select_batch_and_serial_no(row) {
 		frappe.dom.unfreeze();
 
-		erpnext.show_serial_batch_selector(this.frm, row, () => {
-			this.frm.doc.items.forEach(item => {
-				this.update_item_in_frm(item, 'qty', item.qty)
-					.then(() => {
-						// update cart
-						frappe.run_serially([
-							() => {
-								if (item.qty === 0) {
-									frappe.model.clear_doc(item.doctype, item.name);
-								}
-							},
-							() => this.update_cart_data(item),
-							() => this.post_qty_change(item)
-						]);
-					});
-			})
-		}, () => {
-			this.on_close(row);
-		}, true);
+		new erpnext.stock.SerialBatchSelector(this.frm, row, {
+			callback: () => {
+				this.frm.doc.items.forEach(item => {
+					this.update_item_in_frm(item, 'qty', item.qty)
+						.then(() => {
+							// update cart
+							frappe.run_serially([
+								() => {
+									if (item.qty === 0) {
+										frappe.model.clear_doc(item.doctype, item.name);
+									}
+								},
+								() => this.update_cart_data(item),
+								() => this.post_qty_change(item)
+							]);
+						});
+				})
+			},
+			on_close: () => {
+				this.on_close(row);
+			}
+		});
 	}
 
 	on_close(item) {
