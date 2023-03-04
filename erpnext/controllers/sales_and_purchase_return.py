@@ -393,9 +393,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if serial_nos:
 				target_doc.serial_no = "\n".join(serial_nos)
 
-<<<<<<< HEAD
-		if doctype == "Purchase Receipt":
-=======
 		if source_doc.get("rejected_serial_no"):
 			returned_serial_nos = get_returned_serial_nos(
 				source_doc, source_parent, serial_no_field="rejected_serial_no"
@@ -406,8 +403,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if rejected_serial_nos:
 				target_doc.rejected_serial_no = "\n".join(rejected_serial_nos)
 
-		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
->>>>>>> a9f0a11ce6 (fix: `rejected_serial_no` not getting copied from PR to PR(Return))
+		if doctype == "Purchase Receipt":
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
