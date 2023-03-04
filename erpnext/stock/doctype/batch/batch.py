@@ -8,6 +8,7 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint, get_link_to_form, cstr
 from frappe.utils.data import add_days
 import math
+import json
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
@@ -336,10 +337,14 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1.0, conversion_facto
 	if not warehouse or not qty:
 		return []
 
+	precision = cint(precision)
 	if not precision:
 		precision = cint(frappe.db.get_default("float_precision")) or 3
 
 	batches = get_batches(item_code, warehouse)
+
+	if isinstance(batches_used, str):
+		batches_used = json.loads(batches_used or "{}")
 
 	if batches_used:
 		for batch in batches:
@@ -378,7 +383,7 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1.0, conversion_facto
 		remaining_stock_qty -= selected_stock_qty
 
 	if remaining_stock_qty > 0:
-		if include_empty_batch:
+		if cint(include_empty_batch):
 			selected_batches.append(frappe._dict({
 				'batch_no': None,
 				'available_qty': 0,
