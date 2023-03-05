@@ -52,6 +52,7 @@ def execute():
 		"Employee Internal Work History",
 		"Fiscal Year Company",
 		"Fiscal Year",
+		"Item Reorder",
 	]
 
 	for doctype in doctypes:

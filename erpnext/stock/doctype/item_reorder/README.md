@@ -1,1 +1,0 @@
-Warehouse-wise reorder level for the parent Item.
