@@ -22,11 +22,11 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		cost_center = create_cost_center("Test Cost Center 1")
 
 		jv1 = make_journal_entry(
+			posting_date="2021-03-15",
 			amount=400,
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
-			posting_date=now(),
 			save=False,
 		)
 		jv1.company = company
@@ -34,18 +34,18 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		jv1.submit()
 
 		jv2 = make_journal_entry(
+			posting_date="2021-03-15",
 			amount=600,
 			account1="Cost of Goods Sold - TPC",
 			account2="Cash - TPC",
 			cost_center=cost_center,
-			posting_date=now(),
 			save=False,
 		)
 		jv2.company = company
 		jv2.save()
 		jv2.submit()
 
-		pcv = self.make_period_closing_voucher()
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31")
 		surplus_account = pcv.closing_account_head
 
 		expected_gle = (
@@ -83,6 +83,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			debit_to="Debtors - TPC",
 			currency="USD",
 			customer="_Test Customer USD",
+			posting_date="2021-03-15",
 		)
 		create_sales_invoice(
 			company=company,
@@ -93,9 +94,10 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			debit_to="Debtors - TPC",
 			currency="USD",
 			customer="_Test Customer USD",
+			posting_date="2021-03-15",
 		)
 
-		pcv = self.make_period_closing_voucher(submit=False)
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
 		pcv.save()
 		pcv.submit()
 		surplus_account = pcv.closing_account_head
@@ -136,7 +138,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 
-		si = create_sales_invoice(
+		create_sales_invoice(
 			company=company,
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
@@ -145,6 +147,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			debit_to="Debtors - TPC",
 			currency="USD",
 			customer="_Test Customer USD",
+			posting_date="2021-03-15",
 		)
 
 		jv = make_journal_entry(
@@ -152,14 +155,14 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			account2="Sales - TPC",
 			amount=400,
 			cost_center=cost_center,
-			posting_date=now(),
+			posting_date="2021-03-15",
 		)
 		jv.company = company
 		jv.finance_book = create_finance_book().name
 		jv.save()
 		jv.submit()
 
-		pcv = self.make_period_closing_voucher()
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31")
 		surplus_account = pcv.closing_account_head
 
 		expected_gle = (
@@ -197,14 +200,38 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		repost_doc.posting_date = add_months(today(), 13)
 		repost_doc.save()
 
-	def make_period_closing_voucher(self, submit=True):
+	def test_gl_entries_restrictions(self):
+		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+
+		company = create_company()
+		cost_center = create_cost_center("Test Cost Center 1")
+
+		self.make_period_closing_voucher(posting_date="2021-03-31")
+
+		jv1 = make_journal_entry(
+			posting_date="2021-03-15",
+			amount=400,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center,
+			save=False,
+		)
+		jv1.company = company
+		jv1.save()
+
+		self.assertRaises(frappe.ValidationError, jv1.submit)
+
+	# def test_closing_balance_with_dimensions(self):
+
+	def make_period_closing_voucher(self, posting_date=None, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 		pcv = frappe.get_doc(
 			{
 				"doctype": "Period Closing Voucher",
-				"transaction_date": today(),
-				"posting_date": today(),
+				"transaction_date": posting_date or today(),
+				"posting_date": posting_date or today(),
 				"company": "Test PCV Company",
 				"fiscal_year": get_fiscal_year(today(), company="Test PCV Company")[0],
 				"cost_center": cost_center,
