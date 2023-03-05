@@ -341,6 +341,7 @@ erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 #erpnext.patches.v14_0.update_closing_balances
 >>>>>>> c3f39c3f32 (feat: Cascade closing balances on PCV submit)
 =======
@@ -349,3 +350,6 @@ erpnext.patches.v14_0.update_closing_balances
 =======
 erpnext.patches.v14_0.update_closing_balances #13
 >>>>>>> c089c4156c (chore: Minor fixes)
+=======
+erpnext.patches.v14_0.update_closing_balances
+>>>>>>> 4a2046dfb6 (fix: Aggregation with previous closing balance)

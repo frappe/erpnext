@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year
 
 def execute():
 	company_wise_order = {}
+	get_opening_entries = True
 	for pcv in frappe.db.get_all(
 		"Period Closing Voucher",
 		fields=["company", "posting_date", "name"],
@@ -23,7 +24,8 @@ def execute():
 			pcv_doc.year_start_date = get_fiscal_year(
 				pcv.posting_date, pcv.fiscal_year, company=pcv.company
 			)[1]
-			pcv_doc.make_closing_entries()
 			gl_entries = pcv_doc.get_gl_entries()
-			make_closing_entries(gl_entries, is_period_closing_voucher_entry=True, voucher_name=pcv.name)
+			closing_entries = pcv_doc.get_grouped_gl_entries(get_opening_entries=get_opening_entries)
+			make_closing_entries(gl_entries + closing_entries, voucher_name=pcv.name)
 			company_wise_order[pcv.company].append(pcv.posting_date)
+			get_opening_entries = False
