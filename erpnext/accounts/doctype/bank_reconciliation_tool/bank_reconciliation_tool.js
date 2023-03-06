@@ -72,6 +72,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				},
 			})
 		});
+
 	},
 
 	after_save: function (frm) {
@@ -89,7 +90,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					r.account,
 					"account_currency",
 					(r) => {
-						frm.currency = r.account_currency;
+						frm.doc.account_currency = r.account_currency;
 						frm.trigger("render_chart");
 					}
 				);
@@ -162,9 +163,9 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					"reconciliation_tool_cards"
 				).$wrapper,
 				bank_statement_closing_balance:
-					frm.doc.bank_statement_closing_balance,
+				frm.doc.bank_statement_closing_balance,
 				cleared_balance: frm.cleared_balance,
-				currency: frm.currency,
+				currency: frm.doc.account_currency,
 			}
 		);
 	},
