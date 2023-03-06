@@ -424,15 +424,28 @@ class PaymentEntry(AccountsController):
 					payment_schedule = frappe.get_all(
 						"Payment Schedule",
 						filters={"parent": ref.reference_name},
-						fields=["paid_amount", "payment_amount", "payment_term", "discount", "outstanding"],
+						fields=[
+							"paid_amount",
+							"payment_amount",
+							"payment_term",
+							"discount",
+							"outstanding",
+							"discount_type",
+						],
 					)
 					for term in payment_schedule:
 						invoice_key = (term.payment_term, ref.reference_name)
 						invoice_paid_amount_map.setdefault(invoice_key, {})
 						invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
-						invoice_paid_amount_map[invoice_key]["discounted_amt"] = ref.total_amount * (
-							term.discount / 100
-						)
+						if not (term.discount_type and term.discount):
+							continue
+
+						if term.discount_type == "Percentage":
+							invoice_paid_amount_map[invoice_key]["discounted_amt"] = ref.total_amount * (
+								term.discount / 100
+							)
+						else:
+							invoice_paid_amount_map[invoice_key]["discounted_amt"] = term.discount
 
 		for idx, (key, allocated_amount) in enumerate(invoice_payment_amount_map.items(), 1):
 			if not invoice_paid_amount_map.get(key):
