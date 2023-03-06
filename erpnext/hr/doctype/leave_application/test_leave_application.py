@@ -1043,6 +1043,7 @@ class TestLeaveApplication(unittest.TestCase):
 			"unused_leaves": 15.0,
 			"new_leaves_allocated": 15.0,
 			"leave_type": leave_type.name,
+			"employee": employee.name,
 		}
 		self.assertEqual(details.get(leave_type.name), expected_data)
 
