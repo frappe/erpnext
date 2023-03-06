@@ -151,8 +151,9 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 		traceback = frappe.get_traceback()
 		frappe.log_error(message=traceback, title='Exc GL entry Insert Permission')
 	except Exception as error:
+		frappe.db.sql(f"""update `tab{args.get('voucher_type')}` set docstatus=0 where name={args.get('voucher_no')}""")
 		traceback = frappe.get_traceback()
-		frappe.log_error(message=traceback, title='Exc GL entry Insert '+args[0]['voucher_no'])
+		frappe.log_error(message=traceback, title='Exc GL entry Insert '+args.get('voucher_no'))
 
 
 def validate_account_for_perpetual_inventory(gl_map):
