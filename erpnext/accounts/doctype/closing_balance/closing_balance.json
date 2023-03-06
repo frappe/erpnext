@@ -116,7 +116,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Period Closing Voucher",
-   "options": "Period Closing Voucher"
+   "options": "Period Closing Voucher",
+   "search_index": 1
   },
   {
    "default": "0",
@@ -128,7 +129,7 @@
  "icon": "fa fa-list",
  "in_create": 1,
  "links": [],
- "modified": "2023-02-27 19:47:36.658224",
+ "modified": "2023-03-06 08:56:36.393237",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Closing Balance",

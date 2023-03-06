@@ -198,11 +198,12 @@ def get_opening_balance(
 	)
 
 	if doctype == "Closing Balance":
-		opening_balance = opening_balance.where(closing_balance.closing_date < filters.from_date)
 		if period_closing_voucher:
 			opening_balance = opening_balance.where(
 				closing_balance.period_closing_voucher == period_closing_voucher
 			)
+		else:
+			opening_balance = opening_balance.where(closing_balance.closing_date < filters.from_date)
 	else:
 		opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
 
