@@ -165,7 +165,31 @@ class PaymentEntry(AccountsController):
 		for reference in self.references:
 			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
+				repost_required = False
+				for adv_reference in doc.get("advances"):
+					if adv_reference.exchange_gain_loss != 0:
+						repost_required = True
+						break
+
+				# Identify exchange gain/loss entries
+				exchange_gl_entries = []
+				if repost_required:
+					doc.make_exchange_gain_loss_gl_entries(exchange_gl_entries)
+
 				doc.delink_advance_entries(self.name)
+
+				if repost_required and exchange_gl_entries:
+					# Swap Credit and Debit to reverse the effect of exchange gain/loss
+					for entry in exchange_gl_entries:
+						debit = entry.debit
+						entry.debit = entry.credit
+						entry.credit = debit
+						debit_in_ac = entry.debit_in_account_currency
+						entry.debit_in_account_currency = entry.credit_in_account_currency
+						entry.credit_in_account_currency = debit_in_ac
+
+						entry.remarks = f"Reversing Exchange Gain/Loss upon cancellation of {self.name}"
+					make_gl_entries(exchange_gl_entries)
 
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
