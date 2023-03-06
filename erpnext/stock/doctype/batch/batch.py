@@ -362,7 +362,13 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1.0, conversion_facto
 
 	for batch in batches:
 		if remaining_stock_qty <= 0:
-			break
+			selected_batches.append(frappe._dict({
+				'batch_no': batch.name,
+				'available_qty': batch.qty / conversion_factor,
+				'selected_qty': 0
+			}))
+			
+			continue
 
 		selected_stock_qty = min(remaining_stock_qty, batch.qty)
 		selected_qty = round_down(selected_stock_qty / conversion_factor, precision)

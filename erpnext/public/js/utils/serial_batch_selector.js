@@ -43,6 +43,22 @@ erpnext.stock.SerialBatchSelector = Class.extend({
 			serial_no: this.has_serial_no ? this.item.serial_no : null,
 		}
 
+		frappe.call({
+			method: "erpnext.stock.doctype.batch.batch.get_sufficient_batch_or_fifo",
+			args: {
+				qty: this.doc.qty,
+				item_code: this.doc.item_code,
+				warehouse: this.doc.warehouse,
+				conversion_factor: this.item.conversion_factor,
+				sales_order_item: this.item.sales_order_item,
+			},
+			callback: (r) => {
+				if (r.message) {
+					this.set_batch_nos(r.message, true);
+				}
+			}
+		});
+
 		let total_qty = 0;
 		for (let d of this.frm.doc.items || []) {
 			if (d.item_code == this.doc.item_code) {
@@ -120,9 +136,21 @@ erpnext.stock.SerialBatchSelector = Class.extend({
 				label: __("Warehouse"),
 				reqd: 1,
 				onchange: () => {
-					if (this.doc.batches && this.doc.batches.length) {
-						this.doc.batches = [];
-					}
+					frappe.call({
+						method: "erpnext.stock.doctype.batch.batch.get_sufficient_batch_or_fifo",
+						args: {
+							qty: this.doc.qty,
+							item_code: this.doc.item_code,
+							warehouse: this.doc.warehouse,
+							conversion_factor: this.item.conversion_factor,
+							sales_order_item: this.item.sales_order_item,
+						},
+						callback: (r) => {
+							if (r.message) {
+								this.set_batch_nos(r.message, true);
+							}
+						}
+					});
 				},
 				get_query: () => {
 					return {
