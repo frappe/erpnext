@@ -699,7 +699,11 @@ if (cur_frm.doc.is_old_subcontracting_flow) {
 
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){
-		erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
+		// erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
+		frm.doc.items.map(v=>{
+			v.schedule_date = frm.doc.schedule_date
+		})
+		frm.refresh_field("items")
 	}
 }
 
