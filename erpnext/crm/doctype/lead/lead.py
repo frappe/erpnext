@@ -447,7 +447,7 @@ def get_customer_name_details(customer_name):
 	customer= frappe.get_doc("Customer",customer_name)
 	person_data = []
 	for person in customer.get("customer_contact_person_details"):
-		person_data.append(person.contact_name)
+		person_data.append(person.person_name)
 	return person_data	
  
 @frappe.whitelist()
@@ -460,5 +460,3 @@ def contact_person(**args):
 	contact_person_detail.primary_mobile_number = args.get('primary_mobile_number')
 	contact_person_detail.primary_email_id = args.get('primary_email_id')
 	contact_person_detail.insert(ignore_mandatory=True, ignore_permissions = True)
-	doc1=frappe.get_last_doc("Customer Contact Person")
-	return doc1.name

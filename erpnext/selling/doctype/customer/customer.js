@@ -391,13 +391,10 @@ frappe.ui.form.on('Customer',  {
 					fieldtype: "Data",
 					options: "phone",
 					reqd: 1,
-					
 				},
 			],
-			primary_action_label: 'Submit',
+			primary_action_label: 'Create',
 			primary_action(values) {
-				var new_customer_contact_person;
-				console.log(values);
 				frappe.call({
 					async:false,
 					method:"erpnext.selling.doctype.customer.customer.contact_person",
@@ -410,12 +407,9 @@ frappe.ui.form.on('Customer',  {
 						primary_email_id:(values["primary_email_id"]),
 						customer_region_for_filter_conact_person:frm.doc.region,
 					},
-					callback:function(r){
-						new_customer_contact_person = r.message;
-					}
 				})
 				let customer_contact_person_details  = frm.add_child("customer_contact_person_details");
-				customer_contact_person_details.person_name = new_customer_contact_person
+				customer_contact_person_details.person_name = (values["Person_name"])
 				customer_contact_person_details.department = (values["department"])
 				customer_contact_person_details.designation = (values["designation"])
 				customer_contact_person_details.primary_mobile_number = (values["primary_mobile_number"])
@@ -454,7 +448,6 @@ frappe.ui.form.on('Customer',  {
 							},
 							async: false,
 							callback: function (r) {
-							console.log(r.message)
 						}
 						})
 						// 3'rd delete customer form itself 
@@ -484,5 +477,9 @@ frappe.ui.form.on("Customer Contact Person Details",{
 			})
 		}
 		frm.save();
+	},
+	add_secondary_contact_details: function(frm, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);	
+		frappe.set_route("Form", "Customer Contact Person", row.contact_person);
 	},
  });

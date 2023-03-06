@@ -248,7 +248,6 @@ frappe.ui.form.on('Lead', {
 				],
 				primary_action_label: 'Submit',
 				primary_action(value) {
-					console.log(value["reason_lead_transfer"]);
 					lead_assign_to_user.lead_transfer_reason = (value["reason_lead_transfer"]);
 					refresh_field("lead_assign_to_user");
 					frm.save();
@@ -256,7 +255,6 @@ frappe.ui.form.on('Lead', {
 				}
 			})
 			d.show();
-			console.log(d);
 		}
 		var date = frappe.datetime.now_datetime();
 		lead_assign_to_user.assign_email = frm.doc.lead_transfer
@@ -279,7 +277,6 @@ frappe.ui.form.on('Lead', {
 				async:false,
 				args: {customer_name:frm.doc.customer_name},
 				callback: function(r) {
-					console.log(r.message);
 					var df = frappe.meta.get_docfield("Lead Contact Person Details","person_name", cur_frm.doc.name);
 					df.options = r.message;
 				}
@@ -294,7 +291,6 @@ frappe.ui.form.on('Lead', {
 				arr.push(row.person_name)
 			});		
 			if(arr[arr.length-2] === undefined || arr[arr.length-2] === "" || arr[arr.length-2] === null){
-				console.log("arr length 2 is",arr[arr.length-2]);
 					$.each(frm.doc.lead_contact_person_details || [], function (i, row) {
 
 						if (i === arr.length-2){
@@ -326,7 +322,6 @@ frappe.ui.form.on('Lead', {
 	
 		function() {
 			var d = new frappe.ui.Dialog({
-			
 			title: __('Create New Contact Person'),
 			fields: [	
 				{
@@ -349,13 +344,10 @@ frappe.ui.form.on('Lead', {
 					fieldtype: "Link",
 					options: "Designation"
 				},
-				
 				{
 					fieldname: "column_break1",
 					fieldtype: "Column Break",
 				},
-			
-			
 				{	
 					label: "Division / Department",
 					fieldname: "department",
@@ -375,13 +367,10 @@ frappe.ui.form.on('Lead', {
 					fieldtype: "Data",
 					options: "phone",
 					reqd: 1,
-					
 				},
 			],
-			primary_action_label: 'Submit',
+			primary_action_label: 'Create',
 			primary_action(values) {
-				var new_customer_contact_person;
-				console.log(values);
 				frappe.call({
 					async:false,
 					method:"axis_india_app.visit_module.doctype.visit.visit.contact_person",
@@ -393,13 +382,10 @@ frappe.ui.form.on('Lead', {
 						primary_mobile_number:(values["primary_mobile_number"]),
 						primary_email_id:(values["primary_email_id"]),
 					},
-					callback:function(r){
-						new_customer_contact_person = r.message;
-					}
 				})
 				frm.events.get_customer_contact_person_list(frm);
 				let lead_contact_person_details  = frm.add_child("lead_contact_person_details");
-				lead_contact_person_details.person_name = new_customer_contact_person
+				lead_contact_person_details.person_name = (values["Person_name"])
 				lead_contact_person_details.department = (values["department"])
 				lead_contact_person_details.designation = (values["designation"])
 				lead_contact_person_details.primary_mobile_number = (values["primary_mobile_number"])
@@ -413,9 +399,7 @@ frappe.ui.form.on('Lead', {
 		    } );
 		    frm.fields_dict["lead_contact_person_details"].grid.grid_buttons.find('.btn-custom').removeClass('btn-default').addClass('btn-primary new-custom-btn');
 		}
-		
 	}
-
 });				
 
 frappe.ui.form.on("Lead Contact Person Details", {
@@ -425,22 +409,12 @@ frappe.ui.form.on("Lead Contact Person Details", {
 	//fetch select person name details
 	person_name:function(frm,cdt,cdn) {
 		var d = locals[cdt][cdn];
-		console.log("person_name",d.person_name);
-		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "designation", function (value){
+		frappe.db.get_value("Customer Contact Person", { "person_name": d.person_name}, ["designation", "department","primary_mobile_number","primary_email_id"],function (value){
 			frappe.model.set_value(d.doctype, d.name, "designation", value.designation)
-			refresh_field('designation')
-		});
-		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "department", function (value){
 			frappe.model.set_value(d.doctype, d.name, "department", value.department)
-			refresh_field('department')
-		});
-		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "primary_mobile_number", function (value){
 			frappe.model.set_value(d.doctype, d.name, "primary_mobile_number", value.primary_mobile_number)
-			refresh_field('primary_mobile_number')
-		});
-		frappe.db.get_value("Customer Contact Person", { "name": d.person_name}, "primary_email_id", function (value){
 			frappe.model.set_value(d.doctype, d.name, "primary_email_id", value.primary_email_id)
-			refresh_field('primary_email_id')
+			refresh_field('Customer Contact Person')
 		});
 	},
 });
