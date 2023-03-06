@@ -1,5 +1,4 @@
 {
- "autoname": "ACC-GLE-.YYYY.-.#####",
  "creation": "2013-01-10 16:34:06",
  "doctype": "DocType",
  "document_type": "Document",
@@ -250,7 +249,7 @@
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-03-28 16:22:33.766994",
+ "modified": "2023-02-27 18:14:13.916026",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
