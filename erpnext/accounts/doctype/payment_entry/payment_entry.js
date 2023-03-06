@@ -245,8 +245,6 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_currency_labels(["total_amount", "outstanding_amount", "allocated_amount"],
 			party_account_currency, "references");
 
-		frm.set_currency_labels(["amount"], company_currency, "deductions");
-
 		cur_frm.set_df_property("source_exchange_rate", "description",
 			("1 " + frm.doc.paid_from_account_currency + " = [?] " + company_currency));
 
