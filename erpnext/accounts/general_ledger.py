@@ -152,7 +152,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 		frappe.log_error(message=traceback, title='Exc GL entry Insert Permission')
 	except Exception as error:
 		traceback = frappe.get_traceback()
-		frappe.log_error(message=traceback, title='Exc GL entry Insert')
+		frappe.log_error(message=traceback, title='Exc GL entry Insert '+args[0]['voucher_no'])
 
 
 def validate_account_for_perpetual_inventory(gl_map):
