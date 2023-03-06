@@ -941,7 +941,7 @@ def get_remaining_leaves(
 	if cf_expiry and allocation.unused_leaves:
 		if getdate(date) > getdate(cf_expiry):
 			# carry forwarded leave expiry date passed
-			cf_leaves = remaining_cf_leaves = 0
+			cf_leaves = remaining_cf_leaves = flt(leaves_taken)
 		else:
 			cf_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
 			remaining_cf_leaves = _get_remaining_leaves(cf_leaves, cf_expiry)
