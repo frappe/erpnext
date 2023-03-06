@@ -15,7 +15,8 @@
   "incoming_rate",
   "column_break_8",
   "outgoing_rate",
-  "stock_value_difference"
+  "stock_value_difference",
+  "is_outward"
  ],
  "fields": [
   {
@@ -93,12 +94,19 @@
    "label": "Change in Stock Value",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_outward",
+   "fieldtype": "Check",
+   "label": "Is Outward",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-10 12:55:57.368650",
+ "modified": "2023-03-03 16:52:26.039613",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Ledger",

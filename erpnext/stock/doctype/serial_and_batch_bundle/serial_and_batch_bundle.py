@@ -267,7 +267,11 @@ def get_serial_and_batch_ledger(**kwargs):
 			serial_batch_table.qty,
 			serial_batch_table.incoming_rate,
 		)
-		.where((sle_table.item_code == kwargs.item_code) & (sle_table.warehouse == kwargs.warehouse))
+		.where(
+			(sle_table.item_code == kwargs.item_code)
+			& (sle_table.warehouse == kwargs.warehouse)
+			& (serial_batch_table.is_outward == 0)
+		)
 	)
 
 	if kwargs.serial_nos:

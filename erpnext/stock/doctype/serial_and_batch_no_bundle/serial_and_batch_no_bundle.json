@@ -7,25 +7,20 @@
  "field_order": [
   "item_details_tab",
   "company",
-  "warehouse",
-  "type_of_transaction",
+  "item_group",
+  "has_serial_no",
   "column_break_4",
   "item_code",
   "item_name",
-  "has_serial_no",
   "has_batch_no",
   "serial_no_and_batch_no_tab",
   "ledgers",
-  "quantity_and_rate_section",
-  "total_qty",
-  "item_group",
-  "column_break_13",
-  "avg_rate",
-  "total_amount",
-  "tab_break_12",
+  "qty",
+  "reference_tab",
   "voucher_type",
   "voucher_no",
-  "column_break_aouy",
+  "posting_date",
+  "posting_time",
   "is_cancelled",
   "amended_from"
  ],
@@ -47,7 +42,6 @@
    "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Item Group",
    "options": "Item Group"
   },
@@ -94,9 +88,20 @@
    "allow_bulk_edit": 1,
    "fieldname": "ledgers",
    "fieldtype": "Table",
-   "label": "Serial / Batch Ledgers",
-   "options": "Serial and Batch Ledger",
+   "label": "Serial No and Batch No Transaction",
+   "options": "Serial and Batch No Ledger",
    "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Total Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_tab",
+   "fieldtype": "Tab Break",
+   "label": "Reference"
   },
   {
    "fieldname": "voucher_type",
@@ -112,6 +117,12 @@
    "options": "voucher_type"
   },
   {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
    "default": "0",
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
@@ -123,72 +134,24 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Serial and Batch Bundle",
+   "options": "Serial and Batch No Bundle",
    "print_hide": 1,
    "read_only": 1
   },
   {
-   "fieldname": "tab_break_12",
-   "fieldtype": "Tab Break",
-   "label": "Reference"
-  },
-  {
-   "fieldname": "quantity_and_rate_section",
-   "fieldtype": "Section Break",
-   "label": "Quantity and Rate"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "avg_rate",
-   "fieldtype": "Float",
-   "label": "Avg Rate",
-   "no_copy": 1,
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
    "read_only": 1
-  },
-  {
-   "fieldname": "total_amount",
-   "fieldtype": "Float",
-   "label": "Total Amount",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_qty",
-   "fieldtype": "Float",
-   "label": "Total Qty",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_aouy",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "company",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
-   "fieldname": "type_of_transaction",
-   "fieldtype": "Select",
-   "label": "Type of Transaction",
-   "options": "\nInward\nOutward",
-   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-03 16:18:53.709069",
+ "modified": "2023-03-05 17:38:51.871723",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Serial and Batch Bundle",
+ "name": "Serial and Batch No Bundle",
  "owner": "Administrator",
  "permissions": [
   {
