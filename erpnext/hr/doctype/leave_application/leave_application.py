@@ -856,6 +856,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 			Min(Ledger.from_date).as_("from_date"),
 			Max(Ledger.to_date).as_("to_date"),
 			Ledger.leave_type,
+			Ledger.employee,
 		)
 		.where(
 			(Ledger.from_date <= date)
@@ -895,6 +896,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 					"unused_leaves": d.cf_leaves,
 					"new_leaves_allocated": d.new_leaves,
 					"leave_type": d.leave_type,
+					"employee": d.employee,
 				}
 			),
 		)
@@ -939,11 +941,15 @@ def get_remaining_leaves(
 
 	# balance for carry forwarded leaves
 	if cf_expiry and allocation.unused_leaves:
+		cf_leaves_taken = get_leaves_for_period(
+			allocation.employee, allocation.leave_type, allocation.from_date, cf_expiry
+		)
+
 		if getdate(date) > getdate(cf_expiry):
 			# carry forwarded leave expiry date passed
-			cf_leaves = remaining_cf_leaves = flt(leaves_taken)
+			cf_leaves = remaining_cf_leaves = flt(cf_leaves_taken)
 		else:
-			cf_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
+			cf_leaves = flt(allocation.unused_leaves) + flt(cf_leaves_taken)
 			remaining_cf_leaves = _get_remaining_leaves(cf_leaves, cf_expiry)
 
 		leave_balance = flt(allocation.new_leaves_allocated) + flt(cf_leaves)
