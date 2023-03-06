@@ -79,14 +79,14 @@ class InsuranceandRegistration(Document):
 			"cost_center": frappe.db.get_value('Branch',self.branch,'cost_center'),
 			"party_check": 0,
 			"party_type": "Supplier",
-			"party": args.party
+			"party": args.party,
+			"reference_type": self.doctype,
+			"reference_name": self.name
 			})
 		je.append("accounts",{
 			"account": default_bank_account,
 			"credit_in_account_currency": args.total_amount,
-			"cost_center": frappe.db.get_value('Branch',self.branch,'cost_center'),
-			"reference_type": "Insurance and Registration",
-			"reference_name": self.name
+			"cost_center": frappe.db.get_value('Branch',self.branch,'cost_center')
 		})
 		je.insert()
 		frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
