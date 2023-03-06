@@ -52,6 +52,8 @@ class JournalEntry(AccountsController):
 		except Exception as e:
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
+
 
 		self.update_advance_paid()
 		self.update_expense_claim()

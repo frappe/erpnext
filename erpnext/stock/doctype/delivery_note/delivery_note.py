@@ -315,6 +315,7 @@ class DeliveryNote(SellingController):
 		except Exception as e:
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 		#self.make_gl_entries()
 		frappe.db.sql("UPDATE `tabDelivery Note` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
 			

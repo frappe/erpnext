@@ -45,6 +45,7 @@ class StockReconciliation(StockController):
 		except Exception as e:
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			slef.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")

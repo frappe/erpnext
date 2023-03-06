@@ -78,6 +78,7 @@ class Fees(AccountsController):
 		except Exception as e:
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 		if self.send_payment_request and self.student_email:
 			pr = make_payment_request(party_type="Student", party=self.student, dt="Fees",
 					dn=self.name, recipient_id=self.student_email,

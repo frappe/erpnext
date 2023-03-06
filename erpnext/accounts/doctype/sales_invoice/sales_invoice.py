@@ -180,6 +180,7 @@ class SalesInvoice(SellingController):
 		except Exception as e:
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")

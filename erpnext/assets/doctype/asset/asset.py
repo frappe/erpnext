@@ -39,6 +39,7 @@ class Asset(AccountsController):
 			except Exception as e:
 				traceback = frappe.get_traceback()
 				frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+				self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 
 	def before_cancel(self):
 		self.cancel_auto_gen_movement()
@@ -610,6 +611,7 @@ def make_post_gl_entry():
 				except Exception as e:
 					traceback = frappe.get_traceback()
 					frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+					doc.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')
