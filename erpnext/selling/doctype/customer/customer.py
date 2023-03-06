@@ -755,13 +755,8 @@ def contact_person(**args):
 	contact_person_detail.department = args.get('department')
 	contact_person_detail.primary_mobile_number = args.get('primary_mobile_number')
 	contact_person_detail.primary_email_id = args.get('primary_email_id')
+	contact_person_detail.customer_region_for_filter_conact_person = args.get('customer_region_for_filter_conact_person')
 	contact_person_detail.insert(ignore_mandatory=True, ignore_permissions = True)
-	doc1=frappe.get_last_doc("Customer Contact Person")
-	doc2 = frappe.get_doc("Customer",args.get('customer_name'))
-
-	for d in doc2.get('customer_contact_person_details'):
-		frappe.db.set_value("Customer Contact Person Details",{"name": args.get('name')} ,"contact_name",doc1.name)	
-	return doc1.name
 
 
 

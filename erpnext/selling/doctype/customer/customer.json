@@ -540,14 +540,14 @@
    "label": "Pincode"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
-   "label": "Contact"
+   "label": "Customer Contact Person Details"
   },
   {
    "fieldname": "customer_contact_person_details",
    "fieldtype": "Table",
-   "label": "Customer Contact Person Details",
    "options": "Customer Contact Person Details"
   },
   {
@@ -581,7 +581,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-03-01 09:57:10.715099",
+ "modified": "2023-03-06 10:08:25.499935",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

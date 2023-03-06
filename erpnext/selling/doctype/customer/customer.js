@@ -258,32 +258,6 @@ frappe.ui.form.on('Customer',  {
 				}
 			}
 		});
-
-		$.each(cur_frm.doc.customer_contact_person_details || [], function (i, row) {
-
-			if (!row.contact_name){
-				frappe.call({
-					async:false,
-					method:"erpnext.selling.doctype.customer.customer.contact_person",
-					args: {
-						customer_name: frm.doc.customer_name,
-						person_name:row.person_name,
-						designation:row.designation,
-						primary_email_id:row.primary_email_id,
-						department:row.department,
-						primary_mobile_number:row.primary_mobile_number,
-						name:row.name,
-					},	
-					callback: function (r) {
-						console.log(r)
-					}	
-				})
-			}
-		})
-		setTimeout(function(){
-			window.location.reload(1);
-		}, 200);
-
 // update customer contact person details  automatiicaly that details update in customer contact person
 		$.each(cur_frm.doc.customer_contact_person_details || [], function (i, v) {
 			if(v.contact_name){
@@ -330,6 +304,7 @@ frappe.ui.form.on('Customer',  {
 				});
 			}
 		})	
+		window.location.reload(1);
 	},
 	country: function(frm){
         frm.set_value('city', null)
@@ -364,6 +339,96 @@ frappe.ui.form.on('Customer',  {
 		})
 	},
 	refresh: function (frm) {
+		frm.set_df_property('customer_contact_person_details', 'cannot_add_rows', true);
+		frm.fields_dict["customer_contact_person_details"].grid.add_custom_button(__('Create Contact Person Details'),
+	
+		function() {
+			var d = new frappe.ui.Dialog({
+			
+			title: __('Create New Contact Person'),
+			fields: [	
+				{
+					label: 'Customer Name',
+					fieldname: 'customer_name',
+					fieldtype: 'Data',
+					default: frm.doc.customer_name,
+					read_only: 1,
+					reqd: 1
+				},
+				{
+					label: 'Person Name',
+					fieldname: 'Person_name',
+					fieldtype: 'Data',
+					reqd: 1
+				},
+				{
+					label: "Designation",
+					fieldname: "designation",
+					fieldtype: "Link",
+					options: "Designation"
+				},
+				{
+					fieldname: "column_break1",
+					fieldtype: "Column Break",
+					width: "50%"
+				},
+				{	
+					label: "Division / Department",
+					fieldname: "department",
+					fieldtype: "Link",
+					options: "Person Department"
+				},
+				{
+					label: "Primary Email Id",
+					fieldname: "primary_email_id",
+					fieldtype: "Data",
+					options: "Email",
+					reqd: 1
+				},
+				{
+					label: "Primary Mobile Number",
+					fieldname: "primary_mobile_number",
+					fieldtype: "Data",
+					options: "phone",
+					reqd: 1,
+					
+				},
+			],
+			primary_action_label: 'Submit',
+			primary_action(values) {
+				var new_customer_contact_person;
+				console.log(values);
+				frappe.call({
+					async:false,
+					method:"erpnext.selling.doctype.customer.customer.contact_person",
+					args: {
+						customer_name: frm.doc.customer_name,
+						person_name:(values["Person_name"]),
+						designation:(values["designation"]),
+						department:(values["department"]),
+						primary_mobile_number:(values["primary_mobile_number"]),
+						primary_email_id:(values["primary_email_id"]),
+						customer_region_for_filter_conact_person:frm.doc.region,
+					},
+					callback:function(r){
+						new_customer_contact_person = r.message;
+					}
+				})
+				let customer_contact_person_details  = frm.add_child("customer_contact_person_details");
+				customer_contact_person_details.person_name = new_customer_contact_person
+				customer_contact_person_details.department = (values["department"])
+				customer_contact_person_details.designation = (values["designation"])
+				customer_contact_person_details.primary_mobile_number = (values["primary_mobile_number"])
+				customer_contact_person_details.primary_email_id = (values["primary_email_id"])
+				customer_contact_person_details.primary_email_id = (values["primary_email_id"])
+				refresh_field("customer_contact_person_details")
+				d.hide();
+				window.location.reload(1);
+			}
+		    })
+		    d.show();  
+		    } );
+		    frm.fields_dict["customer_contact_person_details"].grid.grid_buttons.find('.btn-custom').removeClass('btn-default').addClass('btn-primary new-custom-btn');
 		//once delete customer then delete there address,delete customer child table and customer form also delete
 		const customer_name = frm.doc.name +"-" + "Company"
 		if (!frm.doc.__islocal) {

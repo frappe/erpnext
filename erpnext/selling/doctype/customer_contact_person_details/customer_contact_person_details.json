@@ -43,24 +43,27 @@
   {
    "fieldname": "primary_mobile_number",
    "fieldtype": "Data",
-   "label": "Primary Mobile Number"
+   "label": "Primary Mobile Number",
+   "reqd": 1
   },
   {
    "fieldname": "primary_email_id",
    "fieldtype": "Data",
-   "label": "Primary Email Id"
+   "label": "Primary Email Id",
+   "reqd": 1
   },
   {
    "fieldname": "contact_name",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Contact Name"
+   "label": "Contact Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-03 14:48:42.728759",
+ "modified": "2023-03-06 11:19:13.025738",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Contact Person Details",
