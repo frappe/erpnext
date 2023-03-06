@@ -36,9 +36,10 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		if len(self.taxes)>0 and self._action=='save' and self.request_from=='GSSM':
+			frappe.db.delete('Sales Taxes and Charges',{"parent": self.name})
 			frappe.db.sql(f"""DELETE FROM `tabSales Taxes and Charges` WHERE parent='{self.name}'""");
 			frappe.db.commit();
-			self.taxes=[]	
+			self.taxes=[]
 		super(SalesOrder, self).validate()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
