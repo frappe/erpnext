@@ -54,6 +54,7 @@ print_total_fields_from_items = [
 
 	('total', 'amount'),
 	('tax_exclusive_total', 'tax_exclusive_amount'),
+	('retail_total', 'retail_amount'),
 	('net_total', 'net_amount'),
 	('taxable_total', 'taxable_amount'),
 
