@@ -13,8 +13,8 @@ from frappe.utils import (
 	get_datetime,
 	get_datetime_str,
 	get_link_to_form,
+	get_system_timezone,
 	get_time,
-	get_time_zone,
 	get_weekdays,
 	getdate,
 	nowdate,
@@ -981,7 +981,7 @@ def convert_utc_to_user_timezone(utc_timestamp, user):
 
 
 def get_tz(user):
-	return frappe.db.get_value("User", user, "time_zone") or get_time_zone()
+	return frappe.db.get_value("User", user, "time_zone") or get_system_timezone()
 
 
 @frappe.whitelist()
