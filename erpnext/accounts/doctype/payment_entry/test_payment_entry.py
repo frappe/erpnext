@@ -20,8 +20,8 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
+from erpnext.erpnext.setup.master.employee.test_employee import make_employee
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.setup.doctype.employee.test_employee import make_employee
 
 test_dependencies = ["Item"]
 

@@ -1,5 +1,5 @@
 frappe.treeview_settings['Employee'] = {
-	get_tree_nodes: "erpnext.setup.doctype.employee.employee.get_children",
+	get_tree_nodes: "master.master.doctype.employee.employee.get_children",
 	filters: [
 		{
 			fieldname: "company",

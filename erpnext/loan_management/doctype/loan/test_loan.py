@@ -15,6 +15,7 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext.erpnext.setup.master.employee.test_employee import make_employee
 from erpnext.loan_management.doctype.loan.loan import (
 	make_loan_write_off,
 	request_loan_closure,
@@ -39,7 +40,6 @@ from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loa
 	create_process_loan_security_shortfall,
 )
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
 class TestLoan(unittest.TestCase):

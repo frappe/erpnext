@@ -36,6 +36,7 @@ doctype_js = {
 	"Warehouse": "public/js/master/warehouse.js",
 	"Company": "public/js/master/company.js",
 	"Customer Group": "public/js/master/customer_group.js",
+	"Employee": "public/js/master/employee.js",
 }
 
 doctype_list_js = {
@@ -46,6 +47,7 @@ doctype_list_js = {
 doctype_tree_js = {
 	"Supplier Group": "public/js/master/supplier_group_tree.js",
 	"Warehouse": "public/js/master/warehouse_tree.js",
+	"Employee": "public/js/master/employee_tree.js",
 }
 
 override_doctype_class = {
@@ -298,10 +300,6 @@ sounds = [
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
 ]
 
-has_upload_permission = {
-	"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"
-}
-
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -331,11 +329,7 @@ doc_events = {
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
-		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",
-		"on_update": [
-			"erpnext.setup.doctype.employee.employee.update_user_permissions",
-			"erpnext.portal.utils.set_default_role",
-		],
+		"on_update": "erpnext.portal.utils.set_default_role",
 	},
 	"Communication": {
 		"on_update": [

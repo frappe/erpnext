@@ -401,6 +401,7 @@ def add_vouchers():
 
 
 def create_loan_and_repayment():
+	from erpnext.erpnext.setup.master.employee.test_employee import make_employee
 	from erpnext.loan_management.doctype.loan.test_loan import (
 		create_loan,
 		create_loan_type,
@@ -410,7 +411,6 @@ def create_loan_and_repayment():
 	from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
 		process_loan_interest_accrual_for_term_loans,
 	)
-	from erpnext.setup.doctype.employee.test_employee import make_employee
 
 	create_loan_type(
 		"Personal Loan",

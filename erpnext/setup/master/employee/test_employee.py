@@ -5,11 +5,13 @@ import unittest
 
 import frappe
 import frappe.utils
+from master.master.doctype.employee.employee import InactiveEmployeeStatusError
 
 import erpnext
-from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 
-test_records = frappe.get_test_records("Employee")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Setup", "master", "employee", "test_records.json")
+)
 
 
 class TestEmployee(unittest.TestCase):
