@@ -4,7 +4,6 @@ import json
 import frappe
 import pytz
 from frappe import _
-from frappe.utils.data import get_system_timezone
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -126,7 +125,7 @@ def filter_timeslots(date, timeslots):
 
 def convert_to_guest_timezone(guest_tz, datetimeobject):
 	guest_tz = pytz.timezone(guest_tz)
-	local_timezone = pytz.timezone(get_system_timezone())
+	local_timezone = pytz.timezone(frappe.utils.get_time_zone())
 	datetimeobject = local_timezone.localize(datetimeobject)
 	datetimeobject = datetimeobject.astimezone(guest_tz)
 	return datetimeobject
@@ -135,7 +134,7 @@ def convert_to_guest_timezone(guest_tz, datetimeobject):
 def convert_to_system_timezone(guest_tz, datetimeobject):
 	guest_tz = pytz.timezone(guest_tz)
 	datetimeobject = guest_tz.localize(datetimeobject)
-	system_tz = pytz.timezone(get_system_timezone())
+	system_tz = pytz.timezone(frappe.utils.get_time_zone())
 	datetimeobject = datetimeobject.astimezone(system_tz)
 	return datetimeobject
 
