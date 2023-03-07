@@ -19,10 +19,6 @@ frappe.ui.form.on("Opportunity", {
 				}
 			}
 		});
-
-		if (frm.doc.opportunity_from && frm.doc.party_name){
-			frm.trigger('set_contact_link');
-		}
 	},
 
 	validate: function(frm) {
@@ -130,6 +126,10 @@ frappe.ui.form.on("Opportunity", {
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
+
+		if (frm.doc.opportunity_from && frm.doc.party_name) {
+			frm.trigger('set_contact_link');
+		}
 	},
 
 	set_contact_link: function(frm) {
@@ -137,6 +137,8 @@ frappe.ui.form.on("Opportunity", {
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Customer'}
 		} else if(frm.doc.opportunity_from == "Lead" && frm.doc.party_name) {
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Lead'}
+		} else if (frm.doc.opportunity_from == "Prospect" && frm.doc.party_name) {
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Prospect'}
 		}
 	},
 

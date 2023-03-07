@@ -561,7 +561,34 @@ class JobCard(Document):
 		)
 
 	def set_transferred_qty_in_job_card_item(self, ste_doc):
-		from frappe.query_builder.functions import Sum
+		def _get_job_card_items_transferred_qty(ste_doc):
+			from frappe.query_builder.functions import Sum
+
+			job_card_items_transferred_qty = {}
+			job_card_items = [
+				x.get("job_card_item") for x in ste_doc.get("items") if x.get("job_card_item")
+			]
+
+			if job_card_items:
+				se = frappe.qb.DocType("Stock Entry")
+				sed = frappe.qb.DocType("Stock Entry Detail")
+
+				query = (
+					frappe.qb.from_(sed)
+					.join(se)
+					.on(sed.parent == se.name)
+					.select(sed.job_card_item, Sum(sed.qty))
+					.where(
+						(sed.job_card_item.isin(job_card_items))
+						& (se.docstatus == 1)
+						& (se.purpose == "Material Transfer for Manufacture")
+					)
+					.groupby(sed.job_card_item)
+				)
+
+				job_card_items_transferred_qty = frappe._dict(query.run(as_list=True))
+
+			return job_card_items_transferred_qty
 
 		def _validate_over_transfer(row, transferred_qty):
 			"Block over transfer of items if not allowed in settings."
@@ -578,29 +605,23 @@ class JobCard(Document):
 					exc=JobCardOverTransferError,
 				)
 
-		for row in ste_doc.items:
-			if not row.job_card_item:
-				continue
+		job_card_items_transferred_qty = _get_job_card_items_transferred_qty(ste_doc)
 
-			sed = frappe.qb.DocType("Stock Entry Detail")
-			se = frappe.qb.DocType("Stock Entry")
-			transferred_qty = (
-				frappe.qb.from_(sed)
-				.join(se)
-				.on(sed.parent == se.name)
-				.select(Sum(sed.qty))
-				.where(
-					(sed.job_card_item == row.job_card_item)
-					& (se.docstatus == 1)
-					& (se.purpose == "Material Transfer for Manufacture")
-				)
-			).run()[0][0]
-
+		if job_card_items_transferred_qty:
 			allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
-			if not allow_excess:
-				_validate_over_transfer(row, transferred_qty)
 
-			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
+			for row in ste_doc.items:
+				if not row.job_card_item:
+					continue
+
+				transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item))
+
+				if not allow_excess:
+					_validate_over_transfer(row, transferred_qty)
+
+				frappe.db.set_value(
+					"Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty)
+				)
 
 	def set_transferred_qty(self, update_status=False):
 		"Set total FG Qty in Job Card for which RM was transferred."
