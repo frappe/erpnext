@@ -10,7 +10,6 @@ import pytz
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
-from frappe.utils.data import get_system_timezone
 from pyyoutube import Api
 
 
@@ -65,7 +64,7 @@ def update_youtube_data():
 
 	frequency = get_frequency(frequency)
 	time = datetime.now()
-	timezone = pytz.timezone(get_system_timezone())
+	timezone = pytz.timezone(frappe.utils.get_time_zone())
 	site_time = time.astimezone(timezone)
 
 	if frequency == 30:
