@@ -18,6 +18,7 @@
   "uom",
   "other_details_section",
   "warehouse",
+  "actual_qty",
   "column_break_11",
   "cost_center",
   "project",
@@ -187,12 +188,18 @@
    "label": "UOM",
    "options": "UOM",
    "read_only": 1
+  },
+  {
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Balance Qty(Warehouse)",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-27 15:14:00.143338",
+ "modified": "2023-03-07 06:55:19.450551",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Services Item",

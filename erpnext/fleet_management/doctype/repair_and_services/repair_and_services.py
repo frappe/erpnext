@@ -10,8 +10,7 @@ from frappe import _, qb, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.custom_workflow import validate_workflow_states
 from erpnext.stock.stock_ledger import get_valuation_rate
-
-
+from erpnext.stock.get_item_details import get_bin_details
 class RepairAndServices(StockController):
 	def __init__(self, *args, **kwargs):
 		super(RepairAndServices, self).__init__(*args, **kwargs)
@@ -145,6 +144,7 @@ def make_mr(source_name, target_doc=None):
 				row.cost_center = a.cost_center
 				row.issue_to_equipment = source.equipment
 				row.amount = flt(a.charge_amount)
+				row.actual_qty = get_bin_details(a.item_code, a.warehouse,source.company).actual_qty
 	def update_item(obj, target, source_parent):
 		target.issue_to_equipment = source_parent.equipment
 		target.stock_uom = obj.uom

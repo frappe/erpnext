@@ -63,6 +63,23 @@ frappe.ui.form.on('Repair And Services Item', {
 	qty:function(frm,cdt,cdn){
 		calculate_amount(frm,cdt,cdn)
 	},
+	warehouse:function(frm,cdt,cdn){
+		let d = locals[cdt][cdn]
+		if (d.warehouse && d.maintain_stock){
+			frm.call({
+				method: "erpnext.stock.get_item_details.get_bin_details",
+				args: {
+					item_code:d.item_code,
+					warehouse:d.warehouse,
+					company:frm.doc.company
+				},
+				callback:function(r){
+					d.actual_qty = r.message.actual_qty
+					frm.refresh_field("items")
+				}
+			})
+		}
+	}
 });
 
 var calculate_amount = (frm,cdt,cdn)=>{
