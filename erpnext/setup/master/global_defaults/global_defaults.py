@@ -2,61 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 
-"""Global Defaults"""
 import frappe
 import frappe.defaults
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint
-
-keydict = {
-	# "key in defaults": "key in Global Defaults"
-	"fiscal_year": "current_fiscal_year",
-	"company": "default_company",
-	"currency": "default_currency",
-	"country": "country",
-	"hide_currency_symbol": "hide_currency_symbol",
-	"account_url": "account_url",
-	"disable_rounded_total": "disable_rounded_total",
-	"disable_in_words": "disable_in_words",
-}
-
-from frappe.model.document import Document
+from master.master.doctype.global_defaults.global_defaults import GlobalDefaults
 
 
-class GlobalDefaults(Document):
+class ERPNextGlobalDefaults(GlobalDefaults):
 	def on_update(self):
-		"""update defaults"""
-		for key in keydict:
-			frappe.db.set_default(key, self.get(keydict[key], ""))
-
-		# update year start date and year end date from fiscal_year
-		if self.current_fiscal_year:
-			if fiscal_year := frappe.get_all(
-				"Fiscal Year",
-				filters={"name": self.current_fiscal_year},
-				fields=["year_start_date", "year_end_date"],
-				limit=1,
-				order_by=None,
-			):
-				ysd = fiscal_year[0].year_start_date or ""
-				yed = fiscal_year[0].year_end_date or ""
-
-				if ysd and yed:
-					frappe.db.set_default("year_start_date", ysd.strftime("%Y-%m-%d"))
-					frappe.db.set_default("year_end_date", yed.strftime("%Y-%m-%d"))
-
-		# enable default currency
-		if self.default_currency:
-			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
-
+		super(ERPNextGlobalDefaults, self).on_update()
 		self.toggle_rounded_total()
 		self.toggle_in_words()
-
 		frappe.clear_cache()
-
-	@frappe.whitelist()
-	def get_defaults(self):
-		return frappe.defaults.get_defaults()
 
 	def toggle_rounded_total(self):
 		self.disable_rounded_total = cint(self.disable_rounded_total)

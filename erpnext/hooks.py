@@ -61,6 +61,7 @@ override_doctype_class = {
 	"Company": "erpnext.setup.master.company.company.ERPNextCompany",
 	"Department": "erpnext.setup.master.department.department.ERPNextDepartment",
 	"Fiscal Year": "erpnext.accounts.master.fiscal_year.fiscal_year.ERPNextFiscalYear",
+	"Global Defaults": "erpnext.setup.master.global_defaults.global_defaults.ERPNextGlobalDefaults",
 }
 
 override_doctype_dashboards = {

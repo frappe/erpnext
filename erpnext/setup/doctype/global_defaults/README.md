@@ -1,1 +1,0 @@
-Global defaults and settings for various modules.
