@@ -212,7 +212,7 @@ def resume_bom_cost_update_jobs():
 			["name", "boms_updated", "status"],
 		)
 		incomplete_level = any(row.get("status") == "Pending" for row in bom_batches)
-		if not bom_batches or incomplete_level:
+		if not bom_batches or not incomplete_level:
 			continue
 
 		# Prep parent BOMs & updated processed BOMs for next level
@@ -252,6 +252,9 @@ def get_processed_current_boms(
 	current_boms = []
 
 	for row in bom_batches:
+		if not row.boms_updated:
+			continue
+
 		boms_updated = json.loads(row.boms_updated)
 		current_boms.extend(boms_updated)
 		boms_updated_dict = {bom: True for bom in boms_updated}
