@@ -275,7 +275,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Quotation'),
 				function() {
-					erpnext.utils.map_current_doc({
+					let d = erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
@@ -293,7 +293,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							docstatus: 1,
 							status: ["!=", "Lost"]
 						}
-					})
+					});
+
+					setTimeout(() => {
+						d.$parent.append(`
+							<span class='small text-muted'>
+								${__("Note: Please create Sales Orders from individual Quotations to select from among Alternative Items.")}
+							</span>
+					`);
+					}, 200);
+
 				}, __("Get Items From"));
 		}
 
