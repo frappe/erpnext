@@ -2119,7 +2119,7 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 
 
 def set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount):
-	"""Split early bird discount deductions into Income Loss & Tax Loss."""
+	"""Split early payment discount into Income Loss & Tax Loss."""
 	if not (discount_amount and valid_discounts):
 		return discount_amount
 
@@ -2191,12 +2191,16 @@ def add_tax_discount_loss(pe, doc, total_discount_percenatage) -> float:
 
 	for account, loss in tax_discount_loss.items():
 		total_tax_loss += loss
+		amount = flt(loss * doc.get("conversion_rate", 1), precision)
+		if amount == 0.0:
+			continue
+
 		pe.append(
 			"deductions",
 			{
 				"account": account,
 				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
-				"amount": flt(loss * doc.get("conversion_rate", 1), precision),
+				"amount": amount,
 			},
 		)
 
