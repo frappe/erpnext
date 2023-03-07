@@ -153,7 +153,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 		obj = frappe.get_doc(args.get('voucher_type'),args.get('voucher_no'))
 		obj.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 	except Exception as error:
-		frappe.db.sql(f"""update `tab{args.get('voucher_type')}` set docstatus=0 where name={args.get('voucher_no')}""")
+		frappe.db.sql(f"""update `tab{args.get('voucher_type')}` set docstatus=0 where name='{args.get('voucher_no')}'""")
 		frappe.db.commit()
 		traceback = frappe.get_traceback()
 		obj = frappe.get_doc(args.get('voucher_type'),args.get('voucher_no'))
