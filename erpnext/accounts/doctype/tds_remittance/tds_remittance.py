@@ -92,7 +92,7 @@ class TDSRemittance(AccountsController):
 			frappe.throw("Total TDS Amount is Zero.")
 
 
-def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_existing = False, cond=None, party_type = None):
+def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_existing = False, cond='', party_type = None):
 	accounts_cond = accounts_cond_ti = accounts_cond_eme = existing_cond = party_cond = "" 
 	entries = pi_entries = pe_entries = je_entries = []
 
@@ -131,9 +131,10 @@ def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_
 	# Purchase Invoice
 	if not party_type or party_type == "Supplier":
 		pi_entries = frappe.db.sql("""select t.posting_date, 'Purchase Invoice' as invoice_type, t.name as invoice_no,  
-				'Supplier' as party_type, t.supplier as party, s.supplier_tpn_no as tpn, t.business_activity,t.cost_center,
+				'Supplier' as party_type, t.supplier as party, (select supplier_tpn_no from `tabSupplier` where name = t.supplier) as tpn, 
+				t.business_activity, t.cost_center,
 				t1.base_total+t1.base_tax_amount as bill_amount, 
-				case when t1.base_tax_amount > 0 then t1.base_tax_amount else t1.tax_amount end as tds_amount,
+				(case when t1.base_tax_amount > 0 then t1.base_tax_amount else t1.tax_amount end) tds_amount,
 				t1.account_head as tax_account, tre.tds_remittance, tre.tds_receipt_update,
 				(case when tre.tds_receipt_update is not null then 'Paid' else 'Unpaid' end) remittance_status
 			from `tabPurchase Invoice` t 

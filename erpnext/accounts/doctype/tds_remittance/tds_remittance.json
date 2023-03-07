@@ -142,6 +142,7 @@
    "reqd": 1
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "options": "TDS Remittance Item"
@@ -266,7 +267,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-13 13:43:10.373501",
+ "modified": "2023-03-07 14:29:13.280911",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "TDS Remittance",
