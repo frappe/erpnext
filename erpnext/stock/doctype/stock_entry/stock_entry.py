@@ -1262,7 +1262,9 @@ class StockEntry(StockController):
 			and ret.get("has_batch_no")
 			and not args.get("batch_no")
 		):
-			args.batch_no = get_batch_no(args["item_code"], args["s_warehouse"], args["qty"])
+			args.batch_no = get_batch_no(args["item_code"], args["s_warehouse"], args["qty"]).get(
+				"batch_no", None
+			)
 
 		if (
 			self.purpose == "Send to Subcontractor" and self.get("purchase_order") and args.get("item_code")
