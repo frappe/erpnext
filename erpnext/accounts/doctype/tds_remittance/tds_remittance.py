@@ -19,16 +19,21 @@ class TDSRemittance(AccountsController):
 
 	def on_cancel(self):
 		self.make_gl_entries()
-	
+
+	def get_condition(self):
+		if self.branch:
+			return ' AND t.branch ="{}" '.format(self.branch)
+		return ''
 	@frappe.whitelist()
 	def get_details(self):
 		total_tds_amount = total_bill_amount = 0
 
 		if self.purpose != 'Other Invoice':
 			return total_tds_amount, total_bill_amount
+		cond = self.get_condition()
 
 		entries = get_tds_invoices(self.tax_withholding_category, self.from_date, self.to_date, \
-			self.name, filter_existing=True)
+			self.name, filter_existing=True, cond= cond)
 		if not entries:
 			frappe.msgprint(_("No Records Found"))
 
@@ -87,8 +92,8 @@ class TDSRemittance(AccountsController):
 			frappe.throw("Total TDS Amount is Zero.")
 
 
-def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_existing = False, party_type = None):
-	cond = accounts_cond = accounts_cond_ti = accounts_cond_eme = existing_cond = party_cond = "" 
+def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_existing = False, cond=None, party_type = None):
+	accounts_cond = accounts_cond_ti = accounts_cond_eme = existing_cond = party_cond = "" 
 	entries = pi_entries = pe_entries = je_entries = []
 
 	if not tax_withholding_category:
