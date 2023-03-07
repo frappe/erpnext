@@ -309,12 +309,14 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 			account_types = [d.account_type for d in frappe.get_all("Budget Settings Account Types", fields='account_type')]
 			if frappe.db.get_value("Account", args.account, "account_type") in account_types:
 				validate_expense_against_budget(args)
+				cc_doc = frappe.get_doc("Cost Center", args.cost_center)
+				budget_cost_center = cc_doc.budget_cost_center if cc_doc.use_budget_from_parent else args.cost_center
 				if not args.is_cancelled:
 					#Commit Budget
 					bud_obj = frappe.get_doc({
 						"doctype": "Committed Budget",
 						"account": args.account,
-						"cost_center": args.cost_center,
+						"cost_center": budget_cost_center,
 						"project": args.project,
 						"reference_type": args.voucher_type,
 						"reference_no": args.voucher_no,
@@ -330,7 +332,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 					con_obj = frappe.get_doc({
 						"doctype": "Consumed Budget",
 						"account": args.account,
-						"cost_center": args.cost_center,
+						"cost_center": budget_cost_center,
 						"project": args.project,
 						"reference_type": args.voucher_type,
 						"reference_no": args.voucher_no,
@@ -343,10 +345,11 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 					con_obj.submit()
 
 def validate_cwip_accounts(gl_map):
+	# frappe.throw(str(gl_map))
 	"""Validate that CWIP account are not used in Journal Entry"""
 	if gl_map and gl_map[0].voucher_type != "Journal Entry":
 		return
-
+	
 	cwip_enabled = any(
 		cint(ac.enable_cwip_accounting)
 		for ac in frappe.db.get_all("Asset Category", "enable_cwip_accounting")
