@@ -353,7 +353,7 @@ class SalesOrder(SellingController):
 		for item in self.items:
 			if item.supplier:
 				supplier = frappe.db.get_value(
-					"Sales Order Item", {"parent": self.name, "item_code": item.item_code}, "supplier"
+					"Sales Order Item", {"name": item.name}, "supplier"
 				)
 				if item.ordered_qty > 0.0 and item.supplier != supplier:
 					exc_list.append(
