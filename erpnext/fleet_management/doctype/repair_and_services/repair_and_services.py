@@ -16,7 +16,7 @@ class RepairAndServices(StockController):
 		super(RepairAndServices, self).__init__(*args, **kwargs)
 
 	def validate(self):
-		if flt(self.out_source) == 1:
+		if cint(self.out_source) == 1:
 			validate_workflow_states(self)
 		check_future_date(self.posting_date)
 		if not self.posting_time:
