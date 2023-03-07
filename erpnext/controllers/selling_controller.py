@@ -84,6 +84,9 @@ class SellingController(StockController):
 			)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
+			else:
+				self.set("sales_team", party_details.get("sales_team"))
+
 			self.update_if_missing(party_details)
 
 		elif lead:
