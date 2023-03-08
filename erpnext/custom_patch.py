@@ -2,6 +2,21 @@ import frappe
 from erpnext.setup.doctype.employee.employee import create_user
 import pandas as pd
 
+def cost_center_correction_budget():
+    for d in frappe.db.get_list("Committed Budget",filters={"reference_type":"Journal Entry"},fields=["cost_center","name"]):
+        parent_cost_center = frappe.db.get_value("Cost Center",{"name":d.cost_center,"use_budget_from_parent":1},["budget_cost_center"])
+        if parent_cost_center:
+            frappe.db.sql("update `tabCommitted Budget` set cost_center = '{}' where name = '{}'".format(parent_cost_center,d.name))
+            print(d.cost_center,' ',d.name)
+    print('<===================================================>')
+    for d in frappe.db.get_list("Consumed Budget",filters={"reference_type":"Journal Entry"},fields=["cost_center",'name']):
+        parent_cost_center = frappe.db.get_value("Cost Center",{"name":d.cost_center,"use_budget_from_parent":1},["budget_cost_center"])
+        if parent_cost_center:
+            frappe.db.sql("update `tabConsumed Budget` set cost_center = '{}' where name = '{}'".format(parent_cost_center,d.name))
+            print(parent_cost_center,' ',d.name)
+    print('done')
+    frappe.db.commit()
+
 def create_gl_for_previous_production():
     for p in frappe.db.get_list("Production",filters={"creation":["<=","2023-03-02"],"docstatus":1}, fields=["name","creation"]):
         doc = frappe.get_doc("Production",p.name)
