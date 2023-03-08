@@ -10,8 +10,8 @@ dynamic = ["version"]
 dependencies = [
     # Core dependencies
     "pycountry~=20.7.3",
-    "python-stdnum~=1.16",
     "Unidecode~=1.2.0",
+    "barcodenumber~=0.5.0",
 
     # integration dependencies
     "gocardless-pro~=1.22.0",
@@ -27,9 +27,6 @@ dependencies = [
 [build-system]
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
-
-[tool.bench.dev-dependencies]
-hypothesis = "~=6.31.0"
 
 [tool.black]
 line-length = 99

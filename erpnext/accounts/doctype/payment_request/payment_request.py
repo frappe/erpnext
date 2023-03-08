@@ -45,21 +45,20 @@ class PaymentRequest(Document):
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request_amount(self):
-		existing_payment_request_amount = get_existing_payment_request_amount(
-			self.reference_doctype, self.reference_name
+		existing_payment_request_amount = flt(
+			get_existing_payment_request_amount(self.reference_doctype, self.reference_name)
 		)
 
-		if existing_payment_request_amount:
-			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-			if not hasattr(ref_doc, "order_type") or getattr(ref_doc, "order_type") != "Shopping Cart":
-				ref_amount = get_amount(ref_doc, self.payment_account)
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		if not hasattr(ref_doc, "order_type") or getattr(ref_doc, "order_type") != "Shopping Cart":
+			ref_amount = get_amount(ref_doc, self.payment_account)
 
-				if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
-					frappe.throw(
-						_("Total Payment Request amount cannot be greater than {0} amount").format(
-							self.reference_doctype
-						)
+			if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
+				frappe.throw(
+					_("Total Payment Request amount cannot be greater than {0} amount").format(
+						self.reference_doctype
 					)
+				)
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -496,26 +495,22 @@ def get_amount(ref_doc, payment_account=None):
 	"""get amount based on doctype"""
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
-		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
-
+		grand_total = flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if ref_doc.party_account_currency == ref_doc.currency:
 			grand_total = flt(ref_doc.outstanding_amount)
 		else:
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
-
 	elif dt == "POS Invoice":
 		for pay in ref_doc.payments:
 			if pay.type == "Phone" and pay.account == payment_account:
 				grand_total = pay.amount
 				break
-
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
 
 	if grand_total > 0:
 		return grand_total
-
 	else:
 		frappe.throw(_("Payment Entry is already created"))
 

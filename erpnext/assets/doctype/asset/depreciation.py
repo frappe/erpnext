@@ -168,7 +168,7 @@ def make_depreciation_entry(asset_depr_schedule_name, date=None):
 			row.value_after_depreciation -= d.depreciation_amount
 			row.db_update()
 
-	frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Successful")
+	asset.db_set("depr_entry_posting_status", "Successful")
 
 	asset.set_status()
 

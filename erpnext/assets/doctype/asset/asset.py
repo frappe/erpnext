@@ -413,11 +413,14 @@ class Asset(AccountsController):
 
 			if self.journal_entry_for_scrap:
 				status = "Scrapped"
-			elif self.finance_books:
-				idx = self.get_default_finance_book_idx() or 0
+			else:
+				expected_value_after_useful_life = 0
+				value_after_depreciation = self.value_after_depreciation
 
-				expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
-				value_after_depreciation = self.finance_books[idx].value_after_depreciation
+				if self.calculate_depreciation:
+					idx = self.get_default_finance_book_idx() or 0
+					expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
+					value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
 				if flt(value_after_depreciation) <= expected_value_after_useful_life:
 					status = "Fully Depreciated"
@@ -429,25 +432,16 @@ class Asset(AccountsController):
 
 	def get_value_after_depreciation(self, finance_book=None):
 		if not self.calculate_depreciation:
-			return self.value_after_depreciation
+			return flt(self.value_after_depreciation, self.precision("gross_purchase_amount"))
 
 		if not finance_book:
-			return self.get("finance_books")[0].value_after_depreciation
+			return flt(
+				self.get("finance_books")[0].value_after_depreciation, self.precision("gross_purchase_amount")
+			)
 
 		for row in self.get("finance_books"):
 			if finance_book == row.finance_book:
-				return row.value_after_depreciation
-
-	def _get_value_after_depreciation_for_making_schedule(self, fb_row):
-		# value_after_depreciation - current Asset value
-		if self.docstatus == 1 and fb_row.value_after_depreciation:
-			value_after_depreciation = flt(fb_row.value_after_depreciation)
-		else:
-			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
-				self.opening_accumulated_depreciation
-			)
-
-		return value_after_depreciation
+				return flt(row.value_after_depreciation, self.precision("gross_purchase_amount"))
 
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
@@ -472,6 +466,7 @@ class Asset(AccountsController):
 			.where(gle.debit != 0)
 			.where(gle.is_cancelled == 0)
 			.orderby(gle.posting_date)
+			.orderby(gle.creation)
 		).run(as_dict=True)
 
 		return records
