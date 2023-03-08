@@ -10,6 +10,7 @@
   "bank_branch",
   "inr_bank_code",
   "inr_purpose_code",
+  "product_name",
   "column_break_5",
   "bank_account_type",
   "account_number",
@@ -73,12 +74,18 @@
    "fieldname": "ifs_code",
    "fieldtype": "Data",
    "label": "IFS Code"
+  },
+  {
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-16 10:23:57.323866",
+ "modified": "2023-03-08 15:24:24.067193",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Bank Account",
