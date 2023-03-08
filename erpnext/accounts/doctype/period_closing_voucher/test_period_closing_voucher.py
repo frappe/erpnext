@@ -222,7 +222,99 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, jv1.submit)
 
-	# def test_closing_balance_with_dimensions(self):
+	def test_closing_balance_with_dimensions(self):
+		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabAccount Closing Balance` where company='Test PCV Company'")
+
+		company = create_company()
+		cost_center1 = create_cost_center("Test Cost Center 1")
+		cost_center2 = create_cost_center("Test Cost Center 2")
+
+		jv1 = make_journal_entry(
+			posting_date="2021-03-15",
+			amount=400,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center1,
+			save=False,
+		)
+		jv1.company = company
+		jv1.save()
+		jv1.submit()
+
+		jv2 = make_journal_entry(
+			posting_date="2021-03-15",
+			amount=200,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center2,
+			save=False,
+		)
+		jv2.company = company
+		jv2.save()
+		jv2.submit()
+
+		pcv1 = self.make_period_closing_voucher(posting_date="2021-03-31")
+
+		closing_balance = frappe.db.get_value(
+			"Account Closing Balance",
+			{
+				"account": "Sales - TPC",
+				"cost_center": cost_center1,
+				"period_closing_voucher": pcv1.name,
+				"is_period_closing_voucher_entry": 0,
+			},
+			["credit", "credit_in_account_currency"],
+			as_dict=1,
+		)
+
+		self.assertEqual(closing_balance.credit, 400)
+		self.assertEqual(closing_balance.credit_in_account_currency, 400)
+
+		jv3 = make_journal_entry(
+			posting_date="2022-03-15",
+			amount=300,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center2,
+			save=False,
+		)
+
+		jv3.company = company
+		jv3.save()
+		jv3.submit()
+
+		pcv2 = self.make_period_closing_voucher(posting_date="2022-03-31")
+
+		cc1_closing_balance = frappe.db.get_value(
+			"Account Closing Balance",
+			{
+				"account": "Sales - TPC",
+				"cost_center": cost_center1,
+				"period_closing_voucher": pcv2.name,
+				"is_period_closing_voucher_entry": 0,
+			},
+			["credit", "credit_in_account_currency"],
+			as_dict=1,
+		)
+
+		cc2_closing_balance = frappe.db.get_value(
+			"Account Closing Balance",
+			{
+				"account": "Sales - TPC",
+				"cost_center": cost_center2,
+				"period_closing_voucher": pcv2.name,
+				"is_period_closing_voucher_entry": 0,
+			},
+			["credit", "credit_in_account_currency"],
+			as_dict=1,
+		)
+
+		self.assertEqual(cc1_closing_balance.credit, 400)
+		self.assertEqual(cc1_closing_balance.credit_in_account_currency, 400)
+		self.assertEqual(cc2_closing_balance.credit, 500)
+		self.assertEqual(cc2_closing_balance.credit_in_account_currency, 500)
 
 	def make_period_closing_voucher(self, posting_date=None, submit=True):
 		surplus_account = create_account()

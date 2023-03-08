@@ -145,6 +145,7 @@ class PeriodClosingVoucher(AccountsController):
 	def get_gle_for_pl_account(self, acc):
 		gl_entry = self.get_gl_dict(
 			{
+				"company": self.company,
 				"closing_date": self.posting_date,
 				"account": acc.account,
 				"cost_center": acc.cost_center,
@@ -168,6 +169,7 @@ class PeriodClosingVoucher(AccountsController):
 	def get_gle_for_closing_account(self, acc):
 		gl_entry = self.get_gl_dict(
 			{
+				"company": self.company,
 				"closing_date": self.posting_date,
 				"account": self.closing_account_head,
 				"cost_center": acc.cost_center,
@@ -191,6 +193,7 @@ class PeriodClosingVoucher(AccountsController):
 	def get_closing_entries(self, acc):
 		closing_entry = self.get_gl_dict(
 			{
+				"company": self.company,
 				"closing_date": self.posting_date,
 				"period_closing_voucher": self.name,
 				"account": acc.account,
@@ -334,18 +337,10 @@ class PeriodClosingVoucher(AccountsController):
 		return query.run(as_dict=1)
 
 
-def process_closing_entries(closing_entries):
-	from erpnext.accounts.doctype.closing_balance.closing_balance import make_closing_entries
-
-	try:
-		make_closing_entries(closing_entries)
-	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error(e)
-
-
 def process_gl_entries(gl_entries, closing_entries, voucher_name=None):
-	from erpnext.accounts.doctype.closing_balance.closing_balance import make_closing_entries
+	from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
+		make_closing_entries,
+	)
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	try:

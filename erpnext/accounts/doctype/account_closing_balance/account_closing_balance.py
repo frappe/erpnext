@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cint, cstr
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -65,25 +66,26 @@ def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
 
 def generate_key(entry, accounting_dimensions):
 	key = [
-		entry.get("account"),
-		entry.get("account_currency"),
-		entry.get("cost_center"),
-		entry.get("project"),
-		entry.get("finance_book"),
-		entry.get("is_period_closing_voucher_entry"),
+		cstr(entry.get("account")),
+		cstr(entry.get("account_currency")),
+		cstr(entry.get("cost_center")),
+		cstr(entry.get("project")),
+		cstr(entry.get("finance_book")),
+		cint(entry.get("is_period_closing_voucher_entry")),
 	]
 
 	key_values = {
-		"account": entry.get("account"),
-		"account_currency": entry.get("account_currency"),
-		"cost_center": entry.get("cost_center"),
-		"project": entry.get("project"),
-		"finance_book": entry.get("finance_book"),
-		"is_period_closing_voucher_entry": entry.get("is_period_closing_voucher_entry"),
+		"company": cstr(entry.get("company")),
+		"account": cstr(entry.get("account")),
+		"account_currency": cstr(entry.get("account_currency")),
+		"cost_center": cstr(entry.get("cost_center")),
+		"project": cstr(entry.get("project")),
+		"finance_book": cstr(entry.get("finance_book")),
+		"is_period_closing_voucher_entry": cint(entry.get("is_period_closing_voucher_entry")),
 	}
 	for dimension in accounting_dimensions:
-		key.append(entry.get(dimension))
-		key_values[dimension] = entry.get(dimension)
+		key.append(cstr(entry.get(dimension)))
+		key_values[dimension] = cstr(entry.get(dimension))
 
 	return tuple(key), key_values
 
@@ -101,6 +103,7 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	if last_period_closing_voucher:
 		account_closing_balance = frappe.qb.DocType("Account Closing Balance")
 		query = frappe.qb.from_(account_closing_balance).select(
+			account_closing_balance.company,
 			account_closing_balance.account,
 			account_closing_balance.account_currency,
 			account_closing_balance.debit,
