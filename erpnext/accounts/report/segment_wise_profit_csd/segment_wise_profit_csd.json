@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "modified": "2023-03-02 23:32:37.923705",
+ "modified": "2023-03-08 17:21:33.182590",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Segment Wise Profit CSD",
@@ -16,7 +16,7 @@
  "prepared_report": 0,
  "ref_doctype": "Account Segment Data",
  "report_name": "Segment Wise Profit CSD",
- "report_type": "Report Builder",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "System Manager"

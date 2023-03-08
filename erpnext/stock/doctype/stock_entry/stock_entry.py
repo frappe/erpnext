@@ -416,19 +416,15 @@ class StockEntry(StockController):
 			self.set_basic_rate_for_finished_goods()
 
 		for d in self.items:
-			if d.item_code.startswith('WS'):
+			if d.s_warehouse:
+				args = self.get_args_for_incoming_rate(d)
+				d.basic_rate = get_incoming_rate(args)
+			elif d.allow_zero_valuation_rate and not d.s_warehouse:
 				d.basic_rate = 0.0
-				d.basic_amount= 0.0
-			else:
-				if d.s_warehouse:
-					args = self.get_args_for_incoming_rate(d)
-					d.basic_rate = get_incoming_rate(args)
-				elif d.allow_zero_valuation_rate and not d.s_warehouse:
-					d.basic_rate = 0.0
-				elif d.t_warehouse and not d.basic_rate:
-					d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
-						self.doctype, self.name, d.allow_zero_valuation_rate,
-						currency=erpnext.get_company_currency(self.company), company=self.company)
+			elif d.t_warehouse and not d.basic_rate:
+				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
+					self.doctype, self.name, d.allow_zero_valuation_rate,
+					currency=erpnext.get_company_currency(self.company), company=self.company)
 
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
@@ -485,39 +481,30 @@ class StockEntry(StockController):
 		fg_basic_rate = 0.0
 
 		for d in self.get('items'):
-			if d.item_code.startswith('WS'):
-				d.basic_rate = 0.0
-				d.basic_amount= 0.0
-			else:
-				if d.t_warehouse:
-					fg_basic_rate = flt(d.basic_rate)
-				args = self.get_args_for_incoming_rate(d)
-
-				# get basic rate
-				if not d.bom_no:
-					# if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate) or d.s_warehouse or force:
-					if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate and d.s_warehouse) or force:
-						basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate), self.precision("basic_rate", d))
-						if basic_rate > 0:
-							d.basic_rate = basic_rate
-
+			if d.t_warehouse:
+				fg_basic_rate = flt(d.basic_rate)
+			args = self.get_args_for_incoming_rate(d)
+			# get basic rate
+			if not d.bom_no:
+				# if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate) or d.s_warehouse or force:
+				if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate and d.s_warehouse) or force:
+					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate), self.precision("basic_rate", d))
+					if basic_rate > 0:
+						d.basic_rate = basic_rate
+				d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+				if not d.t_warehouse:
+					raw_material_cost += flt(d.basic_amount)
+			# get scrap items basic rate
+			if d.bom_no:
+				if not flt(d.basic_rate) and not d.allow_zero_valuation_rate and \
+					getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
+					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate),
+						self.precision("basic_rate", d))
+					if basic_rate > 0:
+						d.basic_rate = basic_rate
 					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
-					if not d.t_warehouse:
-						raw_material_cost += flt(d.basic_amount)
-
-				# get scrap items basic rate
-				if d.bom_no:
-					if not flt(d.basic_rate) and not d.allow_zero_valuation_rate and \
-						getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
-						basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate),
-							self.precision("basic_rate", d))
-						if basic_rate > 0:
-							d.basic_rate = basic_rate
-						d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
-
-					if getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
-
-						scrap_material_cost += flt(d.basic_amount)
+				if getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
+					scrap_material_cost += flt(d.basic_amount)
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if number_of_fg_items == 1 or update_finished_item_rate:
@@ -592,11 +579,10 @@ class StockEntry(StockController):
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
 		for d in self.get("items"):
-			if not d.item_code.startswith('WS'):
-				if d.t_warehouse:
-					self.total_incoming_value += flt(d.amount)
-				if d.s_warehouse:
-					self.total_outgoing_value += flt(d.amount)
+			if d.t_warehouse:
+				self.total_incoming_value += flt(d.amount)
+			if d.s_warehouse:
+				self.total_outgoing_value += flt(d.amount)
 
 		self.value_difference = self.total_incoming_value - self.total_outgoing_value
 
