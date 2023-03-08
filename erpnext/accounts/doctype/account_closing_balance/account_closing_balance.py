@@ -9,7 +9,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 
 
-class ClosingBalance(Document):
+class AccountClosingBalance(Document):
 	pass
 
 
@@ -23,10 +23,12 @@ def make_closing_entries(closing_entries, voucher_name):
 	)
 	combined_entries = closing_entries + previous_closing_entries
 
-	merged_entries = aggregate_with_last_closing_balance(combined_entries, accounting_dimensions)
+	merged_entries = aggregate_with_last_account_closing_balance(
+		combined_entries, accounting_dimensions
+	)
 
 	for key, value in merged_entries.items():
-		cle = frappe.new_doc("Closing Balance")
+		cle = frappe.new_doc("Account Closing Balance")
 		cle.update(value)
 		cle.update(value["dimensions"])
 		cle.update(
@@ -38,7 +40,7 @@ def make_closing_entries(closing_entries, voucher_name):
 		cle.submit()
 
 
-def aggregate_with_last_closing_balance(entries, accounting_dimensions):
+def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
 	merged_entries = {}
 	for entry in entries:
 		key, key_values = generate_key(entry, accounting_dimensions)
@@ -97,25 +99,25 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	)
 
 	if last_period_closing_voucher:
-		closing_balance = frappe.qb.DocType("Closing Balance")
-		query = frappe.qb.from_(closing_balance).select(
-			closing_balance.account,
-			closing_balance.account_currency,
-			closing_balance.debit,
-			closing_balance.credit,
-			closing_balance.debit_in_account_currency,
-			closing_balance.credit_in_account_currency,
-			closing_balance.cost_center,
-			closing_balance.project,
-			closing_balance.finance_book,
-			closing_balance.is_period_closing_voucher_entry,
+		account_closing_balance = frappe.qb.DocType("Account Closing Balance")
+		query = frappe.qb.from_(account_closing_balance).select(
+			account_closing_balance.account,
+			account_closing_balance.account_currency,
+			account_closing_balance.debit,
+			account_closing_balance.credit,
+			account_closing_balance.debit_in_account_currency,
+			account_closing_balance.credit_in_account_currency,
+			account_closing_balance.cost_center,
+			account_closing_balance.project,
+			account_closing_balance.finance_book,
+			account_closing_balance.is_period_closing_voucher_entry,
 		)
 
 		for dimension in accounting_dimensions:
-			query = query.select(closing_balance[dimension])
+			query = query.select(account_closing_balance[dimension])
 
 		query = query.where(
-			closing_balance.period_closing_voucher == last_period_closing_voucher[0].name
+			account_closing_balance.period_closing_voucher == last_period_closing_voucher[0].name
 		)
 		entries = query.run(as_dict=1)
 

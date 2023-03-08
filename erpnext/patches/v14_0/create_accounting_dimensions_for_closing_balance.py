@@ -10,7 +10,7 @@ def execute():
 	if not accounting_dimensions:
 		return
 
-	doctype = "Closing Balance"
+	doctype = "Account Closing Balance"
 
 	for d in accounting_dimensions:
 		field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})

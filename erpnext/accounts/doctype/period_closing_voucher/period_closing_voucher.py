@@ -54,7 +54,7 @@ class PeriodClosingVoucher(AccountsController):
 		self.delete_closing_entries()
 
 	def delete_closing_entries(self):
-		closing_balance = frappe.qb.DocType("Closing Balance")
+		closing_balance = frappe.qb.DocType("Account Closing Balance")
 		frappe.qb.from_(closing_balance).delete().where(
 			closing_balance.period_closing_voucher == self.name
 		).run()

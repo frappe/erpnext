@@ -132,7 +132,7 @@
  "modified": "2023-03-06 08:56:36.393237",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Closing Balance",
+ "name": "Account Closing Balance",
  "owner": "Administrator",
  "permissions": [
   {

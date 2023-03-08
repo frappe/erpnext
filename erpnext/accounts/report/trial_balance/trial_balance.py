@@ -152,7 +152,7 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	if last_period_closing_voucher:
 		gle = get_opening_balance(
-			"Closing Balance",
+			"Account Closing Balance",
 			filters,
 			report_type,
 			accounting_dimensions,
@@ -197,7 +197,7 @@ def get_opening_balance(
 		.groupby(closing_balance.account)
 	)
 
-	if doctype == "Closing Balance":
+	if doctype == "Account Closing Balance":
 		if period_closing_voucher:
 			opening_balance = opening_balance.where(
 				closing_balance.period_closing_voucher == period_closing_voucher
@@ -211,7 +211,7 @@ def get_opening_balance(
 		opening_balance = opening_balance.where(closing_balance.closing_date >= filters.year_start_date)
 
 	if not flt(filters.with_period_closing_entry):
-		if doctype == "Closing Balance":
+		if doctype == "Account Closing Balance":
 			opening_balance = opening_balance.where(closing_balance.is_period_closing_voucher_entry == 0)
 		else:
 			opening_balance = opening_balance.where(
