@@ -87,9 +87,11 @@ def get_expected_data(bom, warehouse, qty_to_produce, show_exploded_view=False):
 	expected_data = []
 
 	for item in bom.get("exploded_items") if show_exploded_view else bom.get("items"):
-		in_stock_qty = frappe.get_cached_value(
-			"Bin", {"item_code": item.item_code, "warehouse": warehouse}, "actual_qty"
-		)
+		in_stock_qty = None
+		if frappe.db.exists("Bin", {"item_code": item.item_code, "warehouse": warehouse}, "actual_qty"):
+			in_stock_qty = frappe.get_cached_value(
+				"Bin", {"item_code": item.item_code, "warehouse": warehouse}, "actual_qty"
+			)
 
 		expected_data.append(
 			[
