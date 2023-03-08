@@ -136,11 +136,10 @@ class TDSReceiptUpdate(Document):
 						WHERE t.docstatus = 1 
 						AND t.encashment_date BETWEEN '{0}' AND '{1}' 
 						AND t.encashment_tax > 0 
-						# {2} 
 						AND NOT EXISTS (SELECT 1 
 					FROM `tabTDS Receipt Entry` AS b 
 						WHERE b.invoice_no = t.name)
-						""".format(self.from_date, self.to_date, cond)
+						""".format(self.from_date, self.to_date)
 				query += """
 					UNION SELECT 
 						"Employee Benefit Claim" as invoice_type, 
