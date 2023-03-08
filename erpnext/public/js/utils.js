@@ -335,7 +335,13 @@ erpnext.utils.select_alternate_items = function(opts) {
 					in_list_view: 1,
 					read_only: 1,
 					label: __('Item Code')
-				}, {
+				},{
+					fieldtype:'Data',
+					fieldname:"item_name",
+					in_list_view: 1,
+					read_only: 1,
+					label: __('Item Name')
+				},{
 					fieldtype:'Link',
 					fieldname:"alternate_item",
 					options: 'Item',
@@ -403,6 +409,7 @@ erpnext.utils.select_alternate_items = function(opts) {
 		],
 		primary_action: function() {
 			const args = this.get_values()["alternative_items"];
+			console.log(args)
 			const alternative_items = args.filter(d => {
 				if (d.alternate_item && d.item_code != d.alternate_item) {
 					return true;
@@ -410,6 +417,7 @@ erpnext.utils.select_alternate_items = function(opts) {
 			});
 
 			alternative_items.forEach(d => {
+				console.log(d)
 				let row = frappe.get_doc(opts.child_doctype, d.docname);
 				let qty = null;
 				if (row.doctype === 'Work Order Item') {
@@ -437,6 +445,7 @@ erpnext.utils.select_alternate_items = function(opts) {
 			dialog.fields_dict.alternative_items.df.data.push({
 				"docname": d.name,
 				"item_code": d[item_field],
+				"item_name": d['item_name'],
 				"warehouse": d[warehouse_field],
 				"actual_qty": d.actual_qty
 			});

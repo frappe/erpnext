@@ -77,7 +77,8 @@ class Fees(AccountsController):
 			frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
 		except Exception as e:
 			traceback = frappe.get_traceback()
-			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue'+str(self.name))
+			self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 		if self.send_payment_request and self.student_email:
 			pr = make_payment_request(party_type="Student", party=self.student, dt="Fees",
 					dn=self.name, recipient_id=self.student_email,

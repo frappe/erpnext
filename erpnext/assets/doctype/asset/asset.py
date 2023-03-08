@@ -38,7 +38,8 @@ class Asset(AccountsController):
 				frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
 			except Exception as e:
 				traceback = frappe.get_traceback()
-				frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+				frappe.log_error(message=traceback,title='Exc GL entry Adding Queue'+str(self.name))
+				self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 
 	def before_cancel(self):
 		self.cancel_auto_gen_movement()
@@ -609,7 +610,8 @@ def make_post_gl_entry():
 					frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
 				except Exception as e:
 					traceback = frappe.get_traceback()
-					frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+					frappe.log_error(message=traceback,title='Exc GL entry Adding Queue'+str(self.name))
+					doc.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')

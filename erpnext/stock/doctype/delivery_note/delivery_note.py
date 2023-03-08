@@ -314,7 +314,8 @@ class DeliveryNote(SellingController):
 			frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doctype,queue="gl",enqueue_after_commit=True)
 		except Exception as e:
 			traceback = frappe.get_traceback()
-			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue')
+			frappe.log_error(message=traceback,title='Exc GL entry Adding Queue'+str(self.name))
+			self.add_comment('Comment', _('Action Failed') + '<br><br>' + traceback)
 		#self.make_gl_entries()
 		frappe.db.sql("UPDATE `tabDelivery Note` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
 			
