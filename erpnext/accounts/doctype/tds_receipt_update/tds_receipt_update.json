@@ -96,7 +96,7 @@
    "fieldtype": "Select",
    "label": "Month",
    "mandatory_depends_on": "eval:doc.purpose == \"Employee Salary\"",
-   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+   "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12"
   },
   {
    "depends_on": "eval:in_list([\"PBVA\"], doc.purpose)",
@@ -218,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-28 17:37:19.635053",
+ "modified": "2023-03-08 19:38:50.135042",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "TDS Receipt Update",
