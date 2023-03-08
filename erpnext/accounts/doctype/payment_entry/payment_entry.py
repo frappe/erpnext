@@ -1683,7 +1683,7 @@ def get_payment_entry(
 	)
 
 	paid_amount, received_amount, discount_amount, valid_discounts = apply_early_payment_discount(
-		paid_amount, received_amount, doc
+		paid_amount, received_amount, doc, party_account_currency
 	)
 
 	pe = frappe.new_doc("Payment Entry")
@@ -1783,17 +1783,10 @@ def get_payment_entry(
 		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
 
-		discount_amount = set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount)
-		if discount_amount > 0:
-			# Set pending base discount amount in deductions
-			positive_negative = -1 if payment_type == "Pay" else 1
-			pe.set_gain_or_loss(
-				account_details={
-					"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
-					"cost_center": pe.cost_center
-					or frappe.get_cached_value("Company", pe.company, "cost_center"),
-					"amount": discount_amount * positive_negative * doc.get("conversion_rate", 1),
-				}
+		if discount_amount:
+			base_total_discount_loss = set_early_payment_discount_loss(pe, doc, valid_discounts)
+			set_pending_discount_loss(
+				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
 
 		pe.set_difference_amount()
@@ -1907,7 +1900,7 @@ def set_paid_amount_and_received_amount(
 	return paid_amount, received_amount
 
 
-def apply_early_payment_discount(paid_amount, received_amount, doc):
+def apply_early_payment_discount(paid_amount, received_amount, doc, party_account_currency):
 	total_discount = 0
 	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
@@ -1916,12 +1909,17 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 	if doc.doctype in eligible_for_payments and has_payment_schedule:
 		for term in doc.payment_schedule:
 			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
+				is_multi_currency = party_account_currency != doc.company_currency
+
 				if term.discount_type == "Percentage":
-					discount_amount = flt(doc.get("grand_total")) * (term.discount / 100)
+					grand_total = doc.get("grand_total") if is_multi_currency else doc.get("base_grand_total")
+					discount_amount = flt(grand_total) * (term.discount / 100)
 				else:
 					discount_amount = term.discount
 
-				discount_amount_in_foreign_currency = discount_amount * doc.get("conversion_rate", 1)
+				# if accounting is done in the same currency, paid_amount = received_amount
+				conversion_rate = doc.get("conversion_rate", 1) if is_multi_currency else 1
+				discount_amount_in_foreign_currency = discount_amount * conversion_rate
 
 				if doc.doctype == "Sales Invoice":
 					paid_amount -= discount_amount
@@ -1940,20 +1938,38 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 	return paid_amount, received_amount, total_discount, valid_discounts
 
 
-def set_early_payment_discount_loss(pe, doc, valid_discounts, discount_amount):
-	"""Split early payment discount into Income Loss & Tax Loss."""
-	if not (discount_amount and valid_discounts):
-		return discount_amount
+def set_pending_discount_loss(
+	pe, doc, discount_amount, base_total_discount_loss, party_account_currency
+):
+	# If multi-currency, get base discount amount to adjust with base currency deductions/losses
+	if party_account_currency != doc.company_currency:
+		discount_amount = discount_amount * doc.get("conversion_rate", 1)
 
+	discount_amount -= base_total_discount_loss
+
+	# If pending base discount amount, set it in deductions
+	if discount_amount > 0.0:
+		positive_negative = -1 if pe.payment_type == "Pay" else 1
+		pe.set_gain_or_loss(
+			account_details={
+				"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
+				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
+				"amount": discount_amount * positive_negative,
+			}
+		)
+
+
+def set_early_payment_discount_loss(pe, doc, valid_discounts) -> float:
+	"""Split early payment discount into Income Loss & Tax Loss."""
 	total_discount_percent = get_total_discount_percent(doc, valid_discounts)
 
 	if not total_discount_percent:
-		return discount_amount
+		return 0.0
 
 	loss_on_income = add_income_discount_loss(pe, doc, total_discount_percent)
 	loss_on_taxes = add_tax_discount_loss(pe, doc, total_discount_percent)
 
-	return flt(discount_amount - (loss_on_income + loss_on_taxes))
+	return flt(loss_on_income + loss_on_taxes)
 
 
 def get_total_discount_percent(doc, valid_discounts) -> float:
