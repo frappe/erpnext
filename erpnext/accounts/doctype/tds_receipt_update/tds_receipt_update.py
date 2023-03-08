@@ -112,7 +112,7 @@ class TDSReceiptUpdate(Document):
 		accounts = [i.account for i in frappe.db.get_all("Tax Withholding Account", \
 			{"parent": self.tax_withholding_category}, "account")]
 
-		if not len(accounts):
+		if not len(accounts) and self.purpose != "Leave Encashment":
 			return total_tds_amount, total_bill_amount
 		elif len(accounts) == 1:
 			accounts_cond = 'and t1.tax_account = "{}"'.format(accounts[0])
@@ -156,11 +156,11 @@ class TDSReceiptUpdate(Document):
 						AND t1.parent = t.name
 						AND t.posting_date BETWEEN '{0}' 
 						AND '{1}'
-						AND t1.tax_amount > 0 {2}
+						AND t1.tax_amount > 0
 						AND NOT EXISTS (SELECT 1 
 					FROM `tabTDS Receipt Entry` AS b 
 						WHERE b.invoice_no = t.name)
-						""".format(self.from_date, self.to_date, cond)
+						""".format(self.from_date, self.to_date)
 				entries = frappe.db.sql(query,as_dict=1)
 			elif self.purpose == 'Overtime':
 				pass
