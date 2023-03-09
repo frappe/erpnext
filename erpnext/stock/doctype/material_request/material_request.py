@@ -10,6 +10,7 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
@@ -180,6 +181,34 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
 
+	def get_mr_items_ordered_qty(self, mr_items):
+		mr_items_ordered_qty = {}
+		mr_items = [d.name for d in self.get("items") if d.name in mr_items]
+
+		doctype = qty_field = None
+		if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
+			doctype = frappe.qb.DocType("Stock Entry Detail")
+			qty_field = doctype.transfer_qty
+		elif self.material_request_type == "Manufacture":
+			doctype = frappe.qb.DocType("Work Order")
+			qty_field = doctype.qty
+
+		if doctype and qty_field:
+			query = (
+				frappe.qb.from_(doctype)
+				.select(doctype.material_request_item, Sum(qty_field))
+				.where(
+					(doctype.material_request == self.name)
+					& (doctype.material_request_item.isin(mr_items))
+					& (doctype.docstatus == 1)
+				)
+				.groupby(doctype.material_request_item)
+			)
+
+			mr_items_ordered_qty = frappe._dict(query.run())
+
+		return mr_items_ordered_qty
+
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
 			return
@@ -187,18 +216,13 @@ class MaterialRequest(BuyingController):
 		if not mr_items:
 			mr_items = [d.name for d in self.get("items")]
 
+		mr_items_ordered_qty = self.get_mr_items_ordered_qty(mr_items)
+		mr_qty_allowance = frappe.db.get_single_value("Stock Settings", "mr_qty_allowance")
+
 		for d in self.get("items"):
 			if d.name in mr_items:
 				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
-					d.ordered_qty = flt(
-						frappe.db.sql(
-							"""select sum(transfer_qty)
-						from `tabStock Entry Detail` where material_request = %s
-						and material_request_item = %s and docstatus = 1""",
-							(self.name, d.name),
-						)[0][0]
-					)
-					mr_qty_allowance = frappe.db.get_single_value("Stock Settings", "mr_qty_allowance")
+					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
 
 					if mr_qty_allowance:
 						allowed_qty = d.qty + (d.qty * (mr_qty_allowance / 100))
@@ -217,14 +241,7 @@ class MaterialRequest(BuyingController):
 						)
 
 				elif self.material_request_type == "Manufacture":
-					d.ordered_qty = flt(
-						frappe.db.sql(
-							"""select sum(qty)
-						from `tabWork Order` where material_request = %s
-						and material_request_item = %s and docstatus = 1""",
-							(self.name, d.name),
-						)[0][0]
-					)
+					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
