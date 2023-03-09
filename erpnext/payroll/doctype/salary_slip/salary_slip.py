@@ -315,7 +315,7 @@ class SalarySlip(TransactionBase):
 		)
 
 		working_days = date_diff(self.end_date, self.start_date) + 1
-		working_days_list = [add_days(self.start_date)for i in range(working_days)]
+		working_days_list = [add_days(self.start_date, i) for i in range(working_days)]
 
 		if for_preview:
 			self.total_working_days = working_days
@@ -324,7 +324,7 @@ class SalarySlip(TransactionBase):
 
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
 
-		joining_date, relieving_date = self.get_joining_and_relieving_date()
+		joining_date, relieving_date = self.get_joining_and_relieving_dates()
 
 		if not cint(include_holidays_in_total_working_days):
 			working_days -= len(holidays)
@@ -337,10 +337,14 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set Payroll based on in Payroll settings"))
 
 		if payroll_based_on == "Attendance":
-			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(holidays, relieving_date)
+			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
+				holidays, relieving_date
+			)
 			self.absent_days = absent
 		else:
-			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(holidays, working_days_list, relieving_date)
+			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
+				holidays, working_days_list, relieving_date
+			)
 
 		if not lwp:
 			lwp = actual_lwp
@@ -463,7 +467,10 @@ class SalarySlip(TransactionBase):
 	def get_holidays_for_employee(self, start_date, end_date):
 		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
 
-	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days_list, relieving_date=None):
+	def calculate_lwp_or_ppl_based_on_leave_application(
+		self, holidays, working_days_list, relieving_date=None
+	):
+
 		lwp = 0
 
 		daily_wages_fraction_for_half_day = (

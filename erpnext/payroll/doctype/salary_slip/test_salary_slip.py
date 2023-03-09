@@ -1128,7 +1128,6 @@ class TestSalarySlip(FrappeTestCase):
 			if deduction.salary_component == "TDS":
 				self.assertEqual(deduction.amount, rounded(monthly_tax_amount))
 
-
 	@change_settings("Payroll Settings", {"payroll_based_on": "Leave"})
 	def test_lwp_calculation_based_on_relieving_date(self):
 		emp_id = make_employee("test_lwp_based_on_relieving_date@salary.com")
@@ -1157,6 +1156,7 @@ class TestSalarySlip(FrappeTestCase):
 		self.assertEqual(ss.leave_without_pay, 0)
 
 		self.assertEqual(ss.payment_days, (days_between_start_and_relieving - len(holidays)))
+
 
 def get_no_of_days():
 	no_of_days_in_month = calendar.monthrange(getdate(nowdate()).year, getdate(nowdate()).month)
