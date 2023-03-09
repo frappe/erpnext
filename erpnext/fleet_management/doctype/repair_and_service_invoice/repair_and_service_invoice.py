@@ -17,11 +17,11 @@ class RepairAndServiceInvoice(AccountsController):
 		self.set_status()
 		if not self.credit_account:
 			self.credit_account = get_party_account(self.party_type,self.party,self.company)
-			
+
 	def on_submit(self):
 		self.make_gl_entry()
 		self.update_repair_and_service()
-		self.post_journal_entry()
+		# self.post_journal_entry()
 
 	def on_cancel(self):
 		self.make_gl_entry()

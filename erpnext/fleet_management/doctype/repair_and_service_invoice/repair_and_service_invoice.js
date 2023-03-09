@@ -14,18 +14,24 @@ frappe.ui.form.on('Repair And Service Invoice', {
 				frappe.set_route("query-report", "General Ledger");
 			})
 			if (self.status != "Paid"){
-				cur_frm.add_custom_button(__('Make Journal Entry'), function(doc) {
-					frm.events.make_journal_entry(frm)
+				cur_frm.add_custom_button(__('Pay'), function(doc) {
+					frm.events.make_payment_entry(frm)
 				})
 			}			
 		}
 	},
-	make_journal_entry:function(frm){
+	make_payment_entry:function(frm){
 		frappe.call({
-			method:
-			"post_journal_entry",
-			doc:frm.doc,
-			callback: function (r) {},
+			method:"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+			args: {
+				dt: frm.doc.doctype,
+				dn: frm.doc.name,
+				party_type:frm.doc.party_type
+			},
+			callback: function (r) {
+				var doc = frappe.model.sync(r.message);
+				frappe.set_route("Form", doc[0].doctype, doc[0].name);
+			},
 		});
 	},
 	party_type:function(frm){
