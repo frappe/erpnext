@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
@@ -316,6 +316,132 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 186)
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
+
+	@change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1},
+	)
+	def test_payment_entry_multicurrency_si_with_base_currency_accounting_early_payment_discount(
+		self,
+	):
+		"""
+		1. Multi-currency SI with single currency accounting (company currency)
+		2. PE with early payment discount
+		3. Test if Paid Amount is calculated in company currency
+		4. Test if deductions are calculated in company currency
+
+		SI is in USD to document agreed amounts that are in USD, but the accounting is in base currency.
+		"""
+		si = create_sales_invoice(
+			customer="_Test Customer",
+			currency="USD",
+			conversion_rate=50,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		si.save()
+		si.submit()
+
+		pe = get_payment_entry(
+			"Sales Invoice",
+			si.name,
+			bank_account="_Test Bank - _TC",
+		)
+		pe.reference_no = si.name
+		pe.reference_date = nowdate()
+
+		# Early payment discount loss on income
+		self.assertEqual(pe.paid_amount, 4500.0)  # Amount in company currency
+		self.assertEqual(pe.received_amount, 4500.0)
+		self.assertEqual(pe.deductions[0].amount, 500.0)
+		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
+		self.assertEqual(pe.difference_amount, 0.0)
+
+		pe.insert()
+		pe.submit()
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [
+				["Debtors - _TC", 0, 5000, si.name],
+				["_Test Bank - _TC", 4500, 0, None],
+				["Write Off - _TC", 500.0, 0, None],
+			]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, 0)
+
+	def test_payment_entry_multicurrency_accounting_si_with_early_payment_discount(self):
+		"""
+		1. Multi-currency SI with multi-currency accounting
+		2. PE with early payment discount and also exchange loss
+		3. Test if Paid Amount is calculated in transaction currency
+		4. Test if deductions are calculated in base/company currency
+		5. Test if exchange loss is reflected in difference
+		"""
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		si.save()
+		si.submit()
+
+		pe = get_payment_entry(
+			"Sales Invoice", si.name, bank_account="_Test Bank - _TC", bank_amount=4700
+		)
+		pe.reference_no = si.name
+		pe.reference_date = nowdate()
+
+		# Early payment discount loss on income
+		self.assertEqual(pe.paid_amount, 90.0)
+		self.assertEqual(pe.received_amount, 4200.0)  # 5000 - 500 (discount) - 300 (exchange loss)
+		self.assertEqual(pe.deductions[0].amount, 500.0)
+		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
+
+		# Exchange loss
+		self.assertEqual(pe.difference_amount, 300.0)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "_Test Exchange Gain/Loss - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 300.0,
+			},
+		)
+
+		pe.insert()
+		pe.submit()
+
+		self.assertEqual(pe.difference_amount, 0.0)
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [
+				["_Test Receivable USD - _TC", 0, 5000, si.name],
+				["_Test Bank - _TC", 4200, 0, None],
+				["Write Off - _TC", 500.0, 0, None],
+				["_Test Exchange Gain/Loss - _TC", 300.0, 0, None],
+			]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_against_purchase_invoice_to_check_status(self):
 		pi = make_purchase_invoice(
