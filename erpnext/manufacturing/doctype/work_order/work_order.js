@@ -506,7 +506,7 @@ frappe.ui.form.on("Work Order Item", {
 				callback: function(r) {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, {
-							"required_qty": 1,
+							"required_qty": row.required_qty || 1,
 							"item_name": r.message.item_name,
 							"description": r.message.description,
 							"source_warehouse": r.message.default_warehouse,
