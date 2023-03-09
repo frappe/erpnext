@@ -348,3 +348,81 @@ frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
 	frappe.route_options = {"item_code": d.item_code};
 	frappe.set_route("query-report", "Stock Balance");
 })
+
+frappe.ui.form.on('Quotation', {
+	refresh(frm) {
+		frm.add_custom_button('Quotation Template', function () { frm.trigger('get_items') }, __("Get Items From"));
+	},
+	get_items(frm){
+		start_quotation_template_dialog(frm);
+	}
+});
+
+function start_quotation_template_dialog(frm) {
+
+  var transaction_controller = new erpnext.TransactionController({ frm: frm });
+	let dialog = new frappe.ui.form.MultiSelectDialog({
+
+		// Read carefully and adjust parameters
+		doctype: "Quotation Template", // Doctype we want to pick up
+		target: frm,
+		setters: {
+			// MultiDialog Filterfields
+			// customer: frm.doc.customer,
+		},
+		date_field: "creation", // "modified", "creation", ...
+		get_query() {
+			// MultiDialog Listfilter
+			return {
+				filters: {  }
+			};
+		},
+	  action(selections) {
+		  for(var n = 0; n < selections.length; n++){
+			  var name = selections[n];
+			  var items_idx = 0;
+			  frappe.db.get_doc("Quotation Template", name) // Again, the Doctype we want to pick up
+			  .then(doc => {
+				  // Remove the first empty element of the table
+				  try {
+					  let last = frm.get_field("items").grid.grid_rows.length -1;
+					  items_idx = last;
+					  if(!('item_code' in frm.get_field("items").grid.grid_rows[last].doc)){
+						  frm.get_field("items").grid.grid_rows[0].remove();
+						  frm.refresh_fields("items");
+					  }
+				  } catch (error) {
+					  console.log(error);
+					  var row=frm.add_child("items"); // add row
+					  frm.refresh_fields("items"); // Refresh Tabelle
+				  }
+
+				  // Run through all items of the template quotation
+				  for(var k = 0; k < doc.quotation_template_item.length; k++){
+
+					  // Declare variables and add table row
+					  var item=doc.quotation_template_item[k];
+					  var row=frm.add_child("items"); // add row
+					  frm.refresh_fields("items"); // Refresh table
+
+					  // Copy-Paste Operation
+					  let idx = items_idx+1;
+					  let fields = ['item_code', 'qty'];
+					  for(var m = 0; m < fields.length; m++){
+						  frm.get_field("items").grid.grid_rows[idx].doc[fields[m]] = item[fields[m]];
+						  frm.get_field("items").grid.grid_rows[idx].refresh_field(fields[m]);
+					  }
+					  frm.refresh_fields("items"); // Refresh table
+
+					  // Get all other values from stock etc.
+					  let quotation_doc = frm.doc;
+					  let cdn = row.name;
+					  transaction_controller.item_code(quotation_doc, "Quotation Item", cdn);
+					  items_idx++;
+
+				  }
+			  });
+		  }
+	  }
+  });
+}
