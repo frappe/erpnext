@@ -54,7 +54,7 @@ class ItemAlternative(Document):
 		if not item_data.allow_alternative_item:
 			frappe.throw(alternate_item_check_msg.format(self.item_code))
 		if self.two_way and not alternative_item_data.allow_alternative_item:
-			frappe.throw(alternate_item_check_msg.format(self.item_code))
+			frappe.throw(alternate_item_check_msg.format(self.alternative_item_code))
 
 	def validate_duplicate(self):
 		if frappe.db.get_value(
