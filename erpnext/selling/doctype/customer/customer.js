@@ -424,40 +424,6 @@ frappe.ui.form.on('Customer',  {
 		    } );
 		    frm.fields_dict["customer_contact_person_details"].grid.grid_buttons.find('.btn-custom').removeClass('btn-default').addClass('btn-primary new-custom-btn');
 		//once delete customer then delete there address,delete customer child table and customer form also delete
-		const customer_name = frm.doc.name +"-" + "Company"
-		if (!frm.doc.__islocal) {
-			if(frm.doc.name && frm.doc.docstatus !=1 ){
-				if(frm.has_perm('delete')) {
-					frm.add_custom_button(__("Delete"), function(){
-						//1'st delete Customer Contact Person Details 
-						$.each(frm.doc.customer_contact_person_details || [], function (i, v) {
-							frappe.call({
-								method: "erpnext.selling.doctype.customer.customer.delete_customer_contact_person",
-								async:false,
-								args: {
-									name: v.contact_name,
-								}
-							})
-						})
-						//2'nd delete customer address
-						frappe.call({
-							method: "erpnext.selling.doctype.customer.customer.remove_customer_address",
-							args: {
-								name: frm.doc.name,
-								address_name : customer_name,	
-							},
-							async: false,
-							callback: function (r) {
-						}
-						})
-						// 3'rd delete customer form itself 
-						frappe.model.delete_doc(frm.doc.doctype, frm.doc.name, function() {
-							window.history.back();
-						});
-					})		
-				}
-			}
-		}
 	},
 })
 frappe.ui.form.on("Customer Contact Person Details",{
