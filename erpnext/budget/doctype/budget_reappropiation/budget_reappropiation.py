@@ -10,9 +10,9 @@ from erpnext.custom_workflow import validate_workflow_states, notify_workflow_st
 class BudgetReappropiation(Document):
 	def validate(self):
 		self.validate_budget()
-		# validate_workflow_states(self)
-	def on_submit(self):
 		self.budget_check()
+		validate_workflow_states(self)
+	def on_submit(self):
 		self.budget_appropriate(cancel=False)
 
 	def on_cancel(self):
@@ -23,11 +23,12 @@ class BudgetReappropiation(Document):
 		budget_against_field = frappe.scrub(self.budget_against)
 		from_budget_against = self.from_cost_center if self.budget_against == "Cost Center" else self.from_project
 		to_budget_against = self.to_cost_center if self.budget_against == "Cost Center" else self.to_project
-
+		total_amount = 0
 		if not self.items:
 			frappe.throw(_("Please provide Budget Head or Account to Appropriate budget"))
 
 		for d in self.items:
+			total_amount += flt(d.amount)
 			if d.from_account:
 				from_budget_exist = frappe.db.sql(
 						"""
@@ -64,7 +65,7 @@ class BudgetReappropiation(Document):
 							"Budget record doesnot exists against {0} '{1}' and account '{2}' for fiscal year {3}"
 						).format(self.budget_against, to_budget_against, d.to_account, self.fiscal_year),
 					)
-	
+		self.total_reappropiation_amount = total_amount
 	# Check the budget amount in the from cost center and account
 	def budget_check(self):
 		args = frappe._dict()
@@ -137,6 +138,7 @@ class BudgetReappropiation(Document):
 					to_budget_account.db_set("budget_amount", total)
 
 				app_details = frappe.new_doc("Reappropriation Details")
+				app_details.flags.ignore_permissions = 1
 				app_details.budget_against = self.budget_against
 				app_details.from_cost_center = self.from_cost_center if self.budget_against == "Cost Center" else ""
 				app_details.to_cost_center = self.to_cost_center if self.budget_against == "Cost Center" else ""
@@ -153,3 +155,18 @@ class BudgetReappropiation(Document):
 			#Delete the reappropriation details for record
 			if cancel:
 				frappe.db.sql("delete from `tabReappropriation Details` where reference=%s", self.name)
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator":
+		return
+	if "Budget Manager" in user_roles or "GM" in user_roles or "CEO" in user_roles:
+		return
+
+	return """(
+		`tabBudget Reappropiation`.owner = '{user}'
+		or
+		(`tabBudget Reappropiation`.approver = '{user}' and `tabBudget Reappropiation`.workflow_state not in  ('Draft','Approved','Rejected','Cancelled'))
+	)""".format(user=user)

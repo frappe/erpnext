@@ -1,6 +1,5 @@
 // Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-
 frappe.ui.form.on('Repair And Service Invoice', {
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 1){
@@ -15,25 +14,18 @@ frappe.ui.form.on('Repair And Service Invoice', {
 				frappe.set_route("query-report", "General Ledger");
 			})
 			if (self.status != "Paid"){
-				cur_frm.add_custom_button(__('Pay'), function(doc) {
-					frm.events.make_payment_entry(frm)
+				cur_frm.add_custom_button(__('Make Journal Entry'), function(doc) {
+					frm.events.make_journal_entry(frm)
 				})
 			}			
 		}
 	},
-	make_payment_entry:function(frm){
+	make_journal_entry:function(frm){
 		frappe.call({
 			method:
-			"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
-			args: {
-				dt: frm.doc.doctype,
-				dn: frm.doc.name,
-				party_type:frm.doc.party_type
-			},
-			callback: function (r) {
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route("Form", doc[0].doctype, doc[0].name);
-			},
+			"post_journal_entry",
+			doc:frm.doc,
+			callback: function (r) {},
 		});
 	},
 	party_type:function(frm){

@@ -6,8 +6,8 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from erpnext.custom_utils import check_future_date
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.doctype.business_activity.business_activity import get_default_ba
-from frappe.utils import flt
+from frappe import _, qb, throw, msgprint
+from frappe.utils import flt, cint, money_in_words
 from erpnext.accounts.party import get_party_account
 
 class RepairAndServiceInvoice(AccountsController):
@@ -67,7 +67,6 @@ class RepairAndServiceInvoice(AccountsController):
 	def make_gl_entry(self):
 		from erpnext.accounts.general_ledger import make_gl_entries
 		gl_entries = []
-		ba = get_default_ba()
 		expense_account = frappe.db.get_value("Equipment Category", self.equipment_category, "r_m_expense_account")
 		if not expense_account:
 			expense_account = frappe.db.get_value("Company", self.company, "repair_and_service_expense_account")
@@ -84,7 +83,6 @@ class RepairAndServiceInvoice(AccountsController):
 				"voucher_no": self.name,
 				"voucher_type": self.doctype,
 				"cost_center": self.cost_center,
-				"business_activity": ba,
 			}, self.currency)
 		)
 		gl_entries.append(
@@ -94,7 +92,6 @@ class RepairAndServiceInvoice(AccountsController):
 				"party": self.party,
 				"credit": self.total_amount,
 				"credit_in_account_currency": self.total_amount,
-				"business_activity": ba,
 				"cost_center": self.cost_center,
 				"voucher_no":self.name,
 				"voucher_type":self.doctype,
@@ -103,6 +100,59 @@ class RepairAndServiceInvoice(AccountsController):
 			}, self.currency)
 		)
 		make_gl_entries(gl_entries, update_outstanding="No", cancel=(self.docstatus == 2), merge_entries=False)
+
+	@frappe.whitelist()
+	def post_journal_entry(self):
+		if self.journal_entry and frappe.db.exists("Journal Entry",{"name":self.journal_entry,"docstatus":("!=",2)}):
+			frappe.msgprint(_("Journal Entry Already Exists {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry))))
+		if not flt(self.outstanding_amount) > 0:
+			frappe.throw(_("Outstanding Amount should be greater than zero"))
+		
+		credit_account = self.credit_account
+	
+		if not credit_account:
+			frappe.throw("Credit Account is mandatory")
+	
+		bank_account = frappe.db.get_value("Branch",self.branch, "expense_bank_account")
+		if not bank_account:
+			frappe.throw(_("Default bank account is not set in company {}".format(frappe.bold(self.company))))
+		# Posting Journal Entry
+		je = frappe.new_doc("Journal Entry")
+		je.flags.ignore_permissions=1
+		je.update({
+			"doctype": "Journal Entry",
+			"voucher_type": "Bank Entry",
+			"naming_series": "Bank Payment Voucher",
+			"title": "Transporter Payment "+ self.party,
+			"user_remark": "Note: " + "Repair And Service - " + self.party,
+			"posting_date": self.posting_date,
+			"company": self.company,
+			"total_amount_in_words": money_in_words(self.outstanding_amount),
+			"branch": self.branch,
+			"reference_type":self.doctype,
+			"referece_doctype":self.name
+		})
+		je.append("accounts",{
+			"account": credit_account,
+			"debit_in_account_currency": self.outstanding_amount,
+			"cost_center": self.cost_center,
+			"party_check": 1,
+			"party_type": self.party_type,
+			"party": self.party,
+			"reference_type": self.doctype,
+			"reference_name": self.name
+		})
+		je.append("accounts",{
+			"account": bank_account,
+			"credit_in_account_currency": self.outstanding_amount,
+			"cost_center": self.cost_center
+		})
+
+		je.insert()
+		#Set a reference to the claim journal entry
+		self.db_set("journal_entry",je.name)
+		frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
+	
 # permission query
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user

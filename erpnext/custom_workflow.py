@@ -20,15 +20,8 @@ from frappe.utils.nestedset import get_ancestors_of
 class CustomWorkflow:
 	def __init__(self, doc):
 		self.doc = doc
-		if self.doc.doctype == 'Review':
-			self.new_state = self.doc.rev_workflow_state
-			self.old_state = self.doc.get_db_value("rev_workflow_state")
-		elif self.doc.doctype == 'Performance Evaluation':
-			self.new_state = self.doc.eval_workflow_state
-			self.old_state = self.doc.get_db_value("eval_workflow_state")
-		else:
-			self.new_state = self.doc.workflow_state
-			self.old_state = self.doc.get_db_value("workflow_state")
+		self.new_state = self.doc.workflow_state
+		self.old_state = self.doc.get_db_value("workflow_state")
 
 		self.field_map 		= get_field_map()
 		self.doc_approver	= self.field_map[self.doc.doctype]
@@ -98,7 +91,7 @@ class CustomWorkflow:
 			self.reports_to		= frappe.db.get_value("Employee", frappe.db.get_value("Employee", self.doc.employee, "reports_to"), self.field_list)
 			self.supervisors_supervisor = frappe.db.get_value("Employee", frappe.db.get_value("Employee", frappe.db.get_value("Employee", {"user_id": self.doc.approver}, "name"), "reports_to"), self.field_list)
 		
-		if self.doc.doctype == "Asset Movement" and self.doc.doctype == "Budget Reappropiation":
+		if self.doc.doctype == "Asset Movement":
 			department = frappe.db.get_value("Employee",{"user_id":frappe.session.user}, "department")
 			if not department:
 				frappe.throw("Department not set for {}".format(frappe.session.user))
@@ -111,7 +104,7 @@ class CustomWorkflow:
 			else:
 				self.asset_verifier = frappe.db.get_value("Employee", frappe.db.get_value("Employee", {"designation": "Chief Executive Officer", "status": "Active"},"name"), self.field_list)
 		
-		if self.doc.doctype == "POL Expense":
+		if self.doc.doctype in ("POL Expense"):
 			department = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"department")
 			section = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"section")
 			if section in ("Chunaikhola Dolomite Mines - SMCL","Samdrup Jongkhar - SMCL"):
@@ -126,7 +119,28 @@ class CustomWorkflow:
 					{"parent": department, "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
-			
+		if self.doc.doctype in ("Budget Reappropiation"):
+			department = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"department")
+			section = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"section")
+			self.ceo= frappe.db.get_value("Employee", frappe.db.get_value("Employee", {"designation": "Chief Executive Officer", "status": "Active"},"name"), self.field_list)
+			if section in ("Chunaikhola Dolomite Mines - SMCL","Samdrup Jongkhar - SMCL"):
+				self.budget_reappropiation_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
+					"Department Approver",
+					{"parent": section, "parentfield": "expense_approvers", "idx": 1},
+					"approver",
+				)},self.field_list)
+			else:
+				self.budget_reappropiation_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
+					"Department Approver",
+					{"parent": department, "parentfield": "expense_approvers", "idx": 1},
+					"approver",
+				)},self.field_list)
+			if not self.budget_reappropiation_approver:
+				frappe.throw("No employee found for user id(expense approver) {}".format(frappe.db.get_value(
+					"Department Approver",
+					{"parent": department, "parentfield": "expense_approvers", "idx": 1},
+					"approver",
+				)))
 		if self.doc.doctype == "Employee Advance":
 			if self.doc.advance_type != "Imprest Advance":
 				self.hr_approver	= frappe.db.get_value("Employee", frappe.db.get_single_value("HR Settings", "hr_approver"), self.field_list)
@@ -529,7 +543,13 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.project_approver[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.project_approver[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.project_approver[2]
-		
+		elif approver_type == "Budget Reappropiation":
+			officiating = get_officiating_employee(self.budget_reappropiation_approver[3])
+			if officiating:
+				officiating = frappe.db.get_value("Employee", officiating[0].officiate, self.field_list)
+			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.budget_reappropiation_approver[0]
+			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.budget_reappropiation_approver[1]
+			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.budget_reappropiation_approver[2]
 		else:
 			frappe.throw(_("Invalid approver type for Workflow"))
 
@@ -566,6 +586,8 @@ class CustomWorkflow:
 			self.training_approval_request()
 		elif self.doc.doctype == "POL Expense":
 			self.pol_expenses()
+		elif self.doc.doctype == "Budget Reappropiation":
+			self.budget_reappropiation()
 		elif self.doc.doctype == "Ad hoc Training Request":
 			self.adhoc_training_request()
 		elif self.doc.doctype == "SWS Application":
@@ -596,8 +618,6 @@ class CustomWorkflow:
 			self.compile_budget()
 		elif self.doc.doctype == "Asset Movement":
 			self.asset_movement()
-		elif self.doc.doctype == "Budget Reappropiation":
-			self.budget_reappropiation()
 		else:
 			frappe.throw(_("Workflow not defined for {}").format(self.doc.doctype))
 	
@@ -697,7 +717,6 @@ class CustomWorkflow:
 		if self.new_state.lower() in ("Rejected".lower()):
 			if self.doc.approver != frappe.session.user:
 				frappe.throw("Only {} can reject this Document".format(self.doc.approver))
-
 	def target_setup_request(self):
 		if self.new_state.lower() in ("Draft".lower()):
 			if self.doc.set_manual_approver == 1:
@@ -1073,8 +1092,11 @@ class CustomWorkflow:
 		''' Travel Authorization Workflow
 			1. Employee -> Supervisor
 		'''
+		if self.new_state and self.old_state and self.new_state.lower() == self.old_state.lower():
+			return
+
 		if self.new_state.lower() in ("Waiting Approval".lower()):
-			self.doc.check_advance()
+			self.doc.check_advance_and_report()
 			self.doc.check_date()
 			self.set_approver("Supervisor")
 			self.doc.document_status = "Draft"
@@ -1146,16 +1168,30 @@ class CustomWorkflow:
 				frappe.throw("Only {} can Apply this request".format(self.doc.owner))
 				
 	def budget_reappropiation(self):
-		if self.new_state.lower() in ("Draft".lower()):
+		user_roles = frappe.get_roles(frappe.session.user)
+		if self.new_state and self.old_state and self.new_state.lower() == self.old_state.lower():
+			return
+		if self.new_state.lower() in ("Draft".lower(),"Waiting for Verification".lower()):
 			if self.doc.owner != frappe.session.user:
-				frappe.throw("Only the document owner can Apply this request")
-			self.set_approver("Asset Verifier")
+				frappe.throw("Only the document owner can Apply this document")
 
-		if self.new_state.lower() in ("Waiting for Verification".lower()):
-			if self.doc.owner != frappe.session.user:
-				frappe.throw("Only {} can Apply this request".format(self.doc.owner))
-			
+		if self.new_state.lower() in ("Waiting Approval".lower()):
+			if "Budget Manager" not in user_roles:
+				frappe.throw("Only Budget Manager Can verify this document")
+			self.set_approver("Budget Reappropiation")
 
+		if self.new_state.lower() in ("Waiting CEO Approval".lower()):
+			if self.doc.approver != frappe.session.user:
+				frappe.throw("Only {} or CEO can approve this document".format(self.doc.approver))
+			self.set_approver("CEO")
+
+		if self.new_state.lower() in ("Approved".lower()):
+			if self.doc.approver != frappe.session.user or "CEO" not in user_roles:
+				frappe.throw("Only {} or CEO can approve this document".format(self.doc.approver))
+
+		if self.new_state.lower() in ("Rejected".lower()):
+			if "Budget Manager" not in user_roles or "CEO" not in user_roles or self.doc.approver != frappe.session.user:
+				frappe.throw("Only Budget Manager or {} Can reject this document".format(self.doc.approver))
 	def repair_services(self):
 		if self.new_state.lower() in ("Draft".lower()):
 			cost_center = frappe.db.get_value("Employee",{"user_id":self.doc.owner},"cost_center")

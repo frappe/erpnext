@@ -9,22 +9,24 @@
  "field_order": [
   "appropriation_on",
   "budget_against",
+  "budget_type",
   "from_cost_center",
   "from_project",
-  "fiscal_year",
   "column_break_4",
   "company",
   "to_cost_center",
   "to_project",
+  "fiscal_year",
   "remark",
   "section_break_10",
   "items",
-  "amended_from",
+  "total_reappropiation_amount",
   "approver_details_section",
   "approver",
+  "approver_designation",
   "column_break_16",
   "approver_name",
-  "approver_designation"
+  "amended_from"
  ],
  "fields": [
   {
@@ -148,12 +150,25 @@
    "fieldtype": "Data",
    "label": "Approver Designation",
    "read_only": 1
+  },
+  {
+   "fieldname": "budget_type",
+   "fieldtype": "Link",
+   "label": "Budget Type",
+   "options": "Budget Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_reappropiation_amount",
+   "fieldtype": "Currency",
+   "label": "Total Reappropiation Amount",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-22 11:09:54.500900",
+ "modified": "2023-03-03 14:48:51.718251",
  "modified_by": "Administrator",
  "module": "Budget",
  "name": "Budget Reappropiation",

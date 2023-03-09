@@ -38,6 +38,8 @@
   "remarks",
   "section_break_54",
   "currency",
+  "journal_entry",
+  "column_break_33",
   "company",
   "amended_from"
  ],
@@ -255,12 +257,22 @@
    "label": "Equipment Category",
    "options": "Equipment Category",
    "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Data",
+   "label": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-04 15:57:40.446235",
+ "modified": "2023-03-08 20:23:12.508090",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Service Invoice",

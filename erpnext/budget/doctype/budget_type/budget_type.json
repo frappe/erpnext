@@ -26,7 +26,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-09 15:41:47.066335",
+ "modified": "2023-03-06 13:49:05.176612",
  "modified_by": "Administrator",
  "module": "Budget",
  "name": "Budget Type",
@@ -55,6 +55,15 @@
    "role": "Budget Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "quick_entry": 1,

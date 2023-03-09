@@ -297,7 +297,7 @@ class TransporterInvoice(AccountsController):
 			r.append(_("Note: {0}").format(self.remarks))
 
 		remarks = ("").join(r) #User Remarks is not mandatory
-		bank_account = frappe.db.get_value("Company",self.company, "default_bank_account")
+		bank_account = frappe.db.get_value("Branch",self.branch, "expense_bank_account")
 		if not bank_account:
 			frappe.throw(_("Default bank account is not set in company {}".format(frappe.bold(self.company))))
 		# Posting Journal Entry
