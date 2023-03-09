@@ -937,12 +937,7 @@ def get_remaining_leaves(
 
 	if cf_expiry and allocation.unused_leaves:
 		# allocation contains both carry forwarded and new leaves
-		cf_leaves_taken = get_leaves_for_period(
-			allocation.employee, allocation.leave_type, allocation.from_date, cf_expiry
-		)
-		new_leaves_taken = get_leaves_for_period(
-			allocation.employee, allocation.leave_type, add_days(cf_expiry, 1), allocation.to_date
-		)
+		new_leaves_taken, cf_leaves_taken = get_new_and_cf_leaves_taken(allocation, cf_expiry)
 
 		if getdate(date) > getdate(cf_expiry):
 			# carry forwarded leaves have expired
@@ -965,6 +960,24 @@ def get_remaining_leaves(
 
 	remaining_leaves = _get_remaining_leaves(leave_balance_for_consumption, allocation.to_date)
 	return frappe._dict(leave_balance=leave_balance, leave_balance_for_consumption=remaining_leaves)
+
+
+def get_new_and_cf_leaves_taken(allocation: Dict, cf_expiry: str) -> Tuple[float, float]:
+	"""returns new leaves taken and carry forwarded leaves taken within an allocation period based on cf leave expiry"""
+	cf_leaves_taken = get_leaves_for_period(
+		allocation.employee, allocation.leave_type, allocation.from_date, cf_expiry
+	)
+	new_leaves_taken = get_leaves_for_period(
+		allocation.employee, allocation.leave_type, add_days(cf_expiry, 1), allocation.to_date
+	)
+
+	# using abs because leaves taken is a -ve number in the ledger
+	if abs(cf_leaves_taken) > allocation.unused_leaves:
+		# adjust the excess leaves in new_leaves_taken
+		new_leaves_taken += -(abs(cf_leaves_taken) - allocation.unused_leaves)
+		cf_leaves_taken = -allocation.unused_leaves
+
+	return new_leaves_taken, cf_leaves_taken
 
 
 def get_leaves_for_period(
