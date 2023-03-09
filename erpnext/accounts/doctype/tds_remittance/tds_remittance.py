@@ -135,7 +135,7 @@ def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_
 				t.business_activity, t.cost_center,
 				t1.base_total+t1.base_tax_amount as bill_amount, 
 				(case when t1.base_tax_amount > 0 then t1.base_tax_amount else t1.tax_amount end) tds_amount,
-				t1.account_head as tax_account, tre.tds_remittance, tre.tds_receipt_update,
+				t1.account_head as tax_account, tre.tds_remittance, tre.tds_receipt_update,t.bill_no, t.bill_date,
 				(case when tre.tds_receipt_update is not null then 'Paid' else 'Unpaid' end) remittance_status
 			from `tabPurchase Invoice` t 
 				inner join `tabPurchase Taxes and Charges` t1 on t.name = t1.parent
@@ -197,7 +197,7 @@ def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_
 			else 0 end) as tds_amount,
 		(case when t1.tax_amount > 0 and t1.debit > 0 and ifnull(t1.apply_tds) = 1 
 				then t1.tax_account
-			else t1.account end) as tax_account, tre.tds_remittance, tre.tds_receipt_update,
+			else t1.account end) as tax_account, tre.tds_remittance, tre.tds_receipt_update, t.bill_no, t.bill_date,
 		(case when tre.tds_receipt_update is not null then 'Paid' else 'Unpaid' end) remittance_status
 		from `tabJournal Entry` as t
 			inner join `tabJournal Entry Account` t1 on t.name = t1.parent
@@ -235,7 +235,7 @@ def get_tds_invoices(tax_withholding_category, from_date, to_date, name, filter_
 	eme_entries = frappe.db.sql("""select t.posting_date, t.name as invoice_no, 'EME Invoice' as invoice_type,
 				'Supplier' as party_type, t.supplier as party, 
 				(select supplier_tpn_no from `tabSupplier` where name = t.supplier) as tpn, 
-				t.cost_center,
+				t.cost_center, t.bill_no, t.bill_date,
 				t.grand_total as bill_amount, 
 				t.tds_amount,
 				t.tds_account as tax_account, tre.tds_remittance, tre.tds_receipt_update,

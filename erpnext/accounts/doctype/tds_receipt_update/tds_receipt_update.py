@@ -162,32 +162,16 @@ class TDSReceiptUpdate(Document):
 						WHERE b.invoice_no = t.name)
 						""".format(self.from_date, self.to_date)
 				entries = frappe.db.sql(query,as_dict=1)
-			elif self.purpose == 'Overtime':
-				pass
-				'''
-				query = """select 
-							"Overtime Application" as invoice_type, 
-								name as invoice_no, 
-								posting_date as posting_date, 
-								total_amount as bill_amount, 
-								overtime_tax as tds_amount, 
-								employee as party, 
-								'Employee' as party_type
-							FROM `tabOvertime Application` AS t 
-								WHERE t.docstatus = 1 
-							 	AND t.posting_date BETWEEN '{0}' AND '{1}' 
-								AND t.overtime_tax > 0 {2}
-								AND NOT EXISTS (SELECT 1 FROM `tabRRCO Receipt Entries` AS b 
-								WHERE b.purchase_invoice = t.name)
-								""".format(self.from_date, self.to_date, cond)
-				'''
 			else:
+				if not self.branch:
+					frappe.throw("Branch is required")
 				entries = frappe.db.sql("""SELECT posting_date, party_type, party, invoice_type, invoice_no, bill_amount, 
 						tax_account, tds_amount, party_name, tpn, cost_center, business_activity, parent as tds_remittance
 					FROM `tabTDS Remittance Item` t1
 					WHERE t1.posting_date BETWEEN '{from_date}' AND '{to_date}'
 					AND t1.docstatus = 1
 					{accounts_cond}
+					AND t1.cost_center = '{cost_center}'
 					AND t1.parenttype = 'TDS Remittance'
 					AND NOT EXISTS(SELECT 1
 						FROM `tabTDS Receipt Entry` t2
@@ -198,7 +182,7 @@ class TDSReceiptUpdate(Document):
 						AND t3.parenttype = 'TDS Receipt Update'
 						AND t3.parent != "{name}"
 						AND t3.docstatus != 2)
-				""".format(name = self.name, accounts_cond = accounts_cond, \
+				""".format(name = self.name, accounts_cond = accounts_cond, cost_center= self.cost_center,\
 					from_date = self.from_date, to_date = self.to_date),as_dict=True)
 
 			if not len(entries):

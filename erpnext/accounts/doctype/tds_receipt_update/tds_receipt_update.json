@@ -43,7 +43,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Purpose",
-   "options": "\nOther Invoice\nEmployee Salary\nLeave Encashment\nPBVA\nBonus\nOvertime",
+   "options": "\nOther Invoice\nEmployee Salary\nLeave Encashment\nPBVA\nBonus",
    "reqd": 1
   },
   {
@@ -218,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-08 19:38:50.135042",
+ "modified": "2023-03-09 14:15:19.568267",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "TDS Receipt Update",

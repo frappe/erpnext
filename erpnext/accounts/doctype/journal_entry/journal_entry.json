@@ -352,7 +352,8 @@
    "fieldtype": "Date",
    "label": "Due Date",
    "oldfieldname": "due_date",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -614,7 +615,7 @@
    "link_fieldname": "journal_entry"
   }
  ],
- "modified": "2023-03-02 16:55:56.443128",
+ "modified": "2023-03-09 15:25:01.428448",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

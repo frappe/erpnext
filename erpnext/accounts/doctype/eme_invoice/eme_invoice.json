@@ -9,9 +9,11 @@
  "field_order": [
   "branch",
   "cost_center",
+  "bill_no",
   "column_break_2",
   "posting_date",
   "supplier",
+  "bill_date",
   "section_break_10",
   "from_date",
   "to_date",
@@ -279,11 +281,23 @@
    "fieldtype": "Float",
    "label": "Total Hours",
    "read_only": 1
+  },
+  {
+   "fieldname": "bill_no",
+   "fieldtype": "Data",
+   "label": "Bill No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bill_date",
+   "fieldtype": "Date",
+   "label": "Bill Date",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-18 11:56:14.169229",
+ "modified": "2023-03-09 14:46:28.362688",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice",
