@@ -25,6 +25,8 @@ def execute(filters=None):
 		company=filters.company,
 	)
 
+	filters.period_start_date = period_list[0]["year_start_date"]
+
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
