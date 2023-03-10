@@ -7,6 +7,7 @@
  "field_order": [
   "party",
   "policy_number",
+  "journal_entry",
   "post_bank_entry",
   "cb_1",
   "insured_date",
@@ -15,8 +16,7 @@
   "cb_2",
   "insurance_type",
   "type",
-  "total_amount",
-  "journal_entry"
+  "total_amount"
  ],
  "fields": [
   {
@@ -24,6 +24,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Policy Number",
+   "read_only_depends_on": "eval:doc.journal_entry",
    "reqd": 1
   },
   {
@@ -35,6 +36,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Insured Date",
+   "read_only_depends_on": "eval:doc.journal_entry",
    "reqd": 1
   },
   {
@@ -76,6 +78,7 @@
    "in_list_view": 1,
    "label": "Party(Insurance Company)",
    "options": "Supplier",
+   "read_only_depends_on": "eval:doc.journal_entry",
    "reqd": 1
   },
   {
@@ -95,13 +98,14 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Total Amount",
+   "read_only_depends_on": "eval:doc.journal_entry",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-01 16:07:55.290277",
+ "modified": "2023-03-09 17:09:12.358968",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Insurance Details",

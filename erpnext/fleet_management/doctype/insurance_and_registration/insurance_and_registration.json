@@ -112,6 +112,7 @@
   {
    "fieldname": "insurance_item",
    "fieldtype": "Table",
+   "ignore_user_permissions": 1,
    "options": "Insurance Details"
   },
   {
@@ -181,7 +182,7 @@
   {
    "fieldname": "items",
    "fieldtype": "Table",
-   "options": "Bluebook Fitness and Emission Details"
+   "options": "Bluebook and Emission"
   },
   {
    "fieldname": "company",
@@ -192,7 +193,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-28 23:22:53.967914",
+ "modified": "2023-03-09 16:34:41.141992",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Insurance and Registration",

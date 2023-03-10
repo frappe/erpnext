@@ -16,25 +16,22 @@ class InsuranceandRegistration(Document):
 		unsafed_record = [d.name for d in self.insurance_item]
 		if flt(len(unsafed_record)) <= 0:
 			unsafed_record = ["Dummy"]
-		for d in frappe.db.get_list('Insurance Details', filters={'parent': self.name },
-							fields=['name', 'journal_entry','idx'],
-						):
+		for d in frappe.db.sql("select name, journal_entry, idx from `tabInsurance Details` where parent = '{}'".format(self.name),as_dict=True):
 			if d.name not in unsafed_record and d.journal_entry:
 				je = frappe.get_doc("Journal Entry",d.journal_entry)
 				if je.docstatus != 2:
 					frappe.throw("You cannot delete row {} from Insurance Detail as \
 						accounting entry is booked".format(frappe.bold(d.idx)))
-		# unsafed_record = [d.name for d in self.items]
-		# if flt(len(unsafed_record)) <= 0:
-		# 	unsafed_record = ["Dummy"]
-		# for d in frappe.db.get_list('Bluebook Fitness and Emission Details', filters={'parent': self.name },
-		# 					fields=['name', 'journal_entry','idx'],
-		# 				):
-		# 	if d.name not in unsafed_record and d.journal_entry:
-		# 		je = frappe.get_doc("Journal Entry",d.journal_entry)
-		# 		if je.docstatus != 2:
-		# 			frappe.throw("You cannot delete row {} from Bluebook Fitness \
-		# 					and Emission Details as accounting entry is booked".format(frappe.bold(d.idx)))
+
+		unsafed_record = [d.name for d in self.items]
+		if flt(len(unsafed_record)) <= 0:
+			unsafed_record = ["Dummy"]
+		for d in frappe.db.sql("select name, journal_entry, idx from `tabBluebook and Emission` where parent = '{}'".format(self.name),as_dict=True):
+			if d.name not in unsafed_record and d.journal_entry:
+				je = frappe.get_doc("Journal Entry",d.journal_entry)
+				if je.docstatus != 2:
+					frappe.throw("You cannot delete row {} from Bluebook Fitness \
+							and Emission Details as accounting entry is booked".format(frappe.bold(d.idx)))
 		
 	@frappe.whitelist()
 	def create_je(self, args):
@@ -57,10 +54,10 @@ class InsuranceandRegistration(Document):
 		else:
 			posting_date = args.get("receipt_date")
 			debit_account 	= frappe.db.get_value("Company", self.company,'repair_and_service_expense_account')
-		if not debit_account:
-			frappe.throw("Setup Fleet Expense Account in company")
+			if not debit_account:
+				frappe.throw("Setup Fleet Expense Account in Company".format())
 		if not default_bank_account:
-			frappe.throw("Setup Default Bank Account in company")
+			frappe.throw("Setup Default Bank Account in Branch {}".format(self.branch))
 		posting_date
 		je.update({
 			"doctype": "Journal Entry",

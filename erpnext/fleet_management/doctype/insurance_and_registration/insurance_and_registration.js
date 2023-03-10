@@ -66,7 +66,7 @@ frappe.ui.form.on("Insurance Details", {
 		}
 	}
 });
-frappe.ui.form.on("Bluebook Fitness and Emission Details", {	
+frappe.ui.form.on("Bluebook and Emission", {	
 	"amount": function(frm, cdt, cdn) {
 		set_total_amount(frm, cdt, cdn);
 	},
@@ -101,7 +101,6 @@ frappe.ui.form.on("Bluebook Fitness and Emission Details", {
 					}
 				},
 				callback: function(r){
-					console.log(r.message.docstatus)
 					if (flt(r.message.docstatus) != 2) frappe.throw("You cannot delete row " + row.idx +" of "+ row.doctype+ " as there exist accounting entry")
 				}})
 		}
