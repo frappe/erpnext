@@ -99,7 +99,7 @@ class LeaveAllocation(Document):
 			# run required validations again since total leaves are being updated
 			self.validate_leave_days_and_dates()
 
-			leaves_to_be_added = (
+			leaves_to_be_added = flt(
 				frappe.db.get_value("Leave Allocation", self.name, "new_leaves_allocated")
 				- self.get_existing_leave_count()
 			)
@@ -123,14 +123,12 @@ class LeaveAllocation(Document):
 				"company": self.company,
 				"leave_type": self.leave_type,
 				"is_carry_forward": 0,
+				"docstatus": 1,
 			},
-			pluck="leaves",
+			fields=["SUM(leaves) as total_leaves"],
 		)
-		total_existing_leaves = 0
-		for entry in ledger_entries:
-			total_existing_leaves += entry
 
-		return total_existing_leaves
+		return ledger_entries[0].total_leaves if ledger_entries else 0
 
 	def validate_against_leave_applications(self):
 		leaves_taken = get_approved_leaves_for_period(
