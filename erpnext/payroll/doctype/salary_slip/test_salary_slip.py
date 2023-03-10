@@ -267,7 +267,6 @@ class TestSalarySlip(FrappeTestCase):
 		make_leave_application(emp_id, first_sunday, add_days(first_sunday, 3), "Leave Without Pay")
 
 		leave_type_ppl = create_leave_type(leave_type_name="Test Partially Paid Leave", is_ppl=1)
-		leave_type_ppl.save()
 
 		alloc = create_leave_allocation(
 			employee=emp_id,

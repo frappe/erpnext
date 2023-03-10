@@ -702,7 +702,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		).insert()
+		)
 
 		create_carry_forwarded_allocation(employee, leave_type)
 		details = get_leave_balance_on(
@@ -774,7 +774,6 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 
 		leave_type = create_leave_type(leave_type_name="Test Leave Type 1")
-		leave_type.save()
 
 		leave_allocation = create_leave_allocation(
 			employee=employee.name, employee_name=employee.employee_name, leave_type=leave_type.name
@@ -817,7 +816,6 @@ class TestLeaveApplication(unittest.TestCase):
 			expire_carry_forwarded_leaves_after_days=90,
 			include_holiday=True,
 		)
-		leave_type.submit()
 
 		create_carry_forwarded_allocation(employee, leave_type)
 
@@ -856,7 +854,6 @@ class TestLeaveApplication(unittest.TestCase):
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
 		)
-		leave_type.submit()
 
 		create_carry_forwarded_allocation(employee, leave_type)
 
@@ -1005,7 +1002,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		).insert()
+		)
 
 		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
 		cf_expiry = frappe.db.get_value(
@@ -1038,7 +1035,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		).insert()
+		)
 
 		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
 		cf_expiry = frappe.db.get_value(
@@ -1072,7 +1069,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		).insert()
+		)
 
 		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
 		cf_expiry = frappe.db.get_value(
@@ -1114,7 +1111,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		).insert()
+		)
 
 		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
 		cf_expiry = frappe.db.get_value(
@@ -1148,7 +1145,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
-		).insert()
+		)
 
 		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
 		cf_expiry = frappe.db.get_value(
