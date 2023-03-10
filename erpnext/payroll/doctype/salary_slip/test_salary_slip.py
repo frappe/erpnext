@@ -1587,7 +1587,6 @@ def setup_test():
 	frappe.db.set_value("HR Settings", None, "leave_approval_notification_template", None)
 
 
-
 def make_holiday_list(list_name=None, from_date=None, to_date=None, add_weekly_offs=True):
 	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
 	name = list_name or "Salary Slip Test Holiday List"
