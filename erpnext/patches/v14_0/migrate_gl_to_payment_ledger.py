@@ -61,6 +61,9 @@ def get_columns():
 		"finance_book",
 	]
 
+	if frappe.db.has_column("Payment Ledger Entry", "remarks"):
+		columns.append("remarks")
+
 	dimensions_and_defaults = get_dimensions()
 	if dimensions_and_defaults:
 		for dimension in dimensions_and_defaults[0]:
