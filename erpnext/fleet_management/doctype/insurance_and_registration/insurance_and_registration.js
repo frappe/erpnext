@@ -41,30 +41,12 @@ frappe.ui.form.on("Insurance Details", {
 			callback:function(r){
 				if (r.message){
 					frappe.model.set_value(cdt, cdn, "journal_entry", r.message);
-					frm.refresh_field("items")
+					frm.refresh_field("insurance_item")
 					frm.dirty()
 				}
 			}
 		})
 	},
-	before_insurance_item_remove:function(frm, cdt, cdn){
-		let row = locals[cdt][cdn]
-		if (row.journal_entry){
-			frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					doctype: "Journal Entry",
-					fieldname: ["docstatus"],
-					filters: {
-						"name": row.journal_entry
-					}
-				},
-				callback: function(r){
-					console.log(r.message.docstatus)
-					if (flt(r.message.docstatus) != 2) frappe.throw("You cannot delete row " + row.idx +" of "+ row.doctype+" as there exist accounting entry")
-				}})
-		}
-	}
 });
 frappe.ui.form.on("Bluebook and Emission", {	
 	"amount": function(frm, cdt, cdn) {
@@ -88,23 +70,23 @@ frappe.ui.form.on("Bluebook and Emission", {
 			}
 		})
 	},
-	before_items_remove:function(frm, cdt, cdn){
-		let row = locals[cdt][cdn]
-		if (row.journal_entry){
-			frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					doctype: "Journal Entry",
-					fieldname: ["docstatus"],
-					filters: {
-						"name": row.journal_entry
-					}
-				},
-				callback: function(r){
-					if (flt(r.message.docstatus) != 2) frappe.throw("You cannot delete row " + row.idx +" of "+ row.doctype+ " as there exist accounting entry")
-				}})
-		}
-	}
+	// before_items_remove:function(frm, cdt, cdn){
+	// 	let row = locals[cdt][cdn]
+	// 	if (row.journal_entry){
+	// 		frappe.call({
+	// 			method: "frappe.client.get_value",
+	// 			args: {
+	// 				doctype: "Journal Entry",
+	// 				fieldname: ["docstatus"],
+	// 				filters: {
+	// 					"name": row.journal_entry
+	// 				}
+	// 			},
+	// 			callback: function(r){
+	// 				if (flt(r.message.docstatus) != 2) frappe.throw("You cannot delete row " + row.idx +" of "+ row.doctype+ " as there exist accounting entry")
+	// 			}})
+	// 	}
+	// }
 }); 
 var set_total_amount = function(frm, cdt, cdn){
 	var item = locals[cdt][cdn];

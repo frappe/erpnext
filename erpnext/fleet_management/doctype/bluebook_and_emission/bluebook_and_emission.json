@@ -17,9 +17,7 @@
   "total_amount",
   "column_break_7",
   "post_bank_entry",
-  "column_break_13",
   "journal_entry",
-  "section_break_15",
   "remarks"
  ],
  "fields": [
@@ -87,7 +85,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval: !doc.journal_entry",
+   "depends_on": "eval: !doc.journal_entry && doc.__islocal",
    "fieldname": "post_bank_entry",
    "fieldtype": "Button",
    "label": "Post Bank Entry"
@@ -116,20 +114,12 @@
    "options": "Supplier",
    "read_only_depends_on": "eval:doc.journal_entry",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_15",
-   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-09 17:11:49.626897",
+ "modified": "2023-03-10 10:11:40.304492",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Bluebook and Emission",
