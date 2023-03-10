@@ -181,7 +181,6 @@ def get_gl_entries(filters, accounting_dimensions):
 	dimension_fields = ""
 	if accounting_dimensions:
 		dimension_fields = ", ".join(accounting_dimensions) + ","
-
 	gl_entries = frappe.db.sql(
 		"""
 		select
@@ -190,7 +189,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening, creation {select_fields}
-		from `tabGL Entry`
+		from `tabGL Entry` gl
 		where company=%(company)s {conditions}
 		{order_by_statement}
 	""".format(
@@ -228,6 +227,7 @@ def get_conditions(filters):
 
 	if filters.get("party_type"):
 		conditions.append("party_type=%(party_type)s")
+		conditions.append(" EXISTS(SELECT 1 FROM `tabAccount` where name = gl.account and account_type in ('Payable','Receivable'))")
 
 	if filters.get("party"):
 		conditions.append("party in %(party)s")
@@ -331,7 +331,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	data.append(totals.total)
 
 	# closing
-	# added by Dendup Show Closing
+	# added by Dendup  to Show Closing
 	balance = 0
 	if totals.closing['debit'] > totals.closing['credit']:
 		balance = totals.closing['debit'] - totals.closing['credit']
