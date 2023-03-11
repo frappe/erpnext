@@ -457,6 +457,139 @@ class TestQuotation(FrappeTestCase):
 			expected_index = id + 1
 			self.assertEqual(item.idx, expected_index)
 
+	def test_alternative_items_with_stock_items(self):
+		"""
+		Check if taxes & totals considers only non-alternative items with:
+		- One set of non-alternative & alternative items [first 3 rows]
+		- One simple stock item
+		"""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_list = []
+		stock_items = {
+			"_Test Simple Item 1": 100,
+			"_Test Alt 1": 120,
+			"_Test Alt 2": 110,
+			"_Test Simple Item 2": 200,
+		}
+
+		for item, rate in stock_items.items():
+			make_item(item, {"is_stock_item": 1})
+			item_list.append(
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": rate,
+					"is_alternative": bool("Alt" in item),
+				}
+			)
+
+		quotation = make_quotation(item_list=item_list, do_not_submit=1)
+		quotation.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 10,
+			},
+		)
+		quotation.submit()
+
+		self.assertEqual(quotation.net_total, 300)
+		self.assertEqual(quotation.grand_total, 330)
+
+	def test_alternative_items_with_service_items(self):
+		"""
+		Check if taxes & totals considers only non-alternative items with:
+		- One set of non-alternative & alternative service items [first 3 rows]
+		- One simple non-alternative service item
+		All having the same item code and unique item name/description due to
+		dynamic services
+		"""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_list = []
+		service_items = {
+			"Tiling with Standard Tiles": 100,
+			"Alt Tiling with Durable Tiles": 150,
+			"Alt Tiling with Premium Tiles": 180,
+			"False Ceiling with Material #234": 190,
+		}
+
+		make_item("_Test Dynamic Service Item", {"is_stock_item": 0})
+
+		for name, rate in service_items.items():
+			item_list.append(
+				{
+					"item_code": "_Test Dynamic Service Item",
+					"item_name": name,
+					"description": name,
+					"qty": 1,
+					"rate": rate,
+					"is_alternative": bool("Alt" in name),
+				}
+			)
+
+		quotation = make_quotation(item_list=item_list, do_not_submit=1)
+		quotation.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 10,
+			},
+		)
+		quotation.submit()
+
+		self.assertEqual(quotation.net_total, 290)
+		self.assertEqual(quotation.grand_total, 319)
+
+	def test_alternative_items_sales_order_mapping_with_stock_items(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.flags.args = frappe._dict()
+		item_list = []
+		stock_items = {
+			"_Test Simple Item 1": 100,
+			"_Test Alt 1": 120,
+			"_Test Alt 2": 110,
+			"_Test Simple Item 2": 200,
+		}
+
+		for item, rate in stock_items.items():
+			make_item(item, {"is_stock_item": 1})
+			item_list.append(
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": rate,
+					"is_alternative": bool("Alt" in item),
+					"warehouse": "_Test Warehouse - _TC",
+				}
+			)
+
+		quotation = make_quotation(item_list=item_list)
+
+		frappe.flags.args.selected_items = [quotation.items[2]]
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = add_days(sales_order.transaction_date, 10)
+		sales_order.save()
+
+		self.assertEqual(sales_order.items[0].item_code, "_Test Alt 2")
+		self.assertEqual(sales_order.items[1].item_code, "_Test Simple Item 2")
+		self.assertEqual(sales_order.net_total, 310)
+
+		sales_order.submit()
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+
 
 test_records = frappe.get_test_records("Quotation")
 
