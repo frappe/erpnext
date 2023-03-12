@@ -47,6 +47,7 @@ def get_data(filters):
 			task.delay = 0
 		
 		task.status = _(task.status)
+		
 		task.priority = _(task.priority)	
 
 	# Sort by descending order of delay
