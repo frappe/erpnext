@@ -19,7 +19,28 @@ from erpnext.accounts.utils import get_balance_on
 
 
 class BankReconciliationTool(Document):
-	pass
+	def __init__(self, *args, **kwargs):
+		super(BankReconciliationTool, self).__init__(*args, **kwargs)
+		self.fields_to_cache = [
+			"company",
+			"bank_account",
+			"bank_statement_from_date",
+			"bank_statement_to_date",
+			"from_reference_date",
+			"to_reference_date",
+			"filter_by_reference_date",
+		]
+
+	def onload(self):
+		if frappe.cache().hexists("Bank Reconciliation Tool", frappe.session.sid):
+			filters = frappe.cache().hget("Bank Reconciliation Tool", frappe.session.sid)
+			self.update(filters)
+
+	def before_save(self):
+		filters = frappe._dict()
+		for field in self.fields_to_cache:
+			filters[field] = self.get(field)
+		frappe.cache().hset("Bank Reconciliation Tool", frappe.session.sid, filters)
 
 
 @frappe.whitelist()
