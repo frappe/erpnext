@@ -119,10 +119,8 @@ def get_data(filters):
 
 	calculate_values(accounts, gl_entries_by_account, opening_balances)
 	accumulate_values_into_parents(accounts, accounts_by_name)
-	total_row = calculate_total_row(accounts, company_currency)
 
-	print(total_row)
-	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
+	data = prepare_data(accounts, filters, parent_children_map, company_currency)
 	data = filter_out_zero_value_rows(
 		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
 	)
@@ -277,7 +275,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 				accounts_by_name[d.parent_account][key] += d[key]
 
 
-def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
+def prepare_data(accounts, filters, parent_children_map, company_currency):
 	data = []
 
 	for d in accounts:
@@ -308,6 +306,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 		row["has_value"] = has_value
 		data.append(row)
 
+	total_row = calculate_total_row(accounts, company_currency)
 	data.extend([{}, total_row])
 
 	return data
