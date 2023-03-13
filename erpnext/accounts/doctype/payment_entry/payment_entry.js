@@ -217,7 +217,6 @@ frappe.ui.form.on('Payment Entry', {
 		frm.toggle_display("set_exchange_gain_loss",
 			frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount);
 
-		frm.refresh_fields();
 	},
 
 	set_dynamic_labels: function(frm) {
