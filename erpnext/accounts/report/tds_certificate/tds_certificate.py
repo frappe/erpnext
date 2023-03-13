@@ -5,9 +5,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-# changes made by dorji 05/07/22 for issue #1911
-# added line 91, added cases from line 93-103, added line 112, added cases from line 114-123, added line 136
-
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
@@ -62,12 +59,6 @@ def get_condition(filters):
 def get_columns():
 	return [
 		{
-			"fieldname":"party",
-			"label":_("Party"),
-			"fieldtype":"Data",
-			"width":120
-		},
-		{
 			"fieldname":"posting_date",
 			"label":_("Invoice Date"),
 			"fieldtype":"Date",
@@ -82,7 +73,7 @@ def get_columns():
 		{
 			"fieldname":"tds_rate",
 			"label":_("TDS Rate(%)"),
-			"fieldtype":"Data",
+			"fieldtype":"Percent",
 			"width":130
 		},
 		{

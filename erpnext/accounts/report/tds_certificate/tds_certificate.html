@@ -1,0 +1,68 @@
+    {%
+        if (report.columns.length > 10) {
+            frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
+            }
+    %}
+    
+    <!-- <h2 class="text-center">Bank of Bhutan Ltd.</h2> -->
+    <h4 class="text-center">TDS Certificate</h4>
+    {% if (filters.from_date) { %}
+    <h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} to {%= dateutil.str_to_user(filters.to_date) %}
+    </h4>
+    {% } %}
+    <div style="float: right;">
+        <strong>Date: </strong>{%= dateutil.str_to_user(dateutil.get_datetime_as_string().split(' ')[0]) %}
+    </div>
+    <table style="width: 100%;">
+        <tr>
+            {% if (filters.party_type == 'Customer') %}
+            <td>Customer Name: <strong>{%= filters.customer %}</strong></td>
+            <td>Customer TPN: <strong>{%= filters.vendor_tpn_no %}</strong></td>
+            {% endif %}
+            {%if (filters.party_type == 'Supplier') %}
+            <td>Supplier Name: <strong>{%= filters.supplier %}</strong></td>
+            <td>Supplier TPN: <strong>{%= filters.vendor_tpn_no %}</strong></td>
+            {% endif %}
+    
+        </tr>
+    </table>
+    <hr>
+    <table class="table table-bordered" style="font-size: 12px;">
+        <thead>
+            <tr>
+                <th>Invoice Date</th>
+                <th>Bill Amount</th>
+                <th>TDS Rate</th>
+                <th>TDS Amount</th>
+                <th>Cheque Number</th>
+                <th>Cheque Date</th>
+                <th>Receipt Number</th>
+                <th>Receipt Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% console.log(data)%}
+            {% for d in data %}
+            <tr>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.posting_date,{fieldtype: "Date"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.bill_amount,{fieldtype:"Currency"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.tds_rate,{fieldtype:"Percent"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.tds_amount,{fieldtype:"Currency"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.cheque_no,{fieldtype:"Data"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.cheque_date,{fieldtype:"Date"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.tds_receipt_number,{fieldtype:"Data"})}}</td>
+                <td style = "text-align: center; align-content: center;">{{frappe.format(d.tds_receipt_date,{fieldtype:"Date"})}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div>
+        I hereby certify that the information given in this certificate is true and correct to the best of my knowledge. In
+        case any information is found untrue and false, I shall be liable for fines and penalities as per chapter 5, General
+        Provisions of the Income Tax Act of the Kindom of Bhutan,2001
+    </div>
+    <br/><br/>
+    <div style="margin-top: 20px; float: left;">
+        <!-- <img src = "{{filters.seal}}" height = "130" width = "180"></img><br> -->
+        Name and Signature of Disbursing Officer
+    </div>
