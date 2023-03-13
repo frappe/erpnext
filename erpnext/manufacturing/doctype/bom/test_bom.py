@@ -71,6 +71,7 @@ class TestBOM(FrappeTestCase):
 
 		self.assertTrue(_get_default_bom_in_item(), bom.name)
 
+	@timeout(seconds=30)
 	def test_update_bom_cost_in_all_boms(self):
 		# get current rate for '_Test Item 2'
 		bom_rates = frappe.db.get_values(
