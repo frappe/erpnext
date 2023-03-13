@@ -7,7 +7,6 @@ on:
       - '**.css'
       - '**.md'
       - '**.html'
-      - '**.csv'
   push:
     branches: [ develop ]
     paths-ignore:
