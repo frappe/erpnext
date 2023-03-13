@@ -12,15 +12,18 @@ frappe.query_reports["TDS Certificate"] = {
 			"reqd": 1,
 			"on_change":function(query_report){
 				var party_type = query_report.get_filter_value('party_type')
-				if (party_type == 'Customer'){
-					query_report.get_filter('customer').toggle(party_type == 'Customer' ? 1:0)
-					query_report.get_filter('supplier').toggle(party_type == 'Customer' ? 0:1)
+				if (party_type){
+					query_report.get_filter('customer').toggle(party_type == 'Customer')
+					query_report.get_filter('supplier').toggle(party_type == 'Supplier')
+					query_report.get_filter('vendor_tpn_no').toggle(false)
 				}
-				if (party_type == 'Supplier'){
-					query_report.get_filter('supplier').toggle(party_type == 'Supplier' ? 1:0)
-					query_report.get_filter('customer').toggle(party_type == 'Supplier' ? 0:1)
+				else{
+					query_report.get_filter('supplier').toggle(false)
+					query_report.get_filter('customer').toggle(false)
+					query_report.get_filter('vendor_tpn_no').toggle(false)
 				}
-			}
+			},
+			"default":"Supplier",
 		},
 		{
 			"fieldname": "customer",
@@ -45,31 +48,24 @@ frappe.query_reports["TDS Certificate"] = {
 			"label": __("Supplier Name"),
 			"fieldtype": "Link",
 			"options": "Supplier",
-			"hidden": 1,
 			"on_change": function(query_report) {
 				var supplier = query_report.get_filter_value('supplier');
 				if (!supplier) {
 					return;
 				}
 				frappe.model.with_doc("Supplier", supplier, function(r) {
-					var supplier = frappe.model.get_doc("Supplier", supplier);
-					query_report.set_filter_value("vendor_tpn_no", supplier.vendor_tpn_no);
+					var vendor = frappe.model.get_doc("Supplier", supplier);
+					console.log(vendor)
+					query_report.set_filter_value("vendor_tpn_no", vendor.supplier_tpn_no);
 					query_report.refresh("vendor_tpn_no");
 				});
 			}
 		},
 		{
 			"fieldname": "vendor_tpn_no",
-			"label": __("Vendor TPN Number"),
+			"label": __("TPN Number"),
 			"fieldtype": "Data",
 			"read_only": 1
-		},
-		{
-			"fieldname": "currency",
-			"label" : __("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"reqd": 1,
 		},
 		{
 			"fieldname": "fiscal_year",
