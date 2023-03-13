@@ -266,16 +266,16 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Education Cess - _TC": [3, 1618, 0.06, 32.36],
 			"_Test Account S&H Education Cess - _TC": [1.5, 1619.5, 0.03, 32.39],
 			"_Test Account CST - _TC": [32.5, 1652, 0.65, 33.04],
-			"_Test Account VAT - _TC": [156.5, 1808.5, 3.13, 36.17],
-			"_Test Account Discount - _TC": [-181.0, 1627.5, -3.62, 32.55],
+			"_Test Account VAT - _TC": [156.0, 1808.0, 3.12, 36.16],
+			"_Test Account Discount - _TC": [-181.0, 1627.0, -3.62, 32.54],
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEqual(si.base_grand_total, 1627.5)
-		self.assertEqual(si.grand_total, 32.55)
+		self.assertEqual(si.base_grand_total, 1627.0)
+		self.assertEqual(si.grand_total, 32.54)
 
 	def test_sales_invoice_with_discount_and_inclusive_tax(self):
 		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
@@ -401,10 +401,10 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account S&H Education Cess - _TC": [1.4, 1.30, 1297.67],
 			"_Test Account CST - _TC": [27.88, 25.95, 1323.62],
 			"_Test Account VAT - _TC": [156.25, 145.43, 1469.05],
-			"_Test Account Customs Duty - _TC": [125, 116.35, 1585.40],
-			"_Test Account Shipping Charges - _TC": [100, 100, 1685.40],
-			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.86],
-			"_Test Account Service Tax - _TC": [-18.03, -16.85, 1500.01],
+			"_Test Account Customs Duty - _TC": [125, 116.34, 1585.39],
+			"_Test Account Shipping Charges - _TC": [100, 100, 1685.39],
+			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.85],
+			"_Test Account Service Tax - _TC": [-18.03, -16.85, 1500.00],
 		}
 
 		for d in si.get("taxes"):
@@ -413,7 +413,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(si.base_grand_total, 1500)
 		self.assertEqual(si.grand_total, 1500)
-		self.assertEqual(si.rounding_adjustment, -0.01)
+		self.assertEqual(si.rounding_adjustment, 0.0)
 
 	def test_discount_amount_gl_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -454,7 +454,7 @@ class TestSalesInvoice(unittest.TestCase):
 				[test_records[3]["taxes"][2]["account_head"], 0.0, 1.30],
 				[test_records[3]["taxes"][3]["account_head"], 0.0, 25.95],
 				[test_records[3]["taxes"][4]["account_head"], 0.0, 145.43],
-				[test_records[3]["taxes"][5]["account_head"], 0.0, 116.35],
+				[test_records[3]["taxes"][5]["account_head"], 0.0, 116.34],
 				[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
 				[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
 				["_Test Account Service Tax - _TC", 16.85, 0.0],
@@ -1614,7 +1614,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Education Cess - _TC": [1.4, 1.4, 1.4],
 			"_Test Account S&H Education Cess - _TC": [0.7, 0.7, 0.7],
 			"_Test Account CST - _TC": [17.19, 17.19, 17.19],
-			"_Test Account VAT - _TC": [78.13, 78.13, 78.13],
+			"_Test Account VAT - _TC": [78.12, 78.12, 78.12],
 			"_Test Account Discount - _TC": [-95.49, -95.49, -95.49],
 		}
 
@@ -1623,9 +1623,9 @@ class TestSalesInvoice(unittest.TestCase):
 				if expected_values.get(d.account_head):
 					self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEqual(si.total_taxes_and_charges, 234.43)
-		self.assertEqual(si.base_grand_total, 859.43)
-		self.assertEqual(si.grand_total, 859.43)
+		self.assertEqual(si.total_taxes_and_charges, 234.42)
+		self.assertEqual(si.base_grand_total, 859.42)
+		self.assertEqual(si.grand_total, 859.42)
 
 	def test_multi_currency_gle(self):
 		si = create_sales_invoice(
@@ -1985,17 +1985,17 @@ class TestSalesInvoice(unittest.TestCase):
 			)
 		si.save()
 		si.submit()
-		self.assertEqual(si.net_total, 19453.13)
+		self.assertEqual(si.net_total, 19453.12)
 		self.assertEqual(si.grand_total, 24900)
 		self.assertEqual(si.total_taxes_and_charges, 5446.88)
-		self.assertEqual(si.rounding_adjustment, -0.01)
+		self.assertEqual(si.rounding_adjustment, 0.0)
 
 		expected_values = dict(
 			(d[0], d)
 			for d in [
 				[si.debit_to, 24900, 0.0],
 				["_Test Account Service Tax - _TC", 0.0, 5446.88],
-				["Sales - _TC", 0.0, 19453.13],
+				["Sales - _TC", 0.0, 19453.12],
 				["Round Off - _TC", 0.01, 0.0],
 			]
 		)
