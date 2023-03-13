@@ -331,7 +331,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		dialog.fields_dict.info.$wrapper.html(
 			`<p class="small text-muted">
 				<span class="indicator yellow"></span>
-				Alternative Items
+				${__("Alternative Items")}
 			</p>`
 		)
 		dialog.show();
