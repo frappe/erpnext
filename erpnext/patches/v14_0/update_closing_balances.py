@@ -4,7 +4,9 @@
 
 import frappe
 
-from erpnext.accounts.doctype.closing_balance.closing_balance import make_closing_entries
+from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
+	make_closing_entries,
+)
 from erpnext.accounts.utils import get_fiscal_year
 
 
