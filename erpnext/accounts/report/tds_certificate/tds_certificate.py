@@ -16,7 +16,7 @@ def get_data(filters):
 	data = []
 	conditions = get_condition(filters)
 	for d in frappe.db.sql('''
-			SELECT ti.posting_date, ti.bill_amount, t.tax_withholding_category, 
+			SELECT ti.party, ti.posting_date, ti.bill_amount, t.tax_withholding_category, 
 				ti.tds_amount, t.cheque_no, t.cheque_date, ti.invoice_no, ti.invoice_type,
 				t.tds_receipt_number, t.tds_receipt_date
 			FROM `tabTDS Receipt Update` t INNER JOIN `tabTDS Remittance Item` ti ON t.name = ti.parent
@@ -61,6 +61,12 @@ def get_condition(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 def get_columns():
 	return [
+		{
+			"fieldname":"party",
+			"label":_("Party"),
+			"fieldtype":"Date",
+			"width":120
+		},
 		{
 			"fieldname":"posting_date",
 			"label":_("Invoice Date"),
