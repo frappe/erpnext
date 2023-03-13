@@ -24,7 +24,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-
+import time
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
 from six import iteritems
@@ -149,6 +149,10 @@ class SalesInvoice(SellingController):
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
+	
+	def submit(self):
+		time.sleep(1)
+		self.queue_action('submit',queue_name="si_tertiary")
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
