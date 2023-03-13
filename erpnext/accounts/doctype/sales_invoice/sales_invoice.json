@@ -2138,11 +2138,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2022-11-07 16:02:07.972258",
-=======
  "modified": "2023-03-13 11:43:15.883055",
->>>>>>> c8cc3fc65f (chore: Move source and campaign to additional info section (#34414))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
