@@ -327,4 +327,3 @@ erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances
 # below 2 migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
-erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
