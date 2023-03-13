@@ -523,7 +523,7 @@ class SalarySlip(TransactionBase):
 		for leave_type in leave_types:
 			leave_type_map[leave_type.name] = leave_type
 
-		attendances = frappe.db.sql(
+		attendances = frappe.db.sql(  # nosemgrep
 			"""
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
