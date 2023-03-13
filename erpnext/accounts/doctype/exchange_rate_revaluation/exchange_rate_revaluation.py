@@ -146,7 +146,7 @@ class ExchangeRateRevaluation(Document):
 					conditions.append(gle.party_type == party_type)
 				if party:
 					conditions.append(gle.party == party)
-
+     
 				account_details = (
 					qb.from_(gle)
 					.select(
@@ -158,10 +158,6 @@ class ExchangeRateRevaluation(Document):
 							"balance_in_account_currency"
 						),
 						(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
-						(Sum(gle.debit) - Sum(gle.credit) == 0)
-						^ (Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency) == 0).as_(
-							"zero_balance"
-						),
 					)
 					.where(Criterion.all(conditions))
 					.groupby(gle.account, NullIf(gle.party_type, ""), NullIf(gle.party, ""))
@@ -169,6 +165,19 @@ class ExchangeRateRevaluation(Document):
 					.orderby(gle.account)
 					.run(as_dict=True)
 				)
+    
+				# Calculate correct zero_balance and balance_in_account_currency
+				precision = get_field_precision(
+						frappe.get_meta("Exchange Rate Revaluation Account").get_field("gain_loss"),
+						company_currency,
+					)
+
+				for d in account_details:
+					d.balance_in_account_currency = flt(d.balance_in_account_currency, precision)
+					zero_balance = (flt(d.balance, precision) == 0) ^ \
+         				(flt(d.balance_in_account_currency, precision) == 0)
+					d.zero_balance = +zero_balance
+					
 
 		return account_details
 
@@ -426,7 +435,7 @@ class ExchangeRateRevaluation(Document):
 						abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")
 					),
 					"cost_center": erpnext.get_default_cost_center(self.company),
-					"exchange_rate": flt(d.get("new_exchange_rate"), d.precision("new_exchange_rate")),
+					"exchange_rate": d.get("new_exchange_rate"),
 					"reference_type": "Exchange Rate Revaluation",
 					"reference_name": self.name,
 				}
@@ -444,7 +453,7 @@ class ExchangeRateRevaluation(Document):
 						abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")
 					),
 					"cost_center": erpnext.get_default_cost_center(self.company),
-					"exchange_rate": flt(d.get("current_exchange_rate"), d.precision("current_exchange_rate")),
+					"exchange_rate": d.get("current_exchange_rate"),
 					"reference_type": "Exchange Rate Revaluation",
 					"reference_name": self.name,
 				}
