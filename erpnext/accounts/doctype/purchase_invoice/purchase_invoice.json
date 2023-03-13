@@ -167,6 +167,7 @@
   "subscription_section",
   "auto_repeat",
   "update_auto_repeat_reference",
+  "subscription_id",
   "column_break_114",
   "from_date",
   "to_date",
@@ -1304,6 +1305,14 @@
    "fieldname": "update_auto_repeat_reference",
    "fieldtype": "Button",
    "label": "Update Auto Repeat Reference"
+  },
+  {
+    "fieldname": "subscription_id",
+    "fieldtype": "Link",
+    "label": "Subscription",
+    "options": "Subscription",
+    "print_hide": 1,
+    "read_only": 1
   },
   {
    "collapsible": 1,

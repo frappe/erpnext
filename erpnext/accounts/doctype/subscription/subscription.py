@@ -427,6 +427,9 @@ class Subscription(Document):
 		invoice.from_date = self.current_invoice_start
 		invoice.to_date = self.current_invoice_end
 
+		# Subscription ID
+		invoice.subscription_id = self.name
+
 		invoice.flags.ignore_mandatory = True
 
 		invoice.set_missing_values()
