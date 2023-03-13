@@ -64,7 +64,7 @@ def get_columns():
 		{
 			"fieldname":"party",
 			"label":_("Party"),
-			"fieldtype":"Date",
+			"fieldtype":"Data",
 			"width":120
 		},
 		{
