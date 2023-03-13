@@ -197,6 +197,7 @@
   "subscription_section",
   "from_date",
   "auto_repeat",
+  "subscription_id",
   "column_break_140",
   "to_date",
   "update_auto_repeat_reference",
@@ -1847,6 +1848,14 @@
    "label": "To Date",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "subscription_id",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_140",
