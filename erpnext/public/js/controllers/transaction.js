@@ -682,6 +682,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	on_submit() {
+		refresh_field("items");
+	}
+
 	update_qty(cdt, cdn) {
 		var valid_serial_nos = [];
 		var serialnos = [];

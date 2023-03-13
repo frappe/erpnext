@@ -264,7 +264,7 @@ def set_batch_nos(doc, warehouse_field, throw=False, child_table="items"):
 		warehouse = d.get(warehouse_field, None)
 		if warehouse and qty > 0 and frappe.db.get_value("Item", d.item_code, "has_batch_no"):
 			if not d.batch_no:
-				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
+				pass
 			else:
 				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
 				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
@@ -365,7 +365,7 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 def make_batch(args):
 	if frappe.db.get_value("Item", args.item, "has_batch_no"):
 		args.doctype = "Batch"
-		frappe.get_doc(args).insert().name
+		return frappe.get_doc(args).insert().name
 
 
 @frappe.whitelist()

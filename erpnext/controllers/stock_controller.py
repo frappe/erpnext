@@ -325,53 +325,6 @@ class StockController(AccountsController):
 			stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
 
-	def make_batches(self, warehouse_field):
-		"""Create batches if required. Called before submit"""
-		for d in self.items:
-			if d.get(warehouse_field) and not d.serial_and_batch_bundle:
-				has_batch_no, create_new_batch = frappe.get_cached_value(
-					"Item", d.item_code, ["has_batch_no", "create_new_batch"]
-				)
-
-				if has_batch_no and create_new_batch:
-					batch_no = (
-						frappe.get_doc(
-							dict(doctype="Batch", item=d.item_code, supplier=getattr(self, "supplier", None))
-						)
-						.insert()
-						.name
-					)
-
-					d.serial_and_batch_bundle = (
-						frappe.get_doc(
-							{
-								"doctype": "Serial and Batch Bundle",
-								"item_code": d.item_code,
-								"voucher_type": self.doctype,
-								"voucher_no": self.name,
-								"ledgers": [
-									{
-										"batch_no": batch_no,
-										"qty": d.qty,
-										"warehouse": d.get(warehouse_field),
-										"incoming_rate": d.rate,
-									}
-								],
-							}
-						)
-						.submit()
-						.name
-					)
-
-					frappe.db.set_value(
-						"Batch",
-						batch_no,
-						{
-							"reference_doctype": "Serial and Batch Bundle",
-							"reference_name": d.serial_and_batch_bundle,
-						},
-					)
-
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
 			msg = _("Please set an Expense Account in the Items table")
@@ -760,6 +713,13 @@ class StockController(AccountsController):
 				if flt(values["qty_put"]) > flt(values["capacity"]):
 					message = self.prepare_over_receipt_message(rule, values)
 					frappe.throw(msg=message, title=_("Over Receipt"))
+
+	def set_serial_and_batch_bundle(self):
+		for row in self.items:
+			if row.serial_and_batch_bundle:
+				frappe.get_doc(
+					"Serial and Batch Bundle", row.serial_and_batch_bundle
+				).set_serial_and_batch_values(self, row)
 
 	def prepare_over_receipt_message(self, rule, values):
 		message = _(

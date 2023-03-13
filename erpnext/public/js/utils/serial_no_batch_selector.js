@@ -624,13 +624,16 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 		this.item = item;
 		this.qty = item.qty;
 		this.callback = callback;
+		this.bundle = this.item?.is_rejected ?
+			this.item.rejected_serial_and_batch_bundle : this.item.serial_and_batch_bundle;
+
 		this.make();
 		this.render_data();
 	}
 
 	make() {
 		let label = this.item?.has_serial_no ? __('Serial No') : __('Batch No');
-		let primary_label = this.item?.serial_and_batch_bundle
+		let primary_label = this.bundle
 			? __('Update') : __('Add');
 
 		if (this.item?.has_serial_no && this.item?.batch_no) {
@@ -655,7 +658,7 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 
 	get_serial_no_filters() {
 		let warehouse = this.item?.outward ?
-			this.item.warehouse : "";
+			(this.item.warehouse || this.item.s_warehouse) : "";
 
 		return {
 			'item_code': this.item.item_code,
@@ -684,7 +687,6 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 		if (this.item.has_batch_no && this.item.has_serial_no) {
 			fields.push({
 				fieldtype: 'Column Break',
-				label: __('Batch No')
 			});
 		}
 
@@ -695,6 +697,22 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 				label: __('Scan Batch No'),
 				options: 'Batch',
 				onchange: () => this.update_serial_batch_no()
+			});
+		}
+
+		if (this.frm.doc.doctype === 'Stock Entry'
+			&& this.frm.doc.purpose === 'Manufacture') {
+			fields.push({
+				fieldtype: 'Column Break',
+			});
+
+			fields.push({
+				fieldtype: 'Link',
+				fieldname: 'work_order',
+				label: __('For Work Order'),
+				options: 'Work Order',
+				read_only: 1,
+				default: this.frm.doc.work_order,
 			});
 		}
 
@@ -770,30 +788,36 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 			})
 		}
 
+		let batch_fields = []
 		if (this.item.has_batch_no) {
-			fields = [
+			batch_fields = [
 				{
 					fieldtype: 'Link',
 					options: 'Batch',
 					fieldname: 'batch_no',
 					label: __('Batch No'),
 					in_list_view: 1,
-				},
-				{
+				}
+			]
+
+			if (!this.item.has_serial_no) {
+				batch_fields.push({
 					fieldtype: 'Float',
 					fieldname: 'qty',
 					label: __('Quantity'),
 					in_list_view: 1,
-				}
-			]
+				})
+			}
 		}
+
+		fields = [...fields, ...batch_fields];
 
 		fields.push({
 			fieldtype: 'Data',
 			fieldname: 'name',
 			label: __('Name'),
 			hidden: 1,
-		})
+		});
 
 		return fields;
 	}
@@ -815,13 +839,14 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 			method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_auto_data',
 			args: {
 				item_code: this.item.item_code,
-				warehouse: this.item.warehouse,
+				warehouse: this.item.warehouse || this.item.s_warehouse,
 				has_serial_no: this.item.has_serial_no,
 				has_batch_no: this.item.has_batch_no,
 				qty: qty,
 				based_on: based_on
 			},
 			callback: (r) => {
+				debugger
 				if (r.message) {
 					this.dialog.fields_dict.ledgers.df.data = r.message;
 					this.dialog.fields_dict.ledgers.grid.refresh();
@@ -854,7 +879,7 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 		if (!this.frm.is_new()) {
 			let ledgers = this.dialog.get_values().ledgers;
 
-			if (ledgers && !ledgers.length) {
+			if (ledgers && !ledgers.length || !ledgers) {
 				frappe.throw(__('Please add atleast one Serial No / Batch No'));
 			}
 
@@ -862,9 +887,11 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers',
 				args: {
 					ledgers: ledgers,
-					child_row: this.item
+					child_row: this.item,
+					doc: this.frm.doc,
 				}
 			}).then(r => {
+				debugger
 				this.callback && this.callback(r.message);
 				this.dialog.hide();
 			})
@@ -872,12 +899,12 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 	}
 
 	render_data() {
-		if (!this.frm.is_new() && this.item.serial_and_batch_bundle) {
+		if (!this.frm.is_new() && this.bundle) {
 			frappe.call({
 				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers',
 				args: {
 					item_code: this.item.item_code,
-					name: this.item.serial_and_batch_bundle,
+					name: this.bundle,
 					voucher_no: this.item.parent,
 				}
 			}).then(r => {

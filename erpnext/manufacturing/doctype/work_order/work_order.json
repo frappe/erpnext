@@ -537,7 +537,8 @@
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
    "label": "Serial Nos",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "default": "0",

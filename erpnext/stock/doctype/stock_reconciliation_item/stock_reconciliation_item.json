@@ -17,6 +17,7 @@
   "amount",
   "allow_zero_valuation_rate",
   "serial_no_and_batch_section",
+  "serial_and_batch_bundle",
   "batch_no",
   "column_break_11",
   "serial_no",
@@ -25,6 +26,7 @@
   "current_amount",
   "column_break_9",
   "current_valuation_rate",
+  "current_serial_and_batch_bundle",
   "current_serial_no",
   "section_break_14",
   "quantity_difference",
@@ -168,7 +170,8 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -184,6 +187,21 @@
    "fieldname": "has_item_scanned",
    "fieldtype": "Data",
    "label": "Has Item Scanned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "current_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Current Serial / Batch Bundle",
+   "options": "Serial and Batch Bundle",
    "read_only": 1
   }
  ],

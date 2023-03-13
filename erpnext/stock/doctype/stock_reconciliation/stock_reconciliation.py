@@ -48,7 +48,6 @@ class StockReconciliation(StockController):
 
 		if self._action == "submit":
 			self.validate_reserved_stock()
-			self.make_batches("warehouse")
 
 	def on_submit(self):
 		self.update_stock_ledger()

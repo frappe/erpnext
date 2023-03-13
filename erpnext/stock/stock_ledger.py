@@ -27,6 +27,7 @@ from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
+from erpnext.stock.serial_batch_bundle import BatchNoBundleValuation, SerialNoBundleValuation
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -69,9 +70,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			if sle.serial_no and not via_landed_cost_voucher:
 				validate_serial_no(sle)
 
-			if not cancel and sle["actual_qty"] > 0 and sle.get("serial_and_batch_bundle"):
-				set_incoming_rate_for_serial_and_batch(sle)
-
 			if cancel:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
 
@@ -105,18 +103,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				frappe.msgprint(
 					_("Item {0} ignored since it is not a stock item").format(args.get("item_code"))
 				)
-
-
-def set_incoming_rate_for_serial_and_batch(row):
-	frappe.db.sql(
-		"""
-		UPDATE `tabSerial and Batch Ledger`
-			SET incoming_rate = %s
-		WHERE
-			parent = %s
-	""",
-		(row.get("incoming_rate"), row.get("serial_and_batch_bundle")),
-	)
 
 
 def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False):
@@ -705,17 +691,23 @@ class update_entries_after(object):
 		):
 			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
-		if sle.serial_and_batch_bundle and sle.has_serial_no:
-			self.get_serialized_values(sle)
-			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-			if sle.voucher_type == "Stock Reconciliation":
-				self.wh_data.qty_after_transaction = sle.qty_after_transaction
-
-			self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
-				self.wh_data.valuation_rate
-			)
-		elif sle.serial_and_batch_bundle and sle.has_batch_no:
-			self.update_batched_values(sle)
+		if sle.serial_and_batch_bundle:
+			if frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
+				SerialNoBundleValuation(
+					sle=sle,
+					sle_self=self,
+					wh_data=self.wh_data,
+					warehouse=sle.warehouse,
+					item_code=sle.item_code,
+				)
+			else:
+				BatchNoBundleValuation(
+					sle=sle,
+					sle_self=self,
+					wh_data=self.wh_data,
+					warehouse=sle.warehouse,
+					item_code=sle.item_code,
+				)
 		else:
 			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
 				# assert
@@ -972,58 +964,6 @@ class update_entries_after(object):
 
 			for item in sr.items:
 				item.db_update()
-
-	def get_serialized_values(self, sle):
-		ledger = frappe.db.get_value(
-			"Serial and Batch Bundle",
-			sle.serial_and_batch_bundle,
-			["avg_rate", "total_amount", "total_qty"],
-			as_dict=True,
-		)
-
-		if flt(abs(ledger.total_qty)) - flt(abs(sle.actual_qty)) > 0.001:
-			msg = f"""Actual Qty in Serial and Batch Bundle
-				{sle.serial_and_batch_bundle} does not match with
-				Stock Ledger Entry {sle.name}"""
-
-			frappe.throw(_(msg))
-
-		actual_qty = flt(sle.actual_qty)
-		incoming_rate = flt(ledger.avg_rate)
-
-		if incoming_rate < 0:
-			# wrong incoming rate
-			incoming_rate = self.wh_data.valuation_rate
-
-		stock_value_change = 0
-		if actual_qty > 0:
-			stock_value_change = actual_qty * incoming_rate
-		else:
-			# In case of delivery/stock issue, get average purchase rate
-			# of serial nos of current entry
-			outgoing_value = flt(ledger.total_amount)
-			if not sle.is_cancelled:
-				stock_value_change = -1 * outgoing_value
-			else:
-				stock_value_change = outgoing_value
-
-		new_stock_qty = self.wh_data.qty_after_transaction + actual_qty
-
-		if new_stock_qty > 0:
-			new_stock_value = (
-				self.wh_data.qty_after_transaction * self.wh_data.valuation_rate
-			) + stock_value_change
-			if new_stock_value >= 0:
-				# calculate new valuation rate only if stock value is positive
-				# else it remains the same as that of previous entry
-				self.wh_data.valuation_rate = new_stock_value / new_stock_qty
-
-		if not self.wh_data.valuation_rate and sle.voucher_detail_no:
-			allow_zero_rate = self.check_if_allow_zero_valuation_rate(
-				sle.voucher_type, sle.voucher_detail_no
-			)
-			if not allow_zero_rate:
-				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -1468,9 +1408,6 @@ def get_batch_incoming_rate(
 		.where(timestamp_condition)
 	).run(as_dict=True)
 
-	print(batch_details)
-
-	print(batch_details[0].batch_value / batch_details[0].batch_qty)
 	if batch_details and batch_details[0].batch_qty:
 		return batch_details[0].batch_value / batch_details[0].batch_qty
 

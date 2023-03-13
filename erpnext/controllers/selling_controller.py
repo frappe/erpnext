@@ -38,6 +38,7 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_auto_repeat_subscription_dates()
+		self.set_serial_and_batch_bundle()
 
 	def set_missing_values(self, for_validate=False):
 

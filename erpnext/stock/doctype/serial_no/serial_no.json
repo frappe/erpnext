@@ -14,7 +14,9 @@
   "item_code",
   "batch_no",
   "warehouse",
+  "purchase_rate",
   "column_break1",
+  "status",
   "item_name",
   "description",
   "item_group",
@@ -35,9 +37,11 @@
   "maintenance_status",
   "warranty_period",
   "more_info",
-  "serial_no_details",
   "company",
-  "work_order"
+  "column_break_2cmm",
+  "work_order",
+  "section_break_fgyk",
+  "serial_no_details"
  ],
  "fields": [
   {
@@ -227,6 +231,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
@@ -243,6 +248,7 @@
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Warehouse",
    "options": "Warehouse",
    "read_only": 1
@@ -251,13 +257,37 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_rate",
+   "fieldtype": "Float",
+   "label": "Incoming Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive\nExpired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2cmm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_fgyk",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2023-04-15 15:58:46.139887",
+ "modified": "2023-04-16 15:58:46.139887",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

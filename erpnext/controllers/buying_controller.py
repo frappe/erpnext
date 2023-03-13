@@ -58,6 +58,7 @@ class BuyingController(SubcontractingController):
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
+			self.set_serial_and_batch_bundle()
 
 	def onload(self):
 		super(BuyingController, self).onload()
@@ -305,8 +306,7 @@ class BuyingController(SubcontractingController):
 							"posting_date": self.get("posting_date") or self.get("transation_date"),
 							"posting_time": posting_time,
 							"qty": -1 * flt(d.get("stock_qty")),
-							"serial_no": d.get("serial_no"),
-							"batch_no": d.get("batch_no"),
+							"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
@@ -463,7 +463,12 @@ class BuyingController(SubcontractingController):
 						sl_entries.append(from_warehouse_sle)
 
 					sle = self.get_sl_entries(
-						d, {"actual_qty": flt(pr_qty), "serial_no": cstr(d.serial_no).strip()}
+						d,
+						{
+							"actual_qty": flt(pr_qty),
+							"serial_no": cstr(d.serial_no).strip(),
+							"serial_and_batch_bundle": d.serial_and_batch_bundle,
+						},
 					)
 
 					if self.is_return:
@@ -471,7 +476,13 @@ class BuyingController(SubcontractingController):
 							self.doctype, self.name, d.item_code, self.return_against, item_row=d
 						)
 
-						sle.update({"outgoing_rate": outgoing_rate, "recalculate_rate": 1})
+						sle.update(
+							{
+								"outgoing_rate": outgoing_rate,
+								"recalculate_rate": 1,
+								"serial_and_batch_bundle": d.serial_and_batch_bundle,
+							}
+						)
 						if d.from_warehouse:
 							sle.dependant_sle_voucher_detail_no = d.name
 					else:
@@ -483,6 +494,7 @@ class BuyingController(SubcontractingController):
 								"recalculate_rate": 1
 								if (self.is_subcontracted and (d.bom or d.fg_item)) or d.from_warehouse
 								else 0,
+								"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							}
 						)
 					sl_entries.append(sle)
@@ -506,6 +518,7 @@ class BuyingController(SubcontractingController):
 							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
 							"serial_no": cstr(d.rejected_serial_no).strip(),
 							"incoming_rate": 0.0,
+							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
 						},
 					)
 				)

@@ -118,9 +118,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
 
-		if self._action == "submit":
-			self.make_batches("warehouse")
-		else:
+		if self._action != "submit":
 			self.set_status()
 
 		self.po_required()

@@ -874,12 +874,14 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Text",
+   "hidden": 1,
    "label": "Serial No",
    "read_only": 1
   },
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Batch No",
    "options": "Batch",
    "read_only": 1

@@ -7,6 +7,8 @@ frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
+		frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
+
 		frm.set_indicator_formatter('item_code', function(doc) {
 			if (!doc.s_warehouse) {
 				return 'blue';
@@ -680,17 +682,17 @@ frappe.ui.form.on('Stock Entry', {
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
-	qty: function(frm, cdt, cdn) {
+	qty(frm, cdt, cdn) {
 		frm.events.set_serial_no(frm, cdt, cdn, () => {
 			frm.events.set_basic_rate(frm, cdt, cdn);
 		});
 	},
 
-	conversion_factor: function(frm, cdt, cdn) {
+	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
 	},
 
-	s_warehouse: function(frm, cdt, cdn) {
+	s_warehouse(frm, cdt, cdn) {
 		frm.events.set_serial_no(frm, cdt, cdn, () => {
 			frm.events.get_warehouse_details(frm, cdt, cdn);
 		});
@@ -702,16 +704,16 @@ frappe.ui.form.on('Stock Entry Detail', {
 		}
 	},
 
-	t_warehouse: function(frm, cdt, cdn) {
+	t_warehouse(frm, cdt, cdn) {
 		frm.events.get_warehouse_details(frm, cdt, cdn);
 	},
 
-	basic_rate: function(frm, cdt, cdn) {
+	basic_rate(frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 		frm.events.calculate_basic_amount(frm, item);
 	},
 
-	uom: function(doc, cdt, cdn) {
+	uom(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.uom && d.item_code){
 			return frappe.call({
@@ -730,7 +732,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 		}
 	},
 
-	item_code: function(frm, cdt, cdn) {
+	item_code(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.item_code) {
 			var args = {
@@ -777,18 +779,27 @@ frappe.ui.form.on('Stock Entry Detail', {
 			});
 		}
 	},
-	expense_account: function(frm, cdt, cdn) {
+
+	expense_account(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
 	},
-	cost_center: function(frm, cdt, cdn) {
+
+	cost_center(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
 	},
-	sample_quantity: function(frm, cdt, cdn) {
+
+	sample_quantity(frm, cdt, cdn) {
 		validate_sample_quantity(frm, cdt, cdn);
 	},
-	batch_no: function(frm, cdt, cdn) {
+
+	batch_no(frm, cdt, cdn) {
 		validate_sample_quantity(frm, cdt, cdn);
 	},
+
+	add_serial_batch_bundle(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		erpnext.stock.select_batch_and_serial_no(frm, child);
+	}
 });
 
 var validate_sample_quantity = function(frm, cdt, cdn) {
@@ -1093,35 +1104,28 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 };
 
 erpnext.stock.select_batch_and_serial_no = (frm, item) => {
-	let get_warehouse_type_and_name = (item) => {
-		let value = '';
-		if(frm.fields_dict.from_warehouse.disp_status === "Write") {
-			value = cstr(item.s_warehouse) || '';
-			return {
-				type: 'Source Warehouse',
-				name: value
-			};
-		} else {
-			value = cstr(item.t_warehouse) || '';
-			return {
-				type: 'Target Warehouse',
-				name: value
-			};
-		}
-	}
+	let path = "assets/erpnext/js/utils/serial_no_batch_selector.js";
 
-	if(item && !item.has_serial_no && !item.has_batch_no) return;
-	if (frm.doc.purpose === 'Material Receipt') return;
+	frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+		.then((r) => {
+			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+				item.has_serial_no = r.message.has_serial_no;
+				item.has_batch_no = r.message.has_batch_no;
+				item.outward = item.s_warehouse ? 1 : 0;
 
-	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		if (frm.batch_selector?.dialog?.display) return;
-		frm.batch_selector = new erpnext.SerialNoBatchSelector({
-			frm: frm,
-			item: item,
-			warehouse_details: get_warehouse_type_and_name(item),
+				frappe.require(path, function() {
+					new erpnext.SerialNoBatchBundleUpdate(
+						frm, item, (r) => {
+							if (r) {
+								frm.refresh_fields();
+								frappe.model.set_value(item.doctype, item.name,
+									"serial_and_batch_bundle", r.name);
+							}
+						}
+					);
+				});
+			}
 		});
-	});
-
 }
 
 function attach_bom_items(bom_no) {

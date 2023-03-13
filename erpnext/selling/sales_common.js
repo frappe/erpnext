@@ -430,7 +430,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 				if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
 					item.has_serial_no = r.message.has_serial_no;
 					item.has_batch_no = r.message.has_batch_no;
-					item.outward = true;
+					item.type_of_transaction = item.qty > 0 ? "Outward":"Inward";
 
 					item.title = item.has_serial_no ?
 						__("Select Serial No") : __("Select Batch No");

@@ -1,11 +1,13 @@
 {
  "actions": [],
+ "autoname": "naming_series:",
  "creation": "2022-09-29 14:56:38.338267",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "item_details_tab",
+  "naming_series",
   "company",
   "warehouse",
   "type_of_transaction",
@@ -25,15 +27,20 @@
   "tab_break_12",
   "voucher_type",
   "voucher_no",
+  "voucher_detail_no",
   "column_break_aouy",
+  "posting_date",
+  "posting_time",
+  "section_break_wzou",
   "is_cancelled",
+  "is_rejected",
   "amended_from"
  ],
  "fields": [
   {
    "fieldname": "item_details_tab",
    "fieldtype": "Tab Break",
-   "label": "Item Details"
+   "label": "Serial and Batch"
   },
   {
    "fieldname": "company",
@@ -94,13 +101,14 @@
    "allow_bulk_edit": 1,
    "fieldname": "ledgers",
    "fieldtype": "Table",
-   "label": "Serial / Batch Ledgers",
+   "label": "Ledgers",
    "options": "Serial and Batch Ledger",
    "reqd": 1
   },
   {
    "fieldname": "voucher_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Voucher Type",
    "options": "DocType",
    "reqd": 1
@@ -109,6 +117,7 @@
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "label": "Voucher No",
+   "no_copy": 1,
    "options": "voucher_type"
   },
   {
@@ -116,6 +125,7 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -133,6 +143,7 @@
    "label": "Reference"
   },
   {
+   "collapsible": 1,
    "fieldname": "quantity_and_rate_section",
    "fieldtype": "Section Break",
    "label": "Quantity and Rate"
@@ -170,6 +181,8 @@
    "depends_on": "company",
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Warehouse",
    "options": "Warehouse",
    "reqd": 1
@@ -180,15 +193,55 @@
    "label": "Type of Transaction",
    "options": "\nInward\nOutward",
    "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "SBB-.####"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.voucher_type == \"Purchase Receipt\"",
+   "fieldname": "is_rejected",
+   "fieldtype": "Check",
+   "label": "Is Rejected",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_wzou",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "no_copy": 1
+  },
+  {
+   "default": "today",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-03 16:18:53.709069",
+ "modified": "2023-03-12 16:05:18.141958",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
