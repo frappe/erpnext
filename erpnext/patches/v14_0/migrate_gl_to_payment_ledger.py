@@ -1,6 +1,6 @@
 import frappe
 from frappe import qb
-from frappe.query_builder import Case, CustomFunction
+from frappe.query_builder import CustomFunction
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Count, IfNull
 from frappe.utils import flt
@@ -18,9 +18,21 @@ def create_accounting_dimension_fields():
 			make_dimension_in_accounting_doctypes(dimension, ["Payment Ledger Entry"])
 
 
-def generate_name_for_payment_ledger_entries(gl_entries, start):
+def generate_name_and_calculate_amount(gl_entries, start, receivable_accounts):
 	for index, entry in enumerate(gl_entries, 0):
 		entry.name = start + index
+		if entry.account in receivable_accounts:
+			entry.account_type = "Receivable"
+			entry.amount = entry.debit - entry.credit
+			entry.amount_in_account_currency = (
+				entry.debit_in_account_currency - entry.credit_in_account_currency
+			)
+		else:
+			entry.account_type = "Payable"
+			entry.amount = entry.credit - entry.debit
+			entry.amount_in_account_currency = (
+				entry.credit_in_account_currency - entry.debit_in_account_currency
+			)
 
 
 def get_columns():
@@ -48,6 +60,9 @@ def get_columns():
 		"due_date",
 		"finance_book",
 	]
+
+	if frappe.db.has_column("Payment Ledger Entry", "remarks"):
+		columns.append("remarks")
 
 	dimensions_and_defaults = get_dimensions()
 	if dimensions_and_defaults:
@@ -99,12 +114,17 @@ def execute():
 		ifelse = CustomFunction("IF", ["condition", "then", "else"])
 
 		# Get Records Count
-		accounts = (
+		relavant_accounts = (
 			qb.from_(account)
-			.select(account.name)
+			.select(account.name, account.account_type)
 			.where((account.account_type == "Receivable") | (account.account_type == "Payable"))
 			.orderby(account.name)
+			.run(as_dict=True)
 		)
+
+		receivable_accounts = [x.name for x in relavant_accounts if x.account_type == "Receivable"]
+		accounts = [x.name for x in relavant_accounts]
+
 		un_processed = (
 			qb.from_(gl)
 			.select(Count(gl.name))
@@ -122,37 +142,21 @@ def execute():
 
 			while True:
 				if last_name:
-					where_clause = gl.name.gt(last_name) & (gl.is_cancelled == 0)
+					where_clause = gl.name.gt(last_name) & gl.account.isin(accounts) & gl.is_cancelled == 0
 				else:
-					where_clause = gl.is_cancelled == 0
+					where_clause = gl.account.isin(accounts) & gl.is_cancelled == 0
 
 				gl_entries = (
 					qb.from_(gl)
-					.inner_join(account)
-					.on((gl.account == account.name) & (account.account_type.isin(["Receivable", "Payable"])))
 					.select(
 						gl.star,
 						ConstantColumn(1).as_("docstatus"),
-						account.account_type.as_("account_type"),
 						IfNull(
 							ifelse(gl.against_voucher_type == "", None, gl.against_voucher_type), gl.voucher_type
 						).as_("against_voucher_type"),
 						IfNull(ifelse(gl.against_voucher == "", None, gl.against_voucher), gl.voucher_no).as_(
 							"against_voucher_no"
 						),
-						# convert debit/credit to amount
-						Case()
-						.when(account.account_type == "Receivable", gl.debit - gl.credit)
-						.else_(gl.credit - gl.debit)
-						.as_("amount"),
-						# convert debit/credit in account currency to amount in account currency
-						Case()
-						.when(
-							account.account_type == "Receivable",
-							gl.debit_in_account_currency - gl.credit_in_account_currency,
-						)
-						.else_(gl.credit_in_account_currency - gl.debit_in_account_currency)
-						.as_("amount_in_account_currency"),
 					)
 					.where(where_clause)
 					.orderby(gl.name)
@@ -163,8 +167,8 @@ def execute():
 				if gl_entries:
 					last_name = gl_entries[-1].name
 
-					# primary key(name) for payment ledger records
-					generate_name_for_payment_ledger_entries(gl_entries, processed)
+					# add primary key(name) and calculate based on debit and credit
+					generate_name_and_calculate_amount(gl_entries, processed, receivable_accounts)
 
 					try:
 						insert_query = build_insert_query()
