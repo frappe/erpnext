@@ -356,6 +356,16 @@ class TestLeaveAllocation(FrappeTestCase):
 		leave_allocation.new_leaves_allocated = 40
 		leave_allocation.save()
 		leave_allocation.reload()
+
+		updated_entry = frappe.db.get_all(
+			"Leave Ledger Entry",
+			{"transaction_name": leave_allocation.name},
+			pluck="leaves",
+			order_by="creation desc",
+			limit=1,
+		)
+
+		self.assertEqual(updated_entry[0], 25)
 		self.assertEqual(leave_allocation.total_leaves_allocated, 40)
 
 	def test_leave_addition_after_submit_with_carry_forward(self):
@@ -370,7 +380,7 @@ class TestLeaveAllocation(FrappeTestCase):
 		)
 
 		leave_allocation = create_carry_forwarded_allocation(self.employee, leave_type)
-
+		# 15 new leaves, 15 carry forwarded leaves
 		self.assertEqual(leave_allocation.total_leaves_allocated, 30)
 
 		leave_allocation.new_leaves_allocated = 32
@@ -385,6 +395,7 @@ class TestLeaveAllocation(FrappeTestCase):
 			limit=1,
 		)
 		self.assertEqual(updated_entry[0], 17)
+		self.assertEqual(leave_allocation.total_leaves_allocated, 47)
 
 	def test_leave_subtraction_after_submit(self):
 		leave_allocation = create_leave_allocation(
@@ -397,6 +408,16 @@ class TestLeaveAllocation(FrappeTestCase):
 		leave_allocation.new_leaves_allocated = 10
 		leave_allocation.submit()
 		leave_allocation.reload()
+
+		updated_entry = frappe.db.get_all(
+			"Leave Ledger Entry",
+			{"transaction_name": leave_allocation.name},
+			pluck="leaves",
+			order_by="creation desc",
+			limit=1,
+		)
+
+		self.assertEqual(updated_entry[0], -5)
 		self.assertEqual(leave_allocation.total_leaves_allocated, 10)
 
 	def test_leave_subtraction_after_submit_with_carry_forward(self):
@@ -424,6 +445,7 @@ class TestLeaveAllocation(FrappeTestCase):
 			limit=1,
 		)
 		self.assertEqual(updated_entry[0], -7)
+		self.assertEqual(leave_allocation.total_leaves_allocated, 23)
 
 	def test_validation_against_leave_application_after_submit(self):
 		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list

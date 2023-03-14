@@ -90,6 +90,7 @@ class LeaveAllocation(Document):
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
 
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting
 	def on_update_after_submit(self):
 		if self.has_value_changed("new_leaves_allocated"):
 			self.validate_against_leave_applications()
