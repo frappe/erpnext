@@ -45,7 +45,10 @@ class TestPaymentRequest(unittest.TestCase):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
 	def test_payment_request_linkings(self):
-		so_inr = make_sales_order(currency="INR")
+		so_inr = make_sales_order(currency="INR", do_not_save=True)
+		so_inr.disable_rounded_total = 1
+		so_inr.save()
+
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so_inr.name,
