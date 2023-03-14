@@ -154,7 +154,6 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 	@set_holiday_list("_Test Emp Balance Holiday List", "_Test Company")
 	def test_opening_balance_considers_carry_forwarded_leaves(self):
 		leave_type = create_leave_type(leave_type_name="_Test_CF_leave_expiry", is_carry_forward=1)
-		leave_type.insert()
 
 		# 30 leaves allocated for first half of the year
 		allocation1 = make_allocation_record(
