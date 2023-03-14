@@ -140,8 +140,8 @@ class AssetDepreciationSchedule(Document):
 		self.asset = asset_doc.name
 		self.finance_book = row.finance_book
 		self.finance_book_id = row.idx
-		self.opening_accumulated_depreciation = asset_doc.opening_accumulated_depreciation
-		self.number_of_depreciations_booked = asset_doc.number_of_depreciations_booked
+		self.opening_accumulated_depreciation = asset_doc.opening_accumulated_depreciation or 0
+		self.number_of_depreciations_booked = asset_doc.number_of_depreciations_booked or 0
 		self.gross_purchase_amount = asset_doc.gross_purchase_amount
 		self.depreciation_method = row.depreciation_method
 		self.total_number_of_depreciations = row.total_number_of_depreciations
