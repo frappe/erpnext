@@ -32,6 +32,16 @@ from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 
+PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
+SALES_TRANSACTION_TYPES = {
+	"Quotation",
+	"Sales Order",
+	"Delivery Note",
+	"Sales Invoice",
+	"POS Invoice",
+}
+TRANSACTION_TYPES = PURCHASE_TRANSACTION_TYPES | SALES_TRANSACTION_TYPES
+
 
 class DuplicatePartyAccountError(frappe.ValidationError):
 	pass
@@ -124,12 +134,6 @@ def _get_party_details(
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
-	party_details["tax_category"] = get_address_tax_category(
-		party.get("tax_category"),
-		party_address,
-		shipping_address if party_type != "Supplier" else party_address,
-	)
-
 	tax_template = set_taxes(
 		party.name,
 		party_type,
@@ -211,20 +215,10 @@ def set_address_details(
 	else:
 		party_details.update(get_company_address(company))
 
-	if doctype and doctype in [
-		"Delivery Note",
-		"Sales Invoice",
-		"Sales Order",
-		"Quotation",
-		"POS Invoice",
-	]:
-		if party_details.company_address:
-			party_details.update(
-				get_fetch_values(doctype, "company_address", party_details.company_address)
-			)
-		get_regional_address_details(party_details, doctype, company)
+	if doctype in SALES_TRANSACTION_TYPES and party_details.company_address:
+		party_details.update(get_fetch_values(doctype, "company_address", party_details.company_address))
 
-	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
+	if doctype in PURCHASE_TRANSACTION_TYPES:
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
@@ -250,9 +244,21 @@ def set_address_details(
 					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
 				)
 
+	party_address, shipping_address = (
+		party_details.get(billing_address_field),
+		party_details.shipping_address_name,
+	)
+
+	party_details["tax_category"] = get_address_tax_category(
+		party.get("tax_category"),
+		party_address,
+		shipping_address if party_type != "Supplier" else party_address,
+	)
+
+	if doctype in TRANSACTION_TYPES:
 		get_regional_address_details(party_details, doctype, company)
 
-	return party_details.get(billing_address_field), party_details.shipping_address_name
+	return party_address, shipping_address
 
 
 @erpnext.allow_regional

@@ -211,8 +211,7 @@ class ExchangeRateRevaluation(Document):
 			# Handle Accounts with '0' balance in Account/Base Currency
 			for d in [x for x in account_details if x.zero_balance]:
 
-				# TODO: Set new balance in Base/Account currency
-				if d.balance > 0:
+				if d.balance != 0:
 					current_exchange_rate = new_exchange_rate = 0
 
 					new_balance_in_account_currency = 0  # this will be '0'
@@ -399,6 +398,9 @@ class ExchangeRateRevaluation(Document):
 
 		journal_entry_accounts = []
 		for d in accounts:
+			if not flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")):
+				continue
+
 			dr_or_cr = (
 				"debit_in_account_currency"
 				if d.get("balance_in_account_currency") > 0
@@ -448,7 +450,13 @@ class ExchangeRateRevaluation(Document):
 				}
 			)
 
-		journal_entry_accounts.append(
+		journal_entry.set("accounts", journal_entry_accounts)
+		journal_entry.set_amounts_in_company_currency()
+		journal_entry.set_total_debit_credit()
+
+		self.gain_loss_unbooked += journal_entry.difference - self.gain_loss_unbooked
+		journal_entry.append(
+			"accounts",
 			{
 				"account": unrealized_exchange_gain_loss_account,
 				"balance": get_balance_on(unrealized_exchange_gain_loss_account),
@@ -460,10 +468,9 @@ class ExchangeRateRevaluation(Document):
 				"exchange_rate": 1,
 				"reference_type": "Exchange Rate Revaluation",
 				"reference_name": self.name,
-			}
+			},
 		)
 
-		journal_entry.set("accounts", journal_entry_accounts)
 		journal_entry.set_amounts_in_company_currency()
 		journal_entry.set_total_debit_credit()
 		journal_entry.save()
