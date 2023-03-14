@@ -455,7 +455,9 @@ def reconcile_against_document(args):  # nosemgrep
 			try:
 				doc.validate_total_debit_and_credit()
 			except Exception as validation_exception:
-				raise frappe.ValidationError(_("Validation Error for {0}").format(doc.name)) from validation_exception
+				raise frappe.ValidationError(
+					_("Validation Error for {0}").format(doc.name)
+				) from validation_exception
 
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
