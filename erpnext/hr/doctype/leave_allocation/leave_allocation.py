@@ -100,8 +100,8 @@ class LeaveAllocation(Document):
 			self.validate_leave_days_and_dates()
 
 			leaves_to_be_added = flt(
-				frappe.db.get_value("Leave Allocation", self.name, "new_leaves_allocated")
-				- self.get_existing_leave_count()
+				(self.new_leaves_allocated - self.get_existing_leave_count()),
+				self.precision("new_leaves_allocated"),
 			)
 
 			args = {
