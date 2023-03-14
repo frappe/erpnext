@@ -193,7 +193,7 @@
    "fieldname": "item_sub_group",
    "fieldtype": "Link",
    "label": "Item Sub Group",
-   "options": "Item Sub Group"
+   "options": "Item Group"
   },
   {
    "fieldname": "mineral_raising_group",
@@ -206,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-13 22:10:11.243769",
+ "modified": "2023-03-14 17:19:02.315499",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Production Entry",

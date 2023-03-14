@@ -47,6 +47,10 @@ frappe.ui.form.on('Fleet Engagement Item', {
 
 var calculate_total_km = function(frm, cdt, cdn){
 	let item = locals[cdt][cdn]
+	if ( item.ignore_time == 1){
+		item.total_km=0
+		return
+	}
 	if (flt(item.initial_km) > 0 && flt(item.final_km) > 0 ){
 		if ( flt(item.initial_km) > flt(item.final_km)){
 			frappe.throw("Initial KM Cannot be greater than finial KM")
@@ -66,6 +70,11 @@ var calculate_meterage_drilled = function(frm, cdt, cdn){
 }
 var calculate_total_time = function(frm, cdt, cdn){
 	let item = locals[cdt][cdn]
+	if ( item.ignore_time == 1){
+		item.total_hours=0
+		return
+	}
+
 	if ( item.end_time &&  item.start_time){
 		item.total_hours = frappe.datetime.get_hour_diff( item.end_time, item.start_time)
 		frm.refresh_field("items")
