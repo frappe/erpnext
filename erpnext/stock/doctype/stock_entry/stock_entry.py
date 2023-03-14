@@ -642,6 +642,7 @@ class StockEntry(StockController):
 			d.transfer_qty for d in self.items if d.is_finished_item or d.is_process_loss
 		)
 
+		items = []
 		# Set basic rate for incoming items
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
@@ -649,6 +650,11 @@ class StockEntry(StockController):
 
 			if d.allow_zero_valuation_rate:
 				d.basic_rate = 0.0
+<<<<<<< HEAD
+=======
+				items.append(d.item_code)
+
+>>>>>>> 22ad9a1903 (chore: `Allow Zero Valuation Rate` msg in SE)
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
@@ -674,6 +680,20 @@ class StockEntry(StockController):
 			if d.is_process_loss:
 				d.basic_rate = flt(0.0)
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
+
+		if items:
+			message = ""
+
+			if len(items) > 1:
+				message = _(
+					"Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
+				).format(", ".join(frappe.bold(item) for item in items))
+			else:
+				message = _(
+					"Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
+				).format(frappe.bold(items[0]))
+
+			frappe.msgprint(message, alert=True)
 
 	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		outgoing_items_cost = 0.0
