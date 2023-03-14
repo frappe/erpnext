@@ -1741,8 +1741,21 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	)
 
 
+<<<<<<< HEAD
 def get_amounts_based_on_reference_doctype(
 	reference_doctype, ref_doc, party_account_currency, company_currency, reference_name
+=======
+@frappe.whitelist()
+def get_payment_entry(
+	dt,
+	dn,
+	party_amount=None,
+	bank_account=None,
+	bank_amount=None,
+	party_type=None,
+	payment_type=None,
+	reference_date=None,
+>>>>>>> d6d0163514 (fix: Provision to apply early payment discount if payment is recorded late)
 ):
 	total_amount = outstanding_amount = exchange_rate = None
 	if reference_doctype == "Fees":
@@ -1866,8 +1879,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 	)
 
+	reference_date = getdate(reference_date)
 	paid_amount, received_amount, discount_amount, valid_discounts = apply_early_payment_discount(
-		paid_amount, received_amount, doc, party_account_currency
+		paid_amount, received_amount, doc, party_account_currency, reference_date
 	)
 
 	pe = frappe.new_doc("Payment Entry")
@@ -1875,6 +1889,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.company = doc.company
 	pe.cost_center = doc.get("cost_center")
 	pe.posting_date = nowdate()
+	pe.reference_date = reference_date
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
@@ -2109,7 +2124,9 @@ def set_paid_amount_and_received_amount(
 	return paid_amount, received_amount
 
 
-def apply_early_payment_discount(paid_amount, received_amount, doc, party_account_currency):
+def apply_early_payment_discount(
+	paid_amount, received_amount, doc, party_account_currency, reference_date
+):
 	total_discount = 0
 	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
@@ -2118,7 +2135,7 @@ def apply_early_payment_discount(paid_amount, received_amount, doc, party_accoun
 
 	if doc.doctype in eligible_for_payments and has_payment_schedule:
 		for term in doc.payment_schedule:
-			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
+			if not term.discounted_amount and term.discount and reference_date <= term.discount_date:
 
 				if term.discount_type == "Percentage":
 					grand_total = doc.get("grand_total") if is_multi_currency else doc.get("base_grand_total")

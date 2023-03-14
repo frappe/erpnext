@@ -302,6 +302,15 @@ class TestPaymentEntry(unittest.TestCase):
 		si.save()
 		si.submit()
 
+		# Set reference date past discount cut off date
+		pe_1 = get_payment_entry(
+			"Sales Invoice",
+			si.name,
+			bank_account="_Test Cash - _TC",
+			reference_date=frappe.utils.add_days(si.posting_date, 2),
+		)
+		self.assertEqual(pe_1.paid_amount, 236.0)  # discount not applied
+
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
 		self.assertEqual(pe.references[0].allocated_amount, 236.0)
 		self.assertEqual(pe.paid_amount, 186)

@@ -81,8 +81,17 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 
 		if(doc.docstatus == 1 && doc.outstanding_amount != 0
+<<<<<<< HEAD
 			&& !(doc.is_return && doc.return_against)) {
 			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __('Create'));
+=======
+			&& !(doc.is_return && doc.return_against) && !doc.on_hold) {
+			this.frm.add_custom_button(
+				__('Payment'),
+				() => this.make_payment_entry(),
+				__('Create')
+			);
+>>>>>>> d6d0163514 (fix: Provision to apply early payment discount if payment is recorded late)
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
