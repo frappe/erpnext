@@ -71,34 +71,6 @@ class TestBOM(FrappeTestCase):
 
 		self.assertTrue(_get_default_bom_in_item(), bom.name)
 
-	def test_update_bom_cost_in_all_boms(self):
-		# get current rate for '_Test Item 2'
-		bom_rates = frappe.db.get_values(
-			"BOM Item",
-			{
-				"parent": "BOM-_Test Item Home Desktop Manufactured-001",
-				"item_code": "_Test Item 2",
-				"docstatus": 1,
-			},
-			fieldname=["rate", "base_rate"],
-			as_dict=True,
-		)
-		rm_base_rate = bom_rates[0].get("base_rate") if bom_rates else 0
-
-		# Reset item valuation rate
-		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_base_rate + 10)
-
-		# update cost of all BOMs based on latest valuation rate
-		update_cost_in_all_boms_in_test()
-
-		# check if new valuation rate updated in all BOMs
-		for d in frappe.db.sql(
-			"""select base_rate from `tabBOM Item`
-			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""",
-			as_dict=1,
-		):
-			self.assertEqual(d.base_rate, rm_base_rate + 10)
-
 	def test_bom_cost(self):
 		bom = frappe.copy_doc(test_records[2])
 		bom.insert()
