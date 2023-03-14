@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "field:branch",
  "creation": "2013-01-10 16:34:13",
  "doctype": "DocType",
@@ -119,7 +118,7 @@
  "icon": "fa fa-code-fork",
  "idx": 1,
  "links": [],
- "modified": "2023-01-18 11:49:46.370436",
+ "modified": "2023-03-14 11:57:08.953207",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Branch",

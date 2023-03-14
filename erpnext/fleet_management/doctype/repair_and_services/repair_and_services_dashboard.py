@@ -10,6 +10,6 @@ def get_data():
 		# 	"EME Invoice": ["items", "logbook"],
 		# },
 		"transactions": [
-			{"label": _("Related Transaction"), "items": ["Repair And Service Invoice"]},
+			{"label": _("Related Transaction"), "items": ["Repair And Service Invoice","Material Request"]},
 		],
 	}

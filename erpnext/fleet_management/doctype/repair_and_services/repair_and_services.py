@@ -127,11 +127,12 @@ class RepairAndServices(StockController):
 
 @frappe.whitelist()
 def make_mr(source_name, target_doc=None):
+	if frappe.db.exists("Material Request",{"repair_and_services":source_name}):
+		frappe.throw("Material Request already exists for this transaction")
 	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Issue"
 		for a in source.items:
-			# if (a.qty_in_warehouse <= 0 and a.qty_required > 0) or (a.qty_in_warehouse > 0 and a.qty_required > a.qty_in_warehouse and a.qty_required > 0):
 			if a.maintain_stock == 1 and a.qty > 0:
 				row = target.append("items",{})
 				row.warehouse = a.warehouse
@@ -156,10 +157,6 @@ def make_mr(source_name, target_doc=None):
 					"repair_and_services": "name"
 				},
 		},
-		# "Repair And Services Item": {
-		# 	"doctype": "Material Request Item",
-		# 	"postprocess": update_item,
-		# }
 	}, target_doc, set_missing_values)
 
 	return doclist
