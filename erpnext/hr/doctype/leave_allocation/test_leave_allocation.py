@@ -18,6 +18,7 @@ class TestLeaveAllocation(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Leave Period")
 		frappe.db.delete("Leave Allocation")
+		frappe.db.delete("Leave Ledger Entry")
 
 		emp_id = make_employee("test_emp_leave_allocation@salary.com", company="_Test Company")
 		self.employee = frappe.get_doc("Employee", emp_id)
@@ -369,7 +370,7 @@ class TestLeaveAllocation(FrappeTestCase):
 		self.assertEqual(leave_allocation.total_leaves_allocated, 40)
 
 	def test_leave_addition_after_submit_with_carry_forward(self):
-		from hrms.hr.doctype.leave_application.test_leave_application import (
+		from erpnext.hr.doctype.leave_application.test_leave_application import (
 			create_carry_forwarded_allocation,
 		)
 
@@ -421,7 +422,7 @@ class TestLeaveAllocation(FrappeTestCase):
 		self.assertEqual(leave_allocation.total_leaves_allocated, 10)
 
 	def test_leave_subtraction_after_submit_with_carry_forward(self):
-		from hrms.hr.doctype.leave_application.test_leave_application import (
+		from erpnext.hr.doctype.leave_application.test_leave_application import (
 			create_carry_forwarded_allocation,
 		)
 
