@@ -83,6 +83,7 @@
   "relation",
   "attendance_and_leave_details",
   "attendance_device_id",
+  "casual_leave_allocated",
   "column_break_44",
   "holiday_list",
   "salary_information",
@@ -130,6 +131,8 @@
   "column_break_99",
   "leave_encashed",
   "encashment_date",
+  "employee_separation_benefits_section",
+  "separation_benefits",
   "feedback_section",
   "reason_for_leaving",
   "column_break_104",
@@ -825,7 +828,7 @@
    "fieldname": "employment_status",
    "fieldtype": "Select",
    "label": "Employment Status",
-   "options": "\nIn Service\nEOL\nProbation"
+   "options": "\nIn Service\nEOL\nProbation\nLeft"
   },
   {
    "fieldname": "increment_cycle",
@@ -942,13 +945,31 @@
    "fieldname": "license_no",
    "fieldtype": "Data",
    "label": "License No."
+  },
+  {
+   "fieldname": "employee_separation_benefits_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Separation Benefits"
+  },
+  {
+   "fieldname": "separation_benefits",
+   "fieldtype": "Table",
+   "label": "Separation Benefits",
+   "options": "Separation Benefits"
+  },
+  {
+   "default": "0",
+   "fieldname": "casual_leave_allocated",
+   "fieldtype": "Check",
+   "label": "Causal Leave Allocated",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-01-20 16:51:49.969094",
+ "modified": "2023-03-14 14:10:11.354378",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
