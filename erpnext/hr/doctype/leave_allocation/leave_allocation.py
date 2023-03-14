@@ -90,6 +90,7 @@ class LeaveAllocation(Document):
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
 
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting
 	def on_update_after_submit(self):
 		if self.has_value_changed("new_leaves_allocated"):
 			self.validate_against_leave_applications()
@@ -99,7 +100,11 @@ class LeaveAllocation(Document):
 			# run required validations again since total leaves are being updated
 			self.validate_leave_days_and_dates()
 
-			leaves_to_be_added = self.new_leaves_allocated - self.get_existing_leave_count()
+			leaves_to_be_added = flt(
+				(self.new_leaves_allocated - self.get_existing_leave_count()),
+				self.precision("new_leaves_allocated"),
+			)
+
 			args = {
 				"leaves": leaves_to_be_added,
 				"from_date": self.from_date,
@@ -118,14 +123,13 @@ class LeaveAllocation(Document):
 				"employee": self.employee,
 				"company": self.company,
 				"leave_type": self.leave_type,
+				"is_carry_forward": 0,
+				"docstatus": 1,
 			},
-			pluck="leaves",
+			fields=["SUM(leaves) as total_leaves"],
 		)
-		total_existing_leaves = 0
-		for entry in ledger_entries:
-			total_existing_leaves += entry
 
-		return total_existing_leaves
+		return ledger_entries[0].total_leaves if ledger_entries else 0
 
 	def validate_against_leave_applications(self):
 		leaves_taken = get_approved_leaves_for_period(

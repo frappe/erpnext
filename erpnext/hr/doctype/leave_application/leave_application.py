@@ -856,6 +856,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 			Min(Ledger.from_date).as_("from_date"),
 			Max(Ledger.to_date).as_("to_date"),
 			Ledger.leave_type,
+			Ledger.employee,
 		)
 		.where(
 			(Ledger.from_date <= date)
@@ -895,6 +896,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 					"unused_leaves": d.cf_leaves,
 					"new_leaves_allocated": d.new_leaves,
 					"leave_type": d.leave_type,
+					"employee": d.employee,
 				}
 			),
 		)
@@ -933,24 +935,49 @@ def get_remaining_leaves(
 
 		return remaining_leaves
 
-	leave_balance = leave_balance_for_consumption = flt(allocation.total_leaves_allocated) + flt(
-		leaves_taken
-	)
-
-	# balance for carry forwarded leaves
 	if cf_expiry and allocation.unused_leaves:
+		# allocation contains both carry forwarded and new leaves
+		new_leaves_taken, cf_leaves_taken = get_new_and_cf_leaves_taken(allocation, cf_expiry)
+
 		if getdate(date) > getdate(cf_expiry):
-			# carry forwarded leave expiry date passed
+			# carry forwarded leaves have expired
 			cf_leaves = remaining_cf_leaves = 0
 		else:
-			cf_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
+			cf_leaves = flt(allocation.unused_leaves) + flt(cf_leaves_taken)
 			remaining_cf_leaves = _get_remaining_leaves(cf_leaves, cf_expiry)
 
-		leave_balance = flt(allocation.new_leaves_allocated) + flt(cf_leaves)
-		leave_balance_for_consumption = flt(allocation.new_leaves_allocated) + flt(remaining_cf_leaves)
+		# new leaves allocated - new leaves taken + cf leave balance
+		# Note: `new_leaves_taken` is added here because its already a -ve number in the ledger
+		leave_balance = (flt(allocation.new_leaves_allocated) + flt(new_leaves_taken)) + flt(cf_leaves)
+		leave_balance_for_consumption = (
+			flt(allocation.new_leaves_allocated) + flt(new_leaves_taken)
+		) + flt(remaining_cf_leaves)
+	else:
+		# allocation only contains newly allocated leaves
+		leave_balance = leave_balance_for_consumption = flt(allocation.total_leaves_allocated) + flt(
+			leaves_taken
+		)
 
 	remaining_leaves = _get_remaining_leaves(leave_balance_for_consumption, allocation.to_date)
 	return frappe._dict(leave_balance=leave_balance, leave_balance_for_consumption=remaining_leaves)
+
+
+def get_new_and_cf_leaves_taken(allocation: Dict, cf_expiry: str) -> Tuple[float, float]:
+	"""returns new leaves taken and carry forwarded leaves taken within an allocation period based on cf leave expiry"""
+	cf_leaves_taken = get_leaves_for_period(
+		allocation.employee, allocation.leave_type, allocation.from_date, cf_expiry
+	)
+	new_leaves_taken = get_leaves_for_period(
+		allocation.employee, allocation.leave_type, add_days(cf_expiry, 1), allocation.to_date
+	)
+
+	# using abs because leaves taken is a -ve number in the ledger
+	if abs(cf_leaves_taken) > allocation.unused_leaves:
+		# adjust the excess leaves in new_leaves_taken
+		new_leaves_taken += -(abs(cf_leaves_taken) - allocation.unused_leaves)
+		cf_leaves_taken = -allocation.unused_leaves
+
+	return new_leaves_taken, cf_leaves_taken
 
 
 def get_leaves_for_period(

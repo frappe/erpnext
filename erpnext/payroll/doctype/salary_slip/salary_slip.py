@@ -324,6 +324,8 @@ class SalarySlip(TransactionBase):
 
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
 
+		joining_date, relieving_date = self.get_joining_and_relieving_dates()
+
 		if not cint(include_holidays_in_total_working_days):
 			working_days -= len(holidays)
 			working_days_list = [cstr(day) for day in working_days_list if cstr(day) not in holidays]
@@ -335,10 +337,14 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set Payroll based on in Payroll settings"))
 
 		if payroll_based_on == "Attendance":
-			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(holidays)
+			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(
+				holidays, relieving_date
+			)
 			self.absent_days = absent
 		else:
-			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(holidays, working_days_list)
+			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(
+				holidays, working_days_list, relieving_date
+			)
 
 		if not lwp:
 			lwp = actual_lwp
@@ -461,7 +467,10 @@ class SalarySlip(TransactionBase):
 	def get_holidays_for_employee(self, start_date, end_date):
 		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
 
-	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days_list):
+	def calculate_lwp_or_ppl_based_on_leave_application(
+		self, holidays, working_days_list, relieving_date=None
+	):
+
 		lwp = 0
 
 		daily_wages_fraction_for_half_day = (
@@ -469,6 +478,9 @@ class SalarySlip(TransactionBase):
 		)
 
 		for d in working_days_list:
+			if relieving_date and getdate(d) > getdate(relieving_date):
+				break
+
 			leave = get_lwp_or_ppl_for_date(d, self.employee, holidays)
 
 			if leave:
@@ -488,9 +500,14 @@ class SalarySlip(TransactionBase):
 
 		return lwp
 
-	def calculate_lwp_ppl_and_absent_days_based_on_attendance(self, holidays):
+	def calculate_lwp_ppl_and_absent_days_based_on_attendance(self, holidays, relieving_date=None):
 		lwp = 0
 		absent = 0
+
+		end_date = self.end_date
+
+		if relieving_date:
+			end_date = relieving_date
 
 		daily_wages_fraction_for_half_day = (
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
@@ -506,7 +523,7 @@ class SalarySlip(TransactionBase):
 		for leave_type in leave_types:
 			leave_type_map[leave_type.name] = leave_type
 
-		attendances = frappe.db.sql(
+		attendances = frappe.db.sql(  # nosemgrep
 			"""
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
@@ -516,7 +533,7 @@ class SalarySlip(TransactionBase):
 				AND docstatus = 1
 				AND attendance_date between %s and %s
 		""",
-			values=(self.employee, self.start_date, self.end_date),
+			values=(self.employee, self.start_date, end_date),
 			as_dict=1,
 		)
 
