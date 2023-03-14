@@ -342,7 +342,7 @@ class AssetDepreciationSchedule(Document):
 		straight_line_idx = [
 			d.idx
 			for d in self.get("depreciation_schedule")
-			if d.depreciation_method == "Straight Line" or d.depreciation_method == "Manual"
+			if self.depreciation_method == "Straight Line" or self.depreciation_method == "Manual"
 		]
 
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
