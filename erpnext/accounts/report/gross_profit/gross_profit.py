@@ -741,6 +741,8 @@ class GrossProfitGenerator(object):
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
 
+		conditions += " and (is_return = 0 or (is_return=1 and return_against is null))"
+
 		if self.filters.item_group:
 			conditions += " and {0}".format(get_item_group_condition(self.filters.item_group))
 
