@@ -451,8 +451,9 @@ class PaymentEntry(AccountsController):
 		if frappe.flags.in_import and self.title:
 			# do not set title dynamically if title exists during data import.
 			return
-
-		if self.payment_type in ("Receive", "Pay"):
+		if self.title:
+			self.title = self.title
+		elif self.payment_type in ("Receive", "Pay"):
 			self.title = self.party
 		else:
 			self.title = self.paid_from + " - " + self.paid_to
