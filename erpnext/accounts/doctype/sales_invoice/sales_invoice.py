@@ -152,6 +152,7 @@ class SalesInvoice(SellingController):
 	
 	def submit(self):
 		time.sleep(1)
+		frappe.db.commit()
 		self.queue_action('submit',queue_name="si_tertiary")
 
 	def on_submit(self):

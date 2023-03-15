@@ -10,51 +10,42 @@ from frappe.model.document import Document
 from frappe.utils import cstr
 
 class Attendance(Document):
-	def validate_duplicate_record(self):
-		res = frappe.db.sql("""select name,status from `tabAttendance` where employee = %s and attendance_date = %s
-			and name != %s and docstatus != 2""",
-			(self.employee, getdate(self.attendance_date), self.name), as_dict= 1)
-		if res:
-			frappe.throw(_("Attendance {4} with status {2} for employee {0} is already marked, Attendance {3} can not mark Attendance with status {1} ").format(self.employee, self.status, res[0]['status'], self.name, res[0]['name']))
-
-	def check_leave_record(self):
-		leave_record = frappe.db.sql("""select leave_type, half_day, half_day_date from `tabLeave Application`
-			where employee = %s and %s between from_date and to_date and status = 'Approved'
-			and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
-		if leave_record:
-			for d in leave_record:
-				if d.half_day_date == getdate(self.attendance_date):
-					self.status = 'Half Day'
-					frappe.msgprint(_("Employee {0} on Half day on {1}").format(self.employee, self.attendance_date))
-				else:
-					self.status = 'On Leave'
-					self.leave_type = d.leave_type
-					frappe.msgprint(_("Employee {0} is on Leave on {1}").format(self.employee, self.attendance_date))
-
-		if self.status == "On Leave" and not leave_record:
-			frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
-
-	def validate_attendance_date(self):
-		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
-
-		# leaves can be marked for future dates
-		if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
-			frappe.throw(_("Attendance can not be marked for future dates"))
-		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
-			frappe.throw(_("Attendance date can not be less than employee's joining date"))
-
-	def validate_employee(self):
-		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
-		 	self.employee)
-		if not emp:
-			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
-
-	def validate(self):
-		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day"])
-		self.validate_attendance_date()
-		self.validate_duplicate_record()
-		self.check_leave_record()
+    def on_cancel(self):
+        frappe.db.sql("""UPDATE `tabEmployee Checkin` SET attendance = null , skip_auto_attendance = 0 WHERE attendance = %s""", (self.name))
+        frappe.db.commit()
+    def validate_duplicate_record(self):
+        res = frappe.db.sql("""select name,status from `tabAttendance` where employee = %s and attendance_date = %s and name != %s and docstatus != 2""",(self.employee, getdate(self.attendance_date), self.name), as_dict= 1)
+        if res:
+            frappe.throw(_("Attendance {4} with status {2} for employee {0} is already marked, Attendance {3} can not mark Attendance with status {1} ").format(self.employee, self.status, res[0]['status'], self.name, res[0]['name']))
+    def check_leave_record(self):
+        leave_record = frappe.db.sql("""select leave_type, half_day, half_day_date from `tabLeave Application` where employee = %s and %s between from_date and to_date and status = 'Approved' and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
+        if leave_record:
+            for d in leave_record:
+                if d.half_day_date == getdate(self.attendance_date):
+                    self.status = 'Half Day'
+                    frappe.msgprint(_("Employee {0} on Half day on {1}").format(self.employee, self.attendance_date))
+                else:
+                    self.status = 'On Leave'
+                    self.leave_type = d.leave_type
+                    frappe.msgprint(_("Employee {0} is on Leave on {1}").format(self.employee, self.attendance_date))
+        if self.status == "On Leave" and not leave_record:
+            frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
+    def validate_attendance_date(self):
+        date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
+        if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
+            frappe.throw(_("Attendance can not be marked for future dates"))
+        elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
+            frappe.throw(_("Attendance date can not be less than employee's joining date"))
+    def validate_employee(self):
+        emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'", self.employee)
+        if not emp:
+            frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
+    def validate(self):
+        from erpnext.controllers.status_updater import validate_status
+        validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day"])
+        self.validate_attendance_date()
+        self.validate_duplicate_record()
+        self.check_leave_record()
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
