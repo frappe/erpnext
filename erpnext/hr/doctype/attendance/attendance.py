@@ -11,11 +11,11 @@ from frappe.utils import cstr
 
 class Attendance(Document):
 	def validate_duplicate_record(self):
-		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and attendance_date = %s
+		res = frappe.db.sql("""select name,status from `tabAttendance` where employee = %s and attendance_date = %s
 			and name != %s and docstatus != 2""",
-			(self.employee, getdate(self.attendance_date), self.name))
+			(self.employee, getdate(self.attendance_date), self.name), as_dict= 1)
 		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
+			frappe.throw(_("Attendance {4} with status {2} for employee {0} is already marked, Attendance {3} can not mark Attendance with status {1} ").format(self.employee, self.status, res[0]['status'], self.name, res[0]['name']))
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""select leave_type, half_day, half_day_date from `tabLeave Application`
