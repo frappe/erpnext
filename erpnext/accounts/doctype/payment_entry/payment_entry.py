@@ -1317,7 +1317,6 @@ def get_outstanding_reference_documents(args):
 			company_currency,
 			condition=condition,
 		)
-	frappe.msgprint(str(negative_outstanding_invoices))
 	# commented as -ve outstanding was not required
 	# data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 	data = outstanding_invoices + orders_to_be_billed
