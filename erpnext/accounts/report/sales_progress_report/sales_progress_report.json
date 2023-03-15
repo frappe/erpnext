@@ -1,0 +1,39 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-01-01 12:25:11.128570",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "SMCL Letter Head",
+ "modified": "2023-01-01 12:25:11.128570",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Progress Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Sales Progress Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales Master Manager"
+  },
+  {
+   "role": "Sales User"
+  }
+ ]
+}

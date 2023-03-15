@@ -19,6 +19,7 @@ def execute(filters=None):
 	data = []
 
 	customer_list = get_details(filters)
+
 	for d in customer_list:
 		row = []
 

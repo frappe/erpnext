@@ -38,24 +38,24 @@ def get_period_date(fiscal_year, period, cumulative=None):
 def get_loss_tolerance():
     loss_tolerance = frappe.db.sql("select name,loss_tolerance,loss_qty_flat from `tabLoss Tolerance` order by creation desc limit 1;");
     #msgprint(_("Fetching Loss Tolerance {0}").format(loss_tolerance))
-    return (loss_tolerance);
+    return (loss_tolerance)
 
 # Ver 20160627.1 by SSK, Fetching the latest
 @frappe.whitelist()
 def get_parent_cost_center(temp):
     parent_cc = frappe.db.sql("select name from `tabCost Center`;");
-    return (parent_cc);
+    return (parent_cc)
 
 @frappe.whitelist()
 def calculate_depreciation_date():
-    return get_last_day(nowdate());
+    return get_last_day(nowdate())
 
 ##
 #Return all the child cost centers of the current cost center
 ##
 def get_child_cost_centers(current_cs=None):
-    allchilds = allcs = [];
-    cs_name = cs_par_name = "";
+    allchilds = allcs = []
+    cs_name = cs_par_name = ""
 
     if current_cs:
         #Get all cost centers

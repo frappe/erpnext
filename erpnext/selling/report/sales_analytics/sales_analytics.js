@@ -3,20 +3,6 @@
 /* eslint-disable */
 
 frappe.query_reports["Sales Analytics"] = {
-	onload:function(query_report){
-		if  (query_report.get_filter_values("tree_type").tree_type == "Customer"){
-			// frappe.query_report.toggle_filter_display('item_code', false);
-			frappe.query_report.toggle_filter_display('territory', false);
-			frappe.query_report.toggle_filter_display('country', false);
-			frappe.query_report.toggle_filter_display('customer_group', false);
-		}else{
-			// frappe.query_report.toggle_filter_display('item_code', true);
-			frappe.query_report.toggle_filter_display('territory', true);
-			frappe.query_report.toggle_filter_display('country', true);
-			frappe.query_report.toggle_filter_display('customer_group', true);
-		}
-		query_report.refresh()
-	},
 	"filters": [
 		{
 			fieldname: "tree_type",
@@ -24,21 +10,7 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldtype: "Select",
 			options: ["Customer Group", "Customer", "Item Group", "Item", "Territory", "Order Type", "Project"],
 			default: "Customer",
-			reqd: 1,
-			on_change: function(query_report){
-				if  (query_report.get_filter_values("tree_type").tree_type == "Customer"){
-					// frappe.query_report.toggle_filter_display('item_code', false);
-					frappe.query_report.toggle_filter_display('territory', false);
-					frappe.query_report.toggle_filter_display('country', false);
-					frappe.query_report.toggle_filter_display('customer_group', false);
-				}else{
-					// frappe.query_report.toggle_filter_display('item_code', true);
-					frappe.query_report.toggle_filter_display('territory', true);
-					frappe.query_report.toggle_filter_display('country', true);
-					frappe.query_report.toggle_filter_display('customer_group', true);
-				}
-				query_report.refresh()
-			}
+			reqd: 1
 		},
 		{
 			fieldname: "doc_type",
@@ -93,31 +65,7 @@ frappe.query_reports["Sales Analytics"] = {
 			],
 			default: "Monthly",
 			reqd: 1
-		},
-		// {
-		// 	fieldname: "item_code",
-		// 	label: __("Material Code"),
-		// 	fieldtype: "Link",
-		// 	options: "Item",
-		// },
-		{
-			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "Link",
-			options: "Territory",
-		},
-		{
-			fieldname: "country",
-			label: __("Country"),
-			fieldtype: "Link",
-			options: "Country",
-		},
-		{
-			fieldname: "customer_type",
-			label: __("Customer Type"),
-			fieldtype: "Select",
-			options: ["","International Customer","Company","Domestic Customer"],
-		},
+		}
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {
