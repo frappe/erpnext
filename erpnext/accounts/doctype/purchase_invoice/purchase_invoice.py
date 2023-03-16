@@ -1485,11 +1485,17 @@ class PurchaseInvoice(BuyingController):
 		if po_details:
 			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
+		adjust_incoming_rate = frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		)
+
 		for pr in set(updated_pr):
 			from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
 
 			pr_doc = frappe.get_doc("Purchase Receipt", pr)
-			update_billing_percentage(pr_doc, update_modified=update_modified)
+			update_billing_percentage(
+				pr_doc, update_modified=update_modified, adjust_incoming_rate=adjust_incoming_rate
+			)
 
 	def get_pr_details_billed_amt(self):
 		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice

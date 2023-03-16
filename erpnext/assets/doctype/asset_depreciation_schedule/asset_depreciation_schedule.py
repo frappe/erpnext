@@ -4,7 +4,15 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, add_months, cint, flt, get_last_day, is_last_day_of_the_month
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	flt,
+	get_last_day,
+	getdate,
+	is_last_day_of_the_month,
+)
 
 
 class AssetDepreciationSchedule(Document):
@@ -83,15 +91,58 @@ class AssetDepreciationSchedule(Document):
 		date_of_return=None,
 		update_asset_finance_book_row=True,
 	):
+		have_asset_details_been_modified = self.have_asset_details_been_modified(asset_doc)
+		not_manual_depr_or_have_manual_depr_details_been_modified = (
+			self.not_manual_depr_or_have_manual_depr_details_been_modified(row)
+		)
+
 		self.set_draft_asset_depr_schedule_details(asset_doc, row)
-		self.make_depr_schedule(asset_doc, row, date_of_disposal, update_asset_finance_book_row)
-		self.set_accumulated_depreciation(row, date_of_disposal, date_of_return)
+
+		if self.should_prepare_depreciation_schedule(
+			have_asset_details_been_modified, not_manual_depr_or_have_manual_depr_details_been_modified
+		):
+			self.make_depr_schedule(asset_doc, row, date_of_disposal, update_asset_finance_book_row)
+			self.set_accumulated_depreciation(row, date_of_disposal, date_of_return)
+
+	def have_asset_details_been_modified(self, asset_doc):
+		return (
+			asset_doc.gross_purchase_amount != self.gross_purchase_amount
+			or asset_doc.opening_accumulated_depreciation != self.opening_accumulated_depreciation
+			or asset_doc.number_of_depreciations_booked != self.number_of_depreciations_booked
+		)
+
+	def not_manual_depr_or_have_manual_depr_details_been_modified(self, row):
+		return (
+			self.depreciation_method != "Manual"
+			or row.total_number_of_depreciations != self.total_number_of_depreciations
+			or row.frequency_of_depreciation != self.frequency_of_depreciation
+			or getdate(row.depreciation_start_date) != self.get("depreciation_schedule")[0].schedule_date
+			or row.expected_value_after_useful_life != self.expected_value_after_useful_life
+		)
+
+	def should_prepare_depreciation_schedule(
+		self, have_asset_details_been_modified, not_manual_depr_or_have_manual_depr_details_been_modified
+	):
+		if not self.get("depreciation_schedule"):
+			return True
+
+		old_asset_depr_schedule_doc = self.get_doc_before_save()
+
+		if self.docstatus != 0 and not old_asset_depr_schedule_doc:
+			return True
+
+		if have_asset_details_been_modified or not_manual_depr_or_have_manual_depr_details_been_modified:
+			return True
+
+		return False
 
 	def set_draft_asset_depr_schedule_details(self, asset_doc, row):
 		self.asset = asset_doc.name
 		self.finance_book = row.finance_book
 		self.finance_book_id = row.idx
-		self.opening_accumulated_depreciation = asset_doc.opening_accumulated_depreciation
+		self.opening_accumulated_depreciation = asset_doc.opening_accumulated_depreciation or 0
+		self.number_of_depreciations_booked = asset_doc.number_of_depreciations_booked or 0
+		self.gross_purchase_amount = asset_doc.gross_purchase_amount
 		self.depreciation_method = row.depreciation_method
 		self.total_number_of_depreciations = row.total_number_of_depreciations
 		self.frequency_of_depreciation = row.frequency_of_depreciation
@@ -102,7 +153,7 @@ class AssetDepreciationSchedule(Document):
 	def make_depr_schedule(
 		self, asset_doc, row, date_of_disposal, update_asset_finance_book_row=True
 	):
-		if row.depreciation_method != "Manual" and not self.get("depreciation_schedule"):
+		if not self.get("depreciation_schedule"):
 			self.depreciation_schedule = []
 
 		if not asset_doc.available_for_use_date:
@@ -134,14 +185,14 @@ class AssetDepreciationSchedule(Document):
 	):
 		asset_doc.validate_asset_finance_books(row)
 
-		value_after_depreciation = _get_value_after_depreciation_for_making_schedule(asset_doc, row)
+		value_after_depreciation = self._get_value_after_depreciation_for_making_schedule(asset_doc, row)
 		row.value_after_depreciation = value_after_depreciation
 
 		if update_asset_finance_book_row:
 			row.db_update()
 
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
-			asset_doc.number_of_depreciations_booked
+			self.number_of_depreciations_booked
 		)
 
 		has_pro_rata = asset_doc.check_is_pro_rata(row)
@@ -184,13 +235,12 @@ class AssetDepreciationSchedule(Document):
 					self.add_depr_schedule_row(
 						date_of_disposal,
 						depreciation_amount,
-						row.depreciation_method,
 					)
 
 				break
 
 			# For first row
-			if has_pro_rata and not asset_doc.opening_accumulated_depreciation and n == 0:
+			if has_pro_rata and not self.opening_accumulated_depreciation and n == 0:
 				from_date = add_days(
 					asset_doc.available_for_use_date, -1
 				)  # needed to calc depr amount for available_for_use_date too
@@ -209,7 +259,7 @@ class AssetDepreciationSchedule(Document):
 					# In case of increase_in_asset_life, the asset.to_date is already set on asset_repair submission
 					asset_doc.to_date = add_months(
 						asset_doc.available_for_use_date,
-						(n + asset_doc.number_of_depreciations_booked) * cint(row.frequency_of_depreciation),
+						(n + self.number_of_depreciations_booked) * cint(row.frequency_of_depreciation),
 					)
 
 				depreciation_amount_without_pro_rata = depreciation_amount
@@ -247,7 +297,6 @@ class AssetDepreciationSchedule(Document):
 				self.add_depr_schedule_row(
 					schedule_date,
 					depreciation_amount,
-					row.depreciation_method,
 				)
 
 	# to ensure that final accumulated depreciation amount is accurate
@@ -274,14 +323,12 @@ class AssetDepreciationSchedule(Document):
 		self,
 		schedule_date,
 		depreciation_amount,
-		depreciation_method,
 	):
 		self.append(
 			"depreciation_schedule",
 			{
 				"schedule_date": schedule_date,
 				"depreciation_amount": depreciation_amount,
-				"depreciation_method": depreciation_method,
 			},
 		)
 
@@ -293,7 +340,9 @@ class AssetDepreciationSchedule(Document):
 		ignore_booked_entry=False,
 	):
 		straight_line_idx = [
-			d.idx for d in self.get("depreciation_schedule") if d.depreciation_method == "Straight Line"
+			d.idx
+			for d in self.get("depreciation_schedule")
+			if self.depreciation_method == "Straight Line" or self.depreciation_method == "Manual"
 		]
 
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
@@ -324,16 +373,15 @@ class AssetDepreciationSchedule(Document):
 				accumulated_depreciation, d.precision("accumulated_depreciation_amount")
 			)
 
+	def _get_value_after_depreciation_for_making_schedule(self, asset_doc, fb_row):
+		if asset_doc.docstatus == 1 and fb_row.value_after_depreciation:
+			value_after_depreciation = flt(fb_row.value_after_depreciation)
+		else:
+			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
+				self.opening_accumulated_depreciation
+			)
 
-def _get_value_after_depreciation_for_making_schedule(asset_doc, fb_row):
-	if asset_doc.docstatus == 1 and fb_row.value_after_depreciation:
-		value_after_depreciation = flt(fb_row.value_after_depreciation)
-	else:
-		value_after_depreciation = flt(asset_doc.gross_purchase_amount) - flt(
-			asset_doc.opening_accumulated_depreciation
-		)
-
-	return value_after_depreciation
+		return value_after_depreciation
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
