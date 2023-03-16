@@ -31,7 +31,7 @@ class BOMTree:
 
 	# specifying the attributes to save resources
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
-	__slots__ = ["name", "child_items", "is_bom", "item_code", "exploded_qty", "qty"]
+	__slots__ = ["name", "child_items", "is_bom", "item_code", "qty", "exploded_qty", "bom_qty"]
 
 	def __init__(
 		self, name: str, is_bom: bool = True, exploded_qty: float = 1.0, qty: float = 1
@@ -50,9 +50,10 @@ class BOMTree:
 	def __create_tree(self):
 		bom = frappe.get_cached_doc("BOM", self.name)
 		self.item_code = bom.item
+		self.bom_qty = bom.quantity
 
 		for item in bom.get("items", []):
-			qty = item.qty / bom.quantity  # quantity per unit
+			qty = item.stock_qty / bom.quantity  # quantity per unit
 			exploded_qty = self.exploded_qty * qty
 			if item.bom_no:
 				child = BOMTree(item.bom_no, exploded_qty=exploded_qty, qty=qty)
