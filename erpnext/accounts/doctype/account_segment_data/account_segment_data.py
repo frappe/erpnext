@@ -7,14 +7,19 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import (today, add_days)
 #site confige import
-from nrp_manufacturing.utils import  get_config_by_name
+from nrp_manufacturing.utils import  get_config_by_name,get_post_params
 class AccountSegmentData(Document):
 	pass
 
 @frappe.whitelist()
 def calculate_segment_profit():
 	bgroup = ['CSD (Carbonated Soft Drinks)','Confectionery','Water','Juice','19 Ltr','Other']
-	date_yesterday = add_days(today(), -100)
+	form_body = get_post_params()
+	if form_body.get('date'):
+		date_yesterday = form_body.get('date')
+	else:
+		date_yesterday = add_days(today(), -1)
+
 	units = get_config_by_name("segment_wise_profit_csd", {})
 	b_group_data = []
 	for single_unit in units:

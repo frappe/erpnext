@@ -40,6 +40,10 @@ frappe.ui.form.on('Payment Order', {
 						frm.refresh();
 					}
 				})
+				setTimeout(() => {
+					frm.remove_custom_button('Create Payment Entry With Single Cheque','Create');
+
+				}, 100);
 			},('Create'));
 			// frm.add_custom_button(__('Create Payment Entry For All Suppliers'), function() {
 			// 	frappe.call({
