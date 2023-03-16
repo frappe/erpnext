@@ -296,11 +296,9 @@ class DeliveryNote(SellingController):
 		if not self.is_return:
 			self.check_credit_limit()
 		elif self.issue_credit_note:
-			self.make_return_invoice()
+			frappe.enqueue("erpnext.stock.doctype.delivery_note.delivery_note.make_return_sales_invoice",delivery_note=self.name,queue="si_primary",enqueue_after_commit=True)			
 		elif self.is_return and self.return_type == 'Shop Return' and len(self.items) > 0:
-			savedoc =	make_sales_invoice(self.name)
-			savedoc.submit()
-			frappe.db.sql("UPDATE `tabDelivery Note Item` SET against_sales_invoice ='{sale_invoice}' WHERE `parent`='{docname}';".format(docname=self.name,sale_invoice=savedoc.name))
+			frappe.enqueue("erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice_return",delivery_note=self.name,queue="si_primary",enqueue_after_commit=True)
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		from nrp_manufacturing.modules.gourmet.delivery_note.delivery_note import update_stock_ledger
@@ -515,6 +513,17 @@ def get_returned_qty_map(delivery_note):
 	""", delivery_note))
 
 	return returned_qty_map
+@frappe.whitelist()
+def make_return_sales_invoice(source_name):
+	doc = frappe.get_doc('Delivery Note',source_name)
+	doc.make_return_invoice()
+
+@frappe.whitelist()
+def make_sales_invoice_return(source_name):
+	savedoc =	make_sales_invoice(source_name=source_name)
+	savedoc.submit()
+	frappe.db.sql("UPDATE `tabDelivery Note Item` SET against_sales_invoice ='{sale_invoice}' WHERE `parent`='{docname}';".format(docname=source_name,sale_invoice=savedoc.name))
+
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
