@@ -394,7 +394,13 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 	if ancestors and not allow_independent_account_creation:
 		for ancestor in ancestors:
-			if frappe.db.get_value("Account", {"account_name": old_acc_name, "company": ancestor}, "name"):
+			old_name = frappe.db.get_value(
+				"Account",
+				{"account_number": old_acc_number, "account_name": old_acc_name, "company": ancestor},
+				"name",
+			)
+
+			if old_name:
 				# same account in parent company exists
 				allow_child_account_creation = _("Allow Account Creation Against Child Company")
 
