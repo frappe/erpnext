@@ -140,8 +140,8 @@ class AssetDepreciationSchedule(Document):
 		self.asset = asset_doc.name
 		self.finance_book = row.finance_book
 		self.finance_book_id = row.idx
-		self.opening_accumulated_depreciation = asset_doc.opening_accumulated_depreciation
-		self.number_of_depreciations_booked = asset_doc.number_of_depreciations_booked
+		self.opening_accumulated_depreciation = asset_doc.opening_accumulated_depreciation or 0
+		self.number_of_depreciations_booked = asset_doc.number_of_depreciations_booked or 0
 		self.gross_purchase_amount = asset_doc.gross_purchase_amount
 		self.depreciation_method = row.depreciation_method
 		self.total_number_of_depreciations = row.total_number_of_depreciations
@@ -185,14 +185,14 @@ class AssetDepreciationSchedule(Document):
 	):
 		asset_doc.validate_asset_finance_books(row)
 
-		value_after_depreciation = _get_value_after_depreciation_for_making_schedule(asset_doc, row)
+		value_after_depreciation = self._get_value_after_depreciation_for_making_schedule(asset_doc, row)
 		row.value_after_depreciation = value_after_depreciation
 
 		if update_asset_finance_book_row:
 			row.db_update()
 
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
-			asset_doc.number_of_depreciations_booked
+			self.number_of_depreciations_booked
 		)
 
 		has_pro_rata = asset_doc.check_is_pro_rata(row)
@@ -235,13 +235,12 @@ class AssetDepreciationSchedule(Document):
 					self.add_depr_schedule_row(
 						date_of_disposal,
 						depreciation_amount,
-						row.depreciation_method,
 					)
 
 				break
 
 			# For first row
-			if has_pro_rata and not asset_doc.opening_accumulated_depreciation and n == 0:
+			if has_pro_rata and not self.opening_accumulated_depreciation and n == 0:
 				from_date = add_days(
 					asset_doc.available_for_use_date, -1
 				)  # needed to calc depr amount for available_for_use_date too
@@ -260,7 +259,7 @@ class AssetDepreciationSchedule(Document):
 					# In case of increase_in_asset_life, the asset.to_date is already set on asset_repair submission
 					asset_doc.to_date = add_months(
 						asset_doc.available_for_use_date,
-						(n + asset_doc.number_of_depreciations_booked) * cint(row.frequency_of_depreciation),
+						(n + self.number_of_depreciations_booked) * cint(row.frequency_of_depreciation),
 					)
 
 				depreciation_amount_without_pro_rata = depreciation_amount
@@ -298,7 +297,6 @@ class AssetDepreciationSchedule(Document):
 				self.add_depr_schedule_row(
 					schedule_date,
 					depreciation_amount,
-					row.depreciation_method,
 				)
 
 	# to ensure that final accumulated depreciation amount is accurate
@@ -325,14 +323,12 @@ class AssetDepreciationSchedule(Document):
 		self,
 		schedule_date,
 		depreciation_amount,
-		depreciation_method,
 	):
 		self.append(
 			"depreciation_schedule",
 			{
 				"schedule_date": schedule_date,
 				"depreciation_amount": depreciation_amount,
-				"depreciation_method": depreciation_method,
 			},
 		)
 
@@ -346,7 +342,7 @@ class AssetDepreciationSchedule(Document):
 		straight_line_idx = [
 			d.idx
 			for d in self.get("depreciation_schedule")
-			if d.depreciation_method == "Straight Line" or d.depreciation_method == "Manual"
+			if self.depreciation_method == "Straight Line" or self.depreciation_method == "Manual"
 		]
 
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
@@ -377,16 +373,15 @@ class AssetDepreciationSchedule(Document):
 				accumulated_depreciation, d.precision("accumulated_depreciation_amount")
 			)
 
+	def _get_value_after_depreciation_for_making_schedule(self, asset_doc, fb_row):
+		if asset_doc.docstatus == 1 and fb_row.value_after_depreciation:
+			value_after_depreciation = flt(fb_row.value_after_depreciation)
+		else:
+			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
+				self.opening_accumulated_depreciation
+			)
 
-def _get_value_after_depreciation_for_making_schedule(asset_doc, fb_row):
-	if asset_doc.docstatus == 1 and fb_row.value_after_depreciation:
-		value_after_depreciation = flt(fb_row.value_after_depreciation)
-	else:
-		value_after_depreciation = flt(asset_doc.gross_purchase_amount) - flt(
-			asset_doc.opening_accumulated_depreciation
-		)
-
-	return value_after_depreciation
+		return value_after_depreciation
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
