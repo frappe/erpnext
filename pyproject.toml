@@ -28,9 +28,6 @@ dependencies = [
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.bench.dev-dependencies]
-hypothesis = "~=6.31.0"
-
 [tool.black]
 line-length = 99
 

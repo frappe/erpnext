@@ -323,6 +323,6 @@ erpnext.patches.v14_0.update_entry_type_for_journal_entry
 erpnext.patches.v14_0.change_autoname_for_tax_withheld_vouchers
 erpnext.patches.v14_0.set_pick_list_status
 erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
-# below 2 migration patches should always run last
+erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
+# below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
-erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
