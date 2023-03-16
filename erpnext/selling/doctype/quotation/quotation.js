@@ -85,23 +85,15 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		}
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
-<<<<<<< HEAD
 			if (frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation
 				|| (!doc.valid_till)
 				|| frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
 					this.frm.add_custom_button(
 						__("Sales Order"),
-						this.frm.cscript["Make Sales Order"],
+						() => this.make_sales_order(),
 						__("Create")
 					);
 				}
-=======
-			this.frm.add_custom_button(
-				__("Sales Order"),
-				() => this.make_sales_order(),
-				__("Create")
-			);
->>>>>>> cef7dfd0b4 (feat: Dialog to select alternative item before creating Sales order)
 
 			if(doc.status!=="Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
