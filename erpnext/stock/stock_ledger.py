@@ -42,7 +42,7 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 				"sle_id": sle_id,
 				"is_amended": is_amended
 			})
-			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
+			#update_bin(args, allow_negative_stock, via_landed_cost_voucher) for testing and impact calculation 
 
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
