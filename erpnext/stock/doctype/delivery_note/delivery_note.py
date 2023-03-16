@@ -514,13 +514,13 @@ def get_returned_qty_map(delivery_note):
 
 	return returned_qty_map
 @frappe.whitelist()
-def make_return_sales_invoice(source_name):
-	doc = frappe.get_doc('Delivery Note',source_name)
+def make_return_sales_invoice(delivery_note):
+	doc = frappe.get_doc('Delivery Note',delivery_note)
 	doc.make_return_invoice()
 
 @frappe.whitelist()
-def make_sales_invoice_return(source_name):
-	savedoc =	make_sales_invoice(source_name=source_name)
+def make_sales_invoice_return(delivery_note):
+	savedoc =	make_sales_invoice(source_name==delivery_note)
 	savedoc.submit()
 	frappe.db.sql("UPDATE `tabDelivery Note Item` SET against_sales_invoice ='{sale_invoice}' WHERE `parent`='{docname}';".format(docname=source_name,sale_invoice=savedoc.name))
 
