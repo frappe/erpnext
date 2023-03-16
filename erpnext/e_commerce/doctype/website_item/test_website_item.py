@@ -226,11 +226,11 @@ class TestWebsiteItem(unittest.TestCase):
 		self.assertTrue(bool(data.product_info["price"]))
 
 		price_object = data.product_info["price"]
-		self.assertEqual(price_object.get("discount_percent"), 25)
+		self.assertEqual(price_object.get("discount_percent"), 25.0)
 		self.assertEqual(price_object.get("price_list_rate"), 750)
 		self.assertEqual(price_object.get("formatted_mrp"), "₹ 1,000.00")
 		self.assertEqual(price_object.get("formatted_price"), "₹ 750.00")
-		self.assertEqual(price_object.get("formatted_discount_percent"), "25%")
+		self.assertEqual(price_object.get("formatted_discount_percent"), "25.0%")
 
 		# switch to admin and disable show price
 		frappe.set_user("Administrator")
