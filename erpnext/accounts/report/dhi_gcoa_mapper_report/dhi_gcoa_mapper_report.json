@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "SMCL Letter Head",
- "modified": "2022-12-20 14:23:02.799027",
+ "modified": "2023-03-16 10:40:57.148924",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "DHI GCOA Mapper Report",
@@ -25,6 +25,9 @@
   },
   {
    "role": "Accounts User"
+  },
+  {
+   "role": "Accounts Manager"
   }
  ]
 }

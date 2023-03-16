@@ -41,7 +41,6 @@
             </tr>
         </thead>
         <tbody>
-            {% console.log(data)%}
             {% for d in data %}
             <tr>
                 <td style = "text-align: center; align-content: center;">{{frappe.format(d.posting_date,{fieldtype: "Date"})}}</td>

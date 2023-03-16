@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "SMCL Letter Head",
- "modified": "2022-12-16 11:19:07.363179",
+ "modified": "2023-03-16 10:44:56.772926",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Consolidation Report",
@@ -22,6 +22,12 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Accounts Manager"
   }
  ]
 }
