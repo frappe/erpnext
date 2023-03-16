@@ -779,7 +779,6 @@ class StockEntry(StockController):
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
 					rate = get_incoming_rate(args, raise_error_if_no_rate)
-					print(rate, "set rate for outgoing items")
 					if rate > 0:
 						d.basic_rate = rate
 
@@ -1223,6 +1222,14 @@ class StockEntry(StockController):
 				if d.serial_and_batch_bundle and self.docstatus == 1:
 					self.copy_serial_and_batch_bundle(sle, d)
 
+				if d.serial_and_batch_bundle and self.docstatus == 2:
+					bundle_id = frappe.get_cached_value(
+						"Serial and Batch Bundle", {"voucher_detail_no": d.name, "is_cancelled": 0}, "name"
+					)
+
+					if d.serial_and_batch_bundle != bundle_id:
+						sle.serial_and_batch_bundle = bundle_id
+
 				sl_entries.append(sle)
 
 	def copy_serial_and_batch_bundle(self, sle, child):
@@ -1240,9 +1247,17 @@ class StockEntry(StockController):
 			bundle_doc.type_of_transaction = "Inward"
 
 			for row in bundle_doc.ledgers:
+				if row.qty < 0:
+					row.qty = abs(row.qty)
+
+				if row.stock_value_difference < 0:
+					row.stock_value_difference = abs(row.stock_value_difference)
+
 				row.warehouse = child.t_warehouse
 				row.is_outward = 0
 
+			bundle_doc.set_total_qty()
+			bundle_doc.set_avg_rate()
 			bundle_doc.flags.ignore_permissions = True
 			bundle_doc.submit()
 			sle.serial_and_batch_bundle = bundle_doc.name
@@ -2859,6 +2874,8 @@ def create_serial_and_batch_bundle(row, child):
 	)
 
 	if row.serial_nos and row.batches_to_be_consume:
+		doc.has_serial_no = 1
+		doc.has_batch_no = 1
 		batchwise_serial_nos = get_batchwise_serial_nos(child.item_code, row)
 		for batch_no, qty in row.batches_to_be_consume.items():
 
@@ -2870,17 +2887,19 @@ def create_serial_and_batch_bundle(row, child):
 						"batch_no": batch_no,
 						"serial_no": batchwise_serial_nos.get(batch_no).pop(0),
 						"warehouse": row.warehouse,
-						"qty": qty,
+						"qty": -1,
 					},
 				)
 
 	elif row.serial_nos:
+		doc.has_serial_no = 1
 		for serial_no in row.serial_nos:
-			doc.append("ledgers", {"serial_no": serial_no, "warehouse": row.warehouse, "qty": 1})
+			doc.append("ledgers", {"serial_no": serial_no, "warehouse": row.warehouse, "qty": -1})
 
 	elif row.batches_to_be_consume:
+		doc.has_batch_no = 1
 		for batch_no, qty in row.batches_to_be_consume.items():
-			doc.append("ledgers", {"batch_no": batch_no, "warehouse": row.warehouse, "qty": qty})
+			doc.append("ledgers", {"batch_no": batch_no, "warehouse": row.warehouse, "qty": qty * -1})
 
 	return doc.insert(ignore_permissions=True).name
 

@@ -6,7 +6,6 @@ from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, now
-from pypika import Case
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -209,13 +208,18 @@ class SerialBatchBundle:
 		frappe.db.bulk_insert("Serial and Batch Ledger", fields=fields, values=set(ledgers))
 
 	def add_batch_no_to_bundle(self, sn_doc, batch_no, incoming_rate):
+		stock_value_difference = flt(self.sle.actual_qty) * flt(incoming_rate)
+
+		if self.sle.actual_qty < 0:
+			stock_value_difference *= -1
+
 		sn_doc.append(
 			"ledgers",
 			{
 				"batch_no": batch_no,
 				"qty": self.sle.actual_qty,
 				"incoming_rate": incoming_rate,
-				"stock_value_difference": flt(self.sle.actual_qty) * flt(incoming_rate),
+				"stock_value_difference": stock_value_difference,
 			},
 		)
 
@@ -286,7 +290,7 @@ class SerialBatchBundle:
 
 		frappe.db.set_value(
 			"Serial and Batch Bundle",
-			self.sle.serial_and_batch_bundle,
+			{"voucher_no": self.sle.voucher_no, "voucher_type": self.sle.voucher_type},
 			{"is_cancelled": 1, "voucher_no": ""},
 		)
 
@@ -303,22 +307,24 @@ class SerialBatchBundle:
 		return False
 
 	def post_process(self):
-		if not self.sle.is_cancelled:
-			if self.item_details.has_serial_no == 1:
-				self.set_warehouse_and_status_in_serial_nos()
+		if self.item_details.has_serial_no == 1:
+			self.set_warehouse_and_status_in_serial_nos()
 
-			if self.item_details.has_serial_no == 1 and self.item_details.has_batch_no == 1:
-				self.set_batch_no_in_serial_nos()
-		else:
-			pass
-			# self.set_data_based_on_last_sle()
+		if (
+			self.sle.actual_qty > 0
+			and self.item_details.has_serial_no == 1
+			and self.item_details.has_batch_no == 1
+		):
+			self.set_batch_no_in_serial_nos()
 
 	def set_warehouse_and_status_in_serial_nos(self):
+		serial_nos = get_serial_nos(self.sle.serial_and_batch_bundle, check_outward=False)
 		warehouse = self.warehouse if self.sle.actual_qty > 0 else None
 
-		sn_table = frappe.qb.DocType("Serial No")
-		serial_nos = get_serial_nos(self.sle.serial_and_batch_bundle, check_outward=False)
+		if not serial_nos:
+			return
 
+		sn_table = frappe.qb.DocType("Serial No")
 		(
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
@@ -330,7 +336,7 @@ class SerialBatchBundle:
 		ledgers = frappe.get_all(
 			"Serial and Batch Ledger",
 			fields=["serial_no", "batch_no"],
-			filters={"parent": self.serial_and_batch_bundle},
+			filters={"parent": self.sle.serial_and_batch_bundle},
 		)
 
 		batch_serial_nos = {}
@@ -391,7 +397,7 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 					TIMESTAMP(
 						parent.posting_date, parent.posting_time
 					)
-				), child.name
+				), child.name, child.serial_no, child.warehouse
 			FROM
 				`tabSerial and Batch Bundle` as parent,
 				`tabSerial and Batch Ledger` as child
@@ -417,14 +423,18 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 		return frappe.db.sql(
 			f"""
 			SELECT
-				serial_no, incoming_rate
+				ledger.serial_no, ledger.incoming_rate, ledger.warehouse
 			FROM
 				`tabSerial and Batch Ledger` AS ledger,
 				({subquery}) AS SubQuery
 			WHERE
 				ledger.name = SubQuery.name
+				AND ledger.serial_no = SubQuery.serial_no
+				AND ledger.warehouse = SubQuery.warehouse
 			GROUP BY
 				ledger.serial_no
+			Order By
+				ledger.creation
 		""",
 			as_dict=1,
 		)
@@ -468,7 +478,7 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 		return is_rejected(self.sle.voucher_type, self.sle.voucher_detail_no, self.sle.warehouse)
 
 	def get_incoming_rate(self):
-		return flt(self.stock_value_change) / flt(self.sle.actual_qty)
+		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))
 
 
 def is_rejected(voucher_type, voucher_detail_no, warehouse):
@@ -517,7 +527,7 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 			.select(
 				child.batch_no,
 				Sum(child.stock_value_difference).as_("incoming_rate"),
-				Sum(Case().when(child.is_outward == 1, child.qty * -1).else_(child.qty)).as_("qty"),
+				Sum(child.qty).as_("qty"),
 			)
 			.where(
 				(child.batch_no.isin(batch_nos))
@@ -544,7 +554,7 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 	def set_stock_value_difference(self):
 		self.stock_value_change = 0
 		for batch_no, ledger in self.batch_nos.items():
-			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty * -1
+			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
 			frappe.db.set_value(
 				"Serial and Batch Ledger", ledger.name, "stock_value_difference", stock_value_change
@@ -564,9 +574,4 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 		self.wh_data.qty_after_transaction += self.sle.actual_qty
 
 	def get_incoming_rate(self):
-		return flt(self.stock_value_change) / flt(self.sle.actual_qty)
-
-
-class GetAvailableSerialBatchBundle:
-	def __init__(self) -> None:
-		pass
+		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))

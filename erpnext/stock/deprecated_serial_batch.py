@@ -4,6 +4,8 @@ from frappe.utils import flt
 
 
 class DeprecatedSerialNoValuation:
+	# Will be deperecated in v16
+
 	def calculate_stock_value_from_deprecarated_ledgers(self):
 		serial_nos = list(
 			filter(lambda x: x not in self.serial_no_incoming_rate and x, self.get_serial_nos())

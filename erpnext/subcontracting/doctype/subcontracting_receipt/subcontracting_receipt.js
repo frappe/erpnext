@@ -7,6 +7,7 @@ frappe.provide('erpnext.buying');
 
 frappe.ui.form.on('Subcontracting Receipt', {
 	setup: (frm) => {
+		frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
 		frm.get_field('supplied_items').grid.cannot_add_rows = true;
 		frm.get_field('supplied_items').grid.only_sortable();
 

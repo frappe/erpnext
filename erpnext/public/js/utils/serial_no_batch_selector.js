@@ -891,10 +891,11 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 					doc: this.frm.doc,
 				}
 			}).then(r => {
-				debugger
 				this.callback && this.callback(r.message);
 				this.dialog.hide();
 			})
+		} else {
+			frappe.msgprint(__('Please save the document first'));
 		}
 	}
 

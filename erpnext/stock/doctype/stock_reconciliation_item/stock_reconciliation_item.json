@@ -20,13 +20,13 @@
   "serial_and_batch_bundle",
   "batch_no",
   "column_break_11",
+  "current_serial_and_batch_bundle",
   "serial_no",
   "section_break_3",
   "current_qty",
   "current_amount",
   "column_break_9",
   "current_valuation_rate",
-  "current_serial_and_batch_bundle",
   "current_serial_no",
   "section_break_14",
   "quantity_difference",
@@ -192,7 +192,7 @@
   {
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
+   "label": "Serial / Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1

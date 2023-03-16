@@ -33,6 +33,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "main_item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -41,6 +42,7 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "rm_item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -77,14 +79,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "required_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Required Qty",
    "print_hide": 1,
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "consumed_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -102,6 +106,7 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Rate",
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -124,7 +129,6 @@
   {
    "fieldname": "current_stock",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Current Stock",
    "read_only": 1
   },
@@ -188,25 +192,25 @@
    "default": "0",
    "fieldname": "available_qty_for_consumption",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Available Qty For Consumption",
    "print_hide": 1,
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
+   "in_list_view": 1,
+   "label": "Serial / Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-12 14:11:48.816699",
+ "modified": "2023-03-15 13:55:08.132626",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Supplied Item",

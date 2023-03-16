@@ -105,7 +105,12 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_stock_ledger()

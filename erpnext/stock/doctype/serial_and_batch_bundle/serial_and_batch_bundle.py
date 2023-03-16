@@ -19,12 +19,14 @@ class SerialandBatchBundle(Document):
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
 		self.validate_voucher_no()
+		self.validate_serial_nos()
 
 	def before_save(self):
 		self.set_total_qty()
 		self.set_is_outward()
 		self.set_warehouse()
 		self.set_incoming_rate()
+		self.validate_qty_and_stock_value_difference()
 
 		if self.ledgers:
 			self.set_avg_rate()
@@ -34,6 +36,17 @@ class SerialandBatchBundle(Document):
 			self.set_incoming_rate_for_outward_transaction(row, save)
 		else:
 			self.set_incoming_rate_for_inward_transaction(row, save)
+
+	def validate_qty_and_stock_value_difference(self):
+		if self.type_of_transaction != "Outward":
+			return
+
+		for d in self.ledgers:
+			if d.qty and d.qty > 0:
+				d.qty *= -1
+
+			if d.stock_value_difference and d.stock_value_difference > 0:
+				d.stock_value_difference *= -1
 
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
 		sle = self.get_sle_for_outward_transaction(row)
@@ -53,12 +66,12 @@ class SerialandBatchBundle(Document):
 
 		for d in self.ledgers:
 			if self.has_serial_no:
-				d.incoming_rate = sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0)
+				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
-				d.incoming_rate = sn_obj.batch_avg_rate.get(d.batch_no)
+				d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
 
 			if self.has_batch_no:
-				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate) * -1
+				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 
 			if save:
 				d.db_set(
@@ -73,7 +86,7 @@ class SerialandBatchBundle(Document):
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
 				"serial_and_batch_bundle": self.name,
-				"actual_qty": self.total_qty * -1,
+				"actual_qty": self.total_qty,
 				"company": self.company,
 				"serial_nos": [row.serial_no for row in self.ledgers if row.serial_no],
 				"batch_nos": {row.batch_no: row for row in self.ledgers if row.batch_no},
@@ -126,6 +139,9 @@ class SerialandBatchBundle(Document):
 		self.set_incoming_rate(save=True, row=row)
 
 	def validate_voucher_no(self):
+		if self.is_new():
+			return
+
 		if not (self.voucher_type and self.voucher_no):
 			return
 
@@ -150,14 +166,22 @@ class SerialandBatchBundle(Document):
 				)
 			)
 
+	def validate_serial_nos(self):
+		if not self.has_serial_no:
+			return
+
 	def validate_quantity(self, row):
 		self.set_total_qty(save=True)
 
 		precision = row.precision
-		if abs(flt(self.total_qty, precision) - flt(row.qty, precision)) > 0.01:
+		qty_field = "qty"
+		if self.voucher_type in ["Subcontracting Receipt"]:
+			qty_field = "consumed_qty"
+
+		if abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision)) > 0.01:
 			frappe.throw(
 				_(
-					f"Total quantity {self.total_qty} in the Serial and Batch Bundle {self.name} does not match with the Item {row.item_code} in the {self.voucher_type} # {self.voucher_no}"
+					f"Total quantity {self.total_qty} in the Serial and Batch Bundle {self.name} does not match with the Item {self.item_code} in the {self.voucher_type} # {self.voucher_no}"
 				)
 			)
 
@@ -368,7 +392,7 @@ def create_serial_batch_no_ledgers(ledgers, child_row, parent_doc) -> object:
 		doc.append(
 			"ledgers",
 			{
-				"qty": row.qty or 1.0,
+				"qty": (row.qty or 1.0) * (1 if type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse,
 				"batch_no": row.batch_no,
 				"serial_no": row.serial_no,
@@ -535,14 +559,24 @@ def get_available_batches(kwargs):
 
 def get_voucher_wise_serial_batch_from_bundle(**kwargs) -> Dict[str, Dict]:
 	data = get_ledgers_from_serial_batch_bundle(**kwargs)
+	if not data:
+		return {}
 
 	group_by_voucher = {}
 
 	for row in data:
 		key = (row.item_code, row.warehouse, row.voucher_no)
+		if kwargs.get("get_subcontracted_item"):
+			# get_subcontracted_item = ("doctype", "field_name")
+			doctype, field_name = kwargs.get("get_subcontracted_item")
+
+			subcontracted_item_code = frappe.get_cached_value(doctype, row.voucher_detail_no, field_name)
+			key = (row.item_code, subcontracted_item_code, row.warehouse, row.voucher_no)
+
 		if key not in group_by_voucher:
 			group_by_voucher.setdefault(
-				key, {"serial_nos": [], "batch_nos": collections.defaultdict(float)}
+				key,
+				frappe._dict({"serial_nos": [], "batch_nos": collections.defaultdict(float), "item_row": row}),
 			)
 
 		child_row = group_by_voucher[key]
@@ -579,6 +613,9 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> List[frappe._dict]:
 	)
 
 	for key, val in kwargs.items():
+		if key in ["get_subcontracted_item"]:
+			continue
+
 		if key in ["name", "item_code", "warehouse", "voucher_no", "company", "voucher_detail_no"]:
 			if isinstance(val, list):
 				query = query.where(bundle_table[key].isin(val))
@@ -593,3 +630,56 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> List[frappe._dict]:
 				query = query.where(serial_batch_table[key] == val)
 
 	return query.run(as_dict=True)
+
+
+def get_available_serial_nos(item_code, warehouse):
+	filters = {
+		"item_code": item_code,
+		"warehouse": ("is", "set"),
+	}
+
+	fields = ["name", "warehouse", "batch_no"]
+
+	if warehouse:
+		filters["warehouse"] = warehouse
+
+	return frappe.get_all("Serial No", filters=filters, fields=fields)
+
+
+def get_available_batch_nos(item_code, warehouse):
+	sl_entries = get_stock_ledger_entries(item_code, warehouse)
+	batchwise_qty = collections.defaultdict(float)
+
+	precision = frappe.get_precision("Stock Ledger Entry", "qty")
+	for entry in sl_entries:
+		batchwise_qty[entry.batch_no] += flt(entry.qty, precision)
+
+
+def get_stock_ledger_entries(item_code, warehouse):
+	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	batch_ledger = frappe.qb.DocType("Serial and Batch Ledger")
+
+	return (
+		frappe.qb.from_(stock_ledger_entry)
+		.left_join(batch_ledger)
+		.on(stock_ledger_entry.serial_and_batch_bundle == batch_ledger.parent)
+		.select(
+			stock_ledger_entry.warehouse,
+			stock_ledger_entry.item_code,
+			Sum(
+				Case()
+				.when(stock_ledger_entry.serial_and_batch_bundle, batch_ledger.qty)
+				.else_(stock_ledger_entry.actual_qty)
+				.as_("qty")
+			),
+			Case()
+			.when(stock_ledger_entry.serial_and_batch_bundle, batch_ledger.batch_no)
+			.else_(stock_ledger_entry.batch_no)
+			.as_("batch_no"),
+		)
+		.where(
+			(stock_ledger_entry.item_code == item_code)
+			& (stock_ledger_entry.warehouse == warehouse)
+			& (stock_ledger_entry.is_cancelled == 0)
+		)
+	).run(as_dict=True)
