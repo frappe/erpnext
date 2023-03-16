@@ -222,9 +222,6 @@ class ExchangeRateRevaluation(Document):
 					new_balance_in_base_currency = 0
 					new_balance_in_account_currency = 0
 
-					if d["party"] == "500100158":
-						print("debug")
-
 					current_exchange_rate = calculate_exchange_rate_using_last_gle(
 						company, d.account, d.party_type, d.party
 					)
