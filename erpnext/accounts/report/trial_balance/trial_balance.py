@@ -190,7 +190,7 @@ def get_opening_balance(
 			(closing_balance.company == filters.company)
 			& (
 				closing_balance.account.isin(
-					frappe.qb.from_("account").select("name").where(account.report_type == report_type)
+					frappe.qb.from_(account).select("name").where(account.report_type == report_type)
 				)
 			)
 		)
