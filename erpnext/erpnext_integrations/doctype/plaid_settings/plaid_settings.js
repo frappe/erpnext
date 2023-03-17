@@ -47,7 +47,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 	}
 
 	async init_config() {
-		this.product = ["auth", "transactions"];
+		this.product = ["transactions"];
 		this.plaid_env = this.frm.doc.plaid_env;
 		this.client_name = frappe.boot.sitename;
 		this.token = await this.get_link_token();

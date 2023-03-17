@@ -182,6 +182,9 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			);
 		} else {
 			this.transactions.splice(transaction_index, 1);
+			for (const [k, v] of Object.entries(this.transaction_dt_map)) {
+				if (v > transaction_index) this.transaction_dt_map[k] = v - 1;
+			}
 		}
 		this.datatable.refresh(this.transactions, this.columns);
 
