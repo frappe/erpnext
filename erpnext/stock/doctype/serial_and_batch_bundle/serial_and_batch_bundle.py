@@ -18,7 +18,7 @@ class SerialandBatchBundle(Document):
 	def validate(self):
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
-		self.validate_voucher_no()
+		# self.validate_voucher_no()
 		self.validate_serial_nos()
 
 	def before_save(self):
@@ -101,6 +101,9 @@ class SerialandBatchBundle(Document):
 			rate = frappe.db.get_value(self.child_table, self.voucher_detail_no, "valuation_rate")
 
 		for d in self.ledgers:
+			if self.voucher_type in ["Stock Reconciliation", "Stock Entry"] and d.incoming_rate:
+				continue
+
 			if not rate or flt(rate, precision) == flt(d.incoming_rate, precision):
 				continue
 
@@ -134,7 +137,7 @@ class SerialandBatchBundle(Document):
 		if values_to_set:
 			self.db_set(values_to_set)
 
-		self.validate_voucher_no()
+		# self.validate_voucher_no()
 		self.validate_quantity(row)
 		self.set_incoming_rate(save=True, row=row)
 
@@ -196,6 +199,9 @@ class SerialandBatchBundle(Document):
 				row.warehouse = self.warehouse
 
 	def set_total_qty(self, save=False):
+		if not self.ledgers:
+			return
+
 		self.total_qty = sum([row.qty for row in self.ledgers])
 		if save:
 			self.db_set("total_qty", self.total_qty)
@@ -638,7 +644,7 @@ def get_available_serial_nos(item_code, warehouse):
 		"warehouse": ("is", "set"),
 	}
 
-	fields = ["name", "warehouse", "batch_no"]
+	fields = ["name as serial_no", "warehouse", "batch_no"]
 
 	if warehouse:
 		filters["warehouse"] = warehouse
@@ -653,6 +659,8 @@ def get_available_batch_nos(item_code, warehouse):
 	precision = frappe.get_precision("Stock Ledger Entry", "qty")
 	for entry in sl_entries:
 		batchwise_qty[entry.batch_no] += flt(entry.qty, precision)
+
+	return batchwise_qty
 
 
 def get_stock_ledger_entries(item_code, warehouse):
