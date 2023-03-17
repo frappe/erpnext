@@ -501,7 +501,14 @@ class GrossProfitGenerator(object):
 						):
 							returned_item_rows = self.returned_invoices[row.parent][row.item_code]
 							for returned_item_row in returned_item_rows:
-								row.qty += flt(returned_item_row.qty)
+								# returned_items 'qty' should be stateful
+								if returned_item_row.qty != 0:
+									if row.qty >= abs(returned_item_row.qty):
+										row.qty += returned_item_row.qty
+										returned_item_row.qty = 0
+									else:
+										row.qty = 0
+										returned_item_row.qty += row.qty
 								row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
 							row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
 						if flt(row.qty) or row.base_amount:
@@ -733,6 +740,8 @@ class GrossProfitGenerator(object):
 			conditions += " and posting_date >= %(from_date)s"
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
+
+		conditions += " and (is_return = 0 or (is_return=1 and return_against is null))"
 
 		if self.filters.item_group:
 			conditions += " and {0}".format(get_item_group_condition(self.filters.item_group))
