@@ -79,7 +79,6 @@ def validate_filters(filters):
 
 
 def get_data(filters):
-
 	accounts = frappe.db.sql(
 		"""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
 
@@ -119,12 +118,10 @@ def get_data(filters):
 		ignore_closing_entries=not flt(filters.with_period_closing_entry),
 	)
 
-	total_row = calculate_values(
-		accounts, gl_entries_by_account, opening_balances, filters, company_currency
-	)
+	calculate_values(accounts, gl_entries_by_account, opening_balances)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
-	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
+	data = prepare_data(accounts, filters, parent_children_map, company_currency)
 	data = filter_out_zero_value_rows(
 		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
 	)
@@ -266,7 +263,7 @@ def get_opening_balance(
 	return gle
 
 
-def calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency):
+def calculate_values(accounts, gl_entries_by_account, opening_balances):
 	init = {
 		"opening_debit": 0.0,
 		"opening_credit": 0.0,
@@ -274,22 +271,6 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"credit": 0.0,
 		"closing_debit": 0.0,
 		"closing_credit": 0.0,
-	}
-
-	total_row = {
-		"account": "'" + _("Total") + "'",
-		"account_name": "'" + _("Total") + "'",
-		"warn_if_negative": True,
-		"opening_debit": 0.0,
-		"opening_credit": 0.0,
-		"debit": 0.0,
-		"credit": 0.0,
-		"closing_debit": 0.0,
-		"closing_credit": 0.0,
-		"parent_account": None,
-		"indent": 0,
-		"has_value": True,
-		"currency": company_currency,
 	}
 
 	for d in accounts:
@@ -309,8 +290,28 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 		prepare_opening_closing(d)
 
-		for field in value_fields:
-			total_row[field] += d[field]
+
+def calculate_total_row(accounts, company_currency):
+	total_row = {
+		"account": "'" + _("Total") + "'",
+		"account_name": "'" + _("Total") + "'",
+		"warn_if_negative": True,
+		"opening_debit": 0.0,
+		"opening_credit": 0.0,
+		"debit": 0.0,
+		"credit": 0.0,
+		"closing_debit": 0.0,
+		"closing_credit": 0.0,
+		"parent_account": None,
+		"indent": 0,
+		"has_value": True,
+		"currency": company_currency,
+	}
+
+	for d in accounts:
+		if not d.parent_account:
+			for field in value_fields:
+				total_row[field] += d[field]
 
 	return total_row
 
@@ -322,7 +323,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 				accounts_by_name[d.parent_account][key] += d[key]
 
 
-def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
+def prepare_data(accounts, filters, parent_children_map, company_currency):
 	data = []
 
 	for d in accounts:
@@ -353,6 +354,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 		row["has_value"] = has_value
 		data.append(row)
 
+	total_row = calculate_total_row(accounts, company_currency)
 	data.extend([{}, total_row])
 
 	return data
