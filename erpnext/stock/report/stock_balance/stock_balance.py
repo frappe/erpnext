@@ -6,6 +6,10 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
+=======
+from frappe.query_builder.functions import Coalesce, CombineDatetime
+>>>>>>> b04a101c11 (fix: incorrect `Opening Value` in `Stock Balance` report)
 from frappe.utils import cint, date_diff, flt, getdate
 from six import iteritems
 
@@ -276,12 +280,59 @@ def get_stock_ledger_entries(filters, items):
 	)
 
 
+<<<<<<< HEAD
 def get_item_warehouse_map(filters, sle):
+=======
+	if items:
+		query = query.where(sle.item_code.isin(items))
+
+	query = apply_conditions(query, filters)
+	return query.run(as_dict=True)
+
+
+def get_opening_vouchers(to_date):
+	opening_vouchers = {"Stock Entry": [], "Stock Reconciliation": []}
+
+	se = frappe.qb.DocType("Stock Entry")
+	sr = frappe.qb.DocType("Stock Reconciliation")
+
+	vouchers_data = (
+		frappe.qb.from_(
+			(
+				frappe.qb.from_(se)
+				.select(se.name, Coalesce("Stock Entry").as_("voucher_type"))
+				.where((se.docstatus == 1) & (se.posting_date <= to_date) & (se.is_opening == "Yes"))
+			)
+			+ (
+				frappe.qb.from_(sr)
+				.select(sr.name, Coalesce("Stock Reconciliation").as_("voucher_type"))
+				.where((sr.docstatus == 1) & (sr.posting_date <= to_date) & (sr.purpose == "Opening Stock"))
+			)
+		).select("voucher_type", "name")
+	).run(as_dict=True)
+
+	if vouchers_data:
+		for d in vouchers_data:
+			opening_vouchers[d.voucher_type].append(d.name)
+
+	return opening_vouchers
+
+
+def get_inventory_dimension_fields():
+	return [dimension.fieldname for dimension in get_inventory_dimensions()]
+
+
+def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
+>>>>>>> b04a101c11 (fix: incorrect `Opening Value` in `Stock Balance` report)
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
-
+	opening_vouchers = get_opening_vouchers(to_date)
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
+<<<<<<< HEAD
+=======
+	inventory_dimensions = get_inventory_dimension_fields()
+>>>>>>> b04a101c11 (fix: incorrect `Opening Value` in `Stock Balance` report)
 
 	for d in sle:
 		key = (d.company, d.item_code, d.warehouse)
@@ -309,11 +360,7 @@ def get_item_warehouse_map(filters, sle):
 
 		value_diff = flt(d.stock_value_difference)
 
-		if d.posting_date < from_date or (
-			d.posting_date == from_date
-			and d.voucher_type == "Stock Reconciliation"
-			and frappe.db.get_value("Stock Reconciliation", d.voucher_no, "purpose") == "Opening Stock"
-		):
+		if d.posting_date < from_date or d.voucher_no in opening_vouchers.get(d.voucher_type, []):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 
