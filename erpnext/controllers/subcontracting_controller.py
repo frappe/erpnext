@@ -51,7 +51,9 @@ class SubcontractingController(StockController):
 		if self.doctype in ["Subcontracting Order", "Subcontracting Receipt"]:
 			self.validate_items()
 			self.create_raw_materials_supplied()
-			self.set_serial_and_batch_bundle("supplied_items")
+			for table_field in ["items", "supplied_items"]:
+				if self.get(table_field):
+					self.set_total_in_words(table_field)
 		else:
 			super(SubcontractingController, self).validate()
 

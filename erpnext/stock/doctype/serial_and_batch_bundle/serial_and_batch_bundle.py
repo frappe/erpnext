@@ -5,7 +5,7 @@ import collections
 from typing import Dict, List
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, today
@@ -300,6 +300,15 @@ class SerialandBatchBundle(Document):
 
 		for batch in batches:
 			frappe.db.set_value("Batch", batch.name, {"reference_name": None, "reference_doctype": None})
+
+	def on_cancel(self):
+		self.validate_voucher_no_docstatus()
+
+	def validate_voucher_no_docstatus(self):
+		if frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") == 1:
+			msg = f"""The {self.voucher_type} {bold(self.voucher_no)}
+				is in submitted state, please cancel it first"""
+			frappe.throw(_(msg))
 
 	def on_trash(self):
 		self.delink_refernce_from_voucher()

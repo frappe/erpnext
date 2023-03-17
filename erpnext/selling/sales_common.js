@@ -431,6 +431,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 					item.has_serial_no = r.message.has_serial_no;
 					item.has_batch_no = r.message.has_batch_no;
 					item.type_of_transaction = item.qty > 0 ? "Outward":"Inward";
+					item.outward = item.qty > 0 ? 1 : 0;
 
 					item.title = item.has_serial_no ?
 						__("Select Serial No") : __("Select Batch No");
@@ -446,6 +447,8 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 									me.frm.refresh_fields();
 									frappe.model.set_value(cdt, cdn,
 										"serial_and_batch_bundle", r.name);
+
+									me.frm.save();
 								}
 							}
 						);

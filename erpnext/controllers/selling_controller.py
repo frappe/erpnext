@@ -38,7 +38,9 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_auto_repeat_subscription_dates()
-		self.set_serial_and_batch_bundle()
+		for table_field in ["items", "packed_items"]:
+			if self.get(table_field):
+				self.set_serial_and_batch_bundle(table_field)
 
 	def set_missing_values(self, for_validate=False):
 
@@ -426,8 +428,7 @@ class SellingController(StockController):
 							"posting_date": self.get("posting_date") or self.get("transaction_date"),
 							"posting_time": self.get("posting_time") or nowtime(),
 							"qty": qty if cint(self.get("is_return")) else (-1 * qty),
-							"serial_no": d.get("serial_no"),
-							"batch_no": d.get("batch_no"),
+							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,

@@ -307,6 +307,9 @@ class SerialBatchBundle:
 		return False
 
 	def post_process(self):
+		if not self.sle.serial_and_batch_bundle:
+			return
+
 		if self.item_details.has_serial_no == 1:
 			self.set_warehouse_and_status_in_serial_nos()
 

@@ -719,7 +719,7 @@ class StockController(AccountsController):
 			table_name = "items"
 
 		for row in self.get(table_name):
-			if row.serial_and_batch_bundle:
+			if row.get("serial_and_batch_bundle"):
 				frappe.get_doc(
 					"Serial and Batch Bundle", row.serial_and_batch_bundle
 				).set_serial_and_batch_values(self, row)

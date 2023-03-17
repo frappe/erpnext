@@ -1220,11 +1220,18 @@ class StockEntry(StockController):
 					sle.recalculate_rate = 1
 
 				if d.serial_and_batch_bundle and self.docstatus == 1:
-					self.copy_serial_and_batch_bundle(sle, d)
+					d.serial_and_batch_bundle = self.copy_serial_and_batch_bundle(sle)
 
 				if d.serial_and_batch_bundle and self.docstatus == 2:
 					bundle_id = frappe.get_cached_value(
-						"Serial and Batch Bundle", {"voucher_detail_no": d.name, "is_cancelled": 0}, "name"
+						"Serial and Batch Bundle",
+						{
+							"voucher_detail_no": d.name,
+							"voucher_no": self.name,
+							"is_cancelled": 0,
+							"type_of_transaction": "Inward",
+						},
+						"name",
 					)
 
 					if d.serial_and_batch_bundle != bundle_id:
@@ -1232,7 +1239,7 @@ class StockEntry(StockController):
 
 				sl_entries.append(sle)
 
-	def copy_serial_and_batch_bundle(self, sle, child):
+	def copy_serial_and_batch_bundle(self, child):
 		allowed_types = [
 			"Material Transfer",
 			"Send to Subcontractor",
@@ -1260,7 +1267,7 @@ class StockEntry(StockController):
 			bundle_doc.set_avg_rate()
 			bundle_doc.flags.ignore_permissions = True
 			bundle_doc.submit()
-			sle.serial_and_batch_bundle = bundle_doc.name
+			return bundle_doc.name
 
 	def get_gl_entries(self, warehouse_account):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)

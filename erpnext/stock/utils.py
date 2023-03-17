@@ -259,8 +259,11 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
 	)
 
+	if isinstance(args, dict):
+		args = frappe._dict(args)
+
 	if item_details.has_serial_no and args.get("serial_and_batch_bundle"):
-		args["actual_qty"] = args["qty"]
+		args.actual_qty = args.qty
 		sn_obj = SerialNoBundleValuation(
 			sle=args,
 			warehouse=args.get("warehouse"),
@@ -270,7 +273,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		in_rate = sn_obj.get_incoming_rate()
 
 	elif item_details.has_batch_no and args.get("serial_and_batch_bundle"):
-		args["actual_qty"] = args["qty"]
+		args.actual_qty = args.qty
 		batch_obj = BatchNoBundleValuation(
 			sle=args,
 			warehouse=args.get("warehouse"),
