@@ -6,12 +6,14 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "company",
+  "branch",
+  "cost_center",
   "customer",
   "country",
   "disabled",
   "column_break_9",
   "warehouse",
+  "company",
   "campaign",
   "company_address",
   "section_break_15",
@@ -51,10 +53,7 @@
   "expense_account",
   "taxes_and_charges",
   "tax_category",
-  "apply_discount_on",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break"
+  "apply_discount_on"
  ],
  "fields": [
   {
@@ -249,12 +248,14 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "branch.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
    "oldfieldname": "cost_center",
    "oldfieldtype": "Link",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "read_only": 1
   },
   {
    "fieldname": "taxes_and_charges",
@@ -272,19 +273,10 @@
    "options": "Grand Total\nNet Total"
   },
   {
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "print_format",
@@ -375,6 +367,13 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
   }
  ],
  "icon": "icon-cog",
@@ -402,7 +401,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2022-08-10 12:57:06.241439",
+ "modified": "2023-03-16 15:09:11.475935",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

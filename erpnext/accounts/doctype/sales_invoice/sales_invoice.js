@@ -509,27 +509,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		this.calculate_taxes_and_totals();
 	}
 };
-frappe.ui.form.on("Other Charge Entry", {
-	rate:function(frm, cdt, cdn){
-		let row = locals[cdt][cdn]
-		if (flt(row.rate) > 0){
-			row.amount = flt(row.rate) * flt(frm.doc.total_qty)
-			frm.refresh_field('other_charges')
-		}
-		let total_charges = 0
-		frm.doc.other_charges.map(v=>{
-			total_charges += flt(v.amount)
-		})
-		frm.set_value("total_charges",total_charges)
-		frm.refresh_field("total_charges")
-		frm.trigger("other_charges")
-	},
-	other_charges_add:function(frm,cdt,cdn){
-		let row = locals[cdt][cdn]
-		row.cost_center = frm.doc.cost_center
-		frm.refresh_field('other_charges')
-	}
-})
 // for backward compatibility: combine new and previous states
 extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
 
@@ -550,12 +529,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 		]
 	}
 }
-cur_frm.fields_dict["other_charges"].grid.get_field("account").get_query = function (doc) {
-	return {
-		filters: { 'is_group': 0,
-					'account_type':["in",["Income Account","Expense Account"]]}
-	};
-};
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 	return{
 		filters:{
@@ -1090,112 +1063,6 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 
 	dialog.show();
 }
-
-
-// Function for validating Loss Tolerance
-function validate_loss_tolerance(frm, cdt, cdn){
-	var item = frappe.get_doc(cdt, cdn)
-
-	if (item.qty > 0)
-	{
-		 if (item.accepted_qty >= 0 && item.accepted_qty <= item.qty)
-		 {
-			   var loss_qty = item.qty - item.accepted_qty, normal_loss = 0, abnormal_loss = 0;
-
-			   if (item.loss_method == "Quantity in %")
-			   {
-				   if ((loss_qty/item.qty)*100 <= item.loss_tolerance)
-				   {
-						normal_loss = loss_qty;
-				   }
-				   else
-				   {
-						normal_loss = (item.qty*item.loss_tolerance)/100;
-						abnormal_loss = loss_qty-normal_loss
-				   }
-			   }
-			   else if (item.loss_method == "Quantity in Flat")
-			   {
-				   if (loss_qty <= item.loss_qty_flat)
-				   {
-						normal_loss = loss_qty;
-				   }
-				   else
-				   {
-						normal_loss = item.loss_qty_flat;
-						abnormal_loss = loss_qty-normal_loss
-				   }
-			   }
-			   frappe.model.set_value(cdt, cdn, "normal_loss", normal_loss);
-			   frappe.model.set_value(cdt, cdn, "normal_loss_amt", normal_loss*item.rate);
-			   frappe.model.set_value(cdt, cdn, "abnormal_loss", abnormal_loss);
-			   frappe.model.set_value(cdt, cdn, "abnormal_loss_amt", abnormal_loss*item.rate);
-			   frappe.model.set_value(cdt, cdn, "excess_qty", 0);
-			   frappe.model.set_value(cdt, cdn, "excess_amt", 0);
-			   // Billed Quantity should not change irrespective of loss
-		 }
-		 else if(item.accepted_qty > item.qty)
-		 {
-			   var excess_qty=item.accepted_qty-item.qty;
-			   frappe.model.set_value(cdt, cdn, "normal_loss", 0);
-			   frappe.model.set_value(cdt, cdn, "abnormal_loss", 0);
-			   frappe.model.set_value(cdt, cdn, "normal_loss_amt", 0);
-			   frappe.model.set_value(cdt, cdn, "abnormal_loss_amt", 0);
-			   // Billed Quantity should not change irrespective of loss
-			   frappe.model.set_value(cdt, cdn, "excess_qty", excess_qty);
-			   frappe.model.set_value(cdt, cdn, "excess_amt", excess_qty*item.rate);
-		 }
-		 else
-		 {
-			  msgprint(__("Accepted Quantity should be between 1 and "+item.qty));
-			  // Allowing the user to input more accpted qty than delivered qty as per request
-			  frappe.model.set_value(cdt, cdn, "accepted_qty", item.qty);
-			  frappe.model.set_value(cdt, cdn, "normal_loss", 0);
-			  frappe.model.set_value(cdt, cdn, "abnormal_loss", 0);
-			  frappe.model.set_value(cdt, cdn, "normal_loss_amt", 0);
-			  frappe.model.set_value(cdt, cdn, "abnormal_loss_amt", 0);
-			  frappe.model.set_value(cdt, cdn, "excess_qty", 0);
-			  frappe.model.set_value(cdt, cdn, "excess_amt", 0);
-			  frappe.model.set_value(cdt, cdn, "qty", item.accepted_qty);
-		 }
-
-	}
-}
-
-frappe.ui.form.on('Sales Invoice Item', {
-	"accepted_qty":function(frm, cdt, cdn){
-		if (cur_frm.doc.docstatus == 0)
-		{
-			 validate_loss_tolerance(frm, cdt, cdn);
-		}
-   	},
-	"loss_method":function(frm, cdt, cdn){
-		if (cur_frm.doc.docstatus == 0)
-		{
-			 validate_loss_tolerance(frm, cdt, cdn);
-		}
-   	},
-   "name_tolerance":function(frm, cdt, cdn){
-	if (cur_frm.doc.docstatus == 0)
-		{
-			validate_loss_tolerance(frm, cdt, cdn);
-		}
-	}
-})
-
-
-// Validate on Tolerange method value change
-frappe.ui.form.on("Sales Invoice Item","loss_method",function(frm, cdt, cdn){
-	if (cur_frm.doc.docstatus == 0)
-	{
-		 validate_loss_tolerance(frm, cdt, cdn);
-	}
-});
-// frappe.ui.form.on("Sales Invoice Advance",{
-// 	cost_center:function(frm, cdt, cdn){
-// 		console.log('here')
-// 	}
-// })
 
 frappe.ui.form.on("Sales Invoice","items_on_form_rendered", function(frm, grid_row) {
    cur_frm.call({

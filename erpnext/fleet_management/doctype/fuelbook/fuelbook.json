@@ -49,8 +49,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Supplier",
-   "options": "Supplier",
-   "reqd": 1
+   "options": "Supplier"
   },
   {
    "allow_on_submit": 1,
@@ -70,7 +69,6 @@
    "fieldname": "equipment",
    "fieldtype": "Link",
    "label": "Equipment",
-   "mandatory_depends_on": "eval:doc.type == \"Own\"",
    "options": "Equipment"
   },
   {
@@ -83,7 +81,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-02-10 13:41:25.800875",
+ "modified": "2023-03-17 10:37:29.193884",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fuelbook",

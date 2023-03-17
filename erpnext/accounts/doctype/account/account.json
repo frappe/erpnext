@@ -309,7 +309,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-02-07 11:02:13.841312",
+ "modified": "2023-03-16 16:06:54.861389",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -363,6 +363,26 @@
    "set_user_permissions": 1,
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "search_fields": "account_number, account_name",

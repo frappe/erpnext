@@ -124,9 +124,8 @@ class DeliveryNote(SellingController):
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
-		# self.validate_posting_time()
+		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
-		self.calculate_qty_and_fetch_transporter_rate()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
@@ -150,43 +149,6 @@ class DeliveryNote(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.set_warehouse_data()
 
-	def calculate_qty_and_fetch_transporter_rate(self):
-		for item in self.items:
-			if cint(item.is_volumetric) == 1 :
-				item.qty = item.volumetric_weight
-				item.gross_vehicle_weight = item.tare_weight = 0
-			else:
-				if flt(item.gross_vehicle_weight) > 0 and flt(item.tare_weight) > 0 :
-					item.qty = flt(item.gross_vehicle_weight) - flt(item.tare_weight)
-					item.volumetric_weight = 0 
-			if cint(self.is_return) == 1:
-				item.qty = item.qty * -1
-			if item.from_warehouse:
-				if not item.location:
-					throw("Location Mandatory at row {}".format(bold(item.idx)),title="Location Missing")
-				tr 		= qb.DocType("Transporter Rate")
-				tdr 	= qb.DocType("Transporter Distance Rate")
-				l 		= qb.DocType("Location")
-				rate_data = (qb.from_(tr)
-								.inner_join(tdr)
-								.on(tr.name == tdr.parent)
-								.select(tdr.distance,tdr.rate,tr.name,tr.expense_account)
-								.where((tr.from_warehouse == item.from_warehouse) 
-										& (tdr.location == item.location) 
-										& (tr.from_date <= self.posting_date) 
-										& (tr.to_date >= self.posting_date)
-										& (tr.disabled == 0))
-								.orderby(tr.from_date,order=qb.desc)
-								.limit(1)
-								).run()
-				if rate_data:
-					item.distance 							= rate_data[0][0]
-					item.transporter_rate 					= rate_data[0][1]
-					item.transporter_rate_ref 				= rate_data[0][2]
-					item.transporter_rate_expense_account 	= rate_data[0][3]
-				else:
-					if not rate_data:
-						throw("There Is No Rate and Distance Defined Between Warehouse {0} and Location {1}".format(bold(item.from_warehouse),bold(item.location)),title="Rate And Distance Missing")
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc(
 			{

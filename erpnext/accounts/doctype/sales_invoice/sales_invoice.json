@@ -72,8 +72,6 @@
   "scan_barcode",
   "items",
   "total",
-  "other_charges_section",
-  "other_charges",
   "pricing_rule_details",
   "pricing_rules",
   "packing_list",
@@ -119,7 +117,6 @@
   "discount_amount",
   "totals",
   "base_grand_total",
-  "total_charges",
   "base_rounding_adjustment",
   "base_rounded_total",
   "base_in_words",
@@ -129,9 +126,6 @@
   "rounded_total",
   "in_words",
   "total_advance",
-  "total_normal_loss",
-  "total_abnormal_loss",
-  "total_excess_amount",
   "outstanding_amount",
   "disable_rounded_total",
   "column_break4",
@@ -2067,40 +2061,6 @@
    "fieldtype": "Data",
    "label": "Quoted Rate",
    "read_only": 1
-  },
-  {
-   "fieldname": "other_charges_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "other_charges",
-   "fieldtype": "Table",
-   "label": "Other Charges",
-   "options": "Other Charge Entry"
-  },
-  {
-   "fieldname": "total_charges",
-   "fieldtype": "Currency",
-   "label": "Total Charges",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_normal_loss",
-   "fieldtype": "Currency",
-   "label": "Total Normal Loss",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_abnormal_loss",
-   "fieldtype": "Currency",
-   "label": "Total Abnormal Loss",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_excess_amount",
-   "fieldtype": "Currency",
-   "label": "Total Excess Amount",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2113,7 +2073,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-02-24 15:30:34.710806",
+ "modified": "2023-03-16 14:33:01.782984",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

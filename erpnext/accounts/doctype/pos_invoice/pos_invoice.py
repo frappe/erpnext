@@ -549,8 +549,8 @@ class POSInvoice(SalesInvoice):
 				"print_format": print_format,
 				"campaign": profile.get("campaign"),
 				"allow_print_before_pay": profile.get("allow_print_before_pay"),
+				"branch":profile.get("branch")
 			}
-
 	@frappe.whitelist()
 	def reset_mode_of_payments(self):
 		if self.pos_profile:

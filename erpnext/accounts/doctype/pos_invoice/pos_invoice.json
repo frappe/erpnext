@@ -10,6 +10,7 @@
   "customer_section",
   "title",
   "naming_series",
+  "branch",
   "customer",
   "customer_name",
   "tax_id",
@@ -1548,12 +1549,19 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 13:00:24.166684",
+ "modified": "2023-03-16 15:23:05.642391",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

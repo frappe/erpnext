@@ -81,7 +81,8 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
-		self.post_casual_leave()
+		# self.post_casual_leave()
+
 	def post_casual_leave(self):
 		from_date = getdate(self.date_of_joining)
 		to_date = get_year_end_date(from_date)
@@ -423,7 +424,8 @@ def get_overtime_rate(employee, posting_date ):
 		if not cint(basic[0].eligible_for_overtime_and_payment):
 			if not frappe.db.get_value("Employee Grade", frappe.db.get_value("Employee", employee, "grade"), "eligible_for_overtime"):
 				frappe.throw(_("Employee is not eligible for Overtime"))
-		if is_holiday(employee=employee, date= posting_date):
+		
+		if is_holiday(employee=employee, date=posting_date):
 			return ((flt(basic[0].basic_pay) * 1.5) / (30 * 8))
 		else:
 			return (flt(basic[0].basic_pay) / (30 * 8))

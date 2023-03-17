@@ -60,6 +60,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.doc.campaign = r.message.campaign;
 						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
+						this.frm.branch = r.message.branch
 					}
 					this.frm.script_manager.trigger("update_stock");
 					this.calculate_taxes_and_totals();

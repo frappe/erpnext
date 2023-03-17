@@ -9,7 +9,7 @@ app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
-app_logo_url = "/assets/erpnext/images/smcl_logo.gif"
+app_logo_url = "/assets/erpnext/images/stcbl_logo.jpg"
 required_apps = ["payments"]
 
 
@@ -447,8 +447,8 @@ email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
 default_mail_footer = """
 	<span>
 		Sent via
-		<a class="text-muted" href="https://emines.smcl.bt" target="_blank">
-			Emines
+		<a class="text-muted" href="https://dev.stcb.bt" target="_blank">
+			STCBL ERP
 		</a>
 	</span>
 """

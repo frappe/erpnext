@@ -502,7 +502,6 @@ erpnext.PointOfSale.Controller = class {
 		}
 
 		if (!this.frm.doc.company) return;
-
 		return this.frm.trigger("set_pos_data");
 	}
 

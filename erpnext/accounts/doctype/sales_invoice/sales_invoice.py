@@ -115,7 +115,6 @@ class SalesInvoice(SellingController):
 		self.validate_item_cost_centers()
 		self.validate_income_account()
 		self.check_conversion_rate()
-		self.calculate_charges()
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
@@ -177,11 +176,6 @@ class SalesInvoice(SellingController):
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-	def calculate_charges(self):
-		total_charges = 0
-		for d in self.other_charges:
-			total_charges += flt(d.amount)
-		self.total_charges = total_charges
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
@@ -497,6 +491,7 @@ class SalesInvoice(SellingController):
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
 				"campaign": pos.get("campaign"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
+				"branch":pos.get("branch")
 			}
 
 	def update_time_sheet(self, sales_invoice):
@@ -982,7 +977,6 @@ class SalesInvoice(SellingController):
 		self.make_item_gl_entries(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 		self.make_advance_gl_entry(gl_entries)
-		self.make_charges_gl_entry(gl_entries)
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
 
@@ -993,18 +987,6 @@ class SalesInvoice(SellingController):
 		self.make_gle_for_rounding_adjustment(gl_entries)
 
 		return gl_entries
-	def make_charges_gl_entry(self, gl_entries):
-		for a in self.other_charges:
-			if flt(a.amount) and a.account:
-				accounts = get_account_currency(a.account)
-				gl_entries.append(
-					self.get_gl_dict({
-							"account": a.account,
-							"credit": a.amount,
-							"credit_in_account_currency": a.amount,
-							"cost_center": a.cost_center
-						}, accounts)
-					)
 	def make_advance_gl_entry(self, gl_entries):
 		for a in self.get("advances"):
 			if flt(a.allocated_amount) and a.advance_account:
@@ -1032,7 +1014,7 @@ class SalesInvoice(SellingController):
 			if (self.base_rounding_adjustment and self.base_rounded_total)
 			else self.base_grand_total,
 			self.precision("base_grand_total"),
-		) - flt(self.total_advance) - flt(self.total_normal_loss) - flt(self.total_abnormal_loss),2)
+		) - flt(self.total_advance),2)
 		if grand_total and not self.is_internal_transfer():
 			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
@@ -1170,68 +1152,6 @@ class SalesInvoice(SellingController):
 								account_currency,
 								item=item,
 							)
-						)
-						if item.normal_loss_amt:
-							normal_account = frappe.db.get_value('Company', self.company, 'normal_loss_account') 
-							account_currency = get_account_currency(normal_account)
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": normal_account,
-									"against": self.customer,
-									#"party_type": "Customer",
-									#"party": self.customer,
-									"debit": item.normal_loss_amt,
-									"debit_in_account_currency": item.normal_loss_amt \
-										if account_currency==self.company_currency else (item.normal_loss_amt * self.conversion_rate, self.precision("grand_total")) ,
-									"cost_center": item.cost_center,
-								}, account_currency)
-							)						
-					if item.abnormal_loss_amt:
-						abnormal_account = frappe.db.get_value('Company', self.company, 'abnormal_loss_account') 
-						account_currency = get_account_currency(abnormal_account)
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": abnormal_account,
-								"against": self.customer,
-								"debit": item.abnormal_loss_amt,
-								"debit_in_account_currency": item.abnormal_loss_amt \
-									if account_currency==self.company_currency else (item.abnormal_loss_amt * self.conversion_rate, self.precision("grand_total")) ,
-								"cost_center": item.cost_center,
-							}, account_currency)
-						)
-					
-					if item.excess_qty:
-						excess_account = item.income_account
-						excess_amount = flt(item.excess_qty) * flt(item.rate)
-						remark = "Excess Amount due to weight difference by " + str(item.excess_qty) + "MT",
-						account_currency = get_account_currency(excess_account)
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": excess_account,
-								"against": self.customer,
-								"credit": excess_amount,
-								"credit_in_account_currency": excess_amount \
-									if account_currency==self.company_currency else (excess_amount * self.conversion_rate, self.precision("grand_total")) ,
-								"cost_center": item.cost_center,
-								"remark": remark,
-								"remarks": remark,
-							}, account_currency)
-						)
-					
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": self.debit_to,
-								"party_type": "Customer",
-								"party": self.customer,
-								"debit": excess_amount,
-								"debit_in_account_currency": excess_amount \
-									if account_currency==self.company_currency else (excess_amount * self.conversion_rate, self.precision("grand_total")) ,
-								"against_voucher": self.return_against if cint(self.is_return) else self.name,
-								"against_voucher_type": self.doctype,
-								"remark": remark,
-								"remarks": remark,
-								"cost_center": item.cost_center
-							}, account_currency)
 						)
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):

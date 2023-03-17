@@ -35,9 +35,9 @@ class Equipment(Document):
 				"from_date": from_date,
 				"supplier": self.supplier if self.hired_equipment else '',
 				"reference_document": ref_doc,
-				"bank_name": self.bank_name,
-				"account_number": self.account_number,
-				"ifs_code": self.ifs_code
+				# "bank_name": self.bank_name,
+				# "account_number": self.account_number,
+				# "ifs_code": self.ifs_code
 			})
 		else:
 			#doc = frappe.get_doc(self.doctype,self.name)
