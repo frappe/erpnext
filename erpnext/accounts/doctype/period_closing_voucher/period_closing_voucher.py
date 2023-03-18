@@ -235,6 +235,7 @@ class PeriodClosingVoucher(AccountsController):
 			qb_dimension_fields.append("account")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		return frappe.db.sql(
 			"""
 			select
@@ -280,13 +281,17 @@ class PeriodClosingVoucher(AccountsController):
 			.where((account.company == self.company) & (account.is_group == 0) & (account.docstatus < 2))
 >>>>>>> 7fa7d6b5e4 (chore: Rewrite query using query builder)
 		)
+=======
+		account_filters = {
+			"company": self.company,
+			"is_group": 0,
+		}
+>>>>>>> 00fe3042b2 (chore: Simplify query)
 
 		if report_type:
-			accounts_query = accounts_query.where(account.report_type == report_type)
+			account_filters.update({"report_type": report_type})
 
-		accounts = accounts_query.run(as_dict=True)
-
-		accounts = [d.name for d in accounts]
+		accounts = frappe.get_all("Account", filters=account_filters, pluck="name")
 
 		gl_entry = frappe.qb.DocType("GL Entry")
 		query = frappe.qb.from_(gl_entry).select(gl_entry.account, gl_entry.account_currency)
