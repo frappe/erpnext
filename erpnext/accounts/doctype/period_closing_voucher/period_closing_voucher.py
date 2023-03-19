@@ -5,12 +5,12 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt
+from frappe.utils import add_days, flt
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year, validate_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -73,8 +73,6 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 
 	def validate_posting_date(self):
-		from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
-
 		validate_fiscal_year(
 			self.posting_date, self.fiscal_year, self.company, label=_("Posting Date"), doc=self
 		)
@@ -82,6 +80,8 @@ class PeriodClosingVoucher(AccountsController):
 		self.year_start_date = get_fiscal_year(
 			self.posting_date, self.fiscal_year, company=self.company
 		)[1]
+
+		self.check_if_previous_year_closed()
 
 		pce = frappe.db.sql(
 			"""select name from `tabPeriod Closing Voucher`
@@ -94,6 +94,17 @@ class PeriodClosingVoucher(AccountsController):
 					pce[0][0], self.posting_date
 				)
 			)
+
+	def check_if_previous_year_closed(self):
+		last_year_closing = add_days(self.year_start_date, -1)
+
+		previous_fiscal_year = get_fiscal_year(last_year_closing, company=self.company, boolean=True)
+
+		if previous_fiscal_year and not frappe.db.exists(
+			"Period Closing Voucher",
+			{"posting_date": ("<=", last_year_closing), "docstatus": 1, "company": self.company},
+		):
+			frappe.throw(_("Previous Year is not closed, please close it first"))
 
 	def make_gl_entries(self, get_opening_entries=False):
 		gl_entries = self.get_gl_entries()

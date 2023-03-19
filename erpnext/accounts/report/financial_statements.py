@@ -491,8 +491,6 @@ def get_accounting_entries(
 			gl_entry.account,
 			gl_entry.debit,
 			gl_entry.credit,
-			gl_entry.is_opening,
-			gl_entry.fiscal_year,
 			gl_entry.debit_in_account_currency,
 			gl_entry.credit_in_account_currency,
 			gl_entry.account_currency,
@@ -503,7 +501,7 @@ def get_accounting_entries(
 	query = query.where(gl_entry.account.isin(accounts))
 
 	if doctype == "GL Entry":
-		query = query.select(gl_entry.posting_date)
+		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
 	else:
