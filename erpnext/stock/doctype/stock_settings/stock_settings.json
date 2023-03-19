@@ -31,6 +31,10 @@
   "action_if_quality_inspection_is_not_submitted",
   "column_break_23",
   "action_if_quality_inspection_is_rejected",
+  "stock_reservation_tab",
+  "enable_stock_reservation",
+  "column_break_rx3e",
+  "reserve_stock_on_sales_order_submission",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
@@ -339,6 +343,28 @@
   {
    "fieldname": "column_break_121",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_reservation_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Reservation"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_stock_reservation",
+   "fieldtype": "Check",
+   "label": "Enable Stock Reservation"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.enable_stock_reservation",
+   "fieldname": "reserve_stock_on_sales_order_submission",
+   "fieldtype": "Check",
+   "label": "Reserve Stock on Sales Order Submission"
+  },
+  {
+   "fieldname": "column_break_rx3e",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -346,7 +372,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-05 15:33:43.692736",
+ "modified": "2023-03-20 11:42:29.769937",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
