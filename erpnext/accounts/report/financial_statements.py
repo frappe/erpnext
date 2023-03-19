@@ -418,27 +418,23 @@ def set_gl_entries_by_account(
 	ignore_closing_entries=False,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
-
 	gl_entries = []
-	account = frappe.qb.DocType("Account")
 
-	accounts = (
-		frappe.qb.from_(account)
-		.select(account.name)
-		.where(account.lft >= root_lft)
-		.where(account.rgt <= root_rgt)
-		.where(account.company == company)
-		.run(as_dict=True)
+	accounts_list = frappe.db.get_all(
+		"Account",
+		filters={"company": company, "is_group": 0, "lft": (">=", root_lft), "rgt": ("<=", root_rgt)},
+		pluck="name",
 	)
 
-	accounts_list = [account.name for account in accounts]
-
 	if accounts_list:
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 		if filters.get("include_default_book_entries"):
 			gl_filters["company_fb"] = frappe.db.get_value("Company", company, "default_finance_book")
 =======
+=======
+>>>>>>> 44053db010 (chore: Remove unnecessary list comprehension)
 		# For balance sheet
 		if not from_date:
 			from_date = filters["period_start_date"]
@@ -498,8 +494,6 @@ def get_accounting_entries(
 		.where(gl_entry.company == filters.company)
 	)
 
-	query = query.where(gl_entry.account.isin(accounts))
-
 	if doctype == "GL Entry":
 		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
@@ -509,6 +503,7 @@ def get_accounting_entries(
 		query = query.where(gl_entry.period_closing_voucher == period_closing_voucher)
 
 	query = apply_additional_conditions(doctype, query, from_date, ignore_closing_entries, filters)
+	query = query.where(gl_entry.account.isin(accounts))
 
 	entries = query.run(as_dict=True)
 
