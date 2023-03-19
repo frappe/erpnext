@@ -63,6 +63,33 @@ class TestBlanketOrder(FrappeTestCase):
 		po1.currency = get_company_currency(po1.company)
 		self.assertEqual(po1.items[0].qty, (bo.items[0].qty - bo.items[0].ordered_qty))
 
+	def test_over_order_allowance(self):
+		# Sales Order
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=100)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		so.items[0].qty = 110
+		self.assertRaises(frappe.ValidationError, so.submit)
+
+		frappe.db.set_single_value("Selling Settings", "over_order_allowance", 10)
+		so.submit()
+
+		# Purchase Order
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.schedule_date = today()
+		po.items[0].qty = 110
+		self.assertRaises(frappe.ValidationError, po.submit)
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 10)
+		po.submit()
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
