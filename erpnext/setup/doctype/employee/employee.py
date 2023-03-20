@@ -30,6 +30,7 @@ class Employee(NestedSet):
 		name = make_autoname('EMP.####')[3:]
 		if not self.employee_name:
 			self.set_employee_name()
+
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
@@ -81,7 +82,7 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
-		# self.post_casual_leave()
+		self.post_casual_leave()
 
 	def post_casual_leave(self):
 		from_date = getdate(self.date_of_joining)
@@ -89,13 +90,13 @@ class Employee(NestedSet):
 
 		if not cint(self.casual_leave_allocated):
 			if frappe.db.exists("Leave Allocation", {"leave_type": "Casual Leave", "employee": self.name, "from_date": ("<=",str(to_date)), "to_date": (">=", str(from_date))}):
-				self.add_comments("Auto allocation of CL is skipped as an allocation already exists for the period {} - {}".format(from_date, to_date))
+				# self.add_comments("Auto allocation of CL is skipped as an allocation already exists for the period {} - {}".format(from_date, to_date))
 				self.db_set("casual_leave_allocated", 1)
 				return
 				
 			if not frappe.db.sql("""select count(*) as counts from `tabFiscal Year` where now() between year_start_date and year_end_date
 				and '{}' <= year_end_date and '{}' >= year_start_date""".format(from_date, to_date))[0][0]:
-				self.add_comments("Auto allocation of CL is skipped as the Employee's Date of Joing is not in current Fiscal Year")
+				# self.add_comments("Auto allocation of CL is skipped as the Employee's Date of Joing is not in current Fiscal Year")
 				self.db_set("casual_leave_allocated", 1)
 				return
 
@@ -425,10 +426,10 @@ def get_overtime_rate(employee, posting_date ):
 			if not frappe.db.get_value("Employee Grade", frappe.db.get_value("Employee", employee, "grade"), "eligible_for_overtime"):
 				frappe.throw(_("Employee is not eligible for Overtime"))
 		
-		if is_holiday(employee=employee, date=posting_date):
-			return ((flt(basic[0].basic_pay) * 1.5) / (30 * 8))
-		else:
-			return (flt(basic[0].basic_pay) / (30 * 8))
+		# if is_holiday(employee=employee, date=posting_date):
+		return ((flt(basic[0].basic_pay) * 1.5) / (30 * 8))
+		# else:
+		# 	return (flt(basic[0].basic_pay) / (30 * 8))
 	else:
 		frappe.throw("No Salary Structure found for the employee")
 

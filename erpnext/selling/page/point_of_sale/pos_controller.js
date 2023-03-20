@@ -459,7 +459,7 @@ erpnext.PointOfSale.Controller = class {
 					this.frm = this.get_new_frm();
 					this.frm.doc.items = [];
 					this.frm.doc.is_pos = 1
-					resolve();
+					resolve()
 				});
 			}
 		});
@@ -728,6 +728,7 @@ erpnext.PointOfSale.Controller = class {
 	async save_and_checkout() {
 		if (this.frm.is_dirty()) {
 			let save_error = false;
+			console.log('checking : ',this.frm.doc)
 			await this.frm.save(null, null, null, () => save_error = true);
 			// only move to payment section if save is successful
 			!save_error && this.payment.checkout();

@@ -293,7 +293,7 @@
    "fieldname": "repair_and_services_type",
    "fieldtype": "Select",
    "label": "Repair and Services Type",
-   "options": "\nPreventive Maintenance\nProactive Maintenance\nBreakdown Maintenance"
+   "options": "\nCompany\nCorporate\nOthers"
   },
   {
    "fieldname": "sb_approver",
@@ -408,7 +408,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-08 15:32:12.790373",
+ "modified": "2023-03-17 13:55:10.628205",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Services",

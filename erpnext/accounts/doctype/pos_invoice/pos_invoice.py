@@ -32,7 +32,6 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(
 				_("POS Invoice should have {} field checked.").format(frappe.bold("Include Payment"))
 			)
-
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
@@ -543,7 +542,6 @@ class POSInvoice(SalesInvoice):
 		print_format = profile.get("print_format") if profile else None
 		if not print_format and not cint(frappe.db.get_value("Print Format", "POS Invoice", "disabled")):
 			print_format = "POS Invoice"
-
 		if profile:
 			return {
 				"print_format": print_format,

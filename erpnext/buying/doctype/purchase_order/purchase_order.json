@@ -1194,7 +1194,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Thanking You<br>\nYours Sincerely<br><br><br>\n\n\n\n\nChhimi Rinzin<br>\nGeneral Manager-HRAD<br><br>\n\n\n\nCc:<br>\n<ol>\n  <li>GM, HRAD/PMD/RSLO for information;</li>\n  <li>Sr. Mines Manager, KGM for information;</li>\n  <li>Asst. Manager, AFD, RSLO, S/J for information;</li>\n <li>Procurement/Store Asst. for necessary action.</li>\n</ol>",
+   "default": "Thanking You<br>\nYours Sincerely<br><br><br>\n\n\n\n\nTest Name<br>\nGeneral Manager-HRAD<br><br>\n\n\n\nCc:<br>\n<ol>\n  <li>GM, HRAD/PMD/RSLO for information;</li>\n  <li>Sr. Mines Manager, KGM for information;</li>\n  <li>Asst. Manager, AFD, RSLO, S/J for information;</li>\n <li>Procurement/Store Asst. for necessary action.</li>\n</ol>",
    "fieldname": "po_footer_text",
    "fieldtype": "Text Editor",
    "label": "Purchase Order Footer"
@@ -1216,7 +1216,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-01 12:21:26.747177",
+ "modified": "2023-03-20 10:26:58.132879",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

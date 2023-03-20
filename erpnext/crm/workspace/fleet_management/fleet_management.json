@@ -1,23 +1,15 @@
 {
  "charts": [],
- "content": "[{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lead\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Opportunity\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Analytics\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Pipeline\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Campaign\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}}]",
- "creation": "2020-01-23 14:48:30.183272",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 18px;\\\"><b>Quick Access</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Equipment\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POL Expense\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POL Receive\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POL Issue\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Repair &amp; Services\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"R &amp; Service Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Equipment Modifier Tool\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Repair and Services\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Fleet Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Fleet Report\",\"col\":4}}]",
+ "creation": "2023-03-14 12:40:35.110706",
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "crm",
+ "icon": "getting-started",
  "idx": 0,
- "label": "CRM",
+ "label": "Fleet Management",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Pipeline",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
   {
    "dependencies": "",
    "hidden": 0,
@@ -172,14 +164,6 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Reports",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
    "dependencies": "Lead",
    "hidden": 0,
    "is_query_report": 1,
@@ -277,14 +261,6 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Campaign",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -353,14 +329,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Settings",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "CRM Settings",
    "link_count": 0,
    "link_to": "CRM Settings",
@@ -402,14 +370,6 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Maintenance",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -441,51 +401,325 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Data",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Equipment",
+   "link_count": 0,
+   "link_to": "Equipment",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Equipment Category",
+   "link_count": 0,
+   "link_to": "Equipment Category",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Equipment Type",
+   "link_count": 0,
+   "link_to": "Equipment Type",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Equipment Model",
+   "link_count": 0,
+   "link_to": "Equipment Model",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shift",
+   "link_count": 0,
+   "link_to": "Shift Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Repair and Services",
+   "link_count": 6,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Repair and Services",
+   "link_count": 0,
+   "link_to": "Repair And Services",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Repair And Services Invoice",
+   "link_count": 0,
+   "link_to": "Repair And Services Invoice Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POL Expense",
+   "link_count": 0,
+   "link_to": "POL Expense",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POL Receive",
+   "link_count": 0,
+   "link_to": "POL Receive",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Equipment Modifier Tool",
+   "link_count": 0,
+   "link_to": "Equipment Modifier Tool",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POL Issue",
+   "link_count": 0,
+   "link_to": "POL Issue",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fleet Transaction",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Vehicle Request",
+   "link_count": 0,
+   "link_to": "Vehicle Request",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insurance and Registration",
+   "link_count": 0,
+   "link_to": "Insurance and Registration",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fleet Engagement",
+   "link_count": 0,
+   "link_to": "Fleet Engagement",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Hole Depth",
+   "link_count": 0,
+   "link_to": "Hole Depth",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fleet Report",
+   "link_count": 6,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "POL Receive Report",
+   "link_count": 0,
+   "link_to": "POL Receive Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "POL Expense Report",
+   "link_count": 0,
+   "link_to": "POL Expense Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Vehicle Request Report",
+   "link_count": 0,
+   "link_to": "Vehicle Request Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Repair And Services Report",
+   "link_count": 0,
+   "link_to": "Repair And Services Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Fleet Engagement Report",
+   "link_count": 0,
+   "link_to": "Fleet Engagement Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "POL Ledger",
+   "link_count": 0,
+   "link_to": "POL Ledger",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
   }
  ],
- "modified": "2023-03-17 13:35:11.824168",
+ "modified": "2023-03-17 13:35:11.749228",
  "modified_by": "Administrator",
  "module": "CRM",
- "name": "CRM",
+ "name": "Fleet Management",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 15.0,
+ "sequence_id": 14.0,
  "shortcuts": [
   {
-   "color": "Blue",
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "POL Expense",
+   "link_to": "POL Expense",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "Repair &amp; Services",
+   "link_to": "Repair And Services",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "POL Receive",
+   "link_to": "POL Receive",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "R &amp; Service Invoice",
+   "link_to": "Repair And Service Invoice",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
    "format": "{} Open",
-   "label": "Lead",
-   "link_to": "Lead",
-   "stats_filter": "{\"status\":\"Open\"}",
+   "label": "Equipment",
+   "link_to": "Equipment",
+   "stats_filter": "{\"enabled\":[\"=\",1]}",
    "type": "DocType"
   },
   {
-   "color": "Blue",
-   "format": "{} Assigned",
-   "label": "Opportunity",
-   "link_to": "Opportunity",
-   "stats_filter": "{\"_assign\": [\"like\", '%' + frappe.session.user + '%']}",
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "POL Issue",
+   "link_to": "POL Issue",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
    "type": "DocType"
   },
   {
-   "label": "Customer",
-   "link_to": "Customer",
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "Equipment Modifier Tool",
+   "link_to": "Equipment Modifier Tool",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
    "type": "DocType"
-  },
-  {
-   "label": "Sales Analytics",
-   "link_to": "Sales Analytics",
-   "type": "Report"
-  },
-  {
-   "label": "Dashboard",
-   "link_to": "CRM",
-   "type": "Dashboard"
   }
  ],
- "title": "CRM"
+ "title": "Fleet Management"
 }

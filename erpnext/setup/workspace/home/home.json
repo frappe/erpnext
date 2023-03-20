@@ -1,11 +1,6 @@
 {
- "charts": [
-  {
-   "chart_name": "Employee Leave Balance",
-   "label": "Employee Leave Balance"
-  }
- ],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<br>\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Employee Leave Balance\",\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Human Resource</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee Self Services\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Leaderboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounting\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"CRM\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Data Import and Settings\",\"col\":4}}]",
  "creation": "2020-01-23 13:46:38.833076",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -15,6 +10,14 @@
  "idx": 0,
  "label": "Home",
  "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Accounting",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
   {
    "dependencies": "",
    "hidden": 0,
@@ -58,6 +61,14 @@
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
   },
   {
    "dependencies": "",
@@ -115,6 +126,14 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "CRM",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -146,6 +165,14 @@
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Data Import and Settings",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
   },
   {
    "dependencies": "",
@@ -201,123 +228,9 @@
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Reports",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee TDS Certificate",
-   "link_count": 0,
-   "link_to": "Employee TDS Certificate",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Self Services",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Leave Application",
-   "link_count": 0,
-   "link_to": "Leave Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Advance",
-   "link_count": 0,
-   "link_to": "Employee Advance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Material Request",
-   "link_count": 0,
-   "link_to": "Material Request",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Other Transaction",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Leave Encashment",
-   "link_count": 0,
-   "link_to": "Leave Encashment",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Overtime Application",
-   "link_count": 0,
-   "link_to": "Overtime Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Separation",
-   "link_count": 0,
-   "link_to": "Employee Separation",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Transfer",
-   "link_count": 0,
-   "link_to": "Employee Transfer",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2022-12-15 17:11:01.903199",
+ "modified": "2023-03-17 13:35:10.902817",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
@@ -328,6 +241,32 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 1.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "label": "Item",
+   "link_to": "Item",
+   "type": "DocType"
+  },
+  {
+   "label": "Customer",
+   "link_to": "Customer",
+   "type": "DocType"
+  },
+  {
+   "label": "Supplier",
+   "link_to": "Supplier",
+   "type": "DocType"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "label": "Leaderboard",
+   "link_to": "leaderboard",
+   "type": "Page"
+  }
+ ],
  "title": "Home"
 }

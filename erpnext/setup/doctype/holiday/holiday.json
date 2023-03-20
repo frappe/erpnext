@@ -14,15 +14,6 @@
  ],
  "fields": [
   {
-   "fieldname": "holiday_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "oldfieldname": "holiday_date",
-   "oldfieldtype": "Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -44,17 +35,24 @@
   {
    "fieldname": "section_break_4",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "holiday_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-18 19:03:23.507845",
+ "modified": "2023-03-17 16:48:04.285832",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }
