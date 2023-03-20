@@ -531,6 +531,11 @@ class SellingController(StockController):
 				if item_row.warehouse:
 					sle.dependant_sle_voucher_detail_no = item_row.name
 
+			if item_row.serial_and_batch_bundle:
+				sle["serial_and_batch_bundle"] = self.make_package_for_transfer(
+					item_row.serial_and_batch_bundle, item_row.target_warehouse
+				)
+
 		return sle
 
 	def set_po_nos(self, for_validate=False):

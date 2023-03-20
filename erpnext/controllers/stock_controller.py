@@ -372,6 +372,44 @@ class StockController(AccountsController):
 
 				row.db_set("serial_and_batch_bundle", None)
 
+	def make_package_for_transfer(
+		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None
+	):
+		bundle_doc = frappe.get_doc("Serial and Batch Bundle", serial_and_batch_bundle)
+
+		if not type_of_transaction:
+			type_of_transaction = "Inward"
+
+		bundle_doc = frappe.copy_doc(bundle_doc)
+		bundle_doc.warehouse = warehouse
+		bundle_doc.type_of_transaction = type_of_transaction
+		bundle_doc.voucher_type = self.doctype
+		bundle_doc.voucher_no = self.name
+		bundle_doc.is_cancelled = 0
+
+		for row in bundle_doc.ledgers:
+			row.is_outward = 0
+			row.qty = abs(row.qty)
+			row.stock_value_difference = abs(row.stock_value_difference)
+			if type_of_transaction == "Outward":
+				row.qty *= -1
+				row.stock_value_difference *= row.stock_value_difference
+				row.is_outward = 1
+
+			row.warehouse = warehouse
+
+		bundle_doc.set_total_qty()
+		bundle_doc.set_avg_rate()
+		bundle_doc.flags.ignore_permissions = True
+
+		if not do_not_submit:
+			bundle_doc.submit()
+		else:
+			bundle_doc.save(ignore_permissions=True)
+
+		print(bundle_doc.name)
+		return bundle_doc.name
+
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
 			{

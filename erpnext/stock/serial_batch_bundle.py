@@ -4,7 +4,7 @@ from typing import List
 import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, flt, now
 
 from erpnext.stock.deprecated_serial_batch import (
@@ -255,7 +255,7 @@ class SerialBatchBundle:
 		data = frappe.db.get_value(
 			"Serial and Batch Bundle",
 			self.sle.serial_and_batch_bundle,
-			["item_code", "warehouse", "voucher_no"],
+			["item_code", "warehouse", "voucher_no", "name"],
 			as_dict=1,
 		)
 
@@ -408,7 +408,7 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 				parent.name = child.parent
 				AND child.serial_no IN ({', '.join([frappe.db.escape(s) for s in serial_nos])})
 				AND child.is_outward = 0
-				AND parent.docstatus < 2
+				AND parent.docstatus = 1
 				AND parent.is_cancelled = 0
 				AND child.warehouse = {frappe.db.escape(self.sle.warehouse)}
 				AND parent.item_code = {frappe.db.escape(self.sle.item_code)}
@@ -511,8 +511,10 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 			ledgers = self.get_batch_no_ledgers()
 
 			self.batch_avg_rate = defaultdict(float)
+			self.available_qty = defaultdict(float)
 			for ledger in ledgers:
 				self.batch_avg_rate[ledger.batch_no] += flt(ledger.incoming_rate) / flt(ledger.qty)
+				self.available_qty[ledger.batch_no] += flt(ledger.qty)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
 			self.set_stock_value_difference()
@@ -522,6 +524,10 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 		child = frappe.qb.DocType("Serial and Batch Ledger")
 
 		batch_nos = list(self.batch_nos.keys())
+
+		timestamp_condition = CombineDatetime(
+			parent.posting_date, parent.posting_time
+		) < CombineDatetime(self.sle.posting_date, self.sle.posting_time)
 
 		return (
 			frappe.qb.from_(parent)
@@ -537,8 +543,10 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 				& (child.parent != self.sle.serial_and_batch_bundle)
 				& (parent.warehouse == self.sle.warehouse)
 				& (parent.item_code == self.sle.item_code)
+				& (parent.docstatus == 1)
 				& (parent.is_cancelled == 0)
 			)
+			.where(timestamp_condition)
 			.groupby(child.batch_no)
 		).run(as_dict=True)
 

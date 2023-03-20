@@ -7,11 +7,15 @@ from typing import Dict, List
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, today
+from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.utils import cint, flt, get_link_to_form, today
 from pypika import Case
 
 from erpnext.stock.serial_batch_bundle import BatchNoBundleValuation, SerialNoBundleValuation
+
+
+class SerialNoExistsInFutureTransactionError(frappe.ValidationError):
+	pass
 
 
 class SerialandBatchBundle(Document):
@@ -19,7 +23,8 @@ class SerialandBatchBundle(Document):
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
 		# self.validate_voucher_no()
-		self.validate_serial_nos()
+		self.check_future_entries_exists()
+		self.validate_serial_nos_inventory()
 
 	def before_save(self):
 		self.set_total_qty()
@@ -30,6 +35,26 @@ class SerialandBatchBundle(Document):
 
 		if self.ledgers:
 			self.set_avg_rate()
+
+	def validate_serial_nos_inventory(self):
+		if not (self.has_serial_no and self.type_of_transaction == "Outward"):
+			return
+
+		serial_nos = [d.serial_no for d in self.ledgers if d.serial_no]
+		serial_no_warehouse = frappe._dict(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", serial_nos)},
+				fields=["name", "warehouse"],
+				as_list=1,
+			)
+		)
+
+		for serial_no in serial_nos:
+			if serial_no_warehouse.get(serial_no) != self.warehouse:
+				frappe.throw(
+					_(f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}.")
+				)
 
 	def set_incoming_rate(self, row=None, save=False):
 		if self.type_of_transaction == "Outward":
@@ -65,10 +90,14 @@ class SerialandBatchBundle(Document):
 			)
 
 		for d in self.ledgers:
+			available_qty = 0
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
 				d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
+				available_qty = sn_obj.batch_available_qty.get(d.batch_no) + d.qty
+
+				self.validate_negative_batch(d.batch_no, available_qty)
 
 			if self.has_batch_no:
 				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
@@ -77,6 +106,14 @@ class SerialandBatchBundle(Document):
 				d.db_set(
 					{"incoming_rate": d.incoming_rate, "stock_value_difference": d.stock_value_difference}
 				)
+
+	def validate_negative_batch(self, batch_no, available_qty):
+		if available_qty < 0:
+			msg = f"""Batch No {bold(batch_no)} has negative stock
+				of quantity {bold(available_qty)} in the
+				warehouse {self.warehouse}"""
+
+			frappe.throw(_(msg))
 
 	def get_sle_for_outward_transaction(self, row):
 		return frappe._dict(
@@ -169,9 +206,53 @@ class SerialandBatchBundle(Document):
 				)
 			)
 
-	def validate_serial_nos(self):
+	def check_future_entries_exists(self):
 		if not self.has_serial_no:
 			return
+
+		serial_nos = [d.serial_no for d in self.ledgers if d.serial_no]
+
+		parent = frappe.qb.DocType("Serial and Batch Bundle")
+		child = frappe.qb.DocType("Serial and Batch Ledger")
+
+		timestamp_condition = CombineDatetime(
+			parent.posting_date, parent.posting_time
+		) > CombineDatetime(self.posting_date, self.posting_time)
+
+		future_entries = (
+			frappe.qb.from_(parent)
+			.inner_join(child)
+			.on(parent.name == child.parent)
+			.select(
+				child.serial_no,
+				parent.voucher_type,
+				parent.voucher_no,
+			)
+			.where(
+				(child.serial_no.isin(serial_nos))
+				& (child.parent != self.name)
+				& (parent.item_code == self.item_code)
+				& (parent.docstatus == 1)
+				& (parent.is_cancelled == 0)
+			)
+			.where(timestamp_condition)
+		).run(as_dict=True)
+
+		if future_entries:
+			msg = """The serial nos has been used in the future
+				transactions so you need to cancel them first.
+				The list of serial nos and their respective
+				transactions are as below."""
+
+			msg += "<br><br><ul>"
+
+			for d in future_entries:
+				msg += f"<li>{d.serial_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
+			msg += "</li></ul>"
+
+			title = "Serial No Exists In Future Transaction(s)"
+
+			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransactionError)
 
 	def validate_quantity(self, row):
 		self.set_total_qty(save=True)
@@ -429,8 +510,19 @@ def update_serial_batch_no_ledgers(ledgers, child_row, parent_doc) -> object:
 	doc.posting_date = parent_doc.posting_date
 	doc.posting_time = parent_doc.posting_time
 	doc.set("ledgers", [])
-	doc.set("ledgers", ledgers)
-	doc.save()
+
+	for d in ledgers:
+		doc.append(
+			"ledgers",
+			{
+				"qty": 1 if doc.type_of_transaction == "Inward" else -1,
+				"warehouse": d.get("warehouse"),
+				"batch_no": d.get("batch_no"),
+				"serial_no": d.get("serial_no"),
+			},
+		)
+
+	doc.save(ignore_permissions=True)
 
 	frappe.msgprint(_("Serial and Batch Bundle updated"), alert=True)
 

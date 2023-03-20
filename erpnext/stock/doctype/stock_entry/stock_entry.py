@@ -1219,8 +1219,16 @@ class StockEntry(StockController):
 				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
 					sle.recalculate_rate = 1
 
-				if d.serial_and_batch_bundle and self.docstatus == 1:
-					d.serial_and_batch_bundle = self.copy_serial_and_batch_bundle(sle)
+				allowed_types = [
+					"Material Transfer",
+					"Send to Subcontractor",
+					"Material Transfer for Manufacture",
+				]
+
+				if self.purpose in allowed_types and d.serial_and_batch_bundle and self.docstatus == 1:
+					d.serial_and_batch_bundle = self.make_package_for_transfer(
+						d.serial_and_batch_bundle, d.t_warehouse
+					)
 
 				if d.serial_and_batch_bundle and self.docstatus == 2:
 					bundle_id = frappe.get_cached_value(
@@ -1238,36 +1246,6 @@ class StockEntry(StockController):
 						sle.serial_and_batch_bundle = bundle_id
 
 				sl_entries.append(sle)
-
-	def copy_serial_and_batch_bundle(self, child):
-		allowed_types = [
-			"Material Transfer",
-			"Send to Subcontractor",
-			"Material Transfer for Manufacture",
-		]
-
-		if self.purpose in allowed_types:
-			bundle_doc = frappe.get_doc("Serial and Batch Bundle", child.serial_and_batch_bundle)
-
-			bundle_doc = frappe.copy_doc(bundle_doc)
-			bundle_doc.warehouse = child.t_warehouse
-			bundle_doc.type_of_transaction = "Inward"
-
-			for row in bundle_doc.ledgers:
-				if row.qty < 0:
-					row.qty = abs(row.qty)
-
-				if row.stock_value_difference < 0:
-					row.stock_value_difference = abs(row.stock_value_difference)
-
-				row.warehouse = child.t_warehouse
-				row.is_outward = 0
-
-			bundle_doc.set_total_qty()
-			bundle_doc.set_avg_rate()
-			bundle_doc.flags.ignore_permissions = True
-			bundle_doc.submit()
-			return bundle_doc.name
 
 	def get_gl_entries(self, warehouse_account):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)

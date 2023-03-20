@@ -38,6 +38,7 @@ class BuyingController(SubcontractingController):
 		self.set_supplier_address()
 		self.validate_asset_return()
 		self.validate_auto_repeat_subscription_dates()
+		self.create_package_for_transfer()
 
 		if self.doctype == "Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -68,6 +69,36 @@ class BuyingController(SubcontractingController):
 				"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
 			),
 		)
+
+	def create_package_for_transfer(self) -> None:
+		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
+
+		if self.is_internal_transfer() and (
+			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
+		):
+			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
+
+			doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+
+			ids = [d.get(field) for d in self.get("items") if d.get(field)]
+			bundle_ids = {}
+			if ids:
+				for bundle in frappe.get_all(
+					doctype, filters={"name": ("in", ids)}, fields=["serial_and_batch_bundle", "name"]
+				):
+					bundle_ids[bundle.name] = bundle.serial_and_batch_bundle
+
+			if not bundle_ids:
+				return
+
+			for item in self.get("items"):
+				if item.get(field) and not item.serial_and_batch_bundle:
+					item.serial_and_batch_bundle = self.make_package_for_transfer(
+						bundle_ids.get(item.get(field)),
+						item.from_warehouse,
+						type_of_transaction="Outward",
+						do_not_submit=True,
+					)
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
@@ -467,7 +498,11 @@ class BuyingController(SubcontractingController):
 						{
 							"actual_qty": flt(pr_qty),
 							"serial_no": cstr(d.serial_no).strip(),
-							"serial_and_batch_bundle": d.serial_and_batch_bundle,
+							"serial_and_batch_bundle": (
+								d.serial_and_batch_bundle
+								if not self.is_internal_transfer()
+								else self.get_package_for_target_warehouse(d)
+							),
 						},
 					)
 
@@ -494,7 +529,6 @@ class BuyingController(SubcontractingController):
 								"recalculate_rate": 1
 								if (self.is_subcontracted and (d.bom or d.fg_item)) or d.from_warehouse
 								else 0,
-								"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							}
 						)
 					sl_entries.append(sle)
@@ -529,6 +563,15 @@ class BuyingController(SubcontractingController):
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
+		)
+
+	def get_package_for_target_warehouse(self, item) -> str:
+		if not item.serial_and_batch_bundle:
+			return ""
+
+		return self.make_package_for_transfer(
+			item.serial_and_batch_bundle,
+			item.warehouse,
 		)
 
 	def update_ordered_and_reserved_qty(self):
