@@ -1,0 +1,33 @@
+name: Build and push container image to ghcr.io
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate App JSON base64
+        run: |
+          echo "APPS_JSON_BASE64=$(echo "[{\"url\":\"https://github.com/frappe/erpnext\",\"branch\":\"${GITHUB_REF##*/}\"}]" | base64 -w 0)" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: int128/kaniko-action@v1
+        with:
+          push: true
+          kaniko-args: |
+            --build-arg=FRAPPE_BRANCH=develop
+            --build-arg=APPS_JSON_BASE64=${{ env.APPS_JSON_BASE64 }}
+            --destination=ghcr.io/${{ github.repository }}/erpnext:latest
+          file: images/custom/Containerfile
