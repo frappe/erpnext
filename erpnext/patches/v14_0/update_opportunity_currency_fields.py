@@ -7,6 +7,9 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 def execute():
+	frappe.reload_doc(
+		"accounts", "doctype", "currency_exchange_settings"
+	)  # get_exchange_rate depends on Currency Exchange Settings
 	frappe.reload_doctype("Opportunity")
 	opportunities = frappe.db.get_list(
 		"Opportunity",
