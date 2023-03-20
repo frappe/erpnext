@@ -34,6 +34,7 @@ class StockReservationEntry(TransactionBase):
 			"voucher_detail_no",
 			"reserved_qty",
 			"company",
+			"stock_uom",
 		]
 		for d in mandatory:
 			if not self.get(d):
