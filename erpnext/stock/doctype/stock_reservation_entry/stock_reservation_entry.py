@@ -16,6 +16,13 @@ class StockReservationEntry(TransactionBase):
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 
+	def on_submit(self):
+		self.update_status()
+
+	def on_cancel(self):
+		frappe.db.set_value(self.doctype, self.name, "is_cancelled", 1)
+		self.update_status()
+
 	def validate_mandatory(self):
 		mandatory = [
 			"item_code",
@@ -32,5 +39,15 @@ class StockReservationEntry(TransactionBase):
 			if not self.get(d):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(d)))
 
-	def on_cancel(self):
-		frappe.db.set_value(self.doctype, self.name, "is_cancelled", 1)
+	def update_status(self, status=None, update_modified=True):
+		if not status:
+			if self.is_cancelled:
+				status = "Cancelled"
+			elif self.reserved_qty == self.delivered_qty:
+				status = "Delivered"
+			elif self.delivered_qty and self.reserved_qty > self.delivered_qty:
+				status = "Partially Delivered"
+			else:
+				status = "Submitted"
+
+		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)

@@ -18,6 +18,7 @@
   "voucher_detail_no",
   "section_break_11",
   "reserved_qty",
+  "delivered_qty",
   "column_break_17",
   "valuation_rate",
   "section_break_21",
@@ -25,6 +26,7 @@
   "stock_uom",
   "project",
   "column_break_26",
+  "status",
   "is_cancelled"
  ],
  "fields": [
@@ -197,12 +199,26 @@
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nSubmitted\nPartially Delivered\nDelivered\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_qty",
+   "fieldtype": "Float",
+   "label": "Delivered Qty",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-20 11:17:35.898760",
+ "modified": "2023-03-20 18:52:46.414108",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
