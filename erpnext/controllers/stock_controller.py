@@ -407,7 +407,6 @@ class StockController(AccountsController):
 		else:
 			bundle_doc.save(ignore_permissions=True)
 
-		print(bundle_doc.name)
 		return bundle_doc.name
 
 	def get_sl_entries(self, d, args):
@@ -428,7 +427,6 @@ class StockController(AccountsController):
 				),
 				"incoming_rate": 0,
 				"company": self.company,
-				"serial_no": d.get("serial_no"),
 				"project": d.get("project") or self.get("project"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
 			}

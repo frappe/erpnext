@@ -328,8 +328,6 @@ class AssetCapitalization(StockController):
 				{
 					"item_code": self.target_item_code,
 					"warehouse": self.target_warehouse,
-					"batch_no": self.target_batch_no,
-					"serial_no": self.target_serial_no,
 					"actual_qty": flt(self.target_qty),
 					"incoming_rate": flt(self.target_incoming_rate),
 				},

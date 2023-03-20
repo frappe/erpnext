@@ -27,8 +27,8 @@ class SerialandBatchBundle(Document):
 		self.validate_serial_nos_inventory()
 
 	def before_save(self):
-		self.set_total_qty()
 		self.set_is_outward()
+		self.set_total_qty()
 		self.set_warehouse()
 		self.set_incoming_rate()
 		self.validate_qty_and_stock_value_difference()
@@ -51,7 +51,9 @@ class SerialandBatchBundle(Document):
 		)
 
 		for serial_no in serial_nos:
-			if serial_no_warehouse.get(serial_no) != self.warehouse:
+			if (
+				not serial_no_warehouse.get(serial_no) or serial_no_warehouse.get(serial_no) != self.warehouse
+			):
 				frappe.throw(
 					_(f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}.")
 				)
@@ -72,6 +74,9 @@ class SerialandBatchBundle(Document):
 
 			if d.stock_value_difference and d.stock_value_difference > 0:
 				d.stock_value_difference *= -1
+
+	def get_serial_nos(self):
+		return [d.serial_no for d in self.ledgers if d.serial_no]
 
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
 		sle = self.get_sle_for_outward_transaction(row)
@@ -271,6 +276,11 @@ class SerialandBatchBundle(Document):
 
 	def set_is_outward(self):
 		for row in self.ledgers:
+			if self.type_of_transaction == "Outward" and row.qty > 0:
+				row.qty *= -1
+			elif self.type_of_transaction == "Inward" and row.qty < 0:
+				row.qty *= -1
+
 			row.is_outward = 1 if self.type_of_transaction == "Outward" else 0
 
 	@frappe.whitelist()

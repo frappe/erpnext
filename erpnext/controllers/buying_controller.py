@@ -5,7 +5,7 @@
 import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
-from frappe.utils import cint, cstr, flt, getdate
+from frappe.utils import cint, flt, getdate
 from frappe.utils.data import nowtime
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -497,7 +497,6 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"actual_qty": flt(pr_qty),
-							"serial_no": cstr(d.serial_no).strip(),
 							"serial_and_batch_bundle": (
 								d.serial_and_batch_bundle
 								if not self.is_internal_transfer()
@@ -550,7 +549,6 @@ class BuyingController(SubcontractingController):
 						{
 							"warehouse": d.rejected_warehouse,
 							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-							"serial_no": cstr(d.rejected_serial_no).strip(),
 							"incoming_rate": 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
 						},

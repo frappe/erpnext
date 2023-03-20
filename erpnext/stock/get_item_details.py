@@ -127,8 +127,6 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	out.update(data)
 
-	update_stock(args, out)
-
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date, item.lead_time_days)
 
@@ -148,28 +146,6 @@ def remove_standard_fields(details):
 	for key in child_table_fields + default_fields:
 		details.pop(key, None)
 	return details
-
-
-def update_stock(args, out):
-	if (
-		(
-			args.get("doctype") == "Delivery Note"
-			or (args.get("doctype") == "Sales Invoice" and args.get("update_stock"))
-		)
-		and out.warehouse
-		and out.stock_qty > 0
-	):
-		if out.has_serial_no and args.get("batch_no"):
-			reserved_so = get_so_reservation_for_item(args)
-			out.batch_no = args.get("batch_no")
-			out.serial_no = get_serial_no(out, args.serial_no, sales_order=reserved_so)
-
-		elif out.has_serial_no:
-			reserved_so = get_so_reservation_for_item(args)
-			out.serial_no = get_serial_no(out, args.serial_no, sales_order=reserved_so)
-
-	if not out.serial_no:
-		out.pop("serial_no", None)
 
 
 def set_valuation_rate(out, args):
@@ -1490,41 +1466,3 @@ def get_blanket_order_details(args):
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ""
 
 	return blanket_order_details
-
-
-def get_so_reservation_for_item(args):
-	reserved_so = None
-	if args.get("against_sales_order"):
-		if get_reserved_qty_for_so(args.get("against_sales_order"), args.get("item_code")):
-			reserved_so = args.get("against_sales_order")
-	elif args.get("against_sales_invoice"):
-		sales_order = frappe.db.get_all(
-			"Sales Invoice Item",
-			filters={
-				"parent": args.get("against_sales_invoice"),
-				"item_code": args.get("item_code"),
-				"docstatus": 1,
-			},
-			fields="sales_order",
-		)
-		if sales_order and sales_order[0]:
-			if get_reserved_qty_for_so(sales_order[0].sales_order, args.get("item_code")):
-				reserved_so = sales_order[0]
-	elif args.get("sales_order"):
-		if get_reserved_qty_for_so(args.get("sales_order"), args.get("item_code")):
-			reserved_so = args.get("sales_order")
-	return reserved_so
-
-
-def get_reserved_qty_for_so(sales_order, item_code):
-	reserved_qty = frappe.db.get_value(
-		"Sales Order Item",
-		filters={
-			"parent": sales_order,
-			"item_code": item_code,
-			"ensure_delivery_based_on_produced_serial_no": 1,
-		},
-		fieldname="sum(qty)",
-	)
-
-	return reserved_qty or 0

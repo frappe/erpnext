@@ -586,3 +586,62 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 
 	def get_incoming_rate(self):
 		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))
+
+
+def get_empty_batches_based_work_order(work_order, item_code):
+	batches = get_batches_from_work_order(work_order)
+	if not batches:
+		return batches
+
+	entries = get_batches_from_stock_entries(work_order)
+	if not entries:
+		return batches
+
+	ids = [d.serial_and_batch_bundle for d in entries if d.serial_and_batch_bundle]
+	if ids:
+		set_batch_details_from_package(ids, batches)
+
+	# Will be deprecated in v16
+	for d in entries:
+		if not d.batch_no:
+			continue
+
+		batches[d.batch_no] -= d.qty
+
+	return batches
+
+
+def get_batches_from_work_order(work_order):
+	return frappe._dict(
+		frappe.get_all(
+			"Batch", fields=["name", "qty_to_produce"], filters={"reference_name": work_order}, as_list=1
+		)
+	)
+
+
+def get_batches_from_stock_entries(work_order):
+	entries = frappe.get_all(
+		"Stock Entry",
+		filters={"work_order": work_order, "docstatus": 1, "purpose": "Manufacture"},
+		fields=["name"],
+	)
+
+	return frappe.get_all(
+		"Stock Entry Detail",
+		fields=["batch_no", "qty", "serial_and_batch_bundle"],
+		filters={
+			"parent": ("in", [d.name for d in entries]),
+			"is_finished_item": 1,
+		},
+	)
+
+
+def set_batch_details_from_package(ids, batches):
+	entries = frappe.get_all(
+		"Serial and Batch Ledger",
+		filters={"parent": ("in", ids), "is_outward": 0},
+		fields=["batch_no", "qty"],
+	)
+
+	for d in entries:
+		batches[d.batch_no] -= d.qty

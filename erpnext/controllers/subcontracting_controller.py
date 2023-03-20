@@ -8,7 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -768,9 +768,7 @@ class SubcontractingController(StockController):
 				scr_qty = flt(item.qty) * flt(item.conversion_factor)
 
 				if scr_qty:
-					sle = self.get_sl_entries(
-						item, {"actual_qty": flt(scr_qty), "serial_no": cstr(item.serial_no).strip()}
-					)
+					sle = self.get_sl_entries(item, {"actual_qty": flt(scr_qty)})
 					rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
 					incoming_rate = flt(item.rate, rate_db_precision)
 					sle.update(
@@ -788,7 +786,6 @@ class SubcontractingController(StockController):
 							{
 								"warehouse": item.rejected_warehouse,
 								"actual_qty": flt(item.rejected_qty) * flt(item.conversion_factor),
-								"serial_no": cstr(item.rejected_serial_no).strip(),
 								"incoming_rate": 0.0,
 							},
 						)

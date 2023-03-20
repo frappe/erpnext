@@ -4,6 +4,7 @@
 
 import json
 from collections import defaultdict
+from typing import List
 
 import frappe
 from frappe import _
@@ -37,8 +38,8 @@ from erpnext.stock.get_item_details import (
 	get_bin_details,
 	get_conversion_factor,
 	get_default_cost_center,
-	get_reserved_qty_for_so,
 )
+from erpnext.stock.serial_batch_bundle import get_empty_batches_based_work_order
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_bin, get_incoming_rate
 
@@ -203,12 +204,8 @@ class StockEntry(StockController):
 
 		self.repost_future_sle_and_gle()
 		self.update_cost_in_project()
-		self.validate_reserved_serial_no_consumption()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
-
-		if self.work_order and self.purpose == "Manufacture":
-			self.update_so_in_serial_number()
 
 		if self.purpose == "Material Transfer" and self.add_to_transit:
 			self.set_material_request_transfer_status("In Transit")
@@ -359,7 +356,6 @@ class StockEntry(StockController):
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
-		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
 			if flt(item.qty) and flt(item.qty) < 0:
 				frappe.throw(
@@ -400,16 +396,6 @@ class StockEntry(StockController):
 				item.transfer_qty = flt(
 					flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 				)
-
-			# if (
-			# 	self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
-			# 	and not item.serial_and_batch_bundle
-			# 	and item.item_code in serialized_items
-			# ):
-			# 	frappe.throw(
-			# 		_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
-			# 		frappe.MandatoryError,
-			# 	)
 
 	def validate_qty(self):
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
@@ -1352,7 +1338,6 @@ class StockEntry(StockController):
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
-					pro_doc.update_batch_produced_qty(self)
 
 			pro_doc.run_method("update_status")
 			if not pro_doc.operations:
@@ -1479,8 +1464,6 @@ class StockEntry(StockController):
 						"ste_detail": d.name,
 						"stock_uom": d.stock_uom,
 						"conversion_factor": d.conversion_factor,
-						"serial_no": d.serial_no,
-						"batch_no": d.batch_no,
 					},
 				)
 
@@ -1651,6 +1634,7 @@ class StockEntry(StockController):
 		if (
 			self.work_order
 			and self.pro_doc.has_batch_no
+			and not self.pro_doc.has_serial_no
 			and cint(
 				frappe.db.get_single_value(
 					"Manufacturing Settings", "make_serial_no_batch_from_work_order", cache=True
@@ -1662,42 +1646,34 @@ class StockEntry(StockController):
 			self.add_finished_goods(args, item)
 
 	def set_batchwise_finished_goods(self, args, item):
-		filters = {
-			"reference_name": self.pro_doc.name,
-			"reference_doctype": self.pro_doc.doctype,
-			"qty_to_produce": (">", 0),
-			"batch_qty": ("=", 0),
-		}
+		batches = get_empty_batches_based_work_order(self.work_order, self.pro_doc.production_item)
 
-		fields = ["qty_to_produce as qty", "produced_qty", "name"]
-
-		data = frappe.get_all("Batch", filters=filters, fields=fields, order_by="creation asc")
-
-		if not data:
+		if not batches:
 			self.add_finished_goods(args, item)
 		else:
-			self.add_batchwise_finished_good(data, args, item)
+			self.add_batchwise_finished_good(batches, args, item)
 
-	def add_batchwise_finished_good(self, data, args, item):
+	def add_batchwise_finished_good(self, batches, args, item):
 		qty = flt(self.fg_completed_qty)
+		row = frappe._dict({"batches_to_be_consume": defaultdict(float)})
 
-		for row in data:
-			batch_qty = flt(row.qty) - flt(row.produced_qty)
-			if not batch_qty:
-				continue
+		self.update_batches_to_be_consume(batches, row, qty)
 
-			if qty <= 0:
-				break
+		if not row.batches_to_be_consume:
+			return
 
-			fg_qty = batch_qty
-			if batch_qty >= qty:
-				fg_qty = qty
+		id = create_serial_and_batch_bundle(
+			row,
+			frappe._dict(
+				{
+					"item_code": self.pro_doc.production_item,
+					"warehouse": args.get("to_warehouse"),
+				}
+			),
+		)
 
-			qty -= batch_qty
-			args["qty"] = fg_qty
-			args["batch_no"] = row.name
-
-			self.add_finished_goods(args, item)
+		args["serial_and_batch_bundle"] = id
+		self.add_finished_goods(args, item)
 
 	def add_finished_goods(self, args, item):
 		self.add_to_stock_entry_detail({item.name: args}, bom_no=self.bom_no)
@@ -1902,33 +1878,40 @@ class StockEntry(StockController):
 
 			if row.batch_details:
 				row.batches_to_be_consume = defaultdict(float)
-				batches = sorted(row.batch_details.items(), key=lambda x: x[0])
-				qty_to_be_consumed = qty
-				for batch_no, batch_qty in batches:
-					if qty_to_be_consumed <= 0 or batch_qty <= 0:
-						continue
-
-					if batch_qty > qty_to_be_consumed:
-						batch_qty = qty_to_be_consumed
-
-					row.batches_to_be_consume[batch_no] += batch_qty
-
-					if batch_no and row.serial_nos:
-						serial_nos = self.get_serial_nos_based_on_transferred_batch(batch_no, row.serial_nos)
-						serial_nos = serial_nos[0 : cint(batch_qty)]
-
-						# remove consumed serial nos from list
-						for sn in serial_nos:
-							row.serial_nos.remove(sn)
-
-					row.batch_details[batch_no] -= batch_qty
-					qty_to_be_consumed -= batch_qty
+				batches = row.batch_details
+				self.update_batches_to_be_consume(batches, row, qty)
 
 			elif row.serial_nos:
 				serial_nos = row.serial_nos[0 : cint(qty)]
 				row.serial_nos = serial_nos
 
 			self.update_item_in_stock_entry_detail(row, item, qty)
+
+	def update_batches_to_be_consume(self, batches, row, qty):
+		qty_to_be_consumed = qty
+		batches = sorted(batches.items(), key=lambda x: x[0])
+
+		for batch_no, batch_qty in batches:
+			if qty_to_be_consumed <= 0 or batch_qty <= 0:
+				continue
+
+			if batch_qty > qty_to_be_consumed:
+				batch_qty = qty_to_be_consumed
+
+			row.batches_to_be_consume[batch_no] += batch_qty
+
+			if batch_no and row.serial_nos:
+				serial_nos = self.get_serial_nos_based_on_transferred_batch(batch_no, row.serial_nos)
+				serial_nos = serial_nos[0 : cint(batch_qty)]
+
+				# remove consumed serial nos from list
+				for sn in serial_nos:
+					row.serial_nos.remove(sn)
+
+			if "batch_details" in row:
+				row.batch_details[batch_no] -= batch_qty
+
+			qty_to_be_consumed -= batch_qty
 
 	def update_item_in_stock_entry_detail(self, row, item, qty) -> None:
 		if not qty:
@@ -1939,7 +1922,7 @@ class StockEntry(StockController):
 			"to_warehouse": "",
 			"qty": qty,
 			"item_name": item.item_name,
-			"serial_and_batch_bundle": create_serial_and_batch_bundle(row, item),
+			"serial_and_batch_bundle": create_serial_and_batch_bundle(row, item, "Outward"),
 			"description": item.description,
 			"stock_uom": item.stock_uom,
 			"expense_account": item.expense_account,
@@ -2099,8 +2082,6 @@ class StockEntry(StockController):
 				"expense_account",
 				"description",
 				"item_name",
-				"serial_no",
-				"batch_no",
 				"serial_and_batch_bundle",
 				"allow_zero_valuation_rate",
 			]:
@@ -2210,42 +2191,6 @@ class StockEntry(StockController):
 				stock_bin = get_bin(item_code, reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
-	def update_so_in_serial_number(self):
-		so_name, item_code = frappe.db.get_value(
-			"Work Order", self.work_order, ["sales_order", "production_item"]
-		)
-		if so_name and item_code:
-			qty_to_reserve = get_reserved_qty_for_so(so_name, item_code)
-			if qty_to_reserve:
-				reserved_qty = frappe.db.sql(
-					"""select count(name) from `tabSerial No` where item_code=%s and
-					sales_order=%s""",
-					(item_code, so_name),
-				)
-				if reserved_qty and reserved_qty[0][0]:
-					qty_to_reserve -= reserved_qty[0][0]
-				if qty_to_reserve > 0:
-					for item in self.items:
-						has_serial_no = frappe.get_cached_value("Item", item.item_code, "has_serial_no")
-						if item.item_code == item_code and has_serial_no:
-							serial_nos = (item.serial_no).split("\n")
-							for serial_no in serial_nos:
-								if qty_to_reserve > 0:
-									frappe.db.set_value("Serial No", serial_no, "sales_order", so_name)
-									qty_to_reserve -= 1
-
-	def validate_reserved_serial_no_consumption(self):
-		for item in self.items:
-			if item.s_warehouse and not item.t_warehouse and item.serial_no:
-				for sr in get_serial_nos(item.serial_no):
-					sales_order = frappe.db.get_value("Serial No", sr, "sales_order")
-					if sales_order:
-						msg = _(
-							"(Serial No: {0}) cannot be consumed as it's reserverd to fullfill Sales Order {1}."
-						).format(sr, sales_order)
-
-						frappe.throw(_("Item {0} {1}").format(item.item_code, msg))
-
 	def update_transferred_qty(self):
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			stock_entries = {}
@@ -2338,40 +2283,48 @@ class StockEntry(StockController):
 				frappe.db.set_value("Material Request", material_request, "transfer_status", status)
 
 	def set_serial_no_batch_for_finished_good(self):
-		serial_nos = []
-		if self.pro_doc.serial_no:
-			serial_nos = self.get_serial_nos_for_fg() or []
+		if not (
+			(self.pro_doc.has_serial_no or self.pro_doc.has_batch_no)
+			and frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")
+		):
+			return
 
-		for row in self.items:
-			if row.is_finished_item and row.item_code == self.pro_doc.production_item:
+		for d in self.items:
+			if d.is_finished_item and d.item_code == self.pro_doc.production_item:
+				serial_nos = self.get_available_serial_nos()
 				if serial_nos:
-					row.serial_no = "\n".join(serial_nos[0 : cint(row.qty)])
+					row = frappe._dict({"serial_nos": serial_nos[0 : cint(d.qty)]})
 
-	def get_serial_nos_for_fg(self):
-		fields = [
-			"`tabStock Entry`.`name`",
-			"`tabStock Entry Detail`.`qty`",
-			"`tabStock Entry Detail`.`serial_no`",
-			"`tabStock Entry Detail`.`batch_no`",
-		]
+					id = create_serial_and_batch_bundle(
+						row,
+						frappe._dict(
+							{
+								"item_code": d.item_code,
+								"warehouse": d.t_warehouse,
+							}
+						),
+					)
 
-		filters = [
-			["Stock Entry", "work_order", "=", self.work_order],
-			["Stock Entry", "purpose", "=", "Manufacture"],
-			["Stock Entry", "docstatus", "<", 2],
-			["Stock Entry Detail", "item_code", "=", self.pro_doc.production_item],
-		]
+					d.serial_and_batch_bundle = id
 
-		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
-		return self.get_available_serial_nos(stock_entries)
+	def get_available_serial_nos(self) -> List[str]:
+		serial_nos = []
+		data = frappe.get_all(
+			"Serial No",
+			filters={
+				"item_code": self.pro_doc.production_item,
+				"warehouse": ("is", "not set"),
+				"status": "Inactive",
+				"work_order": self.pro_doc.name,
+			},
+			fields=["name"],
+			order_by="creation asc",
+		)
 
-	def get_available_serial_nos(self, stock_entries):
-		used_serial_nos = []
-		for row in stock_entries:
-			if row.serial_no:
-				used_serial_nos.extend(get_serial_nos(row.serial_no))
+		for row in data:
+			serial_nos.append(row.name)
 
-		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
+		return serial_nos
 
 	def update_subcontracting_order_status(self):
 		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
@@ -2847,14 +2800,24 @@ def get_stock_entry_data(work_order):
 	return data
 
 
-def create_serial_and_batch_bundle(row, child):
+def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
+	item_details = frappe.get_cached_value(
+		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+	)
+
+	if not (item_details.has_serial_no or item_details.has_batch_no):
+		return
+
+	if not type_of_transaction:
+		type_of_transaction = "Inward"
+
 	doc = frappe.get_doc(
 		{
 			"doctype": "Serial and Batch Bundle",
 			"voucher_type": "Stock Entry",
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
-			"type_of_transaction": "Outward",
+			"type_of_transaction": type_of_transaction,
 		}
 	)
 
