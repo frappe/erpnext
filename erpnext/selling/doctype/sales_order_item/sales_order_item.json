@@ -10,6 +10,7 @@
   "item_code",
   "customer_item_code",
   "ensure_delivery_based_on_produced_serial_no",
+  "reserve_stock",
   "col_break1",
   "delivery_date",
   "item_name",
@@ -859,12 +860,19 @@
    "fieldname": "material_request_item",
    "fieldtype": "Data",
    "label": "Material Request Item"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: parent.reserve_stock",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-25 02:51:10.247569",
+ "modified": "2023-03-20 23:43:15.099790",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

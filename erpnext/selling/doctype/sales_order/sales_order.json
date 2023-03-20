@@ -46,6 +46,7 @@
   "scan_barcode",
   "column_break_28",
   "set_warehouse",
+  "reserve_stock",
   "items_section",
   "items",
   "section_break_31",
@@ -1637,13 +1638,20 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:34:00.681780",
+ "modified": "2023-03-20 23:51:04.036757",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
