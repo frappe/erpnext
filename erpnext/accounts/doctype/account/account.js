@@ -32,6 +32,12 @@ frappe.ui.form.on('Account', {
 
 		// read-only for root accounts
 		if (!frm.is_new()) {
+			// render account_info
+			if (frm.fields_dict["account_info"].get_status() == "Read") {
+				$(frm.fields_dict["account_info"].wrapper).html(
+					frm.doc.account_info
+				);
+			}
 			if (!frm.doc.parent_account) {
 				frm.set_read_only();
 				frm.set_intro(__("This is a root account and cannot be edited."));

@@ -27,7 +27,9 @@
   "lft",
   "rgt",
   "old_parent",
-  "include_in_gross"
+  "include_in_gross",
+  "more_info",
+  "account_info"
  ],
  "fields": [
   {
@@ -186,13 +188,24 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disable"
+  },
+  {
+   "fieldname": "more_info",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "account_info",
+   "fieldtype": "Text Editor",
+   "label": "Accont Info",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:frappe.user.has_role('Accounts Manager') != 1"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-04-11 16:08:46.983677",
+ "modified": "2023-06-24 12:02:50.955989",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",

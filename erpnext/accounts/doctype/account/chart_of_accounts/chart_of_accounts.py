@@ -26,6 +26,7 @@ def create_charts(
 					"account_name",
 					"account_number",
 					"account_type",
+					"account_info",
 					"root_type",
 					"is_group",
 					"tax_rate",
@@ -53,6 +54,7 @@ def create_charts(
 							"report_type": report_type,
 							"account_number": account_number,
 							"account_type": child.get("account_type"),
+							"account_info": child.get("account_info"),
 							"account_currency": child.get("account_currency")
 							or frappe.get_cached_value("Company", company, "default_currency"),
 							"tax_rate": child.get("tax_rate"),
@@ -100,6 +102,7 @@ def identify_is_group(child):
 			[
 				"account_name",
 				"account_type",
+				"account_info",
 				"root_type",
 				"is_group",
 				"tax_rate",
@@ -190,6 +193,7 @@ def get_account_tree_from_existing_company(existing_company):
 		fields=[
 			"name",
 			"account_name",
+			"account_info",
 			"parent_account",
 			"account_type",
 			"is_group",
@@ -229,6 +233,8 @@ def build_account_tree(tree, parent, all_accounts):
 			tree[child.account_name]["account_number"] = child.account_number
 		if child.account_type:
 			tree[child.account_name]["account_type"] = child.account_type
+		if child.account_info:
+			tree[child.account_name]["account_info"] = child.account_info
 		if child.tax_rate:
 			tree[child.account_name]["tax_rate"] = child.tax_rate
 		if not parent:
@@ -247,7 +253,14 @@ def validate_bank_account(coa, bank_account):
 
 		def _get_account_names(account_master):
 			for account_name, child in account_master.items():
-				if account_name not in ["account_number", "account_type", "root_type", "is_group", "tax_rate"]:
+				if account_name not in [
+					"account_number",
+					"account_type",
+					"account_info",
+					"root_type",
+					"is_group",
+					"tax_rate",
+				]:
 					accounts.append(account_name)
 
 					_get_account_names(child)
@@ -276,6 +289,7 @@ def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=Fals
 				"account_name",
 				"account_number",
 				"account_type",
+				"account_info",
 				"root_type",
 				"is_group",
 				"tax_rate",
