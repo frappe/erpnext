@@ -146,7 +146,8 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -166,6 +167,7 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled",
+   "read_only": 1,
    "report_hide": 1
   },
   {
@@ -218,7 +220,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-20 18:52:46.414108",
+ "modified": "2023-03-20 21:18:03.025423",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
