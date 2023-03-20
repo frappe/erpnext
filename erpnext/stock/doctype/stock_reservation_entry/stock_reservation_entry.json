@@ -203,11 +203,12 @@
    "width": "150px"
   },
   {
+   "default": "Submitted",
    "fieldname": "status",
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "\nSubmitted\nPartially Delivered\nDelivered\nCancelled",
+   "options": "Submitted\nPartially Delivered\nDelivered\nCancelled",
    "read_only": 1
   },
   {
@@ -218,9 +219,10 @@
   }
  ],
  "hide_toolbar": 1,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-20 21:18:03.025423",
+ "modified": "2023-03-20 21:53:07.671437",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
