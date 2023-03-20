@@ -597,12 +597,12 @@ def apply_pricing_rule_on_transaction(doc):
 							if coupon_code_pricing_rule == d.name:
 								# if selected coupon code is linked with pricing rule
 								doc.set(field, d.get(pr_field))
-							else:
+							# else:
 								# reset discount if not linked
-								doc.set(field, 0)
-						else:
+								# doc.set(field, 0)
+						# else:
 							# if coupon code based but no coupon code selected
-							doc.set(field, 0)
+							# doc.set(field, 0)
 
 				doc.calculate_taxes_and_totals()
 			elif d.price_or_product_discount == "Product":
