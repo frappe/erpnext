@@ -387,10 +387,14 @@ class Asset(AccountsController):
 					)
 					or value_after_depreciation < finance_book.expected_value_after_useful_life
 				):
-					depreciation_amount += (
-						value_after_depreciation - finance_book.expected_value_after_useful_life
-					)
-					skip_row = True
+					if (
+						not self.flags.increase_in_asset_value_due_to_repair
+						or not finance_book.depreciation_method in ("Written Down Value", "Double Declining Balance")
+					):
+						depreciation_amount += (
+							value_after_depreciation - finance_book.expected_value_after_useful_life
+						)
+						skip_row = True
 
 				if depreciation_amount > 0:
 					self.append(
