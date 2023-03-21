@@ -17,9 +17,11 @@ class StockReservationEntry(TransactionBase):
 		validate_warehouse_company(self.warehouse, self.company)
 
 	def on_submit(self):
+		self.update_reserved_qty_in_voucher()
 		self.update_status()
 
 	def on_cancel(self):
+		self.update_reserved_qty_in_voucher()
 		self.update_status()
 
 	def validate_mandatory(self):
@@ -53,3 +55,26 @@ class StockReservationEntry(TransactionBase):
 				status = "Draft"
 
 		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
+
+	def update_reserved_qty_in_voucher(self, update_modified=True):
+		from frappe.query_builder.functions import Sum
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		reserved_qty = (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == self.voucher_type)
+				& (sre.voucher_no == self.voucher_no)
+				& (sre.voucher_detail_no == self.voucher_detail_no)
+			)
+		).run(as_list=True)[0][0] or 0
+
+		frappe.db.set_value(
+			"Sales Order Item",
+			self.voucher_detail_no,
+			"stock_reserved_qty",
+			reserved_qty,
+			update_modified=update_modified,
+		)
