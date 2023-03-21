@@ -175,9 +175,7 @@ def _get_party_details(
 		)
 
 	if not party_details.get("tax_category") and pos_profile:
-		party_details["tax_category"] = frappe.get_value(
-			"POS Profile", pos_profile, "tax_category"
-		)
+		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
 
