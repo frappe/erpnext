@@ -28,6 +28,7 @@
   "uom",
   "conversion_factor",
   "stock_qty",
+  "stock_reserved_qty",
   "section_break_16",
   "price_list_rate",
   "base_price_list_rate",
@@ -867,12 +868,21 @@
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
    "label": "Reserve Stock"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: (parent.reserve_stock && doc.reserve_stock)",
+   "fieldname": "stock_reserved_qty",
+   "fieldtype": "Float",
+   "label": "Stock Reserved Qty (in Stock UOM)",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-20 23:43:15.099790",
+ "modified": "2023-03-21 13:14:47.915610",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
