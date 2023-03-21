@@ -446,6 +446,6 @@ frappe.ui.form.on("Customer Contact Person Details",{
 	},
 	add_secondary_contact_details: function(frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);	
-		frappe.set_route("Form", "Customer Contact Person", row.contact_person);
+		frappe.set_route("Form", "Customer Contact Person", row.contact_name);
 	},
  });
