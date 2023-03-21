@@ -7,7 +7,7 @@ from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, scrub, throw
-from frappe.utils import cint, comma_or, flt, getdate, nowdate
+from frappe.utils import cint, comma_or, flt, get_link_to_form, getdate, nowdate
 from six import iteritems, string_types
 
 import erpnext
@@ -168,7 +168,30 @@ class PaymentEntry(AccountsController):
 		for reference in self.references:
 			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
+
+				repost_required = False
+				for adv_reference in doc.get("advances"):
+					if adv_reference.exchange_gain_loss != 0:
+						repost_required = True
+						break
+				if repost_required:
+					for item in doc.get("items"):
+						if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
+							frappe.msgprint(
+								_(
+									"Linked Invoice {0} has Exchange Gain/Loss GL entries due to this Payment. Submit a Journal manually to reverse its effects."
+								).format(get_link_to_form(doc.doctype, doc.name))
+							)
+							repost_required = False
+
 				doc.delink_advance_entries(self.name)
+
+				if repost_required:
+					doc.reload()
+					doc.docstatus = 2
+					doc.make_gl_entries()
+					doc.docstatus = 1
+					doc.make_gl_entries()
 
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
