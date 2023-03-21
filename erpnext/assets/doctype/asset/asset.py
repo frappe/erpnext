@@ -375,12 +375,19 @@ class Asset(AccountsController):
 			value_after_depreciation -= flt(depreciation_amount, self.precision("gross_purchase_amount"))
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if finance_book.expected_value_after_useful_life and (
-				(
-					n == cint(number_of_pending_depreciations) - 1
-					and value_after_depreciation != finance_book.expected_value_after_useful_life
+			if (
+				finance_book.expected_value_after_useful_life
+				and (
+					(
+						n == cint(number_of_pending_depreciations) - 1
+						and value_after_depreciation != finance_book.expected_value_after_useful_life
+					)
+					or value_after_depreciation < finance_book.expected_value_after_useful_life
 				)
-				or value_after_depreciation < finance_book.expected_value_after_useful_life
+				and (
+					not self.flags.increase_in_asset_value_due_to_repair
+					or not finance_book.depreciation_method in ("Written Down Value", "Double Declining Balance")
+				)
 			):
 				depreciation_amount += value_after_depreciation - finance_book.expected_value_after_useful_life
 				skip_row = True
@@ -1175,17 +1182,21 @@ def get_total_days(date, frequency):
 @erpnext.allow_regional
 def get_depreciation_amount(asset, depreciable_value, row):
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		# if the Depreciation Schedule is being prepared for the first time
-		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (
-				flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations)
-
-		# if the Depreciation Schedule is being modified after Asset Repair
-		else:
+		# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset life and value
+		if asset.flags.increase_in_asset_life:
 			depreciation_amount = (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
 			) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
+		# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
+		elif asset.flags.increase_in_asset_value_due_to_repair:
+			depreciation_amount = (
+				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
+			) / flt(row.total_number_of_depreciations)
+		# if the Depreciation Schedule is being prepared for the first time
+		else:
+			depreciation_amount = (
+				flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
+			) / flt(row.total_number_of_depreciations)
 	else:
 		depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
 
