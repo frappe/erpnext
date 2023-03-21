@@ -61,13 +61,14 @@
   {
    "fieldname": "contact_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Contact Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-21 15:57:19.022057",
+ "modified": "2023-03-21 16:14:51.799085",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Contact Person Details",
