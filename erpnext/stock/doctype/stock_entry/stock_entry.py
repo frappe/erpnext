@@ -1197,6 +1197,28 @@ class StockEntry(StockController):
 
 				sl_entries.append(sle)
 
+	def make_serial_and_batch_bundle_for_transfer(self):
+		ids = frappe._dict(
+			frappe.get_all(
+				"Stock Entry Detail",
+				fields=["name", "serial_and_batch_bundle"],
+				filters={"parent": self.outgoing_stock_entry, "serial_and_batch_bundle": ("is", "set")},
+				as_list=1,
+			)
+		)
+
+		if not ids:
+			return
+
+		for d in self.get("items"):
+			serial_and_batch_bundle = ids.get(d.ste_detail)
+			if not serial_and_batch_bundle:
+				continue
+
+			d.serial_and_batch_bundle = self.make_package_for_transfer(
+				serial_and_batch_bundle, d.s_warehouse, "Outward", do_not_submit=True
+			)
+
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
 			if cstr(d.t_warehouse):
@@ -1218,11 +1240,11 @@ class StockEntry(StockController):
 				]
 
 				if self.purpose in allowed_types and d.serial_and_batch_bundle and self.docstatus == 1:
-					d.serial_and_batch_bundle = self.make_package_for_transfer(
+					sle.serial_and_batch_bundle = self.make_package_for_transfer(
 						d.serial_and_batch_bundle, d.t_warehouse
 					)
 
-				if d.serial_and_batch_bundle and self.docstatus == 2:
+				if sle.serial_and_batch_bundle and self.docstatus == 2:
 					bundle_id = frappe.get_cached_value(
 						"Serial and Batch Bundle",
 						{
@@ -1234,7 +1256,7 @@ class StockEntry(StockController):
 						"name",
 					)
 
-					if d.serial_and_batch_bundle != bundle_id:
+					if sle.serial_and_batch_bundle != bundle_id:
 						sle.serial_and_batch_bundle = bundle_id
 
 				sl_entries.append(sle)
@@ -2401,6 +2423,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
+		target.make_serial_and_batch_bundle_for_transfer()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ""
