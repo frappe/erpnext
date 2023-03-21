@@ -3503,14 +3503,8 @@ Provider,sağlayan,
 Read Only,Salt Okunur,
 Recipient,Alıcı,
 Reviews,yorumlar,
-<<<<<<< HEAD
 Sender,Gönderici,
 Shop,Mağaza,
-Sign Up,Kaydol,
-=======
-Sender,Sevkiyatçı,
-Shop,mağaza,
->>>>>>> 0df3a1a3af (fix: remove unused translation (#34519))
 Subsidiary,Yardımcı,
 There is some problem with the file url: {0},Dosya url ile bazı sorun var: {0},
 There were errors while sending email. Please try again.,E-posta gönderirken hatalar vardı. Lütfen tekrar deneyin.,
