@@ -380,21 +380,24 @@ class Asset(AccountsController):
 				value_after_depreciation -= flt(depreciation_amount, self.precision("gross_purchase_amount"))
 
 				# Adjust depreciation amount in the last period based on the expected value after useful life
-				if finance_book.expected_value_after_useful_life and (
-					(
-						n == cint(number_of_pending_depreciations) - 1
-						and value_after_depreciation != finance_book.expected_value_after_useful_life
+				if (
+					finance_book.expected_value_after_useful_life
+					and (
+						(
+							n == cint(number_of_pending_depreciations) - 1
+							and value_after_depreciation != finance_book.expected_value_after_useful_life
+						)
+						or value_after_depreciation < finance_book.expected_value_after_useful_life
 					)
-					or value_after_depreciation < finance_book.expected_value_after_useful_life
-				):
-					if (
+					and (
 						not self.flags.increase_in_asset_value_due_to_repair
 						or not finance_book.depreciation_method in ("Written Down Value", "Double Declining Balance")
-					):
-						depreciation_amount += (
-							value_after_depreciation - finance_book.expected_value_after_useful_life
-						)
-						skip_row = True
+					)
+				):
+					depreciation_amount += (
+						value_after_depreciation - finance_book.expected_value_after_useful_life
+					)
+					skip_row = True
 
 				if depreciation_amount > 0:
 					self.append(
