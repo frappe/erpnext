@@ -27,7 +27,7 @@
   "project",
   "column_break_26",
   "status",
-  "is_cancelled"
+  "amended_from"
  ],
  "fields": [
   {
@@ -163,14 +163,6 @@
    "width": "150px"
   },
   {
-   "default": "0",
-   "fieldname": "is_cancelled",
-   "fieldtype": "Check",
-   "label": "Is Cancelled",
-   "read_only": 1,
-   "report_hide": 1
-  },
-  {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break"
   },
@@ -203,12 +195,12 @@
    "width": "150px"
   },
   {
-   "default": "Submitted",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "Submitted\nPartially Delivered\nDelivered\nCancelled",
+   "options": "Draft\nSubmitted\nPartially Delivered\nDelivered\nCancelled",
    "read_only": 1
   },
   {
@@ -216,13 +208,23 @@
    "fieldtype": "Float",
    "label": "Delivered Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stock Reservation Entry",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "in_create": 1,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2023-03-20 21:53:07.671437",
+ "modified": "2023-03-21 20:15:42.659789",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
@@ -230,6 +232,7 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -239,6 +242,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

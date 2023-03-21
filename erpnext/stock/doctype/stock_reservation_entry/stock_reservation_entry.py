@@ -20,7 +20,6 @@ class StockReservationEntry(TransactionBase):
 		self.update_status()
 
 	def on_cancel(self):
-		frappe.db.set_value(self.doctype, self.name, "is_cancelled", 1)
 		self.update_status()
 
 	def validate_mandatory(self):
@@ -42,13 +41,15 @@ class StockReservationEntry(TransactionBase):
 
 	def update_status(self, status=None, update_modified=True):
 		if not status:
-			if self.is_cancelled:
+			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.reserved_qty == self.delivered_qty:
 				status = "Delivered"
 			elif self.delivered_qty and self.reserved_qty > self.delivered_qty:
 				status = "Partially Delivered"
-			else:
+			elif self.docstatus == 1:
 				status = "Submitted"
+			else:
+				status = "Draft"
 
 		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
