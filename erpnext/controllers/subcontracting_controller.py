@@ -509,7 +509,7 @@ class SubcontractingController(StockController):
 
 				qty -= qty_to_consumed
 				if qty_to_consumed > 0:
-					bundle.append("ledgers", {"batch_no": batch_no, "qty": qty_to_consumed * -1})
+					bundle.append("entries", {"batch_no": batch_no, "qty": qty_to_consumed * -1})
 
 	def __set_serial_nos_for_bundle(self, bundle, qty, key):
 		bundle.has_serial_no = 1
@@ -525,7 +525,7 @@ class SubcontractingController(StockController):
 				if batch_no:
 					self.available_materials[key]["batch_no"][batch_no] -= 1
 
-			bundle.append("ledgers", {"serial_no": sn, "batch_no": batch_no, "qty": -1})
+			bundle.append("entries", {"serial_no": sn, "batch_no": batch_no, "qty": -1})
 
 			self.available_materials[key]["serial_no"].remove(sn)
 

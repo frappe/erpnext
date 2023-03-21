@@ -1,4 +1,4 @@
-erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
+erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	constructor(frm, item, callback) {
 		this.frm = frm;
 		this.item = item;
@@ -105,7 +105,7 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 		});
 
 		fields.push({
-			fieldname: 'ledgers',
+			fieldname: 'entries',
 			fieldtype: 'Table',
 			allow_bulk_edit: true,
 			data: [],
@@ -228,8 +228,8 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 			callback: (r) => {
 				debugger
 				if (r.message) {
-					this.dialog.fields_dict.ledgers.df.data = r.message;
-					this.dialog.fields_dict.ledgers.grid.refresh();
+					this.dialog.fields_dict.entries.df.data = r.message;
+					this.dialog.fields_dict.entries.grid.refresh();
 				}
 			}
 		});
@@ -239,44 +239,40 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
 
 		if (scan_serial_no) {
-			this.dialog.fields_dict.ledgers.df.data.push({
+			this.dialog.fields_dict.entries.df.data.push({
 				serial_no: scan_serial_no
 			});
 
 			this.dialog.fields_dict.scan_serial_no.set_value('');
 		} else if (scan_batch_no) {
-			this.dialog.fields_dict.ledgers.df.data.push({
+			this.dialog.fields_dict.entries.df.data.push({
 				batch_no: scan_batch_no
 			});
 
 			this.dialog.fields_dict.scan_batch_no.set_value('');
 		}
 
-		this.dialog.fields_dict.ledgers.grid.refresh();
+		this.dialog.fields_dict.entries.grid.refresh();
 	}
 
 	update_ledgers() {
-		if (!this.frm.is_new()) {
-			let ledgers = this.dialog.get_values().ledgers;
+		let entries = this.dialog.get_values().entries;
 
-			if (ledgers && !ledgers.length || !ledgers) {
-				frappe.throw(__('Please add atleast one Serial No / Batch No'));
-			}
-
-			frappe.call({
-				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers',
-				args: {
-					ledgers: ledgers,
-					child_row: this.item,
-					doc: this.frm.doc,
-				}
-			}).then(r => {
-				this.callback && this.callback(r.message);
-				this.dialog.hide();
-			})
-		} else {
-			frappe.msgprint(__('Please save the document first'));
+		if (entries && !entries.length || !entries) {
+			frappe.throw(__('Please add atleast one Serial No / Batch No'));
 		}
+
+		frappe.call({
+			method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers',
+			args: {
+				entries: entries,
+				child_row: this.item,
+				doc: this.frm.doc,
+			}
+		}).then(r => {
+			this.callback && this.callback(r.message);
+			this.dialog.hide();
+		})
 	}
 
 	render_data() {
@@ -298,9 +294,9 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 
 	set_data(data) {
 		data.forEach(d => {
-			this.dialog.fields_dict.ledgers.df.data.push(d);
+			this.dialog.fields_dict.entries.df.data.push(d);
 		});
 
-		this.dialog.fields_dict.ledgers.grid.refresh();
+		this.dialog.fields_dict.entries.grid.refresh();
 	}
 }

@@ -360,7 +360,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 					item.is_rejected = false;
 
 					frappe.require(path, function() {
-						new erpnext.SerialNoBatchBundleUpdate(
+						new erpnext.SerialBatchPackageSelector(
 							me.frm, item, (r) => {
 								if (r) {
 									me.frm.refresh_fields();
@@ -388,7 +388,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 					item.is_rejected = true;
 
 					frappe.require(path, function() {
-						new erpnext.SerialNoBatchBundleUpdate(
+						new erpnext.SerialBatchPackageSelector(
 							me.frm, item, (r) => {
 								if (r) {
 									me.frm.refresh_fields();

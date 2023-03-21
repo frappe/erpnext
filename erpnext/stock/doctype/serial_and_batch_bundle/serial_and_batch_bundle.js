@@ -16,7 +16,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 				method: "set_warehouse",
 				doc: frm.doc,
 				callback(r) {
-					refresh_field("ledgers");
+					refresh_field("entries");
 				}
 			})
 		}
@@ -31,11 +31,11 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 	},
 
 	toggle_fields(frm) {
-		frm.fields_dict.ledgers.grid.update_docfield_property(
+		frm.fields_dict.entries.grid.update_docfield_property(
 			'serial_no', 'read_only', !frm.doc.has_serial_no
 		);
 
-		frm.fields_dict.ledgers.grid.update_docfield_property(
+		frm.fields_dict.entries.grid.update_docfield_property(
 			'batch_no', 'read_only', !frm.doc.has_batch_no
 		);
 	},
@@ -74,7 +74,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			};
 		});
 
-		frm.set_query('serial_no', 'ledgers', () => {
+		frm.set_query('serial_no', 'entries', () => {
 			return {
 				filters: {
 					item_code: frm.doc.item_code,
@@ -82,7 +82,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			};
 		});
 
-		frm.set_query('batch_no', 'ledgers', () => {
+		frm.set_query('batch_no', 'entries', () => {
 			return {
 				filters: {
 					item: frm.doc.item_code,
@@ -90,7 +90,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			};
 		});
 
-		frm.set_query('warehouse', 'ledgers', () => {
+		frm.set_query('warehouse', 'entries', () => {
 			return {
 				filters: {
 					company: frm.doc.company,
@@ -101,7 +101,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 });
 
 
-frappe.ui.form.on("Serial and Batch Ledger", {
+frappe.ui.form.on("Serial and Batch Entry", {
 	ledgers_add(frm, cdt, cdn) {
 		if (frm.doc.warehouse) {
 			locals[cdt][cdn].warehouse = frm.doc.warehouse;

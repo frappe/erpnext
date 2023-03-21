@@ -242,6 +242,9 @@ class StockEntry(StockController):
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("In Transit")
 
+	def on_update(self):
+		self.set_serial_and_batch_bundle()
+
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
 			data = frappe.db.get_value(
@@ -695,6 +698,9 @@ class StockEntry(StockController):
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
+
+		if not reset_outgoing_rate:
+			self.set_serial_and_batch_bundle()
 
 	def set_basic_rate(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		"""
@@ -2830,7 +2836,7 @@ def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
 			while qty > 0:
 				qty -= 1
 				doc.append(
-					"ledgers",
+					"entries",
 					{
 						"batch_no": batch_no,
 						"serial_no": batchwise_serial_nos.get(batch_no).pop(0),
@@ -2842,12 +2848,12 @@ def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
 	elif row.serial_nos:
 		doc.has_serial_no = 1
 		for serial_no in row.serial_nos:
-			doc.append("ledgers", {"serial_no": serial_no, "warehouse": row.warehouse, "qty": -1})
+			doc.append("entries", {"serial_no": serial_no, "warehouse": row.warehouse, "qty": -1})
 
 	elif row.batches_to_be_consume:
 		doc.has_batch_no = 1
 		for batch_no, qty in row.batches_to_be_consume.items():
-			doc.append("ledgers", {"batch_no": batch_no, "warehouse": row.warehouse, "qty": qty * -1})
+			doc.append("entries", {"batch_no": batch_no, "warehouse": row.warehouse, "qty": qty * -1})
 
 	return doc.insert(ignore_permissions=True).name
 

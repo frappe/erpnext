@@ -141,12 +141,8 @@ class SerialBatchBundle:
 			self.add_serial_no_to_bundle(sn_doc, sr_nos, incoming_rate, batch_no)
 		elif self.item_details.has_batch_no:
 			self.add_batch_no_to_bundle(sn_doc, batch_no, incoming_rate)
-			sn_doc.save()
 
-		sn_doc.load_from_db()
-		sn_doc.flags.ignore_validate = True
-		sn_doc.flags.ignore_mandatory = True
-
+		sn_doc.save()
 		sn_doc.submit()
 		self.set_serial_and_batch_bundle(sn_doc)
 
@@ -174,38 +170,18 @@ class SerialBatchBundle:
 		return is_rejected(self.sle.voucher_type, self.sle.voucher_detail_no, self.sle.warehouse)
 
 	def add_serial_no_to_bundle(self, sn_doc, serial_nos, incoming_rate, batch_no=None):
-		ledgers = []
-
-		fields = [
-			"name",
-			"serial_no",
-			"batch_no",
-			"warehouse",
-			"item_code",
-			"qty",
-			"incoming_rate",
-			"parent",
-			"parenttype",
-			"parentfield",
-		]
-
 		for serial_no in serial_nos:
-			ledgers.append(
-				(
-					frappe.generate_hash("Serial and Batch Ledger", 10),
-					serial_no,
-					batch_no,
-					self.warehouse,
-					self.item_details.item_code,
-					1,
-					incoming_rate,
-					sn_doc.name,
-					sn_doc.doctype,
-					"ledgers",
-				)
+			sn_doc.append(
+				"entries",
+				{
+					"serial_no": serial_no,
+					"qty": 1,
+					"incoming_rate": incoming_rate,
+					"batch_no": batch_no,
+					"warehouse": self.warehouse,
+					"is_outward": 0,
+				},
 			)
-
-		frappe.db.bulk_insert("Serial and Batch Ledger", fields=fields, values=set(ledgers))
 
 	def add_batch_no_to_bundle(self, sn_doc, batch_no, incoming_rate):
 		stock_value_difference = flt(self.sle.actual_qty) * flt(incoming_rate)
@@ -214,7 +190,7 @@ class SerialBatchBundle:
 			stock_value_difference *= -1
 
 		sn_doc.append(
-			"ledgers",
+			"entries",
 			{
 				"batch_no": batch_no,
 				"qty": self.sle.actual_qty,
@@ -336,14 +312,14 @@ class SerialBatchBundle:
 		).run()
 
 	def set_batch_no_in_serial_nos(self):
-		ledgers = frappe.get_all(
-			"Serial and Batch Ledger",
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
 			fields=["serial_no", "batch_no"],
 			filters={"parent": self.sle.serial_and_batch_bundle},
 		)
 
 		batch_serial_nos = {}
-		for ledger in ledgers:
+		for ledger in entries:
 			batch_serial_nos.setdefault(ledger.batch_no, []).append(ledger.serial_no)
 
 		for batch_no, serial_nos in batch_serial_nos.items():
@@ -360,9 +336,9 @@ def get_serial_nos(serial_and_batch_bundle, check_outward=True):
 	if check_outward:
 		filters["is_outward"] = 1
 
-	ledgers = frappe.get_all("Serial and Batch Ledger", fields=["serial_no"], filters=filters)
+	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters)
 
-	return [d.serial_no for d in ledgers]
+	return [d.serial_no for d in entries]
 
 
 class SerialNoBundleValuation(DeprecatedSerialNoValuation):
@@ -380,12 +356,12 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 			)
 
 		else:
-			ledgers = self.get_serial_no_ledgers()
+			entries = self.get_serial_no_ledgers()
 
 			self.serial_no_incoming_rate = defaultdict(float)
 			self.stock_value_change = 0.0
 
-			for ledger in ledgers:
+			for ledger in entries:
 				self.stock_value_change += ledger.incoming_rate * -1
 				self.serial_no_incoming_rate[ledger.serial_no] = ledger.incoming_rate
 
@@ -403,7 +379,7 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 				), child.name, child.serial_no, child.warehouse
 			FROM
 				`tabSerial and Batch Bundle` as parent,
-				`tabSerial and Batch Ledger` as child
+				`tabSerial and Batch Entry` as child
 			WHERE
 				parent.name = child.parent
 				AND child.serial_no IN ({', '.join([frappe.db.escape(s) for s in serial_nos])})
@@ -428,7 +404,7 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 			SELECT
 				ledger.serial_no, ledger.incoming_rate, ledger.warehouse
 			FROM
-				`tabSerial and Batch Ledger` AS ledger,
+				`tabSerial and Batch Entry` AS ledger,
 				({subquery}) AS SubQuery
 			WHERE
 				ledger.name = SubQuery.name
@@ -508,11 +484,11 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "total_amount"
 			)
 		else:
-			ledgers = self.get_batch_no_ledgers()
+			entries = self.get_batch_no_ledgers()
 
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
-			for ledger in ledgers:
+			for ledger in entries:
 				self.batch_avg_rate[ledger.batch_no] += flt(ledger.incoming_rate) / flt(ledger.qty)
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
 
@@ -521,7 +497,7 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 
 	def get_batch_no_ledgers(self) -> List[dict]:
 		parent = frappe.qb.DocType("Serial and Batch Bundle")
-		child = frappe.qb.DocType("Serial and Batch Ledger")
+		child = frappe.qb.DocType("Serial and Batch Entry")
 
 		batch_nos = list(self.batch_nos.keys())
 
@@ -554,13 +530,13 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 		if self.sle.get("batch_nos"):
 			return self.sle.batch_nos
 
-		ledgers = frappe.get_all(
-			"Serial and Batch Ledger",
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
 			fields=["batch_no", "qty", "name"],
 			filters={"parent": self.sle.serial_and_batch_bundle, "is_outward": 1},
 		)
 
-		return {d.batch_no: d for d in ledgers}
+		return {d.batch_no: d for d in entries}
 
 	def set_stock_value_difference(self):
 		self.stock_value_change = 0
@@ -568,7 +544,7 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
 			frappe.db.set_value(
-				"Serial and Batch Ledger", ledger.name, "stock_value_difference", stock_value_change
+				"Serial and Batch Entry", ledger.name, "stock_value_difference", stock_value_change
 			)
 
 	def calculate_valuation_rate(self):
@@ -638,7 +614,7 @@ def get_batches_from_stock_entries(work_order):
 
 def set_batch_details_from_package(ids, batches):
 	entries = frappe.get_all(
-		"Serial and Batch Ledger",
+		"Serial and Batch Entry",
 		filters={"parent": ("in", ids), "is_outward": 0},
 		fields=["batch_no", "qty"],
 	)

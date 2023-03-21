@@ -441,7 +441,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 					}
 
 					frappe.require(path, function() {
-						new erpnext.SerialNoBatchBundleUpdate(
+						new erpnext.SerialBatchPackageSelector(
 							me.frm, item, (r) => {
 								if (r) {
 									me.frm.refresh_fields();

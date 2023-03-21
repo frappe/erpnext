@@ -510,10 +510,6 @@ class PurchaseInvoice(BuyingController):
 			if self.is_old_subcontracting_flow:
 				self.set_consumed_qty_in_subcontract_order()
 
-			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-			update_serial_nos_after_submit(self, "items")
-
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
 

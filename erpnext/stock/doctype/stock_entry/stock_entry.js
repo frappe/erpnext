@@ -1114,7 +1114,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 				item.outward = item.s_warehouse ? 1 : 0;
 
 				frappe.require(path, function() {
-					new erpnext.SerialNoBatchBundleUpdate(
+					new erpnext.SerialBatchPackageSelector(
 						frm, item, (r) => {
 							if (r) {
 								frm.refresh_fields();

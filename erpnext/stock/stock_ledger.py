@@ -1370,7 +1370,7 @@ def get_batch_incoming_rate(
 ):
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	batch_ledger = frappe.qb.DocType("Serial and Batch Ledger")
+	batch_ledger = frappe.qb.DocType("Serial and Batch Entry")
 
 	timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
 		posting_date, posting_time
@@ -1382,7 +1382,7 @@ def get_batch_incoming_rate(
 		) & (sle.creation < creation)
 
 	batches = frappe.get_all(
-		"Serial and Batch Ledger", fields=["batch_no"], filters={"parent": serial_and_batch_bundle}
+		"Serial and Batch Entry", fields=["batch_no"], filters={"parent": serial_and_batch_bundle}
 	)
 
 	batch_details = (

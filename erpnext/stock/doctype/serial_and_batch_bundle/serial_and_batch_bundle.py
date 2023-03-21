@@ -28,19 +28,16 @@ class SerialandBatchBundle(Document):
 
 	def before_save(self):
 		self.set_is_outward()
-		self.set_total_qty()
+		self.calculate_qty_and_amount()
 		self.set_warehouse()
 		self.set_incoming_rate()
 		self.validate_qty_and_stock_value_difference()
-
-		if self.ledgers:
-			self.set_avg_rate()
 
 	def validate_serial_nos_inventory(self):
 		if not (self.has_serial_no and self.type_of_transaction == "Outward"):
 			return
 
-		serial_nos = [d.serial_no for d in self.ledgers if d.serial_no]
+		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
 		serial_no_warehouse = frappe._dict(
 			frappe.get_all(
 				"Serial No",
@@ -68,7 +65,7 @@ class SerialandBatchBundle(Document):
 		if self.type_of_transaction != "Outward":
 			return
 
-		for d in self.ledgers:
+		for d in self.entries:
 			if d.qty and d.qty > 0:
 				d.qty *= -1
 
@@ -76,7 +73,7 @@ class SerialandBatchBundle(Document):
 				d.stock_value_difference *= -1
 
 	def get_serial_nos(self):
-		return [d.serial_no for d in self.ledgers if d.serial_no]
+		return [d.serial_no for d in self.entries if d.serial_no]
 
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
 		sle = self.get_sle_for_outward_transaction(row)
@@ -94,7 +91,7 @@ class SerialandBatchBundle(Document):
 				item_code=self.warehouse,
 			)
 
-		for d in self.ledgers:
+		for d in self.entries:
 			available_qty = 0
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
@@ -130,19 +127,23 @@ class SerialandBatchBundle(Document):
 				"serial_and_batch_bundle": self.name,
 				"actual_qty": self.total_qty,
 				"company": self.company,
-				"serial_nos": [row.serial_no for row in self.ledgers if row.serial_no],
-				"batch_nos": {row.batch_no: row for row in self.ledgers if row.batch_no},
+				"serial_nos": [row.serial_no for row in self.entries if row.serial_no],
+				"batch_nos": {row.batch_no: row for row in self.entries if row.batch_no},
 			}
 		)
 
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False):
-		rate = row.valuation_rate if row else 0.0
-		precision = frappe.get_precision(self.child_table, "valuation_rate") or 2
+		valuation_field = "valuation_rate"
+		if self.voucher_type in ["Sales Invoice", "Delivery Note"]:
+			valuation_field = "incoming_rate"
+
+		rate = row.get(valuation_field) if row else 0.0
+		precision = frappe.get_precision(self.child_table, valuation_field) or 2
 
 		if not rate and self.voucher_detail_no and self.voucher_no:
-			rate = frappe.db.get_value(self.child_table, self.voucher_detail_no, "valuation_rate")
+			rate = frappe.db.get_value(self.child_table, self.voucher_detail_no, valuation_field)
 
-		for d in self.ledgers:
+		for d in self.entries:
 			if self.voucher_type in ["Stock Reconciliation", "Stock Entry"] and d.incoming_rate:
 				continue
 
@@ -180,8 +181,9 @@ class SerialandBatchBundle(Document):
 			self.db_set(values_to_set)
 
 		# self.validate_voucher_no()
-		self.validate_quantity(row)
 		self.set_incoming_rate(save=True, row=row)
+		self.calculate_qty_and_amount(save=True)
+		self.validate_quantity(row)
 
 	def validate_voucher_no(self):
 		if self.is_new():
@@ -215,10 +217,13 @@ class SerialandBatchBundle(Document):
 		if not self.has_serial_no:
 			return
 
-		serial_nos = [d.serial_no for d in self.ledgers if d.serial_no]
+		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+
+		if not serial_nos:
+			return
 
 		parent = frappe.qb.DocType("Serial and Batch Bundle")
-		child = frappe.qb.DocType("Serial and Batch Ledger")
+		child = frappe.qb.DocType("Serial and Batch Entry")
 
 		timestamp_condition = CombineDatetime(
 			parent.posting_date, parent.posting_time
@@ -260,8 +265,6 @@ class SerialandBatchBundle(Document):
 			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransactionError)
 
 	def validate_quantity(self, row):
-		self.set_total_qty(save=True)
-
 		precision = row.precision
 		qty_field = "qty"
 		if self.voucher_type in ["Subcontracting Receipt"]:
@@ -275,7 +278,7 @@ class SerialandBatchBundle(Document):
 			)
 
 	def set_is_outward(self):
-		for row in self.ledgers:
+		for row in self.entries:
 			if self.type_of_transaction == "Outward" and row.qty > 0:
 				row.qty *= -1
 			elif self.type_of_transaction == "Inward" and row.qty < 0:
@@ -285,30 +288,34 @@ class SerialandBatchBundle(Document):
 
 	@frappe.whitelist()
 	def set_warehouse(self):
-		for row in self.ledgers:
+		for row in self.entries:
 			if row.warehouse != self.warehouse:
 				row.warehouse = self.warehouse
 
-	def set_total_qty(self, save=False):
-		if not self.ledgers:
-			return
-
-		self.total_qty = sum([row.qty for row in self.ledgers])
-		if save:
-			self.db_set("total_qty", self.total_qty)
-
-	def set_avg_rate(self):
+	def calculate_qty_and_amount(self, save=False):
 		self.total_amount = 0.0
+		self.total_qty = 0.0
+		self.avg_rate = 0.0
 
-		for row in self.ledgers:
+		for row in self.entries:
 			rate = flt(row.incoming_rate) or flt(row.outgoing_rate)
 			self.total_amount += flt(row.qty) * rate
+			self.total_qty += flt(row.qty)
 
 		if self.total_qty:
 			self.avg_rate = flt(self.total_amount) / flt(self.total_qty)
 
+		if save:
+			self.db_set(
+				{
+					"total_qty": self.total_qty,
+					"avg_rate": self.avg_rate,
+					"total_amount": self.total_amount,
+				}
+			)
+
 	def calculate_outgoing_rate(self):
-		if not (self.has_serial_no and self.ledgers):
+		if not (self.has_serial_no and self.entries):
 			return
 
 		if not (self.voucher_type and self.voucher_no):
@@ -332,7 +339,7 @@ class SerialandBatchBundle(Document):
 		serial_nos = []
 		batch_nos = []
 
-		for row in self.ledgers:
+		for row in self.entries:
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
 
@@ -362,7 +369,7 @@ class SerialandBatchBundle(Document):
 			frappe.db.set_value("Stock Ledger Entry", sle.name, "serial_and_batch_bundle", None)
 
 	def clear_table(self):
-		self.set("ledgers", [])
+		self.set("entries", [])
 
 	@property
 	def child_table(self):
@@ -434,15 +441,15 @@ def get_serial_batch_ledgers(item_code, voucher_no, name=None):
 	return frappe.get_all(
 		"Serial and Batch Bundle",
 		fields=[
-			"`tabSerial and Batch Ledger`.`name`",
-			"`tabSerial and Batch Ledger`.`qty`",
-			"`tabSerial and Batch Ledger`.`warehouse`",
-			"`tabSerial and Batch Ledger`.`batch_no`",
-			"`tabSerial and Batch Ledger`.`serial_no`",
+			"`tabSerial and Batch Entry`.`name`",
+			"`tabSerial and Batch Entry`.`qty`",
+			"`tabSerial and Batch Entry`.`warehouse`",
+			"`tabSerial and Batch Entry`.`batch_no`",
+			"`tabSerial and Batch Entry`.`serial_no`",
 		],
 		filters=[
 			["Serial and Batch Bundle", "item_code", "=", item_code],
-			["Serial and Batch Ledger", "parent", "=", name],
+			["Serial and Batch Entry", "parent", "=", name],
 			["Serial and Batch Bundle", "voucher_no", "=", voucher_no],
 			["Serial and Batch Bundle", "docstatus", "!=", 2],
 		],
@@ -450,31 +457,30 @@ def get_serial_batch_ledgers(item_code, voucher_no, name=None):
 
 
 @frappe.whitelist()
-def add_serial_batch_ledgers(ledgers, child_row, doc) -> object:
+def add_serial_batch_ledgers(entries, child_row, doc) -> object:
 	if isinstance(child_row, str):
 		child_row = frappe._dict(frappe.parse_json(child_row))
 
-	if isinstance(ledgers, str):
-		ledgers = frappe.parse_json(ledgers)
+	if isinstance(entries, str):
+		entries = frappe.parse_json(entries)
 
 	if doc and isinstance(doc, str):
-		d = frappe.parse_json(doc)
-		parent_doc = frappe.get_doc(d.doctype, d.name)
+		parent_doc = frappe.parse_json(doc)
 
 	if frappe.db.exists("Serial and Batch Bundle", child_row.serial_and_batch_bundle):
-		doc = update_serial_batch_no_ledgers(ledgers, child_row, parent_doc)
+		doc = update_serial_batch_no_ledgers(entries, child_row, parent_doc)
 	else:
-		doc = create_serial_batch_no_ledgers(ledgers, child_row, parent_doc)
+		doc = create_serial_batch_no_ledgers(entries, child_row, parent_doc)
 
 	return doc
 
 
-def create_serial_batch_no_ledgers(ledgers, child_row, parent_doc) -> object:
+def create_serial_batch_no_ledgers(entries, child_row, parent_doc) -> object:
 
 	warehouse = child_row.rejected_warhouse if child_row.is_rejected else child_row.warehouse
 
 	type_of_transaction = child_row.type_of_transaction
-	if parent_doc.doctype == "Stock Entry":
+	if parent_doc.get("doctype") == "Stock Entry":
 		type_of_transaction = "Outward" if child_row.s_warehouse else "Inward"
 		warehouse = child_row.s_warehouse or child_row.t_warehouse
 
@@ -482,21 +488,19 @@ def create_serial_batch_no_ledgers(ledgers, child_row, parent_doc) -> object:
 		{
 			"doctype": "Serial and Batch Bundle",
 			"voucher_type": child_row.parenttype,
-			"voucher_no": child_row.parent,
 			"item_code": child_row.item_code,
 			"warehouse": warehouse,
-			"voucher_detail_no": child_row.name,
 			"is_rejected": child_row.is_rejected,
 			"type_of_transaction": type_of_transaction,
-			"posting_date": parent_doc.posting_date,
-			"posting_time": parent_doc.posting_time,
+			"posting_date": parent_doc.get("posting_date"),
+			"posting_time": parent_doc.get("posting_time"),
 		}
 	)
 
-	for row in ledgers:
+	for row in entries:
 		row = frappe._dict(row)
 		doc.append(
-			"ledgers",
+			"entries",
 			{
 				"qty": (row.qty or 1.0) * (1 if type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse,
@@ -514,16 +518,16 @@ def create_serial_batch_no_ledgers(ledgers, child_row, parent_doc) -> object:
 	return doc
 
 
-def update_serial_batch_no_ledgers(ledgers, child_row, parent_doc) -> object:
+def update_serial_batch_no_ledgers(entries, child_row, parent_doc) -> object:
 	doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
 	doc.voucher_detail_no = child_row.name
 	doc.posting_date = parent_doc.posting_date
 	doc.posting_time = parent_doc.posting_time
-	doc.set("ledgers", [])
+	doc.set("entries", [])
 
-	for d in ledgers:
+	for d in entries:
 		doc.append(
-			"ledgers",
+			"entries",
 			{
 				"qty": 1 if doc.type_of_transaction == "Inward" else -1,
 				"warehouse": d.get("warehouse"),
@@ -543,7 +547,7 @@ def get_serial_and_batch_ledger(**kwargs):
 	kwargs = frappe._dict(kwargs)
 
 	sle_table = frappe.qb.DocType("Stock Ledger Entry")
-	serial_batch_table = frappe.qb.DocType("Serial and Batch Ledger")
+	serial_batch_table = frappe.qb.DocType("Serial and Batch Entry")
 
 	query = (
 		frappe.qb.from_(sle_table)
@@ -638,7 +642,7 @@ def get_auto_batch_nos(kwargs):
 
 def get_available_batches(kwargs):
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
-	batch_ledger = frappe.qb.DocType("Serial and Batch Ledger")
+	batch_ledger = frappe.qb.DocType("Serial and Batch Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
 	query = (
@@ -708,7 +712,7 @@ def get_voucher_wise_serial_batch_from_bundle(**kwargs) -> Dict[str, Dict]:
 
 def get_ledgers_from_serial_batch_bundle(**kwargs) -> List[frappe._dict]:
 	bundle_table = frappe.qb.DocType("Serial and Batch Bundle")
-	serial_batch_table = frappe.qb.DocType("Serial and Batch Ledger")
+	serial_batch_table = frappe.qb.DocType("Serial and Batch Entry")
 
 	query = (
 		frappe.qb.from_(bundle_table)
@@ -776,7 +780,7 @@ def get_available_batch_nos(item_code, warehouse):
 
 def get_stock_ledger_entries(item_code, warehouse):
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
-	batch_ledger = frappe.qb.DocType("Serial and Batch Ledger")
+	batch_ledger = frappe.qb.DocType("Serial and Batch Entry")
 
 	return (
 		frappe.qb.from_(stock_ledger_entry)

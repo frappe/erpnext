@@ -63,10 +63,6 @@ class StockReconciliation(StockController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 	def on_cancel(self):
 		self.validate_reserved_stock()
 		self.ignore_linked_doctypes = (
@@ -108,7 +104,7 @@ class StockReconciliation(StockController):
 
 					for serial_no_row in serial_nos_details:
 						serial_and_batch_bundle.append(
-							"ledgers",
+							"entries",
 							{
 								"serial_no": serial_no_row.serial_no,
 								"qty": -1,
@@ -122,7 +118,7 @@ class StockReconciliation(StockController):
 
 					for batch_no, qty in batch_nos_details.items():
 						serial_and_batch_bundle.append(
-							"ledgers",
+							"entries",
 							{
 								"batch_no": batch_no,
 								"qty": qty * -1,
@@ -144,7 +140,7 @@ class StockReconciliation(StockController):
 				bundle_doc.warehouse = item.warehouse
 				bundle_doc.type_of_transaction = "Inward"
 
-				for row in bundle_doc.ledgers:
+				for row in bundle_doc.entries:
 					if row.qty < 0:
 						row.qty = abs(row.qty)
 
@@ -153,8 +149,7 @@ class StockReconciliation(StockController):
 
 					row.is_outward = 0
 
-				bundle_doc.set_total_qty()
-				bundle_doc.set_avg_rate()
+				bundle_doc.calculate_qty_and_amount()
 				bundle_doc.flags.ignore_permissions = True
 				bundle_doc.save()
 				item.serial_and_batch_bundle = bundle_doc.name

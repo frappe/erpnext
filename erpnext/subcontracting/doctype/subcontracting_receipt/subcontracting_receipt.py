@@ -95,11 +95,6 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_subcontracting_order_status()
 		self.set_consumed_qty_in_subcontract_order()
 		self.update_stock_ledger()
-
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()

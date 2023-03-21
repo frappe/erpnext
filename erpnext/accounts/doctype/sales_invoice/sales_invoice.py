@@ -38,11 +38,7 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.stock.doctype.serial_no.serial_no import (
-	get_delivery_note_serial_no,
-	get_serial_nos,
-	update_serial_nos_after_submit,
-)
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -262,8 +258,6 @@ class SalesInvoice(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
-		if self.is_return and self.update_stock:
-			update_serial_nos_after_submit(self, "items")
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()

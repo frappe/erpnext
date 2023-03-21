@@ -110,7 +110,7 @@
  "modified": "2023-03-17 09:11:31.548862",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Serial and Batch Ledger",
+ "name": "Serial and Batch Entry",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

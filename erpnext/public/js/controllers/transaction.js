@@ -2318,7 +2318,16 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 	}
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchBundleUpdate(frm, item_row, (r) => {
+		if (in_list(["Sales Invoice", "Delivery Note"], frm.doc.doctype)) {
+			item_row.outward = frm.doc.is_return ? 0 : 1;
+		} else {
+			item_row.outward = frm.doc.is_return ? 1 : 0;
+		}
+
+		item_row.type_of_transaction = (item_row.outward === 1
+			? "Outward":"Inward");
+
+		new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 			if (r) {
 				frm.refresh_fields();
 				frappe.model.set_value(item_row.doctype, item_row.name,

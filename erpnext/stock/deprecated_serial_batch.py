@@ -67,8 +67,8 @@ class DeprecatedSerialNoValuation:
 
 class DeprecatedBatchNoValuation:
 	def calculate_avg_rate_from_deprecarated_ledgers(self):
-		ledgers = self.get_sle_for_batches()
-		for ledger in ledgers:
+		entries = self.get_sle_for_batches()
+		for ledger in entries:
 			self.batch_avg_rate[ledger.batch_no] += flt(ledger.batch_value) / flt(ledger.batch_qty)
 			self.available_qty[ledger.batch_no] += flt(ledger.batch_qty)
 

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SerialandBatchLedger(Document):
+class SerialandBatchEntry(Document):
 	pass

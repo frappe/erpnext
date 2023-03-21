@@ -17,7 +17,7 @@
   "has_serial_no",
   "has_batch_no",
   "serial_no_and_batch_no_tab",
-  "ledgers",
+  "entries",
   "quantity_and_rate_section",
   "total_qty",
   "item_group",
@@ -95,15 +95,8 @@
   },
   {
    "fieldname": "serial_no_and_batch_no_tab",
-   "fieldtype": "Section Break"
-  },
-  {
-   "allow_bulk_edit": 1,
-   "fieldname": "ledgers",
-   "fieldtype": "Table",
-   "label": "Ledgers",
-   "options": "Serial and Batch Ledger",
-   "reqd": 1
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch No"
   },
   {
    "fieldname": "voucher_type",
@@ -232,12 +225,19 @@
    "label": "Voucher Detail No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "entries",
+   "fieldtype": "Table",
+   "options": "Serial and Batch Entry",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-12 16:05:18.141958",
+ "modified": "2023-03-21 10:52:25.105421",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

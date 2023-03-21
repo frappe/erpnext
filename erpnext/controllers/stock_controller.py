@@ -387,7 +387,7 @@ class StockController(AccountsController):
 		bundle_doc.voucher_no = self.name
 		bundle_doc.is_cancelled = 0
 
-		for row in bundle_doc.ledgers:
+		for row in bundle_doc.entries:
 			row.is_outward = 0
 			row.qty = abs(row.qty)
 			row.stock_value_difference = abs(row.stock_value_difference)
@@ -398,8 +398,7 @@ class StockController(AccountsController):
 
 			row.warehouse = warehouse
 
-		bundle_doc.set_total_qty()
-		bundle_doc.set_avg_rate()
+		bundle_doc.calculate_qty_and_amount()
 		bundle_doc.flags.ignore_permissions = True
 
 		if not do_not_submit:

@@ -240,11 +240,6 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
 		self.update_stock_ledger()
-
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
