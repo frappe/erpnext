@@ -575,6 +575,14 @@ class calculate_taxes_and_totals(object):
 
 		self.set_rounded_total()
 
+		precision_loss = (
+			flt(self.doc.net_total * self.doc.conversion_rate, self.doc.precision("net_total"))
+			- self.doc.base_net_total
+		)
+		if precision_loss:
+			self.doc.base_rounding_adjustment += precision_loss
+			self.doc.rounding_adjustment += precision_loss
+
 	def calculate_total_net_weight(self):
 		if self.doc.meta.get_field("total_net_weight"):
 			self.doc.total_net_weight = 0.0
