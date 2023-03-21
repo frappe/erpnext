@@ -44,7 +44,66 @@ def search_by_term(search_term, warehouse, price_list):
 			["price_list_rate", "currency"],
 		) or [None, None]
 
+<<<<<<< HEAD
 		item_info.update(
+=======
+	if not item_doc:
+		return
+
+	item = {
+		"barcode": barcode,
+		"batch_no": batch_no,
+		"description": item_doc.description,
+		"is_stock_item": item_doc.is_stock_item,
+		"item_code": item_doc.name,
+		"item_image": item_doc.image,
+		"item_name": item_doc.item_name,
+		"serial_no": serial_no,
+		"stock_uom": item_doc.stock_uom,
+		"uom": item_doc.stock_uom,
+	}
+
+	if barcode:
+		barcode_info = next(filter(lambda x: x.barcode == barcode, item_doc.get("barcodes", [])), None)
+		if barcode_info and barcode_info.uom:
+			uom = next(filter(lambda x: x.uom == barcode_info.uom, item_doc.uoms), {})
+			item.update(
+				{
+					"uom": barcode_info.uom,
+					"conversion_factor": uom.get("conversion_factor", 1),
+				}
+			)
+
+	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
+	item.update({"actual_qty": item_stock_qty})
+
+	price = frappe.get_list(
+		doctype="Item Price",
+		filters={
+			"price_list": price_list,
+			"item_code": item_code,
+		},
+		fields=["uom", "stock_uom", "currency", "price_list_rate"],
+	)
+
+	def __sort(p):
+		p_uom = p.get("uom")
+
+		if p_uom == item.get("uom"):
+			return 0
+		elif p_uom == item.get("stock_uom"):
+			return 1
+		else:
+			return 2
+
+	# sort by fallback preference. always pick exact uom match if available
+	price = sorted(price, key=__sort)
+
+	if len(price) > 0:
+		p = price.pop(0)
+		item.update(
+>>>>>>> 08fc686513 (fix: default pos conversion factor set to 1 (#34437))
 			{
 				"serial_no": serial_no,
 				"batch_no": batch_no,
