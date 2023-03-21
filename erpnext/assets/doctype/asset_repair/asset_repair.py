@@ -39,7 +39,11 @@ class AssetRepair(AccountsController):
 	def before_submit(self):
 		self.check_repair_status()
 
+		self.asset_doc.flags.increase_in_asset_value_due_to_repair = False
+
 		if self.get("stock_consumption") or self.get("capitalize_repair_cost"):
+			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
+
 			self.increase_asset_value()
 		if self.get("stock_consumption"):
 			self.check_for_stock_items_and_warehouse()
@@ -52,14 +56,40 @@ class AssetRepair(AccountsController):
 			):
 				self.modify_depreciation_schedule()
 
+<<<<<<< HEAD
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.prepare_depreciation_data()
 		self.asset_doc.save()
+=======
+			if self.get("stock_consumption"):
+				self.check_for_stock_items_and_warehouse()
+				self.decrease_stock_quantity()
+
+			calculate_asset_depreciation = frappe.db.get_value(
+				"Asset", self.asset, "calculate_depreciation"
+			)
+
+			if self.get("capitalize_repair_cost"):
+				self.make_gl_entries()
+
+				if calculate_asset_depreciation and self.increase_in_asset_life:
+					self.modify_depreciation_schedule()
+
+			self.asset_doc.flags.ignore_validate_update_after_submit = True
+			self.asset_doc.prepare_depreciation_data()
+			if calculate_asset_depreciation:
+				self.update_asset_expected_value_after_useful_life()
+			self.asset_doc.save()
+>>>>>>> ae88ba5d18 (fix: incorrect depr schedules after asset repair [v13] (#34520))
 
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 
+		self.asset_doc.flags.increase_in_asset_value_due_to_repair = False
+
 		if self.get("stock_consumption") or self.get("capitalize_repair_cost"):
+			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
+
 			self.decrease_asset_value()
 		if self.get("stock_consumption"):
 			self.increase_stock_quantity()
@@ -73,9 +103,31 @@ class AssetRepair(AccountsController):
 			):
 				self.revert_depreciation_schedule_on_cancellation()
 
+<<<<<<< HEAD
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.prepare_depreciation_data()
 		self.asset_doc.save()
+=======
+			if self.get("stock_consumption"):
+				self.increase_stock_quantity()
+
+			calculate_asset_depreciation = frappe.db.get_value(
+				"Asset", self.asset, "calculate_depreciation"
+			)
+
+			if self.get("capitalize_repair_cost"):
+				self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+				self.make_gl_entries(cancel=True)
+
+				if calculate_asset_depreciation and self.increase_in_asset_life:
+					self.revert_depreciation_schedule_on_cancellation()
+
+			self.asset_doc.flags.ignore_validate_update_after_submit = True
+			self.asset_doc.prepare_depreciation_data()
+			if calculate_asset_depreciation:
+				self.update_asset_expected_value_after_useful_life()
+			self.asset_doc.save()
+>>>>>>> ae88ba5d18 (fix: incorrect depr schedules after asset repair [v13] (#34520))
 
 	def after_delete(self):
 		frappe.get_doc("Asset", self.asset).set_status()
@@ -94,6 +146,26 @@ class AssetRepair(AccountsController):
 				_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."),
 				title=_("Missing Warehouse"),
 			)
+
+	def update_asset_expected_value_after_useful_life(self):
+		for row in self.asset_doc.get("finance_books"):
+			if row.depreciation_method in ("Written Down Value", "Double Declining Balance"):
+				accumulated_depreciation_after_full_schedule = [
+					d.accumulated_depreciation_amount
+					for d in self.asset_doc.get("schedules")
+					if cint(d.finance_book_id) == row.idx
+				]
+
+				accumulated_depreciation_after_full_schedule = max(
+					accumulated_depreciation_after_full_schedule
+				)
+
+				asset_value_after_full_schedule = flt(
+					flt(row.value_after_depreciation) - flt(accumulated_depreciation_after_full_schedule),
+					row.precision("expected_value_after_useful_life"),
+				)
+
+				row.expected_value_after_useful_life = asset_value_after_full_schedule
 
 	def increase_asset_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
