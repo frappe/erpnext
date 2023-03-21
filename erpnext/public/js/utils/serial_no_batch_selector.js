@@ -261,7 +261,8 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 
 			return frappe.db.get_list("Serial No", {
 				filters: { 'name': ["in", selected_serial_nos]},
-				fields: ["batch_no", "name"]
+				fields: ["batch_no", "name"],
+				limit: 999
 			}).then((data) => {
 				// data = [{batch_no: 'batch-1', name: "SR-001"},
 				// 	{batch_no: 'batch-2', name: "SR-003"}, {batch_no: 'batch-2', name: "SR-004"}]
