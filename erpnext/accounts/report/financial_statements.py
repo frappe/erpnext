@@ -426,6 +426,7 @@ def set_gl_entries_by_account(
 		pluck="name",
 	)
 
+	ignore_opening_entries = False
 	if accounts_list:
 <<<<<<< HEAD
 
@@ -456,10 +457,20 @@ def set_gl_entries_by_account(
 					last_period_closing_voucher[0].name,
 				)
 				from_date = add_days(last_period_closing_voucher[0].posting_date, 1)
+<<<<<<< HEAD
 >>>>>>> 0157fa15eb (chore: Use account closing balance in set gl entries)
+=======
+				ignore_opening_entries = True
+>>>>>>> f9397a87ac (fix: Ignore opening entries if PCV posted)
 
 		gl_entries += get_accounting_entries(
-			"GL Entry", from_date, to_date, accounts_list, filters, ignore_closing_entries
+			"GL Entry",
+			from_date,
+			to_date,
+			accounts_list,
+			filters,
+			ignore_closing_entries,
+			ignore_opening_entries=ignore_opening_entries,
 		)
 
 		if filters and filters.get("presentation_currency"):
@@ -479,6 +490,7 @@ def get_accounting_entries(
 	filters,
 	ignore_closing_entries,
 	period_closing_voucher=None,
+	ignore_opening_entries=False,
 ):
 	gl_entry = frappe.qb.DocType(doctype)
 	query = (
@@ -498,6 +510,9 @@ def get_accounting_entries(
 		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
+
+		if ignore_opening_entries:
+			query = query.where(gl_entry.is_opening == "No")
 	else:
 		query = query.select(gl_entry.closing_date.as_("posting_date"))
 		query = query.where(gl_entry.period_closing_voucher == period_closing_voucher)
