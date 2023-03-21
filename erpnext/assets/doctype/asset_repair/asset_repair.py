@@ -50,19 +50,15 @@ class AssetRepair(AccountsController):
 				self.check_for_stock_items_and_warehouse()
 				self.decrease_stock_quantity()
 
-			calculate_asset_depreciation = frappe.db.get_value(
-				"Asset", self.asset, "calculate_depreciation"
-			)
-
 			if self.get("capitalize_repair_cost"):
 				self.make_gl_entries()
 
-				if calculate_asset_depreciation and self.increase_in_asset_life:
+				if self.asset_doc.calculate_depreciation and self.increase_in_asset_life:
 					self.modify_depreciation_schedule()
 
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			self.asset_doc.prepare_depreciation_data()
-			if calculate_asset_depreciation:
+			if self.asset_doc.calculate_depreciation:
 				self.update_asset_expected_value_after_useful_life()
 			self.asset_doc.save()
 
@@ -79,20 +75,16 @@ class AssetRepair(AccountsController):
 			if self.get("stock_consumption"):
 				self.increase_stock_quantity()
 
-			calculate_asset_depreciation = frappe.db.get_value(
-				"Asset", self.asset, "calculate_depreciation"
-			)
-
 			if self.get("capitalize_repair_cost"):
 				self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 				self.make_gl_entries(cancel=True)
 
-				if calculate_asset_depreciation and self.increase_in_asset_life:
+				if self.asset_doc.calculate_depreciation and self.increase_in_asset_life:
 					self.revert_depreciation_schedule_on_cancellation()
 
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			self.asset_doc.prepare_depreciation_data()
-			if calculate_asset_depreciation:
+			if self.asset_doc.calculate_depreciation:
 				self.update_asset_expected_value_after_useful_life()
 			self.asset_doc.save()
 
