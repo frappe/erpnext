@@ -191,8 +191,14 @@ def update_employee_work_history(employee, details, date=None, cancel=False):
 			new_data = getdate(new_data)
 		elif fieldtype == "Datetime" and new_data:
 			new_data = get_datetime(new_data)
-		elif fieldtype in ["Currency", "Float"] and new_data:
+		elif fieldtype == "Float" and new_data:
 			new_data = flt(new_data)
+		elif fieldtype == "Currency" and new_data:
+			from frappe.utils.data import get_number_format_info
+			number_format = frappe.db.get_default("number_format") or "#,###.##"
+			decimal_str, comma_str, number_format_precision = get_number_format_info(number_format)
+			new_data = new_data.replace(comma_str, "").replace(decimal_str, comma_str)
+			new_data = flt(new_data)			
 		setattr(employee, item.fieldname, new_data)
 		if item.fieldname in ["department", "designation", "branch"]:
 			internal_work_history[item.fieldname] = item.new
