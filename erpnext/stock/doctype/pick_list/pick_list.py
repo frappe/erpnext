@@ -172,8 +172,8 @@ class PickList(Document):
 			if (row.picked_qty / row.stock_qty) * 100 > over_delivery_receipt_allowance:
 				frappe.throw(
 					_(
-						f"You are picking more than required quantity for the item {row.item_code}. Check if there is any other pick list created for the sales order {row.sales_order}."
-					)
+						"You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}."
+					).format(row.item_code, row.sales_order)
 				)
 
 	@frappe.whitelist()
