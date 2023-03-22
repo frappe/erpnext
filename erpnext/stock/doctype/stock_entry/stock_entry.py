@@ -2229,11 +2229,11 @@ class StockEntry(StockController):
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
-	def set_missing_values(self):
+	def set_missing_values(self, raise_error_if_no_rate=True):
 		"Updates rate and availability of all the items of mapped doc."
 		self.set_transfer_qty()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(raise_error_if_no_rate=raise_error_if_no_rate)
 
 
 @frappe.whitelist()

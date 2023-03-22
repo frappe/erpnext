@@ -644,7 +644,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
 
-		stock_entry.set_missing_values()
+		stock_entry.set_missing_values(raise_error_if_no_rate=False)
 		return stock_entry.as_dict()
 	else:
 		frappe.throw(_("No Items selected for transfer"))
