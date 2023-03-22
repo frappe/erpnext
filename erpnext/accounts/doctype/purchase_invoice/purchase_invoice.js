@@ -6,6 +6,23 @@ frappe.provide("erpnext.accounts");
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
+		
+			frm.make_methods = {
+				'Landed Cost Voucher': () => {
+					let lcv = frappe.model.get_new_doc('Landed Cost Voucher');
+					lcv.company = frm.doc.company;
+	
+					let lcv_receipt = frappe.model.get_new_doc('Landed Cost Purchase Invoice');
+					lcv_receipt.receipt_document_type = 'Purchase Invoice';
+					lcv_receipt.receipt_document = frm.doc.name;
+					lcv_receipt.supplier = frm.doc.supplier;
+					lcv_receipt.grand_total = frm.doc.grand_total;
+					lcv.purchase_receipts = [lcv_receipt];
+	
+					frappe.set_route("Form", lcv.doctype, lcv.name);
+				},
+			}
+
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
