@@ -14,11 +14,7 @@
   "column_break_3",
   "po_required",
   "pr_required",
-<<<<<<< HEAD
-=======
   "over_order_allowance",
-  "column_break_12",
->>>>>>> f5937f46cb (feat: add field `Over Order Allowance (%)` in `Buying Settings`)
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
@@ -48,57 +44,6 @@
    "options": "Price List"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "po_required",
-   "fieldtype": "Select",
-   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
-   "options": "No\nYes"
-  },
-  {
-   "fieldname": "pr_required",
-   "fieldtype": "Select",
-   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
-   "options": "No\nYes"
-  },
-  {
-   "default": "0",
-   "fieldname": "maintain_same_rate",
-   "fieldtype": "Check",
-   "label": "Maintain Same Rate Throughout the Purchase Cycle"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_multiple_items",
-   "fieldtype": "Check",
-   "label": "Allow Item To Be Added Multiple Times in a Transaction"
-  },
-  {
-   "fieldname": "subcontract",
-   "fieldtype": "Section Break",
-   "label": "Subcontract"
-  },
-  {
-   "default": "Material Transferred for Subcontract",
-   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
-   "fieldtype": "Select",
-   "label": "Backflush Raw Materials of Subcontract Based On",
-   "options": "BOM\nMaterial Transferred for Subcontract"
-  },
-  {
-   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
-   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
-   "fieldname": "over_transfer_allowance",
-   "fieldtype": "Float",
-   "label": "Over Transfer Allowance (%)"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Stop",
    "depends_on": "maintain_same_rate",
    "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
@@ -116,51 +61,20 @@
    "options": "Role"
   },
   {
-   "default": "1",
-   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
-   "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
-   "fieldtype": "Check",
-   "label": "Bill for Rejected Quantity in Purchase Invoice"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "supplier_and_price_defaults_section",
-   "fieldtype": "Tab Break",
-   "label": "Naming Series and Price Defaults"
-  },
-  {
-   "fieldname": "column_break_4",
+   "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "transaction_settings_section",
-   "fieldtype": "Tab Break",
-   "label": "Transaction Settings"
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "options": "No\nYes"
   },
   {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "disable_last_purchase_rate",
-   "fieldtype": "Check",
-   "label": "Disable Last Purchase Rate"
-  },
-  {
-   "default": "1",
-   "fieldname": "show_pay_button",
-   "fieldtype": "Check",
-   "label": "Show Pay Button in Purchase Order Portal"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: !doc.maintain_same_rate",
-   "description": "Users can enable the checkbox If they want to adjust the incoming rate (set using purchase receipt) based on the purchase invoice rate.",
-   "fieldname": "set_landed_cost_based_on_purchase_invoice_rate",
-   "fieldtype": "Check",
-   "label": "Set Landed Cost Based on Purchase Invoice Rate"
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "options": "No\nYes"
   },
   {
    "default": "0",
@@ -168,7 +82,48 @@
    "fieldname": "over_order_allowance",
    "fieldtype": "Float",
    "label": "Over Order Allowance (%)"
->>>>>>> f5937f46cb (feat: add field `Over Order Allowance (%)` in `Buying Settings`)
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_multiple_items",
+   "fieldtype": "Check",
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+  },
+  {
+   "default": "1",
+   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Section Break",
+   "label": "Subcontract"
+  },
+  {
+   "default": "Material Transferred for Subcontract",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Transferred for Subcontract"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
+   "fieldname": "over_transfer_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance (%)"
   }
  ],
  "icon": "fa fa-cog",
@@ -176,11 +131,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-09-08 19:26:23.548837",
-=======
- "modified": "2023-03-02 17:02:14.404622",
->>>>>>> f5937f46cb (feat: add field `Over Order Allowance (%)` in `Buying Settings`)
+ "modified": "2023-03-22 13:01:49.640869",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

@@ -72,23 +72,10 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
-<<<<<<< HEAD
-<<<<<<< HEAD
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
-=======
-		self.validate_against_blanket_order()
-=======
-		validate_against_blanket_order(self)
->>>>>>> 53701c37b1 (feat: consider `over_order_allowance` while validating sales order qty)
-
-		if self.is_old_subcontracting_flow:
-			self.validate_bom_for_subcontracting_items()
-			self.create_raw_materials_supplied()
-
-		self.validate_fg_item_for_subcontracting()
->>>>>>> 8bcbc45add (feat: consider `over_order_allowance` while validating order qty)
 		self.set_received_qty_for_drop_ship_items()
+		validate_against_blanket_order(self)
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
