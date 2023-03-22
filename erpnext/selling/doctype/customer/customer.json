@@ -500,15 +500,17 @@
   {
    "allow_in_quick_entry": 1,
    "fieldname": "region",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Region",
-   "options": "\nSouth\nNorth\nWest\nEast\nCenter\nMEA\nSEA\nOther",
+   "options": "Region",
    "reqd": 1
   },
   {
    "allow_in_quick_entry": 1,
    "fieldname": "country",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Country",
    "options": "Country",
    "reqd": 1
@@ -581,7 +583,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-03-06 10:08:25.499935",
+ "modified": "2023-03-22 10:01:40.260979",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

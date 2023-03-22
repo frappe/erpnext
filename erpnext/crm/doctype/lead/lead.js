@@ -174,33 +174,6 @@ frappe.ui.form.on('Lead', {
 				filters: {'customer_name': doc.customer_name}
 			}
 		};
-		frm.set_query('customer_name', function(doc) {
-			var reg_user = getCurrentUserRegion()
-			if (reg_user != "HO"){
-				return {
-					filters: {
-						"region"  : getCurrentUserRegion()
-					}
-				}
-			}	
-		});
-		function getCurrentUserRegion()
-		{  
-			var ret_value = "";
-			frappe.call({                        
-				method: "frappe.client.get_value", 
-				async:false,
-				args: { 
-					    doctype: "User",
-					    name:frappe.session.user,
-					    fieldname:"region",
-					  },
-				callback: function(r) {
-                    ret_value=r.message.region;
-				}	 
-		 	});
-			return ret_value;
-		}
 	},
 	//form is save then set status Open, if company name mention then person child table set Mandatory 
 	before_save :function(frm){

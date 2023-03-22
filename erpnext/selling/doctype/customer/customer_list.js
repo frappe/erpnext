@@ -3,9 +3,9 @@ frappe.listview_settings['Customer'] = {
 	hide_name_column: true,
 	onload: function(me) {
 		me.$page.find(`div[data-fieldname='name']`).addClass('hide');
-    },
+	},
 };
-
+/* 
 frappe.listview_settings["Customer"] = {
 	add_fields: [],
 	onload: function(listview) {
@@ -33,4 +33,4 @@ function getCurrentUserRegion()
 				 
 		 });
 		 return ret_value;
-	}
+	} */
