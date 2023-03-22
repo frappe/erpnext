@@ -23,6 +23,7 @@
   "hide_unavailable_items",
   "auto_add_item_to_cart",
   "validate_stock_on_save",
+  "tax_inclusive_pricing",
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
@@ -375,6 +376,12 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "tax_inclusive_pricing",
+   "fieldtype": "Check",
+   "label": "Tax Inclusive Pricing "
   }
  ],
  "icon": "icon-cog",
@@ -402,7 +409,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2022-08-10 12:57:06.241439",
+ "modified": "2023-03-22 12:12:45.709494",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

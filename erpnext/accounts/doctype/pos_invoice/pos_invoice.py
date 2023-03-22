@@ -520,6 +520,11 @@ class POSInvoice(SalesInvoice):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
+			# fetch tax inclusive charges
+			if profile.get("tax_inclusive_pricing") and self.get("taxes"):
+				for tax in self.taxes:
+					tax.included_in_print_rate = 1
+
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value(
 				"Company", self.company, "default_cash_account"
