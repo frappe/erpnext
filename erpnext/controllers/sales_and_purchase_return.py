@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, format_datetime, get_datetime
 
 import erpnext
@@ -238,26 +239,32 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 
 def get_already_returned_items(doc):
-	column = "child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty"
-	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
-			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
-
-	data = frappe.db.sql(
-		"""
-		select {0}
-		from
-			`tab{1} Item` child, `tab{2}` par
-		where
-			child.parent = par.name and par.docstatus = 1
-			and par.is_return = 1 and par.return_against = %s
-		group by item_code
-	""".format(
-			column, doc.doctype, doc.doctype
-		),
-		doc.return_against,
-		as_dict=1,
+	data = []
+	return_docs = frappe.db.get_values(
+		doc.doctype, {"return_against": doc.name, "docstatus": 1}, pluck="name"
 	)
+
+	if return_docs:
+		child_doc = frappe.qb.DocType(doc.doctype + " Item")
+
+		query = (
+			frappe.qb.from_(child_doc)
+			.select(
+				child_doc.item_code,
+				Sum(Abs(child_doc.qty)).as_("qty"),
+				Sum(Abs(child_doc.qty)).as_("stock_qty"),
+			)
+			.where(child_doc.parent.isin(return_docs))
+			.groupby(child_doc.item_code)
+		)
+
+		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
+			query = query.select(
+				Sum(Abs(child_doc.rejected_qty) * child_doc.conversion_factor).as_("rejected_qty"),
+				Sum(Abs(child_doc.received_qty) * child_doc.conversion_factor).as_("received_qty"),
+			)
+
+		data = query.run(as_dict=True)
 
 	items = {}
 

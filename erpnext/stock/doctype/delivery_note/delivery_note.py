@@ -54,37 +54,6 @@ class DeliveryNote(SellingController):
 				"no_allowance": 1,
 			},
 		]
-		if cint(self.is_return):
-			self.status_updater.extend(
-				[
-					{
-						"source_dt": "Delivery Note Item",
-						"target_dt": "Sales Order Item",
-						"join_field": "so_detail",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Sales Order",
-						"source_field": "-1 * qty",
-						"second_source_dt": "Sales Invoice Item",
-						"second_source_field": "-1 * qty",
-						"second_join_field": "so_detail",
-						"extra_cond": """ and exists (select name from `tabDelivery Note`
-					where name=`tabDelivery Note Item`.parent and is_return=1)""",
-						"second_source_extra_cond": """ and exists (select name from `tabSales Invoice`
-					where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)""",
-					},
-					{
-						"source_dt": "Delivery Note Item",
-						"target_dt": "Delivery Note Item",
-						"join_field": "dn_detail",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Delivery Note",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "stock_qty",
-						"source_field": "-1 * stock_qty",
-						"percent_join_field_parent": "return_against",
-					},
-				]
-			)
 
 	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
@@ -235,6 +204,8 @@ class DeliveryNote(SellingController):
 			self.doctype, self.company, self.base_grand_total, self
 		)
 
+		self.update_status_updater_args()
+
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
 		self.update_billing_status()
@@ -255,6 +226,8 @@ class DeliveryNote(SellingController):
 		self.check_sales_order_on_hold_or_close("against_sales_order")
 		self.check_next_docstatus()
 
+		self.update_status_updater_args()
+
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
@@ -267,6 +240,39 @@ class DeliveryNote(SellingController):
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+
+	def update_status_updater_args(self):
+		if cint(self.is_return):
+			self.status_updater.extend(
+				[
+					{
+						"source_dt": "Delivery Note Item",
+						"target_dt": "Sales Order Item",
+						"join_field": "so_detail",
+						"target_field": "returned_qty",
+						"target_parent_dt": "Sales Order",
+						"source_field": "-1 * qty",
+						"second_source_dt": "Sales Invoice Item",
+						"second_source_field": "-1 * qty",
+						"second_join_field": "so_detail",
+						"extra_cond": """ and exists (select name from `tabDelivery Note`
+					where name=`tabDelivery Note Item`.parent and is_return=1)""",
+						"second_source_extra_cond": """ and exists (select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)""",
+					},
+					{
+						"source_dt": "Delivery Note Item",
+						"target_dt": "Delivery Note Item",
+						"join_field": "dn_detail",
+						"target_field": "returned_qty",
+						"target_parent_dt": "Delivery Note",
+						"target_parent_field": "per_returned",
+						"target_ref_field": "stock_qty",
+						"source_field": "-1 * stock_qty",
+						"percent_join_field_parent": "return_against",
+					},
+				]
+			)
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
