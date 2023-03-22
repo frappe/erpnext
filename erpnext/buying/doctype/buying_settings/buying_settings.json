@@ -14,6 +14,7 @@
   "column_break_3",
   "po_required",
   "pr_required",
+  "over_order_allowance",
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
@@ -43,57 +44,6 @@
    "options": "Price List"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "po_required",
-   "fieldtype": "Select",
-   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
-   "options": "No\nYes"
-  },
-  {
-   "fieldname": "pr_required",
-   "fieldtype": "Select",
-   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
-   "options": "No\nYes"
-  },
-  {
-   "default": "0",
-   "fieldname": "maintain_same_rate",
-   "fieldtype": "Check",
-   "label": "Maintain Same Rate Throughout the Purchase Cycle"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_multiple_items",
-   "fieldtype": "Check",
-   "label": "Allow Item To Be Added Multiple Times in a Transaction"
-  },
-  {
-   "fieldname": "subcontract",
-   "fieldtype": "Section Break",
-   "label": "Subcontract"
-  },
-  {
-   "default": "Material Transferred for Subcontract",
-   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
-   "fieldtype": "Select",
-   "label": "Backflush Raw Materials of Subcontract Based On",
-   "options": "BOM\nMaterial Transferred for Subcontract"
-  },
-  {
-   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
-   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
-   "fieldname": "over_transfer_allowance",
-   "fieldtype": "Float",
-   "label": "Over Transfer Allowance (%)"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Stop",
    "depends_on": "maintain_same_rate",
    "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
@@ -111,11 +61,69 @@
    "options": "Role"
   },
   {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "default": "0",
+   "description": "Percentage you are allowed to order more against the Blanket Order Quantity. For example: If you have a Blanket Order of Quantity 100 units. and your Allowance is 10% then you are allowed to order 110 units.",
+   "fieldname": "over_order_allowance",
+   "fieldtype": "Float",
+   "label": "Over Order Allowance (%)"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_multiple_items",
+   "fieldtype": "Check",
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+  },
+  {
    "default": "1",
    "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Section Break",
+   "label": "Subcontract"
+  },
+  {
+   "default": "Material Transferred for Subcontract",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Transferred for Subcontract"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
+   "fieldname": "over_transfer_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance (%)"
   }
  ],
  "icon": "fa fa-cog",
@@ -123,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:26:23.548837",
+ "modified": "2023-03-22 13:01:49.640869",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
