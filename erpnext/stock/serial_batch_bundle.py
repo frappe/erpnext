@@ -385,6 +385,7 @@ class SerialNoBundleValuation(DeprecatedSerialNoValuation):
 				AND child.serial_no IN ({', '.join([frappe.db.escape(s) for s in serial_nos])})
 				AND child.is_outward = 0
 				AND parent.docstatus = 1
+				AND parent.type_of_transaction != 'Maintenance'
 				AND parent.is_cancelled = 0
 				AND child.warehouse = {frappe.db.escape(self.sle.warehouse)}
 				AND parent.item_code = {frappe.db.escape(self.sle.item_code)}
@@ -521,6 +522,7 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 				& (parent.item_code == self.sle.item_code)
 				& (parent.docstatus == 1)
 				& (parent.is_cancelled == 0)
+				& (parent.type_of_transaction != "Maintenance")
 			)
 			.where(timestamp_condition)
 			.groupby(child.batch_no)

@@ -177,14 +177,14 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.type_of_transaction != \"Maintenance\"",
+   "options": "Warehouse"
   },
   {
    "fieldname": "type_of_transaction",
    "fieldtype": "Select",
    "label": "Type of Transaction",
-   "options": "\nInward\nOutward",
+   "options": "\nInward\nOutward\nMaintenance",
    "reqd": 1
   },
   {
@@ -237,7 +237,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-21 10:52:25.105421",
+ "modified": "2023-03-22 18:56:37.035516",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

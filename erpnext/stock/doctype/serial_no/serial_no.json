@@ -79,12 +79,15 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Text",
    "label": "Description",
@@ -188,6 +191,7 @@
    "width": "150px"
   },
   {
+   "fetch_from": "item_code.warranty_period",
    "fieldname": "warranty_period",
    "fieldtype": "Int",
    "label": "Warranty Period (Days)",

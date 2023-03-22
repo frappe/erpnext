@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, get_link_to_form, today
+from frappe.utils import add_days, cint, flt, get_link_to_form, today
 from pypika import Case
 
 from erpnext.stock.serial_batch_bundle import BatchNoBundleValuation, SerialNoBundleValuation
@@ -22,11 +22,14 @@ class SerialandBatchBundle(Document):
 	def validate(self):
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
-		# self.validate_voucher_no()
-		self.check_future_entries_exists()
-		self.validate_serial_nos_inventory()
+		self.validate_voucher_no()
 
 	def before_save(self):
+		if self.type_of_transaction == "Maintenance":
+			return
+
+		self.check_future_entries_exists()
+		self.validate_serial_nos_inventory()
 		self.set_is_outward()
 		self.calculate_qty_and_amount()
 		self.set_warehouse()
@@ -97,7 +100,7 @@ class SerialandBatchBundle(Document):
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
 				d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
-				available_qty = sn_obj.batch_available_qty.get(d.batch_no) + d.qty
+				available_qty = flt(sn_obj.batch_available_qty.get(d.batch_no)) + flt(d.qty)
 
 				self.validate_negative_batch(d.batch_no, available_qty)
 
@@ -184,34 +187,36 @@ class SerialandBatchBundle(Document):
 		self.set_incoming_rate(save=True, row=row)
 		self.calculate_qty_and_amount(save=True)
 		self.validate_quantity(row)
+		self.set_warranty_expiry_date(row)
 
-	def validate_voucher_no(self):
-		if self.is_new():
+	def set_warranty_expiry_date(self):
+		if not (self.docstatus == 1 and self.voucher_type == "Delivery Note" and self.has_serial_no):
 			return
 
+		warranty_period = frappe.get_cached_value("Item", self.item_code, "warranty_period")
+
+		if not warranty_period:
+			return
+
+		warranty_expiry_date = add_days(self.posting_date, cint(warranty_period))
+
+		serial_nos = self.get_serial_nos()
+		if not serial_nos:
+			return
+
+		sn_table = frappe.qb.DocType("Serial No")
+		(
+			frappe.qb.update(sn_table)
+			.set(sn_table.warranty_expiry_date, warranty_expiry_date)
+			.where(sn_table.name.isin(serial_nos))
+		).run()
+
+	def validate_voucher_no(self):
 		if not (self.voucher_type and self.voucher_no):
 			return
 
-		if not frappe.db.exists(self.voucher_type, self.voucher_no):
+		if self.voucher_no and not frappe.db.exists(self.voucher_type, self.voucher_no):
 			frappe.throw(_(f"The {self.voucher_type} # {self.voucher_no} does not exist"))
-
-		bundles = frappe.get_all(
-			"Serial and Batch Bundle",
-			filters={
-				"voucher_no": self.voucher_no,
-				"is_cancelled": 0,
-				"name": ["!=", self.name],
-				"item_code": self.item_code,
-				"warehouse": self.warehouse,
-			},
-		)
-
-		if bundles:
-			frappe.throw(
-				_(
-					f"The {self.voucher_type} # {self.voucher_no} already has a Serial and Batch Bundle {bundles[0].name}"
-				)
-			)
 
 	def check_future_entries_exists(self):
 		if not self.has_serial_no:
@@ -412,12 +417,6 @@ class SerialandBatchBundle(Document):
 		self.delink_refernce_from_voucher()
 		self.delink_reference_from_batch()
 		self.clear_table()
-
-	def on_update(self):
-		self.validate_negative_stock()
-
-	def validate_negative_stock(self):
-		pass
 
 
 @frappe.whitelist()
