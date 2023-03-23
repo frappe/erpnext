@@ -56,8 +56,6 @@ class AssetRepair(AccountsController):
 
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			self.asset_doc.prepare_depreciation_data()
-			if self.asset_doc.calculate_depreciation:
-				self.update_asset_expected_value_after_useful_life()
 			self.asset_doc.save()
 
 	def before_cancel(self):
@@ -81,8 +79,6 @@ class AssetRepair(AccountsController):
 
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			self.asset_doc.prepare_depreciation_data()
-			if self.asset_doc.calculate_depreciation:
-				self.update_asset_expected_value_after_useful_life()
 			self.asset_doc.save()
 
 	def after_delete(self):
@@ -102,26 +98,6 @@ class AssetRepair(AccountsController):
 				_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."),
 				title=_("Missing Warehouse"),
 			)
-
-	def update_asset_expected_value_after_useful_life(self):
-		for row in self.asset_doc.get("finance_books"):
-			if row.depreciation_method in ("Written Down Value", "Double Declining Balance"):
-				accumulated_depreciation_after_full_schedule = [
-					d.accumulated_depreciation_amount
-					for d in self.asset_doc.get("schedules")
-					if cint(d.finance_book_id) == row.idx
-				]
-
-				accumulated_depreciation_after_full_schedule = max(
-					accumulated_depreciation_after_full_schedule
-				)
-
-				asset_value_after_full_schedule = flt(
-					flt(row.value_after_depreciation) - flt(accumulated_depreciation_after_full_schedule),
-					row.precision("expected_value_after_useful_life"),
-				)
-
-				row.expected_value_after_useful_life = asset_value_after_full_schedule
 
 	def increase_asset_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
