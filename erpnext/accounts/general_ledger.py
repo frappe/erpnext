@@ -592,7 +592,7 @@ def validate_against_pcv(is_opening, posting_date, company):
 			formatdate(last_pcv_date)
 		)
 		message += "</br >"
-		message += _("You cannot create any new accounting entries till this date.")
+		message += _("You cannot create/amend any accounting entries till this date.")
 		frappe.throw(message, title=_("Period Closed"))
 
 
