@@ -18,6 +18,10 @@
   "expected_delivery_date",
   "section_break_5",
   "description",
+  "column_break_12",
+  "tvo_no",
+  "chassis_no",
+  "engine_no",
   "col_break1",
   "image",
   "image_view",
@@ -873,13 +877,32 @@
    "fieldtype": "Float",
    "label": "Finished Good Item Qty",
    "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
+  },
+  {
+   "fieldname": "tvo_no",
+   "fieldtype": "Data",
+   "label": "Tvo No."
+  },
+  {
+   "fieldname": "chassis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No."
+  },
+  {
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No."
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-29 22:54:43.995670",
+ "modified": "2023-03-23 13:18:58.914869",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

@@ -16,6 +16,8 @@
   "status",
   "section_break_5",
   "company",
+  "branch",
+  "cost_center",
   "column_break_7",
   "pos_profile",
   "user",
@@ -226,6 +228,21 @@
    "label": "Posting Time",
    "no_copy": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "pos_profile.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fetch_from": "pos_profile.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
@@ -235,7 +252,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2022-08-01 11:37:14.991228",
+ "modified": "2023-03-20 12:48:08.130530",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

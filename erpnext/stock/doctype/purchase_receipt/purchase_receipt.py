@@ -234,7 +234,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
+\
 		update_serial_nos_after_submit(self, "items")
 
 		self.make_gl_entries()
@@ -283,7 +283,7 @@ class PurchaseReceipt(BuyingController):
 	def update_asset_receive_entries(self):
 		for a in self.items:
 			item_group = frappe.db.get_value("Item", a.item_code, "item_group")
-			if item_group and item_group == "Fixed Asset":
+			if item_group and item_group == "Fixed Assets":
 				ae = frappe.new_doc("Asset Received Entries")
 				ae.item_code = a.item_code
 				ae.child_ref = a.name

@@ -24,7 +24,6 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
-
 	refresh(doc) {
 		super.refresh();
 		if (doc.docstatus == 1 && !doc.is_return) {

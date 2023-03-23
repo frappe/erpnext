@@ -56,15 +56,11 @@ class Item(Document):
 		self.set_onload("asset_naming_series", get_asset_naming_series())
 
 	def autoname(self):
-		if self.item_old_code:
-			self.item_code = self.name = self.item_old_code
-			return
+		if frappe.db.exists("Item",{"item_group":self.item_group}):
+			prev_item = frappe.db.sql("select name from `tabItem` where item_group = '{}' order by name desc limit 1".format(self.item_group))
+			self.item_code = self.name = cstr(cint(prev_item[0][0]) + 1)
 		else:
-			if frappe.db.exists("Item",{"item_group":self.item_group}):
-				prev_item = frappe.db.sql("select name from `tabItem` where item_group = '{}' order by name desc limit 1".format(self.item_group))
-				self.item_code = self.name = cstr(cint(prev_item[0][0]) + 1)
-			else:
-				self.item_code = self.name = make_autoname('ABC{}.#####'.format(frappe.db.get_value('Item Group',self.item_group,'item_code_base')))[3:]
+			self.item_code = self.name = make_autoname('ABC{}.#####'.format(frappe.db.get_value('Item Group',self.item_group,'item_code_base')))[3:]
 
 	def after_insert(self):
 		"""set opening stock and item price"""

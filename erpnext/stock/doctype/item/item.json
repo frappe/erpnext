@@ -208,6 +208,7 @@
    "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Alternative Item"
   },
   {
@@ -225,6 +226,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Include Item In Manufacturing"
   },
   {
@@ -324,6 +326,7 @@
   {
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Shelf Life In Days",
    "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
   },
@@ -332,6 +335,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "end_of_life",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "End of Life",
    "oldfieldname": "end_of_life",
    "oldfieldtype": "Date"
@@ -361,6 +365,7 @@
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "warranty_period",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Warranty Period (in days)",
    "oldfieldname": "warranty_period",
    "oldfieldtype": "Data"
@@ -369,12 +374,14 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Weight Per Unit"
   },
   {
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "weight_uom",
    "fieldtype": "Link",
+   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Weight UOM",
    "options": "UOM"
@@ -496,6 +503,7 @@
    "description": "If this item has variants, then it cannot be selected in sales orders etc.",
    "fieldname": "has_variants",
    "fieldtype": "Check",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Has Variants"
   },
@@ -876,6 +884,7 @@
    "default": "0",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Negative Stock"
   },
   {
@@ -923,6 +932,7 @@
    "default": "0",
    "fieldname": "is_production_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Production Item"
   },
   {
@@ -956,7 +966,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-12 16:41:28.318103",
+ "modified": "2023-03-23 11:57:39.394575",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

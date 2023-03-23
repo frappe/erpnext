@@ -1010,7 +1010,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Taxes",
-   "link_count": 8,
+   "link_count": 10,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -1099,9 +1099,29 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TDS Register",
+   "link_count": 0,
+   "link_to": "TDS Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TDS Certificate",
+   "link_count": 0,
+   "link_to": "TDS Certificate",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-03-20 10:20:53.687437",
+ "modified": "2023-03-20 11:00:45.698200",
  "modified_by": "pema.dhendup@thimphutechpark.bt",
  "module": "Accounts",
  "name": "Accounting",

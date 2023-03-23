@@ -443,7 +443,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-03-17 13:35:11.824168",
+ "modified": "2023-03-22 10:29:26.512337",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -453,7 +453,7 @@
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 15.0,
+ "sequence_id": 7.0,
  "shortcuts": [
   {
    "color": "Blue",

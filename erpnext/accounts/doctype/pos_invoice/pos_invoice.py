@@ -34,6 +34,7 @@ class POSInvoice(SalesInvoice):
 			)
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
+		self.assign_custom_field_from_pos_profile()
 		self.validate_auto_set_posting_time()
 		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -56,6 +57,10 @@ class POSInvoice(SalesInvoice):
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
+
+	def assign_custom_field_from_pos_profile(self):
+		if self.pos_profile:
+			self.branch = frappe.db.get_value("POS Profile",self.pos_profile,"branch")
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program

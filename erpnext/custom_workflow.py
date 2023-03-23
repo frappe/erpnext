@@ -539,8 +539,6 @@ class CustomWorkflow:
 			self.employee_advance()
 		elif self.doc.doctype == "Employee Transfer":
 			self.employee_transfer()
-		elif self.doc.doctype == "Employee Benefit Claim":
-			self.employee_benefit_claim()
 		elif self.doc.doctype == "Training Nomination":
 			self.training_nomination()
 		elif self.doc.doctype == "Training Approval Request":
@@ -1268,36 +1266,6 @@ class CustomWorkflow:
 		elif self.new_state.lower() in ('Rejected', 'Rejected By Supervisor'):
 			if self.doc.advance_approver != frappe.session.user:
 				frappe.throw("Only {} can Reject the Festival Advance".format(self.doc.advance_approver_name))
-
-	def employee_benefit_claim(self):
-		workflow_state    = self.doc.get("workflow_state").lower()
-		if workflow_state == "Draft".lower():
-			# if doc.purpose == "Separation":
-			if not "HR Manager" in frappe.get_roles(frappe.session.user):
-				frappe.throw("Only HR user with role HR Manager can create the employee benefit with purpose Separation")
-
-
-		elif workflow_state == "Waiting Approval".lower():
-			# if doc.purpose == "Separation":
-			set_approver("HR")
-
-			if not officiating and not "HR Manager" in frappe.get_roles(frappe.session.user):
-				frappe.throw("Only HR user with role HR Manager can create the employee benefit with purpose Separation")
-
-		elif workflow_state == "Approved".lower():
-			if self.doc.docstatus == 0 and self.doc.workflow_state == "Approved":
-				self.doc.workflow_state == "Waiting Approval"
-			if not "Chief PCD" in frappe.get_roles(frappe.session.user):
-				frappe.throw(_("Only Chief PCD can approve this application").format(title="Invalid Operation"))
-			vars(self.doc)[self.doc_approver[0]] = self.login_user[0]
-			vars(self.doc)[self.doc_approver[1]] = self.login_user[1]
-	
-		elif workflow_state == "Rejected".lower():
-			if not "Chief PCD" in frappe.get_roles(frappe.session.user):
-				if workflow_state != self.doc.get_db_value("workflow_state"):
-					frappe.throw(_("Only Cheif PCD can reject this application").format(title="Invalid Operation"))
-		else:
-			pass
 
 	def employee_transfer(self):
 		if self.doc.workflow_state == "Draft":

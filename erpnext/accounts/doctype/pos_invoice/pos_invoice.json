@@ -1554,14 +1554,13 @@
    "fieldname": "branch",
    "fieldtype": "Link",
    "label": "Branch",
-   "options": "Branch",
-   "reqd": 1
+   "options": "Branch"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-17 16:08:23.098330",
+ "modified": "2023-03-20 12:41:17.225190",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

@@ -57,6 +57,8 @@
   "alternative_email_id",
   "fax_no",
   "column_break_45",
+  "cid_no",
+  "tpn_no",
   "customer_primary_address",
   "primary_address",
   "default_receivable_accounts",
@@ -603,6 +605,16 @@
    "fieldname": "alternative_email_id",
    "fieldtype": "Data",
    "label": "Alternative Email ID"
+  },
+  {
+   "fieldname": "cid_no",
+   "fieldtype": "Data",
+   "label": "CID No"
+  },
+  {
+   "fieldname": "tpn_no",
+   "fieldtype": "Data",
+   "label": "TPN No"
   }
  ],
  "icon": "fa fa-user",
@@ -616,7 +628,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-12-16 12:21:39.157464",
+ "modified": "2023-03-22 09:50:39.127846",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

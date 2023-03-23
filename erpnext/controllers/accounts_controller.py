@@ -790,7 +790,7 @@ class AccountsController(TransactionBase):
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 
-		res = self.get_advance_entries(include_unallocated=False)
+		res = self.get_advance_entries()
 
 		self.set("advances", [])
 		advance_allocated = total_advance = 0
@@ -824,8 +824,9 @@ class AccountsController(TransactionBase):
 
 			self.append("advances", advance_row)
 		self.total_advance = total_advance
-	def get_advance_entries(self, include_unallocated=False):
-		# is advance intorduced as advance account is different 
+	
+	def get_advance_entries(self, include_unallocated=True):
+		# is advance introduced as advance account is different 
 		is_advance = True
 		if self.doctype == "Sales Invoice":
 			party_account = get_party_account('Customer', self.customer, self.company,is_advance)
@@ -843,10 +844,11 @@ class AccountsController(TransactionBase):
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 			cost_center = self.cost_center
+
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(
-			party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated
+			party_type, party, party_account, amount_field, order_doctype, order_list, cost_center, include_unallocated
 		)
 		payment_entries = get_advance_payment_entries(
 			party_type, party, party_account, order_doctype, order_list, include_unallocated, cost_center
@@ -2052,6 +2054,7 @@ def get_advance_journal_entries(
 	amount_field,
 	order_doctype,
 	order_list,
+	cost_center,
 	include_unallocated=True,
 ):
 	dr_or_cr = (
@@ -2076,7 +2079,7 @@ def get_advance_journal_entries(
 	journal_entries = frappe.db.sql(
 		"""
 		select
-			'Journal Entry' as reference_type, t1.name as reference_name,
+			'Journal Entry' as reference_type, t1.name as reference_name, t2.cost_center,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
 			t2.reference_name as against_order, t2.exchange_rate, t2.account as advance_account
 		from
@@ -2084,12 +2087,13 @@ def get_advance_journal_entries(
 		where
 			t1.name = t2.parent and t2.account = %s
 			and t2.party_type = %s and t2.party = %s
+			and t2.cost_center = %s
 			and t2.is_advance = 'Yes' and t1.docstatus = 1
 			and {1} > 0 {2}
 		order by t1.posting_date""".format(
 			amount_field, dr_or_cr, reference_condition
 		),
-		[party_account, party_type, party] + order_list,
+		[party_account, party_type, party, cost_center] + order_list,
 		as_dict=1,
 	)
 
