@@ -47,12 +47,15 @@ class StockReservationEntry(TransactionBase):
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
-			elif self.reserved_qty == self.delivered_qty:
-				status = "Delivered"
-			elif self.delivered_qty and self.reserved_qty > self.delivered_qty:
-				status = "Partially Delivered"
 			elif self.docstatus == 1:
-				status = "Reserved"
+				if self.reserved_qty == self.delivered_qty:
+					status = "Delivered"
+				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+					status = "Partially Delivered"
+				elif self.reserved_qty == self.voucher_qty:
+					status = "Reserved"
+				else:
+					status = "Partially Reserved"
 			else:
 				status = "Draft"
 
