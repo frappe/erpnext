@@ -283,12 +283,19 @@ class AssetDepreciationSchedule(Document):
 			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if row.expected_value_after_useful_life and (
-				(
-					n == cint(number_of_pending_depreciations) - 1
-					and value_after_depreciation != row.expected_value_after_useful_life
+			if (
+				row.expected_value_after_useful_life
+				and (
+					(
+						n == cint(number_of_pending_depreciations) - 1
+						and value_after_depreciation != row.expected_value_after_useful_life
+					)
+					or value_after_depreciation < row.expected_value_after_useful_life
 				)
-				or value_after_depreciation < row.expected_value_after_useful_life
+				and (
+					not asset_doc.flags.increase_in_asset_value_due_to_repair
+					or not row.depreciation_method in ("Written Down Value", "Double Declining Balance")
+				)
 			):
 				depreciation_amount += value_after_depreciation - row.expected_value_after_useful_life
 				skip_row = True
