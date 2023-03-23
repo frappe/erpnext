@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import collections
+from collections import defaultdict
 from typing import Dict, List
 
 import frappe
@@ -31,10 +32,10 @@ class SerialandBatchBundle(Document):
 		self.check_future_entries_exists()
 		self.validate_serial_nos_inventory()
 		self.set_is_outward()
+		self.validate_qty_and_stock_value_difference()
 		self.calculate_qty_and_amount()
 		self.set_warehouse()
 		self.set_incoming_rate()
-		self.validate_qty_and_stock_value_difference()
 
 	def validate_serial_nos_inventory(self):
 		if not (self.has_serial_no and self.type_of_transaction == "Outward"):
@@ -100,7 +101,7 @@ class SerialandBatchBundle(Document):
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
 				d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
-				available_qty = flt(sn_obj.batch_available_qty.get(d.batch_no)) + flt(d.qty)
+				available_qty = flt(sn_obj.available_qty.get(d.batch_no)) + flt(d.qty)
 
 				self.validate_negative_batch(d.batch_no, available_qty)
 
@@ -417,6 +418,7 @@ class SerialandBatchBundle(Document):
 			frappe.throw(_(msg))
 
 	def on_trash(self):
+		self.validate_voucher_no_docstatus()
 		self.delink_refernce_from_voucher()
 		self.delink_reference_from_batch()
 		self.clear_table()
@@ -439,23 +441,46 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code, voucher_no, name=None):
+def get_serial_batch_ledgers(item_code, docstatus=None, voucher_no=None, name=None):
+	filters = get_filters_for_bundle(item_code, docstatus=docstatus, voucher_no=voucher_no, name=name)
+
 	return frappe.get_all(
 		"Serial and Batch Bundle",
 		fields=[
-			"`tabSerial and Batch Entry`.`name`",
+			"`tabSerial and Batch Bundle`.`name`",
 			"`tabSerial and Batch Entry`.`qty`",
 			"`tabSerial and Batch Entry`.`warehouse`",
 			"`tabSerial and Batch Entry`.`batch_no`",
 			"`tabSerial and Batch Entry`.`serial_no`",
 		],
-		filters=[
-			["Serial and Batch Bundle", "item_code", "=", item_code],
-			["Serial and Batch Entry", "parent", "=", name],
-			["Serial and Batch Bundle", "voucher_no", "=", voucher_no],
-			["Serial and Batch Bundle", "docstatus", "!=", 2],
-		],
+		filters=filters,
 	)
+
+
+def get_filters_for_bundle(item_code, docstatus=None, voucher_no=None, name=None):
+	filters = [
+		["Serial and Batch Bundle", "item_code", "=", item_code],
+		["Serial and Batch Bundle", "is_cancelled", "=", 0],
+	]
+
+	if not docstatus:
+		docstatus = [0, 1]
+
+	if isinstance(docstatus, list):
+		filters.append(["Serial and Batch Bundle", "docstatus", "in", docstatus])
+	else:
+		filters.append(["Serial and Batch Bundle", "docstatus", "=", docstatus])
+
+	if voucher_no:
+		filters.append(["Serial and Batch Bundle", "voucher_no", "=", voucher_no])
+
+	if name:
+		if isinstance(name, list):
+			filters.append(["Serial and Batch Entry", "parent", "in", name])
+		else:
+			filters.append(["Serial and Batch Entry", "parent", "=", name])
+
+	return filters
 
 
 @frappe.whitelist()
@@ -603,13 +628,50 @@ def get_auto_serial_nos(kwargs):
 	elif kwargs.based_on == "Expiry":
 		order_by = "amc_expiry_date asc"
 
+	ignore_serial_nos = get_reserved_serial_nos_for_pos(kwargs)
+
 	return frappe.get_all(
 		"Serial No",
 		fields=fields,
-		filters={"item_code": kwargs.item_code, "warehouse": kwargs.warehouse},
+		filters={
+			"item_code": kwargs.item_code,
+			"warehouse": kwargs.warehouse,
+			"name": ("not in", ignore_serial_nos),
+		},
 		limit=cint(kwargs.qty),
 		order_by=order_by,
 	)
+
+
+def get_reserved_serial_nos_for_pos(kwargs):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	ignore_serial_nos = []
+	pos_invoices = frappe.get_all(
+		"POS Invoice",
+		fields=["`tabPOS Invoice Item`.serial_no", "`tabPOS Invoice Item`.serial_and_batch_bundle"],
+		filters=[
+			["POS Invoice", "consolidated_invoice", "is", "not set"],
+			["POS Invoice", "docstatus", "=", 1],
+			["POS Invoice Item", "item_code", "=", kwargs.item_code],
+		],
+	)
+
+	ids = [
+		pos_invoice.serial_and_batch_bundle
+		for pos_invoice in pos_invoices
+		if pos_invoice.serial_and_batch_bundle
+	]
+
+	for d in get_serial_batch_ledgers(ids, docstatus=1, name=ids):
+		ignore_serial_nos.append(d.serial_no)
+
+	# Will be deprecated in v16
+	for pos_invoice in pos_invoices:
+		if pos_invoice.serial_no:
+			ignore_serial_nos.extend(get_serial_nos(pos_invoice.serial_no))
+
+	return ignore_serial_nos
 
 
 def get_auto_batch_nos(kwargs):
@@ -618,6 +680,10 @@ def get_auto_batch_nos(kwargs):
 	qty = flt(kwargs.qty)
 
 	batches = []
+
+	reserved_batches = get_reserved_batches_for_pos(kwargs)
+	if reserved_batches:
+		remove_batches_reserved_for_pos(available_batches, reserved_batches)
 
 	for batch in available_batches:
 		if qty > 0:
@@ -642,6 +708,51 @@ def get_auto_batch_nos(kwargs):
 	return batches
 
 
+def get_reserved_batches_for_pos(kwargs):
+	reserved_batches = defaultdict(float)
+
+	pos_invoices = frappe.get_all(
+		"POS Invoice",
+		fields=[
+			"`tabPOS Invoice Item`.batch_no",
+			"`tabPOS Invoice Item`.qty",
+			"`tabPOS Invoice Item`.serial_and_batch_bundle",
+		],
+		filters=[
+			["POS Invoice", "consolidated_invoice", "is", "not set"],
+			["POS Invoice", "docstatus", "=", 1],
+			["POS Invoice Item", "item_code", "=", kwargs.item_code],
+		],
+	)
+
+	ids = [
+		pos_invoice.serial_and_batch_bundle
+		for pos_invoice in pos_invoices
+		if pos_invoice.serial_and_batch_bundle
+	]
+
+	for d in get_serial_batch_ledgers(ids, docstatus=1, name=ids):
+		if not d.batch_no:
+			continue
+
+		reserved_batches[d.batch_no] += flt(d.qty)
+
+	# Will be deprecated in v16
+	for pos_invoice in pos_invoices:
+		if not pos_invoice.batch_no:
+			continue
+
+		reserved_batches[pos_invoice.batch_no] += flt(pos_invoice.qty)
+
+	return reserved_batches
+
+
+def remove_batches_reserved_for_pos(available_batches, reserved_batches):
+	for batch in available_batches:
+		if batch.batch_no in reserved_batches:
+			available_batches[batch.batch_no] -= reserved_batches[batch.batch_no]
+
+
 def get_available_batches(kwargs):
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_ledger = frappe.qb.DocType("Serial and Batch Entry")
@@ -655,9 +766,7 @@ def get_available_batches(kwargs):
 		.on(batch_ledger.batch_no == batch_table.name)
 		.select(
 			batch_ledger.batch_no,
-			Sum(
-				Case().when(stock_ledger_entry.actual_qty > 0, batch_ledger.qty).else_(batch_ledger.qty * -1)
-			).as_("qty"),
+			Sum(batch_ledger.qty).as_("qty"),
 		)
 		.where(
 			(stock_ledger_entry.item_code == kwargs.item_code)
@@ -699,7 +808,7 @@ def get_voucher_wise_serial_batch_from_bundle(**kwargs) -> Dict[str, Dict]:
 		if key not in group_by_voucher:
 			group_by_voucher.setdefault(
 				key,
-				frappe._dict({"serial_nos": [], "batch_nos": collections.defaultdict(float), "item_row": row}),
+				frappe._dict({"serial_nos": [], "batch_nos": defaultdict(float), "item_row": row}),
 			)
 
 		child_row = group_by_voucher[key]
@@ -771,7 +880,7 @@ def get_available_serial_nos(item_code, warehouse):
 
 def get_available_batch_nos(item_code, warehouse):
 	sl_entries = get_stock_ledger_entries(item_code, warehouse)
-	batchwise_qty = collections.defaultdict(float)
+	batchwise_qty = defaultdict(float)
 
 	precision = frappe.get_precision("Stock Ledger Entry", "qty")
 	for entry in sl_entries:

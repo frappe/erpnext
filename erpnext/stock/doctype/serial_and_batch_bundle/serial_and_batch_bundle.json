@@ -31,6 +31,7 @@
   "column_break_aouy",
   "posting_date",
   "posting_time",
+  "returned_against",
   "section_break_wzou",
   "is_cancelled",
   "is_rejected",
@@ -232,12 +233,18 @@
    "fieldtype": "Table",
    "options": "Serial and Batch Entry",
    "reqd": 1
+  },
+  {
+   "fieldname": "returned_against",
+   "fieldtype": "Data",
+   "label": "Returned Against",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-22 18:56:37.035516",
+ "modified": "2023-03-23 13:39:17.843812",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

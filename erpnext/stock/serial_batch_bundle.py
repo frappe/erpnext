@@ -642,6 +642,8 @@ class SerialBatchCreation:
 		package = frappe.get_doc("Serial and Batch Bundle", id)
 		new_package = frappe.copy_doc(package)
 		new_package.type_of_transaction = self.type_of_transaction
+		new_package.returned_against = self.returned_against
+		print(new_package.voucher_type, new_package.voucher_no)
 		new_package.save()
 
 		self.serial_and_batch_bundle = new_package.name

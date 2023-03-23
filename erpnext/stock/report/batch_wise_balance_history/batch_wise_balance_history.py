@@ -131,7 +131,7 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 			& (sle.has_batch_no == 1)
 			& (sle.posting_date <= filters["to_date"])
 		)
-		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
+		.groupby(batch_package.batch_no)
 		.orderby(sle.item_code, sle.warehouse)
 	)
 
