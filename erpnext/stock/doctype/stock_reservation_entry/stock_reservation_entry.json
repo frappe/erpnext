@@ -12,21 +12,22 @@
   "warehouse",
   "posting_date",
   "posting_time",
-  "column_break_6",
+  "column_break_elik",
   "voucher_type",
   "voucher_no",
   "voucher_detail_no",
-  "section_break_11",
+  "section_break_xt4m",
   "available_qty",
+  "voucher_qty",
+  "stock_uom",
+  "column_break_o6ex",
   "reserved_qty",
   "delivered_qty",
-  "column_break_17",
   "valuation_rate",
-  "section_break_21",
+  "section_break_3vb3",
   "company",
-  "stock_uom",
+  "column_break_jbyr",
   "project",
-  "column_break_26",
   "status",
   "amended_from"
  ],
@@ -164,26 +165,6 @@
    "width": "150px"
   },
   {
-   "fieldname": "column_break_6",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_11",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_21",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "reserved_qty",
    "fieldtype": "Float",
    "in_filter": 1,
@@ -226,6 +207,34 @@
    "label": "Available Qty to Reserve",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "voucher_qty",
+   "fieldtype": "Float",
+   "label": "Voucher Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_elik",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xt4m",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_o6ex",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_3vb3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_jbyr",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -233,7 +242,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-23 12:54:14.168935",
+ "modified": "2023-03-23 19:35:55.479617",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
