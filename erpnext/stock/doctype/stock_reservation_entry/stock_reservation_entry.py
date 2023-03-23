@@ -33,6 +33,7 @@ class StockReservationEntry(TransactionBase):
 			"voucher_type",
 			"voucher_no",
 			"voucher_detail_no",
+			"available_qty",
 			"reserved_qty",
 			"company",
 			"stock_uom",

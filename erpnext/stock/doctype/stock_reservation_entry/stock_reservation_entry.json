@@ -17,6 +17,7 @@
   "voucher_no",
   "voucher_detail_no",
   "section_break_11",
+  "available_qty",
   "reserved_qty",
   "delivered_qty",
   "column_break_17",
@@ -217,6 +218,14 @@
    "options": "Stock Reservation Entry",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "label": "Available Qty to Reserve",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -224,7 +233,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-21 20:15:42.659789",
+ "modified": "2023-03-23 11:16:44.493852",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
