@@ -31,6 +31,7 @@ class PeriodClosingVoucher(AccountsController):
 		self.make_gl_entries(get_opening_entries=get_opening_entries)
 
 	def on_cancel(self):
+		self.validate_future_closing_vouchers()
 		self.db_set("gle_processing_status", "In Progress")
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		gle_count = frappe.db.count(
@@ -52,6 +53,17 @@ class PeriodClosingVoucher(AccountsController):
 			make_reverse_gl_entries(voucher_type="Period Closing Voucher", voucher_no=self.name)
 
 		self.delete_closing_entries()
+
+	def validate_future_closing_vouchers(self):
+		if frappe.db.exists(
+			"Period Closing Voucher",
+			{"posting_date": (">", self.posting_date), "docstatus": 1, "company": self.company},
+		):
+			frappe.throw(
+				_(
+					"You can not cancel this Period Closing Voucher, please cancel the future Period Closing Vouchers first"
+				)
+			)
 
 	def delete_closing_entries(self):
 		closing_balance = frappe.qb.DocType("Account Closing Balance")
