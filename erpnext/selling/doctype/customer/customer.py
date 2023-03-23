@@ -448,7 +448,13 @@ def get_nested_links(link_doctype, link_name, ignore_permissions=False):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
+	from frappe.utils.deprecations import deprecation_warning
+
 	from erpnext.controllers.queries import get_fields
+
+	deprecation_warning(
+		"`get_customer_list` is deprecated and will be removed in version 15. Use `erpnext.controllers.queries.customer_query` instead."
+	)
 
 	fields = ["name", "customer_name", "customer_group", "territory"]
 
