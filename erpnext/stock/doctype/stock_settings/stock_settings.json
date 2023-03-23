@@ -35,6 +35,7 @@
   "enable_stock_reservation",
   "column_break_rx3e",
   "reserve_stock_on_sales_order_submission",
+  "allow_partial_reservation",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
@@ -365,6 +366,13 @@
   {
    "fieldname": "column_break_rx3e",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: (doc.enable_stock_reservation && doc.reserve_stock_on_sales_order_submission)",
+   "fieldname": "allow_partial_reservation",
+   "fieldtype": "Check",
+   "label": "Allow Partial Reservation"
   }
  ],
  "icon": "icon-cog",
@@ -372,7 +380,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-20 11:42:29.769937",
+ "modified": "2023-03-23 18:59:11.773360",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
