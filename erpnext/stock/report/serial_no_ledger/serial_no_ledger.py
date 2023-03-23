@@ -1,7 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+import frappe
 from frappe import _
 
 from erpnext.stock.stock_ledger import get_stock_ledger_entries
@@ -45,10 +45,71 @@ def get_columns(filters):
 			"options": "Warehouse",
 			"width": 220,
 		},
+		{
+			"label": _("Serial No"),
+			"fieldtype": "Link",
+			"fieldname": "serial_no",
+			"options": "Serial No",
+			"width": 220,
+		},
 	]
 
 	return columns
 
 
 def get_data(filters):
-	return get_stock_ledger_entries(filters, "<=", order="asc") or []
+	stock_ledgers = get_stock_ledger_entries(filters, "<=", order="asc", check_serial_no=False)
+
+	if not stock_ledgers:
+		return []
+
+	data = []
+	serial_bundle_ids = [
+		d.serial_and_batch_bundle for d in stock_ledgers if d.serial_and_batch_bundle
+	]
+
+	bundle_wise_serial_nos = get_serial_nos(filters, serial_bundle_ids)
+
+	for row in stock_ledgers:
+		args = frappe._dict(
+			{
+				"posting_date": row.posting_date,
+				"posting_time": row.posting_time,
+				"voucher_type": row.voucher_type,
+				"voucher_no": row.voucher_no,
+				"company": row.company,
+				"warehouse": row.warehouse,
+			}
+		)
+
+		serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle, [])
+
+		for index, serial_no in enumerate(serial_nos):
+			if index == 0:
+				args.serial_no = serial_no
+				data.append(args)
+			else:
+				data.append(
+					{
+						"serial_no": serial_no,
+					}
+				)
+
+	return data
+
+
+def get_serial_nos(filters, serial_bundle_ids):
+	bundle_wise_serial_nos = {}
+	bundle_filters = {"parent": ["in", serial_bundle_ids]}
+	if filters.get("serial_no"):
+		bundle_filters["serial_no"] = filters.get("serial_no")
+
+	for d in frappe.get_all(
+		"Serial and Batch Entry",
+		fields=["serial_no", "parent"],
+		filters=bundle_filters,
+		order_by="idx asc",
+	):
+		bundle_wise_serial_nos.setdefault(d.parent, []).append(d.serial_no)
+
+	return bundle_wise_serial_nos

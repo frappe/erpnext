@@ -341,7 +341,7 @@ def get_serial_nos(serial_and_batch_bundle, check_outward=True):
 	return [d.serial_no for d in entries]
 
 
-class SerialNoBundleValuation(DeprecatedSerialNoValuation):
+class SerialNoValuation(DeprecatedSerialNoValuation):
 	def __init__(self, **kwargs):
 		for key, value in kwargs.items():
 			setattr(self, key, value)
@@ -470,7 +470,7 @@ def is_rejected(voucher_type, voucher_detail_no, warehouse):
 	return False
 
 
-class BatchNoBundleValuation(DeprecatedBatchNoValuation):
+class BatchNoValuation(DeprecatedBatchNoValuation):
 	def __init__(self, **kwargs):
 		for key, value in kwargs.items():
 			setattr(self, key, value)
@@ -567,11 +567,11 @@ class BatchNoBundleValuation(DeprecatedBatchNoValuation):
 
 
 def get_empty_batches_based_work_order(work_order, item_code):
-	batches = get_batches_from_work_order(work_order)
+	batches = get_batches_from_work_order(work_order, item_code)
 	if not batches:
 		return batches
 
-	entries = get_batches_from_stock_entries(work_order)
+	entries = get_batches_from_stock_entries(work_order, item_code)
 	if not entries:
 		return batches
 
@@ -589,15 +589,18 @@ def get_empty_batches_based_work_order(work_order, item_code):
 	return batches
 
 
-def get_batches_from_work_order(work_order):
+def get_batches_from_work_order(work_order, item_code):
 	return frappe._dict(
 		frappe.get_all(
-			"Batch", fields=["name", "qty_to_produce"], filters={"reference_name": work_order}, as_list=1
+			"Batch",
+			fields=["name", "qty_to_produce"],
+			filters={"reference_name": work_order, "item": item_code},
+			as_list=1,
 		)
 	)
 
 
-def get_batches_from_stock_entries(work_order):
+def get_batches_from_stock_entries(work_order, item_code):
 	entries = frappe.get_all(
 		"Stock Entry",
 		filters={"work_order": work_order, "docstatus": 1, "purpose": "Manufacture"},
@@ -610,6 +613,7 @@ def get_batches_from_stock_entries(work_order):
 		filters={
 			"parent": ("in", [d.name for d in entries]),
 			"is_finished_item": 1,
+			"item_code": item_code,
 		},
 	)
 
@@ -623,3 +627,21 @@ def set_batch_details_from_package(ids, batches):
 
 	for d in entries:
 		batches[d.batch_no] -= d.qty
+
+
+class SerialBatchCreation:
+	def __init__(self, args):
+		for key, value in args.items():
+			setattr(self, key, value)
+
+	def duplicate_package(self):
+		if not self.serial_and_batch_bundle:
+			return
+
+		id = self.serial_and_batch_bundle
+		package = frappe.get_doc("Serial and Batch Bundle", id)
+		new_package = frappe.copy_doc(package)
+		new_package.type_of_transaction = self.type_of_transaction
+		new_package.save()
+
+		self.serial_and_batch_bundle = new_package.name

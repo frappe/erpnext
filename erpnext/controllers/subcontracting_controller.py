@@ -294,13 +294,13 @@ class SubcontractingController(StockController):
 				for batch_no, qty in consumed_bundles.batch_nos.items():
 					self.available_materials[key]["batch_no"][batch_no] -= abs(qty)
 
-			# Will be deperecated in v16
+			# Will be deprecated in v16
 			if row.serial_no:
 				self.available_materials[key]["serial_no"] = list(
 					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
 				)
 
-			# Will be deperecated in v16
+			# Will be deprecated in v16
 			if row.batch_no:
 				self.available_materials[key]["batch_no"][row.batch_no] -= row.consumed_qty
 
@@ -814,8 +814,7 @@ class SubcontractingController(StockController):
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
 							"qty": -1 * item.consumed_qty,
-							"serial_no": item.serial_no,
-							"batch_no": item.batch_no,
+							"serial_and_batch_bundle": item.serial_and_batch_bundle,
 						}
 					)
 

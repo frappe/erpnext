@@ -323,8 +323,6 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
 	default_warehouse_for_sales_return = frappe.get_cached_value(
 		"Company", company, "default_warehouse_for_sales_return"
@@ -392,23 +390,51 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
 		target_doc.qty = -1 * source_doc.qty
 
-		if source_doc.serial_no:
-			returned_serial_nos = get_returned_serial_nos(source_doc, source_parent)
-			serial_nos = list(set(get_serial_nos(source_doc.serial_no)) - set(returned_serial_nos))
-			if serial_nos:
-				target_doc.serial_no = "\n".join(serial_nos)
+		if source_doc.get("serial_and_batch_bundle"):
+			type_of_transaction = "Inward"
+			if (
+				frappe.db.get_value(
+					"Serial and Batch Bundle", source_doc.serial_and_batch_bundle, "type_of_transaction"
+				)
+				== "Inward"
+			):
+				type_of_transaction = "Outward"
 
-		if source_doc.get("rejected_serial_no"):
-			returned_serial_nos = get_returned_serial_nos(
-				source_doc, source_parent, serial_no_field="rejected_serial_no"
+			cls_obj = SerialBatchCreation(
+				{
+					"type_of_transaction": type_of_transaction,
+					"serial_and_batch_bundle": source_doc.serial_and_batch_bundle,
+				}
 			)
-			rejected_serial_nos = list(
-				set(get_serial_nos(source_doc.rejected_serial_no)) - set(returned_serial_nos)
+
+			cls_obj.duplicate_package()
+			if cls_obj.serial_and_batch_bundle:
+				target_doc.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+
+		if source_doc.get("rejected_serial_and_batch_bundle"):
+			type_of_transaction = "Inward"
+			if (
+				frappe.db.get_value(
+					"Serial and Batch Bundle", source_doc.rejected_serial_and_batch_bundle, "type_of_transaction"
+				)
+				== "Inward"
+			):
+				type_of_transaction = "Outward"
+
+			cls_obj = SerialBatchCreation(
+				{
+					"type_of_transaction": type_of_transaction,
+					"serial_and_batch_bundle": source_doc.rejected_serial_and_batch_bundle,
+				}
 			)
-			if rejected_serial_nos:
-				target_doc.rejected_serial_no = "\n".join(rejected_serial_nos)
+
+			cls_obj.duplicate_package()
+			if cls_obj.serial_and_batch_bundle:
+				target_doc.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
 
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(

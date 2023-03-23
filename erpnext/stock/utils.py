@@ -12,7 +12,7 @@ from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-from erpnext.stock.serial_batch_bundle import BatchNoBundleValuation, SerialNoBundleValuation
+from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = Dict[str, Optional[str]]
@@ -264,7 +264,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 	if item_details.has_serial_no and args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
-		sn_obj = SerialNoBundleValuation(
+		sn_obj = SerialNoValuation(
 			sle=args,
 			warehouse=args.get("warehouse"),
 			item_code=args.get("item_code"),
@@ -274,7 +274,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 
 	elif item_details.has_batch_no and args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
-		batch_obj = BatchNoBundleValuation(
+		batch_obj = BatchNoValuation(
 			sle=args,
 			warehouse=args.get("warehouse"),
 			item_code=args.get("item_code"),

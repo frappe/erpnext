@@ -157,7 +157,9 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			item_code=serial_item_code, warehouse=serial_warehouse, qty=5, rate=200
 		)
 
-		serial_nos = get_serial_nos(sr.items[0].serial_no)
+		serial_nos = frappe.get_doc(
+			"Serial and Batch Bundle", sr.items[0].serial_and_batch_bundle
+		).get_serial_nos()
 		self.assertEqual(len(serial_nos), 5)
 
 		args = {
@@ -165,7 +167,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"warehouse": serial_warehouse,
 			"posting_date": nowdate(),
 			"posting_time": nowtime(),
-			"serial_no": sr.items[0].serial_no,
+			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -177,7 +179,10 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			item_code=serial_item_code, warehouse=serial_warehouse, qty=5, rate=300
 		)
 
-		serial_nos1 = get_serial_nos(sr.items[0].serial_no)
+		serial_nos1 = frappe.get_doc(
+			"Serial and Batch Bundle", sr.items[0].serial_and_batch_bundle
+		).get_serial_nos()
+
 		self.assertEqual(len(serial_nos1), 5)
 
 		args = {
@@ -185,7 +190,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"warehouse": serial_warehouse,
 			"posting_date": nowdate(),
 			"posting_time": nowtime(),
-			"serial_no": sr.items[0].serial_no,
+			"serial_and_batch_bundle": sr.items[0].serial_and_batch_bundle,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -257,7 +262,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		sr.save()
 		sr.submit()
 
-		batch_no = sr.items[0].batch_no
+		batch_no = sr.items[0].serial_and_batch_bundle
 		self.assertTrue(batch_no)
 		to_delete_records.append(sr.name)
 

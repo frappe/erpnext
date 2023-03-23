@@ -27,7 +27,7 @@ from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
-from erpnext.stock.serial_batch_bundle import BatchNoBundleValuation, SerialNoBundleValuation
+from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -693,7 +693,7 @@ class update_entries_after(object):
 
 		if sle.serial_and_batch_bundle:
 			if frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
-				SerialNoBundleValuation(
+				SerialNoValuation(
 					sle=sle,
 					sle_self=self,
 					wh_data=self.wh_data,
@@ -701,7 +701,7 @@ class update_entries_after(object):
 					item_code=sle.item_code,
 				)
 			else:
-				BatchNoBundleValuation(
+				BatchNoValuation(
 					sle=sle,
 					sle_self=self,
 					wh_data=self.wh_data,

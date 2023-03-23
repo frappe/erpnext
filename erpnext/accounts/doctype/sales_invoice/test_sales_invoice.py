@@ -2573,7 +2573,7 @@ class TestSalesInvoice(unittest.TestCase):
 					"posting_date": si.posting_date,
 					"posting_time": si.posting_time,
 					"qty": -1 * flt(d.get("stock_qty")),
-					"serial_no": d.serial_no,
+					"serial_and_batch_bundle": d.serial_and_batch_bundle,
 					"company": si.company,
 					"voucher_type": "Sales Invoice",
 					"voucher_no": si.name,

@@ -92,6 +92,16 @@ class StockLedgerEntry(Document):
 			as_dict=1,
 		)
 
+		values_to_be_change = {}
+		if self.has_batch_no != item_detail.has_batch_no:
+			values_to_be_change["has_batch_no"] = item_detail.has_batch_no
+
+		if self.has_serial_no != item_detail.has_serial_no:
+			values_to_be_change["has_serial_no"] = item_detail.has_serial_no
+
+		if values_to_be_change:
+			self.db_set(values_to_be_change)
+
 		if not item_detail:
 			frappe.throw(_("Item {0} not found").format(self.item_code))
 

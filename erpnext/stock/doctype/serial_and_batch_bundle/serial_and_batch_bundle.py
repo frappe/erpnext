@@ -11,7 +11,7 @@ from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import add_days, cint, flt, get_link_to_form, today
 from pypika import Case
 
-from erpnext.stock.serial_batch_bundle import BatchNoBundleValuation, SerialNoBundleValuation
+from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 
 
 class SerialNoExistsInFutureTransactionError(frappe.ValidationError):
@@ -81,14 +81,14 @@ class SerialandBatchBundle(Document):
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
 		sle = self.get_sle_for_outward_transaction(row)
 		if self.has_serial_no:
-			sn_obj = SerialNoBundleValuation(
+			sn_obj = SerialNoValuation(
 				sle=sle,
 				warehouse=self.item_code,
 				item_code=self.warehouse,
 			)
 
 		else:
-			sn_obj = BatchNoBundleValuation(
+			sn_obj = BatchNoValuation(
 				sle=sle,
 				warehouse=self.item_code,
 				item_code=self.warehouse,
@@ -187,9 +187,12 @@ class SerialandBatchBundle(Document):
 		self.set_incoming_rate(save=True, row=row)
 		self.calculate_qty_and_amount(save=True)
 		self.validate_quantity(row)
-		self.set_warranty_expiry_date(row)
+		self.set_warranty_expiry_date()
 
 	def set_warranty_expiry_date(self):
+		if self.type_of_transaction != "Outward":
+			return
+
 		if not (self.docstatus == 1 and self.voucher_type == "Delivery Note" and self.has_serial_no):
 			return
 
