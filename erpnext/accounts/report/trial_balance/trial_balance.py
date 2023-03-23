@@ -161,20 +161,31 @@ def get_rootwise_opening_balances(filters, report_type):
 		if getdate(last_period_closing_voucher[0].posting_date) < getdate(
 			add_days(filters.from_date, -1)
 		):
-			filters.from_date = add_days(last_period_closing_voucher, 1)
-			gle = get_opening_balance("GL Entry", filters, report_type, accounting_dimensions)
+			start_date = add_days(last_period_closing_voucher[0].posting_date, 1)
+			gle += get_opening_balance(
+				"GL Entry", filters, report_type, accounting_dimensions, start_date=start_date
+			)
 	else:
 		gle = get_opening_balance("GL Entry", filters, report_type, accounting_dimensions)
 
 	opening = frappe._dict()
 	for d in gle:
-		opening.setdefault(d.account, d)
+		opening.setdefault(
+			d.account,
+			{
+				"account": d.account,
+				"opening_debit": 0.0,
+				"opening_credit": 0.0,
+			},
+		)
+		opening[d.account]["opening_debit"] += flt(d.opening_debit)
+		opening[d.account]["opening_credit"] += flt(d.opening_credit)
 
 	return opening
 
 
 def get_opening_balance(
-	doctype, filters, report_type, accounting_dimensions, period_closing_voucher=None
+	doctype, filters, report_type, accounting_dimensions, period_closing_voucher=None, start_date=None
 ):
 	closing_balance = frappe.qb.DocType(doctype)
 	account = frappe.qb.DocType("Account")
@@ -197,18 +208,22 @@ def get_opening_balance(
 		.groupby(closing_balance.account)
 	)
 
-	if doctype == "Account Closing Balance":
-		if period_closing_voucher:
-			opening_balance = opening_balance.where(
-				closing_balance.period_closing_voucher == period_closing_voucher
-			)
-		else:
-			opening_balance = opening_balance.where(closing_balance.closing_date < filters.from_date)
+	if period_closing_voucher:
+		opening_balance = opening_balance.where(
+			closing_balance.period_closing_voucher == period_closing_voucher
+		)
 	else:
+		if start_date:
+			opening_balance = opening_balance.where(closing_balance.posting_date >= start_date)
+			opening_balance = opening_balance.where(closing_balance.is_opening == "No")
 		opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
 
-	if not filters.show_unclosed_fy_pl_balances and report_type == "Profit and Loss":
-		opening_balance = opening_balance.where(closing_balance.closing_date >= filters.year_start_date)
+	if (
+		not filters.show_unclosed_fy_pl_balances
+		and report_type == "Profit and Loss"
+		and doctype == "GL Entry"
+	):
+		opening_balance = opening_balance.where(closing_balance.posting_date >= filters.year_start_date)
 
 	if not flt(filters.with_period_closing_entry):
 		if doctype == "Account Closing Balance":
