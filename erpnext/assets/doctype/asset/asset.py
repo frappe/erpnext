@@ -79,7 +79,6 @@ class Asset(AccountsController):
 	def after_insert(self):
 		if not self.split_from:
 			make_draft_asset_depr_schedules(self)
-		self.validate_expected_value_after_useful_life()
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -326,13 +325,13 @@ class Asset(AccountsController):
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.name, "Draft", row.finance_book)
+			depr_schedule = get_depr_schedule(self.name, "Draft", row.finance_book)
 
-			if not asset_depr_schedule_doc:
+			if not depr_schedule:
 				continue
 
 			accumulated_depreciation_after_full_schedule = [
-				d.accumulated_depreciation_amount for d in asset_depr_schedule_doc.get("depreciation_schedule")
+				d.accumulated_depreciation_amount for d in depr_schedule
 			]
 
 			if accumulated_depreciation_after_full_schedule:
@@ -356,9 +355,6 @@ class Asset(AccountsController):
 					)
 				elif not row.expected_value_after_useful_life:
 					row.expected_value_after_useful_life = asset_value_after_full_schedule
-					asset_depr_schedule_doc.db_set(
-						"expected_value_after_useful_life", asset_value_after_full_schedule
-					)
 
 	def validate_cancellation(self):
 		if self.status in ("In Maintenance", "Out of Order"):
@@ -625,11 +621,22 @@ class Asset(AccountsController):
 			return 200.0 / args.get("total_number_of_depreciations")
 
 		if args.get("depreciation_method") == "Written Down Value":
-			if args.get("rate_of_depreciation") and on_validate:
+			if (
+				args.get("rate_of_depreciation")
+				and on_validate
+				and not self.flags.increase_in_asset_value_due_to_repair
+			):
 				return args.get("rate_of_depreciation")
 
-			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+			if self.flags.increase_in_asset_value_due_to_repair:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(
+					args.get("value_after_depreciation")
+				)
+			else:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+
 			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
+
 			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):

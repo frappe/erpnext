@@ -9,7 +9,6 @@ import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
@@ -67,8 +66,6 @@ class AssetRepair(AccountsController):
 			)
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
-			if self.asset_doc.calculate_depreciation:
-				self.update_asset_expected_value_after_useful_life()
 			self.asset_doc.save()
 
 	def before_cancel(self):
@@ -96,8 +93,6 @@ class AssetRepair(AccountsController):
 			)
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
-			if self.asset_doc.calculate_depreciation:
-				self.update_asset_expected_value_after_useful_life()
 			self.asset_doc.save()
 
 	def after_delete(self):
@@ -117,32 +112,6 @@ class AssetRepair(AccountsController):
 				_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."),
 				title=_("Missing Warehouse"),
 			)
-
-	def update_asset_expected_value_after_useful_life(self):
-		for row in self.asset_doc.get("finance_books"):
-			if row.depreciation_method in ("Written Down Value", "Double Declining Balance"):
-				asset_depr_schedule_doc = get_asset_depr_schedule_doc(
-					self.asset_doc.name, "Active", row.finance_book
-				)
-
-				accumulated_depreciation_after_full_schedule = [
-					d.accumulated_depreciation_amount
-					for d in asset_depr_schedule_doc.get("depreciation_schedule")
-				]
-
-				accumulated_depreciation_after_full_schedule = max(
-					accumulated_depreciation_after_full_schedule
-				)
-
-				asset_value_after_full_schedule = flt(
-					flt(row.value_after_depreciation) - flt(accumulated_depreciation_after_full_schedule),
-					row.precision("expected_value_after_useful_life"),
-				)
-
-				row.expected_value_after_useful_life = asset_value_after_full_schedule
-				asset_depr_schedule_doc.db_set(
-					"expected_value_after_useful_life", asset_value_after_full_schedule
-				)
 
 	def increase_asset_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
