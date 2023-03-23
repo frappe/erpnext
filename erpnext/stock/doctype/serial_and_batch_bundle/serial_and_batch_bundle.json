@@ -214,7 +214,6 @@
    "no_copy": 1
   },
   {
-   "default": "today",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -244,7 +243,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-23 13:39:17.843812",
+ "modified": "2023-03-24 13:39:17.843812",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

@@ -88,8 +88,9 @@ class TestAssetRepair(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		stock_entry = make_serialized_item()
-		serial_nos = stock_entry.get("items")[0].serial_no
-		serial_no = serial_nos.split("\n")[0]
+		bundle_id = stock_entry.get("items")[0].serial_no
+		serial_nos = frappe.get_doc("Serial and Batch Bundle", bundle_id).get_serial_nos()
+		serial_no = serial_nos[0]
 
 		# should not raise any error
 		create_asset_repair(
