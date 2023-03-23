@@ -201,7 +201,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "Draft\nSubmitted\nPartially Delivered\nDelivered\nCancelled",
+   "options": "Draft\nReserved\nPartially Delivered\nDelivered\nCancelled",
    "read_only": 1
   },
   {
@@ -233,7 +233,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-23 11:16:44.493852",
+ "modified": "2023-03-23 12:54:14.168935",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

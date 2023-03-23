@@ -51,7 +51,7 @@ class StockReservationEntry(TransactionBase):
 			elif self.delivered_qty and self.reserved_qty > self.delivered_qty:
 				status = "Partially Delivered"
 			elif self.docstatus == 1:
-				status = "Submitted"
+				status = "Reserved"
 			else:
 				status = "Draft"
 
