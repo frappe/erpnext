@@ -44,7 +44,67 @@ def search_by_term(search_term, warehouse, price_list):
 			["price_list_rate", "currency"],
 		) or [None, None]
 
+<<<<<<< HEAD
 		item_info.update(
+=======
+	if not item_doc:
+		return
+
+	item = {
+		"barcode": barcode,
+		"batch_no": batch_no,
+		"description": item_doc.description,
+		"is_stock_item": item_doc.is_stock_item,
+		"item_code": item_doc.name,
+		"item_image": item_doc.image,
+		"item_name": item_doc.item_name,
+		"serial_no": serial_no,
+		"stock_uom": item_doc.stock_uom,
+		"uom": item_doc.stock_uom,
+	}
+
+	if barcode:
+		barcode_info = next(filter(lambda x: x.barcode == barcode, item_doc.get("barcodes", [])), None)
+		if barcode_info and barcode_info.uom:
+			uom = next(filter(lambda x: x.uom == barcode_info.uom, item_doc.uoms), {})
+			item.update(
+				{
+					"uom": barcode_info.uom,
+					"conversion_factor": uom.get("conversion_factor", 1),
+				}
+			)
+
+	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
+	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
+	item.update({"actual_qty": item_stock_qty})
+
+	price = frappe.get_list(
+		doctype="Item Price",
+		filters={
+			"price_list": price_list,
+			"item_code": item_code,
+			"batch_no": batch_no,
+		},
+		fields=["uom", "stock_uom", "currency", "price_list_rate", "batch_no"],
+	)
+
+	def __sort(p):
+		p_uom = p.get("uom")
+
+		if p_uom == item.get("uom"):
+			return 0
+		elif p_uom == item.get("stock_uom"):
+			return 1
+		else:
+			return 2
+
+	# sort by fallback preference. always pick exact uom match if available
+	price = sorted(price, key=__sort)
+
+	if len(price) > 0:
+		p = price.pop(0)
+		item.update(
+>>>>>>> 0cd870fc29 (fix: get batch_no. for item automatically (#34473))
 			{
 				"serial_no": serial_no,
 				"batch_no": batch_no,
@@ -125,8 +185,17 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		items = [d.item_code for d in items_data]
 		item_prices_data = frappe.get_all(
 			"Item Price",
+<<<<<<< HEAD
 			fields=["item_code", "price_list_rate", "currency"],
 			filters={"price_list": price_list, "item_code": ["in", items]},
+=======
+			fields=["price_list_rate", "currency", "uom", "batch_no"],
+			filters={
+				"price_list": price_list,
+				"item_code": item.item_code,
+				"selling": True,
+			},
+>>>>>>> 0cd870fc29 (fix: get batch_no. for item automatically (#34473))
 		)
 
 		item_prices = {}
@@ -142,6 +211,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			row.update(item)
 			row.update(
 				{
+<<<<<<< HEAD
 					"price_list_rate": item_price.get("price_list_rate"),
 					"currency": item_price.get("currency"),
 					"actual_qty": item_stock_qty,
@@ -149,6 +219,15 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			)
 			result.append(row)
 
+=======
+					**item,
+					"price_list_rate": price.get("price_list_rate"),
+					"currency": price.get("currency"),
+					"uom": price.uom or item.uom,
+					"batch_no": price.batch_no,
+				}
+			)
+>>>>>>> 0cd870fc29 (fix: get batch_no. for item automatically (#34473))
 	return {"items": result}
 
 
