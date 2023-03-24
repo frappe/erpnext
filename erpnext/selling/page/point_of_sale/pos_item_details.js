@@ -384,9 +384,10 @@ erpnext.PointOfSale.ItemDetails = class {
 
 				new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 					if (r) {
-						frm.refresh_fields();
-						frappe.model.set_value(item_row.doctype, item_row.name,
-							"serial_and_batch_bundle", r.name);
+						frappe.model.set_value(item_row.doctype, item_row.name, {
+							"serial_and_batch_bundle": r.name,
+							"qty": Math.abs(r.total_qty)
+						});
 					}
 				});
 			});

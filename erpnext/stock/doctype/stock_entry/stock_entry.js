@@ -1116,11 +1116,10 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 					new erpnext.SerialBatchPackageSelector(
 						frm, item, (r) => {
 							if (r) {
-								frm.refresh_fields();
-								frappe.model.set_value(item.doctype, item.name,
-									"serial_and_batch_bundle", r.name);
-
-								frm.save();
+								frappe.model.set_value(item.doctype, item.name, {
+									"serial_and_batch_bundle": r.name,
+									"qty": Math.abs(r.total_qty)
+								});
 							}
 						}
 					);

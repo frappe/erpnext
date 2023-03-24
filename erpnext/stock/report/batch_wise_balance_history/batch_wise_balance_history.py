@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
+from frappe.utils.deprecations import deprecated
 from pypika import functions as fn
 
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -68,14 +69,13 @@ def get_columns(filters):
 
 
 def get_stock_ledger_entries(filters):
-	# Will be deprecated in v16
 	entries = get_stock_ledger_entries_for_batch_no(filters)
 
 	entries += get_stock_ledger_entries_for_batch_bundle(filters)
 	return entries
 
 
-# get all details
+@deprecated
 def get_stock_ledger_entries_for_batch_no(filters):
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))

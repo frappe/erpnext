@@ -444,11 +444,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 						new erpnext.SerialBatchPackageSelector(
 							me.frm, item, (r) => {
 								if (r) {
-									me.frm.refresh_fields();
-									frappe.model.set_value(cdt, cdn,
-										"serial_and_batch_bundle", r.name);
-
-									me.frm.save();
+									frappe.model.set_value(item.doctype, item.name, {
+										"serial_and_batch_bundle": r.name,
+										"qty": Math.abs(r.total_qty)
+									});
 								}
 							}
 						);

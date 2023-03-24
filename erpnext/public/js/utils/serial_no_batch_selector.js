@@ -226,7 +226,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				based_on: based_on
 			},
 			callback: (r) => {
-				debugger
 				if (r.message) {
 					this.dialog.fields_dict.entries.df.data = r.message;
 					this.dialog.fields_dict.entries.grid.refresh();
@@ -271,6 +270,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			}
 		}).then(r => {
 			this.callback && this.callback(r.message);
+			this.frm.save();
 			this.dialog.hide();
 		})
 	}

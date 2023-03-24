@@ -1,11 +1,11 @@
 import frappe
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import flt
+from frappe.utils.deprecations import deprecated
 
 
 class DeprecatedSerialNoValuation:
-	# Will be deprecated in v16
-
+	@deprecated
 	def calculate_stock_value_from_deprecarated_ledgers(self):
 		serial_nos = list(
 			filter(lambda x: x not in self.serial_no_incoming_rate and x, self.get_serial_nos())
@@ -25,6 +25,7 @@ class DeprecatedSerialNoValuation:
 
 		self.stock_value_change += stock_value_change
 
+	@deprecated
 	def get_incoming_value_for_serial_nos(self, serial_nos):
 		# get rate from serial nos within same company
 		all_serial_nos = frappe.get_all(
@@ -66,12 +67,14 @@ class DeprecatedSerialNoValuation:
 
 
 class DeprecatedBatchNoValuation:
+	@deprecated
 	def calculate_avg_rate_from_deprecarated_ledgers(self):
 		entries = self.get_sle_for_batches()
 		for ledger in entries:
 			self.batch_avg_rate[ledger.batch_no] += flt(ledger.batch_value) / flt(ledger.batch_qty)
 			self.available_qty[ledger.batch_no] += flt(ledger.batch_qty)
 
+	@deprecated
 	def get_sle_for_batches(self):
 		batch_nos = list(self.batch_nos.keys())
 		sle = frappe.qb.DocType("Stock Ledger Entry")
