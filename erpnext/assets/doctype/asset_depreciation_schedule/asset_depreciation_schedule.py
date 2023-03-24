@@ -283,19 +283,12 @@ class AssetDepreciationSchedule(Document):
 			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if (
-				row.expected_value_after_useful_life
-				and (
-					(
-						n == cint(number_of_pending_depreciations) - 1
-						and value_after_depreciation != row.expected_value_after_useful_life
-					)
-					or value_after_depreciation < row.expected_value_after_useful_life
+			if row.expected_value_after_useful_life and (
+				(
+					n == cint(number_of_pending_depreciations) - 1
+					and value_after_depreciation != row.expected_value_after_useful_life
 				)
-				and (
-					not asset_doc.flags.increase_in_asset_value_due_to_repair
-					or not row.depreciation_method in ("Written Down Value", "Double Declining Balance")
-				)
+				or value_after_depreciation < row.expected_value_after_useful_life
 			):
 				depreciation_amount += value_after_depreciation - row.expected_value_after_useful_life
 				skip_row = True
@@ -466,6 +459,16 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 			)
 
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+
+		if asset_doc.flags.increase_in_asset_value_due_to_repair and row.depreciation_method in (
+			"Written Down Value",
+			"Double Declining Balance",
+		):
+			new_rate_of_depreciation = flt(
+				asset_doc.get_depreciation_rate(row), row.precision("rate_of_depreciation")
+			)
+			row.rate_of_depreciation = new_rate_of_depreciation
+			new_asset_depr_schedule_doc.rate_of_depreciation = new_rate_of_depreciation
 
 		new_asset_depr_schedule_doc.make_depr_schedule(asset_doc, row, date_of_disposal)
 		new_asset_depr_schedule_doc.set_accumulated_depreciation(row, date_of_disposal, date_of_return)
