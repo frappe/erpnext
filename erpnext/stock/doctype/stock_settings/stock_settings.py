@@ -55,6 +55,7 @@ class StockSettings(Document):
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
+		self.cant_disable_stock_reservation()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -98,6 +99,19 @@ class StockSettings(Document):
 	def validate_pending_reposts(self):
 		if self.stock_frozen_upto:
 			check_pending_reposting(self.stock_frozen_upto)
+
+	def cant_disable_stock_reservation(self):
+		if not self.enable_stock_reservation:
+			db_enable_stock_reservation = frappe.db.get_single_value(
+				"Stock Settings", "enable_stock_reservation"
+			)
+
+			if db_enable_stock_reservation and frappe.db.count("Stock Reservation Entry"):
+				frappe.throw(
+					_("As there are existing {0}, you can not change the value of {1}.").format(
+						frappe.bold("Stock Reservation Entries"), frappe.bold("Enable Stock Reservation")
+					)
+				)
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
