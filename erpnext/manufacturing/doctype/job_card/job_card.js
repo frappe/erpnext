@@ -83,7 +83,7 @@ frappe.ui.form.on('Job Card', {
 			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
 				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status'], (result) => {
-					if (result.skip_transfer === 1 || result.status == 'In Process') {
+					if (result.skip_transfer === 1 || result.status == 'In Process' || frm.doc.transferred_qty > 0) {
 						frm.trigger("prepare_timer_buttons");
 					}
 				});
