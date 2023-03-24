@@ -23,7 +23,6 @@
   "column_break_o6ex",
   "reserved_qty",
   "delivered_qty",
-  "valuation_rate",
   "section_break_3vb3",
   "company",
   "column_break_jbyr",
@@ -134,17 +133,6 @@
    "width": "150px"
   },
   {
-   "fieldname": "valuation_rate",
-   "fieldtype": "Currency",
-   "label": "Valuation Rate",
-   "oldfieldname": "valuation_rate",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "print_width": "150px",
-   "read_only": 1,
-   "width": "150px"
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -242,7 +230,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-23 19:41:37.140303",
+ "modified": "2023-03-24 16:08:14.352534",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
