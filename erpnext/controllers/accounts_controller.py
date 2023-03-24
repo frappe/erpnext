@@ -245,15 +245,8 @@ class AccountsController(TransactionBase):
 					else:
 						item.set(field_map.get(self.doctype), default_deferred_account)
 
-	def validate_auto_repeat_subscription_dates(self):
-		if (
-			self.get("from_date")
-			and self.get("to_date")
-			and getdate(self.from_date) > getdate(self.to_date)
-		):
-			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
-
 	def validate_deferred_start_and_end_date(self):
+		allow_arrears = frappe.db.get_single_value("Accounts Settings","allow_arrears_billing")
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
 				if not (d.service_start_date and d.service_end_date):
@@ -265,9 +258,10 @@ class AccountsController(TransactionBase):
 						_("Row #{0}: Service Start Date cannot be greater than Service End Date").format(d.idx)
 					)
 				elif getdate(self.posting_date) > getdate(d.service_end_date):
-					frappe.throw(
-						_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx)
-					)
+					if allow_arrears == 0:
+						frappe.throw(
+							_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx)
+						)
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()

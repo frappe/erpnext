@@ -27,6 +27,7 @@
   "automatically_process_deferred_accounting_entry",
   "book_deferred_entries_via_journal_entry",
   "submit_journal_entries",
+  "allow_arrears_billing",
   "tax_settings_section",
   "determine_address_tax_category_from",
   "column_break_19",
@@ -349,6 +350,13 @@
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
    "fieldtype": "Check",
    "label": "Allow multi-currency invoices against single party account "
+  },
+  {
+   "default": "0",
+   "description": "Billing in arrears simply means that you bill your customers after the job is complete. Instead of taking payment beforehand to cover expenses or other costs, you must wait until after the work is completed to get paid.",
+   "fieldname": "allow_arrears_billing",
+   "fieldtype": "Check",
+   "label": "Allow Arrears Billing"
   },
   {
    "fieldname": "tab_break_dpet",
