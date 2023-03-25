@@ -10,7 +10,9 @@
   "asset",
   "naming_series",
   "column_break_2",
+  "gross_purchase_amount",
   "opening_accumulated_depreciation",
+  "number_of_depreciations_booked",
   "finance_book",
   "finance_book_id",
   "depreciation_details_section",
@@ -148,18 +150,36 @@
    "read_only": 1
   },
   {
-   "depends_on": "opening_accumulated_depreciation",
    "fieldname": "opening_accumulated_depreciation",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Opening Accumulated Depreciation",
    "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "gross_purchase_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Gross Purchase Amount",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_depreciations_booked",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Number of Depreciations Booked",
+   "print_hide": 1,
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-16 21:08:21.421260",
+ "modified": "2023-02-26 16:37:23.734806",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",

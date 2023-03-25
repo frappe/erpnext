@@ -250,18 +250,14 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
-erpnext.patches.v13_0.create_ksa_vat_custom_fields # 07-01-2022
 erpnext.patches.v14_0.migrate_crm_settings
-erpnext.patches.v13_0.rename_ksa_qr_field
 erpnext.patches.v13_0.wipe_serial_no_field_for_0_qty
-erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.update_asset_quantity_field
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.non_profit_deprecation_warning
-erpnext.patches.v13_0.enable_ksa_vat_docs #1
 erpnext.patches.v13_0.show_india_localisation_deprecation_warning
 erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
@@ -269,6 +265,8 @@ erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v15_0.delete_taxjar_doctypes
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
+erpnext.patches.v15_0.saudi_depreciation_warning
+erpnext.patches.v15_0.delete_saudi_doctypes
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -324,7 +322,11 @@ erpnext.patches.v14_0.create_accounting_dimensions_for_payment_request
 erpnext.patches.v14_0.update_entry_type_for_journal_entry
 erpnext.patches.v14_0.change_autoname_for_tax_withheld_vouchers
 erpnext.patches.v14_0.set_pick_list_status
+erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
-# below 2 migration patches should always run last
+erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
+erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
+erpnext.patches.v14_0.update_closing_balances
+# below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
-erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
+execute:frappe.delete_doc_if_exists("Report", "Tax Detail")

@@ -21,7 +21,23 @@ class POSClosingEntry(StatusUpdater):
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
 
+		self.validate_duplicate_pos_invoices()
 		self.validate_pos_invoices()
+
+	def validate_duplicate_pos_invoices(self):
+		pos_occurences = {}
+		for idx, inv in enumerate(self.pos_transactions, 1):
+			pos_occurences.setdefault(inv.pos_invoice, []).append(idx)
+
+		error_list = []
+		for key, value in pos_occurences.items():
+			if len(value) > 1:
+				error_list.append(
+					_("{} is added multiple times on rows: {}".format(frappe.bold(key), frappe.bold(value)))
+				)
+
+		if error_list:
+			frappe.throw(error_list, title=_("Duplicate POS Invoices found"), as_list=True)
 
 	def validate_pos_invoices(self):
 		invalid_rows = []

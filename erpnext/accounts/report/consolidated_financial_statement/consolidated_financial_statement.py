@@ -118,7 +118,6 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 		liability,
 		equity,
 		provisional_profit_loss,
-		total_credit,
 		company_currency,
 		filters,
 		True,
@@ -138,7 +137,8 @@ def prepare_companywise_opening_balance(asset_data, liability_data, equity_data,
 		for data in [asset_data, liability_data, equity_data]:
 			if data:
 				account_name = get_root_account_name(data[0].root_type, company)
-				opening_value += get_opening_balance(account_name, data, company) or 0.0
+				if account_name:
+					opening_value += get_opening_balance(account_name, data, company) or 0.0
 
 		opening_balance[company] = opening_value
 
@@ -155,7 +155,7 @@ def get_opening_balance(account_name, data, company):
 
 
 def get_root_account_name(root_type, company):
-	return frappe.get_all(
+	root_account = frappe.get_all(
 		"Account",
 		fields=["account_name"],
 		filters={
@@ -165,7 +165,10 @@ def get_root_account_name(root_type, company):
 			"parent_account": ("is", "not set"),
 		},
 		as_list=1,
-	)[0][0]
+	)
+
+	if root_account:
+		return root_account[0][0]
 
 
 def get_profit_loss_data(fiscal_year, companies, columns, filters):

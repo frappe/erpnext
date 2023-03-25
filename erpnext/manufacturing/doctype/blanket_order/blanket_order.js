@@ -7,6 +7,12 @@ frappe.ui.form.on('Blanket Order', {
 	},
 
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Purchase Order': 'Purchase Order',
+			'Sales Order': 'Sales Order',
+			'Quotation': 'Quotation',
+		};
+
 		frm.add_fetch("customer", "customer_name", "customer_name");
 		frm.add_fetch("supplier", "supplier_name", "supplier_name");
 	},

@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr, flt, get_number_format_info
 
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -156,7 +156,9 @@ class QualityInspection(Document):
 		for i in range(1, 11):
 			reading_value = reading.get("reading_" + str(i))
 			if reading_value is not None and reading_value.strip():
-				result = flt(reading.get("min_value")) <= flt(reading_value) <= flt(reading.get("max_value"))
+				result = (
+					flt(reading.get("min_value")) <= parse_float(reading_value) <= flt(reading.get("max_value"))
+				)
 				if not result:
 					return False
 		return True
@@ -196,7 +198,7 @@ class QualityInspection(Document):
 			# numeric readings
 			for i in range(1, 11):
 				field = "reading_" + str(i)
-				data[field] = flt(reading.get(field))
+				data[field] = parse_float(reading.get(field))
 			data["mean"] = self.calculate_mean(reading)
 
 		return data
@@ -210,7 +212,7 @@ class QualityInspection(Document):
 		for i in range(1, 11):
 			reading_value = reading.get("reading_" + str(i))
 			if reading_value is not None and reading_value.strip():
-				readings_list.append(flt(reading_value))
+				readings_list.append(parse_float(reading_value))
 
 		actual_mean = mean(readings_list) if readings_list else 0
 		return actual_mean
@@ -324,3 +326,19 @@ def make_quality_inspection(source_name, target_doc=None):
 	)
 
 	return doc
+
+
+def parse_float(num: str) -> float:
+	"""Since reading_# fields are `Data` field they might contain number which
+	is representation in user's prefered number format instead of machine
+	readable format. This function converts them to machine readable format."""
+
+	number_format = frappe.db.get_default("number_format") or "#,###.##"
+	decimal_str, comma_str, _number_format_precision = get_number_format_info(number_format)
+
+	if decimal_str == "," and comma_str == ".":
+		num = num.replace(",", "#$")
+		num = num.replace(".", ",")
+		num = num.replace("#$", ".")
+
+	return flt(num)

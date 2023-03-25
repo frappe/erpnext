@@ -27,7 +27,13 @@ def get_details_of_draft_or_submitted_depreciable_assets():
 
 	records = (
 		frappe.qb.from_(asset)
-		.select(asset.name, asset.opening_accumulated_depreciation, asset.docstatus)
+		.select(
+			asset.name,
+			asset.opening_accumulated_depreciation,
+			asset.gross_purchase_amount,
+			asset.number_of_depreciations_booked,
+			asset.docstatus,
+		)
 		.where(asset.calculate_depreciation == 1)
 		.where(asset.docstatus < 2)
 	).run(as_dict=True)

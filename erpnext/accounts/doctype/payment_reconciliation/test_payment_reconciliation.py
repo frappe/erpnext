@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext import get_default_cost_center
@@ -349,6 +349,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		invoices = [x.as_dict() for x in pr.get("invoices")]
 		payments = [x.as_dict() for x in pr.get("payments")]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Difference amount should not be calculated for base currency accounts
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
 		pr.reconcile()
 
 		si.reload()
@@ -390,6 +395,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		invoices = [x.as_dict() for x in pr.get("invoices")]
 		payments = [x.as_dict() for x in pr.get("payments")]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Difference amount should not be calculated for base currency accounts
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
 		pr.reconcile()
 
 		# check PR tool output
@@ -414,6 +424,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		invoices = [x.as_dict() for x in pr.get("invoices")]
 		payments = [x.as_dict() for x in pr.get("payments")]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Difference amount should not be calculated for base currency accounts
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
 		pr.reconcile()
 
 		# assert outstanding
@@ -450,6 +465,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		invoices = [x.as_dict() for x in pr.get("invoices")]
 		payments = [x.as_dict() for x in pr.get("payments")]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Difference amount should not be calculated for base currency accounts
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
 		pr.reconcile()
 
 		self.assertEqual(pr.get("invoices"), [])
@@ -823,6 +843,52 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.get("payments")), 2)
 		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
 		self.assertCountEqual(payment_vouchers, [je2.name, pe2.name])
+
+	@change_settings(
+		"Accounts Settings",
+		{
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+		},
+	)
+	def test_no_difference_amount_for_base_currency_accounts(self):
+		# Make Sale Invoice
+		si = self.create_sales_invoice(
+			qty=1, rate=1, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		si.customer = self.customer
+		si.currency = "EUR"
+		si.conversion_rate = 85
+		si.debit_to = self.debit_to
+		si.save().submit()
+
+		# Make payment using Payment Entry
+		pe1 = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+		)
+
+		pe1.save()
+		pe1.submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debit_to
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [pr.payments[0].as_dict()]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		self.assertEqual(pr.allocation[0].allocated_amount, 85)
+		self.assertEqual(pr.allocation[0].difference_amount, 0)
 
 
 def make_customer(customer_name, currency=None):

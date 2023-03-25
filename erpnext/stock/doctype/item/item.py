@@ -358,7 +358,7 @@ class Item(Document):
 					check_list.append(d.item_tax_template)
 
 	def validate_barcode(self):
-		from stdnum import ean
+		import barcodenumber
 
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
@@ -376,19 +376,18 @@ class Item(Document):
 					item_barcode.barcode_type = (
 						"" if item_barcode.barcode_type not in options else item_barcode.barcode_type
 					)
-					if item_barcode.barcode_type and item_barcode.barcode_type.upper() in (
-						"EAN",
-						"UPC-A",
-						"EAN-13",
-						"EAN-8",
-					):
-						if not ean.is_valid(item_barcode.barcode):
-							frappe.throw(
-								_("Barcode {0} is not a valid {1} code").format(
-									item_barcode.barcode, item_barcode.barcode_type
-								),
-								InvalidBarcode,
-							)
+					if item_barcode.barcode_type:
+						barcode_type = convert_erpnext_to_barcodenumber(
+							item_barcode.barcode_type.upper(), item_barcode.barcode
+						)
+						if barcode_type in barcodenumber.barcodes():
+							if not barcodenumber.check_code(barcode_type, item_barcode.barcode):
+								frappe.throw(
+									_("Barcode {0} is not a valid {1} code").format(
+										item_barcode.barcode, item_barcode.barcode_type
+									),
+									InvalidBarcode,
+								)
 
 	def validate_warehouse_for_reorder(self):
 		"""Validate Reorder level table for duplicate and conditional mandatory"""
@@ -983,6 +982,31 @@ class Item(Document):
 					title=_("Enable Auto Re-Order"),
 					indicator="orange",
 				)
+
+
+def convert_erpnext_to_barcodenumber(erpnext_number, barcode):
+	if erpnext_number == "EAN":
+		ean_type = {
+			8: "EAN8",
+			13: "EAN13",
+		}
+		barcode_length = len(barcode)
+		if barcode_length in ean_type:
+			return ean_type[barcode_length]
+
+		return erpnext_number
+
+	convert = {
+		"UPC-A": "UPCA",
+		"CODE-39": "CODE39",
+		"ISBN-10": "ISBN10",
+		"ISBN-13": "ISBN13",
+	}
+
+	if erpnext_number in convert:
+		return convert[erpnext_number]
+
+	return erpnext_number
 
 
 def make_item_price(item, price_list_name, item_price):
