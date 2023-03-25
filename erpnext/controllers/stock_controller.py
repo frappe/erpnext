@@ -783,6 +783,75 @@ class StockController(AccountsController):
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
+	def make_sr_entries(self):
+		if not self.get("reserve_stock"):
+			return
+
+		if self.doctype != "Sales Order":
+			frappe.throw(
+				_("Stock Reservation can only be created against a {0}.").format(frappe.bold("Sales Order"))
+			)
+
+		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+			frappe.throw(
+				_("Please enable {0} in the {1}.").format(
+					frappe.bold("Stock Reservation"), frappe.bold("Stock Settings")
+				)
+			)
+
+		if not frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission"):
+			frappe.throw(
+				_("Please enable {0} in the {1}.").format(
+					frappe.bold("Reserve Stock on Sales Order Submission"), frappe.bold("Stock Settings")
+				)
+			)
+
+		for item in self.get("items"):
+			if not item.get("reserve_stock"):
+				continue
+
+			available_qty = get_available_qty_to_reserve(item.item_code, item.warehouse)
+			reserved_qty = min(item.stock_qty, available_qty)
+
+			if not reserved_qty:
+				frappe.msgprint(
+					_("Row {0}: No available stock to reserve for the Item {1}").format(
+						item.idx, frappe.bold(item.item_code)
+					),
+					title=_("Stock Reservation"),
+					indicator="orange",
+				)
+				continue
+
+			elif reserved_qty < item.stock_qty:
+				frappe.msgprint(
+					_("Row {0}: Only {1} available to reserve for the Item {2}").format(
+						item.idx,
+						frappe.bold(str(reserved_qty / item.conversion_factor) + " " + item.uom),
+						frappe.bold(item.item_code),
+					),
+					title=_("Stock Reservation"),
+					indicator="orange",
+				)
+
+				if not frappe.db.get_single_value("Stock Settings", "allow_partial_reservation"):
+					continue
+
+			sre = frappe.new_doc("Stock Reservation Entry")
+			sre.item_code = item.item_code
+			sre.warehouse = item.warehouse
+			sre.voucher_type = self.doctype
+			sre.voucher_no = self.name
+			sre.voucher_detail_no = item.name
+			sre.available_qty = available_qty
+			sre.voucher_qty = item.stock_qty
+			sre.reserved_qty = reserved_qty
+			sre.company = self.company
+			sre.stock_uom = item.stock_uom
+			sre.project = self.project
+			sre.save()
+			sre.submit()
+
 
 def repost_required_for_queue(doc: StockController) -> bool:
 	"""check if stock document contains repeated item-warehouse with queue based valuation.
@@ -950,6 +1019,33 @@ def get_conditions_to_validate_future_sle(sl_entries):
 		)
 
 	return or_conditions
+
+
+@frappe.whitelist()
+def get_available_qty_to_reserve(item_code, warehouse):
+	from frappe.query_builder.functions import Sum
+
+	from erpnext.stock.utils import get_stock_balance
+
+	available_qty = get_stock_balance(item_code, warehouse)
+
+	if available_qty:
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		reserved_qty = (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code == item_code)
+				& (sre.warehouse == warehouse)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+			)
+		).run()[0][0] or 0.0
+
+		if reserved_qty:
+			return available_qty - reserved_qty
+
+	return available_qty
 
 
 def create_repost_item_valuation_entry(args):
