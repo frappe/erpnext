@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -62,8 +63,6 @@ class StockReservationEntry(TransactionBase):
 		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
 
 	def update_reserved_qty_in_voucher(self, update_modified=True):
-		from frappe.query_builder.functions import Sum
-
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		reserved_qty = (
 			frappe.qb.from_(sre)
@@ -83,3 +82,52 @@ class StockReservationEntry(TransactionBase):
 			reserved_qty,
 			update_modified=update_modified,
 		)
+
+
+def get_stock_reservation_entry_for_voucher(voucher_type, voucher_no, voucher_detail_no=None):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(
+			sre.name,
+			sre.item_code,
+			sre.warehouse,
+			sre.voucher_detail_no,
+			sre.reserved_qty,
+			sre.delivered_qty,
+			sre.stock_uom,
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+		.orderby(sre.creation)
+	)
+
+	if voucher_detail_no:
+		query = query.where(sre.voucher_detail_no == voucher_detail_no)
+
+	return query.run(as_dict=True)
+
+
+def has_reserved_stock(voucher_type, voucher_no, voucher_detail_no=None):
+	if get_stock_reservation_entry_for_voucher(voucher_type, voucher_no, voucher_detail_no):
+		return True
+
+	return False
+
+
+def update_delivered_qty(doctype, sre_name, sre_field="against_sre", qty_field="stock_qty"):
+	table = frappe.qb.DocType(doctype)
+	delivered_qty = (
+		frappe.qb.from_(table)
+		.select(Sum(table[qty_field]))
+		.where((table.docstatus == 1) & (table[sre_field] == sre_name))
+	).run(as_list=True)[0][0] or 0.0
+
+	sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+	sre_doc.delivered_qty = delivered_qty
+	sre_doc.db_update()
+	sre_doc.update_status()

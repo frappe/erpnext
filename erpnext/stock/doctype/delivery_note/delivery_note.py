@@ -239,6 +239,8 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		self.update_stock_reservation_entry()
+
 		if not self.is_return:
 			self.check_credit_limit()
 		elif self.issue_credit_note:
@@ -258,6 +260,8 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		self.update_stock_reservation_entry()
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -267,6 +271,16 @@ class DeliveryNote(SellingController):
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+
+	def update_stock_reservation_entry(self):
+		if not self.is_return:
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+				update_delivered_qty,
+			)
+
+			for item in self.get("items"):
+				if item.against_sre:
+					update_delivered_qty(item.doctype, item.against_sre)
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
