@@ -77,6 +77,17 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
+		frm.set_query("against_sre", "items", (doc, cdt, cdn) => {
+			var row  = locals[cdt][cdn];
+			return {
+				filters: {
+					"voucher_type": "Sales Order",
+					"voucher_no": row.against_sales_order,
+					"voucher_detail_no": row.so_detail
+				}
+			}
+		});
+
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
