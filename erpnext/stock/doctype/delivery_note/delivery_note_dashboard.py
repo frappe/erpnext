@@ -13,10 +13,14 @@ def get_data():
 			"Sales Order": ["items", "against_sales_order"],
 			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
+			"Stock Reservation Entry": ["items", "against_sre"],
 		},
 		"transactions": [
 			{"label": _("Related"), "items": ["Sales Invoice", "Packing Slip", "Delivery Trip"]},
-			{"label": _("Reference"), "items": ["Sales Order", "Shipment", "Quality Inspection"]},
+			{
+				"label": _("Reference"),
+				"items": ["Sales Order", "Shipment", "Quality Inspection", "Stock Reservation Entry"],
+			},
 			{"label": _("Returns"), "items": ["Stock Entry"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
 			{"label": _("Internal Transfer"), "items": ["Material Request", "Purchase Order"]},
