@@ -67,20 +67,22 @@ frappe.ui.form.on("Sales Order", {
 				frm.events.get_items_from_internal_purchase_order(frm);
 			}
 
-			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
-				if (value) {
-					frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission").then((value) => {
-						if (value) {
-							frm.set_value("reserve_stock", 1);
-						} else {
-							frm.set_value("reserve_stock", 0);
-						}
-					})
-				} else {
-					frm.set_value("reserve_stock", 0);
-					frm.set_df_property("reserve_stock", "read_only", 1);
-				}
-			})
+			if (frm.is_new()) {
+				frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
+					if (value) {
+						frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission").then((value) => {
+							if (value) {
+								frm.set_value("reserve_stock", 1);
+							} else {
+								frm.set_value("reserve_stock", 0);
+							}
+						})
+					} else {
+						frm.set_value("reserve_stock", 0);
+						frm.set_df_property("reserve_stock", "read_only", 1);
+					}
+				})
+			}
 		}
 	},
 
