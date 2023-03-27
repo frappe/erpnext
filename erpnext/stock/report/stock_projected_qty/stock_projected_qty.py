@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, today
 from pypika.terms import ExistsCriterion
 
@@ -20,6 +21,7 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns()
 	bin_list = get_bin_list(filters)
+	sre_details = get_sre_reserved_qty_details(bin_list)
 	item_map = get_item_map(filters.get("item_code"), include_uom)
 
 	warehouse_company = {}
@@ -75,6 +77,7 @@ def execute(filters=None):
 				bin.indented_qty,
 				bin.ordered_qty,
 				bin.reserved_qty,
+				sre_details.get((bin.item_code, bin.warehouse), 0.0),
 				bin.reserved_qty_for_production,
 				bin.reserved_qty_for_sub_contract,
 				reserved_qty_for_pos,
@@ -162,6 +165,13 @@ def get_columns():
 		{
 			"label": _("Reserved Qty"),
 			"fieldname": "reserved_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Stock Reservation Qty"),
+			"fieldname": "stock_reservation_qty",
 			"fieldtype": "Float",
 			"width": 100,
 			"convertible": "qty",
@@ -262,6 +272,36 @@ def get_bin_list(filters):
 	bin_list = query.run(as_dict=True)
 
 	return bin_list
+
+
+def get_sre_reserved_qty_details(bin_list: list) -> dict:
+	sre_details = {}
+
+	if bin_list:
+		item_code_list, warehouse_list = [], []
+		for bin in bin_list:
+			item_code_list.append(bin["item_code"])
+			warehouse_list.append(bin["warehouse"])
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sre_data = (
+			frappe.qb.from_(sre)
+			.select(
+				sre.item_code, sre.warehouse, Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty")
+			)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code.isin(item_code_list))
+				& (sre.warehouse.isin(warehouse_list))
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+			)
+			.groupby(sre.item_code, sre.warehouse)
+		).run(as_dict=True)
+
+		if sre_data:
+			sre_details = {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in sre_data}
+
+	return sre_details
 
 
 def get_item_map(item_code, include_uom):
