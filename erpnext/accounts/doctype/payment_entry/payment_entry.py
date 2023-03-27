@@ -1983,7 +1983,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_amounts()
 
 		if discount_amount:
-			base_total_discount_loss = set_early_payment_discount_loss(pe, doc, valid_discounts)
+			base_total_discount_loss = 0
+			if frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss"):
+				base_total_discount_loss = split_early_payment_discount_loss(pe, doc, valid_discounts)
+
 			set_pending_discount_loss(
 				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
@@ -2175,19 +2178,25 @@ def set_pending_discount_loss(
 	# Avoid considering miniscule losses
 	discount_amount = flt(discount_amount - base_total_discount_loss, doc.precision("grand_total"))
 
-	# If pending base discount amount (mostly rounding loss), set it in deductions
+	# Set base discount amount (discount loss/pending rounding loss) in deductions
 	if discount_amount > 0.0:
 		positive_negative = -1 if pe.payment_type == "Pay" else 1
+
+		# If tax loss booking is enabled, pending loss will be rounding loss.
+		# Otherwise it will be the total discount loss.
+		book_tax_loss = frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss")
+		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
+
 		pe.set_gain_or_loss(
 			account_details={
-				"account": frappe.get_cached_value("Company", pe.company, "round_off_account"),
+				"account": frappe.get_cached_value("Company", pe.company, account_type),
 				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
 				"amount": discount_amount * positive_negative,
 			}
 		)
 
 
-def set_early_payment_discount_loss(pe, doc, valid_discounts) -> float:
+def split_early_payment_discount_loss(pe, doc, valid_discounts) -> float:
 	"""Split early payment discount into Income Loss & Tax Loss."""
 	total_discount_percent = get_total_discount_percent(doc, valid_discounts)
 

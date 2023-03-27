@@ -256,17 +256,24 @@ class TestPaymentEntry(unittest.TestCase):
 			},
 		)
 		si.save()
-
 		si.submit()
 
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 1)
+		pe_with_tax_loss = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+
+		self.assertEqual(pe_with_tax_loss.references[0].payment_term, "30 Credit Days with 10% Discount")
+		self.assertEqual(pe_with_tax_loss.references[0].allocated_amount, 236.0)
+		self.assertEqual(pe_with_tax_loss.paid_amount, 212.4)
+		self.assertEqual(pe_with_tax_loss.deductions[0].amount, 20.0)  # Loss on Income
+		self.assertEqual(pe_with_tax_loss.deductions[1].amount, 3.6)  # Loss on Tax
+		self.assertEqual(pe_with_tax_loss.deductions[1].account, "_Test Account Service Tax - _TC")
+
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
 
-		self.assertEqual(pe.references[0].payment_term, "30 Credit Days with 10% Discount")
 		self.assertEqual(pe.references[0].allocated_amount, 236.0)
 		self.assertEqual(pe.paid_amount, 212.4)
-		self.assertEqual(pe.deductions[0].amount, 20.0)  # Loss on Income
-		self.assertEqual(pe.deductions[1].amount, 3.6)  # Loss on Tax
-		self.assertEqual(pe.deductions[1].account, "_Test Account Service Tax - _TC")
+		self.assertEqual(pe.deductions[0].amount, 23.6)
 
 		pe.submit()
 		si.load_from_db()
@@ -311,12 +318,18 @@ class TestPaymentEntry(unittest.TestCase):
 		)
 		self.assertEqual(pe_1.paid_amount, 236.0)  # discount not applied
 
+		# Test if tax loss is booked on enabling configuration
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 1)
+		pe_with_tax_loss = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		self.assertEqual(pe_with_tax_loss.deductions[0].amount, 42.37)  # Loss on Income
+		self.assertEqual(pe_with_tax_loss.deductions[1].amount, 7.63)  # Loss on Tax
+		self.assertEqual(pe_with_tax_loss.deductions[1].account, "_Test Account Service Tax - _TC")
+
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
 		self.assertEqual(pe.references[0].allocated_amount, 236.0)
 		self.assertEqual(pe.paid_amount, 186)
-		self.assertEqual(pe.deductions[0].amount, 42.37)  # Loss on Income
-		self.assertEqual(pe.deductions[1].amount, 7.63)  # Loss on Tax
-		self.assertEqual(pe.deductions[1].account, "_Test Account Service Tax - _TC")
+		self.assertEqual(pe.deductions[0].amount, 50.0)
 
 		pe.submit()
 		si.load_from_db()
@@ -328,7 +341,10 @@ class TestPaymentEntry(unittest.TestCase):
 
 	@change_settings(
 		"Accounts Settings",
-		{"allow_multi_currency_invoices_against_single_party_account": 1},
+		{
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+			"book_tax_discount_loss": 1,
+		},
 	)
 	def test_payment_entry_multicurrency_si_with_base_currency_accounting_early_payment_discount(
 		self,
