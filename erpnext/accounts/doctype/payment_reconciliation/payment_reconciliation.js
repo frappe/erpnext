@@ -82,6 +82,32 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'default');
 			this.frm.change_custom_button_type('Allocate', null, 'default');
 		}
+
+		// check for any running reconciliation jobs
+		if (this.frm.doc.receivable_payable_account) {
+			frappe.db.get_single_value("Accounts Settings", "enable_auto_reconciliation").then((enabled) => {
+ 				if(enabled) {
+					this.frm.call({
+						'method': "erpnext.accounts.doctype.auto_reconcile.auto_reconcile.is_any_doc_running",
+						"args": {
+							for_filter: {
+								company: this.frm.doc.company,
+								party_type: this.frm.doc.party_type,
+								party: this.frm.doc.party,
+								receivable_payable_account: this.frm.doc.receivable_payable_account
+							}
+						}
+					}).then(r => {
+						if (r.message) {
+							let doc_link = frappe.utils.get_form_link("Auto Reconcile", r.message[0][0], true);
+							let msg = __("Auto Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
+							this.frm.dashboard.add_comment(msg, "yellow");
+						}
+					});
+				}
+			});
+		}
+
 	}
 
 	company() {

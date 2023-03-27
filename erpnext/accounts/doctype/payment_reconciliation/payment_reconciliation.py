@@ -7,9 +7,10 @@ from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import IfNull
-from frappe.utils import flt, getdate, nowdate, today
+from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.doctype.auto_reconcile.auto_reconcile import is_any_doc_running
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
@@ -306,6 +307,23 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def reconcile(self):
+		if frappe.db.get_single_value("Accounts Settings", "enable_auto_reconciliation"):
+			running_doc = is_any_doc_running(
+				dict(
+					company=self.company,
+					party_type=self.party_type,
+					party=self.party,
+					receivable_payable_account=self.receivable_payable_account,
+				)
+			)
+			if running_doc:
+				frappe.throw(
+					_(
+						"An Auto Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
+					).format(get_link_to_form("Auto Reconcile", running_doc[0][0]))
+				)
+				return
+
 		self.validate_allocation()
 		dr_or_cr = (
 			"credit_in_account_currency"
