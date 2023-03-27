@@ -58,6 +58,7 @@ def execute(filters: Optional[StockBalanceFilter] = None):
 		return columns, []
 
 	iwb_map = get_item_warehouse_map(filters, sle)
+	sre_details = get_sre_reserved_qty_details(iwb_map)
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
@@ -88,6 +89,7 @@ def execute(filters: Optional[StockBalanceFilter] = None):
 				"company": company,
 				"reorder_level": item_reorder_level,
 				"reorder_qty": item_reorder_qty,
+				"stock_reservation_qty": sre_details.get((item, warehouse), 0.0),
 			}
 			report_data.update(item_map[item])
 			report_data.update(qty_dict)
@@ -225,6 +227,13 @@ def get_columns(filters: StockBalanceFilter):
 			{
 				"label": _("Reorder Qty"),
 				"fieldname": "reorder_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Stock Reservation Qty"),
+				"fieldname": "stock_reservation_qty",
 				"fieldtype": "Float",
 				"width": 80,
 				"convertible": "qty",
@@ -386,6 +395,19 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 	iwb_map = filter_items_with_no_transactions(iwb_map, float_precision, inventory_dimensions)
 
 	return iwb_map
+
+
+def get_sre_reserved_qty_details(iwb_map: list) -> dict:
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details as get_reserved_qty_details,
+	)
+
+	item_code_list, warehouse_list = [], []
+	for d in iwb_map:
+		item_code_list.append(d[1])
+		warehouse_list.append(d[2])
+
+	return get_reserved_qty_details(item_code_list, warehouse_list)
 
 
 def get_group_by_key(row, filters, inventory_dimension_fields) -> tuple:

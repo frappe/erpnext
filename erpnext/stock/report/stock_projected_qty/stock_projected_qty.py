@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
 from frappe.utils import flt, today
 from pypika.terms import ExistsCriterion
 
@@ -275,33 +274,16 @@ def get_bin_list(filters):
 
 
 def get_sre_reserved_qty_details(bin_list: list) -> dict:
-	sre_details = {}
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details as get_reserved_qty_details,
+	)
 
-	if bin_list:
-		item_code_list, warehouse_list = [], []
-		for bin in bin_list:
-			item_code_list.append(bin["item_code"])
-			warehouse_list.append(bin["warehouse"])
+	item_code_list, warehouse_list = [], []
+	for bin in bin_list:
+		item_code_list.append(bin["item_code"])
+		warehouse_list.append(bin["warehouse"])
 
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sre_data = (
-			frappe.qb.from_(sre)
-			.select(
-				sre.item_code, sre.warehouse, Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty")
-			)
-			.where(
-				(sre.docstatus == 1)
-				& (sre.item_code.isin(item_code_list))
-				& (sre.warehouse.isin(warehouse_list))
-				& (sre.status.notin(["Delivered", "Cancelled"]))
-			)
-			.groupby(sre.item_code, sre.warehouse)
-		).run(as_dict=True)
-
-		if sre_data:
-			sre_details = {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in sre_data}
-
-	return sre_details
+	return get_reserved_qty_details(item_code_list, warehouse_list)
 
 
 def get_item_map(item_code, include_uom):
