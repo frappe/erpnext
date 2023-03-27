@@ -623,13 +623,13 @@ def make_project(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_stock_reservation_entry_for_voucher,
+		get_stock_reservation_entries_for_voucher,
 		has_reserved_stock,
 	)
 
 	def set_missing_values(source, target):
 		if not target.items and has_reserved_stock("Sales Order", source_name):
-			sre_list = get_stock_reservation_entry_for_voucher("Sales Order", source_name)
+			sre_list = get_stock_reservation_entries_for_voucher("Sales Order", source_name)
 			sre_dict = {d.pop("voucher_detail_no"): d for d in sre_list}
 
 			for item in source.get("items"):

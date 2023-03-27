@@ -9,7 +9,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class StockReservationEntry(TransactionBase):
-	def validate(self):
+	def validate(self) -> None:
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
 		self.validate_posting_time()
@@ -17,15 +17,15 @@ class StockReservationEntry(TransactionBase):
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 
-	def on_submit(self):
+	def on_submit(self) -> None:
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
 
-	def on_cancel(self):
+	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
 
-	def validate_mandatory(self):
+	def validate_mandatory(self) -> None:
 		mandatory = [
 			"item_code",
 			"warehouse",
@@ -44,7 +44,7 @@ class StockReservationEntry(TransactionBase):
 			if not self.get(d):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(d)))
 
-	def update_status(self, status=None, update_modified=True):
+	def update_status(self, status: str = None, update_modified: bool = True) -> None:
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
@@ -62,41 +62,50 @@ class StockReservationEntry(TransactionBase):
 
 		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
 
-	def update_reserved_qty_in_voucher(self, update_modified=True):
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		reserved_qty = (
-			frappe.qb.from_(sre)
-			.select(Sum(sre.reserved_qty))
-			.where(
-				(sre.docstatus == 1)
-				& (sre.voucher_type == self.voucher_type)
-				& (sre.voucher_no == self.voucher_no)
-				& (sre.voucher_detail_no == self.voucher_detail_no)
+	def update_reserved_qty_in_voucher(
+		self, reserved_qty_field: str = "stock_reserved_qty", update_modified: bool = True
+	) -> None:
+		item_doctype = "Sales Order Item" if self.voucher_type == "Sales Order" else None
+
+		if item_doctype:
+			sre = frappe.qb.DocType("Stock Reservation Entry")
+			reserved_qty = (
+				frappe.qb.from_(sre)
+				.select(Sum(sre.reserved_qty))
+				.where(
+					(sre.docstatus == 1)
+					& (sre.voucher_type == self.voucher_type)
+					& (sre.voucher_no == self.voucher_no)
+					& (sre.voucher_detail_no == self.voucher_detail_no)
+				)
+			).run(as_list=True)[0][0] or 0
+
+			frappe.db.set_value(
+				item_doctype,
+				self.voucher_detail_no,
+				reserved_qty_field,
+				reserved_qty,
+				update_modified=update_modified,
 			)
-		).run(as_list=True)[0][0] or 0
-
-		frappe.db.set_value(
-			"Sales Order Item",
-			self.voucher_detail_no,
-			"stock_reserved_qty",
-			reserved_qty,
-			update_modified=update_modified,
-		)
 
 
-def get_stock_reservation_entry_for_voucher(voucher_type, voucher_no, voucher_detail_no=None):
+def get_stock_reservation_entries_for_voucher(
+	voucher_type: str, voucher_no: str, voucher_detail_no: str = None, fields: list[str] = None
+) -> list[dict]:
+	if not fields or not isinstance(fields, list):
+		fields = [
+			"name",
+			"item_code",
+			"warehouse",
+			"voucher_detail_no",
+			"reserved_qty",
+			"delivered_qty",
+			"stock_uom",
+		]
+
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
 		frappe.qb.from_(sre)
-		.select(
-			sre.name,
-			sre.item_code,
-			sre.warehouse,
-			sre.voucher_detail_no,
-			sre.reserved_qty,
-			sre.delivered_qty,
-			sre.stock_uom,
-		)
 		.where(
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
@@ -106,20 +115,27 @@ def get_stock_reservation_entry_for_voucher(voucher_type, voucher_no, voucher_de
 		.orderby(sre.creation)
 	)
 
+	for field in fields:
+		query = query.select(sre[field])
+
 	if voucher_detail_no:
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)
 
 	return query.run(as_dict=True)
 
 
-def has_reserved_stock(voucher_type, voucher_no, voucher_detail_no=None):
-	if get_stock_reservation_entry_for_voucher(voucher_type, voucher_no, voucher_detail_no):
+def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
+	if get_stock_reservation_entries_for_voucher(
+		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
+	):
 		return True
 
 	return False
 
 
-def update_delivered_qty(doctype, sre_name, sre_field="against_sre", qty_field="stock_qty"):
+def update_sre_delivered_qty(
+	doctype: str, sre_name: str, sre_field: str = "against_sre", qty_field: str = "stock_qty"
+) -> None:
 	table = frappe.qb.DocType(doctype)
 	delivered_qty = (
 		frappe.qb.from_(table)
@@ -133,32 +149,35 @@ def update_delivered_qty(doctype, sre_name, sre_field="against_sre", qty_field="
 	sre_doc.update_status()
 
 
-def get_stock_reservation_entry_for_items(items, sre_field="against_sre"):
+def get_stock_reservation_entries_for_items(
+	items: list[dict | object], sre_field: str = "against_sre"
+) -> dict[dict]:
 	sre_details = {}
 
-	sre_list = [item.get(sre_field) for item in items if item.get(sre_field)]
+	if items:
+		sre_list = [item.get(sre_field) for item in items if item.get(sre_field)]
 
-	if sre_list:
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sre_data = (
-			frappe.qb.from_(sre)
-			.select(
-				sre.name,
-				sre.status,
-				sre.docstatus,
-				sre.item_code,
-				sre.warehouse,
-				sre.voucher_type,
-				sre.voucher_no,
-				sre.voucher_detail_no,
-				sre.reserved_qty,
-				sre.delivered_qty,
-				sre.stock_uom,
-			)
-			.where(sre.name.isin(sre_list))
-			.orderby(sre.creation)
-		).run(as_dict=True)
+		if sre_list:
+			sre = frappe.qb.DocType("Stock Reservation Entry")
+			sre_data = (
+				frappe.qb.from_(sre)
+				.select(
+					sre.name,
+					sre.status,
+					sre.docstatus,
+					sre.item_code,
+					sre.warehouse,
+					sre.voucher_type,
+					sre.voucher_no,
+					sre.voucher_detail_no,
+					sre.reserved_qty,
+					sre.delivered_qty,
+					sre.stock_uom,
+				)
+				.where(sre.name.isin(sre_list))
+				.orderby(sre.creation)
+			).run(as_dict=True)
 
-		sre_details = {d.name: d for d in sre_data}
+			sre_details = {d.name: d for d in sre_data}
 
 	return sre_details

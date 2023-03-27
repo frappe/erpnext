@@ -277,20 +277,20 @@ class DeliveryNote(SellingController):
 	def update_stock_reservation_entry(self):
 		if not self.is_return:
 			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-				update_delivered_qty,
+				update_sre_delivered_qty,
 			)
 
 			for item in self.get("items"):
 				if item.against_sre:
-					update_delivered_qty(item.doctype, item.against_sre)
+					update_sre_delivered_qty(item.doctype, item.against_sre)
 
 	def validate_against_sre(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_stock_reservation_entry_for_items,
+			get_stock_reservation_entries_for_items,
 			has_reserved_stock,
 		)
 
-		sre_details = get_stock_reservation_entry_for_items(self.items)
+		sre_details = get_stock_reservation_entries_for_items(self.items)
 
 		for item in self.items:
 			if item.against_sre:
