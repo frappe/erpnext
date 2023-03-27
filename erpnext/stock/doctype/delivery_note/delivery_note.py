@@ -147,6 +147,8 @@ class DeliveryNote(SellingController):
 
 		if not self.installation_status:
 			self.installation_status = "Not Installed"
+
+		self.validate_against_sre()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
@@ -281,6 +283,78 @@ class DeliveryNote(SellingController):
 			for item in self.get("items"):
 				if item.against_sre:
 					update_delivered_qty(item.doctype, item.against_sre)
+
+	def validate_against_sre(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_stock_reservation_entry_for_items,
+			has_reserved_stock,
+		)
+
+		sre_details = get_stock_reservation_entry_for_items(self.items)
+
+		for item in self.items:
+			if item.against_sre:
+				sre = sre_details[item.against_sre]
+
+				# SRE `docstatus` should be `1` (submitted)
+				if sre.docstatus == 0:
+					frappe.throw(
+						_("Row #{0}: Stock Reservation Entry {1} is not submitted").format(
+							item.idx, item.against_sre
+						)
+					)
+				elif sre.docstatus == 2:
+					frappe.throw(
+						_("Row #{0}: Stock Reservation Entry {0} is cancelled").format(item.idx, item.against_sre)
+					)
+
+				# SRE `status` should not be `Delivered`
+				if sre.status == "Delivered":
+					frappe.throw(
+						_("Row #{0}: Cannot deliver more against Stock Reservation Entry {1}").format(
+							item.idx, item.against_sre
+						)
+					)
+
+				for field in (
+					"item_code",
+					"warehouse",
+					("against_sales_order", "voucher_no"),
+					("so_detail", "voucher_detail_no"),
+				):
+					item_field = sre_field = None
+
+					if isinstance(field, tuple):
+						item_field, sre_field = field[0], field[1]
+					else:
+						item_field = sre_field = field
+
+					if item.get(item_field) != sre.get(sre_field):
+						frappe.throw(
+							_("Row #{0}: {1} {2} does not match with Stock Reservation Entry {3}").format(
+								item.idx,
+								frappe.get_meta(item.doctype).get_label(item_field),
+								item.get(item_field),
+								item.against_sre,
+							)
+						)
+
+				max_delivered_qty = (sre.reserved_qty - sre.delivered_qty) / item.conversion_factor
+				if item.qty > max_delivered_qty:
+					frappe.throw(
+						_("Row #{0}: Cannot deliver more than {1} {2} against Stock Reservation Entry {3}").format(
+							item.idx, max_delivered_qty, item.uom, item.against_sre
+						)
+					)
+			elif item.against_sales_order:
+				if not item.so_detail:
+					frappe.throw(_("Row #{0}: Sales Order Item reference is required").format(item.idx))
+				elif has_reserved_stock("Sales Order", item.against_sales_order, item.so_detail):
+					frappe.throw(
+						_("Row #{0}: Cannot deliver against Sales Order {1} without Stock Reservation Entry").format(
+							item.idx, item.against_sales_order
+						)
+					)
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit

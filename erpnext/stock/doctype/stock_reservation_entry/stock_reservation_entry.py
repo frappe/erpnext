@@ -131,3 +131,34 @@ def update_delivered_qty(doctype, sre_name, sre_field="against_sre", qty_field="
 	sre_doc.delivered_qty = delivered_qty
 	sre_doc.db_update()
 	sre_doc.update_status()
+
+
+def get_stock_reservation_entry_for_items(items, sre_field="against_sre"):
+	sre_details = {}
+
+	sre_list = [item.get(sre_field) for item in items if item.get(sre_field)]
+
+	if sre_list:
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sre_data = (
+			frappe.qb.from_(sre)
+			.select(
+				sre.name,
+				sre.status,
+				sre.docstatus,
+				sre.item_code,
+				sre.warehouse,
+				sre.voucher_type,
+				sre.voucher_no,
+				sre.voucher_detail_no,
+				sre.reserved_qty,
+				sre.delivered_qty,
+				sre.stock_uom,
+			)
+			.where(sre.name.isin(sre_list))
+			.orderby(sre.creation)
+		).run(as_dict=True)
+
+		sre_details = {d.name: d for d in sre_data}
+
+	return sre_details
