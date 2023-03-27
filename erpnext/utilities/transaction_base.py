@@ -94,7 +94,7 @@ class TransactionBase(StatusUpdater):
 				"Buying Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
 			)
 		else:
-			action, role_allowed_to_override = frappe.db.get_cached_value(
+			action, role_allowed_to_override = frappe.get_cached_value(
 				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
 			)
 

@@ -545,10 +545,8 @@ class calculate_taxes_and_totals(object):
 			"Sales Invoice",
 			"POS Invoice",
 		]:
-			self.doc.base_grand_total = (
-				flt(self.doc.grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total"))
-				if self.doc.total_taxes_and_charges
-				else self.doc.base_net_total
+			total_base_taxes = sum(
+				[flt(tax.base_tax_amount_after_discount_amount) for tax in self.doc.get("taxes")]
 			)
 		else:
 			self.doc.taxes_and_charges_added = self.doc.taxes_and_charges_deducted = 0.0
@@ -561,27 +559,21 @@ class calculate_taxes_and_totals(object):
 
 			self.doc.round_floats_in(self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"])
 
-			self.doc.base_grand_total = (
-				flt(self.doc.grand_total * self.doc.conversion_rate)
-				if (self.doc.taxes_and_charges_added or self.doc.taxes_and_charges_deducted)
-				else self.doc.base_net_total
-			)
-
 			self._set_in_company_currency(
 				self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"]
 			)
 
+			total_base_taxes = (
+				self.doc.base_taxes_and_charges_added - self.doc.base_taxes_and_charges_deducted
+			)
+
+		self.doc.base_grand_total = (
+			self.doc.base_net_total + total_base_taxes + self.doc.base_rounding_adjustment
+		)
+
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
 		self.set_rounded_total()
-
-		precision_loss = (
-			flt(self.doc.net_total * self.doc.conversion_rate, self.doc.precision("net_total"))
-			- self.doc.base_net_total
-		)
-		if precision_loss:
-			self.doc.base_rounding_adjustment += precision_loss
-			self.doc.rounding_adjustment += precision_loss
 
 	def calculate_total_net_weight(self):
 		if self.doc.meta.get_field("total_net_weight"):
