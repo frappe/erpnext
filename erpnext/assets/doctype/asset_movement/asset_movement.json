@@ -109,7 +109,7 @@
    "fieldtype": "Select",
    "label": "Transfer Type",
    "mandatory_depends_on": "eval:doc.purpose == 'Transfer'",
-   "options": "\nEmployee To Employee"
+   "options": "\nEmployee To Employee\nCost Center To Cost Center"
   },
   {
    "fieldname": "from_employee",
@@ -171,7 +171,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-22 14:48:48.509761",
+ "modified": "2023-03-23 14:05:10.883020",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",

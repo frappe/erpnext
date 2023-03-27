@@ -166,6 +166,11 @@ frappe.ui.form.on("Item", {
 			frm.set_value('is_fixed_asset',0)
 			frm.trigger('is_service_item')
 		}
+		if (frm.doc.item_group == "Consumable"){
+			frm.set_value("is_stock_item", 1);
+			frm.set_value("is_fixed_asset", 0);
+			frm.trigger('is_stock_item')
+		}
 		// if(frm.doc.item_group == 'Fixed Asset'){
 		// 	frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
 		// }

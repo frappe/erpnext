@@ -20,6 +20,9 @@
   "item_sub_group",
   "stock_uom",
   "hsn_code",
+  "parts_no",
+  "part_name",
+  "model",
   "column_break0",
   "disabled",
   "allow_alternative_item",
@@ -208,7 +211,6 @@
    "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Allow Alternative Item"
   },
   {
@@ -959,6 +961,25 @@
    "fieldname": "hsn_code",
    "fieldtype": "Data",
    "label": "HSN Code"
+  },
+  {
+   "fieldname": "parts_no",
+   "fieldtype": "Link",
+   "label": "Part No",
+   "options": "Part No"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model"
+  },
+  {
+   "fetch_from": "parts_no.part_name",
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "label": "Part Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
@@ -966,7 +987,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-23 11:57:39.394575",
+ "modified": "2023-03-24 14:53:34.595767",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
