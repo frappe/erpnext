@@ -81,9 +81,11 @@ frappe.ui.form.on("Delivery Note", {
 			var row  = locals[cdt][cdn];
 			return {
 				filters: {
+					"docstatus": 1,
+					"status": ["not in", ["Delivered", "Cancelled"]],
 					"voucher_type": "Sales Order",
 					"voucher_no": row.against_sales_order,
-					"voucher_detail_no": row.so_detail
+					"voucher_detail_no": row.so_detail,
 				}
 			}
 		});
