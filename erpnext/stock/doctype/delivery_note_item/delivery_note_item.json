@@ -637,7 +637,8 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "so_detail",

@@ -275,7 +275,7 @@ has_website_permission = {
 before_tests = "erpnext.setup.utils.before_tests"
 
 standard_queries = {
-	"Customer": "erpnext.selling.doctype.customer.customer.get_customer_list",
+	"Customer": "erpnext.controllers.queries.customer_query",
 }
 
 doc_events = {
@@ -510,6 +510,7 @@ accounting_dimension_doctypes = [
 	"Subcontracting Order Item",
 	"Subcontracting Receipt",
 	"Subcontracting Receipt Item",
+	"Account Closing Balance",
 ]
 
 # get matching queries for Bank Reconciliation
