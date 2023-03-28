@@ -372,6 +372,16 @@ class StockController(AccountsController):
 
 				row.db_set("serial_and_batch_bundle", None)
 
+	def set_serial_and_batch_bundle(self, table_name=None):
+		if not table_name:
+			table_name = "items"
+
+		for row in self.get(table_name):
+			if row.get("serial_and_batch_bundle"):
+				frappe.get_doc(
+					"Serial and Batch Bundle", row.serial_and_batch_bundle
+				).set_serial_and_batch_values(self, row)
+
 	def make_package_for_transfer(
 		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None
 	):
@@ -748,16 +758,6 @@ class StockController(AccountsController):
 				if flt(values["qty_put"]) > flt(values["capacity"]):
 					message = self.prepare_over_receipt_message(rule, values)
 					frappe.throw(msg=message, title=_("Over Receipt"))
-
-	def set_serial_and_batch_bundle(self, table_name=None):
-		if not table_name:
-			table_name = "items"
-
-		for row in self.get(table_name):
-			if row.get("serial_and_batch_bundle"):
-				frappe.get_doc(
-					"Serial and Batch Bundle", row.serial_and_batch_bundle
-				).set_serial_and_batch_values(self, row)
 
 	def prepare_over_receipt_message(self, rule, values):
 		message = _(

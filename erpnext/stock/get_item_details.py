@@ -8,7 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
-from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
 
 from erpnext import get_company_currency
@@ -1089,28 +1089,6 @@ def get_pos_profile(company, pos_profile=None, user=None):
 	return pos_profile and pos_profile[0] or None
 
 
-def get_serial_nos_by_fifo(args, sales_order=None):
-	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
-		sn = frappe.qb.DocType("Serial No")
-		query = (
-			frappe.qb.from_(sn)
-			.select(sn.name)
-			.where((sn.item_code == args.item_code) & (sn.warehouse == args.warehouse))
-			.orderby(CombineDatetime(sn.purchase_date, sn.purchase_time))
-			.limit(abs(cint(args.stock_qty)))
-		)
-
-		if sales_order:
-			query = query.where(sn.sales_order == sales_order)
-		if args.batch_no:
-			query = query.where(sn.batch_no == args.batch_no)
-
-		serial_nos = query.run(as_list=True)
-		serial_nos = [s[0] for s in serial_nos]
-
-		return "\n".join(serial_nos)
-
-
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
 	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
@@ -1174,51 +1152,6 @@ def get_company_total_stock(item_code, company):
 		.select(Sum(bin.actual_qty))
 		.where((wh.company == company) & (bin.item_code == item_code))
 	).run()[0][0]
-
-
-@frappe.whitelist()
-def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
-	args = frappe._dict(
-		{"item_code": item_code, "warehouse": warehouse, "stock_qty": stock_qty, "serial_no": serial_no}
-	)
-	serial_no = get_serial_no(args)
-
-	return {"serial_no": serial_no}
-
-
-@frappe.whitelist()
-def get_bin_details_and_serial_nos(
-	item_code, warehouse, has_batch_no=None, stock_qty=None, serial_no=None
-):
-	bin_details_and_serial_nos = {}
-	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
-	if flt(stock_qty) > 0:
-		if has_batch_no:
-			args = frappe._dict({"item_code": item_code, "warehouse": warehouse, "stock_qty": stock_qty})
-			serial_no = get_serial_no(args)
-			bin_details_and_serial_nos.update({"serial_no": serial_no})
-			return bin_details_and_serial_nos
-
-		bin_details_and_serial_nos.update(
-			get_serial_no_details(item_code, warehouse, stock_qty, serial_no)
-		)
-
-	return bin_details_and_serial_nos
-
-
-@frappe.whitelist()
-def get_batch_qty_and_serial_no(batch_no, stock_qty, warehouse, item_code, has_serial_no):
-	batch_qty_and_serial_no = {}
-	batch_qty_and_serial_no.update(get_batch_qty(batch_no, warehouse, item_code))
-
-	if (flt(batch_qty_and_serial_no.get("actual_batch_qty")) >= flt(stock_qty)) and has_serial_no:
-		args = frappe._dict(
-			{"item_code": item_code, "warehouse": warehouse, "stock_qty": stock_qty, "batch_no": batch_no}
-		)
-		serial_no = get_serial_no(args)
-		batch_qty_and_serial_no.update({"serial_no": serial_no})
-
-	return batch_qty_and_serial_no
 
 
 @frappe.whitelist()
@@ -1395,32 +1328,8 @@ def get_gross_profit(out):
 
 @frappe.whitelist()
 def get_serial_no(args, serial_nos=None, sales_order=None):
-	serial_no = None
-	if isinstance(args, str):
-		args = json.loads(args)
-		args = frappe._dict(args)
-	if args.get("doctype") == "Sales Invoice" and not args.get("update_stock"):
-		return ""
-	if args.get("warehouse") and args.get("stock_qty") and args.get("item_code"):
-		has_serial_no = frappe.get_value("Item", {"item_code": args.item_code}, "has_serial_no")
-		if args.get("batch_no") and has_serial_no == 1:
-			return get_serial_nos_by_fifo(args, sales_order)
-		elif has_serial_no == 1:
-			args = json.dumps(
-				{
-					"item_code": args.get("item_code"),
-					"warehouse": args.get("warehouse"),
-					"stock_qty": args.get("stock_qty"),
-				}
-			)
-			args = process_args(args)
-			serial_no = get_serial_nos_by_fifo(args, sales_order)
-
-	if not serial_no and serial_nos:
-		# For POS
-		serial_no = serial_nos
-
-	return serial_no
+	serial_nos = serial_nos or []
+	return serial_nos
 
 
 def update_party_blanket_order(args, out):

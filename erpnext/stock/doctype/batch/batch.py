@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -257,54 +259,6 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	return batch.name
 
 
-def set_batch_nos(doc, warehouse_field, throw=False, child_table="items"):
-	"""Automatically select `batch_no` for outgoing items in item table"""
-	for d in doc.get(child_table):
-		qty = d.get("stock_qty") or d.get("transfer_qty") or d.get("qty") or 0
-		warehouse = d.get(warehouse_field, None)
-		if warehouse and qty > 0 and frappe.db.get_value("Item", d.item_code, "has_batch_no"):
-			if not d.batch_no:
-				pass
-			else:
-				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
-				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
-					frappe.throw(
-						_(
-							"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches"
-						).format(d.idx, d.batch_no, batch_qty, qty)
-					)
-
-
-@frappe.whitelist()
-def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
-	"""
-	Get batch number using First Expiring First Out method.
-	:param item_code: `item_code` of Item Document
-	:param warehouse: name of Warehouse to check
-	:param qty: quantity of Items
-	:return: String represent batch number of batch with sufficient quantity else an empty String
-	"""
-
-	batch_no = None
-	batches = get_batches(item_code, warehouse, qty, throw, serial_no)
-
-	for batch in batches:
-		if flt(qty) <= flt(batch.qty):
-			batch_no = batch.batch_id
-			break
-
-	if not batch_no:
-		frappe.msgprint(
-			_(
-				"Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement"
-			).format(frappe.bold(item_code))
-		)
-		if throw:
-			raise UnableToSelectBatchError
-
-	return batch_no
-
-
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -398,3 +352,17 @@ def get_pos_reserved_batch_qty(filters):
 
 	flt_reserved_batch_qty = flt(reserved_batch_qty[0][0])
 	return flt_reserved_batch_qty
+
+
+def get_available_batches(kwargs):
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		get_auto_batch_nos,
+	)
+
+	batchwise_qty = defaultdict(float)
+
+	batches = get_auto_batch_nos(kwargs)
+	for batch in batches:
+		batchwise_qty[batch.get("batch_no")] += batch.get("qty")
+
+	return batchwise_qty

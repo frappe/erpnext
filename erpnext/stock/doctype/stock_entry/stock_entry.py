@@ -28,7 +28,7 @@ from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, validate_bom_no
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -39,7 +39,11 @@ from erpnext.stock.get_item_details import (
 	get_conversion_factor,
 	get_default_cost_center,
 )
-from erpnext.stock.serial_batch_bundle import get_empty_batches_based_work_order
+from erpnext.stock.serial_batch_bundle import (
+	SerialBatchCreation,
+	get_empty_batches_based_work_order,
+	get_serial_or_batch_items,
+)
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_bin, get_incoming_rate
 
@@ -143,9 +147,6 @@ class StockEntry(StockController):
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
 
-		if self._action != "submit":
-			set_batch_nos(self, "s_warehouse")
-
 		self.validate_serialized_batch()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
@@ -241,6 +242,9 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("Not Started")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("In Transit")
+
+	def before_save(self):
+		self.make_serial_and_batch_bundle_for_outward()
 
 	def on_update(self):
 		self.set_serial_and_batch_bundle()
@@ -894,6 +898,30 @@ class StockEntry(StockController):
 
 					serial_nos.append(sn)
 
+	def make_serial_and_batch_bundle_for_outward(self):
+		serial_or_batch_items = get_serial_or_batch_items(self.items)
+
+		for row in self.items:
+			if row.serial_and_batch_bundle or row.item_code not in serial_or_batch_items:
+				continue
+
+			bundle_doc = SerialBatchCreation(
+				{
+					"item_code": row.item_code,
+					"warehouse": row.s_warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"voucher_type": self.doctype,
+					"voucher_detail_no": row.name,
+					"total_qty": row.qty,
+					"type_of_transaction": "Outward",
+					"company": self.company,
+					"do_not_submit": True,
+				}
+			).make_serial_and_batch_bundle()
+
+			row.serial_and_batch_bundle = bundle_doc.name
+
 	def validate_subcontract_order(self):
 		"""Throw exception if more raw material is transferred against Subcontract Order than in
 		the raw materials supplied table"""
@@ -1444,15 +1472,6 @@ class StockEntry(StockController):
 
 		stock_and_rate = get_warehouse_details(args) if args.get("warehouse") else {}
 		ret.update(stock_and_rate)
-
-		# automatically select batch for outgoing item
-		if (
-			args.get("s_warehouse", None)
-			and args.get("qty")
-			and ret.get("has_batch_no")
-			and not args.get("batch_no")
-		):
-			args.batch_no = get_batch_no(args["item_code"], args["s_warehouse"], args["qty"])
 
 		if (
 			self.purpose == "Send to Subcontractor"

@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, formatdate, get_datetime, get_link_to_form, getdate
+from frappe.utils import add_days, cint, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
@@ -51,7 +51,6 @@ class StockLedgerEntry(Document):
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
-		self.calculate_batch_qty()
 
 		if not self.get("via_landed_cost_voucher"):
 			SerialBatchBundle(
@@ -62,18 +61,6 @@ class StockLedgerEntry(Document):
 			)
 
 		self.validate_serial_batch_no_bundle()
-
-	def calculate_batch_qty(self):
-		if self.batch_no:
-			batch_qty = (
-				frappe.db.get_value(
-					"Stock Ledger Entry",
-					{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": 0},
-					"sum(actual_qty)",
-				)
-				or 0
-			)
-			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
 	def validate_mandatory(self):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]
@@ -123,11 +110,14 @@ class StockLedgerEntry(Document):
 				)
 
 				if bundle_data.docstatus != 1:
-					link = get_link_to_form("Serial and Batch Bundle", self.serial_and_batch_bundle)
-					frappe.throw(_(f"Serial and Batch Bundle {link} should be submitted first"))
+					self.submit_serial_and_batch_bundle()
 
 		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
 			frappe.throw(_(f"Serial No and Batch No are not allowed for Item {self.item_code}"))
+
+	def submit_serial_and_batch_bundle(self):
+		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
+		doc.submit()
 
 	def check_stock_frozen_date(self):
 		stock_settings = frappe.get_cached_doc("Stock Settings")

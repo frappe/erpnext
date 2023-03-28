@@ -322,3 +322,16 @@ def fetch_serial_numbers(filters, qty, do_not_include=None):
 
 	serial_numbers = query.run(as_dict=True)
 	return serial_numbers
+
+
+def get_serial_nos_for_outward(kwargs):
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		get_auto_serial_nos,
+	)
+
+	serial_nos = get_auto_serial_nos(kwargs)
+
+	if not serial_nos:
+		return []
+
+	return [d.serial_no for d in serial_nos]

@@ -196,48 +196,6 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		refresh_field("incentives",row.name,row.parentfield);
 	}
 
-	warehouse(doc, cdt, cdn) {
-		var me = this;
-		var item = frappe.get_doc(cdt, cdn);
-
-		// check if serial nos entered are as much as qty in row
-		if (item.serial_no) {
-			let serial_nos = item.serial_no.split(`\n`).filter(sn => sn.trim()); // filter out whitespaces
-			if (item.qty === serial_nos.length) return;
-		}
-
-		if (item.serial_no && !item.batch_no) {
-			item.serial_no = null;
-		}
-
-		var has_batch_no;
-		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_batch_no', (r) => {
-			has_batch_no = r && r.has_batch_no;
-			if(item.item_code && item.warehouse) {
-				return this.frm.call({
-					method: "erpnext.stock.get_item_details.get_bin_details_and_serial_nos",
-					child: item,
-					args: {
-						item_code: item.item_code,
-						warehouse: item.warehouse,
-						has_batch_no: has_batch_no || 0,
-						stock_qty: item.stock_qty,
-						serial_no: item.serial_no || "",
-					},
-					callback:function(r){
-						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-							if (has_batch_no) {
-								me.set_batch_number(cdt, cdn);
-								me.batch_no(doc, cdt, cdn);
-							}
-						}
-					}
-				});
-			}
-		})
-	}
-
 	toggle_editable_price_list_rate() {
 		var df = frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "price_list_rate", this.frm.doc.name);
 		var editable_price_list_rate = cint(frappe.defaults.get_default("editable_price_list_rate"));
@@ -298,36 +256,6 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		}
 	}
 
-	batch_no(doc, cdt, cdn) {
-		super.batch_no(doc, cdt, cdn);
-
-		var item = frappe.get_doc(cdt, cdn);
-
-		if (item.serial_no) {
-			return;
-		}
-
-		item.serial_no = null;
-		var has_serial_no;
-		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_serial_no', (r) => {
-			has_serial_no = r && r.has_serial_no;
-			if(item.warehouse && item.item_code && item.batch_no) {
-				return this.frm.call({
-					method: "erpnext.stock.get_item_details.get_batch_qty_and_serial_no",
-					child: item,
-					args: {
-						"batch_no": item.batch_no,
-						"stock_qty": item.stock_qty || item.qty, //if stock_qty field is not available fetch qty (in case of Packed Items table)
-						"warehouse": item.warehouse,
-						"item_code": item.item_code,
-						"has_serial_no": has_serial_no
-					},
-					"fieldname": "actual_batch_qty"
-				});
-			}
-		})
-	}
-
 	set_dynamic_labels() {
 		super.set_dynamic_labels();
 		this.set_product_bundle_help(this.frm.doc);
@@ -386,38 +314,6 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 			this.set_batch_number(cdt, cdn);
 		}
-	}
-
-	/* Determine appropriate batch number and set it in the form.
-	* @param {string} cdt - Document Doctype
-	* @param {string} cdn - Document name
-	*/
-	set_batch_number(cdt, cdn) {
-		const doc = frappe.get_doc(cdt, cdn);
-		if (doc && doc.has_batch_no && doc.warehouse) {
-			this._set_batch_number(doc);
-		}
-	}
-
-	_set_batch_number(doc) {
-		if (doc.batch_no) {
-			return
-		}
-
-		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
-		if (doc.has_serial_no && doc.serial_no) {
-			args['serial_no'] = doc.serial_no
-		}
-
-		return frappe.call({
-			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
-			args: args,
-			callback: function(r) {
-				if(r.message) {
-					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
-				}
-			}
-		});
 	}
 
 	pick_serial_and_batch(doc, cdt, cdn) {

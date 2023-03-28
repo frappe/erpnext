@@ -13,7 +13,7 @@ from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_batch_nos,
+	get_auto_batch_nos,
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -114,7 +114,14 @@ class StockReconciliation(StockController):
 						)
 
 				if item_details.has_batch_no:
-					batch_nos_details = get_available_batch_nos(item.item_code, item.warehouse)
+					batch_nos_details = get_auto_batch_nos(
+						frappe._dict(
+							{
+								"item_code": item.item_code,
+								"warehouse": item.warehouse,
+							}
+						)
+					)
 
 					for batch_no, qty in batch_nos_details.items():
 						serial_and_batch_bundle.append(

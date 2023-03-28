@@ -38,10 +38,11 @@
   "allow_partial_reservation",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
-  "automatically_set_serial_nos_based_on_fifo",
-  "set_qty_in_transactions_based_on_serial_no_input",
-  "column_break_10",
+  "auto_create_serial_and_batch_bundle_for_outward",
+  "pick_serial_and_batch_based_on",
+  "section_break_plhx",
   "disable_serial_no_and_batch_selector",
+  "column_break_mhzc",
   "use_naming_series",
   "naming_series_prefix",
   "stock_planning_tab",
@@ -148,22 +149,6 @@
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "1",
-   "fieldname": "automatically_set_serial_nos_based_on_fifo",
-   "fieldtype": "Check",
-   "label": "Automatically Set Serial Nos Based on FIFO"
-  },
-  {
-   "default": "1",
-   "fieldname": "set_qty_in_transactions_based_on_serial_no_input",
-   "fieldtype": "Check",
-   "label": "Set Qty in Transactions Based on Serial No Input"
   },
   {
    "fieldname": "auto_material_request",
@@ -376,6 +361,29 @@
    "fieldname": "allow_partial_reservation",
    "fieldtype": "Check",
    "label": "Allow Partial Reservation"
+  },
+  {
+   "fieldname": "section_break_plhx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_mhzc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "FIFO",
+   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "fieldname": "pick_serial_and_batch_based_on",
+   "fieldtype": "Select",
+   "label": "Pick Serial / Batch Based On",
+   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "options": "FIFO\nLIFO\nExpiry"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
+   "fieldtype": "Check",
+   "label": "Auto Create Serial and Batch Bundle For Outward"
   }
  ],
  "icon": "icon-cog",
@@ -383,7 +391,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-29 15:09:54.959411",
+ "modified": "2023-05-29 15:10:54.959411",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

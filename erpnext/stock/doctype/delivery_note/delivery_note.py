@@ -137,6 +137,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
+		self.set_serial_and_batch_bundle_from_pick_list()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
@@ -186,6 +187,24 @@ class DeliveryNote(SellingController):
 					["Sales Invoice", "against_sales_invoice", "si_detail"],
 				]
 			)
+
+	def set_serial_and_batch_bundle_from_pick_list(self):
+		if not self.pick_list:
+			return
+
+		for item in self.items:
+			if item.pick_list_item:
+				filters = {
+					"item_code": item.item_code,
+					"voucher_type": "Pick List",
+					"voucher_no": self.pick_list,
+					"voucher_detail_no": item.pick_list_item,
+				}
+
+				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
+
+				if bundle_id:
+					item.serial_and_batch_bundle = bundle_id
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
