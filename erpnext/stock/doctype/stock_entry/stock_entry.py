@@ -900,6 +900,8 @@ class StockEntry(StockController):
 
 	def make_serial_and_batch_bundle_for_outward(self):
 		serial_or_batch_items = get_serial_or_batch_items(self.items)
+		if not serial_or_batch_items:
+			return
 
 		for row in self.items:
 			if row.serial_and_batch_bundle or row.item_code not in serial_or_batch_items:

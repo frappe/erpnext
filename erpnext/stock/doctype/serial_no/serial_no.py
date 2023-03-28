@@ -133,17 +133,6 @@ def get_items_html(serial_nos, item_code):
 	)
 
 
-def get_item_details(item_code):
-	return frappe.db.sql(
-		"""select name, has_batch_no, docstatus,
-		is_stock_item, has_serial_no, serial_no_series, description, item_name,
-		item_group, stock_uom
-		from tabItem where name=%s""",
-		item_code,
-		as_dict=True,
-	)[0]
-
-
 def get_serial_nos(serial_no):
 	if isinstance(serial_no, list):
 		return serial_no

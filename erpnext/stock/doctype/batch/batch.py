@@ -316,10 +316,10 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 	frappe.throw(_("There is no batch found against the {0}: {1}").format(message, serial_no_link))
 
 
-def make_batch(args):
-	if frappe.db.get_value("Item", args.item, "has_batch_no"):
-		args.doctype = "Batch"
-		return frappe.get_doc(args).insert().name
+def make_batch(kwargs):
+	if frappe.db.get_value("Item", kwargs.item, "has_batch_no"):
+		kwargs.doctype = "Batch"
+		return frappe.get_doc(kwargs).insert().name
 
 
 @frappe.whitelist()

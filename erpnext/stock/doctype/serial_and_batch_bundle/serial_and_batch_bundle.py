@@ -52,9 +52,12 @@ class SerialandBatchBundle(Document):
 			if (
 				not serial_no_warehouse.get(serial_no) or serial_no_warehouse.get(serial_no) != self.warehouse
 			):
-				frappe.throw(
-					_(f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}.")
+				self.throw_error_message(
+					f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}."
 				)
+
+	def throw_error_message(self, message):
+		frappe.throw(_(message), title=_("Error"))
 
 	def set_incoming_rate(self, row=None, save=False):
 		if self.type_of_transaction == "Outward":
@@ -223,10 +226,10 @@ class SerialandBatchBundle(Document):
 			return
 
 		if self.voucher_no and not frappe.db.exists(self.voucher_type, self.voucher_no):
-			frappe.throw(_(f"The {self.voucher_type} # {self.voucher_no} does not exist"))
+			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} does not exist")
 
 		if frappe.get_cached_value(self.voucher_type, self.voucher_no, "docstatus") != 1:
-			frappe.throw(_(f"The {self.voucher_type} # {self.voucher_no} should be submit first."))
+			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
 
 	def check_future_entries_exists(self):
 		if not self.has_serial_no:
@@ -286,10 +289,8 @@ class SerialandBatchBundle(Document):
 			qty_field = "consumed_qty"
 
 		if abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision)) > 0.01:
-			frappe.throw(
-				_(
-					f"Total quantity {self.total_qty} in the Serial and Batch Bundle {self.name} does not match with the Item {self.item_code} in the {self.voucher_type} # {self.voucher_no}"
-				)
+			self.throw_error_message(
+				f"Total quantity {self.total_qty} in the Serial and Batch Bundle {self.name} does not match with the Item {self.item_code} in the {self.voucher_type} # {self.voucher_no}"
 			)
 
 	def set_is_outward(self):
@@ -364,12 +365,12 @@ class SerialandBatchBundle(Document):
 		if serial_nos:
 			for key, value in collections.Counter(serial_nos).items():
 				if value > 1:
-					frappe.throw(_(f"Duplicate Serial No {key} found"))
+					self.throw_error_message(f"Duplicate Serial No {key} found")
 
 		if batch_nos:
 			for key, value in collections.Counter(batch_nos).items():
 				if value > 1:
-					frappe.throw(_(f"Duplicate Batch No {key} found"))
+					self.throw_error_message(f"Duplicate Batch No {key} found")
 
 	def before_cancel(self):
 		self.delink_serial_and_batch_bundle()
