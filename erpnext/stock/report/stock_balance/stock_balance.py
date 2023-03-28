@@ -6,10 +6,7 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-=======
-from frappe.query_builder.functions import Coalesce, CombineDatetime
->>>>>>> b04a101c11 (fix: incorrect `Opening Value` in `Stock Balance` report)
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, date_diff, flt, getdate
 from six import iteritems
 
@@ -280,16 +277,6 @@ def get_stock_ledger_entries(filters, items):
 	)
 
 
-<<<<<<< HEAD
-def get_item_warehouse_map(filters, sle):
-=======
-	if items:
-		query = query.where(sle.item_code.isin(items))
-
-	query = apply_conditions(query, filters)
-	return query.run(as_dict=True)
-
-
 def get_opening_vouchers(to_date):
 	opening_vouchers = {"Stock Entry": [], "Stock Reconciliation": []}
 
@@ -318,21 +305,12 @@ def get_opening_vouchers(to_date):
 	return opening_vouchers
 
 
-def get_inventory_dimension_fields():
-	return [dimension.fieldname for dimension in get_inventory_dimensions()]
-
-
-def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
->>>>>>> b04a101c11 (fix: incorrect `Opening Value` in `Stock Balance` report)
+def get_item_warehouse_map(filters, sle):
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
 	opening_vouchers = get_opening_vouchers(to_date)
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
-<<<<<<< HEAD
-=======
-	inventory_dimensions = get_inventory_dimension_fields()
->>>>>>> b04a101c11 (fix: incorrect `Opening Value` in `Stock Balance` report)
 
 	for d in sle:
 		key = (d.company, d.item_code, d.warehouse)
