@@ -78,6 +78,9 @@ class SerialandBatchBundle(Document):
 
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
 		sle = self.get_sle_for_outward_transaction(row)
+		if not sle.actual_qty:
+			sle.actual_qty = sle.qty
+
 		if self.has_serial_no:
 			sn_obj = SerialNoValuation(
 				sle=sle,

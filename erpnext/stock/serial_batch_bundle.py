@@ -5,7 +5,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, now
+from frappe.utils import cint, flt, now, today
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -557,6 +557,7 @@ class SerialBatchCreation:
 	def __init__(self, args):
 		self.set(args)
 		self.set_item_details()
+		self.set_other_details()
 
 	def set(self, args):
 		self.__dict__ = {}
@@ -585,6 +586,11 @@ class SerialBatchCreation:
 
 		self.__dict__.update(item_details)
 
+	def set_other_details(self):
+		if not self.get("posting_date"):
+			setattr(self, "posting_date", today())
+			self.__dict__["posting_date"] = self.posting_date
+
 	def duplicate_package(self):
 		if not self.serial_and_batch_bundle:
 			return
@@ -611,6 +617,7 @@ class SerialBatchCreation:
 			self.set_auto_serial_batch_entries_for_inward()
 
 		self.set_serial_batch_entries(doc)
+		doc.set_incoming_rate()
 		doc.save()
 
 		if not hasattr(self, "do_not_submit") or not self.do_not_submit:
@@ -633,7 +640,7 @@ class SerialBatchCreation:
 
 		if self.has_serial_no and not self.get("serial_nos"):
 			self.serial_nos = get_serial_nos_for_outward(kwargs)
-		elif self.has_batch_no and not self.get("batches"):
+		elif not self.has_serial_no and self.has_batch_no and not self.get("batches"):
 			self.batches = get_available_batches(kwargs)
 
 	def set_auto_serial_batch_entries_for_inward(self):

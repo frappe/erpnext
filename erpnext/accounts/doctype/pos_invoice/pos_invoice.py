@@ -108,6 +108,20 @@ class POSInvoice(SalesInvoice):
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
+		self.delink_serial_and_batch_bundle()
+
+	def delink_serial_and_batch_bundle(self):
+		for row in self.items:
+			if row.serial_and_batch_bundle:
+				if not self.consolidated_invoice:
+					frappe.db.set_value(
+						"Serial and Batch Bundle",
+						row.serial_and_batch_bundle,
+						{"is_cancelled": 1, "voucher_no": ""},
+					)
+
+				row.db_set("serial_and_batch_bundle", None)
+
 	def submit_serial_batch_bundle(self):
 		for item in self.items:
 			if item.serial_and_batch_bundle:
