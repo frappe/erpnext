@@ -120,6 +120,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	close_lead: function(){
 		cur_frm.set_value("status","Close");
 		cur_frm.save();
+		setTimeout(function(){
+			window.location.reload(1);
+		}, 500);
 	},
 
 	make_customer: function () {

@@ -104,9 +104,9 @@
    "label": "Lead Name",
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
-   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "email_id",
@@ -496,7 +496,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Date",
-   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\""
+   "set_only_once": 1
   },
   {
    "fieldname": "lead_number",
@@ -554,7 +554,7 @@
    "oldfieldname": "company_name",
    "oldfieldtype": "Data",
    "options": "Customer",
-   "read_only_depends_on": "eval:doc.status == \"Success\" || doc.status == \"Close\"",
+   "set_only_once": 1,
    "reqd": 1
   },
   {

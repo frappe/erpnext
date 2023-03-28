@@ -21,7 +21,7 @@
  "number_of_groups": 0,
  "owner": "Administrator",
  "timeseries": 0,
- "type": "Donut",
+ "type": "Pie",
  "use_report_chart": 0,
  "y_axis": []
 }
