@@ -313,12 +313,14 @@ class Asset(AccountsController):
 			if skip_row:
 				continue
 
+			prev_depreciation_amount = self.get("schedules")[n - 1].depreciation_amount if n > 0 else 0
+
 			depreciation_amount = get_depreciation_amount(
 				self,
 				value_after_depreciation,
 				finance_book,
 				n,
-				depreciation_amount,
+				prev_depreciation_amount,
 				has_wdv_or_dd_non_yearly_pro_rata,
 			)
 
@@ -342,7 +344,6 @@ class Asset(AccountsController):
 					depreciation_amount,
 					from_date,
 					date_of_disposal,
-					has_wdv_or_dd_non_yearly_pro_rata,
 				)
 
 				if depreciation_amount > 0:
@@ -946,7 +947,12 @@ class Asset(AccountsController):
 		float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 		if args.get("depreciation_method") == "Double Declining Balance":
-			return 200.0 / args.get("total_number_of_depreciations")
+			return 200.0 / (
+				(
+					flt(args.get("total_number_of_depreciations"), 2) * flt(args.get("frequency_of_depreciation"))
+				)
+				/ 12
+			)
 
 		if args.get("depreciation_method") == "Written Down Value":
 			if (
@@ -965,9 +971,13 @@ class Asset(AccountsController):
 
 			depreciation_rate = math.pow(
 				value,
-				12.0
+				1.0
 				/ (
-					flt(args.get("total_number_of_depreciations"), 2) * flt(args.get("frequency_of_depreciation"))
+					(
+						flt(args.get("total_number_of_depreciations"), 2)
+						* flt(args.get("frequency_of_depreciation"))
+					)
+					/ 12
 				),
 			)
 
@@ -1242,8 +1252,8 @@ def get_depreciation_amount(
 	asset,
 	depreciable_value,
 	row,
-	schedule_idx,
-	prev_depreciation_amount,
+	schedule_idx=0,
+	prev_depreciation_amount=0,
 	has_wdv_or_dd_non_yearly_pro_rata=False,
 ):
 	if row.depreciation_method in ("Straight Line", "Manual"):
@@ -1269,7 +1279,7 @@ def get_depreciation_amount(
 			if has_wdv_or_dd_non_yearly_pro_rata:
 				if schedule_idx == 0:
 					depreciation_amount = flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
-				elif schedule_idx == 1 or schedule_idx % cint(row.frequency_of_depreciation) == 1:
+				elif schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 1:
 					depreciation_amount = (
 						flt(depreciable_value)
 						* flt(row.frequency_of_depreciation)
@@ -1278,7 +1288,7 @@ def get_depreciation_amount(
 				else:
 					depreciation_amount = prev_depreciation_amount
 			else:
-				if schedule_idx % cint(row.frequency_of_depreciation) == 0:
+				if schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 0:
 					depreciation_amount = (
 						flt(depreciable_value)
 						* flt(row.frequency_of_depreciation)
