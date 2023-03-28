@@ -474,17 +474,21 @@ class Asset(AccountsController):
 	@erpnext.allow_regional
 	def get_depreciation_amount(self, depreciable_value, fb_row):
 		if fb_row.depreciation_method in ("Straight Line", "Manual"):
-			# if the Depreciation Schedule is being prepared for the first time
-			if not self.flags.increase_in_asset_life:
-				depreciation_amount = (
-					flt(self.gross_purchase_amount) - flt(fb_row.expected_value_after_useful_life)
-				) / flt(fb_row.total_number_of_depreciations)
-
-			# if the Depreciation Schedule is being modified after Asset Repair
-			else:
+			# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset life and value
+			if self.flags.increase_in_asset_life:
 				depreciation_amount = (
 					flt(fb_row.value_after_depreciation) - flt(fb_row.expected_value_after_useful_life)
 				) / (date_diff(self.to_date, self.available_for_use_date) / 365)
+			# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
+			elif self.flags.increase_in_asset_value_due_to_repair:
+				depreciation_amount = (
+					flt(fb_row.value_after_depreciation) - flt(fb_row.expected_value_after_useful_life)
+				) / flt(fb_row.total_number_of_depreciations)
+			# if the Depreciation Schedule is being prepared for the first time
+			else:
+				depreciation_amount = (
+					flt(self.gross_purchase_amount) - flt(fb_row.expected_value_after_useful_life)
+				) / flt(fb_row.total_number_of_depreciations)
 		else:
 			depreciation_amount = flt(depreciable_value * (flt(fb_row.rate_of_depreciation) / 100))
 
@@ -617,11 +621,22 @@ class Asset(AccountsController):
 			return 200.0 / args.get("total_number_of_depreciations")
 
 		if args.get("depreciation_method") == "Written Down Value":
-			if args.get("rate_of_depreciation") and on_validate:
+			if (
+				args.get("rate_of_depreciation")
+				and on_validate
+				and not self.flags.increase_in_asset_value_due_to_repair
+			):
 				return args.get("rate_of_depreciation")
 
-			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+			if self.flags.increase_in_asset_value_due_to_repair:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(
+					args.get("value_after_depreciation")
+				)
+			else:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+
 			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
+
 			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
