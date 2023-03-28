@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -98,6 +99,15 @@ def run_reconciliation_job():
 	"""
 	Trigger background job for doc if no other doc is running
 	"""
+	if not frappe.db.get_single_value("Accounts Settings", "enable_auto_reconciliation"):
+		frappe.throw(
+			_("Auto Reconciliation has been disabled. Enable it through {}").format(
+				get_link_to_form("Accounts Settings", "Accounts Settings")
+			)
+		)
+
+		return
+
 	if not is_scheduler_inactive():
 		res = is_any_doc_running()
 		if not res:
