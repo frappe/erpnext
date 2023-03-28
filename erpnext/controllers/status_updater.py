@@ -450,11 +450,7 @@ class StatusUpdater(Document):
 					ifnull((select
 						ifnull(sum(if(abs(%(target_ref_field)s) > abs(%(target_field)s), abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
-<<<<<<< HEAD
-					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
-=======
 					from `tab%(target_dt)s` where parent='%(name)s' and parenttype='%(target_parent_dt)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
->>>>>>> 12ad2aa2e5 (fix: Percentage billing in Sales Order (#34606))
 					%(update_modified)s
 				where name='%(name)s'"""
 				% args
