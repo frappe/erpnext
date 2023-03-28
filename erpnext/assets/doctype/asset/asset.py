@@ -375,19 +375,12 @@ class Asset(AccountsController):
 			value_after_depreciation -= flt(depreciation_amount, self.precision("gross_purchase_amount"))
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if (
-				finance_book.expected_value_after_useful_life
-				and (
-					(
-						n == cint(number_of_pending_depreciations) - 1
-						and value_after_depreciation != finance_book.expected_value_after_useful_life
-					)
-					or value_after_depreciation < finance_book.expected_value_after_useful_life
+			if finance_book.expected_value_after_useful_life and (
+				(
+					n == cint(number_of_pending_depreciations) - 1
+					and value_after_depreciation != finance_book.expected_value_after_useful_life
 				)
-				and (
-					not self.flags.increase_in_asset_value_due_to_repair
-					or not finance_book.depreciation_method in ("Written Down Value", "Double Declining Balance")
-				)
+				or value_after_depreciation < finance_book.expected_value_after_useful_life
 			):
 				depreciation_amount += value_after_depreciation - finance_book.expected_value_after_useful_life
 				skip_row = True
@@ -913,11 +906,22 @@ class Asset(AccountsController):
 			return 200.0 / args.get("total_number_of_depreciations")
 
 		if args.get("depreciation_method") == "Written Down Value":
-			if args.get("rate_of_depreciation") and on_validate:
+			if (
+				args.get("rate_of_depreciation")
+				and on_validate
+				and not self.flags.increase_in_asset_value_due_to_repair
+			):
 				return args.get("rate_of_depreciation")
 
-			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+			if self.flags.increase_in_asset_value_due_to_repair:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(
+					args.get("value_after_depreciation")
+				)
+			else:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+
 			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
+
 			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
