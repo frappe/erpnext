@@ -78,18 +78,16 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def customer_query(doctype, txt, searchfield, start, page_len, filters):
+def customer_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	doctype = "Customer"
 	conditions = []
 	cust_master_name = frappe.defaults.get_user_default("cust_master_name")
 
-	if cust_master_name == "Customer Name":
-		fields = ["name", "customer_group", "territory"]
-	else:
-		fields = ["name", "customer_name", "customer_group", "territory"]
+	fields = ["name"]
+	if cust_master_name != "Customer Name":
+		fields.append("customer_name")
 
 	fields = get_fields(doctype, fields)
-
 	searchfields = frappe.get_meta(doctype).get_search_fields()
 	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
@@ -112,20 +110,20 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+		as_dict=as_dict,
 	)
 
 
 # searches for supplier
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def supplier_query(doctype, txt, searchfield, start, page_len, filters):
+def supplier_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	doctype = "Supplier"
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 
-	if supp_master_name == "Supplier Name":
-		fields = ["name", "supplier_group"]
-	else:
-		fields = ["name", "supplier_name", "supplier_group"]
+	fields = ["name"]
+	if supp_master_name != "Supplier Name":
+		fields.append("supplier_name")
 
 	fields = get_fields(doctype, fields)
 
@@ -145,6 +143,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 			**{"field": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+		as_dict=as_dict,
 	)
 
 
