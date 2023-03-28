@@ -11,7 +11,7 @@ class BudgetReappropiation(Document):
 	def validate(self):
 		self.validate_budget()
 		self.budget_check()
-		validate_workflow_states(self)
+		# validate_workflow_states(self)
 	def on_submit(self):
 		self.budget_appropriate(cancel=False)
 

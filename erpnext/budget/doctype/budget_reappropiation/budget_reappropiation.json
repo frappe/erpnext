@@ -155,8 +155,7 @@
    "fieldname": "budget_type",
    "fieldtype": "Link",
    "label": "Budget Type",
-   "options": "Budget Type",
-   "reqd": 1
+   "options": "Budget Type"
   },
   {
    "fieldname": "total_reappropiation_amount",
@@ -168,7 +167,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-03 14:48:51.718251",
+ "modified": "2023-03-28 14:22:08.243081",
  "modified_by": "Administrator",
  "module": "Budget",
  "name": "Budget Reappropiation",
