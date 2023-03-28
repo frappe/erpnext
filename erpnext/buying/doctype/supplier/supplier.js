@@ -64,7 +64,7 @@ frappe.ui.form.on("Supplier", {
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function () {
 				frappe.set_route('query-report', 'General Ledger',
-					{ party_type: 'Supplier', party: frm.doc.name });
+					{ party_type: 'Supplier', party: frm.doc.name, party_name: frm.doc.supplier_name });
 			}, __("View"));
 
 			frm.add_custom_button(__('Accounts Payable'), function () {
