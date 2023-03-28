@@ -378,9 +378,7 @@ class Asset(AccountsController):
 				monthly_schedule_date = add_months(finance_book.depreciation_start_date, -months + 1)
 
 			# For last row
-			elif (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata) and n == cint(
-				number_of_pending_depreciations
-			) - 1:
+			elif has_pro_rata and n == cint(number_of_pending_depreciations) - 1:
 				if not self.flags.increase_in_asset_life:
 					# In case of increase_in_asset_life, the self.to_date is already set on asset_repair submission
 					self.to_date = add_months(
@@ -391,7 +389,11 @@ class Asset(AccountsController):
 				depreciation_amount_without_pro_rata = depreciation_amount
 
 				depreciation_amount, days, months = self.get_pro_rata_amt(
-					finance_book, depreciation_amount, schedule_date, self.to_date
+					finance_book,
+					depreciation_amount,
+					schedule_date,
+					self.to_date,
+					has_wdv_or_dd_non_yearly_pro_rata,
 				)
 
 				depreciation_amount = self.get_adjusted_depreciation_amount(
@@ -1262,18 +1264,28 @@ def get_depreciation_amount(
 			) / flt(row.total_number_of_depreciations)
 	else:
 		if row.frequency_of_depreciation == 12:
-			depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
+			depreciation_amount = flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
 		else:
 			if has_wdv_or_dd_non_yearly_pro_rata:
 				if schedule_idx == 0:
-					depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
+					depreciation_amount = flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
+				elif schedule_idx == 1 or schedule_idx % cint(row.frequency_of_depreciation) == 1:
+					depreciation_amount = (
+						flt(depreciable_value)
+						* flt(row.frequency_of_depreciation)
+						* (flt(row.rate_of_depreciation) / 1200)
+					)
 				else:
-					if schedule_idx == 1 or schedule_idx % 12 == 1:
-						depreciation_amount = flt(
-							depreciable_value * row.frequency_of_depreciation * (row.rate_of_depreciation / 1200)
-						)
-					else:
-						depreciation_amount = prev_depreciation_amount
+					depreciation_amount = prev_depreciation_amount
+			else:
+				if schedule_idx % cint(row.frequency_of_depreciation) == 0:
+					depreciation_amount = (
+						flt(depreciable_value)
+						* flt(row.frequency_of_depreciation)
+						* (flt(row.rate_of_depreciation) / 1200)
+					)
+				else:
+					depreciation_amount = prev_depreciation_amount
 
 	return depreciation_amount
 
