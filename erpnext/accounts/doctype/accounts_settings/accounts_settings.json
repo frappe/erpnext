@@ -39,8 +39,11 @@
   "column_break_12",
   "show_payment_schedule_in_print",
   "currency_exchange_section",
+  "column_break_fwco",
   "allow_stale",
   "stale_days",
+  "section_break_rvrg",
+  "enable_auto_reconciliation",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -59,7 +62,6 @@
   "acc_frozen_upto",
   "column_break_25",
   "frozen_accounts_modifier",
-  "report_settings_sb",
   "tab_break_dpet",
   "show_balance_in_coa"
  ],
@@ -171,11 +173,6 @@
    "fieldname": "stale_days",
    "fieldtype": "Int",
    "label": "Stale Days"
-  },
-  {
-   "fieldname": "report_settings_sb",
-   "fieldtype": "Section Break",
-   "label": "Report Settings"
   },
   {
    "default": "0",
@@ -383,14 +380,29 @@
    "fieldname": "merge_similar_account_heads",
    "fieldtype": "Check",
    "label": "Merge Similar Account Heads"
-  }
+  },
+  {
+   "fieldname": "section_break_rvrg",
+   "fieldtype": "Section Break",
+   "label": "Auto Reconciliation"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_auto_reconciliation",
+   "fieldtype": "Check",
+   "label": "Enable Auto Reconciliation"
+  },
+  {
+   "fieldname": "column_break_fwco",
+   "fieldtype": "Column Break"
+  },
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-17 11:45:42.049247",
+ "modified": "2023-03-28 11:16:15.904972",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
