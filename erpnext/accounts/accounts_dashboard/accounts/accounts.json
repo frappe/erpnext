@@ -44,6 +44,10 @@
   {
    "chart": "Bank Balance",
    "width": "Full"
+  },
+  {
+   "chart": "Budget Variance report",
+   "width": "Half"
   }
  ],
  "creation": "2022-08-24 17:57:48.912970",
@@ -53,8 +57,8 @@
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2022-12-01 14:32:50.638167",
- "modified_by": "pralad.rai@smcl.bt",
+ "modified": "2023-03-28 11:42:16.754052",
+ "modified_by": "pema.dhendup@thimphutechpark.bt",
  "module": "Accounts",
  "name": "Accounts",
  "owner": "birendra.bhuejel@thimphutechpark.bt"

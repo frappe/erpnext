@@ -11,6 +11,7 @@
   "item_code",
   "column_break_3",
   "item_name",
+  "disabled",
   "section_break_5",
   "description"
  ],
@@ -51,11 +52,17 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-24 12:55:27.576673",
+ "modified": "2023-03-28 12:07:39.058970",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Type",

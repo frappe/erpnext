@@ -24,6 +24,7 @@
   "part_name",
   "model",
   "column_break0",
+  "item_type",
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
@@ -960,7 +961,7 @@
   {
    "fieldname": "hsn_code",
    "fieldtype": "Data",
-   "label": "HSN Code"
+   "label": "BTC / HSC Code"
   },
   {
    "fieldname": "parts_no",
@@ -980,6 +981,12 @@
    "fieldtype": "Data",
    "label": "Part Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "item_type",
+   "fieldtype": "Link",
+   "label": "Item Type",
+   "options": "Item Type"
   }
  ],
  "icon": "fa fa-tag",
@@ -987,7 +994,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-24 14:53:34.595767",
+ "modified": "2023-03-28 12:09:03.921876",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

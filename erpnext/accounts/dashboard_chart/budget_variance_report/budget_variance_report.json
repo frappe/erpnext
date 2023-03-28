@@ -1,0 +1,33 @@
+{
+ "chart_name": "Budget Variance report",
+ "chart_type": "Report",
+ "creation": "2023-03-28 11:42:16.683065",
+ "custom_options": "{\"x_field\": \"Account\", \"chart_type\": \"Bar\", \"y_axis_fields\": [{\"idx\": 1, \"__islocal\": true, \"name\": \"row 1\", \"y_field\": \"budget_2023\", \"color\": \"#4F9DD9\"}], \"y_fields\": [\"budget_2023\"], \"colors\": [\"#4F9DD9\"]}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{\"from_fiscal_year\":\"2023\",\"to_fiscal_year\":\"2023\",\"period\":\"Yearly\",\"company\":\"State Trading Corporation of Bhutan Limited\",\"budget_against\":\"Cost Center\",\"budget_against_filter\":[]}",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 0,
+ "is_standard": 1,
+ "modified": "2023-03-28 11:42:16.735587",
+ "modified_by": "pema.dhendup@thimphutechpark.bt",
+ "module": "Accounts",
+ "name": "Budget Variance report",
+ "number_of_groups": 0,
+ "owner": "pema.dhendup@thimphutechpark.bt",
+ "report_name": "Budget Variance Report",
+ "roles": [],
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "x_field": "Account",
+ "y_axis": [
+  {
+   "color": "#4F9DD9",
+   "y_field": "budget_2023"
+  }
+ ]
+}

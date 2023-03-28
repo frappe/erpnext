@@ -266,10 +266,8 @@
    "width": "100px"
   },
   {
-   "collapsible": 1,
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Discount and Margin"
   },
   {
@@ -518,7 +516,6 @@
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Batch No",
    "oldfieldname": "batch_no",
@@ -554,7 +551,6 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Serial No",
    "no_copy": 1,
@@ -813,7 +809,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-16 13:51:18.357346",
+ "modified": "2023-03-24 12:54:18.830291",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

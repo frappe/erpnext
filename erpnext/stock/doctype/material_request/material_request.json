@@ -61,6 +61,7 @@
    "no_copy": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Material Issue",
    "fieldname": "material_request_type",
    "fieldtype": "Select",
@@ -369,7 +370,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-01 12:25:58.725607",
+ "modified": "2023-03-27 14:50:42.600701",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

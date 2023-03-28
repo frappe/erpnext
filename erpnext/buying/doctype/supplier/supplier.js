@@ -100,6 +100,17 @@ frappe.ui.form.on("Supplier", {
 	gewog:function(frm){
 		frm.events.set_filter(frm)
 	},
+	supplier_type:function(frm){
+		if (frm.doc.supplier_type === "Domestic Vendor"){
+			frm.toggle_reqd("supplier_tpn_no", 1)
+			frm.toggle_reqd("supplier_registration_no", 0)
+		} else {
+			frm.toggle_reqd("supplier_registration_no", 1)
+			frm.toggle_reqd("supplier_tpn_no", 0)
+
+		}
+
+	},
 	set_filter:function(frm){
 		frm.set_query("dzongkhag",function(){
 			return {

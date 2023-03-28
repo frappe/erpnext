@@ -228,11 +228,13 @@
    "label": "Include Descendants"
   },
   {
+   "depends_on": "eval:doc.is_group == 1",
    "fieldname": "item_code_base",
    "fieldtype": "Select",
    "label": "Initial Item Code No.",
    "length": 2,
-   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+   "mandatory_depends_on": "eval:doc.is_group == 1",
+   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16"
   },
   {
    "allow_in_quick_entry": 1,
@@ -250,7 +252,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-02-27 19:01:08.867876",
+ "modified": "2023-03-28 14:50:20.277434",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

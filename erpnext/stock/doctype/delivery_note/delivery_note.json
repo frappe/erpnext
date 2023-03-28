@@ -407,7 +407,6 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Currency and Price List",
    "options": "fa fa-tag"
   },
@@ -609,7 +608,6 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -635,8 +633,7 @@
   },
   {
    "fieldname": "section_break_41",
-   "fieldtype": "Section Break",
-   "hidden": 1
+   "fieldtype": "Section Break"
   },
   {
    "description": "If you have created a standard template in Sales Taxes and Charges Template, select one and click on the button below.",
@@ -645,8 +642,7 @@
    "label": "Sales Taxes and Charges Template",
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
-   "options": "Sales Taxes and Charges Template",
-   "print_hide": 1
+   "options": "Sales Taxes and Charges Template"
   },
   {
    "fieldname": "taxes",
@@ -1292,7 +1288,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-03 15:32:25.075081",
+ "modified": "2023-03-24 12:53:09.882285",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -2054,7 +2054,7 @@ def get_advance_journal_entries(
 	amount_field,
 	order_doctype,
 	order_list,
-	cost_center,
+	cost_center = None,
 	include_unallocated=True,
 ):
 	dr_or_cr = (

@@ -76,10 +76,11 @@
  "icon": "icon-legal",
  "idx": 1,
  "links": [],
- "modified": "2022-06-16 15:07:38.094844",
+ "modified": "2023-03-28 12:08:06.456867",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Terms and Conditions",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -100,8 +101,10 @@
    "role": "Sales User"
   },
   {
+   "create": 1,
    "read": 1,
-   "role": "Purchase User"
+   "role": "Purchase User",
+   "write": 1
   },
   {
    "create": 1,
@@ -133,5 +136,6 @@
  "quick_entry": 1,
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

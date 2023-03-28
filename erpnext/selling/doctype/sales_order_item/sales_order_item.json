@@ -8,6 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "parts_no",
+  "model",
   "item_type",
   "customer_item_code",
   "ensure_delivery_based_on_produced_serial_no",
@@ -338,7 +340,6 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval: doc.type != \"\"",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -347,7 +348,6 @@
    "oldfieldtype": "Currency",
    "options": "currency",
    "print_width": "100px",
-   "read_only": 1,
    "width": "100px"
   },
   {
@@ -825,17 +825,34 @@
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.item_type",
    "fieldname": "item_type",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Item Type",
-   "options": "Item Type"
+   "options": "Item Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.parts_no",
+   "fieldname": "parts_no",
+   "fieldtype": "Link",
+   "label": "Parts No",
+   "options": "Part No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-29 14:25:38.423050",
+ "modified": "2023-03-28 12:22:06.183519",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

@@ -19,6 +19,7 @@
   "tax_category",
   "tax_withholding_category",
   "supplier_tpn_no",
+  "supplier_registration_no",
   "company",
   "image",
   "column_break0",
@@ -212,7 +213,7 @@
    "fieldname": "supplier_type",
    "fieldtype": "Select",
    "label": "Supplier Type",
-   "options": "Domestic Vendor\nInternational Vendor",
+   "options": "\nDomestic Vendor\nInternational Vendor",
    "reqd": 1
   },
   {
@@ -669,6 +670,12 @@
    "fieldtype": "Data",
    "label": "Bank",
    "read_only": 1
+  },
+  {
+   "fieldname": "supplier_registration_no",
+   "fieldtype": "Data",
+   "label": "Supplier Registration No",
+   "unique": 1
   }
  ],
  "icon": "fa fa-user",
@@ -681,7 +688,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-03-22 15:05:13.602258",
+ "modified": "2023-03-28 12:19:28.818390",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

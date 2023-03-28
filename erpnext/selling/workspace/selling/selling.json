@@ -699,7 +699,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Selling Transaction",
-   "link_count": 8,
+   "link_count": 10,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -789,10 +789,30 @@
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Profile",
+   "link_count": 0,
+   "link_to": "POS Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Note",
+   "link_count": 0,
+   "link_to": "Delivery Note",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-03-17 13:35:12.006519",
- "modified_by": "Administrator",
+ "modified": "2023-03-27 15:50:54.979687",
+ "modified_by": "pema.dhendup@thimphutechpark.bt",
  "module": "Selling",
  "name": "Selling",
  "owner": "Administrator",

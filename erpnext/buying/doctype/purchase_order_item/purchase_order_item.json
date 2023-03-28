@@ -19,6 +19,9 @@
   "section_break_5",
   "description",
   "column_break_12",
+  "part_no",
+  "model_no",
+  "model_name",
   "tvo_no",
   "chassis_no",
   "engine_no",
@@ -168,7 +171,6 @@
    "search_index": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
    "label": "Description"
@@ -240,7 +242,6 @@
    "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
@@ -400,7 +401,7 @@
   {
    "fieldname": "base_net_rate",
    "fieldtype": "Currency",
-   "label": "Net Rate (Company Currency)",
+   "label": "Net Rate (BTN)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -408,7 +409,7 @@
   {
    "fieldname": "base_net_amount",
    "fieldtype": "Currency",
-   "label": "Net Amount (Company Currency)",
+   "label": "Net Amount (BTN)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -881,6 +882,7 @@
   {
    "fieldname": "tvo_no",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Tvo No."
   },
   {
@@ -896,13 +898,29 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "model_no",
+   "fieldtype": "Data",
+   "label": "Model No."
+  },
+  {
+   "fieldname": "model_name",
+   "fieldtype": "Data",
+   "label": "Model Name"
+  },
+  {
+   "fieldname": "part_no",
+   "fieldtype": "Link",
+   "label": "Part No",
+   "options": "Part No"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-23 13:18:58.914869",
+ "modified": "2023-03-28 12:11:06.567164",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
