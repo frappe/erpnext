@@ -20,7 +20,6 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns()
 	bin_list = get_bin_list(filters)
-	sre_details = get_sre_reserved_qty_details(bin_list)
 	item_map = get_item_map(filters.get("item_code"), include_uom)
 
 	warehouse_company = {}
@@ -76,7 +75,6 @@ def execute(filters=None):
 				bin.indented_qty,
 				bin.ordered_qty,
 				bin.reserved_qty,
-				sre_details.get((bin.item_code, bin.warehouse), 0.0),
 				bin.reserved_qty_for_production,
 				bin.reserved_qty_for_sub_contract,
 				reserved_qty_for_pos,
@@ -164,13 +162,6 @@ def get_columns():
 		{
 			"label": _("Reserved Qty"),
 			"fieldname": "reserved_qty",
-			"fieldtype": "Float",
-			"width": 100,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Stock Reservation Qty"),
-			"fieldname": "stock_reservation_qty",
 			"fieldtype": "Float",
 			"width": 100,
 			"convertible": "qty",
@@ -271,19 +262,6 @@ def get_bin_list(filters):
 	bin_list = query.run(as_dict=True)
 
 	return bin_list
-
-
-def get_sre_reserved_qty_details(bin_list: list) -> dict:
-	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_sre_reserved_qty_details as get_reserved_qty_details,
-	)
-
-	item_code_list, warehouse_list = [], []
-	for bin in bin_list:
-		item_code_list.append(bin["item_code"])
-		warehouse_list.append(bin["warehouse"])
-
-	return get_reserved_qty_details(item_code_list, warehouse_list)
 
 
 def get_item_map(item_code, include_uom):
