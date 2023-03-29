@@ -378,7 +378,7 @@ def reconcile(doc: None | str = None) -> None:
 
 
 @frappe.whitelist()
-def is_any_doc_running(for_filter=None):
+def is_any_doc_running(for_filter: str | dict | None = None) -> tuple:
 	if for_filter:
 		if type(for_filter) == str:
 			for_filter = frappe.json.loads(for_filter)
