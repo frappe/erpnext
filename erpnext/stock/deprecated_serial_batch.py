@@ -76,7 +76,6 @@ class DeprecatedBatchNoValuation:
 
 	@deprecated
 	def get_sle_for_batches(self):
-		batch_nos = list(self.batch_nos.keys())
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
 		timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
@@ -88,7 +87,11 @@ class DeprecatedBatchNoValuation:
 				== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
 			) & (sle.creation < self.sle.creation)
 
-		return (
+		batch_nos = self.batch_nos
+		if isinstance(self.batch_nos, dict):
+			batch_nos = list(self.batch_nos.keys())
+
+		query = (
 			frappe.qb.from_(sle)
 			.select(
 				sle.batch_no,
@@ -97,11 +100,15 @@ class DeprecatedBatchNoValuation:
 			)
 			.where(
 				(sle.item_code == self.sle.item_code)
-				& (sle.name != self.sle.name)
 				& (sle.warehouse == self.sle.warehouse)
 				& (sle.batch_no.isin(batch_nos))
 				& (sle.is_cancelled == 0)
 			)
 			.where(timestamp_condition)
 			.groupby(sle.batch_no)
-		).run(as_dict=True)
+		)
+
+		if self.sle.name:
+			query = query.where(sle.name != self.sle.name)
+
+		return query.run(as_dict=True)

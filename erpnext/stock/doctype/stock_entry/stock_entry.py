@@ -747,7 +747,7 @@ class StockEntry(StockController):
 					currency=erpnext.get_company_currency(self.company),
 					company=self.company,
 					raise_error_if_no_rate=raise_error_if_no_rate,
-					batch_no=d.batch_no,
+					serial_and_batch_bundle=d.serial_and_batch_bundle,
 				)
 
 			# do not round off basic rate to avoid precision loss
@@ -904,6 +904,9 @@ class StockEntry(StockController):
 			return
 
 		for row in self.items:
+			if not row.s_warehouse:
+				continue
+
 			if row.serial_and_batch_bundle or row.item_code not in serial_or_batch_items:
 				continue
 
@@ -915,7 +918,7 @@ class StockEntry(StockController):
 					"posting_time": self.posting_time,
 					"voucher_type": self.doctype,
 					"voucher_detail_no": row.name,
-					"total_qty": row.qty,
+					"qty": row.qty * -1,
 					"type_of_transaction": "Outward",
 					"company": self.company,
 					"do_not_submit": True,
@@ -1437,10 +1440,8 @@ class StockEntry(StockController):
 				"qty": args.get("qty"),
 				"transfer_qty": args.get("qty"),
 				"conversion_factor": 1,
-				"batch_no": "",
 				"actual_qty": 0,
 				"basic_rate": 0,
-				"serial_no": "",
 				"has_serial_no": item.has_serial_no,
 				"has_batch_no": item.has_batch_no,
 				"sample_quantity": item.sample_quantity,

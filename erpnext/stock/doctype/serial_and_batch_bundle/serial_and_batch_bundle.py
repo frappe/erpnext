@@ -9,12 +9,16 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import add_days, cint, flt, get_link_to_form, today
+from frappe.utils import add_days, cint, flt, get_link_to_form, nowtime, today
 
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 
 
 class SerialNoExistsInFutureTransactionError(frappe.ValidationError):
+	pass
+
+
+class BatchNegativeStockError(frappe.ValidationError):
 	pass
 
 
@@ -81,7 +85,7 @@ class SerialandBatchBundle(Document):
 
 	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
 		sle = self.get_sle_for_outward_transaction(row)
-		if not sle.actual_qty:
+		if not sle.actual_qty and sle.qty:
 			sle.actual_qty = sle.qty
 
 		if self.has_serial_no:
@@ -122,7 +126,7 @@ class SerialandBatchBundle(Document):
 				of quantity {bold(available_qty)} in the
 				warehouse {self.warehouse}"""
 
-			frappe.throw(_(msg))
+			frappe.throw(_(msg), BatchNegativeStockError)
 
 	def get_sle_for_outward_transaction(self, row):
 		return frappe._dict(
@@ -228,7 +232,13 @@ class SerialandBatchBundle(Document):
 		if self.voucher_no and not frappe.db.exists(self.voucher_type, self.voucher_no):
 			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} does not exist")
 
-		if frappe.get_cached_value(self.voucher_type, self.voucher_no, "docstatus") != 1:
+		if self.flags.ignore_voucher_validation:
+			return
+
+		if (
+			self.docstatus == 1
+			and frappe.get_cached_value(self.voucher_type, self.voucher_no, "docstatus") != 1
+		):
 			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
 
 	def check_future_entries_exists(self):
@@ -749,6 +759,16 @@ def get_available_batches(kwargs):
 		.where(((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull())))
 		.groupby(batch_ledger.batch_no)
 	)
+
+	if kwargs.get("posting_date"):
+		if kwargs.get("posting_time") is None:
+			kwargs.posting_time = nowtime()
+
+		timestamp_condition = CombineDatetime(
+			stock_ledger_entry.posting_date, stock_ledger_entry.posting_time
+		) <= CombineDatetime(kwargs.posting_date, kwargs.posting_time)
+
+		query = query.where(timestamp_condition)
 
 	for field in ["warehouse", "item_code"]:
 		if not kwargs.get(field):

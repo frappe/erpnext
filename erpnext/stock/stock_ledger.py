@@ -732,6 +732,7 @@ class update_entries_after(object):
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.currency_precision)
 		if not self.wh_data.qty_after_transaction:
 			self.wh_data.stock_value = 0.0
+
 		stock_value_difference = self.wh_data.stock_value - self.wh_data.prev_stock_value
 		self.wh_data.prev_stock_value = self.wh_data.stock_value
 
@@ -1421,7 +1422,7 @@ def get_valuation_rate(
 	currency=None,
 	company=None,
 	raise_error_if_no_rate=True,
-	batch_no=None,
+	serial_and_batch_bundle=None,
 ):
 
 	if not company:
@@ -1430,20 +1431,19 @@ def get_valuation_rate(
 	last_valuation_rate = None
 
 	# Get moving average rate of a specific batch number
-	if warehouse and batch_no and frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation"):
-		last_valuation_rate = frappe.db.sql(
-			"""
-			select sum(stock_value_difference) / sum(actual_qty)
-			from `tabStock Ledger Entry`
-			where
-				item_code = %s
-				AND warehouse = %s
-				AND batch_no = %s
-				AND is_cancelled = 0
-				AND NOT (voucher_no = %s AND voucher_type = %s)
-			""",
-			(item_code, warehouse, batch_no, voucher_no, voucher_type),
+	if warehouse and serial_and_batch_bundle:
+		batch_obj = BatchNoValuation(
+			sle=frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"actual_qty": -1,
+					"serial_and_batch_bundle": serial_and_batch_bundle,
+				}
+			)
 		)
+
+		return batch_obj.get_incoming_rate()
 
 	# Get valuation rate from last sle for the same item and warehouse
 	if not last_valuation_rate or last_valuation_rate[0][0] is None:

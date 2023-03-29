@@ -8,8 +8,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.query_builder.functions import CombineDatetime, CurDate, Sum
-from frappe.utils import cint, flt, get_link_to_form, nowtime
+from frappe.query_builder.functions import CurDate, Sum
+from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
 
@@ -179,44 +179,28 @@ def get_batch_qty(
 	:param warehouse: Optional - give qty for this warehouse
 	:param item_code: Optional - give qty for this item"""
 
-	sle = frappe.qb.DocType("Stock Ledger Entry")
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		get_auto_batch_nos,
+	)
 
-	out = 0
-	if batch_no and warehouse:
-		query = (
-			frappe.qb.from_(sle)
-			.select(Sum(sle.actual_qty))
-			.where((sle.is_cancelled == 0) & (sle.warehouse == warehouse) & (sle.batch_no == batch_no))
-		)
+	batchwise_qty = defaultdict(float)
+	kwargs = frappe._dict({
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"posting_date": posting_date,
+		"posting_time": posting_time,
+		"batch_no": batch_no
+	})
 
-		if posting_date:
-			if posting_time is None:
-				posting_time = nowtime()
+	batches = get_auto_batch_nos(kwargs)
 
-			query = query.where(
-				CombineDatetime(sle.posting_date, sle.posting_time)
-				<= CombineDatetime(posting_date, posting_time)
-			)
+	if not (batch_no and warehouse):
+		return batches
 
-		out = query.run(as_list=True)[0][0] or 0
+	for batch in batches:
+		batchwise_qty[batch.get("batch_no")] += batch.get("qty")
 
-	if batch_no and not warehouse:
-		out = (
-			frappe.qb.from_(sle)
-			.select(sle.warehouse, Sum(sle.actual_qty).as_("qty"))
-			.where((sle.is_cancelled == 0) & (sle.batch_no == batch_no))
-			.groupby(sle.warehouse)
-		).run(as_dict=True)
-
-	if not batch_no and item_code and warehouse:
-		out = (
-			frappe.qb.from_(sle)
-			.select(sle.batch_no, Sum(sle.actual_qty).as_("qty"))
-			.where((sle.is_cancelled == 0) & (sle.item_code == item_code) & (sle.warehouse == warehouse))
-			.groupby(sle.batch_no)
-		).run(as_dict=True)
-
-	return out
+	return batchwise_qty[batch_no]
 
 
 @frappe.whitelist()
@@ -366,3 +350,14 @@ def get_available_batches(kwargs):
 		batchwise_qty[batch.get("batch_no")] += batch.get("qty")
 
 	return batchwise_qty
+
+
+def get_batch_no(bundle_id):
+	from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+	batches = defaultdict(float)
+
+	for batch_id, d in get_batch_nos(bundle_id).items():
+		batches[batch_id] += abs(d.get("qty"))
+
+	return batches

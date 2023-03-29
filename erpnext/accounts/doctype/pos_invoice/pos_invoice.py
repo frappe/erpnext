@@ -128,6 +128,7 @@ class POSInvoice(SalesInvoice):
 				doc = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 
 				if doc.docstatus == 0:
+					doc.flags.ignore_voucher_validation = True
 					doc.submit()
 
 	def check_phone_payments(self):

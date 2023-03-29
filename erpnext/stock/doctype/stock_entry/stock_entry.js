@@ -405,28 +405,6 @@ frappe.ui.form.on('Stock Entry', {
 		}
 	},
 
-	set_serial_no: function(frm, cdt, cdn, callback) {
-		var d = frappe.model.get_doc(cdt, cdn);
-		if(!d.item_code && !d.s_warehouse && !d.qty) return;
-		var	args = {
-			'item_code'	: d.item_code,
-			'warehouse'	: cstr(d.s_warehouse),
-			'stock_qty'		: d.transfer_qty
-		};
-		frappe.call({
-			method: "erpnext.stock.get_item_details.get_serial_no",
-			args: {"args": args},
-			callback: function(r) {
-				if (!r.exe && r.message){
-					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
-				}
-				if (callback) {
-					callback();
-				}
-			}
-		});
-	},
-
 	make_retention_stock_entry: function(frm) {
 		frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
@@ -682,9 +660,7 @@ frappe.ui.form.on('Stock Entry', {
 
 frappe.ui.form.on('Stock Entry Detail', {
 	qty(frm, cdt, cdn) {
-		frm.events.set_serial_no(frm, cdt, cdn, () => {
-			frm.events.set_basic_rate(frm, cdt, cdn);
-		});
+		frm.events.set_basic_rate(frm, cdt, cdn);
 	},
 
 	conversion_factor(frm, cdt, cdn) {
@@ -692,9 +668,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 	},
 
 	s_warehouse(frm, cdt, cdn) {
-		frm.events.set_serial_no(frm, cdt, cdn, () => {
-			frm.events.get_warehouse_details(frm, cdt, cdn);
-		});
+		frm.events.get_warehouse_details(frm, cdt, cdn);
 
 		// set allow_zero_valuation_rate to 0 if s_warehouse is selected.
 		let item = frappe.get_doc(cdt, cdn);
