@@ -567,9 +567,12 @@ class calculate_taxes_and_totals(object):
 				self.doc.base_taxes_and_charges_added - self.doc.base_taxes_and_charges_deducted
 			)
 
-		self.doc.base_grand_total = (
-			self.doc.base_net_total + total_base_taxes + self.doc.base_rounding_adjustment
-		)
+		if self.doc.currency == self.doc.company_currency:
+			self.doc.base_grand_total = self.doc.grand_total
+		else:
+			self.doc.base_grand_total = flt(
+				self.doc.base_net_total + total_base_taxes + self.doc.base_rounding_adjustment
+			)
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
