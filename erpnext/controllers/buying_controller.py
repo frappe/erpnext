@@ -6,6 +6,7 @@ import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
+from frappe.utils.data import nowtime
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import get_party_details
@@ -24,10 +25,6 @@ class BuyingController(SubcontractingController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
-	def get_feed(self):
-		if self.get("supplier_name"):
-			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency, self.grand_total)
-
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
@@ -40,6 +37,7 @@ class BuyingController(SubcontractingController):
 		self.validate_from_warehouse()
 		self.set_supplier_address()
 		self.validate_asset_return()
+		self.validate_auto_repeat_subscription_dates()
 
 		if self.doctype == "Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -193,16 +191,16 @@ class BuyingController(SubcontractingController):
 
 		if self.meta.get_field("base_in_words"):
 			if self.meta.get_field("base_rounded_total") and not self.is_rounded_total_disabled():
-				amount = self.base_rounded_total
+				amount = abs(self.base_rounded_total)
 			else:
-				amount = self.base_grand_total
+				amount = abs(self.base_grand_total)
 			self.base_in_words = money_in_words(amount, self.company_currency)
 
 		if self.meta.get_field("in_words"):
 			if self.meta.get_field("rounded_total") and not self.is_rounded_total_disabled():
-				amount = self.rounded_total
+				amount = abs(self.rounded_total)
 			else:
-				amount = self.grand_total
+				amount = abs(self.grand_total)
 
 			self.in_words = money_in_words(amount, self.currency)
 
@@ -267,13 +265,19 @@ class BuyingController(SubcontractingController):
 					) / qty_in_stock_uom
 				else:
 					item.valuation_rate = (
-						item.base_net_amount + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
+						item.base_net_amount
+						+ item.item_tax_amount
+						+ flt(item.landed_cost_voucher_amount)
+						+ flt(item.get("rate_difference_with_purchase_invoice"))
 					) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0
 
 	def set_incoming_rate(self):
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
+			return
+
+		if not self.is_internal_transfer():
 			return
 
 		ref_doctype_map = {
@@ -289,12 +293,16 @@ class BuyingController(SubcontractingController):
 				# Get outgoing rate based on original item cost based on valuation method
 
 				if not d.get(frappe.scrub(ref_doctype)):
+					posting_time = self.get("posting_time")
+					if not posting_time and self.doctype == "Purchase Order":
+						posting_time = nowtime()
+
 					outgoing_rate = get_incoming_rate(
 						{
 							"item_code": d.item_code,
 							"warehouse": d.get("from_warehouse"),
 							"posting_date": self.get("posting_date") or self.get("transation_date"),
-							"posting_time": self.get("posting_time"),
+							"posting_time": posting_time,
 							"qty": -1 * flt(d.get("stock_qty")),
 							"serial_no": d.get("serial_no"),
 							"batch_no": d.get("batch_no"),
@@ -309,20 +317,25 @@ class BuyingController(SubcontractingController):
 					rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
 				else:
 					field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
-					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+					rate = flt(
+						frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+						* (d.conversion_factor or 1),
+						d.precision("rate"),
+					)
 
 				if self.is_internal_transfer():
-					if rate != d.rate:
-						d.rate = rate
-						frappe.msgprint(
-							_(
-								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-							).format(d.idx),
-							alert=1,
-						)
-					d.discount_percentage = 0.0
-					d.discount_amount = 0.0
-					d.margin_rate_or_amount = 0.0
+					if self.doctype == "Purchase Receipt" or self.get("update_stock"):
+						if rate != d.rate:
+							d.rate = rate
+							frappe.msgprint(
+								_(
+									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+								).format(d.idx),
+								alert=1,
+							)
+						d.discount_percentage = 0.0
+						d.discount_amount = 0.0
+						d.margin_rate_or_amount = 0.0
 
 	def validate_for_subcontracting(self):
 		if self.is_subcontracted and self.get("is_old_subcontracting_flow"):
@@ -537,7 +550,9 @@ class BuyingController(SubcontractingController):
 			self.process_fixed_asset()
 			self.update_fixed_asset(field)
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
+			"Buying Settings", "disable_last_purchase_rate"
+		):
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
@@ -546,7 +561,9 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
+			"Buying Settings", "disable_last_purchase_rate"
+		):
 			update_last_purchase_rate(self, is_submit=0)
 
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
@@ -698,6 +715,8 @@ class BuyingController(SubcontractingController):
 						asset.purchase_date = self.posting_date
 						asset.supplier = self.supplier
 					elif self.docstatus == 2:
+						if asset.docstatus == 2:
+							continue
 						if asset.docstatus == 0:
 							asset.set(field, None)
 							asset.supplier = None

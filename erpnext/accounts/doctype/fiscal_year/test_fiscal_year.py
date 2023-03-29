@@ -7,8 +7,6 @@ import unittest
 import frappe
 from frappe.utils import now_datetime
 
-from erpnext.accounts.doctype.fiscal_year.fiscal_year import FiscalYearIncorrectDate
-
 test_ignore = ["Company"]
 
 
@@ -26,7 +24,7 @@ class TestFiscalYear(unittest.TestCase):
 			}
 		)
 
-		self.assertRaises(FiscalYearIncorrectDate, fy.insert)
+		self.assertRaises(frappe.exceptions.InvalidDates, fy.insert)
 
 
 def test_record_generator():
@@ -35,8 +33,8 @@ def test_record_generator():
 			"doctype": "Fiscal Year",
 			"year": "_Test Short Fiscal Year 2011",
 			"is_short_year": 1,
-			"year_end_date": "2011-04-01",
-			"year_start_date": "2011-12-31",
+			"year_start_date": "2011-04-01",
+			"year_end_date": "2011-12-31",
 		}
 	]
 

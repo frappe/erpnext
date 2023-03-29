@@ -23,10 +23,12 @@
   "fetch_customers",
   "column_break_6",
   "primary_mandatory",
+  "show_net_values_in_party_account",
   "column_break_17",
   "customers",
   "preferences",
   "orientation",
+  "include_break",
   "include_ageing",
   "ageing_based_on",
   "section_break_14",
@@ -284,10 +286,22 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_break",
+   "fieldtype": "Check",
+   "label": "Page Break After Each SoA"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_net_values_in_party_account",
+   "fieldtype": "Check",
+   "label": "Show Net Values in Party Account"
   }
  ],
  "links": [],
- "modified": "2021-09-06 21:00:45.732505",
+ "modified": "2022-11-10 17:44:17.165991",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
@@ -321,5 +335,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

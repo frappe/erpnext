@@ -1323,13 +1323,15 @@ def create_product_bundle_item(new_item_code, packed_items):
 		item.save()
 
 
-def create_items():
-	items = [
-		"_Test Item for Reposting",
-		"_Test Finished Item for Reposting",
-		"_Test Subcontracted Item for Reposting",
-		"_Test Bundled Item for Reposting",
-	]
+def create_items(items=None, uoms=None):
+	if not items:
+		items = [
+			"_Test Item for Reposting",
+			"_Test Finished Item for Reposting",
+			"_Test Subcontracted Item for Reposting",
+			"_Test Bundled Item for Reposting",
+		]
+
 	for d in items:
 		properties = {"valuation_method": "FIFO"}
 		if d == "_Test Bundled Item for Reposting":
@@ -1337,7 +1339,7 @@ def create_items():
 		elif d == "_Test Subcontracted Item for Reposting":
 			properties.update({"is_sub_contracted_item": 1})
 
-		make_item(d, properties=properties)
+		make_item(d, properties=properties, uoms=uoms)
 
 	return items
 

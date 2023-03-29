@@ -5,6 +5,8 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnext.selling.SellingController {
+	settings = {};
+
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		super.setup(doc);
@@ -12,21 +14,37 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 
 	company() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		this.frm.set_value("set_warehouse", "");
+		this.frm.set_value("taxes_and_charges", "");
 	}
 
 	onload(doc) {
 		super.onload();
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice Merge Log', 'POS Closing Entry'];
+
 		if(doc.__islocal && doc.is_pos && frappe.get_route_str() !== 'point-of-sale') {
 			this.frm.script_manager.trigger("is_pos");
 			this.frm.refresh_fields();
 		}
 
+		this.frm.set_query("set_warehouse", function(doc) {
+			return {
+				filters: {
+					company: doc.company ? doc.company : '',
+				}
+			}
+		});
+
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
+	}
+
+	onload_post_render(frm) {
+		this.pos_profile(frm);
 	}
 
 	refresh(doc) {
 		super.refresh();
+
 		if (doc.docstatus == 1 && !doc.is_return) {
 			this.frm.add_custom_button(__('Return'), this.make_sales_return, __('Create'));
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
@@ -36,6 +54,18 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			this.frm.return_print_format = "Sales Invoice Return";
 			this.frm.set_value('consolidated_invoice', '');
 		}
+
+		this.frm.set_query("customer", (function () {
+			const customer_groups = this.settings?.customer_groups;
+
+			if (!customer_groups?.length) return {};
+
+			return {
+				filters: {
+					customer_group: ["in", customer_groups],
+				}
+			}
+		}).bind(this));
 	}
 
 	is_pos() {
@@ -82,10 +112,30 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 				party_type: "Customer",
 				account: this.frm.doc.debit_to,
 				price_list: this.frm.doc.selling_price_list,
-				pos_profile: pos_profile
+				pos_profile: pos_profile,
+				company_address: this.frm.doc.company_address
 			}, () => {
 				this.apply_pricing_rule();
 			});
+	}
+
+	pos_profile(frm) {
+		if (!frm.pos_profile || frm.pos_profile == '') {
+			this.update_customer_groups_settings([]);
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+			args: { "pos_profile": frm.pos_profile },
+			callback: ({ message: profile }) => {
+				this.update_customer_groups_settings(profile?.customer_groups);
+			},
+		});
+	}
+
+	update_customer_groups_settings(customer_groups) {
+		this.settings.customer_groups = customer_groups?.map((group) => group.name)
 	}
 
 	amount(){

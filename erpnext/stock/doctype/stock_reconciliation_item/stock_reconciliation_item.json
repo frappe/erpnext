@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
+  "has_item_scanned",
   "item_code",
   "item_name",
   "warehouse",
@@ -177,11 +178,18 @@
    "label": "Allow Zero Valuation Rate",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Data",
+   "label": "Has Item Scanned",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-04-02 04:19:40.380587",
+ "modified": "2022-11-02 13:01:23.580937",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

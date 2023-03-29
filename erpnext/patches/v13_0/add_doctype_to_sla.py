@@ -14,7 +14,8 @@ def execute():
 
 	for sla in frappe.get_all("Service Level Agreement"):
 		agreement = frappe.get_doc("Service Level Agreement", sla.name)
-		agreement.document_type = "Issue"
+		agreement.db_set("document_type", "Issue")
+		agreement.reload()
 		agreement.apply_sla_for_resolution = 1
 		agreement.append("sla_fulfilled_on", {"status": "Resolved"})
 		agreement.append("sla_fulfilled_on", {"status": "Closed"})

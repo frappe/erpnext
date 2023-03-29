@@ -58,7 +58,7 @@ status_map = {
 			"eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed == 100 and self.docstatus == 1",
 		],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 		["On Hold", "eval:self.status=='On Hold'"],
 	],
 	"Purchase Order": [
@@ -79,7 +79,7 @@ status_map = {
 		["Delivered", "eval:self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["On Hold", "eval:self.status=='On Hold'"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
 	"Delivery Note": [
 		["Draft", None],
@@ -87,7 +87,7 @@ status_map = {
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
 	"Purchase Receipt": [
 		["Draft", None],
@@ -95,7 +95,7 @@ status_map = {
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
 	"Material Request": [
 		["Draft", None],
@@ -307,6 +307,20 @@ class StatusUpdater(Document):
 
 	def limits_crossed_error(self, args, item, qty_or_amount):
 		"""Raise exception for limits crossed"""
+		if (
+			self.doctype in ["Sales Invoice", "Delivery Note"]
+			and qty_or_amount == "amount"
+			and self.is_internal_customer
+		):
+			return
+
+		elif (
+			self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+			and qty_or_amount == "amount"
+			and self.is_internal_supplier
+		):
+			return
+
 		if qty_or_amount == "qty":
 			action_msg = _(
 				'To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.'
@@ -333,16 +347,21 @@ class StatusUpdater(Document):
 		)
 
 	def warn_about_bypassing_with_role(self, item, qty_or_amount, role):
-		action = _("Over Receipt/Delivery") if qty_or_amount == "qty" else _("Overbilling")
+		if qty_or_amount == "qty":
+			msg = _("Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role.")
+		else:
+			msg = _("Overbilling of {0} {1} ignored for item {2} because you have {3} role.")
 
-		msg = _("{} of {} {} ignored for item {} because you have {} role.").format(
-			action,
-			_(item["target_ref_field"].title()),
-			frappe.bold(item["reduce_by"]),
-			frappe.bold(item.get("item_code")),
-			role,
+		frappe.msgprint(
+			msg.format(
+				_(item["target_ref_field"].title()),
+				frappe.bold(item["reduce_by"]),
+				frappe.bold(item.get("item_code")),
+				role,
+			),
+			indicator="orange",
+			alert=True,
 		)
-		frappe.msgprint(msg, indicator="orange", alert=True)
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
@@ -439,40 +458,17 @@ class StatusUpdater(Document):
 		self._update_modified(args, update_modified)
 
 		if args.get("target_parent_field"):
-			if args.get("target_parent_dt") in ["Sales Order"]:
-				frappe.db.sql("""
-					update 
-						`tab%(target_parent_dt)s`
-					set %(target_parent_field)s = round(
-						ifnull(
-							(select
-								ifnull(sum(if(abs(toi.qty) > abs(toi.delivered_qty), abs(toi.delivered_qty), abs(toi.qty))), 0)
-							/ sum(abs(qty)) * 100
-							from 
-								`tab%(target_dt)s` toi 
-							join 
-								`tabItem` ti 
-							on 
-								toi.item_code=ti.name  
-							where 
-								toi.parent="%(name)s" and ti.is_stock_item=1
-							having 
-								sum(abs(toi.qty)) > 0), 0), 6)
-						%(update_modified)s
-					where name='%(name)s'
-				"""% args)
-			else:
-				frappe.db.sql(
-					"""update `tab%(target_parent_dt)s`
-					set %(target_parent_field)s = round(
-						ifnull((select
-							ifnull(sum(case when abs(%(target_ref_field)s) > abs(%(target_field)s) then abs(%(target_field)s) else abs(%(target_ref_field)s) end), 0)
-							/ sum(abs(%(target_ref_field)s)) * 100
-						from `tab%(target_dt)s` where parent='%(name)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
-						%(update_modified)s
-					where name='%(name)s'"""
-					% args
-				)
+			frappe.db.sql(
+				"""update `tab%(target_parent_dt)s`
+				set %(target_parent_field)s = round(
+					ifnull((select
+						ifnull(sum(case when abs(%(target_ref_field)s) > abs(%(target_field)s) then abs(%(target_field)s) else abs(%(target_ref_field)s) end), 0)
+						/ sum(abs(%(target_ref_field)s)) * 100
+					from `tab%(target_dt)s` where parent='%(name)s' and parenttype='%(target_parent_dt)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
+					%(update_modified)s
+				where name='%(name)s'"""
+				% args
+			)
 
 			# update field
 			if args.get("status_field"):

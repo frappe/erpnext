@@ -4,7 +4,7 @@
 frappe.query_reports["Gross Profit"] = {
 	"filters": [
 		{
-			"fieldname":"company",
+			"fieldname": "company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
@@ -12,31 +12,57 @@ frappe.query_reports["Gross Profit"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"from_date",
+			"fieldname": "from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.defaults.get_user_default("year_start_date"),
 			"reqd": 1
 		},
 		{
-			"fieldname":"to_date",
+			"fieldname": "to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.defaults.get_user_default("year_end_date"),
 			"reqd": 1
 		},
 		{
-			"fieldname":"sales_invoice",
+			"fieldname": "sales_invoice",
 			"label": __("Sales Invoice"),
 			"fieldtype": "Link",
 			"options": "Sales Invoice"
 		},
 		{
-			"fieldname":"group_by",
+			"fieldname": "group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",
 			"options": "Invoice\nItem Code\nItem Group\nBrand\nWarehouse\nCustomer\nCustomer Group\nTerritory\nSales Person\nProject\nMonthly\nPayment Term",
 			"default": "Invoice"
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
+		},
+		{
+			"fieldname": "sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person"
+		},
+		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"get_query": function () {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: [
+						["Warehouse", "company", "=", company]
+					]
+				};
+			},
 		},
 	],
 	"tree": true,

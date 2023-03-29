@@ -6,6 +6,7 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import date_diff, flt, getdate
 
 
@@ -16,9 +17,7 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-	conditions = get_conditions(filters)
-
-	data = get_data(conditions, filters)
+	data = get_data(filters)
 
 	if not data:
 		return [], [], None, []
@@ -37,60 +36,61 @@ def validate_filters(filters):
 		frappe.throw(_("To Date cannot be before From Date."))
 
 
-def get_conditions(filters):
-	conditions = ""
-	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " and po.transaction_date between %(from_date)s and %(to_date)s"
+def get_data(filters):
+	po = frappe.qb.DocType("Purchase Order")
+	po_item = frappe.qb.DocType("Purchase Order Item")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
-	for field in ["company", "name"]:
+	query = (
+		frappe.qb.from_(po)
+		.from_(po_item)
+		.left_join(pi_item)
+		.on(pi_item.po_detail == po_item.name)
+		.select(
+			po.transaction_date.as_("date"),
+			po_item.schedule_date.as_("required_date"),
+			po_item.project,
+			po.name.as_("purchase_order"),
+			po.status,
+			po.supplier,
+			po_item.item_code,
+			po_item.qty,
+			po_item.received_qty,
+			(po_item.qty - po_item.received_qty).as_("pending_qty"),
+			IfNull(pi_item.qty, 0).as_("billed_qty"),
+			po_item.base_amount.as_("amount"),
+			(po_item.received_qty * po_item.base_rate).as_("received_qty_amount"),
+			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
+			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
+				"pending_amount"
+			),
+			po.set_warehouse.as_("warehouse"),
+			po.company,
+			po_item.name,
+		)
+		.where(
+			(po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1)
+		)
+		.groupby(po_item.name)
+		.orderby(po.transaction_date)
+	)
+
+	for field in ("company", "name"):
 		if filters.get(field):
-			conditions += f" and po.{field} = %({field})s"
+			query = query.where(po[field] == filters.get(field))
+
+	if filters.get("from_date") and filters.get("to_date"):
+		query = query.where(
+			po.transaction_date.between(filters.get("from_date"), filters.get("to_date"))
+		)
 
 	if filters.get("status"):
-		conditions += " and po.status in %(status)s"
+		query = query.where(po.status.isin(filters.get("status")))
 
 	if filters.get("project"):
-		conditions += " and poi.project = %(project)s"
+		query = query.where(po_item.project == filters.get("project"))
 
-	return conditions
-
-
-def get_data(conditions, filters):
-	data = frappe.db.sql(
-		"""
-		SELECT
-			po.transaction_date as date,
-			poi.schedule_date as required_date,
-			poi.project,
-			po.name as purchase_order,
-			po.status, po.supplier, poi.item_code,
-			poi.qty, poi.received_qty,
-			(poi.qty - poi.received_qty) AS pending_qty,
-			IFNULL(pii.qty, 0) as billed_qty,
-			poi.base_amount as amount,
-			(poi.received_qty * poi.base_rate) as received_qty_amount,
-			(poi.billed_amt * IFNULL(po.conversion_rate, 1)) as billed_amount,
-			(poi.base_amount - (poi.billed_amt * IFNULL(po.conversion_rate, 1))) as pending_amount,
-			po.set_warehouse as warehouse,
-			po.company, poi.name
-		FROM
-			`tabPurchase Order` po,
-			`tabPurchase Order Item` poi
-		LEFT JOIN `tabPurchase Invoice Item` pii
-			ON pii.po_detail = poi.name
-		WHERE
-			poi.parent = po.name
-			and po.status not in ('Stopped', 'Closed')
-			and po.docstatus = 1
-			{0}
-		GROUP BY poi.name
-		ORDER BY po.transaction_date ASC
-	""".format(
-			conditions
-		),
-		filters,
-		as_dict=1,
-	)
+	data = query.run(as_dict=True)
 
 	return data
 

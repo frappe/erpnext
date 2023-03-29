@@ -3,10 +3,6 @@
 
 frappe.ui.form.on('Accounting Dimension Filter', {
 	refresh: function(frm, cdt, cdn) {
-		if (frm.doc.accounting_dimension) {
-			frm.set_df_property('dimensions', 'label', frm.doc.accounting_dimension, cdn, 'dimension_value');
-		}
-
 		let help_content =
 			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
@@ -68,6 +64,7 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 		frm.clear_table("dimensions");
 		let row = frm.add_child("dimensions");
 		row.accounting_dimension = frm.doc.accounting_dimension;
+		frm.fields_dict["dimensions"].grid.update_docfield_property("dimension_value", "label", frm.doc.accounting_dimension);
 		frm.refresh_field("dimensions");
 		frm.trigger('setup_filters');
 	},

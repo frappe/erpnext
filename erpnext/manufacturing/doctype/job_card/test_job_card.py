@@ -136,6 +136,45 @@ class TestJobCard(FrappeTestCase):
 		)
 		self.assertRaises(OverlapError, jc2.save)
 
+	def test_job_card_overlap_with_capacity(self):
+		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
+
+		workstation = make_workstation(workstation_name=random_string(5)).name
+		frappe.db.set_value("Workstation", workstation, "production_capacity", 1)
+
+		jc1 = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		jc2 = frappe.get_last_doc("Job Card", {"work_order": wo2.name})
+
+		jc1.workstation = workstation
+		jc1.append(
+			"time_logs",
+			{"from_time": "2021-01-01 00:00:00", "to_time": "2021-01-01 08:00:00", "completed_qty": 1},
+		)
+		jc1.save()
+
+		jc2.workstation = workstation
+
+		# add a new entry in same time slice
+		jc2.append(
+			"time_logs",
+			{"from_time": "2021-01-01 00:01:00", "to_time": "2021-01-01 06:00:00", "completed_qty": 1},
+		)
+		self.assertRaises(OverlapError, jc2.save)
+
+		frappe.db.set_value("Workstation", workstation, "production_capacity", 2)
+		jc2.load_from_db()
+
+		jc2.workstation = workstation
+
+		# add a new entry in same time slice
+		jc2.append(
+			"time_logs",
+			{"from_time": "2021-01-01 00:01:00", "to_time": "2021-01-01 06:00:00", "completed_qty": 1},
+		)
+
+		jc2.save()
+		self.assertTrue(jc2.name)
+
 	def test_job_card_multiple_materials_transfer(self):
 		"Test transferring RMs separately against Job Card with multiple RMs."
 		self.transfer_material_against = "Job Card"

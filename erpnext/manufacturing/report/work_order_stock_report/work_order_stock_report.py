@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint
 
 
@@ -17,70 +18,70 @@ def execute(filters=None):
 def get_item_list(wo_list, filters):
 	out = []
 
-	# Add a row for each item/qty
-	for wo_details in wo_list:
-		desc = frappe.db.get_value("BOM", wo_details.bom_no, "description")
+	if wo_list:
+		bin = frappe.qb.DocType("Bin")
+		bom = frappe.qb.DocType("BOM")
+		bom_item = frappe.qb.DocType("BOM Item")
 
-		for wo_item_details in frappe.db.get_values(
-			"Work Order Item", {"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1
-		):
+		# Add a row for each item/qty
+		for wo_details in wo_list:
+			desc = frappe.db.get_value("BOM", wo_details.bom_no, "description")
 
-			item_list = frappe.db.sql(
-				"""SELECT
-					bom_item.item_code as item_code,
-					ifnull(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
-				FROM
-					`tabBOM` as bom, `tabBOM Item` AS bom_item
-					LEFT JOIN `tabBin` AS ledger
-						ON bom_item.item_code = ledger.item_code
-						AND ledger.warehouse = ifnull(%(warehouse)s,%(filterhouse)s)
-				WHERE
-					bom.name = bom_item.parent
-					and bom_item.item_code = %(item_code)s
-					and bom.name = %(bom)s
-				GROUP BY
-					bom_item.item_code""",
-				{
-					"bom": wo_details.bom_no,
-					"warehouse": wo_item_details.source_warehouse,
-					"filterhouse": filters.warehouse,
-					"item_code": wo_item_details.item_code,
-				},
-				as_dict=1,
-			)
+			for wo_item_details in frappe.db.get_values(
+				"Work Order Item", {"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1
+			):
+				item_list = (
+					frappe.qb.from_(bom)
+					.from_(bom_item)
+					.left_join(bin)
+					.on(
+						(bom_item.item_code == bin.item_code)
+						& (bin.warehouse == IfNull(wo_item_details.source_warehouse, filters.warehouse))
+					)
+					.select(
+						bom_item.item_code.as_("item_code"),
+						IfNull(bin.actual_qty * bom.quantity / bom_item.stock_qty, 0).as_("build_qty"),
+					)
+					.where(
+						(bom.name == bom_item.parent)
+						& (bom_item.item_code == wo_item_details.item_code)
+						& (bom.name == wo_details.bom_no)
+					)
+					.groupby(bom_item.item_code)
+				).run(as_dict=1)
 
-			stock_qty = 0
-			count = 0
-			buildable_qty = wo_details.qty
-			for item in item_list:
-				count = count + 1
-				if item.build_qty >= (wo_details.qty - wo_details.produced_qty):
-					stock_qty = stock_qty + 1
-				elif buildable_qty >= item.build_qty:
-					buildable_qty = item.build_qty
+				stock_qty = 0
+				count = 0
+				buildable_qty = wo_details.qty
+				for item in item_list:
+					count = count + 1
+					if item.build_qty >= (wo_details.qty - wo_details.produced_qty):
+						stock_qty = stock_qty + 1
+					elif buildable_qty >= item.build_qty:
+						buildable_qty = item.build_qty
 
-			if count == stock_qty:
-				build = "Y"
-			else:
-				build = "N"
+				if count == stock_qty:
+					build = "Y"
+				else:
+					build = "N"
 
-			row = frappe._dict(
-				{
-					"work_order": wo_details.name,
-					"status": wo_details.status,
-					"req_items": cint(count),
-					"instock": stock_qty,
-					"description": desc,
-					"source_warehouse": wo_item_details.source_warehouse,
-					"item_code": wo_item_details.item_code,
-					"bom_no": wo_details.bom_no,
-					"qty": wo_details.qty,
-					"buildable_qty": buildable_qty,
-					"ready_to_build": build,
-				}
-			)
+				row = frappe._dict(
+					{
+						"work_order": wo_details.name,
+						"status": wo_details.status,
+						"req_items": cint(count),
+						"instock": stock_qty,
+						"description": desc,
+						"source_warehouse": wo_item_details.source_warehouse,
+						"item_code": wo_item_details.item_code,
+						"bom_no": wo_details.bom_no,
+						"qty": wo_details.qty,
+						"buildable_qty": buildable_qty,
+						"ready_to_build": build,
+					}
+				)
 
-			out.append(row)
+				out.append(row)
 
 	return out
 

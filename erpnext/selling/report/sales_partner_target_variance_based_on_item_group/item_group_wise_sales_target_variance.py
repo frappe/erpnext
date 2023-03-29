@@ -44,20 +44,30 @@ def get_data(filters, period_list, partner_doctype):
 
 	if not sales_users_data:
 		return
-	sales_users, item_groups = [], []
+	sales_users = []
+	sales_user_wise_item_groups = {}
 
 	for d in sales_users_data:
 		if d.parent not in sales_users:
 			sales_users.append(d.parent)
 
-		if d.item_group not in item_groups:
-			item_groups.append(d.item_group)
+		sales_user_wise_item_groups.setdefault(d.parent, [])
+		if d.item_group:
+			sales_user_wise_item_groups[d.parent].append(d.item_group)
 
 	date_field = "transaction_date" if filters.get("doctype") == "Sales Order" else "posting_date"
 
-	actual_data = get_actual_data(filters, item_groups, sales_users, date_field, sales_field)
+	actual_data = get_actual_data(filters, sales_users, date_field, sales_field)
 
-	return prepare_data(filters, sales_users_data, actual_data, date_field, period_list, sales_field)
+	return prepare_data(
+		filters,
+		sales_users_data,
+		sales_user_wise_item_groups,
+		actual_data,
+		date_field,
+		period_list,
+		sales_field,
+	)
 
 
 def get_columns(filters, period_list, partner_doctype):
@@ -142,7 +152,15 @@ def get_columns(filters, period_list, partner_doctype):
 	return columns
 
 
-def prepare_data(filters, sales_users_data, actual_data, date_field, period_list, sales_field):
+def prepare_data(
+	filters,
+	sales_users_data,
+	sales_user_wise_item_groups,
+	actual_data,
+	date_field,
+	period_list,
+	sales_field,
+):
 	rows = {}
 
 	target_qty_amt_field = "target_qty" if filters.get("target_on") == "Quantity" else "target_amount"
@@ -173,9 +191,9 @@ def prepare_data(filters, sales_users_data, actual_data, date_field, period_list
 			for r in actual_data:
 				if (
 					r.get(sales_field) == d.parent
-					and r.item_group == d.item_group
 					and period.from_date <= r.get(date_field)
 					and r.get(date_field) <= period.to_date
+					and (not sales_user_wise_item_groups.get(d.parent) or r.item_group == d.item_group)
 				):
 					details[p_key] += r.get(qty_or_amount_field, 0)
 					details[variance_key] = details.get(p_key) - details.get(target_key)
@@ -186,7 +204,7 @@ def prepare_data(filters, sales_users_data, actual_data, date_field, period_list
 	return rows
 
 
-def get_actual_data(filters, item_groups, sales_users_or_territory_data, date_field, sales_field):
+def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_field):
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
 	dates = [fiscal_year.year_start_date, fiscal_year.year_end_date]
 
@@ -213,7 +231,6 @@ def get_actual_data(filters, item_groups, sales_users_or_territory_data, date_fi
 		WHERE
 			`tab{child_doc}`.parent = `tab{parent_doc}`.name
 			and `tab{parent_doc}`.docstatus = 1 and {cond}
-			and `tab{child_doc}`.item_group in ({item_groups})
 			and `tab{parent_doc}`.{date_field} between %s and %s""".format(
 			cond=cond,
 			date_field=date_field,
@@ -221,9 +238,8 @@ def get_actual_data(filters, item_groups, sales_users_or_territory_data, date_fi
 			child_table=child_table,
 			parent_doc=filters.get("doctype"),
 			child_doc=filters.get("doctype") + " Item",
-			item_groups=",".join(["%s"] * len(item_groups)),
 		),
-		tuple(sales_users_or_territory_data + item_groups + dates),
+		tuple(sales_users_or_territory_data + dates),
 		as_dict=1,
 	)
 

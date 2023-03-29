@@ -671,7 +671,7 @@ frappe.help.help_links["List/Item"] = [
 		label: "Item Valuation",
 		url:
 			docsUrl +
-			"user/manual/en/stock/articles/item-valuation-fifo-and-moving-average",
+			"user/manual/en/stock/articles/calculation-of-valuation-rate-in-fifo-and-moving-average",
 	},
 ];
 

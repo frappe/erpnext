@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -29,21 +30,23 @@ class BlanketOrder(Document):
 
 	def update_ordered_qty(self):
 		ref_doctype = "Sales Order" if self.blanket_order_type == "Selling" else "Purchase Order"
+
+		trans = frappe.qb.DocType(ref_doctype)
+		trans_item = frappe.qb.DocType(f"{ref_doctype} Item")
+
 		item_ordered_qty = frappe._dict(
-			frappe.db.sql(
-				"""
-			select trans_item.item_code, sum(trans_item.stock_qty) as qty
-			from `tab{0} Item` trans_item, `tab{0}` trans
-			where trans.name = trans_item.parent
-				and trans_item.blanket_order=%s
-				and trans.docstatus=1
-				and trans.status not in ('Closed', 'Stopped')
-			group by trans_item.item_code
-		""".format(
-					ref_doctype
-				),
-				self.name,
-			)
+			(
+				frappe.qb.from_(trans_item)
+				.from_(trans)
+				.select(trans_item.item_code, Sum(trans_item.stock_qty).as_("qty"))
+				.where(
+					(trans.name == trans_item.parent)
+					& (trans_item.blanket_order == self.name)
+					& (trans.docstatus == 1)
+					& (trans.status.notin(["Stopped", "Closed"]))
+				)
+				.groupby(trans_item.item_code)
+			).run()
 		)
 
 		for d in self.items:
@@ -79,7 +82,43 @@ def make_order(source_name):
 				"doctype": doctype + " Item",
 				"field_map": {"rate": "blanket_order_rate", "parent": "blanket_order"},
 				"postprocess": update_item,
+				"condition": lambda item: (flt(item.qty) - flt(item.ordered_qty)) > 0,
 			},
 		},
 	)
 	return target_doc
+
+
+def validate_against_blanket_order(order_doc):
+	if order_doc.doctype in ("Sales Order", "Purchase Order"):
+		order_data = {}
+
+		for item in order_doc.get("items"):
+			if item.against_blanket_order and item.blanket_order:
+				if item.blanket_order in order_data:
+					if item.item_code in order_data[item.blanket_order]:
+						order_data[item.blanket_order][item.item_code] += item.qty
+					else:
+						order_data[item.blanket_order][item.item_code] = item.qty
+				else:
+					order_data[item.blanket_order] = {item.item_code: item.qty}
+
+		if order_data:
+			allowance = flt(
+				frappe.db.get_single_value(
+					"Selling Settings" if order_doc.doctype == "Sales Order" else "Buying Settings",
+					"over_order_allowance",
+				)
+			)
+			for bo_name, item_data in order_data.items():
+				bo_doc = frappe.get_doc("Blanket Order", bo_name)
+				for item in bo_doc.get("items"):
+					if item.item_code in item_data:
+						remaining_qty = item.qty - item.ordered_qty
+						allowed_qty = remaining_qty + (remaining_qty * (allowance / 100))
+						if allowed_qty < item_data[item.item_code]:
+							frappe.throw(
+								_("Item {0} cannot be ordered more than {1} against Blanket Order {2}.").format(
+									item.item_code, allowed_qty, bo_name
+								)
+							)

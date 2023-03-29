@@ -37,7 +37,7 @@ def validate_return_against(doc):
 		if (
 			ref_doc.company == doc.company
 			and ref_doc.get(party_type) == doc.get(party_type)
-			and ref_doc.docstatus == 1
+			and ref_doc.docstatus.is_submitted()
 		):
 			# validate posting date time
 			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
@@ -131,7 +131,7 @@ def validate_returned_items(doc):
 					)
 
 				elif ref.serial_no:
-					if not d.serial_no:
+					if d.qty and not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
 					else:
 						serial_nos = get_serial_nos(d.serial_no)
@@ -305,7 +305,7 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 			fields += ["sum(abs(`tab{0}`.received_stock_qty)) as received_stock_qty".format(child_doctype)]
 
 	# Used retrun against and supplier and is_retrun because there is an index added for it
-	data = frappe.db.get_list(
+	data = frappe.get_all(
 		doctype,
 		fields=fields,
 		filters=[
@@ -326,7 +326,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
-	default_warehouse_for_sales_return = frappe.db.get_value(
+	default_warehouse_for_sales_return = frappe.get_cached_value(
 		"Company", company, "default_warehouse_for_sales_return"
 	)
 
@@ -340,11 +340,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
-				doc.select_print_heading = frappe.db.get_value("Print Heading", _("Credit Note"))
+				doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Credit Note"))
 
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
-			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
+			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
@@ -400,16 +400,31 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if serial_nos:
 				target_doc.serial_no = "\n".join(serial_nos)
 
+		if source_doc.get("rejected_serial_no"):
+			returned_serial_nos = get_returned_serial_nos(
+				source_doc, source_parent, serial_no_field="rejected_serial_no"
+			)
+			rejected_serial_nos = list(
+				set(get_serial_nos(source_doc.rejected_serial_no)) - set(returned_serial_nos)
+			)
+			if rejected_serial_nos:
+				target_doc.rejected_serial_no = "\n".join(rejected_serial_nos)
+
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
-			target_doc.received_qty = -1 * flt(
-				source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
-			)
-			target_doc.rejected_qty = -1 * flt(
-				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
-			)
+
+			if doctype == "Subcontracting Receipt":
+				target_doc.received_qty = -1 * flt(source_doc.qty)
+			else:
+				target_doc.received_qty = -1 * flt(
+					source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
+				)
+				target_doc.rejected_qty = -1 * flt(
+					source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
+				)
+
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 
 			if hasattr(target_doc, "stock_qty"):
@@ -503,7 +518,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			doctype
 			+ " Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no"},
+				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
 				"postprocess": update_item,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
@@ -605,7 +620,7 @@ def get_filters(
 	return filters
 
 
-def get_returned_serial_nos(child_doc, parent_doc):
+def get_returned_serial_nos(child_doc, parent_doc, serial_no_field="serial_no"):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	return_ref_field = frappe.scrub(child_doc.doctype)
@@ -614,7 +629,7 @@ def get_returned_serial_nos(child_doc, parent_doc):
 
 	serial_nos = []
 
-	fields = ["`{0}`.`serial_no`".format("tab" + child_doc.doctype)]
+	fields = [f"`{'tab' + child_doc.doctype}`.`{serial_no_field}`"]
 
 	filters = [
 		[parent_doc.doctype, "return_against", "=", parent_doc.name],
@@ -624,6 +639,6 @@ def get_returned_serial_nos(child_doc, parent_doc):
 	]
 
 	for row in frappe.get_all(parent_doc.doctype, fields=fields, filters=filters):
-		serial_nos.extend(get_serial_nos(row.serial_no))
+		serial_nos.extend(get_serial_nos(row.get(serial_no_field)))
 
 	return serial_nos

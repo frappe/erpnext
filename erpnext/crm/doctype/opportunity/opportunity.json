@@ -544,14 +544,14 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
-   "label": "Dashboard",
+   "label": "Connections",
    "show_dashboard": 1
   },
   {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "notes_tab",
    "fieldtype": "Tab Break",
-   "label": "Notes"
+   "label": "Comments"
   },
   {
    "fieldname": "notes_html",
@@ -622,7 +622,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2022-08-09 18:26:37.235964",
+ "modified": "2022-10-13 12:42:21.545636",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

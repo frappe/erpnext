@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, nowdate
 
@@ -721,6 +722,46 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(
 			flt(payment_entry.total_taxes_and_charges, 2), flt(10 / payment_entry.target_exchange_rate, 2)
 		)
+
+	def test_gl_of_multi_currency_payment_with_taxes(self):
+		payment_entry = create_payment_entry(
+			party="_Test Supplier USD", paid_to="_Test Payable USD - _TC", save=True
+		)
+		payment_entry.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "Actual",
+				"tax_amount": 100,
+				"add_deduct_tax": "Add",
+				"description": "Test",
+			},
+		)
+		payment_entry.target_exchange_rate = 80
+		payment_entry.received_amount = 12.5
+		payment_entry = payment_entry.submit()
+		gle = qb.DocType("GL Entry")
+		gl_entries = (
+			qb.from_(gle)
+			.select(
+				gle.account,
+				gle.debit,
+				gle.credit,
+				gle.debit_in_account_currency,
+				gle.credit_in_account_currency,
+			)
+			.orderby(gle.account)
+			.where(gle.voucher_no == payment_entry.name)
+			.run()
+		)
+
+		expected_gl_entries = (
+			("_Test Account Service Tax - _TC", 100.0, 0.0, 100.0, 0.0),
+			("_Test Bank - _TC", 0.0, 1100.0, 0.0, 1100.0),
+			("_Test Payable USD - _TC", 1000.0, 0.0, 12.5, 0),
+		)
+
+		self.assertEqual(gl_entries, expected_gl_entries)
 
 	def test_payment_entry_against_onhold_purchase_invoice(self):
 		pi = make_purchase_invoice()

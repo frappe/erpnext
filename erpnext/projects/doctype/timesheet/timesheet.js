@@ -5,6 +5,8 @@ frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frappe.require("/assets/erpnext/js/projects/timer.js");
 
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice'];
+
 		frm.fields_dict.employee.get_query = function() {
 			return {
 				filters:{
@@ -92,18 +94,26 @@ frappe.ui.form.on("Timesheet", {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			frm.fields_dict["time_logs"].grid.toggle_enable("is_billable", false);
 		}
+
+		let filters = {
+			"status": "Open"
+		};
+
+		if (frm.doc.customer) {
+			filters["customer"] = frm.doc.customer;
+		}
+
+		frm.set_query('parent_project', function(doc) {
+			return {
+				filters: filters
+			};
+		});
+
 		frm.trigger('setup_filters');
 		frm.trigger('set_dynamic_field_label');
 	},
 
 	customer: function(frm) {
-		frm.set_query('parent_project', function(doc) {
-			return {
-				filters: {
-					"customer": doc.customer
-				}
-			};
-		});
 		frm.set_query('project', 'time_logs', function(doc) {
 			return {
 				filters: {

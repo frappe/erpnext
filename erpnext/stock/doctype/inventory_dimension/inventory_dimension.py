@@ -33,10 +33,22 @@ class InventoryDimension(Document):
 		)
 
 	def validate(self):
+		self.validate_reference_document()
+
+	def before_save(self):
 		self.do_not_update_document()
 		self.reset_value()
-		self.validate_reference_document()
 		self.set_source_and_target_fieldname()
+		self.set_type_of_transaction()
+		self.set_fetch_value_from()
+
+	def set_type_of_transaction(self):
+		if self.apply_to_all_doctypes:
+			self.type_of_transaction = "Both"
+
+	def set_fetch_value_from(self):
+		if self.apply_to_all_doctypes:
+			self.fetch_from_parent = self.reference_document
 
 	def do_not_update_document(self):
 		if self.is_new() or not self.has_stock_ledger():
@@ -114,6 +126,8 @@ class InventoryDimension(Document):
 				insert_after="inventory_dimension",
 				options=self.reference_document,
 				label=self.dimension_name,
+				reqd=self.reqd,
+				mandatory_depends_on=self.mandatory_depends_on,
 			),
 		]
 
@@ -121,18 +135,26 @@ class InventoryDimension(Document):
 
 		if self.apply_to_all_doctypes:
 			for doctype in get_inventory_documents():
-				custom_fields.setdefault(doctype[0], dimension_fields)
-		else:
+				if not field_exists(doctype[0], self.source_fieldname):
+					custom_fields.setdefault(doctype[0], dimension_fields)
+		elif not field_exists(self.document_type, self.source_fieldname):
 			custom_fields.setdefault(self.document_type, dimension_fields)
 
 		if not frappe.db.get_value(
 			"Custom Field", {"dt": "Stock Ledger Entry", "fieldname": self.target_fieldname}
-		):
+		) and not field_exists("Stock Ledger Entry", self.target_fieldname):
 			dimension_field = dimension_fields[1]
+			dimension_field["mandatory_depends_on"] = ""
+			dimension_field["reqd"] = 0
 			dimension_field["fieldname"] = self.target_fieldname
 			custom_fields["Stock Ledger Entry"] = dimension_field
 
-		create_custom_fields(custom_fields)
+		if custom_fields:
+			create_custom_fields(custom_fields)
+
+
+def field_exists(doctype, fieldname) -> str or None:
+	return frappe.db.get_value("DocField", {"parent": doctype, "fieldname": fieldname}, "name")
 
 
 @frappe.whitelist()
@@ -236,3 +258,30 @@ def get_inventory_dimensions():
 def delete_dimension(dimension):
 	doc = frappe.get_doc("Inventory Dimension", dimension)
 	doc.delete()
+
+
+@frappe.whitelist()
+def get_parent_fields(child_doctype, dimension_name):
+	parent_doctypes = frappe.get_all(
+		"DocField", fields=["parent"], filters={"options": child_doctype}
+	)
+
+	fields = []
+
+	fields.extend(
+		frappe.get_all(
+			"DocField",
+			fields=["fieldname as value", "label"],
+			filters={"options": dimension_name, "parent": ("in", [d.parent for d in parent_doctypes])},
+		)
+	)
+
+	fields.extend(
+		frappe.get_all(
+			"Custom Field",
+			fields=["fieldname as value", "label"],
+			filters={"options": dimension_name, "dt": ("in", [d.parent for d in parent_doctypes])},
+		)
+	)
+
+	return fields

@@ -10,7 +10,7 @@ import re
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, flt
 
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
 
@@ -24,6 +24,7 @@ class PricingRule(Document):
 		self.validate_applicable_for_selling_or_buying()
 		self.validate_min_max_amt()
 		self.validate_min_max_qty()
+		self.validate_recursion()
 		self.cleanup_fields_value()
 		self.validate_rate_or_discount()
 		self.validate_max_discount()
@@ -109,6 +110,18 @@ class PricingRule(Document):
 		if self.min_amt and self.max_amt and flt(self.min_amt) > flt(self.max_amt):
 			throw(_("Min Amt can not be greater than Max Amt"))
 
+	def validate_recursion(self):
+		if self.price_or_product_discount != "Product":
+			return
+		if self.free_item or self.same_item:
+			if flt(self.recurse_for) <= 0:
+				self.recurse_for = 1
+		if self.is_recursive:
+			if flt(self.apply_recursion_over) > flt(self.min_qty):
+				throw(_("Min Qty should be greater than Recurse Over Qty"))
+			if flt(self.apply_recursion_over) < 0:
+				throw(_("Recurse Over Qty cannot be less than 0"))
+
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "rate_or_discount"]:
 			fieldname = frappe.scrub(self.get(logic_field) or "")
@@ -171,8 +184,7 @@ class PricingRule(Document):
 		if self.is_cumulative and not (self.valid_from and self.valid_upto):
 			frappe.throw(_("Valid from and valid upto fields are mandatory for the cumulative"))
 
-		if self.valid_from and self.valid_upto and getdate(self.valid_from) > getdate(self.valid_upto):
-			frappe.throw(_("Valid from date must be less than valid upto date"))
+		self.validate_from_to_dates("valid_from", "valid_upto")
 
 	def validate_condition(self):
 		if (
@@ -243,7 +255,7 @@ def apply_pricing_rule(args, doc=None):
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
-		data = get_pricing_rule_for_item(args_copy, item.get("price_list_rate"), doc=doc)
+		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
 		if (
@@ -268,7 +280,19 @@ def get_serial_no_for_item(args):
 	return item_details
 
 
-def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
+def update_pricing_rule_uom(pricing_rule, args):
+	child_doc = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}.get(
+		pricing_rule.apply_on
+	)
+
+	apply_on_field = frappe.scrub(pricing_rule.apply_on)
+
+	for row in pricing_rule.get(child_doc):
+		if row.get(apply_on_field) == args.get(apply_on_field):
+			pricing_rule.uom = row.uom
+
+
+def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
@@ -324,7 +348,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if isinstance(pricing_rule, str):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
-				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
+				update_pricing_rule_uom(pricing_rule, args)
+				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
 
 			if pricing_rule.get("suggestion"):
 				continue
@@ -337,7 +362,6 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
 				item_details.update(
 					{
-						"apply_rule_on_other_items": json.dumps(pricing_rule.apply_rule_on_other_items),
 						"price_or_product_discount": pricing_rule.price_or_product_discount,
 						"apply_rule_on": (
 							frappe.scrub(pricing_rule.apply_rule_on_other)
@@ -346,6 +370,9 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 						),
 					}
 				)
+
+				if pricing_rule.apply_rule_on_other_items:
+					item_details["apply_rule_on_other_items"] = json.dumps(pricing_rule.apply_rule_on_other_items)
 
 			if pricing_rule.coupon_code_based == 1 and args.coupon_code == None:
 				return item_details
@@ -438,12 +465,15 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.currency == args.currency:
 			pricing_rule_rate = pricing_rule.rate
 
+		# TODO https://github.com/frappe/erpnext/pull/23636 solve this in some other way.
 		if pricing_rule_rate:
+			is_blank_uom = pricing_rule.get("uom") != args.get("uom")
 			# Override already set price list rate (from item price)
 			# if pricing_rule_rate > 0
 			item_details.update(
 				{
-					"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
+					"price_list_rate": pricing_rule_rate
+					* (args.get("conversion_factor", 1) if is_blank_uom else 1),
 				}
 			)
 		item_details.update({"discount_percentage": 0.0})
@@ -492,7 +522,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 			)
 
 		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
-			items = get_pricing_rule_items(pricing_rule)
+			items = get_pricing_rule_items(pricing_rule, other_items=True)
 			item_details.apply_on = (
 				frappe.scrub(pricing_rule.apply_rule_on_other)
 				if pricing_rule.apply_rule_on_other

@@ -13,8 +13,8 @@ from frappe.utils import (
 	get_datetime,
 	get_datetime_str,
 	get_link_to_form,
+	get_system_timezone,
 	get_time,
-	get_time_zone,
 	get_weekdays,
 	getdate,
 	nowdate,
@@ -776,6 +776,9 @@ def on_communication_update(doc, status):
 	if not parent.meta.has_field("service_level_agreement"):
 		return
 
+	if not parent.get("service_level_agreement"):
+		return
+
 	if (
 		doc.sent_or_received == "Received"  # a reply is received
 		and parent.get("status") == "Open"  # issue status is set as open from communication.py
@@ -978,7 +981,7 @@ def convert_utc_to_user_timezone(utc_timestamp, user):
 
 
 def get_tz(user):
-	return frappe.db.get_value("User", user, "time_zone") or get_time_zone()
+	return frappe.db.get_value("User", user, "time_zone") or get_system_timezone()
 
 
 @frappe.whitelist()

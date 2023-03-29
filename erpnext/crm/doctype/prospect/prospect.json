@@ -128,7 +128,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "notes_section",
    "fieldtype": "Tab Break",
-   "label": "Notes"
+   "label": "Comments"
   },
   {
    "depends_on": "eval: !doc.__islocal",
@@ -218,7 +218,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-09 18:26:56.950185",
+ "modified": "2022-10-13 12:29:33.674561",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",

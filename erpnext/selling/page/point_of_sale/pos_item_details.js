@@ -242,13 +242,14 @@ erpnext.PointOfSale.ItemDetails = class {
 				if (this.value) {
 					me.events.form_updated(me.current_item, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
-						const available_qty = me.item_stock_map[me.item_row.item_code] && me.item_stock_map[me.item_row.item_code][this.value];
+						const available_qty = me.item_stock_map[me.item_row.item_code][this.value][0];
+						const is_stock_item = Boolean(me.item_stock_map[me.item_row.item_code][this.value][1]);
 						if (available_qty === undefined) {
 							me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
 								// item stock map is updated now reset warehouse
 								me.warehouse_control.set_value(this.value);
 							})
-						} else if (available_qty === 0) {
+						} else if (available_qty === 0 && is_stock_item) {
 							me.warehouse_control.set_value('');
 							const bold_item_code = me.item_row.item_code.bold();
 							const bold_warehouse = this.value.bold();

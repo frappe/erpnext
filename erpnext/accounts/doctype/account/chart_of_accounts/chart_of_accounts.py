@@ -29,6 +29,7 @@ def create_charts(
 					"root_type",
 					"is_group",
 					"tax_rate",
+					"account_currency",
 				]:
 
 					account_number = cstr(child.get("account_number")).strip()
@@ -53,7 +54,7 @@ def create_charts(
 							"account_number": account_number,
 							"account_type": child.get("account_type"),
 							"account_currency": child.get("account_currency")
-							or frappe.db.get_value("Company", company, "default_currency"),
+							or frappe.get_cached_value("Company", company, "default_currency"),
 							"tax_rate": child.get("tax_rate"),
 						}
 					)
@@ -95,7 +96,17 @@ def identify_is_group(child):
 		is_group = child.get("is_group")
 	elif len(
 		set(child.keys())
-		- set(["account_name", "account_type", "root_type", "is_group", "tax_rate", "account_number"])
+		- set(
+			[
+				"account_name",
+				"account_type",
+				"root_type",
+				"is_group",
+				"tax_rate",
+				"account_number",
+				"account_currency",
+			]
+		)
 	):
 		is_group = 1
 	else:
@@ -148,7 +159,7 @@ def get_charts_for_country(country, with_standard=False):
 			) or frappe.local.flags.allow_unverified_charts:
 				charts.append(content["name"])
 
-	country_code = frappe.db.get_value("Country", country, "code")
+	country_code = frappe.get_cached_value("Country", country, "code")
 	if country_code:
 		folders = ("verified",)
 		if frappe.local.flags.allow_unverified_charts:
@@ -185,6 +196,7 @@ def get_account_tree_from_existing_company(existing_company):
 			"root_type",
 			"tax_rate",
 			"account_number",
+			"account_currency",
 		],
 		order_by="lft, rgt",
 	)
@@ -267,6 +279,7 @@ def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=Fals
 				"root_type",
 				"is_group",
 				"tax_rate",
+				"account_currency",
 			]:
 				continue
 

@@ -25,8 +25,8 @@
 	<thead>
 		<tr>
 			<th style="width: 12%">{%= __("Date") %}</th>
-			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 25%">{%= __("Party") %}</th>
+			<th style="width: 15%">{%= __("Reference") %}</th>
+			<th style="width: 25%">{%= __("Remarks") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
 			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
@@ -38,36 +38,41 @@
 			{% if(data[i].posting_date) { %}
 				<td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
 				<td>{%= data[i].voucher_type %}
-					<br>{%= data[i].voucher_no %}</td>
-				<td>
+					<br>{%= data[i].voucher_no %}
+				</td>
+				{% var longest_word = cstr(data[i].remarks).split(" ").reduce((longest, word) => word.length > longest.length ? word : longest, ""); %}
+				<td {% if longest_word.length > 45 %} class="overflow-wrap-anywhere" {% endif %}>
+					<span>
 					{% if(!(filters.party || filters.account)) { %}
 						{%= data[i].party || data[i].account %}
 						<br>
 					{% } %}
 
-					{{ __("Against") }}: {%= data[i].against %}
 					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
 					{% if(data[i].bill_no) { %}
 						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
 					{% } %}
-					</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].debit, filters.presentation_currency) %}</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].credit, filters.presentation_currency) %}</td>
+					</span>
+				</td>
+				<td style="text-align: right">
+					{%= format_currency(data[i].debit, filters.presentation_currency) %}
+				</td>
+				<td style="text-align: right">
+					{%= format_currency(data[i].credit, filters.presentation_currency) %}
+				</td>
 			{% } else { %}
 				<td></td>
 				<td></td>
 				<td><b>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
 				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}
+					{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency || data[i].account_currency) %}
 				</td>
 				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
+					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency || data[i].account_currency) %}
 				</td>
 			{% } %}
 				<td style="text-align: right">
-					{%= format_currency(data[i].balance, filters.presentation_currency) %}
+					{%= format_currency(data[i].balance, filters.presentation_currency || data[i].account_currency) %}
 				</td>
 			</tr>
 		{% } %}

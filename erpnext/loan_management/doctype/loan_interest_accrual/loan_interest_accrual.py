@@ -236,7 +236,7 @@ def get_term_loans(date, term_loan=None, loan_type=None):
 			AND l.is_term_loan =1
 			AND rs.payment_date <= %s
 			AND rs.is_accrued=0 {0}
-			AND rs.interest_amount > 0
+			AND rs.principal_amount > 0
 			AND l.status = 'Disbursed'
 			ORDER BY rs.payment_date""".format(
 			condition

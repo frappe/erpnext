@@ -6,7 +6,7 @@ import json
 import frappe
 import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 from erpnext.controllers.accounts_controller import update_child_qty_rate
@@ -551,6 +551,42 @@ class TestSalesOrder(FrappeTestCase):
 		test_user2.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
 		workflow.is_active = 0
 		workflow.save()
+
+	def test_bin_details_of_packed_item(self):
+		# test Update Items with product bundle
+		if not frappe.db.exists("Item", "_Test Product Bundle Item New"):
+			bundle_item = make_item("_Test Product Bundle Item New", {"is_stock_item": 0})
+			bundle_item.append(
+				"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+			)
+			bundle_item.save(ignore_permissions=True)
+
+		make_item("_Packed Item New 1", {"is_stock_item": 1})
+		make_product_bundle("_Test Product Bundle Item New", ["_Packed Item New 1"], 2)
+
+		so = make_sales_order(
+			item_code="_Test Product Bundle Item New",
+			warehouse="_Test Warehouse - _TC",
+			transaction_date=add_days(nowdate(), -1),
+			do_not_submit=1,
+		)
+
+		make_stock_entry(item="_Packed Item New 1", target="_Test Warehouse - _TC", qty=120, rate=100)
+
+		bin_details = frappe.db.get_value(
+			"Bin",
+			{"item_code": "_Packed Item New 1", "warehouse": "_Test Warehouse - _TC"},
+			["actual_qty", "projected_qty", "ordered_qty"],
+			as_dict=1,
+		)
+
+		so.transaction_date = nowdate()
+		so.save()
+
+		packed_item = so.packed_items[0]
+		self.assertEqual(flt(bin_details.actual_qty), flt(packed_item.actual_qty))
+		self.assertEqual(flt(bin_details.projected_qty), flt(packed_item.projected_qty))
+		self.assertEqual(flt(bin_details.ordered_qty), flt(packed_item.ordered_qty))
 
 	def test_update_child_product_bundle(self):
 		# test Update Items with product bundle
@@ -1181,6 +1217,8 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertTrue(si.get("payment_schedule"))
 
 	def test_make_work_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
 		# Make a new Sales Order
 		so = make_sales_order(
 			**{
@@ -1194,7 +1232,7 @@ class TestSalesOrder(FrappeTestCase):
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
-		for item in so.get_work_order_items():
+		for item in get_work_order_items(so.name):
 			po_items.append(
 				{
 					"warehouse": item.get("warehouse"),
@@ -1346,6 +1384,33 @@ class TestSalesOrder(FrappeTestCase):
 
 		self.assertRaises(frappe.LinkExistsError, so_doc.cancel)
 
+	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
+	def test_advance_paid_upon_payment_cancellation(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		so = make_sales_order()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = so.currency
+		pe.paid_to_account_currency = so.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = so.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+		so.reload()
+
+		self.assertEqual(so.advance_paid, so.base_grand_total)
+
+		# cancel advance payment
+		pe.reload()
+		pe.cancel()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
+
 	def test_cancel_sales_order_after_cancel_payment_entry(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -1385,6 +1450,7 @@ class TestSalesOrder(FrappeTestCase):
 
 		from erpnext.controllers.item_variant import create_variant
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
 
 		make_item(  # template item
 			"Test-WO-Tshirt",
@@ -1424,7 +1490,7 @@ class TestSalesOrder(FrappeTestCase):
 				]
 			}
 		)
-		wo_items = so.get_work_order_items()
+		wo_items = get_work_order_items(so.name)
 
 		self.assertEqual(wo_items[0].get("item_code"), "Test-WO-Tshirt-R")
 		self.assertEqual(wo_items[0].get("bom"), red_var_bom.name)
@@ -1434,6 +1500,8 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(wo_items[1].get("bom"), template_bom.name)
 
 	def test_request_for_raw_materials(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
 		item = make_item(
 			"_Test Finished Item",
 			{
@@ -1466,7 +1534,7 @@ class TestSalesOrder(FrappeTestCase):
 		so = make_sales_order(**{"item_list": [{"item_code": item.item_code, "qty": 1, "rate": 1000}]})
 		so.submit()
 		mr_dict = frappe._dict()
-		items = so.get_work_order_items(1)
+		items = get_work_order_items(so.name, 1)
 		mr_dict["items"] = items
 		mr_dict["include_exploded_items"] = 0
 		mr_dict["ignore_existing_ordered_qty"] = 1
@@ -1746,6 +1814,69 @@ class TestSalesOrder(FrappeTestCase):
 		sales_order.items[0].qty = 21
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
+
+	def test_sales_order_partial_advance_payment(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_entry,
+			get_payment_entry,
+		)
+		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
+		# Make a customer
+		customer = get_customer_dict("QA Logistics")
+		frappe.get_doc(customer).insert()
+
+		# Make a Sales Order
+		so = make_sales_order(
+			customer="QA Logistics",
+			item_list=[
+				{"item_code": "_Test Item", "qty": 1, "rate": 200},
+				{"item_code": "_Test Item 2", "qty": 1, "rate": 300},
+			],
+		)
+
+		# Create a advance payment against that Sales Order
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = so.currency
+		pe.paid_to_account_currency = so.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = so.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		# Make standalone advance payment entry
+		create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party="QA Logistics",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Bank - _TC",
+			save=1,
+			submit=1,
+		)
+
+		si = make_sales_invoice(so.name)
+
+		item = si.get("items")[1]
+		si.remove(item)
+
+		si.allocate_advances_automatically = 1
+		si.save()
+
+		self.assertEqual(len(si.get("advances")), 1)
+		self.assertEqual(si.get("advances")[0].allocated_amount, 200)
+		self.assertEqual(si.get("advances")[0].reference_name, pe.name)
+
+		si.submit()
+		pe.load_from_db()
+
+		self.assertEqual(pe.references[0].reference_name, si.name)
+		self.assertEqual(pe.references[0].allocated_amount, 200)
+		self.assertEqual(pe.references[1].reference_name, so.name)
+		self.assertEqual(pe.references[1].allocated_amount, 300)
 
 
 def automatically_fetch_payment_terms(enable=1):

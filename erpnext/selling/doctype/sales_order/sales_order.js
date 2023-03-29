@@ -59,7 +59,36 @@ frappe.ui.form.on("Sales Order", {
 				})
 			});
 		}
+
+		if (frm.doc.docstatus === 0 && frm.doc.is_internal_customer) {
+			frm.events.get_items_from_internal_purchase_order(frm);
+		}
 	},
+
+	get_items_from_internal_purchase_order(frm) {
+		frm.add_custom_button(__('Purchase Order'), () => {
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order',
+				source_doctype: 'Purchase Order',
+				target: frm,
+				setters: [
+					{
+						label: 'Supplier',
+						fieldname: 'supplier',
+						fieldtype: 'Link',
+						options: 'Supplier'
+					}
+				],
+				get_query_filters: {
+					company: frm.doc.company,
+					is_internal_supplier: 1,
+					docstatus: 1,
+					status: ['!=', 'Completed']
+				}
+			});
+		}, __('Get Items From'));
+	},
+
 	onload: function(frm) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
@@ -94,6 +123,11 @@ frappe.ui.form.on("Sales Order", {
 			}
 			return query;
 		});
+
+		// On cancel and amending a sales order with advance payment, reset advance paid amount
+		if (frm.is_new()) {
+			frm.set_value("advance_paid", 0)
+		}
 
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
@@ -241,7 +275,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Quotation'),
 				function() {
-					erpnext.utils.map_current_doc({
+					let d = erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
@@ -259,7 +293,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							docstatus: 1,
 							status: ["!=", "Lost"]
 						}
-					})
+					});
+
+					setTimeout(() => {
+						d.$parent.append(`
+							<span class='small text-muted'>
+								${__("Note: Please create Sales Orders from individual Quotations to select from among Alternative Items.")}
+							</span>
+					`);
+					}, 200);
+
 				}, __("Get Items From"));
 		}
 
@@ -275,9 +318,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_work_order() {
 		var me = this;
-		this.frm.call({
-			doc: this.frm.doc,
-			method: 'get_work_order_items',
+		me.frm.call({
+			method: "erpnext.selling.doctype.sales_order.sales_order.get_work_order_items",
+			args: {
+				sales_order: this.frm.docname,
+			},
+			freeze: true,
 			callback: function(r) {
 				if(!r.message) {
 					frappe.msgprint({
@@ -287,14 +333,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					});
 					return;
 				}
-				else if(!r.message) {
-					frappe.msgprint({
-						title: __('Work Order not created'),
-						message: __('Work Order already created for all items with BOM'),
-						indicator: 'orange'
-					});
-					return;
-				} else {
+				else {
 					const fields = [{
 						label: 'Items',
 						fieldtype: 'Table',
@@ -395,9 +434,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	make_raw_material_request() {
 		var me = this;
 		this.frm.call({
-			doc: this.frm.doc,
-			method: 'get_work_order_items',
+			method: "erpnext.selling.doctype.sales_order.sales_order.get_work_order_items",
 			args: {
+				sales_order: this.frm.docname,
 				for_raw_material_request: 1
 			},
 			callback: function(r) {
@@ -416,6 +455,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	make_raw_material_request_dialog(r) {
+		var me = this;
 		var fields = [
 			{fieldtype:'Check', fieldname:'include_exploded_items',
 				label: __('Include Exploded Items')},

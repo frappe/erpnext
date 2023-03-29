@@ -9,6 +9,7 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 	refresh: function(frm){
 		if(!frm.doc.__islocal) {
 			frm.add_custom_button(__('Send Emails'), function(){
+				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."))
 				frappe.call({
 					method: "erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_emails",
 					args: {
@@ -25,7 +26,8 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 				});
 			});
 			frm.add_custom_button(__('Download'), function(){
-				var url = frappe.urllib.get_full_url(
+				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."))
+				let url = frappe.urllib.get_full_url(
 					'/api/method/erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.download_statements?'
 					+ 'document_name='+encodeURIComponent(frm.doc.name))
 				$.ajax({

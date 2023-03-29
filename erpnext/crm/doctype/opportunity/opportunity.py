@@ -60,7 +60,7 @@ class Opportunity(TransactionBase, CRMNote):
 			if not self.get(field) and frappe.db.field_exists(self.opportunity_from, field):
 				try:
 					value = frappe.db.get_value(self.opportunity_from, self.party_name, field)
-					frappe.db.set(self, field, value)
+					self.db_set(field, value)
 				except Exception:
 					continue
 

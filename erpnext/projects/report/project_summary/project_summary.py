@@ -91,9 +91,9 @@ def get_chart_data(data):
 		"data": {
 			"labels": labels[:30],
 			"datasets": [
-				{"name": "Overdue", "values": overdue[:30]},
-				{"name": "Completed", "values": completed[:30]},
-				{"name": "Total Tasks", "values": total[:30]},
+				{"name": _("Overdue"), "values": overdue[:30]},
+				{"name": _("Completed"), "values": completed[:30]},
+				{"name": _("Total Tasks"), "values": total[:30]},
 			],
 		},
 		"type": "bar",

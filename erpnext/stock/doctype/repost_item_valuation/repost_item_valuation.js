@@ -34,6 +34,22 @@ frappe.ui.form.on('Repost Item Valuation', {
 		frm.trigger('setup_realtime_progress');
 	},
 
+	based_on: function(frm) {
+		var fields_to_reset = [];
+
+		if (frm.doc.based_on == 'Transaction') {
+			fields_to_reset = ['item_code', 'warehouse'];
+		} else if (frm.doc.based_on == 'Item and Warehouse') {
+			fields_to_reset = ['voucher_type', 'voucher_no'];
+		}
+
+		if (fields_to_reset) {
+			fields_to_reset.forEach(field => {
+				frm.set_value(field, undefined);
+			});
+		}
+	},
+
 	setup_realtime_progress: function(frm) {
 		frappe.realtime.on('item_reposting_progress', data => {
 			if (frm.doc.name !== data.name) {
@@ -58,6 +74,21 @@ frappe.ui.form.on('Repost Item Valuation', {
 		}
 
 		frm.trigger('show_reposting_progress');
+
+		if (frm.doc.status === 'Queued' && frm.doc.docstatus === 1) {
+			frm.trigger('execute_reposting');
+		}
+	},
+
+	execute_reposting(frm) {
+		frm.add_custom_button(__("Start Reposting"), () => {
+			frappe.call({
+				method: 'erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_repost_item_valuation',
+				callback: function() {
+					frappe.msgprint(__('Reposting has been started in the background.'));
+				}
+			});
+		});
 	},
 
 	show_reposting_progress: function(frm) {

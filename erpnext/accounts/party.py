@@ -32,6 +32,16 @@ from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 
+PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
+SALES_TRANSACTION_TYPES = {
+	"Quotation",
+	"Sales Order",
+	"Delivery Note",
+	"Sales Invoice",
+	"POS Invoice",
+}
+TRANSACTION_TYPES = PURCHASE_TRANSACTION_TYPES | SALES_TRANSACTION_TYPES
+
 
 class DuplicatePartyAccountError(frappe.ValidationError):
 	pass
@@ -124,12 +134,6 @@ def _get_party_details(
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
-	party_details["tax_category"] = get_address_tax_category(
-		party.get("tax_category"),
-		party_address,
-		shipping_address if party_type != "Supplier" else party_address,
-	)
-
 	tax_template = set_taxes(
 		party.name,
 		party_type,
@@ -169,6 +173,9 @@ def _get_party_details(
 		party_details["supplier_tds"] = frappe.get_value(
 			party_type, party.name, "tax_withholding_category"
 		)
+
+	if not party_details.get("tax_category") and pos_profile:
+		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
 
@@ -211,14 +218,10 @@ def set_address_details(
 	else:
 		party_details.update(get_company_address(company))
 
-	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order", "Quotation"]:
-		if party_details.company_address:
-			party_details.update(
-				get_fetch_values(doctype, "company_address", party_details.company_address)
-			)
-		get_regional_address_details(party_details, doctype, company)
+	if doctype in SALES_TRANSACTION_TYPES and party_details.company_address:
+		party_details.update(get_fetch_values(doctype, "company_address", party_details.company_address))
 
-	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
+	if doctype in PURCHASE_TRANSACTION_TYPES:
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
@@ -244,9 +247,21 @@ def set_address_details(
 					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
 				)
 
+	party_address, shipping_address = (
+		party_details.get(billing_address_field),
+		party_details.shipping_address_name,
+	)
+
+	party_details["tax_category"] = get_address_tax_category(
+		party.get("tax_category"),
+		party_address,
+		shipping_address if party_type != "Supplier" else party_address,
+	)
+
+	if doctype in TRANSACTION_TYPES:
 		get_regional_address_details(party_details, doctype, company)
 
-	return party_details.get(billing_address_field), party_details.shipping_address_name
+	return party_address, shipping_address
 
 
 @erpnext.allow_regional
@@ -296,7 +311,7 @@ def get_default_price_list(party):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
-		return frappe.db.get_value("Customer Group", party.customer_group, "default_price_list")
+		return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
 
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
@@ -385,7 +400,7 @@ def get_party_account(party_type, party=None, company=None):
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
 		if account:
-			account_currency = frappe.db.get_value("Account", account, "account_currency", cache=True)
+			account_currency = frappe.get_cached_value("Account", account, "account_currency")
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
@@ -402,7 +417,7 @@ def get_party_bank_account(party_type, party):
 def get_party_account_currency(party_type, party, company):
 	def generator():
 		party_account = get_party_account(party_type, party, company)
-		return frappe.db.get_value("Account", party_account, "account_currency", cache=True)
+		return frappe.get_cached_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
 
@@ -474,15 +489,15 @@ def validate_party_accounts(doc):
 		else:
 			companies.append(account.company)
 
-		party_account_currency = frappe.db.get_value(
-			"Account", account.account, "account_currency", cache=True
-		)
+		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value(
 				"Company", frappe.db.get_default("Company"), "default_currency"
 			)
 		else:
-			company_default_currency = frappe.db.get_value("Company", account.company, "default_currency")
+			company_default_currency = frappe.get_cached_value(
+				"Company", account.company, "default_currency"
+			)
 
 		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 
@@ -544,7 +559,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 		elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
 		else:
-			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
+			due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
 	return due_date
 
 
@@ -801,7 +816,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 	)
 
 	for d in companies:
-		company_default_currency = frappe.db.get_value("Company", d.company, "default_currency")
+		company_default_currency = frappe.get_cached_value("Company", d.company, "default_currency")
 		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
 		if party_account_currency == company_default_currency:

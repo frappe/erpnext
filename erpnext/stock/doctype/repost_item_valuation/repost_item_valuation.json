@@ -50,13 +50,15 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date",
+   "read_only_depends_on": "eval: doc.based_on == \"Transaction\"",
    "reqd": 1
   },
   {
    "fetch_from": "voucher_no.posting_time",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time"
+   "label": "Posting Time",
+   "read_only_depends_on": "eval: doc.based_on == \"Transaction\""
   },
   {
    "default": "Queued",
@@ -195,7 +197,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-13 12:20:22.182322",
+ "modified": "2022-11-28 16:00:05.637440",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

@@ -20,9 +20,6 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Supplier(TransactionBase):
-	def get_feed(self):
-		return self.supplier_name
-
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
@@ -128,24 +125,15 @@ class Supplier(TransactionBase):
 
 	def on_trash(self):
 		if self.supplier_primary_contact:
-			frappe.db.sql(
-				"""
-				UPDATE `tabSupplier`
-				SET
-					supplier_primary_contact=null,
-					supplier_primary_address=null,
-					mobile_no=null,
-					email_id=null,
-					primary_address=null
-				WHERE name=%(name)s""",
-				{"name": self.name},
-			)
+			self.db_set("supplier_primary_contact", None)
+		if self.supplier_primary_address:
+			self.db_set("supplier_primary_address", None)
 
 		delete_contact_and_address("Supplier", self.name)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default("supp_master_name") == "Supplier Name":
-			frappe.db.set(self, "supplier_name", newdn)
+			self.db_set("supplier_name", newdn)
 
 
 @frappe.whitelist()

@@ -6,6 +6,7 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import add_days, add_months, format_date, getdate, today
 from frappe.utils.jinja import validate_template
@@ -23,7 +24,7 @@ from erpnext.accounts.report.general_ledger.general_ledger import execute as get
 class ProcessStatementOfAccounts(Document):
 	def validate(self):
 		if not self.subject:
-			self.subject = "Statement Of Accounts for {{ customer.name }}"
+			self.subject = "Statement Of Accounts for {{ customer.customer_name }}"
 		if not self.body:
 			self.body = "Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}."
 
@@ -86,6 +87,7 @@ def get_report_pdf(doc, consolidated=True):
 				"account": [doc.account] if doc.account else None,
 				"party_type": "Customer",
 				"party": [entry.customer],
+				"party_name": [entry.customer_name] if entry.customer_name else None,
 				"presentation_currency": presentation_currency,
 				"group_by": doc.group_by,
 				"currency": doc.currency,
@@ -94,6 +96,7 @@ def get_report_pdf(doc, consolidated=True):
 				"show_opening_entries": 0,
 				"include_default_book_entries": 0,
 				"tax_id": tax_id if tax_id else None,
+				"show_net_values_in_party_account": doc.show_net_values_in_party_account,
 			}
 		)
 		col, res = get_soa(filters)
@@ -128,7 +131,8 @@ def get_report_pdf(doc, consolidated=True):
 	if not bool(statement_dict):
 		return False
 	elif consolidated:
-		result = "".join(list(statement_dict.values()))
+		delimiter = '<div style="page-break-before: always;"></div>' if doc.include_break else ""
+		result = delimiter.join(list(statement_dict.values()))
 		return get_pdf(result, {"orientation": doc.orientation})
 	else:
 		for customer, statement_html in statement_dict.items():
@@ -153,7 +157,7 @@ def get_customers_based_on_territory_or_customer_group(customer_collection, coll
 	]
 	return frappe.get_list(
 		"Customer",
-		fields=["name", "email_id"],
+		fields=["name", "customer_name", "email_id"],
 		filters=[[fields_dict[customer_collection], "IN", selected]],
 	)
 
@@ -176,7 +180,7 @@ def get_customers_based_on_sales_person(sales_person):
 	if sales_person_records.get("Customer"):
 		return frappe.get_list(
 			"Customer",
-			fields=["name", "email_id"],
+			fields=["name", "customer_name", "email_id"],
 			filters=[["name", "in", list(sales_person_records["Customer"])]],
 		)
 	else:
@@ -225,7 +229,7 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 		if customer_collection == "Sales Partner":
 			customers = frappe.get_list(
 				"Customer",
-				fields=["name", "email_id"],
+				fields=["name", "customer_name", "email_id"],
 				filters=[["default_sales_partner", "=", collection_name]],
 			)
 		else:
@@ -240,11 +244,14 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 		if int(primary_mandatory):
 			if primary_email == "":
 				continue
-		elif (billing_email == "") and (primary_email == ""):
-			continue
 
 		customer_list.append(
-			{"name": customer.name, "primary_email": primary_email, "billing_email": billing_email}
+			{
+				"name": customer.name,
+				"customer_name": customer.customer_name,
+				"primary_email": primary_email,
+				"billing_email": billing_email,
+			}
 		)
 	return customer_list
 
@@ -273,8 +280,12 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 			link.link_doctype='Customer'
 			and link.link_name=%s
 			and contact.is_billing_contact=1
+			{mcond}
 		ORDER BY
-			contact.creation desc""",
+			contact.creation desc
+		""".format(
+			mcond=get_match_cond("Contact")
+		),
 		customer_name,
 	)
 
@@ -313,6 +324,8 @@ def send_emails(document_name, from_scheduler=False):
 			attachments = [{"fname": customer + ".pdf", "fcontent": report_pdf}]
 
 			recipients, cc = get_recipients_and_cc(customer, doc)
+			if not recipients:
+				continue
 			context = get_context(customer, doc)
 			subject = frappe.render_template(doc.subject, context)
 			message = frappe.render_template(doc.body, context)

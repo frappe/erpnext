@@ -155,7 +155,6 @@ def adjust_account(data, period_list, consolidated=False):
 	for d in data:
 		for period in period_list:
 			key = period if consolidated else period.key
-			d[key] = totals[d["account"]]
 			d["total"] = totals[d["account"]]
 	return data
 
