@@ -1266,7 +1266,8 @@ def get_depreciation_amount(
 	else:
 		return get_wdv_or_dd_depr_amount(
 			depreciable_value,
-			row,
+			row.rate_of_depreciation,
+			row.frequency_of_depreciation,
 			schedule_idx,
 			prev_depreciation_amount,
 			has_wdv_or_dd_non_yearly_pro_rata,
@@ -1292,28 +1293,29 @@ def get_straight_line_or_manual_depr_amount(asset, row):
 
 
 def get_wdv_or_dd_depr_amount(
-	depreciable_value, row, schedule_idx, prev_depreciation_amount, has_wdv_or_dd_non_yearly_pro_rata
+	depreciable_value,
+	rate_of_depreciation,
+	frequency_of_depreciation,
+	schedule_idx,
+	prev_depreciation_amount,
+	has_wdv_or_dd_non_yearly_pro_rata,
 ):
-	if row.frequency_of_depreciation == 12:
-		return flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
+	if cint(frequency_of_depreciation) == 12:
+		return flt(depreciable_value) * (flt(rate_of_depreciation) / 100)
 	else:
 		if has_wdv_or_dd_non_yearly_pro_rata:
 			if schedule_idx == 0:
-				return flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
-			elif schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 1:
+				return flt(depreciable_value) * (flt(rate_of_depreciation) / 100)
+			elif schedule_idx % (12 / cint(frequency_of_depreciation)) == 1:
 				return (
-					flt(depreciable_value)
-					* flt(row.frequency_of_depreciation)
-					* (flt(row.rate_of_depreciation) / 1200)
+					flt(depreciable_value) * flt(frequency_of_depreciation) * (flt(rate_of_depreciation) / 1200)
 				)
 			else:
 				return prev_depreciation_amount
 		else:
-			if schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 0:
+			if schedule_idx % (12 / cint(frequency_of_depreciation)) == 0:
 				return (
-					flt(depreciable_value)
-					* flt(row.frequency_of_depreciation)
-					* (flt(row.rate_of_depreciation) / 1200)
+					flt(depreciable_value) * flt(frequency_of_depreciation) * (flt(rate_of_depreciation) / 1200)
 				)
 			else:
 				return prev_depreciation_amount
