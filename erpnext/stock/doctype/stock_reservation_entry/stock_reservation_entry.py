@@ -183,20 +183,27 @@ def get_stock_reservation_entries_for_items(
 	return sre_details
 
 
-def get_sre_reserved_qty_details(item_code_list: list, warehouse_list: list) -> dict:
+def get_sre_reserved_qty_details(item_code: str | list, warehouse: str | list) -> dict:
 	sre_details = {}
 
-	if item_code_list and warehouse_list:
+	if item_code and warehouse:
+		if isinstance(item_code, str):
+			item_code = [item_code]
+		if isinstance(warehouse, str):
+			warehouse = [warehouse]
+
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		sre_data = (
 			frappe.qb.from_(sre)
 			.select(
-				sre.item_code, sre.warehouse, Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty")
+				sre.item_code,
+				sre.warehouse,
+				Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
 			)
 			.where(
 				(sre.docstatus == 1)
-				& (sre.item_code.isin(item_code_list))
-				& (sre.warehouse.isin(warehouse_list))
+				& (sre.item_code.isin(item_code))
+				& (sre.warehouse.isin(warehouse))
 				& (sre.status.notin(["Delivered", "Cancelled"]))
 			)
 			.groupby(sre.item_code, sre.warehouse)
