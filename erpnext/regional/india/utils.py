@@ -17,6 +17,10 @@ from frappe.utils import (
 )
 from six import string_types
 
+from erpnext.assets.doctype.asset.asset import (
+	get_straight_line_or_manual_depr_amount,
+	get_wdv_or_dd_depr_amount,
+)
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.hr.utils import get_salary_assignments
@@ -1099,23 +1103,16 @@ def update_taxable_values(doc, method):
 		doc.get("items")[item_count - 1].taxable_value += diff
 
 
-def get_depreciation_amount(asset, depreciable_value, row):
+def get_depreciation_amount(
+	asset,
+	depreciable_value,
+	row,
+	schedule_idx=0,
+	prev_depreciation_amount=0,
+	has_wdv_or_dd_non_yearly_pro_rata=False,
+):
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset life and value
-		if asset.flags.increase_in_asset_life:
-			depreciation_amount = (
-				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
-		# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
-		elif asset.flags.increase_in_asset_value_due_to_repair:
-			depreciation_amount = (
-				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations)
-		# if the Depreciation Schedule is being prepared for the first time
-		else:
-			depreciation_amount = (
-				flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations)
+		return get_straight_line_or_manual_depr_amount(asset, row)
 	else:
 		rate_of_depreciation = row.rate_of_depreciation
 		# if its the first depreciation
@@ -1130,10 +1127,14 @@ def get_depreciation_amount(asset, depreciable_value, row):
 							"As per IT Act, the rate of depreciation for the first depreciation entry is reduced by 50%."
 						)
 					)
-
-		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
-
-	return depreciation_amount
+		return get_wdv_or_dd_depr_amount(
+			depreciable_value,
+			rate_of_depreciation,
+			row.frequency_of_depreciation,
+			schedule_idx,
+			prev_depreciation_amount,
+			has_wdv_or_dd_non_yearly_pro_rata,
+		)
 
 
 def set_item_tax_from_hsn_code(item):
