@@ -15,9 +15,7 @@ class AutoReconcile(Document):
 
 	def validate_receivable_payable_account(self):
 		if self.receivable_payable_account:
-			if not frappe.db.get_list(
-				"Account", filters={"name": self.receivable_payable_account, "company": self.company}
-			):
+			if self.company != frappe.db.get_value("Account", self.receivable_payable_account, "company"):
 				frappe.throw(
 					_("Receivable/Payable Account: {0} doesn't below to company {1}").format(
 						frappe.bold(self.receivable_payable_account), frappe.bold(self.company)
@@ -26,9 +24,7 @@ class AutoReconcile(Document):
 
 	def validate_bank_cash_account(self):
 		if self.bank_cash_account:
-			if not frappe.db.get_list(
-				"Account", filters={"name": self.bank_cash_account, "company": self.company}
-			):
+			if self.company != frappe.db.get_value("Account", self.bank_cash_account, "company"):
 				frappe.throw(
 					_("Bank/Cash Account {0} doesn't below to company {1}").format(
 						frappe.bold(self.bank_cash_account), frappe.bold(self.company)
