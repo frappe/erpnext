@@ -11,27 +11,27 @@ frappe.ui.form.on("Auto Reconcile", {
 				}
 			}
 		});
-		frm.set_query('receivable_payable_account',  function(doc, cdt, cdn) {
+		frm.set_query('receivable_payable_account',  function(doc) {
 			return {
 				filters: {
-					"company": locals[cdt][cdn].company,
+					"company": doc.company,
 					"is_group": 0,
-					"account_type": frappe.boot.party_account_types[locals[cdt][cdn].party_type]
+					"account_type": frappe.boot.party_account_types[doc.party_type]
 				}
 			};
 		});
-		frm.set_query('cost_center', function(doc, cdt, cdn) {
+		frm.set_query('cost_center', function(doc) {
 			return {
 				filters: {
-					"company": locals[cdt][cdn].company,
+					"company": doc.company,
 					"is_group": 0,
 				}
 			};
 		});
-		frm.set_query('bank_cash_account', function(doc, cdt, cdn) {
+		frm.set_query('bank_cash_account', function(doc) {
 			return {
 				filters:[
-					['Account', 'company', '=', locals[cdt][cdn].company],
+					['Account', 'company', '=', doc.company],
 					['Account', 'is_group', '=', 0],
 					['Account', 'account_type', 'in', ['Bank', 'Cash']]
 				]
