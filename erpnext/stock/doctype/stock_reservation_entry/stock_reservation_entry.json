@@ -25,10 +25,8 @@
   "delivered_qty",
   "section_break_3vb3",
   "company",
-  "project",
   "column_break_jbyr",
-  "batch_no",
-  "serial_no",
+  "project",
   "status",
   "amended_from"
  ],
@@ -176,6 +174,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "delivered_qty",
    "fieldtype": "Float",
    "label": "Delivered Qty",
@@ -225,18 +224,6 @@
   {
    "fieldname": "column_break_jbyr",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "batch_no",
-   "fieldtype": "Data",
-   "label": "Batch No",
-   "read_only": 1
-  },
-  {
-   "fieldname": "serial_no",
-   "fieldtype": "Long Text",
-   "label": "Serial No",
-   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -244,7 +231,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-24 16:22:08.859347",
+ "modified": "2023-03-29 18:24:18.332719",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
