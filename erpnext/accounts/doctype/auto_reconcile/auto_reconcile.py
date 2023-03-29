@@ -44,7 +44,7 @@ class AutoReconcile(Document):
 def get_progress(docname: str | None = None) -> float:
 	progress = 0.0
 	if docname:
-		reconcile_log = frappe.db.get_list(
+		reconcile_log = frappe.db.get_all(
 			"Auto Reconcile Log", filters={"auto_reconcile": docname}, as_list=1
 		)
 		if reconcile_log:
@@ -83,7 +83,7 @@ def get_pr_instance(doc: str):
 
 
 def is_job_running(job_name: str) -> bool:
-	jobs = frappe.db.get_list("RQ Job", filters={"status": ["in", ["started", "queued"]]})
+	jobs = frappe.db.get_all("RQ Job", filters={"status": ["in", ["started", "queued"]]})
 	for x in jobs:
 		if x.job_name == job_name:
 			return True
@@ -108,7 +108,7 @@ def run_reconciliation_job():
 		res = is_any_doc_running()
 		if not res:
 			# Get Queued item and start the process
-			queued = frappe.db.get_list(
+			queued = frappe.db.get_all(
 				"Auto Reconcile",
 				filters={"docstatus": 1, "status": "Queued"},
 				order_by="creation desc",
@@ -154,7 +154,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 	Identify current state of document and execute next tasks in background
 	"""
 	if doc:
-		log = frappe.db.get_list("Auto Reconcile Log", filters={"auto_reconcile": doc}, as_list=1)
+		log = frappe.db.get_all("Auto Reconcile Log", filters={"auto_reconcile": doc}, as_list=1)
 		if not log:
 			log = frappe.new_doc("Auto Reconcile Log")
 			log.auto_reconcile = doc
@@ -228,7 +228,7 @@ def split_allocations_into_batches(unreconciled_allocations: list) -> list:
 
 def fetch_and_allocate(doc: str) -> None:
 	if doc:
-		log = frappe.db.get_list("Auto Reconcile Log", filters={"auto_reconcile": doc}, as_list=1)
+		log = frappe.db.get_all("Auto Reconcile Log", filters={"auto_reconcile": doc}, as_list=1)
 		if log:
 			if not frappe.db.get_value("Auto Reconcile Log", log[0][0], "allocated"):
 				reconcile_log = frappe.get_doc("Auto Reconcile Log", log[0][0])
@@ -294,7 +294,7 @@ def fetch_and_allocate(doc: str) -> None:
 
 def reconcile(doc: None | str = None) -> None:
 	if doc:
-		log = frappe.db.get_list("Auto Reconcile Log", filters={"auto_reconcile": doc}, as_list=1)
+		log = frappe.db.get_all("Auto Reconcile Log", filters={"auto_reconcile": doc}, as_list=1)
 		if log:
 			reconcile_log = frappe.get_doc("Auto Reconcile Log", log[0][0])
 			if reconcile_log.reconciled_entries != reconcile_log.total_allocations:
@@ -382,7 +382,7 @@ def is_any_doc_running(for_filter=None):
 	if for_filter:
 		if type(for_filter) == str:
 			for_filter = frappe.json.loads(for_filter)
-		running_doc = frappe.db.get_list(
+		running_doc = frappe.db.get_all(
 			"Auto Reconcile",
 			filters={
 				"docstatus": 1,
@@ -395,7 +395,7 @@ def is_any_doc_running(for_filter=None):
 			as_list=1,
 		)
 	else:
-		running_doc = frappe.db.get_list(
+		running_doc = frappe.db.get_all(
 			"Auto Reconcile", filters={"docstatus": 1, "status": "Running"}, as_list=1
 		)
 
