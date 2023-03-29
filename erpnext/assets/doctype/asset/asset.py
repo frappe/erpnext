@@ -1262,47 +1262,61 @@ def get_depreciation_amount(
 	has_wdv_or_dd_non_yearly_pro_rata=False,
 ):
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset life and value
-		if asset.flags.increase_in_asset_life:
-			depreciation_amount = (
-				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
-		# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
-		elif asset.flags.increase_in_asset_value_due_to_repair:
-			depreciation_amount = (
-				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations)
-		# if the Depreciation Schedule is being prepared for the first time
-		else:
-			depreciation_amount = (
-				flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations)
+		return get_straight_line_or_manual_depr_amount(asset, row)
 	else:
-		if row.frequency_of_depreciation == 12:
-			depreciation_amount = flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
-		else:
-			if has_wdv_or_dd_non_yearly_pro_rata:
-				if schedule_idx == 0:
-					depreciation_amount = flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
-				elif schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 1:
-					depreciation_amount = (
-						flt(depreciable_value)
-						* flt(row.frequency_of_depreciation)
-						* (flt(row.rate_of_depreciation) / 1200)
-					)
-				else:
-					depreciation_amount = prev_depreciation_amount
-			else:
-				if schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 0:
-					depreciation_amount = (
-						flt(depreciable_value)
-						* flt(row.frequency_of_depreciation)
-						* (flt(row.rate_of_depreciation) / 1200)
-					)
-				else:
-					depreciation_amount = prev_depreciation_amount
+		return get_wdv_or_dd_depr_amount(
+			depreciable_value,
+			row,
+			schedule_idx,
+			prev_depreciation_amount,
+			has_wdv_or_dd_non_yearly_pro_rata,
+		)
 
-	return depreciation_amount
+
+def get_straight_line_or_manual_depr_amount(asset, row):
+	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset life and value
+	if asset.flags.increase_in_asset_life:
+		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / (
+			date_diff(asset.to_date, asset.available_for_use_date) / 365
+		)
+	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
+	elif asset.flags.increase_in_asset_value_due_to_repair:
+		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / flt(
+			row.total_number_of_depreciations
+		)
+	# if the Depreciation Schedule is being prepared for the first time
+	else:
+		return (flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)) / flt(
+			row.total_number_of_depreciations
+		)
+
+
+def get_wdv_or_dd_depr_amount(
+	depreciable_value, row, schedule_idx, prev_depreciation_amount, has_wdv_or_dd_non_yearly_pro_rata
+):
+	if row.frequency_of_depreciation == 12:
+		return flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
+	else:
+		if has_wdv_or_dd_non_yearly_pro_rata:
+			if schedule_idx == 0:
+				return flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
+			elif schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 1:
+				return (
+					flt(depreciable_value)
+					* flt(row.frequency_of_depreciation)
+					* (flt(row.rate_of_depreciation) / 1200)
+				)
+			else:
+				return prev_depreciation_amount
+		else:
+			if schedule_idx % (12 / cint(row.frequency_of_depreciation)) == 0:
+				return (
+					flt(depreciable_value)
+					* flt(row.frequency_of_depreciation)
+					* (flt(row.rate_of_depreciation) / 1200)
+				)
+			else:
+				return prev_depreciation_amount
 
 
 @frappe.whitelist()
