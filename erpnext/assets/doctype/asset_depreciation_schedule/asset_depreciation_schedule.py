@@ -488,7 +488,7 @@ def get_total_days(date, frequency):
 
 @erpnext.allow_regional
 def get_depreciation_amount(
-	asset_doc,
+	asset,
 	depreciable_value,
 	row,
 	schedule_idx=0,
@@ -496,7 +496,7 @@ def get_depreciation_amount(
 	has_wdv_or_dd_non_yearly_pro_rata=False,
 ):
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		return get_straight_line_or_manual_depr_amount(asset_doc, row)
+		return get_straight_line_or_manual_depr_amount(asset, row)
 	else:
 		return get_wdv_or_dd_depr_amount(
 			depreciable_value,
@@ -508,20 +508,20 @@ def get_depreciation_amount(
 		)
 
 
-def get_straight_line_or_manual_depr_amount(asset_doc, row):
+def get_straight_line_or_manual_depr_amount(asset, row):
 	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset life and value
-	if asset_doc.flags.increase_in_asset_life:
+	if asset.flags.increase_in_asset_life:
 		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / (
-			date_diff(asset_doc.to_date, asset_doc.available_for_use_date) / 365
+			date_diff(asset.to_date, asset.available_for_use_date) / 365
 		)
 	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
-	elif asset_doc.flags.increase_in_asset_value_due_to_repair:
+	elif asset.flags.increase_in_asset_value_due_to_repair:
 		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / flt(
 			row.total_number_of_depreciations
 		)
 	# if the Depreciation Schedule is being prepared for the first time
 	else:
-		return (flt(asset_doc.gross_purchase_amount) - flt(row.expected_value_after_useful_life)) / flt(
+		return (flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)) / flt(
 			row.total_number_of_depreciations
 		)
 
