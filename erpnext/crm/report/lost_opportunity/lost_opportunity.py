@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 
-
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
@@ -82,7 +81,7 @@ def get_data(filters):
 			{join}
 		WHERE
 			`tabOpportunity`.status = 'Lost' and `tabOpportunity`.company = %(company)s
-			AND `tabOpportunity`.modified BETWEEN %(from_date)s AND %(to_date)s
+			AND DATE(`tabOpportunity`.modified) BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
 		GROUP BY
 			`tabOpportunity`.name
