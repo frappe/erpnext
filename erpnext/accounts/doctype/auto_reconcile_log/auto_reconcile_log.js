@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Auto Reconcile Log", {
 	refresh(frm) {
-		var progress = 0;
+		let progress = 0;
 		if (frm.doc.reconciled_entries != 0) {
 			progress = frm.doc.reconciled_entries / frm.doc.total_allocations * 100;
 		} else if(frm.doc.total_allocations == 0){
