@@ -324,7 +324,9 @@ class Asset(AccountsController):
 				has_wdv_or_dd_non_yearly_pro_rata,
 			)
 
-			if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
+			if not has_pro_rata or (
+				n < (cint(number_of_pending_depreciations) - 1) or number_of_pending_depreciations == 2
+			):
 				schedule_date = add_months(
 					finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
 				)
