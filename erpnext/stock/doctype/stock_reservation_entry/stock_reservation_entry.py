@@ -3,16 +3,14 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 
-from erpnext.utilities.transaction_base import TransactionBase
 
-
-class StockReservationEntry(TransactionBase):
+class StockReservationEntry(Document):
 	def validate(self) -> None:
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
-		self.validate_posting_time()
 		self.validate_mandatory()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
@@ -29,8 +27,6 @@ class StockReservationEntry(TransactionBase):
 		mandatory = [
 			"item_code",
 			"warehouse",
-			"posting_date",
-			"posting_time",
 			"voucher_type",
 			"voucher_no",
 			"voucher_detail_no",

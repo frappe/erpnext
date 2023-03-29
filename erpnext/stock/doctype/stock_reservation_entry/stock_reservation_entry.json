@@ -10,8 +10,6 @@
  "field_order": [
   "item_code",
   "warehouse",
-  "posting_date",
-  "posting_time",
   "column_break_elik",
   "voucher_type",
   "voucher_no",
@@ -59,29 +57,6 @@
    "print_width": "100px",
    "read_only": 1,
    "search_index": 1,
-   "width": "100px"
-  },
-  {
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "label": "Posting Date",
-   "oldfieldname": "posting_date",
-   "oldfieldtype": "Date",
-   "print_width": "100px",
-   "read_only": 1,
-   "search_index": 1,
-   "width": "100px"
-  },
-  {
-   "fieldname": "posting_time",
-   "fieldtype": "Time",
-   "label": "Posting Time",
-   "oldfieldname": "posting_time",
-   "oldfieldtype": "Time",
-   "print_width": "100px",
-   "read_only": 1,
    "width": "100px"
   },
   {
@@ -231,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-29 18:24:18.332719",
+ "modified": "2023-03-29 18:36:26.752872",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
