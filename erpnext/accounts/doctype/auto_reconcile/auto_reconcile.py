@@ -137,7 +137,6 @@ def run_reconciliation_job():
 			# so, no commit and no job trigger
 			job_name = f"trigger_auto_reconcile_for_{res[0][0]}"
 			if not is_job_running(job_name):
-				# reconcile_based_on_filters(res[0][0])
 				job = frappe.enqueue(
 					method="erpnext.accounts.doctype.auto_reconcile.auto_reconcile.reconcile_based_on_filters",
 					queue="long",
@@ -160,7 +159,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 			log = frappe.new_doc("Auto Reconcile Log")
 			log.auto_reconcile = doc
 			log = log.save()
-			# fetch_and_allocate(doc)
+
 			job_name = f"auto_reconcile_{doc}_fetch_and_allocate"
 			if not is_job_running(job_name):
 				job = frappe.enqueue(
@@ -175,7 +174,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 		else:
 			reconcile_log = frappe.get_doc("Auto Reconcile Log", log[0][0])
 			if not reconcile_log.allocated:
-				# fetch_and_allocate(doc)
+
 				job_name = f"auto_reconcile_{doc}_fetch_and_allocate"
 				if not is_job_running(job_name):
 					job = frappe.enqueue(
