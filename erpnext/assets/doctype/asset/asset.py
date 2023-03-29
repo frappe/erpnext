@@ -313,7 +313,10 @@ class Asset(AccountsController):
 			if skip_row:
 				continue
 
-			prev_depreciation_amount = self.get("schedules")[n - 1].depreciation_amount if n > 0 else 0
+			if n > 0 and len(self.get("schedules")) > n - 1:
+				prev_depreciation_amount = self.get("schedules")[n - 1].depreciation_amount
+			else:
+				prev_depreciation_amount = 0
 
 			depreciation_amount = get_depreciation_amount(
 				self,
