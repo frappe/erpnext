@@ -43,7 +43,7 @@
   "allow_stale",
   "stale_days",
   "section_break_rvrg",
-  "enable_auto_reconciliation",
+  "enable_payment_reconciliation_in_background",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -388,9 +388,9 @@
   },
   {
    "default": "0",
-   "fieldname": "enable_auto_reconciliation",
+   "fieldname": "enable_payment_reconciliation_in_background",
    "fieldtype": "Check",
-   "label": "Enable Auto Reconciliation"
+   "label": "Enable Payment Reconciliation in background"
   },
   {
    "fieldname": "column_break_fwco",
@@ -402,7 +402,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-28 11:16:15.904972",
+ "modified": "2023-03-31 14:07:03.002997",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

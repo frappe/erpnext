@@ -1,4 +1,4 @@
-frappe.listview_settings['Auto Reconcile Log'] = {
+frappe.listview_settings['Process Payment Reconciliation Log'] = {
 	add_fields: ["allocated", "reconciled", "reconciled_entries", "total_allocations", "error_log"],
 	get_indicator: function(doc) {
 		if (doc.reconciled) {

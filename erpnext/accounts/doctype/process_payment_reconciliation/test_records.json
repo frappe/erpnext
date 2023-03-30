@@ -1,22 +1,22 @@
 [
 	{
-		"company": "Test Auto Reconcile",
+		"company": "Test Process PR",
 		"conversion_rate": 1.0,
 		"currency": "INR",
-		"cost_center": "Main - TAR",
+		"cost_center": "Main - TPP",
 		"customer": "John Doe",
 		"customer_name": "John Doe",
-		"debit_to": "Debtors - TAR",
+		"debit_to": "Debtors - TPP",
 		"doctype": "Sales Invoice",
 		"items": [
 			{
 				"amount": 100.0,
 				"base_amount": 100.0,
 				"base_rate": 100.0,
-				"cost_center": "Main - TAR",
+				"cost_center": "Main - TPP",
 				"doctype": "Sales Invoice Item",
-				"income_account": "Sales - TAR",
-				"expense_account": "Cost of Goods Sold - TAR",
+				"income_account": "Sales - TPP",
+				"expense_account": "Cost of Goods Sold - TPP",
 				"item_code": "Notebook 90",
 				"item_name": "Notebook 90",
 				"parentfield": "items",
@@ -34,15 +34,15 @@
 	},
 	{
 		"doctype": "Payment Entry",
-		"company": "Test Auto Reconcile",
+		"company": "Test Process PR",
 		"conversion_rate": 1.0,
 		"currency": "INR",
-		"cost_center": "Main - TAR",
+		"cost_center": "Main - TPP",
 		"party": "John Doe",
 		"party_type": "Customer",
 		"payment_type": "Receive",
-		"paid_from": "Debtors - TAR",
-		"paid_to": "Cash - TAR",
+		"paid_from": "Debtors - TPP",
+		"paid_to": "Cash - TPP",
 		"paid_amount": 200,
 		"received_amount": 200
 	}

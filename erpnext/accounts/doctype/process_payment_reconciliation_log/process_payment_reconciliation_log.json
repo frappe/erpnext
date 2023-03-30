@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "autoincrement",
+ "autoname": "format:PPR-LOG-{##}",
  "beta": 1,
  "creation": "2023-03-13 15:00:09.149681",
  "default_view": "List",
@@ -8,7 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "auto_reconcile",
+  "process_pr",
   "tasks_section",
   "allocated",
   "reconciled",
@@ -26,14 +26,14 @@
    "fieldname": "invoices",
    "fieldtype": "Table",
    "label": "Invoices",
-   "options": "Auto Reconcile Log Invoices",
+   "options": "Process Payment Reconciliation Log Invoices",
    "read_only": 1
   },
   {
    "fieldname": "allocations",
    "fieldtype": "Table",
    "label": "Allocations",
-   "options": "Auto Reconcile Log Allocations",
+   "options": "Process Payment Reconciliation Log Allocations",
    "read_only": 1
   },
   {
@@ -81,15 +81,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "auto_reconcile",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Parent Document",
-   "options": "Auto Reconcile",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_4ywv",
    "fieldtype": "Section Break"
   },
@@ -99,16 +90,25 @@
    "fieldtype": "Long Text",
    "label": "Reconciliation Error Log",
    "read_only": 1
+  },
+  {
+   "fieldname": "process_pr",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parent Document",
+   "options": "Process Payment Reconciliation",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-27 16:40:55.113793",
+ "modified": "2023-03-30 22:13:48.455626",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Auto Reconcile Log",
- "naming_rule": "Autoincrement",
+ "name": "Process Payment Reconciliation Log",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -127,6 +127,5 @@
  "search_fields": "allocated, reconciled, total_allocations, reconciled_entries",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "title_field": "auto_reconcile"
+ "states": []
 }

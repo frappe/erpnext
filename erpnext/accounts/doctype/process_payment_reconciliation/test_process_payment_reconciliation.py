@@ -8,10 +8,10 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestAutoReconcile(unittest.TestCase):
-	# class TestAutoReconcile(FrappeTestCase):
+class TestProcessPaymentReconciliation(unittest.TestCase):
+	# class TestProcessPaymentReconciliation(FrappeTestCase):
 	def setUp(self):
-		self.test_records = frappe.get_test_records("Auto Reconcile")
+		self.test_records = frappe.get_test_records("Process Payment Reconciliation")
 		self.create_company()
 		self.clear_old_records()
 		self.create_new_records()
@@ -21,7 +21,7 @@ class TestAutoReconcile(unittest.TestCase):
 
 	def create_company(self):
 		company = None
-		name = "Test Auto Reconcile"
+		name = "Test Process PR"
 		if frappe.db.exists("Company", name):
 			company = frappe.get_doc("Company", name)
 		else:
@@ -39,11 +39,11 @@ class TestAutoReconcile(unittest.TestCase):
 
 		self.company = company.name
 		self.cost_center = company.cost_center
-		self.warehouse = "All Warehouses - TAR"
-		self.income_account = "Sales - TAR"
-		self.expense_account = "Cost of Goods Sold - TAR"
-		self.debit_to = "Debtors - TAR"
-		self.creditors = "Creditors - TAR"
+		self.warehouse = "All Warehouses - TPP"
+		self.income_account = "Sales - TPP"
+		self.expense_account = "Cost of Goods Sold - TPP"
+		self.debit_to = "Debtors - TPP"
+		self.creditors = "Creditors - TPP"
 
 	def clear_old_records(self):
 		doctype_list = [

@@ -10,7 +10,9 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
 
 import erpnext
-from erpnext.accounts.doctype.auto_reconcile.auto_reconcile import is_any_doc_running
+from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
+	is_any_doc_running,
+)
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
@@ -308,7 +310,7 @@ class PaymentReconciliation(Document):
 	@frappe.whitelist()
 	def reconcile(self, skip_job_check=False):
 		if not skip_job_check and frappe.db.get_single_value(
-			"Accounts Settings", "enable_auto_reconciliation"
+			"Accounts Settings", "enable_payment_reconciliation_in_background"
 		):
 			running_doc = is_any_doc_running(
 				dict(
@@ -318,11 +320,12 @@ class PaymentReconciliation(Document):
 					receivable_payable_account=self.receivable_payable_account,
 				)
 			)
+
 			if running_doc:
 				frappe.throw(
-					_(
-						"An Auto Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
-					).format(get_link_to_form("Auto Reconcile", running_doc[0][0]))
+					_("A Reconciliation Job {0} is running for the same filters. Cannot reconcile now").format(
+						get_link_to_form("Auto Reconcile", running_doc[0][0])
+					)
 				)
 				return
 

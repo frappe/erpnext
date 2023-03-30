@@ -160,7 +160,7 @@
  "modified": "2023-03-20 21:05:43.121945",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Auto Reconcile Log Allocations",
+ "name": "Process Payment Reconciliation Log Allocations",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

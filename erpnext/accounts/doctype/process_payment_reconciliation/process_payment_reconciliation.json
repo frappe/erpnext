@@ -1,8 +1,8 @@
 {
  "actions": [],
- "autoname": "hash",
+ "autoname": "format:ACC-PPR-{#####}",
  "beta": 1,
- "creation": "2023-03-13 10:42:34.062670",
+ "creation": "2023-03-30 21:28:39.793927",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -25,8 +25,8 @@
   "cost_center",
   "bank_cash_account",
   "section_break_2n02",
-  "amended_from",
-  "error_log"
+  "error_log",
+  "amended_from"
  ],
  "fields": [
   {
@@ -34,7 +34,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nQueued\nRunning\nCompleted\nPartially Reconciled\nFailed",
+   "options": "Queued\nRunning\nCompleted\nPartially Reconciled\nFailed",
    "read_only": 1
   },
   {
@@ -123,15 +123,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Auto Reconcile",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_2n02",
    "fieldtype": "Section Break"
   },
@@ -140,16 +131,34 @@
    "fieldname": "error_log",
    "fieldtype": "Long Text",
    "label": "Error Log"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Payment Reconciliation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Payment Reconciliation",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-27 16:40:41.830610",
+ "modified": "2023-03-31 10:12:39.196194",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Auto Reconcile",
- "naming_rule": "Random",
+ "name": "Process Payment Reconciliation",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

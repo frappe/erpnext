@@ -77,7 +77,7 @@
  "modified": "2023-03-13 14:48:20.066846",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Auto Reconcile Log Invoices",
+ "name": "Process Payment Reconciliation Log Invoices",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

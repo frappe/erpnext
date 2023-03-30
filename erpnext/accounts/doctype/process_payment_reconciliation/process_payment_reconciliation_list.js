@@ -1,4 +1,4 @@
-frappe.listview_settings['Auto Reconcile'] = {
+frappe.listview_settings['Process Payment Reconciliation'] = {
 	add_fields: ["status"],
 	get_indicator: function(doc) {
 		var colors = {

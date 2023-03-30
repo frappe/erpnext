@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestAutoReconcileLog(FrappeTestCase):
+class TestProcessPaymentReconciliationLog(FrappeTestCase):
 	pass

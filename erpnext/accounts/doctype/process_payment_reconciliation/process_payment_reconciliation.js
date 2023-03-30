@@ -1,7 +1,7 @@
 // Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("Auto Reconcile", {
+frappe.ui.form.on("Process Payment Reconciliation", {
 	onload: function(frm) {
 		// set queries
 		frm.set_query("party_type", function() {
@@ -44,13 +44,13 @@ frappe.ui.form.on("Auto Reconcile", {
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({
-					method: 'erpnext.accounts.doctype.auto_reconcile.auto_reconcile.run_reconciliation_job',
+					method: 'erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.run_reconciliation_job',
 				});
 			});
 		}
 		if (frm.doc.docstatus==1 && ['Completed', 'Running', "Partially Reconciled"].find(x => x == frm.doc.status)) {
 			frm.call({
-				'method': "erpnext.accounts.doctype.auto_reconcile.auto_reconcile.get_progress",
+				'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.get_progress",
 				args: {
 					"docname": frm.docname,
 				}

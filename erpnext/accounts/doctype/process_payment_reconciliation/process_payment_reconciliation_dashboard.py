@@ -3,12 +3,12 @@ from frappe import _
 
 def get_data():
 	return {
-		"fieldname": "auto_reconcile",
+		"fieldname": "process_pr",
 		"transactions": [
 			{
 				"label": _("Reconciliation Logs"),
 				"items": [
-					"Auto Reconcile Log",
+					"Process Payment Reconciliation Log",
 				],
 			},
 		],

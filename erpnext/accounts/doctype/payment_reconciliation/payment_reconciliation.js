@@ -88,7 +88,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			frappe.db.get_single_value("Accounts Settings", "enable_auto_reconciliation").then((enabled) => {
  				if(enabled) {
 					this.frm.call({
-						'method': "erpnext.accounts.doctype.auto_reconcile.auto_reconcile.is_any_doc_running",
+						'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
 						"args": {
 							for_filter: {
 								company: this.frm.doc.company,
@@ -99,7 +99,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						}
 					}).then(r => {
 						if (r.message) {
-							let doc_link = frappe.utils.get_form_link("Auto Reconcile", r.message[0][0], true);
+							let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message[0][0], true);
 							let msg = __("Auto Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
 							this.frm.dashboard.add_comment(msg, "yellow");
 						}

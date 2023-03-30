@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class AutoReconcileLogInvoices(Document):
+class ProcessPaymentReconciliationLogAllocations(Document):
 	pass
