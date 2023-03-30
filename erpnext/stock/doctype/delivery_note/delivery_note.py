@@ -148,7 +148,7 @@ class DeliveryNote(SellingController):
 		if not self.installation_status:
 			self.installation_status = "Not Installed"
 
-		self.validate_against_sre()
+		self.validate_against_stock_reservation()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
@@ -262,8 +262,6 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
-		self.update_stock_reservation_entry()
-
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -275,104 +273,86 @@ class DeliveryNote(SellingController):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
 
 	def update_stock_reservation_entry(self):
-		if not self.is_return:
-			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-				update_sre_delivered_qty,
-			)
-
-			for item in self.get("items"):
-				if item.against_sre:
-					update_sre_delivered_qty(item.doctype, item.against_sre)
-
-	def validate_against_sre(self):
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_stock_reservation_entries_for_items,
-			has_reserved_stock,
-		)
-
-		sre_details = get_stock_reservation_entries_for_items(self.items)
+		if self.is_return or self._action != "submit":
+			return
 
 		for item in self.items:
-			if item.against_sre:
-				sre = sre_details[item.against_sre]
+			if not item.against_sales_order or not item.so_detail:
+				continue
 
-				# SRE `docstatus` should be `1` (submitted)
-				if sre.docstatus == 0:
-					frappe.throw(
-						_("Row #{0}: Stock Reservation Entry {1} is not submitted").format(
-							item.idx, item.against_sre
-						)
-					)
-				elif sre.docstatus == 2:
-					frappe.throw(
-						_("Row #{0}: Stock Reservation Entry {0} is cancelled").format(item.idx, item.against_sre)
-					)
+			sre_list = frappe.db.get_all(
+				"Stock Reservation Entry",
+				{
+					"docstatus": 1,
+					"voucher_type": "Sales Order",
+					"voucher_no": item.against_sales_order,
+					"voucher_detail_no": item.so_detail,
+					"warehouse": item.warehouse,
+					"status": ["not in", ["Delivered", "Cancelled"]],
+				},
+				order_by="creation",
+			)
 
-				# SRE `status` should not be `Delivered`
-				if sre.status == "Delivered":
-					frappe.throw(
-						_("Row #{0}: Cannot deliver more against Stock Reservation Entry {1}").format(
-							item.idx, item.against_sre
-						)
-					)
+			if not sre_list:
+				continue
 
-				if not frappe.get_cached_value("Warehouse", sre.warehouse, "is_group"):
-					if item.warehouse != sre.warehouse:
+			available_qty_to_deliver = item.stock_qty
+			for sre in sre_list:
+				if available_qty_to_deliver <= 0:
+					break
+
+				sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+				qty_to_be_deliver = min(sre_doc.reserved_qty - sre_doc.delivered_qty, available_qty_to_deliver)
+				sre_doc.delivered_qty += qty_to_be_deliver
+				sre_doc.db_update()
+				sre_doc.update_status()
+
+				available_qty_to_deliver -= qty_to_be_deliver
+
+	def validate_against_stock_reservation(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher_detail_no,
+		)
+
+		if self.is_return:
+			return
+
+		for item in self.items:
+			if not item.against_sales_order or not item.so_detail:
+				continue
+
+			sre_data = get_sre_reserved_qty_details_for_voucher_detail_no(
+				"Sales Order", item.against_sales_order, item.so_detail
+			)
+
+			if not sre_data:
+				continue
+
+			is_group_warehouse = frappe.get_cached_value("Warehouse", sre_data[0], "is_group")
+
+			if not item.warehouse:
+				if not is_group_warehouse:
+					item.warehouse = sre_data[0]
+				else:
+					frappe.throw(_("Row #{0}: Warehouse is mandatory").format(item.idx, item.item_code))
+			else:
+				if not is_group_warehouse:
+					if item.warehouse != sre_data[0]:
 						frappe.throw(
-							_("Row #{0}: Warehouse {1} does not match with Stock Reservation Entry {2}").format(
-								item.idx, item.warehouse, item.against_sre
-							)
+							_("Row #{0}: Stock is reserved for Warehouse {1}").format(item.idx, sre_data[0]),
+							title="Stock Reservation Warehouse Mismatch",
 						)
 				else:
 					from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
-					warehouses = get_child_warehouses(sre.warehouse)
-
+					warehouses = get_child_warehouses(sre_data[0])
 					if item.warehouse not in warehouses:
 						frappe.throw(
-							_("Row #{0}: Warehouse {1} should be a child of Warehouse {2}").format(
-								item.idx, item.warehouse, sre.warehouse
-							)
+							_(
+								"Row #{0}: Stock is reserved for Group Warehouse {1}, please select its child Warehouse"
+							).format(item.idx, sre_data[0]),
+							title="Stock Reservation Group Warehouse",
 						)
-
-				for field in (
-					"item_code",
-					("against_sales_order", "voucher_no"),
-					("so_detail", "voucher_detail_no"),
-				):
-					item_field = sre_field = None
-
-					if isinstance(field, tuple):
-						item_field, sre_field = field[0], field[1]
-					else:
-						item_field = sre_field = field
-
-					if item.get(item_field) != sre.get(sre_field):
-						frappe.throw(
-							_("Row #{0}: {1} {2} does not match with Stock Reservation Entry {3}").format(
-								item.idx,
-								frappe.get_meta(item.doctype).get_label(item_field),
-								item.get(item_field),
-								item.against_sre,
-							)
-						)
-
-				max_delivered_qty = (sre.reserved_qty - sre.delivered_qty) / item.conversion_factor
-				if item.qty > max_delivered_qty:
-					frappe.throw(
-						_("Row #{0}: Cannot deliver more than {1} {2} against Stock Reservation Entry {3}").format(
-							item.idx, max_delivered_qty, item.uom, item.against_sre
-						)
-					)
-			elif item.against_sales_order:
-				if not item.so_detail:
-					frappe.throw(_("Row #{0}: Sales Order Item reference is required").format(item.idx))
-				elif has_reserved_stock("Sales Order", item.against_sales_order, item.so_detail):
-					frappe.throw(
-						_("Row #{0}: Cannot deliver against Sales Order {1} without Stock Reservation Entry").format(
-							item.idx, item.against_sales_order
-						)
-					)
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit

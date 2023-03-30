@@ -152,6 +152,24 @@ def get_stock_reservation_entries_for_voucher(
 	return query.run(as_dict=True)
 
 
+def get_sre_reserved_qty_details_for_voucher_detail_no(
+	voucher_type: str, voucher_no: str, voucher_detail_no: str
+) -> list:
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	return (
+		frappe.qb.from_(sre)
+		.select(sre.warehouse, (Sum(sre.reserved_qty) - Sum(sre.delivered_qty)).as_("reserved_qty"))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.voucher_detail_no == voucher_detail_no)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+		.groupby(sre.warehouse)
+	).run(as_list=True)[0]
+
+
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
 	if get_stock_reservation_entries_for_voucher(
 		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
@@ -159,56 +177,6 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 		return True
 
 	return False
-
-
-def update_sre_delivered_qty(
-	doctype: str, sre_name: str, sre_field: str = "against_sre", qty_field: str = "stock_qty"
-) -> None:
-	table = frappe.qb.DocType(doctype)
-	delivered_qty = (
-		frappe.qb.from_(table)
-		.select(Sum(table[qty_field]))
-		.where((table.docstatus == 1) & (table[sre_field] == sre_name))
-	).run(as_list=True)[0][0] or 0.0
-
-	sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
-	sre_doc.delivered_qty = delivered_qty
-	sre_doc.db_update()
-	sre_doc.update_status()
-
-
-def get_stock_reservation_entries_for_items(
-	items: list[dict | object], sre_field: str = "against_sre"
-) -> dict[dict]:
-	sre_details = {}
-
-	if items:
-		sre_list = [item.get(sre_field) for item in items if item.get(sre_field)]
-
-		if sre_list:
-			sre = frappe.qb.DocType("Stock Reservation Entry")
-			sre_data = (
-				frappe.qb.from_(sre)
-				.select(
-					sre.name,
-					sre.status,
-					sre.docstatus,
-					sre.item_code,
-					sre.warehouse,
-					sre.voucher_type,
-					sre.voucher_no,
-					sre.voucher_detail_no,
-					sre.reserved_qty,
-					sre.delivered_qty,
-					sre.stock_uom,
-				)
-				.where(sre.name.isin(sre_list))
-				.orderby(sre.creation)
-			).run(as_dict=True)
-
-			sre_details = {d.name: d for d in sre_data}
-
-	return sre_details
 
 
 def get_sre_reserved_qty_details(item_code: str | list, warehouse: str | list) -> dict:

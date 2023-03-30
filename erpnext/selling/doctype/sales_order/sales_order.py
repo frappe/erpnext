@@ -622,42 +622,7 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
-	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_stock_reservation_entries_for_voucher,
-		has_reserved_stock,
-	)
-
 	def set_missing_values(source, target):
-		if not target.items and has_reserved_stock("Sales Order", source_name):
-			sre_list = get_stock_reservation_entries_for_voucher("Sales Order", source_name)
-			sre_dict = {d.pop("voucher_detail_no"): d for d in sre_list}
-
-			for item in source.get("items"):
-				if item.name in sre_dict:
-					reserved_qty, delivered_qty, warehouse = (
-						sre_dict[item.name]["reserved_qty"],
-						sre_dict[item.name]["delivered_qty"],
-						sre_dict[item.name]["warehouse"],
-					)
-					qty_to_deliver = (reserved_qty - delivered_qty) / item.conversion_factor
-
-					row = frappe.new_doc("Delivery Note Item")
-					row.against_sales_order = source.name
-					row.against_sre = sre_dict[item.name]["name"]
-					row.so_detail = item.name
-					row.item_code = item.item_code
-					row.item_name = item.item_name
-					row.description = item.description
-					row.qty = qty_to_deliver
-					row.stock_uom = item.stock_uom
-					row.uom = item.uom
-					row.conversion_factor = item.conversion_factor
-
-					if not frappe.get_cached_value("Warehouse", warehouse, "is_group"):
-						row.warehouse = warehouse
-
-					target.append("items", row)
-
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -685,9 +650,6 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				or item.get("buying_cost_center")
 				or item_group.get("buying_cost_center")
 			)
-
-	if has_reserved_stock("Sales Order", source_name):
-		skip_item_mapping = True
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
