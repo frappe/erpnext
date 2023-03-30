@@ -316,9 +316,27 @@ class DeliveryNote(SellingController):
 						)
 					)
 
+				if not frappe.get_cached_value("Warehouse", sre.warehouse, "is_group"):
+					if item.warehouse != sre.warehouse:
+						frappe.throw(
+							_("Row #{0}: Warehouse {1} does not match with Stock Reservation Entry {2}").format(
+								item.idx, item.warehouse, item.against_sre
+							)
+						)
+				else:
+					from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+					warehouses = get_child_warehouses(sre.warehouse)
+
+					if item.warehouse not in warehouses:
+						frappe.throw(
+							_("Row #{0}: Warehouse {1} should be a child of Warehouse {2}").format(
+								item.idx, item.warehouse, sre.warehouse
+							)
+						)
+
 				for field in (
 					"item_code",
-					"warehouse",
 					("against_sales_order", "voucher_no"),
 					("so_detail", "voucher_detail_no"),
 				):
