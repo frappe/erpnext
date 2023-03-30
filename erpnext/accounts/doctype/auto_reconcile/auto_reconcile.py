@@ -206,6 +206,8 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 						enqueue_after_commit=True,
 						doc=doc,
 					)
+			elif reconcile_log.reconciled:
+				frappe.db.set_value("Auto Reconcile", doc, "status", "Completed")
 
 
 def split_allocations_into_batches(unreconciled_allocations: list) -> list:
