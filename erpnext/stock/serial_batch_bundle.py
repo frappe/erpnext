@@ -388,6 +388,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			setattr(self, key, value)
 
 		self.batch_nos = self.get_batch_nos()
+		self.prepare_batches()
 		self.calculate_avg_rate()
 		self.calculate_valuation_rate()
 
@@ -401,21 +402,21 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
+			self.stock_value_differece = defaultdict(float)
 
 			for ledger in entries:
-				self.batch_avg_rate[ledger.batch_no] += flt(ledger.incoming_rate) / flt(ledger.qty)
+				self.stock_value_differece[ledger.batch_no] += flt(ledger.incoming_rate)
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
 			self.set_stock_value_difference()
 
 	def get_batch_no_ledgers(self) -> List[dict]:
+		if not self.batchwise_valuation_batches:
+			return []
+
 		parent = frappe.qb.DocType("Serial and Batch Bundle")
 		child = frappe.qb.DocType("Serial and Batch Entry")
-
-		batch_nos = self.batch_nos
-		if isinstance(self.batch_nos, dict):
-			batch_nos = list(self.batch_nos.keys())
 
 		timestamp_condition = ""
 		if self.sle.posting_date and self.sle.posting_time:
@@ -433,7 +434,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				Sum(child.qty).as_("qty"),
 			)
 			.where(
-				(child.batch_no.isin(batch_nos))
+				(child.batch_no.isin(self.batchwise_valuation_batches))
 				& (parent.warehouse == self.sle.warehouse)
 				& (parent.item_code == self.sle.item_code)
 				& (parent.docstatus == 1)
@@ -451,6 +452,25 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		return query.run(as_dict=True)
 
+	def prepare_batches(self):
+		self.batches = self.batch_nos
+		if isinstance(self.batch_nos, dict):
+			self.batches = list(self.batch_nos.keys())
+
+		self.batchwise_valuation_batches = []
+		self.non_batchwise_valuation_batches = []
+
+		batches = frappe.get_all(
+			"Batch", filters={"name": ("in", self.batches), "use_batchwise_valuation": 1}, fields=["name"]
+		)
+
+		for batch in batches:
+			self.batchwise_valuation_batches.append(batch.name)
+
+		self.non_batchwise_valuation_batches = list(
+			set(self.batches) - set(self.batchwise_valuation_batches)
+		)
+
 	def get_batch_nos(self) -> list:
 		if self.sle.get("batch_nos"):
 			return self.sle.batch_nos
@@ -463,6 +483,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		self.stock_value_change = 0
 		for batch_no, ledger in self.batch_nos.items():
+			self.batch_avg_rate[batch_no] = (
+				self.stock_value_differece[batch_no] / self.available_qty[batch_no]
+			)
+
+			# New Stock Value Difference
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
 			frappe.db.set_value(
