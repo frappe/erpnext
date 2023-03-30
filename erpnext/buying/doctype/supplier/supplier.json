@@ -54,7 +54,15 @@
   "primary_address",
   "accounting_tab",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+  "bank_details_section",
+  "bank_account_no",
+  "column_break_n8mz",
+  "iban",
+  "section_break_ow3k",
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
   "payment_terms",
 >>>>>>> dbf7a479b6 (fix: Use existing bank fields to match by bank account no/IBAN)
   "accounts",
@@ -449,6 +457,29 @@
   {
    "fieldname": "column_break_59",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No"
+  },
+  {
+   "fieldname": "column_break_n8mz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
+  },
+  {
+   "fieldname": "section_break_ow3k",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-user",
@@ -462,10 +493,14 @@
   }
  ],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-11-09 18:02:59.075203",
 =======
  "modified": "2023-05-09 15:34:13.408932",
 >>>>>>> dbf7a479b6 (fix: Use existing bank fields to match by bank account no/IBAN)
+=======
+ "modified": "2023-03-30 15:50:40.241257",
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

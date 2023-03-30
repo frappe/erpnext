@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-12-25 16:50:53.878430",
  "doctype": "DocType",
@@ -19,7 +20,11 @@
   "contact_html",
   "section_break_3",
   "share_balance",
-  "contact_list"
+  "contact_list",
+  "bank_details_section",
+  "bank_account_no",
+  "column_break_tyo0",
+  "iban"
  ],
  "fields": [
   {
@@ -109,18 +114,42 @@
    "hidden": 1,
    "label": "Contact List",
    "read_only": 1
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No"
+  },
+  {
+   "fieldname": "column_break_tyo0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
   }
  ],
+<<<<<<< HEAD
 <<<<<<< HEAD
  "modified": "2019-11-17 23:24:11.395882",
 =======
  "links": [],
  "modified": "2023-04-10 22:02:20.406087",
 >>>>>>> 430b247dfc (fix: Remove bank details fields from Shareholder)
+=======
+ "links": [],
+ "modified": "2023-03-30 16:00:55.087823",
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shareholder",
- "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -163,6 +192,7 @@
  "search_fields": "folio_no",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

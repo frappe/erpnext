@@ -34,6 +34,7 @@
   "party_section",
   "party_type",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "party"
 =======
   "party",
@@ -47,6 +48,13 @@
   "bank_party_iban",
   "bank_party_mapper"
 >>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
+=======
+  "party",
+  "column_break_3czf",
+  "bank_party_name",
+  "bank_party_no",
+  "bank_party_iban"
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
  ],
  "fields": [
   {
@@ -216,7 +224,10 @@
    "label": "Transaction Type",
    "length": 50
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
   },
   {
    "fieldname": "column_break_3czf",
@@ -225,12 +236,22 @@
   {
    "fieldname": "bank_party_name",
    "fieldtype": "Data",
+<<<<<<< HEAD
    "label": "Party Name/Account Holder (Bank Statement)"
+=======
+   "label": "Party Name (Bank Statement)"
+  },
+  {
+   "fieldname": "bank_party_no",
+   "fieldtype": "Data",
+   "label": "Party Account No. (Bank Statement)"
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
   },
   {
    "fieldname": "bank_party_iban",
    "fieldtype": "Data",
    "label": "Party IBAN (Bank Statement)"
+<<<<<<< HEAD
   },
   {
    "fieldname": "bank_party_account_number",
@@ -248,10 +269,13 @@
    "options": "Bank Party Mapper",
    "read_only": 1
 >>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
+=======
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
   }
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -265,6 +289,9 @@
 =======
  "modified": "2023-04-04 15:47:20.620006",
 >>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
+=======
+ "modified": "2023-03-30 15:30:46.485683",
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

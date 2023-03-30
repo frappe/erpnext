@@ -61,6 +61,10 @@
   "tax_category",
   "tax_withholding_category",
   "accounting_tab",
+  "bank_details_section",
+  "bank_account_no",
+  "column_break_xtwg",
+  "iban",
   "credit_limit_section",
   "payment_terms",
   "credit_limits",
@@ -555,6 +559,25 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No"
+  },
+  {
+   "fieldname": "column_break_xtwg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
   }
  ],
  "icon": "fa fa-user",
@@ -569,10 +592,14 @@
   }
  ],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-11-08 15:52:34.462657",
 =======
  "modified": "2023-05-09 15:38:40.255193",
 >>>>>>> dbf7a479b6 (fix: Use existing bank fields to match by bank account no/IBAN)
+=======
+ "modified": "2023-03-30 15:45:44.387975",
+>>>>>>> ad31e02616 (feat: Store Party bank details in party records (Customer/Supplier/Employee/Shareholder))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
