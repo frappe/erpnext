@@ -257,7 +257,7 @@ def notify_depr_entry_posting_error(failed_asset_names):
 		+ "."
 		+ "<br><br>"
 		+ _(
-			"Please raise a support ticket and share this email, or forward this email to your development team so that they can find the issue in the developer console by manually creating the depreciation entry via the asset's schedule table."
+			"Please raise a support ticket and share this email, or forward this email to your development team so that they can find the issue in the developer console by manually creating the depreciation entry via the asset's depreciation schedule table."
 		)
 	)
 
