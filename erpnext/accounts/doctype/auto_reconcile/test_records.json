@@ -1,0 +1,49 @@
+[
+	{
+		"company": "Test Auto Reconcile",
+		"conversion_rate": 1.0,
+		"currency": "INR",
+		"cost_center": "Main - TAR",
+		"customer": "John Doe",
+		"customer_name": "John Doe",
+		"debit_to": "Debtors - TAR",
+		"doctype": "Sales Invoice",
+		"items": [
+			{
+				"amount": 100.0,
+				"base_amount": 100.0,
+				"base_rate": 100.0,
+				"cost_center": "Main - TAR",
+				"doctype": "Sales Invoice Item",
+				"income_account": "Sales - TAR",
+				"expense_account": "Cost of Goods Sold - TAR",
+				"item_code": "Notebook 90",
+				"item_name": "Notebook 90",
+				"parentfield": "items",
+				"qty": 1.0,
+				"rate": 100.0,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"stock_uom": "Nos"
+			}
+		],
+		"update_stock": 0,
+		"is_pos": 0,
+		"plc_conversion_rate": 1.0,
+		"price_list_currency": "INR"
+	},
+	{
+		"doctype": "Payment Entry",
+		"company": "Test Auto Reconcile",
+		"conversion_rate": 1.0,
+		"currency": "INR",
+		"cost_center": "Main - TAR",
+		"party": "John Doe",
+		"party_type": "Customer",
+		"payment_type": "Receive",
+		"paid_from": "Debtors - TAR",
+		"paid_to": "Cash - TAR",
+		"paid_amount": 200,
+		"received_amount": 200
+	}
+]
