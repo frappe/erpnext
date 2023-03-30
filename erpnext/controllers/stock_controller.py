@@ -784,6 +784,10 @@ class StockController(AccountsController):
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
 	def make_sr_entries(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_available_qty_to_reserve,
+		)
+
 		if not self.get("reserve_stock"):
 			return
 
@@ -1019,33 +1023,6 @@ def get_conditions_to_validate_future_sle(sl_entries):
 		)
 
 	return or_conditions
-
-
-@frappe.whitelist()
-def get_available_qty_to_reserve(item_code, warehouse):
-	from frappe.query_builder.functions import Sum
-
-	from erpnext.stock.utils import get_stock_balance
-
-	available_qty = get_stock_balance(item_code, warehouse)
-
-	if available_qty:
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		reserved_qty = (
-			frappe.qb.from_(sre)
-			.select(Sum(sre.reserved_qty - sre.delivered_qty))
-			.where(
-				(sre.docstatus == 1)
-				& (sre.item_code == item_code)
-				& (sre.warehouse == warehouse)
-				& (sre.status.notin(["Delivered", "Cancelled"]))
-			)
-		).run()[0][0] or 0.0
-
-		if reserved_qty:
-			return available_qty - reserved_qty
-
-	return available_qty
 
 
 def create_repost_item_valuation_entry(args):

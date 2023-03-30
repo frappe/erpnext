@@ -634,9 +634,12 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 			for item in source.get("items"):
 				if item.name in sre_dict:
-					qty_to_deliver = (
-						sre_dict[item.name]["reserved_qty"] - sre_dict[item.name]["delivered_qty"]
-					) / item.conversion_factor
+					reserved_qty, delivered_qty, warehouse = (
+						sre_dict[item.name]["reserved_qty"],
+						sre_dict[item.name]["delivered_qty"],
+						sre_dict[item.name]["warehouse"],
+					)
+					qty_to_deliver = (reserved_qty - delivered_qty) / item.conversion_factor
 
 					row = frappe.new_doc("Delivery Note Item")
 					row.against_sales_order = source.name
@@ -649,6 +652,9 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 					row.stock_uom = item.stock_uom
 					row.uom = item.uom
 					row.conversion_factor = item.conversion_factor
+
+					if not frappe.get_cached_value("Warehouse", warehouse, "is_group"):
+						row.warehouse = warehouse
 
 					target.append("items", row)
 

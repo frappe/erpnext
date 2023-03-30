@@ -85,6 +85,38 @@ class StockReservationEntry(Document):
 			)
 
 
+@frappe.whitelist()
+def get_available_qty_to_reserve(item_code, warehouse):
+	from frappe.query_builder.functions import Sum
+
+	from erpnext.stock.get_item_details import get_bin_details
+
+	available_qty = get_bin_details(item_code, warehouse, include_child_warehouses=True).get(
+		"actual_qty"
+	)
+
+	if available_qty:
+		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+		warehouses = get_child_warehouses(warehouse)
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		reserved_qty = (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code == item_code)
+				& (sre.warehouse.isin(warehouses))
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+			)
+		).run()[0][0] or 0.0
+
+		if reserved_qty:
+			return available_qty - reserved_qty
+
+	return available_qty
+
+
 def get_stock_reservation_entries_for_voucher(
 	voucher_type: str, voucher_no: str, voucher_detail_no: str = None, fields: list[str] = None
 ) -> list[dict]:
