@@ -9,6 +9,11 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 class BankTransaction(StatusUpdater):
 	# TODO
+	# On BT save:
+	# 	- Match by account no/iban in Customer/Supplier/Employee
+	# 	- Match by Party Name
+	# 	- If match found, set party type and party name.
+
 	# On submit/update after submit
 	# 	- Create/Update a Bank Party Map record
 	# 	- User can edit after submit.
