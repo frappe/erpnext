@@ -326,10 +326,7 @@ erpnext.patches.v14_0.change_autoname_for_tax_withheld_vouchers
 erpnext.patches.v14_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v14_0.set_pick_list_status
 erpnext.patches.v13_0.update_docs_link
-# below migration patches should always run last
-erpnext.patches.v14_0.migrate_gl_to_payment_ledger
-<<<<<<< HEAD
-=======
 execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
 erpnext.patches.v15_0.enable_all_leads
->>>>>>> ad11934d39 (fix: enabling lead even after "Opportunity" created against it (#34627))
+# below migration patches should always run last
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger
