@@ -515,11 +515,7 @@
    "table_fieldname": "accounts"
   }
  ],
-<<<<<<< HEAD
- "modified": "2023-01-31 01:03:09.467817",
-=======
  "modified": "2023-03-30 15:07:41.542374",
->>>>>>> af3e807607 (chore: auto fill asset name and available for use date)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
