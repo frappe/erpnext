@@ -306,8 +306,10 @@ class PaymentReconciliation(Document):
 		)
 
 	@frappe.whitelist()
-	def reconcile(self):
-		if frappe.db.get_single_value("Accounts Settings", "enable_auto_reconciliation"):
+	def reconcile(self, skip_job_check=False):
+		if not skip_job_check and frappe.db.get_single_value(
+			"Accounts Settings", "enable_auto_reconciliation"
+		):
 			running_doc = is_any_doc_running(
 				dict(
 					company=self.company,

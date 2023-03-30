@@ -118,7 +118,6 @@ def run_reconciliation_job():
 
 			if queued:
 				doc = queued[0][0]
-				frappe.db.set_value("Auto Reconcile", doc, "status", "Running")
 				job_name = f"trigger_auto_reconcile_for_{doc}"
 				if not is_job_running(job_name):
 					job = frappe.enqueue(
@@ -129,6 +128,7 @@ def run_reconciliation_job():
 						enqueue_after_commit=True,
 						doc=doc,
 					)
+					frappe.db.set_value("Auto Reconcile", doc, "status", "Running")
 					frappe.msgprint(_("Background Job {0} triggered").format(job_name))
 		else:
 			# resume tasks on running doc
@@ -316,7 +316,7 @@ def reconcile(doc: None | str = None) -> None:
 						x.reconciled = True
 
 					# then reconcile
-					pr.reconcile()
+					pr.reconcile(skip_job_check=True)
 
 					reconcile_log.reconciled_entries = len(
 						[x for x in reconcile_log.get("allocations") if x.reconciled == True]
