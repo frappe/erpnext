@@ -45,15 +45,16 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def onload(self):
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			has_reserved_stock,
-		)
+		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+				has_reserved_stock,
+			)
 
-		if has_reserved_stock(self.doctype, self.name):
-			self.set_onload("has_reserved_stock", True)
+			if has_reserved_stock(self.doctype, self.name):
+				self.set_onload("has_reserved_stock", True)
 
-		if self.has_unreserved_stock():
-			self.set_onload("has_unreserved_stock", True)
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
 
 	def validate(self):
 		super(SalesOrder, self).validate()
