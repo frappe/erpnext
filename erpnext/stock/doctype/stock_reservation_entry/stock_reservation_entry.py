@@ -85,7 +85,6 @@ class StockReservationEntry(Document):
 			)
 
 
-@frappe.whitelist()
 def get_available_qty_to_reserve(item_code, warehouse):
 	from frappe.query_builder.functions import Sum
 
@@ -170,15 +169,6 @@ def get_sre_reserved_qty_details_for_voucher_detail_no(
 	).run(as_list=True)[0]
 
 
-def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
-	if get_stock_reservation_entries_for_voucher(
-		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
-	):
-		return True
-
-	return False
-
-
 def get_sre_reserved_qty_details(item_code: str | list, warehouse: str | list) -> dict:
 	sre_details = {}
 
@@ -209,3 +199,25 @@ def get_sre_reserved_qty_details(item_code: str | list, warehouse: str | list) -
 			sre_details = {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in sre_data}
 
 	return sre_details
+
+
+@frappe.whitelist()
+def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
+	if get_stock_reservation_entries_for_voucher(
+		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
+	):
+		return True
+
+	return False
+
+
+@frappe.whitelist()
+def cancel_stock_reservation_entries(
+	voucher_type: str, voucher_no: str, voucher_detail_no: str = None
+) -> None:
+	sre_list = get_stock_reservation_entries_for_voucher(
+		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
+	)
+
+	for sre in sre_list:
+		frappe.get_doc("Stock Reservation Entry", sre.name).cancel()

@@ -291,6 +291,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				}
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
+
+			// Stock Reservation
+			if (this.frm.doc.__onload && this.frm.doc.__onload.has_reserved_stock) {
+				this.frm.add_custom_button(__('Unreserve'), () => this.cancel_stock_reservation_entries(), __('Stock Reservation'));
+			}
 		}
 
 		if (this.frm.doc.docstatus===0) {
@@ -328,6 +333,22 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		this.order_type(doc);
+	}
+
+	cancel_stock_reservation_entries() {
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries",
+			args: {
+				voucher_type: this.frm.doctype,
+				voucher_no: this.frm.docname
+			},
+			freeze: true,
+			freeze_message: __("Unreserving Stock..."),
+			callback: (r) => {
+				this.frm.doc.__onload.has_reserved_stock = false;
+				this.frm.refresh();
+			}
+		})
 	}
 
 	create_pick_list() {

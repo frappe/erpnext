@@ -44,6 +44,14 @@ class SalesOrder(SellingController):
 	def __init__(self, *args, **kwargs):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
+	def onload(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			has_reserved_stock,
+		)
+
+		if has_reserved_stock(self.doctype, self.name):
+			self.set_onload("has_reserved_stock", True)
+
 	def validate(self):
 		super(SalesOrder, self).validate()
 		self.validate_delivery_date()
