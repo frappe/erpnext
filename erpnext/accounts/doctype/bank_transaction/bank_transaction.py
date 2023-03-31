@@ -9,11 +9,6 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 class BankTransaction(StatusUpdater):
 	# TODO
-	# On BT save:
-	# 	- Match by account no/iban in Customer/Supplier/Employee
-	# 	- Match by Party Name
-	# 	- If match found, set party type and party name.
-
 	# On submit/update after submit
 	# 	- Create/Update a Bank Party Map record
 	# 	- User can edit after submit.
@@ -24,6 +19,7 @@ class BankTransaction(StatusUpdater):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	def on_update(self):
 		self.auto_set_party()
@@ -31,6 +27,14 @@ class BankTransaction(StatusUpdater):
 >>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
 =======
 >>>>>>> 33604550ce (chore: Perform automatch on submit)
+=======
+	def on_update(self):
+		if self.party_type and self.party:
+			return
+
+		self.auto_set_party()
+
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 	def on_submit(self):
 		self.clear_linked_payment_entries()
 		self.set_status()
@@ -193,6 +197,7 @@ class BankTransaction(StatusUpdater):
 		)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	def auto_set_party(self):
 		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
@@ -200,6 +205,12 @@ class BankTransaction(StatusUpdater):
 		if self.party_type and self.party:
 			return
 
+=======
+	def auto_set_party(self):
+		# TODO: check if enabled
+		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
+
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 		result = AutoMatchParty(
 			bank_party_account_number=self.bank_party_account_number,
 			bank_party_iban=self.bank_party_iban,
@@ -211,6 +222,7 @@ class BankTransaction(StatusUpdater):
 		if result:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 			party_type, party = result
 			frappe.db.set_value(
 				"Bank Transaction", self.name, field={"party_type": party_type, "party": party}
@@ -219,21 +231,27 @@ class BankTransaction(StatusUpdater):
 			party_type, party, mapper = result
 			to_update = {"party_type": party_type, "party": party}
 =======
+=======
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 			self.party_type, self.party, mapper = result
 
 			if not mapper:
 				return
 
+<<<<<<< HEAD
 			if mapper.get("mapper_name"):
 				# Transaction matched with a Bank party Mapper record
 				self.bank_party_mapper = mapper.get("mapper_name")  # Link mapper to Bank Transaction
 				return
 
+=======
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 			mapper_doc = frappe.get_doc(
 				{"doctype": "Bank Party Mapper", "party_type": self.party_type, "party": self.party}
 			)
 			mapper_doc.update(mapper)
 			mapper_doc.insert()
+<<<<<<< HEAD
 			self.bank_party_mapper = mapper_doc.name  # Link mapper to Bank Transaction
 
 	def update_automatch_bank_party_mapper(self):
@@ -275,6 +293,9 @@ class BankTransaction(StatusUpdater):
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
 
 >>>>>>> 752a92bd8b (chore: Remove Bank Party Mapper implementation)
+=======
+
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 
 @frappe.whitelist()
 def get_doctypes_for_bank_reconciliation():

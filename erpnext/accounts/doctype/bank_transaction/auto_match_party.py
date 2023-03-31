@@ -1,11 +1,16 @@
+<<<<<<< HEAD
 from typing import Tuple, Union
 
 import frappe
 from frappe.utils import flt
+=======
+import frappe
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 from rapidfuzz import fuzz, process
 
 
 class AutoMatchParty:
+<<<<<<< HEAD
 	"""
 	Matches by Account/IBAN and then by Party Name/Description sequentially.
 	Returns when a result is obtained.
@@ -32,23 +37,30 @@ class AutoMatchParty:
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
 	"""
 
+=======
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 	def __init__(self, **kwargs) -> None:
 		self.__dict__.update(kwargs)
 
 	def get(self, key):
 		return self.__dict__.get(key, None)
 
+<<<<<<< HEAD
 	def match(self) -> Union[Tuple, None]:
 <<<<<<< HEAD
 		result = None
 =======
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
+=======
+	def match(self):
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 		result = AutoMatchbyAccountIBAN(
 			bank_party_account_number=self.bank_party_account_number,
 			bank_party_iban=self.bank_party_iban,
 			deposit=self.deposit,
 		).match()
 
+<<<<<<< HEAD
 		fuzzy_matching_enabled = frappe.db.get_single_value("Accounts Settings", "enable_fuzzy_matching")
 		if not result and fuzzy_matching_enabled:
 <<<<<<< HEAD
@@ -56,6 +68,10 @@ class AutoMatchParty:
 =======
 			result = AutoMatchbyPartyDescription(
 >>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
+=======
+		if not result:
+			result = AutoMatchbyPartyDescription(
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 				bank_party_name=self.bank_party_name, description=self.description, deposit=self.deposit
 			).match()
 
@@ -73,6 +89,7 @@ class AutoMatchbyAccountIBAN:
 		if not (self.bank_party_account_number or self.bank_party_iban):
 			return None
 
+<<<<<<< HEAD
 		result = self.match_account_in_party()
 		return result
 
@@ -82,6 +99,14 @@ class AutoMatchbyAccountIBAN:
 	def match_account_in_bank_party_mapper(self) -> Union[Tuple, None]:
 		"""Check for a IBAN/Account No. match in Bank Party Mapper"""
 =======
+=======
+		result = self.match_account_in_bank_party_mapper()
+		if not result:
+			result = self.match_account_in_party()
+
+		return result
+
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 	def match_account_in_bank_party_mapper(self):
 		filter_field = (
 			"bank_party_account_number" if self.bank_party_account_number else "bank_party_iban"
@@ -89,11 +114,19 @@ class AutoMatchbyAccountIBAN:
 		result = frappe.db.get_value(
 			"Bank Party Mapper",
 			filters={filter_field: self.get(filter_field)},
+<<<<<<< HEAD
 			fieldname=["party_type", "party", "name"],
 		)
 		if result:
 			party_type, party, mapper_name = result
 			return (party_type, party, {"mapper_name": mapper_name})
+=======
+			fieldname=["party_type", "party"],
+		)
+		if result:
+			party_type, party = result
+			return (party_type, party, None)
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 
 		return result
 
@@ -103,6 +136,7 @@ class AutoMatchbyAccountIBAN:
 		transaction_field = (
 			"bank_party_account_number" if self.bank_party_account_number else "bank_party_iban"
 		)
+<<<<<<< HEAD
 >>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 		result = None
 		or_filters = {}
@@ -185,10 +219,25 @@ class AutoMatchbyAccountIBAN:
 					},
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
 				)
+=======
+		result = None
+
+		parties = ["Supplier", "Employee", "Customer"]  # most -> least likely to receive
+		if self.deposit > 0:
+			parties = ["Customer", "Supplier", "Employee"]  # most -> least likely to pay
+
+		for party in parties:
+			party_name = frappe.db.get_value(
+				party, filters={filter_field: self.get(transaction_field)}, fieldname=["name"]
+			)
+			if party_name:
+				result = (party, party_name, {transaction_field: self.get(transaction_field)})
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 				break
 
 		return result
 
+<<<<<<< HEAD
 	def get_or_filters(self) -> dict:
 		or_filters = {}
 		if self.bank_party_account_number:
@@ -201,12 +250,17 @@ class AutoMatchbyAccountIBAN:
 
 
 class AutoMatchbyPartyNameDescription:
+=======
+
+class AutoMatchbyPartyDescription:
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 	def __init__(self, **kwargs) -> None:
 		self.__dict__.update(kwargs)
 
 	def get(self, key):
 		return self.__dict__.get(key, None)
 
+<<<<<<< HEAD
 	def match(self) -> Union[Tuple, None]:
 <<<<<<< HEAD
 =======
@@ -216,10 +270,16 @@ class AutoMatchbyPartyNameDescription:
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
 =======
 >>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
+=======
+	def match(self):
+		# Match  by Customer, Supplier or Employee Name
+		# search bank party mapper by party and then description
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 		# fuzzy search by customer/supplier & employee
 		if not (self.bank_party_name or self.description):
 			return None
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 		result = self.match_party_name_desc_in_party()
 		return result
@@ -247,12 +307,16 @@ class AutoMatchbyPartyNameDescription:
 >>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
 =======
 		result = self.match_party_name_in_bank_party_mapper()
+=======
+		result = self.match_party_name_desc_in_bank_party_mapper()
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 
 		if not result:
 			result = self.match_party_name_desc_in_party()
 
 		return result
 
+<<<<<<< HEAD
 	def match_party_name_in_bank_party_mapper(self):
 		"""Check if match exists for party name in Bank Party Mapper"""
 		result = None
@@ -414,3 +478,60 @@ def get_parties_in_order(deposit: float) -> list:
 	return parties
 =======
 >>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
+=======
+	def match_party_name_desc_in_bank_party_mapper(self):
+		"""Check if match exists for party name or description in Bank Party Mapper"""
+		result = None
+		# TODO: or filters
+		if self.bank_party_name:
+			result = frappe.db.get_value(
+				"Bank Party Mapper",
+				filters={"bank_party_name_desc": self.bank_party_name},
+				fieldname=["party_type", "party"],
+			)
+
+		if not result and self.description:
+			result = frappe.db.get_value(
+				"Bank Party Mapper",
+				filters={"bank_party_name_desc": self.description},
+				fieldname=["party_type", "party"],
+			)
+
+		result = result + (None,) if result else result
+
+		return result
+
+	def match_party_name_desc_in_party(self):
+		"""Fuzzy search party name and/or description against parties in the system"""
+		result = None
+
+		parties = ["Supplier", "Employee", "Customer"]  # most-least likely to receive
+		if frappe.utils.flt(self.deposit) > 0.0:
+			parties = ["Customer", "Supplier", "Employee"]  # most-least likely to pay
+
+		for party in parties:
+			name_field = party.lower() + "_name"
+			filters = {"status": "Active"} if party == "Employee" else {"disabled": 0}
+
+			names = frappe.get_all(party, filters=filters, pluck=name_field)
+
+			for field in ["bank_party_name", "description"]:
+				if not result and self.get(field):
+					result = self.fuzzy_search_and_return_result(party, names, field)
+					if result:
+						break
+
+		return result
+
+	def fuzzy_search_and_return_result(self, party, names, field):
+		result = process.extractOne(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+
+		if result:
+			party_name, score, index = result
+			if score > 75:
+				return (party, party_name, {"bank_party_name_desc": self.get(field)})
+			else:
+				return None
+
+		return result
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)

@@ -12,7 +12,12 @@ dependencies = [
     "pycountry~=20.7.3",
     "python-stdnum~=1.16",
     "Unidecode~=1.2.0",
+<<<<<<< HEAD
     "redisearch~=2.1.0",
+=======
+    "barcodenumber~=0.5.0",
+    "rapidfuzz~=2.15.0",
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
 
     # integration dependencies
     "gocardless-pro~=1.22.0",

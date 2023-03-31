@@ -9,7 +9,11 @@
   "party_type",
   "party",
   "column_break_wbna",
+<<<<<<< HEAD
   "bank_party_name",
+=======
+  "bank_party_name_desc",
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
   "bank_party_account_number",
   "bank_party_iban"
  ],
@@ -47,14 +51,24 @@
    "options": "party_type"
   },
   {
+<<<<<<< HEAD
    "fieldname": "bank_party_name",
    "fieldtype": "Data",
    "label": "Party Name (Bank Statement)"
+=======
+   "fieldname": "bank_party_name_desc",
+   "fieldtype": "Small Text",
+   "label": "Party Name/Desc (Bank Statement)"
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-04-04 14:27:23.450456",
+=======
+ "modified": "2023-04-03 10:11:31.384383",
+>>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Party Mapper",
