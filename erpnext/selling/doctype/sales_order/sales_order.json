@@ -1643,7 +1643,7 @@
    "default": "0",
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
-   "label": "Reserve Stock",
+   "label": "Reserve Stock on Submit",
    "no_copy": 1
   }
  ],
@@ -1651,7 +1651,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-20 23:51:04.036757",
+ "modified": "2023-03-31 13:04:36.653260",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1684,7 +1684,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "submit": 1,
    "write": 1
