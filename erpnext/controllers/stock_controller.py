@@ -791,11 +791,6 @@ class StockController(AccountsController):
 		if not self.get("reserve_stock"):
 			return
 
-		if self.doctype != "Sales Order":
-			frappe.throw(
-				_("Stock Reservation can only be created against a {0}.").format(frappe.bold("Sales Order"))
-			)
-
 		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			frappe.throw(
 				_("Please enable {0} in the {1}.").format(
@@ -803,11 +798,9 @@ class StockController(AccountsController):
 				)
 			)
 
-		if not frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission"):
+		if self.doctype != "Sales Order":
 			frappe.throw(
-				_("Please enable {0} in the {1}.").format(
-					frappe.bold("Reserve Stock on Sales Order Submission"), frappe.bold("Stock Settings")
-				)
+				_("Stock Reservation can only be created against a {0}.").format(frappe.bold("Sales Order"))
 			)
 
 		for item in self.get("items"):
