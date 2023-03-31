@@ -378,11 +378,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2022-03-25 09:15:25.017664",
-=======
- "modified": "2023-03-31 10:30:48.118932",
->>>>>>> 706be2a415 (chore: make `Production Plan Item Reference` table hidden in Production Plan)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
