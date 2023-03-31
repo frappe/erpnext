@@ -325,14 +325,14 @@ def get_template(template_type):
 
 	if template_type == "Blank Template":
 		for root_type in get_root_types():
-			writer.writerow(["", "", "", 1, "", root_type])
+			writer.writerow(["", "", "", "", 1, "", root_type])
 
 		for account in get_mandatory_group_accounts():
-			writer.writerow(["", "", "", 1, account, "Asset"])
+			writer.writerow(["", "", "", "", 1, account, "Asset"])
 
 		for account_type in get_mandatory_account_types():
 			writer.writerow(
-				["", "", "", 0, account_type.get("account_type"), account_type.get("root_type")]
+				["", "", "", "", 0, account_type.get("account_type"), account_type.get("root_type")]
 			)
 	else:
 		writer = get_sample_template(writer)
