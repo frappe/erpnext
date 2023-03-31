@@ -34,7 +34,6 @@
   "item_wise_tax_detail",
   "account_posting_detail_section",
   "payable_to_different_vendor",
-  "column_break_28",
   "party"
  ],
  "fields": [
@@ -248,10 +247,6 @@
    "label": "Payment to different vendor"
   },
   {
-   "fieldname": "column_break_28",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval:doc.category == \"Valuation\" && doc.payable_to_different_vendor",
    "fieldname": "party",
    "fieldtype": "Link",
@@ -263,7 +258,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-30 11:26:59.242831",
+ "modified": "2023-03-31 15:50:22.644067",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
