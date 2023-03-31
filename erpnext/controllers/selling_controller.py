@@ -302,7 +302,8 @@ class SellingController(StockController):
 									"item_code": p.item_code,
 									"qty": flt(p.qty),
 									"uom": p.uom,
-									"serial_and_batch_bundle": p.serial_and_batch_bundle,
+									"serial_and_batch_bundle": p.serial_and_batch_bundle
+									or get_serial_and_batch_bundle(p, self),
 									"name": d.name,
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
@@ -338,6 +339,7 @@ class SellingController(StockController):
 						}
 					)
 				)
+
 		return il
 
 	def has_product_bundle(self, item_code):
@@ -511,6 +513,7 @@ class SellingController(StockController):
 				"actual_qty": -1 * flt(item_row.qty),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
+				"serial_and_batch_bundle": item_row.serial_and_batch_bundle,
 			},
 		)
 		if item_row.target_warehouse and not cint(self.is_return):
@@ -674,3 +677,40 @@ def set_default_income_account_for_item(obj):
 		if d.item_code:
 			if getattr(d, "income_account", None):
 				set_item_default(d.item_code, obj.company, "income_account", d.income_account)
+
+
+def get_serial_and_batch_bundle(child, parent):
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	if not frappe.db.get_single_value(
+		"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+	):
+		return
+
+	item_details = frappe.db.get_value(
+		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+	)
+
+	if not item_details.has_serial_no and not item_details.has_batch_no:
+		return
+
+	sn_doc = SerialBatchCreation(
+		{
+			"item_code": child.item_code,
+			"warehouse": child.warehouse,
+			"voucher_type": parent.doctype,
+			"voucher_no": parent.name,
+			"voucher_detail_no": child.name,
+			"posting_date": parent.posting_date,
+			"posting_time": parent.posting_time,
+			"qty": child.qty,
+			"type_of_transaction": "Outward" if child.qty > 0 else "Inward",
+			"company": parent.company,
+			"do_not_submit": "True",
+		}
+	)
+
+	doc = sn_doc.make_serial_and_batch_bundle()
+	child.db_set("serial_and_batch_bundle", doc.name)
+
+	return doc.name

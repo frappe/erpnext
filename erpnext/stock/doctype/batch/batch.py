@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, nowtime, today
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
 
@@ -184,13 +184,15 @@ def get_batch_qty(
 	)
 
 	batchwise_qty = defaultdict(float)
-	kwargs = frappe._dict({
-		"item_code": item_code,
-		"warehouse": warehouse,
-		"posting_date": posting_date,
-		"posting_time": posting_time,
-		"batch_no": batch_no
-	})
+	kwargs = frappe._dict(
+		{
+			"item_code": item_code,
+			"warehouse": warehouse,
+			"posting_date": posting_date,
+			"posting_time": posting_time,
+			"batch_no": batch_no,
+		}
+	)
 
 	batches = get_auto_batch_nos(kwargs)
 
@@ -216,13 +218,37 @@ def get_batches_by_oldest(item_code, warehouse):
 
 @frappe.whitelist()
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
+
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype="Batch", item=item_code, batch_id=new_batch_id)).insert()
+	qty = flt(qty)
 
-	company = frappe.db.get_value(
-		"Stock Ledger Entry",
-		dict(item_code=item_code, batch_no=batch_no, warehouse=warehouse),
-		["company"],
+	company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+	from_bundle_id = make_batch_bundle(
+		frappe._dict(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"batches": frappe._dict({batch_no: qty}),
+				"company": company,
+				"type_of_transaction": "Outward",
+				"qty": qty,
+			}
+		)
+	)
+
+	to_bundle_id = make_batch_bundle(
+		frappe._dict(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"batches": frappe._dict({batch.name: qty}),
+				"company": company,
+				"type_of_transaction": "Inward",
+				"qty": qty,
+			}
+		)
 	)
 
 	stock_entry = frappe.get_doc(
@@ -231,8 +257,12 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 			purpose="Repack",
 			company=company,
 			items=[
-				dict(item_code=item_code, qty=float(qty or 0), s_warehouse=warehouse, batch_no=batch_no),
-				dict(item_code=item_code, qty=float(qty or 0), t_warehouse=warehouse, batch_no=batch.name),
+				dict(
+					item_code=item_code, qty=qty, s_warehouse=warehouse, serial_and_batch_bundle=from_bundle_id
+				),
+				dict(
+					item_code=item_code, qty=qty, t_warehouse=warehouse, serial_and_batch_bundle=to_bundle_id
+				),
 			],
 		)
 	)
@@ -241,6 +271,29 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	stock_entry.submit()
 
 	return batch.name
+
+
+def make_batch_bundle(kwargs):
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	return (
+		SerialBatchCreation(
+			{
+				"item_code": kwargs.item_code,
+				"warehouse": kwargs.warehouse,
+				"posting_date": today(),
+				"posting_time": nowtime(),
+				"voucher_type": "Stock Entry",
+				"qty": flt(kwargs.qty),
+				"type_of_transaction": kwargs.type_of_transaction,
+				"company": kwargs.company,
+				"batches": kwargs.batches,
+				"do_not_submit": True,
+			}
+		)
+		.make_serial_and_batch_bundle()
+		.name
+	)
 
 
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):

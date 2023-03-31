@@ -133,8 +133,12 @@ def make_stock_entry(**args):
 	serial_number = args.serial_no
 
 	bundle_id = None
-	if not args.serial_no and args.qty and args.batch_no:
-		batches = frappe._dict({args.batch_no: args.qty})
+	if args.serial_no or args.batch_no or args.batches:
+		batches = frappe._dict({})
+		if args.batch_no:
+			batches = frappe._dict({args.batch_no: args.qty})
+		elif args.batches:
+			batches = args.batches
 
 		bundle_id = (
 			SerialBatchCreation(
@@ -144,8 +148,13 @@ def make_stock_entry(**args):
 					"voucher_type": "Stock Entry",
 					"total_qty": args.qty * (-1 if args.source else 1),
 					"batches": batches,
+					"serial_nos": args.serial_no,
 					"type_of_transaction": "Outward" if args.source else "Inward",
 					"company": s.company,
+					"posting_date": s.posting_date,
+					"posting_time": s.posting_time,
+					"rate": args.rate or args.basic_rate,
+					"do_not_submit": True,
 				}
 			)
 			.make_serial_and_batch_bundle()
@@ -178,6 +187,6 @@ def make_stock_entry(**args):
 		if not args.do_not_submit:
 			s.submit()
 
-	s.load_from_db()
+		s.load_from_db()
 
 	return s

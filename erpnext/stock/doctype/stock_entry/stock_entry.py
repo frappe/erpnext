@@ -1263,6 +1263,7 @@ class StockEntry(StockController):
 						"incoming_rate": flt(d.valuation_rate),
 					},
 				)
+
 				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
 					sle.recalculate_rate = 1
 
@@ -2398,6 +2399,11 @@ class StockEntry(StockController):
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
+	from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+		get_batch_from_bundle,
+	)
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
 	if isinstance(items, str):
 		items = json.loads(items)
 	retention_warehouse = frappe.db.get_single_value("Stock Settings", "sample_retention_warehouse")
@@ -2406,20 +2412,25 @@ def move_sample_to_retention_warehouse(company, items):
 	stock_entry.purpose = "Material Transfer"
 	stock_entry.set_stock_entry_type()
 	for item in items:
-		if item.get("sample_quantity") and item.get("batch_no"):
+		if item.get("sample_quantity") and item.get("serial_and_batch_bundle"):
+			batch_no = get_batch_from_bundle(item.get("serial_and_batch_bundle"))
 			sample_quantity = validate_sample_quantity(
 				item.get("item_code"),
 				item.get("sample_quantity"),
 				item.get("transfer_qty") or item.get("qty"),
-				item.get("batch_no"),
+				batch_no,
 			)
+
 			if sample_quantity:
-				sample_serial_nos = ""
-				if item.get("serial_no"):
-					serial_nos = (item.get("serial_no")).split()
-					if serial_nos and len(serial_nos) > item.get("sample_quantity"):
-						serial_no_list = serial_nos[: -(len(serial_nos) - item.get("sample_quantity"))]
-						sample_serial_nos = "\n".join(serial_no_list)
+				cls_obj = SerialBatchCreation(
+					{
+						"type_of_transaction": "Outward",
+						"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
+						"item_code": item.get("item_code"),
+					}
+				)
+
+				cls_obj.duplicate_package()
 
 				stock_entry.append(
 					"items",
@@ -2432,8 +2443,7 @@ def move_sample_to_retention_warehouse(company, items):
 						"uom": item.get("uom"),
 						"stock_uom": item.get("stock_uom"),
 						"conversion_factor": item.get("conversion_factor") or 1.0,
-						"serial_no": sample_serial_nos,
-						"batch_no": item.get("batch_no"),
+						"serial_and_batch_bundle": cls_obj.serial_and_batch_bundle,
 					},
 				)
 	if stock_entry.get("items"):

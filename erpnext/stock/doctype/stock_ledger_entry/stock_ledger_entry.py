@@ -104,23 +104,12 @@ class StockLedgerEntry(Document):
 		if item_detail.has_serial_no or item_detail.has_batch_no:
 			if not self.serial_and_batch_bundle:
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
-			else:
-				bundle_data = frappe.get_cached_value(
-					"Serial and Batch Bundle", self.serial_and_batch_bundle, ["item_code", "docstatus"], as_dict=1
-				)
-
-				if bundle_data.docstatus != 1:
-					self.submit_serial_and_batch_bundle()
 
 		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
 			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception)
-
-	def submit_serial_and_batch_bundle(self):
-		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
-		doc.submit()
 
 	def check_stock_frozen_date(self):
 		stock_settings = frappe.get_cached_doc("Stock Settings")

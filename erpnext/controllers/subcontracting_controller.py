@@ -53,7 +53,7 @@ class SubcontractingController(StockController):
 			self.create_raw_materials_supplied()
 			for table_field in ["items", "supplied_items"]:
 				if self.get(table_field):
-					self.set_total_in_words(table_field)
+					self.set_serial_and_batch_bundle(table_field)
 		else:
 			super(SubcontractingController, self).validate()
 

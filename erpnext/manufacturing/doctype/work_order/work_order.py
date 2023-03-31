@@ -33,7 +33,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 )
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
-from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -450,7 +450,7 @@ class WorkOrder(Document):
 
 		serial_nos = []
 		if item_details.serial_no_series:
-			serial_nos = get_auto_serial_nos(item_details.serial_no_series, self.qty)
+			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
 
 		if not serial_nos:
 			return

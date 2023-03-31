@@ -37,7 +37,7 @@ class DeprecatedSerialNoValuation:
 		incoming_values = 0.0
 		for d in all_serial_nos:
 			if d.company == self.sle.company:
-				self.serial_no_incoming_rate[d.name] = flt(d.purchase_rate)
+				self.serial_no_incoming_rate[d.name] += flt(d.purchase_rate)
 				incoming_values += flt(d.purchase_rate)
 
 		# Get rate for serial nos which has been transferred to other company
@@ -49,6 +49,7 @@ class DeprecatedSerialNoValuation:
 				from `tabStock Ledger Entry`
 				where
 					company = %s
+					and serial_and_batch_bundle IS NULL
 					and actual_qty > 0
 					and is_cancelled = 0
 					and (serial_no = %s
@@ -62,7 +63,7 @@ class DeprecatedSerialNoValuation:
 				(self.sle.company, serial_no, serial_no + "\n%", "%\n" + serial_no, "%\n" + serial_no + "\n%"),
 			)
 
-			self.serial_no_incoming_rate[serial_no] = flt(incoming_rate[0][0]) if incoming_rate else 0
+			self.serial_no_incoming_rate[serial_no] += flt(incoming_rate[0][0]) if incoming_rate else 0
 			incoming_values += self.serial_no_incoming_rate[serial_no]
 
 		return incoming_values

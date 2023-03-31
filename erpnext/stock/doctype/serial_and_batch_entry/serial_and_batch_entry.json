@@ -5,7 +5,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item_code",
   "serial_no",
   "batch_no",
   "column_break_2",
@@ -28,7 +27,8 @@
    "in_standard_filter": 1,
    "label": "Serial No",
    "mandatory_depends_on": "eval:parent.has_serial_no == 1",
-   "options": "Serial No"
+   "options": "Serial No",
+   "search_index": 1
   },
   {
    "depends_on": "eval:parent.has_batch_no == 1",
@@ -38,7 +38,8 @@
    "in_standard_filter": 1,
    "label": "Batch No",
    "mandatory_depends_on": "eval:parent.has_batch_no == 1",
-   "options": "Batch"
+   "options": "Batch",
+   "search_index": 1
   },
   {
    "default": "1",
@@ -52,7 +53,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "search_index": 1
   },
   {
    "fieldname": "column_break_2",
@@ -84,13 +86,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "label": "Item Code",
-   "options": "Item",
-   "read_only": 1
-  },
-  {
    "fieldname": "stock_value_difference",
    "fieldtype": "Float",
    "label": "Change in Stock Value",
@@ -114,7 +109,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-29 12:13:55.455738",
+ "modified": "2023-03-31 11:18:59.809486",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",

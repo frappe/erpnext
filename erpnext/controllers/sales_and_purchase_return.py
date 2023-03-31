@@ -409,6 +409,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 					"type_of_transaction": type_of_transaction,
 					"serial_and_batch_bundle": source_doc.serial_and_batch_bundle,
 					"returned_against": source_doc.name,
+					"item_code": source_doc.item_code,
 				}
 			)
 
@@ -431,6 +432,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 					"type_of_transaction": type_of_transaction,
 					"serial_and_batch_bundle": source_doc.rejected_serial_and_batch_bundle,
 					"returned_against": source_doc.name,
+					"item_code": source_doc.item_code,
 				}
 			)
 

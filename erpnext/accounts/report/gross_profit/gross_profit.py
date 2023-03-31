@@ -703,6 +703,9 @@ class GrossProfitGenerator(object):
 				}
 			)
 
+			if row.serial_and_batch_bundle:
+				args.update({"serial_and_batch_bundle": row.serial_and_batch_bundle})
+
 			average_buying_rate = get_incoming_rate(args)
 			self.average_buying_rate[item_code] = flt(average_buying_rate)
 
@@ -805,7 +808,7 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
-				`tabSales Invoice Item`.cost_center
+				`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.serial_and_batch_bundle
 				{sales_person_cols}
 				{payment_term_cols}
 			from

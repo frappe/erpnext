@@ -107,7 +107,7 @@ class SerialNo(StockController):
 			)
 
 
-def get_auto_serial_nos(serial_no_series, qty) -> List[str]:
+def get_available_serial_nos(serial_no_series, qty) -> List[str]:
 	serial_nos = []
 	for i in range(cint(qty)):
 		serial_nos.append(get_new_serial_number(serial_no_series))
@@ -315,10 +315,10 @@ def fetch_serial_numbers(filters, qty, do_not_include=None):
 
 def get_serial_nos_for_outward(kwargs):
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_auto_serial_nos,
+		get_available_serial_nos,
 	)
 
-	serial_nos = get_auto_serial_nos(kwargs)
+	serial_nos = get_available_serial_nos(kwargs)
 
 	if not serial_nos:
 		return []

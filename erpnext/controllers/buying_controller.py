@@ -92,7 +92,7 @@ class BuyingController(SubcontractingController):
 				return
 
 			for item in self.get("items"):
-				if item.get(field) and not item.serial_and_batch_bundle:
+				if item.get(field) and not item.serial_and_batch_bundle and bundle_ids.get(item.get(field)):
 					item.serial_and_batch_bundle = self.make_package_for_transfer(
 						bundle_ids.get(item.get(field)),
 						item.from_warehouse,
@@ -557,6 +557,7 @@ class BuyingController(SubcontractingController):
 
 		if self.get("is_old_subcontracting_flow"):
 			self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,

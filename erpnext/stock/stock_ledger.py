@@ -27,7 +27,6 @@ from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
-from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -692,22 +691,7 @@ class update_entries_after(object):
 			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
 		if sle.serial_and_batch_bundle:
-			if frappe.get_cached_value("Item", sle.item_code, "has_serial_no"):
-				SerialNoValuation(
-					sle=sle,
-					sle_self=self,
-					wh_data=self.wh_data,
-					warehouse=sle.warehouse,
-					item_code=sle.item_code,
-				)
-			else:
-				BatchNoValuation(
-					sle=sle,
-					sle_self=self,
-					wh_data=self.wh_data,
-					warehouse=sle.warehouse,
-					item_code=sle.item_code,
-				)
+			self.calculate_valuation_for_serial_batch_bundle(sle)
 		else:
 			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
 				# assert
@@ -758,6 +742,18 @@ class update_entries_after(object):
 			sle.actual_qty = current_qty * -1
 		elif current_qty == 0:
 			sle.is_cancelled = 1
+
+	def calculate_valuation_for_serial_batch_bundle(self, sle):
+		doc = frappe.get_cached_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
+
+		doc.set_incoming_rate(save=True)
+		doc.calculate_qty_and_amount(save=True)
+
+		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
+
+		self.wh_data.qty_after_transaction += doc.total_qty
+		if self.wh_data.qty_after_transaction:
+			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def validate_negative_stock(self, sle):
 		"""
@@ -1424,6 +1420,8 @@ def get_valuation_rate(
 	raise_error_if_no_rate=True,
 	serial_and_batch_bundle=None,
 ):
+
+	from erpnext.stock.serial_batch_bundle import BatchNoValuation
 
 	if not company:
 		company = frappe.get_cached_value("Warehouse", warehouse, "company")

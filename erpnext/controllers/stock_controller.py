@@ -372,15 +372,26 @@ class StockController(AccountsController):
 
 				row.db_set("serial_and_batch_bundle", None)
 
-	def set_serial_and_batch_bundle(self, table_name=None):
+	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
 		if not table_name:
 			table_name = "items"
 
+		QTY_FIELD = {
+			"serial_and_batch_bundle": "qty",
+			"current_serial_and_batch_bundle": "current_qty",
+			"rejected_serial_and_batch_bundle": "rejected_qty",
+		}
+
 		for row in self.get(table_name):
-			if row.get("serial_and_batch_bundle"):
-				frappe.get_doc(
-					"Serial and Batch Bundle", row.serial_and_batch_bundle
-				).set_serial_and_batch_values(self, row)
+			for field in [
+				"serial_and_batch_bundle",
+				"current_serial_and_batch_bundle",
+				"rejected_serial_and_batch_bundle",
+			]:
+				if row.get(field):
+					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
+						self, row, qty_field=QTY_FIELD[field]
+					)
 
 	def make_package_for_transfer(
 		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None
@@ -410,11 +421,7 @@ class StockController(AccountsController):
 
 		bundle_doc.calculate_qty_and_amount()
 		bundle_doc.flags.ignore_permissions = True
-
-		if not do_not_submit:
-			bundle_doc.submit()
-		else:
-			bundle_doc.save(ignore_permissions=True)
+		bundle_doc.save(ignore_permissions=True)
 
 		return bundle_doc.name
 
