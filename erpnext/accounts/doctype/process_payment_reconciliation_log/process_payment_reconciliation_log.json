@@ -19,7 +19,8 @@
   "error_log",
   "allocations_section",
   "allocations",
-  "invoices"
+  "invoices",
+  "payments"
  ],
  "fields": [
   {
@@ -99,12 +100,18 @@
    "options": "Process Payment Reconciliation",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "Process Payment Reconciliation Payments"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-30 22:13:48.455626",
+ "modified": "2023-03-31 14:25:34.623073",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",

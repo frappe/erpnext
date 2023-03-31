@@ -239,6 +239,10 @@ def split_allocations_into_batches(unreconciled_allocations: list) -> list:
 
 
 def fetch_and_allocate(doc: str) -> None:
+	"""
+	Fetch Invoices and Payments based on filters applied. FIFO ordering is used for allocation.
+	"""
+
 	if doc:
 		log = frappe.db.get_all(
 			"Process Payment Reconciliation Log", filters={"process_pr": doc}, as_list=1
@@ -258,6 +262,18 @@ def fetch_and_allocate(doc: str) -> None:
 					for x in pr.get("invoices"):
 						reconcile_log.append(
 							"invoices",
+							x.as_dict().update(
+								{
+									"parenttype": "Process Payment Reconciliation Log",
+									"parent": reconcile_log.name,
+									"name": None,
+								}
+							),
+						)
+
+					for x in pr.get("payments"):
+						reconcile_log.append(
+							"payments",
 							x.as_dict().update(
 								{
 									"parenttype": "Process Payment Reconciliation Log",
