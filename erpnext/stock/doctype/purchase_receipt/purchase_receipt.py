@@ -1085,6 +1085,32 @@ def make_stock_entry(source_name, target_doc=None):
 def make_inter_company_delivery_note(source_name, target_doc=None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
 
+# tax amount payment to different vendors
+@frappe.whitelist()
+def make_charges_advance_payment(source_name, target_doc=None):
+	po = frappe.get_doc("Purchase Invoice", source_name)
+	doc = frappe.new_doc("Direct Payment")
+	doc.branch = po.branch
+	doc.cost_center = frappe.db.get_value("Branch", po.branch, "cost_center")
+	doc.reference_type = "Purchase Invoice"
+	doc.reference_no = po.name
+	doc.remarks = "Payment for Taxes and Charges from Purchase Invoice no. " + po.name
+	for a in po.taxes:
+		if a.payable_to_different_vendor and not a.reference_no and not a.advance_payment_applicable:    
+			doc.append("item", {
+						"party_type": "Supplier",
+						"party": a.party,
+						"account": po.credit_to,
+						"amount": a.tax_amount,
+						"tds_applicable": 0,
+						"invoice_no": po.name,
+						"invoice_date": po.posting_date,
+						"taxable_amount": a.tax_amount,
+						"tds_amount": 0.00,
+						"net_amount": a.tax_amount,
+					})
+	return doc
+
 
 def get_item_account_wise_additional_cost(purchase_document):
 	landed_cost_vouchers = frappe.get_all(

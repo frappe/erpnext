@@ -9,11 +9,17 @@
  "field_order": [
   "barcode",
   "item_code",
+  "parts_no",
+  "part_name",
+  "model",
   "col_break1",
   "item_name",
   "customer_item_code",
   "description_section",
   "description",
+  "column_break_11",
+  "tvo_no",
+  "engine_no",
   "item_group",
   "brand",
   "image_section",
@@ -608,10 +614,11 @@
    "print_hide": 1
   },
   {
+   "description": "<b>Use comma to enter more than one nos.</b>",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "Serial No",
+   "label": "Serial No/Chassis No",
    "oldfieldname": "serial_no",
    "oldfieldtype": "Small Text"
   },
@@ -764,7 +771,6 @@
    "report_hide": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "description_section",
    "fieldtype": "Section Break",
    "label": "Description"
@@ -839,12 +845,49 @@
    "fieldtype": "Check",
    "label": "Grant Commission",
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.parts_no",
+   "fieldname": "parts_no",
+   "fieldtype": "Link",
+   "label": "Parts No",
+   "options": "Part No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.part_name",
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "label": "Part Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tvo_no",
+   "fieldtype": "Data",
+   "label": "Tvo No."
+  },
+  {
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No."
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-27 10:43:38.805355",
+ "modified": "2023-03-29 14:35:00.774740",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

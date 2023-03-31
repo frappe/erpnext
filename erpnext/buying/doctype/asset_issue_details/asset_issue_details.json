@@ -50,6 +50,7 @@
    "reqd": 1
   },
   {
+   "default": "State Trading Corporation of Bhutan Limited",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -241,7 +242,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-28 16:48:42.444410",
+ "modified": "2023-03-30 11:02:35.656468",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Asset Issue Details",

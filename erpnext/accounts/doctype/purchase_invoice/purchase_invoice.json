@@ -1449,7 +1449,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-29 11:48:32.062913",
+ "modified": "2023-03-29 15:59:33.418723",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1471,17 +1471,21 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Purchase User"
+   "role": "Purchase User",
+   "submit": 1,
+   "write": 1
   },
   {
    "amend": 1,
    "cancel": 1,
    "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,

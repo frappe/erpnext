@@ -38,11 +38,13 @@
   "get_items",
   "section_break_12",
   "from_warehouse",
+  "from_warehouse_name",
   "source_warehouse_address",
   "source_address_display",
   "issued_by",
   "cb0",
   "to_warehouse",
+  "to_warehouse_name",
   "target_warehouse_address",
   "target_address_display",
   "received_by",
@@ -664,6 +666,20 @@
   {
    "fieldname": "column_break_55",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "from_warehouse.warehouse_name",
+   "fieldname": "from_warehouse_name",
+   "fieldtype": "Data",
+   "label": "Source Warehouse Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "to_warehouse.warehouse_name",
+   "fieldname": "to_warehouse_name",
+   "fieldtype": "Data",
+   "label": "Receiving Warehouse Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -671,7 +687,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-22 15:09:34.211394",
+ "modified": "2023-03-30 15:14:53.583662",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

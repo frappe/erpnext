@@ -10,10 +10,16 @@
   "barcode",
   "item_code",
   "col_break1",
+  "parts_no",
+  "parts_name",
+  "model",
   "item_name",
   "customer_item_code",
   "section_break_6",
   "description",
+  "column_break_11",
+  "tvo_no",
+  "engine_no",
   "brand",
   "item_group",
   "image_section",
@@ -111,7 +117,6 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "print_width": "150px",
-   "read_only": 1,
    "reqd": 1,
    "search_index": 1,
    "width": "150px"
@@ -143,10 +148,8 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_6",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Description"
   },
   {
@@ -549,10 +552,11 @@
    "width": "150px"
   },
   {
+   "description": "<b>Use comma to enter more than one nos.</b>",
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "in_list_view": 1,
-   "label": "Serial No",
+   "label": "Serial No/Chassis No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
    "oldfieldtype": "Text"
@@ -803,13 +807,50 @@
   {
    "fieldname": "column_break_24",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.parts_no",
+   "fieldname": "parts_no",
+   "fieldtype": "Link",
+   "label": "Parts No",
+   "options": "Part No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.part_name",
+   "fieldname": "parts_name",
+   "fieldtype": "Data",
+   "label": "Parts Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tvo_no",
+   "fieldtype": "Data",
+   "label": "Tvo No."
+  },
+  {
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No."
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-24 12:54:18.830291",
+ "modified": "2023-03-30 13:41:33.172572",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

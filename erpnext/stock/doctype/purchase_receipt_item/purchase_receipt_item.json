@@ -10,23 +10,22 @@
   "barcode",
   "section_break_2",
   "item_code",
+  "item_name",
   "product_bundle",
   "supplier_part_no",
+  "tvo_no",
+  "engine_no",
   "column_break_2",
-  "item_name",
+  "item_group",
+  "part_no",
+  "part_name",
+  "model",
   "section_break_4",
   "description",
-  "column_break_10",
-  "model_no",
-  "model_name",
-  "tvo_no",
-  "chassis_no",
-  "engine_no",
-  "brand",
   "image_column",
-  "item_group",
   "image",
   "image_view",
+  "brand",
   "received_and_accepted",
   "received_qty",
   "qty",
@@ -584,7 +583,7 @@
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "Serial No",
+   "label": "Serial No/Chassis No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
    "oldfieldtype": "Text"
@@ -1036,18 +1035,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "tvo_no",
    "fieldtype": "Data",
    "label": "Tvo No."
-  },
-  {
-   "fieldname": "chassis_no",
-   "fieldtype": "Data",
-   "label": "Chassis No."
   },
   {
    "fieldname": "engine_no",
@@ -1055,20 +1045,33 @@
    "label": "Engine No."
   },
   {
-   "fieldname": "model_no",
-   "fieldtype": "Data",
-   "label": "Model No."
+   "fetch_from": "item_code.parts_no",
+   "fieldname": "part_no",
+   "fieldtype": "Link",
+   "label": "Part No",
+   "options": "Part No",
+   "read_only": 1
   },
   {
-   "fieldname": "model_name",
+   "fetch_from": "item_code.part_name",
+   "fieldname": "part_name",
    "fieldtype": "Data",
-   "label": "Model Name"
+   "label": "Part Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-24 13:07:13.461888",
+ "modified": "2023-03-29 11:14:16.174995",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

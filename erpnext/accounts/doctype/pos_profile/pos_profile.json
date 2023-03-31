@@ -53,7 +53,12 @@
   "expense_account",
   "taxes_and_charges",
   "tax_category",
-  "apply_discount_on"
+  "apply_discount_on",
+  "section_break_49",
+  "walk_in_customer_name",
+  "cid_ph_no",
+  "bank",
+  "jrnl_no"
  ],
  "fields": [
   {
@@ -374,6 +379,32 @@
    "label": "Branch",
    "options": "Branch",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_49",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Financial Institution"
+  },
+  {
+   "fieldname": "jrnl_no",
+   "fieldtype": "Data",
+   "label": "Jrnl No"
+  },
+  {
+   "fieldname": "walk_in_customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "cid_ph_no",
+   "fieldtype": "Data",
+   "label": "CID/Ph No"
   }
  ],
  "icon": "icon-cog",
@@ -401,7 +432,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2023-03-16 15:09:11.475935",
+ "modified": "2023-03-30 14:33:10.495596",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

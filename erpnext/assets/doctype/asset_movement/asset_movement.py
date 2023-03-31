@@ -124,11 +124,11 @@ class AssetMovement(Document):
 			
 			branch = get_branch_from_cost_center(cc)
 
-			frappe.db.set_value("Asset", self.asset, "cost_center", cc)
-			frappe.db.set_value("Asset", self.asset, "branch", branch)
+			frappe.db.set_value("Asset", ass.asset, "cost_center", cc)
+			frappe.db.set_value("Asset", ass.asset, "branch", branch)
 
 			equipment = frappe.db.get_value(
-				"Equipment", {"asset_code": self.asset}, "name")
+				"Equipment", {"asset_code": ass.asset}, "name")
 			if equipment:
 				save_equipment(equipment, branch, self.posting_date,
 							self.name, purpose)

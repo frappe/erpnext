@@ -8,20 +8,19 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "product_bundle",
-  "col_break1",
   "item_name",
+  "product_bundle",
+  "tvo_no",
+  "engine_no",
+  "col_break1",
+  "item_group",
+  "brand",
+  "part_no",
+  "part_name",
+  "model",
   "description_section",
   "description",
-  "column_break_7",
-  "model_no",
-  "model_name",
-  "tvo_no",
-  "chassis_no",
-  "engine_no",
-  "brand",
   "col_break7",
-  "item_group",
   "image",
   "image_view",
   "quantity_and_rate",
@@ -452,7 +451,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "label": "Serial No",
+   "label": "Serial No/Chassis No",
    "no_copy": 1
   },
   {
@@ -878,18 +877,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "tvo_no",
    "fieldtype": "Data",
    "label": "Tvo No."
-  },
-  {
-   "fieldname": "chassis_no",
-   "fieldtype": "Data",
-   "label": "Chassis No."
   },
   {
    "fieldname": "engine_no",
@@ -897,20 +887,33 @@
    "label": "Engine No"
   },
   {
-   "fieldname": "model_no",
-   "fieldtype": "Data",
-   "label": "Model No."
+   "fetch_from": "item_code.parts_no",
+   "fieldname": "part_no",
+   "fieldtype": "Link",
+   "label": "Part No",
+   "options": "Part No",
+   "read_only": 1
   },
   {
-   "fieldname": "model_name",
+   "fetch_from": "item_code.part_name",
+   "fieldname": "part_name",
    "fieldtype": "Data",
-   "label": "Model Name"
+   "label": "Part Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-24 15:59:01.336284",
+ "modified": "2023-03-29 11:13:09.379703",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

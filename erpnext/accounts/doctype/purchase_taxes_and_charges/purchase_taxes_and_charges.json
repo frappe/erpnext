@@ -31,7 +31,11 @@
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail"
+  "item_wise_tax_detail",
+  "account_posting_detail_section",
+  "payable_to_different_vendor",
+  "column_break_28",
+  "party"
  ],
  "fields": [
   {
@@ -230,12 +234,36 @@
    "fieldname": "title",
    "fieldtype": "Data",
    "label": "Title"
+  },
+  {
+   "fieldname": "account_posting_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Account Posting Detail"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.category==\"Valuation\"",
+   "fieldname": "payable_to_different_vendor",
+   "fieldtype": "Check",
+   "label": "Payment to different vendor"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.category == \"Valuation\" && doc.payable_to_different_vendor",
+   "fieldname": "party",
+   "fieldtype": "Link",
+   "label": "Payable to Party",
+   "mandatory_depends_on": "eval:doc.category == \"Valuation\" && doc.payable_to_different_vendor",
+   "options": "Supplier"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-29 19:42:59.095267",
+ "modified": "2023-03-30 11:26:59.242831",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

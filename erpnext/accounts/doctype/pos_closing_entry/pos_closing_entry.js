@@ -18,7 +18,7 @@ frappe.ui.form.on('POS Closing Entry', {
 		});
 
 		frm.set_query("pos_opening_entry", function(doc) {
-			return { filters: { 'status': 'Open', 'docstatus': 1 } };
+			return { filters: { 'status': 'Open', 'docstatus': 1, 'owner':doc.user} };
 		});
 
 		if (frm.doc.docstatus === 0 && !frm.doc.amended_from) frm.set_value("period_end_date", frappe.datetime.now_datetime());

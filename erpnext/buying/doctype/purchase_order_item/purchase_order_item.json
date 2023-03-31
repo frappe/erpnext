@@ -13,18 +13,16 @@
   "product_bundle",
   "fg_item",
   "fg_item_qty",
+  "tvo_no",
+  "engine_no",
   "column_break_4",
   "schedule_date",
   "expected_delivery_date",
+  "part_no",
+  "part_name",
+  "model",
   "section_break_5",
   "description",
-  "column_break_12",
-  "part_no",
-  "model_no",
-  "model_name",
-  "tvo_no",
-  "chassis_no",
-  "engine_no",
   "col_break1",
   "image",
   "image_view",
@@ -886,41 +884,39 @@
    "label": "Tvo No."
   },
   {
-   "fieldname": "chassis_no",
-   "fieldtype": "Data",
-   "label": "Chassis No."
-  },
-  {
    "fieldname": "engine_no",
    "fieldtype": "Data",
    "label": "Engine No."
   },
   {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "model_no",
-   "fieldtype": "Data",
-   "label": "Model No."
-  },
-  {
-   "fieldname": "model_name",
-   "fieldtype": "Data",
-   "label": "Model Name"
-  },
-  {
+   "fetch_from": "item_code.parts_no",
    "fieldname": "part_no",
    "fieldtype": "Link",
    "label": "Part No",
-   "options": "Part No"
+   "options": "Part No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.part_name",
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "label": "Part Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.model",
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Model",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-28 12:11:06.567164",
+ "modified": "2023-03-29 11:06:03.771323",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

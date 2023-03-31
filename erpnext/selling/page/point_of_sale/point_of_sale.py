@@ -93,7 +93,10 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			item.description,
 			item.stock_uom,
 			item.image AS item_image,
-			item.is_stock_item
+			item.is_stock_item,
+			item.parts_no,
+			item.part_name, 
+			item.model
 		FROM
 			`tabItem` item {bin_join_selection}
 		WHERE

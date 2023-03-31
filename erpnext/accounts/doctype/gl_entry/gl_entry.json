@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "ACC-GLE-.YYYY.-.#####",
+ "autoname": "hash",
  "creation": "2013-01-10 16:34:06",
  "doctype": "DocType",
  "document_type": "Document",
@@ -272,11 +272,11 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2022-12-21 16:14:56.724200",
+ "modified": "2023-03-29 10:01:08.036286",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

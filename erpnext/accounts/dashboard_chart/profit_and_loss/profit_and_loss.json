@@ -1,7 +1,7 @@
 {
  "chart_name": "Profit and Loss",
  "chart_type": "Report",
- "creation": "2020-07-17 11:25:34.448572",
+ "creation": "2023-03-13 14:18:16.010783",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
  "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"from_fiscal_year\":\"frappe.sys_defaults.fiscal_year\",\"to_fiscal_year\":\"frappe.sys_defaults.fiscal_year\"}",
@@ -9,15 +9,29 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2020-07-22 12:33:48.888943",
- "modified_by": "Administrator",
+ "modified": "2023-03-31 15:32:20.073571",
+ "modified_by": "pema.dhendup@thimphutechpark.bt",
  "module": "Accounts",
  "name": "Profit and Loss",
  "number_of_groups": 0,
  "owner": "Administrator",
  "report_name": "Profit and Loss Statement",
+ "roles": [
+  {
+   "role": "CEO"
+  },
+  {
+   "role": "GM"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
  "timeseries": 0,
- "type": "Bar",
+ "type": "Percentage",
  "use_report_chart": 1,
  "y_axis": []
 }

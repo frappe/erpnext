@@ -1687,6 +1687,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	taxes_and_charges() {
 		var me = this;
 		if(this.frm.doc.taxes_and_charges) {
+			// console.log(this.frm.doc.taxes_and_charges)
 			return this.frm.call({
 				method: "erpnext.controllers.accounts_controller.get_taxes_and_charges",
 				args: {
@@ -1697,12 +1698,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function(r) {
 					if(!r.exc) {
 						if(me.frm.doc.shipping_rule && me.frm.doc.taxes) {
+							console.log('ghg')
 							for (let tax of r.message) {
 								me.frm.add_child("taxes", tax);
 							}
 
 							refresh_field("taxes");
 						} else {
+							console.log('hereee')
 							me.frm.set_value("taxes", r.message);
 							me.calculate_taxes_and_totals();
 						}
