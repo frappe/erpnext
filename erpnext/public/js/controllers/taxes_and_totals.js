@@ -135,7 +135,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 				else {
 					// allow for '0' qty on Credit/Debit notes
-					let qty = item.qty || me.frm.doc.is_debit_note ? 1 : -1;
+					let qty = item.qty || (me.frm.doc.is_debit_note ? 1 : -1);
 					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
 				}
 
