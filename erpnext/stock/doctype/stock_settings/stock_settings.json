@@ -357,7 +357,7 @@
    "label": "Enable Stock Reservation"
   },
   {
-   "default": "1",
+   "default": "0",
    "depends_on": "eval: doc.enable_stock_reservation",
    "fieldname": "reserve_stock_on_sales_order_submission",
    "fieldtype": "Check",
@@ -380,7 +380,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-23 18:59:11.773360",
+ "modified": "2023-03-31 12:49:14.473312",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
