@@ -52,6 +52,9 @@ class SalesOrder(SellingController):
 		if has_reserved_stock(self.doctype, self.name):
 			self.set_onload("has_reserved_stock", True)
 
+		if self.has_unreserved_stock():
+			self.set_onload("has_unreserved_stock", True)
+
 	def validate(self):
 		super(SalesOrder, self).validate()
 		self.validate_delivery_date()
@@ -249,7 +252,12 @@ class SalesOrder(SellingController):
 
 			update_coupon_code_count(self.coupon_code, "used")
 
-		self.make_sr_entries()
+		if self.get("reserve_stock"):
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+				reserve_stock_against_sales_order,
+			)
+
+			reserve_stock_against_sales_order(self)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
@@ -494,6 +502,34 @@ class SalesOrder(SellingController):
 						"Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
 					).format(item.item_code)
 				)
+
+	def has_unreserved_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher_detail_no,
+		)
+
+		for item in self.items:
+			if not item.get("reserve_stock"):
+				continue
+
+			reserved_qty_details = get_sre_reserved_qty_details_for_voucher_detail_no(
+				"Sales Order", self.name, item.name
+			)
+
+			existing_reserved_qty = 0.0
+			if reserved_qty_details:
+				existing_reserved_qty = reserved_qty_details[1]
+
+			unreserved_qty = (
+				item.stock_qty
+				- flt(item.delivered_qty) * item.get("conversion_factor", 1)
+				- existing_reserved_qty
+			)
+
+			if unreserved_qty > 0:
+				return True
+
+		return False
 
 
 def get_list_context(context=None):

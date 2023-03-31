@@ -293,6 +293,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			}
 
 			// Stock Reservation
+			if (this.frm.doc.__onload && this.frm.doc.__onload.has_unreserved_stock) {
+				this.frm.add_custom_button(__('Reserve'), () => this.reserve_stock_against_sales_order(), __('Stock Reservation'));
+			}
+
 			if (this.frm.doc.__onload && this.frm.doc.__onload.has_reserved_stock) {
 				this.frm.add_custom_button(__('Unreserve'), () => this.cancel_stock_reservation_entries(), __('Stock Reservation'));
 			}
@@ -333,6 +337,21 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		this.order_type(doc);
+	}
+
+	reserve_stock_against_sales_order() {
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.reserve_stock_against_sales_order",
+			args: {
+				sales_order: this.frm.docname
+			},
+			freeze: true,
+			freeze_message: __("Reserving Stock..."),
+			callback: (r) => {
+				this.frm.doc.__onload.has_unreserved_stock = false;
+				this.frm.refresh();
+			}
+		})
 	}
 
 	cancel_stock_reservation_entries() {

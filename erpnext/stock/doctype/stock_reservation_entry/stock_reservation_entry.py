@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 
 
 class StockReservationEntry(Document):
@@ -85,6 +86,21 @@ class StockReservationEntry(Document):
 			)
 
 
+def validate_stock_reservation_settings(voucher):
+	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+		frappe.throw(
+			_("Please enable {0} in the {1}.").format(
+				frappe.bold("Stock Reservation"), frappe.bold("Stock Settings")
+			)
+		)
+
+	allowed_voucher_types = ["Sales Order"]
+	if voucher.doctype not in allowed_voucher_types:
+		frappe.throw(
+			_("Stock Reservation can only be created against {0}.").format(", ".join(allowed_voucher_types))
+		)
+
+
 def get_available_qty_to_reserve(item_code, warehouse):
 	from frappe.query_builder.functions import Sum
 
@@ -155,7 +171,7 @@ def get_sre_reserved_qty_details_for_voucher_detail_no(
 	voucher_type: str, voucher_no: str, voucher_detail_no: str
 ) -> list:
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	return (
+	reserved_qty_details = (
 		frappe.qb.from_(sre)
 		.select(sre.warehouse, (Sum(sre.reserved_qty) - Sum(sre.delivered_qty)).as_("reserved_qty"))
 		.where(
@@ -166,7 +182,12 @@ def get_sre_reserved_qty_details_for_voucher_detail_no(
 			& (sre.status.notin(["Delivered", "Cancelled"]))
 		)
 		.groupby(sre.warehouse)
-	).run(as_list=True)[0]
+	).run(as_list=True)
+
+	if reserved_qty_details:
+		return reserved_qty_details[0]
+
+	return reserved_qty_details
 
 
 def get_sre_reserved_qty_details(item_code: str | list, warehouse: str | list) -> dict:
@@ -209,6 +230,84 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 		return True
 
 	return False
+
+
+@frappe.whitelist()
+def reserve_stock_against_sales_order(sales_order: object | str) -> None:
+	if isinstance(sales_order, str):
+		sales_order = frappe.get_doc("Sales Order", sales_order)
+
+	validate_stock_reservation_settings(sales_order)
+
+	for item in sales_order.get("items"):
+		if not item.get("reserve_stock"):
+			continue
+
+		reserved_qty_details = get_sre_reserved_qty_details_for_voucher_detail_no(
+			"Sales Order", sales_order.name, item.name
+		)
+
+		existing_reserved_qty = 0.0
+		if reserved_qty_details:
+			existing_reserved_qty = reserved_qty_details[1]
+
+		unreserved_qty = (
+			item.stock_qty
+			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
+			- existing_reserved_qty
+		)
+
+		if unreserved_qty <= 0:
+			frappe.msgprint(
+				_("Row #{0}: Stock is already reserved for the Item {1}").format(
+					item.idx, frappe.bold(item.item_code)
+				),
+				title=_("Stock Reservation"),
+			)
+			continue
+
+		available_qty_to_reserve = get_available_qty_to_reserve(item.item_code, item.warehouse)
+
+		if available_qty_to_reserve <= 0:
+			frappe.msgprint(
+				_("Row #{0}: No available stock to reserve for the Item {1}").format(
+					item.idx, frappe.bold(item.item_code)
+				),
+				title=_("Stock Reservation"),
+				indicator="orange",
+			)
+			continue
+
+		qty_to_be_reserved = min(unreserved_qty, available_qty_to_reserve)
+
+		if qty_to_be_reserved < unreserved_qty:
+			frappe.msgprint(
+				_("Row #{0}: Only {1} available to reserve for the Item {2}").format(
+					item.idx,
+					frappe.bold(str(qty_to_be_reserved / item.conversion_factor) + " " + item.uom),
+					frappe.bold(item.item_code),
+				),
+				title=_("Stock Reservation"),
+				indicator="orange",
+			)
+
+			if not frappe.db.get_single_value("Stock Settings", "allow_partial_reservation"):
+				continue
+
+		sre = frappe.new_doc("Stock Reservation Entry")
+		sre.item_code = item.item_code
+		sre.warehouse = item.warehouse
+		sre.voucher_type = sales_order.doctype
+		sre.voucher_no = sales_order.name
+		sre.voucher_detail_no = item.name
+		sre.available_qty = available_qty_to_reserve
+		sre.voucher_qty = item.stock_qty
+		sre.reserved_qty = qty_to_be_reserved
+		sre.company = sales_order.company
+		sre.stock_uom = item.stock_uom
+		sre.project = sales_order.project
+		sre.save()
+		sre.submit()
 
 
 @frappe.whitelist()
