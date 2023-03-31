@@ -9,11 +9,6 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 class BankTransaction(StatusUpdater):
 	# TODO
-	# On BT save:
-	# 	- Match by account no/iban in Customer/Supplier/Employee
-	# 	- Match by Party Name
-	# 	- If match found, set party type and party name.
-
 	# On submit/update after submit
 	# 	- Create/Update a Bank Party Map record
 	# 	- User can edit after submit.
@@ -21,6 +16,12 @@ class BankTransaction(StatusUpdater):
 
 	def after_insert(self):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
+
+	def on_update(self):
+		if self.party_type and self.party:
+			return
+
+		self.auto_set_party()
 
 	def on_submit(self):
 		self.clear_linked_payment_entries()
@@ -156,6 +157,30 @@ class BankTransaction(StatusUpdater):
 		set_voucher_clearance(
 			payment_entry.payment_document, payment_entry.payment_entry, clearance_date, self
 		)
+
+	def auto_set_party(self):
+		# TODO: check if enabled
+		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
+
+		result = AutoMatchParty(
+			bank_party_account_number=self.bank_party_account_number,
+			bank_party_iban=self.bank_party_iban,
+			bank_party_name=self.bank_party_name,
+			description=self.description,
+			deposit=self.deposit,
+		).match()
+
+		if result:
+			self.party_type, self.party, mapper = result
+
+			if not mapper:
+				return
+
+			mapper_doc = frappe.get_doc(
+				{"doctype": "Bank Party Mapper", "party_type": self.party_type, "party": self.party}
+			)
+			mapper_doc.update(mapper)
+			mapper_doc.insert()
 
 
 @frappe.whitelist()

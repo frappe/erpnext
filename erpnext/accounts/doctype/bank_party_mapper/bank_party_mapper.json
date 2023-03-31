@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "creation": "2023-03-31 10:48:20.249481",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "party",
+  "column_break_wbna",
+  "bank_party_name_desc",
+  "bank_party_account_number",
+  "bank_party_iban"
+ ],
+ "fields": [
+  {
+   "fieldname": "bank_party_account_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party Account No. (Bank Statement)"
+  },
+  {
+   "fieldname": "bank_party_iban",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party IBAN (Bank Statement)"
+  },
+  {
+   "fieldname": "column_break_wbna",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Party Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "bank_party_name_desc",
+   "fieldtype": "Small Text",
+   "label": "Party Name/Desc (Bank Statement)"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-04-03 10:11:31.384383",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Party Mapper",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
