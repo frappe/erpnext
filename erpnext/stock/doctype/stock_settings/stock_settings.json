@@ -369,7 +369,7 @@
   },
   {
    "default": "1",
-   "depends_on": "eval: (doc.enable_stock_reservation && doc.reserve_stock_on_sales_order_submission)",
+   "depends_on": "eval: doc.enable_stock_reservation",
    "fieldname": "allow_partial_reservation",
    "fieldtype": "Check",
    "label": "Allow Partial Reservation"
@@ -380,7 +380,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-31 12:49:14.473312",
+ "modified": "2023-04-01 15:52:28.717324",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
