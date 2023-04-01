@@ -239,6 +239,7 @@ def reserve_stock_against_sales_order(sales_order: object | str) -> None:
 
 	validate_stock_reservation_settings(sales_order)
 
+	sre_count = 0
 	for item in sales_order.get("items"):
 		if not item.get("reserve_stock"):
 			continue
@@ -309,6 +310,11 @@ def reserve_stock_against_sales_order(sales_order: object | str) -> None:
 		sre.save()
 		sre.submit()
 
+		sre_count += 1
+
+	if sre_count:
+		frappe.msgprint(_("Stock Reservation Entry created"), alert=True, indicator="green")
+
 
 @frappe.whitelist()
 def cancel_stock_reservation_entries(
@@ -318,5 +324,8 @@ def cancel_stock_reservation_entries(
 		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
 	)
 
-	for sre in sre_list:
-		frappe.get_doc("Stock Reservation Entry", sre.name).cancel()
+	if sre_list:
+		for sre in sre_list:
+			frappe.get_doc("Stock Reservation Entry", sre.name).cancel()
+
+		frappe.msgprint(_("Stock Reservation Entry cancelled"), alert=True, indicator="red")
