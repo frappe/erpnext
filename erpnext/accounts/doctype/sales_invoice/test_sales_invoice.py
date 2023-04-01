@@ -30,6 +30,11 @@ from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 	get_qty_after_transaction,
@@ -1348,55 +1353,47 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+		se.load_from_db()
+		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
 		si.get("items")[0].item_code = "_Test Serialized Item With Series"
 		si.get("items")[0].qty = 1
-		si.get("items")[0].serial_no = serial_nos[0]
+		si.get("items")[0].warehouse = se.get("items")[0].t_warehouse
+		si.get("items")[0].serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": si.get("items")[0].item_code,
+					"warehouse": si.get("items")[0].warehouse,
+					"company": si.company,
+					"qty": 1,
+					"voucher_type": "Stock Entry",
+					"serial_nos": [serial_nos[0]],
+					"posting_date": si.posting_date,
+					"posting_time": si.posting_time,
+					"type_of_transaction": "Outward",
+					"do_not_submit": True,
+				}
+			)
+		).name
+
 		si.insert()
 		si.submit()
 
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
-		self.assertEqual(
-			frappe.db.get_value("Serial No", serial_nos[0], "delivery_document_no"), si.name
-		)
 
 		return si
 
 	def test_serialized_cancel(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 		si = self.test_serialized()
 		si.cancel()
 
-		serial_nos = get_serial_nos(si.get("items")[0].serial_no)
+		serial_nos = get_serial_nos_from_bundle(si.get("items")[0].serial_and_batch_bundle)
 
 		self.assertEqual(
 			frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC"
 		)
-		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "delivery_document_no"))
-		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"))
-
-	def test_serialize_status(self):
-		serial_no = frappe.get_doc(
-			{
-				"doctype": "Serial No",
-				"item_code": "_Test Serialized Item With Series",
-				"serial_no": make_autoname("SR", "Serial No"),
-			}
-		)
-		serial_no.save()
-
-		si = frappe.copy_doc(test_records[0])
-		si.update_stock = 1
-		si.get("items")[0].item_code = "_Test Serialized Item With Series"
-		si.get("items")[0].qty = 1
-		si.get("items")[0].serial_no = serial_no.name
-		si.insert()
-
-		self.assertRaises(SerialNoWarehouseError, si.submit)
 
 	def test_serial_numbers_against_delivery_note(self):
 		"""
@@ -1404,19 +1401,21 @@ class TestSalesInvoice(unittest.TestCase):
 		serial numbers are same
 		"""
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+		se.load_from_db()
+		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
-		dn = create_delivery_note(item=se.get("items")[0].item_code, serial_no=serial_nos[0])
+		dn = create_delivery_note(item=se.get("items")[0].item_code, serial_no=[serial_nos])
 		dn.submit()
+		dn.load_from_db()
+
+		serial_nos = get_serial_nos_from_bundle(dn.get("items")[0].serial_and_batch_bundle)[0]
+		self.assertTrue(get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0])
 
 		si = make_sales_invoice(dn.name)
 		si.save()
-
-		self.assertEqual(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
 
 	def test_return_sales_invoice(self):
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
@@ -3174,7 +3173,7 @@ class TestSalesInvoice(unittest.TestCase):
 			item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1
 		)
 		si.reload()
-		self.assertTrue(si.items[0].serial_no)
+		self.assertTrue(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle))
 
 	def test_sales_invoice_with_disabled_account(self):
 		try:
@@ -3283,11 +3282,11 @@ class TestSalesInvoice(unittest.TestCase):
 
 		pr = make_purchase_receipt(qty=1, item_code=item.name)
 
-		batch_no = pr.items[0].batch_no
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
 		si = create_sales_invoice(qty=1, item_code=item.name, update_stock=1, batch_no=batch_no)
 
 		si.load_from_db()
-		batch_no = si.items[0].batch_no
+		batch_no = get_batch_from_bundle(si.items[0].serial_and_batch_bundle)
 		self.assertTrue(batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
@@ -3386,6 +3385,32 @@ def create_sales_invoice(**args):
 	si.naming_series = args.naming_series or "T-SINV-"
 	si.cost_center = args.parent_cost_center
 
+	bundle_id = None
+	if si.update_stock and (args.get("batch_no") or args.get("serial_no")):
+		batches = {}
+		qty = args.qty or 1
+		item_code = args.item or args.item_code or "_Test Item"
+		if args.get("batch_no"):
+			batches = frappe._dict({args.batch_no: qty})
+
+		serial_nos = args.get("serial_no") or []
+
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": args.warehouse or "_Test Warehouse - _TC",
+					"qty": qty,
+					"batches": batches,
+					"voucher_type": "Purchase Invoice",
+					"serial_nos": serial_nos,
+					"type_of_transaction": "Outward" if not args.is_return else "Inward",
+					"posting_date": si.posting_date or today(),
+					"posting_time": si.posting_time,
+				}
+			)
+		).name
+
 	si.append(
 		"items",
 		{
@@ -3405,10 +3430,9 @@ def create_sales_invoice(**args):
 			"discount_amount": args.discount_amount or 0,
 			"asset": args.asset or None,
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
-			"serial_no": args.serial_no,
 			"conversion_factor": args.get("conversion_factor", 1),
 			"incoming_rate": args.incoming_rate or 0,
-			"batch_no": args.batch_no or None,
+			"serial_and_batch_bundle": bundle_id,
 		},
 	)
 
@@ -3418,6 +3442,8 @@ def create_sales_invoice(**args):
 			si.submit()
 		else:
 			si.payment_schedule = []
+
+		si.load_from_db()
 	else:
 		si.payment_schedule = []
 
@@ -3452,7 +3478,6 @@ def create_sales_invoice_against_cost_center(**args):
 			"income_account": "Sales - _TC",
 			"expense_account": "Cost of Goods Sold - _TC",
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
-			"serial_no": args.serial_no,
 		},
 	)
 

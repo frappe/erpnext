@@ -1142,7 +1142,6 @@ class update_entries_after(object):
 			self.allow_zero_rate,
 			currency=erpnext.get_company_currency(sle.company),
 			company=sle.company,
-			batch_no=sle.batch_no,
 		)
 
 	def get_sle_before_datetime(self, args):

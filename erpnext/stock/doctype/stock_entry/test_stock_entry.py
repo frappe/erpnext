@@ -647,7 +647,7 @@ class TestStockEntry(FrappeTestCase):
 					"do_not_submit": True,
 				}
 			)
-		)
+		).name
 
 		se.insert()
 		se.submit()
@@ -1789,7 +1789,7 @@ def make_serialized_item(**args):
 					"do_not_submit": True,
 				}
 			)
-		)
+		).name
 
 	if args.cost_center:
 		se.get("items")[0].cost_center = args.cost_center

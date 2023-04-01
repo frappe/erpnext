@@ -343,7 +343,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			qty=1,
 			rate=200,
 			item_code=item_code,
-			serial_no=serial_no,
+			serial_no=[serial_no],
 		)
 
 		serial_no_rate = frappe.db.get_value("Serial No", serial_no, "purchase_rate")
@@ -353,7 +353,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			item_code=item_code,
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			serial_no=serial_no,
+			serial_no=[serial_no],
 			qty=1,
 			rate=500,
 			cost_center="Main - TCP1",

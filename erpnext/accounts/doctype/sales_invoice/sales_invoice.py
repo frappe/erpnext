@@ -266,8 +266,6 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
 
-		self.update_serial_no()
-
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
@@ -351,7 +349,6 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.update_serial_no(in_cancel=True)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -1508,20 +1505,6 @@ class SalesInvoice(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.due_date = None
-
-	def update_serial_no(self, in_cancel=False):
-		"""update Sales Invoice refrence in Serial No"""
-		invoice = None if (in_cancel or self.is_return) else self.name
-		if in_cancel and self.is_return:
-			invoice = self.return_against
-
-		for item in self.items:
-			if not item.serial_no:
-				continue
-
-			for serial_no in get_serial_nos(item.serial_no):
-				if serial_no and frappe.db.get_value("Serial No", serial_no, "item_code") == item.item_code:
-					frappe.db.set_value("Serial No", serial_no, "sales_invoice", invoice)
 
 	def validate_serial_numbers(self):
 		"""

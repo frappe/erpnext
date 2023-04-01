@@ -24,6 +24,10 @@ def get_serial_nos_from_bundle(bundle):
 def make_serial_batch_bundle(kwargs):
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
+	type_of_transaction = "Inward" if kwargs.qty > 0 else "Outward"
+	if kwargs.get("type_of_transaction"):
+		type_of_transaction = kwargs.get("type_of_transaction")
+
 	sb = SerialBatchCreation(
 		{
 			"item_code": kwargs.item_code,
@@ -36,7 +40,7 @@ def make_serial_batch_bundle(kwargs):
 			"avg_rate": kwargs.rate,
 			"batches": kwargs.batches,
 			"serial_nos": kwargs.serial_nos,
-			"type_of_transaction": "Inward" if kwargs.qty > 0 else "Outward",
+			"type_of_transaction": type_of_transaction,
 			"company": kwargs.company or "_Test Company",
 			"do_not_submit": kwargs.do_not_submit,
 		}
