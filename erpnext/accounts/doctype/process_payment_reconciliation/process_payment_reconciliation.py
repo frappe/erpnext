@@ -44,17 +44,15 @@ class ProcessPaymentReconciliation(Document):
 def get_progress(docname: str | None = None) -> float:
 	progress = 0.0
 	if docname:
-		reconcile_log = frappe.db.get_all(
-			"Process Payment Reconciliation Log",
-			filters={"process_pr": docname},
-			as_list=1,
+		reconcile_log = frappe.db.get_value(
+			"Process Payment Reconciliation Log", filters={"process_pr": docname}, fieldname="name"
 		)
 		if reconcile_log:
 			processed = frappe.db.get_value(
-				"Process Payment Reconciliation Log", reconcile_log[0][0], "reconciled_entries"
+				"Process Payment Reconciliation Log", reconcile_log, "reconciled_entries"
 			)
 			total = frappe.db.get_value(
-				"Process Payment Reconciliation Log", reconcile_log[0][0], "total_allocations"
+				"Process Payment Reconciliation Log", reconcile_log, "total_allocations"
 			)
 
 			if processed != 0:
