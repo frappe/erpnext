@@ -35,7 +35,14 @@ purchase_doctypes = [
 
 
 @frappe.whitelist()
-def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+def get_item_details(
+	args,
+	doc=None,
+	for_validate=False,
+	overwrite_warehouse=True,
+	return_basic_details=False,
+	basic_details=None,
+):
 	"""
 	args = {
 	        "item_code": "",
@@ -73,7 +80,13 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		if doc.get("doctype") == "Purchase Invoice":
 			args["bill_date"] = doc.get("bill_date")
 
-	out = get_basic_details(args, item, overwrite_warehouse)
+	if not basic_details:
+		out = get_basic_details(args, item, overwrite_warehouse)
+	else:
+		out = basic_details
+
+	basic_details = out.copy()
+
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -141,7 +154,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.amount = flt(args.qty) * flt(out.rate)
 
 	out = remove_standard_fields(out)
-	return out
+
+	if return_basic_details:
+		return out, basic_details
+	else:
+		return out
 
 
 def remove_standard_fields(details):
