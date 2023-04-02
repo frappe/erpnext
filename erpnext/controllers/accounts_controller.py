@@ -2784,6 +2784,17 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.update_billing_percentage()
 	parent.set_status()
 
+	if parent_doctype == "Sales Order":
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+			has_reserved_stock,
+			reserve_stock_against_sales_order,
+		)
+
+		if has_reserved_stock(parent.doctype, parent.name):
+			cancel_stock_reservation_entries(parent.doctype, parent.name)
+			reserve_stock_against_sales_order(parent.name)
+
 
 @erpnext.allow_regional
 def validate_regional(doc):
