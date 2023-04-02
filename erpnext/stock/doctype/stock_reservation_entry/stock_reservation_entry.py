@@ -86,7 +86,7 @@ class StockReservationEntry(Document):
 			)
 
 
-def validate_stock_reservation_settings(voucher):
+def validate_stock_reservation_settings(voucher: object) -> None:
 	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 		frappe.throw(
 			_("Please enable {0} in the {1}.").format(
@@ -101,9 +101,7 @@ def validate_stock_reservation_settings(voucher):
 		)
 
 
-def get_available_qty_to_reserve(item_code, warehouse):
-	from frappe.query_builder.functions import Sum
-
+def get_available_qty_to_reserve(item_code: str, warehouse: str) -> float:
 	from erpnext.stock.get_item_details import get_bin_details
 
 	available_qty = get_bin_details(item_code, warehouse, include_child_warehouses=True).get(
