@@ -512,6 +512,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 	def test_return_for_serialized_items(self):
 		se = make_serialized_item()
+
 		serial_no = [get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]]
 
 		dn = create_delivery_note(
@@ -1215,6 +1216,9 @@ def create_delivery_note(**args):
 	if args.get("batch_no") or args.get("serial_no"):
 		type_of_transaction = args.type_of_transaction or "Outward"
 
+		if dn.is_return:
+			type_of_transaction = "Inward"
+
 		qty = args.get("qty") or 1
 		qty *= -1 if type_of_transaction == "Outward" else 1
 		batches = {}
@@ -1233,6 +1237,7 @@ def create_delivery_note(**args):
 					"posting_date": dn.posting_date,
 					"posting_time": dn.posting_time,
 					"type_of_transaction": type_of_transaction,
+					"do_not_submit": True,
 				}
 			)
 		).name
@@ -1257,6 +1262,9 @@ def create_delivery_note(**args):
 		dn.insert()
 		if not args.do_not_submit:
 			dn.submit()
+
+		dn.load_from_db()
+
 	return dn
 
 

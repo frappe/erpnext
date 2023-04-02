@@ -393,8 +393,15 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 		target_doc.qty = -1 * source_doc.qty
+		item_details = frappe.get_cached_value(
+			"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
+		)
 
+		returned_serial_nos = []
 		if source_doc.get("serial_and_batch_bundle"):
+			if item_details.has_serial_no:
+				returned_serial_nos = get_returned_serial_nos(source_doc, source_parent)
+
 			type_of_transaction = "Inward"
 			if (
 				frappe.db.get_value(
@@ -410,6 +417,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 					"serial_and_batch_bundle": source_doc.serial_and_batch_bundle,
 					"returned_against": source_doc.name,
 					"item_code": source_doc.item_code,
+					"returned_serial_nos": returned_serial_nos,
 				}
 			)
 
@@ -418,6 +426,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 				target_doc.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
 
 		if source_doc.get("rejected_serial_and_batch_bundle"):
+			if item_details.has_serial_no:
+				returned_serial_nos = get_returned_serial_nos(
+					source_doc, source_parent, serial_no_field="rejected_serial_and_batch_bundle"
+				)
+
 			type_of_transaction = "Inward"
 			if (
 				frappe.db.get_value(
@@ -433,6 +446,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 					"serial_and_batch_bundle": source_doc.rejected_serial_and_batch_bundle,
 					"returned_against": source_doc.name,
 					"item_code": source_doc.item_code,
+					"returned_serial_nos": returned_serial_nos,
 				}
 			)
 
@@ -649,8 +663,11 @@ def get_filters(
 	return filters
 
 
-def get_returned_serial_nos(child_doc, parent_doc, serial_no_field="serial_no"):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None):
+	from erpnext.stock.serial_batch_bundle import get_serial_nos
+
+	if not serial_no_field:
+		serial_no_field = "serial_and_batch_bundle"
 
 	return_ref_field = frappe.scrub(child_doc.doctype)
 	if child_doc.doctype == "Delivery Note Item":
@@ -667,7 +684,10 @@ def get_returned_serial_nos(child_doc, parent_doc, serial_no_field="serial_no"):
 		[parent_doc.doctype, "docstatus", "=", 1],
 	]
 
+	ids = []
 	for row in frappe.get_all(parent_doc.doctype, fields=fields, filters=filters):
-		serial_nos.extend(get_serial_nos(row.get(serial_no_field)))
+		ids.append(row.get("serial_and_batch_bundle"))
+
+	serial_nos.extend(get_serial_nos(ids))
 
 	return serial_nos

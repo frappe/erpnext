@@ -39,9 +39,7 @@
   "more_info",
   "company",
   "column_break_2cmm",
-  "work_order",
-  "section_break_fgyk",
-  "serial_no_details"
+  "work_order"
  ],
  "fields": [
   {
@@ -227,11 +225,6 @@
    "label": "More Information"
   },
   {
-   "fieldname": "serial_no_details",
-   "fieldtype": "Text Editor",
-   "label": "Serial No Details"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -282,10 +275,6 @@
   {
    "fieldname": "column_break_2cmm",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_fgyk",
-   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-barcode",

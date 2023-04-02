@@ -257,6 +257,9 @@ class SerialBatchBundle:
 
 def get_serial_nos(serial_and_batch_bundle):
 	filters = {"parent": serial_and_batch_bundle}
+	if isinstance(serial_and_batch_bundle, list):
+		filters = {"parent": ("in", serial_and_batch_bundle)}
+
 	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters)
 
 	return [d.serial_no for d in entries]
@@ -306,7 +309,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 				(bundle.is_cancelled == 0)
 				& (bundle.docstatus == 1)
 				& (bundle_child.serial_no.isin(serial_nos))
-				& (bundle.type_of_transaction != "Maintenance")
+				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
 				& (bundle.item_code == self.sle.item_code)
 				& (bundle_child.warehouse == self.sle.warehouse)
 			)
@@ -314,7 +317,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		)
 
 		# Important to exclude the current voucher
-		if self.sle.voucher_type == "Stock Reconciliation" and self.sle.voucher_no:
+		if self.sle.voucher_no:
 			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
 		if self.sle.posting_date:
@@ -369,6 +372,9 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 	def get_incoming_rate(self):
 		return abs(flt(self.stock_value_change) / flt(self.sle.actual_qty))
+
+	def get_incoming_rate_of_serial_no(self, serial_no):
+		return self.serial_no_incoming_rate.get(serial_no, 0.0)
 
 
 def is_rejected(voucher_type, voucher_detail_no, warehouse):
@@ -437,7 +443,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				& (parent.item_code == self.sle.item_code)
 				& (parent.docstatus == 1)
 				& (parent.is_cancelled == 0)
-				& (parent.type_of_transaction != "Maintenance")
+				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.groupby(child.batch_no)
 		)
@@ -644,12 +650,25 @@ class SerialBatchCreation:
 		id = self.serial_and_batch_bundle
 		package = frappe.get_doc("Serial and Batch Bundle", id)
 		new_package = frappe.copy_doc(package)
+
+		if self.get("returned_serial_nos"):
+			self.remove_returned_serial_nos(new_package)
+
 		new_package.docstatus = 0
 		new_package.type_of_transaction = self.type_of_transaction
 		new_package.returned_against = self.get("returned_against")
 		new_package.save()
 
 		self.serial_and_batch_bundle = new_package.name
+
+	def remove_returned_serial_nos(self, package):
+		remove_list = []
+		for d in package.entries:
+			if d.serial_no in self.returned_serial_nos:
+				remove_list.append(d)
+
+		for d in remove_list:
+			package.remove(d)
 
 	def make_serial_and_batch_bundle(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
@@ -664,6 +683,9 @@ class SerialBatchCreation:
 			self.set_auto_serial_batch_entries_for_inward()
 
 		self.set_serial_batch_entries(doc)
+		if not doc.get("entries"):
+			return frappe._dict({})
+
 		doc.save()
 
 		if not hasattr(self, "do_not_submit") or not self.do_not_submit:

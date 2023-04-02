@@ -1364,10 +1364,10 @@ def split_qty_based_on_batch_size(wo_doc, row, qty):
 
 
 def get_serial_nos_for_job_card(row, wo_doc):
-	if not wo_doc.serial_no:
+	if not wo_doc.has_serial_no:
 		return
 
-	serial_nos = get_serial_nos(wo_doc.serial_no)
+	serial_nos = get_serial_nos_for_work_order(wo_doc.name, wo_doc.production_item)
 	used_serial_nos = []
 	for d in frappe.get_all(
 		"Job Card",
@@ -1378,6 +1378,21 @@ def get_serial_nos_for_job_card(row, wo_doc):
 
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
 	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
+
+
+def get_serial_nos_for_work_order(work_order, production_item):
+	serial_nos = []
+	for d in frappe.get_all(
+		"Serial No",
+		fields=["name"],
+		filters={
+			"work_order": work_order,
+			"item_code": production_item,
+		},
+	):
+		serial_nos.append(d.name)
+
+	return serial_nos
 
 
 def validate_operation_data(row):

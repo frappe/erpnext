@@ -211,6 +211,7 @@ class DeprecatedBatchNoValuation:
 				& (bundle_child.batch_no.isnotnull())
 				& (batch.use_batchwise_valuation == 0)
 				& (bundle.is_cancelled == 0)
+				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.where(timestamp_condition)
 		)

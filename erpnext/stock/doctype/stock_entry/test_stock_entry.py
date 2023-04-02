@@ -1803,6 +1803,8 @@ def make_serialized_item(**args):
 	se.set_stock_entry_type()
 	se.insert()
 	se.submit()
+
+	se.load_from_db()
 	return se
 
 

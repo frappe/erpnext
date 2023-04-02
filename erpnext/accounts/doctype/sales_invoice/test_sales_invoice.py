@@ -3402,11 +3402,12 @@ def create_sales_invoice(**args):
 					"warehouse": args.warehouse or "_Test Warehouse - _TC",
 					"qty": qty,
 					"batches": batches,
-					"voucher_type": "Purchase Invoice",
+					"voucher_type": "Sales Invoice",
 					"serial_nos": serial_nos,
 					"type_of_transaction": "Outward" if not args.is_return else "Inward",
 					"posting_date": si.posting_date or today(),
 					"posting_time": si.posting_time,
+					"do_not_submit": True,
 				}
 			)
 		).name

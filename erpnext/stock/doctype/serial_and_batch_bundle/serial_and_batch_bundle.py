@@ -52,9 +52,11 @@ class SerialandBatchBundle(Document):
 			return
 
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
-		available_serial_nos = get_available_serial_nos(
-			frappe._dict({"item_code": self.item_code, "warehouse": self.warehouse})
-		)
+		kwargs = {"item_code": self.item_code, "warehouse": self.warehouse}
+		if self.voucher_type == "POS Invoice":
+			kwargs["ignore_voucher_no"] = self.voucher_no
+
+		available_serial_nos = get_available_serial_nos(frappe._dict(kwargs))
 
 		serial_no_warehouse = {}
 		for data in available_serial_nos:
@@ -149,12 +151,9 @@ class SerialandBatchBundle(Document):
 					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
 
 				available_qty = flt(sn_obj.available_qty.get(d.batch_no)) + flt(d.qty)
-
 				self.validate_negative_batch(d.batch_no, available_qty)
 
-			if self.has_batch_no:
-				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
-
+			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 			if save:
 				d.db_set(
 					{"incoming_rate": d.incoming_rate, "stock_value_difference": d.stock_value_difference}
@@ -197,6 +196,9 @@ class SerialandBatchBundle(Document):
 		valuation_field = "valuation_rate"
 		if self.voucher_type in ["Sales Invoice", "Delivery Note"]:
 			valuation_field = "incoming_rate"
+
+		if self.voucher_type == "POS Invoice":
+			valuation_field = "rate"
 
 		rate = row.get(valuation_field) if row else 0.0
 		precision = frappe.get_precision(self.child_table, valuation_field) or 2
@@ -325,6 +327,7 @@ class SerialandBatchBundle(Document):
 				& (parent.item_code == self.item_code)
 				& (parent.docstatus == 1)
 				& (parent.is_cancelled == 0)
+				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.where(timestamp_condition)
 		).run(as_dict=True)
@@ -830,6 +833,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 			["POS Invoice", "consolidated_invoice", "is", "not set"],
 			["POS Invoice", "docstatus", "=", 1],
 			["POS Invoice Item", "item_code", "=", kwargs.item_code],
+			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
 		],
 	)
 
@@ -839,7 +843,10 @@ def get_reserved_serial_nos_for_pos(kwargs):
 		if pos_invoice.serial_and_batch_bundle
 	]
 
-	for d in get_serial_batch_ledgers(ids, docstatus=1, name=ids):
+	if not ids:
+		return []
+
+	for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 		ignore_serial_nos.append(d.serial_no)
 
 	# Will be deprecated in v16
@@ -1010,7 +1017,11 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> List[frappe._dict]:
 			bundle_table.posting_date,
 			bundle_table.posting_time,
 		)
-		.where((bundle_table.docstatus == 1) & (bundle_table.is_cancelled == 0))
+		.where(
+			(bundle_table.docstatus == 1)
+			& (bundle_table.is_cancelled == 0)
+			& (bundle_table.type_of_transaction.isin(["Inward", "Outward"]))
+		)
 	)
 
 	for key, val in kwargs.items():
