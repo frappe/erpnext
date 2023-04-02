@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, nowtime
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
 
@@ -179,7 +179,11 @@ def get_batch_qty(
 	out = 0
 	if batch_no and warehouse:
 		cond = ""
-		if posting_date and posting_time:
+
+		if posting_date:
+			if posting_time is None:
+				posting_time = nowtime()
+
 			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(
 				posting_date, posting_time
 			)
