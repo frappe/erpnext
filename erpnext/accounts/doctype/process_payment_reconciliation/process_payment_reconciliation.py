@@ -164,16 +164,38 @@ def trigger_reconciliation_for_queued_docs():
 		return
 
 	if not is_scheduler_inactive():
-		# Get Queued documents and start the process
-		queued = frappe.db.get_all(
+		# Get all queued documents
+		all_queued = frappe.db.get_all(
 			"Process Payment Reconciliation",
 			filters={"docstatus": 1, "status": "Queued"},
 			order_by="creation desc",
 			as_list=1,
 		)
 
-		for doc in queued:
-			trigger_job_for_doc(doc[0])
+		docs_to_trigger = []
+		unique_filters = set()
+		queue_size = 5
+
+		fields = ["company", "party_type", "party", "receivable_payable_account"]
+
+		def get_filters_as_tuple(fields, doc):
+			filters = ()
+			for x in fields:
+				filters += tuple(doc.get(x))
+			return filters
+
+		for x in all_queued:
+			doc = frappe.get_doc("Process Payment Reconciliation", x)
+			filters = get_filters_as_tuple(fields, doc)
+			if filters not in unique_filters:
+				unique_filters.add(filters)
+				docs_to_trigger.append(doc.name)
+			if len(docs_to_trigger) == queue_size:
+				break
+
+		# trigger reconcilation process for queue_size unique filters
+		for doc in docs_to_trigger:
+			trigger_job_for_doc(doc)
 
 	else:
 		frappe.msgprint(_("Scheduler is Inactive. Can't trigger jobs now."))
