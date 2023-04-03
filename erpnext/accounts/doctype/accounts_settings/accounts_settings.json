@@ -384,7 +384,7 @@
   {
    "fieldname": "section_break_rvrg",
    "fieldtype": "Section Break",
-   "label": "Auto Reconciliation"
+   "label": "Background Reconciliation"
   },
   {
    "default": "0",
@@ -402,7 +402,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-31 14:07:03.002997",
+ "modified": "2023-04-03 10:10:33.962499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
