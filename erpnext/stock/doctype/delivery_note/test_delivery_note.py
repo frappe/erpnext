@@ -931,7 +931,7 @@ class TestDeliveryNote(FrappeTestCase):
 				"is_stock_item": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
-				"batch_number_series": "TESTBATCH.#####",
+				"batch_number_series": "TESTBATCHIUU.#####",
 			},
 		)
 		make_product_bundle(parent=batched_bundle.name, items=[batched_item.name])
@@ -942,7 +942,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = create_delivery_note(item_code=batched_bundle.name, qty=1)
 		dn.load_from_db()
 
-		batch_no = get_batch_from_bundle(dn.items[0].serial_and_batch_bundle)
+		batch_no = get_batch_from_bundle(dn.packed_items[0].serial_and_batch_bundle)
 		self.assertTrue(batch_no)
 
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):

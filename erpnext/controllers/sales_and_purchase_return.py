@@ -663,11 +663,20 @@ def get_filters(
 	return filters
 
 
-def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None):
+def get_returned_serial_nos(
+	child_doc, parent_doc, serial_no_field=None, ignore_voucher_detail_no=None
+):
+	from erpnext.stock.doctype.serial_no.serial_no import (
+		get_serial_nos as get_serial_nos_from_serial_no,
+	)
 	from erpnext.stock.serial_batch_bundle import get_serial_nos
 
 	if not serial_no_field:
 		serial_no_field = "serial_and_batch_bundle"
+
+	old_field = "serial_no"
+	if serial_no_field == "rejected_serial_and_batch_bundle":
+		old_field = "rejected_serial_no"
 
 	return_ref_field = frappe.scrub(child_doc.doctype)
 	if child_doc.doctype == "Delivery Note Item":
@@ -675,7 +684,10 @@ def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None):
 
 	serial_nos = []
 
-	fields = [f"`{'tab' + child_doc.doctype}`.`{serial_no_field}`"]
+	fields = [
+		f"`{'tab' + child_doc.doctype}`.`{serial_no_field}`",
+		f"`{'tab' + child_doc.doctype}`.`{old_field}`",
+	]
 
 	filters = [
 		[parent_doc.doctype, "return_against", "=", parent_doc.name],
@@ -684,9 +696,15 @@ def get_returned_serial_nos(child_doc, parent_doc, serial_no_field=None):
 		[parent_doc.doctype, "docstatus", "=", 1],
 	]
 
+	# Required for POS Invoice
+	if ignore_voucher_detail_no:
+		filters.append([child_doc.doctype, "name", "!=", ignore_voucher_detail_no])
+
 	ids = []
 	for row in frappe.get_all(parent_doc.doctype, fields=fields, filters=filters):
 		ids.append(row.get("serial_and_batch_bundle"))
+		if row.get(old_field):
+			serial_nos.extend(get_serial_nos_from_serial_no(row.get(old_field)))
 
 	serial_nos.extend(get_serial_nos(ids))
 

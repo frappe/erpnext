@@ -387,7 +387,7 @@ def split_invoices(invoices):
 	]
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
-			if not item.serial_no:
+			if not item.serial_no and not item.serial_and_batch_bundle:
 				continue
 
 			return_against_is_added = any(

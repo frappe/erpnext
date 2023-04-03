@@ -2981,7 +2981,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# Sales Invoice with Payment Schedule
 		si_with_payment_schedule = create_sales_invoice(do_not_submit=True)
-		si_with_payment_schedule.extend(
+		si_with_payment_schedule.set(
 			"payment_schedule",
 			[
 				{

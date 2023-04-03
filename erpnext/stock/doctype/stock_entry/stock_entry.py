@@ -142,7 +142,6 @@ class StockEntry(StockController):
 		self.validate_job_card_item()
 		self.set_purpose_for_stock_entry()
 		self.clean_serial_nos()
-		self.validate_duplicate_serial_no()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -878,52 +877,63 @@ class StockEntry(StockController):
 		if self.stock_entry_type and not self.purpose:
 			self.purpose = frappe.get_cached_value("Stock Entry Type", self.stock_entry_type, "purpose")
 
-	def validate_duplicate_serial_no(self):
-		warehouse_wise_serial_nos = {}
-
-		# In case of repack the source and target serial nos could be same
-		for warehouse in ["s_warehouse", "t_warehouse"]:
-			serial_nos = []
-			for row in self.items:
-				if not (row.serial_no and row.get(warehouse)):
-					continue
-
-				for sn in get_serial_nos(row.serial_no):
-					if sn in serial_nos:
-						frappe.throw(
-							_("The serial no {0} has added multiple times in the stock entry {1}").format(
-								frappe.bold(sn), self.name
-							)
-						)
-
-					serial_nos.append(sn)
-
 	def make_serial_and_batch_bundle_for_outward(self):
+		if self.docstatus == 1:
+			return
+
 		serial_or_batch_items = get_serial_or_batch_items(self.items)
 		if not serial_or_batch_items:
 			return
+
+		already_picked_serial_nos = []
 
 		for row in self.items:
 			if not row.s_warehouse:
 				continue
 
-			if row.serial_and_batch_bundle or row.item_code not in serial_or_batch_items:
+			if row.item_code not in serial_or_batch_items:
 				continue
 
-			bundle_doc = SerialBatchCreation(
-				{
-					"item_code": row.item_code,
-					"warehouse": row.s_warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"voucher_type": self.doctype,
-					"voucher_detail_no": row.name,
-					"qty": row.qty * -1,
-					"type_of_transaction": "Outward",
-					"company": self.company,
-					"do_not_submit": True,
-				}
-			).make_serial_and_batch_bundle()
+			bundle_doc = None
+			if row.serial_and_batch_bundle and abs(row.qty) != abs(
+				frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
+			):
+				bundle_doc = SerialBatchCreation(
+					{
+						"item_code": row.item_code,
+						"warehouse": row.s_warehouse,
+						"serial_and_batch_bundle": row.serial_and_batch_bundle,
+						"type_of_transaction": "Outward",
+						"ignore_serial_nos": already_picked_serial_nos,
+						"qty": row.qty * -1,
+					}
+				).update_serial_and_batch_entries()
+			elif not row.serial_and_batch_bundle:
+				bundle_doc = SerialBatchCreation(
+					{
+						"item_code": row.item_code,
+						"warehouse": row.s_warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"voucher_type": self.doctype,
+						"voucher_detail_no": row.name,
+						"qty": row.qty * -1,
+						"ignore_serial_nos": already_picked_serial_nos,
+						"type_of_transaction": "Outward",
+						"company": self.company,
+						"do_not_submit": True,
+					}
+				).make_serial_and_batch_bundle()
+
+			if not bundle_doc:
+				continue
+
+			if self.docstatus == 0:
+				for entry in bundle_doc.entries:
+					if not entry.serial_no:
+						continue
+
+					already_picked_serial_nos.append(entry.serial_no)
 
 			row.serial_and_batch_bundle = bundle_doc.name
 

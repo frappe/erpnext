@@ -255,10 +255,13 @@ class SerialBatchBundle:
 			frappe.db.set_value("Batch", batch_no, "batch_qty", batches_qty.get(batch_no, 0))
 
 
-def get_serial_nos(serial_and_batch_bundle):
+def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 	filters = {"parent": serial_and_batch_bundle}
 	if isinstance(serial_and_batch_bundle, list):
 		filters = {"parent": ("in", serial_and_batch_bundle)}
+
+	if serial_nos:
+		filters["serial_no"] = ("in", serial_nos)
 
 	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters)
 
@@ -694,6 +697,18 @@ class SerialBatchCreation:
 
 		return doc
 
+	def update_serial_and_batch_entries(self):
+		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
+		doc.type_of_transaction = self.type_of_transaction
+		doc.set("entries", [])
+		self.set_auto_serial_batch_entries_for_outward()
+		self.set_serial_batch_entries(doc)
+		if not doc.get("entries"):
+			return frappe._dict({})
+
+		doc.save()
+		return doc
+
 	def set_auto_serial_batch_entries_for_outward(self):
 		from erpnext.stock.doctype.batch.batch import get_available_batches
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
@@ -706,6 +721,9 @@ class SerialBatchCreation:
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
 		)
+
+		if self.get("ignore_serial_nos"):
+			kwargs["ignore_serial_nos"] = self.ignore_serial_nos
 
 		if self.has_serial_no and not self.get("serial_nos"):
 			self.serial_nos = get_serial_nos_for_outward(kwargs)

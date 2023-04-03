@@ -6,7 +6,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 import frappe
-from frappe import _, bold
+from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import add_days, cint, flt, get_link_to_form, nowtime, today
@@ -82,15 +82,19 @@ class SerialandBatchBundle(Document):
 			return
 
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
-		available_serial_nos = get_available_serial_nos(
-			frappe._dict(
-				{
-					"item_code": self.item_code,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-				}
-			)
+		kwargs = frappe._dict(
+			{
+				"item_code": self.item_code,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"serial_nos": serial_nos,
+			}
 		)
+
+		if self.returned_against and self.docstatus == 1:
+			kwargs["ignore_voucher_detail_no"] = self.voucher_detail_no
+
+		available_serial_nos = get_available_serial_nos(kwargs)
 
 		for data in available_serial_nos:
 			if data.serial_no in serial_nos:
@@ -776,6 +780,10 @@ def get_available_serial_nos(kwargs):
 
 	ignore_serial_nos = get_reserved_serial_nos_for_pos(kwargs)
 
+	# To ignore serial nos in the same record for the draft state
+	if kwargs.get("ignore_serial_nos"):
+		ignore_serial_nos.extend(kwargs.get("ignore_serial_nos"))
+
 	if kwargs.get("posting_date"):
 		if kwargs.get("posting_time") is None:
 			kwargs.posting_time = nowtime()
@@ -801,7 +809,7 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 
 	for d in data:
 		if d.serial_and_batch_bundle:
-			sns = get_serial_nos_from_bundle(d.serial_and_batch_bundle)
+			sns = get_serial_nos_from_bundle(d.serial_and_batch_bundle, kwargs.get("serial_nos", []))
 			if d.actual_qty > 0:
 				serial_nos.update(sns)
 			else:
@@ -823,12 +831,19 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 
 
 def get_reserved_serial_nos_for_pos(kwargs):
+	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	ignore_serial_nos = []
 	pos_invoices = frappe.get_all(
 		"POS Invoice",
-		fields=["`tabPOS Invoice Item`.serial_no", "`tabPOS Invoice Item`.serial_and_batch_bundle"],
+		fields=[
+			"`tabPOS Invoice Item`.serial_no",
+			"`tabPOS Invoice`.is_return",
+			"`tabPOS Invoice Item`.name as child_docname",
+			"`tabPOS Invoice`.name as parent_docname",
+			"`tabPOS Invoice Item`.serial_and_batch_bundle",
+		],
 		filters=[
 			["POS Invoice", "consolidated_invoice", "is", "not set"],
 			["POS Invoice", "docstatus", "=", 1],
@@ -850,11 +865,35 @@ def get_reserved_serial_nos_for_pos(kwargs):
 		ignore_serial_nos.append(d.serial_no)
 
 	# Will be deprecated in v16
+	returned_serial_nos = []
 	for pos_invoice in pos_invoices:
 		if pos_invoice.serial_no:
 			ignore_serial_nos.extend(get_serial_nos(pos_invoice.serial_no))
 
-	return ignore_serial_nos
+		if pos_invoice.is_return:
+			continue
+
+		child_doc = _dict(
+			{
+				"doctype": "POS Invoice Item",
+				"name": pos_invoice.child_docname,
+			}
+		)
+
+		parent_doc = _dict(
+			{
+				"doctype": "POS Invoice",
+				"name": pos_invoice.parent_docname,
+			}
+		)
+
+		returned_serial_nos.extend(
+			get_returned_serial_nos(
+				child_doc, parent_doc, ignore_voucher_detail_no=kwargs.get("ignore_voucher_detail_no")
+			)
+		)
+
+	return list(set(ignore_serial_nos) - set(returned_serial_nos))
 
 
 def get_auto_batch_nos(kwargs):
