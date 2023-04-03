@@ -85,7 +85,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
-			frappe.db.get_single_value("Accounts Settings", "enable_auto_reconciliation").then((enabled) => {
+			frappe.db.get_single_value("Accounts Settings", "enable_payment_reconciliation_in_background").then((enabled) => {
  				if(enabled) {
 					this.frm.call({
 						'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
