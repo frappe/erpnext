@@ -166,6 +166,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 		if not log:
 			log = frappe.new_doc("Process Payment Reconciliation Log")
 			log.process_pr = doc
+			log.status = "Running"
 			log = log.save()
 
 			job_name = f"process_{doc}_fetch_and_allocate"
@@ -374,12 +375,18 @@ def reconcile(doc: None | str = None) -> None:
 						and reconcile_log.reconciled_entries < reconcile_log.total_allocations
 					):
 						frappe.db.set_value(
+							"Process Payment Reconciliation Log", reconcile_log.name, "status", "Partially Reconciled"
+						)
+						frappe.db.set_value(
 							"Process Payment Reconciliation",
 							reconcile_log.process_pr,
 							"status",
 							"Partially Reconciled",
 						)
 					else:
+						frappe.db.set_value(
+							"Process Payment Reconciliation Log", reconcile_log.name, "status", "Failed"
+						)
 						frappe.db.set_value(
 							"Process Payment Reconciliation",
 							reconcile_log.process_pr,
@@ -390,6 +397,7 @@ def reconcile(doc: None | str = None) -> None:
 					reconcile_log.reload()
 					if reconcile_log.reconciled_entries == reconcile_log.total_allocations:
 						reconcile_log.reconciled = True
+						reconcile_log.status = "Reconciled"
 						reconcile_log.save()
 						frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
 					else:
