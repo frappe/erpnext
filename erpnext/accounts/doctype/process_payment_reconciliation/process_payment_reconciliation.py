@@ -125,6 +125,7 @@ def run_reconciliation_job():
 			if queued:
 				doc = queued[0][0]
 				job_name = f"start_processing_{doc}"
+				frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Running")
 				if not is_job_running(job_name):
 					job = frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
@@ -134,7 +135,6 @@ def run_reconciliation_job():
 						enqueue_after_commit=True,
 						doc=doc,
 					)
-					frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Running")
 					frappe.msgprint(_("Background Job {0} triggered").format(job_name))
 		else:
 			# resume tasks on running doc
@@ -424,6 +424,7 @@ def reconcile(doc: None | str = None) -> None:
 							)
 			else:
 				reconcile_log.reconciled = True
+				reconcile_log.status = "Reconciled"
 				reconcile_log.save()
 				frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
 
