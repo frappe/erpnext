@@ -9,6 +9,8 @@
  "engine": "InnoDB",
  "field_order": [
   "process_pr",
+  "section_break_fvdw",
+  "status",
   "tasks_section",
   "allocated",
   "reconciled",
@@ -106,12 +108,24 @@
    "fieldtype": "Table",
    "label": "Payments",
    "options": "Process Payment Reconciliation Payments"
+  },
+  {
+   "fieldname": "section_break_fvdw",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Running\nReconciled\nPartially Reconciled\nFailed",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-31 14:25:34.623073",
+ "modified": "2023-04-03 10:28:16.577419",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",
