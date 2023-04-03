@@ -3,9 +3,12 @@ from typing import Tuple, Union
 
 import frappe
 from frappe.utils import flt
+<<<<<<< HEAD
 =======
 import frappe
 >>>>>>> e7745033df (feat: Party auto-matcher from Bank Transaction data)
+=======
+>>>>>>> 3a898289b0 (chore: Single query with or filter to search Party Mapper by name/desc)
 from rapidfuzz import fuzz, process
 
 
@@ -223,7 +226,7 @@ class AutoMatchbyAccountIBAN:
 		result = None
 
 		parties = ["Supplier", "Employee", "Customer"]  # most -> least likely to receive
-		if self.deposit > 0:
+		if flt(self.deposit) > 0:
 			parties = ["Customer", "Supplier", "Employee"]  # most -> least likely to pay
 
 		for party in parties:
@@ -482,22 +485,27 @@ def get_parties_in_order(deposit: float) -> list:
 	def match_party_name_desc_in_bank_party_mapper(self):
 		"""Check if match exists for party name or description in Bank Party Mapper"""
 		result = None
-		# TODO: or filters
+		or_filters = []
+
 		if self.bank_party_name:
-			result = frappe.db.get_value(
-				"Bank Party Mapper",
-				filters={"bank_party_name_desc": self.bank_party_name},
-				fieldname=["party_type", "party"],
-			)
+			or_filters.append(["bank_party_name_desc", self.bank_party_name])
 
-		if not result and self.description:
-			result = frappe.db.get_value(
-				"Bank Party Mapper",
-				filters={"bank_party_name_desc": self.description},
-				fieldname=["party_type", "party"],
-			)
+		if self.description:
+			or_filters.append(["bank_party_name_desc", self.description])
 
-		result = result + (None,) if result else result
+		mapper_res = frappe.get_all(
+			"Bank Party Mapper",
+			or_filters=or_filters,
+			fields=["party_type", "party"],
+			limit_page_length=1,
+		)
+		if mapper_res:
+			mapper_res = mapper_res[0]
+			result = (
+				mapper_res["party_type"],
+				mapper_res["party"],
+				None,
+			)
 
 		return result
 
@@ -506,7 +514,7 @@ def get_parties_in_order(deposit: float) -> list:
 		result = None
 
 		parties = ["Supplier", "Employee", "Customer"]  # most-least likely to receive
-		if frappe.utils.flt(self.deposit) > 0.0:
+		if flt(self.deposit) > 0.0:
 			parties = ["Customer", "Supplier", "Employee"]  # most-least likely to pay
 
 		for party in parties:
