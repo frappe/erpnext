@@ -344,6 +344,7 @@
   {
    "fieldname": "prod_plan_references",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Production Plan Item Reference",
    "options": "Production Plan Item Reference"
   },
@@ -397,7 +398,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-26 14:51:08.774372",
+ "modified": "2023-03-31 10:30:48.118932",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
