@@ -95,9 +95,59 @@ def is_job_running(job_name: str) -> bool:
 
 
 @frappe.whitelist()
-def run_reconciliation_job():
+def trigger_job_for_doc(docname: str | None = None):
 	"""
-	Trigger background job for doc if no other doc is running
+	Trigger background job
+	"""
+	if not docname:
+		return
+
+	if not frappe.db.get_single_value(
+		"Accounts Settings", "enable_payment_reconciliation_in_background"
+	):
+		frappe.throw(
+			_(
+				"Payment Reconciliation through backgound Job has been disabled. Enable it through {}"
+			).format(get_link_to_form("Accounts Settings", "Accounts Settings"))
+		)
+
+		return
+
+	if not is_scheduler_inactive():
+		if frappe.db.get_value("Process Payment Reconciliation", docname, "status") == "Queued":
+			frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Running")
+			job_name = f"start_processing_{docname}"
+			if not is_job_running(job_name):
+				job = frappe.enqueue(
+					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
+					queue="long",
+					is_async=True,
+					job_name=job_name,
+					enqueue_after_commit=True,
+					doc=docname,
+				)
+				frappe.msgprint(_("Background Job {0} triggered").format(job_name))
+		elif frappe.db.get_value("Process Payment Reconciliation", docname, "status") == "Running":
+			# Resume tasks for running doc
+			job_name = f"start_processing_{docname}"
+			if not is_job_running(job_name):
+				job = frappe.enqueue(
+					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
+					queue="long",
+					is_async=True,
+					job_name=job_name,
+					doc=docname,
+				)
+				frappe.msgprint(_("Background Job {0} triggered").format(job_name))
+	else:
+		frappe.msgprint(_("Scheduler is Inactive. Can't trigger job now."))
+
+
+@frappe.whitelist()
+def trigger_reconciliation_for_queued_docs():
+	"""
+	Will be called from Cron Job
+	Fetch queued docs and start reconciliation process for each one
 	"""
 	if not frappe.db.get_single_value(
 		"Accounts Settings", "enable_payment_reconciliation_in_background"
@@ -111,48 +161,19 @@ def run_reconciliation_job():
 		return
 
 	if not is_scheduler_inactive():
-		res = is_any_doc_running()
-		if not res:
-			# Get Queued item and start the process
-			queued = frappe.db.get_all(
-				"Process Payment Reconciliation",
-				filters={"docstatus": 1, "status": "Queued"},
-				order_by="creation desc",
-				limit=1,
-				as_list=1,
-			)
+		# Get Queued documents and start the process
+		queued = frappe.db.get_all(
+			"Process Payment Reconciliation",
+			filters={"docstatus": 1, "status": "Queued"},
+			order_by="creation desc",
+			as_list=1,
+		)
 
-			if queued:
-				doc = queued[0][0]
-				job_name = f"start_processing_{doc}"
-				frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Running")
-				if not is_job_running(job_name):
-					job = frappe.enqueue(
-						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
-						queue="long",
-						is_async=True,
-						job_name=job_name,
-						enqueue_after_commit=True,
-						doc=doc,
-					)
-					frappe.msgprint(_("Background Job {0} triggered").format(job_name))
-		else:
-			# resume tasks on running doc
+		for doc in queued:
+			trigger_job_for_doc(doc[0])
 
-			# can't use enqueue_after_commit, as we don't make DB changes before the enqueue call in the else block
-			# so, no commit and no job trigger
-			job_name = f"trigger_process_payment_reconciliation_for_{res[0][0]}"
-			if not is_job_running(job_name):
-				job = frappe.enqueue(
-					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
-					queue="long",
-					is_async=True,
-					job_name=job_name,
-					doc=res[0][0],
-				)
-				frappe.msgprint(_("Background Job {0} triggered").format(job_name))
 	else:
-		frappe.msgprint(_("Scheduler is Inactive. Can't trigger job now."))
+		frappe.msgprint(_("Scheduler is Inactive. Can't trigger jobs now."))
 
 
 def reconcile_based_on_filters(doc: None | str = None) -> None:

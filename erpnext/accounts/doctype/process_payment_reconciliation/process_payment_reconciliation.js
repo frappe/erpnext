@@ -44,7 +44,14 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({
-					method: 'erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.run_reconciliation_job',
+					method: 'erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_job_for_doc',
+					args: {
+						docname: frm.doc.name
+					}
+				}).then(r => {
+					if(!r.exc) {
+						frm.reload_doc();
+					}
 				});
 			});
 		}
