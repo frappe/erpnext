@@ -304,6 +304,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					fieldname: "alternative_items",
 					fieldtype: "Table",
 					cannot_add_rows: true,
+					cannot_delete_rows: true,
 					in_place_edit: true,
 					reqd: 1,
 					data: this.data,
@@ -330,7 +331,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		dialog.fields_dict.info.$wrapper.html(
 			`<p class="small text-muted">
 				<span class="indicator yellow"></span>
-				Alternative Items
+				${__("Alternative Items")}
 			</p>`
 		)
 		dialog.show();

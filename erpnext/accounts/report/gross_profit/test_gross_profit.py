@@ -381,3 +381,82 @@ class TestGrossProfit(FrappeTestCase):
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		self.assertDictContainsSubset(expected_entry, gp_entry[0])
+
+	def test_crnote_against_invoice_with_multiple_instances_of_same_item(self):
+		"""
+		Item Qty for Sales Invoices with multiple instances of same item go in the -ve. Ideally, the credit noteshould cancel out the invoice items.
+		"""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		# Invoice with an item added twice
+		sinv = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate(), do_not_submit=True)
+		sinv.append("items", frappe.copy_doc(sinv.items[0], ignore_no_copy=False))
+		sinv = sinv.save().submit()
+
+		# Create Credit Note for Invoice
+		cr_note = make_sales_return(sinv.name)
+		cr_note = cr_note.save().submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+		)
+
+		columns, data = execute(filters=filters)
+		expected_entry = {
+			"parent_invoice": sinv.name,
+			"currency": "INR",
+			"sales_invoice": self.item,
+			"customer": self.customer,
+			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
+			"item_code": self.item,
+			"item_name": self.item,
+			"warehouse": "Stores - _GP",
+			"qty": 0.0,
+			"avg._selling_rate": 0.0,
+			"valuation_rate": 0.0,
+			"selling_amount": -100.0,
+			"buying_amount": 0.0,
+			"gross_profit": -100.0,
+			"gross_profit_%": 100.0,
+		}
+		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
+		# Both items of Invoice should have '0' qty
+		self.assertEqual(len(gp_entry), 2)
+		self.assertDictContainsSubset(expected_entry, gp_entry[0])
+		self.assertDictContainsSubset(expected_entry, gp_entry[1])
+
+	def test_standalone_cr_notes(self):
+		"""
+		Standalone cr notes will be reported as usual
+		"""
+		# Make Cr Note
+		sinv = self.create_sales_invoice(
+			qty=-1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		sinv.is_return = 1
+		sinv = sinv.save().submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+		)
+
+		columns, data = execute(filters=filters)
+		expected_entry = {
+			"parent_invoice": sinv.name,
+			"currency": "INR",
+			"sales_invoice": self.item,
+			"customer": self.customer,
+			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
+			"item_code": self.item,
+			"item_name": self.item,
+			"warehouse": "Stores - _GP",
+			"qty": -1.0,
+			"avg._selling_rate": 100.0,
+			"valuation_rate": 0.0,
+			"selling_amount": -100.0,
+			"buying_amount": 0.0,
+			"gross_profit": -100.0,
+			"gross_profit_%": 100.0,
+		}
+		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
+		self.assertDictContainsSubset(expected_entry, gp_entry[0])

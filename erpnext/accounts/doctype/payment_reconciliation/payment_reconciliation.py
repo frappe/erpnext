@@ -221,14 +221,26 @@ class PaymentReconciliation(Document):
 
 	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
 		difference_amount = 0
-		if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
-			"exchange_rate", 1
-		):
-			allocated_amount_in_ref_rate = payment_entry.get("exchange_rate", 1) * allocated_amount
-			allocated_amount_in_inv_rate = invoice.get("exchange_rate", 1) * allocated_amount
-			difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
+		if frappe.get_cached_value(
+			"Account", self.receivable_payable_account, "account_currency"
+		) != frappe.get_cached_value("Company", self.company, "default_currency"):
+			if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
+				"exchange_rate", 1
+			):
+				allocated_amount_in_ref_rate = payment_entry.get("exchange_rate", 1) * allocated_amount
+				allocated_amount_in_inv_rate = invoice.get("exchange_rate", 1) * allocated_amount
+				difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
 
 		return difference_amount
+
+	@frappe.whitelist()
+	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
+		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
+		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
+		new_difference_amount = self.get_difference_amount(
+			payment_entry[0], invoice[0], allocated_amount
+		)
+		return new_difference_amount
 
 	@frappe.whitelist()
 	def allocate_entries(self, args):

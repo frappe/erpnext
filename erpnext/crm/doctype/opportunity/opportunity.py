@@ -33,7 +33,6 @@ class Opportunity(TransactionBase, CRMNote):
 	def after_insert(self):
 		if self.opportunity_from == "Lead":
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)
-			self.disable_lead()
 
 			link_open_tasks(self.opportunity_from, self.party_name, self)
 			link_open_events(self.opportunity_from, self.party_name, self)
@@ -118,10 +117,6 @@ class Opportunity(TransactionBase, CRMNote):
 				prospect.flags.ignore_permissions = True
 				prospect.flags.ignore_mandatory = True
 				prospect.save()
-
-	def disable_lead(self):
-		if self.opportunity_from == "Lead":
-			frappe.db.set_value("Lead", self.party_name, {"disabled": 1, "docstatus": 1})
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""

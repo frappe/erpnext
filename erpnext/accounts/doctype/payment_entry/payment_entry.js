@@ -217,7 +217,6 @@ frappe.ui.form.on('Payment Entry', {
 		frm.toggle_display("set_exchange_gain_loss",
 			frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount);
 
-		frm.refresh_fields();
 	},
 
 	set_dynamic_labels: function(frm) {
@@ -244,8 +243,6 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_currency_labels(["total_amount", "outstanding_amount", "allocated_amount"],
 			party_account_currency, "references");
-
-		frm.set_currency_labels(["amount"], company_currency, "deductions");
 
 		cur_frm.set_df_property("source_exchange_rate", "description",
 			("1 " + frm.doc.paid_from_account_currency + " = [?] " + company_currency));
