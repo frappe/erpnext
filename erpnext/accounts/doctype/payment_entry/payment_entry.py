@@ -416,7 +416,7 @@ class PaymentEntry(AccountsController):
 
 		for ref in self.get("references"):
 			if ref.payment_term and ref.reference_name:
-				key = (ref.payment_term, ref.reference_name)
+				key = (ref.payment_term, ref.reference_name, ref.reference_doctype)
 				invoice_payment_amount_map.setdefault(key, 0.0)
 				invoice_payment_amount_map[key] += ref.allocated_amount
 
@@ -424,19 +424,36 @@ class PaymentEntry(AccountsController):
 					payment_schedule = frappe.get_all(
 						"Payment Schedule",
 						filters={"parent": ref.reference_name},
-						fields=["paid_amount", "payment_amount", "payment_term", "discount", "outstanding"],
+						fields=[
+							"paid_amount",
+							"payment_amount",
+							"payment_term",
+							"discount",
+							"outstanding",
+							"discount_type",
+						],
 					)
 					for term in payment_schedule:
-						invoice_key = (term.payment_term, ref.reference_name)
+						invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 						invoice_paid_amount_map.setdefault(invoice_key, {})
 						invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
-						invoice_paid_amount_map[invoice_key]["discounted_amt"] = ref.total_amount * (
-							term.discount / 100
-						)
+						if not (term.discount_type and term.discount):
+							continue
+
+						if term.discount_type == "Percentage":
+							invoice_paid_amount_map[invoice_key]["discounted_amt"] = ref.total_amount * (
+								term.discount / 100
+							)
+						else:
+							invoice_paid_amount_map[invoice_key]["discounted_amt"] = term.discount
 
 		for idx, (key, allocated_amount) in enumerate(invoice_payment_amount_map.items(), 1):
 			if not invoice_paid_amount_map.get(key):
 				frappe.throw(_("Payment term {0} not used in {1}").format(key[0], key[1]))
+
+			allocated_amount = self.get_allocated_amount_in_transaction_currency(
+				allocated_amount, key[2], key[1]
+			)
 
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
@@ -471,6 +488,33 @@ class PaymentEntry(AccountsController):
 						WHERE parent = %s and payment_term = %s""",
 						(allocated_amount - discounted_amt, discounted_amt, allocated_amount, key[1], key[0]),
 					)
+
+	def get_allocated_amount_in_transaction_currency(
+		self, allocated_amount, reference_doctype, reference_docname
+	):
+		"""
+		Payment Entry could be in base currency while reference's payment schedule
+		is always in transaction currency.
+		E.g.
+		* SI with base=INR and currency=USD
+		* SI with payment schedule in USD
+		* PE in INR (accounting done in base currency)
+		"""
+		ref_currency, ref_exchange_rate = frappe.db.get_value(
+			reference_doctype, reference_docname, ["currency", "conversion_rate"]
+		)
+		is_single_currency = self.paid_from_account_currency == self.paid_to_account_currency
+		# PE in different currency
+		reference_is_multi_currency = self.paid_from_account_currency != ref_currency
+
+		if not (is_single_currency and reference_is_multi_currency):
+			return allocated_amount
+
+		allocated_amount = flt(
+			allocated_amount / ref_exchange_rate, self.precision("total_allocated_amount")
+		)
+
+		return allocated_amount
 
 	def set_status(self):
 		if self.docstatus == 2:
@@ -1642,7 +1686,14 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 @frappe.whitelist()
 def get_payment_entry(
-	dt, dn, party_amount=None, bank_account=None, bank_amount=None, party_type=None, payment_type=None
+	dt,
+	dn,
+	party_amount=None,
+	bank_account=None,
+	bank_amount=None,
+	party_type=None,
+	payment_type=None,
+	reference_date=None,
 ):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
@@ -1669,8 +1720,9 @@ def get_payment_entry(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 	)
 
-	paid_amount, received_amount, discount_amount = apply_early_payment_discount(
-		paid_amount, received_amount, doc
+	reference_date = getdate(reference_date)
+	paid_amount, received_amount, discount_amount, valid_discounts = apply_early_payment_discount(
+		paid_amount, received_amount, doc, party_account_currency, reference_date
 	)
 
 	pe = frappe.new_doc("Payment Entry")
@@ -1678,6 +1730,7 @@ def get_payment_entry(
 	pe.company = doc.company
 	pe.cost_center = doc.get("cost_center")
 	pe.posting_date = nowdate()
+	pe.reference_date = reference_date
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
@@ -1718,7 +1771,7 @@ def get_payment_entry(
 		):
 
 			for reference in get_reference_as_per_payment_terms(
-				doc.payment_schedule, dt, dn, doc, grand_total, outstanding_amount
+				doc.payment_schedule, dt, dn, doc, grand_total, outstanding_amount, party_account_currency
 			):
 				pe.append("references", reference)
 		else:
@@ -1769,16 +1822,17 @@ def get_payment_entry(
 	if party_account and bank:
 		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
+
 		if discount_amount:
-			pe.set_gain_or_loss(
-				account_details={
-					"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
-					"cost_center": pe.cost_center
-					or frappe.get_cached_value("Company", pe.company, "cost_center"),
-					"amount": discount_amount * (-1 if payment_type == "Pay" else 1),
-				}
+			base_total_discount_loss = 0
+			if frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss"):
+				base_total_discount_loss = split_early_payment_discount_loss(pe, doc, valid_discounts)
+
+			set_pending_discount_loss(
+				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
-			pe.set_difference_amount()
+
+		pe.set_difference_amount()
 
 	return pe
 
@@ -1889,20 +1943,28 @@ def set_paid_amount_and_received_amount(
 	return paid_amount, received_amount
 
 
-def apply_early_payment_discount(paid_amount, received_amount, doc):
+def apply_early_payment_discount(
+	paid_amount, received_amount, doc, party_account_currency, reference_date
+):
 	total_discount = 0
+	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
 	has_payment_schedule = hasattr(doc, "payment_schedule") and doc.payment_schedule
+	is_multi_currency = party_account_currency != doc.company_currency
 
 	if doc.doctype in eligible_for_payments and has_payment_schedule:
 		for term in doc.payment_schedule:
-			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
+			if not term.discounted_amount and term.discount and reference_date <= term.discount_date:
+
 				if term.discount_type == "Percentage":
-					discount_amount = flt(doc.get("grand_total")) * (term.discount / 100)
+					grand_total = doc.get("grand_total") if is_multi_currency else doc.get("base_grand_total")
+					discount_amount = flt(grand_total) * (term.discount / 100)
 				else:
 					discount_amount = term.discount
 
-				discount_amount_in_foreign_currency = discount_amount * doc.get("conversion_rate", 1)
+				# if accounting is done in the same currency, paid_amount = received_amount
+				conversion_rate = doc.get("conversion_rate", 1) if is_multi_currency else 1
+				discount_amount_in_foreign_currency = discount_amount * conversion_rate
 
 				if doc.doctype == "Sales Invoice":
 					paid_amount -= discount_amount
@@ -1911,23 +1973,151 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 					received_amount -= discount_amount
 					paid_amount -= discount_amount_in_foreign_currency
 
+				valid_discounts.append({"type": term.discount_type, "discount": term.discount})
 				total_discount += discount_amount
 
 		if total_discount:
-			money = frappe.utils.fmt_money(total_discount, currency=doc.get("currency"))
+			currency = doc.get("currency") if is_multi_currency else doc.company_currency
+			money = frappe.utils.fmt_money(total_discount, currency=currency)
 			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(money), alert=1)
 
-	return paid_amount, received_amount, total_discount
+	return paid_amount, received_amount, total_discount, valid_discounts
+
+
+def set_pending_discount_loss(
+	pe, doc, discount_amount, base_total_discount_loss, party_account_currency
+):
+	# If multi-currency, get base discount amount to adjust with base currency deductions/losses
+	if party_account_currency != doc.company_currency:
+		discount_amount = discount_amount * doc.get("conversion_rate", 1)
+
+	# Avoid considering miniscule losses
+	discount_amount = flt(discount_amount - base_total_discount_loss, doc.precision("grand_total"))
+
+	# Set base discount amount (discount loss/pending rounding loss) in deductions
+	if discount_amount > 0.0:
+		positive_negative = -1 if pe.payment_type == "Pay" else 1
+
+		# If tax loss booking is enabled, pending loss will be rounding loss.
+		# Otherwise it will be the total discount loss.
+		book_tax_loss = frappe.db.get_single_value("Accounts Settings", "book_tax_discount_loss")
+		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
+
+		pe.set_gain_or_loss(
+			account_details={
+				"account": frappe.get_cached_value("Company", pe.company, account_type),
+				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
+				"amount": discount_amount * positive_negative,
+			}
+		)
+
+
+def split_early_payment_discount_loss(pe, doc, valid_discounts) -> float:
+	"""Split early payment discount into Income Loss & Tax Loss."""
+	total_discount_percent = get_total_discount_percent(doc, valid_discounts)
+
+	if not total_discount_percent:
+		return 0.0
+
+	base_loss_on_income = add_income_discount_loss(pe, doc, total_discount_percent)
+	base_loss_on_taxes = add_tax_discount_loss(pe, doc, total_discount_percent)
+
+	# Round off total loss rather than individual losses to reduce rounding error
+	return flt(base_loss_on_income + base_loss_on_taxes, doc.precision("grand_total"))
+
+
+def get_total_discount_percent(doc, valid_discounts) -> float:
+	"""Get total percentage and amount discount applied as a percentage."""
+	total_discount_percent = (
+		sum(
+			discount.get("discount") for discount in valid_discounts if discount.get("type") == "Percentage"
+		)
+		or 0.0
+	)
+
+	# Operate in percentages only as it makes the income & tax split easier
+	total_discount_amount = (
+		sum(discount.get("discount") for discount in valid_discounts if discount.get("type") == "Amount")
+		or 0.0
+	)
+
+	if total_discount_amount:
+		discount_percentage = (total_discount_amount / doc.get("grand_total")) * 100
+		total_discount_percent += discount_percentage
+		return total_discount_percent
+
+	return total_discount_percent
+
+
+def add_income_discount_loss(pe, doc, total_discount_percent) -> float:
+	"""Add loss on income discount in base currency."""
+	precision = doc.precision("total")
+	base_loss_on_income = doc.get("base_total") * (total_discount_percent / 100)
+
+	pe.append(
+		"deductions",
+		{
+			"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
+			"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
+			"amount": flt(base_loss_on_income, precision),
+		},
+	)
+
+	return base_loss_on_income  # Return loss without rounding
+
+
+def add_tax_discount_loss(pe, doc, total_discount_percentage) -> float:
+	"""Add loss on tax discount in base currency."""
+	tax_discount_loss = {}
+	base_total_tax_loss = 0
+	precision = doc.precision("tax_amount_after_discount_amount", "taxes")
+
+	# The same account head could be used more than once
+	for tax in doc.get("taxes", []):
+		base_tax_loss = tax.get("base_tax_amount_after_discount_amount") * (
+			total_discount_percentage / 100
+		)
+
+		account = tax.get("account_head")
+		if not tax_discount_loss.get(account):
+			tax_discount_loss[account] = base_tax_loss
+		else:
+			tax_discount_loss[account] += base_tax_loss
+
+	for account, loss in tax_discount_loss.items():
+		base_total_tax_loss += loss
+		if loss == 0.0:
+			continue
+
+		pe.append(
+			"deductions",
+			{
+				"account": account,
+				"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
+				"amount": flt(loss, precision),
+			},
+		)
+
+	return base_total_tax_loss  # Return loss without rounding
 
 
 def get_reference_as_per_payment_terms(
-	payment_schedule, dt, dn, doc, grand_total, outstanding_amount
+	payment_schedule, dt, dn, doc, grand_total, outstanding_amount, party_account_currency
 ):
 	references = []
+	is_multi_currency_acc = (doc.currency != doc.company_currency) and (
+		party_account_currency != doc.company_currency
+	)
+
 	for payment_term in payment_schedule:
 		payment_term_outstanding = flt(
 			payment_term.payment_amount - payment_term.paid_amount, payment_term.precision("payment_amount")
 		)
+		if not is_multi_currency_acc:
+			# If accounting is done in company currency for multi-currency transaction
+			payment_term_outstanding = flt(
+				payment_term_outstanding * doc.get("conversion_rate"), payment_term.precision("payment_amount")
+			)
 
 		if payment_term_outstanding:
 			references.append(
