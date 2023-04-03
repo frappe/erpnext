@@ -1,4 +1,3 @@
-
 from frappe import _
 
 
@@ -45,7 +44,7 @@ def get_data():
 					"description": _("Project Update."),
 					"dependencies": ["Project"],
 				},
-			]
+			],
 		},
 		{
 			"label": _("Time Tracking"),
@@ -68,7 +67,7 @@ def get_data():
 					"description": _("Cost of various activities"),
 					"dependencies": ["Activity Type"],
 				},
-			]
+			],
 		},
 		{
 			"label": _("Reports"),
@@ -96,7 +95,6 @@ def get_data():
 					"doctype": "Project",
 					"dependencies": ["Project"],
 				},
-			]
+			],
 		},
-
 	]

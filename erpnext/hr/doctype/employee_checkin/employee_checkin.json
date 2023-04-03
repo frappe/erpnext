@@ -26,7 +26,8 @@
    "fieldtype": "Link",
    "label": "Employee",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "employee.employee_name",
@@ -48,7 +49,8 @@
    "fieldtype": "Link",
    "label": "Shift",
    "options": "Shift Type",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_4",
@@ -107,7 +109,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-08 11:02:32.660986",
+ "modified": "2022-07-19 15:38:41.767539",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",

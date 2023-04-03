@@ -16,12 +16,15 @@
   "company",
   "is_term_loan",
   "disabled",
+  "repayment_schedule_type",
+  "repayment_date_on",
   "description",
   "account_details_section",
   "mode_of_payment",
+  "disbursement_account",
   "payment_account",
-  "loan_account",
   "column_break_12",
+  "loan_account",
   "interest_income_account",
   "penalty_income_account",
   "amended_from"
@@ -79,7 +82,7 @@
   {
    "fieldname": "payment_account",
    "fieldtype": "Link",
-   "label": "Payment Account",
+   "label": "Repayment Account",
    "options": "Account",
    "reqd": 1
   },
@@ -149,15 +152,41 @@
    "fieldtype": "Currency",
    "label": "Auto Write Off Amount ",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "disbursement_account",
+   "fieldtype": "Link",
+   "label": "Disbursement Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "description": "The schedule type that will be used for generating the term loan schedules (will affect the payment date and monthly repayment amount)",
+   "fieldname": "repayment_schedule_type",
+   "fieldtype": "Select",
+   "label": "Repayment Schedule Type",
+   "mandatory_depends_on": "is_term_loan",
+   "options": "\nMonthly as per repayment start date\nPro-rated calendar months"
+  },
+  {
+   "depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
+   "description": "Select whether the repayment date should be the end of the current month or start of the upcoming month",
+   "fieldname": "repayment_date_on",
+   "fieldtype": "Select",
+   "label": "Repayment Date On",
+   "mandatory_depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
+   "options": "\nStart of the next month\nEnd of the current month"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:10:57.368490",
+ "modified": "2022-11-01 17:43:03.954201",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -181,5 +210,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

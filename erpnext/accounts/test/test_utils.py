@@ -1,11 +1,17 @@
-
 import unittest
 
+import frappe
 from frappe.test_runner import make_test_objects
 
 from erpnext.accounts.party import get_party_shipping_address
-from erpnext.accounts.utils import get_future_stock_vouchers, get_voucherwise_gl_entries
+from erpnext.accounts.utils import (
+	get_future_stock_vouchers,
+	get_voucherwise_gl_entries,
+	sort_stock_vouchers_by_posting_date,
+)
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestUtils(unittest.TestCase):
@@ -44,8 +50,28 @@ class TestUtils(unittest.TestCase):
 		posting_date = "2021-01-01"
 		gl_entries = get_voucherwise_gl_entries(future_vouchers, posting_date)
 		self.assertTrue(
-			voucher_type_and_no in gl_entries, msg="get_voucherwise_gl_entries not returning expected GLes",
+			voucher_type_and_no in gl_entries,
+			msg="get_voucherwise_gl_entries not returning expected GLes",
 		)
+
+	def test_stock_voucher_sorting(self):
+		vouchers = []
+
+		item = make_item().name
+
+		stock_entry = {"item": item, "to_warehouse": "_Test Warehouse - _TC", "qty": 1, "rate": 10}
+
+		se1 = make_stock_entry(posting_date="2022-01-01", **stock_entry)
+		se3 = make_stock_entry(posting_date="2022-03-01", **stock_entry)
+		se2 = make_stock_entry(posting_date="2022-02-01", **stock_entry)
+
+		for doc in (se1, se2, se3):
+			vouchers.append((doc.doctype, doc.name))
+
+		vouchers.append(("Stock Entry", "Wat"))
+
+		sorted_vouchers = sort_stock_vouchers_by_posting_date(list(reversed(vouchers)))
+		self.assertEqual(sorted_vouchers, vouchers)
 
 
 ADDRESS_RECORDS = [

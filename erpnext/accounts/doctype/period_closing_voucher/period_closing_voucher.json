@@ -10,10 +10,11 @@
   "fiscal_year",
   "amended_from",
   "company",
-  "cost_center_wise_pnl",
   "column_break1",
   "closing_account_head",
-  "remarks"
+  "remarks",
+  "gle_processing_status",
+  "error_message"
  ],
  "fields": [
   {
@@ -86,17 +87,26 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "cost_center_wise_pnl",
-   "fieldtype": "Check",
-   "label": "Book Cost Center Wise Profit/Loss"
+   "depends_on": "eval:doc.docstatus!=0",
+   "fieldname": "gle_processing_status",
+   "fieldtype": "Select",
+   "label": "GL Entry Processing Status",
+   "options": "In Progress\nCompleted\nFailed",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.gle_processing_status=='Failed'",
+   "fieldname": "error_message",
+   "fieldtype": "Text",
+   "label": "Error Message",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-20 15:27:37.210458",
+ "modified": "2022-07-20 14:51:04.714154",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Period Closing Voucher",

@@ -5,8 +5,8 @@ from erpnext.domains.healthcare import data
 
 
 def execute():
-	if 'Healthcare' not in frappe.get_active_domains():
+	if "Healthcare" not in frappe.get_active_domains():
 		return
 
-	if data['custom_fields']:
-		create_custom_fields(data['custom_fields'])
+	if data["custom_fields"]:
+		create_custom_fields(data["custom_fields"])

@@ -17,7 +17,8 @@
   "paid",
   "amount",
   "mode_of_payment",
-  "razorpay_payment_id",
+  "column_break_12",
+  "payment_id",
   "amended_from"
  ],
  "fields": [
@@ -74,12 +75,6 @@
    "options": "Mode of Payment"
   },
   {
-   "fieldname": "razorpay_payment_id",
-   "fieldtype": "Data",
-   "label": "Razorpay Payment ID",
-   "read_only": 1
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
@@ -108,12 +103,21 @@
    "options": "Donation",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_id",
+   "fieldtype": "Data",
+   "label": "Payment ID"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-11 10:53:11.269005",
+ "modified": "2022-03-16 17:18:45.611741",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donation",

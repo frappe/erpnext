@@ -17,14 +17,16 @@ class TestMembership(unittest.TestCase):
 
 		# make test member
 		self.member_doc = create_member(
-			frappe._dict({
-				"fullname": "_Test_Member",
-				"email": "_test_member_erpnext@example.com",
-				"plan_id": plan.name,
-				"subscription_id": "sub_DEX6xcJ1HSW4CR",
-				"customer_id": "cust_C0WlbKhp3aLA7W",
-				"subscription_status": "Active"
-			})
+			frappe._dict(
+				{
+					"fullname": "_Test_Member",
+					"email": "_test_member_erpnext@example.com",
+					"plan_id": plan.name,
+					"subscription_id": "sub_DEX6xcJ1HSW4CR",
+					"customer_id": "cust_C0WlbKhp3aLA7W",
+					"subscription_status": "Active",
+				}
+			)
 		)
 		self.member_doc.make_customer_and_link()
 		self.member = self.member_doc.name
@@ -40,30 +42,38 @@ class TestMembership(unittest.TestCase):
 	def test_renew_within_30_days(self):
 		# create a membership for two months
 		# Should work fine
-		make_membership(self.member, { "from_date": nowdate() })
-		make_membership(self.member, { "from_date": add_months(nowdate(), 1) })
+		make_membership(self.member, {"from_date": nowdate()})
+		make_membership(self.member, {"from_date": add_months(nowdate(), 1)})
 
 		from frappe.utils.user import add_role
+
 		add_role("test@example.com", "Non Profit Manager")
 		frappe.set_user("test@example.com")
 
 		# create next membership with expiry not within 30 days
-		self.assertRaises(frappe.ValidationError, make_membership, self.member, {
-			"from_date": add_months(nowdate(), 2),
-		})
+		self.assertRaises(
+			frappe.ValidationError,
+			make_membership,
+			self.member,
+			{
+				"from_date": add_months(nowdate(), 2),
+			},
+		)
 
 		frappe.set_user("Administrator")
 		# create the same membership but as administrator
-		make_membership(self.member, {
-			"from_date": add_months(nowdate(), 2),
-			"to_date": add_months(nowdate(), 3),
-		})
+		make_membership(
+			self.member,
+			{
+				"from_date": add_months(nowdate(), 2),
+				"to_date": add_months(nowdate(), 3),
+			},
+		)
 
 	def test_halted_memberships(self):
-		make_membership(self.member, {
-			"from_date": add_months(nowdate(), 2),
-			"to_date": add_months(nowdate(), 3)
-		})
+		make_membership(
+			self.member, {"from_date": add_months(nowdate(), 2), "to_date": add_months(nowdate(), 3)}
+		)
 
 		self.assertEqual(frappe.db.get_value("Member", self.member, "subscription_status"), "Active")
 		payload = get_subscription_payload()
@@ -73,8 +83,10 @@ class TestMembership(unittest.TestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
+
 def set_config(key, value):
 	frappe.db.set_value("Non Profit Settings", None, key, value)
+
 
 def make_membership(member, payload={}):
 	data = {
@@ -82,15 +94,16 @@ def make_membership(member, payload={}):
 		"member": member,
 		"membership_status": "Current",
 		"membership_type": "_rzpy_test_milythm",
-		"currency": "INR",
+		"currency": "USD",
 		"paid": 1,
 		"from_date": nowdate(),
-		"amount": 100
+		"amount": 100,
 	}
 	data.update(payload)
 	membership = frappe.get_doc(data)
 	membership.insert(ignore_permissions=True, ignore_if_duplicate=True)
 	return membership
+
 
 def create_item(item_code):
 	if not frappe.db.exists("Item", item_code):
@@ -105,6 +118,7 @@ def create_item(item_code):
 	else:
 		item = frappe.get_doc("Item", item_code)
 	return item
+
 
 def setup_membership():
 	# Get default company
@@ -139,14 +153,13 @@ def setup_membership():
 
 	return plan
 
+
 def get_subscription_payload():
 	return {
 		"entity": "event",
 		"account_id": "acc_BFQ7uQEaa7j2z7",
 		"event": "subscription.halted",
-		"contains": [
-			"subscription"
-		],
+		"contains": ["subscription"],
 		"payload": {
 			"subscription": {
 				"entity": {
@@ -155,10 +168,8 @@ def get_subscription_payload():
 					"plan_id": "_rzpy_test_milythm",
 					"customer_id": "cust_C0WlbKhp3aLA7W",
 					"status": "halted",
-					"notes": {
-						"Important": "Notes for Internal Reference"
-					},
+					"notes": {"Important": "Notes for Internal Reference"},
 				}
 			}
-		}
+		},
 	}

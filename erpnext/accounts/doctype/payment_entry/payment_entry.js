@@ -196,8 +196,14 @@ frappe.ui.form.on('Payment Entry', {
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
 
 		frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
-		frm.toggle_display("base_total_taxes_and_charges", frm.doc.total_taxes_and_charges &&
-			(frm.doc.paid_from_account_currency != company_currency));
+
+		if (frm.doc.payment_type == "Pay") {
+			frm.toggle_display("base_total_taxes_and_charges", frm.doc.total_taxes_and_charges &&
+				(frm.doc.paid_to_account_currency != company_currency));
+		} else {
+			frm.toggle_display("base_total_taxes_and_charges", frm.doc.total_taxes_and_charges &&
+				(frm.doc.paid_from_account_currency != company_currency));
+		}
 
 		frm.toggle_display("base_received_amount", (
 			frm.doc.paid_to_account_currency != company_currency
@@ -220,10 +226,7 @@ frappe.ui.form.on('Payment Entry', {
 			(frm.doc.total_allocated_amount > party_amount)));
 
 		frm.toggle_display("set_exchange_gain_loss",
-			(frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount &&
-				((frm.doc.paid_from_account_currency != company_currency ||
-					frm.doc.paid_to_account_currency != company_currency) &&
-					frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)));
+			frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount);
 
 		frm.refresh_fields();
 	},
@@ -232,7 +235,8 @@ frappe.ui.form.on('Payment Entry', {
 		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
-			"difference_amount", "base_paid_amount_after_tax", "base_received_amount_after_tax"], company_currency);
+			"difference_amount", "base_paid_amount_after_tax", "base_received_amount_after_tax",
+			"base_total_taxes_and_charges"], company_currency);
 
 		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
 		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
@@ -341,6 +345,8 @@ frappe.ui.form.on('Payment Entry', {
 			}
 			frm.set_party_account_based_on_party = true;
 
+			let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details",
 				args: {
@@ -374,7 +380,11 @@ frappe.ui.form.on('Payment Entry', {
 								if (r.message.bank_account) {
 									frm.set_value("bank_account", r.message.bank_account);
 								}
-							}
+							},
+							() => frm.events.set_current_exchange_rate(frm, "source_exchange_rate",
+									frm.doc.paid_from_account_currency, company_currency),
+							() => frm.events.set_current_exchange_rate(frm, "target_exchange_rate",
+									frm.doc.paid_to_account_currency, company_currency)
 						]);
 					}
 				}
@@ -478,14 +488,14 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_from_account_currency: function(frm) {
-		if(!frm.doc.paid_from_account_currency) return;
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		if(!frm.doc.paid_from_account_currency || !frm.doc.company) return;
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		if (frm.doc.paid_from_account_currency == company_currency) {
 			frm.set_value("source_exchange_rate", 1);
 		} else if (frm.doc.paid_from){
 			if (in_list(["Internal Transfer", "Pay"], frm.doc.payment_type)) {
-				var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+				let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 				frappe.call({
 					method: "erpnext.setup.utils.get_exchange_rate",
 					args: {
@@ -505,8 +515,8 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_to_account_currency: function(frm) {
-		if(!frm.doc.paid_to_account_currency) return;
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		if(!frm.doc.paid_to_account_currency || !frm.doc.company) return;
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		frm.events.set_current_exchange_rate(frm, "target_exchange_rate",
 			frm.doc.paid_to_account_currency, company_currency);
@@ -1101,7 +1111,7 @@ frappe.ui.form.on('Payment Entry', {
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0; });
 
-			frm.doc.paid_amount_after_tax = frm.doc.paid_amount;
+			frm.doc.paid_amount_after_tax = frm.doc.base_paid_amount;
 		});
 	},
 
@@ -1192,7 +1202,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			cumulated_tax_fraction += tax.tax_fraction_for_current_item;
-			frm.doc.paid_amount_after_tax = flt(frm.doc.paid_amount/(1+cumulated_tax_fraction))
+			frm.doc.paid_amount_after_tax = flt(frm.doc.base_paid_amount/(1+cumulated_tax_fraction))
 		});
 	},
 
@@ -1224,6 +1234,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.doc.total_taxes_and_charges = 0.0;
 		frm.doc.base_total_taxes_and_charges = 0.0;
 
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		let actual_tax_dict = {};
 
 		// maintain actual tax rate based on idx
@@ -1244,8 +1255,8 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 
-			tax.tax_amount = current_tax_amount;
-			tax.base_tax_amount = tax.tax_amount * frm.doc.source_exchange_rate;
+			// tax accounts are only in company currency
+			tax.base_tax_amount = current_tax_amount;
 			current_tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 
 			if(i==0) {
@@ -1254,9 +1265,29 @@ frappe.ui.form.on('Payment Entry', {
 				tax.total = flt(frm.doc["taxes"][i-1].total + current_tax_amount, precision("total", tax));
 			}
 
-			tax.base_total = tax.total * frm.doc.source_exchange_rate;
-			frm.doc.total_taxes_and_charges += current_tax_amount;
-			frm.doc.base_total_taxes_and_charges += current_tax_amount * frm.doc.source_exchange_rate;
+			// tac accounts are only in company currency
+			tax.base_total = tax.total
+
+			// calculate total taxes and base total taxes
+			if(frm.doc.payment_type == "Pay") {
+				// tax accounts only have company currency
+				if(tax.currency != frm.doc.paid_to_account_currency) {
+					//total_taxes_and_charges has the target currency. so using target conversion rate
+					frm.doc.total_taxes_and_charges += flt(current_tax_amount / frm.doc.target_exchange_rate);
+
+				} else {
+					frm.doc.total_taxes_and_charges += current_tax_amount;
+				}
+			} else if(frm.doc.payment_type == "Receive") {
+				if(tax.currency != frm.doc.paid_from_account_currency) {
+					//total_taxes_and_charges has the target currency. so using source conversion rate
+					frm.doc.total_taxes_and_charges += flt(current_tax_amount / frm.doc.source_exchange_rate);
+				} else {
+					frm.doc.total_taxes_and_charges += current_tax_amount;
+				}
+			}
+
+			frm.doc.base_total_taxes_and_charges += tax.base_tax_amount;
 
 			frm.refresh_field('taxes');
 			frm.refresh_field('total_taxes_and_charges');

@@ -7,21 +7,17 @@ import frappe
 
 def execute(filters=None):
 	columns = [
+		{"fieldname": "creation_date", "label": "Date", "fieldtype": "Date", "width": 300},
 		{
-			'fieldname': 'creation_date',
-			'label': 'Date',
-			'fieldtype': 'Date',
-			'width': 300
-		},
-		{
-			'fieldname': 'first_response_time',
-			'fieldtype': 'Duration',
-			'label': 'First Response Time',
-			'width': 300
+			"fieldname": "first_response_time",
+			"fieldtype": "Duration",
+			"label": "First Response Time",
+			"width": 300,
 		},
 	]
 
-	data = frappe.db.sql('''
+	data = frappe.db.sql(
+		"""
 		SELECT
 			date(creation) as creation_date,
 			avg(first_response_time) as avg_response_time
@@ -31,6 +27,8 @@ def execute(filters=None):
 			and first_response_time > 0
 		GROUP BY creation_date
 		ORDER BY creation_date desc
-	''', (filters.from_date, filters.to_date))
+	""",
+		(filters.from_date, filters.to_date),
+	)
 
 	return columns, data

@@ -15,6 +15,7 @@ class ContractTemplate(Document):
 		if self.contract_terms:
 			validate_template(self.contract_terms)
 
+
 @frappe.whitelist()
 def get_contract_template(template_name, doc):
 	if isinstance(doc, string_types):
@@ -26,7 +27,4 @@ def get_contract_template(template_name, doc):
 	if contract_template.contract_terms:
 		contract_terms = frappe.render_template(contract_template.contract_terms, doc)
 
-	return {
-		'contract_template': contract_template,
-		'contract_terms': contract_terms
-	}
+	return {"contract_template": contract_template, "contract_terms": contract_terms}

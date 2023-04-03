@@ -18,7 +18,7 @@
 			<b class="caret"></b>
 		</button>
 		<ul class="dropdown-menu dropdown-menu-right" role="menu">
-			{% if doc.doctype == 'Purchase Order' %}
+			{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
 				<a class="dropdown-item" href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}" data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}</a>
 			{% endif %}
 			<a class="dropdown-item" href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}'

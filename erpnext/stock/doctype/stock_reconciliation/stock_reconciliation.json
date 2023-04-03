@@ -18,7 +18,6 @@
   "items",
   "section_break_9",
   "expense_account",
-  "reconciliation_json",
   "column_break_13",
   "difference_amount",
   "amended_from",
@@ -112,15 +111,6 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "reconciliation_json",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "label": "Reconciliation JSON",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
@@ -155,7 +145,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-30 01:33:51.437194",
+ "modified": "2022-02-06 14:28:19.043905",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
@@ -178,5 +168,6 @@
  "search_fields": "posting_date",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -46,8 +46,6 @@ frappe.ui.form.on("Purchase Receipt", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
-
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {

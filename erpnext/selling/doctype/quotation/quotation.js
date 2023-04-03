@@ -20,6 +20,20 @@ frappe.ui.form.on('Quotation', {
 
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
+
+		frm.set_query('company_address', function(doc) {
+			if(!doc.company) {
+				frappe.throw(__('Please set Company'));
+			}
+
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: 'Company',
+					link_name: doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -69,11 +83,16 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			}
 		}
 
-		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			if(!doc.valid_till || frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
-				cur_frm.add_custom_button(__('Sales Order'),
-					cur_frm.cscript['Make Sales Order'], __('Create'));
-			}
+		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
+			if (frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation
+				|| (!doc.valid_till)
+				|| frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
+					this.frm.add_custom_button(
+						__("Sales Order"),
+						this.frm.cscript["Make Sales Order"],
+						__("Create")
+					);
+				}
 
 			if(doc.status!=="Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {

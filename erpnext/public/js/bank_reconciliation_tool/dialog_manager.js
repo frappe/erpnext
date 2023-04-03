@@ -182,6 +182,12 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				onchange: () => this.update_options(),
 			},
 			{
+				fieldtype: "Check",
+				label: "Loan Repayment",
+				fieldname: "loan_repayment",
+				onchange: () => this.update_options(),
+			},
+			{
 				fieldname: "column_break_5",
 				fieldtype: "Column Break",
 			},
@@ -191,11 +197,16 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "sales_invoice",
 				onchange: () => this.update_options(),
 			},
-
 			{
 				fieldtype: "Check",
 				label: "Purchase Invoice",
 				fieldname: "purchase_invoice",
+				onchange: () => this.update_options(),
+			},
+			{
+				fieldtype: "Check",
+				label: "Show Only Exact Amount",
+				fieldname: "exact_match",
 				onchange: () => this.update_options(),
 			},
 			{
@@ -210,8 +221,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			},
 			{
 				fieldtype: "Check",
-				label: "Show Only Exact Amount",
-				fieldname: "exact_match",
+				label: "Loan Disbursement",
+				fieldname: "loan_disbursement",
 				onchange: () => this.update_options(),
 			},
 			{
@@ -360,12 +371,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "deposit",
 				fieldtype: "Currency",
 				label: "Deposit",
+				options: "currency",
 				read_only: 1,
 			},
 			{
 				fieldname: "withdrawal",
 				fieldtype: "Currency",
 				label: "Withdrawal",
+				options: "currency",
 				read_only: 1,
 			},
 			{
@@ -383,6 +396,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "allocated_amount",
 				fieldtype: "Currency",
 				label: "Allocated Amount",
+				options: "Currency",
 				read_only: 1,
 			},
 
@@ -390,8 +404,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "unallocated_amount",
 				fieldtype: "Currency",
 				label: "Unallocated Amount",
+				options: "Currency",
 				read_only: 1,
 			},
+			{
+				fieldname: "currency",
+				fieldtype: "Link",
+				label: "Currency",
+				options: "Currency",
+				read_only: 1,
+				hidden: 1,
+			}
 		];
 
 		me.dialog = new frappe.ui.Dialog({

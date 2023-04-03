@@ -5,7 +5,7 @@ import frappe
 
 
 def execute():
-	if frappe.db.table_exists('Supplier Item Group'):
+	if frappe.db.table_exists("Supplier Item Group"):
 		frappe.reload_doc("selling", "doctype", "party_specific_item")
 		sig = frappe.db.get_all("Supplier Item Group", fields=["name", "supplier", "item_group"])
 		for item in sig:

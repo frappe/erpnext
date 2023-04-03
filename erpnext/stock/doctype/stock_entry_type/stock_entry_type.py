@@ -8,5 +8,5 @@ from frappe.model.document import Document
 
 class StockEntryType(Document):
 	def validate(self):
-		if self.add_to_transit and self.purpose != 'Material Transfer':
+		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0

@@ -13,6 +13,12 @@ frappe.ui.form.on("Rename Tool", {
 	},
 	refresh: function(frm) {
 		frm.disable_save();
+
+		frm.get_field("file_to_rename").df.options = {
+			restrictions: {
+				allowed_file_types: [".csv"],
+			},
+		};
 		if (!frm.doc.file_to_rename) {
 			frm.get_field("rename_log").$wrapper.html("");
 		}

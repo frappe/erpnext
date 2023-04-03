@@ -58,9 +58,8 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Link",
-			"options": "Party Type",
-			"default": "",
+			"fieldtype": "Autocomplete",
+			options: Object.keys(frappe.boot.party_account_types),
 			on_change: function() {
 				frappe.query_report.set_filter_value('party', "");
 			}
@@ -167,7 +166,7 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "include_dimensions",
 			"label": __("Consider Accounting Dimensions"),
 			"fieldtype": "Check",
-			"default": 0
+			"default": 1
 		},
 		{
 			"fieldname": "show_opening_entries",

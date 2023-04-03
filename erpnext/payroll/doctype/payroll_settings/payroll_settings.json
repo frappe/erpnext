@@ -11,6 +11,7 @@
   "max_working_hours_against_timesheet",
   "include_holidays_in_total_working_days",
   "disable_rounded_total",
+  "define_opening_balance_for_earning_and_deductions",
   "column_break_11",
   "daily_wages_fraction_for_half_day",
   "email_salary_slip_to_employee",
@@ -91,13 +92,20 @@
    "fieldname": "show_leave_balances_in_salary_slip",
    "fieldtype": "Check",
    "label": "Show Leave Balances in Salary Slip"
+  },
+  {
+   "default": "0",
+   "description": "If checked, then the system will enable the provision to set the opening balance for earnings and deductions till date while creating a Salary Structure Assignment (if any)",
+   "fieldname": "define_opening_balance_for_earning_and_deductions",
+   "fieldtype": "Check",
+   "label": "Define Opening Balance for Earning and Deductions"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-03 17:49:59.579723",
+ "modified": "2022-12-21 17:30:08.704247",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",

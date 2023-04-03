@@ -1,5 +1,5 @@
 frappe.listview_settings['Website Item'] = {
-	add_fields: ["item_name", "web_item_name", "published", "image", "has_variants", "variant_of"],
+	add_fields: ["item_name", "web_item_name", "published", "website_image", "has_variants", "variant_of"],
 	filters: [["published", "=", "1"]],
 
 	get_indicator: function(doc) {

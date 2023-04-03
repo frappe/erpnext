@@ -130,7 +130,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		if (!doc.taxes.length) return '';
 
 		let taxes_html = doc.taxes.map(t => {
-			const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+			// if tax rate is 0, don't print it.
+			const description = /[0-9]+/.test(t.description) ? t.description : ((t.rate != 0) ? `${t.description} @ ${t.rate}%`: t.description);
 			return `
 				<div class="tax-row">
 					<div class="tax-label">${description}</div>

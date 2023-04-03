@@ -4,7 +4,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-03-07 09:04:18",
+ "creation": "2022-02-21 11:54:09.632218",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
@@ -813,11 +813,12 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-06-17 11:31:37.730760",
+ "modified": "2022-08-20 13:44:37.088519",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

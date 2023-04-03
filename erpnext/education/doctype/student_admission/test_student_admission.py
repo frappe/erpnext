@@ -5,5 +5,6 @@ import unittest
 
 # test_records = frappe.get_test_records('Student Admission')
 
+
 class TestStudentAdmission(unittest.TestCase):
 	pass

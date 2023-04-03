@@ -11,7 +11,6 @@ from erpnext.hr.utils import validate_overlap
 
 
 class LeavePeriod(Document):
-
 	def validate(self):
 		self.validate_dates()
 		validate_overlap(self, self.from_date, self.to_date, self.company)

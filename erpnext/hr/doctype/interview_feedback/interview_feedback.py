@@ -24,28 +24,36 @@ class InterviewFeedback(Document):
 	def validate_interviewer(self):
 		applicable_interviewers = get_applicable_interviewers(self.interview)
 		if self.interviewer not in applicable_interviewers:
-			frappe.throw(_('{0} is not allowed to submit Interview Feedback for the Interview: {1}').format(
-				frappe.bold(self.interviewer), frappe.bold(self.interview)))
+			frappe.throw(
+				_("{0} is not allowed to submit Interview Feedback for the Interview: {1}").format(
+					frappe.bold(self.interviewer), frappe.bold(self.interview)
+				)
+			)
 
 	def validate_interview_date(self):
-		scheduled_date = frappe.db.get_value('Interview', self.interview, 'scheduled_on')
+		scheduled_date = frappe.db.get_value("Interview", self.interview, "scheduled_on")
 
 		if getdate() < getdate(scheduled_date) and self.docstatus == 1:
-			frappe.throw(_('{0} submission before {1} is not allowed').format(
-				frappe.bold('Interview Feedback'),
-				frappe.bold('Interview Scheduled Date')
-			))
+			frappe.throw(
+				_("{0} submission before {1} is not allowed").format(
+					frappe.bold("Interview Feedback"), frappe.bold("Interview Scheduled Date")
+				)
+			)
 
 	def validate_duplicate(self):
-		duplicate_feedback = frappe.db.exists('Interview Feedback', {
-			'interviewer': self.interviewer,
-			'interview': self.interview,
-			'docstatus': 1
-		})
+		duplicate_feedback = frappe.db.exists(
+			"Interview Feedback",
+			{"interviewer": self.interviewer, "interview": self.interview, "docstatus": 1},
+		)
 
 		if duplicate_feedback:
-			frappe.throw(_('Feedback already submitted for the Interview {0}. Please cancel the previous Interview Feedback {1} to continue.').format(
-				self.interview, get_link_to_form('Interview Feedback', duplicate_feedback)))
+			frappe.throw(
+				_(
+					"Feedback already submitted for the Interview {0}. Please cancel the previous Interview Feedback {1} to continue."
+				).format(
+					self.interview, get_link_to_form("Interview Feedback", duplicate_feedback)
+				)
+			)
 
 	def calculate_average_rating(self):
 		total_rating = 0
@@ -53,10 +61,12 @@ class InterviewFeedback(Document):
 			if d.rating:
 				total_rating += d.rating
 
-		self.average_rating = flt(total_rating / len(self.skill_assessment) if len(self.skill_assessment) else 0)
+		self.average_rating = flt(
+			total_rating / len(self.skill_assessment) if len(self.skill_assessment) else 0
+		)
 
 	def update_interview_details(self):
-		doc = frappe.get_doc('Interview', self.interview)
+		doc = frappe.get_doc("Interview", self.interview)
 		total_rating = 0
 
 		if self.docstatus == 2:
@@ -75,12 +85,14 @@ class InterviewFeedback(Document):
 				if entry.average_rating:
 					total_rating += entry.average_rating
 
-		doc.average_rating = flt(total_rating / len(doc.interview_details) if len(doc.interview_details) else 0)
+		doc.average_rating = flt(
+			total_rating / len(doc.interview_details) if len(doc.interview_details) else 0
+		)
 		doc.save()
 		doc.notify_update()
 
 
 @frappe.whitelist()
 def get_applicable_interviewers(interview):
-	data = frappe.get_all('Interview Detail', filters={'parent': interview}, fields=['interviewer'])
+	data = frappe.get_all("Interview Detail", filters={"parent": interview}, fields=["interviewer"])
 	return [d.interviewer for d in data]

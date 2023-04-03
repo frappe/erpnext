@@ -6,5 +6,5 @@ import frappe
 
 
 def execute():
-	frappe.rename_doc('DocType', 'Health Insurance', 'Employee Health Insurance', force=True)
-	frappe.reload_doc('hr', 'doctype', 'employee_health_insurance')
+	frappe.rename_doc("DocType", "Health Insurance", "Employee Health Insurance", force=True)
+	frappe.reload_doc("hr", "doctype", "employee_health_insurance")

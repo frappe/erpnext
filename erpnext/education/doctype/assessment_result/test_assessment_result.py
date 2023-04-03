@@ -7,6 +7,7 @@ from erpnext.education.api import get_grade
 
 # test_records = frappe.get_test_records('Assessment Result')
 
+
 class TestAssessmentResult(unittest.TestCase):
 	def test_grade(self):
 		grade = get_grade("_Test Grading Scale", 80)

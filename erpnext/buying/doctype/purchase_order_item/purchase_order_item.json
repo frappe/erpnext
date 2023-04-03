@@ -63,6 +63,7 @@
   "material_request_item",
   "sales_order",
   "sales_order_item",
+  "sales_order_packed_item",
   "supplier_quotation",
   "supplier_quotation_item",
   "col_break5",
@@ -837,21 +838,30 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_order_packed_item",
+   "fieldtype": "Data",
+   "label": "Sales Order Packed Item",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-30 20:06:26.712097",
+ "modified": "2022-02-02 13:10:18.398976",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
  "search_fields": "item_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

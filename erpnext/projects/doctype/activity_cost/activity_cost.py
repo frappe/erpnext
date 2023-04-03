@@ -7,7 +7,9 @@ from frappe import _
 from frappe.model.document import Document
 
 
-class DuplicationError(frappe.ValidationError): pass
+class DuplicationError(frappe.ValidationError):
+	pass
+
 
 class ActivityCost(Document):
 	def validate(self):
@@ -24,12 +26,22 @@ class ActivityCost(Document):
 
 	def check_unique(self):
 		if self.employee:
-			if frappe.db.sql("""select name from `tabActivity Cost` where employee_name= %s and activity_type= %s and name != %s""",
-				(self.employee_name, self.activity_type, self.name)):
-					frappe.throw(_("Activity Cost exists for Employee {0} against Activity Type - {1}")
-						.format(self.employee, self.activity_type), DuplicationError)
+			if frappe.db.sql(
+				"""select name from `tabActivity Cost` where employee_name= %s and activity_type= %s and name != %s""",
+				(self.employee_name, self.activity_type, self.name),
+			):
+				frappe.throw(
+					_("Activity Cost exists for Employee {0} against Activity Type - {1}").format(
+						self.employee, self.activity_type
+					),
+					DuplicationError,
+				)
 		else:
-			if frappe.db.sql("""select name from `tabActivity Cost` where ifnull(employee, '')='' and activity_type= %s and name != %s""",
-				(self.activity_type, self.name)):
-					frappe.throw(_("Default Activity Cost exists for Activity Type - {0}")
-						.format(self.activity_type), DuplicationError)
+			if frappe.db.sql(
+				"""select name from `tabActivity Cost` where ifnull(employee, '')='' and activity_type= %s and name != %s""",
+				(self.activity_type, self.name),
+			):
+				frappe.throw(
+					_("Default Activity Cost exists for Activity Type - {0}").format(self.activity_type),
+					DuplicationError,
+				)

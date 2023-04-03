@@ -30,7 +30,7 @@ class EmployeeReferral(Document):
 @frappe.whitelist()
 def create_job_applicant(source_name, target_doc=None):
 	emp_ref = frappe.get_doc("Employee Referral", source_name)
-	#just for Api call if some set status apart from default Status
+	# just for Api call if some set status apart from default Status
 	status = emp_ref.status
 	if emp_ref.status in ["Pending", "In process"]:
 		status = "Open"
@@ -47,9 +47,13 @@ def create_job_applicant(source_name, target_doc=None):
 	job_applicant.resume_link = emp_ref.resume_link
 	job_applicant.save()
 
-	frappe.msgprint(_("Job Applicant {0} created successfully.").format(
-		get_link_to_form("Job Applicant", job_applicant.name)),
-		title=_("Success"), indicator="green")
+	frappe.msgprint(
+		_("Job Applicant {0} created successfully.").format(
+			get_link_to_form("Job Applicant", job_applicant.name)
+		),
+		title=_("Success"),
+		indicator="green",
+	)
 
 	emp_ref.db_set("status", "In Process")
 

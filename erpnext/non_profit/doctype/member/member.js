@@ -21,13 +21,18 @@ frappe.ui.form.on('Member', {
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.set_route('query-report', 'General Ledger',
-					{party_type:'Member', party:frm.doc.name});
+				if (frm.doc.customer) {
+					frappe.set_route('query-report', 'General Ledger', {party_type: 'Customer', party: frm.doc.customer});
+				} else {
+					frappe.set_route('query-report', 'General Ledger', {party_type: 'Member', party: frm.doc.name});
+				}
 			});
 
-			frm.add_custom_button(__('Accounts Receivable'), function() {
-				frappe.set_route('query-report', 'Accounts Receivable', {member:frm.doc.name});
-			});
+			if (frm.doc.customer) {
+				frm.add_custom_button(__('Accounts Receivable'), function() {
+					frappe.set_route('query-report', 'Accounts Receivable', {customer: frm.doc.customer});
+				});
+			}
 
 			if (!frm.doc.customer) {
 				frm.add_custom_button(__('Create Customer'), () => {
@@ -44,21 +49,18 @@ frappe.ui.form.on('Member', {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
 
-		frappe.call({
-			method:"frappe.client.get_value",
-			args:{
-				'doctype':"Membership",
-				'filters':{'member': frm.doc.name},
-				'fieldname':[
-					'to_date'
-				]
-			},
-			callback: function (data) {
-				if(data.message) {
-					frappe.model.set_value(frm.doctype,frm.docname,
-						"membership_expiry_date", data.message.to_date);
+		if (!frm.doc.membership_expiry_date && !frm.doc.__islocal) {
+			frappe.call({
+				method: "erpnext.get_last_membership",
+				args: {
+					member: frm.doc.member
+				},
+				callback: function(data) {
+					if (data.message) {
+						frappe.model.set_value(frm.doctype, frm.docname, "membership_expiry_date", data.message.to_date);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 });

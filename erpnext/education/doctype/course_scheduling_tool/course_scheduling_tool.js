@@ -11,9 +11,12 @@ frappe.ui.form.on('Course Scheduling Tool', {
 	},
 	refresh(frm) {
 		frm.disable_save();
+		frm.trigger("render_days");
 		frm.page.set_primary_action(__('Schedule Course'), () => {
-			frm.call('schedule_course')
+			frappe.dom.freeze(__("Scheduling..."));
+			frm.call('schedule_course', { days: frm.days.get_checked_options() })
 				.then(r => {
+					frappe.dom.unfreeze();
 					if (!r.message) {
 						frappe.throw(__('There were errors creating Course Schedule'));
 					}
@@ -40,5 +43,60 @@ frappe.ui.form.on('Course Scheduling Tool', {
 					}
 				});
 		});
+	},
+	render_days: function(frm) {
+		const days_html = $('<div class="days-editor">').appendTo(
+			frm.fields_dict.days_html.wrapper
+		);
+
+		if (!frm.days) {
+			frm.days = frappe.ui.form.make_control({
+				parent: days_html,
+				df: {
+					fieldname: "days",
+					fieldtype: "MultiCheck",
+					select_all: true,
+					columns: 4,
+					options: [
+						{
+							label: __("Monday"),
+							value: "Monday",
+							checked: 0,
+						},
+						{
+							label: __("Tuesday"),
+							value: "Tuesday",
+							checked: 0,
+						},
+						{
+							label: __("Wednesday"),
+							value: "Wednesday",
+							checked: 0,
+						},
+						{
+							label: __("Thursday"),
+							value: "Thursday",
+							checked: 0,
+						},
+						{
+							label: __("Friday"),
+							value: "Friday",
+							checked: 0,
+						},
+						{
+							label: __("Saturday"),
+							value: "Saturday",
+							checked: 0,
+						},
+						{
+							label: __("Sunday"),
+							value: "Sunday",
+							checked: 0,
+						},
+					],
+				},
+				render_input: true,
+			});
+		}
 	}
 });

@@ -123,7 +123,7 @@ frappe.ui.form.on("Customer", {
 
 			frm.add_custom_button(__('Accounting Ledger'), function () {
 				frappe.set_route('query-report', 'General Ledger',
-					{party_type: 'Customer', party: frm.doc.name});
+					{party_type: 'Customer', party: frm.doc.name, party_name: frm.doc.customer_name});
 			}, __('View'));
 
 			frm.add_custom_button(__('Pricing Rule'), function () {
@@ -155,7 +155,6 @@ frappe.ui.form.on("Customer", {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 
 	},
-
 	get_customer_group_details: function(frm) {
 		frappe.call({
 			method: "get_customer_group_details",
@@ -204,3 +203,4 @@ frappe.ui.form.on("Customer", {
 		dialog.show();
 	}
 });
+

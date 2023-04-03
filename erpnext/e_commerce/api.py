@@ -14,16 +14,16 @@ from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_web
 @frappe.whitelist(allow_guest=True)
 def get_product_filter_data(query_args=None):
 	"""
-		Returns filtered products and discount filters.
-		:param query_args (dict): contains filters to get products list
+	Returns filtered products and discount filters.
+	:param query_args (dict): contains filters to get products list
 
-		Query Args filters:
-		search (str): Search Term.
-		field_filters (dict): Keys include item_group, brand, etc.
-		attribute_filters(dict): Keys include Color, Size, etc.
-		start (int): Offset items by
-		item_group (str): Valid Item Group
-		from_filters (bool): Set as True to jump to page 1
+	Query Args filters:
+	search (str): Search Term.
+	field_filters (dict): Keys include item_group, brand, etc.
+	attribute_filters(dict): Keys include Color, Size, etc.
+	start (int): Offset items by
+	item_group (str): Valid Item Group
+	from_filters (bool): Set as True to jump to page 1
 	"""
 	if isinstance(query_args, str):
 		query_args = json.loads(query_args)
@@ -47,17 +47,12 @@ def get_product_filter_data(query_args=None):
 
 	sub_categories = []
 	if item_group:
-		field_filters['item_group'] = item_group
 		sub_categories = get_child_groups_for_website(item_group, immediate=True)
 
 	engine = ProductQuery()
 	try:
 		result = engine.query(
-			attribute_filters,
-			field_filters,
-			search_term=search,
-			start=start,
-			item_group=item_group
+			attribute_filters, field_filters, search_term=search, start=start, item_group=item_group
 		)
 	except Exception:
 		traceback = frappe.get_traceback()
@@ -77,8 +72,9 @@ def get_product_filter_data(query_args=None):
 		"filters": filters,
 		"settings": engine.settings,
 		"sub_categories": sub_categories,
-		"items_count": result["items_count"]
+		"items_count": result["items_count"],
 	}
+
 
 @frappe.whitelist(allow_guest=True)
 def get_guest_redirect_on_action():

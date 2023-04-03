@@ -24,52 +24,58 @@ class TestTherapyPlan(unittest.TestCase):
 		patient, practitioner = create_healthcare_docs()
 		medical_department = create_medical_department()
 		encounter = create_encounter(patient, medical_department, practitioner)
-		self.assertTrue(frappe.db.exists('Therapy Plan', encounter.therapy_plan))
+		self.assertTrue(frappe.db.exists("Therapy Plan", encounter.therapy_plan))
 
 	def test_status(self):
 		plan = create_therapy_plan()
-		self.assertEqual(plan.status, 'Not Started')
+		self.assertEqual(plan.status, "Not Started")
 
-		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
+		session = make_therapy_session(plan.name, plan.patient, "Basic Rehab", "_Test Company")
 		session.start_date = getdate()
 		frappe.get_doc(session).submit()
-		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'In Progress')
+		self.assertEqual(frappe.db.get_value("Therapy Plan", plan.name, "status"), "In Progress")
 
-		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
+		session = make_therapy_session(plan.name, plan.patient, "Basic Rehab", "_Test Company")
 		session.start_date = add_days(getdate(), 1)
 		frappe.get_doc(session).submit()
-		self.assertEqual(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
+		self.assertEqual(frappe.db.get_value("Therapy Plan", plan.name, "status"), "Completed")
 
 		patient, practitioner = create_healthcare_docs()
 		appointment = create_appointment(patient, practitioner, nowdate())
 
-		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company', appointment.name)
+		session = make_therapy_session(
+			plan.name, plan.patient, "Basic Rehab", "_Test Company", appointment.name
+		)
 		session.start_date = add_days(getdate(), 2)
 		session = frappe.get_doc(session)
 		session.submit()
-		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
+		self.assertEqual(
+			frappe.db.get_value("Patient Appointment", appointment.name, "status"), "Closed"
+		)
 		session.cancel()
-		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
+		self.assertEqual(frappe.db.get_value("Patient Appointment", appointment.name, "status"), "Open")
 
 	def test_therapy_plan_from_template(self):
 		patient = create_patient()
 		template = create_therapy_plan_template()
 		# check linked item
-		self.assertTrue(frappe.db.exists('Therapy Plan Template', {'linked_item': 'Complete Rehab'}))
+		self.assertTrue(frappe.db.exists("Therapy Plan Template", {"linked_item": "Complete Rehab"}))
 
 		plan = create_therapy_plan(template)
 		# invoice
-		si = make_sales_invoice(plan.name, patient, '_Test Company', template)
+		si = make_sales_invoice(plan.name, patient, "_Test Company", template)
 		si.save()
 
-		therapy_plan_template_amt = frappe.db.get_value('Therapy Plan Template', template, 'total_amount')
+		therapy_plan_template_amt = frappe.db.get_value(
+			"Therapy Plan Template", template, "total_amount"
+		)
 		self.assertEqual(si.items[0].amount, therapy_plan_template_amt)
 
 
 def create_therapy_plan(template=None):
 	patient = create_patient()
 	therapy_type = create_therapy_type()
-	plan = frappe.new_doc('Therapy Plan')
+	plan = frappe.new_doc("Therapy Plan")
 	plan.patient = patient
 	plan.start_date = getdate()
 
@@ -77,42 +83,36 @@ def create_therapy_plan(template=None):
 		plan.therapy_plan_template = template
 		plan = plan.set_therapy_details_from_template()
 	else:
-		plan.append('therapy_plan_details', {
-			'therapy_type': therapy_type.name,
-			'no_of_sessions': 2
-		})
+		plan.append("therapy_plan_details", {"therapy_type": therapy_type.name, "no_of_sessions": 2})
 
 	plan.save()
 	return plan
 
+
 def create_encounter(patient, medical_department, practitioner):
-	encounter = frappe.new_doc('Patient Encounter')
+	encounter = frappe.new_doc("Patient Encounter")
 	encounter.patient = patient
 	encounter.practitioner = practitioner
 	encounter.medical_department = medical_department
 	therapy_type = create_therapy_type()
-	encounter.append('therapies', {
-		'therapy_type': therapy_type.name,
-		'no_of_sessions': 2
-	})
+	encounter.append("therapies", {"therapy_type": therapy_type.name, "no_of_sessions": 2})
 	encounter.save()
 	encounter.submit()
 	return encounter
 
+
 def create_therapy_plan_template():
-	template_name = frappe.db.exists('Therapy Plan Template', 'Complete Rehab')
+	template_name = frappe.db.exists("Therapy Plan Template", "Complete Rehab")
 	if not template_name:
 		therapy_type = create_therapy_type()
-		template = frappe.new_doc('Therapy Plan Template')
-		template.plan_name = template.item_code = template.item_name = 'Complete Rehab'
-		template.item_group = 'Services'
-		rate = frappe.db.get_value('Therapy Type', therapy_type.name, 'rate')
-		template.append('therapy_types', {
-			'therapy_type': therapy_type.name,
-			'no_of_sessions': 2,
-			'rate': rate,
-			'amount': 2 * flt(rate)
-		})
+		template = frappe.new_doc("Therapy Plan Template")
+		template.plan_name = template.item_code = template.item_name = "Complete Rehab"
+		template.item_group = "Services"
+		rate = frappe.db.get_value("Therapy Type", therapy_type.name, "rate")
+		template.append(
+			"therapy_types",
+			{"therapy_type": therapy_type.name, "no_of_sessions": 2, "rate": rate, "amount": 2 * flt(rate)},
+		)
 		template.save()
 		template_name = template.name
 

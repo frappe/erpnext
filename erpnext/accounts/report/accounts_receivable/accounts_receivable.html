@@ -42,7 +42,7 @@
 
 	{% if(filters.show_future_payments) { %}
 		{% var balance_row = data.slice(-1).pop();
-			var start = filters.based_on_payment_terms ? 13 : 11;
+			var start = report.columns.findIndex((elem) => (elem.fieldname == 'age'));
 			var range1 = report.columns[start].label;
 			var range2 = report.columns[start+1].label;
 			var range3 = report.columns[start+2].label;

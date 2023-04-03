@@ -21,9 +21,11 @@
   "paid",
   "currency",
   "amount",
+  "column_break_16",
   "invoice",
   "razorpay_details_section",
   "subscription_id",
+  "column_break_19",
   "payment_id"
  ],
  "fields": [
@@ -106,20 +108,17 @@
   {
    "fieldname": "razorpay_details_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Razorpay Details"
   },
   {
    "fieldname": "subscription_id",
    "fieldtype": "Data",
-   "label": "Subscription ID",
-   "read_only": 1
+   "label": "Subscription ID"
   },
   {
    "fieldname": "payment_id",
    "fieldtype": "Data",
-   "label": "Payment ID",
-   "read_only": 1
+   "label": "Payment ID"
   },
   {
    "fieldname": "invoice",
@@ -140,11 +139,19 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-19 14:33:44.925122",
+ "modified": "2022-03-16 17:37:28.672916",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",

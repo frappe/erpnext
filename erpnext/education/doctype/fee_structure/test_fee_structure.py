@@ -5,5 +5,6 @@ import unittest
 
 # test_records = frappe.get_test_records('Fee Structure')
 
+
 class TestFeeStructure(unittest.TestCase):
 	pass

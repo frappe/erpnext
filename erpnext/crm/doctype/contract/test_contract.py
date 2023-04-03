@@ -8,7 +8,6 @@ from frappe.utils import add_days, nowdate
 
 
 class TestContract(unittest.TestCase):
-
 	def setUp(self):
 		frappe.db.sql("delete from `tabContract`")
 		self.contract_doc = get_contract()
@@ -65,10 +64,7 @@ class TestContract(unittest.TestCase):
 		# Mark all the terms as fulfilled
 		self.contract_doc.requires_fulfilment = 1
 		fulfilment_terms = []
-		fulfilment_terms.append({
-			"requirement": "This is a test requirement.",
-			"fulfilled": 0
-		})
+		fulfilment_terms.append({"requirement": "This is a test requirement.", "fulfilled": 0})
 		self.contract_doc.set("fulfilment_terms", fulfilment_terms)
 
 		for term in self.contract_doc.fulfilment_terms:
@@ -85,14 +81,8 @@ class TestContract(unittest.TestCase):
 		# Mark only the first term as fulfilled
 		self.contract_doc.save()
 		fulfilment_terms = []
-		fulfilment_terms.append({
-			"requirement": "This is a test requirement.",
-			"fulfilled": 0
-		})
-		fulfilment_terms.append({
-			"requirement": "This is another test requirement.",
-			"fulfilled": 0
-		})
+		fulfilment_terms.append({"requirement": "This is a test requirement.", "fulfilled": 0})
+		fulfilment_terms.append({"requirement": "This is another test requirement.", "fulfilled": 0})
 
 		self.contract_doc.set("fulfilment_terms", fulfilment_terms)
 		self.contract_doc.fulfilment_terms[0].fulfilled = 1
@@ -109,6 +99,7 @@ class TestContract(unittest.TestCase):
 		self.contract_doc.save()
 
 		self.assertEqual(self.contract_doc.fulfilment_status, "Lapsed")
+
 
 def get_contract():
 	doc = frappe.new_doc("Contract")

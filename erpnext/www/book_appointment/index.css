@@ -45,7 +45,7 @@
 
 .time-slot.selected {
     color: white;
-    background: #5e64ff;
+    background: var(--primary-color);
 }
 
 .time-slot.selected .text-muted {

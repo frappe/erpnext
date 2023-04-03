@@ -102,7 +102,7 @@
   }
  ],
  "links": [],
- "modified": "2021-06-29 18:27:02.832979",
+ "modified": "2022-12-28 16:35:34.377575",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -120,16 +120,6 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   },
   {
    "create": 1,

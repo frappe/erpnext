@@ -23,16 +23,13 @@ def get_context(context):
 	context.settings = settings
 	context.no_cache = 1
 
+
 def get_stock_availability(item_code, warehouse):
 	stock_qty = frappe.utils.flt(
-		frappe.db.get_value("Bin",
-			{
-				"item_code": item_code,
-				"warehouse": warehouse
-			},
-			"actual_qty")
+		frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
 	)
 	return bool(stock_qty)
+
 
 def get_wishlist_items():
 	if not frappe.db.exists("Wishlist", frappe.session.user):
@@ -40,14 +37,19 @@ def get_wishlist_items():
 
 	return frappe.db.get_all(
 		"Wishlist Item",
-		filters={
-			"parent": frappe.session.user
-		},
+		filters={"parent": frappe.session.user},
 		fields=[
-			"web_item_name", "item_code", "item_name",
-			"website_item", "warehouse",
-			"image", "item_group", "route"
-		])
+			"web_item_name",
+			"item_code",
+			"item_name",
+			"website_item",
+			"warehouse",
+			"image",
+			"item_group",
+			"route",
+		],
+	)
+
 
 def set_stock_price_details(items, settings, selling_price_list):
 	for item in items:
@@ -55,17 +57,15 @@ def set_stock_price_details(items, settings, selling_price_list):
 			item.available = get_stock_availability(item.item_code, item.get("warehouse"))
 
 		price_details = get_price(
-			item.item_code,
-			selling_price_list,
-			settings.default_customer_group,
-			settings.company
+			item.item_code, selling_price_list, settings.default_customer_group, settings.company
 		)
 
 		if price_details:
-			item.formatted_price = price_details.get('formatted_price')
-			item.formatted_mrp = price_details.get('formatted_mrp')
+			item.formatted_price = price_details.get("formatted_price")
+			item.formatted_mrp = price_details.get("formatted_mrp")
 			if item.formatted_mrp:
-				item.discount = price_details.get('formatted_discount_percent') or \
-					price_details.get('formatted_discount_rate')
+				item.discount = price_details.get("formatted_discount_percent") or price_details.get(
+					"formatted_discount_rate"
+				)
 
 	return items

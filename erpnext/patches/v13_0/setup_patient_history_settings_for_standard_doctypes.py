@@ -1,4 +1,3 @@
-
 import frappe
 
 from erpnext.healthcare.setup import setup_patient_history_settings

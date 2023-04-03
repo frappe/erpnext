@@ -19,11 +19,12 @@ class object_dict(dict):
 	>>> a['water'] = 'water'
 	>>> a.water
 	'water'
- 	>>> a.test = {'value': 1}
+	>>> a.test = {'value': 1}
 	>>> a.test2 = object_dict({'name': 'test2', 'value': 2})
 	>>> a.test, a.test2.name, a.test2.value
 	(1, 'test2', 2)
 	"""
+
 	def __init__(self, initd=None):
 		if initd is None:
 			initd = {}
@@ -36,8 +37,8 @@ class object_dict(dict):
 		except KeyError:
 			return None
 
-		if isinstance(d, dict) and 'value' in d and len(d) == 1:
-			return d['value']
+		if isinstance(d, dict) and "value" in d and len(d) == 1:
+			return d["value"]
 		else:
 			return d
 
@@ -49,11 +50,10 @@ class object_dict(dict):
 		self.__setitem__(item, value)
 
 	def getvalue(self, item, value=None):
-		return self.get(item, {}).get('value', value)
+		return self.get(item, {}).get("value", value)
 
 
 class xml2dict(object):
-
 	def __init__(self):
 		pass
 
@@ -63,12 +63,11 @@ class xml2dict(object):
 		if node.text:
 			node_tree.value = node.text
 		for (k, v) in node.attrib.items():
-			k, v = self._namespace_split(k, object_dict({'value':v}))
+			k, v = self._namespace_split(k, object_dict({"value": v}))
 			node_tree[k] = v
-		#Save childrens
+		# Save childrens
 		for child in node.getchildren():
-			tag, tree = self._namespace_split(child.tag,
-											self._parse_node(child))
+			tag, tree = self._namespace_split(child.tag, self._parse_node(child))
 			if tag not in node_tree:  # the first time, so store it in dict
 				node_tree[tag] = tree
 				continue
@@ -94,7 +93,7 @@ class xml2dict(object):
 
 	def parse(self, file):
 		"""parse a xml file to a dict"""
-		f = open(file, 'r')
+		f = open(file, "r")
 		return self.fromstring(f.read())
 
 	def fromstring(self, s):

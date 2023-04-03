@@ -125,7 +125,7 @@ $.extend(erpnext.utils, {
 	},
 
 	add_indicator_for_multicompany: function(frm, info) {
-		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
 		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
 
@@ -213,8 +213,10 @@ $.extend(erpnext.utils, {
 						filters.splice(index, 0, {
 							"fieldname": dimension["fieldname"],
 							"label": __(dimension["label"]),
-							"fieldtype": "Link",
-							"options": dimension["document_type"]
+							"fieldtype": "MultiSelectList",
+							get_data: function(txt) {
+								return frappe.db.get_link_options(dimension["document_type"], txt);
+							},
 						});
 					}
 				});
@@ -464,7 +466,20 @@ erpnext.utils.update_child_items = function(opts) {
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
 
-	this.data = [];
+	this.data = frm.doc[opts.child_docname].map((d) => {
+		return {
+			"docname": d.name,
+			"name": d.name,
+			"item_code": d.item_code,
+			"delivery_date": d.delivery_date,
+			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
+			"qty": d.qty,
+			"rate": d.rate,
+			"uom": d.uom
+		}
+	});
+
 	const fields = [{
 		fieldtype:'Data',
 		fieldname:"docname",
@@ -557,7 +572,7 @@ erpnext.utils.update_child_items = function(opts) {
 		})
 	}
 
-	const dialog = new frappe.ui.Dialog({
+	new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
 			{
@@ -593,24 +608,7 @@ erpnext.utils.update_child_items = function(opts) {
 			refresh_field("items");
 		},
 		primary_action_label: __('Update')
-	});
-
-	frm.doc[opts.child_docname].forEach(d => {
-		dialog.fields_dict.trans_items.df.data.push({
-			"docname": d.name,
-			"name": d.name,
-			"item_code": d.item_code,
-			"delivery_date": d.delivery_date,
-			"schedule_date": d.schedule_date,
-			"conversion_factor": d.conversion_factor,
-			"qty": d.qty,
-			"rate": d.rate,
-			"uom": d.uom
-		});
-		this.data = dialog.fields_dict.trans_items.df.data;
-		dialog.fields_dict.trans_items.grid.refresh();
-	})
-	dialog.show();
+	}).show();
 }
 
 erpnext.utils.map_current_doc = function(opts) {
@@ -711,7 +709,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
-			child_fieldname: opts.child_fielname,
+			child_fieldname: opts.child_fieldname,
 			child_columns: opts.child_columns,
 			size: opts.size,
 			action: function(selections, args) {

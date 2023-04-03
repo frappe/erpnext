@@ -37,7 +37,6 @@
   "inspection_required",
   "quality_inspection_template",
   "column_break_31",
-  "bom_level",
   "section_break_33",
   "items",
   "scrap_section",
@@ -523,13 +522,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "bom_level",
-   "fieldtype": "Int",
-   "label": "BOM Level",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_33",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -540,7 +532,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-18 13:04:16.271975",
+ "modified": "2022-01-30 21:27:54.727298",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -577,5 +569,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

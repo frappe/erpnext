@@ -214,7 +214,7 @@ class ItemConfigure {
 			? `<div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
 				<div><div>
 					${one_item}
-					${product_info && product_info.price && !$.isEmptyObject()
+					${product_info && product_info.price && !$.isEmptyObject(product_info.price)
 						? '(' + product_info.price.formatted_price_sales_uom + ')'
 						: ''
 					}

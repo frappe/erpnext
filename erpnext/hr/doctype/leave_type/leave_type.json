@@ -19,6 +19,7 @@
   "fraction_of_daily_salary_per_leave",
   "is_optional_leave",
   "allow_negative",
+  "allow_over_allocation",
   "include_holiday",
   "is_compensatory",
   "carry_forward_section",
@@ -211,15 +212,23 @@
    "fieldtype": "Float",
    "label": "Fraction of Daily Salary per Leave",
    "mandatory_depends_on": "eval:doc.is_ppl == 1"
+  },
+  {
+   "default": "0",
+   "description": "Allows allocating more leaves than the number of days in the allocation period.",
+   "fieldname": "allow_over_allocation",
+   "fieldtype": "Check",
+   "label": "Allow Over Allocation"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2021-10-02 11:59:40.503359",
+ "modified": "2022-05-09 05:01:38.957545",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -251,5 +260,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

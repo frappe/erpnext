@@ -11,7 +11,8 @@ from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_setting
 
 no_cache = 1
 
-expected_keys = ('redirect_flow_id', 'reference_doctype', 'reference_docname')
+expected_keys = ("redirect_flow_id", "reference_doctype", "reference_docname")
+
 
 def get_context(context):
 	context.no_cache = 1
@@ -22,10 +23,13 @@ def get_context(context):
 			context[key] = frappe.form_dict[key]
 
 	else:
-		frappe.redirect_to_message(_('Some information is missing'),
-			_('Looks like someone sent you to an incomplete URL. Please ask them to look into it.'))
+		frappe.redirect_to_message(
+			_("Some information is missing"),
+			_("Looks like someone sent you to an incomplete URL. Please ask them to look into it."),
+		)
 		frappe.local.flags.redirect_location = frappe.local.response.location
 		raise frappe.Redirect
+
 
 @frappe.whitelist(allow_guest=True)
 def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
@@ -34,15 +38,15 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 
 	try:
 		redirect_flow = client.redirect_flows.complete(
-			redirect_flow_id,
-			params={
-				"session_token": frappe.session.user
-		})
+			redirect_flow_id, params={"session_token": frappe.session.user}
+		)
 
 		confirmation_url = redirect_flow.confirmation_url
-		gocardless_success_page = frappe.get_hooks('gocardless_success_page')
+		gocardless_success_page = frappe.get_hooks("gocardless_success_page")
 		if gocardless_success_page:
-			confirmation_url = frappe.get_attr(gocardless_success_page[-1])(reference_doctype, reference_docname)
+			confirmation_url = frappe.get_attr(gocardless_success_page[-1])(
+				reference_doctype, reference_docname
+			)
 
 		data = {
 			"mandate": redirect_flow.links.mandate,
@@ -50,7 +54,7 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 			"redirect_to": confirmation_url,
 			"redirect_message": "Mandate successfully created",
 			"reference_doctype": reference_doctype,
-			"reference_docname": reference_docname
+			"reference_docname": reference_docname,
 		}
 
 		try:
@@ -65,29 +69,38 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 
 	except Exception as e:
 		frappe.log_error(e, "GoCardless Payment Error")
-		return {"redirect_to": '/integrations/payment-failed'}
+		return {"redirect_to": "/integrations/payment-failed"}
 
 
 def create_mandate(data):
 	data = frappe._dict(data)
 	frappe.logger().debug(data)
 
-	mandate = data.get('mandate')
+	mandate = data.get("mandate")
 
 	if frappe.db.exists("GoCardless Mandate", mandate):
 		return
 
 	else:
-		reference_doc = frappe.db.get_value(data.get('reference_doctype'), data.get('reference_docname'), ["reference_doctype", "reference_name"], as_dict=1)
-		erpnext_customer = frappe.db.get_value(reference_doc.reference_doctype, reference_doc.reference_name, ["customer_name"], as_dict=1)
+		reference_doc = frappe.db.get_value(
+			data.get("reference_doctype"),
+			data.get("reference_docname"),
+			["reference_doctype", "reference_name"],
+			as_dict=1,
+		)
+		erpnext_customer = frappe.db.get_value(
+			reference_doc.reference_doctype, reference_doc.reference_name, ["customer_name"], as_dict=1
+		)
 
 		try:
-			frappe.get_doc({
-			"doctype": "GoCardless Mandate",
-			"mandate": mandate,
-			"customer": erpnext_customer.customer_name,
-			"gocardless_customer": data.get('customer')
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "GoCardless Mandate",
+					"mandate": mandate,
+					"customer": erpnext_customer.customer_name,
+					"gocardless_customer": data.get("customer"),
+				}
+			).insert(ignore_permissions=True)
 
 		except Exception:
 			frappe.log_error(frappe.get_traceback())

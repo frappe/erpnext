@@ -99,7 +99,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -559,7 +558,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 11:04:17.195848",
+ "modified": "2022-01-20 12:37:07.943153",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

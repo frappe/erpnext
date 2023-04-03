@@ -12,5 +12,5 @@ def execute():
 	if selling_settings.territory in (_("All Territories"), "All Territories"):
 		selling_settings.territory = None
 
-	selling_settings.flags.ignore_mandatory=True
+	selling_settings.flags.ignore_mandatory = True
 	selling_settings.save(ignore_permissions=True)

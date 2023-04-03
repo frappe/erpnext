@@ -38,7 +38,7 @@
   "amount",
   "column_break_27",
   "mode_of_payment",
-  "razorpay_payment_id"
+  "payment_id"
  ],
  "fields": [
   {
@@ -202,13 +202,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "donation.razorpay_payment_id",
-   "fieldname": "razorpay_payment_id",
-   "fieldtype": "Data",
-   "label": "RazorPay Payment ID",
-   "read_only": 1
-  },
-  {
    "fetch_from": "donation.date",
    "fieldname": "date_of_donation",
    "fieldtype": "Date",
@@ -266,11 +259,18 @@
    "hidden": 1,
    "label": "Title",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "donation.payment_id",
+   "fieldname": "payment_id",
+   "fieldtype": "Data",
+   "label": "Payment ID",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-22 00:03:34.215633",
+ "modified": "2022-03-16 17:21:39.831059",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Tax Exemption 80G Certificate",

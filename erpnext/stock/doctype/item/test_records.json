@@ -273,6 +273,28 @@
   }]
  },
  {
+  "description": "_Test FG Item 3 11",
+  "doctype": "Item",
+  "has_batch_no": 0,
+  "has_serial_no": 0,
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 1,
+  "item_code": "_Test FG Item 3",
+  "item_group": "_Test Item Group Desktops",
+  "item_name": "_Test FG Item 3",
+  "stock_uom": "_Test UOM",
+  "gst_hsn_code": "999800",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
+ },
+ {
   "description": "_Test Variant Item 12",
   "doctype": "Item",
   "has_batch_no": 0,

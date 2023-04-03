@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
- "creation": "2013-04-10 08:35:39",
+ "creation": "2022-01-25 10:29:55.938239",
  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -66,12 +66,12 @@
   "payment_terms",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
-  "enable_perpetual_inventory_for_non_stock_items",
+  "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
   "stock_adjustment_account",
   "column_break_32",
   "stock_received_but_not_billed",
-  "service_received_but_not_billed",
+  "default_provisional_account",
   "expenses_included_in_valuation",
   "fixed_asset_defaults",
   "accumulated_depreciation_account",
@@ -693,20 +693,6 @@
    "options": "Terms and Conditions"
   },
   {
-   "fieldname": "service_received_but_not_billed",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Service Received But Not Billed",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_perpetual_inventory_for_non_stock_items",
-   "fieldtype": "Check",
-   "label": "Enable Perpetual Inventory For Non Stock Items"
-  },
-  {
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
@@ -735,6 +721,25 @@
    "fieldtype": "Link",
    "label": "Repair and Maintenance Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "section_break_28",
+   "fieldtype": "Section Break",
+   "label": "Chart of Accounts"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_provisional_accounting_for_non_stock_items",
+   "fieldtype": "Check",
+   "label": "Enable Provisional Accounting For Non Stock Items"
+  },
+  {
+   "fieldname": "default_provisional_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Provisional Account",
+   "no_copy": 1,
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -742,7 +747,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-12-02 14:52:08.187233",
+ "modified": "2022-01-25 10:33:16.826067",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -802,5 +807,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

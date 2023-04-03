@@ -75,7 +75,8 @@
    "fieldname": "cost",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Cost"
+   "label": "Cost",
+   "options": "currency"
   },
   {
    "depends_on": "eval:doc.price_determination==\"Based On Price List\"",
@@ -147,7 +148,7 @@
   }
  ],
  "links": [],
- "modified": "2021-08-13 10:53:44.205774",
+ "modified": "2021-12-10 15:24:15.794477",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",

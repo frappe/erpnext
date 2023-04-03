@@ -9,8 +9,9 @@ from whoosh.query import Prefix
 # TODO: Make obsolete
 INDEX_NAME = "products"
 
+
 class ProductSearch(FullTextSearch):
-	""" Wrapper for WebsiteSearch """
+	"""Wrapper for WebsiteSearch"""
 
 	def get_schema(self):
 		return Schema(
@@ -29,7 +30,7 @@ class ProductSearch(FullTextSearch):
 		in www/ and routes from published documents
 
 		Returns:
-			self (object): FullTextSearch Instance
+		        self (object): FullTextSearch Instance
 		"""
 		items = get_all_published_items()
 		documents = [self.get_document_to_index(item) for item in items]
@@ -69,12 +70,12 @@ class ProductSearch(FullTextSearch):
 		"""Search from the current index
 
 		Args:
-			text (str): String to search for
-			scope (str, optional): Scope to limit the search. Defaults to None.
-			limit (int, optional): Limit number of search results. Defaults to 20.
+		        text (str): String to search for
+		        scope (str, optional): Scope to limit the search. Defaults to None.
+		        limit (int, optional): Limit number of search results. Defaults to 20.
 
 		Returns:
-			[List(_dict)]: Search results
+		        [List(_dict)]: Search results
 		"""
 		ix = self.get_index()
 
@@ -111,16 +112,22 @@ class ProductSearch(FullTextSearch):
 			keyword_highlights=keyword_highlights,
 		)
 
+
 def get_all_published_items():
-	return frappe.get_all("Website Item", filters={"variant_of": "", "published": 1}, pluck="item_code")
+	return frappe.get_all(
+		"Website Item", filters={"variant_of": "", "published": 1}, pluck="item_code"
+	)
+
 
 def update_index_for_path(path):
 	search = ProductSearch(INDEX_NAME)
 	return search.update_index_by_name(path)
 
+
 def remove_document_from_index(path):
 	search = ProductSearch(INDEX_NAME)
 	return search.remove_document_from_index(path)
+
 
 def build_index_for_all_routes():
 	search = ProductSearch(INDEX_NAME)
