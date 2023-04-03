@@ -39,6 +39,9 @@ class ProcessPaymentReconciliation(Document):
 		self.db_set("status", "Queued")
 		self.db_set("error_log", None)
 
+	def on_cancel(self):
+		self.db_set("status", "Cancelled")
+
 
 @frappe.whitelist()
 def get_progress(docname: str | None = None) -> float:

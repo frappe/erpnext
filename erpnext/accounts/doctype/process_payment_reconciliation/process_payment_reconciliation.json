@@ -34,7 +34,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Queued\nRunning\nCompleted\nPartially Reconciled\nFailed",
+   "options": "Queued\nRunning\nCompleted\nPartially Reconciled\nFailed\nCancelled",
    "read_only": 1
   },
   {
@@ -145,7 +145,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-31 14:22:55.067587",
+ "modified": "2023-04-03 12:11:59.302259",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",
