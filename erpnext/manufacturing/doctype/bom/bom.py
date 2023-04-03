@@ -943,7 +943,8 @@ def get_valuation_rate(data):
 	2) If no value, get last valuation rate from SLE
 	3) If no value, get valuation rate from Item
 	"""
-	from frappe.query_builder.functions import Sum
+	from frappe.query_builder.functions import Count, IfNull, Sum
+	from pypika import Case
 
 	item_code, company = data.get("item_code"), data.get("company")
 	valuation_rate = 0.0
@@ -954,7 +955,14 @@ def get_valuation_rate(data):
 		frappe.qb.from_(bin_table)
 		.join(wh_table)
 		.on(bin_table.warehouse == wh_table.name)
-		.select((Sum(bin_table.stock_value) / Sum(bin_table.actual_qty)).as_("valuation_rate"))
+		.select(
+			Case()
+			.when(
+				Count(bin_table.name) > 0, IfNull(Sum(bin_table.stock_value) / Sum(bin_table.actual_qty), 0.0)
+			)
+			.else_(None)
+			.as_("valuation_rate")
+		)
 		.where((bin_table.item_code == item_code) & (wh_table.company == company))
 	).run(as_dict=True)[0]
 

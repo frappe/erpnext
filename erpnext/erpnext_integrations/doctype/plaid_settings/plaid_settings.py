@@ -220,7 +220,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 		if e.code == "ITEM_LOGIN_REQUIRED":
 			msg = _("There was an error syncing transactions.") + " "
 			msg += _("Please refresh or reset the Plaid linking of the Bank {}.").format(bank) + " "
-			frappe.log_error(msg, title=_("Plaid Link Refresh Required"))
+			frappe.log_error(message=msg, title=_("Plaid Link Refresh Required"))
 
 	return transactions
 
