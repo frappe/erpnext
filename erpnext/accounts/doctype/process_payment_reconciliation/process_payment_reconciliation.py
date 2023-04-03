@@ -409,9 +409,9 @@ def reconcile(doc: None | str = None) -> None:
 						if batch:
 							start = batch[0].idx
 							end = batch[-1].idx
-							reconcile_job_name = f"process_payment_reconciliation_{doc}_reconcile_{start}_{end}"
+							reconcile_job_name = f"process_{doc}_reconcile_{start}_{end}"
 						else:
-							reconcile_job_name = f"process_payment_reconciliation_{doc}_reconcile"
+							reconcile_job_name = f"process_{doc}_reconcile"
 						if not is_job_running(reconcile_job_name):
 							job = frappe.enqueue(
 								method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
