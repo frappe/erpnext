@@ -1,3 +1,4 @@
+import functools
 import inspect
 
 import frappe
@@ -140,6 +141,7 @@ def allow_regional(fn):
 	def myfunction():
 	  pass"""
 
+	@functools.wraps(fn)
 	def caller(*args, **kwargs):
 		region = get_region()
 		fn_name = inspect.getmodule(fn).__name__ + "." + fn.__name__
