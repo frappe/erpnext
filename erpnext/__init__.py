@@ -1,3 +1,4 @@
+import functools
 import inspect
 
 import frappe
@@ -138,6 +139,7 @@ def allow_regional(fn):
 	def myfunction():
 	  pass"""
 
+	@functools.wraps(fn)
 	def caller(*args, **kwargs):
 		overrides = frappe.get_hooks("regional_overrides", {}).get(get_region())
 		function_path = f"{inspect.getmodule(fn).__name__}.{fn.__name__}"
