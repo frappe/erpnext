@@ -11,6 +11,12 @@ class BankTransaction(StatusUpdater):
 	def after_insert(self):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
+<<<<<<< HEAD
+=======
+	def on_update(self):
+		self.auto_set_party()
+
+>>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
 	def on_submit(self):
 		self.clear_linked_payment_entries()
 		self.set_status()

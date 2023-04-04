@@ -200,6 +200,7 @@ class AutoMatchbyPartyNameDescription:
 	def match_party_name_desc_in_party(self) -> Union[Tuple, None]:
 		"""Fuzzy search party name and/or description against parties in the system"""
 		result = None
+<<<<<<< HEAD
 		parties = get_parties_in_order(self.deposit)
 =======
 	def match_party_name_in_bank_party_mapper(self) -> Union[Tuple, None]:
@@ -207,6 +208,15 @@ class AutoMatchbyPartyNameDescription:
 		result = None
 		if not self.bank_party_name:
 			return
+=======
+		or_filters = []
+
+		if self.bank_party_name:
+			or_filters.append({"bank_party_name_desc": self.bank_party_name})
+
+		if self.description:
+			or_filters.append({"bank_party_name_desc": self.description})
+>>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
 
 		mapper_res = frappe.get_all(
 			"Bank Party Mapper",
@@ -270,8 +280,23 @@ class AutoMatchbyPartyNameDescription:
 		result = process.extractOne(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
 
+<<<<<<< HEAD
 		if not party_name:
 			return None, skip
+=======
+		if result:
+			party_name, score, index = result
+			if score > 75:
+				# Dont set description as a key in Bank Party Mapper due to its volatility
+				mapper = {"bank_party_name_desc": self.get(field)} if field == "bank_party_name" else None
+				return (
+					party,
+					party_name,
+					mapper,
+				)
+			else:
+				return None
+>>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
 
 		return (
 			party,
