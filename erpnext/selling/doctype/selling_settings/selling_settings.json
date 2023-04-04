@@ -30,12 +30,18 @@
   "so_required",
   "dn_required",
   "sales_update_frequency",
+  "over_order_allowance",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "hide_tax_id",
   "allow_sales_order_creation_for_expired_quotation"
  ],
  "fields": [
+  {
+   "fieldname": "customer_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Defaults"
+  },
   {
    "default": "Customer Name",
    "fieldname": "cust_master_name",
@@ -45,18 +51,15 @@
    "options": "Customer Name\nNaming Series\nAuto Name"
   },
   {
-   "fieldname": "campaign_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series\nAuto Name"
-  },
-  {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Customer Group",
    "options": "Customer Group"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "territory",
@@ -66,11 +69,31 @@
    "options": "Territory"
   },
   {
-   "fieldname": "selling_price_list",
-   "fieldtype": "Link",
+   "fieldname": "crm_settings_section",
+   "fieldtype": "Section Break",
+   "label": "CRM Settings"
+  },
+  {
+   "fieldname": "campaign_naming_by",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Default Price List",
-   "options": "Price List"
+   "label": "Campaign Naming By",
+   "options": "Campaign Name\nNaming Series\nAuto Name"
+  },
+  {
+   "fieldname": "contract_naming_by",
+   "fieldtype": "Select",
+   "label": "Contract Naming By",
+   "options": "Party Name\nNaming Series"
+  },
+  {
+   "fieldname": "default_valid_till",
+   "fieldtype": "Data",
+   "label": "Default Quotation Validity Days"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   },
   {
    "default": "15",
@@ -80,9 +103,65 @@
    "label": "Close Opportunity After Days"
   },
   {
-   "fieldname": "default_valid_till",
-   "fieldtype": "Data",
-   "label": "Default Quotation Validity Days"
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "selling_price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Price List",
+   "options": "Price List"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_sales_rate",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
+   "mandatory_depends_on": "maintain_same_sales_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_sales_rate && doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_sales_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout Sales Cycle"
+  },
+  {
+   "default": "0",
+   "fieldname": "editable_price_list_rate",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Price List Rate in Transactions"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_selling_price",
+   "fieldtype": "Check",
+   "label": "Validate Selling Price for Item Against Purchase Rate or Valuation Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "editable_bundle_item_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "fieldname": "sales_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
   },
   {
    "fieldname": "so_required",
@@ -107,15 +186,10 @@
   },
   {
    "default": "0",
-   "fieldname": "maintain_same_sales_rate",
-   "fieldtype": "Check",
-   "label": "Maintain Same Rate Throughout Sales Cycle"
-  },
-  {
-   "default": "0",
-   "fieldname": "editable_price_list_rate",
-   "fieldtype": "Check",
-   "label": "Allow User to Edit Price List Rate in Transactions"
+   "description": "Percentage you are allowed to order more against the Blanket Order Quantity. For example: If you have a Blanket Order of Quantity 100 units. and your Allowance is 10% then you are allowed to order 110 units.",
+   "fieldname": "over_order_allowance",
+   "fieldtype": "Float",
+   "label": "Over Order Allowance (%)"
   },
   {
    "default": "0",
@@ -131,81 +205,15 @@
   },
   {
    "default": "0",
-   "fieldname": "validate_selling_price",
-   "fieldtype": "Check",
-   "label": "Validate Selling Price for Item Against Purchase Rate or Valuation Rate"
-  },
-  {
-   "default": "0",
    "fieldname": "hide_tax_id",
    "fieldtype": "Check",
    "label": "Hide Customer's Tax ID from Sales Transactions"
   },
   {
-   "default": "Stop",
-   "depends_on": "maintain_same_sales_rate",
-   "fieldname": "maintain_same_rate_action",
-   "fieldtype": "Select",
-   "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
-   "mandatory_depends_on": "maintain_same_sales_rate",
-   "options": "Stop\nWarn"
-  },
-  {
-   "depends_on": "eval: doc.maintain_same_sales_rate && doc.maintain_same_rate_action == 'Stop'",
-   "fieldname": "role_to_override_stop_action",
-   "fieldtype": "Link",
-   "label": "Role Allowed to Override Stop Action",
-   "options": "Role"
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
-   "fieldname": "editable_bundle_item_rates",
+   "fieldname": "allow_sales_order_creation_for_expired_quotation",
    "fieldtype": "Check",
-   "label": "Calculate Product Bundle Price based on Child Items' Rates"
-  },
-  {
-   "fieldname": "customer_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Customer Defaults"
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "crm_settings_section",
-   "fieldtype": "Section Break",
-   "label": "CRM Settings"
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "item_price_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Item Price Settings"
-  },
-  {
-   "fieldname": "sales_transactions_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Transaction Settings"
-  },
-  {
-   "fieldname": "contract_naming_by",
-   "fieldtype": "Select",
-   "label": "Contract Naming By",
-   "options": "Party Name\nNaming Series"
-  },
-  {
-    "default": "0",
-    "fieldname": "allow_sales_order_creation_for_expired_quotation",
-    "fieldtype": "Check",
-    "label": "Allow Sales Order Creation For Expired Quotation"
+   "label": "Allow Sales Order Creation For Expired Quotation"
   }
  ],
  "icon": "fa fa-cog",
@@ -213,7 +221,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-02-04 12:37:53.380857",
+ "modified": "2023-03-22 13:09:38.513317",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

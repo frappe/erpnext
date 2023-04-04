@@ -21,6 +21,9 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+	validate_against_blanket_order,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
@@ -72,6 +75,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
+		validate_against_blanket_order(self)
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
@@ -640,7 +644,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
 
-		stock_entry.set_missing_values()
+		stock_entry.set_missing_values(raise_error_if_no_rate=False)
 		return stock_entry.as_dict()
 	else:
 		frappe.throw(_("No Items selected for transfer"))
