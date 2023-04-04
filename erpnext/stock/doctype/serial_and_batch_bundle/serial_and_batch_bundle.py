@@ -154,7 +154,10 @@ class SerialandBatchBundle(Document):
 				if sn_obj.batch_avg_rate.get(d.batch_no):
 					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
 
-				available_qty = flt(sn_obj.available_qty.get(d.batch_no)) + flt(d.qty)
+				available_qty = flt(sn_obj.available_qty.get(d.batch_no))
+				if self.docstatus == 1:
+					available_qty += flt(d.qty)
+
 				self.validate_negative_batch(d.batch_no, available_qty)
 
 			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
@@ -553,6 +556,38 @@ class SerialandBatchBundle(Document):
 	def on_submit(self):
 		self.validate_serial_nos_inventory()
 
+	def validate_serial_and_batch_inventory(self):
+		self.check_future_entries_exists()
+		self.validate_batch_inventory()
+
+	def validate_batch_inventory(self):
+		if not self.has_batch_no:
+			return
+
+		batches = [d.batch_no for d in self.entries if d.batch_no]
+		if not batches:
+			return
+
+		available_batches = get_auto_batch_nos(
+			frappe._dict(
+				{
+					"item_code": self.item_code,
+					"warehouse": self.warehouse,
+					"batch_no": batches,
+				}
+			)
+		)
+
+		if not available_batches:
+			return
+
+		available_batches = get_availabel_batches_qty(available_batches)
+		for batch_no in batches:
+			if batch_no not in available_batches or available_batches[batch_no] < 0:
+				self.throw_error_message(
+					f"Batch {bold(batch_no)} is not available in the selected warehouse {self.warehouse}"
+				)
+
 	def on_cancel(self):
 		self.validate_voucher_no_docstatus()
 
@@ -599,6 +634,7 @@ def get_serial_batch_ledgers(item_code, docstatus=None, voucher_no=None, name=No
 			"`tabSerial and Batch Entry`.`serial_no`",
 		],
 		filters=filters,
+		order_by="`tabSerial and Batch Entry`.`idx`",
 	)
 
 
@@ -762,6 +798,14 @@ def get_auto_data(**kwargs):
 		return get_auto_batch_nos(kwargs)
 
 
+def get_availabel_batches_qty(available_batches):
+	available_batches_qty = defaultdict(float)
+	for batch in available_batches:
+		available_batches_qty[batch.batch_no] += batch.qty
+
+	return available_batches_qty
+
+
 def get_available_serial_nos(kwargs):
 	fields = ["name as serial_no", "warehouse"]
 	if kwargs.has_batch_no:
@@ -778,6 +822,7 @@ def get_available_serial_nos(kwargs):
 	if kwargs.warehouse:
 		filters["warehouse"] = kwargs.warehouse
 
+	# Since SLEs are not present against POS invoices, need to ignore serial nos present in the POS invoice
 	ignore_serial_nos = get_reserved_serial_nos_for_pos(kwargs)
 
 	# To ignore serial nos in the same record for the draft state
@@ -792,6 +837,13 @@ def get_available_serial_nos(kwargs):
 	elif ignore_serial_nos:
 		filters["name"] = ("not in", ignore_serial_nos)
 
+	if kwargs.get("batches"):
+		batches = get_non_expired_batches(kwargs.get("batches"))
+		if not batches:
+			return []
+
+		filters["batch_no"] = ("in", batches)
+
 	return frappe.get_all(
 		"Serial No",
 		fields=fields,
@@ -799,6 +851,23 @@ def get_available_serial_nos(kwargs):
 		limit=cint(kwargs.qty) or 10000000,
 		order_by=order_by,
 	)
+
+
+def get_non_expired_batches(batches):
+	filters = {}
+	if isinstance(batches, list):
+		filters["name"] = ("in", batches)
+	else:
+		filters["name"] = batches
+
+	data = frappe.get_all(
+		"Batch",
+		filters=filters,
+		or_filters=[["expiry_date", ">=", today()], ["expiry_date", "is", "not set"]],
+		fields=["name"],
+	)
+
+	return [d.name for d in data] if data else []
 
 
 def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):

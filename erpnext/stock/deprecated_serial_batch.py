@@ -17,13 +17,9 @@ class DeprecatedSerialNoValuation:
 
 		stock_value_change = 0
 		if actual_qty < 0:
-			# In case of delivery/stock issue, get average purchase rate
-			# of serial nos of current entry
 			if not self.sle.is_cancelled:
 				outgoing_value = self.get_incoming_value_for_serial_nos(serial_nos)
 				stock_value_change = -1 * outgoing_value
-			else:
-				stock_value_change = actual_qty * self.sle.outgoing_rate
 
 		self.stock_value_change += stock_value_change
 

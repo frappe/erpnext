@@ -139,7 +139,7 @@
   {
    "collapsible": 1,
    "fieldname": "quantity_and_rate_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Quantity and Rate"
   },
   {
@@ -243,7 +243,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-24 13:39:17.843812",
+ "modified": "2023-04-03 16:22:30.767805",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

@@ -177,6 +177,11 @@ class SerialBatchBundle:
 			{"is_cancelled": 1, "voucher_no": ""},
 		)
 
+		if self.sle.serial_and_batch_bundle:
+			frappe.get_cached_doc(
+				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle
+			).validate_serial_and_batch_inventory()
+
 	def post_process(self):
 		if not self.sle.serial_and_batch_bundle:
 			return

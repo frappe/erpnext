@@ -29,10 +29,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			primary_action: () => this.update_ledgers()
 		});
 
-		if (this.item?.outward) {
-			this.prepare_for_auto_fetch();
-		}
-
 		this.dialog.show();
 	}
 
@@ -76,6 +72,13 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				fieldname: 'scan_batch_no',
 				label: __('Scan Batch No'),
 				options: 'Batch',
+				get_query: () => {
+					return {
+						filters: {
+							'item': this.item.item_code
+						}
+					};
+				},
 				onchange: () => this.update_serial_batch_no()
 			});
 		}
@@ -97,7 +100,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		if (this.item?.outward) {
-			fields = [...fields, ...this.get_filter_fields()];
+			fields = [...this.get_filter_fields(), ...fields];
 		}
 
 		fields.push({
@@ -126,6 +129,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				fieldname: 'qty',
 				default: this.item.qty || 0,
 				label: __('Qty to Fetch'),
+				onchange: () => this.get_auto_data()
 			},
 			{
 				fieldtype: 'Column Break',
@@ -135,16 +139,11 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				options: ['FIFO', 'LIFO', 'Expiry'],
 				default: 'FIFO',
 				fieldname: 'based_on',
-				label: __('Fetch Based On')
+				label: __('Fetch Based On'),
+				onchange: () => this.get_auto_data()
 			},
 			{
-				fieldtype: 'Column Break',
-			},
-			{
-				fieldtype: 'Button',
-				fieldname: 'get_auto_data',
-				label: __('Fetch {0}',
-					[this.item?.has_serial_no ? 'Serial Nos' : 'Batch Nos']),
+				fieldtype: 'Section Break',
 			},
 		]
 
@@ -177,6 +176,13 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					fieldname: 'batch_no',
 					label: __('Batch No'),
 					in_list_view: 1,
+					get_query: () => {
+						return {
+							filters: {
+								'item': this.item.item_code
+							}
+						};
+					},
 				}
 			]
 
@@ -202,17 +208,15 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		return fields;
 	}
 
-	prepare_for_auto_fetch() {
-		this.dialog.fields_dict.get_auto_data.$input.on('click', () => {
-			this.get_auto_data();
-		});
-	}
-
 	get_auto_data() {
 		const { qty, based_on } = this.dialog.get_values();
 
 		if (!qty) {
 			frappe.throw(__('Please enter Qty to Fetch'));
+		}
+
+		if (!based_on) {
+			based_on = 'FIFO';
 		}
 
 		frappe.call({
