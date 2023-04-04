@@ -12,21 +12,29 @@ class BankTransaction(StatusUpdater):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	def on_update(self):
 		self.auto_set_party()
 
 >>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
+=======
+>>>>>>> 33604550ce (chore: Perform automatch on submit)
 	def on_submit(self):
 		self.clear_linked_payment_entries()
 		self.set_status()
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
 			self.auto_set_party()
 
 >>>>>>> aea4315435 (chore: Make auto matching party configurable)
+=======
+		self.auto_set_party()
+
+>>>>>>> 33604550ce (chore: Perform automatch on submit)
 	_saving_flag = False
 
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting
@@ -40,6 +48,7 @@ class BankTransaction(StatusUpdater):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
 			self.update_automatch_bank_party_mapper()
@@ -47,6 +56,9 @@ class BankTransaction(StatusUpdater):
 >>>>>>> aea4315435 (chore: Make auto matching party configurable)
 =======
 		self.set_in_bank_party_mapper()
+=======
+		self.update_automatch_bank_party_mapper()
+>>>>>>> 33604550ce (chore: Perform automatch on submit)
 
 >>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 	def on_cancel(self):
@@ -213,8 +225,8 @@ class BankTransaction(StatusUpdater):
 			mapper_doc.insert()
 			self.bank_party_mapper = mapper_doc.name  # Link mapper to Bank Transaction
 
-	def set_in_bank_party_mapper(self):
-		"""Set in Bank Party Mapper if Party Type & Party are manually changed after submit."""
+	def update_automatch_bank_party_mapper(self):
+		"""Update Bank Party Mapper if Party Type & Party are manually changed after submit."""
 		doc_before_update = self.get_doc_before_save()
 		party_type_changed = self.party_type and (doc_before_update.party_type != self.party_type)
 		party_changed = self.party and (doc_before_update.party != self.party)
