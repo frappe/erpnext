@@ -55,6 +55,14 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 
 	allocate_advances_automatically: function(frm) {
+		frm.trigger('fetch_advances');
+	},
+
+	only_include_allocated_payments: function(frm) {
+		frm.trigger('fetch_advances');
+	},
+
+	fetch_advances: function(frm) {
 		if(frm.doc.allocate_advances_automatically) {
 			frappe.call({
 				doc: frm.doc,
