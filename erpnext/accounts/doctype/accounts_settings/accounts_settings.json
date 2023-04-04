@@ -39,11 +39,10 @@
   "column_break_12",
   "show_payment_schedule_in_print",
   "currency_exchange_section",
-  "column_break_fwco",
   "allow_stale",
-  "stale_days",
-  "section_break_rvrg",
+  "section_break_jpd0",
   "enable_payment_reconciliation_in_background",
+  "stale_days",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -390,19 +389,20 @@
    "default": "0",
    "fieldname": "enable_payment_reconciliation_in_background",
    "fieldtype": "Check",
-   "label": "Enable Payment Reconciliation in background"
+   "label": "Enable Payment Reconciliation in Background"
   },
   {
-   "fieldname": "column_break_fwco",
-   "fieldtype": "Column Break"
-  },
+   "fieldname": "section_break_jpd0",
+   "fieldtype": "Section Break",
+   "label": "Reconciliation in Background"
+  }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-03 10:10:33.962499",
+ "modified": "2023-04-04 19:25:35.046576",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
