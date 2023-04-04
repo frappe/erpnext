@@ -189,13 +189,13 @@ def invalidate_cache_for(doc, item_group=None):
 
 
 def get_item_group_defaults(item, company):
-	item = frappe.get_cached_doc("Item", item)
-	item_group = frappe.get_cached_doc("Item Group", item.item_group)
+	if item_group_name := frappe.get_cached_value("Item", item, "item_group"):
+		item_group = frappe.get_cached_doc("Item Group", item_group_name)
 
-	for d in item_group.item_group_defaults or []:
-		if d.company == company:
-			row = copy.deepcopy(d.as_dict())
-			row.pop("name")
-			return row
+		for d in item_group.item_group_defaults or []:
+			if d.company == company:
+				row = copy.deepcopy(d.as_dict())
+				row.pop("name")
+				return row
 
 	return frappe._dict()
