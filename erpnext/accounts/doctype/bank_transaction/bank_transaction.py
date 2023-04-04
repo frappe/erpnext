@@ -39,11 +39,16 @@ class BankTransaction(StatusUpdater):
 			self._saving_flag = False
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
 			self.update_automatch_bank_party_mapper()
 
 >>>>>>> aea4315435 (chore: Make auto matching party configurable)
+=======
+		self.set_in_bank_party_mapper()
+
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 	def on_cancel(self):
 		self.clear_linked_payment_entries(for_cancel=True)
 		self.set_status(update=True)
@@ -182,6 +187,7 @@ class BankTransaction(StatusUpdater):
 
 		if result:
 <<<<<<< HEAD
+<<<<<<< HEAD
 			party_type, party = result
 			frappe.db.set_value(
 				"Bank Transaction", self.name, field={"party_type": party_type, "party": party}
@@ -189,6 +195,35 @@ class BankTransaction(StatusUpdater):
 =======
 			party_type, party, mapper = result
 			to_update = {"party_type": party_type, "party": party}
+=======
+			self.party_type, self.party, mapper = result
+
+			if not mapper:
+				return
+
+			if mapper.get("mapper_name"):
+				# Transaction matched with a Bank party Mapper record
+				self.bank_party_mapper = mapper.get("mapper_name")  # Link mapper to Bank Transaction
+				return
+
+			mapper_doc = frappe.get_doc(
+				{"doctype": "Bank Party Mapper", "party_type": self.party_type, "party": self.party}
+			)
+			mapper_doc.update(mapper)
+			mapper_doc.insert()
+			self.bank_party_mapper = mapper_doc.name  # Link mapper to Bank Transaction
+
+	def set_in_bank_party_mapper(self):
+		"""Set in Bank Party Mapper if Party Type & Party are manually changed after submit."""
+		doc_before_update = self.get_doc_before_save()
+		party_type_changed = self.party_type and (doc_before_update.party_type != self.party_type)
+		party_changed = self.party and (doc_before_update.party != self.party)
+
+		if (party_type_changed or party_changed) and self.bank_party_mapper:
+			mapper_doc = frappe.get_doc("Bank Party Mapper", self.bank_party_mapper)
+			mapper_doc.update({"party_type": self.party_type, "party": self.party})
+			mapper_doc.save()
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 
 			if mapper and mapper.get("mapper_name"):
 				# Transaction matched with an existing Bank party Mapper record

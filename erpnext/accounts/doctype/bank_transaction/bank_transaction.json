@@ -40,8 +40,13 @@
   "column_break_3czf",
   "bank_party_name",
   "bank_party_account_number",
+<<<<<<< HEAD
   "bank_party_iban"
 >>>>>>> 752a92bd8b (chore: Remove Bank Party Mapper implementation)
+=======
+  "bank_party_iban",
+  "bank_party_mapper"
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
  ],
  "fields": [
   {
@@ -231,11 +236,23 @@
    "fieldname": "bank_party_account_number",
    "fieldtype": "Data",
    "label": "Party Account No. (Bank Statement)"
+<<<<<<< HEAD
 >>>>>>> 752a92bd8b (chore: Remove Bank Party Mapper implementation)
+=======
+  },
+  {
+   "fieldname": "bank_party_mapper",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Bank Party Mapper",
+   "options": "Bank Party Mapper",
+   "read_only": 1
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
   }
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
  "modified": "2022-05-29 18:36:50.475964",
@@ -245,6 +262,9 @@
 =======
  "modified": "2023-05-17 14:56:10.547480",
 >>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
+=======
+ "modified": "2023-04-04 15:47:20.620006",
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

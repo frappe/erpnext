@@ -77,9 +77,33 @@ class AutoMatchbyAccountIBAN:
 		return result
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	def match_account_in_bank_party_mapper(self) -> Union[Tuple, None]:
 		"""Check for a IBAN/Account No. match in Bank Party Mapper"""
+=======
+	def match_account_in_bank_party_mapper(self):
+		filter_field = (
+			"bank_party_account_number" if self.bank_party_account_number else "bank_party_iban"
+		)
+		result = frappe.db.get_value(
+			"Bank Party Mapper",
+			filters={filter_field: self.get(filter_field)},
+			fieldname=["party_type", "party", "name"],
+		)
+		if result:
+			party_type, party, mapper_name = result
+			return (party_type, party, {"mapper_name": mapper_name})
+
+		return result
+
+	def match_account_in_party(self):
+		# If not check if there is a match in Customer/Supplier/Employee
+		filter_field = "bank_account_no" if self.bank_party_account_number else "iban"
+		transaction_field = (
+			"bank_party_account_number" if self.bank_party_account_number else "bank_party_iban"
+		)
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 		result = None
 		or_filters = {}
 		if self.bank_party_account_number:
@@ -188,11 +212,15 @@ class AutoMatchbyPartyNameDescription:
 =======
 		# Match  by Customer, Supplier or Employee Name
 		# search bank party mapper by party
+<<<<<<< HEAD
 >>>>>>> d7bc192804 (fix: Match by both Account No and IBAN & other cleanups)
+=======
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 		# fuzzy search by customer/supplier & employee
 		if not (self.bank_party_name or self.description):
 			return None
 
+<<<<<<< HEAD
 		result = self.match_party_name_desc_in_party()
 		return result
 
@@ -217,6 +245,21 @@ class AutoMatchbyPartyNameDescription:
 		if self.description:
 			or_filters.append({"bank_party_name_desc": self.description})
 >>>>>>> 37c1331aba (fix: Don't set description as key in Mapper doc if matched by description)
+=======
+		result = self.match_party_name_in_bank_party_mapper()
+
+		if not result:
+			result = self.match_party_name_desc_in_party()
+
+		return result
+
+	def match_party_name_in_bank_party_mapper(self):
+		"""Check if match exists for party name in Bank Party Mapper"""
+		result = None
+
+		if not self.bank_party_name:
+			return
+>>>>>>> 27ce789023 (feat: Manually Update/Correct Party in Bank Transaction)
 
 		mapper_res = frappe.get_all(
 			"Bank Party Mapper",
@@ -288,7 +331,7 @@ class AutoMatchbyPartyNameDescription:
 			party_name, score, index = result
 			if score > 75:
 				# Dont set description as a key in Bank Party Mapper due to its volatility
-				mapper = {"bank_party_name_desc": self.get(field)} if field == "bank_party_name" else None
+				mapper = {"bank_party_name": self.get(field)} if field == "bank_party_name" else None
 				return (
 					party,
 					party_name,
