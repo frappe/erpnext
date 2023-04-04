@@ -191,17 +191,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
 
-<<<<<<< HEAD
-					if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-						cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __('Create'));
-=======
 					if(flt(doc.per_billed) < 100 && doc.status != "Delivered") {
 						this.frm.add_custom_button(
 							__('Payment'),
 							() => this.make_payment_entry(),
 							__('Create')
 						);
->>>>>>> d6d0163514 (fix: Provision to apply early payment discount if payment is recorded late)
 					}
 
 					if(flt(doc.per_billed)==0) {

@@ -1741,21 +1741,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	)
 
 
-<<<<<<< HEAD
 def get_amounts_based_on_reference_doctype(
 	reference_doctype, ref_doc, party_account_currency, company_currency, reference_name
-=======
-@frappe.whitelist()
-def get_payment_entry(
-	dt,
-	dn,
-	party_amount=None,
-	bank_account=None,
-	bank_amount=None,
-	party_type=None,
-	payment_type=None,
-	reference_date=None,
->>>>>>> d6d0163514 (fix: Provision to apply early payment discount if payment is recorded late)
 ):
 	total_amount = outstanding_amount = exchange_rate = None
 	if reference_doctype == "Fees":
@@ -1858,7 +1845,14 @@ def get_bill_no_and_update_amounts(
 
 
 @frappe.whitelist()
-def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
+def get_payment_entry(
+	dt,
+	dn,
+	party_amount=None,
+	bank_account=None,
+	bank_amount=None,
+	reference_date=None,
+):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:

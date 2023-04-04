@@ -5,10 +5,7 @@ import unittest
 
 import frappe
 from frappe import qb
-<<<<<<< HEAD
-=======
-from frappe.tests.utils import FrappeTestCase, change_settings
->>>>>>> 9abf0ef615 (test: Multi currency SI with multi-currency accounting and single currency accounting + Early payment discount)
+from frappe.tests.utils import change_settings
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (

@@ -1987,9 +1987,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-<<<<<<< HEAD
-	make_payment_entry: function() {
-=======
 	make_payment_entry() {
 		let via_journal_entry = this.frm.doc.__onload && this.frm.doc.__onload.make_payment_via_journal_entry;
 		if(this.has_discount_in_schedule() && !via_journal_entry) {
@@ -1998,12 +1995,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		} else {
 			this.make_mapped_payment_entry();
 		}
-	}
+	},
 
 	make_mapped_payment_entry(args) {
 		var me = this;
 		args = args || { "dt": this.frm.doc.doctype, "dn": this.frm.doc.name };
->>>>>>> d6d0163514 (fix: Provision to apply early payment discount if payment is recorded late)
 		return frappe.call({
 			method: me.get_method_for_payment(),
 			args: args,
@@ -2014,9 +2010,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-<<<<<<< HEAD
-	make_quality_inspection: function () {
-=======
 	prompt_user_for_reference_date(){
 		var me = this;
 		frappe.prompt({
@@ -2035,7 +2028,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		__("Reference Date for Early Payment Discount"),
 		__("Continue")
 		);
-	}
+	},
 
 	has_discount_in_schedule() {
 		let is_eligible = in_list(
@@ -2047,10 +2040,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		let has_discount = this.frm.doc.payment_schedule.some(row => row.discount_date);
 		return has_discount;
-	}
+	},
 
 	make_quality_inspection() {
->>>>>>> d6d0163514 (fix: Provision to apply early payment discount if payment is recorded late)
 		let data = [];
 		const fields = [
 			{

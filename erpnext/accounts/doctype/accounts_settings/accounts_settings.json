@@ -26,6 +26,7 @@
   "determine_address_tax_category_from",
   "column_break_19",
   "add_taxes_from_item_tax_template",
+  "book_tax_discount_loss",
   "period_closing_settings_section",
   "acc_frozen_upto",
   "frozen_accounts_modifier",
@@ -37,14 +38,6 @@
   "automatically_process_deferred_accounting_entry",
   "book_deferred_entries_via_journal_entry",
   "submit_journal_entries",
-<<<<<<< HEAD
-=======
-  "tax_settings_section",
-  "determine_address_tax_category_from",
-  "column_break_19",
-  "add_taxes_from_item_tax_template",
-  "book_tax_discount_loss",
->>>>>>> 216a46bd66 (feat: Make Tax loss booking optional)
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -287,112 +280,26 @@
    "label": "Enable Common Party Accounting"
   },
   {
-<<<<<<< HEAD
     "default": "0",
     "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
     "fieldname": "allow_multi_currency_invoices_against_single_party_account",
     "fieldtype": "Check",
     "label": "Allow multi-currency invoices against single party account"
+   },
+   {
+    "default": "0",
+    "description": "Split Early Payment Discount Loss into Income and Tax Loss",
+    "fieldname": "book_tax_discount_loss",
+    "fieldtype": "Check",
+    "label": "Book Tax Loss on Early Payment Discount"
    }
-=======
-   "fieldname": "enable_features_section",
-   "fieldtype": "Section Break",
-   "label": "Invoice Cancellation"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "asset_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Asset Settings"
-  },
-  {
-   "fieldname": "invoicing_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Credit Limits"
-  },
-  {
-   "fieldname": "assets_tab",
-   "fieldtype": "Tab Break",
-   "label": "Assets"
-  },
-  {
-   "fieldname": "closing_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Accounts Closing"
-  },
-  {
-   "fieldname": "pos_setting_section",
-   "fieldtype": "Section Break",
-   "label": "POS Setting"
-  },
-  {
-   "fieldname": "invoice_and_billing_tab",
-   "fieldtype": "Tab Break",
-   "label": "Invoice and Billing"
-  },
-  {
-   "fieldname": "invoicing_features_section",
-   "fieldtype": "Section Break",
-   "label": "Invoicing Features"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "pos_tab",
-   "fieldtype": "Tab Break",
-   "label": "POS"
-  },
-  {
-   "fieldname": "report_setting_section",
-   "fieldtype": "Section Break",
-   "label": "Report Setting"
-  },
-  {
-   "default": "0",
-   "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
-   "fieldname": "allow_multi_currency_invoices_against_single_party_account",
-   "fieldtype": "Check",
-   "label": "Allow multi-currency invoices against single party account "
-  },
-  {
-   "fieldname": "tab_break_dpet",
-   "fieldtype": "Tab Break",
-   "label": "Chart Of Accounts"
-  },
-  {
-   "default": "1",
-   "fieldname": "show_balance_in_coa",
-   "fieldtype": "Check",
-   "label": "Show Balances in Chart Of Accounts"
-  },
-  {
-   "default": "0",
-   "description": "Split Early Payment Discount Loss into Income and Tax Loss",
-   "fieldname": "book_tax_discount_loss",
-   "fieldtype": "Check",
-   "label": "Book Tax Loss on Early Payment Discount"
-  }
->>>>>>> 216a46bd66 (feat: Make Tax loss booking optional)
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-07-11 13:37:50.605141",
-=======
  "modified": "2023-03-28 09:50:20.375233",
->>>>>>> 216a46bd66 (feat: Make Tax loss booking optional)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
