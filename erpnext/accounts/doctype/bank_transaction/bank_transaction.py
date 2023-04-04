@@ -23,9 +23,6 @@ class BankTransaction(StatusUpdater):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
 	def on_update(self):
-		if self.party_type and self.party:
-			return
-
 		self.auto_set_party()
 
 	def on_submit(self):
@@ -166,6 +163,9 @@ class BankTransaction(StatusUpdater):
 	def auto_set_party(self):
 		# TODO: check if enabled
 		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
+
+		if self.party_type and self.party:
+			return
 
 		result = AutoMatchParty(
 			bank_party_account_number=self.bank_party_account_number,

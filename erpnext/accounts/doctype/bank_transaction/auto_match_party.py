@@ -107,10 +107,10 @@ class AutoMatchbyPartyDescription:
 		or_filters = []
 
 		if self.bank_party_name:
-			or_filters.append(["bank_party_name_desc", self.bank_party_name])
+			or_filters.append({"bank_party_name_desc": self.bank_party_name})
 
 		if self.description:
-			or_filters.append(["bank_party_name_desc", self.description])
+			or_filters.append({"bank_party_name_desc": self.description})
 
 		mapper_res = frappe.get_all(
 			"Bank Party Mapper",
@@ -156,7 +156,13 @@ class AutoMatchbyPartyDescription:
 		if result:
 			party_name, score, index = result
 			if score > 75:
-				return (party, party_name, {"bank_party_name_desc": self.get(field)})
+				# Dont set description as a key in Bank Party Mapper due to its volatility
+				mapper = {"bank_party_name_desc": self.get(field)} if field == "bank_party_name" else None
+				return (
+					party,
+					party_name,
+					mapper,
+				)
 			else:
 				return None
 
