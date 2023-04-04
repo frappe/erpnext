@@ -22,12 +22,11 @@ class BankTransaction(StatusUpdater):
 	def after_insert(self):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
-	def on_update(self):
-		self.auto_set_party()
-
 	def on_submit(self):
 		self.clear_linked_payment_entries()
 		self.set_status()
+
+		self.auto_set_party()
 
 	_saving_flag = False
 
@@ -40,7 +39,7 @@ class BankTransaction(StatusUpdater):
 			self.update_allocations()
 			self._saving_flag = False
 
-		self.set_in_bank_party_mapper()
+		self.update_automatch_bank_party_mapper()
 
 	def on_cancel(self):
 		self.clear_linked_payment_entries(for_cancel=True)
@@ -195,8 +194,8 @@ class BankTransaction(StatusUpdater):
 			mapper_doc.insert()
 			self.bank_party_mapper = mapper_doc.name  # Link mapper to Bank Transaction
 
-	def set_in_bank_party_mapper(self):
-		"""Set in Bank Party Mapper if Party Type & Party are manually changed after submit."""
+	def update_automatch_bank_party_mapper(self):
+		"""Update Bank Party Mapper if Party Type & Party are manually changed after submit."""
 		doc_before_update = self.get_doc_before_save()
 		party_type_changed = self.party_type and (doc_before_update.party_type != self.party_type)
 		party_changed = self.party and (doc_before_update.party != self.party)
