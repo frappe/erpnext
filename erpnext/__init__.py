@@ -120,12 +120,14 @@ def get_region(company=None):
 
 	You can also set global company flag in `frappe.flags.company`
 	"""
-	if company or frappe.flags.company:
-		return frappe.get_cached_value("Company", company or frappe.flags.company, "country")
-	elif frappe.flags.country:
-		return frappe.flags.country
-	else:
-		return frappe.get_system_settings("country")
+
+	if not company:
+		company = frappe.local.flags.company
+
+	if company:
+		return frappe.get_cached_value("Company", company, "country")
+
+	return frappe.flags.country or frappe.get_system_settings("country")
 
 
 def allow_regional(fn):
