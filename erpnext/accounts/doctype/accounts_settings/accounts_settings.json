@@ -59,7 +59,9 @@
   "frozen_accounts_modifier",
   "report_settings_sb",
   "tab_break_dpet",
-  "show_balance_in_coa"
+  "show_balance_in_coa",
+  "banking_tab",
+  "enable_party_matching"
  ],
  "fields": [
   {
@@ -368,6 +370,18 @@
    "fieldname": "book_tax_discount_loss",
    "fieldtype": "Check",
    "label": "Book Tax Loss on Early Payment Discount"
+  },
+  {
+   "fieldname": "banking_tab",
+   "fieldtype": "Tab Break",
+   "label": "Banking"
+  },
+  {
+   "default": "0",
+   "description": "Auto match and set the Party in Bank Transactions",
+   "fieldname": "enable_party_matching",
+   "fieldtype": "Check",
+   "label": "Enable Automatic Party Matching"
   }
  ],
  "icon": "icon-cog",
@@ -375,7 +389,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-28 09:50:20.375233",
+ "modified": "2023-04-04 16:20:41.330039",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

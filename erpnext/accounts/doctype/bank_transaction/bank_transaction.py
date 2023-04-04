@@ -8,12 +8,6 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 
 class BankTransaction(StatusUpdater):
-	# TODO
-	# On submit/update after submit
-	# 	- Create/Update a Bank Party Map record
-	# 	- User can edit after submit.
-	# 	- If changes in party/party name after submit, edit bank party map (which should edit all transactions with same account no/iban/bank party name)
-
 	def after_insert(self):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
@@ -21,7 +15,8 @@ class BankTransaction(StatusUpdater):
 		self.clear_linked_payment_entries()
 		self.set_status()
 
-		self.auto_set_party()
+		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
+			self.auto_set_party()
 
 	_saving_flag = False
 
@@ -34,7 +29,8 @@ class BankTransaction(StatusUpdater):
 			self.update_allocations()
 			self._saving_flag = False
 
-		self.update_automatch_bank_party_mapper()
+		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
+			self.update_automatch_bank_party_mapper()
 
 	def on_cancel(self):
 		self.clear_linked_payment_entries(for_cancel=True)
@@ -157,7 +153,6 @@ class BankTransaction(StatusUpdater):
 		)
 
 	def auto_set_party(self):
-		# TODO: check if enabled
 		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
 
 		if self.party_type and self.party:
