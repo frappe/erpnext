@@ -68,9 +68,13 @@
   "tab_break_dpet",
   "show_balance_in_coa",
   "banking_tab",
+<<<<<<< HEAD
   "enable_party_matching",
   "enable_fuzzy_matching"
 >>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
+=======
+  "enable_party_matching"
+>>>>>>> aea4315435 (chore: Make auto matching party configurable)
  ],
  "fields": [
   {
@@ -366,6 +370,7 @@
    "label": "Book Tax Loss on Early Payment Discount"
   },
   {
+<<<<<<< HEAD
    "fieldname": "journals_section",
    "fieldtype": "Section Break",
    "label": "Journals"
@@ -405,6 +410,18 @@
    "fieldtype": "Check",
    "label": "Enable Fuzzy Matching"
 >>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
+=======
+   "fieldname": "banking_tab",
+   "fieldtype": "Tab Break",
+   "label": "Banking"
+  },
+  {
+   "default": "0",
+   "description": "Auto match and set the Party in Bank Transactions",
+   "fieldname": "enable_party_matching",
+   "fieldtype": "Check",
+   "label": "Enable Automatic Party Matching"
+>>>>>>> aea4315435 (chore: Make auto matching party configurable)
   }
  ],
  "icon": "icon-cog",
@@ -413,10 +430,14 @@
  "issingle": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2023-06-13 18:47:46.430291",
 =======
  "modified": "2023-05-17 12:20:04.107641",
 >>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
+=======
+ "modified": "2023-04-04 16:20:41.330039",
+>>>>>>> aea4315435 (chore: Make auto matching party configurable)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

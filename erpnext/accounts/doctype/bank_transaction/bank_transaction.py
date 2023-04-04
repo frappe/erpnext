@@ -15,6 +15,12 @@ class BankTransaction(StatusUpdater):
 		self.clear_linked_payment_entries()
 		self.set_status()
 
+<<<<<<< HEAD
+=======
+		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
+			self.auto_set_party()
+
+>>>>>>> aea4315435 (chore: Make auto matching party configurable)
 	_saving_flag = False
 
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting
@@ -26,6 +32,12 @@ class BankTransaction(StatusUpdater):
 			self.update_allocations()
 			self._saving_flag = False
 
+<<<<<<< HEAD
+=======
+		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
+			self.update_automatch_bank_party_mapper()
+
+>>>>>>> aea4315435 (chore: Make auto matching party configurable)
 	def on_cancel(self):
 		self.clear_linked_payment_entries(for_cancel=True)
 		self.set_status(update=True)
