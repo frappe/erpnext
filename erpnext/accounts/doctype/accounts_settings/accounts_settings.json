@@ -31,6 +31,7 @@
   "determine_address_tax_category_from",
   "column_break_19",
   "add_taxes_from_item_tax_template",
+  "book_tax_discount_loss",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -347,6 +348,13 @@
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
    "fieldtype": "Check",
    "label": "Allow multi-currency invoices against single party account "
+  },
+  {
+   "default": "0",
+   "description": "Split Early Payment Discount Loss into Income and Tax Loss",
+   "fieldname": "book_tax_discount_loss",
+   "fieldtype": "Check",
+   "label": "Book Tax Loss on Early Payment Discount"
   }
  ],
  "icon": "icon-cog",
@@ -354,7 +362,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-11-27 21:49:52.538655",
+ "modified": "2023-03-28 09:50:20.375233",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
