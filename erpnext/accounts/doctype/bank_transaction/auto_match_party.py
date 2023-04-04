@@ -49,11 +49,11 @@ class AutoMatchbyAccountIBAN:
 		result = frappe.db.get_value(
 			"Bank Party Mapper",
 			filters={filter_field: self.get(filter_field)},
-			fieldname=["party_type", "party"],
+			fieldname=["party_type", "party", "name"],
 		)
 		if result:
-			party_type, party = result
-			return (party_type, party, None)
+			party_type, party, mapper_name = result
+			return (party_type, party, {"mapper_name": mapper_name})
 
 		return result
 
@@ -89,33 +89,29 @@ class AutoMatchbyPartyDescription:
 
 	def match(self):
 		# Match  by Customer, Supplier or Employee Name
-		# search bank party mapper by party and then description
+		# search bank party mapper by party
 		# fuzzy search by customer/supplier & employee
 		if not (self.bank_party_name or self.description):
 			return None
 
-		result = self.match_party_name_desc_in_bank_party_mapper()
+		result = self.match_party_name_in_bank_party_mapper()
 
 		if not result:
 			result = self.match_party_name_desc_in_party()
 
 		return result
 
-	def match_party_name_desc_in_bank_party_mapper(self):
-		"""Check if match exists for party name or description in Bank Party Mapper"""
+	def match_party_name_in_bank_party_mapper(self):
+		"""Check if match exists for party name in Bank Party Mapper"""
 		result = None
-		or_filters = []
 
-		if self.bank_party_name:
-			or_filters.append({"bank_party_name_desc": self.bank_party_name})
-
-		if self.description:
-			or_filters.append({"bank_party_name_desc": self.description})
+		if not self.bank_party_name:
+			return
 
 		mapper_res = frappe.get_all(
 			"Bank Party Mapper",
-			or_filters=or_filters,
-			fields=["party_type", "party"],
+			filters={"bank_party_name": self.bank_party_name},
+			fields=["party_type", "party", "name"],
 			limit_page_length=1,
 		)
 		if mapper_res:
@@ -123,7 +119,7 @@ class AutoMatchbyPartyDescription:
 			result = (
 				mapper_res["party_type"],
 				mapper_res["party"],
-				None,
+				{"mapper_name": mapper_res["name"]},
 			)
 
 		return result
@@ -157,7 +153,7 @@ class AutoMatchbyPartyDescription:
 			party_name, score, index = result
 			if score > 75:
 				# Dont set description as a key in Bank Party Mapper due to its volatility
-				mapper = {"bank_party_name_desc": self.get(field)} if field == "bank_party_name" else None
+				mapper = {"bank_party_name": self.get(field)} if field == "bank_party_name" else None
 				return (
 					party,
 					party_name,

@@ -9,7 +9,7 @@
   "party_type",
   "party",
   "column_break_wbna",
-  "bank_party_name_desc",
+  "bank_party_name",
   "bank_party_account_number",
   "bank_party_iban"
  ],
@@ -47,14 +47,14 @@
    "options": "party_type"
   },
   {
-   "fieldname": "bank_party_name_desc",
-   "fieldtype": "Small Text",
-   "label": "Party Name/Desc (Bank Statement)"
+   "fieldname": "bank_party_name",
+   "fieldtype": "Data",
+   "label": "Party Name (Bank Statement)"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-03 10:11:31.384383",
+ "modified": "2023-04-04 14:27:23.450456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Party Mapper",
