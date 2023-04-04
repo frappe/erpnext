@@ -2128,9 +2128,11 @@ def apply_early_payment_discount(
 	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
 	has_payment_schedule = hasattr(doc, "payment_schedule") and doc.payment_schedule
-	is_multi_currency = party_account_currency != doc.company_currency
 
 	if doc.doctype in eligible_for_payments and has_payment_schedule:
+		# Non eligible documents may not have `company_currency` field
+		is_multi_currency = party_account_currency != doc.company_currency
+
 		for term in doc.payment_schedule:
 			if not term.discounted_amount and term.discount and reference_date <= term.discount_date:
 
