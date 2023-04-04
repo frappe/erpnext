@@ -873,6 +873,9 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 				| (
 					(Ledger.is_carry_forward == 1)
 					& (Ledger.to_date.between(LeaveAllocation.from_date, LeaveAllocation.to_date))
+					# only consider cf leaves from current allocation
+					& (LeaveAllocation.from_date <= date)
+					& (date <= LeaveAllocation.to_date)
 				)
 			)
 		)
