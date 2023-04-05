@@ -18,7 +18,8 @@ def get_batch_from_bundle(bundle):
 
 
 def get_serial_nos_from_bundle(bundle):
-	return sorted(get_serial_nos(bundle))
+	serial_nos = get_serial_nos(bundle)
+	return sorted(serial_nos) if serial_nos else []
 
 
 def make_serial_batch_bundle(kwargs):

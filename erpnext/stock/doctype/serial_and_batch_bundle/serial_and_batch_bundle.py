@@ -94,6 +94,9 @@ class SerialandBatchBundle(Document):
 		if self.returned_against and self.docstatus == 1:
 			kwargs["ignore_voucher_detail_no"] = self.voucher_detail_no
 
+		if self.docstatus == 1:
+			kwargs["voucher_no"] = self.voucher_no
+
 		available_serial_nos = get_available_serial_nos(kwargs)
 
 		for data in available_serial_nos:
@@ -208,10 +211,20 @@ class SerialandBatchBundle(Document):
 			valuation_field = "rate"
 
 		rate = row.get(valuation_field) if row else 0.0
-		precision = frappe.get_precision(self.child_table, valuation_field) or 2
+		child_table = self.child_table
+
+		if self.voucher_type == "Subcontracting Receipt" and self.voucher_detail_no:
+			if frappe.db.exists("Subcontracting Receipt Supplied Item", self.voucher_detail_no):
+				valuation_field = "rate"
+				child_table = "Subcontracting Receipt Supplied Item"
+			else:
+				valuation_field = "rm_supp_cost"
+				child_table = "Subcontracting Receipt Item"
+
+		precision = frappe.get_precision(child_table, valuation_field) or 2
 
 		if not rate and self.voucher_detail_no and self.voucher_no:
-			rate = frappe.db.get_value(self.child_table, self.voucher_detail_no, valuation_field)
+			rate = frappe.db.get_value(child_table, self.voucher_detail_no, valuation_field)
 
 		for d in self.entries:
 			if not rate or (
@@ -528,6 +541,13 @@ class SerialandBatchBundle(Document):
 			fields = ["name", "rejected_serial_and_batch_bundle", "serial_and_batch_bundle"]
 			or_filters["rejected_serial_and_batch_bundle"] = self.name
 
+		if (
+			self.voucher_type == "Subcontracting Receipt"
+			and self.voucher_detail_no
+			and not frappe.db.exists("Subcontracting Receipt Item", self.voucher_detail_no)
+		):
+			self.voucher_type = "Subcontracting Receipt Supplied"
+
 		vouchers = frappe.get_all(
 			self.child_table,
 			fields=fields,
@@ -833,7 +853,12 @@ def get_available_serial_nos(kwargs):
 		if kwargs.get("posting_time") is None:
 			kwargs.posting_time = nowtime()
 
-		filters["name"] = ("in", get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos))
+		time_based_serial_nos = get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos)
+
+		if not time_based_serial_nos:
+			return []
+
+		filters["name"] = ("in", time_based_serial_nos)
 	elif ignore_serial_nos:
 		filters["name"] = ("not in", ignore_serial_nos)
 
@@ -1130,6 +1155,7 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> List[frappe._dict]:
 			& (bundle_table.is_cancelled == 0)
 			& (bundle_table.type_of_transaction.isin(["Inward", "Outward"]))
 		)
+		.orderby(bundle_table.posting_date, bundle_table.posting_time)
 	)
 
 	for key, val in kwargs.items():
@@ -1183,6 +1209,9 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			query = query.where(stock_ledger_entry[field].isin(kwargs.get(field)))
 		else:
 			query = query.where(stock_ledger_entry[field] == kwargs.get(field))
+
+	if kwargs.voucher_no:
+		query = query.where(stock_ledger_entry.voucher_no != kwargs.voucher_no)
 
 	return query.run(as_dict=True)
 

@@ -88,6 +88,11 @@ class SubcontractingReceipt(SubcontractingController):
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.get_current_stock()
 
+	def on_update(self):
+		for table_field in ["items", "supplied_items"]:
+			if self.get(table_field):
+				self.set_serial_and_batch_bundle(table_field)
+
 	def on_submit(self):
 		self.validate_available_qty_for_consumption()
 		self.update_status_updater_args()

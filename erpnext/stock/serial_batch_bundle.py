@@ -261,7 +261,10 @@ class SerialBatchBundle:
 
 
 def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
-	filters = {"parent": serial_and_batch_bundle}
+	if not serial_and_batch_bundle:
+		return []
+
+	filters = {"parent": serial_and_batch_bundle, "serial_no": ("is", "set")}
 	if isinstance(serial_and_batch_bundle, list):
 		filters = {"parent": ("in", serial_and_batch_bundle)}
 
@@ -269,8 +272,14 @@ def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 		filters["serial_no"] = ("in", serial_nos)
 
 	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters)
+	if not entries:
+		return []
 
-	return [d.serial_no for d in entries]
+	return [d.serial_no for d in entries if d.serial_no]
+
+
+def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
+	return get_serial_nos(serial_and_batch_bundle, serial_nos=serial_nos)
 
 
 class SerialNoValuation(DeprecatedSerialNoValuation):
@@ -411,6 +420,8 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			)
 		else:
 			entries = self.get_batch_no_ledgers()
+			if frappe.flags.add_breakpoint:
+				breakpoint()
 
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
@@ -534,12 +545,18 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 
 def get_batch_nos(serial_and_batch_bundle):
+	if not serial_and_batch_bundle:
+		return frappe._dict({})
+
 	entries = frappe.get_all(
 		"Serial and Batch Entry",
 		fields=["batch_no", "qty", "name"],
-		filters={"parent": serial_and_batch_bundle},
+		filters={"parent": serial_and_batch_bundle, "batch_no": ("is", "set")},
 		order_by="idx",
 	)
+
+	if not entries:
+		return frappe._dict({})
 
 	return {d.batch_no: d for d in entries}
 
@@ -689,6 +706,7 @@ class SerialBatchCreation:
 			self.set_auto_serial_batch_entries_for_outward()
 		elif self.type_of_transaction == "Inward":
 			self.set_auto_serial_batch_entries_for_inward()
+			self.add_serial_nos_for_batch_item()
 
 		self.set_serial_batch_entries(doc)
 		if not doc.get("entries"):
@@ -701,6 +719,17 @@ class SerialBatchCreation:
 			doc.submit()
 
 		return doc
+
+	def add_serial_nos_for_batch_item(self):
+		if not (self.has_serial_no and self.has_batch_no):
+			return
+
+		if not self.get("serial_nos") and self.get("batches"):
+			batches = list(self.get("batches").keys())
+			if len(batches) == 1:
+				self.batch_no = batches[0]
+				self.serial_nos = self.get_auto_created_serial_nos()
+				print(self.serial_nos)
 
 	def update_serial_and_batch_entries(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
@@ -768,7 +797,7 @@ class SerialBatchCreation:
 					},
 				)
 
-		if self.get("batches"):
+		elif self.get("batches"):
 			for batch_no, batch_qty in self.batches.items():
 				doc.append(
 					"entries",

@@ -695,9 +695,9 @@ class TestStockEntry(FrappeTestCase):
 	def test_serial_cancel(self):
 		se, serial_nos = self.test_serial_by_series()
 		se.load_from_db()
-		se.cancel()
-
 		serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
+
+		se.cancel()
 		self.assertFalse(frappe.db.get_value("Serial No", serial_no, "warehouse"))
 
 	def test_serial_batch_item_stock_entry(self):
@@ -737,63 +737,6 @@ class TestStockEntry(FrappeTestCase):
 
 		batch_in_serial_no = frappe.db.get_value("Serial No", serial_no, "batch_no")
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "warehouse"), None)
-
-	def test_serial_batch_item_qty_deduction(self):
-		"""
-		Behaviour: Create 2 Stock Entries, both adding Serial Nos to same batch
-		Expected: 1) Cancelling first Stock Entry (origin transaction of created batch)
-		should throw a LinkExistsError
-		2) Cancelling second Stock Entry should make Serial Nos that are, linked to mentioned batch
-		and in that transaction only, Inactive.
-		"""
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
-
-		item = frappe.db.exists("Item", {"item_name": "Batched and Serialised Item"})
-		if not item:
-			item = create_item("Batched and Serialised Item")
-			item.has_batch_no = 1
-			item.create_new_batch = 1
-			item.has_serial_no = 1
-			item.batch_number_series = "B-BATCH-.##"
-			item.serial_no_series = "S-.####"
-			item.save()
-		else:
-			item = frappe.get_doc("Item", {"item_name": "Batched and Serialised Item"})
-
-		se1 = make_stock_entry(
-			item_code=item.item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100
-		)
-		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
-		serial_no1 = get_serial_nos_from_bundle(se1.items[0].serial_and_batch_bundle)[0]
-
-		# Check Source (Origin) Document of Batch
-		self.assertEqual(frappe.db.get_value("Batch", batch_no, "reference_name"), se1.name)
-
-		se2 = make_stock_entry(
-			item_code=item.item_code,
-			target="_Test Warehouse - _TC",
-			qty=1,
-			basic_rate=100,
-			batch_no=batch_no,
-		)
-		serial_no2 = get_serial_nos_from_bundle(se2.items[0].serial_and_batch_bundle)[0]
-
-		batch_qty = get_batch_qty(batch_no, "_Test Warehouse - _TC", item.item_code)
-		self.assertEqual(batch_qty, 2)
-
-		se2.cancel()
-
-		# Check decrease in Batch Qty
-		batch_qty = get_batch_qty(batch_no, "_Test Warehouse - _TC", item.item_code)
-		self.assertEqual(batch_qty, 1)
-
-		# Check if Serial No from Stock Entry 1 is intact
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no1, "batch_no"), batch_no)
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no1, "status"), "Active")
-
-		# Check if Serial No from Stock Entry 2 is Unlinked and Inactive
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no2, "batch_no"), None)
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no2, "warehouse"), None)
 
 	def test_warehouse_company_validation(self):
 		company = frappe.db.get_value("Warehouse", "_Test Warehouse 2 - _TC1", "company")

@@ -370,6 +370,7 @@ class PickList(Document):
 					pi_item.item_code,
 					pi_item.warehouse,
 					pi_item.batch_no,
+					pi_item.serial_and_batch_bundle,
 					Sum(Case().when(pi_item.picked_qty > 0, pi_item.picked_qty).else_(pi_item.stock_qty)).as_(
 						"picked_qty"
 					),
@@ -592,7 +593,7 @@ def get_available_item_locations_for_serialized_item(
 		frappe.qb.from_(sn)
 		.select(sn.name, sn.warehouse)
 		.where((sn.item_code == item_code) & (sn.company == company))
-		.orderby(sn.purchase_date)
+		.orderby(sn.creation)
 		.limit(cint(required_qty + total_picked_qty))
 	)
 

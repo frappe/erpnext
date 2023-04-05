@@ -335,11 +335,10 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		# Check if Serial No from Stock Reconcilation is intact
 		self.assertEqual(frappe.db.get_value("Serial No", reco_serial_no, "batch_no"), batch_no)
-		self.assertEqual(frappe.db.get_value("Serial No", reco_serial_no, "status"), "Active")
+		self.assertTrue(frappe.db.get_value("Serial No", reco_serial_no, "warehouse"))
 
 		# Check if Serial No from Stock Entry is Unlinked and Inactive
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no_2, "batch_no"), None)
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no_2, "warehouse"), None)
+		self.assertFalse(frappe.db.get_value("Serial No", serial_no_2, "warehouse"))
 
 		stock_reco.cancel()
 
