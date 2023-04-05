@@ -120,6 +120,7 @@
   "account_for_change_amount",
   "advances_section",
   "allocate_advances_automatically",
+  "only_include_allocated_payments",
   "get_advances",
   "advances",
   "write_off_section",
@@ -2126,6 +2127,13 @@
    "label": "Repost Required",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "allocate_advances_automatically",
+   "description": "Advance payments allocated against orders will only be fetched",
+   "fieldname": "only_include_allocated_payments",
+   "fieldtype": "Check",
+   "label": "Only Include Allocated Payments"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2138,7 +2146,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-03-13 11:43:15.883055",
+ "modified": "2023-04-03 22:55:14.206473",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
