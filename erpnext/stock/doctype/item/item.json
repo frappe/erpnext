@@ -1164,7 +1164,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-28 05:27:25.455371",
+ "modified": "2023-04-04 10:16:58.820724",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1227,7 +1227,7 @@
    "share": 1
   }
  ],
- "search_fields": "item_name,description,item_group,customer_code",
+ "search_fields": "item_name,pack_size",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",

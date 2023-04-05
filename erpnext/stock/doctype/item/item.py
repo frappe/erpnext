@@ -79,6 +79,10 @@ class Item(Document):
 		if self.opening_stock:
 			self.set_opening_stock()
 
+	def before_save(self) :
+		if self.description != self.item_name:
+			self.description = self.item_name
+			
 	def validate(self):
 		if not self.item_name:
 			self.item_name = self.item_code
