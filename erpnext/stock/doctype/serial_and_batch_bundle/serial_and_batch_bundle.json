@@ -185,7 +185,7 @@
    "fieldname": "type_of_transaction",
    "fieldtype": "Select",
    "label": "Type of Transaction",
-   "options": "\nInward\nOutward\nMaintenance",
+   "options": "\nInward\nOutward\nMaintenance\nAsset Repair",
    "reqd": 1
   },
   {
@@ -243,7 +243,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-03 16:22:30.767805",
+ "modified": "2023-04-06 02:35:38.404537",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

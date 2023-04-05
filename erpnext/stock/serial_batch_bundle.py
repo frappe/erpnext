@@ -125,6 +125,12 @@ class SerialBatchBundle:
 		if self.sle.voucher_type == "Stock Entry":
 			child_doctype = "Stock Entry Detail"
 
+		if self.sle.voucher_type == "Asset Capitalization":
+			child_doctype = "Asset Capitalization Stock Item"
+
+		if self.sle.voucher_type == "Asset Repair":
+			child_doctype = "Asset Repair Consumed Item"
+
 		return child_doctype
 
 	def is_rejected_entry(self):

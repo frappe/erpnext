@@ -110,6 +110,9 @@ class SerialandBatchBundle(Document):
 		frappe.throw(_(message), exception, title=_("Error"))
 
 	def set_incoming_rate(self, row=None, save=False):
+		if self.type_of_transaction not in ["Inward", "Outward"]:
+			return
+
 		if self.type_of_transaction == "Outward":
 			self.set_incoming_rate_for_outward_transaction(row, save)
 		else:
