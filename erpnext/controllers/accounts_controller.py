@@ -845,7 +845,9 @@ class AccountsController(TransactionBase):
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 
-		res = self.get_advance_entries()
+		res = self.get_advance_entries(
+			include_unallocated=not cint(self.get("only_include_allocated_payments"))
+		)
 
 		self.set("advances", [])
 		advance_allocated = 0
