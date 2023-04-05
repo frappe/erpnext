@@ -272,4 +272,32 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 };
 
+frappe.ui.form.on('Payment Reconciliation Allocation', {
+	allocated_amount: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		// filter invoice
+		let invoice = frm.doc.invoices.filter((x) => (x.invoice_number == row.invoice_number));
+		// filter payment
+		let payment = frm.doc.payments.filter((x) => (x.reference_name == row.reference_name));
+
+		frm.call({
+			doc: frm.doc,
+			method: 'calculate_difference_on_allocation_change',
+			args: {
+				payment_entry: payment,
+				invoice: invoice,
+				allocated_amount: row.allocated_amount
+			},
+			callback: (r) => {
+				if (r.message) {
+					row.difference_amount = r.message;
+					frm.refresh();
+				}
+			}
+		});
+	}
+});
+
+
+
 extend_cscript(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({frm: cur_frm}));

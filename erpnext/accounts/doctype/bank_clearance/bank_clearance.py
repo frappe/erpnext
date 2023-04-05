@@ -81,7 +81,7 @@ class BankClearance(Document):
 
 		loan_disbursement = frappe.qb.DocType("Loan Disbursement")
 
-		loan_disbursements = (
+		query = (
 			frappe.qb.from_(loan_disbursement)
 			.select(
 				ConstantColumn("Loan Disbursement").as_("payment_document"),
@@ -90,17 +90,22 @@ class BankClearance(Document):
 				ConstantColumn(0).as_("debit"),
 				loan_disbursement.reference_number.as_("cheque_number"),
 				loan_disbursement.reference_date.as_("cheque_date"),
+				loan_disbursement.clearance_date.as_("clearance_date"),
 				loan_disbursement.disbursement_date.as_("posting_date"),
 				loan_disbursement.applicant.as_("against_account"),
 			)
 			.where(loan_disbursement.docstatus == 1)
 			.where(loan_disbursement.disbursement_date >= self.from_date)
 			.where(loan_disbursement.disbursement_date <= self.to_date)
-			.where(loan_disbursement.clearance_date.isnull())
 			.where(loan_disbursement.disbursement_account.isin([self.bank_account, self.account]))
 			.orderby(loan_disbursement.disbursement_date)
 			.orderby(loan_disbursement.name, order=frappe.qb.desc)
-		).run(as_dict=1)
+		)
+
+		if not self.include_reconciled_entries:
+			query = query.where(loan_disbursement.clearance_date.isnull())
+
+		loan_disbursements = query.run(as_dict=1)
 
 		loan_repayment = frappe.qb.DocType("Loan Repayment")
 
@@ -113,15 +118,18 @@ class BankClearance(Document):
 				ConstantColumn(0).as_("credit"),
 				loan_repayment.reference_number.as_("cheque_number"),
 				loan_repayment.reference_date.as_("cheque_date"),
+				loan_repayment.clearance_date.as_("clearance_date"),
 				loan_repayment.applicant.as_("against_account"),
 				loan_repayment.posting_date,
 			)
 			.where(loan_repayment.docstatus == 1)
-			.where(loan_repayment.clearance_date.isnull())
 			.where(loan_repayment.posting_date >= self.from_date)
 			.where(loan_repayment.posting_date <= self.to_date)
 			.where(loan_repayment.payment_account.isin([self.bank_account, self.account]))
 		)
+
+		if not self.include_reconciled_entries:
+			query = query.where(loan_repayment.clearance_date.isnull())
 
 		if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
 			query = query.where((loan_repayment.repay_from_salary == 0))

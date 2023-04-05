@@ -674,7 +674,7 @@ def get_bin_qty(item_code, warehouse):
 
 def get_pos_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql(
-		"""select sum(p_item.qty) as qty
+		"""select sum(p_item.stock_qty) as qty
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
 		where p.name = p_item.parent
 		and ifnull(p.consolidated_invoice, '') = ''

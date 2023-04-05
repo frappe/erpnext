@@ -93,9 +93,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {
-			cur_frm.add_custom_button(__('Payment'),
-				this.make_payment_entry, __('Create'));
-			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+			this.frm.add_custom_button(
+				__('Payment'),
+				() => this.make_payment_entry(),
+				__('Create')
+			);
+			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if(doc.docstatus==1 && !doc.is_return) {

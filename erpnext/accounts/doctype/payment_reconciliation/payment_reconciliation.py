@@ -234,6 +234,15 @@ class PaymentReconciliation(Document):
 		return difference_amount
 
 	@frappe.whitelist()
+	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
+		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
+		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
+		new_difference_amount = self.get_difference_amount(
+			payment_entry[0], invoice[0], allocated_amount
+		)
+		return new_difference_amount
+
+	@frappe.whitelist()
 	def allocate_entries(self, args):
 		self.validate_entries()
 
