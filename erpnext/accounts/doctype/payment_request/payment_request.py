@@ -472,11 +472,24 @@ def get_amount(ref_doc, payment_account=None):
 			grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid) / ref_doc.conversion_rate
 
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
+<<<<<<< HEAD
 		if ref_doc.party_account_currency == ref_doc.currency:
 			grand_total = flt(ref_doc.outstanding_amount)
 		else:
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
 
+=======
+		if not ref_doc.is_pos:
+			if ref_doc.party_account_currency == ref_doc.currency:
+				grand_total = flt(ref_doc.outstanding_amount)
+			else:
+				grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
+		elif dt == "Sales Invoice":
+			for pay in ref_doc.payments:
+				if pay.type == "Phone" and pay.account == payment_account:
+					grand_total = pay.amount
+					break
+>>>>>>> 9bf87d708e (fix: `payment entry is already created` on posawesome. (#34712))
 	elif dt == "POS Invoice":
 		for pay in ref_doc.payments:
 			if pay.type == "Phone" and pay.account == payment_account:
