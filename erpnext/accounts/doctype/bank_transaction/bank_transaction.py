@@ -167,22 +167,22 @@ class BankTransaction(StatusUpdater):
 		).match()
 
 		if result:
-			self.party_type, self.party, mapper = result
+			party_type, party, mapper = result
+			to_update = {"party_type": party_type, "party": party}
 
-			if not mapper:
-				return
+			if mapper and mapper.get("mapper_name"):
+				# Transaction matched with an existing Bank party Mapper record
+				to_update["bank_party_mapper"] = mapper.get("mapper_name")
+			elif mapper:
+				# Make new Mapper record to remember match
+				mapper_doc = frappe.get_doc(
+					{"doctype": "Bank Party Mapper", "party_type": party_type, "party": party}
+				)
+				mapper_doc.update(mapper)
+				mapper_doc.insert()
+				to_update["bank_party_mapper"] = mapper_doc.name
 
-			if mapper.get("mapper_name"):
-				# Transaction matched with a Bank party Mapper record
-				self.bank_party_mapper = mapper.get("mapper_name")  # Link mapper to Bank Transaction
-				return
-
-			mapper_doc = frappe.get_doc(
-				{"doctype": "Bank Party Mapper", "party_type": self.party_type, "party": self.party}
-			)
-			mapper_doc.update(mapper)
-			mapper_doc.insert()
-			self.bank_party_mapper = mapper_doc.name  # Link mapper to Bank Transaction
+			frappe.db.set_value("Bank Transaction", self.name, field=to_update)
 
 	def update_automatch_bank_party_mapper(self):
 		"""Update Bank Party Mapper if Party Type & Party are manually changed after submit."""
