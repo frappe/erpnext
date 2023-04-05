@@ -2121,20 +2121,19 @@
   },
   {
    "default": "0",
-<<<<<<< HEAD
    "fieldname": "repost_required",
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Repost Required",
    "no_copy": 1,
    "read_only": 1
-=======
+  },
+  {
    "depends_on": "allocate_advances_automatically",
    "description": "Advance payments allocated against orders will only be fetched",
    "fieldname": "only_include_allocated_payments",
    "fieldtype": "Check",
    "label": "Only Include Allocated Payments"
->>>>>>> fd3fb64aa3 (feat: Auto allocate advance payments only against orders (#34727))
   }
  ],
  "icon": "fa fa-file-text",
