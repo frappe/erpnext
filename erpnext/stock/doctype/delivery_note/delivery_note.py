@@ -148,7 +148,7 @@ class DeliveryNote(SellingController):
 		if not self.installation_status:
 			self.installation_status = "Not Installed"
 
-		self.validate_against_stock_reservation()
+		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
@@ -241,7 +241,7 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
-		self.update_stock_reservation_entry()
+		self.update_stock_reservation_entries()
 
 		if not self.is_return:
 			self.check_credit_limit()
@@ -272,11 +272,15 @@ class DeliveryNote(SellingController):
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
 
-	def update_stock_reservation_entry(self):
-		if self.is_return or self._action != "submit":
+	def update_stock_reservation_entries(self) -> None:
+		"""Updates Delivered Qty in Stock Reservation Entries."""
+
+		# Don't update Delivered Qty on Return or Cancellation.
+		if self.is_return or self._action == "cancel":
 			return
 
-		for item in self.items:
+		for item in self.get("items"):
+			# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 			if not item.against_sales_order or not item.so_detail:
 				continue
 
@@ -293,6 +297,7 @@ class DeliveryNote(SellingController):
 				order_by="creation",
 			)
 
+			# Skip if no Stock Reservation Entries.
 			if not sre_list:
 				continue
 
@@ -302,22 +307,31 @@ class DeliveryNote(SellingController):
 					break
 
 				sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+
+				# `Delivered Qty` should be less than or equal to `Reserved Qty`.
 				qty_to_be_deliver = min(sre_doc.reserved_qty - sre_doc.delivered_qty, available_qty_to_deliver)
+
 				sre_doc.delivered_qty += qty_to_be_deliver
 				sre_doc.db_update()
+
+				# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
 				sre_doc.update_status()
 
 				available_qty_to_deliver -= qty_to_be_deliver
 
-	def validate_against_stock_reservation(self):
+	def validate_against_stock_reservation_entries(self):
+		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""
+
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_qty_details_for_voucher_detail_no,
 		)
 
+		# Don't validate if Return
 		if self.is_return:
 			return
 
-		for item in self.items:
+		for item in self.get("items"):
+			# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 			if not item.against_sales_order or not item.so_detail:
 				continue
 
@@ -325,6 +339,7 @@ class DeliveryNote(SellingController):
 				"Sales Order", item.against_sales_order, item.so_detail
 			)
 
+			# Skip if stock is not reserved.
 			if not sre_data:
 				continue
 

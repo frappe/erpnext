@@ -101,6 +101,8 @@ class StockSettings(Document):
 			check_pending_reposting(self.stock_frozen_upto)
 
 	def cant_disable_stock_reservation(self):
+		"""Raises an exception if user tries to disable Stock Reservation and there are existing Stock Reservation Entries."""
+
 		if not self.enable_stock_reservation:
 			db_enable_stock_reservation = frappe.db.get_single_value(
 				"Stock Settings", "enable_stock_reservation"

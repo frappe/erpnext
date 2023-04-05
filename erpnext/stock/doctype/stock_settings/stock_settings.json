@@ -352,6 +352,7 @@
   },
   {
    "default": "1",
+   "description": "Allows to create Stock Reservations against <b>Sales Order</b>",
    "fieldname": "enable_stock_reservation",
    "fieldtype": "Check",
    "label": "Enable Stock Reservation"
@@ -359,6 +360,7 @@
   {
    "default": "0",
    "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "If enabled, <b>Stock Reservation Entries</b> will be created on submission of <b>Sales Order</b>",
    "fieldname": "reserve_stock_on_sales_order_submission",
    "fieldtype": "Check",
    "label": "Reserve Stock on Sales Order Submission"
@@ -370,6 +372,7 @@
   {
    "default": "1",
    "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "If enabled, <b>Partial Stock Reservation Entries</b> can be created. For example, If you have a <b>Sales Order</b> of 100 units and the Available Stock is 90 units then a Stock Reservation Entry will be created for 90 units. ",
    "fieldname": "allow_partial_reservation",
    "fieldtype": "Check",
    "label": "Allow Partial Reservation"
@@ -380,7 +383,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-01 15:52:28.717324",
+ "modified": "2023-04-04 22:46:42.287425",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

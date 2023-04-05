@@ -46,8 +46,6 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
-
-
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
@@ -71,13 +69,11 @@ frappe.ui.form.on("Sales Order", {
 				frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
 					if (value) {
 						frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission").then((value) => {
-							if (value) {
-								frm.set_value("reserve_stock", 1);
-							} else {
-								frm.set_value("reserve_stock", 0);
-							}
+							// If `Reserve Stock on Sales Order Submission` is enabled in Stock Settings, set Reserve Stock to 1 else 0.
+							frm.set_value("reserve_stock", value ? 1 : 0);
 						})
 					} else {
+						// If `Stock Reservation` is disabled in Stock Settings, set Reserve Stock to 0 and read only.
 						frm.set_value("reserve_stock", 0);
 						frm.set_df_property("reserve_stock", "read_only", 1);
 					}
@@ -292,11 +288,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 
-			// Stock Reservation
+			// Stock Reservation > Reserve button will be only visible if the SO has unreserved stock.
 			if (this.frm.doc.__onload && this.frm.doc.__onload.has_unreserved_stock) {
-				this.frm.add_custom_button(__('Reserve'), () => this.reserve_stock_against_sales_order(), __('Stock Reservation'));
+				this.frm.add_custom_button(__('Reserve'), () => this.create_stock_reservation_entries(), __('Stock Reservation'));
 			}
 
+			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
 			if (this.frm.doc.__onload && this.frm.doc.__onload.has_reserved_stock) {
 				this.frm.add_custom_button(__('Unreserve'), () => this.cancel_stock_reservation_entries(), __('Stock Reservation'));
 			}
@@ -339,14 +336,15 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		this.order_type(doc);
 	}
 
-	reserve_stock_against_sales_order() {
+	create_stock_reservation_entries() {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.reserve_stock_against_sales_order",
+			doc: this.frm.doc,
+			method: 'create_stock_reservation_entries',
 			args: {
-				sales_order: this.frm.docname
+				notify: true
 			},
 			freeze: true,
-			freeze_message: __("Reserving Stock..."),
+			freeze_message: __('Reserving Stock...'),
 			callback: (r) => {
 				this.frm.doc.__onload.has_unreserved_stock = false;
 				this.frm.refresh();
@@ -356,13 +354,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	cancel_stock_reservation_entries() {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries",
+			method: 'erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries',
 			args: {
 				voucher_type: this.frm.doctype,
 				voucher_no: this.frm.docname
 			},
 			freeze: true,
-			freeze_message: __("Unreserving Stock..."),
+			freeze_message: __('Unreserving Stock...'),
 			callback: (r) => {
 				this.frm.doc.__onload.has_reserved_stock = false;
 				this.frm.refresh();

@@ -1641,17 +1641,20 @@
   },
   {
    "default": "0",
+   "description": "If checked, Stock Reservation Entries will be created on <b>Submit</b>",
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
-   "label": "Reserve Stock on Submit",
-   "no_copy": 1
+   "label": "Reserve Stock",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-31 13:04:36.653260",
+ "modified": "2023-04-04 10:39:34.129343",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

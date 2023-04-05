@@ -398,8 +398,10 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 
 
 def get_sre_reserved_qty_details(iwb_map: list) -> dict:
+	"""Returns a dict like {("item_code", "warehouse"): "reserved_qty", ... }."""
+
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_sre_reserved_qty_details as get_reserved_qty_details,
+		get_sre_reserved_qty_details_for_item_and_warehouse as get_reserved_qty_details,
 	)
 
 	item_code_list, warehouse_list = [], []
