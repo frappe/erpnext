@@ -98,7 +98,7 @@ def get_data(filters):
 			`tabAddress`.name=`tabDynamic Link`.parent)
 		WHERE
 			company = %(company)s
-			AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
+			AND DATE(`tabLead`.creation) BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
 		ORDER BY
 			`tabLead`.creation asc """.format(
