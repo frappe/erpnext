@@ -23,5 +23,15 @@ frappe.ui.form.on("Item Price", {
 				}
 			};
 		});
+	},
+
+	refresh: function(frm) {
+		if( frm.has_perm('delete')) {
+			frm.add_custom_button(__('Delete'), function() {
+				frappe.model.delete_doc(frm.doc.doctype, frm.doc.name, function() {
+					window.history.back();
+				});
+			})
+		}
 	}
 });
