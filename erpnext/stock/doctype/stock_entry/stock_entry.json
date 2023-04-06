@@ -27,7 +27,6 @@
   "set_posting_time",
   "inspection_required",
   "apply_putaway_rule",
-  "items_tab",
   "bom_info_section",
   "from_bom",
   "use_multi_level_bom",
@@ -256,7 +255,7 @@
    "description": "As per Stock UOM",
    "fieldname": "fg_completed_qty",
    "fieldtype": "Float",
-   "label": "For Quantity",
+   "label": "Finished Good Quantity ",
    "oldfieldname": "fg_completed_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1
@@ -612,11 +611,7 @@
    "read_only": 1
   },
   {
-   "fieldname": "items_tab",
-   "fieldtype": "Tab Break",
-   "label": "Items"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "bom_info_section",
    "fieldtype": "Section Break",
    "label": "BOM Info"
@@ -644,8 +639,10 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_7qsm",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Process Loss"
   },
   {
    "depends_on": "process_loss_percentage",
@@ -677,7 +674,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-03 16:02:50.741816",
+ "modified": "2023-04-06 12:42:56.673180",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
