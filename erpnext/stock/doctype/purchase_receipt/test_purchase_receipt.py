@@ -1544,6 +1544,72 @@ class TestPurchaseReceipt(FrappeTestCase):
 		res = get_item_details(args)
 		self.assertEqual(res.get("last_purchase_rate"), 100)
 
+	def test_validate_received_qty_for_internal_pr(self):
+		prepare_data_for_internal_transfer()
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
+		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
+		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+
+		# Step 1: Create Item
+		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+
+		# Step 2: Create Stock Entry (Material Receipt)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		make_stock_entry(
+			purpose="Material Receipt",
+			item_code=item.name,
+			qty=15,
+			company=company,
+			to_warehouse=from_warehouse,
+		)
+
+		# Step 3: Create Delivery Note with Internal Customer
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		dn = create_delivery_note(
+			item_code=item.name,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=target_warehouse,
+		)
+
+		# Step 4: Create Internal Purchase Receipt
+		from erpnext.controllers.status_updater import OverAllowanceError
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].qty = 15
+		pr.items[0].from_warehouse = target_warehouse
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].rejected_warehouse = from_warehouse
+		pr.save()
+
+		self.assertRaises(OverAllowanceError, pr.submit)
+
+		# Step 5: Test Over Receipt Allowance
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
+
+		make_stock_entry(
+			purpose="Material Transfer",
+			item_code=item.name,
+			qty=5,
+			company=company,
+			from_warehouse=from_warehouse,
+			to_warehouse=target_warehouse,
+		)
+
+		pr.submit()
+
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

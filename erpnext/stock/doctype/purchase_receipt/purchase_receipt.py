@@ -65,6 +65,16 @@ class PurchaseReceipt(BuyingController):
 				"percent_join_field": "purchase_invoice",
 				"overflow_type": "receipt",
 			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Delivery Note Item",
+				"join_field": "delivery_note_item",
+				"source_field": "received_qty",
+				"target_field": "received_qty",
+				"target_parent_dt": "Delivery Note",
+				"target_ref_field": "qty",
+				"overflow_type": "receipt",
+			},
 		]
 
 		if cint(self.is_return):
