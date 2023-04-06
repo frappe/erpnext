@@ -82,6 +82,8 @@
   "actual_qty",
   "installed_qty",
   "item_tax_rate",
+  "column_break_atna",
+  "received_qty",
   "accounting_details_section",
   "expense_account",
   "allow_zero_valuation_rate",
@@ -775,13 +777,79 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:parent.is_internal_customer == 1",
+   "fieldname": "internal_transfer_section",
+   "fieldtype": "Section Break",
+   "label": "Internal Transfer"
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_82",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "label": "Purchase Order Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Check",
+   "label": "Has Item Scanned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
+  },
+  {
+   "fieldname": "column_break_atna",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: parent.is_internal_customer",
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+>>>>>>> bc39dfab5d (feat: add `Received Qty` field in `Delivery Note Item`)
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-10-12 03:36:05.344847",
+=======
+ "modified": "2023-04-06 09:28:29.182053",
+>>>>>>> bc39dfab5d (feat: add `Received Qty` field in `Delivery Note Item`)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
