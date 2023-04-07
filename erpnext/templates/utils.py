@@ -6,13 +6,12 @@ import frappe
 
 
 @frappe.whitelist(allow_guest=True)
-def send_message(subject="Website Query", message="", sender="", status="Open"):
+def send_message(sender, message, subject="Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
+	website_send_message(sender, message, subject)
+
 	lead = customer = None
-
-	website_send_message(subject, message, sender)
-
 	customer = frappe.db.sql(
 		"""select distinct dl.link_name from `tabDynamic Link` dl
 		left join `tabContact` c on dl.parent=c.name where dl.link_doctype='Customer'
@@ -58,5 +57,3 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		}
 	)
 	comm.insert(ignore_permissions=True)
-
-	return "okay"

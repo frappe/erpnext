@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
@@ -256,10 +256,25 @@ class TestPaymentEntry(FrappeTestCase):
 			},
 		)
 		si.save()
-
 		si.submit()
 
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 1)
+		pe_with_tax_loss = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+
+		self.assertEqual(pe_with_tax_loss.references[0].payment_term, "30 Credit Days with 10% Discount")
+		self.assertEqual(pe_with_tax_loss.references[0].allocated_amount, 236.0)
+		self.assertEqual(pe_with_tax_loss.paid_amount, 212.4)
+		self.assertEqual(pe_with_tax_loss.deductions[0].amount, 20.0)  # Loss on Income
+		self.assertEqual(pe_with_tax_loss.deductions[1].amount, 3.6)  # Loss on Tax
+		self.assertEqual(pe_with_tax_loss.deductions[1].account, "_Test Account Service Tax - _TC")
+
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+
+		self.assertEqual(pe.references[0].allocated_amount, 236.0)
+		self.assertEqual(pe.paid_amount, 212.4)
+		self.assertEqual(pe.deductions[0].amount, 23.6)
+
 		pe.submit()
 		si.load_from_db()
 
@@ -268,6 +283,190 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 212.40)
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 23.6)
+
+	def test_payment_entry_against_payment_terms_with_discount_amount(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+
+		si.payment_terms_template = "Test Discount Amount Template"
+		create_payment_terms_template_with_discount(
+			name="30 Credit Days with Rs.50 Discount",
+			discount_type="Amount",
+			discount=50,
+			template_name="Test Discount Amount Template",
+		)
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 18,
+			},
+		)
+		si.save()
+		si.submit()
+
+		# Set reference date past discount cut off date
+		pe_1 = get_payment_entry(
+			"Sales Invoice",
+			si.name,
+			bank_account="_Test Cash - _TC",
+			reference_date=frappe.utils.add_days(si.posting_date, 2),
+		)
+		self.assertEqual(pe_1.paid_amount, 236.0)  # discount not applied
+
+		# Test if tax loss is booked on enabling configuration
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 1)
+		pe_with_tax_loss = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		self.assertEqual(pe_with_tax_loss.deductions[0].amount, 42.37)  # Loss on Income
+		self.assertEqual(pe_with_tax_loss.deductions[1].amount, 7.63)  # Loss on Tax
+		self.assertEqual(pe_with_tax_loss.deductions[1].account, "_Test Account Service Tax - _TC")
+
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		self.assertEqual(pe.references[0].allocated_amount, 236.0)
+		self.assertEqual(pe.paid_amount, 186)
+		self.assertEqual(pe.deductions[0].amount, 50.0)
+
+		pe.submit()
+		si.load_from_db()
+
+		self.assertEqual(si.payment_schedule[0].payment_amount, 236.0)
+		self.assertEqual(si.payment_schedule[0].paid_amount, 186)
+		self.assertEqual(si.payment_schedule[0].outstanding, 0)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
+
+	@change_settings(
+		"Accounts Settings",
+		{
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+			"book_tax_discount_loss": 1,
+		},
+	)
+	def test_payment_entry_multicurrency_si_with_base_currency_accounting_early_payment_discount(
+		self,
+	):
+		"""
+		1. Multi-currency SI with single currency accounting (company currency)
+		2. PE with early payment discount
+		3. Test if Paid Amount is calculated in company currency
+		4. Test if deductions are calculated in company currency
+
+		SI is in USD to document agreed amounts that are in USD, but the accounting is in base currency.
+		"""
+		si = create_sales_invoice(
+			customer="_Test Customer",
+			currency="USD",
+			conversion_rate=50,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		si.save()
+		si.submit()
+
+		pe = get_payment_entry(
+			"Sales Invoice",
+			si.name,
+			bank_account="_Test Bank - _TC",
+		)
+		pe.reference_no = si.name
+		pe.reference_date = nowdate()
+
+		# Early payment discount loss on income
+		self.assertEqual(pe.paid_amount, 4500.0)  # Amount in company currency
+		self.assertEqual(pe.received_amount, 4500.0)
+		self.assertEqual(pe.deductions[0].amount, 500.0)
+		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
+		self.assertEqual(pe.difference_amount, 0.0)
+
+		pe.insert()
+		pe.submit()
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [
+				["Debtors - _TC", 0, 5000, si.name],
+				["_Test Bank - _TC", 4500, 0, None],
+				["Write Off - _TC", 500.0, 0, None],
+			]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, 0)
+
+	def test_payment_entry_multicurrency_accounting_si_with_early_payment_discount(self):
+		"""
+		1. Multi-currency SI with multi-currency accounting
+		2. PE with early payment discount and also exchange loss
+		3. Test if Paid Amount is calculated in transaction currency
+		4. Test if deductions are calculated in base/company currency
+		5. Test if exchange loss is reflected in difference
+		"""
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		si.save()
+		si.submit()
+
+		pe = get_payment_entry(
+			"Sales Invoice", si.name, bank_account="_Test Bank - _TC", bank_amount=4700
+		)
+		pe.reference_no = si.name
+		pe.reference_date = nowdate()
+
+		# Early payment discount loss on income
+		self.assertEqual(pe.paid_amount, 90.0)
+		self.assertEqual(pe.received_amount, 4200.0)  # 5000 - 500 (discount) - 300 (exchange loss)
+		self.assertEqual(pe.deductions[0].amount, 500.0)
+		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
+
+		# Exchange loss
+		self.assertEqual(pe.difference_amount, 300.0)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "_Test Exchange Gain/Loss - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": 300.0,
+			},
+		)
+
+		pe.insert()
+		pe.submit()
+
+		self.assertEqual(pe.difference_amount, 0.0)
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [
+				["_Test Receivable USD - _TC", 0, 5000, si.name],
+				["_Test Bank - _TC", 4200, 0, None],
+				["Write Off - _TC", 500.0, 0, None],
+				["_Test Exchange Gain/Loss - _TC", 300.0, 0, None],
+			]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_against_purchase_invoice_to_check_status(self):
 		pi = make_purchase_invoice(
@@ -839,24 +1038,27 @@ def create_payment_terms_template():
 		).insert()
 
 
-def create_payment_terms_template_with_discount():
+def create_payment_terms_template_with_discount(
+	name=None, discount_type=None, discount=None, template_name=None
+):
+	create_payment_term(name or "30 Credit Days with 10% Discount")
+	template_name = template_name or "Test Discount Template"
 
-	create_payment_term("30 Credit Days with 10% Discount")
-
-	if not frappe.db.exists("Payment Terms Template", "Test Discount Template"):
-		payment_term_template = frappe.get_doc(
+	if not frappe.db.exists("Payment Terms Template", template_name):
+		frappe.get_doc(
 			{
 				"doctype": "Payment Terms Template",
-				"template_name": "Test Discount Template",
+				"template_name": template_name,
 				"allocate_payment_based_on_payment_terms": 1,
 				"terms": [
 					{
 						"doctype": "Payment Terms Template Detail",
-						"payment_term": "30 Credit Days with 10% Discount",
+						"payment_term": name or "30 Credit Days with 10% Discount",
 						"invoice_portion": 100,
 						"credit_days_based_on": "Day(s) after invoice date",
 						"credit_days": 2,
-						"discount": 10,
+						"discount_type": discount_type or "Percentage",
+						"discount": discount or 10,
 						"discount_validity_based_on": "Day(s) after invoice date",
 						"discount_validity": 1,
 					}

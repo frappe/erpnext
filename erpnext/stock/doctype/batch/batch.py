@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum, Timestamp
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, nowtime
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
 
@@ -187,7 +187,10 @@ def get_batch_qty(
 			.where((sle.is_cancelled == 0) & (sle.warehouse == warehouse) & (sle.batch_no == batch_no))
 		)
 
-		if posting_date and posting_time:
+		if posting_date:
+			if posting_time is None:
+				posting_time = nowtime()
+
 			query = query.where(
 				Timestamp(sle.posting_date, sle.posting_time) <= Timestamp(posting_date, posting_time)
 			)

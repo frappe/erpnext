@@ -1337,6 +1337,9 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	next_stock_reco_detail = get_next_stock_reco(args)
 	if next_stock_reco_detail:
 		detail = next_stock_reco_detail[0]
+		if detail.batch_no:
+			regenerate_sle_for_batch_stock_reco(detail)
+
 		# add condition to update SLEs before this date & time
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
@@ -1362,6 +1365,16 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	)
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
+
+def regenerate_sle_for_batch_stock_reco(detail):
+	doc = frappe.get_cached_doc("Stock Reconciliation", detail.voucher_no)
+	doc.docstatus = 2
+	doc.update_stock_ledger()
+
+	doc.recalculate_current_qty(detail.item_code, detail.batch_no)
+	doc.docstatus = 1
+	doc.update_stock_ledger()
 
 
 def get_stock_reco_qty_shift(args):
@@ -1393,7 +1406,7 @@ def get_next_stock_reco(args):
 	return frappe.db.sql(
 		"""
 		select
-			name, posting_date, posting_time, creation, voucher_no
+			name, posting_date, posting_time, creation, voucher_no, item_code, batch_no, actual_qty
 		from
 			`tabStock Ledger Entry`
 		where
