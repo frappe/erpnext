@@ -88,8 +88,12 @@ def get_gl_entries(filters):
 
 	debit = frappe.query_builder.functions.Sum(gle.debit).as_("debit")
 	credit = frappe.query_builder.functions.Sum(gle.credit).as_("credit")
-	debit_currency = frappe.query_builder.functions.Sum(gle.debit_in_account_currency).as_("debitCurr")
-	credit_currency = frappe.query_builder.functions.Sum(gle.credit_in_account_currency).as_("creditCurr")
+	debit_currency = frappe.query_builder.functions.Sum(gle.debit_in_account_currency).as_(
+		"debitCurr"
+	)
+	credit_currency = frappe.query_builder.functions.Sum(gle.credit_in_account_currency).as_(
+		"creditCurr"
+	)
 
 	query = (
 		frappe.qb.from_(gle)
@@ -141,12 +145,9 @@ def get_gl_entries(filters):
 			supplier.supplier_name,
 			supplier.name.as_("supName"),
 			employee.employee_name,
-			employee.name.as_("empName")
+			employee.name.as_("empName"),
 		)
-		.where(
-			(gle.company == filters.get("company"))
-			& (gle.fiscal_year == filters.get("fiscal_year"))
-		)
+		.where((gle.company == filters.get("company")) & (gle.fiscal_year == filters.get("fiscal_year")))
 		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
 		.orderby(gle.posting_date, gle.voucher_no)
 	)
@@ -156,6 +157,7 @@ def get_gl_entries(filters):
 
 
 def get_result_as_list(data, filters):
+
 	result = []
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
