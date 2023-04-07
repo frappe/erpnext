@@ -29,6 +29,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			primary_action: () => this.update_ledgers()
 		});
 
+		this.dialog.set_value("qty", this.item.qty);
 		this.dialog.show();
 	}
 
@@ -127,7 +128,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			{
 				fieldtype: 'Float',
 				fieldname: 'qty',
-				default: this.item.qty || 0,
 				label: __('Qty to Fetch'),
 				onchange: () => this.get_auto_data()
 			},

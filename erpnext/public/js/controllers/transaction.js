@@ -524,6 +524,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 												if (r.message &&
 												(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
+												} else {
+													show_batch_dialog = false;
 												}
 											});
 								},
