@@ -11,7 +11,10 @@ from frappe.utils import format_datetime
 
 def execute(filters=None):
 	account_details = {}
-	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
+
+	account = frappe.qb.DocType("Account")
+
+	for acc in frappe.qb.from_(account).select(account.name, account.is_group).run(as_dict=True):
 		account_details.setdefault(acc.name, acc)
 
 	validate_filters(filters, account_details)
