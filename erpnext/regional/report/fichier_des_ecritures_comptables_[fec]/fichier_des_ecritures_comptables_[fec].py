@@ -77,49 +77,80 @@ def get_result(filters):
 
 def get_gl_entries(filters):
 
-	group_by_condition = (
-		"group by voucher_type, voucher_no, account"
-		if filters.get("group_by_voucher")
-		else "group by gl.name"
-	)
+	gle = frappe.qb.DocType("GL Entry")
+	sales_invoice = frappe.qb.DocType("Sales Invoice")
+	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+	journal_entry = frappe.qb.DocType("Journal Entry")
+	payment_entry = frappe.qb.DocType("Payment Entry")
+	customer = frappe.qb.DocType("Customer")
+	supplier = frappe.qb.DocType("Supplier")
+	employee = frappe.qb.DocType("Employee")
 
-	gl_entries = frappe.db.sql(
-		"""
-		select
-			gl.posting_date as GlPostDate, gl.name as GlName, gl.account, gl.transaction_date,
-			sum(gl.debit) as debit, sum(gl.credit) as credit,
-			sum(gl.debit_in_account_currency) as debitCurr, sum(gl.credit_in_account_currency) as creditCurr,
-			gl.voucher_type, gl.voucher_no, gl.against_voucher_type,
-			gl.against_voucher, gl.account_currency, gl.against,
-			gl.party_type, gl.party,
-			inv.name as InvName, inv.title as InvTitle, inv.posting_date as InvPostDate,
-			pur.name as PurName, pur.title as PurTitle, pur.posting_date as PurPostDate,
-			jnl.cheque_no as JnlRef, jnl.posting_date as JnlPostDate, jnl.title as JnlTitle,
-			pay.name as PayName, pay.posting_date as PayPostDate, pay.title as PayTitle,
-			cus.customer_name, cus.name as cusName,
-			sup.supplier_name, sup.name as supName,
-			emp.employee_name, emp.name as empName,
-			stu.title as student_name, stu.name as stuName,
-			member_name, mem.name as memName
+	debit = frappe.query_builder.functions.Sum(gle.debit).as_("debit")
+	credit = frappe.query_builder.functions.Sum(gle.credit).as_("credit")
+	debit_currency = frappe.query_builder.functions.Sum(gle.debit_in_account_currency).as_("debitCurr")
+	credit_currency = frappe.query_builder.functions.Sum(gle.credit_in_account_currency).as_("creditCurr")
 
-		from `tabGL Entry` gl
-			left join `tabSales Invoice` inv on gl.voucher_no = inv.name
-			left join `tabPurchase Invoice` pur on gl.voucher_no = pur.name
-			left join `tabJournal Entry` jnl on gl.voucher_no = jnl.name
-			left join `tabPayment Entry` pay on gl.voucher_no = pay.name
-			left join `tabCustomer` cus on gl.party = cus.name
-			left join `tabSupplier` sup on gl.party = sup.name
-			left join `tabEmployee` emp on gl.party = emp.name
-			left join `tabStudent` stu on gl.party = stu.name
-			left join `tabMember` mem on gl.party = mem.name
-		where gl.company=%(company)s and gl.fiscal_year=%(fiscal_year)s
-		{group_by_condition}
-		order by GlPostDate, voucher_no""".format(
-			group_by_condition=group_by_condition
-		),
-		filters,
-		as_dict=1,
+	query = (
+		frappe.qb.from_(gle)
+		.left_join(sales_invoice)
+		.on(gle.voucher_no == sales_invoice.name)
+		.left_join(purchase_invoice)
+		.on(gle.voucher_no == purchase_invoice.name)
+		.left_join(journal_entry)
+		.on(gle.voucher_no == journal_entry.name)
+		.left_join(payment_entry)
+		.on(gle.voucher_no == payment_entry.name)
+		.left_join(customer)
+		.on(gle.party == customer.name)
+		.left_join(supplier)
+		.on(gle.party == supplier.name)
+		.left_join(employee)
+		.on(gle.party == employee.name)
+		.select(
+			gle.posting_date.as_("GlPostDate"),
+			gle.name.as_("GlName"),
+			gle.account,
+			gle.transaction_date,
+			debit,
+			credit,
+			debit_currency,
+			credit_currency,
+			gle.voucher_type,
+			gle.voucher_no,
+			gle.against_voucher_type,
+			gle.against_voucher,
+			gle.account_currency,
+			gle.against,
+			gle.party_type,
+			gle.party,
+			sales_invoice.name.as_("InvName"),
+			sales_invoice.title.as_("InvTitle"),
+			sales_invoice.posting_date.as_("InvPostDate"),
+			purchase_invoice.name.as_("PurName"),
+			purchase_invoice.title.as_("PurTitle"),
+			purchase_invoice.posting_date.as_("PurPostDate"),
+			journal_entry.cheque_no.as_("JnlRef"),
+			journal_entry.posting_date.as_("JnlPostDate"),
+			journal_entry.title.as_("JnlTitle"),
+			payment_entry.name.as_("PayName"),
+			payment_entry.posting_date.as_("PayPostDate"),
+			payment_entry.title.as_("PayTitle"),
+			customer.customer_name,
+			customer.name.as_("cusName"),
+			supplier.supplier_name,
+			supplier.name.as_("supName"),
+			employee.employee_name,
+			employee.name.as_("empName")
+		)
+		.where(
+			(gle.company == filters.get("company"))
+			& (gle.fiscal_year == filters.get("fiscal_year"))
+		)
+		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
+		.orderby(gle.posting_date, gle.voucher_no)
 	)
+	gl_entries = query.run(as_dict=True)
 
 	return gl_entries
 
