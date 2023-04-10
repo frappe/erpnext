@@ -51,12 +51,13 @@ def get_progress(docname: str | None = None) -> float:
 			"Process Payment Reconciliation Log", filters={"process_pr": docname}, fieldname="name"
 		)
 		if reconcile_log:
-			processed = frappe.db.get_value(
-				"Process Payment Reconciliation Log", reconcile_log, "reconciled_entries"
+			res = frappe.get_all(
+				"Process Payment Reconciliation Log",
+				filters={"name": reconcile_log},
+				fields=["reconciled_entries", "total_allocations"],
+				as_list=1,
 			)
-			total = frappe.db.get_value(
-				"Process Payment Reconciliation Log", reconcile_log, "total_allocations"
-			)
+			processed, total = res[0]
 
 			if processed != 0:
 				progress = processed / total * 100
