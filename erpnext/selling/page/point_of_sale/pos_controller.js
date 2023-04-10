@@ -559,8 +559,10 @@ erpnext.PointOfSale.Controller = class {
 
 				item_row = this.frm.add_child('items', new_item);
 
-				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
-					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
+				if (field === 'qty' && value !== 0 && !this.allow_negative_stock) {
+					const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
+					await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
+				}
 
 				await this.trigger_new_item_events(item_row);
 
