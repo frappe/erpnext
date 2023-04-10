@@ -20,11 +20,7 @@
   "contact_html",
   "section_break_3",
   "share_balance",
-  "contact_list",
-  "bank_details_section",
-  "bank_account_no",
-  "column_break_tyo0",
-  "iban"
+  "contact_list"
  ],
  "fields": [
   {
@@ -114,29 +110,10 @@
    "hidden": 1,
    "label": "Contact List",
    "read_only": 1
-  },
-  {
-   "fieldname": "bank_details_section",
-   "fieldtype": "Section Break",
-   "label": "Bank Details"
-  },
-  {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Data",
-   "label": "Bank Account No"
-  },
-  {
-   "fieldname": "column_break_tyo0",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "iban",
-   "fieldtype": "Data",
-   "label": "IBAN"
   }
  ],
  "links": [],
- "modified": "2023-03-30 16:00:55.087823",
+ "modified": "2023-04-10 22:02:20.406087",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shareholder",
