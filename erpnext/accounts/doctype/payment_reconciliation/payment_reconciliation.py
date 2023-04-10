@@ -246,7 +246,7 @@ class PaymentReconciliation(Document):
 		return new_difference_amount
 
 	@frappe.whitelist()
-	def allocate_entries(self, args):
+	def allocate_entries(self, args, isolate_each_allocation=True):
 		self.validate_entries()
 
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
@@ -256,8 +256,12 @@ class PaymentReconciliation(Document):
 
 		entries = []
 		for pay in args.get("payments"):
-			pay.update({"unreconciled_amount": pay.get("amount")})
+			if not isolate_each_allocation:
+				pay.update({"unreconciled_amount": pay.get("amount")})
 			for inv in args.get("invoices"):
+				if isolate_each_allocation:
+					pay.update({"unreconciled_amount": pay.get("amount")})
+
 				if pay.get("amount") >= inv.get("outstanding_amount"):
 					res = self.get_allocated_entry(pay, inv, inv["outstanding_amount"])
 					pay["amount"] = flt(pay.get("amount")) - flt(inv.get("outstanding_amount"))
@@ -308,7 +312,7 @@ class PaymentReconciliation(Document):
 		)
 
 	@frappe.whitelist()
-	def reconcile(self, skip_job_check=False):
+	def reconcile(self, skip_job_check=False, skip_pulling_outstanding=False):
 		if not skip_job_check and frappe.db.get_single_value(
 			"Accounts Settings", "enable_payment_reconciliation_in_background"
 		):
@@ -359,7 +363,9 @@ class PaymentReconciliation(Document):
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
 		msgprint(_("Successfully Reconciled"))
-		self.get_unreconciled_entries()
+
+		if not skip_pulling_outstanding:
+			self.get_unreconciled_entries()
 
 	def make_difference_entry(self, row):
 		journal_entry = frappe.new_doc("Journal Entry")
