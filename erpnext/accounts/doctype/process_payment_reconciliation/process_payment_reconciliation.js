@@ -40,7 +40,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus==1 && ['Queued', 'Running'].find(x => x == frm.doc.status)) {
-			var execute_btn = __("Reconcile in Background")
+			let execute_btn = __("Reconcile in Background")
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({

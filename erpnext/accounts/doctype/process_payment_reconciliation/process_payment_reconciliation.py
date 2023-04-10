@@ -17,7 +17,7 @@ class ProcessPaymentReconciliation(Document):
 		if self.receivable_payable_account:
 			if self.company != frappe.db.get_value("Account", self.receivable_payable_account, "company"):
 				frappe.throw(
-					_("Receivable/Payable Account: {0} doesn't below to company {1}").format(
+					_("Receivable/Payable Account: {0} doesn't belong to company {1}").format(
 						frappe.bold(self.receivable_payable_account), frappe.bold(self.company)
 					)
 				)
@@ -26,7 +26,7 @@ class ProcessPaymentReconciliation(Document):
 		if self.bank_cash_account:
 			if self.company != frappe.db.get_value("Account", self.bank_cash_account, "company"):
 				frappe.throw(
-					_("Bank/Cash Account {0} doesn't below to company {1}").format(
+					_("Bank/Cash Account {0} doesn't belong to company {1}").format(
 						frappe.bold(self.bank_cash_account), frappe.bold(self.company)
 					)
 				)
@@ -157,7 +157,7 @@ def trigger_reconciliation_for_queued_docs():
 	):
 		frappe.throw(
 			_(
-				"Payment Reconciliation through backgound Job has been disabled. Enable it through {}"
+				"Payment Reconciliation through backgound Job has been disabled. Enable it through {0}"
 			).format(get_link_to_form("Accounts Settings", "Accounts Settings"))
 		)
 
