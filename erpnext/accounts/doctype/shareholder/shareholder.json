@@ -111,7 +111,12 @@
    "read_only": 1
   }
  ],
+<<<<<<< HEAD
  "modified": "2019-11-17 23:24:11.395882",
+=======
+ "links": [],
+ "modified": "2023-04-10 22:02:20.406087",
+>>>>>>> 430b247dfc (fix: Remove bank details fields from Shareholder)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shareholder",
