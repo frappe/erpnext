@@ -324,7 +324,7 @@ class PaymentReconciliation(Document):
 			if running_doc:
 				frappe.throw(
 					_("A Reconciliation Job {0} is running for the same filters. Cannot reconcile now").format(
-						get_link_to_form("Auto Reconcile", running_doc[0][0])
+						get_link_to_form("Auto Reconcile", running_doc)
 					)
 				)
 				return

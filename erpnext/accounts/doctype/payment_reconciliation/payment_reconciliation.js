@@ -99,7 +99,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						}
 					}).then(r => {
 						if (r.message) {
-							let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message[0][0], true);
+							let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message, true);
 							let msg = __("Payment Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
 							this.frm.dashboard.add_comment(msg, "yellow");
 						}

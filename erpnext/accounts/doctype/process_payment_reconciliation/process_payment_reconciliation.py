@@ -476,12 +476,13 @@ def reconcile(doc: None | str = None) -> None:
 
 
 @frappe.whitelist()
-def is_any_doc_running(for_filter: str | dict | None = None) -> tuple:
+def is_any_doc_running(for_filter: str | dict | None = None) -> str | None:
 	running_doc = None
 	if for_filter:
 		if type(for_filter) == str:
 			for_filter = frappe.json.loads(for_filter)
-		running_doc = frappe.db.get_all(
+
+		running_doc = frappe.db.get_value(
 			"Process Payment Reconciliation",
 			filters={
 				"docstatus": 1,
@@ -491,10 +492,10 @@ def is_any_doc_running(for_filter: str | dict | None = None) -> tuple:
 				"party": for_filter.get("party"),
 				"receivable_payable_account": for_filter.get("receivable_payable_account"),
 			},
-			as_list=1,
+			fieldname="name",
 		)
 	else:
-		running_doc = frappe.db.get_all(
-			"Process Payment Reconciliation", filters={"docstatus": 1, "status": "Running"}, as_list=1
+		running_doc = frappe.db.get_value(
+			"Process Payment Reconciliation", filters={"docstatus": 1, "status": "Running"}
 		)
 	return running_doc
