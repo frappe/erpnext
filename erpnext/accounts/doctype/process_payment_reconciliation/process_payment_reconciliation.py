@@ -146,7 +146,6 @@ def trigger_job_for_doc(docname: str | None = None):
 		frappe.msgprint(_("Scheduler is Inactive. Can't trigger job now."))
 
 
-@frappe.whitelist()
 def trigger_reconciliation_for_queued_docs():
 	"""
 	Will be called from Cron Job
