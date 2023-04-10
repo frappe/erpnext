@@ -31,6 +31,7 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
 )
 from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
@@ -275,6 +276,7 @@ class SalesOrder(SellingController):
 		self.db_set("status", "Cancelled")
 
 		self.update_blanket_order()
+		cancel_stock_reservation_entries("Sales Order", self.name)
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
