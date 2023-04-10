@@ -207,7 +207,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 	"""
 	if doc:
 		log = frappe.db.get_all(
-			"Process Payment Reconciliation Log", filters={"process_pr": doc}, as_list=1
+			"Process Payment Reconciliation Log", filters={"process_pr": doc}, pluck="name"
 		)
 		if not log:
 			log = frappe.new_doc("Process Payment Reconciliation Log")
@@ -227,7 +227,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 					doc=doc,
 				)
 		else:
-			reconcile_log = frappe.get_doc("Process Payment Reconciliation Log", log[0][0])
+			reconcile_log = frappe.get_doc("Process Payment Reconciliation Log", log[0])
 			if not reconcile_log.allocated:
 
 				job_name = f"process__{doc}_fetch_and_allocate"
