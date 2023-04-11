@@ -17,13 +17,9 @@ erpnext/manufacturing/          @rohitwaghchaure @s-aga-r
 erpnext/quality_management/     @rohitwaghchaure @s-aga-r
 erpnext/stock/                  @rohitwaghchaure @s-aga-r
 
-erpnext/controllers             @deepeshgarg007 @rohitwaghchaure @marination
+erpnext/controllers             @deepeshgarg007 @rohitwaghchaure
 erpnext/patches/                @deepeshgarg007 @rohitwaghchaure
-erpnext/public/                 @marination
-
 requirements.txt                @ankush
-erpnext/controllers/            @deepeshgarg007 @rohitwaghchaure
-erpnext/patches/                @deepeshgarg007 
 
 .github/                        @deepeshgarg007
 pyproject.toml                  @ankush
