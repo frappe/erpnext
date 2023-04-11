@@ -18,14 +18,8 @@ erpnext/quality_management/     @rohitwaghchaure @s-aga-r
 erpnext/stock/                  @rohitwaghchaure @s-aga-r
 erpnext/subcontracting          @rohitwaghchaure @s-aga-r
 
-<<<<<<< HEAD
-erpnext/crm/                    @NagariaHussain 
-erpnext/education/              @rutwikhdev 
-erpnext/projects/               @ruchamahabal
-=======
 erpnext/controllers/            @deepeshgarg007 @rohitwaghchaure
 erpnext/patches/                @deepeshgarg007 
->>>>>>> aa8b241d5a (chore: update CODEOWNERS)
 
 .github/                        @deepeshgarg007
 pyproject.toml                  @ankush
