@@ -1375,6 +1375,7 @@ def regenerate_sle_for_batch_stock_reco(detail):
 	doc.recalculate_current_qty(detail.item_code, detail.batch_no)
 	doc.docstatus = 1
 	doc.update_stock_ledger()
+	doc.repost_future_sle_and_gle()
 
 
 def get_stock_reco_qty_shift(args):
