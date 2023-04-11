@@ -5,20 +5,17 @@
 
 erpnext/accounts/               @deepeshgarg007 @ruthra-kumar
 erpnext/assets/                 @anandbaburajan @deepeshgarg007
-<<<<<<< HEAD
-erpnext/erpnext_integrations/   @nextchamp-saqib
-erpnext/loan_management/        @nextchamp-saqib @deepeshgarg007
-erpnext/regional                @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
-erpnext/selling                 @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
-erpnext/support/                @nextchamp-saqib @deepeshgarg007
-pos*                            @nextchamp-saqib
-=======
+erpnext/loan_management/        @deepeshgarg007
+erpnext/regional                @deepeshgarg007 @ruthra-kumar
+erpnext/selling                 @deepeshgarg007 @ruthra-kumar
+erpnext/support/                @deepeshgarg007
+pos*
+
 erpnext/loan_management/        @deepeshgarg007
 erpnext/regional                @deepeshgarg007 @ruthra-kumar
 erpnext/selling                 @deepeshgarg007 @ruthra-kumar
 erpnext/support/                @deepeshgarg007
 pos*                            
->>>>>>> aa8b241d5a (chore: update CODEOWNERS)
 
 erpnext/buying/                 @rohitwaghchaure @s-aga-r
 erpnext/maintenance/            @rohitwaghchaure @s-aga-r
@@ -26,24 +23,14 @@ erpnext/manufacturing/          @rohitwaghchaure @s-aga-r
 erpnext/quality_management/     @rohitwaghchaure @s-aga-r
 erpnext/stock/                  @rohitwaghchaure @s-aga-r
 
-<<<<<<< HEAD
+erpnext/controllers             @deepeshgarg007 @rohitwaghchaure @marination
+erpnext/patches/                @deepeshgarg007 @rohitwaghchaure
+erpnext/public/                 @marination
 
-erpnext/healthcare/             @chillaranand
-erpnext/hr/                     @ruchamahabal
-erpnext/non_profit/             @ruchamahabal
-erpnext/payroll                 @ruchamahabal
-erpnext/projects/               @ruchamahabal
-
-erpnext/controllers             @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure @marination
-erpnext/patches/                @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure
-erpnext/public/                 @nextchamp-saqib @marination
-
-.github/                        @ankush
-requirements.txt                @gavindsouza @ankush
-=======
+requirements.txt                @ankush
 erpnext/controllers/            @deepeshgarg007 @rohitwaghchaure
 erpnext/patches/                @deepeshgarg007 
 
 .github/                        @deepeshgarg007
 pyproject.toml                  @ankush
->>>>>>> aa8b241d5a (chore: update CODEOWNERS)
+
