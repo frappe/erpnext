@@ -995,7 +995,7 @@ frappe.ui.form.on('Payment Entry', {
 
 						if (!r.message[account]) {
 							frappe.prompt({
-								label: frappe.unscrub(account),
+								label: __("Please Specify Account"),
 								fieldname: account,
 								fieldtype: "Link",
 								options: "Account",
@@ -1007,7 +1007,7 @@ frappe.ui.form.on('Payment Entry', {
 							}, (values) => {
 								const details = Object.assign({}, r.message, values);
 								add_deductions(details);
-							});
+							}, __(frappe.unscrub(account)));
 						} else {
 							add_deductions(r.message);
 						}
