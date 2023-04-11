@@ -467,14 +467,6 @@ def reconcile_against_document(args):  # nosemgrep
 			else:
 				update_reference_in_payment_entry(entry, doc, do_not_save=True)
 
-		if doc.doctype == "Journal Entry":
-			try:
-				doc.validate_total_debit_and_credit()
-			except Exception as validation_exception:
-				raise frappe.ValidationError(
-					_("Validation Error for {0}").format(doc.name)
-				) from validation_exception
-
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)

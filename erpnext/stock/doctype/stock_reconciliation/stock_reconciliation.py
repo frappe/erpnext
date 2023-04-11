@@ -4,7 +4,8 @@
 from typing import Optional
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, bold, msgprint
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt
 
 import erpnext
@@ -89,7 +90,7 @@ class StockReconciliation(StockController):
 
 				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
-					if self.purpose == "Stock Reconciliation" and not item.serial_no:
+					if self.purpose == "Stock Reconciliation" and not item.serial_no and item.qty:
 						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")
@@ -139,6 +140,14 @@ class StockReconciliation(StockController):
 				item_warehouse_combinations.append(key)
 
 			self.validate_item(row.item_code, row)
+
+			if row.serial_no and not row.qty:
+				self.validation_messages.append(
+					_get_msg(
+						row_num,
+						f"Quantity should not be zero for the {bold(row.item_code)} since serial nos are specified",
+					)
+				)
 
 			# validate warehouse
 			if not frappe.db.get_value("Warehouse", row.warehouse):
@@ -560,6 +569,54 @@ class StockReconciliation(StockController):
 			self.queue_action("cancel", timeout=2000)
 		else:
 			self._cancel()
+
+	def recalculate_current_qty(self, item_code, batch_no):
+		for row in self.items:
+			if not (row.item_code == item_code and row.batch_no == batch_no):
+				continue
+
+			row.current_qty = get_batch_qty_for_stock_reco(item_code, row.warehouse, batch_no)
+
+			qty, val_rate = get_stock_balance(
+				item_code,
+				row.warehouse,
+				self.posting_date,
+				self.posting_time,
+				with_valuation_rate=True,
+			)
+
+			row.current_valuation_rate = val_rate
+
+			row.db_set(
+				{
+					"current_qty": row.current_qty,
+					"current_valuation_rate": row.current_valuation_rate,
+					"current_amount": flt(row.current_qty * row.current_valuation_rate),
+				}
+			)
+
+
+def get_batch_qty_for_stock_reco(item_code, warehouse, batch_no):
+	ledger = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(ledger)
+		.select(
+			Sum(ledger.actual_qty).as_("batch_qty"),
+		)
+		.where(
+			(ledger.item_code == item_code)
+			& (ledger.warehouse == warehouse)
+			& (ledger.docstatus == 1)
+			& (ledger.is_cancelled == 0)
+			& (ledger.batch_no == batch_no)
+		)
+		.groupby(ledger.batch_no)
+	)
+
+	sle = query.run(as_dict=True)
+
+	return flt(sle[0].batch_qty) if sle else 0
 
 
 @frappe.whitelist()
