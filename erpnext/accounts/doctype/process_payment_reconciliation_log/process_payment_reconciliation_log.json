@@ -107,7 +107,8 @@
    "fieldname": "payments",
    "fieldtype": "Table",
    "label": "Payments",
-   "options": "Process Payment Reconciliation Payments"
+   "options": "Process Payment Reconciliation Payments",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_fvdw",
@@ -125,7 +126,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-03 10:28:16.577419",
+ "modified": "2023-04-11 13:16:07.322861",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",
