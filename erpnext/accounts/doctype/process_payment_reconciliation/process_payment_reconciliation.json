@@ -9,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "status",
+  "pause",
   "section_break_gasn",
   "company",
   "party_type",
@@ -140,12 +141,19 @@
    "options": "Process Payment Reconciliation",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "pause",
+   "fieldtype": "Check",
+   "label": "Pause"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-03 12:11:59.302259",
+ "modified": "2023-04-11 13:17:12.434858",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",
