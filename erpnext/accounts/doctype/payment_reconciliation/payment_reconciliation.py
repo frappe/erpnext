@@ -246,7 +246,7 @@ class PaymentReconciliation(Document):
 		return new_difference_amount
 
 	@frappe.whitelist()
-	def allocate_entries(self, args, isolate_each_allocation=True):
+	def allocate_entries(self, args):
 		self.validate_entries()
 
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
@@ -256,12 +256,8 @@ class PaymentReconciliation(Document):
 
 		entries = []
 		for pay in args.get("payments"):
-			if not isolate_each_allocation:
-				pay.update({"unreconciled_amount": pay.get("amount")})
+			pay.update({"unreconciled_amount": pay.get("amount")})
 			for inv in args.get("invoices"):
-				if isolate_each_allocation:
-					pay.update({"unreconciled_amount": pay.get("amount")})
-
 				if pay.get("amount") >= inv.get("outstanding_amount"):
 					res = self.get_allocated_entry(pay, inv, inv["outstanding_amount"])
 					pay["amount"] = flt(pay.get("amount")) - flt(inv.get("outstanding_amount"))
