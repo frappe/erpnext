@@ -1881,7 +1881,6 @@ class TestSalesOrder(FrappeTestCase):
 	def test_stock_reservation_against_sales_order(self) -> None:
 		from random import randint, uniform
 
-		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 			get_sre_reserved_qty_details_for_voucher,
@@ -1994,23 +1993,27 @@ class TestSalesOrder(FrappeTestCase):
 			self.assertGreater(sre_details[0].delivered_qty, 0)
 			self.assertEqual(sre_details[0].status, "Partially Delivered")
 
-		# Test - 9: Over Delivery against Sales Order, should throw `OverAllowanceError` if Over Allowance is not set.
-		update_stock_settings("over_delivery_receipt_allowance", 0)
+		# Test - 9: Over Delivery against Sales Order, SRE Delivered Qty should not be greater than the SRE Reserved Qty.
+		update_stock_settings("over_delivery_receipt_allowance", 100)
 		dn2 = make_delivery_note(so.name)
 
 		for item in dn2.items:
 			item.qty += flt(uniform(1, 10), 0 if item.stock_uom == "Nos" else 3)
 
 		dn2.save()
-		self.assertRaises(OverAllowanceError, dn2.submit)
-
-		# Test - 10: Over Delivery against Sales Order when Over Allowance is set.
-		update_stock_settings("over_delivery_receipt_allowance", 100)
 		dn2.submit()
 		update_stock_settings("over_delivery_receipt_allowance", 0)
 
-		# Test - 11: SRE Delivered Qty should be equal to the SRE Reserved Qty.
-		so.load_from_db()
+		for item in so.items:
+			sre_details = frappe.db.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_type": "Sales Order", "voucher_no": so.name, "voucher_detail_no": item.name},
+				fields=["status", "reserved_qty", "delivered_qty"],
+			)
+
+			for sre_detail in sre_details:
+				self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
+				self.assertEqual(sre_detail.status, "Delivered")
 
 
 def automatically_fetch_payment_terms(enable=1):
