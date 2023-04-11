@@ -4,6 +4,7 @@ import frappe
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import flt
 from frappe.utils.deprecations import deprecated
+from pypika import Order
 
 
 class DeprecatedSerialNoValuation:
@@ -39,25 +40,25 @@ class DeprecatedSerialNoValuation:
 		# Get rate for serial nos which has been transferred to other company
 		invalid_serial_nos = [d.name for d in all_serial_nos if d.company != self.sle.company]
 		for serial_no in invalid_serial_nos:
-			incoming_rate = frappe.db.sql(
-				"""
-				select incoming_rate
-				from `tabStock Ledger Entry`
-				where
-					company = %s
-					and serial_and_batch_bundle IS NULL
-					and actual_qty > 0
-					and is_cancelled = 0
-					and (serial_no = %s
-						or serial_no like %s
-						or serial_no like %s
-						or serial_no like %s
+			table = frappe.qb.DocType("Stock Ledger Entry")
+			incoming_rate = (
+				frappe.qb.from_(table)
+				.select(table.incoming_rate)
+				.where(
+					(
+						(table.serial_no == serial_no)
+						| (table.serial_no.like(serial_no + "\n%"))
+						| (table.serial_no.like("%\n" + serial_no))
+						| (table.serial_no.like("%\n" + serial_no + "\n%"))
 					)
-				order by posting_date desc
-				limit 1
-			""",
-				(self.sle.company, serial_no, serial_no + "\n%", "%\n" + serial_no, "%\n" + serial_no + "\n%"),
-			)
+					& (table.company == self.sle.company)
+					& (table.serial_and_batch_bundle.isnull())
+					& (table.actual_qty > 0)
+					& (table.is_cancelled == 0)
+				)
+				.orderby(table.posting_date, order=Order.desc)
+				.limit(1)
+			).run()
 
 			self.serial_no_incoming_rate[serial_no] += flt(incoming_rate[0][0]) if incoming_rate else 0
 			incoming_values += self.serial_no_incoming_rate[serial_no]

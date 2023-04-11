@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import collections
+import csv
 from collections import defaultdict
 from typing import Dict, List
 
@@ -9,7 +10,17 @@ import frappe
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import add_days, cint, flt, get_link_to_form, nowtime, today
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	flt,
+	get_link_to_form,
+	now,
+	nowtime,
+	parse_json,
+	today,
+)
 
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
@@ -626,6 +637,173 @@ class SerialandBatchBundle(Document):
 		self.delink_reference_from_batch()
 		self.clear_table()
 
+	@frappe.whitelist()
+	def add_serial_batch(self, data):
+		serial_nos, batch_nos = [], []
+		if isinstance(data, str):
+			data = parse_json(data)
+
+		if data.get("csv_file"):
+			serial_nos, batch_nos = get_serial_batch_from_csv(self.item_code, data.get("csv_file"))
+		else:
+			serial_nos, batch_nos = get_serial_batch_from_data(self.item_code, data)
+
+		if not serial_nos and not batch_nos:
+			return
+
+		if serial_nos:
+			self.set("entries", serial_nos)
+		elif batch_nos:
+			self.set("entries", batch_nos)
+
+
+def get_serial_batch_from_csv(item_code, file_path):
+	file_path = frappe.get_site_path() + file_path
+	serial_nos = []
+	batch_nos = []
+
+	with open(file_path, "r") as f:
+		reader = csv.reader(f)
+		serial_nos, batch_nos = parse_csv_file_to_get_serial_batch(reader)
+
+	if serial_nos:
+		make_serial_nos(item_code, serial_nos)
+
+	print(batch_nos)
+	if batch_nos:
+		make_batch_nos(item_code, batch_nos)
+
+	return serial_nos, batch_nos
+
+
+def parse_csv_file_to_get_serial_batch(reader):
+	has_serial_no, has_batch_no = False, False
+	serial_nos = []
+	batch_nos = []
+
+	for index, row in enumerate(reader):
+		if index == 0:
+			has_serial_no = row[0] == "Serial No"
+			has_batch_no = row[0] == "Batch No"
+			continue
+
+		if not row[0]:
+			continue
+
+		if has_serial_no or (has_serial_no and has_batch_no):
+			_dict = {"serial_no": row[0], "qty": 1}
+
+			if has_batch_no:
+				_dict.update(
+					{
+						"batch_no": row[1],
+						"qty": row[2],
+					}
+				)
+
+			serial_nos.append(_dict)
+		elif has_batch_no:
+			batch_nos.append(
+				{
+					"batch_no": row[0],
+					"qty": row[1],
+				}
+			)
+
+	return serial_nos, batch_nos
+
+
+def get_serial_batch_from_data(item_code, kwargs):
+	serial_nos = []
+	batch_nos = []
+	if kwargs.get("serial_nos"):
+		data = parse_serial_nos(kwargs.get("serial_nos"))
+		for serial_no in data:
+			if not serial_no:
+				continue
+			serial_nos.append({"serial_no": serial_no, "qty": 1})
+
+		make_serial_nos(item_code, serial_nos)
+
+	return serial_nos, batch_nos
+
+
+def make_serial_nos(item_code, serial_nos):
+	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
+
+	serial_nos = [d.get("serial_no") for d in serial_nos if d.get("serial_no")]
+
+	serial_nos_details = []
+	user = frappe.session.user
+	for serial_no in serial_nos:
+		serial_nos_details.append(
+			(
+				serial_no,
+				serial_no,
+				now(),
+				now(),
+				user,
+				user,
+				item.item_code,
+				item.item_name,
+				item.description,
+				"Inactive",
+			)
+		)
+
+	fields = [
+		"name",
+		"serial_no",
+		"creation",
+		"modified",
+		"owner",
+		"modified_by",
+		"item_code",
+		"item_name",
+		"description",
+		"status",
+	]
+
+	frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+
+	frappe.msgprint(_("Serial Nos are created successfully"))
+
+
+def make_batch_nos(item_code, batch_nos):
+	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
+
+	batch_nos = [d.get("batch_no") for d in batch_nos if d.get("batch_no")]
+
+	batch_nos_details = []
+	user = frappe.session.user
+	for batch_no in batch_nos:
+		batch_nos_details.append(
+			(batch_no, batch_no, now(), now(), user, user, item.item_code, item.item_name, item.description)
+		)
+
+	fields = [
+		"name",
+		"batch_id",
+		"creation",
+		"modified",
+		"owner",
+		"modified_by",
+		"item",
+		"item_name",
+		"description",
+	]
+
+	frappe.db.bulk_insert("Batch", fields=fields, values=set(batch_nos_details))
+
+	frappe.msgprint(_("Batch Nos are created successfully"))
+
+
+def parse_serial_nos(data):
+	if isinstance(data, list):
+		return data
+
+	return [s.strip() for s in cstr(data).strip().upper().replace(",", "\n").split("\n") if s.strip()]
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -690,13 +868,13 @@ def get_filters_for_bundle(item_code, docstatus=None, voucher_no=None, name=None
 @frappe.whitelist()
 def add_serial_batch_ledgers(entries, child_row, doc) -> object:
 	if isinstance(child_row, str):
-		child_row = frappe._dict(frappe.parse_json(child_row))
+		child_row = frappe._dict(parse_json(child_row))
 
 	if isinstance(entries, str):
-		entries = frappe.parse_json(entries)
+		entries = parse_json(entries)
 
 	if doc and isinstance(doc, str):
-		parent_doc = frappe.parse_json(doc)
+		parent_doc = parse_json(doc)
 
 	if frappe.db.exists("Serial and Batch Bundle", child_row.serial_and_batch_bundle):
 		doc = update_serial_batch_no_ledgers(entries, child_row, parent_doc)

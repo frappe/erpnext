@@ -8,6 +8,17 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 
 	refresh(frm) {
 		frm.trigger('toggle_fields');
+		frm.trigger('prepare_serial_batch_prompt');
+	},
+
+	item_code(frm) {
+		frm.clear_custom_buttons();
+		frm.trigger('prepare_serial_batch_prompt');
+	},
+
+	type_of_transaction(frm) {
+		frm.clear_custom_buttons();
+		frm.trigger('prepare_serial_batch_prompt');
 	},
 
 	warehouse(frm) {
@@ -28,6 +39,91 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 
 	has_batch_no(frm) {
 		frm.trigger('toggle_fields');
+	},
+
+	prepare_serial_batch_prompt(frm) {
+		if (frm.doc.docstatus === 0 && frm.doc.item_code
+			&& frm.doc.type_of_transaction === "Inward") {
+			let label = frm.doc?.has_serial_no === 1
+				? __('Serial Nos') : __('Batch Nos');
+
+			if (frm.doc?.has_serial_no === 1 && frm.doc?.has_batch_no === 1) {
+				label = __('Serial and Batch Nos');
+			}
+
+			let fields = frm.events.get_prompt_fields(frm);
+
+			frm.add_custom_button(__("Make " + label), () => {
+				frappe.prompt(fields, (data) => {
+					frm.events.add_serial_batch(frm, data);
+				}, "Add " + label, "Make " + label);
+			});
+		}
+	},
+
+	get_prompt_fields(frm) {
+		let attach_field = {
+			"label": __("Attach CSV File"),
+			"fieldname": "csv_file",
+			"fieldtype": "Attach"
+		}
+
+		if (!frm.doc.has_batch_no) {
+			attach_field.depends_on = "eval:doc.using_csv_file === 1"
+		}
+
+		let fields = [
+			{
+				"label": __("Using CSV File"),
+				"fieldname": "using_csv_file",
+				"default": 1,
+				"fieldtype": "Check",
+			},
+			attach_field,
+			{
+				"fieldtype": "Section Break",
+			}
+		]
+
+		if (frm.doc.has_serial_no) {
+			fields.push({
+				"label": "Serial Nos",
+				"fieldname": "serial_nos",
+				"fieldtype": "Small Text",
+				"depends_on": "eval:doc.using_csv_file === 0"
+			})
+		}
+
+		if (frm.doc.has_batch_no) {
+			fields = attach_field
+		}
+
+		return fields;
+	},
+
+	add_serial_batch(frm, prompt_data) {
+		frm.events.validate_prompt_data(frm, prompt_data);
+
+		frm.call({
+			method: "add_serial_batch",
+			doc: frm.doc,
+			args: {
+				"data": prompt_data,
+			},
+			callback(r) {
+				refresh_field("entries");
+			}
+		});
+	},
+
+	validate_prompt_data(frm, prompt_data) {
+		if (prompt_data.using_csv_file && !prompt_data.csv_file) {
+			frappe.throw(__("Please attach CSV file"));
+		}
+
+		if (frm.doc.has_serial_no && !prompt_data.using_csv_file && !prompt_data.serial_nos) {
+			frappe.throw(__("Please enter serial nos"));
+		}
 	},
 
 	toggle_fields(frm) {

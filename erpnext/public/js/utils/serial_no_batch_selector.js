@@ -12,12 +12,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	make() {
-		let label = this.item?.has_serial_no ? __('Serial No') : __('Batch No');
+		let label = this.item?.has_serial_no ? __('Serial Nos') : __('Batch Nos');
 		let primary_label = this.bundle
 			? __('Update') : __('Add');
 
 		if (this.item?.has_serial_no && this.item?.batch_no) {
-			label = __('Serial No / Batch No');
+			label = __('Serial Nos / Batch Nos');
 		}
 
 		primary_label += ' ' + label;
@@ -26,7 +26,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			title: this.item?.title || primary_label,
 			fields: this.get_dialog_fields(),
 			primary_action_label: primary_label,
-			primary_action: () => this.update_ledgers()
+			primary_action: () => this.update_ledgers(),
+			secondary_action_label: __('Edit Full Form'),
+			secondary_action: () => this.edit_full_form(),
 		});
 
 		this.dialog.set_value("qty", this.item.qty);
@@ -48,7 +50,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		if (this.item.has_serial_no) {
 			fields.push({
-				fieldtype: 'Link',
+				fieldtype: 'Data',
 				fieldname: 'scan_serial_no',
 				label: __('Scan Serial No'),
 				options: 'Serial No',
@@ -277,6 +279,37 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			this.frm.save();
 			this.dialog.hide();
 		})
+	}
+
+	edit_full_form() {
+		let bundle_id = this.item.serial_and_batch_bundle
+		if (!bundle_id) {
+			_new = frappe.model.get_new_doc(
+				"Serial and Batch Bundle", null, null, true
+			);
+
+			_new.item_code = this.item.item_code;
+			_new.warehouse = this.get_warehouse();
+			_new.has_serial_no = this.item.has_serial_no;
+			_new.has_batch_no = this.item.has_batch_no;
+			_new.type_of_transaction = this.get_type_of_transaction();
+			_new.company = this.frm.doc.company;
+			_new.voucher_type = this.frm.doc.doctype;
+			bundle_id = _new.name;
+		}
+
+		frappe.set_route("Form", "Serial and Batch Bundle", bundle_id);
+		this.dialog.hide();
+	}
+
+	get_warehouse() {
+		return (this.item?.outward ?
+			(this.item.warehouse || this.item.s_warehouse)
+			: (this.item.warehouse || this.item.t_warehouse));
+	}
+
+	get_type_of_transaction() {
+		return (this.item?.outward ? 'Outward' : 'Inward');
 	}
 
 	render_data() {

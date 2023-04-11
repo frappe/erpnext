@@ -1527,7 +1527,6 @@ class TestWorkOrder(FrappeTestCase):
 		ste_doc.load_from_db()
 
 		# Create a stock entry to manufacture the item
-		print("remove 2 qty from each item")
 		ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 5))
 		for row in ste_doc.items:
 			if row.s_warehouse and not row.t_warehouse:
