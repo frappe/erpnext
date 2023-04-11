@@ -57,13 +57,24 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 		}
 		if (frm.doc.docstatus==1 && ['Completed', 'Running', "Partially Reconciled"].find(x => x == frm.doc.status)) {
 			frm.call({
-				'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.get_progress",
+				'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.get_reconciled_count",
 				args: {
 					"docname": frm.docname,
 				}
 			}).then(r => {
-				if (r) {
-					frm.dashboard.add_progress('Reconciliation Progress', r.message);
+				if (r.message) {
+					let progress = 0;
+					let description = "";
+
+					if (r.message.processed) {
+						progress = (r.message.processed/r.message.total) * 100;
+						description = r.message.processed + "/" + r.message.total +  " processed";
+					} else if (r.message.total == 0) {
+						progress = 100;
+					}
+
+
+					frm.dashboard.add_progress('Reconciliation Progress', progress, description);
 				}
 			})
 		}

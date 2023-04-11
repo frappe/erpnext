@@ -44,8 +44,8 @@ class ProcessPaymentReconciliation(Document):
 
 
 @frappe.whitelist()
-def get_progress(docname: str | None = None) -> float:
-	progress = 0.0
+def get_reconciled_count(docname: str | None = None) -> float:
+	current_status = {}
 	if docname:
 		reconcile_log = frappe.db.get_value(
 			"Process Payment Reconciliation Log", filters={"process_pr": docname}, fieldname="name"
@@ -57,16 +57,9 @@ def get_progress(docname: str | None = None) -> float:
 				fields=["reconciled_entries", "total_allocations"],
 				as_list=1,
 			)
-			processed, total = res[0]
+			current_status["processed"], current_status["total"] = res[0]
 
-			if processed != 0:
-				progress = processed / total * 100
-			elif total == 0:
-				progress = 100
-
-			return progress
-
-	return progress
+	return current_status
 
 
 def get_pr_instance(doc: str):
