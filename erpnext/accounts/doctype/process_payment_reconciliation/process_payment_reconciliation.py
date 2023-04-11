@@ -424,6 +424,8 @@ def reconcile(doc: None | str = None) -> None:
 					frappe.db.set_value(
 						"Process Payment Reconciliation Log", log, "reconciled_entries", reconciled_count
 					)
+					frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Running")
+					frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Running")
 				except Exception as err:
 					# Update the parent doc about the exception
 					frappe.db.rollback()
