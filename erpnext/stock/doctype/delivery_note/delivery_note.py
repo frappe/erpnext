@@ -355,7 +355,7 @@ class DeliveryNote(SellingController):
 					if item.warehouse != sre_data[0]:
 						frappe.throw(
 							_("Row #{0}: Stock is reserved for Warehouse {1}").format(item.idx, sre_data[0]),
-							title="Stock Reservation Warehouse Mismatch",
+							title=_("Stock Reservation Warehouse Mismatch"),
 						)
 				else:
 					from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -366,7 +366,7 @@ class DeliveryNote(SellingController):
 							_(
 								"Row #{0}: Stock is reserved for Group Warehouse {1}, please select its child Warehouse"
 							).format(item.idx, sre_data[0]),
-							title="Stock Reservation Group Warehouse",
+							title=_("Stock Reservation Group Warehouse"),
 						)
 
 	def check_credit_limit(self):
