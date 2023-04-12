@@ -179,18 +179,13 @@ def get_stock_reservation_entries_for_voucher(
 
 
 def get_sre_reserved_qty_details_for_item_and_warehouse(
-	item_code: str | list, warehouse: str | list
+	item_code_list: list, warehouse_list: list
 ) -> dict:
 	"""Returns a dict like {("item_code", "warehouse"): "reserved_qty", ... }."""
 
 	sre_details = {}
 
-	if item_code and warehouse:
-		if isinstance(item_code, str):
-			item_code = [item_code]
-		if isinstance(warehouse, str):
-			warehouse = [warehouse]
-
+	if item_code_list and warehouse_list:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		sre_data = (
 			frappe.qb.from_(sre)
@@ -201,8 +196,8 @@ def get_sre_reserved_qty_details_for_item_and_warehouse(
 			)
 			.where(
 				(sre.docstatus == 1)
-				& (sre.item_code.isin(item_code))
-				& (sre.warehouse.isin(warehouse))
+				& (sre.item_code.isin(item_code_list))
+				& (sre.warehouse.isin(warehouse_list))
 				& (sre.status.notin(["Delivered", "Cancelled"]))
 			)
 			.groupby(sre.item_code, sre.warehouse)
@@ -212,6 +207,27 @@ def get_sre_reserved_qty_details_for_item_and_warehouse(
 			sre_details = {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in sre_data}
 
 	return sre_details
+
+
+def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str) -> float:
+	"""Returns `Reserved Qty` for Item and Warehouse combination."""
+
+	reserved_qty = 0.0
+
+	if item_code and warehouse:
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		return (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code == item_code)
+				& (sre.warehouse == warehouse)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+			)
+		).run(as_list=True)[0][0] or 0.0
+
+	return reserved_qty
 
 
 def get_sre_reserved_qty_details_for_voucher(
