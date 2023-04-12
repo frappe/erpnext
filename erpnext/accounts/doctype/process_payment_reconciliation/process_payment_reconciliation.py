@@ -244,7 +244,9 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 			elif not reconciled:
 				allocation = get_next_allocation(log)
 				if allocation:
-					reconcile_job_name = f"process_{doc}_reconcile_allocation_{allocation[0].idx}"
+					reconcile_job_name = (
+						f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
+					)
 				else:
 					reconcile_job_name = f"process_{doc}_reconcile"
 				if not is_job_running(reconcile_job_name):
@@ -263,13 +265,28 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 
 def get_next_allocation(log: str) -> list:
 	if log:
-		allocations = frappe.db.get_all(
+		allocations = []
+		next = frappe.db.get_all(
 			"Process Payment Reconciliation Log Allocations",
 			filters={"parent": log, "reconciled": 0},
-			fields=["*"],
+			fields=["reference_type", "reference_name"],
 			order_by="idx",
 			limit=1,
 		)
+
+		if next:
+			allocations = frappe.db.get_all(
+				"Process Payment Reconciliation Log Allocations",
+				filters={
+					"parent": log,
+					"reconciled": 0,
+					"reference_type": next[0].reference_type,
+					"reference_name": next[0].reference_name,
+				},
+				fields=["*"],
+				order_by="idx",
+			)
+
 		return allocations
 	return []
 
@@ -340,7 +357,9 @@ def fetch_and_allocate(doc: str) -> None:
 				# generate reconcile job name
 				allocation = get_next_allocation(log)
 				if allocation:
-					reconcile_job_name = f"process_{doc}_reconcile_allocation_{allocation[0].idx}"
+					reconcile_job_name = (
+						f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
+					)
 				else:
 					reconcile_job_name = f"process_{doc}_reconcile"
 
@@ -375,26 +394,20 @@ def reconcile(doc: None | str = None) -> None:
 			if reconciled_entries != total_allocations:
 				try:
 					# Fetch next allocation
-					allocations = frappe.db.get_all(
-						"Process Payment Reconciliation Log Allocations",
-						filters={"parent": log, "reconciled": 0},
-						fields=["*"],
-						order_by="idx",
-						limit=1,
-					)
+					allocations = get_next_allocation(log)
 
 					# Get invoice related to allocations. This will be used for validation by Payment Reconciliation tool
+					inv_nos = [x.invoice_number for x in allocations]
 					invoices = frappe.db.get_all(
 						"Process Payment Reconciliation Log Invoices",
-						filters={"parent": log, "invoice_number": allocations[0]["invoice_number"]},
+						filters={"parent": log, "invoice_number": ["in", inv_nos]},
 						fields=["*"],
 						order_by="idx",
-						limit=1,
 					)
 
 					pr = get_pr_instance(doc)
 
-					# Just pass all invoices, no need to filter. They are only used for validations
+					# Invoices are required for Validation by the Payment Reconciliation tool
 					for x in invoices:
 						pr.append("invoices", x)
 
@@ -465,7 +478,9 @@ def reconcile(doc: None | str = None) -> None:
 						# generate reconcile job name
 						allocation = get_next_allocation(log)
 						if allocation:
-							reconcile_job_name = f"process_{doc}_reconcile_allocation_{allocation[0].idx}"
+							reconcile_job_name = (
+								f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
+							)
 						else:
 							reconcile_job_name = f"process_{doc}_reconcile"
 
