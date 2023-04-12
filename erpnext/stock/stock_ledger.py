@@ -1010,7 +1010,7 @@ class update_entries_after(object):
 		msg_list = []
 		for warehouse, exceptions in self.exceptions.items():
 			deficiency = min(e["diff"] for e in exceptions)
-			msg_prefix = _("As {} units are reserved, ").format(frappe.bold(self.reserved_stock))
+			msg_prefix = _("As {} units are reserved").format(frappe.bold(self.reserved_stock))
 
 			if (
 				exceptions[0]["voucher_type"],
@@ -1036,7 +1036,7 @@ class update_entries_after(object):
 
 			if msg:
 				if self.reserved_stock:
-					msg = msg_prefix + msg
+					msg = "{0}, {1}".format(msg_prefix, msg)
 
 				msg_list.append(msg)
 
