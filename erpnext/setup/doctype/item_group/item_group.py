@@ -36,7 +36,23 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 		self.make_route()
 		self.validate_item_group_defaults()
+		self.check_item_tax()
 		ECommerceSettings.validate_field_filters(self.filter_fields, enable_field_filters=True)
+
+	def check_item_tax(self):
+		"""Check whether Tax Rate is not entered twice for same Tax Type"""
+		check_list = []
+		for d in self.get("taxes"):
+			if d.item_tax_template:
+				if (d.item_tax_template, d.tax_category) in check_list:
+					frappe.throw(
+						_("{0} entered twice {1} in Item Taxes").format(
+							frappe.bold(d.item_tax_template),
+							"for tax category {0}".format(frappe.bold(d.tax_category)) if d.tax_category else "",
+						)
+					)
+				else:
+					check_list.append((d.item_tax_template, d.tax_category))
 
 	def on_update(self):
 		NestedSet.on_update(self)
