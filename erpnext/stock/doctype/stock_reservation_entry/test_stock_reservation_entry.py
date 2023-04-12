@@ -184,14 +184,38 @@ def create_items() -> dict:
 		"SR Item 1": {"is_stock_item": 1, "valuation_rate": 100},
 		"SR Item 2": {"is_stock_item": 1, "valuation_rate": 200, "stock_uom": "Kg"},
 		# Batch Items
-		"SR Batch Item 1": {"is_stock_item": 1, "valuation_rate": 100},
-		"SR Batch Item 2": {"is_stock_item": 1, "valuation_rate": 200, "stock_uom": "Kg"},
-		# Serial Items
-		"SR Serial Item 1": {"is_stock_item": 1, "valuation_rate": 100},
-		"SR Serial Item 2": {"is_stock_item": 1, "valuation_rate": 200, "stock_uom": "Kg"},
-		# Batch and Serial Items
-		"SR Batch and Serial Item 1": {"is_stock_item": 1, "valuation_rate": 100},
-		"SR Batch and Serial Item 2": {"is_stock_item": 1, "valuation_rate": 200, "stock_uom": "Kg"},
+		"SR Batch Item 1": {
+			"is_stock_item": 1,
+			"valuation_rate": 100,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SRBI-1-.#####.",
+		},
+		"SR Batch Item 2": {
+			"is_stock_item": 1,
+			"valuation_rate": 200,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SRBI-2-.#####.",
+			"stock_uom": "Kg",
+		},
+		# Serial Item
+		"SR Serial Item 1": {
+			"is_stock_item": 1,
+			"valuation_rate": 100,
+			"has_serial_no": 1,
+			"serial_no_series": "SRSI-1-.#####",
+		},
+		# Batch and Serial Item
+		"SR Batch and Serial Item 1": {
+			"is_stock_item": 1,
+			"valuation_rate": 100,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SRBSI-1-.#####.",
+			"has_serial_no": 1,
+			"serial_no_series": "SRBSI-1-.#####",
+		},
 	}
 
 	items = {}
