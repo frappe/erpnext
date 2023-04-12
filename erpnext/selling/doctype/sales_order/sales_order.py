@@ -538,7 +538,20 @@ class SalesOrder(SellingController):
 		sre_count = 0
 		reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", self.name)
 		for item in self.get("items"):
+			# Skip if `Reserved Stock` is not checked for the item.
 			if not item.get("reserve_stock"):
+				continue
+
+			# Skip if Non-Stock Item.
+			if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+				frappe.msgprint(
+					_("Row #{0}: Stock cannot be reserved for a non-stock Item {1}").format(
+						item.idx, frappe.bold(item.item_code)
+					),
+					title=_("Stock Reservation"),
+					indicator="yellow",
+				)
+				item.db_set("reserve_stock", 0)
 				continue
 
 			unreserved_qty = get_unreserved_qty(item, reserved_qty_details)
