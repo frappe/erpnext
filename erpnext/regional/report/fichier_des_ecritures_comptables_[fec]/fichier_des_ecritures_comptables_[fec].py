@@ -10,14 +10,8 @@ from frappe.utils import format_datetime
 
 
 def execute(filters=None):
-	account_details = {}
 
-	account = frappe.qb.DocType("Account")
-
-	for acc in frappe.qb.from_(account).select(account.name, account.is_group).run(as_dict=True):
-		account_details.setdefault(acc.name, acc)
-
-	validate_filters(filters, account_details)
+	validate_filters(filters)
 
 	filters = set_account_currency(filters)
 
@@ -28,7 +22,7 @@ def execute(filters=None):
 	return columns, res
 
 
-def validate_filters(filters, account_details):
+def validate_filters(filters):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
