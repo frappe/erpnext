@@ -108,7 +108,9 @@ class StockSettings(Document):
 				"Stock Settings", "enable_stock_reservation"
 			)
 
-			if db_enable_stock_reservation and frappe.db.count("Stock Reservation Entry"):
+			if db_enable_stock_reservation and frappe.db.exists(
+				"Stock Reservation Entry", {"docstatus": 1, "status": ["!=", "Delivered"]}
+			):
 				frappe.throw(
 					_("As there are existing {0}, you can not change the value of {1}.").format(
 						frappe.bold("Stock Reservation Entries"), frappe.bold("Enable Stock Reservation")
