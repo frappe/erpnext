@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
 from frappe.utils.scheduler import is_scheduler_inactive
@@ -80,6 +80,8 @@ def get_pr_instance(doc: str):
 	for field in fields:
 		d[field] = process_payment_reconciliation.get(field)
 	pr.update(d)
+	pr.invoice_limit = 1000
+	pr.payment_limit = 100
 	return pr
 
 
@@ -419,9 +421,9 @@ def reconcile(doc: None | str = None) -> None:
 					pr.reconcile(skip_job_check=True, skip_pulling_outstanding=True)
 
 					# Update reconciled flag
-					frappe.db.set_value(
-						"Process Payment Reconciliation Log Allocations", allocations[0].name, "reconciled", True
-					)
+					allocation_names = [x.name for x in allocations]
+					ppa = qb.DocType("Process Payment Reconciliation Log Allocations")
+					qb.update(ppa).set(ppa.reconciled, True).where(ppa.name.isin(allocation_names)).run()
 
 					# Update reconciled count
 					reconciled_count = frappe.db.count(
