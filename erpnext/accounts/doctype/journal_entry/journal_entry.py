@@ -878,6 +878,8 @@ class JournalEntry(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
 
+		merge_entries = frappe.db.get_single_value("Accounts Settings", "merge_similar_account_heads")
+
 		gl_map = self.build_gl_map()
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			update_outstanding = "No"
@@ -885,7 +887,13 @@ class JournalEntry(AccountsController):
 			update_outstanding = "Yes"
 
 		if gl_map:
-			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
+			make_gl_entries(
+				gl_map,
+				cancel=cancel,
+				adv_adj=adv_adj,
+				merge_entries=merge_entries,
+				update_outstanding=update_outstanding,
+			)
 
 	@frappe.whitelist()
 	def get_balance(self, difference_account=None):
