@@ -516,6 +516,7 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, time_in_mins, wo):
+		ws_hr_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
@@ -541,6 +542,7 @@ class JobCard(Document):
 				if data.get("workstation") != self.workstation:
 					# workstations can change in a job card
 					data.workstation = self.workstation
+					data.hour_rate = flt(ws_hr_rate)
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
