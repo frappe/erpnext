@@ -36,8 +36,7 @@
    "fieldname": "allocations",
    "fieldtype": "Table",
    "label": "Allocations",
-   "options": "Process Payment Reconciliation Log Allocations",
-   "read_only": 1
+   "options": "Process Payment Reconciliation Log Allocations"
   },
   {
    "default": "0",
@@ -126,7 +125,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-11 13:16:07.322861",
+ "modified": "2023-04-11 17:50:24.457790",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",
