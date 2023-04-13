@@ -535,17 +535,19 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					basic_details = basic_item_details_map.get(item.item_code)
-					ret, basic_item_details = get_item_details(
-						args,
-						self,
-						for_validate=True,
-						overwrite_warehouse=False,
-						return_basic_details=True,
-						basic_details=basic_details,
-					)
+					def get_basic_item_details(basic_details=None):
+						if basic_details is None:
+							return get_item_details(args, self, for_validate=True, overwrite_warehouse=False, return_basic_details=True)
+						else:
+							return basic_details
 
-					basic_item_details_map.setdefault(item.item_code, basic_item_details)
+					basic_details = basic_item_details_map.get(item.item_code)
+
+					basic_item_details = get_basic_item_details(basic_details)
+
+					basic_item_details_map[item.item_code, item.qty] = basic_item_details
+
+					ret = {key: value for dict_item in basic_item_details for key, value in dict_item.items()}
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
