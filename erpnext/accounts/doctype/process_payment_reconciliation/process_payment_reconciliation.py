@@ -418,7 +418,15 @@ def reconcile(doc: None | str = None) -> None:
 						pr.append("allocation", x)
 
 					# reconcile
-					pr.reconcile(skip_job_check=True, skip_pulling_outstanding=True)
+					pr.reconcile(
+						skip_job_check=True, skip_pulling_outstanding=True, skip_setter_for_missing_values=True
+					)
+
+					# If Payment Entry, trigger setter for missing values
+					if allocations[0].reference_type == "Payment Entry":
+						pe = frappe.get_doc(allocations[0].reference_type, allocations[0].reference_name)
+						pe.set_missing_values()
+						pe.save()
 
 					# Update reconciled flag
 					allocation_names = [x.name for x in allocations]

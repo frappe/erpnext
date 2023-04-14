@@ -308,7 +308,9 @@ class PaymentReconciliation(Document):
 		)
 
 	@frappe.whitelist()
-	def reconcile(self, skip_job_check=False, skip_pulling_outstanding=False):
+	def reconcile(
+		self, skip_job_check=False, skip_pulling_outstanding=False, skip_setter_for_missing_values=False
+	):
 		if not skip_job_check and frappe.db.get_single_value(
 			"Accounts Settings", "enable_payment_reconciliation_in_background"
 		):
@@ -353,7 +355,7 @@ class PaymentReconciliation(Document):
 					self.make_difference_entry(payment_details)
 
 		if entry_list:
-			reconcile_against_document(entry_list)
+			reconcile_against_document(entry_list, skip_setter_for_missing_values)
 
 		if dr_or_cr_notes:
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
