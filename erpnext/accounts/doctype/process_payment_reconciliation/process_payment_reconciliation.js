@@ -78,5 +78,16 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 				}
 			})
 		}
+		if (frm.doc.docstatus==1 && frm.doc.status == 'Running') {
+			let execute_btn = __("Pause")
+
+			frm.add_custom_button(execute_btn, () => {
+				frappe.db.set_value(frm.doctype, frm.docname, 'pause', 1).then(r => {
+					if(!r.exc) {
+						frm.reload_doc();
+					}
+				});
+			});
+		}
 	}
 });
