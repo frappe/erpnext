@@ -1594,17 +1594,7 @@ def get_account_details(account, date, cost_center=None):
 @frappe.whitelist()
 def get_company_defaults(company):
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
-	ret = frappe.get_cached_value("Company", company, fields, as_dict=1)
-
-	for fieldname in fields:
-		if not ret[fieldname]:
-			frappe.throw(
-				_("Please set default {0} in Company {1}").format(
-					frappe.get_meta("Company").get_label(fieldname), company
-				)
-			)
-
-	return ret
+	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
 
 def get_outstanding_on_journal_entry(name):
