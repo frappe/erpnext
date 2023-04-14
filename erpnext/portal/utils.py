@@ -50,7 +50,8 @@ def create_customer_or_supplier():
 	if not doctype:
 		return
 
-	if party_exists(doctype, user):
+	party_exist = party_exists(doctype, user)
+	if party_exist["party_exist"]:
 		return
 
 	party = frappe.new_doc(doctype)
@@ -93,12 +94,22 @@ def create_customer_or_supplier():
 		# if user is both customer and supplier, alter fullname to avoid contact name duplication
 		fullname += "-" + doctype
 
-	create_party_contact(doctype, fullname, user, party.name)
+	create_party_contact(doctype, fullname, user, party.name, party_exist["contact"])
 
 	return party
 
 
-def create_party_contact(doctype, fullname, user, party_name):
+def create_party_contact(doctype, fullname, user, party_name, contact_check):
+	# if contact with no doctype links exist, then amend and save.
+	if contact_check:
+		contact = frappe.get_doc("Contact", contact_check)
+		
+		contact.append("links", dict(link_doctype=doctype, link_name=party_name))
+		contact.flags.ignore_mandatory = True
+		contact.save(ignore_permissions=True)
+		return
+	
+	# if not, then create new contact.
 	contact = frappe.new_doc("Contact")
 	contact.update({"first_name": fullname, "email_id": user})
 	contact.append("links", dict(link_doctype=doctype, link_name=party_name))
@@ -108,11 +119,22 @@ def create_party_contact(doctype, fullname, user, party_name):
 
 
 def party_exists(doctype, user):
-	# check if contact exists against party and if it is linked to the doctype
-	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	# list all contacts that match user email and check if it is linked to the doctype
+	contact_name = frappe.db.get_all("Contact", {"email_id": user}, pluck='name')
+	party_exist = False
+	no_link_contact = None
+	
 	if contact_name:
-		contact = frappe.get_doc("Contact", contact_name)
-		doctypes = [d.link_doctype for d in contact.links]
-		return doctype in doctypes
+		for c_loop in contact_name:
+			contact = frappe.get_doc("Contact", c_loop)
+			doctypes = [d.link_doctype for d in contact.links]
+			# check for contact with links to customer/supplier doctype
+			if doctype in doctypes:
+				party_exist = True
+			# check for contact with empty doctype links table	
+			if not doctypes:
+				no_link_contact = c_loop
 
-	return False
+		return {"party_exist": party_exist, "contact": no_link_contact}
+	
+	return {"party_exist": party_exist, "contact": no_link_contact}
