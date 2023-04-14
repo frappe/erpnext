@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 
 class TestStockReservationEntry(FrappeTestCase):
@@ -25,18 +25,17 @@ class TestStockReservationEntry(FrappeTestCase):
 		)
 
 		# Case - 1: When `Stock Reservation` is disabled in `Stock Settings`, throw `ValidationError`
-		update_stock_settings("enable_stock_reservation", 0)
-		self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
+		with change_settings("Stock Settings", {"enable_stock_reservation": 0}):
+			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
 
-		# Case - 2: When `Voucher Type` is not allowed for `Stock Reservation`, throw `ValidationError`
-		update_stock_settings("enable_stock_reservation", 1)
-		voucher.doctype = "NOT ALLOWED"
-		self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
+		with change_settings("Stock Settings", {"enable_stock_reservation": 1}):
+			# Case - 2: When `Voucher Type` is not allowed for `Stock Reservation`, throw `ValidationError`
+			voucher.doctype = "NOT ALLOWED"
+			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
 
-		# Case - 3: When `Stock Reservation` is enabled and `Voucher Type` is allowed
-		update_stock_settings("enable_stock_reservation", 1)
-		voucher.doctype = "Sales Order"
-		self.assertIsNone(validate_stock_reservation_settings(voucher), None)
+			# Case - 3: When `Voucher Type` is allowed for `Stock Reservation`
+			voucher.doctype = "Sales Order"
+			self.assertIsNone(validate_stock_reservation_settings(voucher), None)
 
 	def test_get_available_qty_to_reserve(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -106,15 +105,13 @@ class TestStockReservationEntry(FrappeTestCase):
 		sre.load_from_db()
 		self.assertEqual(sre.status, "Cancelled")
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_update_reserved_qty_in_voucher(self) -> None:
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
 
-		# Step - 1: Enable `Stock Reservation`
-		update_stock_settings("enable_stock_reservation", 1)
-
-		# Step - 2: Create a `Sales Order`
+		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
 			item_code=item_code,
 			warehouse=warehouse,
@@ -127,7 +124,7 @@ class TestStockReservationEntry(FrappeTestCase):
 		so.save()
 		so.submit()
 
-		# Step - 3: Create a `Stock Reservation Entry[1]` for the `Sales Order Item`
+		# Step - 2: Create a `Stock Reservation Entry[1]` for the `Sales Order Item`
 		sre1 = make_stock_reservation_entry(
 			item_code=item_code,
 			warehouse=warehouse,
@@ -142,7 +139,7 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.assertEqual(sre1.status, "Partially Reserved")
 		self.assertEqual(so.items[0].stock_reserved_qty, sre1.reserved_qty)
 
-		# Step - 4: Create a `Stock Reservation Entry[2]` for the `Sales Order Item`
+		# Step - 3: Create a `Stock Reservation Entry[2]` for the `Sales Order Item`
 		sre2 = make_stock_reservation_entry(
 			item_code=item_code,
 			warehouse=warehouse,
@@ -157,23 +154,19 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.assertEqual(sre1.status, "Partially Reserved")
 		self.assertEqual(so.items[0].stock_reserved_qty, sre1.reserved_qty + sre2.reserved_qty)
 
-		# Step - 5: Cancel `Stock Reservation Entry[1]`
+		# Step - 4: Cancel `Stock Reservation Entry[1]`
 		sre1.cancel()
 		so.load_from_db()
 		sre1.load_from_db()
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
 
-		# Step - 6: Cancel `Stock Reservation Entry[2]`
+		# Step - 5: Cancel `Stock Reservation Entry[2]`
 		sre2.cancel()
 		so.load_from_db()
 		sre2.load_from_db()
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, 0)
-
-
-def update_stock_settings(field: str, value: any) -> None:
-	frappe.db.set_single_value("Stock Settings", field, value)
 
 
 def create_items() -> dict:
