@@ -18,7 +18,9 @@ def execute(filters=None):
 	columns = get_columns(filters)
 
 	res = get_result(filters)
-
+	print("toto")
+	# print(columns)
+	# print(res)
 	return columns, res
 
 
@@ -118,24 +120,6 @@ def get_columns(filters):
 		{
 			"label": _("Credit"),
 			"fieldname": "Credit",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("EcritureLet"),
-			"fieldname": "EcritureLet",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("DateLet"),
-			"fieldname": "DateLet",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("ValidDate"),
-			"fieldname": "ValidDate",
 			"fieldtype": "Data",
 			"width": 90,
 		},
