@@ -5,7 +5,7 @@ from typing import Optional
 
 import frappe
 from frappe import _, bold, msgprint
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, cstr, flt
 
 import erpnext
@@ -575,7 +575,9 @@ class StockReconciliation(StockController):
 			if not (row.item_code == item_code and row.batch_no == batch_no):
 				continue
 
-			row.current_qty = get_batch_qty_for_stock_reco(item_code, row.warehouse, batch_no)
+			row.current_qty = get_batch_qty_for_stock_reco(
+				item_code, row.warehouse, batch_no, self.posting_date, self.posting_time, self.name
+			)
 
 			qty, val_rate = get_stock_balance(
 				item_code,
@@ -596,7 +598,9 @@ class StockReconciliation(StockController):
 			)
 
 
-def get_batch_qty_for_stock_reco(item_code, warehouse, batch_no):
+def get_batch_qty_for_stock_reco(
+	item_code, warehouse, batch_no, posting_date, posting_time, voucher_no
+):
 	ledger = frappe.qb.DocType("Stock Ledger Entry")
 
 	query = (
@@ -610,6 +614,12 @@ def get_batch_qty_for_stock_reco(item_code, warehouse, batch_no):
 			& (ledger.docstatus == 1)
 			& (ledger.is_cancelled == 0)
 			& (ledger.batch_no == batch_no)
+			& (ledger.posting_date <= posting_date)
+			& (
+				CombineDatetime(ledger.posting_date, ledger.posting_time)
+				<= CombineDatetime(posting_date, posting_time)
+			)
+			& (ledger.voucher_no != voucher_no)
 		)
 		.groupby(ledger.batch_no)
 	)

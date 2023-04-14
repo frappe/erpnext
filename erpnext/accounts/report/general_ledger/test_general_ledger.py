@@ -24,7 +24,6 @@ class TestGeneralLedger(FrappeTestCase):
 				"root_type": "Asset",
 				"report_type": "Balance Sheet",
 				"account_currency": "USD",
-				"inter_company_account": 0,
 				"parent_account": "Bank Accounts - _TC",
 				"account_type": "Bank",
 				"doctype": "Account",
