@@ -14,6 +14,7 @@ from frappe.utils import cint, cstr, flt, random_string
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from frappe.website.website_generator import WebsiteGenerator
 
+from erpnext import get_default_currency
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
 from erpnext.e_commerce.redisearch_utils import (
 	delete_item_from_index,
@@ -221,8 +222,8 @@ class WebsiteItem(WebsiteGenerator):
 		if self.slideshow:
 			context.update(get_slideshow(self))
 
-		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
+		self.set_metatags(context)
 
 		settings = context.shopping_cart.cart_settings
 
@@ -305,8 +306,19 @@ class WebsiteItem(WebsiteGenerator):
 
 		context.metatags.title = self.web_item_name or self.item_name or self.item_code
 
+		settings = context.shopping_cart.cart_settings
+		selling_price_list = _set_price_list(settings, None)
+		price = get_price(
+			self.item_code, selling_price_list, settings.default_customer_group, settings.company
+		)
+
 		context.metatags["og:type"] = "product"
 		context.metatags["og:site_name"] = "ERPNext"
+		context.metatags["og:offers"] = {
+			"@type": "Offer",
+			"price": price,
+			"priceCurrency": get_default_currency(),
+		}
 
 	def set_shopping_cart_data(self, context):
 		from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
