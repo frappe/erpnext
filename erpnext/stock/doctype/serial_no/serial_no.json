@@ -434,11 +434,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-01-08 14:31:15.375996",
-=======
  "modified": "2023-04-14 15:58:46.139887",
->>>>>>> fb3271c624 (fix: unable to change `company` for manual `Serial No` entry)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
