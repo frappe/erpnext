@@ -293,10 +293,10 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 				in_rate = (
 					_get_fifo_lifo_rate(previous_stock_queue, args.get("qty") or 0, valuation_method)
 					if previous_stock_queue
-					else 0
+					else None
 				)
 		elif valuation_method == "Moving Average":
-			in_rate = previous_sle.get("valuation_rate") or 0
+			in_rate = previous_sle.get("valuation_rate")
 
 	if in_rate is None:
 		in_rate = get_valuation_rate(
