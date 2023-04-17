@@ -770,7 +770,7 @@ DocType: Delivery Note,Billing Address Name,Naziv adrese za naplatu
 DocType: Restaurant Order Entry,Add Item,Dodaj stavku
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +108,All Customer Groups,Sve grupe kupca
 ,Employee Birthday,Rođendan Zaposlenih
-DocType: Project,Total Billed Amount (via Sales Invoices),Ukupno fakturisano (putem fakture prodaje)
+DocType: Project,Total Billed Amount (via Sales Invoice),Ukupno fakturisano (putem fakture prodaje)
 DocType: Purchase Invoice Item,Weight UOM,JM Težina
 DocType: Purchase Invoice Item,Stock Qty,Zaliha
 DocType: Delivery Note,Return Against Delivery Note,Povraćaj u vezi sa otpremnicom

@@ -3177,7 +3177,7 @@ DocType: Opportunity,Opportunity Date,Příležitost Datum
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order_list.js +10,To Bill,Billa
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +56,Piecework,Úkolová práce
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +64,Avg. Buying Rate,Avg. Nákup Rate
-DocType: Task,Actual Time (in Hours),Skutečná doba (v hodinách)
+DocType: Task,Actual Time in Hours (via Timesheet),Skutečná doba (v hodinách)
 DocType: Employee,History In Company,Historie ve Společnosti
 DocType: Address,Shipping,Lodní
 DocType: Stock Ledger Entry,Stock Ledger Entry,Reklamní Ledger Entry
@@ -3720,7 +3720,7 @@ DocType: Appraisal,Total Score (Out of 5),Celkové skóre (Out of 5)
 DocType: Contact Us Settings,State,Stav
 DocType: Batch,Batch,Šarže
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +48,Balance,Zůstatek
-DocType: Project,Total Expense Claim (via Expense Claims),Total Expense Claim (via Expense nároků)
+DocType: Project,Total Expense Claim (via Expense Claim),Total Expense Claim (via Expense nároků)
 DocType: User,Gender,Pohlaví
 DocType: Journal Entry,Debit Note,Debit Note
 DocType: Stock Entry,As per Stock UOM,Podle Stock nerozpuštěných

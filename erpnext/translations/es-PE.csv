@@ -192,7 +192,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py +175,A Customer Group 
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +165,Quotation {0} is cancelled,Cotización {0} se cancela
 apps/erpnext/erpnext/controllers/stock_controller.py +341,Quality Inspection required for Item {0},Inspección de la calidad requerida para el articulo {0}
 apps/erpnext/erpnext/public/js/setup_wizard.js +114,What does it do?,¿Qué hace?
-DocType: Task,Actual Time (in Hours),Tiempo actual (En horas)
+DocType: Task,Actual Time in Hours (via Timesheet),Tiempo actual (En horas)
 apps/erpnext/erpnext/utilities/activation.py +83,Make Sales Order,Hacer Orden de Venta
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +157,Doc Type,Tipo Doc.
 apps/erpnext/erpnext/utilities/user_progress.py +67,List a few of your customers. They could be organizations or individuals.,Enumere algunos de sus clientes. Pueden ser organizaciones o individuos.
