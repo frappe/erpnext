@@ -11,7 +11,10 @@
 
 			<div class="product-price">
 				<!-- Final Price -->
-				{{ price_info.formatted_price_sales_uom }}
+				<span itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+					<span itemprop="price" content="{{ price_info.price_list_rate }}">{{ price_info.formatted_price_sales_uom }}</span>
+					<span style="display:none;" itemprop="priceCurrency" content="{{ price_info.currency }}">{{ price_info.currency }}</span>
+				</span>
 
 				<!-- Striked Price and Discount  -->
 				{% if price_info.formatted_mrp %}
