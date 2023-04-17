@@ -81,7 +81,7 @@ def get_pr_instance(doc: str):
 		d[field] = process_payment_reconciliation.get(field)
 	pr.update(d)
 	pr.invoice_limit = 1000
-	pr.payment_limit = 100
+	pr.payment_limit = 1000
 	return pr
 
 
