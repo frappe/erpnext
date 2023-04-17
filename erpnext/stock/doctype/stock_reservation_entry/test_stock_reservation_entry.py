@@ -4,6 +4,10 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.utils import get_stock_balance
+
 
 class TestStockReservationEntry(FrappeTestCase):
 	def setUp(self) -> None:
@@ -41,7 +45,6 @@ class TestStockReservationEntry(FrappeTestCase):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_available_qty_to_reserve,
 		)
-		from erpnext.stock.utils import get_stock_balance
 
 		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
 
@@ -107,8 +110,6 @@ class TestStockReservationEntry(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_update_reserved_qty_in_voucher(self) -> None:
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
 		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
 
 		# Step - 1: Create a `Sales Order`
@@ -168,6 +169,56 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, 0)
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_cant_consume_reserved_stock(self) -> None:
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
+
+		# Step - 1: Create a `Sales Order`
+		so = make_sales_order(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=50,
+			rate=100,
+			do_not_submit=True,
+		)
+		so.reserve_stock = 1  # Stock Reservation Entries will be created on submit
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+
+		actual_qty = get_stock_balance(item_code, warehouse)
+
+		# Step - 2: Try to consume (Transfer/Issue/Deliver) the Available Qty via Stock Entry or Delivery Note, should throw `NegativeStockError`.
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=actual_qty,
+			from_warehouse=warehouse,
+			rate=100,
+			purpose="Material Issue",
+			do_not_submit=True,
+		)
+		self.assertRaises(NegativeStockError, se.submit)
+		se.cancel()
+
+		# Step - 3: Unreserve the stock and consume the Available Qty via Stock Entry.
+		cancel_stock_reservation_entries(so.doctype, so.name)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=actual_qty,
+			from_warehouse=warehouse,
+			rate=100,
+			purpose="Material Issue",
+			do_not_submit=True,
+		)
+		se.submit()
+		se.cancel()
+
 
 def create_items() -> dict:
 	from erpnext.stock.doctype.item.test_item import make_item
@@ -221,8 +272,6 @@ def create_items() -> dict:
 def create_material_receipts(
 	items: dict, warehouse: str = "_Test Warehouse - _TC", qty: float = 100
 ) -> None:
-	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-
 	for item in items.values():
 		if item.is_stock_item:
 			make_stock_entry(
