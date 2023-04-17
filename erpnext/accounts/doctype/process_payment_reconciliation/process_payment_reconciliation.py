@@ -201,9 +201,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 	Identify current state of document and execute next tasks in background
 	"""
 	if doc:
-		log = frappe.db.get_all(
-			"Process Payment Reconciliation Log", filters={"process_pr": doc}, as_list=1
-		)
+		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": doc})
 		if not log:
 			log = frappe.new_doc("Process Payment Reconciliation Log")
 			log.process_pr = doc
@@ -222,7 +220,6 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 					doc=doc,
 				)
 		else:
-			log = log[0][0]
 			res = frappe.get_all(
 				"Process Payment Reconciliation Log",
 				filters={"name": log},
@@ -299,11 +296,8 @@ def fetch_and_allocate(doc: str) -> None:
 	"""
 
 	if doc:
-		log = frappe.db.get_all(
-			"Process Payment Reconciliation Log", filters={"process_pr": doc}, as_list=1
-		)
+		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": doc})
 		if log:
-			log = log[0][0]
 			if not frappe.db.get_value("Process Payment Reconciliation Log", log, "allocated"):
 				reconcile_log = frappe.get_doc("Process Payment Reconciliation Log", log)
 
@@ -355,11 +349,8 @@ def fetch_and_allocate(doc: str) -> None:
 
 def reconcile(doc: None | str = None) -> None:
 	if doc:
-		log = frappe.db.get_all(
-			"Process Payment Reconciliation Log", filters={"process_pr": doc}, as_list=1, limit=1
-		)
+		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": doc})
 		if log:
-			log = log[0][0]
 			res = frappe.get_all(
 				"Process Payment Reconciliation Log",
 				filters={"name": log},
