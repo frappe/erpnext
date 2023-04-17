@@ -3931,10 +3931,10 @@ Please set default UOM in Stock Settings,Configure la UOM predeterminada en la c
 Please set filter based on Item or Warehouse due to a large amount of entries.,Configure el filtro en función del artículo o almacén debido a una gran cantidad de entradas.,
 Please set up the Campaign Schedule in the Campaign {0},Configure la programación de la campaña en la campaña {0},
 Please set valid GSTIN No. in Company Address for company {0},Establezca un número GSTIN válido en la dirección de la empresa para la empresa {0},
-Please set {0},Por favor establezca {0},customer
+Please set {0},Por favor establezca {0},customer,
 Please setup a default bank account for company {0},Configure una cuenta bancaria predeterminada para la empresa {0},
 Please specify,"Por favor, especifique",
-Please specify a {0},"Por favor, especifique un {0}",lead
+Please specify a {0},"Por favor, especifique un {0}",lead,
 Pledge Status,Estado de compromiso,
 Pledge Time,Tiempo de compromiso,
 Printing,Impresión,
@@ -4278,7 +4278,7 @@ Percentage,Porcentaje,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,"Error al configurar los valores predeterminados para el país {0}. Por favor, póngase en contacto con support@erpnext.com",
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Fila # {0}: el artículo {1} no es un artículo serializado / en lote. No puede tener un No de serie / No de lote en su contra.,
 Please set {0},"Por favor, configure {0}",
-Please set {0},Por favor establezca {0},supplier
+Please set {0},Por favor establezca {0},supplier,
 Draft,Sequía,"docstatus,=,0"
 Cancelled,Cancelado,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Configure el Sistema de nombres de instructores en Educación&gt; Configuración de educación,

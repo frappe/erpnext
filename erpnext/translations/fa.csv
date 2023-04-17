@@ -3931,10 +3931,10 @@ Please set default UOM in Stock Settings,لطفا UOM پیش فرض را در ت
 Please set filter based on Item or Warehouse due to a large amount of entries.,لطفاً فیلتر را بر اساس آیتم یا انبار تنظیم کنید زیرا به دلیل تعداد زیاد ورودی می توانید از آن استفاده کنید.,
 Please set up the Campaign Schedule in the Campaign {0},لطفاً برنامه کمپین را در کمپین تنظیم کنید {0},
 Please set valid GSTIN No. in Company Address for company {0},لطفاً شماره معتبر GSTIN را در آدرس شرکت برای شرکت set 0 set تعیین کنید,
-Please set {0},لطفا {0 set تعیین کنید,customer
+Please set {0},لطفا {0 set تعیین کنید,customer,
 Please setup a default bank account for company {0},لطفاً یک حساب بانکی پیش فرض برای شرکت {0 تنظیم کنید,
 Please specify,لطفا مشخص کنید,
-Please specify a {0},لطفاً {0 را مشخص کنید,lead
+Please specify a {0},لطفاً {0 را مشخص کنید,lead,
 Pledge Status,وضعیت تعهد,
 Pledge Time,زمان تعهد,
 Printing,چاپ,
@@ -4278,7 +4278,7 @@ Percentage,در صد,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,تنظیم پیش فرض برای کشور {0 انجام نشد. لطفا با support@erpnext.com تماس بگیرید,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,ردیف شماره {0: مورد {1} یک مورد سریال / دسته دار نیست. این نمی تواند یک سریال شماره / دسته ای در برابر آن نداشته باشد.,
 Please set {0},لطفا {0},
-Please set {0},لطفا {0 set تعیین کنید,supplier
+Please set {0},لطفا {0 set تعیین کنید,supplier,
 Draft,پیش نویس,"docstatus,=,0"
 Cancelled,لغو شد,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,لطفاً سیستم نامگذاری مربی را در آموزش و پرورش&gt; تنظیمات آموزش تنظیم کنید,

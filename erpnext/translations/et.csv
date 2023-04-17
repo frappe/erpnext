@@ -3931,10 +3931,10 @@ Please set default UOM in Stock Settings,Seadke laoseadetes vaikimisi UOM,
 Please set filter based on Item or Warehouse due to a large amount of entries.,"Valige paljude kirjete tõttu filter, mis põhineb üksusel või laos.",
 Please set up the Campaign Schedule in the Campaign {0},Seadistage kampaania ajakava kampaanias {0},
 Please set valid GSTIN No. in Company Address for company {0},Valige ettevõtte {0} ettevõtte aadressis kehtiv GSTIN-number.,
-Please set {0},Palun määrake {0},customer
+Please set {0},Palun määrake {0},customer,
 Please setup a default bank account for company {0},Seadistage ettevõtte {0} vaikekonto arvelduskonto,
 Please specify,Palun täpsusta,
-Please specify a {0},Palun täpsustage {0},lead
+Please specify a {0},Palun täpsustage {0},lead,
 Pledge Status,Pandi staatus,
 Pledge Time,Pandi aeg,
 Printing,Trükkimine,
@@ -4278,7 +4278,7 @@ Percentage,Protsent,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,Riigi {0} vaikeseadete seadistamine ebaõnnestus. Palun võtke ühendust support@erpnext.com,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Rida # {0}: üksus {1} ei ole serialiseeritud / komplekteeritud üksus. Sellel ei saa olla järjekorranumbrit / partii nr.,
 Please set {0},Palun määra {0},
-Please set {0},Palun määrake {0},supplier
+Please set {0},Palun määrake {0},supplier,
 Draft,Mustand,"docstatus,=,0"
 Cancelled,Tühistatud,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Seadistage juhendaja nimetamise süsteem jaotises Haridus&gt; Hariduse sätted,

@@ -3931,10 +3931,10 @@ Please set default UOM in Stock Settings,Aseta oletus UOM osakeasetuksiin,
 Please set filter based on Item or Warehouse due to a large amount of entries.,"Aseta suodatin Tuotteen tai Varaston perusteella, koska kirjoituksia on paljon.",
 Please set up the Campaign Schedule in the Campaign {0},Määritä kampanja-aikataulu kampanjaan {0},
 Please set valid GSTIN No. in Company Address for company {0},Aseta voimassa oleva GSTIN-numero yrityksen osoitteeseen yritykselle {0},
-Please set {0},Aseta {0},customer
+Please set {0},Aseta {0},customer,
 Please setup a default bank account for company {0},Aseta oletuspankkitili yritykselle {0},
 Please specify,Ilmoitathan,
-Please specify a {0},Määritä {0},lead
+Please specify a {0},Määritä {0},lead,
 Pledge Status,Pantin tila,
 Pledge Time,Pantti aika,
 Printing,Tulostus,
@@ -4278,7 +4278,7 @@ Percentage,Prosentti,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,Maan {0} oletusasetusten määrittäminen epäonnistui. Ota yhteyttä support@erpnext.com,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Rivi # {0}: Kohde {1} ei ole sarjoitettu / erä. Sillä ei voi olla sarjanumero / eränumero sitä vastaan.,
 Please set {0},Aseta {0},
-Please set {0},Aseta {0},supplier
+Please set {0},Aseta {0},supplier,
 Draft,Laatia,"docstatus,=,0"
 Cancelled,peruttu,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Asenna ohjaajien nimeämisjärjestelmä kohtaan Koulutus&gt; Koulutusasetukset,
