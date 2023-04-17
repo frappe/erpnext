@@ -1451,6 +1451,8 @@ def get_next_stock_reco(kwargs):
 				)
 			)
 		)
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.orderby(sle.creation)
 	)
 
 	if kwargs.get("batch_no"):
