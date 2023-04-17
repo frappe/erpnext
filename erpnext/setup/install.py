@@ -156,7 +156,7 @@ def add_standard_navbar_items():
 		{
 			"item_label": "User Forum",
 			"item_type": "Route",
-			"route": "https://discuss.erpnext.com",
+			"route": "https://discuss.frappe.io",
 			"is_standard": 1,
 		},
 		{
