@@ -20,18 +20,9 @@
   "section_break_4ywv",
   "error_log",
   "allocations_section",
-  "allocations",
-  "invoices",
-  "payments"
+  "allocations"
  ],
  "fields": [
-  {
-   "fieldname": "invoices",
-   "fieldtype": "Table",
-   "label": "Invoices",
-   "options": "Process Payment Reconciliation Log Invoices",
-   "read_only": 1
-  },
   {
    "fieldname": "allocations",
    "fieldtype": "Table",
@@ -103,13 +94,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "payments",
-   "fieldtype": "Table",
-   "label": "Payments",
-   "options": "Process Payment Reconciliation Payments",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_fvdw",
    "fieldtype": "Section Break",
    "label": "Status"
@@ -125,7 +109,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-11 17:50:24.457790",
+ "modified": "2023-04-17 13:30:12.126762",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",

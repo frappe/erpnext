@@ -307,31 +307,7 @@ class PaymentReconciliation(Document):
 			}
 		)
 
-	@frappe.whitelist()
-	def reconcile(
-		self, skip_job_check=False, skip_pulling_outstanding=False, skip_setter_for_missing_values=False
-	):
-		if not skip_job_check and frappe.db.get_single_value(
-			"Accounts Settings", "enable_payment_reconciliation_in_background"
-		):
-			running_doc = is_any_doc_running(
-				dict(
-					company=self.company,
-					party_type=self.party_type,
-					party=self.party,
-					receivable_payable_account=self.receivable_payable_account,
-				)
-			)
-
-			if running_doc:
-				frappe.throw(
-					_("A Reconciliation Job {0} is running for the same filters. Cannot reconcile now").format(
-						get_link_to_form("Auto Reconcile", running_doc)
-					)
-				)
-				return
-
-		self.validate_allocation()
+	def reconcile_allocations(self, skip_setter_for_missing_values=False):
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -360,10 +336,33 @@ class PaymentReconciliation(Document):
 		if dr_or_cr_notes:
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
+	@frappe.whitelist()
+	def reconcile(self):
+		if frappe.db.get_single_value(
+			"Accounts Settings", "enable_payment_reconciliation_in_background"
+		):
+			running_doc = is_any_doc_running(
+				dict(
+					company=self.company,
+					party_type=self.party_type,
+					party=self.party,
+					receivable_payable_account=self.receivable_payable_account,
+				)
+			)
+
+			if running_doc:
+				frappe.throw(
+					_("A Reconciliation Job {0} is running for the same filters. Cannot reconcile now").format(
+						get_link_to_form("Auto Reconcile", running_doc)
+					)
+				)
+				return
+
+		self.validate_allocation()
+		self.reconcile_allocations()
 		msgprint(_("Successfully Reconciled"))
 
-		if not skip_pulling_outstanding:
-			self.get_unreconciled_entries()
+		self.get_unreconciled_entries()
 
 	def make_difference_entry(self, row):
 		journal_entry = frappe.new_doc("Journal Entry")

@@ -315,30 +315,6 @@ def fetch_and_allocate(doc: str) -> None:
 					payments = [x.as_dict() for x in pr.payments]
 					pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
 
-					for x in pr.get("invoices"):
-						reconcile_log.append(
-							"invoices",
-							x.as_dict().update(
-								{
-									"parenttype": "Process Payment Reconciliation Log",
-									"parent": reconcile_log.name,
-									"name": None,
-								}
-							),
-						)
-
-					for x in pr.get("payments"):
-						reconcile_log.append(
-							"payments",
-							x.as_dict().update(
-								{
-									"parenttype": "Process Payment Reconciliation Log",
-									"parent": reconcile_log.name,
-									"name": None,
-								}
-							),
-						)
-
 					for x in pr.get("allocation"):
 						reconcile_log.append(
 							"allocations",
@@ -398,29 +374,14 @@ def reconcile(doc: None | str = None) -> None:
 					# Fetch next allocation
 					allocations = get_next_allocation(log)
 
-					# Get invoice related to allocations. This will be used for validation by Payment Reconciliation tool
-					inv_nos = [x.invoice_number for x in allocations]
-					invoices = frappe.db.get_all(
-						"Process Payment Reconciliation Log Invoices",
-						filters={"parent": log, "invoice_number": ["in", inv_nos]},
-						fields=["*"],
-						order_by="idx",
-					)
-
 					pr = get_pr_instance(doc)
-
-					# Invoices are required for Validation by the Payment Reconciliation tool
-					for x in invoices:
-						pr.append("invoices", x)
 
 					# pass allocation to PR instance
 					for x in allocations:
 						pr.append("allocation", x)
 
 					# reconcile
-					pr.reconcile(
-						skip_job_check=True, skip_pulling_outstanding=True, skip_setter_for_missing_values=True
-					)
+					pr.reconcile_allocations(skip_setter_for_missing_values=True)
 
 					# If Payment Entry, trigger setter for missing values
 					if allocations[0].reference_type == "Payment Entry":
