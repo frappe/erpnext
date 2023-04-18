@@ -571,24 +571,33 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 	def recalculate_current_qty(self, item_code, batch_no):
+		from erpnext.stock.stock_ledger import get_valuation_rate
+
+		sl_entries = []
 		for row in self.items:
 			if not (row.item_code == item_code and row.batch_no == batch_no):
 				continue
 
-			row.current_qty = get_batch_qty_for_stock_reco(
+			current_qty = get_batch_qty_for_stock_reco(
 				item_code, row.warehouse, batch_no, self.posting_date, self.posting_time, self.name
 			)
 
-			qty, val_rate = get_stock_balance(
-				item_code,
-				row.warehouse,
-				self.posting_date,
-				self.posting_time,
-				with_valuation_rate=True,
+			precesion = row.precision("current_qty")
+			if flt(current_qty, precesion) == flt(row.current_qty, precesion):
+				continue
+
+			val_rate = get_valuation_rate(
+				item_code, row.warehouse, self.doctype, self.name, company=self.company, batch_no=batch_no
 			)
 
 			row.current_valuation_rate = val_rate
+			if not row.current_qty and current_qty:
+				sle = self.get_sle_for_items(row)
+				sle.actual_qty = current_qty * -1
+				sle.valuation_rate = val_rate
+				sl_entries.append(sle)
 
+			row.current_qty = current_qty
 			row.db_set(
 				{
 					"current_qty": row.current_qty,
@@ -596,6 +605,9 @@ class StockReconciliation(StockController):
 					"current_amount": flt(row.current_qty * row.current_valuation_rate),
 				}
 			)
+
+		if sl_entries:
+			self.make_sl_entries(sl_entries)
 
 
 def get_batch_qty_for_stock_reco(

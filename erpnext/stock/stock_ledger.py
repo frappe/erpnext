@@ -545,6 +545,14 @@ class update_entries_after(object):
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
 		if (
+			sle.voucher_type == "Stock Reconciliation"
+			and sle.batch_no
+			and sle.voucher_detail_no
+			and sle.actual_qty < 0
+		):
+			self.reset_actual_qty_for_stock_reco(sle)
+
+		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
 			and sle.actual_qty < 0
@@ -604,6 +612,16 @@ class update_entries_after(object):
 
 		if not self.args.get("sle_id"):
 			self.update_outgoing_rate_on_transaction(sle)
+
+	def reset_actual_qty_for_stock_reco(self, sle):
+		current_qty = frappe.get_cached_value(
+			"Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"
+		)
+
+		if current_qty:
+			sle.actual_qty = current_qty * -1
+		elif current_qty == 0:
+			sle.is_cancelled = 1
 
 	def validate_negative_stock(self, sle):
 		"""
@@ -1369,12 +1387,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 
 def regenerate_sle_for_batch_stock_reco(detail):
 	doc = frappe.get_cached_doc("Stock Reconciliation", detail.voucher_no)
-	doc.docstatus = 2
-	doc.update_stock_ledger()
-
 	doc.recalculate_current_qty(detail.item_code, detail.batch_no)
-	doc.docstatus = 1
-	doc.update_stock_ledger()
 	doc.repost_future_sle_and_gle()
 
 
@@ -1401,33 +1414,51 @@ def get_stock_reco_qty_shift(args):
 	return stock_reco_qty_shift
 
 
-def get_next_stock_reco(args):
+def get_next_stock_reco(kwargs):
 	"""Returns next nearest stock reconciliaton's details."""
 
-	return frappe.db.sql(
-		"""
-		select
-			name, posting_date, posting_time, creation, voucher_no, item_code, batch_no, actual_qty
-		from
-			`tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_type = 'Stock Reconciliation'
-			and voucher_no != %(voucher_no)s
-			and is_cancelled = 0
-			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
-				or (
-					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
-					and creation > %(creation)s
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.name,
+			sle.posting_date,
+			sle.posting_time,
+			sle.creation,
+			sle.voucher_no,
+			sle.item_code,
+			sle.batch_no,
+			sle.actual_qty,
+		)
+		.where(
+			(sle.item_code == kwargs.get("item_code"))
+			& (sle.warehouse == kwargs.get("warehouse"))
+			& (sle.voucher_type == "Stock Reconciliation")
+			& (sle.voucher_no != kwargs.get("voucher_no"))
+			& (sle.is_cancelled == 0)
+			& (
+				(
+					CombineDatetime(sle.posting_date, sle.posting_time)
+					> CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
+					| (
+						(
+							CombineDatetime(sle.posting_date, sle.posting_time)
+							== CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
+						)
+						& (sle.creation > kwargs.get("creation"))
+					)
 				)
 			)
-		order by timestamp(posting_date, posting_time) asc, creation asc
-		limit 1
-	""",
-		args,
-		as_dict=1,
+		)
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.orderby(sle.creation)
 	)
+
+	if kwargs.get("batch_no"):
+		query.where(sle.batch_no == kwargs.get("batch_no"))
+
+	return query.run(as_dict=True)
 
 
 def get_datetime_limit_condition(detail):
