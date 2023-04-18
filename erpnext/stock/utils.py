@@ -269,8 +269,6 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	if isinstance(args, str):
 		args = json.loads(args)
 
-	voucher_no = args.get("voucher_no") or args.get("name")
-
 	in_rate = None
 	if (args.get("serial_no") or "").strip():
 		in_rate = get_avg_purchase_rate(args.get("serial_no"))
@@ -299,6 +297,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			in_rate = previous_sle.get("valuation_rate")
 
 	if in_rate is None:
+		voucher_no = args.get("voucher_no") or args.get("name")
 		in_rate = get_valuation_rate(
 			args.get("item_code"),
 			args.get("warehouse"),
