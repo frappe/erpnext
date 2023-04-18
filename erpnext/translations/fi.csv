@@ -4278,7 +4278,7 @@ Percentage,Prosentti,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,Maan {0} oletusasetusten määrittäminen epäonnistui. Ota yhteyttä support@erpnext.com,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Rivi # {0}: Kohde {1} ei ole sarjoitettu / erä. Sillä ei voi olla sarjanumero / eränumero sitä vastaan.,
 Please set {0},Aseta {0},
-Please set {0},Aseta {0},supplier,
+Please set {0},Aseta {0},supplier
 Draft,Laatia,"docstatus,=,0"
 Cancelled,peruttu,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Asenna ohjaajien nimeämisjärjestelmä kohtaan Koulutus&gt; Koulutusasetukset,

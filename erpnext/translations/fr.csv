@@ -4278,7 +4278,7 @@ Percentage,Pourcentage,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,Échec de la configuration des paramètres par défaut pour le pays {0}. Veuillez contacter support@erpnext.com,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Ligne # {0}: l'article {1} n'est pas un article sérialisé / en lot. Il ne peut pas avoir de numéro de série / de lot contre lui.,
 Please set {0},Veuillez définir {0},
-Please set {0},Veuillez définir {0},supplier,
+Please set {0},Veuillez définir {0},supplier
 Draft,Brouillon,"docstatus,=,0"
 Cancelled,Annulé,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Veuillez configurer le système de dénomination de l'instructeur dans Éducation&gt; Paramètres de l'éducation,

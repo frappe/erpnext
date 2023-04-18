@@ -4278,7 +4278,7 @@ Percentage,Protsent,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,Riigi {0} vaikeseadete seadistamine ebaõnnestus. Palun võtke ühendust support@erpnext.com,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Rida # {0}: üksus {1} ei ole serialiseeritud / komplekteeritud üksus. Sellel ei saa olla järjekorranumbrit / partii nr.,
 Please set {0},Palun määra {0},
-Please set {0},Palun määrake {0},supplier,
+Please set {0},Palun määrake {0},supplier
 Draft,Mustand,"docstatus,=,0"
 Cancelled,Tühistatud,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Seadistage juhendaja nimetamise süsteem jaotises Haridus&gt; Hariduse sätted,

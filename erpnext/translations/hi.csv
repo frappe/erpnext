@@ -4278,7 +4278,7 @@ Percentage,का प्रतिशत,
 Failed to setup defaults for country {0}. Please contact support@erpnext.com,देश के लिए सेटअप डिफॉल्ट्स में विफल {0}। Support@erpnext.com पर संपर्क करें,
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,पंक्ति # {0}: आइटम {1} सीरियल / बैच आइटम नहीं है। इसके विरुद्ध कोई सीरियल नंबर / बैच नहीं हो सकता है।,
 Please set {0},सेट करें {0},
-Please set {0},कृपया {0} सेट करें,supplier,
+Please set {0},कृपया {0} सेट करें,supplier
 Draft,प्रारूप,"docstatus,=,0"
 Cancelled,रद्द,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,कृपया शिक्षा&gt; शिक्षा सेटिंग्स में इंस्ट्रक्टर नामकरण प्रणाली सेटअप करें,
