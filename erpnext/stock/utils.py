@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
+from pypika.terms import ExistsCriterion
 
 import erpnext
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -57,39 +58,39 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	if not posting_date:
 		posting_date = nowdate()
 
-	values, condition = [posting_date], ""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.stock_value,
+			sle.name,
+			sle.warehouse,
+		)
+		.where((sle.posting_date <= posting_date) & (sle.is_cancelled == 0))
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=frappe.qb.desc)
+		.orderby(sle.creation, order=frappe.qb.desc)
+	)
 
 	if warehouse:
-
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
 
 		if is_group:
-			values.extend([lft, rgt])
-			condition += "and exists (\
-				select name from `tabWarehouse` wh where wh.name = sle.warehouse\
-				and wh.lft >= %s and wh.rgt <= %s)"
-
+			wh = frappe.qb.DocType("Warehouse")
+			query = query.where(
+				ExistsCriterion(
+					frappe.qb.from_(wh)
+					.select(wh.name)
+					.where((wh.name == sle.warehouse) & (wh.lft >= lft) & (wh.rgt <= rgt))
+				)
+			)
 		else:
-			values.append(warehouse)
-			condition += " AND warehouse = %s"
+			query = query.where(sle.warehouse == warehouse)
 
 	if item_code:
-		values.append(item_code)
-		condition += " AND item_code = %s"
+		query = query.where(sle.item_code == item_code)
 
-	stock_ledger_entries = frappe.db.sql(
-		"""
-		SELECT item_code, stock_value, name, warehouse
-		FROM `tabStock Ledger Entry` sle
-		WHERE posting_date <= %s {0}
-			and is_cancelled = 0
-		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
-	""".format(
-			condition
-		),
-		values,
-		as_dict=1,
-	)
+	stock_ledger_entries = query.run(as_dict=True)
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
