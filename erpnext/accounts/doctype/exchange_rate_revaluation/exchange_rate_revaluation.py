@@ -490,6 +490,8 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 		conditions.append(gl.company == company)
 		conditions.append(gl.account == account)
 		conditions.append(gl.is_cancelled == 0)
+		conditions.append((gl.debit > 0) | (gl.credit > 0))
+		conditions.append((gl.debit_in_account_currency > 0) | (gl.credit_in_account_currency > 0))
 		if party_type:
 			conditions.append(gl.party_type == party_type)
 		if party:
