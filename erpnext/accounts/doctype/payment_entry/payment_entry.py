@@ -1594,17 +1594,7 @@ def get_account_details(account, date, cost_center=None):
 @frappe.whitelist()
 def get_company_defaults(company):
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
-	ret = frappe.get_cached_value("Company", company, fields, as_dict=1)
-
-	for fieldname in fields:
-		if not ret[fieldname]:
-			frappe.throw(
-				_("Please set default {0} in Company {1}").format(
-					frappe.get_meta("Company").get_label(fieldname), company
-				)
-			)
-
-	return ret
+	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
 
 def get_outstanding_on_journal_entry(name):
@@ -1764,7 +1754,12 @@ def get_payment_entry(
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
 		frappe.msgprint(_("{0} is on hold till {1}").format(doc.name, doc.release_date))
 	else:
-		if doc.doctype in ("Sales Invoice", "Purchase Invoice") and frappe.get_value(
+		if doc.doctype in (
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Purchase Order",
+			"Sales Order",
+		) and frappe.get_cached_value(
 			"Payment Terms Template",
 			{"name": doc.payment_terms_template},
 			"allocate_payment_based_on_payment_terms",

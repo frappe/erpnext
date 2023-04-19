@@ -971,29 +971,47 @@ frappe.ui.form.on('Payment Entry', {
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						var write_off_row = $.map(frm.doc["deductions"] || [], function(t) {
+						const write_off_row = $.map(frm.doc["deductions"] || [], function(t) {
 							return t.account==r.message[account] ? t : null; });
 
-						var row = [];
-
-						var difference_amount = flt(frm.doc.difference_amount,
+						const difference_amount = flt(frm.doc.difference_amount,
 							precision("difference_amount"));
 
-						if (!write_off_row.length && difference_amount) {
-							row = frm.add_child("deductions");
-							row.account = r.message[account];
-							row.cost_center = r.message["cost_center"];
-						} else {
-							row = write_off_row[0];
-						}
+						const add_deductions = (details) => {
+							if (!write_off_row.length && difference_amount) {
+								row = frm.add_child("deductions");
+								row.account = details[account];
+								row.cost_center = details["cost_center"];
+							} else {
+								row = write_off_row[0];
+							}
 
-						if (row) {
-							row.amount = flt(row.amount) + difference_amount;
-						} else {
-							frappe.msgprint(__("No gain or loss in the exchange rate"))
-						}
+							if (row) {
+								row.amount = flt(row.amount) + difference_amount;
+							} else {
+								frappe.msgprint(__("No gain or loss in the exchange rate"))
+							}
+							refresh_field("deductions");
+						};
 
-						refresh_field("deductions");
+						if (!r.message[account]) {
+							frappe.prompt({
+								label: __("Please Specify Account"),
+								fieldname: account,
+								fieldtype: "Link",
+								options: "Account",
+								get_query: () => ({
+									filters: {
+										company: frm.doc.company,
+									}
+								})
+							}, (values) => {
+								const details = Object.assign({}, r.message, values);
+								add_deductions(details);
+							}, __(frappe.unscrub(account)));
+						} else {
+							add_deductions(r.message);
+						}
 
 						frm.events.set_unallocated_amount(frm);
 					}
