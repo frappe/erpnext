@@ -307,7 +307,7 @@ class PaymentReconciliation(Document):
 			}
 		)
 
-	def reconcile_allocations(self, skip_setter_for_missing_values=False):
+	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -331,7 +331,7 @@ class PaymentReconciliation(Document):
 					self.make_difference_entry(payment_details)
 
 		if entry_list:
-			reconcile_against_document(entry_list, skip_setter_for_missing_values)
+			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
 
 		if dr_or_cr_notes:
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
