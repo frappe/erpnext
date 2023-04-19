@@ -374,10 +374,14 @@ def reconcile(doc: None | str = None) -> None:
 					# reconcile
 					pr.reconcile_allocations(skip_setter_for_missing_values=True)
 
-					# If Payment Entry, trigger setter for missing values
+					# If Payment Entry, update details only for newly linked references
+					# This is for performance
 					if allocations[0].reference_type == "Payment Entry":
+
+						references = [(x.invoice_type, x.invoice_number) for x in allocations]
 						pe = frappe.get_doc(allocations[0].reference_type, allocations[0].reference_name)
-						pe.set_missing_values()
+						pe.flags.ignore_validate_update_after_submit = True
+						pe.set_missing_ref_details(update_ref_details_only_for=references)
 						pe.save()
 
 					# Update reconciled flag
