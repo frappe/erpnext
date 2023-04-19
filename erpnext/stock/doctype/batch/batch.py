@@ -376,7 +376,7 @@ def get_pos_reserved_batch_qty(filters):
 
 	p = frappe.qb.DocType("POS Invoice").as_("p")
 	item = frappe.qb.DocType("POS Invoice Item").as_("item")
-	sum_qty = frappe.query_builder.functions.Sum(item.qty).as_("qty")
+	sum_qty = frappe.query_builder.functions.Sum(item.stock_qty).as_("qty")
 
 	reserved_batch_qty = (
 		frappe.qb.from_(p)
