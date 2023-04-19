@@ -495,6 +495,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Purchase Order Item",
@@ -1100,8 +1101,7 @@
   {
    "fieldname": "before_items_section",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "Items"
+   "hide_border": 1
   },
   {
    "fieldname": "items_col_break",
@@ -1271,7 +1271,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-28 18:59:16.322824",
+ "modified": "2023-04-14 16:42:29.448464",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
