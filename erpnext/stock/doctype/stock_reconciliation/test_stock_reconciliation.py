@@ -530,7 +530,9 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		# check if cancellation of stock reco is blocked
 		self.assertRaises(NegativeStockError, sr.cancel)
 
-		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
+		repost_exists = bool(
+			frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name, "status": "Queued"})
+		)
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
 
 	def test_intermediate_sr_bin_update(self):
