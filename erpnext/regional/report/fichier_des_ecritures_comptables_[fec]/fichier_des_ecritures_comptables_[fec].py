@@ -123,9 +123,10 @@ COLUMNS = [
 
 def execute(filters=None):
 	validate_filters(filters)
-	set_account_currency(filters)
-
-	return COLUMNS, get_result(filters)
+	return COLUMNS, get_result(
+		company=filters["company"],
+		fiscal_year=filters["fiscal_year"],
+	)
 
 
 def validate_filters(filters):
@@ -136,13 +137,7 @@ def validate_filters(filters):
 		frappe.throw(_("{0} is mandatory").format(_("Fiscal Year")))
 
 
-def set_account_currency(filters):
-	filters["company_currency"] = frappe.get_cached_value(
-		"Company", filters.company, "default_currency"
-	)
-
-
-def get_gl_entries(filters):
+def get_gl_entries(company, fiscal_year):
 	gle = frappe.qb.DocType("GL Entry")
 	sales_invoice = frappe.qb.DocType("Sales Invoice")
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
@@ -213,7 +208,7 @@ def get_gl_entries(filters):
 			employee.employee_name,
 			employee.name.as_("empName"),
 		)
-		.where((gle.company == filters.get("company")) & (gle.fiscal_year == filters.get("fiscal_year")))
+		.where((gle.company == company) & (gle.fiscal_year == fiscal_year))
 		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
 		.orderby(gle.posting_date, gle.voucher_no)
 	)
@@ -221,18 +216,17 @@ def get_gl_entries(filters):
 	return query.run(as_dict=True)
 
 
-def get_result(filters):
-	data = get_gl_entries(filters)
+def get_result(company, fiscal_year):
+	data = get_gl_entries(company, fiscal_year)
 
 	result = []
 
-	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 	accounts = frappe.get_all(
-		"Account", filters={"Company": filters.company}, fields=["name", "account_number"]
+		"Account", filters={"Company": company}, fields=["name", "account_number"]
 	)
 
 	for d in data:
-
 		JournalCode = re.split("-|/|[0-9]", d.get("voucher_no"))[0]
 
 		if d.get("voucher_no").startswith("{0}-".format(JournalCode)) or d.get("voucher_no").startswith(
@@ -240,9 +234,7 @@ def get_result(filters):
 		):
 			EcritureNum = re.split("-|/", d.get("voucher_no"))[1]
 		else:
-			EcritureNum = re.search(
-				r"{0}(\d+)".format(JournalCode), d.get("voucher_no"), re.IGNORECASE
-			).group(1)
+			EcritureNum = re.search(r"{0}(\d+)".format(JournalCode), d.get("voucher_no"), re.IGNORECASE)[1]
 
 		EcritureDate = format_datetime(d.get("GlPostDate"), "yyyyMMdd")
 
@@ -284,7 +276,7 @@ def get_result(filters):
 
 		ValidDate = format_datetime(d.get("GlPostDate"), "yyyyMMdd")
 
-		PieceRef = d.get("voucher_no") if d.get("voucher_no") else "Sans Reference"
+		PieceRef = d.get("voucher_no") or "Sans Reference"
 
 		# EcritureLib is the reference title unless it is an opening entry
 		if d.get("is_opening") == "Yes":
