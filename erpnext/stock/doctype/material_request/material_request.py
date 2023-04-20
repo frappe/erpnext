@@ -619,7 +619,7 @@ def make_stock_entry(source_name, target_doc=None):
 		target.set_transfer_qty()
 		target.set_actual_qty()
 		target.calculate_rate_and_amount(raise_error_if_no_rate=False)
-		target.set_stock_entry_type()
+		target.stock_entry_type = target.purpose
 		target.set_job_card_data()
 
 	doclist = get_mapped_doc(
