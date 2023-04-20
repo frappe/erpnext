@@ -411,7 +411,6 @@ frappe.ui.form.on("BOM", {
 		}
 
 		frm.set_value("process_loss_qty", qty);
-		frm.set_value("add_process_loss_cost_in_fg", qty ? 1: 0);
 	}
 });
 

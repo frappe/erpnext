@@ -2346,7 +2346,7 @@ def move_sample_to_retention_warehouse(company, items):
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.set_stock_entry_type()
+		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
 
 	def update_item(source_doc, target_doc, source_parent):
