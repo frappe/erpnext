@@ -273,8 +273,8 @@ class AccountsController(TransactionBase):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
 		self.set_payment_schedule()
-		self.validate_payment_schedule_amount()
 		if not self.get("ignore_default_payment_terms_template"):
+			self.validate_payment_schedule_amount()
 			self.validate_due_date()
 		self.validate_advance_entries()
 
@@ -515,7 +515,6 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			self.pricing_rules = []
-			basic_item_details_map = {}
 
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -535,17 +534,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					basic_details = basic_item_details_map.get(item.item_code)
-					ret, basic_item_details = get_item_details(
-						args,
-						self,
-						for_validate=True,
-						overwrite_warehouse=False,
-						return_basic_details=True,
-						basic_details=basic_details,
-					)
-
-					basic_item_details_map.setdefault(item.item_code, basic_item_details)
+					ret = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -845,7 +834,9 @@ class AccountsController(TransactionBase):
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 
-		res = self.get_advance_entries()
+		res = self.get_advance_entries(
+			include_unallocated=not cint(self.get("only_include_allocated_payments"))
+		)
 
 		self.set("advances", [])
 		advance_allocated = 0
@@ -1616,6 +1607,7 @@ class AccountsController(TransactionBase):
 
 		base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 		grand_total = self.get("rounded_total") or self.grand_total
+		automatically_fetch_payment_terms = 0
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -1661,19 +1653,20 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
-		for d in self.get("payment_schedule"):
-			if d.invoice_portion:
-				d.payment_amount = flt(
-					grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
-				)
-				d.base_payment_amount = flt(
-					base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
-				)
-				d.outstanding = d.payment_amount
-			elif not d.invoice_portion:
-				d.base_payment_amount = flt(
-					d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
-				)
+		if not automatically_fetch_payment_terms:
+			for d in self.get("payment_schedule"):
+				if d.invoice_portion:
+					d.payment_amount = flt(
+						grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
+					)
+					d.base_payment_amount = flt(
+						base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
+					)
+					d.outstanding = d.payment_amount
+				elif not d.invoice_portion:
+					d.base_payment_amount = flt(
+						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
+					)
 
 	def get_order_details(self):
 		if self.doctype == "Sales Invoice":
@@ -1726,6 +1719,10 @@ class AccountsController(TransactionBase):
 				"invoice_portion": schedule.invoice_portion,
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
+				"payment_amount": schedule.payment_amount,
+				"base_payment_amount": schedule.base_payment_amount,
+				"outstanding": schedule.outstanding,
+				"paid_amount": schedule.paid_amount,
 			}
 
 			if schedule.discount_type == "Percentage":

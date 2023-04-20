@@ -60,6 +60,7 @@ class PaymentEntry(AccountsController):
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
+		self.set_missing_ref_details()
 		self.validate_payment_type()
 		self.validate_party_details()
 		self.set_exchange_rate()
@@ -219,11 +220,16 @@ class PaymentEntry(AccountsController):
 			else self.paid_to_account_currency
 		)
 
-		self.set_missing_ref_details()
-
-	def set_missing_ref_details(self, force=False):
+	def set_missing_ref_details(
+		self, force: bool = False, update_ref_details_only_for: list | None = None
+	) -> None:
 		for d in self.get("references"):
 			if d.allocated_amount:
+				if update_ref_details_only_for and (
+					not (d.reference_doctype, d.reference_name) in update_ref_details_only_for
+				):
+					continue
+
 				ref_details = get_reference_details(
 					d.reference_doctype, d.reference_name, self.party_account_currency
 				)
@@ -1594,17 +1600,7 @@ def get_account_details(account, date, cost_center=None):
 @frappe.whitelist()
 def get_company_defaults(company):
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
-	ret = frappe.get_cached_value("Company", company, fields, as_dict=1)
-
-	for fieldname in fields:
-		if not ret[fieldname]:
-			frappe.throw(
-				_("Please set default {0} in Company {1}").format(
-					frappe.get_meta("Company").get_label(fieldname), company
-				)
-			)
-
-	return ret
+	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
 
 def get_outstanding_on_journal_entry(name):
@@ -1764,7 +1760,12 @@ def get_payment_entry(
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
 		frappe.msgprint(_("{0} is on hold till {1}").format(doc.name, doc.release_date))
 	else:
-		if doc.doctype in ("Sales Invoice", "Purchase Invoice") and frappe.get_cached_value(
+		if doc.doctype in (
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Purchase Order",
+			"Sales Order",
+		) and frappe.get_cached_value(
 			"Payment Terms Template",
 			doc.payment_terms_template,
 			"allocate_payment_based_on_payment_terms",
@@ -1816,6 +1817,7 @@ def get_payment_entry(
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
+	pe.set_missing_ref_details()
 
 	update_accounting_dimensions(pe, doc)
 
