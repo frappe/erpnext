@@ -1457,7 +1457,7 @@ def get_next_stock_reco(kwargs):
 	)
 
 	if kwargs.get("batch_no"):
-		query.where(sle.batch_no == kwargs.get("batch_no"))
+		query = query.where(sle.batch_no == kwargs.get("batch_no"))
 
 	return query.run(as_dict=True)
 
