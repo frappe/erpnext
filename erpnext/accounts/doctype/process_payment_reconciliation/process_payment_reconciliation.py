@@ -437,29 +437,27 @@ def reconcile(doc: None | str = None) -> None:
 						frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
 					else:
 
-						if frappe.db.get_value("Process Payment Reconciliation", doc, "pause"):
-							return
+						if not frappe.db.get_value("Process Payment Reconciliation", doc, "pause"):
+							# trigger next batch in job
+							# generate reconcile job name
+							allocation = get_next_allocation(log)
+							if allocation:
+								reconcile_job_name = (
+									f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
+								)
+							else:
+								reconcile_job_name = f"process_{doc}_reconcile"
 
-						# trigger next batch in job
-						# generate reconcile job name
-						allocation = get_next_allocation(log)
-						if allocation:
-							reconcile_job_name = (
-								f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
-							)
-						else:
-							reconcile_job_name = f"process_{doc}_reconcile"
-
-						if not is_job_running(reconcile_job_name):
-							job = frappe.enqueue(
-								method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
-								queue="long",
-								timeout="3600",
-								is_async=True,
-								job_name=reconcile_job_name,
-								enqueue_after_commit=True,
-								doc=doc,
-							)
+							if not is_job_running(reconcile_job_name):
+								job = frappe.enqueue(
+									method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
+									queue="long",
+									timeout="3600",
+									is_async=True,
+									job_name=reconcile_job_name,
+									enqueue_after_commit=True,
+									doc=doc,
+								)
 			else:
 				frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Reconciled")
 				frappe.db.set_value("Process Payment Reconciliation Log", log, "reconciled", True)
