@@ -978,6 +978,7 @@ frappe.ui.form.on('Payment Entry', {
 							precision("difference_amount"));
 
 						const add_deductions = (details) => {
+							let row = null;
 							if (!write_off_row.length && difference_amount) {
 								row = frm.add_child("deductions");
 								row.account = details[account];
