@@ -65,7 +65,6 @@ class StockLedgerEntry(Document):
 					"Stock Ledger Entry",
 					{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": 0},
 					"sum(actual_qty)",
-					for_update=True,
 				)
 				or 0
 			)
