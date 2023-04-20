@@ -58,7 +58,7 @@ def get_columns(filters):
 		{
 			"label": _("EcritureNum"),
 			"fieldname": "EcritureNum",
-			"fieldtype": "Dynamic Link",
+			"fieldtype": "Data",
 			"width": 90,
 		},
 		{
