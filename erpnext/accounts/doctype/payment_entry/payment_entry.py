@@ -1922,7 +1922,7 @@ def get_payment_entry(
 			"Purchase Invoice",
 			"Purchase Order",
 			"Sales Order",
-		) and frappe.get_cached_value(
+		) and frappe.get_value(
 			"Payment Terms Template",
 			{"name": doc.payment_terms_template},
 			"allocate_payment_based_on_payment_terms",
