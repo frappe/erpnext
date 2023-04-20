@@ -212,6 +212,9 @@ def set_address_details(
 	else:
 		party_details.update(get_company_address(company))
 
+	# required to set correct region when calling `get_regional_address_details`
+	frappe.flags.company = company
+
 	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order", "Quotation"]:
 		if party_details.company_address:
 			party_details.update(
@@ -251,23 +254,6 @@ def set_address_details(
 					}
 				)
 
-<<<<<<< HEAD
-=======
-	party_address, shipping_address = (
-		party_details.get(billing_address_field),
-		party_details.shipping_address_name,
-	)
-
-	party_details["tax_category"] = get_address_tax_category(
-		party.get("tax_category"),
-		party_address,
-		shipping_address if party_type != "Supplier" else party_address,
-	)
-
-	if doctype in TRANSACTION_TYPES:
-		# required to set correct region
-		frappe.flags.company = company
->>>>>>> 17ef3c964f (fix: set `frappe.flags.company` to call regional code accurately)
 		get_regional_address_details(party_details, doctype, company)
 
 	return party_details.get(billing_address_field), party_details.shipping_address_name
