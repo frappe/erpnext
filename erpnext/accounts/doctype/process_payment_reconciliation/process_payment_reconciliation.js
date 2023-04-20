@@ -89,5 +89,34 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 				});
 			});
 		}
+	},
+	company(frm) {
+		frm.set_value('party', '');
+		frm.set_value('receivable_payable_account', '');
+	},
+	party_type(frm) {
+		frm.set_value('party', '');
+	},
+
+	party(frm) {
+		frm.set_value('receivable_payable_account', '');
+		if (!frm.doc.receivable_payable_account && frm.doc.party_type && frm.doc.party) {
+			return frappe.call({
+				method: "erpnext.accounts.party.get_party_account",
+				args: {
+					company: frm.doc.company,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party
+				},
+				callback: (r) => {
+					if (!r.exc && r.message) {
+						frm.set_value("receivable_payable_account", r.message);
+					}
+					frm.refresh();
+
+				}
+			});
+		}
 	}
+
 });
