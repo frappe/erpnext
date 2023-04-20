@@ -1453,10 +1453,11 @@ def get_next_stock_reco(kwargs):
 		)
 		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
 		.orderby(sle.creation)
+		.limit(1)
 	)
 
 	if kwargs.get("batch_no"):
-		query.where(sle.batch_no == kwargs.get("batch_no"))
+		query = query.where(sle.batch_no == kwargs.get("batch_no"))
 
 	return query.run(as_dict=True)
 
