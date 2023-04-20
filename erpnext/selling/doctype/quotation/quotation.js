@@ -407,12 +407,11 @@ function start_quotation_template_dialog(frm) {
 					  frm.refresh_fields("items"); // Refresh table
 
 					  // Copy-Paste Operation
-					  let idx = items_idx+1;
-					  let fields = ['item_code', 'qty'];
-					  for(var m = 0; m < fields.length; m++){
-						  frm.get_field("items").grid.grid_rows[idx].doc[fields[m]] = item[fields[m]];
-						  frm.get_field("items").grid.grid_rows[idx].refresh_field(fields[m]);
-					  }
+					for (field of ['item_code', 'qty']) {
+						let row = frm.get_field("items").grid.grid_rows[items_idx + 1];
+						row.doc[field] = item[field];
+						row.refresh_field(field);
+					}
 					  frm.refresh_fields("items"); // Refresh table
 
 					  // Get all other values from stock etc.
