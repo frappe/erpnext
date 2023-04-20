@@ -1,27 +1,131 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import re
 
 import frappe
 from frappe import _
 from frappe.utils import format_datetime
 
+COLUMNS = [
+	{
+		"label": "JournalCode",
+		"fieldname": "JournalCode",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "JournalLib",
+		"fieldname": "JournalLib",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "EcritureNum",
+		"fieldname": "EcritureNum",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "EcritureDate",
+		"fieldname": "EcritureDate",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "CompteNum",
+		"fieldname": "CompteNum",
+		"fieldtype": "Link",
+		"options": "Account",
+		"width": 100,
+	},
+	{
+		"label": "CompteLib",
+		"fieldname": "CompteLib",
+		"fieldtype": "Link",
+		"options": "Account",
+		"width": 200,
+	},
+	{
+		"label": "CompAuxNum",
+		"fieldname": "CompAuxNum",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "CompAuxLib",
+		"fieldname": "CompAuxLib",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "PieceRef",
+		"fieldname": "PieceRef",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "PieceDate",
+		"fieldname": "PieceDate",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "EcritureLib",
+		"fieldname": "EcritureLib",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "Debit",
+		"fieldname": "Debit",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "Credit",
+		"fieldname": "Credit",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "EcritureLet",
+		"fieldname": "EcritureLet",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "DateLet",
+		"fieldname": "DateLet",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "ValidDate",
+		"fieldname": "ValidDate",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "Montantdevise",
+		"fieldname": "Montantdevise",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+	{
+		"label": "Idevise",
+		"fieldname": "Idevise",
+		"fieldtype": "Data",
+		"width": 90,
+	},
+]
+
 
 def execute(filters=None):
-
 	validate_filters(filters)
+	set_account_currency(filters)
 
-	filters = set_account_currency(filters)
-
-	columns = get_columns(filters)
-
-	res = get_result(filters)
-	print("toto")
-	# print(columns)
-	# print(res)
-	return columns, res
+	return COLUMNS, get_result(filters)
 
 
 def validate_filters(filters):
@@ -33,141 +137,12 @@ def validate_filters(filters):
 
 
 def set_account_currency(filters):
-
 	filters["company_currency"] = frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
 
-	return filters
-
-
-def get_columns(filters):
-	columns = [
-		{
-			"label": _("JournalCode"),
-			"fieldname": "JournalCode",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("JournalLib"),
-			"fieldname": "JournalLib",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("EcritureNum"),
-			"fieldname": "EcritureNum",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("EcritureDate"),
-			"fieldname": "EcritureDate",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("CompteNum"),
-			"fieldname": "CompteNum",
-			"fieldtype": "Link",
-			"options": "Account",
-			"width": 100,
-		},
-		{
-			"label": _("CompteLib"),
-			"fieldname": "CompteLib",
-			"fieldtype": "Link",
-			"options": "Account",
-			"width": 200,
-		},
-		{
-			"label": _("CompAuxNum"),
-			"fieldname": "CompAuxNum",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("CompAuxLib"),
-			"fieldname": "CompAuxLib",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("PieceRef"),
-			"fieldname": "PieceRef",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("PieceDate"),
-			"fieldname": "PieceDate",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("EcritureLib"),
-			"fieldname": "EcritureLib",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("Debit"),
-			"fieldname": "Debit",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("Credit"),
-			"fieldname": "Credit",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("EcritureLet"),
-			"fieldname": "EcritureLet",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("DateLet"),
-			"fieldname": "DateLet",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("ValidDate"),
-			"fieldname": "ValidDate",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("Montantdevise"),
-			"fieldname": "Montantdevise",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-		{
-			"label": _("Idevise"),
-			"fieldname": "Idevise",
-			"fieldtype": "Data",
-			"width": 90,
-		},
-	]
-
-	return columns
-
-
-def get_result(filters):
-	gl_entries = get_gl_entries(filters)
-
-	result = get_result_as_list(gl_entries, filters)
-
-	return result
-
 
 def get_gl_entries(filters):
-
 	gle = frappe.qb.DocType("GL Entry")
 	sales_invoice = frappe.qb.DocType("Sales Invoice")
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
@@ -242,12 +217,12 @@ def get_gl_entries(filters):
 		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
 		.orderby(gle.posting_date, gle.voucher_no)
 	)
-	gl_entries = query.run(as_dict=True)
 
-	return gl_entries
+	return query.run(as_dict=True)
 
 
-def get_result_as_list(data, filters):
+def get_result(filters):
+	data = get_gl_entries(filters)
 
 	result = []
 
