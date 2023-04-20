@@ -1661,7 +1661,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		# Step - 3: Create back-date Stock Reconciliation [After DN and Before PR]
 		create_stock_reconciliation(
-			item_code=item,
+			item_code=item.name,
 			warehouse=target_warehouse,
 			qty=10,
 			rate=50,
