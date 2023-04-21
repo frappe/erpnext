@@ -101,9 +101,7 @@ def trigger_job_for_doc(docname: str | None = None):
 	if not docname:
 		return
 
-	if not frappe.db.get_single_value(
-		"Accounts Settings", "enable_payment_reconciliation_in_background"
-	):
+	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
 			_(
 				"Payment Reconciliation through backgound Job has been disabled. Enable it through {}"
@@ -147,9 +145,7 @@ def trigger_reconciliation_for_queued_docs():
 	Will be called from Cron Job
 	Fetch queued docs and start reconciliation process for each one
 	"""
-	if not frappe.db.get_single_value(
-		"Accounts Settings", "enable_payment_reconciliation_in_background"
-	):
+	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
 			_(
 				"Payment Reconciliation through backgound Job has been disabled. Enable it through {0}"
