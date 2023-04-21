@@ -103,14 +103,14 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Running\nReconciled\nPartially Reconciled\nFailed",
+   "options": "Running\nPaused\nReconciled\nPartially Reconciled\nFailed\nCancelled",
    "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-18 19:47:33.076023",
+ "modified": "2023-04-21 17:36:26.642617",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",

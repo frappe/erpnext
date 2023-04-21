@@ -6,6 +6,7 @@ frappe.listview_settings['Process Payment Reconciliation Log'] = {
 			'Paused': 'orange',
 			'Reconciled': 'green',
 			'Failed': 'red',
+			'Cancelled': 'red',
 			'Running': 'blue',
 		};
 		let status = doc.status;

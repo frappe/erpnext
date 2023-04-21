@@ -8,8 +8,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "status",
-  "section_break_gasn",
   "company",
   "party_type",
   "column_break_io6c",
@@ -25,7 +23,9 @@
   "cost_center",
   "bank_cash_account",
   "section_break_2n02",
+  "status",
   "error_log",
+  "section_break_a8yx",
   "amended_from"
  ],
  "fields": [
@@ -36,10 +36,6 @@
    "label": "Status",
    "options": "\nQueued\nRunning\nPaused\nCompleted\nPartially Reconciled\nFailed\nCancelled",
    "read_only": 1
-  },
-  {
-   "fieldname": "section_break_gasn",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "company",
@@ -124,7 +120,8 @@
   },
   {
    "fieldname": "section_break_2n02",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Status"
   },
   {
    "depends_on": "eval:doc.error_log",
@@ -140,12 +137,16 @@
    "options": "Process Payment Reconciliation",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_a8yx",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-21 13:41:35.834457",
+ "modified": "2023-04-21 17:19:30.912953",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",

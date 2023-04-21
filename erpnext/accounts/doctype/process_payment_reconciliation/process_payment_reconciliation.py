@@ -41,6 +41,11 @@ class ProcessPaymentReconciliation(Document):
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
+		log = frappe.db.get_value(
+			"Process Payment Reconciliation Log", filters={"process_pr": self.name}
+		)
+		if log:
+			frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Cancelled")
 
 
 @frappe.whitelist()
@@ -132,7 +137,7 @@ def trigger_job_for_doc(docname: str | None = None):
 					enqueue_after_commit=True,
 					doc=docname,
 				)
-				frappe.msgprint(_("Job triggered"))
+
 		elif frappe.db.get_value("Process Payment Reconciliation", docname, "status") == "Paused":
 			frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Running")
 			log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": docname})
@@ -149,7 +154,6 @@ def trigger_job_for_doc(docname: str | None = None):
 					job_name=job_name,
 					doc=docname,
 				)
-				frappe.msgprint(_("Job triggered"))
 	else:
 		frappe.msgprint(_("Scheduler is Inactive. Can't trigger job now."))
 

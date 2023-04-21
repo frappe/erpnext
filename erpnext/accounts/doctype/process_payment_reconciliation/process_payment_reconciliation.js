@@ -51,6 +51,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 					}
 				}).then(r => {
 					if(!r.exc) {
+						frappe.show_alert(__("Job Started"));
 						frm.reload_doc();
 					}
 				});
@@ -70,7 +71,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 					if (r.message.processed) {
 						progress = (r.message.processed/r.message.total) * 100;
 						description = r.message.processed + "/" + r.message.total +  " processed";
-					} else if (r.message.total == 0) {
+					} else if (r.message.total == 0 && frm.doc.status == "Completed") {
 						progress = 100;
 					}
 
@@ -90,6 +91,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 					}
 				}).then(r => {
 					if (!r.exc) {
+						frappe.show_alert(__("Job Paused"));
 						frm.reload_doc()
 					}
 				});
