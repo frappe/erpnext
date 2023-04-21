@@ -103,9 +103,9 @@ def trigger_job_for_doc(docname: str | None = None):
 
 	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
-			_(
-				"Payment Reconciliation through backgound Job has been disabled. Enable it through {}"
-			).format(get_link_to_form("Accounts Settings", "Accounts Settings"))
+			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
+				get_link_to_form("Accounts Settings", "Accounts Settings")
+			)
 		)
 
 		return
@@ -147,9 +147,9 @@ def trigger_reconciliation_for_queued_docs():
 	"""
 	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
-			_(
-				"Payment Reconciliation through backgound Job has been disabled. Enable it through {0}"
-			).format(get_link_to_form("Accounts Settings", "Accounts Settings"))
+			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
+				get_link_to_form("Accounts Settings", "Accounts Settings")
+			)
 		)
 
 		return
