@@ -41,7 +41,7 @@
   "currency_exchange_section",
   "allow_stale",
   "section_break_jpd0",
-  "enable_payment_reconciliation_in_background",
+  "auto_reconcile_payments",
   "stale_days",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
@@ -381,20 +381,15 @@
    "label": "Merge Similar Account Heads"
   },
   {
-   "fieldname": "section_break_rvrg",
+   "fieldname": "section_break_jpd0",
    "fieldtype": "Section Break",
-   "label": "Background Reconciliation"
+   "label": "Payment Reconciliations"
   },
   {
    "default": "0",
-   "fieldname": "enable_payment_reconciliation_in_background",
+   "fieldname": "auto_reconcile_payments",
    "fieldtype": "Check",
-   "label": "Enable Payment Reconciliation in Background"
-  },
-  {
-   "fieldname": "section_break_jpd0",
-   "fieldtype": "Section Break",
-   "label": "Reconciliation in Background"
+   "label": "Auto Reconcile Payments"
   }
  ],
  "icon": "icon-cog",
@@ -402,7 +397,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-04 19:25:35.046576",
+ "modified": "2023-04-21 13:11:37.130743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
