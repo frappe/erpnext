@@ -94,6 +94,15 @@ def is_job_running(job_name: str) -> bool:
 
 
 @frappe.whitelist()
+def pause_job_for_doc(docname: str | None = None):
+	if docname:
+		frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Paused")
+		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": docname})
+		if log:
+			frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Paused")
+
+
+@frappe.whitelist()
 def trigger_job_for_doc(docname: str | None = None):
 	"""
 	Trigger background job
@@ -123,8 +132,13 @@ def trigger_job_for_doc(docname: str | None = None):
 					enqueue_after_commit=True,
 					doc=docname,
 				)
-				frappe.msgprint(_("Background Job {0} triggered").format(job_name))
-		elif frappe.db.get_value("Process Payment Reconciliation", docname, "status") == "Running":
+				frappe.msgprint(_("Job triggered"))
+		elif frappe.db.get_value("Process Payment Reconciliation", docname, "status") == "Paused":
+			frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Running")
+			log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": docname})
+			if log:
+				frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Running")
+
 			# Resume tasks for running doc
 			job_name = f"start_processing_{docname}"
 			if not is_job_running(job_name):
@@ -135,7 +149,7 @@ def trigger_job_for_doc(docname: str | None = None):
 					job_name=job_name,
 					doc=docname,
 				)
-				frappe.msgprint(_("Background Job {0} triggered").format(job_name))
+				frappe.msgprint(_("Job triggered"))
 	else:
 		frappe.msgprint(_("Scheduler is Inactive. Can't trigger job now."))
 
@@ -392,8 +406,7 @@ def reconcile(doc: None | str = None) -> None:
 					frappe.db.set_value(
 						"Process Payment Reconciliation Log", log, "reconciled_entries", reconciled_count
 					)
-					frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Running")
-					frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Running")
+
 				except Exception as err:
 					# Update the parent doc about the exception
 					frappe.db.rollback()
@@ -433,7 +446,7 @@ def reconcile(doc: None | str = None) -> None:
 						frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
 					else:
 
-						if not frappe.db.get_value("Process Payment Reconciliation", doc, "pause"):
+						if not (frappe.db.get_value("Process Payment Reconciliation", doc, "status") == "Paused"):
 							# trigger next batch in job
 							# generate reconcile job name
 							allocation = get_next_allocation(log)
@@ -471,7 +484,7 @@ def is_any_doc_running(for_filter: str | dict | None = None) -> str | None:
 			"Process Payment Reconciliation",
 			filters={
 				"docstatus": 1,
-				"status": "Running",
+				"status": ["in", ["Running", "Paused"]],
 				"company": for_filter.get("company"),
 				"party_type": for_filter.get("party_type"),
 				"party": for_filter.get("party"),

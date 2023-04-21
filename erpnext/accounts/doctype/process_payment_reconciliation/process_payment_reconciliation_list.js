@@ -3,6 +3,7 @@ frappe.listview_settings['Process Payment Reconciliation'] = {
 	get_indicator: function(doc) {
 		let colors = {
 			'Queued': 'orange',
+			'Paused': 'orange',
 			'Completed': 'green',
 			'Partially Reconciled': 'orange',
 			'Running': 'blue',

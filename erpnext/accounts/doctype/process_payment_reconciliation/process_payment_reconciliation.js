@@ -37,10 +37,11 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 				]
 			};
 		});
+
 	},
 	refresh: function(frm) {
-		if (frm.doc.docstatus==1 && ['Queued', 'Running'].find(x => x == frm.doc.status)) {
-			let execute_btn = __("Reconcile in Background")
+		if (frm.doc.docstatus==1 && ['Queued', 'Paused'].find(x => x == frm.doc.status)) {
+			let execute_btn = __("Start / Resume")
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({
@@ -55,7 +56,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 				});
 			});
 		}
-		if (frm.doc.docstatus==1 && ['Completed', 'Running', "Partially Reconciled"].find(x => x == frm.doc.status)) {
+		if (frm.doc.docstatus==1 && ['Completed', 'Running', 'Paused', 'Partially Reconciled'].find(x => x == frm.doc.status)) {
 			frm.call({
 				'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.get_reconciled_count",
 				args: {
@@ -82,11 +83,17 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 			let execute_btn = __("Pause")
 
 			frm.add_custom_button(execute_btn, () => {
-				frappe.db.set_value(frm.doctype, frm.docname, 'pause', 1).then(r => {
-					if(!r.exc) {
-						frm.reload_doc();
+				frm.call({
+					'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.pause_job_for_doc",
+					args: {
+						"docname": frm.docname,
+					}
+				}).then(r => {
+					if (!r.exc) {
+						frm.reload_doc()
 					}
 				});
+
 			});
 		}
 	},
@@ -118,5 +125,4 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 			});
 		}
 	}
-
 });
