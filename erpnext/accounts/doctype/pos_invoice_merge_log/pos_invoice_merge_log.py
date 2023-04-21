@@ -282,24 +282,26 @@ def unconsolidate_pos_invoices(closing_entry):
     else:
         cancel_merge_logs(merge_logs, closing_entry)
 
-def collect_invocie_by_customers(invoice_by_customer, invoice_by_defualt_customer):
-    tmp_ob={}
-    for customer,invoice in six.iteritems(invoice_by_customer):
-        da=frappe.get_doc("Customer", customer).forward_sale
-        if(da):
-            tmp_ob.update({customer:invoice})
-        else:
-            if(not invoice_by_defualt_customer in tmp_ob.keys()):
-                tmp_ob[invoice_by_defualt_customer]=[]
-                tmp_ob[invoice_by_defualt_customer]+=invoice
-            else:
-                tmp_ob[invoice_by_defualt_customer]+=invoice
-    return tmp_ob
+# moving to the new custom erpnext not used any more
+# def collect_invoice_by_customers(invoice_by_customer, invoice_by_defualt_customer):
+#     tmp_ob={}
+#     for customer,invoice in six.iteritems(invoice_by_customer):
+#         da=frappe.get_doc("Customer", customer).forward_sale
+#         if(da):
+#             tmp_ob.update({customer:invoice})
+#         else:
+#             if(not invoice_by_defualt_customer in tmp_ob.keys()):
+#                 tmp_ob[invoice_by_defualt_customer]=[]
+#                 tmp_ob[invoice_by_defualt_customer]+=invoice
+#             else:
+#                 tmp_ob[invoice_by_defualt_customer]+=invoice
+#     return tmp_ob
 
 def create_merge_logs(invoice_by_customer, closing_entry=None,invoice_by_defualt_customer=None):
     try:
-        custom_invoice_by_customer=collect_invocie_by_customers(invoice_by_customer,invoice_by_defualt_customer)
-        for customer, invoices in six.iteritems(custom_invoice_by_customer):
+        # moving to the new custom erpnext not used any more
+        # custom_invoice_by_customer=collect_invoice_by_customers(invoice_by_customer,invoice_by_defualt_customer)
+        for customer, invoices in six.iteritems(invoice_by_customer):
             merge_log = frappe.new_doc('POS Invoice Merge Log')
             merge_log.posting_date = getdate(closing_entry.get('period_end_date')) if closing_entry else nowdate()
             merge_log.posting_time = get_time(closing_entry.get('period_end_date')) if closing_entry else format_time(nowtime(), 'HH:mm:ss')
