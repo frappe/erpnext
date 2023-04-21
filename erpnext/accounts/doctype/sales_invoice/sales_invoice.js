@@ -315,7 +315,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 	},
 
+<<<<<<< HEAD
 	make_inter_company_invoice: function() {
+=======
+	make_inter_company_invoice() {
+		let me = this;
+>>>>>>> 19911b48fd (fix: validation for internal transfer entry)
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
 			frm: me.frm
