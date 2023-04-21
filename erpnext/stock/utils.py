@@ -7,7 +7,7 @@ from typing import Dict, Optional
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime
+from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 from pypika.terms import ExistsCriterion
 
@@ -61,12 +61,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
-		.select(
-			sle.item_code,
-			sle.stock_value,
-			sle.name,
-			sle.warehouse,
-		)
+		.select(IfNull(Sum(sle.stock_value_difference), 0))
 		.where((sle.posting_date <= posting_date) & (sle.is_cancelled == 0))
 		.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=frappe.qb.desc)
 		.orderby(sle.creation, order=frappe.qb.desc)
@@ -90,14 +85,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	if item_code:
 		query = query.where(sle.item_code == item_code)
 
-	stock_ledger_entries = query.run(as_dict=True)
-
-	sle_map = {}
-	for sle in stock_ledger_entries:
-		if not (sle.item_code, sle.warehouse) in sle_map:
-			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
-
-	return sum(sle_map.values())
+	return query.run(as_list=True)[0][0]
 
 
 @frappe.whitelist()
