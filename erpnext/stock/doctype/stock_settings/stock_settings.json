@@ -352,7 +352,6 @@
   },
   {
    "default": "0",
-   "description": "Allows to create Stock Reservations against <b>Sales Order</b>",
    "fieldname": "enable_stock_reservation",
    "fieldtype": "Check",
    "label": "Enable Stock Reservation"
@@ -383,7 +382,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-12 15:11:35.744375",
+ "modified": "2023-04-22 08:48:37.767646",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
