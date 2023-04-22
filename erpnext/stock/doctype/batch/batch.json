@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "field:batch_id",
  "creation": "2013-03-05 14:50:38",
  "doctype": "DocType",
@@ -207,7 +208,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2022-02-21 08:08:23.999236",
+ "modified": "2023-04-22 08:53:30.243534",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -233,6 +234,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "batch_id",
  "track_changes": 1
 }
