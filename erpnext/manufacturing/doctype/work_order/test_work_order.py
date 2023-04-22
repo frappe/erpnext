@@ -1598,6 +1598,57 @@ class TestWorkOrder(FrappeTestCase):
 			self.assertEqual(row.to_time, add_to_date(planned_start_date, minutes=30))
 			self.assertEqual(row.workstation, workstations_to_check[index])
 
+	def test_job_card_extra_qty(self):
+		items = [
+			"Test FG Item for Scrap Item Test 1",
+			"Test RM Item 1 for Scrap Item Test 1",
+			"Test RM Item 2 for Scrap Item Test 1",
+		]
+
+		company = "_Test Company with perpetual inventory"
+		for item_code in items:
+			create_item(
+				item_code=item_code,
+				is_stock_item=1,
+				is_purchase_item=1,
+				opening_stock=100,
+				valuation_rate=10,
+				company=company,
+				warehouse="Stores - TCP1",
+			)
+
+		item = "Test FG Item for Scrap Item Test 1"
+		raw_materials = ["Test RM Item 1 for Scrap Item Test 1", "Test RM Item 2 for Scrap Item Test 1"]
+		if not frappe.db.get_value("BOM", {"item": item}):
+			bom = make_bom(
+				item=item, source_warehouse="Stores - TCP1", raw_materials=raw_materials, do_not_save=True
+			)
+			bom.with_operations = 1
+			bom.append(
+				"operations",
+				{
+					"operation": "_Test Operation 1",
+					"workstation": "_Test Workstation 1",
+					"hour_rate": 20,
+					"time_in_mins": 60,
+				},
+			)
+
+			bom.submit()
+
+		wo_order = make_wo_order_test_record(
+			item=item,
+			company=company,
+			planned_start_date=now(),
+			qty=20,
+		)
+		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
+		job_card_doc = frappe.get_doc("Job Card", job_card)
+
+		# Make another Job Card for the same Work Order
+		job_card2 = frappe.copy_doc(job_card_doc)
+		self.assertRaises(frappe.ValidationError, job_card2.save)
+
 
 def prepare_data_for_workstation_type_check():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation

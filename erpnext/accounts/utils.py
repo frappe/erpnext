@@ -646,6 +646,7 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
+	payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
 
 	if not do_not_save:

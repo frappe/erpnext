@@ -30,10 +30,6 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "column_break_77",
-  "source",
-  "campaign",
-  "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -163,7 +159,9 @@
   "is_internal_customer",
   "represents_company",
   "column_break_152",
+  "source",
   "inter_company_order_reference",
+  "campaign",
   "party_account_currency",
   "connections_tab"
  ],
@@ -1166,12 +1164,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_77",
-   "fieldtype": "Column Break",
-   "hide_days": 1,
-   "hide_seconds": 1
-  },
-  {
    "fieldname": "source",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1612,10 +1604,6 @@
   {
    "fieldname": "column_break_92",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "custom_dimensions_section",
-   "fieldtype": "Section Break"
   },
   {
    "collapsible": 1,
