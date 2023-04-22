@@ -51,13 +51,25 @@ GL_REPOSTING_CHUNK = 100
 
 @frappe.whitelist()
 def get_fiscal_year(
-	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False
+	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
-	return get_fiscal_years(date, fiscal_year, label, verbose, company, as_dict=as_dict)[0]
+	fiscal_years = get_fiscal_years(
+		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
+	)
+	if boolean:
+		return fiscal_years
+	else:
+		return fiscal_years[0]
 
 
 def get_fiscal_years(
-	transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False
+	transaction_date=None,
+	fiscal_year=None,
+	label="Date",
+	verbose=1,
+	company=None,
+	as_dict=False,
+	boolean=False,
 ):
 	fiscal_years = frappe.cache().hget("fiscal_years", company) or []
 
@@ -121,8 +133,12 @@ def get_fiscal_years(
 	if company:
 		error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
 
+	if boolean:
+		return False
+
 	if verbose == 1:
 		frappe.msgprint(error_msg)
+
 	raise FiscalYearError(error_msg)
 
 
@@ -420,7 +436,7 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args):  # nosemgrep
+def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -449,13 +465,9 @@ def reconcile_against_document(args):  # nosemgrep
 			if voucher_type == "Journal Entry":
 				update_reference_in_journal_entry(entry, doc, do_not_save=True)
 			else:
-				update_reference_in_payment_entry(entry, doc, do_not_save=True)
-
-		if doc.doctype == "Journal Entry":
-			try:
-				doc.validate_total_debit_and_credit()
-			except Exception as validation_exception:
-				raise frappe.ValidationError(_(f"Validation Error for {doc.name}")) from validation_exception
+				update_reference_in_payment_entry(
+					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
+				)
 
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
@@ -592,7 +604,9 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 		journal_entry.save(ignore_permissions=True)
 
 
-def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
+def update_reference_in_payment_entry(
+	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False
+):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
 		"reference_name": d.against_voucher,
@@ -636,6 +650,8 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
+	if not skip_ref_details_update_for_pe:
+		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
 
 	if not do_not_save:

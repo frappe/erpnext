@@ -32,9 +32,6 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "column_break_27",
-  "campaign",
-  "source",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -123,6 +120,7 @@
   "account_for_change_amount",
   "advances_section",
   "allocate_advances_automatically",
+  "only_include_allocated_payments",
   "get_advances",
   "advances",
   "write_off_section",
@@ -203,7 +201,9 @@
   "more_information",
   "status",
   "inter_company_invoice_reference",
+  "campaign",
   "represents_company",
+  "source",
   "customer_group",
   "col_break23",
   "is_internal_customer",
@@ -2084,10 +2084,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
   },
@@ -2131,6 +2127,14 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "depends_on": "allocate_advances_automatically",
+   "description": "Advance payments allocated against orders will only be fetched",
+   "fieldname": "only_include_allocated_payments",
+   "fieldtype": "Check",
+   "label": "Only Include Allocated Payments"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2143,11 +2147,10 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-01-28 19:45:47.538163",
+ "modified": "2023-04-03 22:55:14.206473",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

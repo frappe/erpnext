@@ -253,7 +253,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	calculate_commission() {
-		if(!this.frm.fields_dict.commission_rate) return;
+		if(!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
 
 		if(this.frm.doc.commission_rate > 100) {
 			this.frm.set_value("commission_rate", 100);
@@ -418,8 +418,6 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			callback: function(r) {
 				if(r.message) {
 					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
-				} else {
-				    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
 				}
 			}
 		});

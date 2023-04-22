@@ -30,10 +30,6 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "column_break_77",
-  "source",
-  "campaign",
-  "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -162,7 +158,9 @@
   "is_internal_customer",
   "represents_company",
   "column_break_152",
+  "source",
   "inter_company_order_reference",
+  "campaign",
   "party_account_currency",
   "connections_tab"
  ],
@@ -1165,12 +1163,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_77",
-   "fieldtype": "Column Break",
-   "hide_days": 1,
-   "hide_seconds": 1
-  },
-  {
    "fieldname": "source",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1613,10 +1605,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "custom_dimensions_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "additional_info_section",
    "fieldtype": "Section Break",
@@ -1643,7 +1631,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:34:00.681780",
+ "modified": "2023-04-20 11:14:01.036202",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

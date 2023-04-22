@@ -84,6 +84,8 @@ def calculate_next_due_date(
 		next_due_date = add_years(start_date, 1)
 	if periodicity == "2 Yearly":
 		next_due_date = add_years(start_date, 2)
+	if periodicity == "3 Yearly":
+		next_due_date = add_years(start_date, 3)
 	if periodicity == "Quarterly":
 		next_due_date = add_months(start_date, 3)
 	if end_date and (
