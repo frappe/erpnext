@@ -33,6 +33,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
+	has_reserved_stock,
 )
 from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
@@ -49,16 +50,13 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def onload(self) -> None:
-		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
-			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-				has_reserved_stock,
-			)
-
-			if has_reserved_stock(self.doctype, self.name):
-				self.set_onload("has_reserved_stock", True)
-
-			if self.has_unreserved_stock():
-				self.set_onload("has_unreserved_stock", True)
+		stock_settings = frappe.get_doc("Stock Settings")
+		self.set_onload("enable_stock_reservation", stock_settings.enable_stock_reservation)
+		self.set_onload(
+			"reserve_stock_on_so_submission", stock_settings.reserve_stock_on_sales_order_submission
+		)
+		self.set_onload("has_reserved_stock", has_reserved_stock(self.doctype, self.name))
+		self.set_onload("has_unreserved_stock", self.has_unreserved_stock())
 
 	def validate(self):
 		super(SalesOrder, self).validate()
