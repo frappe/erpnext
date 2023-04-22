@@ -198,11 +198,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-07-27 11:16:45.596579",
-=======
  "modified": "2023-04-21 17:16:56.192560",
->>>>>>> ac871797b2 (fix: SLA permissions (#34981))
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
