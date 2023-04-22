@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Min, Timestamp
+from frappe.query_builder.functions import CombineDatetime, Min
 from frappe.utils import add_days, getdate, today
 
 import erpnext
@@ -75,7 +75,7 @@ def get_data(report_filters):
 			& (sle.company == report_filters.company)
 			& (sle.is_cancelled == 0)
 		)
-		.orderby(Timestamp(sle.posting_date, sle.posting_time), sle.creation)
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time), sle.creation)
 	).run(as_dict=True)
 
 	for d in data:
