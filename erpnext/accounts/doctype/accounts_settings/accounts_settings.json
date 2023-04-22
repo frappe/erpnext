@@ -40,6 +40,8 @@
   "show_payment_schedule_in_print",
   "currency_exchange_section",
   "allow_stale",
+  "section_break_jpd0",
+  "auto_reconcile_payments",
   "stale_days",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
@@ -169,11 +171,6 @@
    "fieldname": "stale_days",
    "fieldtype": "Int",
    "label": "Stale Days"
-  },
-  {
-   "fieldname": "report_settings_sb",
-   "fieldtype": "Section Break",
-   "label": "Report Settings"
   },
   {
    "default": "0",
@@ -370,6 +367,17 @@
    "fieldname": "merge_similar_account_heads",
    "fieldtype": "Check",
    "label": "Merge Similar Account Heads"
+  },
+  {
+   "fieldname": "section_break_jpd0",
+   "fieldtype": "Section Break",
+   "label": "Payment Reconciliations"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_reconcile_payments",
+   "fieldtype": "Check",
+   "label": "Auto Reconcile Payments"
   }
  ],
  "icon": "icon-cog",
@@ -377,7 +385,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-17 11:45:42.049247",
+ "modified": "2023-04-21 13:11:37.130743",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
