@@ -1,0 +1,444 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:Meter-Point-{project}-{YYYY}-{#####}",
+ "creation": "2023-01-20 02:06:53.991759",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "antrag_auf_anbotslegung",
+  "section_break_2",
+  "project",
+  "rechnungsanschrift",
+  "titel",
+  "vorname",
+  "nachname",
+  "strasse",
+  "hausnummer_stock_tur",
+  "ort_plz",
+  "section_break_12",
+  "kundennummer",
+  "anlagennummer",
+  "energielieferant",
+  "anlagenadresse",
+  "strasse_1",
+  "haus_nr_stock_tur_1",
+  "plz_ort",
+  "kontakt",
+  "tel",
+  "email",
+  "geb_datum",
+  "art_der_energiequelle",
+  "sonne",
+  "wind",
+  "wasser",
+  "biomasse",
+  "biogas",
+  "sonstiges",
+  "sonstiges1",
+  "betriebsweise",
+  "volleinspeisung",
+  "uberschusseinspeisung",
+  "inselbetrieb",
+  "beantragte",
+  "gesamtleistung_m",
+  "bereits_bestehende",
+  "erzeugungsanlage",
+  "wechselrichter1",
+  "ac_nennleistung",
+  "hersteller_typ",
+  "phasen",
+  "inselbetrieb_moglich",
+  "batteriespeicher",
+  "batteriespeicher1",
+  "ac_nennleistug1",
+  "hersteller_typ1",
+  "dc_oder_ac",
+  "phasig1",
+  "netzruckspeisung",
+  "inselbetrieb_moglich1",
+  "section_break_52",
+  "html_53",
+  "erwunschter_termin",
+  "voraussichtliche_intertriebnahme",
+  "section_break_56",
+  "html_57",
+  "section_break_58",
+  "datum",
+  "konzessioniertes_elektrounternehmen",
+  "signature_60",
+  "anschlusswerber_kunde",
+  "signature_62"
+ ],
+ "fields": [
+  {
+   "fieldname": "antrag_auf_anbotslegung",
+   "fieldtype": "Heading",
+   "label": "ANTRAG AUF ANBOTSLEGUNG / Z\u00c4HLPUNKTANFRAGE"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Pers\u00f6nliche Daten"
+  },
+  {
+   "fieldname": "rechnungsanschrift",
+   "fieldtype": "Column Break",
+   "label": "Rechnungsanschrift - falls anders als Kundenadresse"
+  },
+  {
+   "fieldname": "titel",
+   "fieldtype": "Select",
+   "label": "Titel",
+   "options": "Bitte ausw\u00e4hlen\nFrau\nHerr\nFirma"
+  },
+  {
+   "fieldname": "vorname",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "nachname",
+   "fieldtype": "Data",
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "hausnummer_stock_tur",
+   "fieldtype": "Data",
+   "label": "Hausnummer/Stock/T\u00fcr"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kundennummer",
+   "fieldtype": "Data",
+   "label": "Kundennumer"
+  },
+  {
+   "fieldname": "anlagennummer",
+   "fieldtype": "Data",
+   "label": "Anlagennummer"
+  },
+  {
+   "fieldname": "energielieferant",
+   "fieldtype": "Data",
+   "label": "Energielieferant"
+  },
+  {
+   "fieldname": "anlagenadresse",
+   "fieldtype": "Column Break",
+   "label": "Anlagenadresse"
+  },
+  {
+   "fieldname": "strasse_1",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "haus_nr_stock_tur_1",
+   "fieldtype": "Data",
+   "label": "Haus-Nr./Stock/T\u00fcr:"
+  },
+  {
+   "fieldname": "plz_ort",
+   "fieldtype": "Data",
+   "label": "PLZ, Ort"
+  },
+  {
+   "fieldname": "kontakt",
+   "fieldtype": "Column Break",
+   "label": "Kontakt"
+  },
+  {
+   "fieldname": "ort_plz",
+   "fieldtype": "Data",
+   "label": "PLZ , Ort"
+  },
+  {
+   "fieldname": "tel",
+   "fieldtype": "Phone",
+   "label": "Tel"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "E-mail",
+   "options": "Email"
+  },
+  {
+   "fieldname": "geb_datum",
+   "fieldtype": "Date",
+   "label": "Geb.Datum"
+  },
+  {
+   "fieldname": "art_der_energiequelle",
+   "fieldtype": "Section Break",
+   "label": "Art der Energiequelle"
+  },
+  {
+   "default": "0",
+   "fieldname": "sonne",
+   "fieldtype": "Check",
+   "label": "Sonne"
+  },
+  {
+   "default": "0",
+   "fieldname": "wind",
+   "fieldtype": "Check",
+   "label": "Wind"
+  },
+  {
+   "default": "0",
+   "fieldname": "wasser",
+   "fieldtype": "Check",
+   "label": "Wasser"
+  },
+  {
+   "default": "0",
+   "fieldname": "biomasse",
+   "fieldtype": "Check",
+   "label": "Biomasse"
+  },
+  {
+   "default": "0",
+   "fieldname": "biogas",
+   "fieldtype": "Check",
+   "label": "Biogas"
+  },
+  {
+   "default": "0",
+   "fieldname": "sonstiges",
+   "fieldtype": "Check",
+   "label": "Sonstiges"
+  },
+  {
+   "fieldname": "sonstiges1",
+   "fieldtype": "Data",
+   "label": "Sonstiges"
+  },
+  {
+   "fieldname": "betriebsweise",
+   "fieldtype": "Column Break",
+   "label": "Betriebsweise der Gesamtanlage"
+  },
+  {
+   "default": "0",
+   "fieldname": "volleinspeisung",
+   "fieldtype": "Check",
+   "label": "Volleinspeisung"
+  },
+  {
+   "default": "0",
+   "fieldname": "uberschusseinspeisung",
+   "fieldtype": "Check",
+   "label": "\u00dcberschusseinspeisung"
+  },
+  {
+   "default": "0",
+   "fieldname": "inselbetrieb",
+   "fieldtype": "Check",
+   "label": "Inselbetrieb"
+  },
+  {
+   "fieldname": "beantragte",
+   "fieldtype": "Column Break",
+   "label": "Beantragte"
+  },
+  {
+   "description": "kW",
+   "fieldname": "gesamtleistung_m",
+   "fieldtype": "Data",
+   "label": "Gesamtleistung Module: "
+  },
+  {
+   "description": "kW",
+   "fieldname": "bereits_bestehende",
+   "fieldtype": "Data",
+   "label": "Bereits bestehende Leistung"
+  },
+  {
+   "fieldname": "erzeugungsanlage",
+   "fieldtype": "Section Break",
+   "label": "Erzeugungsanlage"
+  },
+  {
+   "fieldname": "wechselrichter1",
+   "fieldtype": "Select",
+   "label": "Erzeugungsanlage",
+   "options": "Bitte ausw\u00e4hlen\nWechselrichter\nGenerator"
+  },
+  {
+   "description": "kVA",
+   "fieldname": "ac_nennleistung",
+   "fieldtype": "Data",
+   "label": "AC-Nennleistung"
+  },
+  {
+   "fieldname": "hersteller_typ",
+   "fieldtype": "Data",
+   "label": "Hersteller/Typ"
+  },
+  {
+   "fieldname": "phasen",
+   "fieldtype": "Select",
+   "label": "Phasen",
+   "options": "Bitte ausw\u00e4hlen\n1-phasig\n2-phasig\n3-phasig"
+  },
+  {
+   "fieldname": "inselbetrieb_moglich",
+   "fieldtype": "Select",
+   "label": "Inselbetrieb m\u00f6glich",
+   "options": "Bitte ausw\u00e4hlen\nJa\nNein"
+  },
+  {
+   "fieldname": "batteriespeicher",
+   "fieldtype": "Column Break",
+   "label": "<b>Batteriespeicher</b>"
+  },
+  {
+   "fieldname": "batteriespeicher1",
+   "fieldtype": "Select",
+   "label": "Batteriespeicher",
+   "options": "Bitte ausw\u00e4hlen\nWechselrichter\nGenerator"
+  },
+  {
+   "fieldname": "ac_nennleistug1",
+   "fieldtype": "Data",
+   "label": "AC-Nennleistung"
+  },
+  {
+   "fieldname": "hersteller_typ1",
+   "fieldtype": "Data",
+   "label": "Hersteller/Typ"
+  },
+  {
+   "fieldname": "dc_oder_ac",
+   "fieldtype": "Select",
+   "label": "DC- oder AC- Kopplung",
+   "options": "Bitte ausw\u00e4hlen\nDC-Kopplung\nAC-Kopplung"
+  },
+  {
+   "fieldname": "phasig1",
+   "fieldtype": "Select",
+   "label": "Phasig",
+   "options": "Bitte ausw\u00e4hlen\n1-phasig\n2-phasig\n3-phasig"
+  },
+  {
+   "fieldname": "netzruckspeisung",
+   "fieldtype": "Select",
+   "label": "Netzr\u00fcckspeisung:",
+   "options": "Bitte ausw\u00e4hlen\nJa\nNein"
+  },
+  {
+   "fieldname": "inselbetrieb_moglich1",
+   "fieldtype": "Select",
+   "label": "Inselbetrieb m\u00f6glich:",
+   "options": "Bitte ausw\u00e4hlen\nJa\nNein"
+  },
+  {
+   "fieldname": "section_break_52",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "html_53",
+   "fieldtype": "HTML",
+   "options": "Mit dieser Anfrage beauftragt der Kunde das EVU mit einer\nkostenlosen und unverbindlichen Z\u00e4hlpunktanfrage f\u00fcr die oben\nangef\u00fchrte Erzeugungsanlage. "
+  },
+  {
+   "fieldname": "erwunschter_termin",
+   "fieldtype": "Date",
+   "label": "Erw\u00fcnschter Termin der Anbotslegung"
+  },
+  {
+   "fieldname": "voraussichtliche_intertriebnahme",
+   "fieldtype": "Date",
+   "label": "Voraussichtliche Inbetriebnahme der Anlage"
+  },
+  {
+   "fieldname": "section_break_56",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "html_57",
+   "fieldtype": "HTML",
+   "options": "<p>Basierend auf den angegebenen Anlagendaten erfolgt die technische Beurteilung der Netzvertr\u00e4glichkeit der angefragten Erzeugungs-/Speicheranlage gem\u00e4\u00df den\nBeurteilungsrichtlinien der Technischen und Organisatorischen Regeln f\u00fcr Betreiber und Benutzer von Netzen (TOR) von Energie-Control Austria, sowie in weiterer Folge die\nFestlegung des Netzanschlusspunktes und der Einspeiseleistung. Im Interesse einer sicheren, kosteng\u00fcnstigen, umweltvertr\u00e4glichen und effizienten Stromversorgung kann dem\nKunden im erforderlichen Ausma\u00df eine Begrenzung der Einspeiseleistung sowie eine definierte Betriebsweise der Einspeiseanlage hinsichtlich Wirk- und/oder Blindleistung\n(Regelkonzept) gem\u00e4\u00df der jeweils g\u00fcltigen TOR vorgegeben werden. Die Zusage \u00fcber die M\u00f6glichkeit des Nutzzutritts der Erzeugungsanlage am festgelegten Netzanschlusspunkt\ngilt 6 Monate und erlischt nach Ablauf dieser Zeit ohne weitere Information an den Kunden.</p>"
+  },
+  {
+   "fieldname": "datum",
+   "fieldtype": "Date",
+   "label": "Datum"
+  },
+  {
+   "fieldname": "konzessioniertes_elektrounternehmen",
+   "fieldtype": "Column Break",
+   "label": "(Konzessioniertes Elektrounternehmen)"
+  },
+  {
+   "fieldname": "signature_60",
+   "fieldtype": "Signature"
+  },
+  {
+   "fieldname": "anschlusswerber_kunde",
+   "fieldtype": "Column Break",
+   "label": "Anschlusswerber / Kunde"
+  },
+  {
+   "fieldname": "signature_62",
+   "fieldtype": "Signature"
+  },
+  {
+   "fieldname": "section_break_58",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Projekt",
+   "options": "Project"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-01-20 03:59:42.056379",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Meter Point Request",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

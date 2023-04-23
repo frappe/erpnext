@@ -1,0 +1,225 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-01-20 01:04:13.137916",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vollmacht",
+  "section_break_2",
+  "rechtsform",
+  "firmenname",
+  "vorname",
+  "nachname",
+  "geb_datum",
+  "strasse_nr",
+  "plz",
+  "ort",
+  "column_break_11",
+  "project",
+  "section_break_11",
+  "html_12",
+  "section_break_13",
+  "energie",
+  "bauanzeige",
+  "ansuchen",
+  "forderantrag",
+  "abschliessende",
+  "section_break_19",
+  "html_20",
+  "section_break_21",
+  "unterrschrift_kunde",
+  "sig_unterschift",
+  "column_break_24",
+  "ort_1",
+  "column_break_26",
+  "datetime",
+  "section_break_28",
+  "html_29"
+ ],
+ "fields": [
+  {
+   "fieldname": "vollmacht",
+   "fieldtype": "Heading",
+   "label": "<u>Vollmacht</u>"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rechtsform",
+   "fieldtype": "Data",
+   "label": "Rechtsform"
+  },
+  {
+   "fieldname": "firmenname",
+   "fieldtype": "Data",
+   "label": "Firmenname"
+  },
+  {
+   "fieldname": "vorname",
+   "fieldtype": "Data",
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "nachname",
+   "fieldtype": "Data",
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "geb_datum",
+   "fieldtype": "Date",
+   "label": "Geb.Datum"
+  },
+  {
+   "fieldname": "strasse_nr",
+   "fieldtype": "Data",
+   "label": "Strasse / Nr"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Int",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "html_12",
+   "fieldtype": "HTML",
+   "options": "best\u00e4tigt eine Zeichnungsberechtigung f\u00fcr die Firmen: <br><br>\n<b>Okovolt Solartechnik GmbH sowie OKOVOLT GmbH Solartechnik</b>\n<br><br>\nDiese Zeichnungsberechtigung wird nur f\u00fcr die Unterfertigung der angef\u00fchrten Fomulare erteilt. <br><br>\nSie dient ausschlie\u00dflich und alleine der vom Kunden in Auftrag gegebenen Antragstellung, dem F\u00f6rderansuchen\nund der abschlie\u00dfenden F\u00f6rdereinreichung der beauftragten Photovoltaikanlage."
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "energie",
+   "fieldtype": "Check",
+   "label": "<b>Energieversorger</b> Ansuchen fur Netzzugang"
+  },
+  {
+   "default": "0",
+   "fieldname": "bauanzeige",
+   "fieldtype": "Check",
+   "label": "<b>Bauanzeige</b> f\u00fcr die Errichtung eine PV -Anlage in der Gemeinde"
+  },
+  {
+   "default": "0",
+   "fieldname": "ansuchen",
+   "fieldtype": "Check",
+   "label": "<b>Ansuchen f\u00fcr </b>die Errichtung einer PV- Anlage bei der BH/Gemeinden/Landesregierung"
+  },
+  {
+   "default": "0",
+   "fieldname": "forderantrag",
+   "fieldtype": "Check",
+   "label": "<b>F\u00f6rderantrag</b> bei der jeweiligen F\u00f6rderstelle"
+  },
+  {
+   "default": "0",
+   "fieldname": "abschliessende",
+   "fieldtype": "Check",
+   "label": "<b>Abschlie\u00dfende F\u00f6rdereinreichung</b> bei der jeweiligen F\u00f6rderstelle"
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "html_20",
+   "fieldtype": "HTML",
+   "options": "Die in Vertretung ausgef\u00fchrten Unterzeichnungen sind nur in Verbindung dieses Schreibens g\u00fcltig.\n<br><br>\nDiese Zeichnungsberechtigung ist nur g\u00fcltig auf Formularen mit gleichem Kundennamen. <br> "
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break",
+   "options": "<br><br>"
+  },
+  {
+   "fieldname": "sig_unterschift",
+   "fieldtype": "Signature",
+   "label": "Unterschrift Kunde"
+  },
+  {
+   "fieldname": "unterrschrift_kunde",
+   "fieldtype": "HTML",
+   "label": "Unterschrift Kunde",
+   "options": "Unterschrift Kunde"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ort_1",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "datetime",
+   "fieldtype": "Date",
+   "label": "Datum"
+  },
+  {
+   "fieldname": "section_break_28",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "html_29",
+   "fieldtype": "HTML",
+   "options": "OKOVOLT GmbH Solartechnik / Schlingener Str. la / D - 86842 Tiirkheim / www.oekovolt.com / office@oekovolt.com <br>\nOkovolt Solartechnik GmbH / Gewerbegebiet 10 / A-5121 Ostermiething / www.oekovolt.com / salzburg@oekovolt.com <br>\nOkovolt Solartechnik GmbH / LandstraGe 11 / A - 6911 Lochau / www.oekovolt.com / salzburg@oekovolt.com"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break",
+   "print_hide": 1,
+   "report_hide": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-01-21 17:51:53.458376",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Power of attorney",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
