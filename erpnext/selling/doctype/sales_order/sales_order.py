@@ -556,8 +556,8 @@ class SalesOrder(SellingController):
 			# Stock is already reserved for the item, notify the user and skip the item.
 			if unreserved_qty <= 0:
 				frappe.msgprint(
-					_("Row #{0}: Stock is already reserved for the Item {1}").format(
-						item.idx, frappe.bold(item.item_code)
+					_("Row #{0}: Stock is already reserved for the Item {1} in Warehouse {2}.").format(
+						item.idx, frappe.bold(item.item_code), frappe.bold(item.warehouse)
 					),
 					title=_("Stock Reservation"),
 				)
@@ -568,8 +568,8 @@ class SalesOrder(SellingController):
 			# No stock available to reserve, notify the user and skip the item.
 			if available_qty_to_reserve <= 0:
 				frappe.msgprint(
-					_("Row #{0}: No available stock to reserve for the Item {1}").format(
-						item.idx, frappe.bold(item.item_code)
+					_("Row #{0}: No available stock to reserve for the Item {1} in Warehouse {2}.").format(
+						item.idx, frappe.bold(item.item_code), frappe.bold(item.warehouse)
 					),
 					title=_("Stock Reservation"),
 					indicator="orange",
