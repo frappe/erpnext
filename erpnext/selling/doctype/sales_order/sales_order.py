@@ -50,13 +50,12 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def onload(self) -> None:
-		stock_settings = frappe.get_doc("Stock Settings")
-		self.set_onload("enable_stock_reservation", stock_settings.enable_stock_reservation)
-		self.set_onload(
-			"reserve_stock_on_so_submission", stock_settings.reserve_stock_on_sales_order_submission
-		)
-		self.set_onload("has_reserved_stock", has_reserved_stock(self.doctype, self.name))
-		self.set_onload("has_unreserved_stock", self.has_unreserved_stock())
+		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
+
+		if has_reserved_stock(self.doctype, self.name):
+			self.set_onload("has_reserved_stock", True)
 
 	def validate(self):
 		super(SalesOrder, self).validate()
