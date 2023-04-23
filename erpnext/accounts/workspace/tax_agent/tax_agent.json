@@ -1,0 +1,28 @@
+{
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Tax Agent</span>\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}}]",
+ "creation": "2023-01-16 18:05:00.980611",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "idx": 0,
+ "label": "Tax Agent",
+ "links": [],
+ "modified": "2023-01-20 07:44:44.097471",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Tax Agent",
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Tax Agent"
+  }
+ ],
+ "sequence_id": 72.0,
+ "shortcuts": [],
+ "title": "Tax Agent"
+}
