@@ -91,6 +91,23 @@ frappe.ui.form.on("Sales Invoice", {
 });
 
 frappe.ui.form.on('Purchase Invoice', {
+	setup: (frm) => {
+		frm.make_methods = {
+			'Landed Cost Voucher': () => {
+				let lcv = frappe.model.get_new_doc('Landed Cost Voucher');
+				lcv.company = frm.doc.company;
+
+				let lcv_receipt = frappe.model.get_new_doc('Landed Cost Purchase Invoice');
+				lcv_receipt.receipt_document_type = 'Purchase Invoice';
+				lcv_receipt.receipt_document = frm.doc.name;
+				lcv_receipt.supplier = frm.doc.supplier;
+				lcv_receipt.grand_total = frm.doc.grand_total;
+				lcv.purchase_receipts = [lcv_receipt];
+
+				frappe.set_route("Form", lcv.doctype, lcv.name);
+			},
+		}
+	},
 	mode_of_payment: function(frm) {
 		get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
 			frm.set_value('cash_bank_account', account);
