@@ -12,6 +12,7 @@ class StockReservationEntry(Document):
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
 		self.validate_mandatory()
+		self.validate_for_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 
@@ -41,6 +42,15 @@ class StockReservationEntry(Document):
 		for d in mandatory:
 			if not self.get(d):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(d)))
+
+	def validate_for_group_warehouse(self) -> None:
+		"""Raises exception if `Warehouse` is a Group Warehouse."""
+
+		if frappe.get_cached_value("Warehouse", self.warehouse, "is_group"):
+			frappe.throw(
+				_("Stock cannot be reserved in group warehouse {0}.").format(frappe.bold(self.warehouse)),
+				title=_("Invalid Warehouse"),
+			)
 
 	def update_status(self, status: str = None, update_modified: bool = True) -> None:
 		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
@@ -113,16 +123,11 @@ def validate_stock_reservation_settings(voucher: object) -> None:
 def get_available_qty_to_reserve(item_code: str, warehouse: str) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item and Warehouse combination."""
 
-	from erpnext.stock.get_item_details import get_bin_details
+	from erpnext.stock.utils import get_stock_balance
 
-	available_qty = get_bin_details(item_code, warehouse, include_child_warehouses=True).get(
-		"actual_qty"
-	)
+	available_qty = get_stock_balance(item_code, warehouse)
 
 	if available_qty:
-		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-
-		warehouses = get_child_warehouses(warehouse)
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		reserved_qty = (
 			frappe.qb.from_(sre)
@@ -130,7 +135,7 @@ def get_available_qty_to_reserve(item_code: str, warehouse: str) -> float:
 			.where(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
-				& (sre.warehouse.isin(warehouses))
+				& (sre.warehouse == warehouse)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
 			)
 		).run()[0][0] or 0.0
@@ -230,19 +235,14 @@ def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str) 
 	return reserved_qty
 
 
-def get_sre_reserved_qty_details_for_voucher(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str = None
-) -> dict:
-	"""Returns a dict like {("voucher_detail_no", "warehouse"): "reserved_qty", ... }."""
-
-	reserved_qty_details = {}
+def get_sre_reserved_qty_details_for_voucher(voucher_type: str, voucher_no: str) -> dict:
+	"""Returns a dict like {"voucher_detail_no": "reserved_qty", ... }."""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	query = (
+	data = (
 		frappe.qb.from_(sre)
 		.select(
 			sre.voucher_detail_no,
-			sre.warehouse,
 			(Sum(sre.reserved_qty) - Sum(sre.delivered_qty)).as_("reserved_qty"),
 		)
 		.where(
@@ -251,18 +251,10 @@ def get_sre_reserved_qty_details_for_voucher(
 			& (sre.voucher_no == voucher_no)
 			& (sre.status.notin(["Delivered", "Cancelled"]))
 		)
-		.groupby(sre.voucher_detail_no, sre.warehouse)
-	)
+		.groupby(sre.voucher_detail_no)
+	).run(as_list=True)
 
-	if voucher_detail_no:
-		query = query.where(sre.voucher_detail_no == voucher_detail_no)
-
-	data = query.run(as_dict=True)
-
-	for d in data:
-		reserved_qty_details[(d["voucher_detail_no"], d["warehouse"])] = d["reserved_qty"]
-
-	return reserved_qty_details
+	return frappe._dict(data)
 
 
 def get_sre_reserved_qty_details_for_voucher_detail_no(
@@ -281,6 +273,7 @@ def get_sre_reserved_qty_details_for_voucher_detail_no(
 			& (sre.voucher_detail_no == voucher_detail_no)
 			& (sre.status.notin(["Delivered", "Cancelled"]))
 		)
+		.orderby(sre.creation)
 		.groupby(sre.warehouse)
 	).run(as_list=True)
 

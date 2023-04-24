@@ -169,19 +169,82 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	create_stock_reservation_entries(frm) {
-		frappe.call({
-			doc: frm.doc,
-			method: 'create_stock_reservation_entries',
-			args: {
-				notify: true
-			},
-			freeze: true,
-			freeze_message: __('Reserving Stock...'),
-			callback: (r) => {
-				frm.doc.__onload.has_unreserved_stock = false;
-				frm.refresh();
+		let items_data = [];
+
+		const dialog = frappe.prompt({fieldname: 'items', fieldtype: 'Table', label: __('Items to Reserve'),
+			fields: [
+				{
+					fieldtype: 'Data',
+					fieldname: 'name',
+					label: __('Name'),
+					reqd: 1,
+					read_only: 1,
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'item_code',
+					label: __('Item Code'),
+					options: 'Item',
+					reqd: 1,
+					read_only: 1,
+					in_list_view: 1,
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'warehouse',
+					label: __('Warehouse'),
+					options: 'Warehouse',
+					reqd: 1,
+					in_list_view: 1
+				},
+				{
+					fieldtype: 'Float',
+					fieldname: 'qty_to_reserve',
+					label: __('Qty'),
+					reqd: 1,
+					in_list_view: 1
+				}
+			],
+			data: items_data,
+			in_place_edit: true,
+			get_data: function() {
+				return items_data;
 			}
-		})
+		}, function(data) {
+			if (data.items.length > 0) {
+				frappe.call({
+					doc: frm.doc,
+					method: 'create_stock_reservation_entries',
+					args: {
+						items_details: data.items,
+						notify: true
+					},
+					freeze: true,
+					freeze_message: __('Reserving Stock...'),
+					callback: (r) => {
+						frm.doc.__onload.has_unreserved_stock = false;
+						frm.reload_doc();
+					}
+				});
+			}
+		}, __("Stock Reservation"), __("Reserve Stock"));
+
+		frm.doc.items.forEach(item => {
+			if (item.reserve_stock) {
+				let unreserved_qty = (flt(item.stock_qty) - (flt(item.delivered_qty) * flt(item.conversion_factor)) - flt(item.stock_reserved_qty))
+
+				if (unreserved_qty > 0) {
+					dialog.fields_dict.items.df.data.push({
+						'name': item.name,
+						'item_code': item.item_code,
+						'warehouse': item.warehouse,
+						'qty_to_reserve': (unreserved_qty / flt(item.conversion_factor))
+					});
+				}
+			}
+		});
+
+		dialog.fields_dict.items.grid.refresh();
 	},
 
 	cancel_stock_reservation_entries(frm) {
@@ -195,7 +258,7 @@ frappe.ui.form.on("Sales Order", {
 			freeze_message: __('Unreserving Stock...'),
 			callback: (r) => {
 				frm.doc.__onload.has_reserved_stock = false;
-				frm.refresh();
+				frm.reload_doc();
 			}
 		})
 	}

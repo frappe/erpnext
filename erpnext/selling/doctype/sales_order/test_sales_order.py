@@ -1939,7 +1939,7 @@ class TestSalesOrder(FrappeTestCase):
 
 			reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", so.name)
 			for item in so.items:
-				reserved_qty = reserved_qty_details[(item.name, item.warehouse)]
+				reserved_qty = reserved_qty_details[item.name]
 				self.assertEqual(item.stock_reserved_qty, reserved_qty)
 				self.assertEqual(item.stock_qty, item.stock_reserved_qty)
 

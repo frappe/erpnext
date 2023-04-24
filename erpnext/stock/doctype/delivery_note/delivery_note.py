@@ -343,31 +343,18 @@ class DeliveryNote(SellingController):
 			if not sre_data:
 				continue
 
-			is_group_warehouse = frappe.get_cached_value("Warehouse", sre_data[0], "is_group")
-
+			# Set `Warehouse` from SRE if not set.
 			if not item.warehouse:
-				if not is_group_warehouse:
-					item.warehouse = sre_data[0]
-				else:
-					frappe.throw(_("Row #{0}: Warehouse is mandatory").format(item.idx, item.item_code))
+				item.warehouse = sre_data[0]
 			else:
-				if not is_group_warehouse:
-					if item.warehouse != sre_data[0]:
-						frappe.throw(
-							_("Row #{0}: Stock is reserved for Warehouse {1}").format(item.idx, sre_data[0]),
-							title=_("Stock Reservation Warehouse Mismatch"),
-						)
-				else:
-					from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-
-					warehouses = get_child_warehouses(sre_data[0])
-					if item.warehouse not in warehouses:
-						frappe.throw(
-							_(
-								"Row #{0}: Stock is reserved for Group Warehouse {1}, please select its child Warehouse"
-							).format(item.idx, sre_data[0]),
-							title=_("Stock Reservation Group Warehouse"),
-						)
+				# Throw if `Warehouse` is different from SRE.
+				if item.warehouse != sre_data[0]:
+					frappe.throw(
+						_("Row #{0}: Stock is reserved for Item {1} in Warehouse {2}.").format(
+							item.idx, frappe.bold(item.item_code), frappe.bold(sre_data[0])
+						),
+						title=_("Stock Reservation Warehouse Mismatch"),
+					)
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit

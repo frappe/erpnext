@@ -518,7 +518,7 @@ class SalesOrder(SellingController):
 		return False
 
 	@frappe.whitelist()
-	def create_stock_reservation_entries(self, notify=True):
+	def create_stock_reservation_entries(self, items_details=None, notify=True):
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -532,9 +532,18 @@ class SalesOrder(SellingController):
 			"Stock Settings", "allow_partial_reservation"
 		)
 
+		items = []
+		if items_details:
+			for item in items_details:
+				so_item = frappe.get_doc("Sales Order Item", item["name"])
+				so_item.reserve_stock = 1
+				so_item.warehouse = item["warehouse"]
+				so_item.qty_to_reserve = flt(item["qty_to_reserve"]) * flt(so_item.conversion_factor)
+				items.append(so_item)
+
 		sre_count = 0
 		reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", self.name)
-		for item in self.get("items"):
+		for item in items or self.get("items"):
 			# Skip if `Reserved Stock` is not checked for the item.
 			if not item.get("reserve_stock"):
 				continue
@@ -551,15 +560,27 @@ class SalesOrder(SellingController):
 				item.db_set("reserve_stock", 0)
 				continue
 
+			# Skip if Group Warehouse.
+			if frappe.get_cached_value("Warehouse", item.warehouse, "is_group"):
+				frappe.msgprint(
+					_("Row #{0}: Stock cannot be reserved in group warehouse {1}.").format(
+						item.idx, frappe.bold(item.warehouse)
+					),
+					title=_("Stock Reservation"),
+					indicator="yellow",
+				)
+				continue
+
 			unreserved_qty = get_unreserved_qty(item, reserved_qty_details)
 
 			# Stock is already reserved for the item, notify the user and skip the item.
 			if unreserved_qty <= 0:
 				frappe.msgprint(
-					_("Row #{0}: Stock is already reserved for the Item {1} in Warehouse {2}.").format(
-						item.idx, frappe.bold(item.item_code), frappe.bold(item.warehouse)
+					_("Row #{0}: Stock is already reserved for the Item {1}.").format(
+						item.idx, frappe.bold(item.item_code)
 					),
 					title=_("Stock Reservation"),
+					indicator="yellow",
 				)
 				continue
 
@@ -579,17 +600,31 @@ class SalesOrder(SellingController):
 			# The quantity which can be reserved.
 			qty_to_be_reserved = min(unreserved_qty, available_qty_to_reserve)
 
+			if hasattr(item, "qty_to_reserve"):
+				if item.qty_to_reserve <= 0:
+					frappe.msgprint(
+						_("Row #{0}: Quantity to reserve for the Item {1} should be greater than 0.").format(
+							item.idx, frappe.bold(item.item_code)
+						),
+						title=_("Stock Reservation"),
+						indicator="orange",
+					)
+					continue
+				else:
+					qty_to_be_reserved = min(qty_to_be_reserved, item.qty_to_reserve)
+
 			# Partial Reservation
 			if qty_to_be_reserved < unreserved_qty:
-				frappe.msgprint(
-					_("Row #{0}: Only {1} available to reserve for the Item {2}").format(
-						item.idx,
-						frappe.bold(str(qty_to_be_reserved / item.conversion_factor) + " " + item.uom),
-						frappe.bold(item.item_code),
-					),
-					title=_("Stock Reservation"),
-					indicator="orange",
-				)
+				if not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve")):
+					frappe.msgprint(
+						_("Row #{0}: Only {1} available to reserve for the Item {2}").format(
+							item.idx,
+							frappe.bold(str(qty_to_be_reserved / item.conversion_factor) + " " + item.uom),
+							frappe.bold(item.item_code),
+						),
+						title=_("Stock Reservation"),
+						indicator="orange",
+					)
 
 				# Skip the item if `Partial Reservation` is disabled in the Stock Settings.
 				if not allow_partial_reservation:
@@ -620,7 +655,7 @@ class SalesOrder(SellingController):
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
 
-	existing_reserved_qty = reserved_qty_details.get((item.name, item.warehouse), 0)
+	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
 	return (
 		item.stock_qty
 		- flt(item.delivered_qty) * item.get("conversion_factor", 1)
