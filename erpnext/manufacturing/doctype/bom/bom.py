@@ -1317,7 +1317,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not field in searchfields
 	]
 
-	query_filters = {"disabled": 0, "end_of_life": (">", today())}
+	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
 
 	or_cond_filters = {}
 	if txt:
