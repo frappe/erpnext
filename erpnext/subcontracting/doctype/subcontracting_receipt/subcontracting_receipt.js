@@ -67,6 +67,15 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		});
 
+		frm.set_query('batch_no', 'supplied_items', function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					item: row.rm_item_code
+				}
+			}
+		});
+
 		let batch_no_field = frm.get_docfield("items", "batch_no");
 		if (batch_no_field) {
 			batch_no_field.get_route_options_for_new_doc = function(row) {
