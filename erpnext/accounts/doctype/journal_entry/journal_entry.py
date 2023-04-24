@@ -233,7 +233,7 @@ class JournalEntry(AccountsController):
 			self.remove(d)
 
 	def update_asset_value(self):
-		if self.voucher_type != "Depreciation Entry":
+		if self.voucher_type != "Depreciation Entry" or self.flags.planned_depr_entry:
 			return
 
 		processed_assets = []
@@ -244,14 +244,22 @@ class JournalEntry(AccountsController):
 			):
 				processed_assets.append(d.reference_name)
 
+				depr_value = d.debit or d.credit
+
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
-					continue
-
-				depr_value = d.debit or d.credit
-
-				asset.db_set("value_after_depreciation", asset.value_after_depreciation - depr_value)
+					finance_book_idx = 1
+					if self.finance_book:
+						for fb_row in asset.get("finance_books"):
+							if fb_row.finance_book == self.finance_book:
+								finance_book_idx = fb_row.idx
+								break
+					fb_row = asset.get("finance_books")[finance_book_idx - 1]
+					fb_row.value_after_depreciation -= depr_value
+					fb_row.db_update()
+				else:
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation - depr_value)
 
 				asset.set_status()
 
@@ -324,27 +332,22 @@ class JournalEntry(AccountsController):
 			):
 				processed_assets.append(d.reference_name)
 
+				depr_value = d.debit or d.credit
+
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
 					for s in asset.get("schedules"):
 						if s.journal_entry == self.name:
 							s.db_set("journal_entry", None)
-
 							idx = cint(s.finance_book_id) or 1
 							finance_books = asset.get("finance_books")[idx - 1]
-							finance_books.value_after_depreciation += s.depreciation_amount
+							finance_books.value_after_depreciation += depr_value
 							finance_books.db_update()
-
-							asset.set_status()
-
 							break
 				else:
-					depr_value = d.debit or d.credit
-
 					asset.db_set("value_after_depreciation", asset.value_after_depreciation + depr_value)
-
-					asset.set_status()
+				asset.set_status()
 
 	def unlink_inter_company_jv(self):
 		if (
