@@ -29,8 +29,11 @@ from erpnext.assets.doctype.asset.depreciation import (
 	scrap_asset,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	_check_is_pro_rata,
+	_get_pro_rata_amt,
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
+	get_depreciation_amount,
 )
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_invoice,
@@ -234,7 +237,7 @@ class TestAsset(AssetSetup):
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
 			asset.precision("gross_purchase_amount"),
 		)
-		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
+		pro_rata_amount, _, _ = _get_pro_rata_amt(
 			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
@@ -321,7 +324,7 @@ class TestAsset(AssetSetup):
 		self.assertEquals(second_asset_depr_schedule.status, "Active")
 		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 
-		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
+		pro_rata_amount, _, _ = _get_pro_rata_amt(
 			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
@@ -857,12 +860,12 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2022-02-28", 647.25, 647.25],
-			["2022-03-31", 1210.71, 1857.96],
-			["2022-04-30", 1053.99, 2911.95],
-			["2022-05-31", 917.55, 3829.5],
-			["2022-06-30", 798.77, 4628.27],
-			["2022-07-15", 371.73, 5000.0],
+			["2022-02-28", 310.89, 310.89],
+			["2022-03-31", 654.45, 965.34],
+			["2022-04-30", 654.45, 1619.79],
+			["2022-05-31", 654.45, 2274.24],
+			["2022-06-30", 654.45, 2928.69],
+			["2022-07-15", 2071.31, 5000.0],
 		]
 
 		schedules = [
@@ -938,7 +941,7 @@ class TestDepreciationBasics(AssetSetup):
 			},
 		)
 
-		depreciation_amount = asset.get_depreciation_amount(100000, asset.finance_books[0])
+		depreciation_amount = get_depreciation_amount(asset, 100000, asset.finance_books[0])
 		self.assertEqual(depreciation_amount, 30000)
 
 	def test_make_depr_schedule(self):
@@ -997,7 +1000,7 @@ class TestDepreciationBasics(AssetSetup):
 			},
 		)
 
-		has_pro_rata = asset.check_is_pro_rata(asset.finance_books[0])
+		has_pro_rata = _check_is_pro_rata(asset, asset.finance_books[0])
 		self.assertFalse(has_pro_rata)
 
 		asset.finance_books = []
@@ -1012,7 +1015,7 @@ class TestDepreciationBasics(AssetSetup):
 			},
 		)
 
-		has_pro_rata = asset.check_is_pro_rata(asset.finance_books[0])
+		has_pro_rata = _check_is_pro_rata(asset, asset.finance_books[0])
 		self.assertTrue(has_pro_rata)
 
 	def test_expected_value_after_useful_life_greater_than_purchase_amount(self):

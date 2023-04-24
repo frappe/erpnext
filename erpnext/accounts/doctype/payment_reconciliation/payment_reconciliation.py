@@ -7,9 +7,12 @@ from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import IfNull
-from frappe.utils import flt, getdate, nowdate, today
+from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
+	is_any_doc_running,
+)
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
@@ -234,6 +237,15 @@ class PaymentReconciliation(Document):
 		return difference_amount
 
 	@frappe.whitelist()
+	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
+		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
+		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
+		new_difference_amount = self.get_difference_amount(
+			payment_entry[0], invoice[0], allocated_amount
+		)
+		return new_difference_amount
+
+	@frappe.whitelist()
 	def allocate_entries(self, args):
 		self.validate_entries()
 
@@ -295,9 +307,7 @@ class PaymentReconciliation(Document):
 			}
 		)
 
-	@frappe.whitelist()
-	def reconcile(self):
-		self.validate_allocation()
+	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -321,12 +331,35 @@ class PaymentReconciliation(Document):
 					self.make_difference_entry(payment_details)
 
 		if entry_list:
-			reconcile_against_document(entry_list)
+			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
 
 		if dr_or_cr_notes:
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
+	@frappe.whitelist()
+	def reconcile(self):
+		if frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
+			running_doc = is_any_doc_running(
+				dict(
+					company=self.company,
+					party_type=self.party_type,
+					party=self.party,
+					receivable_payable_account=self.receivable_payable_account,
+				)
+			)
+
+			if running_doc:
+				frappe.throw(
+					_("A Reconciliation Job {0} is running for the same filters. Cannot reconcile now").format(
+						get_link_to_form("Auto Reconcile", running_doc)
+					)
+				)
+				return
+
+		self.validate_allocation()
+		self.reconcile_allocations()
 		msgprint(_("Successfully Reconciled"))
+
 		self.get_unreconciled_entries()
 
 	def make_difference_entry(self, row):

@@ -245,17 +245,17 @@ class SubcontractingReceipt(SubcontractingController):
 					item.expense_account = expense_account
 
 	def update_status(self, status=None, update_modified=False):
-		if self.docstatus >= 1 and not status:
-			if self.docstatus == 1:
+		if not status:
+			if self.docstatus == 0:
+				status = "Draft"
+			elif self.docstatus == 1:
+				status = "Completed"
 				if self.is_return:
 					status = "Return"
 					return_against = frappe.get_doc("Subcontracting Receipt", self.return_against)
 					return_against.run_method("update_status")
-				else:
-					if self.per_returned == 100:
-						status = "Return Issued"
-					elif self.status == "Draft":
-						status = "Completed"
+				elif self.per_returned == 100:
+					status = "Return Issued"
 			elif self.docstatus == 2:
 				status = "Cancelled"
 

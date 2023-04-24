@@ -74,6 +74,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 			args["bill_date"] = doc.get("bill_date")
 
 	out = get_basic_details(args, item, overwrite_warehouse)
+
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -620,7 +621,9 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key=lambda i: i.valid_from, reverse=True)
+		taxes = sorted(
+			taxes_with_validity, key=lambda i: i.valid_from or tax.maximum_net_rate, reverse=True
+		)
 	else:
 		taxes = taxes_with_no_validity
 

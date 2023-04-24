@@ -28,6 +28,10 @@ doctype_js = {
 
 override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
+override_whitelisted_methods = {
+	"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"
+}
+
 welcome_email = "erpnext.setup.utils.welcome_email"
 
 # setup wizard
@@ -358,6 +362,7 @@ scheduler_events = {
 	"cron": {
 		"0/15 * * * *": [
 			"erpnext.manufacturing.doctype.bom_update_log.bom_update_log.resume_bom_cost_update_jobs",
+			"erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs",
 		],
 		"0/30 * * * *": [
 			"erpnext.utilities.doctype.video.video.update_youtube_data",

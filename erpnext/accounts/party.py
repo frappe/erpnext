@@ -174,6 +174,9 @@ def _get_party_details(
 			party_type, party.name, "tax_withholding_category"
 		)
 
+	if not party_details.get("tax_category") and pos_profile:
+		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
+
 	return party_details
 
 
@@ -256,6 +259,8 @@ def set_address_details(
 	)
 
 	if doctype in TRANSACTION_TYPES:
+		# required to set correct region
+		frappe.flags.company = company
 		get_regional_address_details(party_details, doctype, company)
 
 	return party_address, shipping_address

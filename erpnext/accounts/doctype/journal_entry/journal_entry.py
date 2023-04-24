@@ -51,7 +51,7 @@ class JournalEntry(AccountsController):
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
 		self.validate_debit_credit_amount()
-
+		self.set_total_debit_credit()
 		# Do not validate while importing via data import
 		if not frappe.flags.in_import:
 			self.validate_total_debit_and_credit()
@@ -666,7 +666,6 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Row {0}: Both Debit and Credit values cannot be zero").format(d.idx))
 
 	def validate_total_debit_and_credit(self):
-		self.set_total_debit_credit()
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
 			if self.difference:
 				frappe.throw(
@@ -886,6 +885,8 @@ class JournalEntry(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
 
+		merge_entries = frappe.db.get_single_value("Accounts Settings", "merge_similar_account_heads")
+
 		gl_map = self.build_gl_map()
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			update_outstanding = "No"
@@ -893,7 +894,13 @@ class JournalEntry(AccountsController):
 			update_outstanding = "Yes"
 
 		if gl_map:
-			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
+			make_gl_entries(
+				gl_map,
+				cancel=cancel,
+				adv_adj=adv_adj,
+				merge_entries=merge_entries,
+				update_outstanding=update_outstanding,
+			)
 
 	@frappe.whitelist()
 	def get_balance(self, difference_account=None):
