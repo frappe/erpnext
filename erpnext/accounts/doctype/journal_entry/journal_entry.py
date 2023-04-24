@@ -254,13 +254,13 @@ class JournalEntry(AccountsController):
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
-					finance_book_idx = 1
+					fb_idx = 1
 					if self.finance_book:
 						for fb_row in asset.get("finance_books"):
 							if fb_row.finance_book == self.finance_book:
-								finance_book_idx = fb_row.idx
+								fb_idx = fb_row.idx
 								break
-					fb_row = asset.get("finance_books")[finance_book_idx - 1]
+					fb_row = asset.get("finance_books")[fb_idx - 1]
 					fb_row.value_after_depreciation -= d.debit
 					fb_row.db_update()
 				else:
@@ -339,14 +339,22 @@ class JournalEntry(AccountsController):
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
+					fb_idx = None
 					for s in asset.get("schedules"):
 						if s.journal_entry == self.name:
 							s.db_set("journal_entry", None)
-							idx = cint(s.finance_book_id) or 1
-							finance_books = asset.get("finance_books")[idx - 1]
-							finance_books.value_after_depreciation += d.debit
-							finance_books.db_update()
+							fb_idx = cint(s.finance_book_id) or 1
 							break
+					if not fb_idx:
+						fb_idx = 1
+						if self.finance_book:
+							for fb_row in asset.get("finance_books"):
+								if fb_row.finance_book == self.finance_book:
+									fb_idx = fb_row.idx
+									break
+					fb_row = asset.get("finance_books")[fb_idx - 1]
+					fb_row.value_after_depreciation += d.debit
+					fb_row.db_update()
 				else:
 					asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 				asset.set_status()
