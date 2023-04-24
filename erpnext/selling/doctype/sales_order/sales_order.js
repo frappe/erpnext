@@ -47,17 +47,29 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
+
 	refresh: function(frm) {
-		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
-			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
-			frm.add_custom_button(__('Update Items'), () => {
-				erpnext.utils.update_child_items({
-					frm: frm,
-					child_docname: "items",
-					child_doctype: "Sales Order Detail",
-					cannot_add_row: false,
-				})
-			});
+		if(frm.doc.docstatus === 1) {
+			if (frm.doc.status !== 'Closed' && flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
+				frm.add_custom_button(__('Update Items'), () => {
+					erpnext.utils.update_child_items({
+						frm: frm,
+						child_docname: "items",
+						child_doctype: "Sales Order Detail",
+						cannot_add_row: false,
+					})
+				});
+
+				// Stock Reservation > Reserve button will be only visible if the SO has unreserved stock.
+				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					frm.add_custom_button(__('Reserve'), () => frm.events.create_stock_reservation_entries(frm), __('Stock Reservation'));
+				}
+			}
+
+			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
+			if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
+				frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
+			}
 		}
 
 		if (frm.doc.docstatus === 0) {
@@ -154,6 +166,38 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
+	},
+
+	create_stock_reservation_entries(frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: 'create_stock_reservation_entries',
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __('Reserving Stock...'),
+			callback: (r) => {
+				frm.doc.__onload.has_unreserved_stock = false;
+				frm.refresh();
+			}
+		})
+	},
+
+	cancel_stock_reservation_entries(frm) {
+		frappe.call({
+			method: 'erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries',
+			args: {
+				voucher_type: frm.doctype,
+				voucher_no: frm.docname
+			},
+			freeze: true,
+			freeze_message: __('Unreserving Stock...'),
+			callback: (r) => {
+				frm.doc.__onload.has_reserved_stock = false;
+				frm.refresh();
+			}
+		})
 	}
 });
 
@@ -287,16 +331,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				}
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
-
-			// Stock Reservation > Reserve button will be only visible if the SO has unreserved stock.
-			if (this.frm.doc.__onload && this.frm.doc.__onload.has_unreserved_stock) {
-				this.frm.add_custom_button(__('Reserve'), () => this.create_stock_reservation_entries(), __('Stock Reservation'));
-			}
-
-			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
-			if (this.frm.doc.__onload && this.frm.doc.__onload.has_reserved_stock) {
-				this.frm.add_custom_button(__('Unreserve'), () => this.cancel_stock_reservation_entries(), __('Stock Reservation'));
-			}
 		}
 
 		if (this.frm.doc.docstatus===0) {
@@ -334,38 +368,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		this.order_type(doc);
-	}
-
-	create_stock_reservation_entries() {
-		frappe.call({
-			doc: this.frm.doc,
-			method: 'create_stock_reservation_entries',
-			args: {
-				notify: true
-			},
-			freeze: true,
-			freeze_message: __('Reserving Stock...'),
-			callback: (r) => {
-				this.frm.doc.__onload.has_unreserved_stock = false;
-				this.frm.refresh();
-			}
-		})
-	}
-
-	cancel_stock_reservation_entries() {
-		frappe.call({
-			method: 'erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries',
-			args: {
-				voucher_type: this.frm.doctype,
-				voucher_no: this.frm.docname
-			},
-			freeze: true,
-			freeze_message: __('Unreserving Stock...'),
-			callback: (r) => {
-				this.frm.doc.__onload.has_reserved_stock = false;
-				this.frm.refresh();
-			}
-		})
 	}
 
 	create_pick_list() {
