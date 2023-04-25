@@ -1662,7 +1662,10 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
-		if not automatically_fetch_payment_terms:
+		if not (
+			automatically_fetch_payment_terms
+			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
+		):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
