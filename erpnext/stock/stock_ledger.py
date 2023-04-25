@@ -1388,7 +1388,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 def regenerate_sle_for_batch_stock_reco(detail):
 	doc = frappe.get_cached_doc("Stock Reconciliation", detail.voucher_no)
 	doc.recalculate_current_qty(detail.item_code, detail.batch_no)
-	doc.repost_future_sle_and_gle()
+
+	if not frappe.db.exists(
+		"Repost Item Valuation", {"voucher_no": doc.name, "status": "Queued", "docstatus": "1"}
+	):
+		doc.repost_future_sle_and_gle()
 
 
 def get_stock_reco_qty_shift(args):
@@ -1441,13 +1445,13 @@ def get_next_stock_reco(kwargs):
 				(
 					CombineDatetime(sle.posting_date, sle.posting_time)
 					> CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
-					| (
-						(
-							CombineDatetime(sle.posting_date, sle.posting_time)
-							== CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
-						)
-						& (sle.creation > kwargs.get("creation"))
+				)
+				| (
+					(
+						CombineDatetime(sle.posting_date, sle.posting_time)
+						== CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 					)
+					& (sle.creation > kwargs.get("creation"))
 				)
 			)
 		)
