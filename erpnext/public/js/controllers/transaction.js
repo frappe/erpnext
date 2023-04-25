@@ -297,13 +297,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-<<<<<<< HEAD
-	make_payment_request: function() {
-		var me = this;
-=======
 	make_payment_request() {
 		let me = this;
->>>>>>> dc178984ae (fix: Payment Request flow fixes from Order to Payment Entry)
 		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
