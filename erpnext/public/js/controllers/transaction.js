@@ -297,8 +297,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-	make_payment_request: function() {
-		var me = this;
+	make_payment_request() {
+		let me = this;
 		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
@@ -314,7 +314,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			},
 			callback: function(r) {
 				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
+					frappe.model.sync(r.message);
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
@@ -2011,7 +2011,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	prompt_user_for_reference_date(){
-		var me = this;
+		let me = this;
 		frappe.prompt({
 			label: __("Cheque/Reference Date"),
 			fieldname: "reference_date",
@@ -2038,7 +2038,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		let has_payment_schedule = this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length;
 		if(!is_eligible || !has_payment_schedule) return false;
 
-		let has_discount = this.frm.doc.payment_schedule.some(row => row.discount_date);
+		let has_discount = this.frm.doc.payment_schedule.some(row => row.discount);
 		return has_discount;
 	},
 

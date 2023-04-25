@@ -199,7 +199,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						);
 					}
 
-					if(flt(doc.per_billed)==0) {
+					if(flt(doc.per_billed) < 100) {
 						this.frm.add_custom_button(__('Payment Request'),
 							function() { me.make_payment_request() }, __('Create'));
 					}
