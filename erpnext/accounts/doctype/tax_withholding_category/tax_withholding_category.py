@@ -215,7 +215,7 @@ def get_tax_row_for_tds(tax_details, tax_amount):
 	}
 
 
-def get_lower_deduction_certificate(tax_details, pan_no):
+def get_lower_deduction_certificate(company, tax_details, pan_no):
 	ldc_name = frappe.db.get_value(
 		"Lower Deduction Certificate",
 		{
@@ -223,6 +223,7 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 			"tax_withholding_category": tax_details.tax_withholding_category,
 			"valid_from": (">=", tax_details.from_date),
 			"valid_upto": ("<=", tax_details.to_date),
+			"company": company,
 		},
 		"name",
 	)
@@ -255,7 +256,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	tax_amount = 0
 
 	if party_type == "Supplier":
-		ldc = get_lower_deduction_certificate(tax_details, pan_no)
+		ldc = get_lower_deduction_certificate(inv.company, tax_details, pan_no)
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
 			if ldc:

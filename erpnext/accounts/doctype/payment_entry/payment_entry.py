@@ -60,6 +60,7 @@ class PaymentEntry(AccountsController):
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
+		self.set_missing_ref_details()
 		self.validate_payment_type()
 		self.validate_party_details()
 		self.set_exchange_rate()
@@ -219,11 +220,16 @@ class PaymentEntry(AccountsController):
 			else self.paid_to_account_currency
 		)
 
-		self.set_missing_ref_details()
-
-	def set_missing_ref_details(self, force=False):
+	def set_missing_ref_details(
+		self, force: bool = False, update_ref_details_only_for: list | None = None
+	) -> None:
 		for d in self.get("references"):
 			if d.allocated_amount:
+				if update_ref_details_only_for and (
+					not (d.reference_doctype, d.reference_name) in update_ref_details_only_for
+				):
+					continue
+
 				ref_details = get_reference_details(
 					d.reference_doctype, d.reference_name, self.party_account_currency
 				)
@@ -1687,7 +1693,10 @@ def get_payment_entry(
 ):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
-	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= 99.99:
+	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
+	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
+		100.0 + over_billing_allowance
+	):
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	if not party_type:
@@ -1811,6 +1820,7 @@ def get_payment_entry(
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
+	pe.set_missing_ref_details()
 
 	update_accounting_dimensions(pe, doc)
 

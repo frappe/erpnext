@@ -69,6 +69,7 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
+		self.validate_depr_entry_voucher_type()
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
@@ -129,6 +130,13 @@ class JournalEntry(AccountsController):
 			if account_currency == previous_account_currency:
 				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
+
+	def validate_depr_entry_voucher_type(self):
+		if (
+			any(d.account_type == "Depreciation" for d in self.get("accounts"))
+			and self.voucher_type != "Depreciation Entry"
+		):
+			frappe.throw(_("Journal Entry type should be set as Depreciation Entry for asset depreciation"))
 
 	def validate_stock_accounts(self):
 		stock_accounts = get_stock_accounts(self.company, self.doctype, self.name)
@@ -233,25 +241,30 @@ class JournalEntry(AccountsController):
 			self.remove(d)
 
 	def update_asset_value(self):
-		if self.voucher_type != "Depreciation Entry":
+		if self.flags.planned_depr_entry or self.voucher_type != "Depreciation Entry":
 			return
-
-		processed_assets = []
 
 		for d in self.get("accounts"):
 			if (
-				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+				d.reference_type == "Asset"
+				and d.reference_name
+				and d.account_type == "Depreciation"
+				and d.debit
 			):
-				processed_assets.append(d.reference_name)
-
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
-					continue
-
-				depr_value = d.debit or d.credit
-
-				asset.db_set("value_after_depreciation", asset.value_after_depreciation - depr_value)
+					fb_idx = 1
+					if self.finance_book:
+						for fb_row in asset.get("finance_books"):
+							if fb_row.finance_book == self.finance_book:
+								fb_idx = fb_row.idx
+								break
+					fb_row = asset.get("finance_books")[fb_idx - 1]
+					fb_row.value_after_depreciation -= d.debit
+					fb_row.db_update()
+				else:
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 
 				asset.set_status()
 
@@ -316,35 +329,35 @@ class JournalEntry(AccountsController):
 		if self.voucher_type != "Depreciation Entry":
 			return
 
-		processed_assets = []
-
 		for d in self.get("accounts"):
 			if (
-				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+				d.reference_type == "Asset"
+				and d.reference_name
+				and d.account_type == "Depreciation"
+				and d.debit
 			):
-				processed_assets.append(d.reference_name)
-
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
+					fb_idx = None
 					for s in asset.get("schedules"):
 						if s.journal_entry == self.name:
 							s.db_set("journal_entry", None)
-
-							idx = cint(s.finance_book_id) or 1
-							finance_books = asset.get("finance_books")[idx - 1]
-							finance_books.value_after_depreciation += s.depreciation_amount
-							finance_books.db_update()
-
-							asset.set_status()
-
+							fb_idx = cint(s.finance_book_id) or 1
 							break
+					if not fb_idx:
+						fb_idx = 1
+						if self.finance_book:
+							for fb_row in asset.get("finance_books"):
+								if fb_row.finance_book == self.finance_book:
+									fb_idx = fb_row.idx
+									break
+					fb_row = asset.get("finance_books")[fb_idx - 1]
+					fb_row.value_after_depreciation += d.debit
+					fb_row.db_update()
 				else:
-					depr_value = d.debit or d.credit
-
-					asset.db_set("value_after_depreciation", asset.value_after_depreciation + depr_value)
-
-					asset.set_status()
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
+				asset.set_status()
 
 	def unlink_inter_company_jv(self):
 		if (
@@ -878,6 +891,8 @@ class JournalEntry(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
 
+		merge_entries = frappe.db.get_single_value("Accounts Settings", "merge_similar_account_heads")
+
 		gl_map = self.build_gl_map()
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			update_outstanding = "No"
@@ -885,7 +900,13 @@ class JournalEntry(AccountsController):
 			update_outstanding = "Yes"
 
 		if gl_map:
-			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
+			make_gl_entries(
+				gl_map,
+				cancel=cancel,
+				adv_adj=adv_adj,
+				merge_entries=merge_entries,
+				update_outstanding=update_outstanding,
+			)
 
 	@frappe.whitelist()
 	def get_balance(self, difference_account=None):
