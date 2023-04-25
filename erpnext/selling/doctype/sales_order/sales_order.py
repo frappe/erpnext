@@ -1340,8 +1340,9 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 						.select(Sum(wo.qty))
 						.where(
 							(wo.production_item == i.item_code)
-							& (wo.sales_order == so.name) * (wo.sales_order_item == i.name)
-							& (wo.docstatus.lte(2))
+							& (wo.sales_order == so.name)
+							& (wo.sales_order_item == i.name)
+							& (wo.docstatus.lt(2))
 						)
 						.run()[0][0]
 					)
