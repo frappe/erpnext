@@ -9,9 +9,9 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
-from pypika.terms import ExistsCriterion
 
 import erpnext
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = Dict[str, Optional[str]]
@@ -54,7 +54,9 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 	return stock_value
 
 
-def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
+def get_stock_value_on(
+	warehouses: list | str = None, posting_date: str = None, item_code: str = None
+) -> float:
 	if not posting_date:
 		posting_date = nowdate()
 
@@ -67,20 +69,16 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		.orderby(sle.creation, order=frappe.qb.desc)
 	)
 
-	if warehouse:
-		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
+	if warehouses:
+		if isinstance(warehouses, str):
+			warehouses = [warehouses]
 
-		if is_group:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				ExistsCriterion(
-					frappe.qb.from_(wh)
-					.select(wh.name)
-					.where((wh.name == sle.warehouse) & (wh.lft >= lft) & (wh.rgt <= rgt))
-				)
-			)
-		else:
-			query = query.where(sle.warehouse == warehouse)
+		warehouses = set(warehouses)
+		for wh in list(warehouses):
+			if frappe.db.get_value("Warehouse", wh, "is_group"):
+				warehouses.update(get_child_warehouses(wh))
+
+		query = query.where(sle.warehouse.isin(warehouses))
 
 	if item_code:
 		query = query.where(sle.item_code == item_code)
