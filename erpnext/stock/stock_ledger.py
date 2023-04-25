@@ -1445,13 +1445,13 @@ def get_next_stock_reco(kwargs):
 				(
 					CombineDatetime(sle.posting_date, sle.posting_time)
 					> CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
-					| (
-						(
-							CombineDatetime(sle.posting_date, sle.posting_time)
-							== CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
-						)
-						& (sle.creation > kwargs.get("creation"))
+				)
+				| (
+					(
+						CombineDatetime(sle.posting_date, sle.posting_time)
+						== CombineDatetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 					)
+					& (sle.creation > kwargs.get("creation"))
 				)
 			)
 		)
