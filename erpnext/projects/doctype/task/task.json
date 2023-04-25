@@ -21,6 +21,10 @@
   "parent_task",
   "completed_by",
   "completed_on",
+  "customer_details",
+  "customer",
+  "column_break_14",
+  "sales_order",  
   "sb_timeline",
   "exp_start_date",
   "expected_time",
@@ -141,6 +145,35 @@
    "label": "Parent Task",
    "options": "Task",
    "search_index": 1
+  },
+    {
+   "collapsible": 1,
+   "fieldname": "customer_details",
+   "fieldtype": "Section Break",
+   "label": "Customer Details",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-user"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "label": "Customer",
+   "oldfieldname": "customer",
+   "oldfieldtype": "Link",
+   "options": "Customer",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
   },
   {
    "collapsible": 1,
@@ -389,7 +422,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2022-06-23 16:58:47.005241",
+ "modified": "2022-04-25 15:27:36.005212",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
