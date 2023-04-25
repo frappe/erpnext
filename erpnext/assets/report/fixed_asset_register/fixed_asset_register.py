@@ -45,8 +45,6 @@ def get_conditions(filters):
 		filters.year_end_date = getdate(fiscal_year.year_end_date)
 
 		conditions[date_field] = ["between", [filters.year_start_date, filters.year_end_date]]
-	if filters.get("only_depreciable_assets"):
-		conditions["calculate_depreciation"] = filters.get("only_depreciable_assets")
 	if filters.get("only_existing_assets"):
 		conditions["is_existing_asset"] = filters.get("only_existing_assets")
 	if filters.get("asset_category"):
@@ -106,7 +104,7 @@ def get_data(filters):
 
 	assets_linked_to_fb = None
 
-	if filters.only_depreciable_assets:
+	if filters.filter_by_finance_book:
 		assets_linked_to_fb = frappe.db.get_all(
 			doctype="Asset Finance Book",
 			filters={"finance_book": filters.finance_book or ("is", "not set")},
