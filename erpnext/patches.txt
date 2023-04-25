@@ -332,3 +332,4 @@ execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_h
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
 erpnext.patches.v15_0.enable_all_leads
+erpnext.patches.v14_0.update_company_in_ldc
