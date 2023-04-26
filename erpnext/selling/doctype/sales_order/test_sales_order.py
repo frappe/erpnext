@@ -1878,6 +1878,37 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(pe.references[1].reference_name, so.name)
 		self.assertEqual(pe.references[1].allocated_amount, 300)
 
+	def test_delivered_item_material_request(self):
+		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_se_from_wo,
+		)
+		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
+
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test FG Item", "qty": 10, "rate": 100, "warehouse": "Work In Progress - _TC"}
+			]
+		)
+
+		make_stock_entry(
+			item_code="_Test FG Item", target="Work In Progress - _TC", qty=4, basic_rate=100
+		)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 4
+		dn.submit()
+
+		so.load_from_db()
+		self.assertEqual(so.items[0].delivered_qty, 4)
+
+		mr = make_material_request(so.name)
+		mr.material_request_type = "Purchase"
+		mr.schedule_date = today()
+		mr.save()
+
+		self.assertEqual(mr.items[0].qty, 6)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
