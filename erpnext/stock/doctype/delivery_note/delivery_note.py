@@ -271,6 +271,9 @@ class DeliveryNote(SellingController):
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
+		if self.per_billed == 100:
+			return
+
 		extra_amount = 0
 		validate_against_credit_limit = False
 		bypass_credit_limit_check_at_sales_order = cint(
