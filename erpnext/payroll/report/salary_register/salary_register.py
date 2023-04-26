@@ -12,6 +12,7 @@ salary_slip = frappe.qb.DocType("Salary Slip")
 salary_detail = frappe.qb.DocType("Salary Detail")
 salary_component = frappe.qb.DocType("Salary Component")
 
+
 def execute(filters=None):
 	if not filters:
 		filters = {}
@@ -259,6 +260,7 @@ def get_salary_components(salary_slips):
 		.select(salary_detail.salary_component)
 		.distinct()
 	).run(as_list=True)
+
 
 def get_salary_component_type(salary_component):
 	return frappe.db.get_value("Salary Component", salary_component, "type", cache=True)
