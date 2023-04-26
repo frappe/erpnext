@@ -1475,8 +1475,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
-		// if you want to apply the pricing rule just change the fales to ture  
-		if(false){
+		// if you want to apply the pricing rule just change the fales to ture
+		if(true){
 			var me = this;
 			var args = this._get_args(item);
 			if (!(args.items && args.items.length)) {
