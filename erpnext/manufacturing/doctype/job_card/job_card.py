@@ -573,7 +573,7 @@ class JobCard(Document):
 				if data.get("workstation") != self.workstation:
 					# workstations can change in a job card
 					data.workstation = self.workstation
-					data.hour_rate = flt(ws_hr_rate)
+					data.hour_rate = flt(workstation_hour_rate)
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
