@@ -1712,6 +1712,13 @@ def get_payment_entry(
 	# bank or cash
 	bank = get_bank_cash_account(doc, bank_account)
 
+	# if default bank or cash account is not set in company master and party has default company bank account, fetch it
+	if party_type in ["Customer", "Supplier"] and not bank:
+		party_bank_account = get_party_bank_account(party_type, doc.get(scrub(party_type)))
+		if party_bank_account:
+			account = frappe.db.get_value("Bank Account", party_bank_account, "account")
+			bank = get_bank_cash_account(doc, account)
+
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 	)
@@ -1928,19 +1935,27 @@ def set_paid_amount_and_received_amount(
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
 		paid_amount = received_amount = abs(outstanding_amount)
-	elif payment_type == "Receive":
-		paid_amount = abs(outstanding_amount)
-		if bank_amount:
-			received_amount = bank_amount
-		else:
-			received_amount = paid_amount * doc.get("conversion_rate", 1)
 	else:
-		received_amount = abs(outstanding_amount)
-		if bank_amount:
-			paid_amount = bank_amount
+		company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
+		if payment_type == "Receive":
+			paid_amount = abs(outstanding_amount)
+			if bank_amount:
+				received_amount = bank_amount
+			else:
+				if company_currency != bank.account_currency:
+					received_amount = paid_amount / doc.get("conversion_rate", 1)
+				else:
+					received_amount = paid_amount * doc.get("conversion_rate", 1)
 		else:
-			# if party account currency and bank currency is different then populate paid amount as well
-			paid_amount = received_amount * doc.get("conversion_rate", 1)
+			received_amount = abs(outstanding_amount)
+			if bank_amount:
+				paid_amount = bank_amount
+			else:
+				if company_currency != bank.account_currency:
+					paid_amount = received_amount / doc.get("conversion_rate", 1)
+				else:
+					# if party account currency and bank currency is different then populate paid amount as well
+					paid_amount = received_amount * doc.get("conversion_rate", 1)
 
 	return paid_amount, received_amount
 
