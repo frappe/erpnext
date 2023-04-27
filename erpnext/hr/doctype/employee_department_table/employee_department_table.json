@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-04-26 16:05:18.679261",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_department"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_department",
+   "fieldtype": "Link",
+   "label": "Employee Department",
+   "options": "Employee Department List"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-04-26 16:05:18.679261",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Department Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
