@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe import _, bold, throw
+from frappe import _, bold, qb, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Abs, Sum
@@ -968,67 +968,119 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
-	def make_exchange_gain_loss_gl_entries(self, gl_entries):
-		if self.get("doctype") in ["Purchase Invoice", "Sales Invoice"]:
-			for d in self.get("advances"):
-				if d.exchange_gain_loss:
-					is_purchase_invoice = self.get("doctype") == "Purchase Invoice"
-					party = self.supplier if is_purchase_invoice else self.customer
-					party_account = self.credit_to if is_purchase_invoice else self.debit_to
-					party_type = "Supplier" if is_purchase_invoice else "Customer"
-
-					gain_loss_account = frappe.get_cached_value(
-						"Company", self.company, "exchange_gain_loss_account"
-					)
-					if not gain_loss_account:
-						frappe.throw(
-							_("Please set default Exchange Gain/Loss Account in Company {}").format(self.get("company"))
+	def make_exchange_gain_loss_journal(self) -> None:
+		"""
+		Make Exchange Gain/Loss journal for Invoices and Payments
+		"""
+		# Cancelling is existing exchange gain/loss journals is handled in on_cancel event
+		if self.docstatus == 1:
+			if self.get("doctype") == "Payment Entry":
+				gain_loss_to_book = [x for x in self.references if x.exchange_gain_loss != 0]
+				booked = []
+				if gain_loss_to_book:
+					vtypes = [x.reference_doctype for x in gain_loss_to_book]
+					vnames = [x.reference_name for x in gain_loss_to_book]
+					je = qb.DocType("Journal Entry")
+					jea = qb.DocType("Journal Entry Account")
+					parents = (
+						qb.from_(jea)
+						.select(jea.parent)
+						.where(
+							(jea.reference_type == "Payment Entry")
+							& (jea.reference_name == self.name)
+							& (jea.docstatus == 1)
 						)
-					account_currency = get_account_currency(gain_loss_account)
-					if account_currency != self.company_currency:
-						frappe.throw(
-							_("Currency for {0} must be {1}").format(gain_loss_account, self.company_currency)
-						)
-
-					# for purchase
-					dr_or_cr = "debit" if d.exchange_gain_loss > 0 else "credit"
-					if not is_purchase_invoice:
-						# just reverse for sales?
-						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
-
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": gain_loss_account,
-								"account_currency": account_currency,
-								"against": party,
-								dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
-								dr_or_cr: abs(d.exchange_gain_loss),
-								"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
-								"project": self.project,
-							},
-							item=d,
-						)
+						.run()
 					)
 
-					dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+					booked = []
+					if parents:
+						booked = (
+							qb.from_(je)
+							.inner_join(jea)
+							.on(je.name == jea.parent)
+							.select(jea.reference_type, jea.reference_name, jea.reference_detail_no)
+							.where(
+								(je.docstatus == 1)
+								& (je.name.isin(parents))
+								& (je.voucher_type == "Exchange Gain or Loss")
+							)
+							.run()
+						)
 
-					gl_entries.append(
-						self.get_gl_dict(
+				for d in gain_loss_to_book:
+					if d.exchange_gain_loss and (
+						(d.reference_doctype, d.reference_name, str(d.idx)) not in booked
+					):
+						journal_entry = frappe.new_doc("Journal Entry")
+						journal_entry.voucher_type = "Exchange Gain Or Loss"
+						journal_entry.company = self.company
+						journal_entry.posting_date = nowdate()
+						journal_entry.multi_currency = 1
+
+						if self.payment_type == "Receive":
+							party_account = self.paid_from
+						elif self.payment_type == "Pay":
+							party_account = self.paid_to
+
+						party_account_currency = frappe.get_cached_value(
+							"Account", party_account, "account_currency"
+						)
+						dr_or_cr = "debit" if d.exchange_gain_loss > 0 else "credit"
+						reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
+						gain_loss_account = frappe.get_cached_value(
+							"Company", self.company, "exchange_gain_loss_account"
+						)
+						if not gain_loss_account:
+							frappe.throw(
+								_("Please set default Exchange Gain/Loss Account in Company {}").format(
+									self.get("company")
+								)
+							)
+						gain_loss_account_currency = get_account_currency(gain_loss_account)
+						if gain_loss_account_currency != self.company_currency:
+							frappe.throw(
+								_("Currency for {0} must be {1}").format(gain_loss_account, self.company_currency)
+							)
+
+						journal_account = frappe._dict(
 							{
 								"account": party_account,
-								"party_type": party_type,
-								"party": party,
-								"against": gain_loss_account,
-								dr_or_cr + "_in_account_currency": flt(abs(d.exchange_gain_loss) / self.conversion_rate),
+								"party_type": self.party_type,
+								"party": self.party,
+								"account_currency": party_account_currency,
+								"exchange_rate": 0,
+								"cost_center": erpnext.get_default_cost_center(self.company),
+								"reference_type": d.reference_doctype,
+								"reference_name": d.reference_name,
+								"reference_detail_no": d.idx,
 								dr_or_cr: abs(d.exchange_gain_loss),
-								"cost_center": self.cost_center,
-								"project": self.project,
-							},
-							self.party_account_currency,
-							item=self,
+								dr_or_cr + "_in_account_currency": 0,
+							}
 						)
-					)
+
+						journal_entry.append("accounts", journal_account)
+
+						journal_account = frappe._dict(
+							{
+								"account": gain_loss_account,
+								"account_currency": gain_loss_account_currency,
+								"exchange_rate": 1,
+								"cost_center": erpnext.get_default_cost_center(self.company),
+								"reference_type": self.doctype,
+								"reference_name": self.name,
+								"reference_detail_no": d.idx,
+								reverse_dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
+								reverse_dr_or_cr: abs(d.exchange_gain_loss),
+							}
+						)
+
+						journal_entry.append("accounts", journal_account)
+
+						journal_entry.save()
+						journal_entry.submit()
+				# frappe.throw("stopping...")
 
 	def update_against_document_in_jv(self):
 		"""
@@ -1090,9 +1142,15 @@ class AccountsController(TransactionBase):
 			reconcile_against_document(lst)
 
 	def on_cancel(self):
-		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		from erpnext.accounts.utils import (
+			cancel_exchange_gain_loss_journal,
+			unlink_ref_doc_from_payment_entries,
+		)
 
-		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+			# Cancel Exchange Gain/Loss Journal before unlinking
+			cancel_exchange_gain_loss_journal(self)
+
 			if frappe.db.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
 				unlink_ref_doc_from_payment_entries(self)
 
