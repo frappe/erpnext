@@ -695,8 +695,27 @@ def make_packing_slip(source_name, target_doc=None):
 				"field_map": {
 					"item_code": "item_code",
 					"item_name": "item_name",
+					"batch_no": "batch_no",
 					"description": "description",
 					"qty": "qty",
+					"total_weight": "net_weight",
+					"stock_uom": "stock_uom",
+					"weight_uom": "weight_uom",
+					"name": "dn_detail",
+				},
+				"condition": lambda doc: not frappe.db.exists(
+					"Product Bundle", {"new_item_code": doc.item_code}
+				),
+			},
+			"Packed Item": {
+				"doctype": "Packing Slip Item",
+				"field_map": {
+					"item_code": "item_code",
+					"item_name": "item_name",
+					"batch_no": "batch_no",
+					"description": "description",
+					"qty": "qty",
+					"name": "pi_detail",
 				},
 			},
 		},
