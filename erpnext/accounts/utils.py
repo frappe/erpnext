@@ -612,9 +612,7 @@ def update_reference_in_payment_entry(
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate
-		if not d.exchange_gain_loss
-		else payment_entry.get_exchange_rate(),
+		"exchange_rate": d.exchange_rate if d.exchange_gain_loss else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.exchange_gain_loss,  # only populated from invoice in case of advance allocation
 	}
 
@@ -657,9 +655,39 @@ def update_reference_in_payment_entry(
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
+	payment_entry.make_exchange_gain_loss_journal()
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
+
+
+def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
+	"""
+	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
+	"""
+	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+		journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"reference_type": parent_doc.doctype,
+				"reference_name": parent_doc.name,
+				"docstatus": 1,
+			},
+			fields=["parent"],
+			as_list=1,
+		)
+		if journals:
+			exchange_journals = frappe.db.get_all(
+				"Journal Entry",
+				filters={
+					"name": ["in", [x[0] for x in journals]],
+					"voucher_type": "Exchange Gain Or Loss",
+					"docstatus": 1,
+				},
+				as_list=1,
+			)
+			for doc in exchange_journals:
+				frappe.get_doc("Journal Entry", doc[0]).cancel()
 
 
 def unlink_ref_doc_from_payment_entries(ref_doc):
