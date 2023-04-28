@@ -86,6 +86,10 @@ class DeliveryNote(SellingController):
 				]
 			)
 
+	def onload(self):
+		if self.docstatus == 0:
+			self.set_onload("has_unpacked_items", self.has_unpacked_items())
+
 	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
@@ -389,6 +393,20 @@ class DeliveryNote(SellingController):
 					"Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 				)
 			)
+
+	def has_unpacked_items(self):
+		for item in self.items:
+			if (
+				not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code})
+				and item.packed_qty < item.qty
+			):
+				return True
+
+		for item in self.packed_items:
+			if item.packed_qty < item.qty:
+				return True
+
+		return False
 
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
@@ -708,9 +726,9 @@ def make_packing_slip(source_name, target_doc=None):
 					"name": "dn_detail",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: (
-					not frappe.db.exists("Product Bundle", {"new_item_code": doc.item_code})
-					and (doc.qty - doc.packed_qty) > 0
+				"condition": lambda item: (
+					not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code})
+					and item.packed_qty < item.qty
 				),
 			},
 			"Packed Item": {
@@ -724,7 +742,7 @@ def make_packing_slip(source_name, target_doc=None):
 					"name": "pi_detail",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: ((doc.qty - doc.packed_qty) > 0),
+				"condition": lambda item: (item.packed_qty < item.qty),
 			},
 		},
 		target_doc,

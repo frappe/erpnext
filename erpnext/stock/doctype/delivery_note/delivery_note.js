@@ -185,23 +185,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 			}
 
 			if(doc.docstatus==0 && !doc.__islocal) {
-				var remaining_qty = 0;
-
-				doc.items.forEach(item => {
-					frappe.db.exists("Product Bundle", item.item_code).then(exists => {
-						if (!exists) {
-							remaining_qty += (item.qty - item.packed_qty);
-						}
-					});
-				});
-
-				if (!remaining_qty) {
-					doc.packed_items.forEach(item => {
-						remaining_qty += (item.qty - item.packed_qty);
-					});
-				}
-
-				if (remaining_qty > 0) {
+				if (doc.__onload && doc.__onload.has_unpacked_items) {
 					this.frm.add_custom_button(__('Packing Slip'), function() {
 						frappe.model.open_mapped_doc({
 							method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
