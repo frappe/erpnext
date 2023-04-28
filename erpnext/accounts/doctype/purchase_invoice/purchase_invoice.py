@@ -978,7 +978,7 @@ class PurchaseInvoice(BuyingController):
 
 	def make_precision_loss_gl_entry(self, gl_entries):
 		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-			self.company, "Purchase Invoice", self.name
+			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 		)
 
 		precision_loss = self.get("base_net_total") - flt(
@@ -992,7 +992,9 @@ class PurchaseInvoice(BuyingController):
 						"account": round_off_account,
 						"against": self.supplier,
 						"credit": precision_loss,
-						"cost_center": self.cost_center or round_off_cost_center,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else self.cost_center or round_off_cost_center,
 						"remarks": _("Net total calculation precision loss"),
 					}
 				)
@@ -1386,7 +1388,7 @@ class PurchaseInvoice(BuyingController):
 			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
 		):
 			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-				self.company, "Purchase Invoice", self.name
+				self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 			)
 
 			gl_entries.append(
@@ -1396,7 +1398,9 @@ class PurchaseInvoice(BuyingController):
 						"against": self.supplier,
 						"debit_in_account_currency": self.rounding_adjustment,
 						"debit": self.base_rounding_adjustment,
-						"cost_center": self.cost_center or round_off_cost_center,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else (self.cost_center or round_off_cost_center),
 					},
 					item=self,
 				)
