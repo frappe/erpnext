@@ -687,6 +687,9 @@ def make_packing_slip(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) - flt(obj.packed_qty)
+
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -707,8 +710,10 @@ def make_packing_slip(source_name, target_doc=None):
 					"stock_uom": "stock_uom",
 					"name": "dn_detail",
 				},
-				"condition": lambda doc: not frappe.db.exists(
-					"Product Bundle", {"new_item_code": doc.item_code}
+				"postprocess": update_item,
+				"condition": lambda doc: (
+					not frappe.db.exists("Product Bundle", {"new_item_code": doc.item_code})
+					and (doc.qty - doc.packed_qty) > 0
 				),
 			},
 			"Packed Item": {
@@ -721,6 +726,8 @@ def make_packing_slip(source_name, target_doc=None):
 					"qty": "qty",
 					"name": "pi_detail",
 				},
+				"postprocess": update_item,
+				"condition": lambda doc: ((doc.qty - doc.packed_qty) > 0),
 			},
 		},
 		target_doc,
