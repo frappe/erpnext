@@ -123,6 +123,7 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Delivery Note Item",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -130,13 +131,14 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Delivery Note Packed Item",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-04-27 15:37:17.023153",
+ "modified": "2023-04-28 15:00:14.079306",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",
