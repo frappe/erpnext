@@ -303,20 +303,13 @@ class DeliveryNote(SellingController):
 			)
 
 	def validate_packed_qty(self):
-		"""
-		Validate that if packed qty exists, it should be equal to qty
-		"""
-		if not any(flt(d.get("packed_qty")) for d in self.get("items")):
-			return
-		has_error = False
-		for d in self.get("items"):
-			if flt(d.get("qty")) != flt(d.get("packed_qty")):
-				frappe.msgprint(
-					_("Packed quantity must equal quantity for Item {0} in row {1}").format(d.item_code, d.idx)
+		"""Validate that if packed qty exists, it should be equal to qty"""
+
+		for item in self.items + self.packed_items:
+			if item.packed_qty and item.packed_qty != item.qty:
+				frappe.throw(
+					_("Row {0}: Packed Qty must be equal to {1} Qty.").format(item.idx, frappe.bold(item.doctype))
 				)
-				has_error = True
-		if has_error:
-			raise frappe.ValidationError
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
