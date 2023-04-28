@@ -38,7 +38,7 @@ class PackingSlip(StatusUpdater):
 
 		self.validate_delivery_note()
 		self.validate_case_nos()
-		self.validate_mandatory()
+		self.validate_items()
 
 		validate_uom_is_integer(self, "stock_uom", "qty")
 		validate_uom_is_integer(self, "weight_uom", "net_weight")
@@ -91,11 +91,36 @@ class PackingSlip(StatusUpdater):
 					)
 				)
 
-	def validate_mandatory(self):
+	def validate_items(self):
 		for item in self.items:
 			if not item.dn_detail and not item.pi_detail:
 				frappe.throw(
 					_("Row {0}: Either Delivery Note Item or Packed Item reference is mandatory").format(item.idx)
+				)
+
+			remaining_qty = frappe.db.get_value(
+				"Delivery Note Item" if item.dn_detail else "Packed Item",
+				{"name": item.dn_detail or item.pi_detail, "docstatus": 0},
+				["sum(qty - packed_qty)"],
+			)
+
+			if remaining_qty is None:
+				frappe.throw(
+					_("Row {0}: Please provide a valid Delivery Note Item or Packed Item reference.").format(
+						item.idx
+					)
+				)
+			elif remaining_qty <= 0:
+				frappe.throw(
+					_("Row {0}: Packing Slip is already created for Item {1}.").format(
+						item.idx, frappe.bold(item.item_code)
+					)
+				)
+			elif item.qty > remaining_qty:
+				frappe.throw(
+					_("Row {0}: Qty cannot be greater than {1} for the Item {2}.").format(
+						item.idx, frappe.bold(remaining_qty), frappe.bold(item.item_code)
+					)
 				)
 
 	def set_missing_values(self):
