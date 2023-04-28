@@ -38,6 +38,7 @@ class PackingSlip(StatusUpdater):
 
 		self.validate_delivery_note()
 		self.validate_case_nos()
+		self.validate_mandatory()
 
 		validate_uom_is_integer(self, "stock_uom", "qty")
 		validate_uom_is_integer(self, "weight_uom", "net_weight")
@@ -88,6 +89,13 @@ class PackingSlip(StatusUpdater):
 					_("""Package No(s) already in use. Try from Package No {0}""").format(
 						self.get_recommended_case_no()
 					)
+				)
+
+	def validate_mandatory(self):
+		for item in self.items:
+			if not item.dn_detail and not item.pi_detail:
+				frappe.throw(
+					_("Row {0}: Either Delivery Note Item or Packed Item reference is mandatory").format(item.idx)
 				)
 
 	def set_missing_values(self):
