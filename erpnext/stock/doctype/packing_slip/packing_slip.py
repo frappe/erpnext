@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -44,6 +44,7 @@ class PackingSlip(StatusUpdater):
 		validate_uom_is_integer(self, "weight_uom", "net_weight")
 
 		self.set_missing_values()
+		self.calculate_net_total_pkg()
 
 	def on_submit(self):
 		self.update_prevdoc_status()
@@ -62,9 +63,13 @@ class PackingSlip(StatusUpdater):
 	def validate_case_nos(self):
 		"""Validate if case nos overlap. If they do, recommend next case no."""
 
-		if not self.to_case_no:
+		if cint(self.from_case_no) <= 0:
+			frappe.throw(
+				_("The 'From Package No.' field must neither be empty nor it's value less than 1.")
+			)
+		elif not self.to_case_no:
 			self.to_case_no = self.from_case_no
-		elif cint(self.from_case_no) > cint(self.to_case_no):
+		elif cint(self.to_case_no) < cint(self.from_case_no):
 			frappe.throw(_("'To Package No.' cannot be less than 'From Package No.'"))
 		else:
 			ps = frappe.qb.DocType("Packing Slip")
@@ -93,9 +98,14 @@ class PackingSlip(StatusUpdater):
 
 	def validate_items(self):
 		for item in self.items:
+			if item.qty <= 0:
+				frappe.throw(_("Row {0}: Qty must be greater than 0.").format(item.idx))
+
 			if not item.dn_detail and not item.pi_detail:
 				frappe.throw(
-					_("Row {0}: Either Delivery Note Item or Packed Item reference is mandatory").format(item.idx)
+					_("Row {0}: Either Delivery Note Item or Packed Item reference is mandatory.").format(
+						item.idx
+					)
 				)
 
 			remaining_qty = frappe.db.get_value(
@@ -149,6 +159,26 @@ class PackingSlip(StatusUpdater):
 			)
 			+ 1
 		)
+
+	def calculate_net_total_pkg(self):
+		self.net_weight_uom = self.items[0].weight_uom if self.items else None
+		self.gross_weight_uom = self.net_weight_uom
+
+		net_weight_pkg = 0
+		for item in self.items:
+			if item.weight_uom != self.net_weight_uom:
+				frappe.throw(
+					_(
+						"Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM."
+					)
+				)
+
+			net_weight_pkg += flt(item.net_weight) * flt(item.qty)
+
+		self.net_weight_pkg = round(net_weight_pkg, 2)
+
+		if not flt(self.gross_weight_pkg):
+			self.gross_weight_pkg = self.net_weight_pkg
 
 
 @frappe.whitelist()
