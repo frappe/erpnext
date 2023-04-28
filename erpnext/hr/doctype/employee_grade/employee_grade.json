@@ -8,19 +8,28 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "default_salary_structure"
+  "default_salary_structure",
+  "employee_travel_expense_limit_table"
  ],
  "fields": [
   {
    "fieldname": "default_salary_structure",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Salary Structure",
    "options": "Salary Structure"
+  },
+  {
+   "fieldname": "employee_travel_expense_limit_table",
+   "fieldtype": "Table",
+   "label": "Employee Travel Expense Limit Table",
+   "options": "Employee Travel Expense Limit Table"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-26 13:12:07.815330",
+ "modified": "2023-04-28 18:41:57.105883",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grade",

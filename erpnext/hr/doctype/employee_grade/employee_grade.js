@@ -2,28 +2,28 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Grade', {
-    refresh: function (frm) {
+   
+    refresh:function(frm) {
+        frm.dashboard.heatmap_area.hide();
+        frm.dashboard.links_area.hide();
 
-    },
-    setup: function (frm) {
-        frm.set_query("default_salary_structure", function () {
-            return {
-                "filters": {
-                    "docstatus": 1,
-                    "is_active": "Yes"
-                }
-            };
-        });
+      
+        if (frm.doc.__islocal) {
+            cur_frm.clear_table("employee_travel_expense_limit_table");
+        //in employee_travel_expense_limit_table table in city_type set static value
+            let row = frm.add_child('employee_travel_expense_limit_table', {
+                city_type:"Metro City",
+            });
+            let row1= frm.add_child('employee_travel_expense_limit_table', {
+                city_type:"Urban City",
+            });
+            let row2= frm.add_child('employee_travel_expense_limit_table', {
+                city_type:"Other City",
+            });
+            frm.refresh_field('employee_travel_expense_limit_table');
 
-        frm.set_query("default_leave_policy", function () {
-            return {
-                "filters": {
-                    "docstatus": 1
-                }
-            };
-        });
-
-
+        }
+        
+        
     }
-
-});
+})
