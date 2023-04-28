@@ -84,6 +84,7 @@
   "installed_qty",
   "item_tax_rate",
   "column_break_atna",
+  "packed_qty",
   "received_qty",
   "accounting_details_section",
   "expense_account",
@@ -850,13 +851,27 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.packed_qty",
+   "fieldname": "packed_qty",
+   "fieldtype": "Float",
+   "label": "Packed Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-05-01 21:05:14.175640",
+=======
+ "modified": "2023-04-28 13:14:10.648655",
+>>>>>>> e6fc281acf (feat: add field `Packed Qty` in `Delivery Note Item` and `Packed Item`)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
