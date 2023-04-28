@@ -28,6 +28,8 @@ class PackingSlip(Document):
 		validate_uom_is_integer(self, "stock_uom", "qty")
 		validate_uom_is_integer(self, "weight_uom", "net_weight")
 
+		self.set_missing_values()
+
 	def validate_delivery_note(self):
 		"""
 		Validates if delivery note has status as draft
@@ -79,6 +81,20 @@ class PackingSlip(Document):
 			new_packed_qty = (flt(ps_item_qty[item["item_code"]]) * no_of_cases) + flt(item["packed_qty"])
 			if new_packed_qty > flt(item["qty"]) and no_of_cases:
 				self.recommend_new_qty(item, ps_item_qty, no_of_cases)
+
+	def set_missing_values(self):
+		if not self.from_case_no:
+			self.from_case_no = self.get_recommended_case_no()
+
+		for item in self.items:
+			weight_per_unit, weight_uom = frappe.db.get_value(
+				"Item", item.item_code, ["weight_per_unit", "weight_uom"]
+			)
+
+			if weight_per_unit and not item.net_weight:
+				item.net_weight = weight_per_unit
+			if weight_uom and not item.weight_uom:
+				item.weight_uom = weight_uom
 
 	def get_details_for_packing(self):
 		"""
@@ -141,56 +157,17 @@ class PackingSlip(Document):
 			)
 		)
 
-	def update_item_details(self):
-		"""
-		Fill empty columns in Packing Slip Item
-		"""
-		if not self.from_case_no:
-			self.from_case_no = self.get_recommended_case_no()
-
-		for d in self.get("items"):
-			res = frappe.db.get_value("Item", d.item_code, ["weight_per_unit", "weight_uom"], as_dict=True)
-
-			if res and len(res) > 0:
-				d.net_weight = res["weight_per_unit"]
-				d.weight_uom = res["weight_uom"]
-
 	def get_recommended_case_no(self):
-		"""
-		Returns the next case no. for a new packing slip for a delivery
-		note
-		"""
-		recommended_case_no = frappe.db.sql(
-			"""SELECT MAX(to_case_no) FROM `tabPacking Slip`
-			WHERE delivery_note = %s AND docstatus=1""",
-			self.delivery_note,
+		"""Returns the next case no. for a new packing slip for a delivery note"""
+
+		return (
+			cint(
+				frappe.db.get_value(
+					"Packing Slip", {"delivery_note": self.delivery_note, "docstatus": 1}, ["max(to_case_no)"]
+				)
+			)
+			+ 1
 		)
-
-		return cint(recommended_case_no[0][0]) + 1
-
-	@frappe.whitelist()
-	def get_items(self):
-		self.set("items", [])
-
-		custom_fields = frappe.get_meta("Delivery Note Item").get_custom_fields()
-
-		dn_details = self.get_details_for_packing()[0]
-		for item in dn_details:
-			if flt(item.qty) > flt(item.packed_qty):
-				ch = self.append("items", {})
-				ch.item_code = item.item_code
-				ch.item_name = item.item_name
-				ch.stock_uom = item.stock_uom
-				ch.description = item.description
-				ch.batch_no = item.batch_no
-				ch.qty = flt(item.qty) - flt(item.packed_qty)
-
-				# copy custom fields
-				for d in custom_fields:
-					if item.get(d.fieldname):
-						ch.set(d.fieldname, item.get(d.fieldname))
-
-		self.update_item_details()
 
 
 @frappe.whitelist()
