@@ -684,6 +684,9 @@ def make_installation_note(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_packing_slip(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
@@ -701,9 +704,7 @@ def make_packing_slip(source_name, target_doc=None):
 					"batch_no": "batch_no",
 					"description": "description",
 					"qty": "qty",
-					"total_weight": "net_weight",
 					"stock_uom": "stock_uom",
-					"weight_uom": "weight_uom",
 					"name": "dn_detail",
 				},
 				"condition": lambda doc: not frappe.db.exists(
@@ -723,6 +724,7 @@ def make_packing_slip(source_name, target_doc=None):
 			},
 		},
 		target_doc,
+		set_missing_values,
 	)
 
 	return doclist

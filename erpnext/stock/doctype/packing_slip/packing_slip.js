@@ -35,24 +35,6 @@ frappe.ui.form.on("Packing Slip", {
 		frm.trigger("validate_calculate_item_details");
 	},
 
-	onload_post_render: (frm) => {
-		if(frm.doc.delivery_note && frm.doc.__islocal) {
-			frm.trigger("get_items");
-		}
-	},
-
-	get_items: (frm) => {
-		return frm.call({
-			doc: frm.doc,
-			method: "get_items",
-			callback: function(r) {
-				if(!r.exc) {
-					frm.refresh();
-				}
-			}
-		});
-	},
-
 	// To Case No. cannot be less than From Case No.
 	validate_case_nos: (frm) => {
 		doc = locals[frm.doc.doctype][frm.doc.name];
