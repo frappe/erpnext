@@ -95,13 +95,22 @@ class TestPackingSlip(FrappeTestCase):
 		# Test - 5: Should throw an ValidationError, as Packing Slip Qty is more than Delivery Note Qty
 		self.assertRaises(frappe.exceptions.ValidationError, ps3.save)
 
+		# Step - 8: Make Packing Slip for less Qty than Delivery Note
+		ps4 = make_packing_slip(dn.name)
+		ps4.items[0].qty = 5
+		ps4.save()
+		ps4.submit()
+
+		# Test - 6: Delivery Note should throw a ValidationError on Submit, as Packed Qty and Delivery Note Qty are not the same
+		dn.load_from_db()
+		self.assertRaises(frappe.exceptions.ValidationError, dn.submit)
+
 
 def create_items():
 	items_properties = [
 		{"is_stock_item": 0},
-		{"is_stock_item": 1},
-		{"is_stock_item": 1},
-		{"is_stock_item": 1},
+		{"is_stock_item": 1, "stock_uom": "Nos"},
+		{"is_stock_item": 1, "stock_uom": "Box"},
 	]
 
 	items = []
