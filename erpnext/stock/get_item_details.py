@@ -1508,11 +1508,15 @@ def get_so_reservation_for_item(args):
 	elif args.get("against_sales_invoice"):
 		sales_order = frappe.db.get_all(
 			"Sales Invoice Item",
-			filters={"parent": args.get("against_sales_invoice"), "item_code": args.get("item_code")},
+			filters={
+				"parent": args.get("against_sales_invoice"),
+				"item_code": args.get("item_code"),
+				"docstatus": 1,
+			},
 			fields="sales_order",
 		)
 		if sales_order and sales_order[0]:
-			if get_reserved_qty_for_so(sales_order[0][0], args.get("item_code")):
+			if get_reserved_qty_for_so(sales_order[0].sales_order, args.get("item_code")):
 				reserved_so = sales_order[0]
 	elif args.get("sales_order"):
 		if get_reserved_qty_for_so(args.get("sales_order"), args.get("item_code")):
