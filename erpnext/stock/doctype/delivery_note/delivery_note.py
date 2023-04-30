@@ -305,11 +305,19 @@ class DeliveryNote(SellingController):
 	def validate_packed_qty(self):
 		"""Validate that if packed qty exists, it should be equal to qty"""
 
-		for item in self.items + self.packed_items:
-			if item.packed_qty and item.packed_qty != item.qty:
-				frappe.throw(
-					_("Row {0}: Packed Qty must be equal to {1} Qty.").format(item.idx, frappe.bold(item.doctype))
-				)
+		if frappe.db.exists("Packing Slip", {"docstatus": 1, "delivery_note": self.name}):
+			product_bundle_list = self.get_product_bundle_list()
+			for item in self.items + self.packed_items:
+				if (
+					item.item_code not in product_bundle_list
+					and flt(item.packed_qty)
+					and flt(item.packed_qty) != flt(item.qty)
+				):
+					frappe.throw(
+						_("Row {0}: Packed Qty must be equal to {1} Qty.").format(
+							item.idx, frappe.bold(item.doctype)
+						)
+					)
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
@@ -388,18 +396,21 @@ class DeliveryNote(SellingController):
 			)
 
 	def has_unpacked_items(self):
-		for item in self.items:
-			if (
-				not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code})
-				and item.packed_qty < item.qty
-			):
-				return True
+		product_bundle_list = self.get_product_bundle_list()
 
-		for item in self.packed_items:
-			if item.packed_qty < item.qty:
+		for item in self.items + self.packed_items:
+			if item.item_code not in product_bundle_list and flt(item.packed_qty) < flt(item.qty):
 				return True
 
 		return False
+
+	def get_product_bundle_list(self):
+		items_list = [item.item_code for item in self.items]
+		return frappe.db.get_all(
+			"Product Bundle",
+			filters={"new_item_code": ["in", items_list]},
+			pluck="name",
+		)
 
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
@@ -721,7 +732,7 @@ def make_packing_slip(source_name, target_doc=None):
 				"postprocess": update_item,
 				"condition": lambda item: (
 					not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code})
-					and item.packed_qty < item.qty
+					and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
 			"Packed Item": {
@@ -735,7 +746,7 @@ def make_packing_slip(source_name, target_doc=None):
 					"name": "pi_detail",
 				},
 				"postprocess": update_item,
-				"condition": lambda item: (item.packed_qty < item.qty),
+				"condition": lambda item: (flt(item.packed_qty) < flt(item.qty)),
 			},
 		},
 		target_doc,
