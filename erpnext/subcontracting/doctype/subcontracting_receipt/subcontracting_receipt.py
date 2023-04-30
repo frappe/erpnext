@@ -191,14 +191,17 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_available_qty_for_consumption(self):
 		for item in self.get("supplied_items"):
+			precision = item.precision("consumed_qty")
 			if (
-				item.available_qty_for_consumption and item.available_qty_for_consumption < item.consumed_qty
+				item.available_qty_for_consumption
+				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
 			):
-				frappe.throw(
-					_(
-						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
-					).format(item.idx)
-				)
+				msg = f"""Row {item.idx}: Consumed Qty {flt(item.consumed_qty, precision)}
+					must be less than or equal to Available Qty For Consumption
+					{flt(item.available_qty_for_consumption, precision)}
+					in Consumed Items Table."""
+
+				frappe.throw(_(msg))
 
 	def validate_items_qty(self):
 		for item in self.items:
@@ -242,17 +245,17 @@ class SubcontractingReceipt(SubcontractingController):
 					item.expense_account = expense_account
 
 	def update_status(self, status=None, update_modified=False):
-		if self.docstatus >= 1 and not status:
-			if self.docstatus == 1:
+		if not status:
+			if self.docstatus == 0:
+				status = "Draft"
+			elif self.docstatus == 1:
+				status = "Completed"
 				if self.is_return:
 					status = "Return"
 					return_against = frappe.get_doc("Subcontracting Receipt", self.return_against)
 					return_against.run_method("update_status")
-				else:
-					if self.per_returned == 100:
-						status = "Return Issued"
-					elif self.status == "Draft":
-						status = "Completed"
+				elif self.per_returned == 100:
+					status = "Return Issued"
 			elif self.docstatus == 2:
 				status = "Cancelled"
 

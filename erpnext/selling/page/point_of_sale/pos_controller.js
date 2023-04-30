@@ -522,7 +522,7 @@ erpnext.PointOfSale.Controller = class {
 
 			const from_selector = field === 'qty' && value === "+1";
 			if (from_selector)
-				value = flt(item_row.qty) + flt(value);
+				value = flt(item_row.stock_qty) + flt(value);
 
 			if (item_row_exists) {
 				if (field === 'qty')

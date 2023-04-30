@@ -17,34 +17,26 @@ class PaymentLedger(object):
 		self.ple = qb.DocType("Payment Ledger Entry")
 
 	def init_voucher_dict(self):
-
 		if self.voucher_amount:
-			s = set()
-			# build  a set of unique vouchers
+			# for each ple, using group_by_key to create a key and assign it to +/- list
 			for ple in self.voucher_amount:
-				key = (ple.voucher_type, ple.voucher_no, ple.party)
-				s.add(key)
+				group_by_key = None
+				if not self.filters.group_party:
+					group_by_key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
+				else:
+					group_by_key = (ple.party_type, ple.party)
 
-			# for each unique vouchers, initialize +/- list
-			for key in s:
-				self.voucher_dict[key] = frappe._dict(increase=list(), decrease=list())
-
-			# for each ple, using against voucher and amount, assign it to +/- list
-			# group by against voucher
-			for ple in self.voucher_amount:
-				against_key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
 				target = None
-				if self.voucher_dict.get(against_key):
-					if ple.amount > 0:
-						target = self.voucher_dict.get(against_key).increase
-					else:
-						target = self.voucher_dict.get(against_key).decrease
+				if ple.amount > 0:
+					target = self.voucher_dict.setdefault(group_by_key, {}).setdefault("increase", [])
+				else:
+					target = self.voucher_dict.setdefault(group_by_key, {}).setdefault("decrease", [])
 
 				# this if condition will lose unassigned ple entries(against_voucher doc doesn't have ple)
 				# need to somehow include the stray entries as well.
 				if target is not None:
 					entry = frappe._dict(
-						company=ple.company,
+						posting_date=ple.posting_date,
 						account=ple.account,
 						party_type=ple.party_type,
 						party=ple.party,
@@ -66,10 +58,10 @@ class PaymentLedger(object):
 
 		for value in self.voucher_dict.values():
 			voucher_data = []
-			if value.increase != []:
-				voucher_data.extend(value.increase)
-			if value.decrease != []:
-				voucher_data.extend(value.decrease)
+			if value.get("increase"):
+				voucher_data.extend(value.get("increase"))
+			if value.get("decrease"):
+				voucher_data.extend(value.get("decrease"))
 
 			if voucher_data:
 				# balance row
@@ -117,6 +109,12 @@ class PaymentLedger(object):
 		if self.filters.against_voucher_no:
 			self.conditions.append(self.ple.against_voucher_no == self.filters.against_voucher_no)
 
+		if self.filters.party_type:
+			self.conditions.append(self.ple.party_type == self.filters.party_type)
+
+		if self.filters.party:
+			self.conditions.append(self.ple.party.isin(self.filters.party))
+
 	def get_data(self):
 		ple = self.ple
 
@@ -134,7 +132,13 @@ class PaymentLedger(object):
 	def get_columns(self):
 		options = None
 		self.columns.append(
-			dict(label=_("Company"), fieldname="company", fieldtype="data", options=options, width="100")
+			dict(
+				label=_("Posting Date"),
+				fieldname="posting_date",
+				fieldtype="Date",
+				options=options,
+				width="100",
+			)
 		)
 
 		self.columns.append(
@@ -160,7 +164,11 @@ class PaymentLedger(object):
 		)
 		self.columns.append(
 			dict(
-				label=_("Voucher No"), fieldname="voucher_no", fieldtype="data", options=options, width="100"
+				label=_("Voucher No"),
+				fieldname="voucher_no",
+				fieldtype="Dynamic Link",
+				options="voucher_type",
+				width="100",
 			)
 		)
 		self.columns.append(
@@ -176,8 +184,8 @@ class PaymentLedger(object):
 			dict(
 				label=_("Against Voucher No"),
 				fieldname="against_voucher_no",
-				fieldtype="data",
-				options=options,
+				fieldtype="Dynamic Link",
+				options="against_voucher_type",
 				width="100",
 			)
 		)
@@ -209,7 +217,7 @@ class PaymentLedger(object):
 		self.get_columns()
 		self.get_data()
 
-		# initialize dictionary and group using against voucher
+		# initialize dictionary and group using key
 		self.init_voucher_dict()
 
 		# convert dictionary to list and add balance rows

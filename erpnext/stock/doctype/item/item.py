@@ -117,7 +117,6 @@ class Item(Document):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.validate_item_tax_net_rate_range()
-		set_item_tax_from_hsn_code(self)
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -352,10 +351,15 @@ class Item(Document):
 		check_list = []
 		for d in self.get("taxes"):
 			if d.item_tax_template:
-				if d.item_tax_template in check_list:
-					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
+				if (d.item_tax_template, d.tax_category) in check_list:
+					frappe.throw(
+						_("{0} entered twice {1} in Item Taxes").format(
+							frappe.bold(d.item_tax_template),
+							"for tax category {0}".format(frappe.bold(d.tax_category)) if d.tax_category else "",
+						)
+					)
 				else:
-					check_list.append(d.item_tax_template)
+					check_list.append((d.item_tax_template, d.tax_category))
 
 	def validate_barcode(self):
 		import barcodenumber
@@ -377,7 +381,9 @@ class Item(Document):
 						"" if item_barcode.barcode_type not in options else item_barcode.barcode_type
 					)
 					if item_barcode.barcode_type:
-						barcode_type = convert_erpnext_to_barcodenumber(item_barcode.barcode_type.upper())
+						barcode_type = convert_erpnext_to_barcodenumber(
+							item_barcode.barcode_type.upper(), item_barcode.barcode
+						)
 						if barcode_type in barcodenumber.barcodes():
 							if not barcodenumber.check_code(barcode_type, item_barcode.barcode):
 								frappe.throw(
@@ -982,20 +988,29 @@ class Item(Document):
 				)
 
 
-def convert_erpnext_to_barcodenumber(erpnext_number):
+def convert_erpnext_to_barcodenumber(erpnext_number, barcode):
+	if erpnext_number == "EAN":
+		ean_type = {
+			8: "EAN8",
+			13: "EAN13",
+		}
+		barcode_length = len(barcode)
+		if barcode_length in ean_type:
+			return ean_type[barcode_length]
+
+		return erpnext_number
+
 	convert = {
 		"UPC-A": "UPCA",
 		"CODE-39": "CODE39",
-		"EAN": "EAN13",
-		"EAN-12": "EAN",
-		"EAN-8": "EAN8",
 		"ISBN-10": "ISBN10",
 		"ISBN-13": "ISBN13",
 	}
+
 	if erpnext_number in convert:
 		return convert[erpnext_number]
-	else:
-		return erpnext_number
+
+	return erpnext_number
 
 
 def make_item_price(item, price_list_name, item_price):
@@ -1303,11 +1318,6 @@ def update_variants(variants, template, publish_progress=True):
 		variant.save()
 		if publish_progress:
 			frappe.publish_progress(count / total * 100, title=_("Updating Variants..."))
-
-
-@erpnext.allow_regional
-def set_item_tax_from_hsn_code(item):
-	pass
 
 
 def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> None:

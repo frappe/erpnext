@@ -24,7 +24,7 @@ from erpnext.accounts.report.general_ledger.general_ledger import execute as get
 class ProcessStatementOfAccounts(Document):
 	def validate(self):
 		if not self.subject:
-			self.subject = "Statement Of Accounts for {{ customer.name }}"
+			self.subject = "Statement Of Accounts for {{ customer.customer_name }}"
 		if not self.body:
 			self.body = "Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}."
 
@@ -87,6 +87,7 @@ def get_report_pdf(doc, consolidated=True):
 				"account": [doc.account] if doc.account else None,
 				"party_type": "Customer",
 				"party": [entry.customer],
+				"party_name": [entry.customer_name] if entry.customer_name else None,
 				"presentation_currency": presentation_currency,
 				"group_by": doc.group_by,
 				"currency": doc.currency,
@@ -156,7 +157,7 @@ def get_customers_based_on_territory_or_customer_group(customer_collection, coll
 	]
 	return frappe.get_list(
 		"Customer",
-		fields=["name", "email_id"],
+		fields=["name", "customer_name", "email_id"],
 		filters=[[fields_dict[customer_collection], "IN", selected]],
 	)
 
@@ -179,7 +180,7 @@ def get_customers_based_on_sales_person(sales_person):
 	if sales_person_records.get("Customer"):
 		return frappe.get_list(
 			"Customer",
-			fields=["name", "email_id"],
+			fields=["name", "customer_name", "email_id"],
 			filters=[["name", "in", list(sales_person_records["Customer"])]],
 		)
 	else:
@@ -228,7 +229,7 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 		if customer_collection == "Sales Partner":
 			customers = frappe.get_list(
 				"Customer",
-				fields=["name", "email_id"],
+				fields=["name", "customer_name", "email_id"],
 				filters=[["default_sales_partner", "=", collection_name]],
 			)
 		else:
@@ -245,7 +246,12 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 				continue
 
 		customer_list.append(
-			{"name": customer.name, "primary_email": primary_email, "billing_email": billing_email}
+			{
+				"name": customer.name,
+				"customer_name": customer.customer_name,
+				"primary_email": primary_email,
+				"billing_email": billing_email,
+			}
 		)
 	return customer_list
 

@@ -859,7 +859,7 @@ class ReceivablePayableReport(object):
 						)
 					else:
 						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname] == self.filters[dimension.fieldname]
+							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
 						)
 
 	def is_invoice(self, ple):

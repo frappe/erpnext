@@ -676,6 +676,79 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(flt(sl_entry.actual_qty), 1.0)
 		self.assertEqual(flt(sl_entry.qty_after_transaction), 1.0)
 
+	def test_backdated_stock_reco_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(
+			"Test New Batch Item ABCV",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# Added 100 Qty, Balace Qty 100
+		se1 = make_stock_entry(
+			item_code=item_code, posting_time="09:00:00", target=warehouse, qty=100, basic_rate=700
+		)
+
+		# Removed 50 Qty, Balace Qty 50
+		se2 = make_stock_entry(
+			item_code=item_code,
+			batch_no=se1.items[0].batch_no,
+			posting_time="10:00:00",
+			source=warehouse,
+			qty=50,
+			basic_rate=700,
+		)
+
+		# Stock Reco for 100, Balace Qty 100
+		stock_reco = create_stock_reconciliation(
+			item_code=item_code,
+			posting_time="11:00:00",
+			warehouse=warehouse,
+			batch_no=se1.items[0].batch_no,
+			qty=100,
+			rate=100,
+		)
+
+		# Removed 50 Qty, Balace Qty 50
+		make_stock_entry(
+			item_code=item_code,
+			batch_no=se1.items[0].batch_no,
+			posting_time="12:00:00",
+			source=warehouse,
+			qty=50,
+			basic_rate=700,
+		)
+
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": stock_reco.name}))
+
+		# Cancel the backdated Stock Entry se2,
+		# Since Stock Reco entry in the future the Balace Qty should remain as it's (50)
+
+		se2.cancel()
+
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": stock_reco.name}))
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", {"voucher_no": stock_reco.name}, "status"),
+			"Completed",
+		)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
+			fields=["qty_after_transaction"],
+			order_by="posting_time desc, creation desc",
+		)
+
+		self.assertEqual(flt(sle[0].qty_after_transaction), flt(50.0))
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
