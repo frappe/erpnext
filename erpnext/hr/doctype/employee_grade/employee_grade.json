@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "employee_travel_expense_section",
   "employee_travel_expense_limit_table",
   "section_break_3",
   "air_travel",
@@ -28,7 +29,6 @@
   {
    "fieldname": "employee_travel_expense_limit_table",
    "fieldtype": "Table",
-   "label": "Employee Travel Expense Limit Table",
    "options": "Employee Travel Expense Limit Table"
   },
   {
@@ -62,13 +62,18 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
-   "label": "section"
+   "label": "Travel Type Allowed"
+  },
+  {
+   "fieldname": "employee_travel_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Travel Expenses"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-05-01 15:36:51.161589",
+ "modified": "2023-05-01 18:57:46.614490",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grade",
