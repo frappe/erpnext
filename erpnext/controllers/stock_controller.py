@@ -329,9 +329,10 @@ class StockController(AccountsController):
 		"""Create batches if required. Called before submit"""
 		for d in self.items:
 			if d.get(warehouse_field) and not d.batch_no:
-				has_batch_no, create_new_batch = frappe.db.get_value(
+				has_batch_no, create_new_batch = frappe.get_cached_value(
 					"Item", d.item_code, ["has_batch_no", "create_new_batch"]
 				)
+
 				if has_batch_no and create_new_batch:
 					d.batch_no = (
 						frappe.get_doc(
@@ -414,7 +415,7 @@ class StockController(AccountsController):
 				"voucher_no": self.name,
 				"voucher_detail_no": d.name,
 				"actual_qty": (self.docstatus == 1 and 1 or -1) * flt(d.get("stock_qty")),
-				"stock_uom": frappe.db.get_value(
+				"stock_uom": frappe.get_cached_value(
 					"Item", args.get("item_code") or d.get("item_code"), "stock_uom"
 				),
 				"incoming_rate": 0,
@@ -609,7 +610,7 @@ class StockController(AccountsController):
 	def validate_customer_provided_item(self):
 		for d in self.get("items"):
 			# Customer Provided parts will have zero valuation rate
-			if frappe.db.get_value("Item", d.item_code, "is_customer_provided_item"):
+			if frappe.get_cached_value("Item", d.item_code, "is_customer_provided_item"):
 				d.allow_zero_valuation_rate = 1
 
 	def set_rate_of_stock_uom(self):
@@ -722,7 +723,7 @@ class StockController(AccountsController):
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
-	def repost_future_sle_and_gle(self):
+	def repost_future_sle_and_gle(self, force=False):
 		args = frappe._dict(
 			{
 				"posting_date": self.posting_date,
@@ -733,7 +734,7 @@ class StockController(AccountsController):
 			}
 		)
 
-		if future_sle_exists(args) or repost_required_for_queue(self):
+		if force or future_sle_exists(args) or repost_required_for_queue(self):
 			item_based_reposting = cint(
 				frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			)
@@ -894,9 +895,6 @@ def future_sle_exists(args, sl_entries=None):
 	)
 
 	for d in data:
-		if key not in frappe.local.future_sle:
-			frappe.local.future_sle[key] = frappe._dict({})
-
 		frappe.local.future_sle[key][(d.item_code, d.warehouse)] = d.total_row
 
 	return len(data)
@@ -919,7 +917,7 @@ def validate_future_sle_not_exists(args, key, sl_entries=None):
 
 def get_cached_data(args, key):
 	if key not in frappe.local.future_sle:
-		return False
+		frappe.local.future_sle[key] = frappe._dict({})
 
 	if args.get("item_code"):
 		item_key = (args.get("item_code"), args.get("warehouse"))
