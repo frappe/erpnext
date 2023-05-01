@@ -80,6 +80,7 @@ calendars = [
 	"Leave Application",
 	"Sales Order",
 	"Holiday List",
+	"ToDo"
 ]
 
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
