@@ -177,31 +177,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
 
-<<<<<<< HEAD
-	def make_period_closing_voucher(self, submit=True):
-=======
-	def test_gl_entries_restrictions(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-
-		company = create_company()
-		cost_center = create_cost_center("Test Cost Center 1")
-
-		self.make_period_closing_voucher(posting_date="2021-03-31")
-
-		jv1 = make_journal_entry(
-			posting_date="2021-03-15",
-			amount=400,
-			account1="Cash - TPC",
-			account2="Sales - TPC",
-			cost_center=cost_center,
-			save=False,
-		)
-		jv1.company = company
-		jv1.save()
-
-		self.assertRaises(frappe.ValidationError, jv1.submit)
-
 	def test_closing_balance_with_dimensions_and_test_reposting_entry(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
 		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
@@ -314,8 +289,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		repost_doc.posting_date = today()
 		repost_doc.save()
 
-	def make_period_closing_voucher(self, posting_date=None, submit=True):
->>>>>>> f751727149 (fix: don't allow to make reposting for the closed period)
+	def make_period_closing_voucher(self, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 		pcv = frappe.get_doc(
