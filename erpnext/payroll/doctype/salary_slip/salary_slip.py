@@ -1331,6 +1331,7 @@ class SalarySlip(TransactionBase):
 				if declaration:
 					total_exemption_amount = declaration
 
+		if tax_slab.standard_tax_exemption_amount:
 			total_exemption_amount += flt(tax_slab.standard_tax_exemption_amount)
 
 		return total_exemption_amount
