@@ -5,7 +5,7 @@
 import unittest
 
 import frappe
-from frappe.utils import today
+from frappe.utils import today, add_days
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -192,7 +192,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, repost_doc.save)
 
-		repost_doc.posting_date = today()
+		repost_doc.posting_date = add_days(today(), 1)
 		repost_doc.save()
 
 	def make_period_closing_voucher(self, submit=True):
