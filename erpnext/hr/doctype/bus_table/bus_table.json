@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-05-01 11:34:18.601340",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bus_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "bus_table",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bus Table",
+   "options": "Bus List"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-05-01 13:13:50.595422",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Bus Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
