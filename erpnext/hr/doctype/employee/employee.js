@@ -107,7 +107,13 @@ frappe.ui.form.on('Employee', {
 				frm.set_value("user_id", r.message);
 			}
 		});
-	}
+	},
+	// permanent address copy to current address
+	check: function(frm) {
+        if (frm.doc.check && frm.doc.permanent_address) {
+            frm.set_value('current_address', frm.doc.permanent_address);
+        }
+    }
 });
 
 cur_frm.cscript = new erpnext.hr.EmployeeController({
@@ -116,11 +122,11 @@ cur_frm.cscript = new erpnext.hr.EmployeeController({
 
 
 frappe.tour['Employee'] = [
-	{
-		fieldname: "first_name",
-		title: "First Name",
-		description: __("Enter First and Last name of Employee, based on Which Full Name will be updated. IN transactions, it will be Full Name which will be fetched.")
-	},
+	// {
+	// 	fieldname: "first_name",
+	// 	title: "First Name",
+	// 	description: __("Enter First and Last name of Employee, based on Which Full Name will be updated. IN transactions, it will be Full Name which will be fetched.")
+	// },
 	{
 		fieldname: "company",
 		title: "Company",

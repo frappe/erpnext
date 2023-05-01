@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 import frappe
 from frappe import _, scrub, throw
-from frappe.model.naming import set_name_by_naming_series
+from frappe.model.naming import make_autoname
 from frappe.permissions import (
 	add_user_permission,
 	get_doc_permissions,
@@ -28,19 +28,21 @@ class Employee(NestedSet):
 	nsm_parent_field = "reports_to"
 
 	def autoname(self):
-		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
-		if not naming_method:
-			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
-		else:
-			if naming_method == "Naming Series":
-				set_name_by_naming_series(self)
-			elif naming_method == "Employee Number":
-				self.name = self.employee_number
-			elif naming_method == "Full Name":
-				self.set_employee_name()
-				self.name = self.employee_name
+			self.name = make_autoname("EMP-" + ".####")
+			self.employee_id = self.name
+		# naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
+		# if not naming_method:
+		# 	throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
+		# else:
+		# 	if naming_method == "Naming Series":
+		# 		set_name_by_naming_series(self)
+		# 	elif naming_method == "Employee Number":
+		# 		self.name = self.employee_number
+		# 	elif naming_method == "Full Name":
+		# 		self.set_employee_name()
+		# 		self.name = self.employee_name
 
-		self.employee = self.name
+		# self.employee = self.name
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
@@ -48,7 +50,7 @@ class Employee(NestedSet):
 		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
 
 		self.employee = self.name
-		self.set_employee_name()
+		# self.set_employee_name()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
@@ -67,10 +69,10 @@ class Employee(NestedSet):
 	def after_rename(self, old, new, merge):
 		self.db_set("employee", new)
 
-	def set_employee_name(self):
-		self.employee_name = " ".join(
-			filter(lambda x: x, [self.first_name, self.middle_name, self.last_name])
-		)
+	# def set_employee_name(self):
+	# 	self.employee_name = " ".join(
+	# 		filter(lambda x: x, [self.first_name, self.middle_name, self.last_name])
+	# 	)
 
 	def validate_user_details(self):
 		if self.user_id:
