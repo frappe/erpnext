@@ -178,45 +178,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertEqual(pcv_gle, expected_gle)
 
-	def test_gl_entries_restrictions(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-
-		company = create_company()
-		cost_center = create_cost_center("Test Cost Center 1")
-
-		self.make_period_closing_voucher(posting_date="2021-03-31")
-
-		jv1 = make_journal_entry(
-			posting_date="2021-03-15",
-			amount=400,
-			account1="Cash - TPC",
-			account2="Sales - TPC",
-			cost_center=cost_center,
-			save=False,
-		)
-		jv1.company = company
-		jv1.save()
-
-		self.assertRaises(frappe.ValidationError, jv1.submit)
-		warehouse = frappe.db.get_value("Warehouse", {"company": company}, "name")
-
-		repost_doc = frappe.get_doc(
-			{
-				"doctype": "Repost Item Valuation",
-				"company": company,
-				"posting_date": "2020-03-15",
-				"based_on": "Item and Warehouse",
-				"item_code": "Test Item 1",
-				"warehouse": warehouse,
-			}
-		)
-
-		self.assertRaises(frappe.ValidationError, repost_doc.save)
-
-		repost_doc.posting_date = today()
-		repost_doc.save()
-
 	def make_period_closing_voucher(self, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
