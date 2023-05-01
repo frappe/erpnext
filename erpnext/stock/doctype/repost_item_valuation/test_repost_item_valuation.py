@@ -272,3 +272,25 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			[{"credit": 50, "debit": 0}],
 			gle_filters={"account": "Stock In Hand - TCP1"},
 		)
+
+	def test_account_freeze_validation(self):
+		today = nowdate()
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			item_code="_Test Item",
+			warehouse="_Test Warehouse - _TC",
+			based_on="Item and Warehouse",
+			posting_date=today,
+			posting_time="00:01:00",
+		)
+		riv.flags.dont_run_in_test = True  # keep it queued
+
+		accounts_settings = frappe.get_doc("Accounts Settings")
+		accounts_settings.acc_frozen_upto = today
+		accounts_settings.frozen_accounts_modifier = ""
+		accounts_settings.save()
+
+		self.assertRaises(frappe.ValidationError, riv.save)
+		accounts_settings.acc_frozen_upto = ""
+		accounts_settings.save()
