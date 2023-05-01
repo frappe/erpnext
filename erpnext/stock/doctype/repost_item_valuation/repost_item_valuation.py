@@ -5,11 +5,7 @@ import frappe
 from frappe import _
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
-<<<<<<< HEAD
-=======
-from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import Max, Now
->>>>>>> f751727149 (fix: don't allow to make reposting for the closed period)
+from frappe.query_builder.functions import Max
 from frappe.utils import cint, get_link_to_form, get_weekday, getdate, now, nowtime
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
