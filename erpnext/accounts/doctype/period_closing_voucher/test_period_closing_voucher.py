@@ -5,7 +5,7 @@
 import unittest
 
 import frappe
-from frappe.utils import today, add_months
+from frappe.utils import add_months, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
