@@ -51,6 +51,38 @@ class TestPaymentEntry(FrappeTestCase):
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
 
+	def test_payment_against_sales_order_usd_to_inr(self):
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_submit=True
+		)
+		so.conversion_rate = 50
+		so.submit()
+		pe = get_payment_entry("Sales Order", so.name)
+		pe.source_exchange_rate = 55
+		pe.received_amount = 5500
+		pe.insert()
+		pe.submit()
+
+		# there should be no difference amount
+		pe.reload()
+		self.assertEqual(pe.difference_amount, 0)
+		self.assertEqual(pe.deductions, [])
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], ["Cash - _TC", 5500.0, 0, None]]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
+		self.assertEqual(so_advance_paid, 100)
+
+		pe.cancel()
+
+		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
+		self.assertEqual(so_advance_paid, 0)
+
 	def test_payment_entry_for_blocked_supplier_invoice(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
