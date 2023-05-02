@@ -176,7 +176,8 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname": "include_default_book_entries",
 			"label": __("Include Default Book Entries"),
-			"fieldtype": "Check"
+			"fieldtype": "Check",
+			"default": 1
 		},
 		{
 			"fieldname": "show_cancelled_entries",
