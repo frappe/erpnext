@@ -176,7 +176,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		)
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
-		
 		warehouse = frappe.db.get_value("Warehouse", {"company": company}, "name")
 
 		repost_doc = frappe.get_doc(
