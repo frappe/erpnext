@@ -122,7 +122,7 @@ class DeliveryNote(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
-		if frappe.db.get_value("Selling Settings", None, "so_required") == "Yes":
+		if frappe.db.get_single_value("Selling Settings", "so_required") == "Yes":
 			for d in self.get("items"):
 				if not d.against_sales_order:
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
@@ -209,7 +209,7 @@ class DeliveryNote(SellingController):
 		super(DeliveryNote, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if not d["warehouse"] and frappe.db.get_value("Item", d["item_code"], "is_stock_item") == 1:
+			if not d["warehouse"] and frappe.get_cached_value("Item", d["item_code"], "is_stock_item") == 1:
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 	def update_current_stock(self):
