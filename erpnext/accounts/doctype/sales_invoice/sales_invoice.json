@@ -79,6 +79,7 @@
   "column_break5",
   "grand_total",
   "rounding_adjustment",
+  "use_company_roundoff_cost_center",
   "rounded_total",
   "in_words",
   "total_advance",
@@ -2134,6 +2135,12 @@
    "fieldname": "only_include_allocated_payments",
    "fieldtype": "Check",
    "label": "Only Include Allocated Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_company_roundoff_cost_center",
+   "fieldtype": "Check",
+   "label": "Use Company default Cost Center for Round off"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2146,7 +2153,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-04-03 22:55:14.206473",
+ "modified": "2023-04-28 14:15:59.901154",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
