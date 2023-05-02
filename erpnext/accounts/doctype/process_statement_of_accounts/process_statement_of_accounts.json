@@ -286,12 +286,6 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
-<<<<<<< HEAD
-  }
- ],
- "links": [],
- "modified": "2021-09-06 21:00:45.732505",
-=======
   },
   {
    "default": "1",
@@ -318,7 +312,6 @@
  ],
  "links": [],
  "modified": "2023-04-26 12:46:43.645455",
->>>>>>> ea0b03ae9e (fix: Updates in process statement of Accounts (#35064))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
