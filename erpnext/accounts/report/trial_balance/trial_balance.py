@@ -157,12 +157,23 @@ def get_rootwise_opening_balances(filters, report_type):
 	if filters.project:
 		additional_conditions += " and project = %(project)s"
 
+	company_fb = frappe.db.get_value("Company", filters.company, "default_finance_book")
+
 	if filters.get("include_default_book_entries"):
-		additional_conditions += (
-			" AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
-		)
+		if filters.get("finance_book"):
+			if company_fb and cstr(filters.get("finance_book")) != cstr(company_fb):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
+				)
+			else:
+				additional_conditions += " AND (finance_book in (%(finance_book)s) OR finance_book IS NULL)"
+		else:
+			additional_conditions += " AND (finance_book in (%(company_fb)s) OR finance_book IS NULL)"
 	else:
-		additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
+		if filters.get("finance_book"):
+			additional_conditions += " AND (finance_book in (%(finance_book)s) OR finance_book IS NULL)"
+		else:
+			additional_conditions += " AND (finance_book IS NULL)"
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -174,7 +185,7 @@ def get_rootwise_opening_balances(filters, report_type):
 		"year_start_date": filters.year_start_date,
 		"project": filters.project,
 		"finance_book": filters.finance_book,
-		"company_fb": frappe.db.get_value("Company", filters.company, "default_finance_book"),
+		"company_fb": company_fb,
 	}
 
 	if accounting_dimensions:
