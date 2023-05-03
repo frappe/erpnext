@@ -1855,7 +1855,10 @@ def get_payment_entry(
 ):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
-	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= 99.99:
+	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
+	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
+		100.0 + over_billing_allowance
+	):
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	party_type = set_party_type(dt)
