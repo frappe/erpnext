@@ -281,10 +281,13 @@ def get_paid_amount(payment_entry, currency, gl_bank_account):
 		)
 
 	elif payment_entry.payment_document == "Journal Entry":
-		return frappe.db.get_value(
-			"Journal Entry Account",
-			{"parent": payment_entry.payment_entry, "account": gl_bank_account},
-			"sum(credit_in_account_currency)",
+		return abs(
+			frappe.db.get_value(
+				"Journal Entry Account",
+				{"parent": payment_entry.payment_entry, "account": gl_bank_account},
+				"sum(debit_in_account_currency-credit_in_account_currency)",
+			)
+			or 0
 		)
 
 	elif payment_entry.payment_document == "Expense Claim":

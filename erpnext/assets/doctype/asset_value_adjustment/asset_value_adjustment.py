@@ -14,6 +14,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciatio
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
+	get_depreciation_amount,
 )
 
 
@@ -149,7 +150,9 @@ class AssetValueAdjustment(Document):
 			if d.depreciation_method in ("Straight Line", "Manual"):
 				end_date = max(s.schedule_date for s in depr_schedule)
 				total_days = date_diff(end_date, self.date)
-				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
+				rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
+					total_days
+				)
 				from_date = self.date
 			else:
 				no_of_depreciations = len([s.name for s in depr_schedule if not s.journal_entry])
@@ -162,7 +165,7 @@ class AssetValueAdjustment(Document):
 						depreciation_amount = days * rate_per_day
 						from_date = data.schedule_date
 					else:
-						depreciation_amount = asset.get_depreciation_amount(value_after_depreciation, d)
+						depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
 
 					if depreciation_amount:
 						value_after_depreciation -= flt(depreciation_amount)

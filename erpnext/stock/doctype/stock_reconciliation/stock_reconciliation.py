@@ -5,6 +5,7 @@ from typing import Optional
 
 import frappe
 from frappe import _, bold, msgprint
+from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, cstr, flt
 
 import erpnext
@@ -568,6 +569,76 @@ class StockReconciliation(StockController):
 			self.queue_action("cancel", timeout=2000)
 		else:
 			self._cancel()
+
+	def recalculate_current_qty(self, item_code, batch_no):
+		from erpnext.stock.stock_ledger import get_valuation_rate
+
+		sl_entries = []
+		for row in self.items:
+			if not (row.item_code == item_code and row.batch_no == batch_no):
+				continue
+
+			current_qty = get_batch_qty_for_stock_reco(
+				item_code, row.warehouse, batch_no, self.posting_date, self.posting_time, self.name
+			)
+
+			precesion = row.precision("current_qty")
+			if flt(current_qty, precesion) == flt(row.current_qty, precesion):
+				continue
+
+			val_rate = get_valuation_rate(
+				item_code, row.warehouse, self.doctype, self.name, company=self.company, batch_no=batch_no
+			)
+
+			row.current_valuation_rate = val_rate
+			if not row.current_qty and current_qty:
+				sle = self.get_sle_for_items(row)
+				sle.actual_qty = current_qty * -1
+				sle.valuation_rate = val_rate
+				sl_entries.append(sle)
+
+			row.current_qty = current_qty
+			row.db_set(
+				{
+					"current_qty": row.current_qty,
+					"current_valuation_rate": row.current_valuation_rate,
+					"current_amount": flt(row.current_qty * row.current_valuation_rate),
+				}
+			)
+
+		if sl_entries:
+			self.make_sl_entries(sl_entries)
+
+
+def get_batch_qty_for_stock_reco(
+	item_code, warehouse, batch_no, posting_date, posting_time, voucher_no
+):
+	ledger = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(ledger)
+		.select(
+			Sum(ledger.actual_qty).as_("batch_qty"),
+		)
+		.where(
+			(ledger.item_code == item_code)
+			& (ledger.warehouse == warehouse)
+			& (ledger.docstatus == 1)
+			& (ledger.is_cancelled == 0)
+			& (ledger.batch_no == batch_no)
+			& (ledger.posting_date <= posting_date)
+			& (
+				CombineDatetime(ledger.posting_date, ledger.posting_time)
+				<= CombineDatetime(posting_date, posting_time)
+			)
+			& (ledger.voucher_no != voucher_no)
+		)
+		.groupby(ledger.batch_no)
+	)
+
+	sle = query.run(as_dict=True)
+
+	return flt(sle[0].batch_qty) if sle else 0
 
 
 @frappe.whitelist()
