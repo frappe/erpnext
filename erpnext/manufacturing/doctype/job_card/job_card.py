@@ -87,6 +87,12 @@ class JobCard(Document):
 			frappe.db.get_value("Work Order Operation", self.operation_id, "completed_qty")
 		)
 
+		over_production_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+
+		wo_qty = wo_qty + (wo_qty * over_production_percentage / 100)
+
 		job_card_qty = frappe.get_all(
 			"Job Card",
 			fields=["sum(for_quantity)"],
@@ -101,8 +107,17 @@ class JobCard(Document):
 		job_card_qty = flt(job_card_qty[0][0]) if job_card_qty else 0
 
 		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
-			msg = f"""Job Card quantity cannot be greater than
-				Work Order quantity for the operation {self.operation}"""
+			form_link = get_link_to_form("Manufacturing Settings", "Manufacturing Settings")
+
+			msg = f"""
+				Qty To Manufacture in the job card
+				cannot be greater than Qty To Manufacture in the
+				work order for the operation {bold(self.operation)}.
+				<br><br><b>Solution: </b> Either you can reduce the
+				Qty To Manufacture in the job card or set the
+				'Overproduction Percentage For Work Order'
+				in the {form_link}."""
+
 			frappe.throw(_(msg), title=_("Extra Job Card Quantity"))
 
 	def set_sub_operations(self):
