@@ -9,7 +9,8 @@
   "city_type",
   "hotel",
   "food",
-  "other"
+  "other",
+  "total"
  ],
  "fields": [
   {
@@ -22,29 +23,35 @@
   {
    "columns": 2,
    "fieldname": "hotel",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Hotel"
   },
   {
    "columns": 2,
    "fieldname": "food",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Food"
   },
   {
    "columns": 2,
    "fieldname": "other",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Other"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-04-28 12:11:02.096798",
+ "modified": "2023-05-03 15:52:26.278080",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Travel Expense Limit Table",

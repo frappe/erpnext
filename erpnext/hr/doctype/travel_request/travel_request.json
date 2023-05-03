@@ -9,12 +9,23 @@
   "travel_type",
   "travel_funding",
   "travel_proof",
+  "requition_no",
+  "employee_name",
+  "loaction",
+  "advance_required",
+  "date",
   "column_break_2",
+  "employee",
+  "team",
+  "designation",
+  "employee_grade",
   "purpose_of_travel",
   "details_of_sponsor",
+  "section_break_7",
+  "travel_requisition_table",
+  "section_break_9",
+  "requisition_program",
   "employee_details",
-  "employee",
-  "employee_name",
   "cell_number",
   "prefered_email",
   "column_break_7",
@@ -41,20 +52,21 @@
   {
    "fieldname": "travel_type",
    "fieldtype": "Select",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Travel Type",
-   "options": "\nDomestic\nInternational",
-   "reqd": 1
+   "options": "\nDomestic\nInternational"
   },
   {
    "fieldname": "travel_funding",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Travel Funding",
    "options": "\nRequire Full Funding\nFully Sponsored\nPartially Sponsored, Require Partial Funding"
   },
   {
    "fieldname": "travel_proof",
    "fieldtype": "Attach",
+   "hidden": 1,
    "label": "Copy of Invitation/Announcement"
   },
   {
@@ -64,20 +76,21 @@
   {
    "fieldname": "purpose_of_travel",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Purpose of Travel",
-   "options": "Purpose of Travel",
-   "reqd": 1
+   "options": "Purpose of Travel"
   },
   {
    "fieldname": "details_of_sponsor",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Details of Sponsor (Name, Location)"
   },
   {
    "collapsible": 1,
    "fieldname": "section_break_4",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Description"
   },
   {
@@ -89,13 +102,14 @@
    "collapsible": 1,
    "fieldname": "employee_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Employee Details"
   },
   {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Employee",
+   "label": "Employee ID",
    "options": "Employee",
    "reqd": 1
   },
@@ -103,8 +117,7 @@
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "label": "Employee Name",
-   "read_only": 1
+   "label": "Employee Name"
   },
   {
    "fetch_from": "employee.cell_number",
@@ -149,6 +162,7 @@
   {
    "fieldname": "travel_itinerary",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Travel Itinerary"
   },
   {
@@ -159,6 +173,7 @@
   {
    "fieldname": "costing_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Costing Details"
   },
   {
@@ -177,6 +192,7 @@
    "collapsible": 1,
    "fieldname": "event_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Event Details"
   },
   {
@@ -207,16 +223,74 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "requisition_program",
+   "fieldtype": "Table",
+   "label": "Requisition Program",
+   "options": "Requisition Program Table"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "requition_no",
+   "fieldtype": "Data",
+   "label": "Requition No"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Data",
+   "label": "Team"
+  },
+  {
+   "fieldname": "loaction",
+   "fieldtype": "Data",
+   "label": "Loaction"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "advance_required",
+   "fieldtype": "Float",
+   "label": "Advance Required"
+  },
+  {
+   "fetch_from": "employee.employee_grade",
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": " Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "travel_requisition_table",
+   "fieldtype": "Table",
+   "label": "Requisition Details",
+   "options": "Travel Requisition Table"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-12 18:42:26.451359",
+ "modified": "2023-05-03 17:23:11.652087",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

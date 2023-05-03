@@ -52,6 +52,10 @@ frappe.ui.form.on('Employee', {
 			};
 		});
 	},
+	refresh: function(frm) {
+		frm.dashboard.links_area.hide();
+		frm.dashboard.heatmap_area.hide();
+	},
 	onload: function (frm) {
 		frm.set_query("department", function() {
 			return {

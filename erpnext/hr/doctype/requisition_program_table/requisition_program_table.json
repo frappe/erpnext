@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-04-28 09:41:43.846752",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "client_name",
+  "client_company_name",
+  "client_designation",
+  "column_break_4",
+  "appointment",
+  "remark"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client Name"
+  },
+  {
+   "fieldname": "client_designation",
+   "fieldtype": "Data",
+   "label": "Client Designation"
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Datetime",
+   "label": "Appointment"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "Remark"
+  },
+  {
+   "columns": 2,
+   "fieldname": "client_company_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client Company Name"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-05-01 09:22:29.663955",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Requisition Program Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -28,8 +28,8 @@ class Employee(NestedSet):
 	nsm_parent_field = "reports_to"
 
 	def autoname(self):
-			self.name = make_autoname("EMP-" + ".####")
-			self.employee_id = self.name
+			self.name = make_autoname("EMP-" + ".###")
+			self.employee_code = self.name
 		# naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		# if not naming_method:
 		# 	throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
