@@ -259,6 +259,8 @@ def set_address_details(
 	)
 
 	if doctype in TRANSACTION_TYPES:
+		# required to set correct region
+		frappe.flags.company = company
 		get_regional_address_details(party_details, doctype, company)
 
 	return party_address, shipping_address
