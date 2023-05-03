@@ -157,6 +157,7 @@ def make_depreciation_entry(asset_depr_schedule_name, date=None):
 			je.append("accounts", debit_entry)
 
 			je.flags.ignore_permissions = True
+			je.flags.planned_depr_entry = True
 			je.save()
 			if not je.meta.get_workflow():
 				je.submit()

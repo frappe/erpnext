@@ -69,7 +69,7 @@ def task(doc_name, from_doctype, to_doctype):
 		"Sales Order": {
 			"Sales Invoice": sales_order.make_sales_invoice,
 			"Delivery Note": sales_order.make_delivery_note,
-			"Advance Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Sales Invoice": {
 			"Delivery Note": sales_invoice.make_delivery_note,
@@ -86,11 +86,11 @@ def task(doc_name, from_doctype, to_doctype):
 		"Supplier Quotation": {
 			"Purchase Order": supplier_quotation.make_purchase_order,
 			"Purchase Invoice": supplier_quotation.make_purchase_invoice,
-			"Advance Payment": payment_entry.get_payment_entry,
 		},
 		"Purchase Order": {
 			"Purchase Invoice": purchase_order.make_purchase_invoice,
 			"Purchase Receipt": purchase_order.make_purchase_receipt,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Purchase Invoice": {
 			"Purchase Receipt": purchase_invoice.make_purchase_receipt,
@@ -98,12 +98,13 @@ def task(doc_name, from_doctype, to_doctype):
 		},
 		"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice},
 	}
-	if to_doctype in ["Advance Payment", "Payment Entry"]:
+	if to_doctype in ["Payment Entry"]:
 		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)
 	else:
 		obj = mapper[from_doctype][to_doctype](doc_name)
 
 	obj.flags.ignore_validate = True
+	obj.set_title_field()
 	obj.insert(ignore_mandatory=True)
 
 
