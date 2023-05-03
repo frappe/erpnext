@@ -3,7 +3,6 @@
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "naming_series:",
  "creation": "2013-03-07 09:04:18",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -12,16 +11,13 @@
  "field_order": [
   "basic_information",
   "employee",
-  "naming_series",
-  "employee_id",
-  "first_name",
-  "middle_name",
-  "last_name",
-  "salutation",
   "employee_name",
+  "employee_id",
+  "salutation",
   "employment_type",
   "image",
   "employee_deparment",
+  "employee_vertical",
   "column_break1",
   "company",
   "status",
@@ -29,7 +25,6 @@
   "date_of_birth",
   "employee_code",
   "employee_grade",
-  "employee_vertical",
   "date_of_joining",
   "employee_number",
   "hod_details_section",
@@ -91,6 +86,7 @@
   "company_email",
   "current_accommodation_type",
   "alternate_mobile_no",
+  "check",
   "current_address",
   "sb53",
   "bio",
@@ -99,23 +95,21 @@
   "aadhar_number",
   "driving_license_no",
   "esic_number",
-  "pf_number",
   "column_break_87",
   "attach_pan",
   "attach_aadhar",
   "attach_driving_license",
+  "pf_number",
   "passport_number",
   "date_of_issue",
   "valid_upto",
   "place_of_issue",
   "marital_status",
   "blood_group",
-  "column_break6",
   "family_background",
   "health_details",
   "insurance_policy_section",
   "policy_no",
-  "column_break_101",
   "attach_policy",
   "educational_qualification",
   "education",
@@ -153,17 +147,6 @@
    "report_hide": 1
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "HR-EMP-",
-   "set_only_once": 1
-  },
-  {
    "fieldname": "salutation",
    "fieldtype": "Link",
    "hidden": 1,
@@ -173,33 +156,12 @@
    "options": "Salutation"
   },
   {
-   "fieldname": "first_name",
-   "fieldtype": "Data",
-   "label": "First Name",
-   "reqd": 1
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "middle_name",
-   "fieldtype": "Data",
-   "label": "Middle Name"
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "last_name",
-   "fieldtype": "Data",
-   "label": "Last Name"
-  },
-  {
+   "fetch_from": "User.full_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Full Name",
+   "label": "Employee name",
    "oldfieldname": "employee_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
+   "oldfieldtype": "Data"
   },
   {
    "fetch_from": "user_id.user_image",
@@ -397,7 +359,6 @@
   {
    "fieldname": "department",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Department",
    "oldfieldname": "department",
    "oldfieldtype": "Link",
@@ -625,11 +586,6 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Place of Issue"
-  },
-  {
-   "fieldname": "column_break6",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "fieldname": "marital_status",
@@ -881,9 +837,9 @@
   },
   {
    "fieldname": "employee_vertical",
-   "fieldtype": "Select",
+   "fieldtype": "Table MultiSelect",
    "label": "Employee Vertical",
-   "options": "-select-"
+   "options": "Employee Vertical Table"
   },
   {
    "bold": 1,
@@ -968,10 +924,6 @@
    "label": "Policy No."
   },
   {
-   "fieldname": "column_break_101",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "attach_policy",
    "fieldtype": "Attach",
    "label": "Attach policy"
@@ -980,18 +932,24 @@
    "fieldname": "employee_id",
    "fieldtype": "Data",
    "label": "Employee ID",
+   "read_only": 1,
    "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "label": "Current Address same as Permanent Address"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-04-27 17:28:36.293280",
+ "modified": "2023-05-01 12:03:33.271229",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
- "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
