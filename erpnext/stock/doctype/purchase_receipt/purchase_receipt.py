@@ -65,6 +65,16 @@ class PurchaseReceipt(BuyingController):
 				"percent_join_field": "purchase_invoice",
 				"overflow_type": "receipt",
 			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Delivery Note Item",
+				"join_field": "delivery_note_item",
+				"source_field": "received_qty",
+				"target_field": "received_qty",
+				"target_parent_dt": "Delivery Note",
+				"target_ref_field": "qty",
+				"overflow_type": "receipt",
+			},
 		]
 
 		if cint(self.is_return):
@@ -370,7 +380,19 @@ class PurchaseReceipt(BuyingController):
 
 					outgoing_amount = d.base_net_amount
 					if self.is_internal_supplier and d.valuation_rate:
-						outgoing_amount = d.valuation_rate * d.stock_qty
+						outgoing_amount = abs(
+							frappe.db.get_value(
+								"Stock Ledger Entry",
+								{
+									"voucher_type": "Purchase Receipt",
+									"voucher_no": self.name,
+									"voucher_detail_no": d.name,
+									"warehouse": d.from_warehouse,
+									"is_cancelled": 0,
+								},
+								"stock_value_difference",
+							)
+						)
 						credit_amount = outgoing_amount
 
 					if credit_amount:

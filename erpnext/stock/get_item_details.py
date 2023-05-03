@@ -74,6 +74,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 			args["bill_date"] = doc.get("bill_date")
 
 	out = get_basic_details(args, item, overwrite_warehouse)
+
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -620,7 +621,9 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key=lambda i: i.valid_from, reverse=True)
+		taxes = sorted(
+			taxes_with_validity, key=lambda i: i.valid_from or tax.maximum_net_rate, reverse=True
+		)
 	else:
 		taxes = taxes_with_no_validity
 
@@ -1505,11 +1508,15 @@ def get_so_reservation_for_item(args):
 	elif args.get("against_sales_invoice"):
 		sales_order = frappe.db.get_all(
 			"Sales Invoice Item",
-			filters={"parent": args.get("against_sales_invoice"), "item_code": args.get("item_code")},
+			filters={
+				"parent": args.get("against_sales_invoice"),
+				"item_code": args.get("item_code"),
+				"docstatus": 1,
+			},
 			fields="sales_order",
 		)
 		if sales_order and sales_order[0]:
-			if get_reserved_qty_for_so(sales_order[0][0], args.get("item_code")):
+			if get_reserved_qty_for_so(sales_order[0].sales_order, args.get("item_code")):
 				reserved_so = sales_order[0]
 	elif args.get("sales_order"):
 		if get_reserved_qty_for_so(args.get("sales_order"), args.get("item_code")):

@@ -5,7 +5,7 @@
 import unittest
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_months, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -176,6 +176,23 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		)
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
+		warehouse = frappe.db.get_value("Warehouse", {"company": company}, "name")
+
+		repost_doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"company": company,
+				"posting_date": "2020-03-15",
+				"based_on": "Item and Warehouse",
+				"item_code": "Test Item 1",
+				"warehouse": warehouse,
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, repost_doc.save)
+
+		repost_doc.posting_date = add_months(today(), 13)
+		repost_doc.save()
 
 	def make_period_closing_voucher(self, submit=True):
 		surplus_account = create_account()
