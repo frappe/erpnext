@@ -21,18 +21,18 @@ class TravelRequest(Document):
 @frappe.whitelist()
 def get_grade_child_details(grade,mode):
 	grade= frappe.get_doc("Employee Grade",grade)
-	person_data = []
+	mode_data = []
 	if mode == "Bus":
-		for person in grade.get("bus"):
-			person_data.append(person.bus_table)
+		for travel_mode in grade.get("bus"):
+			mode_data.append(travel_mode.bus_table)
 	elif mode == "Air Travel":
-		for person in grade.get("air_travel"):
-			person_data.append(person.air_travel_table)
+		for travel_mode in grade.get("air_travel"):
+			mode_data.append(travel_mode.air_travel_table)
 	elif mode == "Railway":
-		for person in grade.get("railway"):
-			person_data.append(person.railway_table)
+		for travel_mode in grade.get("railway"):
+			mode_data.append(travel_mode.railway_table)
 	elif mode == "Local":
-		for person in grade.get("local"):
-			person_data.append(person.local_table)
-	return person_data 
+		for travel_mode in grade.get("local"):
+			mode_data.append(travel_mode.local_table)
+	return mode_data 
 
