@@ -1649,6 +1649,14 @@ class TestWorkOrder(FrappeTestCase):
 		job_card2 = frappe.copy_doc(job_card_doc)
 		self.assertRaises(frappe.ValidationError, job_card2.save)
 
+		frappe.db.set_single_value(
+			"Manufacturing Settings", "overproduction_percentage_for_work_order", 100
+		)
+
+		job_card2 = frappe.copy_doc(job_card_doc)
+		job_card2.time_logs = []
+		job_card2.save()
+
 
 def prepare_data_for_workstation_type_check():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
