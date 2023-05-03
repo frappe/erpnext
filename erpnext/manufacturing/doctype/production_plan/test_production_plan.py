@@ -868,6 +868,27 @@ class TestProductionPlan(FrappeTestCase):
 		for item_code in mr_items:
 			self.assertTrue(item_code in validate_mr_items)
 
+	def test_resered_qty_for_production_plan_for_material_requests(self):
+		from erpnext.stock.utils import get_or_make_bin
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		pln = create_production_plan(item_code="Test Production Item 1")
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		self.assertEqual(after_qty - before_qty, 1)
+
+		pln = frappe.get_doc("Production Plan", pln.name)
+		pln.cancel()
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		self.assertEqual(after_qty, before_qty)
+
 
 def create_production_plan(**args):
 	"""
