@@ -2,12 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Grade', {
-   
     refresh:function(frm) {
         frm.dashboard.heatmap_area.hide();
         frm.dashboard.links_area.hide();
 
-      
         if (frm.doc.__islocal) {
             cur_frm.clear_table("employee_travel_expense_limit_table");
         //in employee_travel_expense_limit_table table in city_type set static value
@@ -21,39 +19,27 @@ frappe.ui.form.on('Employee Grade', {
                 city_type:"Other City",
             });
             frm.refresh_field('employee_travel_expense_limit_table');
-
         }
-        
-// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
-// For license information, please see license.txt
-
-frappe.ui.form.on('Employee Grade', {
-    refresh: function (frm) {
-
     },
-    setup: function (frm) {
-        frm.set_query("default_salary_structure", function () {
-            return {
-                "filters": {
-                    "docstatus": 1,
-                    "is_active": "Yes"
-                }
-            };
-        });
-
-        frm.set_query("default_leave_policy", function () {
-            return {
-                "filters": {
-                    "docstatus": 1
-                }
-            };
-        });
-
-
-    }
-
-});
-        
-
-    }
 })
+
+
+frappe.ui.form.on('Employee Travel Expense Limit Table', {
+   hotel:function(frm, cdt, cdn){
+    var row = locals[cdt][cdn];
+    frappe.model.set_value(cdt, cdn, 'total',row.hotel + row.food +row.other);
+    refresh_field('total');
+   },
+   food: function(_frm, cdt, cdn) {
+    var row = locals[cdt][cdn];
+    frappe.model.set_value(cdt, cdn, 'total',row.hotel + row.food +row.other);
+    refresh_field('total');
+   }, 
+   other: function(frm, cdt, cdn) {
+    var row = locals[cdt][cdn];
+    frappe.model.set_value(cdt, cdn, 'total',row.hotel + row.food +row.other);
+    refresh_field('total');
+   }, 
+})
+
+
