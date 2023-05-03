@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-05-01 11:27:50.479220",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "railway_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "railway_table",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Railway Table",
+   "options": "Railway List"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-05-01 11:27:50.479220",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Railway Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

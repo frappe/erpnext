@@ -8,19 +8,72 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "employee_travel_expense_section",
+  "employee_travel_expense_limit_table",
+  "section_break_3",
+  "air_travel",
+  "railway",
+  "column_break_3",
+  "bus",
+  "local",
   "default_salary_structure"
  ],
  "fields": [
   {
    "fieldname": "default_salary_structure",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Salary Structure",
    "options": "Salary Structure"
+  },
+  {
+   "fieldname": "employee_travel_expense_limit_table",
+   "fieldtype": "Table",
+   "options": "Employee Travel Expense Limit Table"
+  },
+  {
+   "fieldname": "air_travel",
+   "fieldtype": "Table MultiSelect",
+   "label": "Air Travel",
+   "options": "Air Travel Table"
+  },
+  {
+   "fieldname": "railway",
+   "fieldtype": "Table MultiSelect",
+   "label": "Railway ",
+   "options": "Railway Table"
+  },
+  {
+   "fieldname": "bus",
+   "fieldtype": "Table MultiSelect",
+   "label": "Bus",
+   "options": "Bus Table"
+  },
+  {
+   "fieldname": "local",
+   "fieldtype": "Table MultiSelect",
+   "label": "Local",
+   "options": "Local Table"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Travel Type Allowed"
+  },
+  {
+   "fieldname": "employee_travel_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Travel Expenses"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-26 13:12:07.815330",
+ "modified": "2023-05-01 18:57:46.614490",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grade",
