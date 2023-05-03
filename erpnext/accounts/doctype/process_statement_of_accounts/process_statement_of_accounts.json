@@ -34,6 +34,8 @@
   "terms_and_conditions",
   "section_break_1",
   "enable_auto_email",
+  "column_break_ocfq",
+  "sender",
   "section_break_18",
   "frequency",
   "filter_duration",
@@ -284,10 +286,32 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_break",
+   "fieldtype": "Check",
+   "label": "Page Break After Each SoA"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_net_values_in_party_account",
+   "fieldtype": "Check",
+   "label": "Show Net Values in Party Account"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "label": "Sender",
+   "options": "Email Account"
+  },
+  {
+   "fieldname": "column_break_ocfq",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2021-09-06 21:00:45.732505",
+ "modified": "2023-04-26 12:46:43.645455",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

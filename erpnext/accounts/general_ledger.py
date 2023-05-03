@@ -472,7 +472,9 @@ def update_accounting_dimensions(round_off_gle):
 			round_off_gle[dimension] = dimension_values.get(dimension)
 
 
-def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
+def get_round_off_account_and_cost_center(
+	company, voucher_type, voucher_no, use_company_default=False
+):
 	round_off_account, round_off_cost_center = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
@@ -480,7 +482,7 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
 	meta = frappe.get_meta(voucher_type)
 
 	# Give first preference to parent cost center for round off GLE
-	if meta.has_field("cost_center"):
+	if not use_company_default and meta.has_field("cost_center"):
 		parent_cost_center = frappe.db.get_value(voucher_type, voucher_no, "cost_center")
 		if parent_cost_center:
 			round_off_cost_center = parent_cost_center

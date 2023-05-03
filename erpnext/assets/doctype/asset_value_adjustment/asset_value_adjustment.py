@@ -116,7 +116,9 @@ class AssetValueAdjustment(Document):
 			if d.depreciation_method in ("Straight Line", "Manual"):
 				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
 				total_days = date_diff(end_date, self.date)
-				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
+				rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
+					total_days
+				)
 				from_date = self.date
 			else:
 				no_of_depreciations = len(

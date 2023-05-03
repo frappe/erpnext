@@ -1392,7 +1392,7 @@ def regenerate_sle_for_batch_stock_reco(detail):
 	if not frappe.db.exists(
 		"Repost Item Valuation", {"voucher_no": doc.name, "status": "Queued", "docstatus": "1"}
 	):
-		doc.repost_future_sle_and_gle()
+		doc.repost_future_sle_and_gle(force=True)
 
 
 def get_stock_reco_qty_shift(args):

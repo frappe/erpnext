@@ -250,7 +250,7 @@ def get_columns(group_wise_columns, filters):
 				"label": _("Warehouse"),
 				"fieldname": "warehouse",
 				"fieldtype": "Link",
-				"options": "warehouse",
+				"options": "Warehouse",
 				"width": 100,
 			},
 			"qty": {"label": _("Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 80},
@@ -305,7 +305,8 @@ def get_columns(group_wise_columns, filters):
 			"sales_person": {
 				"label": _("Sales Person"),
 				"fieldname": "sales_person",
-				"fieldtype": "Data",
+				"fieldtype": "Link",
+				"options": "Sales Person",
 				"width": 100,
 			},
 			"allocated_amount": {
@@ -326,14 +327,14 @@ def get_columns(group_wise_columns, filters):
 				"label": _("Customer Group"),
 				"fieldname": "customer_group",
 				"fieldtype": "Link",
-				"options": "customer",
+				"options": "Customer Group",
 				"width": 100,
 			},
 			"territory": {
 				"label": _("Territory"),
 				"fieldname": "territory",
 				"fieldtype": "Link",
-				"options": "territory",
+				"options": "Territory",
 				"width": 100,
 			},
 			"monthly": {
