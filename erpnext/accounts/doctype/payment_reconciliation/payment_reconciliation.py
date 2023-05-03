@@ -210,6 +210,8 @@ class PaymentReconciliation(Document):
 			min_outstanding=self.minimum_invoice_amount if self.minimum_invoice_amount else None,
 			max_outstanding=self.maximum_invoice_amount if self.maximum_invoice_amount else None,
 			accounting_dimensions=self.accounting_dimension_filter_conditions,
+			limit=self.invoice_limit,
+			voucher_no=self.invoice_name,
 		)
 
 		cr_dr_notes = (

@@ -26,8 +26,10 @@
   "bank_cash_account",
   "cost_center",
   "sec_break1",
+  "invoice_name",
   "invoices",
   "column_break_15",
+  "payment_name",
   "payments",
   "sec_break2",
   "allocation"
@@ -136,6 +138,7 @@
    "label": "Minimum Invoice Amount"
   },
   {
+   "default": "50",
    "description": "System will fetch all the entries if limit value is zero.",
    "fieldname": "invoice_limit",
    "fieldtype": "Int",
@@ -166,6 +169,7 @@
    "label": "Maximum Payment Amount"
   },
   {
+   "default": "50",
    "description": "System will fetch all the entries if limit value is zero.",
    "fieldname": "payment_limit",
    "fieldtype": "Int",
@@ -185,13 +189,38 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "depends_on": "eval:doc.party",
+   "fieldname": "default_advance_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Account",
+   "mandatory_depends_on": "doc.party_type",
+   "options": "Account"
+  },
+  {
+   "fieldname": "invoice_name",
+   "fieldtype": "Data",
+   "label": "Filter on Invoice"
+  },
+  {
+   "fieldname": "payment_name",
+   "fieldtype": "Data",
+   "label": "Filter on Payment"
+>>>>>>> 7a381affce (refactor: limit output to 50 in reconciliation tool)
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-04-29 15:37:10.246831",
+=======
+ "modified": "2023-08-15 05:35:50.109290",
+>>>>>>> 7a381affce (refactor: limit output to 50 in reconciliation tool)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
