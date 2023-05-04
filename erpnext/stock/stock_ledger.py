@@ -556,7 +556,7 @@ class update_entries_after(object):
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
 			and sle.actual_qty < 0
-			and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
+			and is_internal_transfer(sle)
 		):
 			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
@@ -679,7 +679,7 @@ class update_entries_after(object):
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
-				and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
+				and is_internal_transfer(sle)
 			):
 				rate = get_incoming_rate_for_inter_company_transfer(sle)
 			else:
@@ -1609,3 +1609,15 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 		)
 
 	return rate
+
+
+def is_internal_transfer(sle):
+	data = frappe.get_cached_value(
+		sle.voucher_type,
+		sle.voucher_no,
+		["is_internal_supplier", "represents_company", "company"],
+		as_dict=True,
+	)
+
+	if data.is_internal_supplier and data.represents_company == data.company:
+		return True
