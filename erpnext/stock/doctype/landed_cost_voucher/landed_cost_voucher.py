@@ -21,7 +21,7 @@ class LandedCostVoucher(Document):
 			if pr.receipt_document_type and pr.receipt_document:
 				pr_items = frappe.db.sql(
 					"""select pr_item.item_code, pr_item.description,
-					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name,
+					pr_item.qty, pr_item.base_net_rate, pr_item.net_amount, pr_item.name,
 					pr_item.cost_center, pr_item.is_fixed_asset
 					from `tab{doctype} Item` pr_item where parent = %s
 					and exists(select name from tabItem
@@ -38,9 +38,9 @@ class LandedCostVoucher(Document):
 					item.item_code = d.item_code
 					item.description = d.description
 					item.qty = d.qty
-					item.rate = d.base_rate
+					item.rate = d.base_net_rate
 					item.cost_center = d.cost_center or erpnext.get_default_cost_center(self.company)
-					item.amount = d.base_amount
+					item.amount = d.net_amount
 					item.receipt_document_type = pr.receipt_document_type
 					item.receipt_document = pr.receipt_document
 					item.purchase_receipt_item = d.name
