@@ -76,7 +76,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 				"fields": ", ".join(fields),
 				"key": searchfield,
 				"scond": searchfields,
-				"mcond": get_match_cond(doctype)
+				"mcond": get_match_cond(doctype),
 			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
