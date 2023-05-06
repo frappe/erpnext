@@ -166,14 +166,16 @@ def get_rootwise_opening_balances(filters, report_type):
 					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
 				)
 			else:
-				additional_conditions += " AND (finance_book in (%(finance_book)s) OR finance_book IS NULL)"
+				additional_conditions += (
+					" AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
+				)
 		else:
-			additional_conditions += " AND (finance_book in (%(company_fb)s) OR finance_book IS NULL)"
+			additional_conditions += " AND (finance_book in (%(company_fb)s, '') OR finance_book IS NULL)"
 	else:
 		if filters.get("finance_book"):
-			additional_conditions += " AND (finance_book in (%(finance_book)s) OR finance_book IS NULL)"
+			additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
 		else:
-			additional_conditions += " AND (finance_book IS NULL)"
+			additional_conditions += " AND (finance_book in ('') OR finance_book IS NULL)"
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
