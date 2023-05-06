@@ -587,6 +587,7 @@ class ProductionPlan(Document):
 					"production_plan_sub_assembly_item": row.name,
 					"bom": row.bom_no,
 					"production_plan": self.name,
+					"fg_item_qty": row.qty,
 				}
 
 				for field in [
