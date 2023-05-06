@@ -202,6 +202,9 @@ class TestStockEntry(FrappeTestCase):
 		)
 
 		end_transit_entry = make_stock_in_entry(transit_entry.name)
+
+		self.assertEqual(end_transit_entry.stock_entry_type, "Material Transfer")
+		self.assertEqual(end_transit_entry.purpose, "Material Transfer")
 		self.assertEqual(transit_entry.name, end_transit_entry.outgoing_stock_entry)
 		self.assertEqual(transit_entry.name, end_transit_entry.items[0].against_stock_entry)
 		self.assertEqual(transit_entry.items[0].name, end_transit_entry.items[0].ste_detail)

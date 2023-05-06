@@ -94,11 +94,11 @@ frappe.query_reports["Fixed Asset Register"] = {
 			label: __("Finance Book"),
 			fieldtype: "Link",
 			options: "Finance Book",
-			depends_on: "eval: doc.only_depreciable_assets == 1",
+			depends_on: "eval: doc.filter_by_finance_book == 1",
 		},
 		{
-			fieldname:"only_depreciable_assets",
-			label: __("Only depreciable assets"),
+			fieldname:"filter_by_finance_book",
+			label: __("Filter by Finance Book"),
 			fieldtype: "Check"
 		},
 		{

@@ -205,7 +205,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, jv1.submit)
 
-	def test_closing_balance_with_dimensions(self):
+	def test_closing_balance_with_dimensions_and_test_reposting_entry(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
 		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
 		frappe.db.sql("delete from `tabAccount Closing Balance` where company='Test PCV Company'")
@@ -298,6 +298,24 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		self.assertEqual(cc1_closing_balance.credit_in_account_currency, 400)
 		self.assertEqual(cc2_closing_balance.credit, 500)
 		self.assertEqual(cc2_closing_balance.credit_in_account_currency, 500)
+
+		warehouse = frappe.db.get_value("Warehouse", {"company": company}, "name")
+
+		repost_doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"company": company,
+				"posting_date": "2020-03-15",
+				"based_on": "Item and Warehouse",
+				"item_code": "Test Item 1",
+				"warehouse": warehouse,
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, repost_doc.save)
+
+		repost_doc.posting_date = today()
+		repost_doc.save()
 
 	def make_period_closing_voucher(self, posting_date=None, submit=True):
 		surplus_account = create_account()

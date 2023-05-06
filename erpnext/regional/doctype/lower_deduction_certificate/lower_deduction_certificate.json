@@ -10,6 +10,7 @@
   "tax_withholding_category",
   "fiscal_year",
   "column_break_3",
+  "company",
   "certificate_no",
   "section_break_3",
   "supplier",
@@ -123,11 +124,18 @@
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category",
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-23 18:33:38.962622",
+ "modified": "2023-04-18 08:25:35.302081",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Lower Deduction Certificate",
@@ -136,5 +144,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
