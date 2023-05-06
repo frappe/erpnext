@@ -500,14 +500,18 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 						_("To use a different finance book, please uncheck 'Include Default Book Entries'")
 					)
 				else:
-					additional_conditions.append("(finance_book in (%(finance_book)s) OR finance_book IS NULL)")
+					additional_conditions.append(
+						"(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
+					)
 			else:
-				additional_conditions.append("(finance_book in (%(company_fb)s) OR finance_book IS NULL)")
+				additional_conditions.append("(finance_book in (%(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			if filters.get("finance_book"):
-				additional_conditions.append("(finance_book in (%(finance_book)s) OR finance_book IS NULL)")
+				additional_conditions.append(
+					"(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
+				)
 			else:
-				additional_conditions.append("(finance_book IS NULL)")
+				additional_conditions.append("(finance_book in ('') OR finance_book IS NULL)")
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
