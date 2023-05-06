@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe import _, throw
+from frappe import _, bold, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
@@ -404,6 +404,15 @@ class AccountsController(TransactionBase):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
+
+			label = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+
+			field = frappe.scrub(label)
+
+			for row in self.get("items"):
+				if not row.get(field):
+					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
+					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
 
 	def disable_pricing_rule_on_internal_transfer(self):
 		if not self.get("ignore_pricing_rule") and self.is_internal_transfer():
@@ -1653,7 +1662,10 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
-		if not automatically_fetch_payment_terms:
+		if not (
+			automatically_fetch_payment_terms
+			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
+		):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
@@ -1892,12 +1904,14 @@ class AccountsController(TransactionBase):
 		reconcilation_entry.party = secondary_party
 		reconcilation_entry.reference_type = self.doctype
 		reconcilation_entry.reference_name = self.name
-		reconcilation_entry.cost_center = self.cost_center
+		reconcilation_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(
+			self.company
+		)
 
 		advance_entry.account = primary_account
 		advance_entry.party_type = primary_party_type
 		advance_entry.party = primary_party
-		advance_entry.cost_center = self.cost_center
+		advance_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(self.company)
 		advance_entry.is_advance = "Yes"
 
 		if self.doctype == "Sales Invoice":

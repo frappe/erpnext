@@ -28,6 +28,7 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.utils import get_or_make_bin
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -398,9 +399,20 @@ class ProductionPlan(Document):
 		self.set_status()
 		self.db_set("status", self.status)
 
+	def on_submit(self):
+		self.update_bin_qty()
+
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 		self.delete_draft_work_order()
+		self.update_bin_qty()
+
+	def update_bin_qty(self):
+		for d in self.mr_items:
+			if d.warehouse:
+				bin_name = get_or_make_bin(d.item_code, d.warehouse)
+				bin = frappe.get_doc("Bin", bin_name, for_update=True)
+				bin.update_reserved_qty_for_production_plan()
 
 	def delete_draft_work_order(self):
 		for d in frappe.get_all(
@@ -1068,6 +1080,7 @@ def get_material_request_items(
 			"item_code": row.item_code,
 			"item_name": row.item_name,
 			"quantity": required_qty / conversion_factor,
+			"conversion_factor": conversion_factor,
 			"required_bom_qty": total_qty,
 			"stock_uom": row.get("stock_uom"),
 			"warehouse": warehouse
@@ -1474,3 +1487,34 @@ def set_default_warehouses(row, default_warehouses):
 	for field in ["wip_warehouse", "fg_warehouse"]:
 		if not row.get(field):
 			row[field] = default_warehouses.get(field)
+
+
+def get_reserved_qty_for_production_plan(item_code, warehouse):
+	from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
+
+	table = frappe.qb.DocType("Production Plan")
+	child = frappe.qb.DocType("Material Request Plan Item")
+
+	query = (
+		frappe.qb.from_(table)
+		.inner_join(child)
+		.on(table.name == child.parent)
+		.select(Sum(child.quantity * IfNull(child.conversion_factor, 1.0)))
+		.where(
+			(table.docstatus == 1)
+			& (child.item_code == item_code)
+			& (child.warehouse == warehouse)
+			& (table.status.notin(["Completed", "Closed"]))
+		)
+	).run()
+
+	if not query:
+		return 0.0
+
+	reserved_qty_for_production_plan = flt(query[0][0])
+
+	reserved_qty_for_production = flt(
+		get_reserved_qty_for_production(item_code, warehouse, check_production_plan=True)
+	)
+
+	return reserved_qty_for_production_plan - reserved_qty_for_production

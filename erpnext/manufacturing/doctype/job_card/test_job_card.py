@@ -272,6 +272,42 @@ class TestJobCard(FrappeTestCase):
 		transfer_entry_2.insert()
 		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	def test_job_card_excess_material_transfer_with_no_reference(self):
+
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+
+		self.generate_required_stock(self.work_order)
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
+
+		# fully transfer both RMs
+		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
+		row = transfer_entry_1.items[0]
+
+		# Add new row without reference of the job card item
+		transfer_entry_1.append(
+			"items",
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"item_group": row.item_group,
+				"qty": row.qty,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"stock_uom": row.stock_uom,
+				"basic_rate": row.basic_rate,
+				"basic_amount": row.basic_amount,
+				"expense_account": row.expense_account,
+				"cost_center": row.cost_center,
+				"s_warehouse": row.s_warehouse,
+				"t_warehouse": row.t_warehouse,
+			},
+		)
+
+		self.assertRaises(frappe.ValidationError, transfer_entry_1.insert)
+
 	def test_job_card_partial_material_transfer(self):
 		"Test partial material transfer against Job Card"
 		self.transfer_material_against = "Job Card"

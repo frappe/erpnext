@@ -127,6 +127,7 @@ class StockEntry(StockController):
 		self.validate_fg_completed_qty()
 		self.validate_difference_account()
 		self.set_job_card_data()
+		self.validate_job_card_item()
 		self.set_purpose_for_stock_entry()
 		self.clean_serial_nos()
 		self.validate_duplicate_serial_no()
@@ -210,6 +211,24 @@ class StockEntry(StockController):
 			self.work_order = data.work_order
 			self.from_bom = 1
 			self.bom_no = data.bom_no
+
+	def validate_job_card_item(self):
+		if not self.job_card:
+			return
+
+		if cint(frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")):
+			return
+
+		for row in self.items:
+			if row.job_card_item:
+				continue
+
+			msg = f"""Row #{0}: The job card item reference
+				is missing. Kindly create the stock entry
+				from the job card. If you have added the row manually
+				then you won't be able to add job card item reference."""
+
+			frappe.throw(_(msg))
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
