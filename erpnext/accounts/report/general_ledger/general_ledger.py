@@ -253,14 +253,14 @@ def get_conditions(filters):
 					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
 				)
 			else:
-				conditions.append("(finance_book in (%(finance_book)s) OR finance_book IS NULL)")
+				conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 		else:
-			conditions.append("(finance_book in (%(company_fb)s) OR finance_book IS NULL)")
+			conditions.append("(finance_book in (%(company_fb)s, '') OR finance_book IS NULL)")
 	else:
 		if filters.get("finance_book"):
-			conditions.append("(finance_book in (%(finance_book)s) OR finance_book IS NULL)")
+			conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 		else:
-			conditions.append("(finance_book IS NULL)")
+			conditions.append("(finance_book in ('') OR finance_book IS NULL)")
 
 	if not filters.get("show_cancelled_entries"):
 		conditions.append("is_cancelled = 0")
