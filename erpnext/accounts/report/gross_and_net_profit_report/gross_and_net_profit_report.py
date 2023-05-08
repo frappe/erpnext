@@ -152,10 +152,17 @@ def adjust_account(data, period_list, consolidated=False):
 	totals = {}
 	for node in leaf_nodes:
 		set_total(node, node["total"], data, totals)
-	for d in data:
+
+	for d in reversed(data):
 		for period in period_list:
-			key = period if consolidated else period.key
+			if d.get("is_group"):
+				# reset totals for group accounts as totals set by get_data doesn't consider include_in_gross check
+				d[period.key] = sum(
+					item[period.key] for item in data if item.get("parent_account") == d.get("account")
+				)
+
 			d["total"] = totals[d["account"]]
+
 	return data
 
 
@@ -169,7 +176,6 @@ def set_total(node, value, complete_list, totals):
 		return set_total(
 			next(item for item in complete_list if item["account"] == parent), value, complete_list, totals
 		)
-
 
 def get_profit(
 	gross_income, gross_expense, period_list, company, profit_type, currency=None, consolidated=False
