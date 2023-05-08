@@ -300,9 +300,7 @@ def _get_directly_dependent_vouchers(doc):
 
 
 def notify_error_to_stock_managers(doc, traceback):
-	recipients = get_users_with_role("Stock Manager")
-	if not recipients:
-		recipients = get_users_with_role("System Manager")
+	recipients = get_recipients()
 
 	subject = _("Error while reposting item valuation")
 	message = (
@@ -317,6 +315,17 @@ def notify_error_to_stock_managers(doc, traceback):
 		)
 	)
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+
+
+def get_recipients():
+	role = (
+		frappe.db.get_single_value("Stock Reposting Settings", "notify_reposting_error_to_role")
+		or "Stock Manager"
+	)
+
+	recipients = get_users_with_role(role)
+
+	return recipients
 
 
 def repost_entries():
@@ -344,7 +353,7 @@ def get_repost_item_valuation_entries():
 	return frappe.db.sql(
 		""" SELECT name from `tabRepost Item Valuation`
 		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
-		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
+		ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc
 	""",
 		now(),
 		as_dict=1,
