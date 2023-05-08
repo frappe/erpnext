@@ -558,12 +558,19 @@ class WorkOrder(Document):
 			and self.production_plan_item
 			and not self.production_plan_sub_assembly_item
 		):
-			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty") or 0.0
+			table = frappe.qb.DocType("Work Order")
 
-			if self.docstatus == 1:
-				qty += self.qty
-			elif self.docstatus == 2:
-				qty -= self.qty
+			query = (
+				frappe.qb.from_(table)
+				.select(Sum(table.qty))
+				.where(
+					(table.production_plan == self.production_plan)
+					& (table.production_plan_item == self.production_plan_item)
+					& (table.docstatus == 1)
+				)
+			).run()
+
+			qty = flt(query[0][0]) if query else 0
 
 			frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
 
@@ -1476,12 +1483,14 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 	return doc
 
 
-def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
+def get_reserved_qty_for_production(
+	item_code: str, warehouse: str, check_production_plan: bool = False
+) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
 
-	return (
+	query = (
 		frappe.qb.from_(wo)
 		.from_(wo_item)
 		.select(
@@ -1502,7 +1511,12 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 				| (wo_item.required_qty > wo_item.consumed_qty)
 			)
 		)
-	).run()[0][0] or 0.0
+	)
+
+	if check_production_plan:
+		query = query.where(wo.production_plan.isnotnull())
+
+	return query.run()[0][0] or 0.0
 
 
 @frappe.whitelist()
