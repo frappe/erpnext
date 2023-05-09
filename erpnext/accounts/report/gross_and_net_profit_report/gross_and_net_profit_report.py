@@ -126,7 +126,9 @@ def get_revenue(data, period_list, include_in_gross=1):
 	data_to_be_removed = True
 	while data_to_be_removed:
 		revenue, data_to_be_removed = remove_parent_with_no_child(revenue)
-	revenue = adjust_account(revenue, period_list)
+
+	adjust_account_totals(revenue, period_list)
+
 	return copy.deepcopy(revenue)
 
 
@@ -147,23 +149,19 @@ def remove_parent_with_no_child(data):
 	return data, data_to_be_removed
 
 
-def adjust_account(data, period_list):
-	leaf_nodes = [item for item in data if item["is_group"] == 0]
+def adjust_account_totals(data, period_list):
 	totals = {}
-	for node in leaf_nodes:
-		set_total(node, node["total"], data, totals)
-
 	for d in reversed(data):
-		for period in period_list:
-			if d.get("is_group"):
+		if d.get("is_group"):
+			for period in period_list:
 				# reset totals for group accounts as totals set by get_data doesn't consider include_in_gross check
 				d[period.key] = sum(
 					item[period.key] for item in data if item.get("parent_account") == d.get("account")
 				)
+		else:
+			set_total(d, d["total"], data, totals)
 
-			d["total"] = totals[d["account"]]
-
-	return data
+		d["total"] = totals[d["account"]]
 
 
 def set_total(node, value, complete_list, totals):
@@ -176,6 +174,7 @@ def set_total(node, value, complete_list, totals):
 		return set_total(
 			next(item for item in complete_list if item["account"] == parent), value, complete_list, totals
 		)
+
 
 def get_profit(
 	gross_income, gross_expense, period_list, company, profit_type, currency=None, consolidated=False
