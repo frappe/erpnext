@@ -53,11 +53,6 @@
   "supplier_primary_address",
   "primary_address",
   "accounting_tab",
-  "bank_details_section",
-  "bank_account_no",
-  "column_break_n8mz",
-  "iban",
-  "section_break_ow3k",
   "accounts",
   "settings_tab",
   "allow_purchase_invoice_creation_without_purchase_order",
@@ -450,29 +445,6 @@
   {
    "fieldname": "column_break_59",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "bank_details_section",
-   "fieldtype": "Section Break",
-   "label": "Bank Details"
-  },
-  {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Data",
-   "label": "Bank Account No"
-  },
-  {
-   "fieldname": "column_break_n8mz",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "iban",
-   "fieldtype": "Data",
-   "label": "IBAN"
-  },
-  {
-   "fieldname": "section_break_ow3k",
-   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-user",
@@ -485,7 +457,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-03-30 15:50:40.241257",
+ "modified": "2023-05-09 15:34:13.408932",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
