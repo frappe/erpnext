@@ -99,15 +99,24 @@ class AutoMatchbyAccountIBAN:
 		for party in parties:
 			or_filters = {}
 			if self.bank_party_account_number:
-				acc_no_field = "bank_ac_no" if party == "Employee" else "bank_account_no"
-				or_filters[acc_no_field] = self.bank_party_account_number
+				or_filters["bank_account_no"] = self.bank_party_account_number
 
 			if self.bank_party_iban:
 				or_filters["iban"] = self.bank_party_iban
 
 			party_result = frappe.db.get_all(
-				party, or_filters=or_filters, pluck="name", limit_page_length=1
+				"Bank Account", or_filters=or_filters, pluck="name", limit_page_length=1
 			)
+
+			if party == "Employee" and not party_result:
+				# Search in Bank Accounts first for Employee, and then Employee record
+				if "bank_account_no" in or_filters:
+					or_filters["bank_ac_no"] = or_filters.pop("bank_account_no")
+
+				party_result = frappe.db.get_all(
+					party, or_filters=or_filters, pluck="name", limit_page_length=1
+				)
+
 			if party_result:
 				result = (
 					party,
