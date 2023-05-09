@@ -568,7 +568,11 @@
    "link_fieldname": "party"
   }
  ],
+<<<<<<< HEAD
  "modified": "2022-11-08 15:52:34.462657",
+=======
+ "modified": "2023-05-09 15:38:40.255193",
+>>>>>>> dbf7a479b6 (fix: Use existing bank fields to match by bank account no/IBAN)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
