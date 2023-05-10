@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from typing import Optional
+
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.contacts.doctype.address.address import (
@@ -850,33 +852,23 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 	return company_wise_info
 
 
-def get_party_shipping_address(doctype, name):
-	"""
-	Returns an Address name (best guess) for the given doctype and name for which `address_type == 'Shipping'` is true.
-	and/or `is_shipping_address = 1`.
-
-	It returns an empty string if there is no matching record.
-
-	:param doctype: Party Doctype
-	:param name: Party name
-	:return: String
-	"""
-	out = frappe.db.sql(
-		"SELECT dl.parent "
-		"from `tabDynamic Link` dl join `tabAddress` ta on dl.parent=ta.name "
-		"where "
-		"dl.link_doctype=%s "
-		"and dl.link_name=%s "
-		"and dl.parenttype='Address' "
-		"and ifnull(ta.disabled, 0) = 0 and"
-		"(ta.address_type='Shipping' or ta.is_shipping_address=1) "
-		"order by ta.is_shipping_address desc, ta.address_type desc limit 1",
-		(doctype, name),
+def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
+	shipping_addresses = frappe.get_list(
+		"Address",
+		filters=[
+			["Dynamic Link", "link_doctype", "=", doctype],
+			["Dynamic Link", "link_name", "=", name],
+			["disabled", "=", 0],
+		],
+		or_filters=[
+			["is_shipping_address", "=", 1],
+			["address_type", "=", "Shipping"],
+		],
+		pluck="name",
+		limit=1,
 	)
-	if out:
-		return out[0][0]
-	else:
-		return ""
+
+	return shipping_addresses[0] if shipping_addresses else None
 
 
 def get_partywise_advanced_payment_amount(
