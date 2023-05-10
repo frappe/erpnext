@@ -900,31 +900,23 @@ def get_partywise_advanced_payment_amount(
 		return frappe._dict(data)
 
 
-def get_default_contact(doctype, name):
-	"""
-	Returns default contact for the given doctype and name.
-	Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
-	"""
-	out = frappe.db.sql(
-		"""
-			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
-			FROM `tabDynamic Link` dl
-			INNER JOIN `tabContact` c ON c.name = dl.parent
-			WHERE
-				dl.link_doctype=%s AND
-				dl.link_name=%s AND
-				dl.parenttype = 'Contact'
-			ORDER BY is_primary_contact DESC, is_billing_contact DESC
-		""",
-		(doctype, name),
+def get_default_contact(doctype: str, name: str) -> Optional[str]:
+	contacts = frappe.get_list(
+		"Contact",
+		filters=[
+			["Dynamic Link", "link_doctype", "=", doctype],
+			["Dynamic Link", "link_name", "=", name],
+		],
+		or_filters=[
+			["is_primary_contact", "=", 1],
+			["is_billing_contact", "=", 1],
+		],
+		pluck="name",
+		limit=1,
+		order_by="is_billing_contact DESC",
 	)
-	if out:
-		try:
-			return out[0][0]
-		except Exception:
-			return None
-	else:
-		return None
+
+	return contacts[0] if contacts else None
 
 
 def add_party_account(party_type, party, company, account):
