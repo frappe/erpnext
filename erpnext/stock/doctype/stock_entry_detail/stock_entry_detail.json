@@ -395,7 +395,8 @@
    "no_copy": 1,
    "options": "Material Request",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "material_request_item",
@@ -571,7 +572,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-03 14:51:16.575515",
+ "modified": "2023-05-09 12:41:18.210864",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
