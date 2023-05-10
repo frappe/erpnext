@@ -196,6 +196,9 @@ def get_profit(
 
 		if profit_loss[key]:
 			has_value = True
+			if not profit_loss.get("total"):
+				profit_loss["total"] = 0
+			profit_loss["total"] += profit_loss[key]
 
 	if has_value:
 		return profit_loss
@@ -234,6 +237,9 @@ def get_net_profit(
 
 		if profit_loss[key]:
 			has_value = True
+			if not profit_loss.get("total"):
+				profit_loss["total"] = 0
+			profit_loss["total"] += profit_loss[key]
 
 	if has_value:
 		return profit_loss
