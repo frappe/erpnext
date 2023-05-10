@@ -41,7 +41,7 @@ def execute():
 				"GL Entry",
 				filters={
 					"is_cancelled": 0,
-					"voucher_type": ["!=", "Period Closing Voucher"],
+					"voucher_no": ["!=", pcv.name],
 					"posting_date": ["<=", pcv.posting_date],
 				},
 				fields=["*"],
