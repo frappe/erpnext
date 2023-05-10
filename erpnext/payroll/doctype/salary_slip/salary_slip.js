@@ -80,22 +80,27 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	currency: function(frm) {
+		frm.trigger("update_currency_changes");
+	},
+
+	update_currency_changes: function(frm) {
+		frm.trigger("set_exchange_rate");
 		frm.trigger("set_dynamic_labels");
 	},
 
 	set_dynamic_labels: function(frm) {
-		var company_currency = frm.doc.company? erpnext.get_currency(frm.doc.company): frappe.defaults.get_default("currency");
 		if (frm.doc.employee && frm.doc.currency) {
 			frappe.run_serially([
-				() => 	frm.events.set_exchange_rate(frm, company_currency),
-				() => 	frm.events.change_form_labels(frm, company_currency),
-				() => 	frm.events.change_grid_labels(frm),
-				() => 	frm.refresh_fields()
+				() => frm.events.change_form_labels(frm),
+				() => frm.events.change_grid_labels(frm),
+				() => frm.refresh_fields()
 			]);
 		}
 	},
 
-	set_exchange_rate: function(frm, company_currency) {
+	set_exchange_rate: function(frm) {
+		const company_currency = erpnext.get_currency(frm.doc.company);
+
 		if (frm.doc.docstatus === 0) {
 			if (frm.doc.currency) {
 				var from_currency = frm.doc.currency;
@@ -133,9 +138,11 @@ frappe.ui.form.on("Salary Slip", {
 		frm.set_df_property('section_break_43', 'hidden', 1);
 	},
 
-	change_form_labels: function(frm, company_currency) {
+	change_form_labels: function(frm) {
+		const company_currency = erpnext.get_currency(frm.doc.company);
+
 		frm.set_currency_labels(["base_hour_rate", "base_gross_pay", "base_total_deduction",
-			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date", "gross_base_year_to_date"],
+			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date", "base_gross_year_to_date"],
 		company_currency);
 
 		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words", "year_to_date", "month_to_date", "gross_year_to_date"],
@@ -207,6 +214,9 @@ frappe.ui.form.on("Salary Slip", {
 						frm.fields_dict.absent_days.set_description(__("Unmarked Days is treated as {0}. You can can change this in {1}", [r.message, frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true)]));
 					}
 					frm.refresh();
+					// triggering events explicitly because structure is set on the server-side
+					// and currency is fetched from the structure
+					frm.trigger("update_currency_changes");
 				}
 			});
 		}
