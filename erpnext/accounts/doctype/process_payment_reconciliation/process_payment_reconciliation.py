@@ -164,7 +164,7 @@ def trigger_reconciliation_for_queued_docs():
 	Fetch queued docs and start reconciliation process for each one
 	"""
 	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
-		frappe.throw(
+		frappe.msgprint(
 			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
 				get_link_to_form("Accounts Settings", "Accounts Settings")
 			)
