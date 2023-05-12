@@ -190,6 +190,9 @@ class StockEntry(StockController):
 		if force:
 			return True
 
+		if frappe.flags.in_test:
+			return False
+
 		# If line items are more than 100 or record is older than 6 months
 		if len(self.items) > 100 or month_diff(nowdate(), self.posting_date) > 6:
 			return True
