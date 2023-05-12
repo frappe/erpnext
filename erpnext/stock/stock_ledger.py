@@ -785,13 +785,15 @@ class update_entries_after(object):
 			frappe.db.set_value("Subcontracting Receipt Item", sle.voucher_detail_no, "rate", outgoing_rate)
 		else:
 			frappe.db.set_value(
-				"Subcontracting Receipt Supplied Item", sle.voucher_detail_no, "rate", outgoing_rate
+				"Subcontracting Receipt Supplied Item",
+				sle.voucher_detail_no,
+				{"rate": outgoing_rate, "amount": abs(sle.actual_qty) * outgoing_rate},
 			)
 
 		scr = frappe.get_doc("Subcontracting Receipt", sle.voucher_no, for_update=True)
-		scr.set_missing_values()
+		scr.calculate_items_qty_and_amount()
 		scr.db_update()
-		for d in scr.items + scr.get("supplied_items", []):
+		for d in scr.items:
 			d.db_update()
 
 	def get_serialized_values(self, sle):
