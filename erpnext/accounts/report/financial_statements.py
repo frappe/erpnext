@@ -546,12 +546,13 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 				)
 
 			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb)]))
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 				| (gl_entry.finance_book.isnull())
 			)
 		else:
 			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.finance_book)])) | (gl_entry.finance_book.isnull())
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), ""]))
+				| (gl_entry.finance_book.isnull())
 			)
 
 	if accounting_dimensions:
