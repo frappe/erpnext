@@ -280,6 +280,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
@@ -355,7 +356,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 17:58:26.366469",
+ "modified": "2023-05-07 20:17:29.108095",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
