@@ -1708,6 +1708,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, sr_doc.submit)
 
 	def test_enqueue_action(self):
+		frappe.flags.in_test = False
 		item_code = "Test Enqueue Item - 001"
 		create_item(item_code=item_code, is_stock_item=1, valuation_rate=10)
 
@@ -1734,6 +1735,7 @@ class TestStockEntry(FrappeTestCase):
 		)
 
 		self.assertFalse(doc.is_enqueue_action())
+		frappe.flags.in_test = True
 
 
 def make_serialized_item(**args):
