@@ -1909,6 +1909,75 @@ class TestSalesOrder(FrappeTestCase):
 
 		self.assertEqual(mr.items[0].qty, 6)
 
+	def test_packed_items_for_partial_sales_order(self):
+		# test Update Items with product bundle
+		for product_bundle in [
+			"_Test Product Bundle Item Partial 1",
+			"_Test Product Bundle Item Partial 2",
+		]:
+			if not frappe.db.exists("Item", product_bundle):
+				bundle_item = make_item(product_bundle, {"is_stock_item": 0})
+				bundle_item.append(
+					"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+				)
+				bundle_item.save(ignore_permissions=True)
+
+		for product_bundle in ["_Packed Item Partial 1", "_Packed Item Partial 2"]:
+			if not frappe.db.exists("Item", product_bundle):
+				make_item(product_bundle, {"is_stock_item": 1, "stock_uom": "Nos"})
+
+			make_stock_entry(item=product_bundle, target="_Test Warehouse - _TC", qty=2, rate=10)
+
+		make_product_bundle("_Test Product Bundle Item Partial 1", ["_Packed Item Partial 1"], 1)
+
+		make_product_bundle("_Test Product Bundle Item Partial 2", ["_Packed Item Partial 2"], 1)
+
+		so = make_sales_order(
+			item_code="_Test Product Bundle Item Partial 1",
+			warehouse="_Test Warehouse - _TC",
+			qty=1,
+			uom="Nos",
+			stock_uom="Nos",
+			conversion_factor=1,
+			transaction_date=nowdate(),
+			delivery_note=nowdate(),
+			do_not_submit=1,
+		)
+
+		so.append(
+			"items",
+			{
+				"item_code": "_Test Product Bundle Item Partial 2",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"delivery_note": nowdate(),
+			},
+		)
+
+		so.save()
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.remove(dn.items[1])
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(len(dn.items), 1)
+		self.assertEqual(len(dn.packed_items), 1)
+		self.assertEqual(dn.items[0].item_code, "_Test Product Bundle Item Partial 1")
+
+		so.load_from_db()
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+
+		self.assertEqual(len(dn.items), 1)
+		self.assertEqual(len(dn.packed_items), 1)
+		self.assertEqual(dn.items[0].item_code, "_Test Product Bundle Item Partial 2")
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
