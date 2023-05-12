@@ -3,11 +3,8 @@
 
 
 frappe.ui.form.on("Travel Request", {
-	refresh: function(frm) {
-		frm.events.grade_details(frm);
-	},
 	grade_details: function(frm) {
-		$.each(frm.doc.travel_requisition_table || [], function (i, row) {
+		$.each(frm.doc.travel_requisition || [], function (i, row) {
 			frappe.call({
 				method: "erpnext.hr.doctype.travel_request.travel_request.get_grade_child_details",
 				async:false,
@@ -15,16 +12,84 @@ frappe.ui.form.on("Travel Request", {
 					mode: row.mode},
 				callback: function(r) {
 					var options = r.message
-					var field = frappe.meta.get_docfield("Travel Requisition Table","class", row.name);
+					var field = frappe.meta.get_docfield("Travel Requisition","class", row.name);
 					field.options = [""].concat(options);
 					cur_frm.refresh_field("class");
 				}
 			})
 		})
 	},
-});
+	before_save :function(frm){
+		if (frm.doc.__islocal)
+		{	frm.set_value("status", "Draft");
+		}
+	},
+	refresh: function (frm) {
+		frm.events.grade_details(frm);
+		let doc = frm.doc;
+		if (!frm.doc.__islocal) {
+			if (frappe.session.user === frm.doc.prepared_by){
+				if (doc.status === "Draft") {
+					cur_frm.add_custom_button(__('Approved Request'), () => cur_frm.events.approved_request(), __("Status"));
+				}
+				if (doc.status == "Request For Approval") {
+					cur_frm.disable_save();				
+				}				
+			}
+		}
 
-frappe.ui.form.on("Travel Requisition Table", {
+		if (frappe.session.user === frm.doc.approving_officer) {
+	
+			if (doc.status == "Request For Approval" || doc.status=== "Check"){
+				cur_frm.add_custom_button(__('Draft'), () => cur_frm.events.draft(), __("Status"));
+			}
+			if (doc.status=== "Request For Approval") {
+				if (doc.status != "Approved") {
+					cur_frm.add_custom_button(__('Approved'), () => cur_frm.events.approved(), __("Status"));
+				}		
+			}
+		}
+	},
+	draft: function(){
+		cur_frm.set_value("status","Draft");
+		cur_frm.save();
+	},
+	approved: function(){
+		let d = new frappe.ui.Dialog({
+			title: 'Approved By HOD',
+			fields: [
+				{
+					label: 'Remark',
+					fieldname: 'remark',
+					fieldtype: 'Small Text'
+				},
+			],
+			primary_action_label: 'Submit',
+			primary_action(values) {
+				console.log(values);
+				d.hide();
+				cur_frm.set_value("status","Approved");
+				cur_frm.set_value('remark', (values["remark"]));
+				cur_frm.save();
+			}
+		});
+		d.show();
+
+	},
+	approved_request: function(){
+		frappe.call({                        
+			method: "erpnext.hr.doctype.travel_request.travel_request.report_to_person_view_travel_request_form", 
+			async:false,
+			args: { 
+					name:cur_frm.doc.name,
+					approving_officer : cur_frm.doc.approving_officer,				},	 
+		 });
+		 cur_frm.set_value("status","Request For Approval");
+		 cur_frm.save();
+		
+	},
+});
+frappe.ui.form.on("Travel Requisition", {
 	mode:function(frm,cdt,cdn) {
 		var d = locals[cdt][cdn];
 		frappe.call({

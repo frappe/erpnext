@@ -1,12 +1,12 @@
 {
  "actions": [],
- "autoname": "HR-TRQ-.YYYY.-.#####",
  "creation": "2018-05-15 06:32:33.950356",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "travel_type",
+  "status",
   "travel_funding",
   "travel_proof",
   "requition_no",
@@ -22,9 +22,14 @@
   "purpose_of_travel",
   "details_of_sponsor",
   "section_break_7",
-  "travel_requisition_table",
-  "section_break_9",
+  "travel_requisition",
   "requisition_program",
+  "approved_by_hod_section",
+  "remark",
+  "section_break_24",
+  "approving_officer",
+  "column_break_22",
+  "prepared_by",
   "employee_details",
   "cell_number",
   "prefered_email",
@@ -117,7 +122,9 @@
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "label": "Employee Name"
+   "label": "Employee Name",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fetch_from": "employee.cell_number",
@@ -232,7 +239,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Requisition Details"
   },
   {
    "fieldname": "requisition_program",
@@ -241,13 +249,10 @@
    "options": "Requisition Program Table"
   },
   {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "requition_no",
    "fieldtype": "Data",
-   "label": "Requition No"
+   "label": "Requition No",
+   "read_only": 1
   },
   {
    "fieldname": "team",
@@ -274,23 +279,68 @@
    "fieldname": "employee_grade",
    "fieldtype": "Link",
    "label": " Employee Grade",
-   "options": "Employee Grade"
+   "options": "Employee Grade",
+   "read_only": 1
   },
   {
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Date"
+   "label": "Date",
+   "reqd": 1
   },
   {
-   "fieldname": "travel_requisition_table",
+   "fetch_from": "employee.expense_approver",
+   "fieldname": "approving_officer",
+   "fieldtype": "Link",
+   "label": "Approving Officer",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nDraft\nApproved\nCheck\nRequest For Approval"
+  },
+  {
+   "fieldname": "travel_requisition",
    "fieldtype": "Table",
-   "label": "Requisition Details",
-   "options": "Travel Requisition Table"
+   "label": "Travel Requisition",
+   "options": "Travel Requisition"
+  },
+  {
+   "default": "__user",
+   "fieldname": "prepared_by",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Prepared By",
+   "options": "User"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Small Text",
+   "label": "Remark"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.status == \"Approved\"",
+   "fieldname": "approved_by_hod_section",
+   "fieldtype": "Section Break",
+   "label": "Approved By HOD"
   }
  ],
+ "hide_toolbar": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-03 17:23:11.652087",
+ "modified": "2023-05-12 14:43:44.240140",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

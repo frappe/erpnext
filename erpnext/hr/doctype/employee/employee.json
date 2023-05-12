@@ -16,15 +16,19 @@
   "employment_type",
   "image",
   "employee_deparment",
-  "employee_vertical",
   "column_break1",
   "company",
   "status",
   "gender",
   "date_of_birth",
   "employee_grade",
+  "employee_vertical",
   "date_of_joining",
   "employee_number",
+  "section_break_18",
+  "expense_approver",
+  "column_break_20",
+  "passing_officer",
   "hod_details_section",
   "hod_name",
   "column_break_23",
@@ -53,7 +57,6 @@
   "grade",
   "branch",
   "approvers_section",
-  "expense_approver",
   "leave_approver",
   "column_break_45",
   "shift_request_approver",
@@ -801,8 +804,9 @@
   {
    "fieldname": "expense_approver",
    "fieldtype": "Link",
-   "label": "Expense Approver",
-   "options": "User"
+   "label": "Approving Officer",
+   "options": "User",
+   "reqd": 1
   },
   {
    "fieldname": "approvers_section",
@@ -940,6 +944,21 @@
   {
    "fieldname": "column_break_101",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "passing_officer",
+   "fieldtype": "Link",
+   "label": "Passing Officer",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -947,7 +966,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-05-03 13:48:30.427525",
+ "modified": "2023-05-11 18:44:08.493131",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

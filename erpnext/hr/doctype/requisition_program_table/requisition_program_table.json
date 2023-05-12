@@ -10,7 +10,7 @@
   "client_company_name",
   "client_designation",
   "column_break_4",
-  "appointment",
+  "appointment_date_and_time",
   "remark"
  ],
  "fields": [
@@ -27,11 +27,6 @@
    "label": "Client Designation"
   },
   {
-   "fieldname": "appointment",
-   "fieldtype": "Datetime",
-   "label": "Appointment"
-  },
-  {
    "fieldname": "remark",
    "fieldtype": "Data",
    "label": "Remark"
@@ -46,12 +41,17 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appointment_date_and_time",
+   "fieldtype": "Datetime",
+   "label": "Appointment Date and Time"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-01 09:22:29.663955",
+ "modified": "2023-05-04 12:26:34.651287",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Requisition Program Table",

@@ -52,6 +52,16 @@ frappe.ui.form.on('Employee', {
 			};
 		});
 	},
+	setup:function(frm){
+		frm.set_query('passing_officer', function(doc) {
+			return {
+				filters: {
+					"designation": "Accountant",
+					"user": doc.user
+				}
+			};
+		});
+	},
 	refresh: function(frm) {
 		frm.dashboard.links_area.hide();
 		frm.dashboard.heatmap_area.hide();

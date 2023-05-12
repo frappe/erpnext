@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from erpnext.hr.utils import validate_active_employee
+from frappe.core.doctype.user.user import share_doc_with_approver
 
 
 class TravelRequest(Document):
@@ -14,9 +15,22 @@ class TravelRequest(Document):
         
 	def validate(self):
 		validate_active_employee(self.employee)
+	
+	def on_submit(self):
+		if self.status != "Approved":
+			frappe.throw(("Document status must be 'Approved' before submitting."))
+
+	def on_update(self):
+		if self.status == "Approved":
+			name = frappe.get_doc("Travel Request", self.name)
+			name.submit()
+			self.reload()
 
 
-
+@frappe.whitelist()
+def report_to_person_view_travel_request_form(name,approving_officer):
+	get_travel_request_form = frappe.get_doc("Travel Request",name)
+	share_doc_with_approver(get_travel_request_form, approving_officer)
 
 @frappe.whitelist()
 def get_grade_child_details(grade,mode):
