@@ -574,7 +574,7 @@ def prepare_data_for_internal_transfer():
 		"Cost Center", {"company": company}, "name"
 	)
 
-	expene_account = frappe.db.get_value(
+	expense_account = frappe.db.get_value(
 		"Company", company, "stock_adjustment_account"
 	) or frappe.db.get_value(
 		"Account", {"company": company, "account_type": "Expense Account"}, "name"
@@ -588,7 +588,7 @@ def prepare_data_for_internal_transfer():
 			"supplier": supplier,
 			"company": company,
 			"cost_center": cost_center,
-			"expene_account": expene_account,
+			"expense_account": expense_account,
 			"store_warehouse": frappe.db.get_value(
 				"Warehouse", {"name": ("like", "Store%"), "company": company}, "name"
 			),
