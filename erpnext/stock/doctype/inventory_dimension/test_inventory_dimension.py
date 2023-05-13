@@ -12,6 +12,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	DoNotChangeError,
 	delete_dimension,
 )
+from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -20,6 +21,7 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 class TestInventoryDimension(FrappeTestCase):
 	def setUp(self):
 		prepare_test_data()
+		create_store_dimension()
 
 	def test_validate_inventory_dimension(self):
 		# Can not be child doc
@@ -73,6 +75,8 @@ class TestInventoryDimension(FrappeTestCase):
 		self.assertFalse(custom_field)
 
 	def test_inventory_dimension(self):
+		frappe.local.document_wise_inventory_dimensions = {}
+
 		warehouse = "Shelf Warehouse - _TC"
 		item_code = "_Test Item"
 
@@ -143,6 +147,8 @@ class TestInventoryDimension(FrappeTestCase):
 		self.assertRaises(DoNotChangeError, inv_dim1.save)
 
 	def test_inventory_dimension_for_purchase_receipt_and_delivery_note(self):
+		frappe.local.document_wise_inventory_dimensions = {}
+
 		inv_dimension = create_inventory_dimension(
 			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
 		)
@@ -249,6 +255,97 @@ class TestInventoryDimension(FrappeTestCase):
 				"name",
 			)
 		)
+
+	def test_for_purchase_sales_and_stock_transaction(self):
+		create_inventory_dimension(
+			reference_document="Store",
+			type_of_transaction="Outward",
+			dimension_name="Store",
+			apply_to_all_doctypes=1,
+		)
+
+		item_code = "Test Inventory Dimension Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Store Warehouse")
+
+		# Purchase Receipt -> Inward in Store 1
+		pr_doc = make_purchase_receipt(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=100, do_not_submit=True
+		)
+
+		pr_doc.items[0].store = "Store 1"
+		pr_doc.save()
+		pr_doc.submit()
+
+		entries = get_voucher_sl_entries(pr_doc.name, ["warehouse", "store", "incoming_rate"])
+
+		self.assertEqual(entries[0].warehouse, warehouse)
+		self.assertEqual(entries[0].store, "Store 1")
+
+		# Stock Entry -> Transfer from Store 1 to Store 2
+		se_doc = make_stock_entry(
+			item_code=item_code, qty=10, from_warehouse=warehouse, to_warehouse=warehouse, do_not_save=True
+		)
+
+		se_doc.items[0].store = "Store 1"
+		se_doc.items[0].to_store = "Store 2"
+
+		se_doc.save()
+		se_doc.submit()
+
+		entries = get_voucher_sl_entries(
+			se_doc.name, ["warehouse", "store", "incoming_rate", "actual_qty"]
+		)
+
+		for entry in entries:
+			self.assertEqual(entry.warehouse, warehouse)
+			if entry.actual_qty > 0:
+				self.assertEqual(entry.store, "Store 2")
+				self.assertEqual(entry.incoming_rate, 100.0)
+			else:
+				self.assertEqual(entry.store, "Store 1")
+
+		# Delivery Note -> Outward from Store 2
+
+		dn_doc = create_delivery_note(item_code=item_code, qty=10, warehouse=warehouse, do_not_save=True)
+
+		dn_doc.items[0].store = "Store 2"
+		dn_doc.save()
+		dn_doc.submit()
+
+		entries = get_voucher_sl_entries(dn_doc.name, ["warehouse", "store", "actual_qty"])
+
+		self.assertEqual(entries[0].warehouse, warehouse)
+		self.assertEqual(entries[0].store, "Store 2")
+		self.assertEqual(entries[0].actual_qty, -10.0)
+
+
+def get_voucher_sl_entries(voucher_no, fields):
+	return frappe.get_all(
+		"Stock Ledger Entry", filters={"voucher_no": voucher_no}, fields=fields, order_by="creation"
+	)
+
+
+def create_store_dimension():
+	if not frappe.db.exists("DocType", "Store"):
+		frappe.get_doc(
+			{
+				"doctype": "DocType",
+				"name": "Store",
+				"module": "Stock",
+				"custom": 1,
+				"naming_rule": "By fieldname",
+				"autoname": "field:store_name",
+				"fields": [{"label": "Store Name", "fieldname": "store_name", "fieldtype": "Data"}],
+				"permissions": [
+					{"role": "System Manager", "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1}
+				],
+			}
+		).insert(ignore_permissions=True)
+
+	for store in ["Store 1", "Store 2"]:
+		if not frappe.db.exists("Store", store):
+			frappe.get_doc({"doctype": "Store", "store_name": store}).insert(ignore_permissions=True)
 
 
 def prepare_test_data():

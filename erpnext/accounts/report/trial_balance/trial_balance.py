@@ -256,12 +256,12 @@ def get_opening_balance(
 			)
 
 		opening_balance = opening_balance.where(
-			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb)]))
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 			| (closing_balance.finance_book.isnull())
 		)
 	else:
 		opening_balance = opening_balance.where(
-			(closing_balance.finance_book.isin([cstr(filters.finance_book)]))
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), ""]))
 			| (closing_balance.finance_book.isnull())
 		)
 
