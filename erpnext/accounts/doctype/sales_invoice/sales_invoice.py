@@ -826,6 +826,7 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
+	@frappe.whitelist()
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
