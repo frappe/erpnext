@@ -654,6 +654,28 @@ class PaymentEntry(AccountsController):
 				self.precision("base_received_amount"),
 			)
 
+	def calculate_base_allocated_amount_for_reference(self, d) -> float:
+		base_allocated_amount = 0
+		if d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
+			# This is so there are no Exchange Gain/Loss generated for such doctypes
+
+			exchange_rate = 1
+			if self.payment_type == "Receive":
+				exchange_rate = self.source_exchange_rate
+			elif self.payment_type == "Pay":
+				exchange_rate = self.target_exchange_rate
+
+			base_allocated_amount += flt(
+				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
+			)
+		else:
+			base_allocated_amount += flt(
+				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+			)
+
+		return base_allocated_amount
+
 	def set_total_allocated_amount(self):
 		if self.payment_type == "Internal Transfer":
 			return
@@ -662,9 +684,7 @@ class PaymentEntry(AccountsController):
 		for d in self.get("references"):
 			if d.allocated_amount:
 				total_allocated_amount += flt(d.allocated_amount)
-				base_total_allocated_amount += flt(
-					flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
-				)
+				base_total_allocated_amount += self.calculate_base_allocated_amount_for_reference(d)
 
 		self.total_allocated_amount = abs(total_allocated_amount)
 		self.base_total_allocated_amount = abs(base_total_allocated_amount)
@@ -881,9 +901,7 @@ class PaymentEntry(AccountsController):
 					}
 				)
 
-				allocated_amount_in_company_currency = flt(
-					flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("paid_amount")
-				)
+				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
 
 				gle.update(
 					{
@@ -1715,6 +1733,13 @@ def get_payment_entry(
 	# bank or cash
 	bank = get_bank_cash_account(doc, bank_account)
 
+	# if default bank or cash account is not set in company master and party has default company bank account, fetch it
+	if party_type in ["Customer", "Supplier"] and not bank:
+		party_bank_account = get_party_bank_account(party_type, doc.get(scrub(party_type)))
+		if party_bank_account:
+			account = frappe.db.get_value("Bank Account", party_bank_account, "account")
+			bank = get_bank_cash_account(doc, account)
+
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 	)
@@ -1931,19 +1956,27 @@ def set_paid_amount_and_received_amount(
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
 		paid_amount = received_amount = abs(outstanding_amount)
-	elif payment_type == "Receive":
-		paid_amount = abs(outstanding_amount)
-		if bank_amount:
-			received_amount = bank_amount
-		else:
-			received_amount = paid_amount * doc.get("conversion_rate", 1)
 	else:
-		received_amount = abs(outstanding_amount)
-		if bank_amount:
-			paid_amount = bank_amount
+		company_currency = frappe.get_cached_value("Company", doc.get("company"), "default_currency")
+		if payment_type == "Receive":
+			paid_amount = abs(outstanding_amount)
+			if bank_amount:
+				received_amount = bank_amount
+			else:
+				if company_currency != bank.account_currency:
+					received_amount = paid_amount / doc.get("conversion_rate", 1)
+				else:
+					received_amount = paid_amount * doc.get("conversion_rate", 1)
 		else:
-			# if party account currency and bank currency is different then populate paid amount as well
-			paid_amount = received_amount * doc.get("conversion_rate", 1)
+			received_amount = abs(outstanding_amount)
+			if bank_amount:
+				paid_amount = bank_amount
+			else:
+				if company_currency != bank.account_currency:
+					paid_amount = received_amount / doc.get("conversion_rate", 1)
+				else:
+					# if party account currency and bank currency is different then populate paid amount as well
+					paid_amount = received_amount * doc.get("conversion_rate", 1)
 
 	return paid_amount, received_amount
 

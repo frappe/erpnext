@@ -89,6 +89,7 @@
   "column_break8",
   "grand_total",
   "rounding_adjustment",
+  "use_company_roundoff_cost_center",
   "rounded_total",
   "in_words",
   "total_advance",
@@ -1368,6 +1369,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
+   "ignore_user_permissions": 1,
    "width": "50px"
   },
   {
@@ -1559,13 +1561,19 @@
    "fieldname": "only_include_allocated_payments",
    "fieldtype": "Check",
    "label": "Only Include Allocated Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_company_roundoff_cost_center",
+   "fieldtype": "Check",
+   "label": "Use Company Default Round Off Cost Center"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-03 22:57:14.074982",
+ "modified": "2023-04-29 12:57:50.832598",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

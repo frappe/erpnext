@@ -379,7 +379,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					outgoing_amount = d.base_net_amount
-					if self.is_internal_supplier and d.valuation_rate:
+					if self.is_internal_transfer() and d.valuation_rate:
 						outgoing_amount = abs(
 							frappe.db.get_value(
 								"Stock Ledger Entry",

@@ -547,7 +547,7 @@ def make_material_request(source_name, target_doc=None):
 		# qty is for packed items, because packed items don't have stock_qty field
 		qty = source.get("qty")
 		target.project = source_parent.project
-		target.qty = qty - requested_item_qty.get(source.name, 0)
+		target.qty = qty - requested_item_qty.get(source.name, 0) - source.delivered_qty
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
 		args = target.as_dict().copy()
@@ -581,7 +581,7 @@ def make_material_request(source_name, target_doc=None):
 				"doctype": "Material Request Item",
 				"field_map": {"name": "sales_order_item", "parent": "sales_order"},
 				"condition": lambda doc: not frappe.db.exists("Product Bundle", doc.item_code)
-				and doc.stock_qty > requested_item_qty.get(doc.name, 0),
+				and (doc.stock_qty - doc.delivered_qty) > requested_item_qty.get(doc.name, 0),
 				"postprocess": update_item,
 			},
 		},
@@ -620,6 +620,8 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
+	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -633,6 +635,8 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
+
+		make_packing_list(target)
 
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)

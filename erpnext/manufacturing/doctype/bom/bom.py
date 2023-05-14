@@ -1339,8 +1339,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not has_variants:
 			query_filters["has_variants"] = 0
 
-	if filters and filters.get("is_stock_item"):
-		query_filters["is_stock_item"] = 1
+	if filters:
+		for fieldname, value in filters.items():
+			query_filters[fieldname] = value
 
 	return frappe.get_list(
 		"Item",

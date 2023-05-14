@@ -392,6 +392,9 @@ class AccountsController(TransactionBase):
 				)
 
 	def validate_inter_company_reference(self):
+		if self.get("is_return"):
+			return
+
 		if self.doctype not in ("Purchase Invoice", "Purchase Receipt"):
 			return
 

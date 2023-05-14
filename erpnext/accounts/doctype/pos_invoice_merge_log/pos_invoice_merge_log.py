@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
-from frappe.utils.background_jobs import enqueue, is_job_queued
+from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -483,15 +483,15 @@ def enqueue_job(job, **kwargs):
 
 	closing_entry = kwargs.get("closing_entry") or {}
 
-	job_name = closing_entry.get("name")
-	if not is_job_queued(job_name):
+	job_id = "pos_invoice_merge::" + str(closing_entry.get("name"))
+	if not is_job_enqueued(job_id):
 		enqueue(
 			job,
 			**kwargs,
 			queue="long",
 			timeout=10000,
 			event="processing_merge_logs",
-			job_name=job_name,
+			job_id=job_id,
 			now=frappe.conf.developer_mode or frappe.flags.in_test
 		)
 
