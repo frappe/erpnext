@@ -45,8 +45,8 @@ def get_conditions(filters):
 		filters.year_end_date = getdate(fiscal_year.year_end_date)
 
 		conditions[date_field] = ["between", [filters.year_start_date, filters.year_end_date]]
-	if filters.get("is_existing_asset"):
-		conditions["is_existing_asset"] = filters.get("is_existing_asset")
+	if filters.get("only_existing_assets"):
+		conditions["is_existing_asset"] = filters.get("only_existing_assets")
 	if filters.get("asset_category"):
 		conditions["asset_category"] = filters.get("asset_category")
 	if filters.get("cost_center"):
@@ -102,19 +102,18 @@ def get_data(filters):
 		]
 		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
-	assets_linked_to_fb = frappe.db.get_all(
-		doctype="Asset Finance Book",
-		filters={"finance_book": filters.finance_book or ("is", "not set")},
-		pluck="parent",
-	)
+	assets_linked_to_fb = None
+
+	if filters.filter_by_finance_book:
+		assets_linked_to_fb = frappe.db.get_all(
+			doctype="Asset Finance Book",
+			filters={"finance_book": filters.finance_book or ("is", "not set")},
+			pluck="parent",
+		)
 
 	for asset in assets_record:
-		if filters.finance_book:
-			if asset.asset_id not in assets_linked_to_fb:
-				continue
-		else:
-			if asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
-				continue
+		if assets_linked_to_fb and asset.asset_id not in assets_linked_to_fb:
+			continue
 
 		asset_value = get_asset_value_after_depreciation(asset.asset_id, filters.finance_book)
 		row = {
@@ -172,11 +171,11 @@ def prepare_chart_data(data, filters):
 			"datasets": [
 				{
 					"name": _("Asset Value"),
-					"values": [d.get("asset_value") for d in labels_values_map.values()],
+					"values": [flt(d.get("asset_value"), 2) for d in labels_values_map.values()],
 				},
 				{
 					"name": _("Depreciatied Amount"),
-					"values": [d.get("depreciated_amount") for d in labels_values_map.values()],
+					"values": [flt(d.get("depreciated_amount"), 2) for d in labels_values_map.values()],
 				},
 			],
 		},
@@ -312,7 +311,7 @@ def get_columns(filters):
 
 	return [
 		{
-			"label": _("Asset Id"),
+			"label": _("Asset ID"),
 			"fieldtype": "Link",
 			"fieldname": "asset_id",
 			"options": "Asset",

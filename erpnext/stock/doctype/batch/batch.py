@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.query_builder.functions import CurDate, Sum, Timestamp
+from frappe.query_builder.functions import CombineDatetime, CurDate, Sum
 from frappe.utils import cint, flt, get_link_to_form, nowtime
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
@@ -192,7 +192,8 @@ def get_batch_qty(
 				posting_time = nowtime()
 
 			query = query.where(
-				Timestamp(sle.posting_date, sle.posting_time) <= Timestamp(posting_date, posting_time)
+				CombineDatetime(sle.posting_date, sle.posting_time)
+				<= CombineDatetime(posting_date, posting_time)
 			)
 
 		out = query.run(as_list=True)[0][0] or 0
@@ -376,7 +377,7 @@ def get_pos_reserved_batch_qty(filters):
 
 	p = frappe.qb.DocType("POS Invoice").as_("p")
 	item = frappe.qb.DocType("POS Invoice Item").as_("item")
-	sum_qty = frappe.query_builder.functions.Sum(item.qty).as_("qty")
+	sum_qty = frappe.query_builder.functions.Sum(item.stock_qty).as_("qty")
 
 	reserved_batch_qty = (
 		frappe.qb.from_(p)

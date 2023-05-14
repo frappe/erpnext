@@ -9,7 +9,17 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from frappe.utils import (
+	cint,
+	comma_or,
+	cstr,
+	flt,
+	format_time,
+	formatdate,
+	getdate,
+	month_diff,
+	nowdate,
+)
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -127,6 +137,7 @@ class StockEntry(StockController):
 		self.validate_fg_completed_qty()
 		self.validate_difference_account()
 		self.set_job_card_data()
+		self.validate_job_card_item()
 		self.set_purpose_for_stock_entry()
 		self.clean_serial_nos()
 		self.validate_duplicate_serial_no()
@@ -149,6 +160,41 @@ class StockEntry(StockController):
 			# in Manufacture Entry
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
+
+	def submit(self):
+		if self.is_enqueue_action():
+			frappe.msgprint(
+				_(
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
+				)
+			)
+			self.queue_action("submit", timeout=2000)
+		else:
+			self._submit()
+
+	def cancel(self):
+		if self.is_enqueue_action():
+			frappe.msgprint(
+				_(
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
+				)
+			)
+			self.queue_action("cancel", timeout=2000)
+		else:
+			self._cancel()
+
+	def is_enqueue_action(self, force=False) -> bool:
+		if force:
+			return True
+
+		if frappe.flags.in_test:
+			return False
+
+		# If line items are more than 100 or record is older than 6 months
+		if len(self.items) > 100 or month_diff(nowdate(), self.posting_date) > 6:
+			return True
+
+		return False
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -210,6 +256,24 @@ class StockEntry(StockController):
 			self.work_order = data.work_order
 			self.from_bom = 1
 			self.bom_no = data.bom_no
+
+	def validate_job_card_item(self):
+		if not self.job_card:
+			return
+
+		if cint(frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")):
+			return
+
+		for row in self.items:
+			if row.job_card_item:
+				continue
+
+			msg = f"""Row #{0}: The job card item reference
+				is missing. Kindly create the stock entry
+				from the job card. If you have added the row manually
+				then you won't be able to add job card item reference."""
+
+			frappe.throw(_(msg))
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -2346,7 +2410,7 @@ def move_sample_to_retention_warehouse(company, items):
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.set_stock_entry_type()
+		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
 
 	def update_item(source_doc, target_doc, source_parent):
