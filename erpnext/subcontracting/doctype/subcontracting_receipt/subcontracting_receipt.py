@@ -113,9 +113,9 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def set_missing_values(self):
-		self.set_missing_values_in_additional_costs()
-		self.set_missing_values_in_supplied_items()
-		self.set_missing_values_in_items()
+		self.calculate_additional_costs()
+		self.calculate_supplied_items_qty_and_amount()
+		self.calculate_items_qty_and_amount()
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
@@ -147,13 +147,13 @@ class SubcontractingReceipt(SubcontractingController):
 					item.rm_item_code, 0
 				)
 
-	def set_missing_values_in_supplied_items(self):
+	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("supplied_items") or []:
 			item.amount = item.rate * item.consumed_qty
 
 		self.set_available_qty_for_consumption()
 
-	def set_missing_values_in_items(self):
+	def calculate_items_qty_and_amount(self):
 		rm_supp_cost = {}
 		for item in self.get("supplied_items") or []:
 			if item.reference_name in rm_supp_cost:
