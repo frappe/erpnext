@@ -11,13 +11,13 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2023-05-15 09:18:42.938872",
+ "modified": "2023-05-16 12:49:52.323387",
  "modified_by": "Administrator",
  "name": "Create an Item",
  "owner": "Administrator",
  "reference_document": "Item",
  "show_form_tour": 1,
- "show_full_form": 1,
+ "show_full_form": 0,
  "title": "Manage Items",
  "validate_action": 1
 }
