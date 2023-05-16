@@ -25,20 +25,14 @@
  "documentation_url": "https://docs.erpnext.com/docs/v13/user/manual/en/setting-up/company-setup",
  "idx": 0,
  "is_complete": 0,
- "modified": "2022-06-07 14:31:00.575193",
+ "modified": "2023-05-16 12:01:24.091499",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Company Set Up"
-  },
-  {
    "step": "Navigation Help"
-  },
-  {
-   "step": "Data import"
   },
   {
    "step": "Create an Item"
@@ -51,12 +45,9 @@
   },
   {
    "step": "Create a Quotation"
-  },
-  {
-   "step": "Letterhead"
   }
  ],
- "subtitle": "Company, Item, Customer, Supplier, Navigation Help, Data Import, Letter Head, Quotation",
+ "subtitle": "Item, Customer, Supplier, Navigation Help, Quotation",
  "success_message": "Masters are all set up!",
- "title": "Let's Set Up Some Masters"
+ "title": "Let's begin your journey with ERPNext"
 }
