@@ -28,6 +28,14 @@ class SubcontractingReceipt(SubcontractingController):
 			},
 		]
 
+	def onload(self):
+		self.set_onload(
+			"backflush_based_on",
+			frappe.db.get_single_value(
+				"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
+			),
+		)
+
 	def update_status_updater_args(self):
 		if cint(self.is_return):
 			self.status_updater.extend(
