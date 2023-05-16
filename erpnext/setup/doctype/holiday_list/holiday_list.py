@@ -115,6 +115,8 @@ def is_holiday(holiday_list, date=None):
 	if date is None:
 		date = today()
 	if holiday_list:
-		return bool(frappe.get_all("Holiday List", dict(name=holiday_list, holiday_date=date)))
+		return bool(
+			frappe.db.exists("Holiday", {"parent": holiday_list, "holiday_date": date}, cache=True)
+		)
 	else:
 		return False
