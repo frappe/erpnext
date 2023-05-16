@@ -22,10 +22,10 @@
  "creation": "2021-11-22 12:19:15.888642",
  "docstatus": 0,
  "doctype": "Module Onboarding",
- "documentation_url": "https://docs.erpnext.com/docs/v13/user/manual/en/setting-up/company-setup",
+ "documentation_url": "https://docs.erpnext.com/docs/v14/user/manual/en/setting-up/company-setup",
  "idx": 0,
  "is_complete": 0,
- "modified": "2023-05-16 12:53:40.191034",
+ "modified": "2023-05-16 13:13:24.043792",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
@@ -47,7 +47,7 @@
    "step": "Create a Quotation"
   }
  ],
- "subtitle": "Item, Customer, Supplier, Navigation Help, Quotation",
- "success_message": "Masters are all set up!",
+ "subtitle": "Item, Customer, Supplier, Navigation Help and Quotation",
+ "success_message": "You're ready to start your journey with ERPNext",
  "title": "Let's begin your journey with ERPNext"
 }

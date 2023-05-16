@@ -9,13 +9,13 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2023-05-15 09:18:42.973085",
+ "modified": "2023-05-16 12:54:54.112364",
  "modified_by": "Administrator",
  "name": "Create a Customer",
  "owner": "Administrator",
  "reference_document": "Customer",
  "show_form_tour": 0,
  "show_full_form": 0,
- "title": "Manage Customers",
+ "title": "Create a Customer",
  "validate_action": 1
 }

@@ -9,13 +9,13 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2023-05-15 09:18:42.950884",
+ "modified": "2023-05-16 12:55:08.610113",
  "modified_by": "Administrator",
  "name": "Create a Supplier",
  "owner": "Administrator",
  "reference_document": "Supplier",
  "show_form_tour": 0,
  "show_full_form": 0,
- "title": "Manage Suppliers",
+ "title": "Create a Supplier",
  "validate_action": 1
 }
