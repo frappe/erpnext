@@ -1682,6 +1682,9 @@ class AccountsController(TransactionBase):
 					d.base_payment_amount = flt(
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
+		else:
+			self.fetch_payment_terms_from_order(po_or_so, doctype)
+			self.ignore_default_payment_terms_template = 1
 
 	def get_order_details(self):
 		if self.doctype == "Sales Invoice":
