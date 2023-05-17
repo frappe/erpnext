@@ -101,6 +101,7 @@ def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account
 		return
 
 	# Create Supplier and Bank Account for the same
+<<<<<<< HEAD
 	supplier = frappe.new_doc("Supplier")
 	supplier.supplier_name = supplier_name
 	supplier.supplier_group = "Services"
@@ -121,6 +122,37 @@ def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account
 		bank_account.party_type = "Supplier"
 		bank_account.party = supplier.name
 		bank_account.insert()
+=======
+	supplier = frappe.get_doc(
+		{
+			"doctype": "Supplier",
+			"supplier_name": supplier_name,
+			"supplier_group": "Services",
+			"supplier_type": "Company",
+		}
+	).insert()
+>>>>>>> 4a14e9ea4e (fix: Tests)
+
+	if not frappe.db.exists("Bank", "TestBank"):
+		frappe.get_doc(
+			{
+				"doctype": "Bank",
+				"bank_name": "TestBank",
+			}
+		).insert(ignore_if_duplicate=True)
+
+	if not frappe.db.exists("Bank Account", supplier.name + " - " + "TestBank"):
+		frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": supplier.name,
+				"bank": "TestBank",
+				"iban": iban,
+				"bank_account_no": account_no,
+				"party_type": "Supplier",
+				"party": supplier.name,
+			}
+		).insert()
 
 
 def create_bank_transaction(
