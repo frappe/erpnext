@@ -19,14 +19,19 @@ def execute(filters=None):
 	return _execute(filters)
 
 
-def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
+def _execute(
+	filters=None,
+	additional_table_columns=None,
+	additional_query_columns=None,
+	additional_conditions=None,
+):
 	if not filters:
 		filters = {}
 	columns = get_columns(additional_table_columns, filters)
 
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
-	item_list = get_items(filters, additional_query_columns)
+	item_list = get_items(filters, additional_query_columns, additional_conditions)
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 
@@ -328,7 +333,7 @@ def get_columns(additional_table_columns, filters):
 	return columns
 
 
-def get_conditions(filters):
+def get_conditions(filters, additional_conditions=None):
 	conditions = ""
 
 	for opts in (
@@ -340,6 +345,9 @@ def get_conditions(filters):
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+
+	if additional_conditions:
+		conditions += additional_conditions
 
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
@@ -376,8 +384,8 @@ def get_group_by_conditions(filters, doctype):
 		return "ORDER BY `tab{0}`.{1}".format(doctype, frappe.scrub(filters.get("group_by")))
 
 
-def get_items(filters, additional_query_columns):
-	conditions = get_conditions(filters)
+def get_items(filters, additional_query_columns, additional_conditions=None):
+	conditions = get_conditions(filters, additional_conditions)
 
 	if additional_query_columns:
 		additional_query_columns = ", " + ", ".join(additional_query_columns)
