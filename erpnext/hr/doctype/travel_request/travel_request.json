@@ -10,15 +10,15 @@
   "travel_funding",
   "travel_proof",
   "requition_no",
-  "employee_name",
+  "employee",
+  "date",
   "loaction",
   "advance_required",
-  "date",
   "column_break_2",
-  "employee",
+  "employee_name",
+  "employee_grade",
   "team",
   "designation",
-  "employee_grade",
   "purpose_of_travel",
   "details_of_sponsor",
   "section_break_7",
@@ -55,6 +55,47 @@
  ],
  "fields": [
   {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "__user",
+   "fieldname": "prepared_by",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Prepared By",
+   "options": "User"
+  },
+  {
+   "fetch_from": "employee.employee_grade",
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": " Employee Grade",
+   "options": "Employee Grade",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Travel Request",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nDraft\nApproved\nTo Be Approved"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Small Text",
+   "label": "Remark"
+  },
+  {
    "fieldname": "travel_type",
    "fieldtype": "Select",
    "hidden": 1,
@@ -75,8 +116,56 @@
    "label": "Copy of Invitation/Announcement"
   },
   {
+   "fieldname": "requition_no",
+   "fieldtype": "Data",
+   "label": "Requition No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "loaction",
+   "fieldtype": "Data",
+   "label": "Loaction"
+  },
+  {
+   "fieldname": "advance_required",
+   "fieldtype": "Float",
+   "label": "Advance Required"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee ID",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Data",
+   "label": "Team"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
   },
   {
    "fieldname": "purpose_of_travel",
@@ -92,16 +181,39 @@
    "label": "Details of Sponsor (Name, Location)"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_4",
+   "fieldname": "section_break_7",
    "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Description"
+   "label": "Requisition Details"
   },
   {
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Any other details"
+   "fieldname": "travel_requisition",
+   "fieldtype": "Table",
+   "label": "Travel Requisition",
+   "options": "Travel Requisition"
+  },
+  {
+   "fieldname": "requisition_program",
+   "fieldtype": "Table",
+   "label": "Requisition Program",
+   "options": "Requisition Program Table"
+  },
+  {
+   "depends_on": "eval:doc.status == \"Approved\"",
+   "fieldname": "approved_by_hod_section",
+   "fieldtype": "Section Break",
+   "label": "Approved By HOD"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "employee.expense_approver",
+   "fieldname": "approving_officer",
+   "fieldtype": "Link",
+   "label": "Approving Officer",
+   "options": "User",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -109,22 +221,6 @@
    "fieldtype": "Section Break",
    "hidden": 1,
    "label": "Employee Details"
-  },
-  {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Employee ID",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "employee.employee_name",
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "label": "Employee Name",
-   "read_only": 1,
-   "reqd": 1
   },
   {
    "fetch_from": "employee.cell_number",
@@ -167,6 +263,18 @@
    "label": "Passport Number"
   },
   {
+   "collapsible": 1,
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Any other details"
+  },
+  {
    "fieldname": "travel_itinerary",
    "fieldtype": "Section Break",
    "hidden": 1,
@@ -184,16 +292,27 @@
    "label": "Costing Details"
   },
   {
+   "fieldname": "costings",
+   "fieldtype": "Table",
+   "label": "Costing",
+   "options": "Travel Request Costing"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Accounting Dimensions"
+  },
+  {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
   },
   {
-   "fieldname": "costings",
-   "fieldtype": "Table",
-   "label": "Costing",
-   "options": "Travel Request Costing"
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   },
   {
    "collapsible": 1,
@@ -216,131 +335,12 @@
    "fieldname": "other_details",
    "fieldtype": "Text",
    "label": "Other Details"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Travel Request",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "label": "Requisition Details"
-  },
-  {
-   "fieldname": "requisition_program",
-   "fieldtype": "Table",
-   "label": "Requisition Program",
-   "options": "Requisition Program Table"
-  },
-  {
-   "fieldname": "requition_no",
-   "fieldtype": "Data",
-   "label": "Requition No",
-   "read_only": 1
-  },
-  {
-   "fieldname": "team",
-   "fieldtype": "Data",
-   "label": "Team"
-  },
-  {
-   "fieldname": "loaction",
-   "fieldtype": "Data",
-   "label": "Loaction"
-  },
-  {
-   "fieldname": "designation",
-   "fieldtype": "Data",
-   "label": "Designation"
-  },
-  {
-   "fieldname": "advance_required",
-   "fieldtype": "Float",
-   "label": "Advance Required"
-  },
-  {
-   "fetch_from": "employee.employee_grade",
-   "fieldname": "employee_grade",
-   "fieldtype": "Link",
-   "label": " Employee Grade",
-   "options": "Employee Grade",
-   "read_only": 1
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "label": "Date",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "employee.expense_approver",
-   "fieldname": "approving_officer",
-   "fieldtype": "Link",
-   "label": "Approving Officer",
-   "options": "User",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_22",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Status",
-   "options": "\nDraft\nApproved\nCheck\nRequest For Approval"
-  },
-  {
-   "fieldname": "travel_requisition",
-   "fieldtype": "Table",
-   "label": "Travel Requisition",
-   "options": "Travel Requisition"
-  },
-  {
-   "default": "__user",
-   "fieldname": "prepared_by",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Prepared By",
-   "options": "User"
-  },
-  {
-   "fieldname": "remark",
-   "fieldtype": "Small Text",
-   "label": "Remark"
-  },
-  {
-   "fieldname": "section_break_24",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:doc.status == \"Approved\"",
-   "fieldname": "approved_by_hod_section",
-   "fieldtype": "Section Break",
-   "label": "Approved By HOD"
   }
  ],
  "hide_toolbar": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-12 14:43:44.240140",
+ "modified": "2023-05-17 09:44:48.701434",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

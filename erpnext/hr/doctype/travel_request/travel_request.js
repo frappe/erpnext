@@ -32,7 +32,7 @@ frappe.ui.form.on("Travel Request", {
 				if (doc.status === "Draft") {
 					cur_frm.add_custom_button(__('Approved Request'), () => cur_frm.events.approved_request(), __("Status"));
 				}
-				if (doc.status == "Request For Approval") {
+				if (doc.status == "To Be Approved") {
 					cur_frm.disable_save();				
 				}				
 			}
@@ -40,10 +40,10 @@ frappe.ui.form.on("Travel Request", {
 
 		if (frappe.session.user === frm.doc.approving_officer) {
 	
-			if (doc.status == "Request For Approval" || doc.status=== "Check"){
+			if (doc.status == "To Be Approved" || doc.status=== "Check"){
 				cur_frm.add_custom_button(__('Draft'), () => cur_frm.events.draft(), __("Status"));
 			}
-			if (doc.status=== "Request For Approval") {
+			if (doc.status=== "To Be Approved") {
 				if (doc.status != "Approved") {
 					cur_frm.add_custom_button(__('Approved'), () => cur_frm.events.approved(), __("Status"));
 				}		
@@ -74,7 +74,6 @@ frappe.ui.form.on("Travel Request", {
 			}
 		});
 		d.show();
-
 	},
 	approved_request: function(){
 		frappe.call({                        
@@ -84,9 +83,8 @@ frappe.ui.form.on("Travel Request", {
 					name:cur_frm.doc.name,
 					approving_officer : cur_frm.doc.approving_officer,				},	 
 		 });
-		 cur_frm.set_value("status","Request For Approval");
+		 cur_frm.set_value("status","To Be Approved");
 		 cur_frm.save();
-		
 	},
 });
 frappe.ui.form.on("Travel Requisition", {
