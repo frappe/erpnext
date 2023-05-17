@@ -163,9 +163,11 @@
    "label": "Team"
   },
   {
+   "fetch_from": "prepared_by.designation",
    "fieldname": "designation",
    "fieldtype": "Data",
-   "label": "Designation"
+   "label": "Designation",
+   "read_only": 1
   },
   {
    "fieldname": "purpose_of_travel",
@@ -189,13 +191,15 @@
    "fieldname": "travel_requisition",
    "fieldtype": "Table",
    "label": "Travel Requisition",
-   "options": "Travel Requisition"
+   "options": "Travel Requisition",
+   "reqd": 1
   },
   {
    "fieldname": "requisition_program",
    "fieldtype": "Table",
    "label": "Requisition Program",
-   "options": "Requisition Program Table"
+   "options": "Requisition Program Table",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.status == \"Approved\"",
@@ -340,7 +344,7 @@
  "hide_toolbar": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-17 09:44:48.701434",
+ "modified": "2023-05-17 16:58:56.612472",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

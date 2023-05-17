@@ -25,7 +25,10 @@ frappe.ui.form.on("Travel Request", {
 		}
 	},
 	refresh: function (frm) {
-		frm.events.grade_details(frm);
+		if (frm.doc.employee_grade){
+			frm.events.grade_details(frm);
+		}
+
 		let doc = frm.doc;
 		if (!frm.doc.__islocal) {
 			if (frappe.session.user === frm.doc.prepared_by){
@@ -101,7 +104,7 @@ frappe.ui.form.on("Travel Requisition", {
 				field.options = [""].concat(options);
 				frappe.model.set_value(cdt, cdn, "class", "");
 				cur_frm.refresh_field("class");				
-				frm.save();
+				// frm.save();
 			}
 		})
 	},
