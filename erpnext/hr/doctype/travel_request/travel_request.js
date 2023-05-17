@@ -28,7 +28,6 @@ frappe.ui.form.on("Travel Request", {
 		if (frm.doc.employee_grade){
 			frm.events.grade_details(frm);
 		}
-
 		let doc = frm.doc;
 		if (!frm.doc.__islocal) {
 			if (frappe.session.user === frm.doc.prepared_by){
