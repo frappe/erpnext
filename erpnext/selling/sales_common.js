@@ -299,7 +299,8 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	batch_no(doc, cdt, cdn) {
-		var me = this;
+		super.batch_no(doc, cdt, cdn);
+
 		var item = frappe.get_doc(cdt, cdn);
 
 		if (item.serial_no) {
@@ -376,10 +377,6 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 				this.set_batch_number(cdt, cdn);
 			}
-	}
-
-	batch_no(doc, cdt, cdn) {
-		super.batch_no(doc, cdt, cdn);
 	}
 
 	qty(doc, cdt, cdn) {

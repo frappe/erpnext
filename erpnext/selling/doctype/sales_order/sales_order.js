@@ -264,7 +264,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 				}
 				// payment request
-				if(flt(doc.per_billed)<100) {
+				if(flt(doc.per_billed, precision('per_billed', doc)) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
 					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
 					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
 				}

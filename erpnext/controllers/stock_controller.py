@@ -449,8 +449,22 @@ class StockController(AccountsController):
 				"Delivery Note",
 				"Stock Entry",
 			]:
-				if (sl_dict.actual_qty > 0 and self.doctype in ["Purchase Invoice", "Purchase Receipt"]) or (
-					sl_dict.actual_qty < 0 and self.doctype in ["Sales Invoice", "Delivery Note", "Stock Entry"]
+				if (
+					(
+						sl_dict.actual_qty > 0
+						and not self.get("is_return")
+						or sl_dict.actual_qty < 0
+						and self.get("is_return")
+					)
+					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+				) or (
+					(
+						sl_dict.actual_qty < 0
+						and not self.get("is_return")
+						or sl_dict.actual_qty > 0
+						and self.get("is_return")
+					)
+					and self.doctype in ["Sales Invoice", "Delivery Note", "Stock Entry"]
 				):
 					sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 				else:
@@ -755,6 +769,9 @@ class StockController(AccountsController):
 				"company": self.company,
 			}
 		)
+
+		if self.docstatus == 2:
+			force = True
 
 		if force or future_sle_exists(args) or repost_required_for_queue(self):
 			item_based_reposting = cint(
