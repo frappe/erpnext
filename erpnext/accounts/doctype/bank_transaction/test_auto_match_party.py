@@ -146,21 +146,49 @@ class TestAutoMatchParty(FrappeTestCase):
 		self.assertEqual(doc_2.party, "Amazon")
 
 
-def create_supplier_for_match(supplier_name="John Doe & Co.", account_no=None, iban=None):
-	if frappe.db.exists("Supplier", supplier_name):
-		frappe.db.set_value("Supplier", supplier_name, {"bank_account_no": account_no, "iban": iban})
+def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account_no=None):
+	if frappe.db.exists("Supplier", {"supplier_name": supplier_name}):
+		# Update related Bank Account details
+		if not (iban or account_no):
+			return
+
+		frappe.db.set_value(
+			dt="Bank Account",
+			dn={"party": supplier_name},
+			field={"iban": iban, "bank_account_no": account_no},
+		)
 		return
 
-	frappe.get_doc(
+	# Create Supplier and Bank Account for the same
+	supplier = frappe.get_doc(
 		{
 			"doctype": "Supplier",
 			"supplier_name": supplier_name,
 			"supplier_group": "Services",
 			"supplier_type": "Company",
-			"bank_account_no": account_no,
-			"iban": iban,
 		}
 	).insert()
+
+	if not frappe.db.exists("Bank", "TestBank"):
+		frappe.get_doc(
+			{
+				"doctype": "Bank",
+				"bank_name": "TestBank",
+			}
+		).insert(ignore_if_duplicate=True)
+
+	if not frappe.db.exists("Bank Account", supplier.name + " - " + "TestBank"):
+		frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": supplier.name,
+				"bank": "TestBank",
+				"iban": iban,
+				"bank_account_no": account_no,
+				"party_type": "Supplier",
+				"party": supplier.name,
+			}
+		).insert()
 
 
 def create_bank_transaction(
