@@ -337,7 +337,7 @@ class AssetDepreciationSchedule(Document):
 				depreciation_amount += value_after_depreciation - row.expected_value_after_useful_life
 				skip_row = True
 
-			if depreciation_amount > 0:
+			if flt(depreciation_amount, asset_doc.precision("gross_purchase_amount")) > 0:
 				self.add_depr_schedule_row(
 					schedule_date,
 					depreciation_amount,
