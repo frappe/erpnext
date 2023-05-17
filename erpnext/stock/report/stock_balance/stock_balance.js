@@ -90,7 +90,8 @@ frappe.query_reports["Stock Balance"] = {
 		{
 			"fieldname": 'ignore_closing_balance',
 			"label": __('Ignore Closing Balance'),
-			"fieldtype": 'Check'
+			"fieldtype": 'Check',
+			"default": 1
 		},
 	],
 

@@ -60,7 +60,7 @@ class StockBalanceReport(object):
 	def run(self):
 		self.float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
-		self.inventory_dimensions = get_inventory_dimension_fields()
+		self.inventory_dimensions = self.get_inventory_dimension_fields()
 		self.prepare_opening_data_from_closing_balance()
 		self.prepare_stock_ledger_entries()
 		self.prepare_new_data()
@@ -110,13 +110,18 @@ class StockBalanceReport(object):
 				report_data.update(variant_data)
 
 			if self.filters.get("show_stock_ageing_data"):
-				fifo_queue = item_wise_fifo_queue[(report_data.item_code, report_data.warehouse)].get(
-					"fifo_queue"
-				)
+				opening_fifo_queue = self.get_opening_fifo_queue(report_data) or []
+
+				fifo_queue = []
+				if fifo_queue := item_wise_fifo_queue.get((report_data.item_code, report_data.warehouse)):
+					fifo_queue = fifo_queue.get("fifo_queue")
+
+				if fifo_queue:
+					opening_fifo_queue.extend(fifo_queue)
 
 				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
-				if fifo_queue:
-					fifo_queue = sorted(filter(_func, fifo_queue), key=_func)
+				if opening_fifo_queue:
+					fifo_queue = sorted(filter(_func, opening_fifo_queue), key=_func)
 					if not fifo_queue:
 						continue
 
@@ -124,6 +129,7 @@ class StockBalanceReport(object):
 					stock_ageing_data["average_age"] = get_average_age(fifo_queue, to_date)
 					stock_ageing_data["earliest_age"] = date_diff(to_date, fifo_queue[0][1])
 					stock_ageing_data["latest_age"] = date_diff(to_date, fifo_queue[-1][1])
+					stock_ageing_data["fifo_queue"] = fifo_queue
 
 				report_data.update(stock_ageing_data)
 
@@ -145,11 +151,6 @@ class StockBalanceReport(object):
 		for group_by_key, entry in self.opening_data.items():
 			if group_by_key not in item_warehouse_map:
 				self.initialize_data(item_warehouse_map, group_by_key, entry)
-
-			qty_dict = item_warehouse_map[group_by_key]
-			qty_dict.val_rate = entry.valuation_rate
-			qty_dict.bal_qty += flt(qty_dict.opening_qty)
-			qty_dict.bal_val += flt(qty_dict.opening_val)
 
 		item_warehouse_map = filter_items_with_no_transactions(
 			item_warehouse_map, self.float_precision, self.inventory_dimensions
@@ -186,10 +187,6 @@ class StockBalanceReport(object):
 				qty_dict.out_qty += abs(qty_diff)
 				qty_dict.out_val += abs(value_diff)
 
-		# if self.opening_data and group_by_key in self.opening_data:
-		# 	qty_diff += flt(qty_dict.opening_qty)
-		# 	value_diff += flt(qty_dict.opening_val)
-
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
@@ -208,12 +205,13 @@ class StockBalanceReport(object):
 				"item_name": entry.item_name,
 				"opening_qty": opening_data.get("bal_qty") or 0.0,
 				"opening_val": opening_data.get("bal_val") or 0.0,
+				"opening_fifo_queue": opening_data.get("fifo_queue") or [],
 				"in_qty": 0.0,
 				"in_val": 0.0,
 				"out_qty": 0.0,
 				"out_val": 0.0,
-				"bal_qty": 0.0,
-				"bal_val": 0.0,
+				"bal_qty": opening_data.get("bal_qty") or 0.0,
+				"bal_val": opening_data.get("bal_val") or 0.0,
 				"val_rate": 0.0,
 			}
 		)
@@ -294,7 +292,7 @@ class StockBalanceReport(object):
 		self.sle_entries = query.run(as_dict=True)
 
 	def apply_inventory_dimensions_filters(self, query, sle) -> str:
-		inventory_dimension_fields = get_inventory_dimension_fields()
+		inventory_dimension_fields = self.get_inventory_dimension_fields()
 		if inventory_dimension_fields:
 			for fieldname in inventory_dimension_fields:
 				query = query.select(fieldname)
@@ -438,20 +436,6 @@ class StockBalanceReport(object):
 					"options": "currency",
 				},
 				{
-					"label": _("Reorder Level"),
-					"fieldname": "reorder_level",
-					"fieldtype": "Float",
-					"width": 80,
-					"convertible": "qty",
-				},
-				{
-					"label": _("Reorder Qty"),
-					"fieldname": "reorder_qty",
-					"fieldtype": "Float",
-					"width": 80,
-					"convertible": "qty",
-				},
-				{
 					"label": _("Company"),
 					"fieldname": "company",
 					"fieldtype": "Link",
@@ -556,9 +540,17 @@ class StockBalanceReport(object):
 
 		return opening_vouchers
 
+	@staticmethod
+	def get_inventory_dimension_fields():
+		return [dimension.fieldname for dimension in get_inventory_dimensions()]
 
-def get_inventory_dimension_fields():
-	return [dimension.fieldname for dimension in get_inventory_dimensions()]
+	@staticmethod
+	def get_opening_fifo_queue(report_data):
+		opening_fifo_queue = report_data.get("opening_fifo_queue") or []
+		for row in opening_fifo_queue:
+			row[1] = getdate(row[1])
+
+		return opening_fifo_queue
 
 
 def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory_dimensions: list):
@@ -571,7 +563,16 @@ def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory
 			if key in inventory_dimensions:
 				continue
 
-			if key in ["item_code", "warehouse", "item_name", "item_group", "projecy", "stock_uom"]:
+			if key in [
+				"item_code",
+				"warehouse",
+				"item_name",
+				"item_group",
+				"projecy",
+				"stock_uom",
+				"company",
+				"opening_fifo_queue",
+			]:
 				continue
 
 			val = flt(val, float_precision)
