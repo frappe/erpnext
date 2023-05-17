@@ -13,11 +13,13 @@ class TestAutoMatchParty(FrappeTestCase):
 	def setUpClass(cls):
 		create_bank_account()
 		frappe.db.set_single_value("Accounts Settings", "enable_party_matching", 1)
+		frappe.db.set_single_value("Accounts Settings", "enable_fuzzy_matching", 1)
 		return super().setUpClass()
 
 	@classmethod
 	def tearDownClass(cls):
 		frappe.db.set_single_value("Accounts Settings", "enable_party_matching", 0)
+		frappe.db.set_single_value("Accounts Settings", "enable_fuzzy_matching", 0)
 
 	def test_match_by_account_number(self):
 		"""Test if transaction matches with existing (Bank Party Mapper) or new match."""
@@ -144,6 +146,22 @@ class TestAutoMatchParty(FrappeTestCase):
 		self.assertEqual(bank_party_mapper.party, "Amazon")
 		self.assertEqual(bank_party_mapper.bank_party_name, "Amazn Co.")
 		self.assertEqual(doc_2.party, "Amazon")
+
+	def test_skip_match_if_multiple_close_results(self):
+		create_supplier_for_match(supplier_name="Adithya Medical & General Stores")
+		create_supplier_for_match(supplier_name="Adithya Medical And General Stores")
+
+		doc = create_bank_transaction(
+			description="Paracetamol Consignment, SINV-0009",
+			withdrawal=24.85,
+			transaction_id="3a1da4ee2dc5a980138d56ef3460cbd9",
+			party_name="Adithya Medical & General",
+		)
+
+		# Mapping is skipped as both Supplier names have the same match score
+		self.assertEqual(doc.party_type, None)
+		self.assertEqual(doc.party, None)
+		self.assertFalse(doc.bank_party_mapper)
 
 
 def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account_no=None):

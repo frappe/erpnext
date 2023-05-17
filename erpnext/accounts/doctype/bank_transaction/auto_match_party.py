@@ -35,13 +35,15 @@ class AutoMatchParty:
 		return self.__dict__.get(key, None)
 
 	def match(self) -> Union[Tuple, None]:
+		result = None
 		result = AutoMatchbyAccountIBAN(
 			bank_party_account_number=self.bank_party_account_number,
 			bank_party_iban=self.bank_party_iban,
 			deposit=self.deposit,
 		).match()
 
-		if not result:
+		fuzzy_matching_enabled = frappe.db.get_single_value("Accounts Settings", "enable_fuzzy_matching")
+		if not result and fuzzy_matching_enabled:
 			result = AutoMatchbyPartyDescription(
 				bank_party_name=self.bank_party_name, description=self.description, deposit=self.deposit
 			).match()
@@ -184,31 +186,66 @@ class AutoMatchbyPartyDescription:
 		for party in parties:
 			name_field = party.lower() + "_name"
 			filters = {"status": "Active"} if party == "Employee" else {"disabled": 0}
-
 			names = frappe.get_all(party, filters=filters, pluck=name_field)
 
 			for field in ["bank_party_name", "description"]:
-				if not result and self.get(field):
-					result = self.fuzzy_search_and_return_result(party, names, field)
-					if result:
-						break
+				if not self.get(field):
+					continue
+
+				result, skip = self.fuzzy_search_and_return_result(party, names, field)
+				if result or skip:
+					break
+
+			if result or skip:
+				# We skip if:
+				# If it was hard to distinguish between close matches and so match is None
+				# OR if the right match was found
+				break
 
 		return result
 
 	def fuzzy_search_and_return_result(self, party, names, field) -> Union[Tuple, None]:
-		result = process.extractOne(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+		skip = False
 
-		if result:
-			party_name, score, index = result
-			if score > 75:
-				# Dont set description as a key in Bank Party Mapper due to its volatility
-				mapper = {"bank_party_name": self.get(field)} if field == "bank_party_name" else None
-				return (
-					party,
-					party_name,
-					mapper,
-				)
-			else:
-				return None
+		result = process.extract(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+		party_name, skip = self.process_fuzzy_result(result)
 
-		return result
+		if not party_name:
+			return None, skip
+
+		# Dont set description as a key in Bank Party Mapper due to its volatility
+		mapper = {"bank_party_name": self.get(field)} if field == "bank_party_name" else None
+		return (
+			party,
+			party_name,
+			mapper,
+		), skip
+
+	def process_fuzzy_result(self, result: Union[list, None]):
+		"""
+		If there are multiple valid close matches return None as result may be faulty.
+		Return the result only if one accurate match stands out.
+
+		Returns: Result, Skip (whether or not to continue matching)
+		"""
+		PARTY, SCORE, CUTOFF = 0, 1, 80
+
+		if not result or not len(result):
+			return None, False
+
+		first_result = result[0]
+
+		if len(result) == 1:
+			return (result[0][PARTY] if first_result[SCORE] > CUTOFF else None), True
+
+		second_result = result[1]
+
+		if first_result[SCORE] > CUTOFF:
+			# If multiple matches with the same score, return None but discontinue matching
+			# Matches were found but were too closes to distinguish between
+			if first_result[SCORE] == second_result[SCORE]:
+				return None, True
+
+			return first_result[PARTY], True
+		else:
+			return None, False

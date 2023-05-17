@@ -64,7 +64,8 @@
   "frozen_accounts_modifier",
   "report_settings_sb",
   "banking_tab",
-  "enable_party_matching"
+  "enable_party_matching",
+  "enable_fuzzy_matching"
  ],
  "fields": [
   {
@@ -399,6 +400,14 @@
    "fieldname": "enable_party_matching",
    "fieldtype": "Check",
    "label": "Enable Automatic Party Matching"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_party_matching",
+   "description": "Approximately match the description/party name against parties",
+   "fieldname": "enable_fuzzy_matching",
+   "fieldtype": "Check",
+   "label": "Enable Fuzzy Matching"
   }
  ],
  "icon": "icon-cog",
