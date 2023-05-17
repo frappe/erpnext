@@ -64,7 +64,8 @@
   "tab_break_dpet",
   "show_balance_in_coa",
   "banking_tab",
-  "enable_party_matching"
+  "enable_party_matching",
+  "enable_fuzzy_matching"
  ],
  "fields": [
   {
@@ -404,6 +405,14 @@
    "fieldname": "enable_party_matching",
    "fieldtype": "Check",
    "label": "Enable Automatic Party Matching"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_party_matching",
+   "description": "Approximately match the description/party name against parties",
+   "fieldname": "enable_fuzzy_matching",
+   "fieldtype": "Check",
+   "label": "Enable Fuzzy Matching"
   }
  ],
  "icon": "icon-cog",
@@ -411,7 +420,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-21 13:11:37.130743",
+ "modified": "2023-05-17 12:20:04.107641",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

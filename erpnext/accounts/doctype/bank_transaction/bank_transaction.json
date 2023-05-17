@@ -68,7 +68,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nPending\nSettled\nUnreconciled\nReconciled"
+   "options": "\nPending\nSettled\nUnreconciled\nReconciled\nCancelled"
   },
   {
    "fieldname": "bank_account",
@@ -238,7 +238,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-04 15:47:20.620006",
+ "modified": "2023-05-17 14:56:10.547480",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
