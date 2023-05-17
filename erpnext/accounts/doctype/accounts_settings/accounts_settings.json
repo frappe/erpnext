@@ -62,7 +62,15 @@
   "acc_frozen_upto",
   "column_break_25",
   "frozen_accounts_modifier",
+<<<<<<< HEAD
   "report_settings_sb"
+=======
+  "tab_break_dpet",
+  "show_balance_in_coa",
+  "banking_tab",
+  "enable_party_matching",
+  "enable_fuzzy_matching"
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
  ],
  "fields": [
   {
@@ -384,7 +392,19 @@
    "default": "0",
    "fieldname": "show_taxes_as_table_in_print",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "label": "Show Taxes as Table in Print"
+=======
+   "label": "Enable Automatic Party Matching"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_party_matching",
+   "description": "Approximately match the description/party name against parties",
+   "fieldname": "enable_fuzzy_matching",
+   "fieldtype": "Check",
+   "label": "Enable Fuzzy Matching"
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
   }
  ],
  "icon": "icon-cog",
@@ -392,7 +412,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-06-13 18:47:46.430291",
+=======
+ "modified": "2023-05-17 12:20:04.107641",
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

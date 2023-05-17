@@ -86,6 +86,22 @@ class TestAutoMatchParty(FrappeTestCase):
 		self.assertEqual(doc.party_type, None)
 		self.assertEqual(doc.party, None)
 
+	def test_skip_match_if_multiple_close_results(self):
+		create_supplier_for_match(supplier_name="Adithya Medical & General Stores")
+		create_supplier_for_match(supplier_name="Adithya Medical And General Stores")
+
+		doc = create_bank_transaction(
+			description="Paracetamol Consignment, SINV-0009",
+			withdrawal=24.85,
+			transaction_id="3a1da4ee2dc5a980138d56ef3460cbd9",
+			party_name="Adithya Medical & General",
+		)
+
+		# Mapping is skipped as both Supplier names have the same match score
+		self.assertEqual(doc.party_type, None)
+		self.assertEqual(doc.party, None)
+		self.assertFalse(doc.bank_party_mapper)
+
 
 def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account_no=None):
 	if frappe.db.exists("Supplier", {"supplier_name": supplier_name}):

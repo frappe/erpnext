@@ -71,7 +71,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nPending\nSettled\nUnreconciled\nReconciled"
+   "options": "\nPending\nSettled\nUnreconciled\nReconciled\nCancelled"
   },
   {
    "fieldname": "bank_account",
@@ -237,10 +237,14 @@
  "is_submittable": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-05-29 18:36:50.475964",
 =======
  "modified": "2023-06-06 13:58:12.821411",
 >>>>>>> 752a92bd8b (chore: Remove Bank Party Mapper implementation)
+=======
+ "modified": "2023-05-17 14:56:10.547480",
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",

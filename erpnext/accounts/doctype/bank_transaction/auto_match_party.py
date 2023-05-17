@@ -29,7 +29,11 @@ class AutoMatchParty:
 
 		fuzzy_matching_enabled = frappe.db.get_single_value("Accounts Settings", "enable_fuzzy_matching")
 		if not result and fuzzy_matching_enabled:
+<<<<<<< HEAD
 			result = AutoMatchbyPartyNameDescription(
+=======
+			result = AutoMatchbyPartyDescription(
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
 				bank_party_name=self.bank_party_name, description=self.description, deposit=self.deposit
 			).match()
 
@@ -128,7 +132,11 @@ class AutoMatchbyPartyNameDescription:
 
 		for party in parties:
 			filters = {"status": "Active"} if party == "Employee" else {"disabled": 0}
+<<<<<<< HEAD
 			names = frappe.get_all(party, filters=filters, pluck=party.lower() + "_name")
+=======
+			names = frappe.get_all(party, filters=filters, pluck=name_field)
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
 
 			for field in ["bank_party_name", "description"]:
 				if not self.get(field):
@@ -139,7 +147,12 @@ class AutoMatchbyPartyNameDescription:
 					break
 
 			if result or skip:
+<<<<<<< HEAD
 				# Skip If: It was hard to distinguish between close matches and so match is None
+=======
+				# We skip if:
+				# If it was hard to distinguish between close matches and so match is None
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
 				# OR if the right match was found
 				break
 
@@ -147,6 +160,7 @@ class AutoMatchbyPartyNameDescription:
 
 	def fuzzy_search_and_return_result(self, party, names, field) -> Union[Tuple, None]:
 		skip = False
+<<<<<<< HEAD
 		result = process.extract(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
 		party_name, skip = self.process_fuzzy_result(result)
 
@@ -156,6 +170,21 @@ class AutoMatchbyPartyNameDescription:
 		return (
 			party,
 			party_name,
+=======
+
+		result = process.extract(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+		party_name, skip = self.process_fuzzy_result(result)
+
+		if not party_name:
+			return None, skip
+
+		# Dont set description as a key in Bank Party Mapper due to its volatility
+		mapper = {"bank_party_name": self.get(field)} if field == "bank_party_name" else None
+		return (
+			party,
+			party_name,
+			mapper,
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
 		), skip
 
 	def process_fuzzy_result(self, result: Union[list, None]):
@@ -163,7 +192,11 @@ class AutoMatchbyPartyNameDescription:
 		If there are multiple valid close matches return None as result may be faulty.
 		Return the result only if one accurate match stands out.
 
+<<<<<<< HEAD
 		Returns: Result, Skip (whether or not to discontinue matching)
+=======
+		Returns: Result, Skip (whether or not to continue matching)
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
 		"""
 		PARTY, SCORE, CUTOFF = 0, 1, 80
 
@@ -171,6 +204,7 @@ class AutoMatchbyPartyNameDescription:
 			return None, False
 
 		first_result = result[0]
+<<<<<<< HEAD
 		if len(result) == 1:
 			return (first_result[PARTY] if first_result[SCORE] > CUTOFF else None), True
 
@@ -178,12 +212,24 @@ class AutoMatchbyPartyNameDescription:
 		if first_result[SCORE] > CUTOFF:
 			# If multiple matches with the same score, return None but discontinue matching
 			# Matches were found but were too close to distinguish between
+=======
+
+		if len(result) == 1:
+			return (result[0][PARTY] if first_result[SCORE] > CUTOFF else None), True
+
+		second_result = result[1]
+
+		if first_result[SCORE] > CUTOFF:
+			# If multiple matches with the same score, return None but discontinue matching
+			# Matches were found but were too closes to distinguish between
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
 			if first_result[SCORE] == second_result[SCORE]:
 				return None, True
 
 			return first_result[PARTY], True
 		else:
 			return None, False
+<<<<<<< HEAD
 
 
 def get_parties_in_order(deposit: float) -> list:
@@ -192,3 +238,5 @@ def get_parties_in_order(deposit: float) -> list:
 		parties = ["Customer", "Supplier", "Employee"]  # most -> least likely to pay
 
 	return parties
+=======
+>>>>>>> 4364fb9628 (feat: Optional Fuzzy Matching & Skip Matches for multiple similar matches)
