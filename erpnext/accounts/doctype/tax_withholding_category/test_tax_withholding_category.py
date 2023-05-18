@@ -110,9 +110,9 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		invoices.append(pi1)
 
 		# Cumulative threshold is 30000
-		# Threshold calculation should be on both the invoices
-		# TDS should be applied only on 1000
-		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
+		# Threshold calculation should be only on the Second invoice
+		# Second didn't breach, no TDS should be applied
+		self.assertEqual(pi1.taxes, [])
 
 		for d in reversed(invoices):
 			d.cancel()
