@@ -442,7 +442,43 @@ class StockController(AccountsController):
 			if not dimension:
 				continue
 
-			if row.get(dimension.source_fieldname):
+			if self.doctype in [
+				"Purchase Invoice",
+				"Purchase Receipt",
+				"Sales Invoice",
+				"Delivery Note",
+				"Stock Entry",
+			]:
+				if (
+					(
+						sl_dict.actual_qty > 0
+						and not self.get("is_return")
+						or sl_dict.actual_qty < 0
+						and self.get("is_return")
+					)
+					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+				) or (
+					(
+						sl_dict.actual_qty < 0
+						and not self.get("is_return")
+						or sl_dict.actual_qty > 0
+						and self.get("is_return")
+					)
+					and self.doctype in ["Sales Invoice", "Delivery Note", "Stock Entry"]
+				):
+					sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
+				else:
+					fieldname_start_with = "to"
+					if self.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+						fieldname_start_with = "from"
+
+					fieldname = f"{fieldname_start_with}_{dimension.source_fieldname}"
+					sl_dict[dimension.target_fieldname] = row.get(fieldname)
+
+					if not sl_dict.get(dimension.target_fieldname):
+						sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
+
+			elif row.get(dimension.source_fieldname):
 				sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 
 			if not sl_dict.get(dimension.target_fieldname) and dimension.fetch_from_parent:
@@ -733,6 +769,9 @@ class StockController(AccountsController):
 				"company": self.company,
 			}
 		)
+
+		if self.docstatus == 2:
+			force = True
 
 		if force or future_sle_exists(args) or repost_required_for_queue(self):
 			item_based_reposting = cint(
