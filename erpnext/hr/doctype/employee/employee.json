@@ -16,19 +16,19 @@
   "employment_type",
   "image",
   "employee_deparment",
-  "column_break1",
-  "company",
   "status",
-  "gender",
-  "date_of_birth",
+  "column_break1",
   "employee_grade",
   "employee_vertical",
+  "date_of_birth",
+  "company",
+  "gender",
   "date_of_joining",
   "employee_number",
   "section_break_18",
   "expense_approver",
   "column_break_20",
-  "passing_officer",
+  "travel_expense_checking_officer",
   "hod_details_section",
   "hod_name",
   "column_break_23",
@@ -76,9 +76,9 @@
   "health_insurance_no",
   "contact_details",
   "cell_number",
+  "personal_email",
   "user_id",
   "prefered_email",
-  "personal_email",
   "unsubscribed",
   "permanent_accommodation_type",
   "permanent_address",
@@ -86,15 +86,15 @@
   "prefered_contact_email",
   "company_email",
   "current_accommodation_type",
-  "alternate_mobile_no",
-  "check",
-  "current_address",
+  "alternate_mobile_number",
+  "current_address_same_as_permanent_address",
+  "employee_current_address",
   "sb53",
   "bio",
   "personal_details",
-  "pan_no",
+  "pan_number",
   "aadhar_number",
-  "driving_license_no",
+  "driving_license_number",
   "esic_number",
   "column_break_87",
   "attach_pan",
@@ -163,7 +163,8 @@
    "fieldtype": "Data",
    "label": "Employee name",
    "oldfieldname": "employee_name",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "reqd": 1
   },
   {
    "fetch_from": "user_id.user_image",
@@ -193,12 +194,10 @@
    "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Active\nInactive\nSuspended\nLeft",
-   "search_index": 1
+   "options": "Active\nInactive\nSuspended\nLeft"
   },
   {
    "fieldname": "employee_number",
@@ -282,8 +281,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "User ID",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
   },
   {
    "depends_on": "eval:(!doc.user_id)",
@@ -508,8 +506,7 @@
   {
    "fieldname": "personal_email",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Personal Email",
+   "label": "Mail ID",
    "options": "Email"
   },
   {
@@ -534,7 +531,7 @@
   {
    "fieldname": "permanent_address",
    "fieldtype": "Small Text",
-   "label": "Permanent Address"
+   "label": "Employee Permanent Address"
   },
   {
    "fieldname": "current_accommodation_type",
@@ -542,11 +539,6 @@
    "hidden": 1,
    "label": "Current Address Is",
    "options": "\nRented\nOwned"
-  },
-  {
-   "fieldname": "current_address",
-   "fieldtype": "Small Text",
-   "label": "Current Address"
   },
   {
    "collapsible": 1,
@@ -804,7 +796,7 @@
   {
    "fieldname": "expense_approver",
    "fieldtype": "Link",
-   "label": "Approving Officer",
+   "label": "Travel Expense Approving Officer",
    "options": "User",
    "reqd": 1
   },
@@ -840,7 +832,8 @@
    "fieldname": "employee_grade",
    "fieldtype": "Link",
    "label": "Employee Grade",
-   "options": "Employee Grade"
+   "options": "Employee Grade",
+   "reqd": 1
   },
   {
    "fieldname": "employee_vertical",
@@ -870,24 +863,9 @@
    "label": "HOD Mobile No."
   },
   {
-   "fieldname": "alternate_mobile_no",
-   "fieldtype": "Int",
-   "label": "Alternate Mobile No."
-  },
-  {
-   "fieldname": "pan_no",
-   "fieldtype": "Data",
-   "label": "PAN No."
-  },
-  {
    "fieldname": "aadhar_number",
    "fieldtype": "Int",
    "label": "Aadhar number"
-  },
-  {
-   "fieldname": "driving_license_no",
-   "fieldtype": "Int",
-   "label": "Driving License No."
   },
   {
    "fieldname": "esic_number",
@@ -936,21 +914,8 @@
    "label": "Attach policy"
   },
   {
-   "default": "0",
-   "fieldname": "check",
-   "fieldtype": "Check",
-   "label": "Current Address same as Permanent Address"
-  },
-  {
    "fieldname": "column_break_101",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "passing_officer",
-   "fieldtype": "Link",
-   "label": "Passing Officer",
-   "options": "User",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_18",
@@ -959,6 +924,41 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "current_address_same_as_permanent_address",
+   "fieldtype": "Check",
+   "label": "Current Address same as Permanent Address"
+  },
+  {
+   "fieldname": "alternate_mobile_number",
+   "fieldtype": "Date",
+   "label": "Alternate Mobile Number",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "driving_license_number",
+   "fieldtype": "Data",
+   "label": "Driving License Number"
+  },
+  {
+   "fieldname": "travel_expense_checking_officer",
+   "fieldtype": "Link",
+   "label": "Travel Expense Checking Officer",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_current_address",
+   "fieldtype": "Small Text",
+   "label": "Employee Current Address",
+   "read_only_depends_on": "eval:doc.current_address_same_as_permanent_address === 1"
+  },
+  {
+   "fieldname": "pan_number",
+   "fieldtype": "Data",
+   "label": "PAN Number"
   }
  ],
  "hide_toolbar": 1,
@@ -966,7 +966,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-05-11 18:44:08.493131",
+ "modified": "2023-05-18 19:07:14.156230",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

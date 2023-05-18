@@ -28,7 +28,7 @@
   },
   {
    "fieldname": "remark",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Remark"
   },
   {
@@ -51,7 +51,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-04 12:26:34.651287",
+ "modified": "2023-05-18 18:31:11.026883",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Requisition Program Table",

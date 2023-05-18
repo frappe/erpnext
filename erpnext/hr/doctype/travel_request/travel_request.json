@@ -9,16 +9,16 @@
   "status",
   "travel_funding",
   "travel_proof",
-  "requition_no",
   "employee",
-  "date",
-  "loaction",
-  "advance_required",
-  "column_break_2",
   "employee_name",
   "employee_grade",
+  "requition_no",
+  "advance_required",
+  "column_break_2",
+  "date",
   "team",
   "designation",
+  "loaction",
   "purpose_of_travel",
   "details_of_sponsor",
   "section_break_7",
@@ -87,13 +87,16 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "\nDraft\nApproved\nTo Be Approved"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "remark",
    "fieldtype": "Small Text",
-   "label": "Remark"
+   "label": "Remark",
+   "read_only_depends_on": "eval:!frappe.user.has_role('Approval Role')"
   },
   {
    "fieldname": "travel_type",
@@ -125,6 +128,8 @@
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee Name",
    "read_only": 1,
    "reqd": 1
@@ -136,14 +141,19 @@
   },
   {
    "fieldname": "advance_required",
-   "fieldtype": "Float",
-   "label": "Advance Required"
+   "fieldtype": "Currency",
+   "label": "Advance Required",
+   "options": "Currency"
   },
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_2",
@@ -153,6 +163,7 @@
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee ID",
    "options": "Employee",
    "reqd": 1
@@ -344,7 +355,7 @@
  "hide_toolbar": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-17 16:58:56.612472",
+ "modified": "2023-05-18 22:30:17.349905",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

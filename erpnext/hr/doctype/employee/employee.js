@@ -53,7 +53,7 @@ frappe.ui.form.on('Employee', {
 		});
 	},
 	setup:function(frm){
-		frm.set_query('passing_officer', function(doc) {
+		frm.set_query('travel_expense_checking_officer', function(doc) {
 			return {
 				filters: {
 					"designation": "Accountant",
@@ -123,9 +123,14 @@ frappe.ui.form.on('Employee', {
 		});
 	},
 	// permanent address copy to current address
-	check: function(frm) {
-        if (frm.doc.check && frm.doc.permanent_address) {
-            frm.set_value('current_address', frm.doc.permanent_address);
+	current_address_same_as_permanent_address: function(frm) {
+        if (frm.doc.current_address_same_as_permanent_address && frm.doc.permanent_address) {
+            frm.set_value('employee_current_address', frm.doc.permanent_address);
+        }
+    },
+	permanent_address:function(frm) {
+		if (frm.doc.current_address_same_as_permanent_address) {
+            frm.set_value('employee_current_address', frm.doc.permanent_address); // Update employee_current_address
         }
     }
 });
