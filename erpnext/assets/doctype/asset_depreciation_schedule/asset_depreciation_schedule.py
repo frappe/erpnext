@@ -337,7 +337,7 @@ class AssetDepreciationSchedule(Document):
 				depreciation_amount += value_after_depreciation - row.expected_value_after_useful_life
 				skip_row = True
 
-			if depreciation_amount > 0:
+			if flt(depreciation_amount, asset_doc.precision("gross_purchase_amount")) > 0:
 				self.add_depr_schedule_row(
 					schedule_date,
 					depreciation_amount,
@@ -521,9 +521,11 @@ def get_straight_line_or_manual_depr_amount(asset, row):
 		)
 	# if the Depreciation Schedule is being prepared for the first time
 	else:
-		return (flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)) / flt(
-			row.total_number_of_depreciations
-		)
+		return (
+			flt(asset.gross_purchase_amount)
+			- flt(asset.opening_accumulated_depreciation)
+			- flt(row.expected_value_after_useful_life)
+		) / flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
 
 
 def get_wdv_or_dd_depr_amount(

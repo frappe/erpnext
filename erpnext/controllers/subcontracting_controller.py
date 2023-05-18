@@ -741,7 +741,7 @@ class SubcontractingController(StockController):
 					sco_doc = frappe.get_doc("Subcontracting Order", sco)
 					sco_doc.update_status()
 
-	def set_missing_values_in_additional_costs(self):
+	def calculate_additional_costs(self):
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
 
 		if self.total_additional_costs:
