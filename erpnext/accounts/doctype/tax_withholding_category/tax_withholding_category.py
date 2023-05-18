@@ -302,7 +302,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 		"docstatus": 1,
 	}
 
-	if not tax_details.get("consider_party_ledger_amount") and doctype != "Sales Invoice":
+	if doctype != "Sales Invoice":
 		filters.update(
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
