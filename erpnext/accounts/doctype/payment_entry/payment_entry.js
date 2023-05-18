@@ -905,7 +905,7 @@ frappe.ui.form.on('Payment Entry', {
 			function(d) { return flt(d.amount) }));
 
 		frm.set_value("difference_amount", difference_amount - total_deductions +
-			frm.doc.base_total_taxes_and_charges);
+			flt(frm.doc.base_total_taxes_and_charges));
 
 		frm.events.hide_unhide_fields(frm);
 	},
