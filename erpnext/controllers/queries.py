@@ -53,13 +53,17 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Lead"
 	fields = get_fields(doctype, ["name", "lead_name", "company_name"])
 
+	searchfields = frappe.get_meta(doctype).get_search_fields()
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
+
 	return frappe.db.sql(
 		"""select {fields} from `tabLead`
 		where docstatus < 2
 			and ifnull(status, '') != 'Converted'
 			and ({key} like %(txt)s
 				or lead_name like %(txt)s
-				or company_name like %(txt)s)
+				or company_name like %(txt)s
+				or {scond})
 			{mcond}
 		order by
 			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
@@ -68,7 +72,12 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			idx desc,
 			name, lead_name
 		limit %(page_len)s offset %(start)s""".format(
-			**{"fields": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"scond": searchfields,
+				"mcond": get_match_cond(doctype),
+			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
 	)
@@ -576,7 +585,9 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
+def get_filtered_dimensions(
+	doctype, txt, searchfield, start, page_len, filters, reference_doctype=None
+):
 	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 		get_dimension_filter_map,
 	)
@@ -617,7 +628,12 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 		query_filters.append(["name", query_selector, dimensions])
 
 	output = frappe.get_list(
-		doctype, fields=fields, filters=query_filters, or_filters=or_filters, as_list=1
+		doctype,
+		fields=fields,
+		filters=query_filters,
+		or_filters=or_filters,
+		as_list=1,
+		reference_doctype=reference_doctype,
 	)
 
 	return [tuple(d) for d in set(output)]

@@ -48,7 +48,8 @@ frappe.ui.form.on("BOM", {
 			return {
 				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
 				filters: {
-					"item_code": doc.item
+					"include_item_in_manufacturing": 1,
+					"is_fixed_asset": 0
 				}
 			};
 		});
@@ -652,7 +653,7 @@ frappe.ui.form.on("BOM Operation", "operation", function(frm, cdt, cdn) {
 
 frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
-
+	if(!d.workstation) return;
 	frappe.call({
 		"method": "frappe.client.get",
 		args: {

@@ -5,9 +5,12 @@
 import unittest
 
 import frappe
+from frappe.test_runner import make_test_records
 
 from erpnext.accounts.doctype.account.account import merge_account, update_account_number
 from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
+
+test_dependencies = ["Company"]
 
 
 class TestAccount(unittest.TestCase):
@@ -188,6 +191,58 @@ class TestAccount(unittest.TestCase):
 		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
 		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
 
+	def test_account_currency_sync(self):
+		"""
+		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
+		"""
+
+		make_test_records("Company")
+
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		def create_bank_account():
+			acc = frappe.new_doc("Account")
+			acc.account_name = "_Test Bank JPY"
+
+			acc.parent_account = "Temporary Accounts - _TC6"
+			acc.company = "_Test Company 6"
+			return acc
+
+		acc = create_bank_account()
+		# Explicitly set currency
+		acc.account_currency = "JPY"
+		acc.insert()
+		self.assertTrue(
+			frappe.db.exists(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Bank JPY",
+					"account_currency": "JPY",
+					"company": "_Test Company 7",
+				}
+			)
+		)
+
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
+
+		acc = create_bank_account()
+		# default currency is used
+		acc.insert()
+		self.assertTrue(
+			frappe.db.exists(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Bank JPY",
+					"account_currency": "USD",
+					"company": "_Test Company 7",
+				}
+			)
+		)
+
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
+
 	def test_child_company_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
@@ -297,7 +352,7 @@ def _make_test_records(verbose=None):
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
 		["_Test Accumulated Depreciations", "Current Assets", 0, "Accumulated Depreciation", None],
-		["_Test Depreciations", "Expenses", 0, None, None],
+		["_Test Depreciations", "Expenses", 0, "Depreciation", None],
 		["_Test Gain/Loss on Asset Disposal", "Expenses", 0, None, None],
 		# Receivable / Payable Account
 		["_Test Receivable", "Current Assets", 0, "Receivable", None],

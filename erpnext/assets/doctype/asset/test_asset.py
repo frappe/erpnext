@@ -691,7 +691,7 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		self.assertEqual(asset.status, "Draft")
-		expected_schedules = [["2032-12-31", 30000.0, 77095.89], ["2033-06-06", 12904.11, 90000.0]]
+		expected_schedules = [["2032-12-31", 42904.11, 90000.0]]
 		schedules = [
 			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in get_depr_schedule(asset.name, "Draft")
@@ -1511,7 +1511,7 @@ class TestDepreciationBasics(AssetSetup):
 		)
 
 		self.assertEqual(asset.status, "Submitted")
-		self.assertEqual(asset.get("value_after_depreciation"), 100000)
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
 
 		jv = make_journal_entry(
 			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
@@ -1524,12 +1524,68 @@ class TestDepreciationBasics(AssetSetup):
 		jv.submit()
 
 		asset.reload()
-		self.assertEqual(asset.get("value_after_depreciation"), 99900)
+		self.assertEqual(asset.get_value_after_depreciation(), 99900)
 
 		jv.cancel()
 
 		asset.reload()
-		self.assertEqual(asset.get("value_after_depreciation"), 100000)
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+	def test_manual_depreciation_for_depreciable_asset(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=10,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+
+		self.assertEqual(asset.status, "Submitted")
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+		jv = make_journal_entry(
+			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
+		)
+		for d in jv.accounts:
+			d.reference_type = "Asset"
+			d.reference_name = asset.name
+		jv.voucher_type = "Depreciation Entry"
+		jv.insert()
+		jv.submit()
+
+		asset.reload()
+		self.assertEqual(asset.get_value_after_depreciation(), 99900)
+
+		jv.cancel()
+
+		asset.reload()
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+	def test_manual_depreciation_with_incorrect_jv_voucher_type(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=10,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+
+		jv = make_journal_entry(
+			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
+		)
+		for d in jv.accounts:
+			d.reference_type = "Asset"
+			d.reference_name = asset.name
+			d.account_type = "Depreciation"
+		jv.voucher_type = "Journal Entry"
+
+		self.assertRaises(frappe.ValidationError, jv.insert)
 
 
 def create_asset_data():

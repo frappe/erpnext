@@ -538,13 +538,21 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 			query = query.where(gl_entry.cost_center.isin(filters.cost_center))
 
 		if filters.get("include_default_book_entries"):
+			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+			if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
+				)
+
 			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(filters.company_fb), ""]))
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 				| (gl_entry.finance_book.isnull())
 			)
 		else:
 			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.company_fb), ""])) | (gl_entry.finance_book.isnull())
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), ""]))
+				| (gl_entry.finance_book.isnull())
 			)
 
 	if accounting_dimensions:
