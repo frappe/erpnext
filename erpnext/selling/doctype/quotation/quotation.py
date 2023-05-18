@@ -288,7 +288,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			)
 
 		# sales team
-		for d in customer.get("sales_team", []):
+		for d in customer.get("sales_team") or []:
 			target.append(
 				"sales_team",
 				{
