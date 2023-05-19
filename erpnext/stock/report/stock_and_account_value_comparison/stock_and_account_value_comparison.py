@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import get_link_to_form, parse_json
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
@@ -134,3 +135,35 @@ def get_columns(filters):
 			"width": "120",
 		},
 	]
+
+
+@frappe.whitelist()
+def create_reposting_entries(rows, company):
+	if isinstance(rows, str):
+		rows = parse_json(rows)
+
+	entries = []
+	for row in rows:
+		row = frappe._dict(row)
+
+		try:
+			doc = frappe.get_doc(
+				{
+					"doctype": "Repost Item Valuation",
+					"based_on": "Transaction",
+					"status": "Queued",
+					"voucher_type": row.voucher_type,
+					"voucher_no": row.voucher_no,
+					"posting_date": row.posting_date,
+					"company": company,
+					"allow_nagative_stock": 1,
+				}
+			).submit()
+
+			entries.append(get_link_to_form("Repost Item Valuation", doc.name))
+		except frappe.DuplicateEntryError:
+			pass
+
+	if entries:
+		entries = ", ".join(entries)
+		frappe.msgprint(_(f"Reposting entries created: {entries}"))
