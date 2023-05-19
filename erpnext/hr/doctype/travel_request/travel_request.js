@@ -15,6 +15,7 @@ frappe.ui.form.on("Travel Request", {
 					var field = frappe.meta.get_docfield("Travel Requisition","class", row.name);
 					field.options = [""].concat(options);
 					cur_frm.refresh_field("class");
+					cur_frm.reload();
 				}
 			})
 		})
@@ -79,7 +80,6 @@ frappe.ui.form.on("Travel Request", {
 			],
 			primary_action_label: 'Submit',
 			primary_action(values) {
-				console.log(values);
 				d.hide();
 				cur_frm.set_value("status","Approved");
 				cur_frm.set_value('remark', (values["remark"]));
@@ -111,11 +111,14 @@ frappe.ui.form.on("Travel Requisition", {
 				mode: d.mode},
 			callback: function(r) {
 				var options = r.message
+				
 				var field = frappe.meta.get_docfield(cdt, "class", cdn);
+				field.options = null;
+				cur_frm.refresh_field("class");
 				field.options = [""].concat(options);
 				frappe.model.set_value(cdt, cdn, "class", "");
-				cur_frm.refresh_field("class");				
-				// frm.save();
+				cur_frm.refresh_field("class");
+				frm.refresh_field('travel_requisition');
 			}
 		})
 	},
