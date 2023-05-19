@@ -33,5 +33,40 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 		},
-	]
+	],
+
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			checkboxColumn: true,
+		});
+	},
+
+	onload(report) {
+		report.page.add_inner_button(__("Create Reposting Entries"), function() {
+			let message = `<div>
+				<p>
+					Reposting Entries will change the value of
+					accounts Stock In Hand, and Stock Expenses
+					in the Trial Balance report and will also change
+					the Balance Value in the Stock Balance report.
+				</p>
+				<p>Are you sure you want to create Reposting Entries?</p>
+				</div>
+			`;
+
+			frappe.confirm(__(message), () => {
+				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+				let selected_rows = indexes.map(i => frappe.query_report.data[i]);
+
+				frappe.call({
+					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
+					args: {
+						rows: selected_rows,
+						company: frappe.query_report.get_filter_values().company
+					}
+				});
+
+			});
+		});
+	}
 };
