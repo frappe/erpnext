@@ -137,6 +137,7 @@ class StockBalanceReport(object):
 
 	def get_item_warehouse_map(self):
 		item_warehouse_map = {}
+		self.opening_vouchers = self.get_opening_vouchers()
 
 		for entry in self.sle_entries:
 			group_by_key = self.get_group_by_key(entry)
@@ -159,20 +160,18 @@ class StockBalanceReport(object):
 		return item_warehouse_map
 
 	def prepare_item_warehouse_map(self, item_warehouse_map, entry, group_by_key):
-		opening_vouchers = self.get_opening_vouchers()
-
 		qty_dict = item_warehouse_map[group_by_key]
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
-		if entry.voucher_type == "Stock Reconciliation" and not entry.batch_no:
+		if entry.voucher_type == "Stock Reconciliation" and (not entry.batch_no or entry.serial_no):
 			qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:
 			qty_diff = flt(entry.actual_qty)
 
 		value_diff = flt(entry.stock_value_difference)
 
-		if entry.posting_date < self.from_date or entry.voucher_no in opening_vouchers.get(
+		if entry.posting_date < self.from_date or entry.voucher_no in self.opening_vouchers.get(
 			entry.voucher_type, []
 		):
 			qty_dict.opening_qty += qty_diff
@@ -271,6 +270,7 @@ class StockBalanceReport(object):
 				sle.voucher_no,
 				sle.stock_value,
 				sle.batch_no,
+				sle.serial_no,
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
@@ -475,7 +475,10 @@ class StockBalanceReport(object):
 		table = frappe.qb.DocType("UOM Conversion Detail")
 		query = (
 			frappe.qb.from_(table)
-			.select(table.conversion_factor)
+			.select(
+				table.conversion_factor,
+				table.parent,
+			)
 			.where((table.parenttype == "Item") & (table.uom == self.filters.include_uom))
 		)
 
@@ -553,14 +556,16 @@ class StockBalanceReport(object):
 		return opening_fifo_queue
 
 
-def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory_dimensions: list):
+def filter_items_with_no_transactions(
+	iwb_map, float_precision: float, inventory_dimensions: list = None
+):
 	pop_keys = []
 	for group_by_key in iwb_map:
 		qty_dict = iwb_map[group_by_key]
 
 		no_transactions = True
 		for key, val in qty_dict.items():
-			if key in inventory_dimensions:
+			if inventory_dimensions and key in inventory_dimensions:
 				continue
 
 			if key in [
