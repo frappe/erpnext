@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe import _
 from frappe.core.doctype.prepared_report.prepared_report import create_json_gz_file
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
@@ -57,7 +58,7 @@ class ClosingStockBalance(Document):
 		if query and query[0].name:
 			name = get_link_to_form("Closing Stock Balance", query[0].name)
 			msg = f"Closing Stock Balance {name} already exists for the selected date range"
-			frappe.throw(msg, title="Duplicate Closing Stock Balance")
+			frappe.throw(_(msg), title=_("Duplicate Closing Stock Balance"))
 
 	def on_submit(self):
 		self.set_status(save=True)
@@ -65,10 +66,22 @@ class ClosingStockBalance(Document):
 
 	def on_cancel(self):
 		self.set_status(save=True)
+		self.clear_attachment()
 
 	@frappe.whitelist()
 	def enqueue_job(self):
+		self.db_set("status", "In Progress")
+		self.clear_attachment()
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
+
+	@frappe.whitelist()
+	def regenerate_closing_balance(self):
+		self.enqueue_job()
+
+	def clear_attachment(self):
+		if attachments := get_attachments(self.doctype, self.name):
+			attachment = attachments[0]
+			frappe.delete_doc("File", attachment.name)
 
 	def create_closing_stock_balance_entries(self):
 		columns, data = execute(
