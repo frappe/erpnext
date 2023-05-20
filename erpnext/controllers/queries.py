@@ -53,13 +53,17 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Lead"
 	fields = get_fields(doctype, ["name", "lead_name", "company_name"])
 
+	searchfields = frappe.get_meta(doctype).get_search_fields()
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
+
 	return frappe.db.sql(
 		"""select {fields} from `tabLead`
 		where docstatus < 2
 			and ifnull(status, '') != 'Converted'
 			and ({key} like %(txt)s
 				or lead_name like %(txt)s
-				or company_name like %(txt)s)
+				or company_name like %(txt)s
+				or {scond})
 			{mcond}
 		order by
 			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
@@ -68,7 +72,12 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			idx desc,
 			name, lead_name
 		limit %(page_len)s offset %(start)s""".format(
-			**{"fields": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"scond": searchfields,
+				"mcond": get_match_cond(doctype),
+			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
 	)
