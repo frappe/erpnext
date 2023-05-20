@@ -436,6 +436,7 @@ class AssetCapitalization(StockController):
 				item.get("finance_book") or self.get("finance_book"),
 				self.get("doctype"),
 				self.get("name"),
+				self.get("posting_date"),
 			)
 
 			asset.db_set("disposal_date", self.posting_date)
