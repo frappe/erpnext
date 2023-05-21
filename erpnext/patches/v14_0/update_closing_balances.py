@@ -13,8 +13,8 @@ from erpnext.accounts.utils import get_fiscal_year
 def execute():
 	frappe.db.truncate("Account Closing Balance")
 
+	i = 0
 	company_wise_order = {}
-	get_opening_entries = True
 	for pcv in frappe.db.get_all(
 		"Period Closing Voucher",
 		fields=["company", "posting_date", "name"],
@@ -29,6 +29,7 @@ def execute():
 				pcv.posting_date, pcv.fiscal_year, company=pcv.company
 			)[1]
 
+			# get gl entries against pcv
 			gl_entries = frappe.db.get_all(
 				"GL Entry", filters={"voucher_no": pcv.name, "is_cancelled": 0}, fields=["*"]
 			)
@@ -37,15 +38,25 @@ def execute():
 				entry["closing_date"] = pcv_doc.posting_date
 				entry["period_closing_voucher"] = pcv_doc.name
 
+			# get all gl entries for the year
 			closing_entries = frappe.db.get_all(
 				"GL Entry",
 				filters={
 					"is_cancelled": 0,
 					"voucher_no": ["!=", pcv.name],
-					"posting_date": ["<=", pcv.posting_date],
+					"posting_date": ["between", [pcv_doc.year_start_date, pcv.posting_date]],
+					"is_opening": "No",
 				},
 				fields=["*"],
 			)
+
+			if i == 0:
+				# add opening entries only for the first pcv
+				closing_entries += frappe.db.get_all(
+					"GL Entry",
+					filters={"is_cancelled": 0, "is_opening": "Yes"},
+					fields=["*"],
+				)
 
 			for entry in closing_entries:
 				entry["closing_date"] = pcv_doc.posting_date
@@ -53,4 +64,5 @@ def execute():
 
 			make_closing_entries(gl_entries + closing_entries, voucher_name=pcv.name)
 			company_wise_order[pcv.company].append(pcv.posting_date)
-			get_opening_entries = False
+
+			i += 1
