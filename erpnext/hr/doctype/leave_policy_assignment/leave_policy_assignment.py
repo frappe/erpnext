@@ -192,9 +192,9 @@ def add_current_month_if_applicable(months_passed, date_of_joining, based_on_doj
 	date = getdate(frappe.flags.current_date) or getdate()
 
 	if based_on_doj:
-		# if leave type allocation is based on DOJ, and the date of assignment creation is same as DOJ,
+		# if leave type allocation is based on DOJ, and the date of assignment creation is after DOJ,
 		# then the month should be considered
-		if date.day == date_of_joining.day:
+		if date.day >= date_of_joining.day:
 			months_passed += 1
 	else:
 		last_day_of_month = get_last_day(date)
