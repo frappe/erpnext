@@ -689,7 +689,6 @@ class SubcontractingController(StockController):
 								"actual_qty": flt(item.rejected_qty) * flt(item.conversion_factor),
 								"serial_no": cstr(item.rejected_serial_no).strip(),
 								"incoming_rate": 0.0,
-								"recalculate_rate": 1,
 							},
 						)
 					)
