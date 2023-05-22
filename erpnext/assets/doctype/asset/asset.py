@@ -343,7 +343,10 @@ class Asset(AccountsController):
 
 			# if asset is being sold
 			if date_of_disposal:
-				from_date = self.get_from_date(finance_book.finance_book)
+				from_date = add_months(
+					self.get_from_date(finance_book.finance_book),
+					(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
+				)
 				depreciation_amount, days, months = self.get_pro_rata_amt(
 					finance_book,
 					depreciation_amount,
