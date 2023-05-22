@@ -120,7 +120,8 @@
    "fieldname": "for_quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty To Manufacture"
+   "label": "Qty To Manufacture",
+   "reqd": 1
   },
   {
    "fieldname": "wip_warehouse",
@@ -439,7 +440,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-09 15:02:44.490731",
+ "modified": "2023-05-22 23:26:57.589331",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
