@@ -447,6 +447,195 @@ class Asset(AccountsController):
 		if len(self.get("finance_books")) > 1 and any(start):
 			self.sort_depreciation_schedule()
 
+<<<<<<< HEAD
+=======
+	def _make_depreciation_schedule(self, finance_book, start, date_of_disposal):
+		self.validate_asset_finance_books(finance_book)
+
+		value_after_depreciation = self._get_value_after_depreciation_for_making_schedule(finance_book)
+		finance_book.value_after_depreciation = value_after_depreciation
+
+		number_of_pending_depreciations = cint(finance_book.total_number_of_depreciations) - cint(
+			self.number_of_depreciations_booked
+		)
+
+		has_pro_rata = self.check_is_pro_rata(finance_book)
+		if has_pro_rata:
+			number_of_pending_depreciations += 1
+
+		has_wdv_or_dd_non_yearly_pro_rata = False
+		if (
+			finance_book.depreciation_method in ("Written Down Value", "Double Declining Balance")
+			and cint(finance_book.frequency_of_depreciation) != 12
+		):
+			has_wdv_or_dd_non_yearly_pro_rata = self.check_is_pro_rata(
+				finance_book, wdv_or_dd_non_yearly=True
+			)
+
+		skip_row = False
+		should_get_last_day = is_last_day_of_the_month(finance_book.depreciation_start_date)
+
+		depreciation_amount = 0
+
+		for n in range(start[finance_book.idx - 1], number_of_pending_depreciations):
+			# If depreciation is already completed (for double declining balance)
+			if skip_row:
+				continue
+
+			if n > 0 and len(self.get("schedules")) > n - 1:
+				prev_depreciation_amount = self.get("schedules")[n - 1].depreciation_amount
+			else:
+				prev_depreciation_amount = 0
+
+			depreciation_amount = get_depreciation_amount(
+				self,
+				value_after_depreciation,
+				finance_book,
+				n,
+				prev_depreciation_amount,
+				has_wdv_or_dd_non_yearly_pro_rata,
+			)
+
+			if not has_pro_rata or (
+				n < (cint(number_of_pending_depreciations) - 1) or number_of_pending_depreciations == 2
+			):
+				schedule_date = add_months(
+					finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
+				)
+
+				if should_get_last_day:
+					schedule_date = get_last_day(schedule_date)
+
+				# schedule date will be a year later from start date
+				# so monthly schedule date is calculated by removing 11 months from it
+				monthly_schedule_date = add_months(schedule_date, -finance_book.frequency_of_depreciation + 1)
+
+			# if asset is being sold
+			if date_of_disposal:
+				from_date = self.get_from_date_for_disposal(finance_book)
+				depreciation_amount, days, months = self.get_pro_rata_amt(
+					finance_book,
+					depreciation_amount,
+					from_date,
+					date_of_disposal,
+				)
+
+				if depreciation_amount > 0:
+					self._add_depreciation_row(
+						date_of_disposal,
+						depreciation_amount,
+						finance_book.depreciation_method,
+						finance_book.finance_book,
+						finance_book.idx,
+					)
+
+				break
+
+			# For first row
+			if (
+				(has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
+				and not self.opening_accumulated_depreciation
+				and n == 0
+			):
+				from_date = add_days(
+					self.available_for_use_date, -1
+				)  # needed to calc depr amount for available_for_use_date too
+				depreciation_amount, days, months = self.get_pro_rata_amt(
+					finance_book,
+					depreciation_amount,
+					from_date,
+					finance_book.depreciation_start_date,
+					has_wdv_or_dd_non_yearly_pro_rata,
+				)
+
+				# For first depr schedule date will be the start date
+				# so monthly schedule date is calculated by removing month difference between use date and start date
+				monthly_schedule_date = add_months(finance_book.depreciation_start_date, -months + 1)
+
+			# For last row
+			elif has_pro_rata and n == cint(number_of_pending_depreciations) - 1:
+				if not self.flags.increase_in_asset_life:
+					# In case of increase_in_asset_life, the self.to_date is already set on asset_repair submission
+					self.to_date = add_months(
+						self.available_for_use_date,
+						(n + self.number_of_depreciations_booked) * cint(finance_book.frequency_of_depreciation),
+					)
+
+				depreciation_amount_without_pro_rata = depreciation_amount
+
+				depreciation_amount, days, months = self.get_pro_rata_amt(
+					finance_book,
+					depreciation_amount,
+					schedule_date,
+					self.to_date,
+					has_wdv_or_dd_non_yearly_pro_rata,
+				)
+
+				depreciation_amount = self.get_adjusted_depreciation_amount(
+					depreciation_amount_without_pro_rata, depreciation_amount, finance_book.finance_book
+				)
+
+				monthly_schedule_date = add_months(schedule_date, 1)
+				schedule_date = add_days(schedule_date, days)
+				last_schedule_date = schedule_date
+
+			if not depreciation_amount:
+				continue
+			value_after_depreciation -= flt(depreciation_amount, self.precision("gross_purchase_amount"))
+
+			# Adjust depreciation amount in the last period based on the expected value after useful life
+			if finance_book.expected_value_after_useful_life and (
+				(
+					n == cint(number_of_pending_depreciations) - 1
+					and value_after_depreciation != finance_book.expected_value_after_useful_life
+				)
+				or value_after_depreciation < finance_book.expected_value_after_useful_life
+			):
+				depreciation_amount += value_after_depreciation - finance_book.expected_value_after_useful_life
+				skip_row = True
+
+			if flt(depreciation_amount, self.precision("gross_purchase_amount")) > 0:
+				self._add_depreciation_row(
+					schedule_date,
+					depreciation_amount,
+					finance_book.depreciation_method,
+					finance_book.finance_book,
+					finance_book.idx,
+				)
+
+	def _add_depreciation_row(
+		self, schedule_date, depreciation_amount, depreciation_method, finance_book, finance_book_id
+	):
+		self.append(
+			"schedules",
+			{
+				"schedule_date": schedule_date,
+				"depreciation_amount": depreciation_amount,
+				"depreciation_method": depreciation_method,
+				"finance_book": finance_book,
+				"finance_book_id": finance_book_id,
+			},
+		)
+
+	def sort_depreciation_schedule(self):
+		self.schedules = sorted(
+			self.schedules, key=lambda s: (int(s.finance_book_id), getdate(s.schedule_date))
+		)
+
+		for idx, s in enumerate(self.schedules, 1):
+			s.idx = idx
+
+	def _get_value_after_depreciation_for_making_schedule(self, finance_book):
+		if self.docstatus == 1 and finance_book.value_after_depreciation:
+			value_after_depreciation = flt(finance_book.value_after_depreciation)
+		else:
+			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
+				self.opening_accumulated_depreciation
+			)
+
+		return value_after_depreciation
+
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
 	# JE: Journal Entry, FB: Finance Book
 	def clear_depreciation_schedule(self):
@@ -482,6 +671,7 @@ class Asset(AccountsController):
 
 		return start
 
+<<<<<<< HEAD
 	def sort_depreciation_schedule(self):
 		self.schedules = sorted(
 			self.schedules, key=lambda s: (int(s.finance_book_id), getdate(s.schedule_date))
@@ -491,15 +681,21 @@ class Asset(AccountsController):
 			s.idx = idx
 
 	def get_from_date(self, finance_book):
+=======
+	def get_from_date_for_disposal(self, finance_book):
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 		if not self.get("schedules"):
-			return self.available_for_use_date
+			return add_months(
+				getdate(self.available_for_use_date),
+				(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
+			)
 
 		if len(self.finance_books) == 1:
 			return self.schedules[-1].schedule_date
 
 		from_date = ""
 		for schedule in self.get("schedules"):
-			if schedule.finance_book == finance_book:
+			if schedule.finance_book == finance_book.finance_book:
 				from_date = schedule.schedule_date
 
 		if from_date:

@@ -1107,7 +1107,16 @@ class SalesInvoice(SellingController):
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
+<<<<<<< HEAD
 							asset, item.base_net_amount, item.finance_book
+=======
+							asset,
+							item.base_net_amount,
+							item.finance_book,
+							self.get("doctype"),
+							self.get("name"),
+							self.get("posting_date"),
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 						)
 						asset.db_set("disposal_date", None)
 
@@ -1122,7 +1131,16 @@ class SalesInvoice(SellingController):
 							asset.reload()
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
+<<<<<<< HEAD
 							asset, item.base_net_amount, item.finance_book
+=======
+							asset,
+							item.base_net_amount,
+							item.finance_book,
+							self.get("doctype"),
+							self.get("name"),
+							self.get("posting_date"),
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 						)
 						asset.db_set("disposal_date", self.posting_date)
 

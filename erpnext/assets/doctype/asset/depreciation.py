@@ -279,7 +279,7 @@ def scrap_asset(asset_name):
 	je.company = asset.company
 	je.remark = "Scrap Entry for asset {0}".format(asset_name)
 
-	for entry in get_gl_entries_on_asset_disposal(asset):
+	for entry in get_gl_entries_on_asset_disposal(asset, date):
 		entry.update({"reference_type": "Asset", "reference_name": asset_name})
 		je.append("accounts", entry)
 
@@ -403,7 +403,16 @@ def disposal_happens_in_the_future(posting_date_of_disposal):
 	return False
 
 
+<<<<<<< HEAD
 def get_gl_entries_on_asset_regain(asset, selling_amount=0, finance_book=None):
+=======
+def get_gl_entries_on_asset_regain(
+	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
+):
+	if not date:
+		date = getdate()
+
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 	(
 		fixed_asset_account,
 		asset,
@@ -415,6 +424,7 @@ def get_gl_entries_on_asset_regain(asset, selling_amount=0, finance_book=None):
 	) = get_asset_details(asset, finance_book)
 
 	gl_entries = [
+<<<<<<< HEAD
 		{
 			"account": fixed_asset_account,
 			"debit_in_account_currency": asset.gross_purchase_amount,
@@ -427,16 +437,58 @@ def get_gl_entries_on_asset_regain(asset, selling_amount=0, finance_book=None):
 			"credit": accumulated_depr_amount,
 			"cost_center": depreciation_cost_center,
 		},
+=======
+		asset.get_gl_dict(
+			{
+				"account": fixed_asset_account,
+				"debit_in_account_currency": asset.gross_purchase_amount,
+				"debit": asset.gross_purchase_amount,
+				"cost_center": depreciation_cost_center,
+				"posting_date": date,
+			},
+			item=asset,
+		),
+		asset.get_gl_dict(
+			{
+				"account": accumulated_depr_account,
+				"credit_in_account_currency": accumulated_depr_amount,
+				"credit": accumulated_depr_amount,
+				"cost_center": depreciation_cost_center,
+				"posting_date": date,
+			},
+			item=asset,
+		),
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 	]
 
 	profit_amount = abs(flt(value_after_depreciation)) - abs(flt(selling_amount))
 	if profit_amount:
+<<<<<<< HEAD
 		get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center)
+=======
+		get_profit_gl_entries(
+			asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center, date
+		)
+
+	if voucher_type and voucher_no:
+		for entry in gl_entries:
+			entry["voucher_type"] = voucher_type
+			entry["voucher_no"] = voucher_no
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 
 	return gl_entries
 
 
+<<<<<<< HEAD
 def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None):
+=======
+def get_gl_entries_on_asset_disposal(
+	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
+):
+	if not date:
+		date = getdate()
+
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 	(
 		fixed_asset_account,
 		asset,
@@ -448,6 +500,7 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 	) = get_asset_details(asset, finance_book)
 
 	gl_entries = [
+<<<<<<< HEAD
 		{
 			"account": fixed_asset_account,
 			"credit_in_account_currency": asset.gross_purchase_amount,
@@ -460,11 +513,44 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 			"debit": accumulated_depr_amount,
 			"cost_center": depreciation_cost_center,
 		},
+=======
+		asset.get_gl_dict(
+			{
+				"account": fixed_asset_account,
+				"credit_in_account_currency": asset.gross_purchase_amount,
+				"credit": asset.gross_purchase_amount,
+				"cost_center": depreciation_cost_center,
+				"posting_date": date,
+			},
+			item=asset,
+		),
+		asset.get_gl_dict(
+			{
+				"account": accumulated_depr_account,
+				"debit_in_account_currency": accumulated_depr_amount,
+				"debit": accumulated_depr_amount,
+				"cost_center": depreciation_cost_center,
+				"posting_date": date,
+			},
+			item=asset,
+		),
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 	]
 
 	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
 	if profit_amount:
+<<<<<<< HEAD
 		get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center)
+=======
+		get_profit_gl_entries(
+			asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center, date
+		)
+
+	if voucher_type and voucher_no:
+		for entry in gl_entries:
+			entry["voucher_type"] = voucher_type
+			entry["voucher_no"] = voucher_no
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 
 	return gl_entries
 
@@ -491,6 +577,7 @@ def get_asset_details(asset, finance_book=None):
 	)
 
 
+<<<<<<< HEAD
 def get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center):
 	debit_or_credit = "debit" if profit_amount < 0 else "credit"
 	gl_entries.append(
@@ -500,6 +587,27 @@ def get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciat
 			debit_or_credit: abs(profit_amount),
 			debit_or_credit + "_in_account_currency": abs(profit_amount),
 		}
+=======
+def get_profit_gl_entries(
+	asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center, date=None
+):
+
+	if not date:
+		date = getdate()
+
+	debit_or_credit = "debit" if profit_amount < 0 else "credit"
+	gl_entries.append(
+		asset.get_gl_dict(
+			{
+				"account": disposal_account,
+				"cost_center": depreciation_cost_center,
+				debit_or_credit: abs(profit_amount),
+				debit_or_credit + "_in_account_currency": abs(profit_amount),
+				"posting_date": date,
+			},
+			item=asset,
+		)
+>>>>>>> 8af6a113d1 (fix: incorrect depr schedule and posting dates on selling of existing assets [v14] (#35396))
 	)
 
 
