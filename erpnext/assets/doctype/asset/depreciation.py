@@ -397,7 +397,6 @@ def disposal_happens_in_the_future(posting_date_of_disposal):
 def get_gl_entries_on_asset_regain(
 	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
 ):
-
 	if not date:
 		date = getdate()
 
@@ -451,7 +450,6 @@ def get_gl_entries_on_asset_regain(
 def get_gl_entries_on_asset_disposal(
 	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
 ):
-
 	if not date:
 		date = getdate()
 
