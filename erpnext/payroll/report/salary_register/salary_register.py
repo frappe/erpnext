@@ -183,13 +183,6 @@ def get_columns(earning_types, ded_types):
 			"fieldtype": "Float",
 			"width": 120,
 		},
-		{
-			"label": _("Currency"),
-			"fieldname": "currency",
-			"fieldtype": "Link",
-			"options": "Currency",
-			"hidden": 1,
-		},
 	]
 
 	for earning in earning_types:
@@ -246,6 +239,13 @@ def get_columns(earning_types, ded_types):
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120,
+			},
+			{
+				"label": _("Currency"),
+				"fieldname": "currency",
+				"fieldtype": "Data",
+				"options": "Currency",
+				"hidden": 1,
 			},
 		]
 	)
