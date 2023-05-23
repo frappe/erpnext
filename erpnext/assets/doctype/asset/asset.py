@@ -343,10 +343,7 @@ class Asset(AccountsController):
 
 			# if asset is being sold
 			if date_of_disposal:
-				from_date = add_months(
-					self.get_from_date(finance_book.finance_book),
-					(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
-				)
+				from_date = self.get_from_date_for_disposal(finance_book)
 				depreciation_amount, days, months = self.get_pro_rata_amt(
 					finance_book,
 					depreciation_amount,
@@ -503,16 +500,19 @@ class Asset(AccountsController):
 
 		return start
 
-	def get_from_date(self, finance_book):
+	def get_from_date_for_disposal(self, finance_book):
 		if not self.get("schedules"):
-			return self.available_for_use_date
+			return add_months(
+				getdate(self.available_for_use_date),
+				(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
+			)
 
 		if len(self.finance_books) == 1:
 			return self.schedules[-1].schedule_date
 
 		from_date = ""
 		for schedule in self.get("schedules"):
-			if schedule.finance_book == finance_book:
+			if schedule.finance_book == finance_book.finance_book:
 				from_date = schedule.schedule_date
 
 		if from_date:
