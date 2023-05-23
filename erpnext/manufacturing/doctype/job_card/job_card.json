@@ -420,15 +420,7 @@
  ],
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2021-11-12 10:15:06.572401",
-=======
  "modified": "2023-05-22 23:26:57.589331",
->>>>>>> a209fb4b64 (fix: error while saving job card)
-=======
- "modified": "2023-05-23 09:56:43.826602",
->>>>>>> 8c34cc0e00 (fix: use flt instead of mandatory field)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
