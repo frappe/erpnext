@@ -254,7 +254,7 @@ class AssetDepreciationSchedule(Document):
 			if date_of_disposal:
 				from_date = add_months(
 					getdate(asset_doc.available_for_use_date),
-					(row.number_of_depreciations_booked * row.frequency_of_depreciation),
+					(asset_doc.number_of_depreciations_booked * row.frequency_of_depreciation),
 				)
 				if self.depreciation_schedule:
 					from_date = self.depreciation_schedule[-1].schedule_date
