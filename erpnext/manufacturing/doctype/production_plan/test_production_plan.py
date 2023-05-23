@@ -926,6 +926,50 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(after_qty, before_qty)
 
+	def test_skip_available_qty_for_sub_assembly_items(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree = {
+			"Fininshed Goods1 For SUB Test": {
+				"SubAssembly1 For SUB Test": {"ChildPart1 For SUB Test": {}},
+				"SubAssembly2 For SUB Test": {},
+			}
+		}
+
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			skip_available_sub_assembly_item=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		make_stock_entry(
+			item_code="SubAssembly1 For SUB Test",
+			qty=5,
+			rate=100,
+			target="_Test Warehouse - _TC",
+		)
+
+		self.assertTrue(plan.skip_available_sub_assembly_item)
+
+		plan.get_sub_assembly_items()
+
+		for row in plan.sub_assembly_items:
+			if row.production_item == "SubAssembly1 For SUB Test":
+				self.assertEqual(row.qty, 5)
+
+		mr_items = get_items_for_material_requests(plan.as_dict())
+		for row in mr_items:
+			row = frappe._dict(row)
+			if row.item_code == "ChildPart1 For SUB Test":
+				self.assertEqual(row.quantity, 5)
+
+			if row.item_code == "SubAssembly2 For SUB Test":
+				self.assertEqual(row.quantity, 10)
+
 
 def create_production_plan(**args):
 	"""
@@ -945,6 +989,7 @@ def create_production_plan(**args):
 			"include_subcontracted_items": args.include_subcontracted_items or 0,
 			"ignore_existing_ordered_qty": args.ignore_existing_ordered_qty or 0,
 			"get_items_from": "Sales Order",
+			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
 		}
 	)
 
@@ -958,6 +1003,7 @@ def create_production_plan(**args):
 				"planned_qty": args.planned_qty or 1,
 				"planned_start_date": args.planned_start_date or now_datetime(),
 				"stock_uom": args.stock_uom or "Nos",
+				"warehouse": args.warehouse,
 			},
 		)
 
