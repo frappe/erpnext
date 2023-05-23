@@ -182,7 +182,7 @@ def get_columns(earning_types, ded_types):
 			"fieldname": "payment_days",
 			"fieldtype": "Float",
 			"width": 120,
-		}
+		},
 	]
 
 	for earning in earning_types:
