@@ -203,6 +203,12 @@ def get_gl_entries(filters, accounting_dimensions):
 		as_dict=1,
 	)
 
+	# fetch party name using frappe.db.get_value
+	for gl_entry in gl_entries:
+    	party_type = gl_entry.party_type
+    	if party_type:
+        	gl_entry.party_name = frappe.db.get_value(party_type, gl_entry.party, f"{party_type.lower()}_name")
+
 	if filters.get("presentation_currency"):
 		return convert_to_presentation_currency(gl_entries, currency_map, filters.get("company"))
 	else:
@@ -573,6 +579,7 @@ def get_columns(filters):
 		{"label": _("Against Account"), "fieldname": "against", "width": 120},
 		{"label": _("Party Type"), "fieldname": "party_type", "width": 100},
 		{"label": _("Party"), "fieldname": "party", "width": 100},
+		{"label": _("Party Name"), "fieldname": "party_name", "width": 100},
 		{"label": _("Project"), "options": "Project", "fieldname": "project", "width": 100},
 	]
 
