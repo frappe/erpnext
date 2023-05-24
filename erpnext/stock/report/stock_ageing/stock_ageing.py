@@ -281,7 +281,7 @@ class FIFOSlots:
 			# consume transfer data and add stock to fifo queue
 			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
-			if not serial_nos:
+			if not serial_nos and not row.get("has_serial_no"):
 				if fifo_queue and flt(fifo_queue[0][0]) <= 0:
 					# neutralize 0/negative stock by adding positive stock
 					fifo_queue[0][0] += flt(row.actual_qty)
