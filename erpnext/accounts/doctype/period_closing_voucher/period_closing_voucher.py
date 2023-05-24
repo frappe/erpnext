@@ -169,21 +169,18 @@ class PeriodClosingVoucher(AccountsController):
 		return frappe.db.sql(
 			"""
 			select
-				t2.account_currency,
+				t1.account_currency,
 				{dimension_fields},
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as bal_in_account_currency,
 				sum(t1.debit) - sum(t1.credit) as bal_in_company_currency
-			from `tabGL Entry` t1, `tabAccount` t2
+			from `tabGL Entry` t1
 			where
 				t1.is_cancelled = 0
-				and t1.account = t2.name
-				and t2.report_type = 'Profit and Loss'
-				and t2.docstatus < 2
-				and t2.company = %s
+				and t1.account in (select name from `tabAccount` where report_type = 'Profit and Loss' and docstatus < 2 and company = %s)
 				and t1.posting_date between %s and %s
 			group by {dimension_fields}
 		""".format(
-				dimension_fields=", ".join(dimension_fields)
+				dimension_fields=", ".join(dimension_fields),
 			),
 			(self.company, self.get("year_start_date"), self.posting_date),
 			as_dict=1,
