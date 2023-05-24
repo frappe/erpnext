@@ -856,7 +856,8 @@
   {
    "fieldname": "hod_name",
    "fieldtype": "Data",
-   "label": "HOD Name"
+   "label": "HOD Name",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_23",
@@ -865,7 +866,8 @@
   {
    "fieldname": "hod_mobile_no",
    "fieldtype": "Data",
-   "label": "HOD Mobile No."
+   "label": "HOD Mobile No.",
+   "read_only": 1
   },
   {
    "fieldname": "aadhar_number",
@@ -991,7 +993,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-05-24 18:27:01.260836",
+ "modified": "2023-05-24 18:52:15.116404",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
