@@ -689,7 +689,6 @@ class SubcontractingController(StockController):
 								"actual_qty": flt(item.rejected_qty) * flt(item.conversion_factor),
 								"serial_no": cstr(item.rejected_serial_no).strip(),
 								"incoming_rate": 0.0,
-								"recalculate_rate": 1,
 							},
 						)
 					)
@@ -741,7 +740,7 @@ class SubcontractingController(StockController):
 					sco_doc = frappe.get_doc("Subcontracting Order", sco)
 					sco_doc.update_status()
 
-	def set_missing_values_in_additional_costs(self):
+	def calculate_additional_costs(self):
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
 
 		if self.total_additional_costs:

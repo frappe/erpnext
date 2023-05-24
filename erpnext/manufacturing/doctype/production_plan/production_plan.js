@@ -451,10 +451,14 @@ frappe.ui.form.on("Material Request Plan Item", {
 					for_warehouse: row.warehouse
 				},
 				callback: function(r) {
-					let {projected_qty, actual_qty} = r.message;
+					if (r.message) {
+						let {projected_qty, actual_qty} = r.message[0];
 
-					frappe.model.set_value(cdt, cdn, 'projected_qty', projected_qty);
-					frappe.model.set_value(cdt, cdn, 'actual_qty', actual_qty);
+						frappe.model.set_value(cdt, cdn, {
+							'projected_qty': projected_qty,
+							'actual_qty': actual_qty
+						});
+					}
 				}
 			})
 		}

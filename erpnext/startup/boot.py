@@ -21,6 +21,10 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.allow_stale = cint(
 			frappe.db.get_single_value("Accounts Settings", "allow_stale")
 		)
+		bootinfo.sysdefaults.over_billing_allowance = frappe.db.get_single_value(
+			"Accounts Settings", "over_billing_allowance"
+		)
+
 		bootinfo.sysdefaults.quotation_valid_till = cint(
 			frappe.db.get_single_value("CRM Settings", "default_valid_till")
 		)
