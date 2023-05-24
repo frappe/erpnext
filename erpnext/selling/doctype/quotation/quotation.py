@@ -286,6 +286,18 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			target.commission_rate = frappe.get_value(
 				"Sales Partner", source.referral_sales_partner, "commission_rate"
 			)
+
+		# sales team
+		for d in customer.get("sales_team") or []:
+			target.append(
+				"sales_team",
+				{
+					"sales_person": d.sales_person,
+					"allocated_percentage": d.allocated_percentage or None,
+					"commission_rate": d.commission_rate,
+				},
+			)
+
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
