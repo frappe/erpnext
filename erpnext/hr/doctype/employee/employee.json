@@ -110,9 +110,7 @@
   "family_background",
   "health_details",
   "insurance_policy_section",
-  "policy_no",
   "column_break_101",
-  "attach_policy",
   "educational_qualification",
   "education",
   "previous_work_experience",
@@ -131,7 +129,13 @@
   "feedback",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "section_break_123",
+  "accidental_insurance",
+  "medical_insurance",
+  "column_break_126",
+  "attach_medical_insurance",
+  "attach_accidental_insurance"
  ],
  "fields": [
   {
@@ -230,7 +234,7 @@
   {
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
-   "label": "Date of Birth",
+   "label": "Date of Birth(dd-mm-yyyy)",
    "oldfieldname": "date_of_birth",
    "oldfieldtype": "Date",
    "reqd": 1
@@ -507,7 +511,8 @@
    "fieldname": "personal_email",
    "fieldtype": "Data",
    "label": "Mail ID",
-   "options": "Email"
+   "options": "Email",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -839,7 +844,7 @@
    "fieldname": "employee_vertical",
    "fieldtype": "Table MultiSelect",
    "label": "Employee Vertical",
-   "options": "Employee Vertical Table"
+   "options": "Employee Vertical"
   },
   {
    "bold": 1,
@@ -904,16 +909,6 @@
    "label": "Insurance Policy"
   },
   {
-   "fieldname": "policy_no",
-   "fieldtype": "Data",
-   "label": "Policy No."
-  },
-  {
-   "fieldname": "attach_policy",
-   "fieldtype": "Attach",
-   "label": "Attach policy"
-  },
-  {
    "fieldname": "column_break_101",
    "fieldtype": "Column Break"
   },
@@ -959,6 +954,36 @@
    "fieldname": "pan_number",
    "fieldtype": "Data",
    "label": "PAN Number"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_123",
+   "fieldtype": "Section Break",
+   "label": "Policy Section"
+  },
+  {
+   "fieldname": "accidental_insurance",
+   "fieldtype": "Data",
+   "label": "Accidental Insurance "
+  },
+  {
+   "fieldname": "medical_insurance",
+   "fieldtype": "Data",
+   "label": "Medical Insurance "
+  },
+  {
+   "fieldname": "column_break_126",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attach_medical_insurance",
+   "fieldtype": "Attach",
+   "label": "Attach Medical Insurance "
+  },
+  {
+   "fieldname": "attach_accidental_insurance",
+   "fieldtype": "Attach",
+   "label": "Attach Accidental Insurance"
   }
  ],
  "hide_toolbar": 1,
@@ -966,7 +991,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-05-18 19:07:14.156230",
+ "modified": "2023-05-24 18:27:01.260836",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

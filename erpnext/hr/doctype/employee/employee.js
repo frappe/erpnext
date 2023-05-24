@@ -43,6 +43,20 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 });
 frappe.ui.form.on('Employee', {
+	expense_approver: function(frm) {
+		if (frm.doc.expense_approver) {
+			frappe.call({
+				"method": "erpnext.hr.doctype.employee.employee.get_employee_data",
+				args: {
+					expense_approver: frm.doc.expense_approver,
+				},
+				callback: function(response){
+					frm.set_value('hod_name', response.message.employee_name);
+					frm.set_value('hod_mobile_no', response.message.cell_number);
+				}
+			})
+		}
+    },
 	setup: function (frm) {
 		frm.set_query("leave_policy", function() {
 			return {

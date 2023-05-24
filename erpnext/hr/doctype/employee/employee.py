@@ -521,3 +521,9 @@ def has_upload_permission(doc, ptype="read", user=None):
 	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
 		return True
 	return doc.user_id == user
+
+@frappe.whitelist()
+def get_employee_data(expense_approver):
+	employee_data = frappe.get_doc("Employee", {"personal_email": expense_approver})
+	return employee_data
+	
