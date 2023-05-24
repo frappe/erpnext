@@ -397,9 +397,9 @@ class TestAsset(AssetSetup):
 
 		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1742.47, 37742.47]]
 
-		first_asset_depr_schedule = get_depr_schedule(asset.name, "Active")
+		second_asset_depr_schedule = get_depr_schedule(asset.name, "Active")
 
-		for i, schedule in enumerate(asset.schedules):
+		for i, schedule in enumerate(second_asset_depr_schedule):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
