@@ -343,7 +343,7 @@ class Asset(AccountsController):
 
 			# if asset is being sold
 			if date_of_disposal:
-				from_date = self.get_from_date(finance_book.finance_book)
+				from_date = self.get_from_date_for_disposal(finance_book)
 				depreciation_amount, days, months = self.get_pro_rata_amt(
 					finance_book,
 					depreciation_amount,
@@ -425,7 +425,7 @@ class Asset(AccountsController):
 				depreciation_amount += value_after_depreciation - finance_book.expected_value_after_useful_life
 				skip_row = True
 
-			if depreciation_amount > 0:
+			if flt(depreciation_amount, self.precision("gross_purchase_amount")) > 0:
 				self._add_depreciation_row(
 					schedule_date,
 					depreciation_amount,
@@ -500,16 +500,19 @@ class Asset(AccountsController):
 
 		return start
 
-	def get_from_date(self, finance_book):
+	def get_from_date_for_disposal(self, finance_book):
 		if not self.get("schedules"):
-			return self.available_for_use_date
+			return add_months(
+				getdate(self.available_for_use_date),
+				(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
+			)
 
 		if len(self.finance_books) == 1:
 			return self.schedules[-1].schedule_date
 
 		from_date = ""
 		for schedule in self.get("schedules"):
-			if schedule.finance_book == finance_book:
+			if schedule.finance_book == finance_book.finance_book:
 				from_date = schedule.schedule_date
 
 		if from_date:
@@ -1287,9 +1290,11 @@ def get_straight_line_or_manual_depr_amount(asset, row):
 		)
 	# if the Depreciation Schedule is being prepared for the first time
 	else:
-		return (flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)) / flt(
-			row.total_number_of_depreciations
-		)
+		return (
+			flt(asset.gross_purchase_amount)
+			- flt(asset.opening_accumulated_depreciation)
+			- flt(row.expected_value_after_useful_life)
+		) / flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
 
 
 def get_wdv_or_dd_depr_amount(
