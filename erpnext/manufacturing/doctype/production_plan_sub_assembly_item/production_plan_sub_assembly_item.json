@@ -28,7 +28,11 @@
   "uom",
   "stock_uom",
   "column_break_22",
-  "description"
+  "description",
+  "section_break_4rxf",
+  "actual_qty",
+  "column_break_xfhm",
+  "projected_qty"
  ],
  "fields": [
   {
@@ -183,12 +187,34 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Schedule Date"
+  },
+  {
+   "fieldname": "section_break_4rxf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Actual Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_xfhm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "projected_qty",
+   "fieldtype": "Float",
+   "label": "Projected Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-28 13:50:15.116082",
+ "modified": "2023-05-22 17:52:34.708879",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",
