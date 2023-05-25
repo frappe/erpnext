@@ -736,7 +736,7 @@ class GrossProfitGenerator(object):
 	def load_invoice_items(self):
 		conditions = ""
 		if self.filters.company:
-			conditions += " and company = %(company)s"
+			conditions += " and `tabSales Invoice`.company = %(company)s"
 		if self.filters.from_date:
 			conditions += " and posting_date >= %(from_date)s"
 		if self.filters.to_date:
