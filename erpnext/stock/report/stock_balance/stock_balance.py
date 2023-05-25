@@ -573,7 +573,7 @@ def filter_items_with_no_transactions(
 				"warehouse",
 				"item_name",
 				"item_group",
-				"projecy",
+				"project",
 				"stock_uom",
 				"company",
 				"opening_fifo_queue",
