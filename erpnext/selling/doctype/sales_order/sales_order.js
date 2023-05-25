@@ -21,21 +21,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 
-		frm.set_query('company_address', function(doc) {
-			if(!doc.company) {
-				frappe.throw(__('Please set Company'));
-			}
-
-			return {
-				query: 'frappe.contacts.doctype.address.address.address_query',
-				filters: {
-					link_doctype: 'Company',
-					link_name: doc.company
-				}
-			};
-		})
-
-		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
+		frm.set_query("bom_no", "items", function (doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
 			return {
 				filters: {
@@ -137,6 +123,26 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
+	},
+
+	company: function(frm) {
+		if(!frm.doc.company){
+			frappe.throw(__('Please set Company'));
+		}
+		frappe.call({
+			method: "frappe.contacts.doctype.address.address.get_company_address",
+			args: {
+				company: frm.doc.company
+			},
+			callback: function (r) {
+				if(r.message) {
+					frm.set_value({
+						company_address: r.message.company_address,
+						company_address_display: r.message.company_address_display
+					})
+				}
+			}
+		});
 	}
 });
 
