@@ -139,9 +139,15 @@ class StockSettings(Document):
 
 				else:
 					# Don't allow if there are negative stock
-					has_negative_stock = frappe.db.exists("Bin", {"actual_qty": ["<", 0]})
+					from frappe.query_builder.functions import Round
 
-					if has_negative_stock:
+					precision = frappe.db.get_single_value("System Settings", "float_precision") or 3
+					bin = frappe.qb.DocType("Bin")
+					bin_with_negative_stock = (
+						frappe.qb.from_(bin).select(bin.name).where(Round(bin.actual_qty, precision) < 0).limit(1)
+					).run()
+
+					if bin_with_negative_stock:
 						frappe.throw(
 							_("As there are negative stock, you can not enable {0}.").format(
 								frappe.bold("Stock Reservation")
