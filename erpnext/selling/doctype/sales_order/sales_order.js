@@ -195,7 +195,14 @@ frappe.ui.form.on("Sales Order", {
 					label: __('Warehouse'),
 					options: 'Warehouse',
 					reqd: 1,
-					in_list_view: 1
+					in_list_view: 1,
+					get_query: function () {
+						return {
+							filters: [
+								["Warehouse", "is_group", "!=", 1]
+							]
+						};
+					},
 				},
 				{
 					fieldtype: 'Float',
