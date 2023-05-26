@@ -1066,15 +1066,15 @@ class update_entries_after(object):
 
 	def update_bin_data(self, sle):
 		bin_name = get_or_make_bin(sle.item_code, sle.warehouse)
-		frappe.db.set_value(
-			"Bin",
-			bin_name,
-			{
-				"actual_qty": sle.qty_after_transaction,
-				"valuation_rate": sle.valuation_rate,
-				"stock_value": sle.stock_value,
-			},
-		)
+		values_to_update = {
+			"actual_qty": sle.qty_after_transaction,
+			"stock_value": sle.stock_value,
+		}
+
+		if sle.valuation_rate is not None:
+			values_to_update["valuation_rate"] = sle.valuation_rate
+
+		frappe.db.set_value("Bin", bin_name, values_to_update)
 
 	def update_bin(self):
 		# update bin for each warehouse
