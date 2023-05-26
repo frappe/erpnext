@@ -17,6 +17,7 @@ class OverlapError(frappe.ValidationError):
 class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
+		self.validate_dupliacte_date()
 		self.total_holidays = len(self.holidays)
 
 	@frappe.whitelist()
@@ -77,6 +78,18 @@ class HolidayList(Document):
 	@frappe.whitelist()
 	def clear_table(self):
 		self.set("holidays", [])
+	
+	def validate_dupliacte_date(self):
+		unique_dates = []
+		for row in self.holidays:
+			if row.holiday_date in unique_dates:
+				frappe.throw(
+					_("Holiday Date {0} appears Multiple times in row {1} & {2}").format(
+						row.holiday_date, unique_dates.index(row.holiday_date) + 1, row.idx
+					)
+				)
+			else:
+				unique_dates.append(row.holiday_date)
 
 
 @frappe.whitelist()
