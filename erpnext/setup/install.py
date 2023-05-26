@@ -209,5 +209,5 @@ def setup_log_settings():
 
 
 def hide_workspaces():
-	frappe.db.set_value("Workspace", "Settings", "public", 0)
-	frappe.db.set_value("Workspace", "Integrations", "public", 0)
+	for ws in ["Integration", "Settings"]:
+		frappe.db.set_value("Workspace", ws, "public", 0)
