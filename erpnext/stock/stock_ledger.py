@@ -443,11 +443,10 @@ class update_entries_after(object):
 				i += 1
 
 				self.process_sle(sle)
+				self.update_bin_data(sle)
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
-
-			self.update_bin()
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -1064,6 +1063,18 @@ class update_entries_after(object):
 				frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
 			else:
 				raise NegativeStockError(message)
+
+	def update_bin_data(self, sle):
+		bin_name = get_or_make_bin(sle.item_code, sle.warehouse)
+		values_to_update = {
+			"actual_qty": sle.qty_after_transaction,
+			"stock_value": sle.stock_value,
+		}
+
+		if sle.valuation_rate is not None:
+			values_to_update["valuation_rate"] = sle.valuation_rate
+
+		frappe.db.set_value("Bin", bin_name, values_to_update)
 
 	def update_bin(self):
 		# update bin for each warehouse
