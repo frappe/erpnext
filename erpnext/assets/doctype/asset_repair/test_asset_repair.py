@@ -88,7 +88,6 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
 
 	def test_serialized_item_consumption(self):
-		from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		stock_entry = make_serialized_item()

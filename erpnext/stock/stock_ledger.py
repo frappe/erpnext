@@ -676,7 +676,7 @@ class update_entries_after(object):
 
 		if (
 			sle.voucher_type == "Stock Reconciliation"
-			and sle.batch_no
+			and (sle.batch_no or (sle.has_batch_no and sle.serial_and_batch_bundle))
 			and sle.voucher_detail_no
 			and sle.actual_qty < 0
 		):
@@ -734,9 +734,17 @@ class update_entries_after(object):
 			self.update_outgoing_rate_on_transaction(sle)
 
 	def reset_actual_qty_for_stock_reco(self, sle):
-		current_qty = frappe.get_cached_value(
-			"Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"
-		)
+		if sle.serial_and_batch_bundle:
+			current_qty = frappe.get_cached_value(
+				"Serial and Batch Bundle", sle.serial_and_batch_bundle, "total_qty"
+			)
+
+			if current_qty is not None:
+				current_qty = abs(current_qty)
+		else:
+			current_qty = frappe.get_cached_value(
+				"Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"
+			)
 
 		if current_qty:
 			sle.actual_qty = current_qty * -1
@@ -1524,7 +1532,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	next_stock_reco_detail = get_next_stock_reco(args)
 	if next_stock_reco_detail:
 		detail = next_stock_reco_detail[0]
-		if detail.batch_no:
+		if detail.batch_no or (detail.serial_and_batch_bundle and detail.has_batch_no):
 			regenerate_sle_for_batch_stock_reco(detail)
 
 		# add condition to update SLEs before this date & time
@@ -1602,7 +1610,9 @@ def get_next_stock_reco(kwargs):
 			sle.voucher_no,
 			sle.item_code,
 			sle.batch_no,
+			sle.serial_and_batch_bundle,
 			sle.actual_qty,
+			sle.has_batch_no,
 		)
 		.where(
 			(sle.item_code == kwargs.get("item_code"))

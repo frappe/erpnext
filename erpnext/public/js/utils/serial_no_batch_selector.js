@@ -53,7 +53,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				fieldtype: 'Data',
 				fieldname: 'scan_serial_no',
 				label: __('Scan Serial No'),
-				options: 'Serial No',
 				get_query: () => {
 					return {
 						filters: this.get_serial_no_filters()
@@ -71,10 +70,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		if (this.item.has_batch_no) {
 			fields.push({
-				fieldtype: 'Link',
+				fieldtype: 'Data',
 				fieldname: 'scan_batch_no',
 				label: __('Scan Batch No'),
-				options: 'Batch',
 				get_query: () => {
 					return {
 						filters: {
@@ -104,6 +102,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		if (this.item?.outward) {
 			fields = [...this.get_filter_fields(), ...fields];
+		} else {
+			fields = [...fields, ...this.get_attach_field()];
 		}
 
 		fields.push({
@@ -119,6 +119,73 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		});
 
 		return fields;
+	}
+
+	get_attach_field() {
+		let label = this.item?.has_serial_no ? __('Serial Nos') : __('Batch Nos');
+		let primary_label = this.bundle
+			? __('Update') : __('Add');
+
+		if (this.item?.has_serial_no && this.item?.has_batch_no) {
+			label = __('Serial Nos / Batch Nos');
+		}
+
+		return [
+			{
+				fieldtype: 'Section Break',
+				label: __('{0} {1} via CSV File', [primary_label, label])
+			},
+			{
+				fieldtype: 'Button',
+				fieldname: 'download_csv',
+				label: __('Download CSV Template'),
+				click: () => this.download_csv_file()
+			},
+			{
+				fieldtype: 'Column Break',
+			},
+			{
+				fieldtype: 'Attach',
+				fieldname: 'attach_serial_batch_csv',
+				label: __('Attach CSV File'),
+				onchange: () => this.upload_csv_file()
+			}
+		]
+	}
+
+	download_csv_file() {
+		let csvFileData = ['Serial No'];
+
+		if (this.item.has_serial_no && this.item.has_batch_no) {
+			csvFileData = ['Serial No', 'Batch No', 'Quantity'];
+		} else if (this.item.has_batch_no) {
+			csvFileData = ['Batch No', 'Quantity'];
+		}
+
+		const method = `/api/method/erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.download_blank_csv_template?content=${encodeURIComponent(JSON.stringify(csvFileData))}`;
+		const w = window.open(frappe.urllib.get_full_url(method));
+		if (!w) {
+			frappe.msgprint(__("Please enable pop-ups"));
+		}
+	}
+
+	upload_csv_file() {
+		const file_path = this.dialog.get_value("attach_serial_batch_csv")
+
+		frappe.call({
+			method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.upload_csv_file',
+			args: {
+				item_code: this.item.item_code,
+				file_path: file_path
+			},
+			callback: (r) => {
+				if (r.message.serial_nos && r.message.serial_nos.length) {
+					this.set_data(r.message.serial_nos);
+				} else if (r.message.batch_nos && r.message.batch_nos.length) {
+					this.set_data(r.message.batch_nos);
+				}
+			}
+		});
 	}
 
 	get_filter_fields() {
@@ -212,10 +279,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 	get_auto_data() {
 		const { qty, based_on } = this.dialog.get_values();
-
-		if (!qty) {
-			frappe.throw(__('Please enter Qty to Fetch'));
-		}
 
 		if (!based_on) {
 			based_on = 'FIFO';

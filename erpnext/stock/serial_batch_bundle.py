@@ -78,6 +78,12 @@ class SerialBatchBundle:
 
 		self.set_serial_and_batch_bundle(sn_doc)
 
+	def validate_actual_qty(self, sn_doc):
+		precision = sn_doc.precision("total_qty")
+		if flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
+			msg = f"Total qty {flt(sn_doc.total_qty, precision)} of Serial and Batch Bundle {sn_doc.name} is not equal to Actual Qty {flt(self.sle.actual_qty, precision)} in the {self.sle.voucher_type} {self.sle.voucher_no}"
+			frappe.throw(_(msg))
+
 	def validate_item(self):
 		msg = ""
 		if self.sle.actual_qty > 0:
@@ -214,6 +220,8 @@ class SerialBatchBundle:
 
 	def submit_serial_and_batch_bundle(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
+		self.validate_actual_qty(doc)
+
 		doc.flags.ignore_voucher_validation = True
 		doc.submit()
 
@@ -426,9 +434,6 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			)
 		else:
 			entries = self.get_batch_no_ledgers()
-			if frappe.flags.add_breakpoint:
-				breakpoint()
-
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
 			self.stock_value_differece = defaultdict(float)

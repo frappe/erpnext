@@ -694,10 +694,12 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			item_code=item_code, posting_time="09:00:00", target=warehouse, qty=100, basic_rate=700
 		)
 
+		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+
 		# Removed 50 Qty, Balace Qty 50
 		se2 = make_stock_entry(
 			item_code=item_code,
-			batch_no=se1.items[0].batch_no,
+			batch_no=batch_no,
 			posting_time="10:00:00",
 			source=warehouse,
 			qty=50,
@@ -709,15 +711,23 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			item_code=item_code,
 			posting_time="11:00:00",
 			warehouse=warehouse,
-			batch_no=se1.items[0].batch_no,
+			batch_no=batch_no,
 			qty=100,
 			rate=100,
 		)
 
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"is_cancelled": 0, "voucher_no": stock_reco.name, "actual_qty": ("<", 0)},
+			fields=["actual_qty"],
+		)
+
+		self.assertEqual(flt(sle[0].actual_qty), flt(-50.0))
+
 		# Removed 50 Qty, Balace Qty 50
 		make_stock_entry(
 			item_code=item_code,
-			batch_no=se1.items[0].batch_no,
+			batch_no=batch_no,
 			posting_time="12:00:00",
 			source=warehouse,
 			qty=50,
@@ -741,11 +751,19 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		sle = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
-			fields=["qty_after_transaction"],
+			fields=["qty_after_transaction", "actual_qty", "voucher_type", "voucher_no"],
 			order_by="posting_time desc, creation desc",
 		)
 
 		self.assertEqual(flt(sle[0].qty_after_transaction), flt(50.0))
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"is_cancelled": 0, "voucher_no": stock_reco.name, "actual_qty": ("<", 0)},
+			fields=["actual_qty"],
+		)
+
+		self.assertEqual(flt(sle[0].actual_qty), flt(-100.0))
 
 	def test_update_stock_reconciliation_while_reposting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -914,7 +932,7 @@ def create_stock_reconciliation(**args):
 					"do_not_submit": True,
 				}
 			)
-		)
+		).name
 
 	sr.append(
 		"items",

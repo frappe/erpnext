@@ -181,20 +181,24 @@ class StockReconciliation(StockController):
 				bundle_doc.flags.ignore_permissions = True
 				bundle_doc.save()
 				item.serial_and_batch_bundle = bundle_doc.name
-			elif item.serial_and_batch_bundle:
-				pass
+			elif item.serial_and_batch_bundle and not item.qty and not item.valuation_rate:
+				bundle_doc = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+
+				item.qty = bundle_doc.total_qty
+				item.valuation_rate = bundle_doc.avg_rate
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
 		self.difference_amount = 0.0
 
 		def _changed(item):
+			if item.current_serial_and_batch_bundle:
+				self.calculate_difference_amount(item, frappe._dict({}))
+				return True
+
 			item_dict = get_stock_balance_for(
 				item.item_code, item.warehouse, self.posting_date, self.posting_time, batch_no=item.batch_no
 			)
-
-			if item.current_serial_and_batch_bundle:
-				return True
 
 			if (item.qty is None or item.qty == item_dict.get("qty")) and (
 				item.valuation_rate is None or item.valuation_rate == item_dict.get("rate")
@@ -210,11 +214,7 @@ class StockReconciliation(StockController):
 
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
-				self.difference_amount += flt(item.qty, item.precision("qty")) * flt(
-					item.valuation_rate or item_dict.get("rate"), item.precision("valuation_rate")
-				) - flt(item_dict.get("qty"), item.precision("qty")) * flt(
-					item_dict.get("rate"), item.precision("valuation_rate")
-				)
+				self.calculate_difference_amount(item, item_dict)
 				return True
 
 		items = list(filter(lambda d: _changed(d), self.items))
@@ -230,6 +230,13 @@ class StockReconciliation(StockController):
 			for i, item in enumerate(self.items):
 				item.idx = i + 1
 			frappe.msgprint(_("Removed items with no change in quantity or value."))
+
+	def calculate_difference_amount(self, item, item_dict):
+		self.difference_amount += flt(item.qty, item.precision("qty")) * flt(
+			item.valuation_rate or item_dict.get("rate"), item.precision("valuation_rate")
+		) - flt(item_dict.get("qty"), item.precision("qty")) * flt(
+			item_dict.get("rate"), item.precision("valuation_rate")
+		)
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
@@ -643,7 +650,14 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		for row in self.items:
-			if not (row.item_code == item_code and row.batch_no == batch_no):
+			if (
+				not (row.item_code == item_code and row.batch_no == batch_no)
+				and not row.serial_and_batch_bundle
+			):
+				continue
+
+			if row.current_serial_and_batch_bundle:
+				self.recalculate_qty_for_serial_and_batch_bundle(row)
 				continue
 
 			current_qty = get_batch_qty_for_stock_reco(
@@ -676,6 +690,27 @@ class StockReconciliation(StockController):
 
 		if sl_entries:
 			self.make_sl_entries(sl_entries)
+
+	def recalculate_qty_for_serial_and_batch_bundle(self, row):
+		doc = frappe.get_doc("Serial and Batch Bundle", row.current_serial_and_batch_bundle)
+		precision = doc.entries[0].precision("qty")
+
+		for d in doc.entries:
+			qty = (
+				get_batch_qty(
+					d.batch_no,
+					doc.warehouse,
+					posting_date=doc.posting_date,
+					posting_time=doc.posting_time,
+					ignore_voucher_nos=[doc.voucher_no],
+				)
+				or 0
+			) * -1
+
+			if flt(d.qty, precision) == flt(qty, precision):
+				continue
+
+			d.db_set("qty", qty)
 
 
 def get_batch_qty_for_stock_reco(

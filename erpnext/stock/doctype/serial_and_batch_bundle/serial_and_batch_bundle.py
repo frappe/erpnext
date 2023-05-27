@@ -21,6 +21,7 @@ from frappe.utils import (
 	parse_json,
 	today,
 )
+from frappe.utils.csvutils import build_csv_response
 
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
@@ -152,15 +153,15 @@ class SerialandBatchBundle(Document):
 		if self.has_serial_no:
 			sn_obj = SerialNoValuation(
 				sle=sle,
-				warehouse=self.item_code,
-				item_code=self.warehouse,
+				item_code=self.item_code,
+				warehouse=self.warehouse,
 			)
 
 		else:
 			sn_obj = BatchNoValuation(
 				sle=sle,
-				warehouse=self.item_code,
-				item_code=self.warehouse,
+				item_code=self.item_code,
+				warehouse=self.warehouse,
 			)
 
 		for d in self.entries:
@@ -657,6 +658,31 @@ class SerialandBatchBundle(Document):
 			self.set("entries", batch_nos)
 
 
+@frappe.whitelist()
+def download_blank_csv_template(content):
+	csv_data = []
+	if isinstance(content, str):
+		content = parse_json(content)
+
+	csv_data.append(content)
+	csv_data.append([])
+	csv_data.append([])
+
+	filename = "serial_and_batch_bundle"
+	build_csv_response(csv_data, filename)
+
+
+@frappe.whitelist()
+def upload_csv_file(item_code, file_path):
+	serial_nos, batch_nos = [], []
+	serial_nos, batch_nos = get_serial_batch_from_csv(item_code, file_path)
+
+	return {
+		"serial_nos": serial_nos,
+		"batch_nos": batch_nos,
+	}
+
+
 def get_serial_batch_from_csv(item_code, file_path):
 	file_path = frappe.get_site_path() + file_path
 	serial_nos = []
@@ -669,7 +695,6 @@ def get_serial_batch_from_csv(item_code, file_path):
 	if serial_nos:
 		make_serial_nos(item_code, serial_nos)
 
-	print(batch_nos)
 	if batch_nos:
 		make_batch_nos(item_code, batch_nos)
 
@@ -938,7 +963,7 @@ def update_serial_batch_no_ledgers(entries, child_row, parent_doc) -> object:
 		doc.append(
 			"entries",
 			{
-				"qty": 1 if doc.type_of_transaction == "Inward" else -1,
+				"qty": d.get("qty") * (1 if doc.type_of_transaction == "Inward" else -1),
 				"warehouse": d.get("warehouse"),
 				"batch_no": d.get("batch_no"),
 				"serial_no": d.get("serial_no"),
@@ -1271,6 +1296,9 @@ def get_available_batches(kwargs):
 		query = query.orderby(batch_table.expiry_date)
 	else:
 		query = query.orderby(batch_table.creation)
+
+	if kwargs.get("ignore_voucher_nos"):
+		query = query.where(stock_ledger_entry.voucher_no.notin(kwargs.get("ignore_voucher_nos")))
 
 	data = query.run(as_dict=True)
 	data = list(filter(lambda x: x.qty > 0, data))

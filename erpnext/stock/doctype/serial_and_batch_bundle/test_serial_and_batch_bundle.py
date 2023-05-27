@@ -8,7 +8,41 @@ from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
 
 
 class TestSerialandBatchBundle(FrappeTestCase):
-	pass
+	def test_inward_serial_batch_bundle(self):
+		pass
+
+	def test_outward_serial_batch_bundle(self):
+		pass
+
+	def test_old_batch_valuation(self):
+		pass
+
+	def test_old_batch_batchwise_valuation(self):
+		pass
+
+	def test_old_serial_no_valuation(self):
+		pass
+
+	def test_batch_not_belong_to_serial_no(self):
+		pass
+
+	def test_serial_no_not_exists(self):
+		pass
+
+	def test_serial_no_item(self):
+		pass
+
+	def test_serial_no_not_required(self):
+		pass
+
+	def test_serial_no_required(self):
+		pass
+
+	def test_batch_no_not_required(self):
+		pass
+
+	def test_batch_no_required(self):
+		pass
 
 
 def get_batch_from_bundle(bundle):

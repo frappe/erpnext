@@ -22,35 +22,7 @@ class SerialNoCannotCannotChangeError(ValidationError):
 	pass
 
 
-class SerialNoNotRequiredError(ValidationError):
-	pass
-
-
-class SerialNoRequiredError(ValidationError):
-	pass
-
-
-class SerialNoQtyError(ValidationError):
-	pass
-
-
-class SerialNoItemError(ValidationError):
-	pass
-
-
 class SerialNoWarehouseError(ValidationError):
-	pass
-
-
-class SerialNoBatchError(ValidationError):
-	pass
-
-
-class SerialNoNotExistsError(ValidationError):
-	pass
-
-
-class SerialNoDuplicateError(ValidationError):
 	pass
 
 
@@ -69,6 +41,15 @@ class SerialNo(StockController):
 			)
 
 		self.set_maintenance_status()
+		self.validate_warehouse()
+
+	def validate_warehouse(self):
+		if not self.get("__islocal"):
+			item_code, warehouse = frappe.db.get_value("Serial No", self.name, ["item_code", "warehouse"])
+			if not self.via_stock_ledger and item_code != self.item_code:
+				frappe.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
+			if not self.via_stock_ledger and warehouse != self.warehouse:
+				frappe.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
