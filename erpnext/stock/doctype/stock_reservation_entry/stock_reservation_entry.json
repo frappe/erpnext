@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "autoname": "MAT-SRE-.YYYY.-.#####",
+ "creation": "2023-03-20 10:45:59.258959",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "warehouse",
+  "column_break_elik",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "section_break_xt4m",
+  "available_qty",
+  "voucher_qty",
+  "stock_uom",
+  "column_break_o6ex",
+  "reserved_qty",
+  "delivered_qty",
+  "section_break_3vb3",
+  "company",
+  "column_break_jbyr",
+  "project",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "print_width": "100px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "oldfieldname": "warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "print_width": "100px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "label": "Voucher Type",
+   "oldfieldname": "voucher_type",
+   "oldfieldtype": "Data",
+   "options": "\nSales Order",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "oldfieldname": "voucher_no",
+   "oldfieldtype": "Data",
+   "options": "voucher_type",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "oldfieldname": "voucher_detail_no",
+   "oldfieldtype": "Data",
+   "print_width": "150px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "oldfieldname": "stock_uom",
+   "oldfieldtype": "Data",
+   "options": "UOM",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Data",
+   "options": "Company",
+   "print_width": "150px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "reserved_qty",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Reserved Qty",
+   "oldfieldname": "actual_qty",
+   "oldfieldtype": "Currency",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delivered_qty",
+   "fieldtype": "Float",
+   "label": "Delivered Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stock Reservation Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "label": "Available Qty to Reserve",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "voucher_qty",
+   "fieldtype": "Float",
+   "label": "Voucher Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_elik",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xt4m",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_o6ex",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_3vb3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_jbyr",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-03-29 18:36:26.752872",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Reservation Entry",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

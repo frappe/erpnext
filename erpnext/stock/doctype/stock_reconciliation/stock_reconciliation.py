@@ -47,6 +47,7 @@ class StockReconciliation(StockController):
 		self.validate_putaway_capacity()
 
 		if self._action == "submit":
+			self.validate_reserved_stock()
 			self.make_batches("warehouse")
 
 	def on_submit(self):
@@ -60,6 +61,7 @@ class StockReconciliation(StockController):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.validate_reserved_stock()
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
@@ -223,6 +225,46 @@ class StockReconciliation(StockController):
 
 		except Exception as e:
 			self.validation_messages.append(_("Row #") + " " + ("%d: " % (row.idx)) + cstr(e))
+
+	def validate_reserved_stock(self) -> None:
+		"""Raises an exception if there is any reserved stock for the items in the Stock Reconciliation."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_item_and_warehouse as get_sre_reserved_qty_details,
+		)
+
+		item_code_list, warehouse_list = [], []
+		for item in self.items:
+			item_code_list.append(item.item_code)
+			warehouse_list.append(item.warehouse)
+
+		sre_reserved_qty_details = get_sre_reserved_qty_details(item_code_list, warehouse_list)
+
+		if sre_reserved_qty_details:
+			data = []
+			for (item_code, warehouse), reserved_qty in sre_reserved_qty_details.items():
+				data.append([item_code, warehouse, reserved_qty])
+
+			msg = ""
+			if len(data) == 1:
+				msg = _(
+					"{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
+				).format(bold(data[0][2]), bold(data[0][0]), bold(data[0][1]), self._action)
+			else:
+				items_html = ""
+				for d in data:
+					items_html += "<li>{0} units of Item {1} in Warehouse {2}</li>".format(
+						bold(d[2]), bold(d[0]), bold(d[1])
+					)
+
+				msg = _(
+					"The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
+				).format(self._action, items_html)
+
+			frappe.throw(
+				msg,
+				title=_("Stock Reservation"),
+			)
 
 	def update_stock_ledger(self):
 		"""find difference between current and expected entries
