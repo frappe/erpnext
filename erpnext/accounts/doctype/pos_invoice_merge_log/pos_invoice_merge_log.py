@@ -261,15 +261,14 @@ def get_invoice_customer_map(pos_invoices, customer = None):
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
     invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
-    # invoice_by_customer = get_invoice_customer_map(invoices, frappe.get_doc("POS Profile", closing_entry.pos_profile).customer)
-    invoice_by_defualt_customer=frappe.get_doc("POS Profile", closing_entry.pos_profile).customer
-    invoice_by_customer = get_invoice_customer_map(invoices)
+    invoice_by_default_customer = frappe.get_doc("POS Profile", closing_entry.pos_profile).customer
+    invoice_by_customer = get_invoice_customer_map(invoices, customer=invoice_by_default_customer)
 
     if len(invoices) >= 10 and closing_entry:
         closing_entry.set_status(update=True, status='Queued')
-        enqueue_job(create_merge_logs, invoice_by_customer=invoice_by_customer, closing_entry=closing_entry,invoice_by_defualt_customer=invoice_by_defualt_customer)
+        enqueue_job(create_merge_logs, invoice_by_customer=invoice_by_customer, closing_entry=closing_entry,invoice_by_default_customer=invoice_by_default_customer)
     else:
-        create_merge_logs(invoice_by_customer, closing_entry,invoice_by_defualt_customer=invoice_by_defualt_customer)
+        create_merge_logs(invoice_by_customer, closing_entry,invoice_by_default_customer=invoice_by_default_customer)
 
 def unconsolidate_pos_invoices(closing_entry):
     merge_logs = frappe.get_all(
@@ -284,26 +283,10 @@ def unconsolidate_pos_invoices(closing_entry):
     else:
         cancel_merge_logs(merge_logs, closing_entry)
 
-def collect_invoice_by_customers(invoice_by_customer, invoice_by_defualt_customer):
-    tmp_ob={}
-    for customer,invoice in six.iteritems(invoice_by_customer):
-        # no forward_sale
-        # da=frappe.get_doc("Customer", customer).forward_sale
-        # if(da):
-        #     tmp_ob.update({customer:invoice})
-        # else:
-            if(not invoice_by_defualt_customer in tmp_ob.keys()):
-                tmp_ob[invoice_by_defualt_customer]=[]
-                tmp_ob[invoice_by_defualt_customer]+=invoice
-            else:
-                tmp_ob[invoice_by_defualt_customer]+=invoice
-    return tmp_ob
 
-def create_merge_logs(invoice_by_customer, closing_entry=None,invoice_by_defualt_customer=None):
+def create_merge_logs(invoice_by_customer, closing_entry=None, invoice_by_default_customer=None):
     try:
-        custom_invoice_by_customer = collect_invoice_by_customers(invoice_by_customer,invoice_by_defualt_customer)
-        for customer, invoices in six.iteritems(custom_invoice_by_customer):
-        # for customer, invoices in six.iteritems(invoice_by_customer):
+        for customer, invoices in six.iteritems(invoice_by_customer):
             merge_log = frappe.new_doc('POS Invoice Merge Log')
             merge_log.posting_date = getdate(closing_entry.get('period_end_date')) if closing_entry else nowdate()
             merge_log.posting_time = get_time(closing_entry.get('period_end_date')) if closing_entry else format_time(nowtime(), 'HH:mm:ss')
