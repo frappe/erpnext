@@ -1,15 +1,30 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import math
+
 import frappe
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.controllers.status_updater import StatusUpdater
 
 
 class BankTransaction(StatusUpdater):
+	_currency_precision = None
+
+	def flt(self, value):
+		# frappe needs a money datatype
+		if self._currency_precision is None:
+			fraction_units = (
+				frappe.db.get_value("Currency", self.currency, "fraction_units", cache=True) or 100
+			)
+			self._currency_precision = cint(math.log(fraction_units, 10))
+		return flt(value, self._currency_precision)
+
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting
 	def after_insert(self):
-		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
+		# still needed?
+		self.unallocated_amount = self.flt(abs(flt(self.withdrawal) - flt(self.deposit)))
 
 	def on_submit(self):
 		self.clear_linked_payment_entries()
@@ -40,9 +55,9 @@ class BankTransaction(StatusUpdater):
 		else:
 			allocated_amount = 0.0
 
-		amount = abs(flt(self.withdrawal) - flt(self.deposit))
-		self.db_set("allocated_amount", flt(allocated_amount))
-		self.db_set("unallocated_amount", amount - flt(allocated_amount))
+		amount = self.flt(abs(flt(self.withdrawal) - flt(self.deposit)))
+		self.db_set("allocated_amount", self.flt(allocated_amount))
+		self.db_set("unallocated_amount", amount - self.flt(allocated_amount))
 		self.reload()
 		self.set_status(update=True)
 
@@ -96,7 +111,8 @@ class BankTransaction(StatusUpdater):
 				unallocated_amount, should_clear, latest_transaction = get_clearance_details(
 					self, payment_entry
 				)
-
+				remaining_amount = self.flt(remaining_amount)
+				unallocated_amount = self.flt(unallocated_amount)
 				if 0.0 == unallocated_amount:
 					if should_clear:
 						latest_transaction.clear_linked_payment_entry(payment_entry)
