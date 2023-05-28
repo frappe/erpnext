@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
@@ -673,18 +674,22 @@ def get_bin_qty(item_code, warehouse):
 
 
 def get_pos_reserved_qty(item_code, warehouse):
-	reserved_qty = frappe.db.sql(
-		"""select sum(p_item.stock_qty) as qty
-		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
-		where p.name = p_item.parent
-		and ifnull(p.consolidated_invoice, '') = ''
-		and p_item.docstatus = 1
-		and p_item.item_code = %s
-		and p_item.warehouse = %s
-		""",
-		(item_code, warehouse),
-		as_dict=1,
-	)
+	p_inv = frappe.qb.DocType("POS Invoice")
+	p_item = frappe.qb.DocType("POS Invoice Item")
+
+	reserved_qty = (
+		frappe.qb.from_(p_inv)
+		.from_(p_item)
+		.select(Sum(p_item.qty).as_("qty"))
+		.where(
+			(p_inv.name == p_item.parent)
+			& (IfNull(p_inv.consolidated_invoice, "") == "")
+			& (p_inv.is_return == 0)
+			& (p_item.docstatus == 1)
+			& (p_item.item_code == item_code)
+			& (p_item.warehouse == warehouse)
+		)
+	).run(as_dict=True)
 
 	return reserved_qty[0].qty or 0 if reserved_qty else 0
 
