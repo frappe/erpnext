@@ -676,20 +676,6 @@ def get_bin_qty(item_code, warehouse):
 
 
 def get_pos_reserved_qty(item_code, warehouse):
-<<<<<<< HEAD
-	reserved_qty = frappe.db.sql(
-		"""select sum(p_item.qty) as qty
-		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
-		where p.name = p_item.parent
-		and ifnull(p.consolidated_invoice, '') = ''
-		and p_item.docstatus = 1
-		and p_item.item_code = %s
-		and p_item.warehouse = %s
-		""",
-		(item_code, warehouse),
-		as_dict=1,
-	)
-=======
 	p_inv = frappe.qb.DocType("POS Invoice")
 	p_item = frappe.qb.DocType("POS Invoice Item")
 
@@ -706,7 +692,6 @@ def get_pos_reserved_qty(item_code, warehouse):
 			& (p_item.warehouse == warehouse)
 		)
 	).run(as_dict=True)
->>>>>>> 027de41600 (fix: incorrect `POS Reserved Qty` in `Stock Projected Qty` Report)
 
 	return reserved_qty[0].qty or 0 if reserved_qty else 0
 
