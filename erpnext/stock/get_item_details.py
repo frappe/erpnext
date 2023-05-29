@@ -948,7 +948,7 @@ def get_price_list_rate_for(args, item_code):
 		desired_qty = args.get("qty")
 		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
-	else:
+	else:#hello
 		for field in ["customer", "supplier"]:
 			del item_price_args[field]
 
