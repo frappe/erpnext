@@ -91,6 +91,7 @@ class POSInvoiceMergeLog(Document):
         sales_invoice.set_posting_time = 1
         sales_invoice.posting_date = getdate(self.posting_date)
         sales_invoice.posting_time = self.posting_time
+        sales_invoice.update_stock = 1
         sales_invoice.save()
         sales_invoice.submit()
 
