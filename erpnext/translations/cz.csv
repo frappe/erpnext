@@ -3096,6 +3096,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +14,Broke
 DocType: Production Order Operation,"in Minutes
 Updated via 'Time Log'","v minutách 
  aktualizovat přes ""Time Log"""
+<<<<<<< HEAD
 DocType: Customer,From Lead,Od Leadu
 apps/erpnext/erpnext/config/manufacturing.py +19,Orders released for production.,Objednávky uvolněna pro výrobu.
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +42,Select Fiscal Year...,Vyberte fiskálního roku ...
@@ -3394,6 +3395,306 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +119,Etching
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +55,Commission,Provize
 apps/erpnext/erpnext/templates/pages/ticket.py +31,You are not allowed to reply to this ticket.,Nejste oprávnění odpovědět na tento lístek.
 DocType: Address Template,"<h4>Default Template</h4>
+=======
+From Lead,Od Leadu,
+Orders released for production.,Objednávky uvolněna pro výrobu.
+Select Fiscal Year...,Vyberte fiskálního roku ...
+Name Token,Jméno Token,
+Planing,Hoblovánn,
+Standard Selling,Standardní prodejnn,
+Atleast one warehouse is mandatory,Alespoň jeden sklad je povinnn,
+Out of Warranty,Out of záruky,
+Replace,Vyměnit,
+{0} against Sales Invoice {1},{0} na Prodejní Faktuře {1}
+Please enter default Unit of Measure,"Prosím, zadejte výchozí měrnou jednotku"
+Project Name,Název projektu,
+Edit,Upravit,
+If Income or Expense,Pokud je výnos nebo náklad,
+New Support Tickets,Nová podpora Vstupenky,
+Item Batch Nos,Položka Batch Nos,
+Stock Value Difference,Reklamní Value Rozdíl,
+Payment Reconciliation Payment,Platba Odsouhlasení Platba,
+Tax Assets,Daňové Aktiva,
+BOM No,BOM No,
+Pincode,PSu,
+Journal Entry {0} does not have account {1} or already matched against other voucher,Zápis do deníku {0} nemá účet {1} nebo již uzavřeno proti ostatním poukaz,
+Moving Average,Klouzavý průměr,
+The BOM which will be replaced,"BOM, který bude nahrazen"
+New Stock UOM must be different from current stock UOM,New Sklad UOM musí být odlišný od běžného akciové nerozpuštěných,
+Debit,Debet,
+Leaves must be allocated in multiples of 0.5,"Listy musí být přiděleny v násobcích 0,5"
+Operation Cost,Provozní náklady,
+Upload attendance from a .csv file,Nahrajte účast ze souboru CSV,
+Outstanding Amt,Vynikající Amt,
+Set targets Item Group-wise for this Sales Person.,Nastavit cíle Item Group-moudrý pro tento prodeje osobě.
+"To assign this issue, use the ""Assign"" button in the sidebar.","Chcete-li přiřadit tento problém vyřešit, použijte tlačítko ""Přiřadit"" v postranním panelu."
+Freeze Stocks Older Than [Days],Freeze Zásoby Starší než [dny]
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","Pokud dva nebo více pravidla pro tvorbu cen se nacházejí na základě výše uvedených podmínek, priorita je aplikována. Priorita je číslo od 0 do 20, zatímco výchozí hodnota je nula (prázdný). Vyšší číslo znamená, že bude mít přednost, pokud existuje více pravidla pro tvorbu cen se za stejných podmínek."
+Against Invoice,Na základě faktury,
+Fiscal Year: {0} does not exists,Fiskální rok: {0} neexistuje,
+To Currency,Chcete-li měny,
+Allow the following users to approve Leave Applications for block days.,Nechte následující uživatelé schválit Žádost o dovolenou.
+Types of Expense Claim.,Druhy výdajů nároku.
+Taxes,Dany,
+Default Cost Center,Výchozí Center Náklady,
+End Date,Datum ukončeny,
+Internal Work History,Vnitřní práce History,
+Column Break,Zalomení sloupce,
+Thursday,Čtvrtek,
+Private Equity,Private Equity,
+Turning,Turning,
+Customer Feedback,Zpětná vazba od zákazníky,
+Expense,Výdaj,
+Exhibition,Výstava,
+Item {0} ignored since it is not a stock item,"Položka {0} ignorována, protože to není skladem"
+Submit this Production Order for further processing.,Odeslat tento výrobní zakázka pro další zpracování.
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","Nechcete-li použít Ceník článek v dané transakce, by měly být všechny platné pravidla pro tvorbu cen zakázáno."
+Domain,Doména,
+Sales Order Trends,Prodejní objednávky Trendy,
+Held On,Které se konalo dne,
+Production Item,Výrobní položka,
+Employee Information,Informace o zaměstnanci,
+Rate (%),Rate (%)
+Financial Year End Date,Finanční rok Datum ukončen$1,
+"Can not filter based on Voucher No, if grouped by Voucher","Nelze filtrovat na základě poukazu ne, pokud seskupeny podle poukazu"
+Make Supplier Quotation,Vytvořit nabídku dodavatele,
+Incoming,Přicházejíce,
+Name and Description,Jméno a popis,
+"Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.","Výchozí Měrná jednotka nelze změnit, přímo, protože jste již nějaké transakce (y) s jiným nerozpuštěných. Chcete-li změnit výchozí UOM, použijte ""UOM Nahradit Utility"" nástroj pod Stock modulu."
+Materials Required (Exploded),Potřebný materiál (Rozložený)
+Reduce Earning for Leave Without Pay (LWP),Snížit Zisk na vstup bez nároku na mzdu (LWP)
+Casual Leave,Casual Leave,
+Credit To account must be a liability account,Připsat na účet musí být účet závazek,
+Batch ID,Šarže ID,
+Note: {0},Poznámka: {0}
+Delivery Note Trends,Dodací list Trendy,
+{0} must be a Purchased or Sub-Contracted Item in row {1},"{0} musí být Zakoupená, nebo Subdodavatelská položka v řádku {1}"
+Account: {0} can only be updated via Stock Transactions,Účet: {0} lze aktualizovat pouze prostřednictvím Skladových Transakca,
+Party,Strana,
+Delivery Date,Dodávka Datum,
+Currency,Měna,
+Opportunity Date,Příležitost Datum,
+To Bill,Billa,
+Piecework,Úkolová práce,
+Avg. Buying Rate,Avg. Nákup Rate,
+Actual Time in Hours (via Timesheet),Skutečná doba (v hodinách)
+History In Company,Historie ve Společnosti,
+Shipping,Lodni,
+Stock Ledger Entry,Reklamní Ledger Entry,
+Leave Block List,Nechte Block List,
+Item {0} is not setup for Serial Nos. Column must be blank,Položka {0} není nastavení pro Serial č. Sloupec musí být prázdni,
+Accounts Settings,Nastavení účtu,
+Plant and Machinery,Továrna a strojní zařízeni,
+You can enter the minimum quantity of this item to be ordered.,Můžete zadat minimální množství této položky do objednávky.
+Partner's Website,Partnera Website,
+To Discuss,K projednáne,
+SMS Settings,Nastavení SMS,
+Temporary Accounts,Dočasné Účty,
+Column Break 1,Zalomení sloupce 1,
+Black,Černe,
+BOM Explosion Item,BOM Explosion Item,
+Auditor,Auditor,
+End date of current order's period,Datum ukončení doby aktuální objednávky,
+Make Offer Letter,Vytvořte nabídku Letter,
+Fold,Fold,
+Production Order Operation,Výrobní zakázka Operace,
+Disable,Zakázat,
+Pending Review,Čeká Review,
+Please specify,Prosím specifikujte,
+Total Expense Claim (via Expense Claim),Total Expense Claim (via Expense nároku)
+Customer Id,Zákazník Id,
+Page Name,Název stránky,
+Exchange Rate,Exchange Rate,
+Sales Order {0} is not submitted,Prodejní objednávky {0} není předložena,
+Warehouse {0}: Parent account {1} does not bolong to the company {2},Sklad {0}: Nadřazený účet {1} napatří společnosti {2}
+Spindle finishing,Úprava vřetena,
+% of materials ordered against this Material Request,% Materiálů objednáno proti tomuto požadavku Materiál,
+Last Purchase Rate,Last Cena při platba,
+Asset,Majetek,
+Task ID,Task ID,
+"e.g. ""MC""","např ""MC """
+Stock cannot exist for Item {0} since has variants,"Sklad nemůže existovat k bodu {0}, protože má varianty"
+Sales Person-wise Transaction Summary,Prodej Person-moudrý Shrnutí transakce,
+Time Zone,Časové pásmo,
+Warehouse {0} does not exist,Sklad {0} neexistuje,
+Register For ERPNext Hub,Registrace pro ERPNext Hub,
+Monthly Distribution Percentages,Měsíční Distribuční Procenta,
+The selected item cannot have Batch,Vybraná položka nemůže mít dávku,
+% of materials delivered against this Delivery Note,% Materiálů doručeno proti tomuto dodacímu listu,
+Stapling,Sešíváne,
+Customer Details,Podrobnosti zákazníke,
+Shaping,Tvarováne,
+Reports to,Zprávy,
+Enter url parameter for receiver nos,Zadejte url parametr pro přijímače nos,
+Paid Amount,Uhrazené částky,
+Closing Account {0} must be of type 'Liability',"Závěrečný účet {0} musí být typu ""odpovědnosti"""
+Available Stock for Packing Items,K dispozici skladem pro balení položek,
+Reserved Warehouse is missing in Sales Order,Reserved Warehouse chybí odběratele,
+Item Variant,Položka Variant,
+Setting this Address Template as default as there is no other default,"Nastavení Tato adresa šablonu jako výchozí, protože není jiná výchozí"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Zůstatek na účtu již v inkasa, není dovoleno stanovit ""Balance musí být"" jako ""úvěru"""
+Quality Management,Řízení kvality,
+Filter based on customer,Filtr dle zákazníka,
+Against Voucher No,Proti poukaz y,
+Please enter quantity for Item {0},"Zadejte prosím množství produktů, bod {0}"
+Warning: Sales Order {0} already exists against same Purchase Order number,Upozornění: prodejní objednávky {0} již existuje proti stejnému číslo objednávky,
+Employee External Work History,Zaměstnanec vnější práce History,
+Purchase,Nákup,
+Status of {0} {1} is now {2},Stav {0} {1} je nyní {2}
+Balance Qty,Zůstatek Množstvp,
+Parent Item Group,Parent Item Group,
+{0} for {1},{0} na {1}
+Cost Centers,Nákladové středisko,
+Warehouses.,Sklady.
+Rate at which supplier's currency is converted to company's base currency,"Sazba, za kterou dodavatel měny je převeden na společnosti základní měny"
+Row #{0}: Timings conflicts with row {1},Row # {0}: časování v rozporu s řadou {1}
+Employment Type,Typ zaměstnánk,
+Fixed Assets,Dlouhodobý majetek,
+Default Expense Account,Výchozí výdajového účtu,
+Notice (days),Oznámení (dny)
+Yes,Ano,
+Material User,Materiál Uživatel,
+Encashment Date,Inkaso Datum,
+Electroforming,Electroforming,
+"Against Voucher Type must be one of Purchase Order, Purchase Invoice or Journal Entry","Proti poukazu Type musí být jedním z objednávky, faktury nebo Journal Entry"
+Stock Adjustment,Reklamní Nastaveny,
+Planned Operating Cost,Plánované provozní náklady,
+New {0} Name,Nový {0} Název,
+Please find attached {0} #{1},V příloze naleznete {0} # {1}
+jsonrates.com API Key,jsonrates.com API Key,
+Applicant Name,Žadatel Název,
+Customer / Item Name,Zákazník / Název zbožy,
+Serial No is mandatory for Item {0},Pořadové číslo je povinná k bodu {0}
+Created By,Vytvořeno (kým)
+Under AMC,Podle AMC,
+Item valuation rate is recalculated considering landed cost voucher amount,Bod míra ocenění je přepočítána zvažuje přistál nákladů částku poukazu,
+Default settings for selling transactions.,Výchozí nastavení pro prodejní transakce.
+Current BOM,Aktuální BOM,
+Add Serial No,Přidat Sériové číslo,
+Warehouses,Sklady,
+Print and Stationary,Print a StacionárnM,
+Group Node,Group Node,
+Minimum Amount,Minimální částka,
+Update Finished Goods,Dokončení aktualizace zbožM,
+"Automatically set. If this item has variants, then it cannot be selected in sales orders etc.","Automatické nastavení. Pokud je tato položka má varianty, pak to nemůže být zvolen do prodejních objednávek atd"
+per hour,za hodinu,
+Series {0} already used in {1},Série {0} jsou již použity v {1}
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,"Účet pro skladu (průběžné inventarizace), bude vytvořena v rámci tohoto účtu."
+Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Warehouse nelze vypustit, neboť existuje zásob, kniha pro tento sklad."
+Distribution,Distribuce,
+Project Manager,Project Manager,
+Dispatch,Odesláne,
+Max discount allowed for item: {0} is {1}%,Max sleva povoleno položku: {0} {1}%
+Receivable,Pohledávky,
+Role that is allowed to submit transactions that exceed credit limits set.,"Role, která se nechá podat transakcí, které přesahují úvěrové limity."
+Supplier Reference,Dodavatel Označen$1,
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","Je-li zaškrtnuto, bude BOM pro sub-montážní položky považují pro získání surovin. V opačném případě budou všechny sub-montážní položky být zacházeno jako surovinu."
+Material Issue,Material Issue,
+Seller Description,Prodejce Popis,
+Is Stock Item,Je skladem,
+Shopping Cart Price List,Nákupní košík Ceník,
+Qualification,Kvalifikace,
+Item Price,Položka Cena,
+Soap & Detergent,Soap & Detergent,
+Motion Picture & Video,Motion Picture & Video,
+Ordered,Objednáno,
+Default Settings,Výchozí nastavene,
+Warehouse Name,Název Skladu,
+Select Transaction,Vybrat Transaction,
+Please enter Approving Role or Approving User,Zadejte Schvalování role nebo Schvalování Uživatel,
+Write Off Entry,Odepsat Vstup,
+Rate Of Materials Based On,Hodnotit materiálů na bázi,
+Support Analtyics,Podpora Analtyics,
+eg. Cheque Number,např. číslo šeku,
+Company is missing in warehouses {0},Společnost chybí ve skladech {0}
+Stock UOM Replace Utility,Sklad UOM Nahradit Utility,
+Terms and Conditions,Podmínky,
+To Date should be within the Fiscal Year. Assuming To Date = {0},"Chcete-li data by měla být v rámci fiskálního roku. Za předpokladu, že To Date = {0}"
+"Here you can maintain height, weight, allergies, medical concerns etc","Zde si můžete udržet výšku, váhu, alergie, zdravotní problémy atd"
+Applies to Company,Platí pro firmy,
+Cannot cancel because submitted Stock Entry {0} exists,"Nelze zrušit, protože předložena Reklamní Entry {0} existuje"
+In Words,Slovy,
+Today is {0}'s birthday!,Dnes je {0} 's narozeniny!
+Material Request For Warehouse,Materiál Request For Warehouse,
+For Production,Pro Výrobu,
+Please enter sales order in the above table,"Prosím, zadejte prodejní objednávky v tabulce výše"
+View Task,Zobrazit Task,
+Your financial year begins on,Váš finanční rok začínk,
+Please enter Purchase Receipts,"Prosím, zadejte Nákup Příjmy"
+Get Advances Received,Získat přijaté zálohy,
+Add/Remove Recipients,Přidat / Odebrat příjemce,
+Transaction not allowed against stopped Production Order {0},Transakce není povoleno proti zastavila výrobu Objednat {0}
+"To set this Fiscal Year as Default, click on 'Set as Default'","Chcete-li nastavit tento fiskální rok jako výchozí, klikněte na tlačítko ""Nastavit jako výchozí"""
+Setup incoming server for support email id. (e.g. support@example.com),Nastavení příchozí server pro podporu e-mailovou id. (Např support@example.com)
+Shortage Qty,Nedostatek Množstv$1,
+Row{0}: Party Type and Party is required for Receivable / Payable account {1},Row {0}: Type Party Party a je nutné pro pohledávky / závazky na účtu {1}
+Salary Slip,Plat Slip,
+Burnishing,Leštěnp,
+To enable <b>Point of Sale</b> view,Chcete-li povolit <b> Point of Sale </ b> Zobrazit,
+'To Date' is required,"""Datum DO"" je povinné"
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Generování balení pásky pro obaly mají být dodány. Používá se k oznámit číslo balíku, obsah balení a jeho hmotnost."
+Sales Order Item,Prodejní objednávky Item,
+Payment Days,Platební dny,
+Manage cost of operations,Správa nákladů na provoz,
+Make Credit Note,Proveďte dobropis,
+Item Advanced,Položka Advanced,
+Hot rolling,Válcovánm,
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Když některý z kontrolovaných operací je ""Odesláno"", email pop-up automaticky otevřeny poslat e-mail na přidružené ""Kontakt"" v této transakci, s transakcí jako přílohu. Uživatel může, ale nemusí odeslat e-mail."
+Customer master.,Master zákazníků.
+Global Settings,Globální nastaveny,
+Employee Education,Vzdělávání zaměstnancy,
+Net Pay,Net Pay,
+Account,Účet,
+Serial No {0} has already been received,Pořadové číslo {0} již obdržel,
+Requested Items To Be Transferred,Požadované položky mají být převedeny,
+Recurring Id,Opakující se Id,
+Sales Team Details,Podrobnosti prodejní tým,
+Total Claimed Amount,Celkem žalované částky,
+Potential opportunities for selling.,Potenciální příležitosti pro prodej.
+Sick Leave,Zdravotní dovolent,
+Email Digest,Email Digest,
+Billing Address Name,Jméno Fakturační adresy,
+Department Stores,Obchodní domy,
+System Balance,System Balance,
+Is Active,Je Aktivnt,
+No accounting entries for the following warehouses,Žádné účetní záznamy pro následující sklady,
+Save the document first.,Uložte dokument jako první.
+Chargeable,Vyměřovacg,
+Linishing,Linishing,
+Change Abbreviation,Změna Zkratky,
+Primary,Primárng,
+Expense Date,Datum výdaje,
+Max Discount (%),Max sleva (%)
+Last Order Amount,Poslední částka objednávky,
+Blasting,Odstřel,
+Warn,Varovat,
+Item valuation updated,Ocenění Item aktualizováno,
+"Any other remarks, noteworthy effort that should go in the records.","Jakékoli jiné poznámky, pozoruhodné úsilí, které by měly jít v záznamech."
+Manufacturing User,Výroba Uživatel,
+Raw Materials Supplied,Dodává suroviny,
+Total valuation ({0}) for manufactured or repacked item(s) can not be less than total valuation of raw materials ({1}),Ocenění Total ({0}) pro vyrobené nebo zabalil položku (y) nesmí být menší než celková ocenění surovin ({1})
+New Projects,Nové projekty,
+Series,Série,
+Expected Delivery Date cannot be before Purchase Order Date,"Očekávané datum dodání, nemůže být před zakoupením pořadí Datum"
+Appraisal Template,Posouzení Template,
+Email,Email,
+Item Classification,Položka Klasifikace,
+Business Development Manager,Business Development Manager,
+Maintenance Visit Purpose,Maintenance Visit Účel,
+Period,Obdobe,
+General Ledger,Hlavní Účetní Kniha,
+View Leads,Zobrazit Vodítka,
+Attribute Value,Hodnota atributu,
+"Email id must be unique, already exists for {0}","E-mail id musí být jedinečný, již existuje {0}"
+Itemwise Recommended Reorder Level,Itemwise Doporučené Změna pořadí Level,
+Please select {0} first,"Prosím, nejprve vyberte {0} "
+To get Item Group in details table,Chcete-li získat položku Group v tabulce Rozpis,
+Redrawing,Překreslens,
+Etching,Lept,
+Commission,Provize,
+You are not allowed to reply to this ticket.,Nejste oprávnění odpovědět na tento lístek.
+"<h4>Default Template</h4>
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 <p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
 <pre><code>{{ address_line1 }}&lt;br&gt;
 {% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
@@ -3605,6 +3906,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +46,Show Balance,Show Balance
 DocType: Item,"Example: ABCD.#####
 If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Příklad:. ABCD ##### 
  Je-li série nastavuje a pořadové číslo není uvedeno v transakcích, bude vytvořen poté automaticky sériové číslo na základě této série. Pokud chcete vždy výslovně uvést pořadová čísla pro tuto položku. ponechte prázdné."
+<<<<<<< HEAD
 DocType: Upload Attendance,Upload Attendance,Nahrát Návštěvnost
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +143,BOM and Manufacturing Quantity are required,BOM a výroba množství jsou povinné
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +44,Ageing Range 2,Stárnutí rozsah 2
@@ -3899,3 +4201,298 @@ apps/erpnext/erpnext/accounts/doctype/account/account.py +160,Account {0} does n
 DocType: Account,Cash,V hotovosti
 DocType: Employee,Short biography for website and other publications.,Krátký životopis na internetové stránky a dalších publikací.
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +31,Please create Salary Structure for employee {0},Prosím vytvořte platovou strukturu pro zaměstnance {0}
+=======
+Upload Attendance,Nahrát Návštěvnost,
+BOM and Manufacturing Quantity are required,BOM a výroba množství jsou povinnt,
+Ageing Range 2,Stárnutí rozsah 2,
+Amount,Částka,
+Riveting,Nýtovánt,
+BOM replaced,BOM nahradil,
+Sales Analytics,Prodejní Analytics,
+Manufacturing Settings,Výrobní nastavent,
+Please enter default currency in Company Master,Zadejte prosím výchozí měnu v podniku Mistr,
+Stock Entry Detail,Reklamní Entry Detail,
+You need to be logged in to view your cart.,Musíte být přihlášen k zobrazení košíku.
+New Account Name,Nový název účtu,
+Raw Materials Supplied Cost,Dodává se nákladů na suroviny,
+Settings for Selling Module,Nastavení pro prodej Module,
+Customer Service,Služby zákazníkům,
+Item Customer Detail,Položka Detail Zákazník,
+Offer candidate a Job.,Nabídka kandidát Job.
+Prompt for Email on Submission of,Výzva pro e-mail na předkládánm,
+Item {0} must be a stock Item,Položka {0} musí být skladem,
+Default settings for accounting transactions.,Výchozí nastavení účetních transakcí.
+{0} is required,{0} je vyžadováno,
+Vacuum molding,Vakuové tvářeno,
+Expected Date cannot be before Material Request Date,Očekávané datum nemůže být před Materiál Poptávka Datum,
+City,Město,
+Ultrasonic machining,Ultrazvukové obráběno,
+Item {0} must be a Sales Item,Bod {0} musí být prodejní položky,
+Update Series Number,Aktualizace Series Number,
+Equity,Hodnota majetku,
+Closing Date,Uzávěrka Datum,
+Produced Quantity,Produkoval Množstvo,
+Engineer,Inženýr,
+Item Code required at Row No {0},Kód položky třeba na řádku č {0}
+Partner Type,Partner Type,
+Actual,Aktuálne,
+% of materials received against this Purchase Order,% materiálů přijatých proti této objednávce,
+Customerwise Discount,Sleva podle zákazníka,
+Against Expense Account,Proti výdajového účtu,
+Production Order,Výrobní Objednávka,
+Installation Note {0} has already been submitted,Poznámka k instalaci {0} již byla odeslána,
+Against Docname,Proti Docname,
+All Employee (Active),Všichni zaměstnanci (Aktivní)
+View Now,Zobrazit nyn$1,
+Select the period when the invoice will be generated automatically,"Vyberte období, kdy faktura budou generovány automaticky"
+Raw Material Cost,Cena surovin,
+Re-Order Level,Re-Order Level,
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,"Zadejte položky a plánované ks, pro které chcete získat zakázky na výrobu, nebo stáhnout suroviny pro analýzu."
+Gantt Chart,Pruhový diagram,
+Part-time,Part-time,
+Applicable Holiday List,Použitelný Seznam Svátkm,
+Cheque,Šek,
+Series Updated,Řada Aktualizováno,
+Report Type is mandatory,Report Type je povinnm,
+Serial Number Series,Sériové číslo Series,
+Warehouse is mandatory for stock Item {0} in row {1},Sklad je povinný pro skladovou položku {0} na řádku {1}
+Retail & Wholesale,Maloobchod a velkoobchod,
+First Responded On,Prvně odpovězeno dne,
+Cross Listing of Item in multiple groups,Cross Výpis zboží v několika skupinách,
+The First User: You,První Uživatel: Vy,
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Datum zahájení a  Datum ukončení Fiskálního roku jsou již stanoveny ve fiskálním roce {0}
+Successfully Reconciled,Úspěšně smířeni,
+Planned End Date,Plánované datum ukončeni,
+Where items are stored.,"Tam, kde jsou uloženy předměty."
+Invoiced Amount,Fakturovaná částka,
+Attendance,Účast,
+No,Ne,
+Materials,Materiály,
+"If not checked, the list will have to be added to each Department where it has to be applied.","Pokud není zatrženo, seznam bude muset být přidány ke každé oddělení, kde má být použit."
+Make Delivery,Proveďte Dodávka,
+Posting date and posting time is mandatory,Datum a čas zadání je povinna,
+Tax template for buying transactions.,Daňové šablona pro nákup transakcí.
+Item Prices,Ceny Položek,
+In Words will be visible once you save the Purchase Order.,"Ve slovech budou viditelné, jakmile uložíte objednávce."
+Period Closing Voucher,Období Uzávěrka Voucher,
+Price List master.,Ceník master.
+Review Date,Review Datum,
+Level,Úrovem,
+On Net Total,On Net Celkem,
+Target warehouse in row {0} must be same as Production Order,Target sklad v řádku {0} musí být stejná jako výrobní zakázky,
+No permission to use Payment Tool,Nemáte oprávnění k použití platební nástroj,
+'Notification Email Addresses' not specified for recurring %s,"""E-mailové adresy pro Oznámení"", které nejsou uvedeny na opakující se %s"
+Milling,Frézovány,
+Nibbling,Okusovány,
+Administrative Expenses,Administrativní náklady,
+Consulting,Consulting,
+Parent Customer Group,Parent Customer Group,
+Change,Změna,
+Contact Email,Kontaktní e-mail,
+Purchase Order {0} is 'Stopped',Vydaná objednávka {0} je 'Zastavena'
+Score Earned,Skóre Zasloužen$1,
+"e.g. ""My Company LLC""","např ""My Company LLC """
+Notice Period,Výpovědní Lhůta,
+Voucher ID,Voucher ID,
+This is a root territory and cannot be edited.,To je kořen území a nelze upravovat.
+Gross Weight UOM,Hrubá Hmotnost UOM,
+Receivables / Payables,Pohledávky / Závazky,
+Against Sales Invoice,Proti prodejní faktuře,
+Stamping,LisovánM,
+Landed Cost Item,Přistálo nákladovou položkou,
+Show zero values,Ukázat nulové hodnoty,
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Množství položky získané po výrobě / přebalení z daných množství surovin,
+Receivable / Payable Account,Pohledávky / závazky účet,
+Against Sales Order Item,Proti položce přijaté objednávky,
+Default Warehouse,Výchozí Warehouse,
+Actual End Date (via Time Logs),Skutečné Datum ukončení (přes Time Záznamy)
+Please enter parent cost center,"Prosím, zadejte nákladové středisko mateřský"
+Print Without Amount,Tisknout bez Částka,
+Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Daň z kategorie nemůže být ""Ocenění"" nebo ""Ocenění a celkový"", protože všechny položky jsou běžně skladem"
+Last Name,Příjmeno,
+Left,Vlevo,
+All Day,Celý den,
+Support Team,Tým podpory,
+Total Score (Out of 5),Celkové skóre (Out of 5)
+State,Stav,
+Batch,Šarže,
+Balance,Zůstatek,
+Gender,Pohlave,
+Debit Note,Debit Note,
+As per Stock UOM,Podle Stock nerozpuštěných,
+Not Expired,Neuplynula,
+Total Debit,Celkem Debit,
+Sales Person,Prodej Osoba,
+Unstop Purchase Order,Uvolnit Objednávka,
+Cold Calling,Cold Calling,
+SMS Parameter,SMS parametre,
+Half Yearly,Pololetne,
+Blog Subscriber,Blog Subscriber,
+Income Year to Date,Rok příjmů do dneška,
+Create rules to restrict transactions based on values.,Vytvoření pravidla pro omezení transakce na základě hodnot.
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Pokud je zaškrtnuto, Total no. pracovních dnů bude zahrnovat dovolenou, a to sníží hodnotu platu za každý den"
+Total Advance,Total Advance,
+Unstop Material Request,Uvolnit materiálu Poptávka,
+User,Uživatel,
+Basic Rate,Basic Rate,
+Set as Lost,Nastavit jako Lost,
+Stock balances updated,Stock zůstatky aktualizováno,
+Maintain Same Rate Throughout Sales Cycle,Udržovat stejná sazba po celou dobu prodejního cyklu,
+Cannot return more than {0} for Item {1},Nelze vrátit více než {0} položky {1}
+Plan time logs outside Workstation Working Hours.,Naplánujte čas protokoly mimo Workstation pracovních hodin.
+{0} {1} has already been submitted,{0} {1} již byla odeslána,
+Items To Be Requested,Položky se budou vyžadovat,
+Get Last Purchase Rate,Získejte posledního nákupu Cena,
+Company Info,Společnost info,
+Seaming,Sešívána,
+"Company Email ID not found, hence mail not sent","Společnost E-mail ID nebyl nalezen, proto pošta neodeslána"
+Application of Funds (Assets),Aplikace fondů (aktiv)
+Filter based on item,Filtr dle položek,
+Year Start Date,Datum Zahájení Roku,
+Employee Name,Jméno zaměstnance,
+Debit To account must be a liability account,"Debetní Chcete-li v úvahu, musí být účet závazek"
+Rounded Total (Company Currency),Zaoblený Total (Company Měna)
+Cannot covert to Group because Account Type is selected.,"Nelze skryté do skupiny, protože je požadovaný typ účtu."
+Purchase Common,Nákup Common,
+{0} {1} has been modified. Please refresh.,{0} {1} byl změněn. Prosím aktualizujte.
+Stop users from making Leave Applications on following days.,Přestaňte uživatelům provádět Nechat aplikací v následujících dnech.
+From Opportunity,Od Opportunity,
+Blanking,Zacloněny,
+Employee Benefits,Zaměstnanecké benefity,
+Is POS,Je POS,
+Packed quantity must equal quantity for Item {0} in row {1},Balíčky množství se musí rovnat množství pro položku {0} v řadě {1}
+Manufactured Qty,Vyrobeno Množstv$1,
+Accepted Quantity,Schválené Množstv$1,
+Bills raised to Customers.,Směnky vznesené zákazníkům.
+Default,Výchozu,
+Project Id,ID projektu,
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","Výběrem ""Yes"" umožní tato položka se objeví v objednávce, a doklad o zaplacení."
+{0} subscribers added,{0} odběratelé z přidann,
+Schedule,Plán,
+Parent Account,Nadřazený účet,
+Available,K dispozici,
+Reading 3,Čtení 3,
+Hub,Hub,
+Voucher Type,Voucher Type,
+Approved,Schválenn,
+Price,Cena,
+Employee relieved on {0} must be set as 'Left',"Zaměstnanec úlevu na {0} musí být nastaven jako ""Left"""
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","Výběrem ""Yes"" dá jedinečnou identitu každého subjektu této položky, které lze zobrazit v sériové číslo mistra."
+Appraisal {0} created for Employee {1} in the given date range,Posouzení {0} vytvořil pro zaměstnance {1} v daném časovém obdoby,
+Education,Vzdělány,
+Campaign Naming By,Kampaň Pojmenování By,
+Current Address Is,Aktuální adresa je,
+Office,Kanceláy,
+Standard Reports,Standardní výpisy,
+Accounting journal entries.,Zápisy v účetním deníku.
+Please select Employee Record first.,"Prosím, vyberte zaměstnance záznam první."
+To create a Tax Account,Chcete-li vytvořit daňovém účtu,
+Please enter Expense Account,"Prosím, zadejte výdajového účtu"
+Stock,Sklad,
+Current Address,Aktuální adresa,
+"If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified","Je-li položka je varianta další položku pak popis, obraz, oceňování, daní atd bude stanoven ze šablony, pokud není výslovně uvedeno"
+Purchase / Manufacture Details,Nákup / Výroba Podrobnosti,
+Contract End Date,Smlouva Datum ukončeni,
+Track this Sales Order against any Project,Sledovat tento prodejní objednávky na jakýkoli projekt,
+Price List not configured.,Ceník není nakonfigurován.
+Pull sales orders (pending to deliver) based on the above criteria,"Prodejní Pull zakázky (čeká dodat), na základě výše uvedených kritérií"
+Document Type,Typ dokumentu,
+From Supplier Quotation,Z nabídky dodavatele,
+Deduction Type,Odpočet Type,
+Half Day,Půl den,
+Not Available,Není k dispozici,
+Min Qty,Min Množstvu,
+Transaction Date,Transakce Datum,
+Planned Qty,Plánované Množstvu,
+Total Tax,Total Tax,
+Default Target Warehouse,Výchozí Target Warehouse,
+Net Total (Company Currency),Net Total (Company Měna)
+Purchase Receipt Message,Zpráva příjemky,
+Actual Start Date,Skutečné datum zahájeny,
+% of materials delivered against this Sales Order,% Materiálů doručeno proti tomuto odběrateli,
+Record item movement.,Záznam pohybu položka.
+Newsletter List Subscriber,Newsletter seznamu účastníky,
+Morticing,Dlabačky,
+Service,Služba,
+Hub Settings,Nastavení Hub,
+Gross Margin %,Hrubá Marže %
+With Operations,S operacemi,
+Monthly Salary Register,Měsíční plat Register,
+Next,Dalši,
+If different than customer address,Pokud se liší od adresy zákazníka,
+BOM Operation,BOM Operation,
+Electropolishing,Elektrolyticki,
+On Previous Row Amount,Na předchozí řady Částka,
+New Delivery Notes,Nové dodací listy,
+Please enter Payment Amount in atleast one row,"Prosím, zadejte částku platby aspoň jedné řadě"
+Please write something in subject and message!,"Prosím, napište něco do předmětu zprávy a poselství!"
+"Seasonality for setting budgets, targets etc.","Sezónnost pro nastavení rozpočtů, cíle atd."
+Row {0}: Payment Amount cannot be greater than Outstanding Amount,Row {0}: Platba Částka nesmí být vyšší než dlužná částka,
+Time Log is not billable,Time Log není zúčtovatelna,
+"Item {0} is a template, please select one of its variants","Položka {0} je šablona, ​​prosím vyberte jednu z jeho variant"
+Localization,Lokalizace,
+Net pay cannot be negative,Net plat nemůže být záporne,
+Please enter the Against Vouchers manually,Zadejte prosím podle dokladů ručne,
+Static Parameters,Statické parametry,
+Advance Paid,Vyplacené zálohy,
+Item Tax,Daň Položky,
+Employees Email Id,Zaměstnanci Email Id,
+Current Liabilities,Krátkodobé závazky,
+Send mass SMS to your contacts,Posílat hromadné SMS vašim kontaktům,
+Consider Tax or Charge for,Zvažte daň či poplatek za,
+Actual Qty is mandatory,Skutečné Množství je povinne,
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.","Zvolte ""Ano"", pokud se udržuje zásoby této položky ve vašem inventáři."
+Item {0} does not exist in {1} {2},Bod {0} neexistuje v {1} {2}
+Cross-rolling,Cross-válcována,
+Credit Card,Kreditní karta,
+Item to be manufactured or repacked,Položka být vyráběn nebo znovu zabalena,
+Default settings for stock transactions.,Výchozí nastavení pro akciových transakcí.
+Next Date,Další data,
+Major/Optional Subjects,Hlavní / Volitelné předměty,
+Please enter Taxes and Charges,"Prosím, zadejte Daně a poplatky"
+Machining,Obráběn$1,
+"Here you can maintain family details like name and occupation of parent, spouse and children","Zde si můžete udržovat rodinné detailů, jako jsou jméno a povolání rodičem, manželem a dětmi"
+Seller Name,Prodejce Name,
+Taxes and Charges Deducted (Company Currency),Daně a poplatky odečteny (Company měna)
+General Settings,Obecné nastavent,
+From Currency and To Currency cannot be same,Z měny a měny nemůže být stejnt,
+Repack,Přebalit,
+You must Save the form before proceeding,Musíte Uložte formulář před pokračováním,
+Attach Logo,Připojit Logo,
+Commission Rate,Výše provize,
+Block leave applications by department.,Aplikace Block dovolené podle oddělení.
+Actual Operating Cost,Skutečné provozní náklady,
+Root cannot be edited.,Root nelze upravovat.
+Allocated amount can not greater than unadusted amount,Přidělená částka nemůže vyšší než částka unadusted,
+Allow Production on Holidays,Povolit Výrobu při dovolend,
+Customer's Purchase Order Date,Zákazníka Objednávka Datum,
+Capital Stock,Základní kapitál,
+Package Weight Details,Hmotnost balení Podrobnosti,
+Please select a csv file,Vyberte soubor csv,
+Designer,Návrhád,
+Terms and Conditions Template,Podmínky Template,
+Delivery Details,Zasílánd,
+Allow Children,Povolit děti,
+Cost Center is required in row {0} in Taxes table for type {1},Nákladové středisko je nutné v řadě {0} na daních tabulka typu {1}
+Discount %,Sleva%
+Item-wise Purchase Register,Item-moudrý Nákup Register,
+Expiry Date,Datum vypršení platnosti,
+Supplier Addresses and Contacts,Dodavatel Adresy a kontakty,
+Please select Category first,Nejdřív vyberte kategorii,
+Project master.,Master Project.
+Do not show any symbol like $ etc next to currencies.,Nevykazují žádný symbol jako $ atd vedle měnám.
+Credit Days,Úvěrové dny,
+Is Carry Forward,Je převádět,
+Get Items from BOM,Získat předměty z BOM,
+Lead Time Days,Dodací lhůta dny,
+Send Notifications To,Odeslat upozorněny,
+Ref Date,Ref Datum,
+Reason for Leaving,Důvod Leaving,
+Sanctioned Amount,Sankcionována Částka,
+Is Opening,Se otevíry,
+Row {0}: Debit entry can not be linked with a {1},Row {0}: záporný nemůže být spojována s {1}
+Account {0} does not exist,Účet {0} neexistuje,
+Cash,V hotovosti,
+Short biography for website and other publications.,Krátký životopis na internetové stránky a dalších publikací.
+Please create Salary Structure for employee {0},Prosím vytvořte platovou strukturu pro zaměstnance {0}
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
