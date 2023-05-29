@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "creation": "2013-03-07 18:50:32",
+ "creation": "2023-05-29 13:02:17.121296",
  "description": "A logical Warehouse against which stock entries are made.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -80,7 +80,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Disabled"
   },
   {
@@ -166,7 +166,6 @@
   {
    "fieldname": "city",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "City",
    "oldfieldname": "city",
    "oldfieldtype": "Data"
@@ -242,6 +241,7 @@
    "options": "Warehouse"
   },
   {
+   "collapsible": 1,
    "fieldname": "transit_section",
    "fieldtype": "Section Break",
    "label": "Transit"
@@ -255,7 +255,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-05-29 12:59:48.371803",
+ "modified": "2023-05-29 13:07:38.666681",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

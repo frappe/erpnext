@@ -42,6 +42,12 @@ frappe.ui.form.on("Warehouse", {
 		if (!frm.is_new()) {
 			frappe.contacts.render_address_and_contact(frm);
 
+			let enable_toggle = frm.doc.disabled ? "Enable" : "Disable";
+			frm.add_custom_button(__(enable_toggle), () => {
+				frm.set_value('disabled', 1 - frm.doc.disabled);
+				frm.save()
+			});
+
 			frm.add_custom_button(__("Stock Balance"), function () {
 				frappe.set_route("query-report", "Stock Balance", {
 					warehouse: frm.doc.name,
