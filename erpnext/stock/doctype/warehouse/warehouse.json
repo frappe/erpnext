@@ -8,16 +8,14 @@
  "engine": "InnoDB",
  "field_order": [
   "warehouse_detail",
+  "disabled",
   "warehouse_name",
   "column_break_3",
-  "warehouse_type",
-  "parent_warehouse",
-  "default_in_transit_warehouse",
   "is_group",
+  "parent_warehouse",
   "column_break_4",
   "account",
   "company",
-  "disabled",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -32,6 +30,10 @@
   "city",
   "state",
   "pin",
+  "transit_section",
+  "warehouse_type",
+  "column_break_qajx",
+  "default_in_transit_warehouse",
   "tree_details",
   "lft",
   "rgt",
@@ -238,13 +240,22 @@
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "transit_section",
+   "fieldtype": "Section Break",
+   "label": "Transit"
+  },
+  {
+   "fieldname": "column_break_qajx",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-03-01 02:37:48.034944",
+ "modified": "2023-05-29 12:59:48.371803",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -261,7 +272,6 @@
    "read": 1,
    "report": 1,
    "role": "Item Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
