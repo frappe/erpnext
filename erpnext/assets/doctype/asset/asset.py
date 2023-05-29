@@ -339,10 +339,6 @@ class Asset(AccountsController):
 					if should_get_last_day:
 						schedule_date = get_last_day(schedule_date)
 
-					# schedule date will be a year later from start date
-					# so monthly schedule date is calculated by removing 11 months from it
-					monthly_schedule_date = add_months(schedule_date, -finance_book.frequency_of_depreciation + 1)
-
 				# if asset is being sold
 				if date_of_disposal:
 					from_date = self.get_from_date_for_disposal(finance_book)
@@ -368,14 +364,8 @@ class Asset(AccountsController):
 					break
 
 				# For first row
-				if (
-					(has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
-					and not self.opening_accumulated_depreciation
-					and n == 0
-				):
-					from_date = add_days(
-						self.available_for_use_date, -1
-					)  # needed to calc depr amount for available_for_use_date too
+				if n == 0 and has_pro_rata and not self.opening_accumulated_depreciation:
+					from_date = add_days(self.available_for_use_date, -1)
 					depreciation_amount, days, months = self.get_pro_rata_amt(
 						finance_book,
 						depreciation_amount,
@@ -383,10 +373,18 @@ class Asset(AccountsController):
 						finance_book.depreciation_start_date,
 						has_wdv_or_dd_non_yearly_pro_rata,
 					)
-
-					# For first depr schedule date will be the start date
-					# so monthly schedule date is calculated by removing month difference between use date and start date
-					monthly_schedule_date = add_months(finance_book.depreciation_start_date, -months + 1)
+				elif n == 0 and has_wdv_or_dd_non_yearly_pro_rata and self.opening_accumulated_depreciation:
+					from_date = add_months(
+						getdate(self.available_for_use_date),
+						(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
+					)
+					depreciation_amount, days, months = self.get_pro_rata_amt(
+						finance_book,
+						depreciation_amount,
+						from_date,
+						finance_book.depreciation_start_date,
+						has_wdv_or_dd_non_yearly_pro_rata,
+					)
 
 				# For last row
 				elif has_pro_rata and n == cint(number_of_pending_depreciations) - 1:
@@ -411,9 +409,7 @@ class Asset(AccountsController):
 						depreciation_amount_without_pro_rata, depreciation_amount, finance_book.finance_book
 					)
 
-					monthly_schedule_date = add_months(schedule_date, 1)
 					schedule_date = add_days(schedule_date, days)
-					last_schedule_date = schedule_date
 
 				if not depreciation_amount:
 					continue
