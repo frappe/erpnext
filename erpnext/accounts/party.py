@@ -880,17 +880,20 @@ def get_party_shipping_address(doctype, name):
 
 
 def get_partywise_advanced_payment_amount(
-	party_type, posting_date=None, future_payment=0, company=None
+	party_type, posting_date=None, future_payment=0, company=None, party=None
 ):
 	cond = "1=1"
 	if posting_date:
 		if future_payment:
-			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' " "".format(posting_date)
+			cond = "(posting_date <= '{0}' OR DATE(creation) <= '{0}')" "".format(posting_date)
 		else:
 			cond = "posting_date <= '{0}'".format(posting_date)
 
 	if company:
 		cond += "and company = {0}".format(frappe.db.escape(company))
+
+	if party:
+		cond += "and party = {0}".format(frappe.db.escape(party))
 
 	data = frappe.db.sql(
 		""" SELECT party, sum({0}) as amount
@@ -903,7 +906,6 @@ def get_partywise_advanced_payment_amount(
 		),
 		party_type,
 	)
-
 	if data:
 		return frappe._dict(data)
 
