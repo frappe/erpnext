@@ -13,6 +13,9 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdat
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
+)
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -380,6 +383,7 @@ class update_entries_after(object):
 		self.new_items_found = False
 		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
 		self.affected_transactions: Set[Tuple[str, str]] = set()
+		self.reserved_stock = get_reserved_stock(self.args.item_code, self.args.warehouse)
 
 		self.data = frappe._dict()
 		self.initialize_previous_data(self.args)
@@ -443,11 +447,10 @@ class update_entries_after(object):
 				i += 1
 
 				self.process_sle(sle)
+				self.update_bin_data(sle)
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
-
-			self.update_bin()
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -628,7 +631,7 @@ class update_entries_after(object):
 		validate negative stock for entries current datetime onwards
 		will not consider cancelled entries
 		"""
-		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty)
+		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty) - flt(self.reserved_stock)
 		diff = flt(diff, self.flt_precision)  # respect system precision
 
 		if diff < 0 and abs(diff) > 0.0001:
@@ -1039,7 +1042,7 @@ class update_entries_after(object):
 			) in frappe.local.flags.currently_saving:
 
 				msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
-					abs(deficiency),
+					frappe.bold(abs(deficiency)),
 					frappe.get_desk_link("Item", exceptions[0]["item_code"]),
 					frappe.get_desk_link("Warehouse", warehouse),
 				)
@@ -1047,7 +1050,7 @@ class update_entries_after(object):
 				msg = _(
 					"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 				).format(
-					abs(deficiency),
+					frappe.bold(abs(deficiency)),
 					frappe.get_desk_link("Item", exceptions[0]["item_code"]),
 					frappe.get_desk_link("Warehouse", warehouse),
 					exceptions[0]["posting_date"],
@@ -1056,6 +1059,12 @@ class update_entries_after(object):
 				)
 
 			if msg:
+				if self.reserved_stock:
+					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
+					msg = "{0} As {1} units are reserved, you are allowed to consume only {2} units.".format(
+						msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
+					)
+
 				msg_list.append(msg)
 
 		if msg_list:
@@ -1064,6 +1073,18 @@ class update_entries_after(object):
 				frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
 			else:
 				raise NegativeStockError(message)
+
+	def update_bin_data(self, sle):
+		bin_name = get_or_make_bin(sle.item_code, sle.warehouse)
+		values_to_update = {
+			"actual_qty": sle.qty_after_transaction,
+			"stock_value": sle.stock_value,
+		}
+
+		if sle.valuation_rate is not None:
+			values_to_update["valuation_rate"] = sle.valuation_rate
+
+		frappe.db.set_value("Bin", bin_name, values_to_update)
 
 	def update_bin(self):
 		# update bin for each warehouse

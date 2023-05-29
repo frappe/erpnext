@@ -220,7 +220,7 @@ def get_bin(item_code, warehouse):
 
 
 def get_or_make_bin(item_code: str, warehouse: str) -> str:
-	bin_record = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	bin_record = frappe.get_cached_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 
 	if not bin_record:
 		bin_obj = _create_bin(item_code, warehouse)

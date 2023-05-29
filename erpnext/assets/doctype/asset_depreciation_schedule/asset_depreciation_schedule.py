@@ -252,7 +252,10 @@ class AssetDepreciationSchedule(Document):
 
 			# if asset is being sold or scrapped
 			if date_of_disposal:
-				from_date = asset_doc.available_for_use_date
+				from_date = add_months(
+					getdate(asset_doc.available_for_use_date),
+					(asset_doc.number_of_depreciations_booked * row.frequency_of_depreciation),
+				)
 				if self.depreciation_schedule:
 					from_date = self.depreciation_schedule[-1].schedule_date
 

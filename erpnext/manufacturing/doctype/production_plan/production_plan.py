@@ -1534,7 +1534,7 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(Sum(child.quantity * IfNull(child.conversion_factor, 1.0)))
+		.select(Sum(child.required_bom_qty * IfNull(child.conversion_factor, 1.0)))
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
@@ -1551,6 +1551,9 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	reserved_qty_for_production = flt(
 		get_reserved_qty_for_production(item_code, warehouse, check_production_plan=True)
 	)
+
+	if reserved_qty_for_production > reserved_qty_for_production_plan:
+		return 0.0
 
 	return reserved_qty_for_production_plan - reserved_qty_for_production
 
