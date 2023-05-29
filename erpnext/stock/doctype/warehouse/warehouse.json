@@ -60,7 +60,7 @@
    "fieldname": "is_group",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Group"
+   "label": "Is Group Warehouse"
   },
   {
    "fieldname": "company",
@@ -255,7 +255,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-05-29 13:07:38.666681",
+ "modified": "2023-05-29 13:10:43.333160",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
