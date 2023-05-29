@@ -39,26 +39,28 @@ frappe.ui.form.on("Warehouse", {
 			!frm.doc.__islocal
 		);
 
-		if (!frm.doc.__islocal) {
+		if (!frm.is_new()) {
 			frappe.contacts.render_address_and_contact(frm);
+
+			frm.add_custom_button(__("Stock Balance"), function () {
+				frappe.set_route("query-report", "Stock Balance", {
+					warehouse: frm.doc.name,
+				});
+			});
+
+			frm.add_custom_button(
+				frm.doc.is_group
+					? __("Convert to Ledger", null, "Warehouse")
+					: __("Convert to Group", null, "Warehouse"),
+				function () {
+					convert_to_group_or_ledger(frm);
+				},
+			);
+
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
 
-		frm.add_custom_button(__("Stock Balance"), function () {
-			frappe.set_route("query-report", "Stock Balance", {
-				warehouse: frm.doc.name,
-			});
-		});
-
-		frm.add_custom_button(
-			frm.doc.is_group
-				? __("Convert to Ledger", null, "Warehouse")
-				: __("Convert to Group", null, "Warehouse"),
-			function () {
-				convert_to_group_or_ledger(frm);
-			},
-		);
 
 		if (!frm.doc.is_group && frm.doc.__onload && frm.doc.__onload.account) {
 			frm.add_custom_button(
