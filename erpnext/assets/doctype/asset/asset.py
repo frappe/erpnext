@@ -359,26 +359,20 @@ class Asset(AccountsController):
 				break
 
 			# For first row
-			if (
-				(has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
-				and (
-					(
-						not self.opening_accumulated_depreciation
-						and finance_book.depreciation_method in ("Straight Line", "Manual")
-					)
-					or (finance_book.depreciation_method in ("Written Down Value", "Double Declining Balance"))
+			if n == 0 and has_pro_rata and not self.opening_accumulated_depreciation:
+				from_date = add_days(self.available_for_use_date, -1)
+				depreciation_amount, days, months = self.get_pro_rata_amt(
+					finance_book,
+					depreciation_amount,
+					from_date,
+					finance_book.depreciation_start_date,
+					has_wdv_or_dd_non_yearly_pro_rata,
 				)
-				and n == 0
-			):
-				if self.opening_accumulated_depreciation:
-					from_date = add_months(
-						getdate(self.available_for_use_date),
-						(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
-					)
-				else:
-					from_date = add_days(
-						self.available_for_use_date, -1
-					)  # needed to calc depr amount for available_for_use_date too
+			elif n == 0 and has_wdv_or_dd_non_yearly_pro_rata and self.opening_accumulated_depreciation:
+				from_date = add_months(
+					getdate(self.available_for_use_date),
+					(self.number_of_depreciations_booked * finance_book.frequency_of_depreciation),
+				)
 				depreciation_amount, days, months = self.get_pro_rata_amt(
 					finance_book,
 					depreciation_amount,
