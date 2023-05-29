@@ -678,7 +678,7 @@ class StockController(AccountsController):
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
-	def repost_future_sle_and_gle(self):
+	def repost_future_sle_and_gle(self, force=False):
 		args = frappe._dict(
 			{
 				"posting_date": self.posting_date,
@@ -689,14 +689,10 @@ class StockController(AccountsController):
 			}
 		)
 
-<<<<<<< HEAD
-		if future_sle_exists(args) or repost_required_for_queue(self):
-=======
 		if self.docstatus == 2:
 			force = True
 
 		if force or future_sle_exists(args) or repost_required_for_queue(self):
->>>>>>> 6e661e7c0e (fix: force to do reposting for cancelled document)
 			item_based_reposting = cint(
 				frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			)
