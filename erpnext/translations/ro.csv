@@ -3293,7 +3293,10 @@ Wednesday,Miercuri,
 Week,Săptămână,
 Weekdays,Zilele saptamanii,
 Weekly,Săptămânal,
+<<<<<<< HEAD
 "Weight is mentioned,\nPlease mention ""Weight UOM"" too",,
+=======
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Welcome email sent,E-mailul de bun venit a fost trimis,
 Welcome to ERPNext,Bine ati venit la ERPNext,
 What do you need help with?,La ce ai nevoie de ajutor?,
@@ -3505,7 +3508,10 @@ Recipient,Destinatar,
 Reviews,opinii,
 Sender,Expeditor,
 Shop,Magazin,
+<<<<<<< HEAD
 Sign Up,Inscrie-te,
+=======
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Subsidiary,Filială,
 There is some problem with the file url: {0},Există unele probleme cu URL-ul fișierului: {0},
 There were errors while sending email. Please try again.,Au fost erori în timp ce trimiterea de e-mail. Încercaţi din nou.,
@@ -3537,7 +3543,11 @@ Quality Feedback Template,Șablon de feedback de calitate,
 Rules for applying different promotional schemes.,Reguli pentru aplicarea diferitelor scheme promoționale.,
 Shift,Schimb,
 Show {0},Afișați {0},
+<<<<<<< HEAD
 "Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","Caractere speciale, cu excepția &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{&quot; Și &quot;}&quot; nu sunt permise în numirea seriei",
+=======
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Caractere speciale, cu excepția &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; Și &quot;}}&quot; nu sunt permise în numirea seriei {0}",
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Target Details,Detalii despre țintă,
 {0} already has a Parent Procedure {1}.,{0} are deja o procedură părinte {1}.,
 API,API-ul,
@@ -5056,7 +5066,10 @@ Rejected Qty,Cant. Respinsă,
 UOM Conversion Factor,Factorul de conversie UOM,
 Discount on Price List Rate (%),Reducere la Lista de preturi Rate (%),
 Price List Rate (Company Currency),Lista de prețuri Rate (Compania de valuta),
+<<<<<<< HEAD
 Rate ,,
+=======
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Rate (Company Currency),Rata de (Compania de valuta),
 Amount (Company Currency),Sumă (monedă companie),
 Is Free Item,Este articol gratuit,
@@ -7480,6 +7493,7 @@ From Template,Din șablon,
 Project will be accessible on the website to these users,Proiectul va fi accesibil pe site-ul acestor utilizatori,
 Copied From,Copiat de la,
 Start and End Dates,Începere și de încheiere Date,
+<<<<<<< HEAD
 Actual Time (in Hours),Ora reală (în ore),
 Costing and Billing,Calculație a cheltuielilor și veniturilor,
 Total Costing Amount (via Timesheets),Suma totală a costurilor (prin intermediul foilor de pontaj),
@@ -7489,6 +7503,17 @@ Total Sales Amount (via Sales Order),Suma totală a vânzărilor (prin comandă 
 Total Billable Amount (via Timesheets),Sumă totală facturată (prin intermediul foilor de pontaj),
 Total Billed Amount (via Sales Invoices),Suma facturată totală (prin facturi de vânzare),
 Total Consumed Material Cost  (via Stock Entry),Costul total al materialelor consumate (prin intrarea în stoc),
+=======
+Actual Time in Hours (via Timesheet),Ora reală (în ore),
+Costing and Billing,Calculație a cheltuielilor și veniturilor,
+Total Costing Amount (via Timesheet),Suma totală a costurilor (prin intermediul foilor de pontaj),
+Total Expense Claim (via Expense Claim),Revendicarea Total cheltuieli (prin formularele de decont),
+Total Purchase Cost (via Purchase Invoice),Cost total de achiziție (prin cumparare factură),
+Total Sales Amount (via Sales Order),Suma totală a vânzărilor (prin comandă de vânzări),
+Total Billable Amount (via Timesheet),Sumă totală facturată (prin intermediul foilor de pontaj),
+Total Billed Amount (via Sales Invoice),Suma facturată totală (prin facturi de vânzare),
+Total Consumed Material Cost (via Stock Entry),Costul total al materialelor consumate (prin intrarea în stoc),
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Gross Margin,Marja Brută,
 Gross Margin %,Marja Bruta%,
 Monitor Progress,Monitorizați progresul,
@@ -7522,9 +7547,15 @@ Task Description,Descrierea sarcinii,
 Dependencies,dependenţe,
 Dependent Tasks,Sarcini dependente,
 Depends on Tasks,Depinde de Sarcini,
+<<<<<<< HEAD
 Actual Start Date (via Time Sheet),Data Efectiva de Început (prin Pontaj),
 Actual Time (in hours),Timpul efectiv (în ore),
 Actual End Date (via Time Sheet),Dată de Încheiere Efectivă (prin Pontaj),
+=======
+Actual Start Date (via Timesheet),Data Efectiva de Început (prin Pontaj),
+Actual Time in Hours (via Timesheet),Timpul efectiv (în ore),
+Actual End Date (via Timesheet),Dată de Încheiere Efectivă (prin Pontaj),
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Total Costing Amount (via Time Sheet),Suma totală de calculație a costurilor (prin timp Sheet),
 Total Expense Claim (via Expense Claim),Revendicarea Total cheltuieli (prin cheltuieli revendicarea),
 Total Billing Amount (via Time Sheet),Suma totală de facturare (prin timp Sheet),

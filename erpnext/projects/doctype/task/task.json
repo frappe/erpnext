@@ -241,7 +241,7 @@
   {
    "fieldname": "act_start_date",
    "fieldtype": "Date",
-   "label": "Actual Start Date (via Time Sheet)",
+   "label": "Actual Start Date (via Timesheet)",
    "oldfieldname": "act_start_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -249,7 +249,11 @@
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
+<<<<<<< HEAD
    "label": "Actual Time (in hours)",
+=======
+   "label": "Actual Time in Hours (via Timesheet)",
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
    "read_only": 1
   },
   {
@@ -259,7 +263,7 @@
   {
    "fieldname": "act_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date (via Time Sheet)",
+   "label": "Actual End Date (via Timesheet)",
    "oldfieldname": "act_end_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -273,7 +277,7 @@
   {
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
-   "label": "Total Costing Amount (via Time Sheet)",
+   "label": "Total Costing Amount (via Timesheet)",
    "oldfieldname": "actual_budget",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -293,7 +297,7 @@
   {
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
-   "label": "Total Billing Amount (via Time Sheet)",
+   "label": "Total Billable Amount (via Timesheet)",
    "read_only": 1
   },
   {
@@ -397,7 +401,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
+<<<<<<< HEAD
  "modified": "2021-04-16 12:46:51.556741",
+=======
+ "modified": "2023-04-17 21:06:50.174418",
+>>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
