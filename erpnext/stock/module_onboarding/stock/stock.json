@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/stock",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-08-20 14:38:55.570067",
+ "modified": "2023-05-29 14:43:36.223302",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -35,10 +35,10 @@
    "step": "Create a Stock Entry"
   },
   {
-   "step": "Stock Opening Balance"
+   "step": "Check Stock Ledger Report"
   },
   {
-   "step": "View Stock Projected Qty"
+   "step": "Stock Opening Balance"
   }
  ],
  "subtitle": "Inventory, Warehouses, Analysis, and more.",
