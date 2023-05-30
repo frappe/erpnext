@@ -132,7 +132,10 @@ class SalesInvoice(SellingController):
 			set_batch_nos(self, 'warehouse', True)
 
 		if self.redeem_loyalty_points:
-			lp = frappe.get_doc('Loyalty Program', self.loyalty_program)
+			loyalty_program = self.loyalty_program
+			if loyalty_program:
+				loyalty_program = frappe.db.get_single_value('Custom Selling Settings', 'default_loyalty_program')
+			lp = frappe.get_doc('Loyalty Program', loyalty_program)
 			self.loyalty_redemption_account = lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
 			self.loyalty_redemption_cost_center = lp.cost_center if not self.loyalty_redemption_cost_center else self.loyalty_redemption_cost_center
 
@@ -825,7 +828,7 @@ class SalesInvoice(SellingController):
 
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
-	
+
 	@frappe.whitelist()
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
