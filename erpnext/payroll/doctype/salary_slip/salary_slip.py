@@ -1,17 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import datetime
-import math
+from datetime import date
 
 import frappe
 from frappe import _, msgprint
 from frappe.model.naming import make_autoname
 from frappe.utils import (
 	add_days,
+	ceil,
 	cint,
 	cstr,
 	date_diff,
+	floor,
 	flt,
 	formatdate,
 	get_first_day,
@@ -57,8 +58,10 @@ class SalarySlip(TransactionBase):
 			"float": float,
 			"long": int,
 			"round": round,
-			"date": datetime.date,
+			"date": date,
 			"getdate": getdate,
+			"ceil": ceil,
+			"floor": floor,
 		}
 
 	def autoname(self):
@@ -959,7 +962,7 @@ class SalarySlip(TransactionBase):
 			tax_slab.allow_tax_exemption, payroll_period=payroll_period
 		)
 		future_structured_taxable_earnings = current_taxable_earnings.taxable_earnings * (
-			math.ceil(remaining_sub_periods) - 1
+			ceil(remaining_sub_periods) - 1
 		)
 
 		# get taxable_earnings, addition_earnings for current actual payment days
