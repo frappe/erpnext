@@ -1338,7 +1338,9 @@ class SalesInvoice(SellingController):
 
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
-		returned_amount = self.get_returned_amount()
+		returned_amount=0.0
+		if not self.doctype=="POS Invoice":
+			returned_amount = self.get_returned_amount()
 		current_amount = flt(self.grand_total) - cint(self.loyalty_amount)
 		eligible_amount = current_amount - returned_amount
 		lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
