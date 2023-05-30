@@ -48,11 +48,18 @@ frappe.ui.form.on('Employee', {
 			frappe.call({
 				"method": "erpnext.hr.doctype.employee.employee.get_employee_data",
 				args: {
-					expense_approver: frm.doc.expense_approver,
+					expense_approver: frm.doc.expense_approver
 				},
 				callback: function(response){
-					frm.set_value('hod_name', response.message.employee_name);
-					frm.set_value('hod_mobile_no', response.message.cell_number);
+					if (response.message != "None")
+					{
+						frm.set_value('hod_name', response.message.employee_name);
+						frm.set_value('hod_mobile_no', response.message.cell_number);
+					}
+					else{
+						frm.set_value('expense_approver', null);
+					}
+
 				}
 			})
 		}
