@@ -133,7 +133,7 @@ class SalesInvoice(SellingController):
 
 		if self.redeem_loyalty_points:
 			loyalty_program = self.loyalty_program
-			if loyalty_program:
+			if loyalty_program is None:
 				loyalty_program = frappe.db.get_single_value('Custom Selling Settings', 'default_loyalty_program')
 			lp = frappe.get_doc('Loyalty Program', loyalty_program)
 			self.loyalty_redemption_account = lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
