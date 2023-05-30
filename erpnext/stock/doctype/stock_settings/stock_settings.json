@@ -347,15 +347,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2022-02-05 15:33:43.692736",
-=======
- "modified": "2023-05-29 12:19:18.884592",
->>>>>>> 2e13fbab5e (fix: stock settings tour)
-=======
  "modified": "2023-05-29 15:09:54.959411",
->>>>>>> 964bb1d948 (chore: docs for stock settings)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
