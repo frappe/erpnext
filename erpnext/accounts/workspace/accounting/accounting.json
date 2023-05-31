@@ -1094,15 +1094,7 @@
    "type": "Link"
   }
  ],
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2022-06-24 05:41:09.236458",
-=======
- "modified": "2023-05-24 14:47:19.346680",
->>>>>>> 243c49c550 (refactor: Workspace cleanup)
-=======
  "modified": "2023-05-30 13:23:29.316711",
->>>>>>> e78a7de1e5 (fix: Rearranged accounting module links)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
