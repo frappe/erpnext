@@ -31,6 +31,7 @@ def after_install():
 	add_standard_navbar_items()
 	add_app_name()
 	setup_log_settings()
+	hide_workspaces()
 	frappe.db.commit()
 
 
@@ -205,3 +206,8 @@ def setup_log_settings():
 	log_settings.append("logs_to_clear", {"ref_doctype": "Repost Item Valuation", "days": 60})
 
 	log_settings.save(ignore_permissions=True)
+
+
+def hide_workspaces():
+	for ws in ["Integration", "Settings"]:
+		frappe.db.set_value("Workspace", ws, "public", 0)
