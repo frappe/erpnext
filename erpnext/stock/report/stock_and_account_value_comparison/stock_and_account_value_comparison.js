@@ -53,11 +53,14 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 					</p>
 					<p>Are you sure you want to create Reposting Entries?</p>
 				</div>`;
+			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
+			let selected_rows = indexes.map(i => frappe.query_report.data[i]);
+
+			if (!selected_rows.length) {
+				frappe.throw(__("Please select rows to create Reposting Entries"));
+			}
 
 			frappe.confirm(__(message), () => {
-				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
-				let selected_rows = indexes.map(i => frappe.query_report.data[i]);
-
 				frappe.call({
 					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
 					args: {
