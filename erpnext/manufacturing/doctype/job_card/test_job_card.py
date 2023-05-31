@@ -342,6 +342,12 @@ class TestJobCard(FrappeTestCase):
 		job_card.reload()
 		self.assertEqual(job_card.transferred_qty, 2)
 
+		transfer_entry_2.cancel()
+		transfer_entry.cancel()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0.0)
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
