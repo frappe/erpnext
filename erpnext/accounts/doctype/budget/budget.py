@@ -108,7 +108,6 @@ class Budget(Document):
 
 
 def validate_expense_against_budget(args, expense_amount=0):
-	print(args, "args")
 	args = frappe._dict(args)
 
 	if args.get("company") and not args.fiscal_year:
