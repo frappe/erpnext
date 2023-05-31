@@ -8,12 +8,12 @@
   "defaults_tab",
   "item_defaults_section",
   "item_naming_by",
-  "valuation_method",
   "item_group",
+  "stock_uom",
   "column_break_4",
   "default_warehouse",
   "sample_retention_warehouse",
-  "stock_uom",
+  "valuation_method",
   "price_list_defaults_section",
   "auto_insert_price_list_rate_if_missing",
   "column_break_12",
@@ -40,6 +40,7 @@
   "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
+  "allow_existing_serial_no",
   "column_break_10",
   "disable_serial_no_and_batch_selector",
   "use_naming_series",
@@ -101,7 +102,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "documentation_url": "https://docs.erpnext.com/docs/v14/user/manual/en/stock/articles/calculation-of-valuation-rate-in-fifo-and-moving-average",
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Default Valuation Method",
@@ -376,6 +376,12 @@
    "fieldname": "allow_partial_reservation",
    "fieldtype": "Check",
    "label": "Allow Partial Reservation"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_existing_serial_no",
+   "fieldtype": "Check",
+   "label": "Allow existing Serial No to be Manufactured/Received again"
   }
  ],
  "icon": "icon-cog",
@@ -383,7 +389,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-29 15:09:54.959411",
+ "modified": "2023-05-31 14:15:14.145048",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
