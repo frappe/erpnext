@@ -8,10 +8,10 @@ from typing import Optional, Set, Tuple
 import frappe
 from frappe import _, scrub
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import (
 	cint,
-	cstr,
 	flt,
 	get_link_to_form,
 	getdate,

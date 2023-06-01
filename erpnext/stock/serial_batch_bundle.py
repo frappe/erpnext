@@ -296,6 +296,10 @@ def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
 	return get_serial_nos(serial_and_batch_bundle, serial_nos=serial_nos)
 
 
+def get_serial_or_batch_nos(bundle):
+	return frappe.get_all("Serial and Batch Entry", fields=["*"], filters={"parent": bundle})
+
+
 class SerialNoValuation(DeprecatedSerialNoValuation):
 	def __init__(self, **kwargs):
 		for key, value in kwargs.items():

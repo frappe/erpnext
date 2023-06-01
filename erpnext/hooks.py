@@ -67,6 +67,12 @@ treeviews = [
 	"Department",
 ]
 
+jinja = {
+	"methods": [
+		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
+	],
+}
+
 # website
 update_website_context = [
 	"erpnext.e_commerce.shopping_cart.utils.update_website_context",

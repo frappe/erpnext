@@ -300,20 +300,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 
 	conversion_factor(doc, cdt, cdn, dont_fetch_price_list_rate) {
 	    super.conversion_factor(doc, cdt, cdn, dont_fetch_price_list_rate);
-		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
-			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-				this.set_batch_number(cdt, cdn);
-			}
 	}
 
 	qty(doc, cdt, cdn) {
 		super.qty(doc, cdt, cdn);
-
-		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-			this.set_batch_number(cdt, cdn);
-		}
 	}
 
 	pick_serial_and_batch(doc, cdt, cdn) {
