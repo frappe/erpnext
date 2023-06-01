@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 import frappe
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import flt
@@ -118,25 +116,38 @@ class DeprecatedBatchNoValuation:
 		if not self.non_batchwise_valuation_batches:
 			return
 
-		avg_rate = self.get_avg_rate_for_non_batchwise_valuation_batches()
-		avilable_qty = self.get_available_qty_for_non_batchwise_valuation_batches()
+		self.non_batchwise_balance_value = 0.0
+		self.non_batchwise_balance_qty = 0.0
 
-		for batch_no in self.non_batchwise_valuation_batches:
-			self.stock_value_differece[batch_no] = avg_rate
-			self.available_qty[batch_no] = avilable_qty.get(batch_no, 0)
+		self.set_balance_value_for_non_batchwise_valuation_batches()
+
+		for batch_no, ledger in self.batch_nos.items():
+			if batch_no not in self.non_batchwise_valuation_batches:
+				continue
+
+			self.batch_avg_rate[batch_no] = (
+				self.non_batchwise_balance_value / self.non_batchwise_balance_qty
+			)
+
+			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
+			self.stock_value_change += stock_value_change
+
+			frappe.db.set_value(
+				"Serial and Batch Entry",
+				ledger.name,
+				{
+					"stock_value_difference": stock_value_change,
+					"incoming_rate": self.batch_avg_rate[batch_no],
+				},
+			)
 
 	@deprecated
-	def get_avg_rate_for_non_batchwise_valuation_batches(self):
-		stock_value, qty = self.get_balance_value_and_qty_from_sl_entries()
-		stock_value, qty = self.get_balance_value_and_qty_from_bundle(stock_value, qty)
-
-		return stock_value / qty if qty else 0
+	def set_balance_value_for_non_batchwise_valuation_batches(self):
+		self.set_balance_value_from_sl_entries()
+		self.set_balance_value_from_bundle()
 
 	@deprecated
-	def get_balance_value_and_qty_from_sl_entries(self):
-		stock_value_difference = 0.0
-		available_qty = 0.0
-
+	def set_balance_value_from_sl_entries(self) -> None:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
 
@@ -154,8 +165,9 @@ class DeprecatedBatchNoValuation:
 			.inner_join(batch)
 			.on(sle.batch_no == batch.name)
 			.select(
-				Sum(sle.stock_value_difference).as_("batch_value"),
+				sle.batch_no,
 				Sum(sle.actual_qty).as_("batch_qty"),
+				Sum(sle.stock_value_difference).as_("batch_value"),
 			)
 			.where(
 				(sle.item_code == self.sle.item_code)
@@ -165,19 +177,19 @@ class DeprecatedBatchNoValuation:
 				& (sle.is_cancelled == 0)
 			)
 			.where(timestamp_condition)
+			.groupby(sle.batch_no)
 		)
 
 		if self.sle.name:
 			query = query.where(sle.name != self.sle.name)
 
 		for d in query.run(as_dict=True):
-			stock_value_difference += flt(d.batch_value)
-			available_qty += flt(d.batch_qty)
-
-		return stock_value_difference, available_qty
+			self.non_batchwise_balance_value += flt(d.batch_value)
+			self.non_batchwise_balance_qty += flt(d.batch_qty)
+			self.available_qty[d.batch_no] += flt(d.batch_qty)
 
 	@deprecated
-	def get_balance_value_and_qty_from_bundle(self, stock_value, qty):
+	def set_balance_value_from_bundle(self) -> None:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
@@ -199,8 +211,9 @@ class DeprecatedBatchNoValuation:
 			.inner_join(batch)
 			.on(bundle_child.batch_no == batch.name)
 			.select(
-				Sum(bundle_child.stock_value_difference).as_("batch_value"),
+				bundle_child.batch_no,
 				Sum(bundle_child.qty).as_("batch_qty"),
+				Sum(bundle_child.stock_value_difference).as_("batch_value"),
 			)
 			.where(
 				(bundle.item_code == self.sle.item_code)
@@ -208,91 +221,8 @@ class DeprecatedBatchNoValuation:
 				& (bundle_child.batch_no.isnotnull())
 				& (batch.use_batchwise_valuation == 0)
 				& (bundle.is_cancelled == 0)
+				& (bundle.docstatus == 1)
 				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
-			)
-			.where(timestamp_condition)
-		)
-
-		if self.sle.serial_and_batch_bundle:
-			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
-
-		for d in query.run(as_dict=True):
-			stock_value += flt(d.batch_value)
-			qty += flt(d.batch_qty)
-
-		return stock_value, qty
-
-	@deprecated
-	def get_available_qty_for_non_batchwise_valuation_batches(self):
-		available_qty = defaultdict(float)
-		self.set_available_qty_for_non_batchwise_valuation_batches_from_sle(available_qty)
-		self.set_available_qty_for_non_batchwise_valuation_batches_from_bundle(available_qty)
-
-		return available_qty
-
-	@deprecated
-	def set_available_qty_for_non_batchwise_valuation_batches_from_sle(self, available_qty):
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-
-		timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
-			self.sle.posting_date, self.sle.posting_time
-		)
-		if self.sle.creation:
-			timestamp_condition |= (
-				CombineDatetime(sle.posting_date, sle.posting_time)
-				== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
-			) & (sle.creation < self.sle.creation)
-
-		query = (
-			frappe.qb.from_(sle)
-			.select(
-				sle.batch_no,
-				Sum(sle.actual_qty).as_("batch_qty"),
-			)
-			.where(
-				(sle.item_code == self.sle.item_code)
-				& (sle.warehouse == self.sle.warehouse)
-				& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
-				& (sle.is_cancelled == 0)
-			)
-			.where(timestamp_condition)
-			.groupby(sle.batch_no)
-		)
-
-		if self.sle.name:
-			query = query.where(sle.name != self.sle.name)
-
-		for d in query.run(as_dict=True):
-			available_qty[d.batch_no] += flt(d.batch_qty)
-
-	@deprecated
-	def set_available_qty_for_non_batchwise_valuation_batches_from_bundle(self, available_qty):
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
-		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
-
-		timestamp_condition = CombineDatetime(
-			bundle.posting_date, bundle.posting_time
-		) < CombineDatetime(self.sle.posting_date, self.sle.posting_time)
-
-		if self.sle.creation:
-			timestamp_condition |= (
-				CombineDatetime(bundle.posting_date, bundle.posting_time)
-				== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
-			) & (bundle.creation < self.sle.creation)
-
-		query = (
-			frappe.qb.from_(bundle)
-			.inner_join(bundle_child)
-			.on(bundle.name == bundle_child.parent)
-			.select(
-				bundle_child.batch_no,
-				Sum(bundle_child.qty).as_("batch_qty"),
-			)
-			.where(
-				(bundle.item_code == self.sle.item_code)
-				& (bundle.warehouse == self.sle.warehouse)
-				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
-				& (bundle.is_cancelled == 0)
 			)
 			.where(timestamp_condition)
 			.groupby(bundle_child.batch_no)
@@ -302,4 +232,6 @@ class DeprecatedBatchNoValuation:
 			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
 
 		for d in query.run(as_dict=True):
-			available_qty[d.batch_no] += flt(d.batch_qty)
+			self.non_batchwise_balance_value += flt(d.batch_value)
+			self.non_batchwise_balance_qty += flt(d.batch_qty)
+			self.available_qty[d.batch_no] += flt(d.batch_qty)

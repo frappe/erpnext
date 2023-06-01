@@ -434,6 +434,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			)
 		else:
 			entries = self.get_batch_no_ledgers()
+			self.stock_value_change = 0.0
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
 			self.stock_value_differece = defaultdict(float)
@@ -443,6 +444,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				self.available_qty[ledger.batch_no] += flt(ledger.qty)
 
 			self.calculate_avg_rate_from_deprecarated_ledgers()
+			self.calculate_avg_rate_for_non_batchwise_valuation()
 			self.set_stock_value_difference()
 
 	def get_batch_no_ledgers(self) -> List[dict]:
@@ -513,8 +515,10 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		return get_batch_nos(self.sle.serial_and_batch_bundle)
 
 	def set_stock_value_difference(self):
-		self.stock_value_change = 0
 		for batch_no, ledger in self.batch_nos.items():
+			if batch_no in self.non_batchwise_valuation_batches:
+				continue
+
 			if not self.available_qty[batch_no]:
 				continue
 
@@ -525,8 +529,14 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			# New Stock Value Difference
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
+
 			frappe.db.set_value(
-				"Serial and Batch Entry", ledger.name, "stock_value_difference", stock_value_change
+				"Serial and Batch Entry",
+				ledger.name,
+				{
+					"stock_value_difference": stock_value_change,
+					"incoming_rate": self.batch_avg_rate[batch_no],
+				},
 			)
 
 	def calculate_valuation_rate(self):
@@ -740,7 +750,6 @@ class SerialBatchCreation:
 			if len(batches) == 1:
 				self.batch_no = batches[0]
 				self.serial_nos = self.get_auto_created_serial_nos()
-				print(self.serial_nos)
 
 	def update_serial_and_batch_entries(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)

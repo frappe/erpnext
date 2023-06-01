@@ -52,6 +52,9 @@ class StockLedgerEntry(Document):
 	def on_submit(self):
 		self.check_stock_frozen_date()
 
+		if frappe.flags.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
+			return
+
 		if not self.get("via_landed_cost_voucher"):
 			SerialBatchBundle(
 				sle=self,

@@ -130,9 +130,7 @@ class Batch(Document):
 			frappe.throw(_("The selected item cannot have Batch"))
 
 	def set_batchwise_valuation(self):
-		from erpnext.stock.stock_ledger import get_valuation_method
-
-		if self.is_new() and get_valuation_method(self.item) != "Moving Average":
+		if self.is_new():
 			self.use_batchwise_valuation = 1
 
 	def before_save(self):

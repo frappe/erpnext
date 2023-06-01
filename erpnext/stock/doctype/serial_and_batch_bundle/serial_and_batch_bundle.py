@@ -179,6 +179,7 @@ class SerialandBatchBundle(Document):
 				self.validate_negative_batch(d.batch_no, available_qty)
 
 			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
+
 			if save:
 				d.db_set(
 					{"incoming_rate": d.incoming_rate, "stock_value_difference": d.stock_value_difference}
@@ -458,6 +459,8 @@ class SerialandBatchBundle(Document):
 		serial_nos = []
 		batch_nos = []
 
+		serial_batches = {}
+
 		for row in self.entries:
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
@@ -465,11 +468,33 @@ class SerialandBatchBundle(Document):
 			if row.batch_no and not row.serial_no:
 				batch_nos.append(row.batch_no)
 
+			if row.serial_no and row.batch_no and self.type_of_transaction == "Outward":
+				serial_batches.setdefault(row.serial_no, row.batch_no)
+
 		if serial_nos:
 			self.validate_incorrect_serial_nos(serial_nos)
 
 		elif batch_nos:
 			self.validate_incorrect_batch_nos(batch_nos)
+
+		if serial_batches:
+			self.validate_serial_batch_no(serial_batches)
+
+	def validate_serial_batch_no(self, serial_batches):
+		correct_batches = frappe._dict(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", list(serial_batches.keys()))},
+				fields=["name", "batch_no"],
+				as_list=True,
+			)
+		)
+
+		for serial_no, batch_no in serial_batches.items():
+			if correct_batches.get(serial_no) != batch_no:
+				self.throw_error_message(
+					f"Serial No {bold(serial_no)} does not belong to Batch No {bold(batch_no)}"
+				)
 
 	def validate_incorrect_serial_nos(self, serial_nos):
 
