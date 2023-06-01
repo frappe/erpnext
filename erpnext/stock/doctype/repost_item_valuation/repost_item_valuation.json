@@ -22,11 +22,15 @@
   "amended_from",
   "error_section",
   "error_log",
+  "reposting_info_section",
+  "reposting_data_file",
   "items_to_be_repost",
-  "affected_transactions",
   "distinct_item_and_warehouse",
+  "column_break_o1sj",
+  "total_reposting_count",
   "current_index",
-  "gl_reposting_index"
+  "gl_reposting_index",
+  "affected_transactions"
  ],
  "fields": [
   {
@@ -191,13 +195,36 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "GL reposting index",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reposting_info_section",
+   "fieldtype": "Section Break",
+   "label": "Reposting Info"
+  },
+  {
+   "fieldname": "column_break_o1sj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_reposting_count",
+   "fieldtype": "Int",
+   "label": "Total Reposting Count",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reposting_data_file",
+   "fieldtype": "Attach",
+   "label": "Reposting Data File",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-28 16:00:05.637440",
+ "modified": "2023-05-31 12:48:57.138693",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

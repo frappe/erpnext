@@ -6,13 +6,27 @@ import json
 from typing import Optional, Set, Tuple
 
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
+from frappe.utils import (
+	cint,
+	cstr,
+	flt,
+	get_link_to_form,
+	getdate,
+	gzip_compress,
+	gzip_decompress,
+	now,
+	nowdate,
+	parse_json,
+)
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
+)
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -211,14 +225,18 @@ def repost_future_sle(
 	if not args:
 		args = []  # set args to empty list if None to avoid enumerate error
 
+	reposting_data = {}
+	if doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
 	items_to_be_repost = get_items_to_be_repost(
-		voucher_type=voucher_type, voucher_no=voucher_no, doc=doc
+		voucher_type=voucher_type, voucher_no=voucher_no, doc=doc, reposting_data=reposting_data
 	)
 	if items_to_be_repost:
 		args = items_to_be_repost
 
-	distinct_item_warehouses = get_distinct_item_warehouse(args, doc)
-	affected_transactions = get_affected_transactions(doc)
+	distinct_item_warehouses = get_distinct_item_warehouse(args, doc, reposting_data=reposting_data)
+	affected_transactions = get_affected_transactions(doc, reposting_data=reposting_data)
 
 	i = get_current_index(doc) or 0
 	while i < len(args):
@@ -261,6 +279,28 @@ def repost_future_sle(
 			)
 
 
+def get_reposting_data(file_path) -> dict:
+	file_name = frappe.db.get_value(
+		"File",
+		{
+			"file_url": file_path,
+			"attached_to_field": "reposting_data_file",
+		},
+		"name",
+	)
+
+	if not file_name:
+		return frappe._dict()
+
+	attached_file = frappe.get_doc("File", file_name)
+
+	data = gzip_decompress(attached_file.get_content())
+	if data := json.loads(data.decode("utf-8")):
+		data = data
+
+	return parse_json(data)
+
+
 def validate_item_warehouse(args):
 	for field in ["item_code", "warehouse", "posting_date", "posting_time"]:
 		if args.get(field) in [None, ""]:
@@ -271,28 +311,107 @@ def validate_item_warehouse(args):
 def update_args_in_repost_item_valuation(
 	doc, index, args, distinct_item_warehouses, affected_transactions
 ):
-	doc.db_set(
-		{
-			"items_to_be_repost": json.dumps(args, default=str),
-			"distinct_item_and_warehouse": json.dumps(
-				{str(k): v for k, v in distinct_item_warehouses.items()}, default=str
-			),
-			"current_index": index,
-			"affected_transactions": frappe.as_json(affected_transactions),
-		}
-	)
+	if not doc.items_to_be_repost:
+		file_name = ""
+		if doc.reposting_data_file:
+			file_name = get_reposting_file_name(doc.doctype, doc.name)
+			# frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
+
+		doc.reposting_data_file = create_json_gz_file(
+			{
+				"items_to_be_repost": args,
+				"distinct_item_and_warehouse": {str(k): v for k, v in distinct_item_warehouses.items()},
+				"affected_transactions": affected_transactions,
+			},
+			doc,
+			file_name,
+		)
+
+		doc.db_set(
+			{
+				"current_index": index,
+				"total_reposting_count": len(args),
+				"reposting_data_file": doc.reposting_data_file,
+			}
+		)
+
+	else:
+		doc.db_set(
+			{
+				"items_to_be_repost": json.dumps(args, default=str),
+				"distinct_item_and_warehouse": json.dumps(
+					{str(k): v for k, v in distinct_item_warehouses.items()}, default=str
+				),
+				"current_index": index,
+				"affected_transactions": frappe.as_json(affected_transactions),
+			}
+		)
 
 	if not frappe.flags.in_test:
 		frappe.db.commit()
 
 	frappe.publish_realtime(
 		"item_reposting_progress",
-		{"name": doc.name, "items_to_be_repost": json.dumps(args, default=str), "current_index": index},
+		{
+			"name": doc.name,
+			"items_to_be_repost": json.dumps(args, default=str),
+			"current_index": index,
+			"total_reposting_count": len(args),
+		},
 	)
 
 
-def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None):
+def get_reposting_file_name(dt, dn):
+	return frappe.db.get_value(
+		"File",
+		{
+			"attached_to_doctype": dt,
+			"attached_to_name": dn,
+			"attached_to_field": "reposting_data_file",
+		},
+		"name",
+	)
+
+
+def create_json_gz_file(data, doc, file_name=None) -> str:
+	encoded_content = frappe.safe_encode(frappe.as_json(data))
+	compressed_content = gzip_compress(encoded_content)
+
+	if not file_name:
+		json_filename = f"{scrub(doc.doctype)}-{scrub(doc.name)}.json.gz"
+		_file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": json_filename,
+				"attached_to_doctype": doc.doctype,
+				"attached_to_name": doc.name,
+				"attached_to_field": "reposting_data_file",
+				"content": compressed_content,
+				"is_private": 1,
+			}
+		)
+		_file.save(ignore_permissions=True)
+
+		return _file.file_url
+	else:
+		file_doc = frappe.get_doc("File", file_name)
+		path = file_doc.get_full_path()
+
+		with open(path, "wb") as f:
+			f.write(compressed_content)
+
+		return doc.reposting_data_file
+
+
+def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposting_data=None):
+	if not reposting_data and doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
+	if reposting_data and reposting_data.items_to_be_repost:
+		return reposting_data.items_to_be_repost
+
 	items_to_be_repost = []
+
 	if doc and doc.items_to_be_repost:
 		items_to_be_repost = json.loads(doc.items_to_be_repost) or []
 
@@ -308,8 +427,15 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None):
 	return items_to_be_repost or []
 
 
-def get_distinct_item_warehouse(args=None, doc=None):
+def get_distinct_item_warehouse(args=None, doc=None, reposting_data=None):
+	if not reposting_data and doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
+	if reposting_data and reposting_data.distinct_item_and_warehouse:
+		return reposting_data.distinct_item_and_warehouse
+
 	distinct_item_warehouses = {}
+
 	if doc and doc.distinct_item_and_warehouse:
 		distinct_item_warehouses = json.loads(doc.distinct_item_and_warehouse)
 		distinct_item_warehouses = {
@@ -324,7 +450,13 @@ def get_distinct_item_warehouse(args=None, doc=None):
 	return distinct_item_warehouses
 
 
-def get_affected_transactions(doc) -> Set[Tuple[str, str]]:
+def get_affected_transactions(doc, reposting_data=None) -> Set[Tuple[str, str]]:
+	if not reposting_data and doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
+	if reposting_data and reposting_data.affected_transactions:
+		return {tuple(transaction) for transaction in reposting_data.affected_transactions}
+
 	if not doc.affected_transactions:
 		return set()
 
@@ -380,6 +512,7 @@ class update_entries_after(object):
 		self.new_items_found = False
 		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
 		self.affected_transactions: Set[Tuple[str, str]] = set()
+		self.reserved_stock = get_reserved_stock(self.args.item_code, self.args.warehouse)
 
 		self.data = frappe._dict()
 		self.initialize_previous_data(self.args)
@@ -443,11 +576,10 @@ class update_entries_after(object):
 				i += 1
 
 				self.process_sle(sle)
+				self.update_bin_data(sle)
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
-
-			self.update_bin()
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -628,7 +760,7 @@ class update_entries_after(object):
 		validate negative stock for entries current datetime onwards
 		will not consider cancelled entries
 		"""
-		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty)
+		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty) - flt(self.reserved_stock)
 		diff = flt(diff, self.flt_precision)  # respect system precision
 
 		if diff < 0 and abs(diff) > 0.0001:
@@ -1039,7 +1171,7 @@ class update_entries_after(object):
 			) in frappe.local.flags.currently_saving:
 
 				msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
-					abs(deficiency),
+					frappe.bold(abs(deficiency)),
 					frappe.get_desk_link("Item", exceptions[0]["item_code"]),
 					frappe.get_desk_link("Warehouse", warehouse),
 				)
@@ -1047,7 +1179,7 @@ class update_entries_after(object):
 				msg = _(
 					"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 				).format(
-					abs(deficiency),
+					frappe.bold(abs(deficiency)),
 					frappe.get_desk_link("Item", exceptions[0]["item_code"]),
 					frappe.get_desk_link("Warehouse", warehouse),
 					exceptions[0]["posting_date"],
@@ -1056,6 +1188,12 @@ class update_entries_after(object):
 				)
 
 			if msg:
+				if self.reserved_stock:
+					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
+					msg = "{0} As {1} units are reserved, you are allowed to consume only {2} units.".format(
+						msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
+					)
+
 				msg_list.append(msg)
 
 		if msg_list:
@@ -1064,6 +1202,18 @@ class update_entries_after(object):
 				frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
 			else:
 				raise NegativeStockError(message)
+
+	def update_bin_data(self, sle):
+		bin_name = get_or_make_bin(sle.item_code, sle.warehouse)
+		values_to_update = {
+			"actual_qty": sle.qty_after_transaction,
+			"stock_value": sle.stock_value,
+		}
+
+		if sle.valuation_rate is not None:
+			values_to_update["valuation_rate"] = sle.valuation_rate
+
+		frappe.db.set_value("Bin", bin_name, values_to_update)
 
 	def update_bin(self):
 		# update bin for each warehouse

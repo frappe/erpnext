@@ -2398,7 +2398,7 @@ def move_sample_to_retention_warehouse(company, items):
 						"basic_rate": item.get("valuation_rate"),
 						"uom": item.get("uom"),
 						"stock_uom": item.get("stock_uom"),
-						"conversion_factor": 1.0,
+						"conversion_factor": item.get("conversion_factor") or 1.0,
 						"serial_no": sample_serial_nos,
 						"batch_no": item.get("batch_no"),
 					},

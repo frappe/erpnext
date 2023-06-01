@@ -234,13 +234,13 @@
   {
    "fieldname": "actual_start_date",
    "fieldtype": "Date",
-   "label": "Actual Start Date (via Time Sheet)",
+   "label": "Actual Start Date (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time (in Hours via Time Sheet)",
+   "label": "Actual Time in Hours (via Timesheet)",
    "read_only": 1
   },
   {
@@ -250,7 +250,7 @@
   {
    "fieldname": "actual_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date (via Time Sheet)",
+   "label": "Actual End Date (via Timesheet)",
    "oldfieldname": "act_completion_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -275,7 +275,7 @@
   {
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
-   "label": "Total Costing Amount (via Timesheets)",
+   "label": "Total Costing Amount (via Timesheet)",
    "read_only": 1
   },
   {
@@ -304,19 +304,19 @@
   {
    "fieldname": "total_billable_amount",
    "fieldtype": "Currency",
-   "label": "Total Billable Amount (via Timesheets)",
+   "label": "Total Billable Amount (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "total_billed_amount",
    "fieldtype": "Currency",
-   "label": "Total Billed Amount (via Sales Invoices)",
+   "label": "Total Billed Amount (via Sales Invoice)",
    "read_only": 1
   },
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
-   "label": "Total Consumed Material Cost  (via Stock Entry)",
+   "label": "Total Consumed Material Cost (via Stock Entry)",
    "read_only": 1
   },
   {
@@ -451,7 +451,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2023-02-14 04:54:25.819620",
+ "modified": "2023-04-17 21:11:11.346986",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

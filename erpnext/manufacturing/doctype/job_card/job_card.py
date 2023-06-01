@@ -653,23 +653,19 @@ class JobCard(Document):
 					exc=JobCardOverTransferError,
 				)
 
-		job_card_items_transferred_qty = _get_job_card_items_transferred_qty(ste_doc)
+		job_card_items_transferred_qty = _get_job_card_items_transferred_qty(ste_doc) or {}
+		allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 
-		if job_card_items_transferred_qty:
-			allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
+		for row in ste_doc.items:
+			if not row.job_card_item:
+				continue
 
-			for row in ste_doc.items:
-				if not row.job_card_item:
-					continue
+			transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item, 0.0))
 
-				transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item))
+			if not allow_excess:
+				_validate_over_transfer(row, transferred_qty)
 
-				if not allow_excess:
-					_validate_over_transfer(row, transferred_qty)
-
-				frappe.db.set_value(
-					"Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty)
-				)
+			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
 	def set_transferred_qty(self, update_status=False):
 		"Set total FG Qty in Job Card for which RM was transferred."
@@ -730,7 +726,7 @@ class JobCard(Document):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 
 		if self.docstatus < 2:
-			if self.for_quantity <= self.transferred_qty:
+			if flt(self.for_quantity) <= flt(self.transferred_qty):
 				self.status = "Material Transferred"
 
 			if self.time_logs:

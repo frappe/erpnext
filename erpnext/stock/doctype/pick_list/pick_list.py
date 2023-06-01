@@ -460,7 +460,7 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 		item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
 	)
 
-	while remaining_stock_qty > 0 and available_locations:
+	while flt(remaining_stock_qty) > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
 
