@@ -751,6 +751,50 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(flt(sle[0].qty_after_transaction), flt(50.0))
 
+	def test_update_stock_reconciliation_while_reposting(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		# Stock Value => 100 * 100 = 10000
+		se = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=100,
+			basic_rate=100,
+			posting_time="10:00:00",
+		)
+
+		# Stock Value => 100 * 200 = 20000
+		# Value Change => 20000 - 10000 = 10000
+		sr1 = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=100,
+			rate=200,
+			posting_time="12:00:00",
+		)
+		self.assertEqual(sr1.difference_amount, 10000)
+
+		# Stock Value => 50 * 50 = 2500
+		# Value Change => 2500 - 10000 = -7500
+		sr2 = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=50,
+			rate=50,
+			posting_time="11:00:00",
+		)
+		self.assertEqual(sr2.difference_amount, -7500)
+
+		sr1.load_from_db()
+		self.assertEqual(sr1.difference_amount, 17500)
+
+		sr2.cancel()
+		sr1.load_from_db()
+		self.assertEqual(sr1.difference_amount, 10000)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
