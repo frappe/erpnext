@@ -8,21 +8,12 @@ from frappe.utils import add_months, getdate
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.loan_management.doctype.loan.test_loan import (
-	create_loan,
-	create_loan_accounts,
-	create_loan_type,
-	create_repayment_entry,
-	make_loan_disbursement_entry,
-)
 
 
 class TestBankClearance(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		make_bank_account()
-		create_loan_accounts()
-		create_loan_masters()
 		add_transactions()
 
 	# Basic test case to test if bank clearance tool doesn't break
@@ -33,7 +24,7 @@ class TestBankClearance(unittest.TestCase):
 		bank_clearance.from_date = add_months(getdate(), -1)
 		bank_clearance.to_date = getdate()
 		bank_clearance.get_payment_entries()
-		self.assertEqual(len(bank_clearance.payment_entries), 3)
+		self.assertEqual(len(bank_clearance.payment_entries), 1)
 
 
 def make_bank_account():
@@ -49,42 +40,8 @@ def make_bank_account():
 		).insert()
 
 
-def create_loan_masters():
-	create_loan_type(
-		"Clearance Loan",
-		2000000,
-		13.5,
-		25,
-		0,
-		5,
-		"Cash",
-		"_Test Bank Clearance - _TC",
-		"_Test Bank Clearance - _TC",
-		"Loan Account - _TC",
-		"Interest Income Account - _TC",
-		"Penalty Income Account - _TC",
-	)
-
-
 def add_transactions():
 	make_payment_entry()
-	make_loan()
-
-
-def make_loan():
-	loan = create_loan(
-		"_Test Customer",
-		"Clearance Loan",
-		280000,
-		"Repay Over Number of Periods",
-		20,
-		applicant_type="Customer",
-	)
-	loan.submit()
-	make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=getdate())
-	repayment_entry = create_repayment_entry(loan.name, "_Test Customer", getdate(), loan.loan_amount)
-	repayment_entry.save()
-	repayment_entry.submit()
 
 
 def make_payment_entry():

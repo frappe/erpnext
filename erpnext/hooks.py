@@ -521,6 +521,10 @@ get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
 )
 
+get_payment_entries_for_bank_clearance = (
+	"erpnext.accounts.doctype.bank_clearance.bank_clearance.get_payment_entries_for_bank_clearance"
+)
+
 regional_overrides = {
 	"France": {
 		"erpnext.tests.test_regional.test_method": "erpnext.regional.france.utils.test_method"
