@@ -15,7 +15,6 @@ erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
 erpnext.patches.v10_0.update_translatable_fields
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
-erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.rename_duplicate_item_code_values
 erpnext.patches.v11_0.make_quality_inspection_template
 erpnext.patches.v11_0.merge_land_unit_with_location
