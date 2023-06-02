@@ -42,7 +42,6 @@
   "has_serial_no",
   "has_batch_no",
   "column_break_18",
-  "serial_no",
   "batch_size",
   "required_items_section",
   "materials_and_operations_tab",
@@ -531,13 +530,6 @@
    "fieldtype": "Check",
    "label": "Has Batch No",
    "read_only": 1
-  },
-  {
-   "depends_on": "has_serial_no",
-   "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "label": "Serial Nos",
-   "no_copy": 1
   },
   {
    "default": "0",

@@ -297,6 +297,7 @@ def create_material_receipt(
 	se.set_stock_entry_type()
 	se.insert()
 	se.submit()
+	se.reload()
 
 	return se
 

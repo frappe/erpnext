@@ -15,9 +15,10 @@
   "voucher_type",
   "voucher_no",
   "voucher_detail_no",
+  "serial_and_batch_bundle",
   "dependant_sle_voucher_detail_no",
-  "recalculate_rate",
   "section_break_11",
+  "recalculate_rate",
   "actual_qty",
   "qty_after_transaction",
   "incoming_rate",
@@ -31,12 +32,14 @@
   "company",
   "stock_uom",
   "project",
-  "batch_no",
   "column_break_26",
   "fiscal_year",
-  "serial_no",
+  "has_batch_no",
+  "has_serial_no",
   "is_cancelled",
-  "to_rename"
+  "to_rename",
+  "serial_no",
+  "batch_no"
  ],
  "fields": [
   {
@@ -309,6 +312,27 @@
    "label": "Recalculate Incoming/Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "options": "Serial and Batch Bundle",
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No"
   }
  ],
  "hide_toolbar": 1,
@@ -317,7 +341,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-21 06:25:30.040801",
+ "modified": "2023-04-03 16:33:16.270722",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
