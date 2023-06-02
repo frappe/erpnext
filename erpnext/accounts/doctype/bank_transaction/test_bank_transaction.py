@@ -23,7 +23,6 @@ test_dependencies = ["Item", "Cost Center"]
 class TestBankTransaction(FrappeTestCase):
 	def setUp(self):
 		for dt in [
-			"Loan Repayment",
 			"Bank Transaction",
 			"Payment Entry",
 			"Payment Entry Reference",
@@ -159,35 +158,6 @@ class TestBankTransaction(FrappeTestCase):
 			frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date")
 			is not None
 		)
-
-	def test_matching_loan_repayment(self):
-		from erpnext.loan_management.doctype.loan.test_loan import create_loan_accounts
-
-		create_loan_accounts()
-		bank_account = frappe.get_doc(
-			{
-				"doctype": "Bank Account",
-				"account_name": "Payment Account",
-				"bank": "Citi Bank",
-				"account": "Payment Account - _TC",
-			}
-		).insert(ignore_if_duplicate=True)
-
-		bank_transaction = frappe.get_doc(
-			{
-				"doctype": "Bank Transaction",
-				"description": "Loan Repayment - OPSKATTUZWXXX AT776000000098709837 Herr G",
-				"date": "2018-10-27",
-				"deposit": 500,
-				"currency": "INR",
-				"bank_account": bank_account.name,
-			}
-		).submit()
-
-		repayment_entry = create_loan_and_repayment()
-
-		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
-		self.assertEqual(linked_payments[0][2], repayment_entry.name)
 
 
 def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
@@ -398,59 +368,3 @@ def add_vouchers():
 	)
 	si.insert()
 	si.submit()
-
-
-def create_loan_and_repayment():
-	from erpnext.loan_management.doctype.loan.test_loan import (
-		create_loan,
-		create_loan_type,
-		create_repayment_entry,
-		make_loan_disbursement_entry,
-	)
-	from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
-		process_loan_interest_accrual_for_term_loans,
-	)
-	from erpnext.setup.doctype.employee.test_employee import make_employee
-
-	create_loan_type(
-		"Personal Loan",
-		500000,
-		8.4,
-		is_term_loan=1,
-		mode_of_payment="Cash",
-		disbursement_account="Disbursement Account - _TC",
-		payment_account="Payment Account - _TC",
-		loan_account="Loan Account - _TC",
-		interest_income_account="Interest Income Account - _TC",
-		penalty_income_account="Penalty Income Account - _TC",
-	)
-
-	applicant = make_employee("test_bank_reco@loan.com", company="_Test Company")
-	loan = create_loan(applicant, "Personal Loan", 5000, "Repay Over Number of Periods", 20)
-	loan = frappe.get_doc(
-		{
-			"doctype": "Loan",
-			"applicant_type": "Employee",
-			"company": "_Test Company",
-			"applicant": applicant,
-			"loan_type": "Personal Loan",
-			"loan_amount": 5000,
-			"repayment_method": "Repay Fixed Amount per Period",
-			"monthly_repayment_amount": 500,
-			"repayment_start_date": "2018-09-27",
-			"is_term_loan": 1,
-			"posting_date": "2018-09-27",
-		}
-	).insert()
-
-	make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date="2018-09-27")
-	process_loan_interest_accrual_for_term_loans(posting_date="2018-10-27")
-
-	repayment_entry = create_repayment_entry(
-		loan.name,
-		applicant,
-		"2018-10-27",
-		500,
-	)
-	repayment_entry.submit()
-	return repayment_entry
