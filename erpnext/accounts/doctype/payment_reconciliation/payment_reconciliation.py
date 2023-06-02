@@ -19,7 +19,8 @@ from erpnext.accounts.utils import (
 	reconcile_against_document,
 )
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
-
+from erpnext.controllers.accounts_controller import make_advance_liability_entry
+from erpnext.accounts.general_ledger import make_gl_entries
 
 class PaymentReconciliation(Document):
 	def __init__(self, *args, **kwargs):
@@ -56,12 +57,26 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(non_reconciled_payments)
 
 	def get_payment_entries(self):
+		receivable_payable_account = self.receivable_payable_account
+		default_advances_account = self.default_advances_received_account
+		party_account = [receivable_payable_account, default_advances_account]
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
-		condition = self.get_conditions(get_payments=True)
+		condition = frappe._dict(
+			{
+				"company": self.get("company"),
+				"get_payments": True,
+				"cost_center": self.get("cost_center"),
+				"from_payment_date": self.get("from_payment_date"),
+				"to_payment_date": self.get("to_payment_date"),
+				"maximum_payment_amount": self.get("maximum_payment_amount"),
+				"minimum_payment_amount": self.get("minimum_payment_amount")
+			}
+		)
+
 		payment_entries = get_advance_payment_entries(
-			self.party_type,
+			self.party_type,  
 			self.party,
-			self.receivable_payable_account,
+			party_account,
 			order_doctype,
 			against_all_orders=True,
 			limit=self.payment_limit,
@@ -319,6 +334,10 @@ class PaymentReconciliation(Document):
 		for row in self.get("allocation"):
 			reconciled_entry = []
 			if row.invoice_number and row.allocated_amount:
+				if row.invoice_type in ["Sales Invoice", "Purchase Invoice"]:
+					gl_entries = []
+					make_advance_liability_entry(gl_entries, row.reference_name, row.allocated_amount, row.invoice_number, self.party_type)
+					make_gl_entries(gl_entries)
 				if row.reference_type in ["Sales Invoice", "Purchase Invoice"]:
 					reconciled_entry = dr_or_cr_notes
 				else:

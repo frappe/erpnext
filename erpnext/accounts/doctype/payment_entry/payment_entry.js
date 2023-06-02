@@ -18,14 +18,20 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	setup: function(frm) {
+		advance_payments_as_liability = frappe.db.get_value("Company", {"company_name": frm.doc.company}, "book_advance_payments_as_liability");
+
+		if(advance_payments_as_liability && frm.doc.payment_type == 'Receive'){
+			account_type = "Payable";
+		}
+		else{
+			account_type = "Receivable";
+		}
+
 		frm.set_query("paid_from", function() {
 			frm.events.validate_company(frm);
-
-			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 			return {
 				filters: {
-					"account_type": ["in", account_types],
+					"account_type": account_type,
 					"is_group": 0,
 					"company": frm.doc.company
 				}
@@ -74,12 +80,15 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("paid_to", function() {
 			frm.events.validate_company(frm);
-
-			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
+			if(advance_payments_as_liability && in_list(['Receive', 'Internal Transfer'], cur_frm.doc.payment_type)){
+				account_type = ["Bank", "Cash"];
+			}
+			else{
+				account_type = "Receivable";
+			}
 			return {
 				filters: {
-					"account_type": ["in", account_types],
+					"account_type": ["in", account_type],
 					"is_group": 0,
 					"company": frm.doc.company
 				}
@@ -270,6 +279,25 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	payment_type: function(frm) {
+		advance_payments_as_liability = frappe.db.get_value("Company", {"company_name": frm.doc.company}, "book_advance_payments_as_liability");
+
+		if(advance_payments_as_liability && frm.doc.payment_type == 'Receive'){
+			account_type = ["Payable"];
+		}
+		else{
+			account_type = ["Bank", "Cash"];
+		}
+
+		frm.set_query("paid_from", function() {
+			frm.events.validate_company(frm);
+			return {
+				filters: {
+					"account_type": ["in", account_type],
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			}
+		});
 		if(frm.doc.payment_type == "Internal Transfer") {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"references", "total_allocated_amount"], function(i, field) {
@@ -318,6 +346,10 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 
+	company: function(frm){
+		frm.trigger('party');
+	},
+
 	party: function(frm) {
 		if (frm.doc.contact_email || frm.doc.contact_person) {
 			frm.set_value("contact_email", "");
@@ -332,7 +364,7 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_party_account_based_on_party = true;
 
 			let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
-
+			
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details",
 				args: {
@@ -340,7 +372,8 @@ frappe.ui.form.on('Payment Entry', {
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
 					date: frm.doc.posting_date,
-					cost_center: frm.doc.cost_center
+					cost_center: frm.doc.cost_center,
+					is_advance: !(frm.doc.references)
 				},
 				callback: function(r, rt) {
 					if(r.message) {

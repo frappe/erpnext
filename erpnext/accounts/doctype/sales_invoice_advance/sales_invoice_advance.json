@@ -14,7 +14,8 @@
   "advance_amount",
   "allocated_amount",
   "exchange_gain_loss",
-  "ref_exchange_rate"
+  "ref_exchange_rate",
+  "account"
  ],
  "fields": [
   {
@@ -112,13 +113,20 @@
    "label": "Reference Exchange Rate",
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+    "fieldname": "account",
+    "fieldtype": "Link",
+    "label": "Account",
+    "options": "Account",
+    "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-26 15:47:46.911595",
+ "modified": "2023-05-31 11:47:00.191681",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Advance",
@@ -126,5 +134,6 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -30,8 +30,30 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 	var d  = locals[cdt][cdn];
 	return {
 		filters: {
-			'account_type': 'Receivable',
-			'company': d.company,
+			"account_type": 'Receivable',
+			"company": d.company,
+			"is_group": 0
+		}
+	}
+}
+
+cur_frm.fields_dict['accounts'].grid.get_field('advances_received_account').get_query = function(doc, cdt, cdn) {
+	var d  = locals[cdt][cdn];
+	return {
+		filters: {
+			"root_type": 'Liability',
+			"company": d.company,
+			"is_group": 0
+		}
+	}
+}
+
+cur_frm.fields_dict['accounts'].grid.get_field('advances_paid_account').get_query = function(doc, cdt, cdn) {
+	var d  = locals[cdt][cdn];
+	return {
+		filters: {
+			"root_type": 'Asset',
+			"company": d.company,
 			"is_group": 0
 		}
 	}

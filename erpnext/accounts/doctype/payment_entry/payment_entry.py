@@ -1563,13 +1563,12 @@ def get_negative_outstanding_invoices(
 
 
 @frappe.whitelist()
-def get_party_details(company, party_type, party, date, cost_center=None):
+def get_party_details(company, party_type, party, date, cost_center=None, is_advance=False):
 	bank_account = ""
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
 
-	party_account = get_party_account(party_type, party, company)
-
+	party_account = get_party_account(party_type, party, company, is_advance)
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"

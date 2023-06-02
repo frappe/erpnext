@@ -53,6 +53,7 @@
   "primary_address",
   "accounting_tab",
   "payment_terms",
+  "default_accounts_section",
   "accounts",
   "settings_tab",
   "allow_purchase_invoice_creation_without_purchase_order",
@@ -445,6 +446,11 @@
   {
    "fieldname": "column_break_59",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Default Accounts"
   }
  ],
  "icon": "fa fa-user",
@@ -457,7 +463,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-02-18 11:05:50.592270",
+ "modified": "2023-05-29 15:23:11.709415",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -489,7 +495,6 @@
    "read": 1,
    "report": 1,
    "role": "Purchase Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },

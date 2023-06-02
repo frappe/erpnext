@@ -34,6 +34,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import validate_account_head
+from erpnext.controllers.accounts_controller import make_advance_liability_entry
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
@@ -580,6 +581,12 @@ class PurchaseInvoice(BuyingController):
 		gl_entries = []
 
 		self.make_supplier_gl_entry(gl_entries)
+		
+		advance_payments_as_liability = frappe.db.get_value("Company", {"company_name": self.company}, "book_advance_payments_as_liability")
+		if advance_payments_as_liability:
+			for advance_entry in self.advances:
+				make_advance_liability_entry(gl_entries, advance_entry.reference_name, advance_entry.allocated_amount, invoice=self.name, party_type="Supplier")
+
 		self.make_item_gl_entries(gl_entries)
 		self.make_precision_loss_gl_entry(gl_entries)
 

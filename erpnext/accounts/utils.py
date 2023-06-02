@@ -495,50 +495,51 @@ def check_if_advance_entry_modified(args):
 
 	ret = None
 	if args.voucher_type == "Journal Entry":
-		ret = frappe.db.sql(
-			"""
-			select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
-			where t1.name = t2.parent and t2.account = %(account)s
-			and t2.party_type = %(party_type)s and t2.party = %(party)s
-			and (t2.reference_type is null or t2.reference_type in ('', 'Sales Order', 'Purchase Order'))
-			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
-			and t1.docstatus=1 """.format(
-				dr_or_cr=args.get("dr_or_cr")
-			),
-			args,
+		journal_entry = frappe.qb.DocType("Journal Entry")
+		journal_acc = frappe.qb.DocType("Journal Entry Account")
+
+		q = (frappe.qb.from_(journal_entry)
+			.innerjoin(journal_acc)
+			.on(journal_entry.name == journal_acc.parent)
 		)
+
+		if args.get("dr_or_cr") == 'debit_in_account_currency':
+			q = q.select(journal_acc.debit_in_account_currency)
+		else:
+			q = q.select(journal_acc.credit_in_account_currency)
+		
+		q = q.where((journal_acc.account == args.get("account"))
+			&((journal_acc.party_type == args.get("party_type")))
+			&((journal_acc.party == args.get("party")))
+			&((journal_acc.reference_type == None) | (journal_acc.reference_type.isin(['', 'Sales Order', 'Purchase Order'])))
+			&((journal_entry.name == args.get("voucher_no")))
+			&((journal_acc.name == args.get("voucher_detail_no")))
+			&((journal_entry.docstatus == 1))
+		)
+
 	else:
-		party_account_field = (
-			"paid_from" if erpnext.get_party_account_type(args.party_type) == "Receivable" else "paid_to"
+		payment_entry = frappe.qb.DocType("Payment Entry")
+		payment_ref = frappe.qb.DocType("Payment Entry Reference")
+
+		q = (frappe.qb.from_(payment_entry)
+			.select(payment_entry.name)
+			.where(payment_entry.name == args.get("voucher_no"))
+			.where(payment_entry.docstatus == 1)
+			.where(payment_entry.party_type == args.get("party_type"))
+			.where(payment_entry.party == args.get("party"))
 		)
 
 		if args.voucher_detail_no:
-			ret = frappe.db.sql(
-				"""select t1.name
-				from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
-				where
-					t1.name = t2.parent and t1.docstatus = 1
-					and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
-					and t1.party_type = %(party_type)s and t1.party = %(party)s and t1.{0} = %(account)s
-					and t2.reference_doctype in ('', 'Sales Order', 'Purchase Order')
-					and t2.allocated_amount = %(unreconciled_amount)s
-			""".format(
-					party_account_field
-				),
-				args,
-			)
+			q = ( q.inner_join(payment_ref)
+				.on(payment_entry.name == payment_ref.parent)
+				.where(payment_ref.name == args.get("voucher_detail_no"))
+				.where(payment_ref.reference_doctype.isin(('', 'Sales Order', 'Purchase Order')))
+				.where(payment_ref.allocated_amount == args.get("unreconciled_amount"))
+			)	
 		else:
-			ret = frappe.db.sql(
-				"""select name from `tabPayment Entry`
-				where
-					name = %(voucher_no)s and docstatus = 1
-					and party_type = %(party_type)s and party = %(party)s and {0} = %(account)s
-					and unallocated_amount = %(unreconciled_amount)s
-			""".format(
-					party_account_field
-				),
-				args,
-			)
+			q = q.where(payment_entry.unallocated_amount == args.get("unreconciled_amount"))
+		
+	ret = q.run(as_dict=True)
 
 	if not ret:
 		throw(_("""Payment Entry has been modified after you pulled it. Please pull it again."""))

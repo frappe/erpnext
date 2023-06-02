@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "account"
+  "account",
+  "advances_received_account",
+  "advances_paid_account"
  ],
  "fields": [
   {
@@ -22,14 +24,26 @@
    "fieldname": "account",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Account",
+   "label": "Default Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "advances_received_account",
+   "fieldtype": "Link",
+   "label": "Advances Received Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "advances_paid_account",
+   "fieldtype": "Link",
+   "label": "Advances Paid Account",
    "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-04 12:31:02.994197",
+ "modified": "2023-06-02 13:00:06.885744",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Party Account",

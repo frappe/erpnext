@@ -33,6 +33,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reverse_depreciation_entry_made_after_disposal,
 )
 from erpnext.controllers.accounts_controller import validate_account_head
+from erpnext.controllers.accounts_controller import make_advance_liability_entry
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -1064,6 +1065,11 @@ class SalesInvoice(SellingController):
 		gl_entries = []
 
 		self.make_customer_gl_entry(gl_entries)
+		
+		advance_payments_as_liability = frappe.db.get_value("Company", {"company_name": self.company}, "book_advance_payments_as_liability")
+		if advance_payments_as_liability:
+			for advance_entry in self.advances:
+				make_advance_liability_entry(gl_entries, advance_entry.reference_name, advance_entry.allocated_amount, invoice=self.name, party_type="Customer")
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
