@@ -7,13 +7,14 @@ from typing import Literal
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
-from frappe.utils.data import add_to_date, now
+from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
 	make_corrective_job_card,
+	make_material_request,
 )
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
@@ -342,6 +343,12 @@ class TestJobCard(FrappeTestCase):
 		job_card.reload()
 		self.assertEqual(job_card.transferred_qty, 2)
 
+		transfer_entry_2.cancel()
+		transfer_entry.cancel()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0.0)
+
 	def test_job_card_material_transfer_correctness(self):
 		"""
 		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
@@ -442,6 +449,25 @@ class TestJobCard(FrappeTestCase):
 
 		jc.docstatus = 2
 		assertStatus("Cancelled")
+
+	def test_job_card_material_request_and_bom_details(self):
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+
+		create_bom_with_multiple_operations()
+		work_order = make_wo_with_transfer_against_jc()
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": work_order.name}, "name")
+
+		mr = make_material_request(job_card_name)
+		mr.schedule_date = today()
+		mr.submit()
+
+		ste = make_stock_entry(mr.name)
+		self.assertEqual(ste.purpose, "Material Transfer for Manufacture")
+		self.assertEqual(ste.work_order, work_order.name)
+		self.assertEqual(ste.job_card, job_card_name)
+		self.assertEqual(ste.from_bom, 1.0)
+		self.assertEqual(ste.bom_no, work_order.bom_no)
 
 
 def create_bom_with_multiple_operations():

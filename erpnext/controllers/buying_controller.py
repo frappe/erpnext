@@ -180,6 +180,7 @@ class BuyingController(SubcontractingController):
 		address_dict = {
 			"supplier_address": "address_display",
 			"shipping_address": "shipping_address_display",
+			"billing_address": "billing_address_display",
 		}
 
 		for address_field, address_display_field in address_dict.items():
