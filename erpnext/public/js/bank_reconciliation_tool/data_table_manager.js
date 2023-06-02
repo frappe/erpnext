@@ -40,8 +40,8 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				name: __("Date"),
 				editable: false,
 				width: 100,
+				format: frappe.form.formatters.Date,
 			},
-
 			{
 				name: __("Party Type"),
 				editable: false,
