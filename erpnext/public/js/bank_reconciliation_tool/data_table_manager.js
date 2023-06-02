@@ -117,7 +117,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 		return [
 			row["date"],
 			row["party_type"],
-			row["party"],
+			frappe.form.formatters.Link(row["party"], {options: row["party_type"]}),
 			row["description"],
 			row["deposit"],
 			row["withdrawal"],
