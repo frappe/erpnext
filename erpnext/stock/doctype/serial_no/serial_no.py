@@ -304,6 +304,9 @@ def validate_serial_no(sle, item_det):
 					_("Duplicate Serial No entered for Item {0}").format(sle.item_code), SerialNoDuplicateError
 				)
 
+			allow_existing_serial_no = cint(
+				frappe.get_cached_value("Stock Settings", "None", "allow_existing_serial_no")
+			)
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value(
@@ -331,6 +334,23 @@ def validate_serial_no(sle, item_det):
 								_("Serial No {0} does not belong to Item {1}").format(serial_no, sle.item_code),
 								SerialNoItemError,
 							)
+
+					if not allow_existing_serial_no and sle.voucher_type in [
+						"Stock Entry",
+						"Purchase Receipt",
+						"Purchase Invoice",
+					]:
+						msg = ""
+
+						if sle.voucher_type == "Stock Entry":
+							se_purpose = frappe.db.get_value("Stock Entry", sle.voucher_no, "purpose")
+							if se_purpose in ["Manufacture", "Material Receipt"]:
+								msg = f"Cannot create a {sle.voucher_type} ({se_purpose}) for the Item {frappe.bold(sle.item_code)} with the existing Serial No {frappe.bold(serial_no)}."
+						else:
+							msg = f"Cannot create a {sle.voucher_type} for the Item {frappe.bold(sle.item_code)} with the existing Serial No {frappe.bold(serial_no)}."
+
+						if msg:
+							frappe.throw(_(msg), SerialNoDuplicateError)
 
 					if cint(sle.actual_qty) > 0 and has_serial_no_exists(sr, sle):
 						doc_name = frappe.bold(get_link_to_form(sr.purchase_document_type, sr.purchase_document_no))
