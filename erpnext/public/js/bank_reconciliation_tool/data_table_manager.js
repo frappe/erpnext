@@ -123,11 +123,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			row["withdrawal"],
 			row["unallocated_amount"],
 			row["reference_number"],
-			`
-			<Button class="btn btn-primary btn-xs center"  data-name = ${row["name"]} >
-				${__("Actions")}
-			</a>
-			`,
+			`<button class="btn btn-primary btn-xs center" data-name="${row["name"]}">${__("Actions")}</button>`
 		];
 	}
 
