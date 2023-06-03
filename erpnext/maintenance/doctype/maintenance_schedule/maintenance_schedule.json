@@ -152,6 +152,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -160,6 +161,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -236,10 +238,11 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2021-05-27 16:05:10.746465",
+ "modified": "2023-06-03 16:15:43.958072",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -260,5 +263,6 @@
  "search_fields": "status,customer,customer_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer"
 }

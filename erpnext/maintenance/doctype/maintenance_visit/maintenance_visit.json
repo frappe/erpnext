@@ -101,6 +101,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -108,6 +109,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Contact Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -293,7 +295,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-17 03:10:27.608112",
+ "modified": "2023-06-03 16:19:07.902723",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit",
@@ -319,6 +321,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "customer_name"
 }
