@@ -288,6 +288,10 @@ class PickList(Document):
 		for item in locations:
 			if not item.item_code:
 				frappe.throw("Row #{0}: Item Code is Mandatory".format(item.idx))
+			if not cint(
+				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+			) and not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code}):
+				continue
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
 			key = (item_code, item.uom, item.warehouse, item.batch_no, reference)
