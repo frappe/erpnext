@@ -363,10 +363,16 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 						new erpnext.SerialBatchPackageSelector(
 							me.frm, item, (r) => {
 								if (r) {
-									frappe.model.set_value(item.doctype, item.name, {
+									let update_values = {
 										"serial_and_batch_bundle": r.name,
 										"qty": Math.abs(r.total_qty)
-									});
+									}
+
+									if (r.warehouse) {
+										update_values["warehouse"] = r.warehouse;
+									}
+
+									frappe.model.set_value(item.doctype, item.name, update_values);
 								}
 							}
 						);
@@ -392,10 +398,16 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 						new erpnext.SerialBatchPackageSelector(
 							me.frm, item, (r) => {
 								if (r) {
-									frappe.model.set_value(item.doctype, item.name, {
-										"rejected_serial_and_batch_bundle": r.name,
+									let update_values = {
+										"serial_and_batch_bundle": r.name,
 										"rejected_qty": Math.abs(r.total_qty)
-									});
+									}
+
+									if (r.warehouse) {
+										update_values["rejected_warehouse"] = r.warehouse;
+									}
+
+									frappe.model.set_value(item.doctype, item.name, update_values);
 								}
 							}
 						);
