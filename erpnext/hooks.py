@@ -515,7 +515,6 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 ]
 
-# get matching queries for Bank Reconciliation
 get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
 )
@@ -529,6 +528,8 @@ get_payment_entries_for_bank_clearance = (
 )
 
 get_entries_for_bank_clearance_summary = "erpnext.accounts.report.bank_clearance_summary.bank_clearance_summary.get_entries_for_bank_clearance_summary"
+
+get_entries_for_bank_reconciliation_statement = "erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement.get_entries_for_bank_reconciliation_statement"
 
 regional_overrides = {
 	"France": {
