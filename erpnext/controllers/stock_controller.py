@@ -15,6 +15,7 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 	process_gl_map,
 )
+from erpnext.accounts.report.general_ledger.general_ledger import get_columns
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
@@ -822,6 +823,18 @@ class StockController(AccountsController):
 			gl_entry.update({"posting_date": posting_date})
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
+
+
+@frappe.whitelist()
+def show_ledger_preview(company, doctype, docname):
+	filters = {"company": company}
+	doc = frappe.get_doc(doctype, docname)
+	columns = get_columns(filters)
+	data = doc.get_gl_entries()
+	return {
+		"columns": columns,
+		"data": data,
+	}
 
 
 def repost_required_for_queue(doc: StockController) -> bool:

@@ -66,7 +66,7 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 	}
 
 	show_general_ledger() {
-		var me = this;
+		let me = this;
 		if(this.frm.doc.docstatus > 0) {
 			cur_frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
@@ -80,5 +80,39 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
 		}
+	}
+
+	show_ledger_preview() {
+		let me = this
+		if(this.frm.doc.docstatus == 0) {
+			cur_frm.add_custom_button(__('Accounting Ledger Preview'), function() {
+				frappe.call({
+					"method": "erpnext.controllers.stock_controller.show_ledger_preview",
+					"args": {
+						"company": me.frm.doc.company,
+						"doctype": me.frm.doc.doctype,
+						"docname": me.frm.doc.name
+					},
+					"callback": function(response) {
+						me.get_datatable(response);
+					}
+				})
+			}, __("View"));
+		}
+	}
+
+	get_datatable(response) {
+		const datatable_options = {
+			columns: response.columns,
+			data: response.data,
+			dynamicRowHeight: true,
+			checkboxColumn: false,
+			inlineFilters: true,
+		};
+
+		this.datatable = new frappe.DataTable(
+			this.frm.page.main.parent,
+			datatable_options
+		);
 	}
 };
