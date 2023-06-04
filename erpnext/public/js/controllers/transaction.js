@@ -2292,8 +2292,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 };
 
 erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close, show_dialog) {
-	debugger
 	let warehouse, receiving_stock, existing_stock;
+
+	let warehouse_field = "warehouse";
 	if (frm.doc.is_return) {
 		if (["Purchase Receipt", "Purchase Invoice"].includes(frm.doc.doctype)) {
 			existing_stock = true;
@@ -2308,6 +2309,19 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 			} else {
 				existing_stock = true;
 				warehouse = item_row.s_warehouse;
+			}
+
+			if (in_list([
+					"Material Transfer",
+					"Send to Subcontractor",
+					"Material Issue",
+					"Material Consumption for Manufacture",
+					"Material Transfer for Manufacture"
+				], frm.doc.purpose)
+			) {
+				warehouse_field = "s_warehouse";
+			} else {
+				warehouse_field = "t_warehouse";
 			}
 		} else {
 			existing_stock = true;
@@ -2335,10 +2349,16 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 
 		new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 			if (r) {
-				frappe.model.set_value(item_row.doctype, item_row.name, {
+				let update_values = {
 					"serial_and_batch_bundle": r.name,
 					"qty": Math.abs(r.total_qty)
-				});
+				}
+
+				if (r.warehouse) {
+					update_values[warehouse_field] = r.warehouse;
+				}
+
+				frappe.model.set_value(item_row.doctype, item_row.name, update_values);
 			}
 		});
 	});
