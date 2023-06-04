@@ -16,6 +16,11 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 
 
 class TestAssetCapitalization(unittest.TestCase):
@@ -371,14 +376,32 @@ def create_asset_capitalization(**args):
 		asset_capitalization.set_posting_time = 1
 
 	if flt(args.stock_rate):
+		bundle = None
+		if args.stock_batch_no or args.stock_serial_no:
+			bundle = make_serial_batch_bundle(
+				frappe._dict(
+					{
+						"item_code": args.stock_item,
+						"warehouse": source_warehouse,
+						"company": frappe.get_cached_value("Warehouse", source_warehouse, "company"),
+						"qty": (flt(args.stock_qty) or 1) * -1,
+						"voucher_type": "Asset Capitalization",
+						"type_of_transaction": "Outward",
+						"serial_nos": args.stock_serial_no,
+						"posting_date": asset_capitalization.posting_date,
+						"posting_time": asset_capitalization.posting_time,
+						"do_not_submit": True,
+					}
+				)
+			).name
+
 		asset_capitalization.append(
 			"stock_items",
 			{
 				"item_code": args.stock_item or "Capitalization Source Stock Item",
 				"warehouse": source_warehouse,
 				"stock_qty": flt(args.stock_qty) or 1,
-				"batch_no": args.stock_batch_no,
-				"serial_no": args.stock_serial_no,
+				"serial_and_batch_bundle": bundle,
 			},
 		)
 

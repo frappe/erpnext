@@ -118,9 +118,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
 
-		if self._action == "submit":
-			self.make_batches("warehouse")
-		else:
+		if self._action != "submit":
 			self.set_status()
 
 		self.po_required()
@@ -242,11 +240,6 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
 		self.update_stock_ledger()
-
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
@@ -283,7 +276,12 @@ class PurchaseReceipt(BuyingController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 

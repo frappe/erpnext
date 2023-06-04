@@ -15,7 +15,6 @@ erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
 erpnext.patches.v10_0.update_translatable_fields
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
-erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.rename_duplicate_item_code_values
 erpnext.patches.v11_0.make_quality_inspection_template
 erpnext.patches.v11_0.merge_land_unit_with_location
@@ -334,3 +333,9 @@ execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
 erpnext.patches.v15_0.enable_all_leads
 erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
+execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Template Details', ignore_missing=True)
+execute:frappe.delete_doc('DocType', 'Cash Flow Mapping', ignore_missing=True)
+execute:frappe.delete_doc('DocType', 'Cash Flow Mapper', ignore_missing=True)
+execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Template', ignore_missing=True)
+execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Accounts', ignore_missing=True)
+erpnext.patches.v14_0.cleanup_workspaces

@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.desk.form.load import get_attachments
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
@@ -95,6 +96,12 @@ class RepostItemValuation(Document):
 
 		self.allow_negative_stock = 1
 
+	def on_cancel(self):
+		self.clear_attachment()
+
+	def on_trash(self):
+		self.clear_attachment()
+
 	def set_company(self):
 		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
@@ -109,6 +116,14 @@ class RepostItemValuation(Document):
 			self.status = status
 		if write:
 			self.db_set("status", self.status)
+
+	def clear_attachment(self):
+		if attachments := get_attachments(self.doctype, self.name):
+			attachment = attachments[0]
+			frappe.delete_doc("File", attachment.name)
+
+		if self.reposting_data_file:
+			self.db_set("reposting_data_file", None)
 
 	def on_submit(self):
 		"""During tests reposts are executed immediately.

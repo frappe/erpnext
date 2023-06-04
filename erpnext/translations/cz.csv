@@ -3177,7 +3177,7 @@ Opportunity Date,Příležitost Datum,
 To Bill,Billa,
 Piecework,Úkolová práce,
 Avg. Buying Rate,Avg. Nákup Rate,
-Actual Time (in Hours),Skutečná doba (v hodinách)
+Actual Time in Hours (via Timesheet),Skutečná doba (v hodinách)
 History In Company,Historie ve Společnosti,
 Shipping,Lodni,
 Stock Ledger Entry,Reklamní Ledger Entry,
@@ -3720,7 +3720,6 @@ Total Score (Out of 5),Celkové skóre (Out of 5)
 State,Stav,
 Batch,Šarže,
 Balance,Zůstatek,
-Total Expense Claim (via Expense Claims),Total Expense Claim (via Expense nároků)
 Gender,Pohlave,
 Debit Note,Debit Note,
 As per Stock UOM,Podle Stock nerozpuštěných,
