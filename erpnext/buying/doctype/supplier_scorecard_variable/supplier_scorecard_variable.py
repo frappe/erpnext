@@ -422,6 +422,30 @@ def get_total_shipments(scorecard):
 	return data
 
 
+def get_ordered_qty(scorecard):
+	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+
+	# Look up all PO Items 
+	data = frappe.db.sql(
+		"""
+			SELECT
+				SUM(po.total_qty)
+			FROM
+				`tabPurchase Order` po
+			WHERE
+				po.supplier = %(supplier)s
+				AND po.transaction_date BETWEEN %(start_date)s AND %(end_date)s
+				AND po.docstatus = 1
+		""",
+		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
+		as_dict=0,
+	)[0][0]	
+	if not data:
+		data = 0
+
+	return data
+
+
 def get_rfq_total_number(scorecard):
 	"""Gets the total number of RFQs sent to supplier"""
 	supplier = frappe.get_doc("Supplier", scorecard.supplier)
