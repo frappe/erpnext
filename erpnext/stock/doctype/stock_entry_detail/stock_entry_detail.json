@@ -46,8 +46,10 @@
   "basic_amount",
   "amount",
   "serial_no_batch",
-  "serial_no",
+  "add_serial_batch_bundle",
+  "serial_and_batch_bundle",
   "col_break4",
+  "serial_no",
   "batch_no",
   "accounting",
   "expense_account",
@@ -292,7 +294,8 @@
    "label": "Serial No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "read_only": 1
   },
   {
    "fieldname": "col_break4",
@@ -305,7 +308,8 @@
    "no_copy": 1,
    "oldfieldname": "batch_no",
    "oldfieldtype": "Link",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "depends_on": "eval:parent.inspection_required && doc.t_warehouse",
@@ -566,6 +570,19 @@
    "fieldtype": "Check",
    "label": "Has Item Scanned",
    "read_only": 1
+  },
+  {
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
   }
  ],
  "idx": 1,

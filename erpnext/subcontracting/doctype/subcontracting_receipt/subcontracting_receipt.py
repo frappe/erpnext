@@ -81,15 +81,17 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_posting_time()
 		self.validate_rejected_warehouse()
 
-		if self._action == "submit":
-			self.make_batches("warehouse")
-
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.get_current_stock()
+
+	def on_update(self):
+		for table_field in ["items", "supplied_items"]:
+			if self.get(table_field):
+				self.set_serial_and_batch_bundle(table_field)
 
 	def on_submit(self):
 		self.validate_available_qty_for_consumption()
@@ -98,17 +100,17 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_subcontracting_order_status()
 		self.set_consumed_qty_in_subcontract_order()
 		self.update_stock_ledger()
-
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_stock_ledger()

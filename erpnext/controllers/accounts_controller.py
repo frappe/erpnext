@@ -758,6 +758,7 @@ class AccountsController(TransactionBase):
 			}
 		)
 
+		update_gl_dict_with_regional_fields(self, gl_dict)
 		accounting_dimensions = get_accounting_dimensions()
 		dimension_dict = frappe._dict()
 
@@ -2444,7 +2445,7 @@ def set_order_defaults(
 	Returns a Sales/Purchase Order Item child item containing the default values
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc(child_doctype, p_doc, child_docname)
+	child_item = frappe.new_doc(child_doctype, parent_doc=p_doc, parentfield=child_docname)
 	item = frappe.get_doc("Item", trans_item.get("item_code"))
 
 	for field in ("item_code", "item_name", "description", "item_group"):
@@ -2845,4 +2846,9 @@ def validate_regional(doc):
 
 @erpnext.allow_regional
 def validate_einvoice_fields(doc):
+	pass
+
+
+@erpnext.allow_regional
+def update_gl_dict_with_regional_fields(doc, gl_dict):
 	pass

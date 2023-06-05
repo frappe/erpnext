@@ -19,6 +19,8 @@
   "rate",
   "uom",
   "section_break_9",
+  "pick_serial_and_batch",
+  "serial_and_batch_bundle",
   "serial_no",
   "column_break_11",
   "batch_no",
@@ -118,7 +120,8 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "label": "Serial No"
+   "label": "Serial No",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_11",
@@ -128,7 +131,8 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_13",
@@ -253,6 +257,19 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "pick_serial_and_batch",
+   "fieldtype": "Button",
+   "label": "Pick Serial / Batch No"
   }
  ],
  "idx": 1,
