@@ -2351,7 +2351,11 @@ class StockEntry(StockController):
 			return
 
 		for d in self.items:
-			if d.is_finished_item and d.item_code == self.pro_doc.production_item:
+			if (
+				d.is_finished_item
+				and d.item_code == self.pro_doc.production_item
+				and not d.serial_and_batch_bundle
+			):
 				serial_nos = self.get_available_serial_nos()
 				if serial_nos:
 					row = frappe._dict({"serial_nos": serial_nos[0 : cint(d.qty)]})
