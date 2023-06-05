@@ -25,7 +25,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/v14/user/manual/en/setting-up/company-setup",
  "idx": 0,
  "is_complete": 0,
- "modified": "2023-05-20 19:45:03.936741",
+ "modified": "2023-05-23 13:20:19.703506",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
@@ -38,10 +38,7 @@
    "step": "Create a Customer"
   },
   {
-   "step": "Create a Supplier"
-  },
-  {
-   "step": "Create a Quotation"
+   "step": "Create Your First Sales Invoice"
   }
  ],
  "subtitle": "Item, Customer, Supplier and Quotation",

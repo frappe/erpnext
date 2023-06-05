@@ -7,6 +7,19 @@ frappe.ui.form.on('Maintenance Schedule', {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
+
+		frm.set_query('serial_and_batch_bundle', 'items', (doc, cdt, cdn) => {
+			let item = locals[cdt][cdn];
+
+			return {
+				filters: {
+					'item_code': item.item_code,
+					'voucher_type': 'Maintenance Schedule',
+					'type_of_transaction': 'Maintenance',
+					'company': doc.company,
+				}
+			}
+		});
 	},
 	onload: function (frm) {
 		if (!frm.doc.status) {

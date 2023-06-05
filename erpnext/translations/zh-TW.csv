@@ -409,7 +409,6 @@ Leaves per Year,每年葉
 Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,行{0}：請檢查'是進階'對科目{1}，如果這是一個進階條目。
 Warehouse {0} does not belong to company {1},倉庫{0}不屬於公司{1}
 Profit & Loss,收益與損失
-Total Costing Amount (via Time Sheet),總成本計算量（通過時間表）
 Please setup Students under Student Groups,請設置學生組的學生
 Item Website Specification,項目網站規格
 Leave Blocked,禁假的
@@ -2673,7 +2672,6 @@ Pricing Rules are further filtered based on quantity.,定價規則進一步過�
 Please set the Date Of Joining for employee {0},請為員工{0}設置加入日期
 Please set the Date Of Joining for employee {0},請為員工{0}設置加入日期
 Discharge,卸貨
-Total Billing Amount (via Time Sheet),總開票金額（通過時間表）
 Repeat Customer Revenue,重複客戶收入
 Mapped Items,映射項目
 IT,它
@@ -2698,7 +2696,7 @@ Shift Type,班次類型
 Personal Details,個人資料
 Please set 'Asset Depreciation Cost Center' in Company {0},請設置在公司的資產折舊成本中心“{0}
 Maintenance Schedules,保養時間表
-Actual End Date (via Time Sheet),實際結束日期（通過時間表）
+Actual End Date (via Timesheet),實際結束日期（通過時間表）
 Soil Type,土壤類型
 Amount {0} {1} against {2} {3},量{0} {1}對{2} {3}
 Quotation Trends,報價趨勢
@@ -2777,7 +2775,7 @@ Price List,價格表
 Expense Claims,報銷
 Total Exemption Amount,免稅總額
 BOM Search,BOM搜索
-Total Consumed Material Cost  (via Stock Entry),總消耗材料成本（通過庫存輸入）
+Total Consumed Material Cost (via Stock Entry),總消耗材料成本（通過庫存輸入）
 Subscription Period,訂閱期
 To Date cannot be less than From Date,迄今不能少於起始日期
 "Publish ""In Stock"" or ""Not in Stock"" on Hub based on stock available in this warehouse.",基於倉庫中的庫存，在Hub上發布“庫存”或“庫存”。
@@ -3303,7 +3301,7 @@ Is billable,是可計費的
 A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,第三方分銷商/經銷商/代理商/分支機構/分銷商誰銷售公司產品的佣金。
 {0} against Purchase Order {1},{0}針對採購訂單{1}
 Patient Demographics,患者人口統計學
-Actual Start Date (via Time Sheet),實際開始日期（通過時間表）
+Actual Start Date (via Timesheet),實際開始日期（通過時間表）
 This is an example website auto-generated from ERPNext,這是一個由 ERPNext 自動產生的範例網站
 Ageing Range 1,老齡範圍1,
 Enable Shopify,啟用Shopify,
@@ -3865,7 +3863,7 @@ Probationary Period,試用期
 Is Inter State,是國際
 Shift Management,班次管理
 Only leaf nodes are allowed in transaction,只有葉節點中允許交易
-Total Costing Amount (via Timesheets),總成本金額（通過時間表）
+Total Costing Amount (via Timesheet),總成本金額（通過時間表）
 Expense Approver,費用審批
 Row {0}: Advance against Customer must be credit,行{0}：提前對客戶必須是信用
 Hourly,每小時
@@ -4570,7 +4568,7 @@ Partly Billed,天色帳單
 Item {0} must be a Fixed Asset Item,項{0}必須是固定資產項目
 Make Variants,變種
 Default BOM,預設的BOM,
-Total Billed Amount (via Sales Invoices),總開票金額（通過銷售發票）
+Total Billed Amount (via Sales Invoice),總開票金額（通過銷售發票）
 Debit Note Amount,借方票據金額
 "There are inconsistencies between the rate, no of shares and the amount calculated",費率，股份數量和計算的金額之間不一致
 You are not present all day(s) between compensatory leave request days,您在補休請求日之間不是全天
@@ -5360,7 +5358,7 @@ Employee Grade,員工等級
 Piecework,計件工作
 Avg. Buying Rate,平均。買入價
 From No,來自No,
-Actual Time (in Hours),實際時間（小時）
+Actual Time in Hours (via Timesheet),實際時間（小時）
 History In Company,公司歷史
 Customer Primary Address,客戶主要地址
 Newsletters,簡訊
@@ -5457,7 +5455,7 @@ Submitted orders can not be deleted,提交的訂單不能被刪除
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'",科目餘額已歸為借方科目，不允許設為貸方
 Quality Management,品質管理
 Item {0} has been disabled,項{0}已被禁用
-Total Billable Amount (via Timesheets),總計費用金額（通過時間表）
+Total Billable Amount (via Timesheet),總計費用金額（通過時間表）
 Previous Business Day,前一個營業日
 Repay Fixed Amount per Period,償還每期固定金額
 Health Insurance No,健康保險No,
@@ -6200,7 +6198,7 @@ Please select the Company,請選擇公司
 Seating Capacity,座位數
 Lab Test Groups,實驗室測試組
 Party Type and Party is mandatory for {0} account,{0}科目的參與方以及類型為必填
-Total Expense Claim (via Expense Claims),總費用報銷（通過費用報銷）
+Total Expense Claim (via Expense Claim),總費用報銷（通過費用報銷）
 GST Summary,消費稅總結
 Please enable default incoming account before creating Daily Work Summary Group,請在創建日常工作摘要組之前啟用默認傳入科目
 Total Score,總得分
