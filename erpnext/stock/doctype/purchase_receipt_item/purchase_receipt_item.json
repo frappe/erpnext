@@ -86,6 +86,7 @@
   "quality_inspection",
   "material_request_item",
   "purchase_order_item",
+  "receipt_plan",
   "purchase_invoice_item",
   "purchase_receipt_item",
   "delivery_note_item",
@@ -1016,12 +1017,21 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "receipt_plan",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Receipt Plan",
+   "no_copy": 1,
+   "print_hide": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 15:43:04.470104",
+ "modified": "2023-06-05 12:59:32.603377",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

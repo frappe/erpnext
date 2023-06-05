@@ -219,7 +219,13 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
 					if(flt(doc.per_received) < 100 && allow_receipt) {
-						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
+						if (doc.has_receipt_plan) {
+							cur_frm.add_custom_button(__('Purchase Receipt'), function() {
+								me.make_purchase_receipt_by_plan();
+							}, __('Create'));
+						} else {
+							cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
+						}
 						if (doc.is_subcontracted) {
 							if (doc.is_old_subcontracting_flow) {
 								if (me.has_unsupplied_items()) {
@@ -331,6 +337,85 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			frm: cur_frm,
 			freeze_message: __("Creating Purchase Receipt ...")
 		})
+	}
+
+	make_purchase_receipt_by_plan() {
+		frappe.call({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.get_used_receipt_plan",
+			args: {
+				purchase_order: cur_frm.doc.name,
+			},
+			callback(r) {
+				let plans = cur_frm.doc.receipt_plan.map(plan => {
+					return {...plan, done: r.message.includes(plan.name)};
+				});
+				var dialog = new frappe.ui.Dialog({
+					title: __("Select Receipt Plan"),
+					fields: [{
+						fieldname: 'receipt_plan',
+						fieldtype: 'Table',
+						label: __("Installments"),
+						cannot_add_rows: 1,
+						fields: [
+							{
+								fieldtype: 'Data',
+								fieldname: 'idx',
+								label: __('No.'),
+								read_only: 1,
+								in_list_view: 1
+							},
+							{
+								fieldtype: 'Data',
+								fieldname: 'name',
+								label: __('Name'),
+								read_only: 1,
+								in_list_view: 0
+							},
+							{
+								fieldtype: 'Data',
+								fieldname: 'description',
+								label: __('Description'),
+								read_only: 1,
+								in_list_view: 1
+							},
+							{
+								fieldtype: 'Percent',
+								fieldname: 'receipt_portion',
+								label: __('Receipt Portion'),
+								read_only: 1,
+								in_list_view: 1
+							},
+							{
+								fieldtype: 'Check',
+								fieldname: 'done',
+								label: __('Done'),
+								read_only: 1,
+								in_list_view: 1
+							},
+						],
+						data: plans
+					}]
+				});
+				dialog.set_primary_action(__('Create Purchase Receipt'), function() {
+					var selected_plans = dialog.fields_dict.receipt_plan.grid.get_selected_children();
+					if (selected_plans.length != 1) { frappe.throw(__('Please select only 1 installment')); }
+					for (let plan of selected_plans) {
+						if (plan.done) {
+							frappe.throw(__('Installment {0} is already created', [plan.idx]));
+						}
+					}
+					frappe.model.open_mapped_doc({
+						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+						frm: cur_frm,
+						args: {
+							plan: selected_plans[0].name,
+							portion: selected_plans[0].receipt_portion
+						},
+					})
+				})
+				dialog.show();
+			},
+		});
 	}
 
 	make_purchase_invoice() {

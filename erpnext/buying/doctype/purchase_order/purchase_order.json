@@ -24,6 +24,7 @@
   "apply_tds",
   "tax_withholding_category",
   "is_subcontracted",
+  "has_receipt_plan",
   "supplier_warehouse",
   "amended_from",
   "accounting_dimensions_section",
@@ -131,6 +132,8 @@
   "terms_section_break",
   "tc_name",
   "terms",
+  "receipt_plan_tab",
+  "receipt_plan",
   "more_info_tab",
   "tracking_section",
   "status",
@@ -1265,13 +1268,33 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "has_receipt_plan",
+   "fieldtype": "Check",
+   "label": "Has Receipt Plan"
+  },
+  {
+   "depends_on": "eval:doc.has_receipt_plan",
+   "fieldname": "receipt_plan_tab",
+   "fieldtype": "Tab Break",
+   "label": "Receipt Plan"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "receipt_plan",
+   "fieldtype": "Table",
+   "label": "Receipt Plan",
+   "options": "Receipt Plan"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-24 11:16:41.195340",
+ "modified": "2023-06-05 14:46:15.977592",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

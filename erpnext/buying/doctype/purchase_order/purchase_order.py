@@ -324,6 +324,12 @@ class PurchaseOrder(BuyingController):
 				raise_exception=True,
 			)
 
+	def validate_receipt_plan(self):
+		if self.has_receipt_plan:
+			total = sum([d.receipt_portion for d in self.receipt_plan])
+			if total != 100:
+				frappe.throw(_("Total Receipt Plan must be 100%"))
+
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
@@ -350,8 +356,12 @@ class PurchaseOrder(BuyingController):
 		)
 
 		self.update_blanket_order()
+		self.validate_receipt_plan()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+
+	def on_update_after_submit(self):
+		self.validate_receipt_plan()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
@@ -496,12 +506,16 @@ def set_missing_values(source, target):
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (
-			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
+		qty = qty_remain = flt(obj.qty) - flt(obj.received_qty)
+		args = frappe.flags.args
+		if args and args.plan and args.portion:
+			qty = flt(obj.qty) * flt(args.portion) / 100
+			qty = qty_remain if (qty > qty_remain) else qty
+			target.receipt_plan = args.plan
+		target.qty = qty
+		target.stock_qty = qty * flt(obj.conversion_factor)
+		target.amount = qty * flt(obj.rate)
+		target.base_amount = qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	doc = get_mapped_doc(
 		"Purchase Order",
@@ -536,6 +550,19 @@ def make_purchase_receipt(source_name, target_doc=None):
 	doc.set_onload("ignore_price_list", True)
 
 	return doc
+
+
+@frappe.whitelist()
+def get_used_receipt_plan(purchase_order):
+	receipt_plans = frappe.get_all(
+		"Purchase Receipt Item",
+		filters={
+			"purchase_order": purchase_order,
+			"docstatus": ["!=", 2],
+		},
+		pluck="receipt_plan",
+	)
+	return receipt_plans
 
 
 @frappe.whitelist()
