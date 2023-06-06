@@ -29,9 +29,6 @@ class BankTransaction(StatusUpdater):
 			self.update_allocations()
 			self._saving_flag = False
 
-		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
-			self.update_automatch_bank_party_mapper()
-
 	def on_cancel(self):
 		self.clear_linked_payment_entries(for_cancel=True)
 		self.set_status(update=True)
@@ -167,33 +164,10 @@ class BankTransaction(StatusUpdater):
 		).match()
 
 		if result:
-			party_type, party, mapper = result
-			to_update = {"party_type": party_type, "party": party}
-
-			if mapper and mapper.get("mapper_name"):
-				# Transaction matched with an existing Bank party Mapper record
-				to_update["bank_party_mapper"] = mapper.get("mapper_name")
-			elif mapper:
-				# Make new Mapper record to remember match
-				mapper_doc = frappe.get_doc(
-					{"doctype": "Bank Party Mapper", "party_type": party_type, "party": party}
-				)
-				mapper_doc.update(mapper)
-				mapper_doc.insert()
-				to_update["bank_party_mapper"] = mapper_doc.name
-
-			frappe.db.set_value("Bank Transaction", self.name, field=to_update)
-
-	def update_automatch_bank_party_mapper(self):
-		"""Update Bank Party Mapper if Party Type & Party are manually changed after submit."""
-		doc_before_update = self.get_doc_before_save()
-		party_type_changed = self.party_type and (doc_before_update.party_type != self.party_type)
-		party_changed = self.party and (doc_before_update.party != self.party)
-
-		if (party_type_changed or party_changed) and self.bank_party_mapper:
-			mapper_doc = frappe.get_doc("Bank Party Mapper", self.bank_party_mapper)
-			mapper_doc.update({"party_type": self.party_type, "party": self.party})
-			mapper_doc.save()
+			party_type, party = result
+			frappe.db.set_value(
+				"Bank Transaction", self.name, field={"party_type": party_type, "party": party}
+			)
 
 
 @frappe.whitelist()
