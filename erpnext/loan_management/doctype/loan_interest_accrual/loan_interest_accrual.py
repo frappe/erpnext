@@ -289,11 +289,13 @@ def get_last_accrual_date(loan, posting_date):
 	)
 
 	if last_posting_date[0][0]:
-		last_accrual_date = last_posting_date[0][0]
+		last_interest_accrual_date = last_posting_date[0][0]
 		# interest for last interest accrual date is already booked, so add 1 day
 		last_disbursement_date = get_last_disbursement_date(loan, posting_date)
 
-		if last_disbursement_date and getdate(last_disbursement_date) > getdate(last_accrual_date):
+		if last_disbursement_date and getdate(last_disbursement_date) > getdate(
+			last_interest_accrual_date
+		):
 			last_interest_accrual_date = last_disbursement_date
 
 		return add_days(last_interest_accrual_date, 1)
