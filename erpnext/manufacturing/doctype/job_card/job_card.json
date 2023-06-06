@@ -16,6 +16,7 @@
   "production_item",
   "item_name",
   "for_quantity",
+  "serial_and_batch_bundle",
   "serial_no",
   "column_break_12",
   "wip_warehouse",
@@ -391,13 +392,17 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "label": "Serial No"
+   "hidden": 1,
+   "label": "Serial No",
+   "read_only": 1
   },
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -435,6 +440,14 @@
    "fieldname": "expected_end_date",
    "fieldtype": "Datetime",
    "label": "Expected End Date"
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,

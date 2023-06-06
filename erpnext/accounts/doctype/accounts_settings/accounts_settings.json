@@ -21,8 +21,6 @@
   "allow_multi_currency_invoices_against_single_party_account",
   "journals_section",
   "merge_similar_account_heads",
-  "report_setting_section",
-  "use_custom_cash_flow",
   "deferred_accounting_settings_section",
   "book_deferred_entries_based_on",
   "column_break_18",
@@ -175,13 +173,6 @@
    "fieldname": "stale_days",
    "fieldtype": "Int",
    "label": "Stale Days"
-  },
-  {
-   "default": "0",
-   "description": "Only select this if you have set up the Cash Flow Mapper documents",
-   "fieldname": "use_custom_cash_flow",
-   "fieldtype": "Check",
-   "label": "Enable Custom Cash Flow Format"
   },
   {
    "default": "0",
@@ -342,11 +333,6 @@
    "label": "POS"
   },
   {
-   "fieldname": "report_setting_section",
-   "fieldtype": "Section Break",
-   "label": "Report Setting"
-  },
-  {
    "default": "0",
    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
@@ -420,7 +406,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-17 12:20:04.107641",
+ "modified": "2023-06-01 15:42:44.912316",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
