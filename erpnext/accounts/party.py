@@ -647,12 +647,12 @@ def set_taxes(
 	else:
 		args.update(get_party_details(party, party_type))
 
-	if party_type in ("Customer", "Lead"):
+	if party_type in ("Customer", "Lead", "Prospect"):
 		args.update({"tax_type": "Sales"})
 
-		if party_type == "Lead":
+		if party_type in ["Lead", "Prospect"]:
 			args["customer"] = None
-			del args["lead"]
+			del args[frappe.scrub(party_type)]
 	else:
 		args.update({"tax_type": "Purchase"})
 
