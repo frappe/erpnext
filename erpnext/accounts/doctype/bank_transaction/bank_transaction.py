@@ -146,6 +146,29 @@ class BankTransaction(StatusUpdater):
 			payment_entry.payment_document, payment_entry.payment_entry, clearance_date, self
 		)
 
+<<<<<<< HEAD
+=======
+	def auto_set_party(self):
+		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
+
+		if self.party_type and self.party:
+			return
+
+		result = AutoMatchParty(
+			bank_party_account_number=self.bank_party_account_number,
+			bank_party_iban=self.bank_party_iban,
+			bank_party_name=self.bank_party_name,
+			description=self.description,
+			deposit=self.deposit,
+		).match()
+
+		if result:
+			party_type, party = result
+			frappe.db.set_value(
+				"Bank Transaction", self.name, field={"party_type": party_type, "party": party}
+			)
+
+>>>>>>> 752a92bd8b (chore: Remove Bank Party Mapper implementation)
 
 @frappe.whitelist()
 def get_doctypes_for_bank_reconciliation():

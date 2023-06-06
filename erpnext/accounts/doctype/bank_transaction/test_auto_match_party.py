@@ -66,6 +66,10 @@ class TestAutoMatchParty(FrappeTestCase):
 		)
 		self.assertEqual(doc.party_type, "Supplier")
 		self.assertEqual(doc.party, "Microsoft")
+<<<<<<< HEAD
+=======
+		self.assertFalse(doc.bank_party_mapper)
+>>>>>>> 752a92bd8b (chore: Remove Bank Party Mapper implementation)
 
 	def test_skip_match_if_multiple_close_results(self):
 		create_supplier_for_match(supplier_name="Adithya Medical & General Stores")
