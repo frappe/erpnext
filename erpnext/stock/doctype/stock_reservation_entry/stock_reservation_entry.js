@@ -3,6 +3,9 @@
 
 frappe.ui.form.on("Stock Reservation Entry", {
 	refresh(frm) {
-        frm.page.btn_primary.hide()
+		// Hide "Amend" button on cancelled document
+		if (frm.doc.docstatus == 2) {
+			frm.page.btn_primary.hide()
+		}
 	},
 });
