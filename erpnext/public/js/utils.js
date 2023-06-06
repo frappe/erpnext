@@ -114,6 +114,10 @@ $.extend(erpnext.utils, {
 	},
 
 	view_serial_batch_nos: function(frm) {
+		if (!frm.doc?.items) {
+			return;
+		}
+
 		let bundle_ids = frm.doc.items.filter(d => d.serial_and_batch_bundle);
 
 		if (bundle_ids?.length) {

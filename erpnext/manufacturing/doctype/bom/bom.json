@@ -78,6 +78,8 @@
   "show_items",
   "show_operations",
   "web_long_description",
+  "reference_section",
+  "bom_configurator",
   "amended_from",
   "connections_tab"
  ],
@@ -599,6 +601,20 @@
    "fieldname": "operating_cost_per_bom_quantity",
    "fieldtype": "Currency",
    "label": "Operating Cost Per BOM Quantity"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "bom_configurator",
+   "fieldtype": "Link",
+   "label": "BOM Configurator",
+   "no_copy": 1,
+   "options": "BOM Configurator",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -606,7 +622,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-06 12:47:58.514795",
+ "modified": "2023-07-19 13:53:43.903724",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
