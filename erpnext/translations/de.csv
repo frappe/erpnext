@@ -8286,14 +8286,8 @@ Under AMC,Innerhalb des jährlichen Wartungsvertrags,
 Out of AMC,Außerhalb des jährlichen Wartungsvertrags,
 Warranty Period (Days),Garantiefrist (Tage),
 Serial No Details,Details zur Seriennummer,
-<<<<<<< HEAD
-MAT-STE-.YYYY.-,MAT-STE-.JJJJ.-,
-Stock Entry Type,Bestandsbuchungsart,
-Stock Entry (Outward GIT),Bestandsbuchung (Outward GIT),
-=======
 Stock Entry Type,Art der Lagerbuchung,
 Stock Entry (Outward GIT),Lagerbuchung (ausgeh. WIT),
->>>>>>> 1f08330ae1 (fix: labels and translations (#34896))
 Material Consumption for Manufacture,Materialverbrauch für die Herstellung,
 Repack,Umpacken,
 Send to Subcontractor,An Subunternehmer senden,
