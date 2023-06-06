@@ -11,6 +11,7 @@ class StockReservationEntry(Document):
 	def validate(self) -> None:
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
+		self.validate_amended_doc()
 		self.validate_mandatory()
 		self.validate_for_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
@@ -23,6 +24,16 @@ class StockReservationEntry(Document):
 	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
+
+	def validate_amended_doc(self) -> None:
+		"""Raises exception if document is amended."""
+
+		if self.amended_from:
+			frappe.throw(
+				_(
+					f"Cannot amend {self.doctype} {frappe.bold(self.amended_from)}, please create a new one instead."
+				)
+			)
 
 	def validate_mandatory(self) -> None:
 		"""Raises exception if mandatory fields are not set."""
