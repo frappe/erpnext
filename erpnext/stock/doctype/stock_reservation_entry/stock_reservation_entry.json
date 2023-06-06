@@ -23,6 +23,8 @@
   "column_break_o6ex",
   "reserved_qty",
   "delivered_qty",
+  "section_break_v3nl",
+  "sb_entries",
   "section_break_3vb3",
   "company",
   "column_break_jbyr",
@@ -228,6 +230,20 @@
    "label": "Has Batch No",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.sb_entries && doc.sb_entries.length",
+   "fieldname": "section_break_v3nl",
+   "fieldtype": "Section Break",
+   "label": "Reserved Serial and Batch"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sb_entries",
+   "fieldtype": "Table",
+   "label": "Reserved Serial and Batch",
+   "options": "Serial and Batch Entry"
   }
  ],
  "hide_toolbar": 1,
@@ -235,7 +251,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-06 15:47:10.040261",
+ "modified": "2023-06-06 16:53:12.549355",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
