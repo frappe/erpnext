@@ -240,6 +240,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval: doc.has_serial_no || doc.has_batch_no",
    "fieldname": "sb_entries",
    "fieldtype": "Table",
    "label": "Reserved Serial and Batch",
@@ -251,7 +252,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-06 16:53:12.549355",
+ "modified": "2023-06-06 17:43:11.304082",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
