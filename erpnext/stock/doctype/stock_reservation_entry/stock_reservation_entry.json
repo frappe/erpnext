@@ -217,6 +217,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.has_serial_no",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No",
@@ -225,6 +226,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.has_batch_no",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
    "label": "Has Batch No",
@@ -252,7 +254,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-06 17:43:11.304082",
+ "modified": "2023-06-06 17:48:39.314050",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
