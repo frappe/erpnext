@@ -2,7 +2,7 @@
  "actions": [],
  "allow_copy": 1,
  "autoname": "MAT-SRE-.YYYY.-.#####",
- "creation": "2023-03-20 10:45:59.258959",
+ "creation": "2023-06-06 15:20:48.016846",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,6 +10,8 @@
  "field_order": [
   "item_code",
   "warehouse",
+  "has_serial_no",
+  "has_batch_no",
   "column_break_elik",
   "voucher_type",
   "voucher_no",
@@ -36,6 +38,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item Code",
+   "no_copy": 1,
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -51,6 +54,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Warehouse",
+   "no_copy": 1,
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -64,6 +68,7 @@
    "fieldtype": "Select",
    "in_filter": 1,
    "label": "Voucher Type",
+   "no_copy": 1,
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Data",
    "options": "\nSales Order",
@@ -78,6 +83,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Voucher No",
+   "no_copy": 1,
    "oldfieldname": "voucher_no",
    "oldfieldtype": "Data",
    "options": "voucher_type",
@@ -89,6 +95,7 @@
    "fieldname": "voucher_detail_no",
    "fieldtype": "Data",
    "label": "Voucher Detail No",
+   "no_copy": 1,
    "oldfieldname": "voucher_detail_no",
    "oldfieldtype": "Data",
    "print_width": "150px",
@@ -100,6 +107,7 @@
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
+   "no_copy": 1,
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
    "options": "UOM",
@@ -111,6 +119,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
+   "no_copy": 1,
    "options": "Project",
    "read_only": 1
   },
@@ -119,6 +128,7 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "label": "Company",
+   "no_copy": 1,
    "oldfieldname": "company",
    "oldfieldtype": "Data",
    "options": "Company",
@@ -133,6 +143,7 @@
    "in_filter": 1,
    "in_list_view": 1,
    "label": "Reserved Qty",
+   "no_copy": 1,
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
@@ -145,6 +156,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled",
    "read_only": 1
   },
@@ -153,6 +165,7 @@
    "fieldname": "delivered_qty",
    "fieldtype": "Float",
    "label": "Delivered Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -199,6 +212,22 @@
   {
    "fieldname": "column_break_jbyr",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -206,7 +235,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-03-29 18:36:26.752872",
+ "modified": "2023-06-06 15:47:10.040261",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
