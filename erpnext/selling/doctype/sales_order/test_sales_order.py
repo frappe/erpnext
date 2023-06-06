@@ -1772,7 +1772,14 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(pe.references[1].reference_name, so.name)
 		self.assertEqual(pe.references[1].allocated_amount, 300)
 
-	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
 	def test_stock_reservation_against_sales_order(self) -> None:
 		from random import randint, uniform
 
