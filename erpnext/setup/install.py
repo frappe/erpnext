@@ -215,13 +215,39 @@ def hide_workspaces():
 
 
 def create_default_role_profiles():
-	for module in ["Accounts", "Stock", "Manufacturing"]:
-		create_role_profile(module)
+	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		role_profile = frappe.new_doc("Role Profile")
+		role_profile.role_profile = role_profile_name
+		for role in roles:
+			role_profile.append("roles", {"role": role})
+
+		role_profile.insert(ignore_permissions=True)
 
 
-def create_role_profile(module):
-	role_profile = frappe.new_doc("Role Profile")
-	role_profile.role_profile = _("{0} User").format(module)
-	role_profile.append("roles", {"role": module + " User"})
-	role_profile.append("roles", {"role": module + " Manager"})
-	role_profile.insert()
+DEFAULT_ROLE_PROFILES = {
+	"Inventory": [
+		"Stock User",
+		"Stock Manager",
+		"Item Manager",
+	],
+	"Manufacturing": [
+		"Stock User",
+		"Manufacturing User",
+		"Manufacturing Manager",
+	],
+	"Accounts": [
+		"Accounts User",
+		"Accounts Manager",
+	],
+	"Sales": [
+		"Sales User",
+		"Stock User",
+		"Sales Manager",
+	],
+	"Purchase": [
+		"Item Manager",
+		"Stock User",
+		"Purchase User",
+		"Purchase Manager",
+	],
+}
