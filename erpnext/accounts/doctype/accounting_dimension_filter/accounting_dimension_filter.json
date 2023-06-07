@@ -86,7 +86,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "apply_restriction_on_values",
    "fieldtype": "Check",
    "label": "Apply restriction on dimension values"
@@ -94,7 +94,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-07 13:41:36.736175",
+ "modified": "2023-06-07 14:59:41.869117",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",

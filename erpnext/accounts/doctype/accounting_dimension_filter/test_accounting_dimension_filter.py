@@ -64,6 +64,7 @@ def create_accounting_dimension_filter():
 				"accounting_dimension": "Cost Center",
 				"allow_or_restrict": "Allow",
 				"company": "_Test Company",
+				"apply_restriction_on_values": 1,
 				"accounts": [
 					{
 						"applicable_on_account": "Sales - _TC",
@@ -85,6 +86,7 @@ def create_accounting_dimension_filter():
 				"doctype": "Accounting Dimension Filter",
 				"accounting_dimension": "Department",
 				"allow_or_restrict": "Allow",
+				"apply_restriction_on_values": 1,
 				"company": "_Test Company",
 				"accounts": [{"applicable_on_account": "Sales - _TC", "is_mandatory": 1}],
 				"dimensions": [{"accounting_dimension": "Department", "dimension_value": "Accounts - _TC"}],
