@@ -488,7 +488,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			# prompt them to send out an email to the controller users
 			frappe.msgprint(
 				message,
-				title="Credit Limit Crossed",
+				title=_("Credit Limit Crossed"),
 				raise_exception=1,
 				primary_action={
 					"label": "Send Email",
