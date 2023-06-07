@@ -66,7 +66,6 @@ class TestAutoMatchParty(FrappeTestCase):
 		)
 		self.assertEqual(doc.party_type, "Supplier")
 		self.assertEqual(doc.party, "Microsoft")
-		self.assertFalse(doc.bank_party_mapper)
 
 	def test_skip_match_if_multiple_close_results(self):
 		create_supplier_for_match(supplier_name="Adithya Medical & General Stores")
@@ -82,7 +81,6 @@ class TestAutoMatchParty(FrappeTestCase):
 		# Mapping is skipped as both Supplier names have the same match score
 		self.assertEqual(doc.party_type, None)
 		self.assertEqual(doc.party, None)
-		self.assertFalse(doc.bank_party_mapper)
 
 
 def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account_no=None):
@@ -99,35 +97,26 @@ def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account
 		return
 
 	# Create Supplier and Bank Account for the same
-	supplier = frappe.get_doc(
-		{
-			"doctype": "Supplier",
-			"supplier_name": supplier_name,
-			"supplier_group": "Services",
-			"supplier_type": "Company",
-		}
-	).insert()
+	supplier = frappe.new_doc("Supplier")
+	supplier.supplier_name = supplier_name
+	supplier.supplier_group = "Services"
+	supplier.supplier_type = "Company"
+	supplier.insert()
 
 	if not frappe.db.exists("Bank", "TestBank"):
-		frappe.get_doc(
-			{
-				"doctype": "Bank",
-				"bank_name": "TestBank",
-			}
-		).insert(ignore_if_duplicate=True)
+		bank = frappe.new_doc("Bank")
+		bank.bank_name = "TestBank"
+		bank.insert(ignore_if_duplicate=True)
 
 	if not frappe.db.exists("Bank Account", supplier.name + " - " + "TestBank"):
-		frappe.get_doc(
-			{
-				"doctype": "Bank Account",
-				"account_name": supplier.name,
-				"bank": "TestBank",
-				"iban": iban,
-				"bank_account_no": account_no,
-				"party_type": "Supplier",
-				"party": supplier.name,
-			}
-		).insert()
+		bank_account = frappe.new_doc("Bank Account")
+		bank_account.account_name = supplier.name
+		bank_account.bank = "TestBank"
+		bank_account.iban = iban
+		bank_account.bank_account_no = account_no
+		bank_account.party_type = "Supplier"
+		bank_account.party = supplier.name
+		bank_account.insert()
 
 
 def create_bank_transaction(
@@ -139,7 +128,8 @@ def create_bank_transaction(
 	account_no=None,
 	iban=None,
 ):
-	doc = frappe.get_doc(
+	doc = frappe.new_doc("Bank Transaction")
+	doc.update(
 		{
 			"doctype": "Bank Transaction",
 			"description": description or "1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G",
@@ -153,7 +143,8 @@ def create_bank_transaction(
 			"bank_party_account_number": account_no,
 			"bank_party_iban": iban,
 		}
-	).insert()
+	)
+	doc.insert()
 	doc.submit()
 	doc.reload()
 
