@@ -738,6 +738,7 @@ class SerialBatchCreation:
 			return frappe._dict({})
 
 		doc.save()
+		self.validate_qty(doc)
 
 		if not hasattr(self, "do_not_submit") or not self.do_not_submit:
 			doc.flags.ignore_voucher_validation = True
@@ -766,6 +767,17 @@ class SerialBatchCreation:
 
 		doc.save()
 		return doc
+
+	def validate_qty(self, doc):
+		if doc.type_of_transaction == "Outward":
+			precision = doc.precision("total_qty")
+
+			total_qty = abs(flt(doc.total_qty, precision))
+			required_qty = abs(flt(self.actual_qty, precision))
+
+			if required_qty - total_qty > 0:
+				msg = f"For the item {bold(doc.item_code)}, the Avaliable qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
+				frappe.throw(msg, title=_("Insufficient Stock"))
 
 	def set_auto_serial_batch_entries_for_outward(self):
 		from erpnext.stock.doctype.batch.batch import get_available_batches

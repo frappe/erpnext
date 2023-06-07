@@ -68,6 +68,26 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			}
 		});
 
+		if (this.frm.doc.doctype === 'Stock Entry'
+			&& this.frm.doc.purpose === 'Manufacture') {
+			fields.push({
+				fieldtype: 'Column Break',
+			});
+
+			fields.push({
+				fieldtype: 'Link',
+				fieldname: 'work_order',
+				label: __('For Work Order'),
+				options: 'Work Order',
+				read_only: 1,
+				default: this.frm.doc.work_order,
+			});
+
+			fields.push({
+				fieldtype: 'Section Break',
+			});
+		}
+
 		fields.push({
 			fieldtype: 'Column Break',
 		});
@@ -98,22 +118,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				fieldname: 'scan_batch_no',
 				label: __('Scan Batch No'),
 				onchange: () => this.update_serial_batch_no()
-			});
-		}
-
-		if (this.frm.doc.doctype === 'Stock Entry'
-			&& this.frm.doc.purpose === 'Manufacture') {
-			fields.push({
-				fieldtype: 'Column Break',
-			});
-
-			fields.push({
-				fieldtype: 'Link',
-				fieldname: 'work_order',
-				label: __('For Work Order'),
-				options: 'Work Order',
-				read_only: 1,
-				default: this.frm.doc.work_order,
 			});
 		}
 
