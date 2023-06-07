@@ -68,6 +68,16 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 		frm.refresh_field("dimensions");
 		frm.trigger('setup_filters');
 	},
+	apply_restriction_on_values: function(frm) {
+		/** If restriction on values is not applied, we should set "allow_or_restrict" to "Restrict" with an empty allowed dimension table.
+		 * Hence it's not "restricted" on any value.
+		  */
+		if (!frm.doc.apply_restriction_on_values) {
+			frm.set_value("allow_or_restrict", "Restrict");
+			frm.clear_table("dimensions");
+			frm.refresh_field("dimensions");
+		}
+	}
 });
 
 frappe.ui.form.on('Allowed Dimension', {
