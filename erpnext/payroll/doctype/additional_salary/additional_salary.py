@@ -145,7 +145,6 @@ class AdditionalSalary(Document):
 		return amount_per_day * no_of_days
 
 
-@frappe.whitelist()
 def get_additional_salaries(employee, start_date, end_date, component_type):
 	from frappe.query_builder import Criterion
 
