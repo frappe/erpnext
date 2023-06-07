@@ -166,7 +166,9 @@ class TestPaymentReconciliation(FrappeTestCase):
 	def create_payment_reconciliation(self):
 		pr = frappe.new_doc("Payment Reconciliation")
 		pr.company = self.company
-		pr.party_type = self.party_type or "Customer"
+		pr.party_type = (
+			self.party_type if hasattr(self, "party_type") and self.party_type else "Customer"
+		)
 		pr.party = self.customer
 		pr.receivable_payable_account = get_party_account(pr.party_type, pr.party, pr.company)
 		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
