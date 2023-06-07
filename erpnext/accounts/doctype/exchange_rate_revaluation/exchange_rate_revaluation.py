@@ -12,6 +12,7 @@ from frappe.utils import flt, get_link_to_form
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -169,6 +170,15 @@ class ExchangeRateRevaluation(Document):
 					.orderby(gle.account)
 					.run(as_dict=True)
 				)
+
+				# round off balance based on currency precision
+				currency_precision = get_currency_precision()
+				for acc in account_details:
+					acc.balance_in_account_currency = flt(acc.balance_in_account_currency, currency_precision)
+					acc.balance = flt(acc.balance, currency_precision)
+					acc.zero_balance = (
+						True if (acc.balance == 0 or acc.balance_in_account_currency == 0) else False
+					)
 
 		return account_details
 
