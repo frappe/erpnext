@@ -11,9 +11,12 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.doctype.item.test_item import create_item
+
+test_dependencies = ["Item"]
 
 
 class TestPaymentReconciliation(FrappeTestCase):
@@ -163,7 +166,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 	def create_payment_reconciliation(self):
 		pr = frappe.new_doc("Payment Reconciliation")
 		pr.company = self.company
-		pr.party_type = "Customer"
+		pr.party_type = self.party_type or "Customer"
 		pr.party = self.customer
 		pr.receivable_payable_account = get_party_account(pr.party_type, pr.party, pr.company)
 		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
@@ -889,6 +892,42 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		self.assertEqual(pr.allocation[0].allocated_amount, 85)
 		self.assertEqual(pr.allocation[0].difference_amount, 0)
+
+	def test_reconciliation_purchase_invoice_against_return(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD", currency="USD", conversion_rate=50
+		).submit()
+
+		pi_return = frappe.get_doc(pi.as_dict())
+		pi_return.name = None
+		pi_return.docstatus = 0
+		pi_return.is_return = 1
+		pi_return.conversion_rate = 80
+		pi_return.items[0].qty = -pi_return.items[0].qty
+		pi_return.submit()
+
+		self.company = "_Test Company"
+		self.party_type = "Supplier"
+		self.customer = "_Test Supplier USD"
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+
+		invoices = []
+		payments = []
+		for invoice in pr.invoices:
+			if invoice.invoice_number == pi.name:
+				invoices.append(invoice.as_dict())
+				break
+		for payment in pr.payments:
+			if payment.reference_name == pi_return.name:
+				payments.append(payment.as_dict())
+				break
+
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Should not raise frappe.exceptions.ValidationError: Total Debit must be equal to Total Credit.
+		pr.reconcile()
 
 
 def make_customer(customer_name, currency=None):
