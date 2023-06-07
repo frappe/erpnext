@@ -8,7 +8,6 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.utils import cint
 
-from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 
@@ -23,10 +22,10 @@ def after_install():
 	set_single_defaults()
 	create_print_setting_custom_fields()
 	add_all_roles_to("Administrator")
-	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
 	create_default_energy_point_rules()
 	create_incoterms()
+	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
@@ -114,13 +113,6 @@ def create_print_setting_custom_fields():
 			]
 		}
 	)
-
-
-def create_default_cash_flow_mapper_templates():
-	for mapper in DEFAULT_MAPPERS:
-		if not frappe.db.exists("Cash Flow Mapper", mapper["section_name"]):
-			doc = frappe.get_doc(mapper)
-			doc.insert(ignore_permissions=True)
 
 
 def create_default_success_action():
@@ -211,3 +203,42 @@ def setup_log_settings():
 def hide_workspaces():
 	for ws in ["Integration", "Settings"]:
 		frappe.db.set_value("Workspace", ws, "public", 0)
+
+
+def create_default_role_profiles():
+	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		role_profile = frappe.new_doc("Role Profile")
+		role_profile.role_profile = role_profile_name
+		for role in roles:
+			role_profile.append("roles", {"role": role})
+
+		role_profile.insert(ignore_permissions=True)
+
+
+DEFAULT_ROLE_PROFILES = {
+	"Inventory": [
+		"Stock User",
+		"Stock Manager",
+		"Item Manager",
+	],
+	"Manufacturing": [
+		"Stock User",
+		"Manufacturing User",
+		"Manufacturing Manager",
+	],
+	"Accounts": [
+		"Accounts User",
+		"Accounts Manager",
+	],
+	"Sales": [
+		"Sales User",
+		"Stock User",
+		"Sales Manager",
+	],
+	"Purchase": [
+		"Item Manager",
+		"Stock User",
+		"Purchase User",
+		"Purchase Manager",
+	],
+}

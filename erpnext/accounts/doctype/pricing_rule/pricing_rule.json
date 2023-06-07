@@ -469,7 +469,7 @@
    "options": "UOM"
   },
   {
-   "description": "If rate is zero them item will be treated as \"Free Item\"",
+   "description": "If rate is zero then item will be treated as \"Free Item\"",
    "fieldname": "free_item_rate",
    "fieldtype": "Currency",
    "label": "Free Item Rate"

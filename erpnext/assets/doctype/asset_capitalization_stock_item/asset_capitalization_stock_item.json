@@ -17,8 +17,9 @@
   "valuation_rate",
   "amount",
   "batch_and_serial_no_section",
-  "batch_no",
+  "serial_and_batch_bundle",
   "column_break_13",
+  "batch_no",
   "serial_no",
   "accounting_dimensions_section",
   "cost_center",
@@ -41,7 +42,10 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "no_copy": 1,
+   "options": "Batch",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "section_break_6",
@@ -100,7 +104,10 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "label": "Serial No"
+   "hidden": 1,
+   "label": "Serial No",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "item_code",
@@ -139,12 +146,20 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-08 15:56:20.230548",
+ "modified": "2023-04-06 01:10:17.947952",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Stock Item",
@@ -152,5 +167,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

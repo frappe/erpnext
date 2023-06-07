@@ -5,6 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import get_stock_balance
 
@@ -12,7 +13,7 @@ from erpnext.stock.utils import get_stock_balance
 class TestStockReservationEntry(FrappeTestCase):
 	def setUp(self) -> None:
 		self.items = create_items()
-		create_material_receipts(self.items)
+		create_material_receipt(self.items)
 
 	def tearDown(self) -> None:
 		return super().tearDown()
@@ -269,18 +270,36 @@ def create_items() -> dict:
 	return items
 
 
-def create_material_receipts(
+def create_material_receipt(
 	items: dict, warehouse: str = "_Test Warehouse - _TC", qty: float = 100
-) -> None:
+) -> StockEntry:
+	se = frappe.new_doc("Stock Entry")
+	se.purpose = "Material Receipt"
+	se.company = "_Test Company"
+	cost_center = frappe.get_value("Company", se.company, "cost_center")
+	expense_account = frappe.get_value("Company", se.company, "stock_adjustment_account")
+
 	for item in items.values():
-		if item.is_stock_item:
-			make_stock_entry(
-				item_code=item.item_code,
-				qty=qty,
-				to_warehouse=warehouse,
-				rate=item.valuation_rate,
-				purpose="Material Receipt",
-			)
+		se.append(
+			"items",
+			{
+				"item_code": item.item_code,
+				"t_warehouse": warehouse,
+				"qty": qty,
+				"basic_rate": item.valuation_rate or 100,
+				"conversion_factor": 1.0,
+				"transfer_qty": qty,
+				"cost_center": cost_center,
+				"expense_account": expense_account,
+			},
+		)
+
+	se.set_stock_entry_type()
+	se.insert()
+	se.submit()
+	se.reload()
+
+	return se
 
 
 def cancel_all_stock_reservation_entries() -> None:
