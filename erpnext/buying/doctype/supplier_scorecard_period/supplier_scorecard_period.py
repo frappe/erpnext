@@ -99,7 +99,6 @@ def import_string_path(path):
 	return mod
 
 
-@frappe.whitelist()
 def make_supplier_scorecard(source_name, target_doc=None):
 	def update_criteria_fields(obj, target, source_parent):
 		target.max_score, target.formula = frappe.db.get_value(

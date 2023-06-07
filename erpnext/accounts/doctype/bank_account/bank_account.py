@@ -70,7 +70,6 @@ def make_bank_account(doctype, docname):
 	return doc
 
 
-@frappe.whitelist()
 def get_party_bank_account(party_type, party):
 	return frappe.db.get_value(party_type, party, "default_bank_account")
 
