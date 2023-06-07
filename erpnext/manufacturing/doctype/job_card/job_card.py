@@ -87,6 +87,12 @@ class JobCard(Document):
 			frappe.db.get_value("Work Order Operation", self.operation_id, "completed_qty")
 		)
 
+		over_production_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+
+		wo_qty = wo_qty + (wo_qty * over_production_percentage / 100)
+
 		job_card_qty = frappe.get_all(
 			"Job Card",
 			fields=["sum(for_quantity)"],
@@ -101,8 +107,17 @@ class JobCard(Document):
 		job_card_qty = flt(job_card_qty[0][0]) if job_card_qty else 0
 
 		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
-			msg = f"""Job Card quantity cannot be greater than
-				Work Order quantity for the operation {self.operation}"""
+			form_link = get_link_to_form("Manufacturing Settings", "Manufacturing Settings")
+
+			msg = f"""
+				Qty To Manufacture in the job card
+				cannot be greater than Qty To Manufacture in the
+				work order for the operation {bold(self.operation)}.
+				<br><br><b>Solution: </b> Either you can reduce the
+				Qty To Manufacture in the job card or set the
+				'Overproduction Percentage For Work Order'
+				in the {form_link}."""
+
 			frappe.throw(_(msg), title=_("Extra Job Card Quantity"))
 
 	def set_sub_operations(self):
@@ -547,6 +562,7 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, time_in_mins, wo):
+		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
@@ -572,6 +588,7 @@ class JobCard(Document):
 				if data.get("workstation") != self.workstation:
 					# workstations can change in a job card
 					data.workstation = self.workstation
+					data.hour_rate = flt(workstation_hour_rate)
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
@@ -636,23 +653,19 @@ class JobCard(Document):
 					exc=JobCardOverTransferError,
 				)
 
-		job_card_items_transferred_qty = _get_job_card_items_transferred_qty(ste_doc)
+		job_card_items_transferred_qty = _get_job_card_items_transferred_qty(ste_doc) or {}
+		allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 
-		if job_card_items_transferred_qty:
-			allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
+		for row in ste_doc.items:
+			if not row.job_card_item:
+				continue
 
-			for row in ste_doc.items:
-				if not row.job_card_item:
-					continue
+			transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item, 0.0))
 
-				transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item))
+			if not allow_excess:
+				_validate_over_transfer(row, transferred_qty)
 
-				if not allow_excess:
-					_validate_over_transfer(row, transferred_qty)
-
-				frappe.db.set_value(
-					"Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty)
-				)
+			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
 	def set_transferred_qty(self, update_status=False):
 		"Set total FG Qty in Job Card for which RM was transferred."
@@ -713,7 +726,7 @@ class JobCard(Document):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 
 		if self.docstatus < 2:
-			if self.for_quantity <= self.transferred_qty:
+			if flt(self.for_quantity) <= flt(self.transferred_qty):
 				self.status = "Material Transferred"
 
 			if self.time_logs:

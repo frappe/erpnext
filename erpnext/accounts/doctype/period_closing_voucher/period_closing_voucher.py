@@ -44,6 +44,7 @@ class PeriodClosingVoucher(AccountsController):
 				voucher_type="Period Closing Voucher",
 				voucher_no=self.name,
 				queue="long",
+				enqueue_after_commit=True,
 			)
 			frappe.msgprint(
 				_("The GL Entries will be cancelled in the background, it can take a few minutes."), alert=True

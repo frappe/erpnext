@@ -147,6 +147,8 @@ class AssetRepair(AccountsController):
 		)
 
 		for stock_item in self.get("stock_items"):
+			self.validate_serial_no(stock_item)
+
 			stock_entry.append(
 				"items",
 				{
@@ -154,7 +156,7 @@ class AssetRepair(AccountsController):
 					"item_code": stock_item.item_code,
 					"qty": stock_item.consumed_quantity,
 					"basic_rate": stock_item.valuation_rate,
-					"serial_no": stock_item.serial_no,
+					"serial_no": stock_item.serial_and_batch_bundle,
 					"cost_center": self.cost_center,
 					"project": self.project,
 				},
@@ -164,6 +166,23 @@ class AssetRepair(AccountsController):
 		stock_entry.submit()
 
 		self.db_set("stock_entry", stock_entry.name)
+
+	def validate_serial_no(self, stock_item):
+		if not stock_item.serial_and_batch_bundle and frappe.get_cached_value(
+			"Item", stock_item.item_code, "has_serial_no"
+		):
+			msg = f"Serial No Bundle is mandatory for Item {stock_item.item_code}"
+			frappe.throw(msg, title=_("Missing Serial No Bundle"))
+
+		if stock_item.serial_and_batch_bundle:
+			values_to_update = {
+				"type_of_transaction": "Outward",
+				"voucher_type": "Stock Entry",
+			}
+
+			frappe.db.set_value(
+				"Serial and Batch Bundle", stock_item.serial_and_batch_bundle, values_to_update
+			)
 
 	def increase_stock_quantity(self):
 		if self.stock_entry:

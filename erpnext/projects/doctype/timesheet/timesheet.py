@@ -374,6 +374,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 	billing_rate = billing_amount / hours
 
 	target.company = timesheet.company
+	target.project = timesheet.parent_project
 	if customer:
 		target.customer = customer
 

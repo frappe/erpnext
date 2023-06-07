@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.desk.form.load import get_attachments
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
@@ -95,6 +96,12 @@ class RepostItemValuation(Document):
 
 		self.allow_negative_stock = 1
 
+	def on_cancel(self):
+		self.clear_attachment()
+
+	def on_trash(self):
+		self.clear_attachment()
+
 	def set_company(self):
 		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
@@ -109,6 +116,14 @@ class RepostItemValuation(Document):
 			self.status = status
 		if write:
 			self.db_set("status", self.status)
+
+	def clear_attachment(self):
+		if attachments := get_attachments(self.doctype, self.name):
+			attachment = attachments[0]
+			frappe.delete_doc("File", attachment.name)
+
+		if self.reposting_data_file:
+			self.db_set("reposting_data_file", None)
 
 	def on_submit(self):
 		"""During tests reposts are executed immediately.
@@ -300,9 +315,7 @@ def _get_directly_dependent_vouchers(doc):
 
 
 def notify_error_to_stock_managers(doc, traceback):
-	recipients = get_users_with_role("Stock Manager")
-	if not recipients:
-		recipients = get_users_with_role("System Manager")
+	recipients = get_recipients()
 
 	subject = _("Error while reposting item valuation")
 	message = (
@@ -317,6 +330,17 @@ def notify_error_to_stock_managers(doc, traceback):
 		)
 	)
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+
+
+def get_recipients():
+	role = (
+		frappe.db.get_single_value("Stock Reposting Settings", "notify_reposting_error_to_role")
+		or "Stock Manager"
+	)
+
+	recipients = get_users_with_role(role)
+
+	return recipients
 
 
 def repost_entries():
@@ -344,7 +368,7 @@ def get_repost_item_valuation_entries():
 	return frappe.db.sql(
 		""" SELECT name from `tabRepost Item Valuation`
 		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
-		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
+		ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc
 	""",
 		now(),
 		as_dict=1,

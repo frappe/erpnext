@@ -50,13 +50,15 @@ class AccountingDimension(Document):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
-			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self, queue="long")
+			frappe.enqueue(
+				make_dimension_in_accounting_doctypes, doc=self, queue="long", enqueue_after_commit=True
+			)
 
 	def on_trash(self):
 		if frappe.flags.in_test:
 			delete_accounting_dimension(doc=self)
 		else:
-			frappe.enqueue(delete_accounting_dimension, doc=self, queue="long")
+			frappe.enqueue(delete_accounting_dimension, doc=self, queue="long", enqueue_after_commit=True)
 
 	def set_fieldname_and_label(self):
 		if not self.label:

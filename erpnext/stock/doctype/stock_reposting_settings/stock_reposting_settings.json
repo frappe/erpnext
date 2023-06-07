@@ -12,7 +12,9 @@
   "start_time",
   "end_time",
   "limits_dont_apply_on",
-  "item_based_reposting"
+  "item_based_reposting",
+  "errors_notification_section",
+  "notify_reposting_error_to_role"
  ],
  "fields": [
   {
@@ -52,12 +54,23 @@
    "fieldname": "item_based_reposting",
    "fieldtype": "Check",
    "label": "Use Item based reposting"
+  },
+  {
+   "fieldname": "notify_reposting_error_to_role",
+   "fieldtype": "Link",
+   "label": "Notify Reposting Error to Role",
+   "options": "Role"
+  },
+  {
+   "fieldname": "errors_notification_section",
+   "fieldtype": "Section Break",
+   "label": "Errors Notification"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-02 01:22:45.155841",
+ "modified": "2023-05-04 16:14:29.080697",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
@@ -76,5 +89,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

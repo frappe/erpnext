@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
-from frappe.utils.background_jobs import enqueue, is_job_queued
+from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -184,6 +184,8 @@ class POSInvoiceMergeLog(Document):
 					item.base_amount = item.base_net_amount
 					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
+					if item.serial_and_batch_bundle:
+						si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
 					items.append(si_item)
 
 			for tax in doc.get("taxes"):
@@ -385,7 +387,7 @@ def split_invoices(invoices):
 	]
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
-			if not item.serial_no:
+			if not item.serial_no and not item.serial_and_batch_bundle:
 				continue
 
 			return_against_is_added = any(
@@ -483,15 +485,15 @@ def enqueue_job(job, **kwargs):
 
 	closing_entry = kwargs.get("closing_entry") or {}
 
-	job_name = closing_entry.get("name")
-	if not is_job_queued(job_name):
+	job_id = "pos_invoice_merge::" + str(closing_entry.get("name"))
+	if not is_job_enqueued(job_id):
 		enqueue(
 			job,
 			**kwargs,
 			queue="long",
 			timeout=10000,
 			event="processing_merge_logs",
-			job_name=job_name,
+			job_id=job_id,
 			now=frappe.conf.developer_mode or frappe.flags.in_test
 		)
 
