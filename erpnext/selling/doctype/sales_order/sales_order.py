@@ -3,6 +3,7 @@
 
 
 import json
+from collections import Counter, defaultdict
 
 import frappe
 import frappe.utils
@@ -1450,36 +1451,66 @@ def create_pick_list(source_name, target_doc=None):
 			and not is_product_bundle(item.item_code)
 		)
 
-	doc = get_mapped_doc(
-		"Sales Order",
-		source_name,
-		{
-			"Sales Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
-			"Sales Order Item": {
-				"doctype": "Pick List Item",
-				"field_map": {"parent": "sales_order", "name": "sales_order_item"},
-				"postprocess": update_item_quantity,
-				"condition": should_pick_order_item,
-			},
-			"Packed Item": {
-				"doctype": "Pick List Item",
-				"field_map": {
-					"parent": "sales_order",
-					"name": "sales_order_item",
-					"parent_detail_docname": "product_bundle_item",
+	def map_doc(parent_warehouse=None, items=None):
+		doc = get_mapped_doc(
+			"Sales Order",
+			source_name,
+			{
+				"Sales Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
+				"Sales Order Item": {
+					"doctype": "Pick List Item",
+					"field_map": {"parent": "sales_order", "name": "sales_order_item"},
+					"postprocess": update_item_quantity,
+					"condition": should_pick_order_item,
 				},
-				"field_no_map": ["picked_qty"],
-				"postprocess": update_packed_item_qty,
+				"Packed Item": {
+					"doctype": "Pick List Item",
+					"field_map": {
+						"parent": "sales_order",
+						"name": "sales_order_item",
+						"parent_detail_docname": "product_bundle_item",
+					},
+					"field_no_map": ["picked_qty"],
+					"postprocess": update_packed_item_qty,
+				},
 			},
-		},
-		target_doc,
+			target_doc,
+		)
+
+		if items:
+			filter(lambda d: d.sales_order_item in items, doc.locations)
+
+		doc.parent_warehouse = parent_warehouse
+		doc.purpose = "Delivery"
+
+		doc.set_item_locations()
+
+		return doc
+
+	so_item_by_warehouse = defaultdict(list)
+	for name, warehouse in frappe.get_all(
+		"Sales Order Item",
+		{"parenttype": "Sales Order", "parentfield": "items", "parent": source_name},
+		["name", "warehouse"],
+		as_list=True,
+	):
+		so_item_by_warehouse[warehouse].append(name)
+
+	warehouses_is_group = frappe.get_all(
+		"Warehouse", {"name": ["IN", so_item_by_warehouse.keys()]}, ["is_group"], pluck="is_group"
 	)
+	if len(Counter(warehouses_is_group)) > 1:
+		frappe.throw(_("All items must be a group warehouse or a non-group warehouse."))
 
-	doc.purpose = "Delivery"
+	if len(warehouses_is_group) > 1 and warehouses_is_group[0]:
+		docs = []
+		for warehouse, items in so_item_by_warehouse.items():
+			docs.append(map_doc(warehouse, items).save())
 
-	doc.set_item_locations()
+		frappe.msgprint(_("Pick List(s) Created!"))
+		return docs
 
-	return doc
+	return map_doc()
 
 
 def update_produced_qty_in_so_item(sales_order, sales_order_item):

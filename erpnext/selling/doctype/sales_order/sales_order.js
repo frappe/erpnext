@@ -441,10 +441,18 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	create_pick_list() {
-		frappe.model.open_mapped_doc({
+		frappe.call({
 			method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
-			frm: this.frm
-		})
+			args: {
+				source_name: this.frm.doc.name,
+			},
+			callback({ message }) {
+				if (!$.isArray(message)) {
+					frappe.model.sync(message);
+					frappe.set_route("Form", message.doctype, message.name);
+				}
+			}
+		});
 	}
 
 	make_work_order() {
