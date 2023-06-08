@@ -876,6 +876,7 @@ def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 		],
 		pluck="name",
 		limit=1,
+		order_by="is_shipping_address DESC",
 	)
 
 	return shipping_addresses[0] if shipping_addresses else None
@@ -932,7 +933,7 @@ def get_default_contact(doctype: str, name: str) -> Optional[str]:
 		],
 		pluck="name",
 		limit=1,
-		order_by="is_billing_contact DESC",
+		order_by="is_primary_contact DESC, is_billing_contact DESC",
 	)
 
 	return contacts[0] if contacts else None
