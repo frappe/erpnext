@@ -9,9 +9,9 @@ from frappe.core.doctype.user.user import share_doc_with_approver
 
 
 class TravelRequest(Document):
-	# def autoname(self):
-	# 	self.name =  make_autoname(self.employee + "/" +(str(self.date)) + "/" + ".##")
-	# 	self.requition_no = make_autoname(self.employee_name + "-.##")
+	def autoname(self):
+		self.name =  make_autoname(self.employee + "/" +(str(self.date)) + "/" + ".##")
+		self.requition_no = make_autoname(self.employee_name + "-.##")
         
 	def validate(self):
 		validate_active_employee(self.employee)

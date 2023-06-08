@@ -2,6 +2,7 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
+ "autoname": "naming_series:",
  "creation": "2013-03-07 09:04:18",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -9,6 +10,7 @@
  "engine": "InnoDB",
  "field_order": [
   "basic_information",
+  "naming_series",
   "employee",
   "employee_name",
   "employee_code",
@@ -986,6 +988,13 @@
    "fieldname": "attach_accidental_insurance",
    "fieldtype": "Attach",
    "label": "Attach Accidental Insurance"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "HR-EMP-"
   }
  ],
  "hide_toolbar": 1,
@@ -993,7 +1002,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-05-24 18:52:15.116404",
+ "modified": "2023-06-08 11:05:57.790672",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
