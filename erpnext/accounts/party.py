@@ -853,6 +853,16 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 
 def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
+	"""
+	Returns an Address name (best guess) for the given doctype and name for which `address_type == 'Shipping'` is true.
+	and/or `is_shipping_address = 1`.
+
+	It returns an empty string if there is no matching record.
+
+	:param doctype: Party Doctype
+	:param name: Party name
+	:return: String
+	"""
 	shipping_addresses = frappe.get_list(
 		"Address",
 		filters=[
@@ -901,6 +911,15 @@ def get_partywise_advanced_payment_amount(
 
 
 def get_default_contact(doctype: str, name: str) -> Optional[str]:
+	"""
+	Returns contact name only if there is a primary contact for given doctype and name.
+
+	Else returns None
+
+	:param doctype: Party Doctype
+	:param name: Party name
+	:return: String
+	"""
 	contacts = frappe.get_list(
 		"Contact",
 		filters=[
