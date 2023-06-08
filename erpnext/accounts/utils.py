@@ -625,6 +625,7 @@ def update_reference_in_payment_entry(
 		if not d.exchange_gain_loss
 		else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.exchange_gain_loss,  # only populated from invoice in case of advance allocation
+		"account": d.account,
 	}
 
 	if d.voucher_detail_no:

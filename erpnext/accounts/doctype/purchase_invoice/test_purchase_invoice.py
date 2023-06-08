@@ -1662,22 +1662,66 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
+	def test_advance_entries_as_liability(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from erpnext.accounts.party import get_party_account
+
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{"book_advance_payments_as_liability": 1, "default_advance_account": "Debtors - _TC"},
+		)
+		pe = create_payment_entry(
+			company="_Test Company",
+			payment_type="Pay",
+			party_type="Supplier",
+			party="_Test Supplier",
+			paid_from="Cash - _TC",
+			paid_to=get_party_account("Supplier", "_Test Supplier", "_Test Company", is_advance=True),
+			paid_amount=1000,
+		)
+		pe.submit()
+
+		pi = make_purchase_invoice(
+			company="_Test Company", customer="_Test Supplier", do_not_save=True, do_not_submit=True
+		)
+		pi.base_grand_total = 100
+		pi.grand_total = 100
+		pi.set_advances()
+		self.assertEqual(pi.advances[0].allocated_amount, 100)
+		pi.advances[0].allocated_amount = 50
+		pi.advances = [pi.advances[0]]
+		pi.save()
+		pi.submit()
+		expected_gle = [
+			["Creditors - _TC", 50, 100],
+			["Debtors - _TC", 0.0, 50],
+			["Stock Received But Not Billed - _TC", 100, 0.0],
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		self.assertEqual(pi.outstanding_amount, 200)
+
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
-	gl_entries = frappe.db.sql(
-		"""select account, debit, credit, posting_date
-		from `tabGL Entry`
-		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
-		order by posting_date asc, account asc""",
-		(voucher_no, posting_date),
-		as_dict=1,
+	gl = frappe.qb.DocType("GL Entry")
+	q = (
+		frappe.qb.from_(gl)
+		.select(gl.account, gl.debit, gl.credit, gl.posting_date)
+		.where(
+			(gl.voucher_type == "Sales Invoice")
+			& (gl.voucher_no == voucher_no)
+			& (gl.posting_date >= posting_date)
+			& (gl.is_cancelled == 0)
+		)
+		.orderby(gl.posting_date, gl.account)
 	)
+	gl_entries = q.run(as_dict=True)
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
-		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 
 def create_tax_witholding_category(category_name, company, account):
