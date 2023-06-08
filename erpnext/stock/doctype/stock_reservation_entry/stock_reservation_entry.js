@@ -7,5 +7,25 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		if (frm.doc.docstatus == 2) {
 			frm.page.btn_primary.hide()
 		}
+
+		frm.trigger("toggle_read_only_fields");
+	},
+
+	has_serial_no(frm) {
+		frm.trigger("toggle_read_only_fields");
+	},
+
+	has_batch_no(frm) {
+		frm.trigger("toggle_read_only_fields");
+	},
+
+	toggle_read_only_fields(frm) {
+		frm.fields_dict.sb_entries.grid.update_docfield_property(
+			"serial_no", "read_only", !frm.doc.has_serial_no
+		);
+
+		frm.fields_dict.sb_entries.grid.update_docfield_property(
+			"batch_no", "read_only", !frm.doc.has_batch_no
+		);
 	},
 });
