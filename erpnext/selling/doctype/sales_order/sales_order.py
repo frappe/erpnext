@@ -1444,12 +1444,17 @@ def create_pick_list(source_name, target_doc=None):
 				target.qty = target.stock_qty = qty * pending_percent
 				return
 
-	def should_pick_order_item(item) -> bool:
-		return (
-			abs(item.delivered_qty) < abs(item.qty)
-			and item.delivered_by_supplier != 1
-			and not is_product_bundle(item.item_code)
-		)
+	def should_pick_order_item(item, items=None) -> bool:
+		conditions = [
+			abs(item.delivered_qty) < abs(item.qty),
+			item.delivered_by_supplier != 1,
+			not is_product_bundle(item.item_code),
+		]
+
+		if isinstance(items, list):
+			conditions.append(item.name in items)
+
+		return all(conditions)
 
 	def map_doc(parent_warehouse=None, items=None):
 		doc = get_mapped_doc(
@@ -1461,7 +1466,7 @@ def create_pick_list(source_name, target_doc=None):
 					"doctype": "Pick List Item",
 					"field_map": {"parent": "sales_order", "name": "sales_order_item"},
 					"postprocess": update_item_quantity,
-					"condition": should_pick_order_item,
+					"condition": lambda item: should_pick_order_item(item, items),
 				},
 				"Packed Item": {
 					"doctype": "Pick List Item",
@@ -1476,9 +1481,6 @@ def create_pick_list(source_name, target_doc=None):
 			},
 			target_doc,
 		)
-
-		if items:
-			filter(lambda d: d.sales_order_item in items, doc.locations)
 
 		doc.parent_warehouse = parent_warehouse
 		doc.purpose = "Delivery"
