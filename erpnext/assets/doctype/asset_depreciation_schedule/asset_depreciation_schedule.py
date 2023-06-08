@@ -280,7 +280,7 @@ class AssetDepreciationSchedule(Document):
 				from_date = add_days(
 					asset_doc.available_for_use_date, -1
 				)  # needed to calc depr amount for available_for_use_date too
-				depreciation_amount, days, months = self.get_pro_rata_amt(
+				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
 					depreciation_amount,
 					from_date,
@@ -300,7 +300,7 @@ class AssetDepreciationSchedule(Document):
 						getdate(add_days(asset_doc.available_for_use_date, -1)),
 						(self.number_of_depreciations_booked * row.frequency_of_depreciation),
 					)
-				depreciation_amount, days, months = self.get_pro_rata_amt(
+				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
 					depreciation_amount,
 					from_date,
