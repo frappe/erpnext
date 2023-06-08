@@ -36,3 +36,14 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 		}
 	};
 };
+
+cur_frm.fields_dict['accounts'].grid.get_field('advance_account').get_query = function(doc, cdt, cdn) {
+	var d  = locals[cdt][cdn];
+	return {
+		filters: {
+			"root_type": 'Asset',
+			"company": d.company,
+			"is_group": 0
+		}
+	}
+};

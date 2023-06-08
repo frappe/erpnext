@@ -337,12 +337,12 @@
    "label": "Default Accounts"
   },
   {
-   "description": "Mention if a non-standard receivable account",
-   "fieldname": "accounts",
-   "fieldtype": "Table",
-   "label": "Accounts",
-   "options": "Party Account"
-  },
+    "description": "Mention if non-standard Receivable account",
+    "fieldname": "accounts",
+    "fieldtype": "Table",
+    "label": "Accounts",
+    "options": "Party Account"
+   },
   {
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
@@ -568,7 +568,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-05-29 14:29:17.789578",
+ "modified": "2023-06-05 13:48:46.152659",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

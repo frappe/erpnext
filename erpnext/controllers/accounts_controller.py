@@ -7,9 +7,8 @@ import json
 import frappe
 from frappe import _, bold, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
-from frappe.query_builder.functions import Abs, Sum
 from frappe.query_builder.custom import ConstantColumn
-
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -859,7 +858,6 @@ class AccountsController(TransactionBase):
 				amount = self.get("base_rounded_total") or self.base_grand_total
 			else:
 				amount = self.get("rounded_total") or self.grand_total
-
 			allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
@@ -887,16 +885,18 @@ class AccountsController(TransactionBase):
 			amount_field = "credit_in_account_currency"
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
-			party_account = frappe.db.get_values("Company", {"company_name": self.company}, ["default_receivable_account", "default_advances_received_account"])
+			party_account = [
+				get_party_account(party_type, party=party, company=self.company, is_advance=True)
+			]
 		else:
 			party_type = "Supplier"
 			party = self.supplier
 			amount_field = "debit_in_account_currency"
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
-			party_account = frappe.db.get_values("Company", {"company_name": self.company}, ["default_receivable_account", "default_advances_paid_account"])		
-		
-		party_account = list(party_account[0])
+			party_account = [
+				get_party_account(party_type, party=party, company=self.company, is_advance=True)
+			]
 
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
 
@@ -2144,35 +2144,43 @@ def get_advance_journal_entries(
 	order_list,
 	include_unallocated=True,
 ):
-	journal_entry = frappe.qb.DocType('Journal Entry')
-	journal_acc = frappe.qb.DocType('Journal Entry Account')
-	q = (frappe.qb.from_(journal_entry)
+	journal_entry = frappe.qb.DocType("Journal Entry")
+	journal_acc = frappe.qb.DocType("Journal Entry Account")
+	q = (
+		frappe.qb.from_(journal_entry)
 		.inner_join(journal_acc)
 		.on(journal_entry.name == journal_acc.parent)
 		.select(
-			ConstantColumn('Journal Entry').as_('reference_type'),
-			(journal_entry.name).as_('reference_name'),
-			(journal_entry.remark).as_('remarks'),
-			(journal_acc.debit_in_account_currency if party_type == 'Supplier' else journal_acc.credit_in_account_currency).as_('amount'),
-			(journal_acc.name).as_('reference_row'),
-			(journal_acc.reference_name).as_('against_order'),
-			(journal_acc.exchange_rate)
+			ConstantColumn("Journal Entry").as_("reference_type"),
+			(journal_entry.name).as_("reference_name"),
+			(journal_entry.remark).as_("remarks"),
+			(
+				journal_acc.debit_in_account_currency
+				if party_type == "Supplier"
+				else journal_acc.credit_in_account_currency
+			).as_("amount"),
+			(journal_acc.name).as_("reference_row"),
+			(journal_acc.reference_name).as_("against_order"),
+			(journal_acc.exchange_rate),
 		)
-		.where(journal_acc.account.isin(party_account)
-	 	& (journal_acc.party_type == party_type)
-	 	& (journal_acc.party == party)
-	 	& (journal_acc.is_advance == 'Yes')
-	 	& (journal_entry.docstatus == 1)
-	 	)
-    )
+		.where(
+			journal_acc.account.isin(party_account)
+			& (journal_acc.party_type == party_type)
+			& (journal_acc.party == party)
+			& (journal_acc.is_advance == "Yes")
+			& (journal_entry.docstatus == 1)
+		)
+	)
 	if party_type == "Customer":
 		q = q.where(journal_acc.credit_in_account_currency > 0)
+
+	else:
+		q = q.where(journal_acc.debit_in_account_currency > 0)
 
 	if order_list:
 		q = q.where(journal_acc.reference_type == order_doctype)
 		if include_unallocated:
-			q = q.where(journal_acc.reference_name.isin(order_list)
-			|(journal_acc.reference_name == ''))
+			q = q.where(journal_acc.reference_name.isin(order_list) | (journal_acc.reference_name == ""))
 		else:
 			q = q.where(journal_acc.reference_name.isin(order_list))
 
@@ -2194,69 +2202,119 @@ def get_advance_payment_entries(
 	condition=None,
 ):
 
-	q = build_query(party_type, party, party_account, order_doctype, order_list, include_unallocated, against_all_orders, limit, condition)
+	q = build_query(
+		party_type,
+		party,
+		party_account,
+		order_doctype,
+		order_list,
+		include_unallocated,
+		against_all_orders,
+		limit,
+		condition,
+	)
 
 	payment_entries = q.run(as_dict=True)
 
 	return list(payment_entries)
 
-def build_query(party_type, party, party_account, order_doctype, order_list, include_unallocated, against_all_orders, limit, condition):
-	payment_type = "Receive" if party_type == "Customer" else "Pay"
-	payment_entry = frappe.qb.DocType('Payment Entry')
-	payment_ref = frappe.qb.DocType('Payment Entry Reference')
 
-	q = (frappe.qb.from_(payment_entry)
+def build_query(
+	party_type,
+	party,
+	party_account,
+	order_doctype,
+	order_list,
+	include_unallocated,
+	against_all_orders,
+	limit,
+	condition,
+):
+	payment_type = "Receive" if party_type == "Customer" else "Pay"
+	payment_entry = frappe.qb.DocType("Payment Entry")
+	payment_ref = frappe.qb.DocType("Payment Entry Reference")
+
+	q = (
+		frappe.qb.from_(payment_entry)
 		.select(
-			ConstantColumn('Payment Entry').as_('reference_type'),
-			(payment_entry.name).as_('reference_name'),
+			ConstantColumn("Payment Entry").as_("reference_type"),
+			(payment_entry.name).as_("reference_name"),
 			payment_entry.posting_date,
-			(payment_entry.remarks).as_('remarks')
+			(payment_entry.remarks).as_("remarks"),
 		)
 		.where(payment_entry.payment_type == payment_type)
 		.where(payment_entry.party_type == party_type)
 		.where(payment_entry.party == party)
 		.where(payment_entry.docstatus == 1)
 	)
-	
+
 	if party_type == "Customer":
-		q = q.select(payment_entry.paid_from_account_currency) 
-		q = q.select(payment_entry.paid_from) 
-		q = q.where(payment_entry.paid_from.isin(party_account)) 
+		q = q.select(payment_entry.paid_from_account_currency)
+		q = q.select(payment_entry.paid_from)
+		q = q.where(payment_entry.paid_from.isin(party_account))
 	else:
 		q = q.select(payment_entry.paid_to_account_currency)
 		q = q.select(payment_entry.paid_to)
-		q = q.where(payment_entry.paid_to.isin(party_account)) 
+		q = q.where(payment_entry.paid_to.isin(party_account))
 
 	if payment_type == "Receive":
 		q = q.select(payment_entry.source_exchange_rate)
-	else: 
+	else:
 		q.select(payment_entry.target_exchange_rate)
 
 	if include_unallocated:
-		q = q.select((payment_entry.unallocated_amount).as_('amount'))
-		q = q.where(payment_entry.unallocated_amount>0)
+		q = q.select((payment_entry.unallocated_amount).as_("amount"))
+		q = q.where(payment_entry.unallocated_amount > 0)
 
 		if condition:
 			q = q.where(payment_entry.company == condition["company"])
-			q = q.where(payment_entry.posting_date >= condition["from_payment_date"]) if condition.get("from_payment_date") else q
-			q = q.where(payment_entry.posting_date <= condition["to_payment_date"]) if condition.get("to_payment_date") else q
+			q = (
+				q.where(payment_entry.posting_date >= condition["from_payment_date"])
+				if condition.get("from_payment_date")
+				else q
+			)
+			q = (
+				q.where(payment_entry.posting_date <= condition["to_payment_date"])
+				if condition.get("to_payment_date")
+				else q
+			)
 			if condition.get("get_payments") == True:
-				q = q.where(payment_entry.cost_center == condition["cost_center"]) if condition.get("cost_center") else q
-				q = q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"]) if condition.get("minimum_payment_amount") else q
-				q = q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"]) if condition.get("maximum_payment_amount") else q
+				q = (
+					q.where(payment_entry.cost_center == condition["cost_center"])
+					if condition.get("cost_center")
+					else q
+				)
+				q = (
+					q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"])
+					if condition.get("minimum_payment_amount")
+					else q
+				)
+				q = (
+					q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"])
+					if condition.get("maximum_payment_amount")
+					else q
+				)
 			else:
-				q = q.where(payment_entry.total_debit >= condition["minimum_payment_amount"]) if condition.get("minimum_payment_amount") else q
-				q = q.where(payment_entry.total_debit <= condition["maximum_payment_amount"]) if condition.get("maximum_payment_amount") else q
+				q = (
+					q.where(payment_entry.total_debit >= condition["minimum_payment_amount"])
+					if condition.get("minimum_payment_amount")
+					else q
+				)
+				q = (
+					q.where(payment_entry.total_debit <= condition["maximum_payment_amount"])
+					if condition.get("maximum_payment_amount")
+					else q
+				)
 
 	elif order_list or against_all_orders:
 		q = q.inner_join(payment_ref).on(payment_entry.name == payment_ref.parent)
 		q = q.select(
-			(payment_ref.allocated_amount).as_('amount'),
-			(payment_ref.name).as_('reference_row'),
-			(payment_ref.reference_name).as_('against_order'),
-			payment_ref.reference_doctype == order_doctype
+			(payment_ref.allocated_amount).as_("amount"),
+			(payment_ref.name).as_("reference_row"),
+			(payment_ref.reference_name).as_("against_order"),
+			payment_ref.reference_doctype == order_doctype,
 		)
-		
+
 		if order_list:
 			q = q.where(payment_ref.reference_name.isin(order_list))
 
@@ -2862,9 +2920,12 @@ def validate_regional(doc):
 def validate_einvoice_fields(doc):
 	pass
 
-def make_advance_liability_entry(gl_entries, pe, allocated_amount, invoice, party_type):
+
+def make_advance_liability_entry(
+	gl_entries, pe, allocated_amount, invoice, party_type, references=False
+):
 	pe = frappe.get_doc("Payment Entry", pe)
-	if party_type=="Customer":
+	if party_type == "Customer":
 		invoice = frappe.get_doc("Sales Invoice", invoice)
 		account = pe.paid_from
 		dr_or_cr = "debit"
@@ -2880,53 +2941,55 @@ def make_advance_liability_entry(gl_entries, pe, allocated_amount, invoice, part
 		against = invoice.credit_to
 		party = invoice.supplier
 		voucher_type = "Purchase Invoice"
-	gl_entries.append(invoice.get_gl_dict(
-		{
-			"account": account,
-			"party_type": party_type,
-			"party": party,
-			"due_date": invoice.due_date,
-			"against": against,
-			dr_or_cr: allocated_amount,
-			dr_or_cr + "_in_account_currency": allocated_amount,
-			rev: 0,
-			rev + "_in_account_currency": 0,
-			"against_voucher": invoice.return_against 
-			if cint(invoice.is_return) and invoice.return_against
-			else invoice.name,
-			"against_voucher_type": invoice.doctype,
-			"cost_center": invoice.cost_center,
-			"project": invoice.project,
-			"voucher_type": voucher_type,
-			"voucher_no": invoice.name
-		},
-		invoice.party_account_currency,
-		item=invoice,
-	))
+	gl_entries.append(
+		invoice.get_gl_dict(
+			{
+				"account": account,
+				"party_type": party_type,
+				"party": party,
+				"due_date": invoice.due_date,
+				"against": against,
+				dr_or_cr: allocated_amount,
+				dr_or_cr + "_in_account_currency": allocated_amount,
+				rev: 0,
+				rev + "_in_account_currency": 0,
+				"against_voucher": invoice.return_against
+				if cint(invoice.is_return) and invoice.return_against
+				else invoice.name,
+				"against_voucher_type": invoice.doctype,
+				"cost_center": invoice.cost_center,
+				"project": invoice.project,
+				"voucher_type": voucher_type,
+				"voucher_no": invoice.name,
+			},
+			invoice.party_account_currency,
+			item=invoice,
+		)
+	)
 
-	(dr_or_cr, rev) = ("credit", "debit") if party_type=="Customer" else ("debit", "credit")
-	gl_entries.append(invoice.get_gl_dict(
-		{
-			"account": against,
-			"party_type": party_type,
-			"party": party,
-			"due_date": invoice.due_date,
-			"against": account,
-			dr_or_cr: allocated_amount,
-			dr_or_cr + "_in_account_currency": allocated_amount,
-			rev: 0,
-			rev + "_in_account_currency": 0,
-			"against_voucher": invoice.return_against
-			if cint(invoice.is_return) and invoice.return_against
-			else invoice.name,
-			"against_voucher_type": invoice.doctype,
-			"cost_center": invoice.cost_center,
-			"project": invoice.project,
-			"voucher_type": voucher_type,
-			"voucher_no": invoice.name
-		},
-		invoice.party_account_currency,
-		item=invoice,
-	))
-
-
+	(dr_or_cr, rev) = ("credit", "debit") if party_type == "Customer" else ("debit", "credit")
+	gl_entries.append(
+		invoice.get_gl_dict(
+			{
+				"account": against,
+				"party_type": party_type,
+				"party": party,
+				"due_date": invoice.due_date,
+				"against": account,
+				dr_or_cr: allocated_amount,
+				dr_or_cr + "_in_account_currency": allocated_amount,
+				rev: 0,
+				rev + "_in_account_currency": 0,
+				"against_voucher": invoice.return_against
+				if cint(invoice.is_return) and invoice.return_against
+				else invoice.name,
+				"against_voucher_type": invoice.doctype,
+				"cost_center": invoice.cost_center,
+				"project": invoice.project,
+				"voucher_type": "Payment Entry" if references else voucher_type,
+				"voucher_no": pe.name if references else invoice.name,
+			},
+			invoice.party_account_currency,
+			item=invoice,
+		)
+	)

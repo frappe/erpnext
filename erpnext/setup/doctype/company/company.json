@@ -72,9 +72,8 @@
   "default_finance_book",
   "advance_payments_section",
   "book_advance_payments_as_liability",
-  "default_advances_received_account",
+  "default_advance_account",
   "column_break_cui0",
-  "default_advances_paid_account",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
   "enable_provisional_accounting_for_non_stock_items",
@@ -712,24 +711,16 @@
    "label": "Advance Payments"
   },
   {
-   "depends_on": "eval:doc.book_advance_payments_as_liability",
-   "fieldname": "default_advances_received_account",
-   "fieldtype": "Link",
-   "label": "Default Advances Received Account",
-   "mandatory_depends_on": "book_advance_payments_as_liability",
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:doc.book_advance_payments_as_liability",
-   "fieldname": "default_advances_paid_account",
-   "fieldtype": "Link",
-   "label": "Default Advances Paid Account",
-   "mandatory_depends_on": "book_advance_payments_as_liability",
-   "options": "Account"
-  },
-  {
    "fieldname": "column_break_cui0",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_as_liability",
+   "fieldname": "default_advance_account",
+   "fieldtype": "Link",
+   "label": "Default Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -737,7 +728,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-06-02 13:11:41.939016",
+ "modified": "2023-06-05 14:12:37.946451",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

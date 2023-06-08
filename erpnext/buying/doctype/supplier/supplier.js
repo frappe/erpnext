@@ -18,22 +18,11 @@ frappe.ui.form.on("Supplier", {
 			}
 		});
 
-		frm.set_query('advances_received_account', 'accounts', function (doc, cdt, cdn) {
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
 				filters: {
 					"root_type": 'Asset',
-					"company": d.company,
-					"is_group": 0
-				}
-			}
-		});
-
-		frm.set_query('advances_paid_account', 'accounts', function (doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {
-					"root_type": 'Liability',
 					"company": d.company,
 					"is_group": 0
 				}

@@ -498,30 +498,36 @@ def check_if_advance_entry_modified(args):
 		journal_entry = frappe.qb.DocType("Journal Entry")
 		journal_acc = frappe.qb.DocType("Journal Entry Account")
 
-		q = (frappe.qb.from_(journal_entry)
+		q = (
+			frappe.qb.from_(journal_entry)
 			.innerjoin(journal_acc)
 			.on(journal_entry.name == journal_acc.parent)
 		)
 
-		if args.get("dr_or_cr") == 'debit_in_account_currency':
+		if args.get("dr_or_cr") == "debit_in_account_currency":
 			q = q.select(journal_acc.debit_in_account_currency)
 		else:
 			q = q.select(journal_acc.credit_in_account_currency)
-		
-		q = q.where((journal_acc.account == args.get("account"))
-			&((journal_acc.party_type == args.get("party_type")))
-			&((journal_acc.party == args.get("party")))
-			&((journal_acc.reference_type == None) | (journal_acc.reference_type.isin(['', 'Sales Order', 'Purchase Order'])))
-			&((journal_entry.name == args.get("voucher_no")))
-			&((journal_acc.name == args.get("voucher_detail_no")))
-			&((journal_entry.docstatus == 1))
+
+		q = q.where(
+			(journal_acc.account == args.get("account"))
+			& ((journal_acc.party_type == args.get("party_type")))
+			& ((journal_acc.party == args.get("party")))
+			& (
+				(journal_acc.reference_type == None)
+				| (journal_acc.reference_type.isin(["", "Sales Order", "Purchase Order"]))
+			)
+			& ((journal_entry.name == args.get("voucher_no")))
+			& ((journal_acc.name == args.get("voucher_detail_no")))
+			& ((journal_entry.docstatus == 1))
 		)
 
 	else:
 		payment_entry = frappe.qb.DocType("Payment Entry")
 		payment_ref = frappe.qb.DocType("Payment Entry Reference")
 
-		q = (frappe.qb.from_(payment_entry)
+		q = (
+			frappe.qb.from_(payment_entry)
 			.select(payment_entry.name)
 			.where(payment_entry.name == args.get("voucher_no"))
 			.where(payment_entry.docstatus == 1)
@@ -530,15 +536,16 @@ def check_if_advance_entry_modified(args):
 		)
 
 		if args.voucher_detail_no:
-			q = ( q.inner_join(payment_ref)
+			q = (
+				q.inner_join(payment_ref)
 				.on(payment_entry.name == payment_ref.parent)
 				.where(payment_ref.name == args.get("voucher_detail_no"))
-				.where(payment_ref.reference_doctype.isin(('', 'Sales Order', 'Purchase Order')))
+				.where(payment_ref.reference_doctype.isin(("", "Sales Order", "Purchase Order")))
 				.where(payment_ref.allocated_amount == args.get("unreconciled_amount"))
-			)	
+			)
 		else:
 			q = q.where(payment_entry.unallocated_amount == args.get("unreconciled_amount"))
-		
+
 	ret = q.run(as_dict=True)
 
 	if not ret:
@@ -921,6 +928,7 @@ def get_outstanding_invoices(
 							"outstanding_amount": outstanding_amount,
 							"due_date": d.due_date,
 							"currency": d.currency,
+							"account": d.account,
 						}
 					)
 				)

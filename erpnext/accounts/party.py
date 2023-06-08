@@ -380,9 +380,7 @@ def get_party_account(party_type, party=None, company=None, is_advance=False):
 
 		return frappe.get_cached_value("Company", company, default_account_name)
 
-	advance_payments_as_liability = frappe.db.get_value("Company", {"company_name": company}, "book_advance_payments_as_liability")
-
-	if is_advance and advance_payments_as_liability and party_type in ["Customer", "Supplier"]:
+	if is_advance and party_type in ["Customer", "Supplier"]:
 		return get_party_advance_account(party_type, party, company)
 
 	account = frappe.db.get_value(
@@ -415,9 +413,10 @@ def get_party_account(party_type, party=None, company=None, is_advance=False):
 
 
 def get_party_advance_account(party_type, party, company):
-	account_name = 'advances_received_account' if party_type == 'Customer' else 'advances_paid_account'
 	account = frappe.db.get_value(
-		"Party Account", {"parenttype": party_type, "parent": party, "company": company}, account_name
+		"Party Account",
+		{"parenttype": party_type, "parent": party, "company": company},
+		"advance_account",
 	)
 
 	if not account:
@@ -426,14 +425,15 @@ def get_party_advance_account(party_type, party, company):
 		account = frappe.db.get_value(
 			"Party Account",
 			{"parenttype": party_group_doctype, "parent": group, "company": company},
-			account_name,
+			"advance_account",
 		)
-	
+
 	if not account:
-		account = frappe.get_cached_value("Company", company, "default_" + account_name)
+		account = frappe.get_cached_value("Company", company, "default_advance_account")
 
 	return account
-	
+
+
 @frappe.whitelist()
 def get_party_bank_account(party_type, party):
 	return frappe.db.get_value(

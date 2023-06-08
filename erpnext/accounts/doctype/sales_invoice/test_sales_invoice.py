@@ -3353,14 +3353,16 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
 		"""select account, debit, credit, posting_date
 		from `tabGL Entry`
-		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date >= %s
 		and is_cancelled = 0
 		order by posting_date asc, account asc""",
 		(voucher_no, posting_date),
 		as_dict=1,
+		debug=True,
 	)
 
 	for i, gle in enumerate(gl_entries):
+		print(i, gle)
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)

@@ -34,8 +34,8 @@ frappe.ui.form.on("Customer", {
 				filters: filters
 			}
 		});
-		
-		frm.set_query('advances_received_account', 'accounts', function (doc, cdt, cdn) {
+
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
 				filters: {
@@ -46,16 +46,6 @@ frappe.ui.form.on("Customer", {
 			}
 		});
 
-		frm.set_query('advances_paid_account', 'accounts', function (doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				filters: {
-					"root_type": 'Asset',
-					"company": d.company,
-					"is_group": 0
-				}
-			}
-		});
 
 		if (frm.doc.__islocal == 1) {
 			frm.set_value("represents_company", "");

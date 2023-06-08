@@ -29,22 +29,12 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			};
 		});
 
-		this.frm.set_query('default_advances_received_account', () => {
+		this.frm.set_query('default_advance_account', () => {
 			return {
 				filters: {
 					"company": this.frm.doc.company,
 					"is_group": 0,
-					"root_type": "Liability"
-				}
-			};
-		});
-
-		this.frm.set_query('default_advances_paid_account', () => {
-			return {
-				filters: {
-					"company": this.frm.doc.company,
-					"is_group": 0,
-					"root_type": "Asset"
+					"root_type": (this.frm.party_type == 'Customer') ? "Liability": "Asset"
 				}
 			};
 		});
@@ -169,23 +159,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						this.frm.set_value("default_advances_received_account", r.message);
-					}
-					this.frm.refresh();
-				}
-			});
-
-			frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
-				args: {
-					company: this.frm.doc.company,
-					party_type: (this.frm.doc.party_type == 'Customer')?'Supplier':'Customer',
-					party: this.frm.doc.party,
-					is_advance: 1
-				},
-				callback: (r) => {
-					if (!r.exc && r.message) {
-						this.frm.set_value("default_advances_paid_account", r.message);
+						this.frm.set_value("default_advance_account", r.message);
 					}
 					this.frm.refresh();
 				}

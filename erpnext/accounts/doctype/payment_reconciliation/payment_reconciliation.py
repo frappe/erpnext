@@ -13,14 +13,17 @@ import erpnext
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	is_any_doc_running,
 )
+from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
 	reconcile_against_document,
 )
-from erpnext.controllers.accounts_controller import get_advance_payment_entries
-from erpnext.controllers.accounts_controller import make_advance_liability_entry
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import (
+	get_advance_payment_entries,
+	make_advance_liability_entry,
+)
+
 
 class PaymentReconciliation(Document):
 	def __init__(self, *args, **kwargs):
@@ -57,9 +60,17 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(non_reconciled_payments)
 
 	def get_payment_entries(self):
-		receivable_payable_account = self.receivable_payable_account
-		default_advances_account = self.default_advances_received_account
-		party_account = [receivable_payable_account, default_advances_account]
+		advance_accounts = []
+		if self.party_type == "Customer":
+			advance_accounts = frappe.db.get_list(
+				"Account", filters={"root_type": "Liability", "company": self.company}, pluck="name"
+			)
+		elif self.party_type == "Supplier":
+			advance_accounts = frappe.db.get_list(
+				"Account", filters={"root_type": "Asset", "company": self.company}, pluck="name"
+			)
+		party_account = [self.receivable_payable_account] + advance_accounts
+
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
 		condition = frappe._dict(
 			{
@@ -69,12 +80,12 @@ class PaymentReconciliation(Document):
 				"from_payment_date": self.get("from_payment_date"),
 				"to_payment_date": self.get("to_payment_date"),
 				"maximum_payment_amount": self.get("maximum_payment_amount"),
-				"minimum_payment_amount": self.get("minimum_payment_amount")
+				"minimum_payment_amount": self.get("minimum_payment_amount"),
 			}
 		)
 
 		payment_entries = get_advance_payment_entries(
-			self.party_type,  
+			self.party_type,
 			self.party,
 			party_account,
 			order_doctype,
@@ -336,7 +347,9 @@ class PaymentReconciliation(Document):
 			if row.invoice_number and row.allocated_amount:
 				if row.invoice_type in ["Sales Invoice", "Purchase Invoice"]:
 					gl_entries = []
-					make_advance_liability_entry(gl_entries, row.reference_name, row.allocated_amount, row.invoice_number, self.party_type)
+					make_advance_liability_entry(
+						gl_entries, row.reference_name, row.allocated_amount, row.invoice_number, self.party_type
+					)
 					make_gl_entries(gl_entries)
 				if row.reference_type in ["Sales Invoice", "Purchase Invoice"]:
 					reconciled_entry = dr_or_cr_notes
