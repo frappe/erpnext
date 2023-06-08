@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+from frappe.utils import cint, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -325,29 +325,6 @@ class StockController(AccountsController):
 			stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
 
-	def make_batches(self, warehouse_field):
-		"""Create batches if required. Called before submit"""
-		for d in self.items:
-			if d.get(warehouse_field) and not d.batch_no:
-				has_batch_no, create_new_batch = frappe.get_cached_value(
-					"Item", d.item_code, ["has_batch_no", "create_new_batch"]
-				)
-
-				if has_batch_no and create_new_batch:
-					d.batch_no = (
-						frappe.get_doc(
-							dict(
-								doctype="Batch",
-								item=d.item_code,
-								supplier=getattr(self, "supplier", None),
-								reference_doctype=self.doctype,
-								reference_name=self.name,
-							)
-						)
-						.insert()
-						.name
-					)
-
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
 			msg = _("Please set an Expense Account in the Items table")
@@ -387,27 +364,73 @@ class StockController(AccountsController):
 				)
 
 	def delete_auto_created_batches(self):
-		for d in self.items:
-			if not d.batch_no:
-				continue
+		for row in self.items:
+			if row.serial_and_batch_bundle:
+				frappe.db.set_value(
+					"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
+				)
 
-			frappe.db.set_value(
-				"Serial No", {"batch_no": d.batch_no, "status": "Inactive"}, "batch_no", None
-			)
+				row.db_set("serial_and_batch_bundle", None)
 
-			d.batch_no = None
-			d.db_set("batch_no", None)
+	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
+		if not table_name:
+			table_name = "items"
 
-		for data in frappe.get_all(
-			"Batch", {"reference_name": self.name, "reference_doctype": self.doctype}
-		):
-			frappe.delete_doc("Batch", data.name)
+		QTY_FIELD = {
+			"serial_and_batch_bundle": "qty",
+			"current_serial_and_batch_bundle": "current_qty",
+			"rejected_serial_and_batch_bundle": "rejected_qty",
+		}
+
+		for row in self.get(table_name):
+			for field in [
+				"serial_and_batch_bundle",
+				"current_serial_and_batch_bundle",
+				"rejected_serial_and_batch_bundle",
+			]:
+				if row.get(field):
+					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
+						self, row, qty_field=QTY_FIELD[field]
+					)
+
+	def make_package_for_transfer(
+		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None
+	):
+		bundle_doc = frappe.get_doc("Serial and Batch Bundle", serial_and_batch_bundle)
+
+		if not type_of_transaction:
+			type_of_transaction = "Inward"
+
+		bundle_doc = frappe.copy_doc(bundle_doc)
+		bundle_doc.warehouse = warehouse
+		bundle_doc.type_of_transaction = type_of_transaction
+		bundle_doc.voucher_type = self.doctype
+		bundle_doc.voucher_no = self.name
+		bundle_doc.is_cancelled = 0
+
+		for row in bundle_doc.entries:
+			row.is_outward = 0
+			row.qty = abs(row.qty)
+			row.stock_value_difference = abs(row.stock_value_difference)
+			if type_of_transaction == "Outward":
+				row.qty *= -1
+				row.stock_value_difference *= row.stock_value_difference
+				row.is_outward = 1
+
+			row.warehouse = warehouse
+
+		bundle_doc.calculate_qty_and_amount()
+		bundle_doc.flags.ignore_permissions = True
+		bundle_doc.save(ignore_permissions=True)
+
+		return bundle_doc.name
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
 			{
 				"item_code": d.get("item_code", None),
 				"warehouse": d.get("warehouse", None),
+				"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"fiscal_year": get_fiscal_year(self.posting_date, company=self.company)[0],
@@ -420,8 +443,6 @@ class StockController(AccountsController):
 				),
 				"incoming_rate": 0,
 				"company": self.company,
-				"batch_no": cstr(d.get("batch_no")).strip(),
-				"serial_no": d.get("serial_no"),
 				"project": d.get("project") or self.get("project"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
 			}

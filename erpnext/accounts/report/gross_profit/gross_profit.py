@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import OrderedDict
 
 import frappe
 from frappe import _, qb, scrub
@@ -702,6 +703,9 @@ class GrossProfitGenerator(object):
 				}
 			)
 
+			if row.serial_and_batch_bundle:
+				args.update({"serial_and_batch_bundle": row.serial_and_batch_bundle})
+
 			average_buying_rate = get_incoming_rate(args)
 			self.average_buying_rate[item_code] = flt(average_buying_rate)
 
@@ -804,7 +808,7 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
-				`tabSales Invoice Item`.cost_center
+				`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.serial_and_batch_bundle
 				{sales_person_cols}
 				{payment_term_cols}
 			from
@@ -856,30 +860,30 @@ class GrossProfitGenerator(object):
 		Turns list of Sales Invoice Items to a tree of Sales Invoices with their Items as children.
 		"""
 
-		parents = []
+		grouped = OrderedDict()
 
 		for row in self.si_list:
-			if row.parent not in parents:
-				parents.append(row.parent)
+			# initialize list with a header row for each new parent
+			grouped.setdefault(row.parent, [self.get_invoice_row(row)]).append(
+				row.update(
+					{"indent": 1.0, "parent_invoice": row.parent, "invoice_or_item": row.item_code}
+				)  # descendant rows will have indent: 1.0 or greater
+			)
 
-		parents_index = 0
-		for index, row in enumerate(self.si_list):
-			if parents_index < len(parents) and row.parent == parents[parents_index]:
-				invoice = self.get_invoice_row(row)
-				self.si_list.insert(index, invoice)
-				parents_index += 1
+			# if item is a bundle, add it's components as seperate rows
+			if frappe.db.exists("Product Bundle", row.item_code):
+				bundled_items = self.get_bundle_items(row)
+				for x in bundled_items:
+					bundle_item = self.get_bundle_item_row(row, x)
+					grouped.get(row.parent).append(bundle_item)
 
-			else:
-				# skipping the bundle items rows
-				if not row.indent:
-					row.indent = 1.0
-					row.parent_invoice = row.parent
-					row.invoice_or_item = row.item_code
+		self.si_list.clear()
 
-					if frappe.db.exists("Product Bundle", row.item_code):
-						self.add_bundle_items(row, index)
+		for items in grouped.values():
+			self.si_list.extend(items)
 
 	def get_invoice_row(self, row):
+		# header row format
 		return frappe._dict(
 			{
 				"parent_invoice": "",
@@ -907,13 +911,6 @@ class GrossProfitGenerator(object):
 				"base_net_amount": frappe.db.get_value("Sales Invoice", row.parent, "base_net_total"),
 			}
 		)
-
-	def add_bundle_items(self, product_bundle, index):
-		bundle_items = self.get_bundle_items(product_bundle)
-
-		for i, item in enumerate(bundle_items):
-			bundle_item = self.get_bundle_item_row(product_bundle, item)
-			self.si_list.insert((index + i + 1), bundle_item)
 
 	def get_bundle_items(self, product_bundle):
 		return frappe.get_all(
