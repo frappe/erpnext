@@ -54,7 +54,7 @@ class EmployeeCheckin(Document):
 		else:
 			self.shift = None
 
-
+@frappe.whitelist()
 def add_log_based_on_employee_field(
 	employee_field_value,
 	timestamp,
