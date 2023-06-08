@@ -863,7 +863,7 @@ def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 	:param name: Party name
 	:return: String
 	"""
-	shipping_addresses = frappe.get_list(
+	shipping_addresses = frappe.get_all(
 		"Address",
 		filters=[
 			["Dynamic Link", "link_doctype", "=", doctype],
@@ -923,7 +923,7 @@ def get_default_contact(doctype: str, name: str) -> Optional[str]:
 	:param name: Party name
 	:return: String
 	"""
-	contacts = frappe.get_list(
+	contacts = frappe.get_all(
 		"Contact",
 		filters=[
 			["Dynamic Link", "link_doctype", "=", doctype],
