@@ -44,6 +44,10 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		frm.fields_dict.sb_entries.grid.update_docfield_property(
 			"batch_no", "read_only", !frm.doc.has_batch_no
 		);
+
+		frm.fields_dict.sb_entries.grid.update_docfield_property(
+			'qty', 'read_only', frm.doc.has_serial_no
+		);
 	},
 
 	hide_primary_action_button(frm) {
