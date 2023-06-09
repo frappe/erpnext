@@ -134,6 +134,10 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 		frm.fields_dict.entries.grid.update_docfield_property(
 			'batch_no', 'read_only', !frm.doc.has_batch_no
 		);
+
+		frm.fields_dict.entries.grid.update_docfield_property(
+			'qty', 'read_only', frm.doc.has_serial_no
+		);
 	},
 
 	set_queries(frm) {
