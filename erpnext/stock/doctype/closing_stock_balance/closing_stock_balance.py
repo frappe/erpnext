@@ -51,7 +51,7 @@ class ClosingStockBalance(Document):
 
 		for fieldname in ["warehouse", "item_code", "item_group", "warehouse_type"]:
 			if self.get(fieldname):
-				query = query.where(table.get(fieldname) == self.get(fieldname))
+				query = query.where(table[fieldname] == self.get(fieldname))
 
 		query = query.run(as_dict=True)
 
