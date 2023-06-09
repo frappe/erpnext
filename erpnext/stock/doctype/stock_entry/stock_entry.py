@@ -455,13 +455,16 @@ class StockEntry(StockController):
 		if self.purpose == "Manufacture" and self.work_order:
 			for d in self.items:
 				if d.is_finished_item:
+					if self.process_loss_qty:
+						d.qty = self.fg_completed_qty - self.process_loss_qty
+
 					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for item_code, qty_list in item_wise_qty.items():
 			total = flt(sum(qty_list), precision)
 
-			if (self.fg_completed_qty - total) > 0:
+			if (self.fg_completed_qty - total) > 0 and not self.process_loss_qty:
 				self.process_loss_qty = flt(self.fg_completed_qty - total, precision)
 				self.process_loss_percentage = flt(self.process_loss_qty * 100 / self.fg_completed_qty)
 
@@ -1573,15 +1576,35 @@ class StockEntry(StockController):
 		if self.purpose not in ("Manufacture", "Repack"):
 			return
 
-		self.process_loss_qty = 0.0
-		if not self.process_loss_percentage:
+		precision = self.precision("process_loss_qty")
+		if self.work_order:
+			data = frappe.get_all(
+				"Work Order Operation",
+				filters={"parent": self.work_order},
+				fields=["max(process_loss_qty) as process_loss_qty"],
+			)
+
+			if data and data[0].process_loss_qty is not None:
+				process_loss_qty = data[0].process_loss_qty
+				if flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
+					self.process_loss_qty = flt(process_loss_qty, precision)
+
+					frappe.msgprint(
+						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
+					)
+
+		if not self.process_loss_percentage and not self.process_loss_qty:
 			self.process_loss_percentage = frappe.get_cached_value(
 				"BOM", self.bom_no, "process_loss_percentage"
 			)
 
-		if self.process_loss_percentage:
+		if self.process_loss_percentage and not self.process_loss_qty:
 			self.process_loss_qty = flt(
 				(flt(self.fg_completed_qty) * flt(self.process_loss_percentage)) / 100
+			)
+		else:
+			self.process_loss_percentage = flt(
+				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
 
 	def set_work_order_details(self):
