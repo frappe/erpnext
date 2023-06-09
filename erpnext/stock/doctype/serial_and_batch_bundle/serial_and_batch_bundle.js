@@ -210,9 +210,9 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 
 
 frappe.ui.form.on("Serial and Batch Entry", {
-	ledgers_add(frm, cdt, cdn) {
+	entries_add(frm, cdt, cdn) {
 		if (frm.doc.warehouse) {
-			locals[cdt][cdn].warehouse = frm.doc.warehouse;
+			frappe.model.set_value(cdt, cdn, 'warehouse', frm.doc.warehouse);
 		}
 	},
 })
