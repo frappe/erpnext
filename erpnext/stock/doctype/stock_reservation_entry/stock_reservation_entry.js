@@ -37,6 +37,14 @@ frappe.ui.form.on("Stock Reservation Entry", {
 	},
 
 	toggle_read_only_fields(frm) {
+		if (frm.doc.has_serial_no) {
+			frm.doc.sb_entries.forEach(row => {
+				if (row.qty !== 1) {
+					frappe.model.set_value(row.doctype, row.name, "qty", 1);
+				}
+			})
+		}
+
 		frm.fields_dict.sb_entries.grid.update_docfield_property(
 			"serial_no", "read_only", !frm.doc.has_serial_no
 		);
