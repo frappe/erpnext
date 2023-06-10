@@ -581,7 +581,9 @@ class StockEntry(StockController):
 
 		for d in prod_order.get("operations"):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
-			completed_qty = d.completed_qty + (allowance_percentage / 100 * d.completed_qty)
+			completed_qty = (
+				d.completed_qty + d.process_loss_qty + (allowance_percentage / 100 * d.completed_qty)
+			)
 			if total_completed_qty > flt(completed_qty):
 				job_card = frappe.db.get_value("Job Card", {"operation_id": d.name}, "name")
 				if not job_card:
@@ -1669,7 +1671,7 @@ class StockEntry(StockController):
 			self.process_loss_qty = flt(
 				(flt(self.fg_completed_qty) * flt(self.process_loss_percentage)) / 100
 			)
-		else:
+		elif self.process_loss_qty and not self.process_loss_percentage:
 			self.process_loss_percentage = flt(
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)

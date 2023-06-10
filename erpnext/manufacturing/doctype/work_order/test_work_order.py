@@ -903,7 +903,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(se.process_loss_qty, 1)
 
 		wo.load_from_db()
-		self.assertEqual(wo.status, "In Process")
+		self.assertEqual(wo.status, "Completed")
 
 	@timeout(seconds=60)
 	def test_job_card_scrap_item(self):
