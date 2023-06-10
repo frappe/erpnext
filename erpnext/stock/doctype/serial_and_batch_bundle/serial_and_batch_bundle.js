@@ -194,6 +194,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			return {
 				filters: {
 					item: frm.doc.item_code,
+					disabled: 0,
 				}
 			};
 		});
