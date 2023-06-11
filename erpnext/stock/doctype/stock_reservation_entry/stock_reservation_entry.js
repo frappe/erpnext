@@ -34,6 +34,17 @@ frappe.ui.form.on("Stock Reservation Entry", {
 				}
 			};
 		});
+
+		frm.set_query("serial_no", "sb_entries", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					item_code: doc.item_code,
+					warehouse: row.warehouse,
+					status: "Active"
+				}
+			}
+		});
 	},
 
 	toggle_read_only_fields(frm) {
@@ -54,7 +65,7 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		);
 
 		frm.fields_dict.sb_entries.grid.update_docfield_property(
-			'qty', 'read_only', frm.doc.has_serial_no
+			"qty", "read_only", frm.doc.has_serial_no
 		);
 	},
 
@@ -75,7 +86,7 @@ frappe.ui.form.on("Stock Reservation Entry", {
 frappe.ui.form.on("Serial and Batch Entry", {
 	sb_entries_add(frm, cdt, cdn) {
 		if (frm.doc.warehouse) {
-			frappe.model.set_value(cdt, cdn, 'warehouse', frm.doc.warehouse);
+			frappe.model.set_value(cdt, cdn, "warehouse", frm.doc.warehouse);
 		}
 	},
 });
