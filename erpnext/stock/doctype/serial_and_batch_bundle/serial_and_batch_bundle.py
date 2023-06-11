@@ -122,7 +122,11 @@ class SerialandBatchBundle(Document):
 		frappe.throw(_(message), exception, title=_("Error"))
 
 	def set_incoming_rate(self, row=None, save=False):
-		if self.type_of_transaction not in ["Inward", "Outward"]:
+		if self.type_of_transaction not in ["Inward", "Outward"] or self.voucher_type in [
+			"Installation Note",
+			"Maintenance Schedule",
+			"Pick List",
+		]:
 			return
 
 		if self.type_of_transaction == "Outward":
@@ -220,7 +224,7 @@ class SerialandBatchBundle(Document):
 
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False):
 		valuation_field = "valuation_rate"
-		if self.voucher_type in ["Sales Invoice", "Delivery Note"]:
+		if self.voucher_type in ["Sales Invoice", "Delivery Note", "Quotation"]:
 			valuation_field = "incoming_rate"
 
 		if self.voucher_type == "POS Invoice":
@@ -229,8 +233,10 @@ class SerialandBatchBundle(Document):
 		rate = row.get(valuation_field) if row else 0.0
 		child_table = self.child_table
 
-		if self.voucher_type == "Subcontracting Receipt" and self.voucher_detail_no:
-			if frappe.db.exists("Subcontracting Receipt Supplied Item", self.voucher_detail_no):
+		if self.voucher_type == "Subcontracting Receipt":
+			if not self.voucher_detail_no:
+				return
+			elif frappe.db.exists("Subcontracting Receipt Supplied Item", self.voucher_detail_no):
 				valuation_field = "rate"
 				child_table = "Subcontracting Receipt Supplied Item"
 			else:
