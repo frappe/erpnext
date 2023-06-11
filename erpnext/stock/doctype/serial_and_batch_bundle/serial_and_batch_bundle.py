@@ -563,9 +563,16 @@ class SerialandBatchBundle(Document):
 
 	@property
 	def child_table(self):
+		parent_child_map = {
+			"Asset Capitalization": "Asset Capitalization Stock Item",
+			"Asset Repair": "Asset Repair Consumed Item",
+			"Quotation": "Packed Item",
+			"Stock Entry": "Stock Entry Detail",
+		}
+
 		table = f"{self.voucher_type} Item"
-		if self.voucher_type == "Stock Entry":
-			table = f"{self.voucher_type} Detail"
+		if self.voucher_type in parent_child_map:
+			table = parent_child_map[self.voucher_type]
 
 		return table
 
