@@ -230,6 +230,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -844,7 +845,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-14 16:43:41.714832",
+ "modified": "2023-06-03 16:20:15.880114",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
