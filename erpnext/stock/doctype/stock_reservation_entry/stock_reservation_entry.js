@@ -45,6 +45,16 @@ frappe.ui.form.on("Stock Reservation Entry", {
 				}
 			}
 		});
+
+		frm.set_query("batch_no", "sb_entries", function(doc) {
+			return {
+				filters: {
+					item: doc.item_code,
+					batch_qty: [">", 0],
+					disabled: 0,
+				}
+			}
+		});
 	},
 
 	toggle_read_only_fields(frm) {
