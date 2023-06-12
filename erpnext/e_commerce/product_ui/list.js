@@ -78,9 +78,10 @@ erpnext.ProductList = class {
 		let title_html = `<div style="display: flex; margin-left: -15px;">`;
 		title_html += `
 			<div class="col-8" style="margin-right: -15px;">
-				<a class="" href="/${ item.route || '#' }"
-					style="color: var(--gray-800); font-weight: 500;">
+				<a href="/${ item.route || '#' }">
+					<div class="product-title">
 					${ title }
+					</div>
 				</a>
 			</div>
 		`;
