@@ -23,7 +23,8 @@
   "column_break_o6ex",
   "reserved_qty",
   "delivered_qty",
-  "section_break_v3nl",
+  "serial_and_batch_reservation_section",
+  "reservation_based_on",
   "sb_entries",
   "section_break_3vb3",
   "company",
@@ -156,7 +157,6 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nDelivered\nCancelled",
@@ -208,8 +208,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_3vb3",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "More Information"
   },
   {
    "fieldname": "column_break_jbyr",
@@ -234,18 +236,26 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.sb_entries && doc.sb_entries.length",
-   "fieldname": "section_break_v3nl",
-   "fieldtype": "Section Break",
-   "label": "Reserved Serial and Batch"
-  },
-  {
    "allow_on_submit": 1,
-   "depends_on": "eval: doc.has_serial_no || doc.has_batch_no",
+   "depends_on": "eval: (doc.has_serial_no || doc.has_batch_no) && doc.reservation_based_on == \"Serial and Batch\"",
    "fieldname": "sb_entries",
    "fieldtype": "Table",
    "options": "Serial and Batch Entry"
+  },
+  {
+   "fieldname": "serial_and_batch_reservation_section",
+   "fieldtype": "Section Break",
+   "label": "Serial and Batch Reservation"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Qty",
+   "depends_on": "eval: parent.has_serial_no || parent.has_batch_no",
+   "fieldname": "reservation_based_on",
+   "fieldtype": "Select",
+   "label": "Reservation Based On",
+   "no_copy": 1,
+   "options": "Qty\nSerial and Batch"
   }
  ],
  "hide_toolbar": 1,
@@ -253,7 +263,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-08 16:10:51.666272",
+ "modified": "2023-06-12 15:00:07.603816",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
