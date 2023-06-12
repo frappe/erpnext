@@ -231,6 +231,7 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
+				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):

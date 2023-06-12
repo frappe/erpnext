@@ -374,6 +374,7 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1398,7 +1399,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-21 11:15:23.931084",
+ "modified": "2023-06-03 16:13:25.011487",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

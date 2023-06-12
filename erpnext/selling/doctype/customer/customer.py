@@ -454,11 +454,11 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		customer_outstanding += flt(extra_amount)
 
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
-		msgprint(
-			_("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-				customer, customer_outstanding, credit_limit
-			)
+		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
+			customer, customer_outstanding, credit_limit
 		)
+
+		message += "<br><br>"
 
 		# If not authorized person raise exception
 		credit_controller_role = frappe.db.get_single_value("Accounts Settings", "credit_controller")
@@ -480,7 +480,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				"<li>".join(credit_controller_users_formatted)
 			)
 
-			message = _(
+			message += _(
 				"Please contact any of the following users to extend the credit limits for {0}: {1}"
 			).format(customer, user_list)
 
@@ -488,7 +488,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			# prompt them to send out an email to the controller users
 			frappe.msgprint(
 				message,
-				title="Notify",
+				title=_("Credit Limit Crossed"),
 				raise_exception=1,
 				primary_action={
 					"label": "Send Email",
@@ -519,7 +519,6 @@ def get_customer_outstanding(
 	customer, company, ignore_outstanding_sales_order=False, cost_center=None
 ):
 	# Outstanding based on GL Entries
-
 	cond = ""
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center", cost_center, ["lft", "rgt"])
