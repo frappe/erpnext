@@ -106,6 +106,12 @@ class PaymentEntry(AccountsController):
 			root_type == "Asset" and self.party_type == "Supplier"
 		):
 			return
+		if self.unallocated_amount == 0:
+			for d in self.references:
+				if d.reference_doctype in ["Sales Order", "Purchase Order"]:
+					break
+			else:
+				return
 		liability_account = get_party_account(
 			self.party_type, self.party, self.company, include_advance=True
 		)[1]
@@ -1694,7 +1700,7 @@ def get_outstanding_on_journal_entry(name):
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
-	total_amount = outstanding_amount = exchange_rate = None
+	total_amount = outstanding_amount = exchange_rate = account = None
 
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(

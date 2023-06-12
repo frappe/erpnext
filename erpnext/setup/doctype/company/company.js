@@ -227,7 +227,8 @@ erpnext.company.setup_queries = function(frm) {
 		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
 		["unrealized_profit_loss_account", {"root_type": ["in", ["Liability", "Asset"]]}],
 		["default_provisional_account", {"root_type": ["in", ["Liability", "Asset"]]}],
-		["default_advance_account", {"root_type": ["in", ["Liability", "Asset"]]}],
+		["default_advance_received_account", {"root_type": "Liability"}],
+		["default_advance_paid_account", {"root_type": "Asset"}],
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});

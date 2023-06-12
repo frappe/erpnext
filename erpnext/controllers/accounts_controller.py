@@ -2908,16 +2908,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.create_stock_reservation_entries()
 
 
-@erpnext.allow_regional
-def validate_regional(doc):
-	pass
-
-
-@erpnext.allow_regional
-def validate_einvoice_fields(doc):
-	pass
-
-
 def make_advance_liability_entry(
 	gl_entries, pe, allocated_amount, invoice, party_type, references=False
 ):
@@ -2990,3 +2980,33 @@ def make_advance_liability_entry(
 			item=invoice,
 		)
 	)
+
+
+def check_advance_liability_entry(gl_entries, company, advances, invoice, party_type):
+	advance_payments_as_liability = frappe.db.get_value(
+		"Company", {"company_name": company}, "book_advance_payments_as_liability"
+	)
+	if advance_payments_as_liability:
+		for advance_entry in advances:
+			make_advance_liability_entry(
+				gl_entries,
+				advance_entry.reference_name,
+				advance_entry.allocated_amount,
+				invoice=invoice,
+				party_type=party_type,
+			)
+
+
+@erpnext.allow_regional
+def validate_regional(doc):
+	pass
+
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
+	pass
+
+
+@erpnext.allow_regional
+def update_gl_dict_with_regional_fields(doc, gl_dict):
+	pass

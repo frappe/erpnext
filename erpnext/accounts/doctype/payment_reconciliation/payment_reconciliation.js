@@ -34,7 +34,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				filters: {
 					"company": this.frm.doc.company,
 					"is_group": 0,
-					"root_type": (this.frm.party_type == 'Customer') ? "Liability": "Asset"
+					"root_type": this.frm.doc.party_type == 'Customer' ? "Liability": "Asset"
 				}
 			};
 		});

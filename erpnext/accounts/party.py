@@ -429,7 +429,12 @@ def get_party_advance_account(party_type, party, company):
 		)
 
 	if not account:
-		account = frappe.get_cached_value("Company", company, "default_advance_account")
+		account_name = (
+			"default_advance_received_account"
+			if party_type == "Customer"
+			else "default_advance_paid_account"
+		)
+		account = frappe.get_cached_value("Company", company, account_name)
 
 	return account
 

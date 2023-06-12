@@ -72,7 +72,8 @@
   "default_finance_book",
   "advance_payments_section",
   "book_advance_payments_as_liability",
-  "default_advance_account",
+  "default_advance_received_account",
+  "default_advance_paid_account",
   "column_break_cui0",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
@@ -716,9 +717,17 @@
   },
   {
    "depends_on": "eval:doc.book_advance_payments_as_liability",
-   "fieldname": "default_advance_account",
+   "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
-   "label": "Default Account",
+   "label": "Default Advance Received Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_as_liability",
+   "fieldname": "default_advance_paid_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Paid Account",
    "mandatory_depends_on": "book_advance_payments_as_liability",
    "options": "Account"
   }
@@ -728,7 +737,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-06-05 14:12:37.946451",
+ "modified": "2023-06-12 12:51:12.007410",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

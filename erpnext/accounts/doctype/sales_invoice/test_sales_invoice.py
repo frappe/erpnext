@@ -3320,7 +3320,10 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.set_value(
 			"Company",
 			"_Test Company",
-			{"book_advance_payments_as_liability": 1, "default_advance_account": "Creditors - _TC"},
+			{
+				"book_advance_payments_as_liability": 1,
+				"default_advance_received_account": "Creditors - _TC",
+			},
 		)
 		pe = create_payment_entry(
 			company="_Test Company",
@@ -3408,6 +3411,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 
 def create_sales_invoice(**args):
