@@ -764,14 +764,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_grand_total")
 			);
 		}
-<<<<<<< HEAD
-		this.frm.doc.payments.find(pay => {
-			if (pay.default) {
-				pay.amount = total_amount_to_pay;
-			}
-		});
-=======
-
 		if(!this.frm.doc.is_return){
 			this.frm.doc.payments.find(payment => {
 				if (payment.default) {
@@ -779,8 +771,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 			});
 		}
-
->>>>>>> 79483cc90e (fix: don't set default payment amount in case of invoice return (#35645))
 		this.frm.refresh_fields();
 	},
 
