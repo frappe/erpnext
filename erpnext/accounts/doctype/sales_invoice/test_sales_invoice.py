@@ -3348,13 +3348,21 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 		si.submit()
 		expected_gle = [
-			["Creditors - _TC", 50, 0.0],
-			["Debtors - _TC", 100, 50],
-			["Sales - _TC", 0.0, 100],
+			["Creditors - _TC", 50, 0.0, nowdate()],
+			["Debtors - _TC", 100, 50, nowdate()],
+			["Sales - _TC", 0.0, 100, nowdate()],
 		]
 
 		check_gl_entries(self, si.name, expected_gle, nowdate())
 		self.assertEqual(si.outstanding_amount, 50)
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"book_advance_payments_as_liability": 0,
+				"default_advance_received_account": "",
+			},
+		)
 
 
 def get_sales_invoice_for_e_invoice():

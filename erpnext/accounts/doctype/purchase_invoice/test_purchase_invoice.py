@@ -1694,13 +1694,18 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.save()
 		pi.submit()
 		expected_gle = [
-			["Creditors - _TC", 50, 100],
-			["Debtors - _TC", 0.0, 50],
-			["Stock Received But Not Billed - _TC", 100, 0.0],
+			["Creditors - _TC", 50, 100, nowdate()],
+			["Debtors - _TC", 0.0, 50, nowdate()],
+			["Stock Received But Not Billed - _TC", 100, 0.0, nowdate()],
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 		self.assertEqual(pi.outstanding_amount, 200)
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{"book_advance_payments_as_liability": 0, "default_advance_paid_account": ""},
+		)
 
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):

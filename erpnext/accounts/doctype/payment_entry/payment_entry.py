@@ -909,6 +909,7 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 			for d in self.get("references"):
+				gle = party_dict.copy()
 				book_advance_payments_as_liability = frappe.get_value(
 					"Company", {"company_name": self.company}, "book_advance_payments_as_liability"
 				)
@@ -917,17 +918,27 @@ class PaymentEntry(AccountsController):
 					and book_advance_payments_as_liability
 				):
 					self.make_invoice_liability_entry(gl_entries, d)
+					gle.update(
+						{
+							"against_voucher_type": "Payment Entry",
+							"against_voucher": self.name,
+						}
+					)
 
 				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
-				gle = party_dict.copy()
 				gle.update(
 					{
 						dr_or_cr: allocated_amount_in_company_currency,
 						dr_or_cr + "_in_account_currency": d.allocated_amount,
-						"against_voucher_type": "Payment Entry",
-						"against_voucher": self.name,
 					}
 				)
+				if not gle.get("against_voucher_type"):
+					gle.update(
+						{
+							"against_voucher_type": d.reference_doctype,
+							"against_voucher": d.reference_name,
+						}
+					)
 
 				gl_entries.append(gle)
 
@@ -940,6 +951,8 @@ class PaymentEntry(AccountsController):
 					{
 						dr_or_cr + "_in_account_currency": self.unallocated_amount,
 						dr_or_cr: base_unallocated_amount,
+						"against_voucher_type": "Payment Entry",
+						"against_voucher": self.name,
 					}
 				)
 
