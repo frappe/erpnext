@@ -10,6 +10,7 @@ from frappe.utils import (
 	cint,
 	date_diff,
 	flt,
+	get_first_day,
 	get_last_day,
 	getdate,
 	is_last_day_of_the_month,
@@ -271,8 +272,14 @@ class AssetDepreciationSchedule(Document):
 				break
 
 			# For first row
-			if n == 0 and has_pro_rata and not self.opening_accumulated_depreciation:
-				from_date = add_days(asset_doc.available_for_use_date, -1)
+			if (
+				n == 0
+				and (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
+				and not self.opening_accumulated_depreciation
+			):
+				from_date = add_days(
+					asset_doc.available_for_use_date, -1
+				)  # needed to calc depr amount for available_for_use_date too
 				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
 					depreciation_amount,
@@ -281,10 +288,18 @@ class AssetDepreciationSchedule(Document):
 					has_wdv_or_dd_non_yearly_pro_rata,
 				)
 			elif n == 0 and has_wdv_or_dd_non_yearly_pro_rata and self.opening_accumulated_depreciation:
-				from_date = add_months(
-					getdate(asset_doc.available_for_use_date),
-					(self.number_of_depreciations_booked * row.frequency_of_depreciation),
-				)
+				if not is_first_day_of_the_month(getdate(asset_doc.available_for_use_date)):
+					from_date = get_last_day(
+						add_months(
+							getdate(asset_doc.available_for_use_date),
+							((self.number_of_depreciations_booked - 1) * row.frequency_of_depreciation),
+						)
+					)
+				else:
+					from_date = add_months(
+						getdate(add_days(asset_doc.available_for_use_date, -1)),
+						(self.number_of_depreciations_booked * row.frequency_of_depreciation),
+					)
 				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
 					depreciation_amount,
@@ -702,3 +717,9 @@ def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
 			["status", "=", status],
 		],
 	)
+
+
+def is_first_day_of_the_month(date):
+	first_day_of_the_month = get_first_day(date)
+
+	return getdate(first_day_of_the_month) == getdate(date)
