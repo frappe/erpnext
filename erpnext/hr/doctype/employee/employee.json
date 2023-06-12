@@ -932,7 +932,7 @@
   },
   {
    "fieldname": "alternate_mobile_number",
-   "fieldtype": "Date",
+   "fieldtype": "Data",
    "label": "Alternate Mobile Number",
    "options": "Phone"
   },
@@ -1002,7 +1002,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-06-08 11:05:57.790672",
+ "modified": "2023-06-12 11:29:27.540466",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
