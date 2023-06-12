@@ -940,6 +940,7 @@ class JournalEntry(AccountsController):
 					blank_row.debit_in_account_currency = abs(diff)
 					blank_row.debit = abs(diff)
 
+			self.set_total_debit_credit()
 			self.validate_total_debit_and_credit()
 
 	@frappe.whitelist()
