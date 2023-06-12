@@ -10,7 +10,7 @@ from frappe.utils.data import fmt_money
 from frappe.utils.jinja import render_template
 from frappe.utils.pdf import get_pdf
 from frappe.utils.print_format import read_multi_pdf
-from pypdf import PdfWriter
+from PyPDF2 import PdfWriter
 
 from erpnext.accounts.utils import get_fiscal_year
 
