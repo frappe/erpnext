@@ -94,24 +94,27 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 						"docname": me.frm.doc.name
 					},
 					"callback": function(response) {
-						me.get_datatable(response);
+						console.log(response.message);
+						me.get_datatable(response.message.gl_columns, response.message.gl_data, me.frm.get_field("accounting_ledger_preview_html").wrapper);
+						me.get_datatable(response.message.sl_columns, response.message.sl_data, me.frm.get_field("stock_ledger_preview_html").wrapper);
+						me.frm.scroll_to_field("accounting_ledger_preview_html");
 					}
 				})
 			}, __("View"));
 		}
 	}
 
-	get_datatable(response) {
+	get_datatable(columns, data, wrapper) {
 		const datatable_options = {
-			columns: response.columns,
-			data: response.data,
+			columns: columns,
+			data: data,
 			dynamicRowHeight: true,
 			checkboxColumn: false,
 			inlineFilters: true,
 		};
 
-		this.datatable = new frappe.DataTable(
-			this.frm.page.main.parent,
+		new frappe.DataTable(
+			wrapper,
 			datatable_options
 		);
 	}

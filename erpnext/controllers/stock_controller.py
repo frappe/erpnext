@@ -15,7 +15,6 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 	process_gl_map,
 )
-from erpnext.accounts.report.general_ledger.general_ledger import get_columns
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
@@ -827,14 +826,74 @@ class StockController(AccountsController):
 
 @frappe.whitelist()
 def show_ledger_preview(company, doctype, docname):
+	from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+	from erpnext.stock.report.stock_ledger.stock_ledger import get_columns as get_sl_columns
+
+	frappe.db.savepoint("show_ledger_preview")
+
 	filters = {"company": company}
 	doc = frappe.get_doc(doctype, docname)
-	columns = get_columns(filters)
-	data = doc.get_gl_entries()
+
+	datatable_sl_columns = []
+	datatable_sl_data = []
+
+	if doc.update_stock or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+		sl_columns = get_sl_columns(filters)
+		doc.docstatus = 1
+		doc.update_stock_ledger()
+		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name)
+		datatable_sl_columns = get_columns(sl_columns)
+		datatable_sl_data = get_data(sl_columns, sl_entries)
+
+	doc.docstatus = 1
+	gl_columns = get_gl_columns(filters)
+	doc.make_gl_entries()
+	gl_data = get_gl_entries_for_preview(doc.doctype, doc.name)
+
+	datatable_gl_columns = get_columns(gl_columns)
+	datatable_gl_data = get_data(gl_columns, gl_data)
+
+	frappe.db.rollback(save_point="show_ledger_preview")
+
 	return {
-		"columns": columns,
-		"data": data,
+		"gl_columns": datatable_gl_columns,
+		"gl_data": datatable_gl_data,
+		"sl_columns": datatable_sl_columns,
+		"sl_data": datatable_sl_data,
 	}
+
+
+def get_sl_entries_for_preview(doctype, docname):
+	return frappe.get_all(
+		"Stock Ledger Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=["*"]
+	)
+
+
+def get_gl_entries_for_preview(doctype, docname):
+	return frappe.get_all(
+		"GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=["*"]
+	)
+
+
+def get_columns(raw_columns):
+	return [
+		{"name": d.get("label"), "editable": False, "width": 100}
+		for d in raw_columns
+		if not d.get("hidden")
+	]
+
+
+def get_data(raw_columns, raw_data):
+	datatable_data = []
+	for row in raw_data:
+		data_row = []
+		for column in raw_columns:
+			if not column.get("hidden"):
+				data_row.append(row.get(column.get("fieldname")))
+
+		datatable_data.append(data_row)
+
+	return datatable_data
 
 
 def repost_required_for_queue(doc: StockController) -> bool:
