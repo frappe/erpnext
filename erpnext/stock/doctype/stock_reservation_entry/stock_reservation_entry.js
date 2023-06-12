@@ -5,6 +5,7 @@ frappe.ui.form.on("Stock Reservation Entry", {
 	refresh(frm) {
 		frm.trigger("set_queries");
 		frm.trigger("toggle_read_only_fields");
+		frm.trigger("hide_rate_related_fields");
 		frm.trigger("hide_primary_action_button");
 		frm.trigger("make_sb_entries_warehouse_read_only");
 	},
@@ -81,6 +82,14 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		frm.fields_dict.sb_entries.grid.update_docfield_property(
 			"qty", "read_only", frm.doc.has_serial_no
 		);
+	},
+
+	hide_rate_related_fields(frm) {
+		["incoming_rate", "outgoing_rate", "stock_value_difference", "is_outward", "stock_queue"].forEach(field => {
+			frm.fields_dict.sb_entries.grid.update_docfield_property(
+				field, "hidden", 1
+			);
+		});
 	},
 
 	hide_primary_action_button(frm) {
