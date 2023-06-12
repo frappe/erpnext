@@ -60,6 +60,7 @@ class PaymentEntry(AccountsController):
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
+		self.set_liability_account()
 		self.set_missing_ref_details()
 		self.validate_payment_type()
 		self.validate_party_details()
@@ -86,35 +87,34 @@ class PaymentEntry(AccountsController):
 	def on_submit(self):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
-		book_advance_payments_as_liability = frappe.get_value(
-			"Company", {"company_name": self.company}, "book_advance_payments_as_liability"
-		)
-		if book_advance_payments_as_liability:
-			self.get_liability_account()
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_payment_schedule()
 		self.set_status()
 
-	def get_liability_account(self):
-		liability_account = get_party_account(self.party_type, self.party, self.company, is_advance=True)
-		if self.party_type == "Customer":
-			msg = "Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}.".format(
-				frappe.bold(self.paid_from),
-				frappe.bold(liability_account),
-			)
-			frappe.db.set_value("Payment Entry", self.name, "paid_from", liability_account)
-			self.paid_from = liability_account
-		else:
-			msg = "Book Advance Payments as Liability option is chosen. Paid To account changed from {0} to {1}.".format(
-				frappe.bold(self.paid_to),
-				frappe.bold(liability_account),
-			)
-			frappe.db.set_value("Payment Entry", self.name, "paid_to", liability_account)
-			self.paid_to = liability_account
-		frappe.msgprint(_(msg), title="Warning", indicator="orange")
-		return liability_account
+	def set_liability_account(self):
+		book_advance_payments_as_liability = frappe.get_value(
+			"Company", {"company_name": self.company}, "book_advance_payments_as_liability"
+		)
+		if not book_advance_payments_as_liability:
+			return
+		root_type = frappe.get_value(
+			"Account", {"name": self.party_account, "company": self.company}, "root_type"
+		)
+		if (root_type == "Liability" and self.party_type == "Customer") or (
+			root_type == "Asset" and self.party_type == "Supplier"
+		):
+			return
+		liability_account = get_party_account(
+			self.party_type, self.party, self.company, include_advance=True
+		)[1]
+		self.set(self.party_account_field, liability_account)
+		msg = "Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}.".format(
+			frappe.bold(self.party_account),
+			frappe.bold(liability_account),
+		)
+		frappe.msgprint(_(msg), alert=True)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -353,13 +353,6 @@ class PaymentEntry(AccountsController):
 							ref_party_account = ref_doc.credit_to
 						elif self.party_type == "Employee":
 							ref_party_account = ref_doc.payable_account
-
-						if ref_party_account != self.party_account:
-							frappe.throw(
-								_("{0} {1} is associated with {2}, but Party Account is {3}").format(
-									d.reference_doctype, d.reference_name, ref_party_account, self.party_account
-								)
-							)
 
 						if ref_doc.doctype == "Purchase Invoice" and ref_doc.get("on_hold"):
 							frappe.throw(
@@ -893,11 +886,9 @@ class PaymentEntry(AccountsController):
 		if self.party_account:
 			if self.payment_type == "Receive":
 				against_account = self.paid_to
-				self.party_account = self.paid_from
 				dr_or_cr = "credit"
 			else:
 				against_account = self.paid_from
-				self.party_account = self.paid_to
 				dr_or_cr = "debit"
 
 			party_dict = self.get_gl_dict(
@@ -927,8 +918,8 @@ class PaymentEntry(AccountsController):
 					{
 						dr_or_cr: allocated_amount_in_company_currency,
 						dr_or_cr + "_in_account_currency": d.allocated_amount,
-						"against_voucher_type": d.reference_doctype,
-						"against_voucher": d.reference_name,
+						"against_voucher_type": "Payment Entry",
+						"against_voucher": self.name,
 					}
 				)
 
@@ -973,7 +964,7 @@ class PaymentEntry(AccountsController):
 		args_dict[dr_or_cr] = 0
 		args_dict[dr_or_cr + "_in_account_currency"] = 0
 		dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
-		args_dict["account"] = self.get_liability_account()
+		args_dict["account"] = self.party_account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		gle = self.get_gl_dict(

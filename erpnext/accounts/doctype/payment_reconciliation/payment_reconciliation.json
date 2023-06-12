@@ -7,8 +7,8 @@
  "field_order": [
   "company",
   "party_type",
-  "party",
   "column_break_4",
+  "party",
   "receivable_payable_account",
   "default_advance_account",
   "col_break1",
@@ -188,20 +188,19 @@
    "options": "Cost Center"
   },
   {
-   "depends_on": "eval:doc.party_type",
+   "depends_on": "eval:doc.party",
    "fieldname": "default_advance_account",
    "fieldtype": "Link",
    "label": "Default Advance Account",
    "mandatory_depends_on": "doc.party_type",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2023-06-05 20:09:58.925427",
+ "modified": "2023-06-09 13:02:48.718362",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

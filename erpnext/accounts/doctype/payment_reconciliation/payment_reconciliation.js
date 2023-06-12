@@ -139,27 +139,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				args: {
 					company: this.frm.doc.company,
 					party_type: this.frm.doc.party_type,
-					party: this.frm.doc.party
-				},
-				callback: (r) => {
-					if (!r.exc && r.message) {
-						this.frm.set_value("receivable_payable_account", r.message);
-					}
-					this.frm.refresh();
-				}
-			});
-
-			frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
-				args: {
-					company: this.frm.doc.company,
-					party_type: this.frm.doc.party_type,
 					party: this.frm.doc.party,
-					is_advance: 1
+					include_advance: 1
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						this.frm.set_value("default_advance_account", r.message);
+						this.frm.set_value("receivable_payable_account", r.message[0]);
+						this.frm.set_value("default_advance_account", r.message[1]);
 					}
 					this.frm.refresh();
 				}

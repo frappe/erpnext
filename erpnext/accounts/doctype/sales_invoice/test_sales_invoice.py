@@ -3327,7 +3327,7 @@ class TestSalesInvoice(unittest.TestCase):
 			payment_type="Receive",
 			party_type="Customer",
 			party="_Test Customer",
-			paid_from=get_party_account("Customer", "_Test Customer", "_Test Company", is_advance=True),
+			paid_from="Debtors - _TC",
 			paid_to="Cash - _TC",
 			paid_amount=1000,
 		)

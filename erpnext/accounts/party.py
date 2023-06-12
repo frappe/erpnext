@@ -365,7 +365,7 @@ def set_account_and_due_date(
 
 
 @frappe.whitelist()
-def get_party_account(party_type, party=None, company=None, is_advance=False):
+def get_party_account(party_type, party=None, company=None, include_advance=False):
 	"""Returns the account for the given `party`.
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
@@ -379,9 +379,6 @@ def get_party_account(party_type, party=None, company=None, is_advance=False):
 		)
 
 		return frappe.get_cached_value("Company", company, default_account_name)
-
-	if is_advance and party_type in ["Customer", "Supplier"]:
-		return get_party_advance_account(party_type, party, company)
 
 	account = frappe.db.get_value(
 		"Party Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
@@ -409,6 +406,9 @@ def get_party_account(party_type, party=None, company=None, is_advance=False):
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
+	if include_advance and party_type in ["Customer", "Supplier"]:
+		advance_account = get_party_advance_account(party_type, party, company)
+		return [account, advance_account]
 	return account
 
 

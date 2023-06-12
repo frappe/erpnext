@@ -1677,7 +1677,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			party_type="Supplier",
 			party="_Test Supplier",
 			paid_from="Cash - _TC",
-			paid_to=get_party_account("Supplier", "_Test Supplier", "_Test Company", is_advance=True),
+			paid_to="Creditors - _TC",
 			paid_amount=1000,
 		)
 		pe.submit()
