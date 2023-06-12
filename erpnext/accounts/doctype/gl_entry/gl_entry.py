@@ -72,6 +72,15 @@ class GLEntry(Document):
 					update_outstanding_amt(
 						self.account, self.party_type, self.party, self.against_voucher_type, self.against_voucher
 					)
+	
+	# kittiu
+	def after_insert(self):
+		from erpnext.accounts.reconcile_utils import get_gl_entries_by_vouchers
+		from erpnext.accounts.reconcile_utils import reconcile_gl_entries
+		gl_entries = get_gl_entries_by_vouchers([self.voucher_no, self.against_voucher])
+		reconcile_gl_entries(gl_entries)
+	# --
+
 
 	def check_mandatory(self):
 		mandatory = ["account", "voucher_type", "voucher_no", "company"]

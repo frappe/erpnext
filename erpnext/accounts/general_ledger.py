@@ -522,6 +522,13 @@ def make_reverse_gl_entries(
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
+		
+		# kittiu, unreconcile cancelled entries
+		from erpnext.accounts.reconcile_utils import unreconcile_gl
+		from erpnext.accounts.reconcile_utils import get_gl_entries_by_vouchers
+		gl_to_unreconcile = get_gl_entries_by_vouchers([gl_entries[0]["voucher_no"]], is_cancelled=1)
+		unreconcile_gl(gl_to_unreconcile)
+		# --
 
 		for entry in gl_entries:
 			new_gle = copy.deepcopy(entry)

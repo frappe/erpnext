@@ -32,7 +32,11 @@
   "finance_book",
   "to_rename",
   "due_date",
-  "is_cancelled"
+  "is_cancelled",
+  "reconciliation_section",
+  "is_reconcile",
+  "full_reconcile_entry",
+  "residual"
  ],
  "fields": [
   {
@@ -253,15 +257,42 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "full_reconcile_entry",
+   "fieldtype": "Link",
+   "label": "Full Reconcile Entry",
+   "options": "Full Reconcile Entry"
+  },
+  {
+   "fieldname": "residual",
+   "fieldtype": "Currency",
+   "ignore_user_permissions": 1,
+   "label": "Residual",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "fetch_from": "account.is_reconcile",
+   "fieldname": "is_reconcile",
+   "fieldtype": "Check",
+   "label": "Is Reconcile"
+  },
+  {
+   "fieldname": "reconciliation_section",
+   "fieldtype": "Section Break",
+   "label": "Reconciliation"
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-04-07 16:22:33.766994",
+ "links": [],
+ "modified": "2023-06-12 12:37:49.730264",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -290,5 +321,6 @@
  "quick_entry": 1,
  "search_fields": "voucher_no,account,posting_date,against_voucher",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -21,6 +21,7 @@
   "column_break1",
   "parent_account",
   "account_type",
+  "is_reconcile",
   "tax_rate",
   "freeze_account",
   "balance_must_be",
@@ -186,13 +187,19 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disable"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_reconcile",
+   "fieldtype": "Check",
+   "label": "Is Reconcile"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-04-11 16:08:46.983677",
+ "modified": "2023-06-10 16:48:34.726345",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",

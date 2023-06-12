@@ -362,6 +362,14 @@ class PaymentReconciliation(Document):
 
 		self.get_unreconciled_entries()
 
+		# New Reconcile
+		from erpnext.accounts.reconcile_utils import get_gl_entries_by_vouchers
+		from erpnext.accounts.reconcile_utils import reconcile_gl_entries
+		for a in self.allocation:
+			gl_entries = get_gl_entries_by_vouchers([a.reference_name, a.invoice_number])
+			reconcile_gl_entries(gl_entries, allocated_amount=a.allocated_amount)
+		# --
+
 	def make_difference_entry(self, row):
 		journal_entry = frappe.new_doc("Journal Entry")
 		journal_entry.voucher_type = "Exchange Gain Or Loss"
