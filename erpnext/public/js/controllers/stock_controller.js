@@ -94,7 +94,6 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 						"docname": me.frm.doc.name
 					},
 					"callback": function(response) {
-						console.log(response.message);
 						me.get_datatable(response.message.gl_columns, response.message.gl_data, me.frm.get_field("accounting_ledger_preview_html").wrapper);
 						me.get_datatable(response.message.sl_columns, response.message.sl_data, me.frm.get_field("stock_ledger_preview_html").wrapper);
 						me.frm.scroll_to_field("accounting_ledger_preview_html");

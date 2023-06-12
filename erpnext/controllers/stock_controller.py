@@ -826,60 +826,118 @@ class StockController(AccountsController):
 
 @frappe.whitelist()
 def show_ledger_preview(company, doctype, docname):
-	from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
-	from erpnext.stock.report.stock_ledger.stock_ledger import get_columns as get_sl_columns
-
 	frappe.db.savepoint("show_ledger_preview")
 
 	filters = {"company": company}
 	doc = frappe.get_doc(doctype, docname)
 
-	datatable_sl_columns = []
-	datatable_sl_data = []
-
-	if doc.update_stock or doc.doctype in ("Purchase Receipt", "Delivery Note"):
-		sl_columns = get_sl_columns(filters)
-		doc.docstatus = 1
-		doc.update_stock_ledger()
-		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name)
-		datatable_sl_columns = get_columns(sl_columns)
-		datatable_sl_data = get_data(sl_columns, sl_entries)
-
-	doc.docstatus = 1
-	gl_columns = get_gl_columns(filters)
-	doc.make_gl_entries()
-	gl_data = get_gl_entries_for_preview(doc.doctype, doc.name)
-
-	datatable_gl_columns = get_columns(gl_columns)
-	datatable_gl_data = get_data(gl_columns, gl_data)
+	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
+	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
 
 	frappe.db.rollback(save_point="show_ledger_preview")
 
 	return {
-		"gl_columns": datatable_gl_columns,
-		"gl_data": datatable_gl_data,
-		"sl_columns": datatable_sl_columns,
-		"sl_data": datatable_sl_data,
+		"gl_columns": gl_columns,
+		"gl_data": gl_data,
+		"sl_columns": sl_columns,
+		"sl_data": sl_data,
 	}
 
 
-def get_sl_entries_for_preview(doctype, docname):
+def get_accounting_ledger_preview(doc, filters):
+	from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+
+	gl_columns, gl_data = [], []
+	fields = [
+		"posting_date",
+		"account",
+		"debit",
+		"credit",
+		"against",
+		"party",
+		"party_type",
+		"against_voucher_type",
+		"against_voucher",
+	]
+
+	doc.docstatus = 1
+	doc.make_gl_entries()
+	columns = get_gl_columns(filters)
+	gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
+
+	gl_columns = get_columns(columns, fields)
+	gl_data = get_data(fields, gl_entries)
+
+	return gl_columns, gl_data
+
+
+def get_stock_ledger_preview(doc, filters):
+	from erpnext.stock.report.stock_ledger.stock_ledger import get_columns as get_sl_columns
+
+	sl_columns, sl_data = [], []
+	fields = [
+		"item_code",
+		"stock_uom",
+		"actual_qty",
+		"qty_after_transaction",
+		"warehouse",
+		"incoming_rate",
+		"valuation_rate",
+		"stock_value",
+		"stock_value_difference",
+	]
+	columns_fields = [
+		"item_code",
+		"stock_uom",
+		"in_qty",
+		"out_qty",
+		"qty_after_transaction",
+		"warehouse",
+		"incoming_rate",
+		"valuation_rate",
+		"stock_value",
+		"stock_value_difference",
+	]
+
+	if doc.update_stock or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+		doc.docstatus = 1
+		doc.update_stock_ledger()
+		columns = get_sl_columns(filters)
+		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
+
+		sl_columns = get_columns(columns, columns_fields)
+		sl_data = get_data(columns_fields, sl_entries)
+
+	return sl_columns, sl_data
+
+
+def get_sl_entries_for_preview(doctype, docname, fields):
+	sl_entries = frappe.get_all(
+		"Stock Ledger Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields
+	)
+
+	for entry in sl_entries:
+		if entry.actual_qty > 0:
+			entry["in_qty"] = entry.actual_qty
+			entry["out_qty"] = 0
+		else:
+			entry["out_qty"] = abs(entry.actual_qty)
+			entry["in_qty"] = 0
+
+	return sl_entries
+
+
+def get_gl_entries_for_preview(doctype, docname, fields):
 	return frappe.get_all(
-		"Stock Ledger Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=["*"]
+		"GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields
 	)
 
 
-def get_gl_entries_for_preview(doctype, docname):
-	return frappe.get_all(
-		"GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=["*"]
-	)
-
-
-def get_columns(raw_columns):
+def get_columns(raw_columns, fields):
 	return [
-		{"name": d.get("label"), "editable": False, "width": 100}
+		{"name": d.get("label"), "editable": False, "width": 110}
 		for d in raw_columns
-		if not d.get("hidden")
+		if not d.get("hidden") and d.get("fieldname") in fields
 	]
 
 
@@ -888,8 +946,7 @@ def get_data(raw_columns, raw_data):
 	for row in raw_data:
 		data_row = []
 		for column in raw_columns:
-			if not column.get("hidden"):
-				data_row.append(row.get(column.get("fieldname")))
+			data_row.append(row.get(column) or "")
 
 		datatable_data.append(data_row)
 
