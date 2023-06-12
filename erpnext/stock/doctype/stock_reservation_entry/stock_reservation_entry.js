@@ -36,12 +36,16 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		});
 
 		frm.set_query("serial_no", "sb_entries", function(doc, cdt, cdn) {
+			var selected_serial_nos = doc.sb_entries.map(row => {
+				return row.serial_no;
+			});
 			var row = locals[cdt][cdn];
 			return {
 				filters: {
 					item_code: doc.item_code,
 					warehouse: row.warehouse,
-					status: "Active"
+					status: "Active",
+					name: ["not in", selected_serial_nos],
 				}
 			}
 		});
