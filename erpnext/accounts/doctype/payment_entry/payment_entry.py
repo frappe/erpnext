@@ -174,12 +174,17 @@ class PaymentEntry(AccountsController):
 		for d in self.get("references").copy():
 			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
 
-			# The reference has already been allocated, or partially allocated.
-			if not latest or d.outstanding_amount != latest.outstanding_amount:
+			# The reference has already been fully paid
+			if not latest:
 				frappe.throw(
-					_("{0} {1}, has already been allocated after the creation of Payment Entry {2}.").format(
-						d.reference_doctype, d.reference_name, self.name
-					)
+					_("{0} {1} has already been fully paid.").format(d.reference_doctype, d.reference_name)
+				)
+			# The reference has already been partly paid
+			elif d.outstanding_amount != latest.outstanding_amount:
+				frappe.throw(
+					_(
+						"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' button to get the latest outstanding amount."
+					).format(d.reference_doctype, d.reference_name)
 				)
 
 			d.outstanding_amount = latest.outstanding_amount
@@ -404,7 +409,7 @@ class PaymentEntry(AccountsController):
 		for k, v in no_oustanding_refs.items():
 			frappe.msgprint(
 				_(
-					"{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry."
+					"{} - {} now has {} as it had no outstanding amount left before submitting the Payment Entry."
 				).format(
 					_(k),
 					frappe.bold(", ".join(d.reference_name for d in v)),
