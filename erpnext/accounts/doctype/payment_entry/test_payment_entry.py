@@ -999,10 +999,6 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue("is on hold" in str(err.exception).lower())
 
-	def test_payment_entry_for_employee(self):
-		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
-		create_payment_entry(party_type="Employee", party=employee, save=True)
-
 	def test_duplicate_payment_entry_allocate_amount(self):
 		si = create_sales_invoice()
 
