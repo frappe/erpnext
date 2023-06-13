@@ -999,6 +999,37 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue("is on hold" in str(err.exception).lower())
 
+<<<<<<< HEAD
+=======
+	def test_payment_entry_for_employee(self):
+		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
+		create_payment_entry(party_type="Employee", party=employee, save=True)
+
+	def test_duplicate_payment_entry_allocate_amount(self):
+		si = create_sales_invoice()
+
+		pe_draft = get_payment_entry("Sales Invoice", si.name)
+		pe_draft.insert()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.submit()
+
+		self.assertRaises(frappe.ValidationError, pe_draft.submit)
+
+	def test_duplicate_payment_entry_partial_allocate_amount(self):
+		si = create_sales_invoice()
+
+		pe_draft = get_payment_entry("Sales Invoice", si.name)
+		pe_draft.insert()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.received_amount = si.total / 2
+		pe.references[0].allocated_amount = si.total / 2
+		pe.submit()
+
+		self.assertRaises(frappe.ValidationError, pe_draft.submit)
+
+>>>>>>> 20de27d480 (fix(accounts): validate payment entry references with latest data. (#31166))
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
