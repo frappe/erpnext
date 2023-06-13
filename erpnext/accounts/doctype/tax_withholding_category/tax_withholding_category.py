@@ -5,7 +5,13 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import cint, getdate
+=======
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Abs, Sum
+from frappe.utils import cint, flt, getdate
+>>>>>>> 937c0feefe (fix: Lower deduction certificate not getting applied (#35667))
 
 
 class TaxWithholdingCategory(Document):
@@ -569,7 +575,12 @@ def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 	tds_amount = 0
 	limit_consumed = frappe.db.get_value(
 		"Purchase Invoice",
-		{"supplier": ("in", parties), "apply_tds": 1, "docstatus": 1},
+		{
+			"supplier": ("in", parties),
+			"apply_tds": 1,
+			"docstatus": 1,
+			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
+		},
 		"sum(tax_withholding_net_total)",
 	)
 
@@ -584,10 +595,10 @@ def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 
 
 def get_ltds_amount(current_amount, deducted_amount, certificate_limit, rate, tax_details):
-	if current_amount < (certificate_limit - deducted_amount):
+	if certificate_limit - flt(deducted_amount) - flt(current_amount) >= 0:
 		return current_amount * rate / 100
 	else:
-		ltds_amount = certificate_limit - deducted_amount
+		ltds_amount = certificate_limit - flt(deducted_amount)
 		tds_amount = current_amount - ltds_amount
 
 		return ltds_amount * rate / 100 + tds_amount * tax_details.rate / 100
@@ -598,9 +609,9 @@ def is_valid_certificate(
 ):
 	valid = False
 
-	if (
-		getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)
-	) and certificate_limit > deducted_amount:
+	available_amount = flt(certificate_limit) - flt(deducted_amount) - flt(current_amount)
+
+	if (getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)) and available_amount > 0:
 		valid = True
 
 	return valid
