@@ -5,13 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import cint, getdate
-=======
-from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
->>>>>>> 937c0feefe (fix: Lower deduction certificate not getting applied (#35667))
 
 
 class TaxWithholdingCategory(Document):
