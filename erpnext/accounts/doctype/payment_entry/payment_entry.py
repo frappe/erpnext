@@ -1487,7 +1487,7 @@ def get_orders_to_be_billed(
 	if voucher_type:
 		doc = frappe.get_doc({"doctype": voucher_type})
 		condition = ""
-		if doc and hasattr(doc, "cost_center") and doc.cost_center is not None:
+		if doc and hasattr(doc, "cost_center") and doc.cost_center:
 			condition = " and cost_center='%s'" % cost_center
 
 	orders = []
