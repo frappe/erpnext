@@ -211,7 +211,13 @@ class PaymentReconciliation(Document):
 			accounting_dimensions=self.accounting_dimension_filter_conditions,
 		)
 
-		cr_dr_notes = [x.voucher_no for x in self.return_invoices]
+		cr_dr_notes = (
+			[x.voucher_no for x in self.return_invoices]
+			if self.party_type in ["Customer", "Supplier"]
+			else []
+		)
+		# Filter out cr/dr notes from outstanding invoices list
+		# Happens when non-standalone cr/dr notes are linked with another invoice through journal entry
 		non_reconciled_invoices = [x for x in non_reconciled_invoices if x.voucher_no not in cr_dr_notes]
 
 		if self.invoice_limit:
