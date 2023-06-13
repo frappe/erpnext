@@ -150,7 +150,7 @@ class PaymentEntry(AccountsController):
 			)
 
 	def validate_allocated_amount(self):
-		if self.payment_type == "Internal Transfer":
+		if self.payment_type == "Internal Transfer" or self.party_type in ("Donor"):
 			return
 
 		latest_references = get_outstanding_reference_documents(
