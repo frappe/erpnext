@@ -96,14 +96,14 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 	range1 = range2 = range3 = above_range3 = 0.0
 
 	for item in fifo_queue:
-		age = date_diff(to_date, item[1])
+		age = flt(date_diff(to_date, item[1]))
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
-		if age <= filters.range1:
+		if age <= flt(filters.range1):
 			range1 = flt(range1 + qty, precision)
-		elif age <= filters.range2:
+		elif age <= flt(filters.range2):
 			range2 = flt(range2 + qty, precision)
-		elif age <= filters.range3:
+		elif age <= flt(filters.range3):
 			range3 = flt(range3 + qty, precision)
 		else:
 			above_range3 = flt(above_range3 + qty, precision)
