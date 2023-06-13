@@ -30,9 +30,15 @@ def set_print_templates_for_taxes(doc, settings):
 	doc.print_templates.update(
 		{
 			"total": "templates/print_formats/includes/total.html",
-			"taxes": "templates/print_formats/includes/taxes.html",
 		}
 	)
+
+	if not doc.should_show_taxes_as_table_in_print():
+		doc.print_templates.update(
+			{
+				"taxes": "templates/print_formats/includes/taxes.html",
+			}
+		)
 
 
 def format_columns(display_columns, compact_fields):

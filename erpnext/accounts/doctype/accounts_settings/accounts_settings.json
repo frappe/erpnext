@@ -36,6 +36,7 @@
   "book_tax_discount_loss",
   "print_settings",
   "show_inclusive_tax_in_print",
+  "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
   "currency_exchange_section",
@@ -378,6 +379,12 @@
    "fieldname": "auto_reconcile_payments",
    "fieldtype": "Check",
    "label": "Auto Reconcile Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
   }
  ],
  "icon": "icon-cog",
@@ -385,7 +392,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-04-21 13:11:37.130743",
+=======
+ "modified": "2023-06-13 18:47:46.430291",
+>>>>>>> 491a50a027 (fix: make showing taxes as table in print configurable (#35672))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
