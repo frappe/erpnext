@@ -55,7 +55,7 @@ class TestStockEntry(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def test_fifo(self):
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
 		warehouse = "_Test Warehouse - _TC"
 
@@ -142,7 +142,7 @@ class TestStockEntry(FrappeTestCase):
 			or 0
 		)
 
-		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_indent", 1)
 
 		# update re-level qty so that it is more than projected_qty
 		if projected_qty >= variant.reorder_levels[0].warehouse_reorder_level:
@@ -154,7 +154,7 @@ class TestStockEntry(FrappeTestCase):
 
 		mr_list = reorder_item()
 
-		frappe.db.set_value("Stock Settings", None, "auto_indent", 0)
+		frappe.db.set_single_value("Stock Settings", "auto_indent", 0)
 
 		items = []
 		for mr in mr_list:
@@ -792,24 +792,24 @@ class TestStockEntry(FrappeTestCase):
 		remove_user_permission("Company", "_Test Company 1", "test2@example.com")
 
 	def test_freeze_stocks(self):
-		frappe.db.set_value("Stock Settings", None, "stock_auth_role", "")
+		frappe.db.set_single_value("Stock Settings", "stock_auth_role", "")
 
 		# test freeze_stocks_upto
-		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", add_days(nowdate(), 5))
+		frappe.db.set_single_value("Stock Settings", "stock_frozen_upto", add_days(nowdate(), 5))
 		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises(StockFreezeError, se.submit)
 
-		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", "")
+		frappe.db.set_single_value("Stock Settings", "stock_frozen_upto", "")
 
 		# test freeze_stocks_upto_days
-		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", -1)
+		frappe.db.set_single_value("Stock Settings", "stock_frozen_upto_days", -1)
 		se = frappe.copy_doc(test_records[0])
 		se.set_posting_time = 1
 		se.posting_date = nowdate()
 		se.set_stock_entry_type()
 		se.insert()
 		self.assertRaises(StockFreezeError, se.submit)
-		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
+		frappe.db.set_single_value("Stock Settings", "stock_frozen_upto_days", 0)
 
 	def test_work_order(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
@@ -1211,7 +1211,7 @@ class TestStockEntry(FrappeTestCase):
 		)
 
 	def test_conversion_factor_change(self):
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		repack_entry = frappe.copy_doc(test_records[3])
 		repack_entry.posting_date = nowdate()
 		repack_entry.posting_time = nowtime()

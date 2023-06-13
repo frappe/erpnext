@@ -503,10 +503,8 @@ class TestWorkOrder(FrappeTestCase):
 			stock_entry.cancel()
 
 	def test_capcity_planning(self):
-		frappe.db.set_value(
-			"Manufacturing Settings",
-			None,
-			{"disable_capacity_planning": 0, "capacity_planning_for_days": 1},
+		frappe.db.set_single_value(
+			"Manufacturing Settings", {"disable_capacity_planning": 0, "capacity_planning_for_days": 1}
 		)
 
 		data = frappe.get_cached_value(
@@ -529,7 +527,7 @@ class TestWorkOrder(FrappeTestCase):
 
 			self.assertRaises(CapacityError, work_order1.submit)
 
-			frappe.db.set_value("Manufacturing Settings", None, {"capacity_planning_for_days": 30})
+			frappe.db.set_single_value("Manufacturing Settings", {"capacity_planning_for_days": 30})
 
 			work_order1.reload()
 			work_order1.submit()
@@ -539,7 +537,7 @@ class TestWorkOrder(FrappeTestCase):
 			work_order.cancel()
 
 	def test_work_order_with_non_transfer_item(self):
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 		items = {"Finished Good Transfer Item": 1, "_Test FG Item": 1, "_Test FG Item 1": 0}
 		for item, allow_transfer in items.items():
@@ -619,7 +617,7 @@ class TestWorkOrder(FrappeTestCase):
 		fg_item = "Test Batch Size Item For BOM 3"
 		rm1 = "Test Batch Size Item RM 1 For BOM 3"
 
-		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
 		for item in ["Test Batch Size Item For BOM 3", "Test Batch Size Item RM 1 For BOM 3"]:
 			item_args = {"include_item_in_manufacturing": 1, "is_stock_item": 1}
 
@@ -655,7 +653,7 @@ class TestWorkOrder(FrappeTestCase):
 		work_order = make_wo_order_test_record(
 			item=fg_item, skip_transfer=True, planned_start_date=now(), qty=1
 		)
-		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 1)
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 1)
 		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		for row in ste1.get("items"):
 			if row.is_finished_item:
@@ -699,10 +697,10 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(sorted(remaining_batches), sorted(batches))
 
-		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
 
 	def test_partial_material_consumption(self):
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 1)
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 1)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
 
 		ste_cancel_list = []
@@ -736,13 +734,12 @@ class TestWorkOrder(FrappeTestCase):
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
 
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 0)
 
 	def test_extra_material_transfer(self):
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
-		frappe.db.set_value(
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 0)
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -787,7 +784,7 @@ class TestWorkOrder(FrappeTestCase):
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
 
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 	def test_make_stock_entry_for_customer_provided_item(self):
 		finished_item = "Test Item for Make Stock Entry 1"
@@ -1087,9 +1084,8 @@ class TestWorkOrder(FrappeTestCase):
 	def test_partial_manufacture_entries(self):
 		cancel_stock_entry = []
 
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1139,7 +1135,7 @@ class TestWorkOrder(FrappeTestCase):
 			doc = frappe.get_doc("Stock Entry", ste)
 			doc.cancel()
 
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_auto_batch_creation(self):
@@ -1283,9 +1279,8 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1356,9 +1351,8 @@ class TestWorkOrder(FrappeTestCase):
 			self.assertEqual(abs(d.qty), 2)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1400,9 +1394,8 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(manufacture_ste_doc2.items[0].qty, 2)
 
 	def test_backflushed_serial_no_batch_raw_materials_based_on_transferred(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1486,9 +1479,8 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertFalse(serial_nos)
 
 	def test_non_consumed_material_return_against_work_order(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)

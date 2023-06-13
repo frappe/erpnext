@@ -416,8 +416,8 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 	def test_back_dated_entry_not_allowed(self):
 		# Back dated stock transactions are only allowed to stock managers
-		frappe.db.set_value(
-			"Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", "Stock Manager"
+		frappe.db.set_single_value(
+			"Stock Settings", "role_allowed_to_create_edit_back_dated_transactions", "Stock Manager"
 		)
 
 		# Set User with Stock User role but not Stock Manager
@@ -453,8 +453,8 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			stock_entry_on_today.cancel()
 
 		finally:
-			frappe.db.set_value(
-				"Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", None
+			frappe.db.set_single_value(
+				"Stock Settings", "role_allowed_to_create_edit_back_dated_transactions", None
 			)
 			frappe.set_user("Administrator")
 			user.remove_roles("Stock Manager")

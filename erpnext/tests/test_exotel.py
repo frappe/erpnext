@@ -12,7 +12,7 @@ class TestExotel(FrappeAPITestCase):
 		cls.test_employee_name = make_employee(
 			user="test_employee_exotel@company.com", cell_number="9999999999"
 		)
-		frappe.db.set_value("Exotel Settings", "Exotel Settings", "enabled", 1)
+		frappe.db.set_single_value("Exotel Settings", "enabled", 1)
 		phones = [{"phone": "+91 9999999991", "is_primary_phone": 0, "is_primary_mobile_no": 1}]
 		create_contact(name="Test Contact", salutation="Mr", phones=phones)
 		frappe.db.commit()
