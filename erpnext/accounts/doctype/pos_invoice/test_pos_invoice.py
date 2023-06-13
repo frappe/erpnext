@@ -31,7 +31,7 @@ class TestPOSInvoice(unittest.TestCase):
 			frappe.set_user("Administrator")
 
 		if frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
-			frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
+			frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 
 	def test_timestamp_change(self):
 		w = create_pos_invoice(do_not_save=1)
@@ -722,7 +722,7 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
-			frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 1)
+			frappe.db.set_single_value("Selling Settings", "validate_selling_price", 1)
 
 		item = "Test Selling Price Validation"
 		make_item(item, {"is_stock_item": 1})

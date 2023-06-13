@@ -43,7 +43,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 
 class TestDeliveryNote(FrappeTestCase):
 	def test_over_billing_against_dn(self):
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 		dn = create_delivery_note(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, dn.name)
@@ -709,7 +709,7 @@ class TestDeliveryNote(FrappeTestCase):
 		# Testing if Customer's Purchase Order No was rightly copied
 		self.assertEqual(so.po_no, si.po_no)
 
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 		dn1 = make_delivery_note(so.name)
 		dn1.get("items")[0].qty = 2
@@ -741,7 +741,7 @@ class TestDeliveryNote(FrappeTestCase):
 			make_sales_invoice as make_sales_invoice_from_so,
 		)
 
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 		so = make_sales_order()
 
