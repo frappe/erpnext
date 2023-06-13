@@ -282,7 +282,6 @@
    "label": "Enable Common Party Accounting"
   },
   {
-<<<<<<< HEAD
     "default": "0",
     "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
     "fieldname": "allow_multi_currency_invoices_against_single_party_account",
@@ -295,130 +294,20 @@
     "fieldname": "book_tax_discount_loss",
     "fieldtype": "Check",
     "label": "Book Tax Loss on Early Payment Discount"
+   },
+   {
+    "default": "0",
+    "fieldname": "show_taxes_as_table_in_print",
+    "fieldtype": "Check",
+    "label": "Show Taxes as Table in Print"
    }
-=======
-   "fieldname": "enable_features_section",
-   "fieldtype": "Section Break",
-   "label": "Invoice Cancellation"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "asset_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Asset Settings"
-  },
-  {
-   "fieldname": "invoicing_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Credit Limits"
-  },
-  {
-   "fieldname": "assets_tab",
-   "fieldtype": "Tab Break",
-   "label": "Assets"
-  },
-  {
-   "fieldname": "closing_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Accounts Closing"
-  },
-  {
-   "fieldname": "pos_setting_section",
-   "fieldtype": "Section Break",
-   "label": "POS Setting"
-  },
-  {
-   "fieldname": "invoice_and_billing_tab",
-   "fieldtype": "Tab Break",
-   "label": "Invoice and Billing"
-  },
-  {
-   "fieldname": "invoicing_features_section",
-   "fieldtype": "Section Break",
-   "label": "Invoicing Features"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "pos_tab",
-   "fieldtype": "Tab Break",
-   "label": "POS"
-  },
-  {
-   "default": "0",
-   "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
-   "fieldname": "allow_multi_currency_invoices_against_single_party_account",
-   "fieldtype": "Check",
-   "label": "Allow multi-currency invoices against single party account "
-  },
-  {
-   "fieldname": "tab_break_dpet",
-   "fieldtype": "Tab Break",
-   "label": "Chart Of Accounts"
-  },
-  {
-   "default": "1",
-   "fieldname": "show_balance_in_coa",
-   "fieldtype": "Check",
-   "label": "Show Balances in Chart Of Accounts"
-  },
-  {
-   "default": "0",
-   "description": "Split Early Payment Discount Loss into Income and Tax Loss",
-   "fieldname": "book_tax_discount_loss",
-   "fieldtype": "Check",
-   "label": "Book Tax Loss on Early Payment Discount"
-  },
-  {
-   "fieldname": "journals_section",
-   "fieldtype": "Section Break",
-   "label": "Journals"
-  },
-  {
-   "default": "0",
-   "description": "Rows with Same Account heads will be merged on Ledger",
-   "fieldname": "merge_similar_account_heads",
-   "fieldtype": "Check",
-   "label": "Merge Similar Account Heads"
-  },
-  {
-   "fieldname": "section_break_jpd0",
-   "fieldtype": "Section Break",
-   "label": "Payment Reconciliations"
-  },
-  {
-   "default": "0",
-   "fieldname": "auto_reconcile_payments",
-   "fieldtype": "Check",
-   "label": "Auto Reconcile Payments"
-  },
-  {
-   "default": "0",
-   "fieldname": "show_taxes_as_table_in_print",
-   "fieldtype": "Check",
-   "label": "Show Taxes as Table in Print"
-  }
->>>>>>> 491a50a027 (fix: make showing taxes as table in print configurable (#35672))
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-04-14 17:22:03.680886",
-=======
  "modified": "2023-06-13 18:47:46.430291",
->>>>>>> 491a50a027 (fix: make showing taxes as table in print configurable (#35672))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
