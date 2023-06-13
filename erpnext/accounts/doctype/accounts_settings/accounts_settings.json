@@ -392,11 +392,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-04-21 13:11:37.130743",
-=======
  "modified": "2023-06-13 18:47:46.430291",
->>>>>>> 491a50a027 (fix: make showing taxes as table in print configurable (#35672))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
