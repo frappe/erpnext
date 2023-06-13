@@ -1664,13 +1664,9 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 	def test_advance_entries_as_liability(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-		from erpnext.accounts.party import get_party_account
 
-		frappe.db.set_value(
-			"Company",
-			"_Test Company",
-			{"book_advance_payments_as_liability": 1, "default_advance_paid_account": "Debtors - _TC"},
-		)
+		set_advance_flag(company="_Test Company", flag=1, default_account="Debtors - _TC")
+
 		pe = create_payment_entry(
 			company="_Test Company",
 			payment_type="Pay",
@@ -1678,34 +1674,48 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			party="_Test Supplier",
 			paid_from="Cash - _TC",
 			paid_to="Creditors - _TC",
-			paid_amount=1000,
+			paid_amount=500,
 		)
 		pe.submit()
 
 		pi = make_purchase_invoice(
-			company="_Test Company", customer="_Test Supplier", do_not_save=True, do_not_submit=True
+			company="_Test Company",
+			customer="_Test Supplier",
+			do_not_save=True,
+			do_not_submit=True,
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
 		)
-		pi.base_grand_total = 100
-		pi.grand_total = 100
+		pi.base_grand_total = 1000
+		pi.grand_total = 1000
 		pi.set_advances()
-		self.assertEqual(pi.advances[0].allocated_amount, 100)
-		pi.advances[0].allocated_amount = 50
-		pi.advances = [pi.advances[0]]
+		for advance in pi.advances:
+			advance.allocated_amount = 500 if advance.reference_name == pe.name else 0
 		pi.save()
 		pi.submit()
-		expected_gle = [
-			["Creditors - _TC", 50, 100, nowdate()],
-			["Debtors - _TC", 0.0, 50, nowdate()],
-			["Stock Received But Not Billed - _TC", 100, 0.0, nowdate()],
-		]
 
+		self.assertEqual(pi.advances[0].allocated_amount, 500)
+		expected_gle = [
+			["Creditors - _TC", 500, 1000, nowdate()],
+			["Debtors - _TC", 0.0, 500, nowdate()],
+			["Stock Received But Not Billed - _TC", 1000, 0.0, nowdate()],
+		]
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		self.assertEqual(pi.outstanding_amount, 200)
-		frappe.db.set_value(
-			"Company",
-			"_Test Company",
-			{"book_advance_payments_as_liability": 0, "default_advance_paid_account": ""},
-		)
+		self.assertEqual(pi.outstanding_amount, 500)
+
+		set_advance_flag(company="_Test Company", flag=0, default_account="")
+
+
+def set_advance_flag(company, flag, default_account):
+	frappe.db.set_value(
+		"Company",
+		company,
+		{
+			"book_advance_payments_as_liability": flag,
+			"default_advance_paid_account": default_account,
+		},
+	)
 
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):

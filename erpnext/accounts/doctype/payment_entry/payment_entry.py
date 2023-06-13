@@ -872,12 +872,12 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
-	def build_gl_map(self):
+	def build_gl_map(self, is_reconcile=False):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
 
 		gl_entries = []
-		self.add_party_gl_entries(gl_entries)
+		self.add_party_gl_entries(gl_entries, is_reconcile)
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
@@ -888,7 +888,7 @@ class PaymentEntry(AccountsController):
 		gl_entries = process_gl_map(gl_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
-	def add_party_gl_entries(self, gl_entries):
+	def add_party_gl_entries(self, gl_entries, is_reconcile):
 		if self.party_account:
 			if self.payment_type == "Receive":
 				against_account = self.paid_to
@@ -917,13 +917,14 @@ class PaymentEntry(AccountsController):
 					d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]
 					and book_advance_payments_as_liability
 				):
-					self.make_invoice_liability_entry(gl_entries, d)
-					gle.update(
-						{
-							"against_voucher_type": "Payment Entry",
-							"against_voucher": self.name,
-						}
-					)
+					if not is_reconcile:
+						self.make_invoice_liability_entry(gl_entries, d)
+						gle.update(
+							{
+								"against_voucher_type": "Payment Entry",
+								"against_voucher": self.name,
+							}
+						)
 
 				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
 				gle.update(

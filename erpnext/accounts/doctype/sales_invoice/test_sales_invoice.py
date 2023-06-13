@@ -3315,16 +3315,10 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_advance_entries_as_liability(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-		from erpnext.accounts.party import get_party_account
+		from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 
-		frappe.db.set_value(
-			"Company",
-			"_Test Company",
-			{
-				"book_advance_payments_as_liability": 1,
-				"default_advance_received_account": "Creditors - _TC",
-			},
-		)
+		set_advance_flag(company="_Test Company", flag=1, default_account="Creditors - _TC")
+
 		pe = create_payment_entry(
 			company="_Test Company",
 			payment_type="Receive",
@@ -3337,32 +3331,42 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 
 		si = create_sales_invoice(
-			company="_Test Company", customer="_Test Customer", do_not_save=True, do_not_submit=True
+			company="_Test Company",
+			customer="_Test Customer",
+			do_not_save=True,
+			do_not_submit=True,
+			rate=500,
+			price_list_rate=500,
 		)
-		si.base_grand_total = 100
-		si.grand_total = 100
+		si.base_grand_total = 500
+		si.grand_total = 500
 		si.set_advances()
-		self.assertEqual(si.advances[0].allocated_amount, 100)
-		si.advances[0].allocated_amount = 50
-		si.advances = [si.advances[0]]
+		for advance in si.advances:
+			advance.allocated_amount = 500 if advance.reference_name == pe.name else 0
 		si.save()
 		si.submit()
-		expected_gle = [
-			["Creditors - _TC", 50, 0.0, nowdate()],
-			["Debtors - _TC", 100, 50, nowdate()],
-			["Sales - _TC", 0.0, 100, nowdate()],
-		]
 
+		self.assertEqual(si.advances[0].allocated_amount, 500)
+		expected_gle = [
+			["Creditors - _TC", 500, 0.0, nowdate()],
+			["Debtors - _TC", 500, 500, nowdate()],
+			["Sales - _TC", 0.0, 500, nowdate()],
+		]
 		check_gl_entries(self, si.name, expected_gle, nowdate())
-		self.assertEqual(si.outstanding_amount, 50)
-		frappe.db.set_value(
-			"Company",
-			"_Test Company",
-			{
-				"book_advance_payments_as_liability": 0,
-				"default_advance_received_account": "",
-			},
-		)
+		self.assertEqual(si.outstanding_amount, 0)
+
+		set_advance_flag(company="_Test Company", flag=0, default_account="")
+
+
+def set_advance_flag(company, flag, default_account):
+	frappe.db.set_value(
+		"Company",
+		company,
+		{
+			"book_advance_payments_as_liability": flag,
+			"default_advance_received_account": default_account,
+		},
+	)
 
 
 def get_sales_invoice_for_e_invoice():

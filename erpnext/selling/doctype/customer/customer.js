@@ -39,7 +39,7 @@ frappe.ui.form.on("Customer", {
 			let d = locals[cdt][cdn];
 			return {
 				filters: {
-					"root_type": 'Liability',
+					"account_type": 'Payable',
 					"company": d.company,
 					"is_group": 0
 				}

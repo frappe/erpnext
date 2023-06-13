@@ -2940,10 +2940,8 @@ def make_advance_liability_entry(
 				dr_or_cr + "_in_account_currency": allocated_amount,
 				rev: 0,
 				rev + "_in_account_currency": 0,
-				"against_voucher": invoice.return_against
-				if cint(invoice.is_return) and invoice.return_against
-				else invoice.name,
-				"against_voucher_type": invoice.doctype,
+				"against_voucher": pe.name,
+				"against_voucher_type": "Payment Entry",
 				"cost_center": invoice.cost_center,
 				"project": invoice.project,
 				"voucher_type": voucher_type,
