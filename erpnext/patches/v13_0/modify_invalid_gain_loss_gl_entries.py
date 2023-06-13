@@ -47,7 +47,7 @@ def execute():
 
 	acc_frozen_upto = frappe.db.get_value("Accounts Settings", None, "acc_frozen_upto")
 	if acc_frozen_upto:
-		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	for invoice in purchase_invoices + sales_invoices:
 		try:
@@ -65,4 +65,4 @@ def execute():
 			print(f"Failed to correct gl entries of {invoice.name}")
 
 	if acc_frozen_upto:
-		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", acc_frozen_upto)
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", acc_frozen_upto)
