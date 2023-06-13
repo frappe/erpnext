@@ -999,8 +999,6 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue("is on hold" in str(err.exception).lower())
 
-<<<<<<< HEAD
-=======
 	def test_payment_entry_for_employee(self):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
 		create_payment_entry(party_type="Employee", party=employee, save=True)
@@ -1029,7 +1027,6 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
->>>>>>> 20de27d480 (fix(accounts): validate payment entry references with latest data. (#31166))
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
