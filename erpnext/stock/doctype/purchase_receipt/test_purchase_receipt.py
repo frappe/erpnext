@@ -27,7 +27,7 @@ from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 
 class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
-		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 	def test_purchase_receipt_received_qty(self):
 		"""
@@ -1925,7 +1925,7 @@ def make_purchase_receipt(**args):
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
 
-	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+	frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
 	pr.posting_date = args.posting_date or today()

@@ -190,7 +190,7 @@ def add_standard_navbar_items():
 
 
 def add_app_name():
-	frappe.db.set_value("System Settings", None, "app_name", "ERPNext")
+	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
 
 
 def setup_log_settings():
