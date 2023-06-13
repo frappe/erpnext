@@ -1804,7 +1804,7 @@ def set_depreciation_settings_in_company(company=None):
 	company.save()
 
 	# Enable booking asset depreciation entry automatically
-	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
+	frappe.db.set_single_value("Accounts Settings", "book_asset_depreciation_entry_automatically", 1)
 
 
 def enable_cwip_accounting(asset_category, enable=1):
