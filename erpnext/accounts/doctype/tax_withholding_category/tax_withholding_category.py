@@ -5,13 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import cint, getdate
-=======
-from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
->>>>>>> 937c0feefe (fix: Lower deduction certificate not getting applied (#35667))
 
 
 class TaxWithholdingCategory(Document):
@@ -526,10 +520,6 @@ def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net
 	tds_amount = 0
 	limit_consumed = frappe.db.get_value(
 		"Purchase Invoice",
-<<<<<<< HEAD
-		{"supplier": ("in", parties), "apply_tds": 1, "docstatus": 1},
-		"sum(net_total)",
-=======
 		{
 			"supplier": ("in", parties),
 			"apply_tds": 1,
@@ -537,7 +527,6 @@ def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net
 			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
 		},
 		"sum(tax_withholding_net_total)",
->>>>>>> 937c0feefe (fix: Lower deduction certificate not getting applied (#35667))
 	)
 
 	if is_valid_certificate(
