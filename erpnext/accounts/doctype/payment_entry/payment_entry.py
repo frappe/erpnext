@@ -151,8 +151,6 @@ class PaymentEntry(AccountsController):
 		if self.payment_type == "Internal Transfer":
 			return
 
-		fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
-
 		latest_references = get_outstanding_reference_documents(
 			{
 				"posting_date": self.posting_date,
@@ -161,7 +159,6 @@ class PaymentEntry(AccountsController):
 				"payment_type": self.payment_type,
 				"party": self.party,
 				"party_account": self.paid_from if self.payment_type == "Receive" else self.paid_to,
-				"cost_center": self.cost_center,
 			}
 		)
 
@@ -180,7 +177,10 @@ class PaymentEntry(AccountsController):
 					_("{0} {1} has already been fully paid.").format(d.reference_doctype, d.reference_name)
 				)
 			# The reference has already been partly paid
-			elif d.outstanding_amount != latest.outstanding_amount:
+			elif (
+				latest.outstanding_amount < latest.invoice_amount
+				and d.outstanding_amount != latest.outstanding_amount
+			):
 				frappe.throw(
 					_(
 						"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' button to get the latest outstanding amount."
@@ -188,6 +188,8 @@ class PaymentEntry(AccountsController):
 				)
 
 			d.outstanding_amount = latest.outstanding_amount
+
+			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
 			if (flt(d.allocated_amount)) > 0:
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
