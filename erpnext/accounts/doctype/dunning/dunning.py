@@ -76,21 +76,26 @@ def resolve_dunning(doc, state):
 	"""
 	for reference in doc.references:
 		if reference.reference_doctype == "Sales Invoice" and reference.outstanding_amount <= 0:
-			unresolved_dunnings = frappe.get_all("Dunning",
+			unresolved_dunnings = frappe.get_all(
+				"Dunning",
 				filters={
 					"sales_invoice": reference.reference_name,
 					"status": ("!=", "Resolved"),
 					"docstatus": ("!=", 2),
 				},
-				pluck="name"
+				pluck="name",
 			)
 
 			for dunning_name in unresolved_dunnings:
 				resolve = True
 				dunning = frappe.get_doc("Dunning", dunning_name)
 				for overdue_payment in dunning.overdue_payments:
-					outstanding_inv = frappe.get_value("Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount")
-					outstanding_ps = frappe.get_value("Payment Schedule", overdue_payment.payment_schedule, "outstanding")
+					outstanding_inv = frappe.get_value(
+						"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
+					)
+					outstanding_ps = frappe.get_value(
+						"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
+					)
 					if outstanding_ps > 0 and outstanding_inv > 0:
 						resolve = False
 
