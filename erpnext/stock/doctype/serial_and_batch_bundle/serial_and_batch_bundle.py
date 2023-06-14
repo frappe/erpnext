@@ -124,6 +124,7 @@ class SerialandBatchBundle(Document):
 	def set_incoming_rate(self, row=None, save=False):
 		if self.type_of_transaction not in ["Inward", "Outward"] or self.voucher_type in [
 			"Installation Note",
+			"Job Card",
 			"Maintenance Schedule",
 			"Pick List",
 		]:
@@ -569,6 +570,9 @@ class SerialandBatchBundle(Document):
 
 	@property
 	def child_table(self):
+		if self.voucher_type == "Job Card":
+			return
+
 		parent_child_map = {
 			"Asset Capitalization": "Asset Capitalization Stock Item",
 			"Asset Repair": "Asset Repair Consumed Item",
@@ -576,11 +580,11 @@ class SerialandBatchBundle(Document):
 			"Stock Entry": "Stock Entry Detail",
 		}
 
-		table = f"{self.voucher_type} Item"
-		if self.voucher_type in parent_child_map:
-			table = parent_child_map[self.voucher_type]
-
-		return table
+		return (
+			parent_child_map[self.voucher_type]
+			if self.voucher_type in parent_child_map
+			else f"{self.voucher_type} Item"
+		)
 
 	def delink_refernce_from_voucher(self):
 		or_filters = {"serial_and_batch_bundle": self.name}
