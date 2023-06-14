@@ -99,11 +99,11 @@ class PaymentEntry(AccountsController):
 		)
 		if not book_advance_payments_as_liability:
 			return
-		root_type = frappe.get_value(
-			"Account", {"name": self.party_account, "company": self.company}, "root_type"
+		account_type = frappe.get_value(
+			"Account", {"name": self.party_account, "company": self.company}, "account_type"
 		)
-		if (root_type == "Liability" and self.party_type == "Customer") or (
-			root_type == "Asset" and self.party_type == "Supplier"
+		if (account_type == "Payable" and self.party_type == "Customer") or (
+			account_type == "Receivable" and self.party_type == "Supplier"
 		):
 			return
 		if self.unallocated_amount == 0:
@@ -908,6 +908,8 @@ class PaymentEntry(AccountsController):
 				},
 				item=self,
 			)
+			is_advance = self.get_advance_flag()
+
 			for d in self.get("references"):
 				gle = party_dict.copy()
 				book_advance_payments_as_liability = frappe.get_value(
@@ -916,13 +918,14 @@ class PaymentEntry(AccountsController):
 				if (
 					d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]
 					and book_advance_payments_as_liability
+					and is_advance
 				):
 					if not is_reconcile:
 						self.make_invoice_liability_entry(gl_entries, d)
 						gle.update(
 							{
-								"against_voucher_type": "Payment Entry",
-								"against_voucher": self.name,
+								"voucher_type": "Payment Entry",
+								"voucher_no": self.name,
 							}
 						)
 
@@ -940,7 +943,6 @@ class PaymentEntry(AccountsController):
 							"against_voucher": d.reference_name,
 						}
 					)
-
 				gl_entries.append(gle)
 
 			if self.unallocated_amount:
@@ -952,12 +954,18 @@ class PaymentEntry(AccountsController):
 					{
 						dr_or_cr + "_in_account_currency": self.unallocated_amount,
 						dr_or_cr: base_unallocated_amount,
-						"against_voucher_type": "Payment Entry",
-						"against_voucher": self.name,
 					}
 				)
 
 				gl_entries.append(gle)
+
+	def get_advance_flag(self):
+		for d in self.get("references"):
+			if d.reference_doctype == "Sales Order":
+				return True
+		if self.unallocated_amount > 0:
+			return True
+		return False
 
 	def make_invoice_liability_entry(self, gl_entries, invoice):
 		args_dict = {
@@ -967,8 +975,6 @@ class PaymentEntry(AccountsController):
 			"cost_center": self.cost_center,
 			"voucher_type": invoice.reference_doctype,
 			"voucher_no": invoice.reference_name,
-			"against_voucher_type": invoice.reference_doctype,
-			"against_voucher": invoice.reference_name,
 		}
 
 		dr_or_cr = "credit" if invoice.reference_doctype == "Sales Invoice" else "debit"
@@ -987,6 +993,12 @@ class PaymentEntry(AccountsController):
 		args_dict["account"] = self.party_account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
+		args_dict.update(
+			{
+				"against_voucher_type": "Payment Entry",
+				"against_voucher": self.name,
+			}
+		)
 		gle = self.get_gl_dict(
 			args_dict,
 			item=self,
