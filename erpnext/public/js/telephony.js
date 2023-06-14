@@ -8,7 +8,7 @@ frappe.ui.form.ControlData = class ControlData extends frappe.ui.form.ControlDat
 			Object.values(this.frm.fields_dict).forEach(function(field) {
 				if (field.df.read_only === 1 && field.df.options === 'Phone'
 					&& field.disp_area.style[0] != 'display' && !field.has_icon) {
-					field.setup_phone();
+					field.setup_phone && field.setup_phone();
 					field.has_icon = true;
 				}
 			});
