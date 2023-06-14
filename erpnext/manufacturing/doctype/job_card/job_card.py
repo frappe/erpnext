@@ -161,7 +161,7 @@ class JobCard(Document):
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
 		for row in self.sub_operations:
-			self.total_completed_qty += row.completed_qty
+			self.c += row.completed_qty
 
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
@@ -451,6 +451,9 @@ class JobCard(Document):
 					},
 				)
 
+	def before_save(self):
+		self.set_process_loss()
+
 	def on_submit(self):
 		self.validate_transfer_qty()
 		self.validate_job_card()
@@ -487,17 +490,33 @@ class JobCard(Document):
 				)
 			)
 
-		if self.for_quantity and self.total_completed_qty != self.for_quantity:
+		precision = self.precision("total_completed_qty")
+		total_completed_qty = flt(
+			flt(self.total_completed_qty, precision) + flt(self.process_loss_qty, precision)
+		)
+
+		if self.for_quantity and flt(total_completed_qty, precision) != flt(
+			self.for_quantity, precision
+		):
 			total_completed_qty = bold(_("Total Completed Qty"))
 			qty_to_manufacture = bold(_("Qty to Manufacture"))
 
 			frappe.throw(
 				_("The {0} ({1}) must be equal to {2} ({3})").format(
 					total_completed_qty,
-					bold(self.total_completed_qty),
+					bold(flt(total_completed_qty, precision)),
 					qty_to_manufacture,
 					bold(self.for_quantity),
 				)
+			)
+
+	def set_process_loss(self):
+		precision = self.precision("total_completed_qty")
+
+		self.process_loss_qty = 0.0
+		if self.total_completed_qty and self.for_quantity > self.total_completed_qty:
+			self.process_loss_qty = flt(self.for_quantity, precision) - flt(
+				self.total_completed_qty, precision
 			)
 
 	def update_work_order(self):
@@ -511,7 +530,7 @@ class JobCard(Document):
 		):
 			return
 
-		for_quantity, time_in_mins = 0, 0
+		for_quantity, time_in_mins, process_loss_qty = 0, 0, 0
 		from_time_list, to_time_list = [], []
 
 		field = "operation_id"
@@ -519,6 +538,7 @@ class JobCard(Document):
 		if data and len(data) > 0:
 			for_quantity = flt(data[0].completed_qty)
 			time_in_mins = flt(data[0].time_in_mins)
+			process_loss_qty = flt(data[0].process_loss_qty)
 
 		wo = frappe.get_doc("Work Order", self.work_order)
 
@@ -526,8 +546,8 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
-			self.validate_produced_quantity(for_quantity, wo)
-			self.update_work_order_data(for_quantity, time_in_mins, wo)
+			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
+			self.update_work_order_data(for_quantity, process_loss_qty, time_in_mins, wo)
 
 	def update_corrective_in_work_order(self, wo):
 		wo.corrective_operation_cost = 0.0
@@ -542,11 +562,11 @@ class JobCard(Document):
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.save()
 
-	def validate_produced_quantity(self, for_quantity, wo):
+	def validate_produced_quantity(self, for_quantity, process_loss_qty, wo):
 		if self.docstatus < 2:
 			return
 
-		if wo.produced_qty > for_quantity:
+		if wo.produced_qty > for_quantity + process_loss_qty:
 			first_part_msg = _(
 				"The {0} {1} is used to calculate the valuation cost for the finished good {2}."
 			).format(
@@ -561,7 +581,7 @@ class JobCard(Document):
 				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
 			)
 
-	def update_work_order_data(self, for_quantity, time_in_mins, wo):
+	def update_work_order_data(self, for_quantity, process_loss_qty, time_in_mins, wo):
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
@@ -582,6 +602,7 @@ class JobCard(Document):
 		for data in wo.operations:
 			if data.get("name") == self.operation_id:
 				data.completed_qty = for_quantity
+				data.process_loss_qty = process_loss_qty
 				data.actual_operation_time = time_in_mins
 				data.actual_start_time = time_data[0].start_time if time_data else None
 				data.actual_end_time = time_data[0].end_time if time_data else None
@@ -599,7 +620,11 @@ class JobCard(Document):
 	def get_current_operation_data(self):
 		return frappe.get_all(
 			"Job Card",
-			fields=["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
+			fields=[
+				"sum(total_time_in_mins) as time_in_mins",
+				"sum(total_completed_qty) as completed_qty",
+				"sum(process_loss_qty) as process_loss_qty",
+			],
 			filters={
 				"docstatus": 1,
 				"work_order": self.work_order,
@@ -777,7 +802,7 @@ class JobCard(Document):
 
 		data = frappe.get_all(
 			"Work Order Operation",
-			fields=["operation", "status", "completed_qty"],
+			fields=["operation", "status", "completed_qty", "sequence_id"],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
@@ -794,6 +819,16 @@ class JobCard(Document):
 					),
 					OperationSequenceError,
 				)
+
+			if row.completed_qty < current_operation_qty:
+				msg = f"""The completed quantity {bold(current_operation_qty)}
+					of an operation {bold(self.operation)} cannot be greater
+					than the completed quantity {bold(row.completed_qty)}
+					of a previous operation
+					{bold(row.operation)}.
+				"""
+
+				frappe.throw(_(msg))
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():

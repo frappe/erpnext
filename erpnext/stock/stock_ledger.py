@@ -803,7 +803,7 @@ class update_entries_after(object):
 
 			for item in sr.items:
 				# Skip for Serial and Batch Items
-				if item.serial_no or item.batch_no:
+				if item.name != sle.voucher_detail_no or item.serial_no or item.batch_no:
 					continue
 
 				previous_sle = get_previous_sle(
