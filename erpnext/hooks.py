@@ -70,6 +70,8 @@ treeviews = [
 	"Department",
 ]
 
+demo_doctypes = ["items"]
+
 jinja = {
 	"methods": [
 		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
