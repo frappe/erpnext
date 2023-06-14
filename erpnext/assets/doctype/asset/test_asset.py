@@ -686,14 +686,14 @@ class TestDepreciationMethods(AssetSetup):
 			number_of_depreciations_booked=1,
 			opening_accumulated_depreciation=50000,
 			expected_value_after_useful_life=10000,
-			depreciation_start_date="2030-12-31",
+			depreciation_start_date="2031-12-31",
 			total_number_of_depreciations=3,
 			frequency_of_depreciation=12,
 		)
 
 		self.assertEqual(asset.status, "Draft")
 
-		expected_schedules = [["2030-12-31", 33333.50, 83333.50], ["2031-12-31", 6666.50, 90000.0]]
+		expected_schedules = [["2031-12-31", 33333.50, 83333.50], ["2032-12-31", 6666.50, 90000.0]]
 
 		schedules = [
 			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]

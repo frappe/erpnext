@@ -764,11 +764,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_grand_total")
 			);
 		}
-		this.frm.doc.payments.find(pay => {
-			if (pay.default) {
-				pay.amount = total_amount_to_pay;
-			}
-		});
+		if(!this.frm.doc.is_return){
+			this.frm.doc.payments.find(payment => {
+				if (payment.default) {
+					payment.amount = total_amount_to_pay;
+				}
+			});
+		}
 		this.frm.refresh_fields();
 	},
 

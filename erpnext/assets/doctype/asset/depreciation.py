@@ -8,6 +8,7 @@ from frappe.utils import (
 	add_months,
 	cint,
 	flt,
+	get_first_day,
 	get_last_day,
 	get_link_to_form,
 	getdate,
@@ -543,3 +544,9 @@ def is_last_day_of_the_month(date):
 	last_day_of_the_month = get_last_day(date)
 
 	return getdate(last_day_of_the_month) == getdate(date)
+
+
+def is_first_day_of_the_month(date):
+	first_day_of_the_month = get_first_day(date)
+
+	return getdate(first_day_of_the_month) == getdate(date)
