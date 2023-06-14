@@ -1850,22 +1850,28 @@ def get_payment_entry(
 		else:
 			if dt == "Dunning":
 				for overdue_payment in doc.overdue_payments:
-					pe.append("references", {
-						"reference_doctype": "Sales Invoice",
-						"reference_name": overdue_payment.sales_invoice,
-						"payment_term": overdue_payment.payment_term,
-						"due_date": overdue_payment.due_date,
-						"total_amount": overdue_payment.outstanding,
-						"outstanding_amount": overdue_payment.outstanding,
-						"allocated_amount": overdue_payment.outstanding
-					})
+					pe.append(
+						"references",
+						{
+							"reference_doctype": "Sales Invoice",
+							"reference_name": overdue_payment.sales_invoice,
+							"payment_term": overdue_payment.payment_term,
+							"due_date": overdue_payment.due_date,
+							"total_amount": overdue_payment.outstanding,
+							"outstanding_amount": overdue_payment.outstanding,
+							"allocated_amount": overdue_payment.outstanding,
+						},
+					)
 
-				pe.append("deductions", {
-					"account": doc.income_account,
-					"cost_center": doc.cost_center,
-					"amount": -1 * doc.dunning_amount,
-					"description": _("Interest and/or dunning fee")
-				})
+				pe.append(
+					"deductions",
+					{
+						"account": doc.income_account,
+						"cost_center": doc.cost_center,
+						"amount": -1 * doc.dunning_amount,
+						"description": _("Interest and/or dunning fee"),
+					},
+				)
 			else:
 				pe.append(
 					"references",
@@ -1957,8 +1963,10 @@ def set_party_account_currency(dt, party_account, doc):
 
 def set_payment_type(dt, doc):
 	if (
-		dt == "Sales Order" or (dt == "Sales Invoice" and doc.outstanding_amount > 0)
-	) or (dt == "Purchase Invoice" and doc.outstanding_amount < 0) or dt == "Dunning":
+		(dt == "Sales Order" or (dt == "Sales Invoice" and doc.outstanding_amount > 0))
+		or (dt == "Purchase Invoice" and doc.outstanding_amount < 0)
+		or dt == "Dunning"
+	):
 		payment_type = "Receive"
 	else:
 		payment_type = "Pay"

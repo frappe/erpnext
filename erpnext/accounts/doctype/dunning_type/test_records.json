@@ -14,7 +14,7 @@
             }
         ],
         "income_account": "Sales - _TC",
-        "cost_center": "_Test Cost Center"
+        "cost_center": "_Test Cost Center - _TC"
     },
     {
         "doctype": "Dunning Type",
@@ -31,6 +31,6 @@
             }
         ],
         "income_account": "Sales - _TC",
-        "cost_center": "_Test Cost Center"
+        "cost_center": "_Test Cost Center - _TC"
     }
 ]

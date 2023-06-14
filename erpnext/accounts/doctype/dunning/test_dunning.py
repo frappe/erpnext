@@ -112,13 +112,16 @@ def create_dunning_type(title, fee, interest, is_default):
 
 
 def get_income_account(company):
-	return frappe.get_value("Company", company, "default_income_account") or frappe.get_all(
-		"Account",
-		filters={"is_group": 0, "company": company},
-		or_filters={
-			"report_type": "Profit and Loss",
-			"account_type": ("in", ("Income Account", "Temporary")),
-		},
-		limit=1,
-		pluck="name",
-	)[0]
+	return (
+		frappe.get_value("Company", company, "default_income_account")
+		or frappe.get_all(
+			"Account",
+			filters={"is_group": 0, "company": company},
+			or_filters={
+				"report_type": "Profit and Loss",
+				"account_type": ("in", ("Income Account", "Temporary")),
+			},
+			limit=1,
+			pluck="name",
+		)[0]
+	)

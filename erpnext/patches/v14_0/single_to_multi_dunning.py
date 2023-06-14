@@ -18,7 +18,8 @@ def execute():
 			# something's already here, doesn't need patching
 			continue
 
-		payment_schedules = frappe.get_all("Payment Schedule",
+		payment_schedules = frappe.get_all(
+			"Payment Schedule",
 			filters={"parent": dunning.sales_invoice},
 			fields=[
 				"parent as sales_invoice",
@@ -30,8 +31,8 @@ def execute():
 				# at the time of creating this dunning, the full amount was outstanding
 				"payment_amount as outstanding",
 				"'0' as paid_amount",
-				"discounted_amount"
-			]
+				"discounted_amount",
+			],
 		)
 
 		dunning.extend("overdue_payments", payment_schedules)

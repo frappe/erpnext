@@ -23,7 +23,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class Dunning(AccountsController):
-
 	def validate(self):
 		self.validate_same_currency()
 		self.validate_overdue_payments()
@@ -37,7 +36,11 @@ class Dunning(AccountsController):
 		for row in self.overdue_payments:
 			invoice_currency = frappe.get_value("Sales Invoice", row.sales_invoice, "currency")
 			if invoice_currency != self.currency:
-				frappe.throw(_("The currency of invoice {} ({}) is different from the currency of this dunning ({}).").format(row.sales_invoice, invoice_currency, self.currency))
+				frappe.throw(
+					_(
+						"The currency of invoice {} ({}) is different from the currency of this dunning ({})."
+					).format(row.sales_invoice, invoice_currency, self.currency)
+				)
 
 	def validate_overdue_payments(self):
 		daily_interest = self.rate_of_interest / 100 / 365
@@ -55,12 +58,13 @@ class Dunning(AccountsController):
 
 	def set_dunning_level(self):
 		for row in self.overdue_payments:
-			past_dunnings = frappe.get_all("Overdue Payment",
+			past_dunnings = frappe.get_all(
+				"Overdue Payment",
 				filters={
 					"payment_schedule": row.payment_schedule,
 					"parent": ("!=", row.parent),
-					"docstatus": 1
-				}
+					"docstatus": 1,
+				},
 			)
 			row.dunning_level = len(past_dunnings) + 1
 
@@ -72,28 +76,32 @@ def resolve_dunning(doc, state):
 	"""
 	for reference in doc.references:
 		if reference.reference_doctype == "Sales Invoice" and reference.outstanding_amount <= 0:
-			unresolved_dunnings = frappe.get_all("Dunning",
+			unresolved_dunnings = frappe.get_all(
+				"Dunning",
 				filters={
 					"sales_invoice": reference.reference_name,
 					"status": ("!=", "Resolved"),
 					"docstatus": ("!=", 2),
 				},
-				pluck="name"
+				pluck="name",
 			)
 
 			for dunning_name in unresolved_dunnings:
 				resolve = True
 				dunning = frappe.get_doc("Dunning", dunning_name)
 				for overdue_payment in dunning.overdue_payments:
-					outstanding_inv = frappe.get_value("Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount")
-					outstanding_ps = frappe.get_value("Payment Schedule", overdue_payment.payment_schedule, "outstanding")
+					outstanding_inv = frappe.get_value(
+						"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
+					)
+					outstanding_ps = frappe.get_value(
+						"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
+					)
 					if outstanding_ps > 0 and outstanding_inv > 0:
 						resolve = False
 
 				if resolve:
 					dunning.status = "Resolved"
 					dunning.save()
-
 
 
 @frappe.whitelist()

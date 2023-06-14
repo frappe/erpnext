@@ -622,7 +622,9 @@ class SalesInvoice(SellingController):
 			return
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company', self.company, 'default_cash_account')
+			self.account_for_change_amount = frappe.get_cached_value(
+				"Company", self.company, "default_cash_account"
+			)
 
 		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 
@@ -1907,17 +1909,17 @@ def get_bank_cash_account(mode_of_payment, company):
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name, target_doc=None):
-	doclist = get_mapped_doc("Sales Invoice", source_name, {
-		"Sales Invoice": {
-			"doctype": "Maintenance Schedule",
-			"validation": {
-				"docstatus": ["=", 1]
-			}
+	doclist = get_mapped_doc(
+		"Sales Invoice",
+		source_name,
+		{
+			"Sales Invoice": {"doctype": "Maintenance Schedule", "validation": {"docstatus": ["=", 1]}},
+			"Sales Invoice Item": {
+				"doctype": "Maintenance Schedule Item",
+			},
 		},
-		"Sales Invoice Item": {
-			"doctype": "Maintenance Schedule Item",
-		},
-	}, target_doc)
+		target_doc,
+	)
 
 	return doclist
 
@@ -2523,9 +2525,7 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			target.income_account = dunning_type.income_account
 			target.cost_center = dunning_type.cost_center
 			letter_text = get_dunning_letter_text(
-				dunning_type=dunning_type.name,
-				doc=target.as_dict(),
-				language=source.language
+				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
 			)
 
 			if letter_text:
@@ -2542,24 +2542,17 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 		table_maps={
 			"Sales Invoice": {
 				"doctype": "Dunning",
-				"field_map": {
-					"customer_address": "customer_address",
-					"parent": "sales_invoice"
-				},
+				"field_map": {"customer_address": "customer_address", "parent": "sales_invoice"},
 			},
 			"Payment Schedule": {
 				"doctype": "Overdue Payment",
-				"field_map": {
-					"name": "payment_schedule",
-					"parent": "sales_invoice"
-				},
+				"field_map": {"name": "payment_schedule", "parent": "sales_invoice"},
 				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
-			}
+			},
 		},
 		postprocess=postprocess_dunning,
-		ignore_permissions=ignore_permissions
+		ignore_permissions=ignore_permissions,
 	)
-
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):
