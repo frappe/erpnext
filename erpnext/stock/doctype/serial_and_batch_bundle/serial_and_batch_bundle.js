@@ -161,6 +161,23 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 					'istable': 0,
 					'issingle': 0,
 					'is_submittable': 1,
+					'name': ['in', [
+						"Asset Capitalization",
+						"Asset Repair",
+						"Delivery Note",
+						"Installation Note",
+						"Job Card",
+						"Maintenance Schedule",
+						"POS Invoice",
+						"Pick List",
+						"Purchase Invoice",
+						"Purchase Receipt",
+						"Quotation",
+						"Sales Invoice",
+						"Stock Entry",
+						"Stock Reconciliation",
+						"Subcontracting Receipt",
+					]],
 				}
 			};
 		});
@@ -194,6 +211,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			return {
 				filters: {
 					item: frm.doc.item_code,
+					disabled: 0,
 				}
 			};
 		});

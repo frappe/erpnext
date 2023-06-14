@@ -12,6 +12,7 @@ frappe.ui.form.on('Pick List', {
 			'Delivery Note': 'Delivery Note',
 			'Stock Entry': 'Stock Entry',
 		};
+
 		frm.set_query('parent_warehouse', () => {
 			return {
 				filters: {
@@ -20,6 +21,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('work_order', () => {
 			return {
 				query: 'erpnext.stock.doctype.pick_list.pick_list.get_pending_work_orders',
@@ -28,6 +30,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('material_request', () => {
 			return {
 				filters: {
@@ -35,9 +38,11 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('item_code', 'locations', () => {
 			return erpnext.queries.item({ "is_stock_item": 1 });
 		});
+
 		frm.set_query('batch_no', 'locations', (frm, cdt, cdn) => {
 			const row = locals[cdt][cdn];
 			return {
@@ -47,6 +52,18 @@ frappe.ui.form.on('Pick List', {
 					warehouse: row.warehouse
 				},
 			};
+		});
+
+		frm.set_query("serial_and_batch_bundle", "locations", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
 		});
 	},
 	set_item_locations:(frm, save) => {

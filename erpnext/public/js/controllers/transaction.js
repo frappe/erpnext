@@ -130,6 +130,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						'item_code': item_row.item_code,
 						'voucher_type': doc.doctype,
 						'voucher_no': ["in", [doc.name, ""]],
+						'is_cancelled': 0,
 					}
 				}
 			});
