@@ -924,8 +924,8 @@ class PaymentEntry(AccountsController):
 						self.make_invoice_liability_entry(gl_entries, d)
 						gle.update(
 							{
-								"voucher_type": "Payment Entry",
-								"voucher_no": self.name,
+								"against_voucher_type": "Payment Entry",
+								"against_voucher": self.name,
 							}
 						)
 
@@ -973,14 +973,20 @@ class PaymentEntry(AccountsController):
 			"party": self.party,
 			"account_currency": self.party_account_currency,
 			"cost_center": self.cost_center,
-			"voucher_type": invoice.reference_doctype,
-			"voucher_no": invoice.reference_name,
+			"voucher_type": "Payment Entry",
+			"voucher_no": self.name,
 		}
 
 		dr_or_cr = "credit" if invoice.reference_doctype == "Sales Invoice" else "debit"
 		args_dict["account"] = invoice.account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
+		args_dict.update(
+			{
+				"against_voucher_type": invoice.reference_doctype,
+				"against_voucher": invoice.reference_name,
+			}
+		)
 		gle = self.get_gl_dict(
 			args_dict,
 			item=self,
