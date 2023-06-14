@@ -158,7 +158,8 @@ class SalesOrder(SellingController):
 						frappe.msgprint(
 							_("Expected Delivery Date should be after Sales Order Date"),
 							indicator="orange",
-							title=_("Warning"),
+							title=_("Invalid Delivery Date"),
+							raise_exception=True,
 						)
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
