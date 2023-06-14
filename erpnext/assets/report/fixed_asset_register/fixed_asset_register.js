@@ -24,7 +24,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 			"label": __("Period Based On"),
 			"fieldtype": "Select",
 			"options": ["Fiscal Year", "Date Range"],
-			"default": ["Fiscal Year"],
+			"default": "Fiscal Year",
 			"reqd": 1
 		},
 		{
@@ -76,12 +76,6 @@ frappe.query_reports["Fixed Asset Register"] = {
 			options: "Asset Category"
 		},
 		{
-			fieldname:"finance_book",
-			label: __("Finance Book"),
-			fieldtype: "Link",
-			options: "Finance Book"
-		},
-		{
 			fieldname:"cost_center",
 			label: __("Cost Center"),
 			fieldtype: "Link",
@@ -96,8 +90,20 @@ frappe.query_reports["Fixed Asset Register"] = {
 			reqd: 1
 		},
 		{
-			fieldname:"is_existing_asset",
-			label: __("Is Existing Asset"),
+			fieldname:"finance_book",
+			label: __("Finance Book"),
+			fieldtype: "Link",
+			options: "Finance Book",
+			depends_on: "eval: doc.filter_by_finance_book == 1",
+		},
+		{
+			fieldname:"filter_by_finance_book",
+			label: __("Filter by Finance Book"),
+			fieldtype: "Check"
+		},
+		{
+			fieldname:"only_existing_assets",
+			label: __("Only existing assets"),
 			fieldtype: "Check"
 		},
 	]

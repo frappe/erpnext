@@ -15,6 +15,7 @@
   "projected_qty",
   "reserved_qty_for_production",
   "reserved_qty_for_sub_contract",
+  "reserved_qty_for_production_plan",
   "ma_rate",
   "stock_uom",
   "fcfs_rate",
@@ -165,13 +166,19 @@
    "oldfieldname": "stock_value",
    "oldfieldtype": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production_plan",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production Plan",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2022-03-30 07:22:23.868602",
+ "modified": "2023-05-02 23:26:21.806965",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",

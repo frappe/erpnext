@@ -13,7 +13,7 @@ frappe.ui.form.on('Quotation', {
 		frm.set_query("quotation_to", function() {
 			return{
 				"filters": {
-					"name": ["in", ["Customer", "Lead"]],
+					"name": ["in", ["Customer", "Lead", "Prospect"]],
 				}
 			}
 		});
@@ -160,19 +160,16 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 
 	set_dynamic_field_label(){
-		if (this.frm.doc.quotation_to == "Customer")
-		{
+		if (this.frm.doc.quotation_to == "Customer") {
 			this.frm.set_df_property("party_name", "label", "Customer");
 			this.frm.fields_dict.party_name.get_query = null;
-		}
-
-		if (this.frm.doc.quotation_to == "Lead")
-		{
+		} else if (this.frm.doc.quotation_to == "Lead") {
 			this.frm.set_df_property("party_name", "label", "Lead");
-
 			this.frm.fields_dict.party_name.get_query = function() {
 				return{	query: "erpnext.controllers.queries.lead_query" }
 			}
+		} else if (this.frm.doc.quotation_to == "Prospect") {
+			this.frm.set_df_property("party_name", "label", "Prospect");
 		}
 	}
 
@@ -304,6 +301,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					fieldname: "alternative_items",
 					fieldtype: "Table",
 					cannot_add_rows: true,
+					cannot_delete_rows: true,
 					in_place_edit: true,
 					reqd: 1,
 					data: this.data,
@@ -330,7 +328,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		dialog.fields_dict.info.$wrapper.html(
 			`<p class="small text-muted">
 				<span class="indicator yellow"></span>
-				Alternative Items
+				${__("Alternative Items")}
 			</p>`
 		)
 		dialog.show();

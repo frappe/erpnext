@@ -31,7 +31,6 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_data(self, args):
 		self.data = []
-
 		self.receivables = ReceivablePayableReport(self.filters).run(args)[1]
 
 		self.get_party_total(args)
@@ -42,6 +41,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				self.filters.report_date,
 				self.filters.show_future_payments,
 				self.filters.company,
+				party=self.filters.get(scrub(self.party_type)),
 			)
 			or {}
 		)
@@ -73,6 +73,9 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			if self.filters.show_gl_balance:
 				row.gl_balance = gl_balance_map.get(party)
 				row.diff = flt(row.outstanding) - flt(row.gl_balance)
+
+			if self.filters.show_future_payments:
+				row.remaining_balance = flt(row.outstanding) - flt(row.future_amount)
 
 			self.data.append(row)
 
@@ -106,6 +109,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range4": 0.0,
 					"range5": 0.0,
 					"total_due": 0.0,
+					"future_amount": 0.0,
 					"sales_person": [],
 				}
 			),
@@ -150,6 +154,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.add_column(_("Difference"), fieldname="diff")
 
 		self.setup_ageing_columns()
+
+		if self.filters.show_future_payments:
+			self.add_column(label=_("Future Payment Amount"), fieldname="future_amount")
+			self.add_column(label=_("Remaining Balance"), fieldname="remaining_balance")
 
 		if self.party_type == "Customer":
 			self.add_column(

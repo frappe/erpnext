@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
+from frappe.utils.deprecations import deprecated
 from pypika import functions as fn
 
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -67,8 +68,15 @@ def get_columns(filters):
 	return columns
 
 
-# get all details
 def get_stock_ledger_entries(filters):
+	entries = get_stock_ledger_entries_for_batch_no(filters)
+
+	entries += get_stock_ledger_entries_for_batch_bundle(filters)
+	return entries
+
+
+@deprecated
+def get_stock_ledger_entries_for_batch_no(filters):
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
 	if not filters.get("to_date"):
@@ -99,7 +107,43 @@ def get_stock_ledger_entries(filters):
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
 
-	return query.run(as_dict=True)
+	return query.run(as_dict=True) or []
+
+
+def get_stock_ledger_entries_for_batch_bundle(filters):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	batch_package = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = (
+		frappe.qb.from_(sle)
+		.inner_join(batch_package)
+		.on(batch_package.parent == sle.serial_and_batch_bundle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			batch_package.batch_no,
+			sle.posting_date,
+			fn.Sum(batch_package.qty).as_("actual_qty"),
+		)
+		.where(
+			(sle.docstatus < 2)
+			& (sle.is_cancelled == 0)
+			& (sle.has_batch_no == 1)
+			& (sle.posting_date <= filters["to_date"])
+		)
+		.groupby(batch_package.batch_no, batch_package.warehouse)
+		.orderby(sle.item_code, sle.warehouse)
+	)
+
+	query = apply_warehouse_filter(query, sle, filters)
+	for field in ["item_code", "batch_no", "company"]:
+		if filters.get(field):
+			if field == "batch_no":
+				query = query.where(batch_package[field] == filters.get(field))
+			else:
+				query = query.where(sle[field] == filters.get(field))
+
+	return query.run(as_dict=True) or []
 
 
 def get_item_warehouse_batch_map(filters, float_precision):

@@ -92,7 +92,7 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
-		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
+		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
 
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
@@ -581,7 +581,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 
 	def test_group_same_items(self):
-		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 		frappe.get_doc(
 			{
 				"doctype": "Purchase Order",
@@ -836,8 +836,8 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
-		frappe.db.set_value("Selling Settings", None, "maintain_same_sales_rate", 1)
-		frappe.db.set_value("Buying Settings", None, "maintain_same_rate", 1)
+		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"

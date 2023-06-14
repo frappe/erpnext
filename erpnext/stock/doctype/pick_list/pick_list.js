@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty === 0) ? "red" : "green"; });
 

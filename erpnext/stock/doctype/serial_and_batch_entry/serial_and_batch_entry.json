@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "creation": "2022-09-29 14:55:15.909881",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "serial_no",
+  "batch_no",
+  "column_break_2",
+  "qty",
+  "warehouse",
+  "section_break_6",
+  "incoming_rate",
+  "column_break_8",
+  "outgoing_rate",
+  "stock_value_difference",
+  "is_outward",
+  "stock_queue"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:parent.has_serial_no == 1",
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Serial No",
+   "mandatory_depends_on": "eval:parent.has_serial_no == 1",
+   "options": "Serial No",
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:parent.has_batch_no == 1",
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Batch No",
+   "mandatory_depends_on": "eval:parent.has_batch_no == 1",
+   "options": "Batch",
+   "search_index": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Rate Section"
+  },
+  {
+   "fieldname": "incoming_rate",
+   "fieldtype": "Float",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "read_only": 1,
+   "read_only_depends_on": "eval:parent.type_of_transaction == \"Outward\""
+  },
+  {
+   "fieldname": "outgoing_rate",
+   "fieldtype": "Float",
+   "label": "Outgoing Rate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_value_difference",
+   "fieldtype": "Float",
+   "label": "Change in Stock Value",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_outward",
+   "fieldtype": "Check",
+   "label": "Is Outward",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_queue",
+   "fieldtype": "Small Text",
+   "label": "FIFO Stock Queue (qty, rate)",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-03-31 11:18:59.809486",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial and Batch Entry",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

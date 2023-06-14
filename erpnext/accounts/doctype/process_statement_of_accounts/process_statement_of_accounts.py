@@ -158,7 +158,7 @@ def get_customers_based_on_territory_or_customer_group(customer_collection, coll
 	return frappe.get_list(
 		"Customer",
 		fields=["name", "customer_name", "email_id"],
-		filters=[[fields_dict[customer_collection], "IN", selected]],
+		filters=[["disabled", "=", 0], [fields_dict[customer_collection], "IN", selected]],
 	)
 
 
@@ -334,7 +334,7 @@ def send_emails(document_name, from_scheduler=False):
 				queue="short",
 				method=frappe.sendmail,
 				recipients=recipients,
-				sender=frappe.session.user,
+				sender=doc.sender or frappe.session.user,
 				cc=cc,
 				subject=subject,
 				message=message,

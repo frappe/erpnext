@@ -25,6 +25,7 @@
   "consumed_qty",
   "current_stock",
   "secbreak_3",
+  "serial_and_batch_bundle",
   "batch_no",
   "col_break4",
   "serial_no",
@@ -32,6 +33,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "main_item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -40,6 +42,7 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "rm_item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -61,27 +64,31 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "no_copy": 1,
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_break1",
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "required_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Required Qty",
    "print_hide": 1,
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "consumed_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -99,6 +106,7 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Rate",
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -121,7 +129,6 @@
   {
    "fieldname": "current_stock",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Current Stock",
    "read_only": 1
   },
@@ -185,16 +192,25 @@
    "default": "0",
    "fieldname": "available_qty_for_consumption",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Available Qty For Consumption",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Serial / Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-07 17:17:21.670761",
+ "modified": "2023-03-15 13:55:08.132626",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Supplied Item",

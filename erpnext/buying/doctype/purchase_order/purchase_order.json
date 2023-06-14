@@ -157,7 +157,7 @@
   "party_account_currency",
   "inter_company_order_reference",
   "is_old_subcontracting_flow",
-  "dashboard"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -322,6 +322,7 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Customer Mobile No",
+   "options": "Phone",
    "print_hide": 1
   },
   {
@@ -368,6 +369,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Contact Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -495,6 +497,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Purchase Order Item",
@@ -1100,8 +1103,7 @@
   {
    "fieldname": "before_items_section",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "Items"
+   "hide_border": 1
   },
   {
    "fieldname": "items_col_break",
@@ -1185,12 +1187,6 @@
    "label": "More Info"
   },
   {
-   "fieldname": "dashboard",
-   "fieldtype": "Tab Break",
-   "label": "Dashboard",
-   "show_dashboard": 1
-  },
-  {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
@@ -1265,13 +1261,19 @@
    "fieldname": "shipping_address_section",
    "fieldtype": "Section Break",
    "label": "Shipping Address"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-28 18:59:16.322824",
+ "modified": "2023-06-03 16:19:45.710444",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

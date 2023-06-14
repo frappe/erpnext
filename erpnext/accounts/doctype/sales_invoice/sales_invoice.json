@@ -79,6 +79,7 @@
   "column_break5",
   "grand_total",
   "rounding_adjustment",
+  "use_company_roundoff_cost_center",
   "rounded_total",
   "in_words",
   "total_advance",
@@ -120,6 +121,7 @@
   "account_for_change_amount",
   "advances_section",
   "allocate_advances_automatically",
+  "only_include_allocated_payments",
   "get_advances",
   "advances",
   "write_off_section",
@@ -518,6 +520,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -2126,6 +2129,20 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "depends_on": "allocate_advances_automatically",
+   "description": "Advance payments allocated against orders will only be fetched",
+   "fieldname": "only_include_allocated_payments",
+   "fieldtype": "Check",
+   "label": "Only Include Allocated Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_company_roundoff_cost_center",
+   "fieldtype": "Check",
+   "label": "Use Company default Cost Center for Round off"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2138,7 +2155,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-03-13 11:43:15.883055",
+ "modified": "2023-06-03 16:22:16.219333",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

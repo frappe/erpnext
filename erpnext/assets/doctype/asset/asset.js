@@ -41,6 +41,8 @@ frappe.ui.form.on('Asset', {
 	},
 
 	setup: function(frm) {
+		frm.ignore_doctypes_on_cancel_all = ['Journal Entry'];
+
 		frm.make_methods = {
 			'Asset Movement': () => {
 				frappe.call({
@@ -465,6 +467,9 @@ frappe.ui.form.on('Asset', {
 			frm.set_value('purchase_date', purchase_doc.bill_date);
 		} else {
 			frm.set_value('purchase_date', purchase_doc.posting_date);
+		}
+		if (!frm.doc.is_existing_asset && !frm.doc.available_for_use_date) {
+			frm.set_value('available_for_use_date', frm.doc.purchase_date);
 		}
 		const item = purchase_doc.items.find(item => item.item_code === frm.doc.item_code);
 		if (!item) {

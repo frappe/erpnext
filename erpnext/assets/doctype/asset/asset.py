@@ -8,16 +8,12 @@ import math
 import frappe
 from frappe import _
 from frappe.utils import (
-	add_months,
 	cint,
-	date_diff,
 	flt,
 	get_datetime,
 	get_last_day,
 	get_link_to_form,
 	getdate,
-	is_last_day_of_the_month,
-	month_diff,
 	nowdate,
 	today,
 )
@@ -239,30 +235,6 @@ class Asset(AccountsController):
 				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
 			)
 
-	# if it returns True, depreciation_amount will not be equal for the first and last rows
-	def check_is_pro_rata(self, row):
-		has_pro_rata = False
-
-		# if not existing asset, from_date = available_for_use_date
-		# otherwise, if number_of_depreciations_booked = 2, available_for_use_date = 01/01/2020 and frequency_of_depreciation = 12
-		# from_date = 01/01/2022
-		from_date = self.get_modified_available_for_use_date(row)
-		days = date_diff(row.depreciation_start_date, from_date) + 1
-
-		# if frequency_of_depreciation is 12 months, total_days = 365
-		total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
-
-		if days < total_days:
-			has_pro_rata = True
-
-		return has_pro_rata
-
-	def get_modified_available_for_use_date(self, row):
-		return add_months(
-			self.available_for_use_date,
-			(self.number_of_depreciations_booked * row.frequency_of_depreciation),
-		)
-
 	def validate_asset_finance_books(self, row):
 		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(
@@ -471,25 +443,6 @@ class Asset(AccountsController):
 
 		return records
 
-	@erpnext.allow_regional
-	def get_depreciation_amount(self, depreciable_value, fb_row):
-		if fb_row.depreciation_method in ("Straight Line", "Manual"):
-			# if the Depreciation Schedule is being prepared for the first time
-			if not self.flags.increase_in_asset_life:
-				depreciation_amount = (
-					flt(self.gross_purchase_amount) - flt(fb_row.expected_value_after_useful_life)
-				) / flt(fb_row.total_number_of_depreciations)
-
-			# if the Depreciation Schedule is being modified after Asset Repair
-			else:
-				depreciation_amount = (
-					flt(fb_row.value_after_depreciation) - flt(fb_row.expected_value_after_useful_life)
-				) / (date_diff(self.to_date, self.available_for_use_date) / 365)
-		else:
-			depreciation_amount = flt(depreciable_value * (flt(fb_row.rate_of_depreciation) / 100))
-
-		return depreciation_amount
-
 	def validate_make_gl_entry(self):
 		purchase_document = self.get_purchase_document()
 		if not purchase_document:
@@ -614,22 +567,41 @@ class Asset(AccountsController):
 		float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 		if args.get("depreciation_method") == "Double Declining Balance":
-			return 200.0 / args.get("total_number_of_depreciations")
+			return 200.0 / (
+				(
+					flt(args.get("total_number_of_depreciations"), 2) * flt(args.get("frequency_of_depreciation"))
+				)
+				/ 12
+			)
 
 		if args.get("depreciation_method") == "Written Down Value":
-			if args.get("rate_of_depreciation") and on_validate:
+			if (
+				args.get("rate_of_depreciation")
+				and on_validate
+				and not self.flags.increase_in_asset_value_due_to_repair
+			):
 				return args.get("rate_of_depreciation")
 
-			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
-			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
+			if self.flags.increase_in_asset_value_due_to_repair:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(
+					args.get("value_after_depreciation")
+				)
+			else:
+				value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+
+			depreciation_rate = math.pow(
+				value,
+				1.0
+				/ (
+					(
+						flt(args.get("total_number_of_depreciations"), 2)
+						* flt(args.get("frequency_of_depreciation"))
+					)
+					/ 12
+				),
+			)
+
 			return flt((100 * (1 - depreciation_rate)), float_precision)
-
-	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
-		days = date_diff(to_date, from_date)
-		months = month_diff(to_date, from_date)
-		total_days = get_total_days(to_date, row.frequency_of_depreciation)
-
-		return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
 
 def update_maintenance_status():
@@ -811,7 +783,7 @@ def make_journal_entry(asset_name):
 	je.voucher_type = "Depreciation Entry"
 	je.naming_series = depreciation_series
 	je.company = asset.company
-	je.remark = "Depreciation Entry against asset {0}".format(asset_name)
+	je.remark = _("Depreciation Entry against asset {0}").format(asset_name)
 
 	je.append(
 		"accounts",
@@ -872,15 +844,6 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
 
 	return asset.get_value_after_depreciation(finance_book)
-
-
-def get_total_days(date, frequency):
-	period_start_date = add_months(date, cint(frequency) * -1)
-
-	if is_last_day_of_the_month(date):
-		period_start_date = get_last_day(period_start_date)
-
-	return date_diff(date, period_start_date)
 
 
 @frappe.whitelist()

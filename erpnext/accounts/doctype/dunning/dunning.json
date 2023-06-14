@@ -245,6 +245,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -315,10 +316,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 18:55:43.683053",
+ "modified": "2023-06-03 16:24:01.677026",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -365,6 +367,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "customer_name",
  "track_changes": 1
 }

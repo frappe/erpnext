@@ -61,7 +61,6 @@ def execute():
 		doc.load_items_from_bom()
 		doc.calculate_rate_and_amount()
 		set_expense_account(doc)
-		doc.make_batches("t_warehouse")
 
 		if doc.docstatus == 0:
 			doc.save()

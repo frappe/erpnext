@@ -376,3 +376,19 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
+
+	def test_create_repost_entry_for_cancelled_document(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			get_multiple_items=True,
+		)
+
+		self.assertTrue(pr.docstatus == 1)
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
+
+		pr.load_from_db()
+
+		pr.cancel()
+		self.assertTrue(pr.docstatus == 2)
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))

@@ -12,12 +12,18 @@ from frappe.utils import flt, get_link_to_form
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
+from erpnext.accounts.utils import get_currency_precision
 from erpnext.setup.utils import get_exchange_rate
 
 
 class ExchangeRateRevaluation(Document):
 	def validate(self):
+		self.validate_rounding_loss_allowance()
 		self.set_total_gain_loss()
+
+	def validate_rounding_loss_allowance(self):
+		if not (self.rounding_loss_allowance > 0 and self.rounding_loss_allowance < 1):
+			frappe.throw(_("Rounding Loss Allowance should be between 0 and 1"))
 
 	def set_total_gain_loss(self):
 		total_gain_loss = 0
@@ -91,7 +97,12 @@ class ExchangeRateRevaluation(Document):
 	def get_accounts_data(self):
 		self.validate_mandatory()
 		account_details = self.get_account_balance_from_gle(
-			company=self.company, posting_date=self.posting_date, account=None, party_type=None, party=None
+			company=self.company,
+			posting_date=self.posting_date,
+			account=None,
+			party_type=None,
+			party=None,
+			rounding_loss_allowance=self.rounding_loss_allowance,
 		)
 		accounts_with_new_balance = self.calculate_new_account_balance(
 			self.company, self.posting_date, account_details
@@ -103,7 +114,9 @@ class ExchangeRateRevaluation(Document):
 		return accounts_with_new_balance
 
 	@staticmethod
-	def get_account_balance_from_gle(company, posting_date, account, party_type, party):
+	def get_account_balance_from_gle(
+		company, posting_date, account, party_type, party, rounding_loss_allowance
+	):
 		account_details = []
 
 		if company and posting_date:
@@ -169,6 +182,23 @@ class ExchangeRateRevaluation(Document):
 					.orderby(gle.account)
 					.run(as_dict=True)
 				)
+
+				# round off balance based on currency precision
+				# and consider debit-credit difference allowance
+				currency_precision = get_currency_precision()
+				rounding_loss_allowance = rounding_loss_allowance or 0.05
+				for acc in account_details:
+					acc.balance_in_account_currency = flt(acc.balance_in_account_currency, currency_precision)
+					if abs(acc.balance_in_account_currency) <= rounding_loss_allowance:
+						acc.balance_in_account_currency = 0
+
+					acc.balance = flt(acc.balance, currency_precision)
+					if abs(acc.balance) <= rounding_loss_allowance:
+						acc.balance = 0
+
+					acc.zero_balance = (
+						True if (acc.balance == 0 or acc.balance_in_account_currency == 0) else False
+					)
 
 		return account_details
 
@@ -490,6 +520,8 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 		conditions.append(gl.company == company)
 		conditions.append(gl.account == account)
 		conditions.append(gl.is_cancelled == 0)
+		conditions.append((gl.debit > 0) | (gl.credit > 0))
+		conditions.append((gl.debit_in_account_currency > 0) | (gl.credit_in_account_currency > 0))
 		if party_type:
 			conditions.append(gl.party_type == party_type)
 		if party:
@@ -519,7 +551,9 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 
 @frappe.whitelist()
-def get_account_details(company, posting_date, account, party_type=None, party=None):
+def get_account_details(
+	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance=None
+):
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
 
@@ -537,7 +571,12 @@ def get_account_details(company, posting_date, account, party_type=None, party=N
 		"account_currency": account_currency,
 	}
 	account_balance = ExchangeRateRevaluation.get_account_balance_from_gle(
-		company=company, posting_date=posting_date, account=account, party_type=party_type, party=party
+		company=company,
+		posting_date=posting_date,
+		account=account,
+		party_type=party_type,
+		party=party,
+		rounding_loss_allowance=rounding_loss_allowance,
 	)
 
 	if account_balance and (

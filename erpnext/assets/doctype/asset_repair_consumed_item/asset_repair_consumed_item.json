@@ -9,7 +9,8 @@
   "valuation_rate",
   "consumed_quantity",
   "total_value",
-  "serial_no"
+  "serial_no",
+  "serial_and_batch_bundle"
  ],
  "fields": [
   {
@@ -34,7 +35,9 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "label": "Serial No"
+   "hidden": 1,
+   "label": "Serial No",
+   "print_hide": 1
   },
   {
    "fieldname": "item_code",
@@ -42,12 +45,18 @@
    "in_list_view": 1,
    "label": "Item",
    "options": "Item"
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "options": "Serial and Batch Bundle"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-08 17:37:20.028290",
+ "modified": "2023-04-06 02:24:20.375870",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair Consumed Item",
@@ -55,5 +64,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

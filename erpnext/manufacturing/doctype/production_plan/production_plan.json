@@ -35,8 +35,12 @@
   "section_break_25",
   "prod_plan_references",
   "section_break_24",
-  "get_sub_assembly_items",
   "combine_sub_items",
+  "section_break_ucc4",
+  "skip_available_sub_assembly_item",
+  "column_break_igxl",
+  "get_sub_assembly_items",
+  "section_break_g4ip",
   "sub_assembly_items",
   "download_materials_request_plan_section_section",
   "download_materials_required",
@@ -344,18 +348,19 @@
   {
    "fieldname": "prod_plan_references",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Production Plan Item Reference",
    "options": "Production Plan Item Reference"
   },
   {
    "fieldname": "section_break_24",
    "fieldtype": "Section Break",
-   "hide_border": 1
+   "hide_border": 1,
+   "label": "Sub Assembly Items"
   },
   {
    "fieldname": "sub_assembly_items",
    "fieldtype": "Table",
-   "label": "Sub Assembly Items",
    "no_copy": 1,
    "options": "Production Plan Sub Assembly Item"
   },
@@ -391,13 +396,33 @@
    "fieldname": "download_materials_request_plan_section_section",
    "fieldtype": "Section Break",
    "label": "Download Materials Request Plan Section"
+  },
+  {
+   "default": "0",
+   "description": "System consider the projected quantity to check available or will be available sub-assembly items ",
+   "fieldname": "skip_available_sub_assembly_item",
+   "fieldtype": "Check",
+   "label": "Skip Available Sub Assembly Items"
+  },
+  {
+   "fieldname": "section_break_ucc4",
+   "fieldtype": "Column Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_g4ip",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_igxl",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-26 14:51:08.774372",
+ "modified": "2023-05-22 23:36:31.770517",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

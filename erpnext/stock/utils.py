@@ -7,10 +7,12 @@ from typing import Dict, Optional
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime
+from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = Dict[str, Optional[str]]
@@ -53,50 +55,36 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 	return stock_value
 
 
-def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
+def get_stock_value_on(
+	warehouses: list | str = None, posting_date: str = None, item_code: str = None
+) -> float:
 	if not posting_date:
 		posting_date = nowdate()
 
-	values, condition = [posting_date], ""
-
-	if warehouse:
-
-		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
-
-		if is_group:
-			values.extend([lft, rgt])
-			condition += "and exists (\
-				select name from `tabWarehouse` wh where wh.name = sle.warehouse\
-				and wh.lft >= %s and wh.rgt <= %s)"
-
-		else:
-			values.append(warehouse)
-			condition += " AND warehouse = %s"
-
-	if item_code:
-		values.append(item_code)
-		condition += " AND item_code = %s"
-
-	stock_ledger_entries = frappe.db.sql(
-		"""
-		SELECT item_code, stock_value, name, warehouse
-		FROM `tabStock Ledger Entry` sle
-		WHERE posting_date <= %s {0}
-			and is_cancelled = 0
-		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
-	""".format(
-			condition
-		),
-		values,
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(IfNull(Sum(sle.stock_value_difference), 0))
+		.where((sle.posting_date <= posting_date) & (sle.is_cancelled == 0))
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=frappe.qb.desc)
+		.orderby(sle.creation, order=frappe.qb.desc)
 	)
 
-	sle_map = {}
-	for sle in stock_ledger_entries:
-		if not (sle.item_code, sle.warehouse) in sle_map:
-			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
+	if warehouses:
+		if isinstance(warehouses, str):
+			warehouses = [warehouses]
 
-	return sum(sle_map.values())
+		warehouses = set(warehouses)
+		for wh in list(warehouses):
+			if frappe.db.get_value("Warehouse", wh, "is_group"):
+				warehouses.update(get_child_warehouses(wh))
+
+		query = query.where(sle.warehouse.isin(warehouses))
+
+	if item_code:
+		query = query.where(sle.item_code == item_code)
+
+	return query.run(as_list=True)[0][0]
 
 
 @frappe.whitelist()
@@ -233,7 +221,7 @@ def get_bin(item_code, warehouse):
 
 
 def get_or_make_bin(item_code: str, warehouse: str) -> str:
-	bin_record = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	bin_record = frappe.get_cached_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 
 	if not bin_record:
 		bin_obj = _create_bin(item_code, warehouse)
@@ -260,30 +248,40 @@ def _create_bin(item_code, warehouse):
 @frappe.whitelist()
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
-	from erpnext.stock.stock_ledger import (
-		get_batch_incoming_rate,
-		get_previous_sle,
-		get_valuation_rate,
-	)
+	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
 	if isinstance(args, str):
 		args = json.loads(args)
 
-	voucher_no = args.get("voucher_no") or args.get("name")
-
 	in_rate = None
-	if (args.get("serial_no") or "").strip():
-		in_rate = get_avg_purchase_rate(args.get("serial_no"))
-	elif args.get("batch_no") and frappe.db.get_value(
-		"Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True
-	):
-		in_rate = get_batch_incoming_rate(
-			item_code=args.get("item_code"),
+
+	item_details = frappe.get_cached_value(
+		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
+	)
+
+	if isinstance(args, dict):
+		args = frappe._dict(args)
+
+	if item_details and item_details.has_serial_no and args.get("serial_and_batch_bundle"):
+		args.actual_qty = args.qty
+		sn_obj = SerialNoValuation(
+			sle=args,
 			warehouse=args.get("warehouse"),
-			batch_no=args.get("batch_no"),
-			posting_date=args.get("posting_date"),
-			posting_time=args.get("posting_time"),
+			item_code=args.get("item_code"),
 		)
+
+		in_rate = sn_obj.get_incoming_rate()
+
+	elif item_details and item_details.has_batch_no and args.get("serial_and_batch_bundle"):
+		args.actual_qty = args.qty
+		batch_obj = BatchNoValuation(
+			sle=args,
+			warehouse=args.get("warehouse"),
+			item_code=args.get("item_code"),
+		)
+
+		in_rate = batch_obj.get_incoming_rate()
+
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
@@ -293,12 +291,13 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 				in_rate = (
 					_get_fifo_lifo_rate(previous_stock_queue, args.get("qty") or 0, valuation_method)
 					if previous_stock_queue
-					else 0
+					else None
 				)
 		elif valuation_method == "Moving Average":
-			in_rate = previous_sle.get("valuation_rate") or 0
+			in_rate = previous_sle.get("valuation_rate")
 
 	if in_rate is None:
+		voucher_no = args.get("voucher_no") or args.get("name")
 		in_rate = get_valuation_rate(
 			args.get("item_code"),
 			args.get("warehouse"),
@@ -308,7 +307,6 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			currency=erpnext.get_company_currency(args.get("company")),
 			company=args.get("company"),
 			raise_error_if_no_rate=raise_error_if_no_rate,
-			batch_no=args.get("batch_no"),
 		)
 
 	return flt(in_rate)
@@ -454,17 +452,6 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	for data in update_dict_values:
 		row, key, value = data
 		row[key] = value
-
-
-def get_available_serial_nos(args):
-	return frappe.db.sql(
-		""" SELECT name from `tabSerial No`
-		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
-		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-	""",
-		args,
-		as_dict=1,
-	)
 
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):

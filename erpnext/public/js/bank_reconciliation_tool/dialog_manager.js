@@ -76,30 +76,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			callback: (result) => {
 				const data = result.message;
 
-
 				if (data && data.length > 0) {
 					const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 					proposals_wrapper.show();
 					this.dialog.fields_dict.no_matching_vouchers.$wrapper.hide();
-					this.data = [];
-					data.forEach((row) => {
-						const reference_date = row[5] ? row[5] : row[8];
-						this.data.push([
-							row[1],
-							row[2],
-							reference_date,
-							format_currency(row[3], row[9]),
-							row[4],
-							row[6],
-						]);
-					});
+					this.data = data.map((row) => this.format_row(row));
 					this.get_dt_columns();
 					this.get_datatable(proposals_wrapper);
 				} else {
 					const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 					proposals_wrapper.hide();
 					this.dialog.fields_dict.no_matching_vouchers.$wrapper.show();
-
 				}
 				this.dialog.show();
 			},
@@ -122,6 +109,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				name: __("Reference Date"),
 				editable: false,
 				width: 120,
+				format: frappe.form.formatters.Date,
 			},
 			{
 				name: __("Remaining"),
@@ -138,6 +126,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				editable: false,
 				width: 100,
 			},
+		];
+	}
+
+	format_row(row) {
+		return [
+			row[1], // Document Type
+			frappe.form.formatters.Link(row[2], {options: row[1]}), // Document Name
+			row[5] || row[8], // Reference Date
+			format_currency(row[3], row[9]), // Remaining
+			row[4], // Reference Number
+			row[6], // Party
 		];
 	}
 
@@ -391,14 +390,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "deposit",
 				fieldtype: "Currency",
 				label: "Deposit",
-				options: "currency",
+				options: "account_currency",
 				read_only: 1,
 			},
 			{
 				fieldname: "withdrawal",
 				fieldtype: "Currency",
 				label: "Withdrawal",
-				options: "currency",
+				options: "account_currency",
 				read_only: 1,
 			},
 			{
@@ -416,18 +415,18 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "allocated_amount",
 				fieldtype: "Currency",
 				label: "Allocated Amount",
-				options: "Currency",
+				options: "account_currency",
 				read_only: 1,
 			},
 			{
 				fieldname: "unallocated_amount",
 				fieldtype: "Currency",
 				label: "Unallocated Amount",
-				options: "Currency",
+				options: "account_currency",
 				read_only: 1,
 			},
 			{
-				fieldname: "currency",
+				fieldname: "account_currency",
 				fieldtype: "Link",
 				label: "Currency",
 				options: "Currency",

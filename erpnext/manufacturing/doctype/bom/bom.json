@@ -9,15 +9,14 @@
   "production_item_tab",
   "item",
   "company",
-  "item_name",
   "uom",
+  "quantity",
   "cb0",
   "is_active",
   "is_default",
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
   "project",
-  "quantity",
   "image",
   "currency_detail",
   "rm_cost_as_per",
@@ -27,6 +26,8 @@
   "column_break_ivyw",
   "currency",
   "conversion_rate",
+  "materials_section",
+  "items",
   "section_break_21",
   "operations_section_section",
   "with_operations",
@@ -38,8 +39,6 @@
   "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
-  "materials_section",
-  "items",
   "scrap_section",
   "scrap_items_section",
   "scrap_items",
@@ -59,6 +58,7 @@
   "total_cost",
   "base_total_cost",
   "more_info_tab",
+  "item_name",
   "description",
   "column_break_27",
   "has_variants",
@@ -192,6 +192,7 @@
    "options": "Quality Inspection Template"
   },
   {
+   "collapsible": 1,
    "fieldname": "currency_detail",
    "fieldtype": "Section Break",
    "label": "Cost Configuration"
@@ -417,7 +418,7 @@
   {
    "collapsible": 1,
    "fieldname": "website_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Website"
   },
   {
@@ -482,7 +483,7 @@
   {
    "fieldname": "section_break_21",
    "fieldtype": "Tab Break",
-   "label": "Operations & Materials"
+   "label": "Operations"
   },
   {
    "fieldname": "column_break_23",
@@ -605,7 +606,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-13 17:31:37.504565",
+ "modified": "2023-04-06 12:47:58.514795",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

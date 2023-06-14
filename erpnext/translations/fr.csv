@@ -951,7 +951,7 @@ End time cannot be before start time,L'heure de fin ne peut pas être avant l'he
 Ends On date cannot be before Next Contact Date.,La date de fin ne peut pas être avant la prochaine date de contact,
 Energy,Énergie,
 Engineer,Ingénieur,
-Enough Parts to Build,Pièces Suffisantes pour Construire
+Enough Parts to Build,Pièces Suffisantes pour Construire,
 Enroll,Inscrire,
 Enrolling student,Inscrire un étudiant,
 Enrolling students,Inscription des étudiants,
@@ -3037,7 +3037,7 @@ To Date must be greater than From Date,La date de fin doit être supérieure à 
 To Date should be within the Fiscal Year. Assuming To Date = {0},La Date Finale doit être dans l'exercice. En supposant Date Finale = {0},
 To Datetime,À la Date,
 To Deliver,À Livrer,
-{}  To Deliver,{} à livrer
+{}  To Deliver,{} à livrer,
 To Deliver and Bill,À Livrer et Facturer,
 To Fiscal Year,À l'année fiscale,
 To GSTIN,GSTIN (Destination),
@@ -3505,7 +3505,6 @@ Recipient,Destinataire,
 Reviews,Avis,
 Sender,Expéditeur,
 Shop,Magasin,
-Sign Up,S'inscrire,
 Subsidiary,Filiale,
 There is some problem with the file url: {0},Il y a un problème avec l'url du fichier : {0},
 There were errors while sending email. Please try again.,Il y a eu des erreurs lors de l'envoi d’emails. Veuillez essayer à nouveau.,
@@ -4944,8 +4943,8 @@ Min Qty,Qté Min,
 Max Qty,Qté Max,
 Min Amt,Montant Min,
 Max Amt,Montant Max,
-"If rate is zero them item will be treated as ""Free Item""",Si le prix est à 0 alors l'article sera traité comme article gratuit
-Is Recursive,Est récursif
+"If rate is zero them item will be treated as ""Free Item""",Si le prix est à 0 alors l'article sera traité comme article gratuit,
+Is Recursive,Est récursif,
 "Discounts to be applied in sequential ranges like buy 1 get 1, buy 2 get 2, buy 3 get 3 and so on","La remise sera appliquée séquentiellement telque : acheter 1 => recupérer 1, acheter 2 => recupérer 2, acheter 3 => recupérer 3, etc..."
 Period Settings,Paramètres de période,
 Margin,Marge,
@@ -7241,7 +7240,7 @@ Replace,Remplacer,
 Update latest price in all BOMs,Mettre à jour le prix le plus récent dans toutes les nomenclatures,
 BOM Website Item,Article de nomenclature du Site Internet,
 BOM Website Operation,Opération de nomenclature du Site Internet,
-Operation Time,Durée de l'Opération
+Operation Time,Durée de l'Opération,
 PO-JOB.#####,PO-JOB. #####,
 Timing Detail,Détail du timing,
 Time Logs,Time Logs,
@@ -7481,15 +7480,15 @@ From Template,À partir du modèle,
 Project will be accessible on the website to these users,Le Projet sera accessible sur le site web à ces utilisateurs,
 Copied From,Copié Depuis,
 Start and End Dates,Dates de Début et de Fin,
-Actual Time (in Hours),Temps réel (en heures),
+Actual Time in Hours (via Timesheet),Temps réel (en heures),
 Costing and Billing,Coûts et Facturation,
-Total Costing Amount (via Timesheets),Montant total des coûts (via les feuilles de temps),
-Total Expense Claim (via Expense Claims),Total des Notes de Frais (via Notes de Frais),
+Total Costing Amount (via Timesheet),Montant total des coûts (via les feuilles de temps),
+Total Expense Claim (via Expense Claim),Total des Notes de Frais (via Notes de Frais),
 Total Purchase Cost (via Purchase Invoice),Coût d'Achat Total (via Facture d'Achat),
 Total Sales Amount (via Sales Order),Montant total des ventes (via la commande client),
-Total Billable Amount (via Timesheets),Montant total facturable (via les feuilles de temps),
-Total Billed Amount (via Sales Invoices),Montant total facturé (via les factures de vente),
-Total Consumed Material Cost  (via Stock Entry),Coût total du matériel consommé (via écriture de stock),
+Total Billable Amount (via Timesheet),Montant total facturable (via les feuilles de temps),
+Total Billed Amount (via Sales Invoice),Montant total facturé (via les factures de vente),
+Total Consumed Material Cost (via Stock Entry),Coût total du matériel consommé (via écriture de stock),
 Gross Margin,Marge Brute,
 Gross Margin %,Marge Brute %,
 Monitor Progress,Suivre l'avancement,
@@ -7523,12 +7522,10 @@ Task Description,Description de la tâche,
 Dependencies,Les dépendances,
 Dependent Tasks,Tâches dépendantes,
 Depends on Tasks,Dépend des Tâches,
-Actual Start Date (via Time Sheet),Date de Début Réelle (via la feuille de temps),
-Actual Time (in hours),Temps Réel (en Heures),
-Actual End Date (via Time Sheet),Date de Fin Réelle (via la Feuille de Temps),
-Total Costing Amount (via Time Sheet),Montant Total des Coûts (via Feuille de Temps),
+Actual Start Date (via Timesheet),Date de Début Réelle (via la feuille de temps),
+Actual Time in Hours (via Timesheet),Temps Réel (en Heures),
+Actual End Date (via Timesheet),Date de Fin Réelle (via la Feuille de Temps),
 Total Expense Claim (via Expense Claim),Total des Notes de Frais (via Note de Frais),
-Total Billing Amount (via Time Sheet),Montant Total de Facturation (via Feuille de Temps),
 Review Date,Date de Revue,
 Closing Date,Date de Clôture,
 Task Depends On,Tâche Dépend De,
@@ -9835,92 +9832,92 @@ Enable European Access,Activer l'accès européen,
 Creating Purchase Order ...,Création d'une commande d'achat ...,
 "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.","Sélectionnez un fournisseur parmi les fournisseurs par défaut des articles ci-dessous. Lors de la sélection, une commande d'achat sera effectué contre des articles appartenant uniquement au fournisseur sélectionné.",
 Row #{}: You must select {} serial numbers for item {}.,Ligne n ° {}: vous devez sélectionner {} numéros de série pour l'article {}.,
-Update Rate as per Last Purchase,Mettre à jour avec les derniers prix d'achats
-Company Shipping Address,Adresse d'expédition
-Shipping Address Details,Détail d'adresse d'expédition
-Company Billing Address,Adresse de la société de facturation
+Update Rate as per Last Purchase,Mettre à jour avec les derniers prix d'achats,
+Company Shipping Address,Adresse d'expédition,
+Shipping Address Details,Détail d'adresse d'expédition,
+Company Billing Address,Adresse de la société de facturation,
 Supplier Address Details,
-Bank Reconciliation Tool,Outil de réconcialiation d'écritures bancaires
-Supplier Contact,Contact fournisseur
-Subcontracting,Sous traitance
-Order Status,Statut de la commande
-Build,Personnalisations avancées
-Dispatch Address Name,Adresse de livraison intermédiaire
-Amount Eligible for Commission,Montant éligible à comission
-Grant Commission,Eligible aux commissions
-Stock Transactions Settings, Paramétre des transactions
-Role Allowed to Over Deliver/Receive, Rôle autorisé à dépasser cette limite
-Users with this role are allowed to over deliver/receive against orders above the allowance percentage,Rôle Utilisateur qui sont autorisé à livrée/commandé au-delà de la limite
-Over Transfer Allowance,Autorisation de limite de transfert
-Quality Inspection Settings,Paramétre de l'inspection qualité
-Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée
-Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série
-Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit
-Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
-Control Historical Stock Transactions,Controle de l'historique des stransaction de stock
+Bank Reconciliation Tool,Outil de réconcialiation d'écritures bancaires,
+Supplier Contact,Contact fournisseur,
+Subcontracting,Sous traitance,
+Order Status,Statut de la commande,
+Build,Personnalisations avancées,
+Dispatch Address Name,Adresse de livraison intermédiaire,
+Amount Eligible for Commission,Montant éligible à comission,
+Grant Commission,Eligible aux commissions,
+Stock Transactions Settings, Paramétre des transactions,
+Role Allowed to Over Deliver/Receive, Rôle autorisé à dépasser cette limite,
+Users with this role are allowed to over deliver/receive against orders above the allowance percentage,Rôle Utilisateur qui sont autorisé à livrée/commandé au-delà de la limite,
+Over Transfer Allowance,Autorisation de limite de transfert,
+Quality Inspection Settings,Paramétre de l'inspection qualits,
+Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée,
+Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série,
+Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit,
+Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture,
+Control Historical Stock Transactions,Controle de l'historique des stransaction de stock,
 No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
-Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
-Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
+Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées,
+Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée,
 "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.","Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire"
-Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent
-Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix
-Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
-Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
-Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
+Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent,
+Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix,
+Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock,
+Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions,
+Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries,
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
-Allowed Items,Articles autorisés
-Party Specific Item,Restriction d'article disponible
-Restrict Items Based On,Type de critére de restriction
-Based On Value,critére de restriction
+Allowed Items,Articles autorisés,
+Party Specific Item,Restriction d'article disponible,
+Restrict Items Based On,Type de critére de restriction,
+Based On Value,critére de restriction,
 Unit of Measure (UOM),Unité de mesure (UdM),
 Unit Of Measure (UOM),Unité de mesure (UdM),
-CRM Settings,Paramètres CRM
-Do Not Explode,Ne pas décomposer
-Quick Access, Accés rapides
-{}  Available,{} Disponible.s
-{} Pending,{} En attente.s
-{} To Bill,{} à facturer
-{}  To Receive,{} A recevoir
+CRM Settings,Paramètres CRM,
+Do Not Explode,Ne pas décomposer,
+Quick Access, Accés rapides,
+{}  Available,{} Disponible.s,
+{} Pending,{} En attente.s,
+{} To Bill,{} à facturer,
+{}  To Receive,{} A recevoir,
 {} Active,{} Actif.ve(s)
 {} Open,{} Ouvert.e(s)
-Incorrect Data Report,Rapport de données incohérentes
-Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots
-Incorrect Balance Qty After Transaction,Equilibre des quantités aprés une transaction
-Interview Type,Type d'entretien
-Interview Round,Cycle d'entretien
-Interview,Entretien
-Interview Feedback,Retour d'entretien
-Journal Energy Point,Historique des points d'énergies
+Incorrect Data Report,Rapport de données incohérentes,
+Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots,
+Incorrect Balance Qty After Transaction,Equilibre des quantités aprés une transaction,
+Interview Type,Type d'entretien,
+Interview Round,Cycle d'entretien,
+Interview,Entretien,
+Interview Feedback,Retour d'entretien,
+Journal Energy Point,Historique des points d'énergies,
 Billing Address Details,Adresse de facturation (détails)
 Supplier Address Details,Adresse Fournisseur (détails)
-Retail,Commerce
-Users,Utilisateurs
-Permission Manager,Gestion des permissions
-Fetch Timesheet,Récuprer les temps saisis
-Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur
-Quality Inspection(s),Inspection(s) Qualité
-Set Advances and Allocate (FIFO),Affecter les encours au réglement
-Apply Putaway Rule,Appliquer la régle de routage d'entrepot
-Delete Transactions,Supprimer les transactions
-Default Payment Discount Account,Compte par défaut des paiements de remise
-Unrealized Profit / Loss Account,Compte de perte
-Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés
-Publish in Website,Publier sur le Site Web
-List View,Vue en liste
-Allow Excess Material Transfer,Autoriser les transfert de stock supérieurs à l'attendue
-Allow transferring raw materials even after the Required Quantity is fulfilled,Autoriser les transfert  de matiéres premiére mais si la quantité requise est atteinte
-Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations de correction de coût pour la valorisation des produits finis
-Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications
-System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications
-Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication
-Quality Inspection Parameter,Paramétre des Inspection Qualité
-Parameter Group,Groupe de paramétre
-E Commerce Settings,Paramétrage E-Commerce
-Follow these steps to create a landing page for your store:,Suivez les intructions suivantes pour créer votre page d'accueil de boutique en ligne
-Show Price in Quotation,Afficher les prix sur les devis
-Add-ons,Extensions
-Enable Wishlist,Activer la liste de souhaits
-Enable Reviews and Ratings,Activer les avis et notes
-Enable Recommendations,Activer les recommendations
-Item Search Settings,Paramétrage de la recherche d'article
-Purchase demande,Demande de materiel
+Retail,Commerce,
+Users,Utilisateurs,
+Permission Manager,Gestion des permissions,
+Fetch Timesheet,Récuprer les temps saisis,
+Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur,
+Quality Inspection(s),Inspection(s) Qualite,
+Set Advances and Allocate (FIFO),Affecter les encours au réglement,
+Apply Putaway Rule,Appliquer la régle de routage d'entrepot,
+Delete Transactions,Supprimer les transactions,
+Default Payment Discount Account,Compte par défaut des paiements de remise,
+Unrealized Profit / Loss Account,Compte de perte,
+Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés,
+Publish in Website,Publier sur le Site Web,
+List View,Vue en liste,
+Allow Excess Material Transfer,Autoriser les transfert de stock supérieurs à l'attendue,
+Allow transferring raw materials even after the Required Quantity is fulfilled,Autoriser les transfert  de matiéres premiére mais si la quantité requise est atteinte,
+Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations de correction de coût pour la valorisation des produits finis,
+Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications,
+System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications,
+Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication,
+Quality Inspection Parameter,Paramétre des Inspection Qualite,
+Parameter Group,Groupe de paramétre,
+E Commerce Settings,Paramétrage E-Commerce,
+Follow these steps to create a landing page for your store:,Suivez les intructions suivantes pour créer votre page d'accueil de boutique en ligne,
+Show Price in Quotation,Afficher les prix sur les devis,
+Add-ons,Extensions,
+Enable Wishlist,Activer la liste de souhaits,
+Enable Reviews and Ratings,Activer les avis et notes,
+Enable Recommendations,Activer les recommendations,
+Item Search Settings,Paramétrage de la recherche d'article,
+Purchase demande,Demande de materiel,

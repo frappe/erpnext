@@ -28,6 +28,14 @@ class SubcontractingReceipt(SubcontractingController):
 			},
 		]
 
+	def onload(self):
+		self.set_onload(
+			"backflush_based_on",
+			frappe.db.get_single_value(
+				"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
+			),
+		)
+
 	def update_status_updater_args(self):
 		if cint(self.is_return):
 			self.status_updater.extend(
@@ -73,15 +81,17 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_posting_time()
 		self.validate_rejected_warehouse()
 
-		if self._action == "submit":
-			self.make_batches("warehouse")
-
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.get_current_stock()
+
+	def on_update(self):
+		for table_field in ["items", "supplied_items"]:
+			if self.get(table_field):
+				self.set_serial_and_batch_bundle(table_field)
 
 	def on_submit(self):
 		self.validate_available_qty_for_consumption()
@@ -90,17 +100,17 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_subcontracting_order_status()
 		self.set_consumed_qty_in_subcontract_order()
 		self.update_stock_ledger()
-
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_stock_ledger()
@@ -113,9 +123,9 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def set_missing_values(self):
-		self.set_missing_values_in_additional_costs()
-		self.set_missing_values_in_supplied_items()
-		self.set_missing_values_in_items()
+		self.calculate_additional_costs()
+		self.calculate_supplied_items_qty_and_amount()
+		self.calculate_items_qty_and_amount()
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
@@ -147,13 +157,13 @@ class SubcontractingReceipt(SubcontractingController):
 					item.rm_item_code, 0
 				)
 
-	def set_missing_values_in_supplied_items(self):
+	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("supplied_items") or []:
 			item.amount = item.rate * item.consumed_qty
 
 		self.set_available_qty_for_consumption()
 
-	def set_missing_values_in_items(self):
+	def calculate_items_qty_and_amount(self):
 		rm_supp_cost = {}
 		for item in self.get("supplied_items") or []:
 			if item.reference_name in rm_supp_cost:
@@ -245,17 +255,17 @@ class SubcontractingReceipt(SubcontractingController):
 					item.expense_account = expense_account
 
 	def update_status(self, status=None, update_modified=False):
-		if self.docstatus >= 1 and not status:
-			if self.docstatus == 1:
+		if not status:
+			if self.docstatus == 0:
+				status = "Draft"
+			elif self.docstatus == 1:
+				status = "Completed"
 				if self.is_return:
 					status = "Return"
 					return_against = frappe.get_doc("Subcontracting Receipt", self.return_against)
 					return_against.run_method("update_status")
-				else:
-					if self.per_returned == 100:
-						status = "Return Issued"
-					elif self.status == "Draft":
-						status = "Completed"
+				elif self.per_returned == 100:
+					status = "Return Issued"
 			elif self.docstatus == 2:
 				status = "Cancelled"
 

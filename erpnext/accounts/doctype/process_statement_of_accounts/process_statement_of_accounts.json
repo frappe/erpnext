@@ -36,6 +36,8 @@
   "terms_and_conditions",
   "section_break_1",
   "enable_auto_email",
+  "column_break_ocfq",
+  "sender",
   "section_break_18",
   "frequency",
   "filter_duration",
@@ -298,10 +300,20 @@
    "fieldname": "show_net_values_in_party_account",
    "fieldtype": "Check",
    "label": "Show Net Values in Party Account"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "label": "Sender",
+   "options": "Email Account"
+  },
+  {
+   "fieldname": "column_break_ocfq",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2022-11-10 17:44:17.165991",
+ "modified": "2023-04-26 12:46:43.645455",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

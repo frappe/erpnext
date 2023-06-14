@@ -57,7 +57,7 @@ frappe.listview_settings['Sales Order'] = {
 		});
 
 		listview.page.add_action_item(__("Advance Payment"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Advance Payment");
+			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Payment Entry");
 		});
 
 	}

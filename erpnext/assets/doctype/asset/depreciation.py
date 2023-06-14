@@ -157,6 +157,7 @@ def make_depreciation_entry(asset_depr_schedule_name, date=None):
 			je.append("accounts", debit_entry)
 
 			je.flags.ignore_permissions = True
+			je.flags.planned_depr_entry = True
 			je.save()
 			if not je.meta.get_workflow():
 				je.submit()
@@ -249,10 +250,16 @@ def notify_depr_entry_posting_error(failed_asset_names):
 	asset_links = get_comma_separated_asset_links(failed_asset_names)
 
 	message = (
-		_("Hi,")
-		+ "<br>"
-		+ _("The following assets have failed to post depreciation entries: {0}").format(asset_links)
+		_("Hello,")
+		+ "<br><br>"
+		+ _("The following assets have failed to automatically post depreciation entries: {0}").format(
+			asset_links
+		)
 		+ "."
+		+ "<br><br>"
+		+ _(
+			"Please raise a support ticket and share this email, or forward this email to your development team so that they can find the issue in the developer console by manually creating the depreciation entry via the asset's depreciation schedule table."
+		)
 	)
 
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
@@ -300,7 +307,7 @@ def scrap_asset(asset_name):
 	je.company = asset.company
 	je.remark = "Scrap Entry for asset {0}".format(asset_name)
 
-	for entry in get_gl_entries_on_asset_disposal(asset):
+	for entry in get_gl_entries_on_asset_disposal(asset, date):
 		entry.update({"reference_type": "Asset", "reference_name": asset_name})
 		je.append("accounts", entry)
 
@@ -427,8 +434,11 @@ def disposal_happens_in_the_future(posting_date_of_disposal):
 
 
 def get_gl_entries_on_asset_regain(
-	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None
+	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
 ):
+	if not date:
+		date = getdate()
+
 	(
 		fixed_asset_account,
 		asset,
@@ -446,7 +456,7 @@ def get_gl_entries_on_asset_regain(
 				"debit_in_account_currency": asset.gross_purchase_amount,
 				"debit": asset.gross_purchase_amount,
 				"cost_center": depreciation_cost_center,
-				"posting_date": getdate(),
+				"posting_date": date,
 			},
 			item=asset,
 		),
@@ -456,7 +466,7 @@ def get_gl_entries_on_asset_regain(
 				"credit_in_account_currency": accumulated_depr_amount,
 				"credit": accumulated_depr_amount,
 				"cost_center": depreciation_cost_center,
-				"posting_date": getdate(),
+				"posting_date": date,
 			},
 			item=asset,
 		),
@@ -465,7 +475,7 @@ def get_gl_entries_on_asset_regain(
 	profit_amount = abs(flt(value_after_depreciation)) - abs(flt(selling_amount))
 	if profit_amount:
 		get_profit_gl_entries(
-			asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center
+			asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center, date
 		)
 
 	if voucher_type and voucher_no:
@@ -477,8 +487,11 @@ def get_gl_entries_on_asset_regain(
 
 
 def get_gl_entries_on_asset_disposal(
-	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None
+	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
 ):
+	if not date:
+		date = getdate()
+
 	(
 		fixed_asset_account,
 		asset,
@@ -496,7 +509,7 @@ def get_gl_entries_on_asset_disposal(
 				"credit_in_account_currency": asset.gross_purchase_amount,
 				"credit": asset.gross_purchase_amount,
 				"cost_center": depreciation_cost_center,
-				"posting_date": getdate(),
+				"posting_date": date,
 			},
 			item=asset,
 		),
@@ -506,7 +519,7 @@ def get_gl_entries_on_asset_disposal(
 				"debit_in_account_currency": accumulated_depr_amount,
 				"debit": accumulated_depr_amount,
 				"cost_center": depreciation_cost_center,
-				"posting_date": getdate(),
+				"posting_date": date,
 			},
 			item=asset,
 		),
@@ -515,7 +528,7 @@ def get_gl_entries_on_asset_disposal(
 	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
 	if profit_amount:
 		get_profit_gl_entries(
-			asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center
+			asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center, date
 		)
 
 	if voucher_type and voucher_no:
@@ -549,8 +562,11 @@ def get_asset_details(asset, finance_book=None):
 
 
 def get_profit_gl_entries(
-	asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center
+	asset, profit_amount, gl_entries, disposal_account, depreciation_cost_center, date=None
 ):
+	if not date:
+		date = getdate()
+
 	debit_or_credit = "debit" if profit_amount < 0 else "credit"
 	gl_entries.append(
 		asset.get_gl_dict(
@@ -559,7 +575,7 @@ def get_profit_gl_entries(
 				"cost_center": depreciation_cost_center,
 				debit_or_credit: abs(profit_amount),
 				debit_or_credit + "_in_account_currency": abs(profit_amount),
-				"posting_date": getdate(),
+				"posting_date": date,
 			},
 			item=asset,
 		)

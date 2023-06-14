@@ -16,6 +16,7 @@
   "column_break_4",
   "quantity",
   "uom",
+  "conversion_factor",
   "projected_qty",
   "reserved_qty_for_production",
   "safety_stock",
@@ -169,11 +170,17 @@
    "label": "Qty As Per BOM",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-11-26 14:59:25.879631",
+ "modified": "2023-05-03 12:43:29.895754",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",

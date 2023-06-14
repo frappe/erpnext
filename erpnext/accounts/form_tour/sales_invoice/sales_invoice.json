@@ -1,0 +1,41 @@
+{
+ "creation": "2023-05-23 09:58:17.235916",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "first_document": 0,
+ "idx": 0,
+ "include_name_field": 0,
+ "is_standard": 1,
+ "modified": "2023-05-23 13:10:56.227127",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Invoice",
+ "owner": "Administrator",
+ "reference_doctype": "Sales Invoice",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select a customer for whom this invoice is being prepared.",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "has_next_condition": 1,
+   "is_table_field": 0,
+   "label": "Customer",
+   "next_step_condition": "eval: doc.customer",
+   "position": "Right",
+   "title": "Select Customer"
+  },
+  {
+   "child_doctype": "Sales Invoice Item",
+   "description": "Select item that you have sold along with quantity and rate.",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "parent_fieldname": "items",
+   "position": "Top",
+   "title": "Select Item"
+  }
+ ],
+ "title": "Sales Invoice"
+}

@@ -105,8 +105,8 @@ class TestJournalEntry(unittest.TestCase):
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
 			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher
-			frappe.db.set_value(
-				"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
+			frappe.db.set_single_value(
+				"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
 			)
 			submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 			self.assertRaises(frappe.LinkExistsError, submitted_voucher.cancel)
@@ -287,10 +287,6 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 	def test_inter_company_jv(self):
-		frappe.db.set_value("Account", "Sales Expenses - _TC", "inter_company_account", 1)
-		frappe.db.set_value("Account", "Buildings - _TC", "inter_company_account", 1)
-		frappe.db.set_value("Account", "Sales Expenses - _TC1", "inter_company_account", 1)
-		frappe.db.set_value("Account", "Buildings - _TC1", "inter_company_account", 1)
 		jv = make_journal_entry(
 			"Sales Expenses - _TC",
 			"Buildings - _TC",

@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, nowdate, nowtime, today
 
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
@@ -19,6 +19,10 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 
 
 class TestAssetRepair(unittest.TestCase):
@@ -84,19 +88,19 @@ class TestAssetRepair(unittest.TestCase):
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
 
 	def test_serialized_item_consumption(self):
-		from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		stock_entry = make_serialized_item()
-		serial_nos = stock_entry.get("items")[0].serial_no
-		serial_no = serial_nos.split("\n")[0]
+		bundle_id = stock_entry.get("items")[0].serial_and_batch_bundle
+		serial_nos = get_serial_nos_from_bundle(bundle_id)
+		serial_no = serial_nos[0]
 
 		# should not raise any error
 		create_asset_repair(
 			stock_consumption=1,
 			item_code=stock_entry.get("items")[0].item_code,
 			warehouse="_Test Warehouse - _TC",
-			serial_no=serial_no,
+			serial_no=[serial_no],
 			submit=1,
 		)
 
@@ -108,7 +112,7 @@ class TestAssetRepair(unittest.TestCase):
 		)
 
 		asset_repair.repair_status = "Completed"
-		self.assertRaises(SerialNoRequiredError, asset_repair.submit)
+		self.assertRaises(frappe.ValidationError, asset_repair.submit)
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
@@ -290,13 +294,32 @@ def create_asset_repair(**args):
 		asset_repair.warehouse = args.warehouse or create_warehouse(
 			"Test Warehouse", company=asset.company
 		)
+
+		bundle = None
+		if args.serial_no:
+			bundle = make_serial_batch_bundle(
+				frappe._dict(
+					{
+						"item_code": args.item_code,
+						"warehouse": asset_repair.warehouse,
+						"company": frappe.get_cached_value("Warehouse", asset_repair.warehouse, "company"),
+						"qty": (flt(args.stock_qty) or 1) * -1,
+						"voucher_type": "Asset Repair",
+						"type_of_transaction": "Asset Repair",
+						"serial_nos": args.serial_no,
+						"posting_date": today(),
+						"posting_time": nowtime(),
+					}
+				)
+			).name
+
 		asset_repair.append(
 			"stock_items",
 			{
 				"item_code": args.item_code or "_Test Stock Item",
 				"valuation_rate": args.rate if args.get("rate") is not None else 100,
 				"consumed_quantity": args.qty or 1,
-				"serial_no": args.serial_no,
+				"serial_and_batch_bundle": bundle,
 			},
 		)
 

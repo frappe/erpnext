@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate
+from frappe.utils import flt, getdate
 
 import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
@@ -58,11 +58,6 @@ def execute(filters=None):
 			fiscal_year, companies, columns, filters
 		)
 	else:
-		if cint(frappe.db.get_single_value("Accounts Settings", "use_custom_cash_flow")):
-			from erpnext.accounts.report.cash_flow.custom_cash_flow import execute as execute_custom
-
-			return execute_custom(filters=filters)
-
 		data, report_summary = get_cash_flow_data(fiscal_year, companies, filters)
 
 	return columns, data, message, chart, report_summary
@@ -118,7 +113,6 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 		liability,
 		equity,
 		provisional_profit_loss,
-		total_credit,
 		company_currency,
 		filters,
 		True,

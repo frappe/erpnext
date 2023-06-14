@@ -28,8 +28,6 @@
   "column_break_18",
   "project",
   "dimension_col_break",
-  "campaign",
-  "source",
   "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
@@ -161,11 +159,12 @@
   "inter_company_reference",
   "customer_group",
   "territory",
+  "source",
+  "campaign",
   "column_break5",
   "excise_page",
   "instructions",
-  "connections_tab",
-  "column_break_25"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -375,6 +374,7 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1340,10 +1340,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_30",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -1403,7 +1399,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-14 04:45:44.179670",
+ "modified": "2023-06-03 16:13:25.011487",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

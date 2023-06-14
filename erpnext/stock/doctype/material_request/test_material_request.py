@@ -54,6 +54,8 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
+		self.assertEqual(se.stock_entry_type, "Material Transfer")
+		self.assertEqual(se.purpose, "Material Transfer")
 		self.assertEqual(se.doctype, "Stock Entry")
 		self.assertEqual(len(se.get("items")), len(mr.get("items")))
 
@@ -69,6 +71,8 @@ class TestMaterialRequest(FrappeTestCase):
 		in_transit_warehouse = get_in_transit_warehouse(mr.company)
 		se = make_in_transit_stock_entry(mr.name, in_transit_warehouse)
 
+		self.assertEqual(se.stock_entry_type, "Material Transfer")
+		self.assertEqual(se.purpose, "Material Transfer")
 		self.assertEqual(se.doctype, "Stock Entry")
 		for row in se.get("items"):
 			self.assertEqual(row.t_warehouse, in_transit_warehouse)
@@ -396,7 +400,7 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.insert()
 		mr.submit()
 
-		frappe.db.set_value("Stock Settings", None, "mr_qty_allowance", 20)
+		frappe.db.set_single_value("Stock Settings", "mr_qty_allowance", 20)
 
 		# map a stock entry
 

@@ -11,10 +11,9 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
-from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
-from frappe.model.rename_doc import update_linked_doctypes
+from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -272,18 +271,9 @@ class Customer(TransactionBase):
 
 	def on_trash(self):
 		if self.customer_primary_contact:
-			frappe.db.sql(
-				"""
-				UPDATE `tabCustomer`
-				SET
-					customer_primary_contact=null,
-					customer_primary_address=null,
-					mobile_no=null,
-					email_id=null,
-					primary_address=null
-				WHERE name=%(name)s""",
-				{"name": self.name},
-			)
+			self.db_set("customer_primary_contact", None)
+		if self.customer_primary_address:
+			self.db_set("customer_primary_address", None)
 
 		delete_contact_and_address("Customer", self.name)
 		if self.lead_name:
@@ -454,44 +444,6 @@ def get_nested_links(link_doctype, link_name, ignore_permissions=False):
 	return links
 
 
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
-	from erpnext.controllers.queries import get_fields
-
-	fields = ["name", "customer_name", "customer_group", "territory"]
-
-	if frappe.db.get_default("cust_master_name") == "Customer Name":
-		fields = ["name", "customer_group", "territory"]
-
-	fields = get_fields("Customer", fields)
-
-	match_conditions = build_match_conditions("Customer")
-	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
-
-	if filters:
-		filter_conditions = get_filters_cond(doctype, filters, [])
-		match_conditions += "{}".format(filter_conditions)
-
-	return frappe.db.sql(
-		"""
-		select %s
-		from `tabCustomer`
-		where docstatus < 2
-			and (%s like %s or customer_name like %s)
-			{match_conditions}
-		order by
-			case when name like %s then 0 else 1 end,
-			case when customer_name like %s then 0 else 1 end,
-			name, customer_name limit %s, %s
-		""".format(
-			match_conditions=match_conditions
-		)
-		% (", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
-		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len),
-	)
-
-
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
 	credit_limit = get_credit_limit(customer, company)
 	if not credit_limit:
@@ -502,11 +454,11 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		customer_outstanding += flt(extra_amount)
 
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
-		msgprint(
-			_("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-				customer, customer_outstanding, credit_limit
-			)
+		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
+			customer, customer_outstanding, credit_limit
 		)
+
+		message += "<br><br>"
 
 		# If not authorized person raise exception
 		credit_controller_role = frappe.db.get_single_value("Accounts Settings", "credit_controller")
@@ -528,7 +480,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				"<li>".join(credit_controller_users_formatted)
 			)
 
-			message = _(
+			message += _(
 				"Please contact any of the following users to extend the credit limits for {0}: {1}"
 			).format(customer, user_list)
 
@@ -536,7 +488,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			# prompt them to send out an email to the controller users
 			frappe.msgprint(
 				message,
-				title="Notify",
+				title=_("Credit Limit Crossed"),
 				raise_exception=1,
 				primary_action={
 					"label": "Send Email",
@@ -567,7 +519,6 @@ def get_customer_outstanding(
 	customer, company, ignore_outstanding_sales_order=False, cost_center=None
 ):
 	# Outstanding based on GL Entries
-
 	cond = ""
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center", cost_center, ["lft", "rgt"])
@@ -665,11 +616,15 @@ def get_credit_limit(customer, company):
 
 		if not credit_limit:
 			customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
-			credit_limit = frappe.db.get_value(
+
+			result = frappe.db.get_values(
 				"Customer Credit Limit",
 				{"parent": customer_group, "parenttype": "Customer Group", "company": company},
-				"credit_limit",
+				fieldname=["credit_limit", "bypass_credit_limit_check"],
+				as_dict=True,
 			)
+			if result and not result[0].bypass_credit_limit_check:
+				credit_limit = result[0].credit_limit
 
 	if not credit_limit:
 		credit_limit = frappe.get_cached_value("Company", company, "credit_limit")

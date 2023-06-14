@@ -5,6 +5,10 @@ frappe.provide("erpnext.stock");
 frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
+	setup(frm) {
+		frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
+	},
+
 	onload: function(frm) {
 		frm.add_fetch("item_code", "item_name", "item_name");
 

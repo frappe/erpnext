@@ -35,6 +35,21 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 		}
 	},
 
+	validate_rounding_loss: function(frm) {
+		allowance = frm.doc.rounding_loss_allowance;
+		if (!(allowance > 0 && allowance < 1)) {
+			frappe.throw(__("Rounding Loss Allowance should be between 0 and 1"));
+		}
+	},
+
+	rounding_loss_allowance: function(frm) {
+		frm.events.validate_rounding_loss(frm);
+	},
+
+	validate: function(frm) {
+		frm.events.validate_rounding_loss(frm);
+	},
+
 	get_entries: function(frm, account) {
 		frappe.call({
 			method: "get_accounts_data",
@@ -126,7 +141,8 @@ var get_account_details = function(frm, cdt, cdn) {
 			company: frm.doc.company,
 			posting_date: frm.doc.posting_date,
 			party_type: row.party_type,
-			party: row.party
+			party: row.party,
+			rounding_loss_allowance: frm.doc.rounding_loss_allowance
 		},
 		callback: function(r){
 			$.extend(row, r.message);

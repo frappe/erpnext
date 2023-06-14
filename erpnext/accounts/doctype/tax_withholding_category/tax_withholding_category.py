@@ -3,9 +3,11 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, qb
 from frappe.model.document import Document
-from frappe.utils import cint, getdate
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Abs, Sum
+from frappe.utils import cint, flt, getdate
 
 
 class TaxWithholdingCategory(Document):
@@ -215,7 +217,7 @@ def get_tax_row_for_tds(tax_details, tax_amount):
 	}
 
 
-def get_lower_deduction_certificate(tax_details, pan_no):
+def get_lower_deduction_certificate(company, tax_details, pan_no):
 	ldc_name = frappe.db.get_value(
 		"Lower Deduction Certificate",
 		{
@@ -223,6 +225,7 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 			"tax_withholding_category": tax_details.tax_withholding_category,
 			"valid_from": (">=", tax_details.from_date),
 			"valid_upto": ("<=", tax_details.to_date),
+			"company": company,
 		},
 		"name",
 	)
@@ -255,7 +258,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	tax_amount = 0
 
 	if party_type == "Supplier":
-		ldc = get_lower_deduction_certificate(tax_details, pan_no)
+		ldc = get_lower_deduction_certificate(inv.company, tax_details, pan_no)
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
 			if ldc:
@@ -301,7 +304,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 		"docstatus": 1,
 	}
 
-	if not tax_details.get("consider_party_ledger_amount") and doctype != "Sales Invoice":
+	if doctype != "Sales Invoice":
 		filters.update(
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
@@ -345,26 +348,33 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 def get_advance_vouchers(
 	parties, company=None, from_date=None, to_date=None, party_type="Supplier"
 ):
-	# for advance vouchers, debit and credit is reversed
-	dr_or_cr = "debit" if party_type == "Supplier" else "credit"
+	"""
+	Use Payment Ledger to fetch unallocated Advance Payments
+	"""
 
-	filters = {
-		dr_or_cr: [">", 0],
-		"is_opening": "No",
-		"is_cancelled": 0,
-		"party_type": party_type,
-		"party": ["in", parties],
-	}
+	ple = qb.DocType("Payment Ledger Entry")
 
-	if party_type == "Customer":
-		filters.update({"against_voucher": ["is", "not set"]})
+	conditions = []
+
+	conditions.append(ple.amount.lt(0))
+	conditions.append(ple.delinked == 0)
+	conditions.append(ple.party_type == party_type)
+	conditions.append(ple.party.isin(parties))
+	conditions.append(ple.voucher_no == ple.against_voucher_no)
 
 	if company:
-		filters["company"] = company
-	if from_date and to_date:
-		filters["posting_date"] = ["between", (from_date, to_date)]
+		conditions.append(ple.company == company)
 
-	return frappe.get_all("GL Entry", filters=filters, distinct=1, pluck="voucher_no") or [""]
+	if from_date and to_date:
+		conditions.append(ple.posting_date[from_date:to_date])
+
+	advances = (
+		qb.from_(ple).select(ple.voucher_no).distinct().where(Criterion.all(conditions)).run(as_list=1)
+	)
+	if advances:
+		advances = [x[0] for x in advances]
+
+	return advances
 
 
 def get_taxes_deducted_on_advances_allocated(inv, tax_details):
@@ -498,6 +508,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 
 def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	tcs_amount = 0
+	ple = qb.DocType("Payment Ledger Entry")
 
 	# sum of debit entries made from sales invoices
 	invoiced_amt = (
@@ -515,18 +526,20 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	)
 
 	# sum of credit entries made from PE / JV with unset 'against voucher'
+
+	conditions = []
+	conditions.append(ple.amount.lt(0))
+	conditions.append(ple.delinked == 0)
+	conditions.append(ple.party.isin(parties))
+	conditions.append(ple.voucher_no == ple.against_voucher_no)
+	conditions.append(ple.company == inv.company)
+
+	advances = (
+		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run(as_list=1)
+	)
+
 	advance_amt = (
-		frappe.db.get_value(
-			"GL Entry",
-			{
-				"is_cancelled": 0,
-				"party": ["in", parties],
-				"company": inv.company,
-				"voucher_no": ["in", adv_vouchers],
-			},
-			"sum(credit)",
-		)
-		or 0.0
+		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run()[0][0] or 0.0
 	)
 
 	# sum of credit entries made from sales invoice
@@ -568,7 +581,12 @@ def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 	tds_amount = 0
 	limit_consumed = frappe.db.get_value(
 		"Purchase Invoice",
-		{"supplier": ("in", parties), "apply_tds": 1, "docstatus": 1},
+		{
+			"supplier": ("in", parties),
+			"apply_tds": 1,
+			"docstatus": 1,
+			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
+		},
 		"sum(tax_withholding_net_total)",
 	)
 
@@ -583,10 +601,10 @@ def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 
 
 def get_ltds_amount(current_amount, deducted_amount, certificate_limit, rate, tax_details):
-	if current_amount < (certificate_limit - deducted_amount):
+	if certificate_limit - flt(deducted_amount) - flt(current_amount) >= 0:
 		return current_amount * rate / 100
 	else:
-		ltds_amount = certificate_limit - deducted_amount
+		ltds_amount = certificate_limit - flt(deducted_amount)
 		tds_amount = current_amount - ltds_amount
 
 		return ltds_amount * rate / 100 + tds_amount * tax_details.rate / 100
@@ -597,9 +615,9 @@ def is_valid_certificate(
 ):
 	valid = False
 
-	if (
-		getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)
-	) and certificate_limit > deducted_amount:
+	available_amount = flt(certificate_limit) - flt(deducted_amount) - flt(current_amount)
+
+	if (getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)) and available_amount > 0:
 		valid = True
 
 	return valid
