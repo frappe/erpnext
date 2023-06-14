@@ -30,6 +30,18 @@ frappe.ui.form.on("Stock Reconciliation", {
 			};
 		});
 
+		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
 		if (frm.doc.company) {
 			erpnext.queries.setup_queries(frm, "Warehouse", function() {
 				return erpnext.queries.warehouse(frm.doc);

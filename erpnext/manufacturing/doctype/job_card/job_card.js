@@ -12,6 +12,17 @@ frappe.ui.form.on('Job Card', {
 			};
 		});
 
+		frm.set_query("serial_and_batch_bundle", () => {
+			return {
+				filters: {
+					'item_code': frm.doc.production_item,
+					'voucher_type': frm.doc.doctype,
+					'voucher_no': ["in", [frm.doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
 		frm.set_indicator_formatter('sub_operation',
 			function(doc) {
 				if (doc.status == "Pending") {
