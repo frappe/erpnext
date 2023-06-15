@@ -574,12 +574,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-<<<<<<< HEAD
-							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-=======
 							"actual_qty": flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")),
-							"serial_no": cstr(d.rejected_serial_no).strip(),
->>>>>>> 3f62e854e5 (fix: consider field precision while setting sle actual_qty (#35717))
 							"incoming_rate": 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
 						},
