@@ -286,6 +286,10 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		}
 	},
 
+	add_serial_batch_bundle(frm, cdt, cdn) {
+		erpnext.utils.pick_serial_and_batch_bundle(frm, cdt, cdn, "Inward");
+	}
+
 });
 
 erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.stock.StockController {

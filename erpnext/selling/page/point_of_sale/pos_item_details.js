@@ -379,7 +379,6 @@ erpnext.PointOfSale.ItemDetails = class {
 			frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", () => {
 				let frm = this.events.get_frm();
 				let item_row = this.item_row;
-				item_row.outward = 1;
 				item_row.type_of_transaction = "Outward";
 
 				new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
