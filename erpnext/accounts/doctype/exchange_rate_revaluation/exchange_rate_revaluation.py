@@ -186,7 +186,7 @@ class ExchangeRateRevaluation(Document):
 				# round off balance based on currency precision
 				# and consider debit-credit difference allowance
 				currency_precision = get_currency_precision()
-				rounding_loss_allowance = rounding_loss_allowance or 0.05
+				rounding_loss_allowance = float(rounding_loss_allowance) or 0.05
 				for acc in account_details:
 					acc.balance_in_account_currency = flt(acc.balance_in_account_currency, currency_precision)
 					if abs(acc.balance_in_account_currency) <= rounding_loss_allowance:
@@ -552,7 +552,7 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 @frappe.whitelist()
 def get_account_details(
-	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance=None
+	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance: float = None
 ):
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
