@@ -442,6 +442,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1554,11 +1555,10 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-30 03:49:50.455199",
+ "modified": "2023-06-03 16:23:41.083409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

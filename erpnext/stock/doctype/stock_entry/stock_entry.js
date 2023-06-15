@@ -103,6 +103,18 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
@@ -656,6 +668,21 @@ frappe.ui.form.on('Stock Entry', {
 			});
 		}
 	},
+
+	process_loss_qty(frm) {
+		if (frm.doc.process_loss_qty) {
+			frm.doc.process_loss_percentage = flt(frm.doc.process_loss_qty / frm.doc.fg_completed_qty * 100, precision("process_loss_qty", frm.doc));
+			refresh_field("process_loss_percentage");
+		}
+	},
+
+	process_loss_percentage(frm) {
+		debugger
+		if (frm.doc.process_loss_percentage) {
+			frm.doc.process_loss_qty = flt((frm.doc.fg_completed_qty * frm.doc.process_loss_percentage) / 100 , precision("process_loss_qty", frm.doc));
+			refresh_field("process_loss_qty");
+		}
+	}
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -1087,7 +1114,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
 				item.has_serial_no = r.message.has_serial_no;
 				item.has_batch_no = r.message.has_batch_no;
-				item.outward = item.s_warehouse ? 1 : 0;
+				item.type_of_transaction = item.s_warehouse ? "Outward" : "Inward";
 
 				frappe.require(path, function() {
 					new erpnext.SerialBatchPackageSelector(

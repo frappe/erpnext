@@ -12,6 +12,17 @@ frappe.ui.form.on('Job Card', {
 			};
 		});
 
+		frm.set_query("serial_and_batch_bundle", () => {
+			return {
+				filters: {
+					'item_code': frm.doc.production_item,
+					'voucher_type': frm.doc.doctype,
+					'voucher_no': ["in", [frm.doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
 		frm.set_indicator_formatter('sub_operation',
 			function(doc) {
 				if (doc.status == "Pending") {
@@ -83,7 +94,7 @@ frappe.ui.form.on('Job Card', {
 			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
 				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status'], (result) => {
-					if (result.skip_transfer === 1 || result.status == 'In Process' || frm.doc.transferred_qty > 0) {
+					if (result.skip_transfer === 1 || result.status == 'In Process' || frm.doc.transferred_qty > 0 || !frm.doc.items.length) {
 						frm.trigger("prepare_timer_buttons");
 					}
 				});
@@ -410,6 +421,16 @@ frappe.ui.form.on('Job Card', {
 				frm.doc.total_completed_qty += d.completed_qty;
 			}
 		});
+
+		if (frm.doc.total_completed_qty && frm.doc.for_quantity > frm.doc.total_completed_qty) {
+			let flt_precision = precision('for_quantity', frm.doc);
+			let process_loss_qty = (
+				flt(frm.doc.for_quantity, flt_precision)
+				- flt(frm.doc.total_completed_qty, flt_precision)
+			);
+
+			frm.set_value('process_loss_qty', process_loss_qty);
+		}
 
 		refresh_field("total_completed_qty");
 	}

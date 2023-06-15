@@ -171,7 +171,8 @@ class SalesOrder(SellingController):
 						frappe.msgprint(
 							_("Expected Delivery Date should be after Sales Order Date"),
 							indicator="orange",
-							title=_("Warning"),
+							title=_("Invalid Delivery Date"),
+							raise_exception=True,
 						)
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
@@ -230,6 +231,7 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
+				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):

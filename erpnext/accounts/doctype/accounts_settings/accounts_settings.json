@@ -34,6 +34,7 @@
   "book_tax_discount_loss",
   "print_settings",
   "show_inclusive_tax_in_print",
+  "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
   "currency_exchange_section",
@@ -381,6 +382,12 @@
    "label": "Auto Reconcile Payments"
   },
   {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
+  },
+  {
    "fieldname": "banking_tab",
    "fieldtype": "Tab Break",
    "label": "Banking"
@@ -406,7 +413,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-01 15:42:44.912316",
+ "modified": "2023-06-15 16:35:45.123456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

@@ -345,7 +345,7 @@ class TestCustomer(FrappeTestCase):
 	def test_serach_fields_for_customer(self):
 		from erpnext.controllers.queries import customer_query
 
-		frappe.db.set_value("Selling Settings", None, "cust_master_name", "Naming Series")
+		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Naming Series")
 
 		make_property_setter(
 			"Customer", None, "search_fields", "customer_group", "Data", for_doctype="Doctype"
@@ -371,7 +371,7 @@ class TestCustomer(FrappeTestCase):
 		self.assertEqual(data[0].territory, "_Test Territory")
 		self.assertTrue("territory" in data[0])
 
-		frappe.db.set_value("Selling Settings", None, "cust_master_name", "Customer Name")
+		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Customer Name")
 
 
 def get_customer_dict(customer_name):

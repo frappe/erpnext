@@ -812,14 +812,14 @@ class TestDepreciationMethods(AssetSetup):
 			number_of_depreciations_booked=1,
 			opening_accumulated_depreciation=50000,
 			expected_value_after_useful_life=10000,
-			depreciation_start_date="2030-12-31",
+			depreciation_start_date="2031-12-31",
 			total_number_of_depreciations=3,
 			frequency_of_depreciation=12,
 		)
 
 		self.assertEqual(asset.status, "Draft")
 
-		expected_schedules = [["2030-12-31", 33333.50, 83333.50], ["2031-12-31", 6666.50, 90000.0]]
+		expected_schedules = [["2031-12-31", 33333.50, 83333.50], ["2032-12-31", 6666.50, 90000.0]]
 
 		schedules = [
 			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -1804,7 +1804,7 @@ def set_depreciation_settings_in_company(company=None):
 	company.save()
 
 	# Enable booking asset depreciation entry automatically
-	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
+	frappe.db.set_single_value("Accounts Settings", "book_asset_depreciation_entry_automatically", 1)
 
 
 def enable_cwip_accounting(asset_category, enable=1):
