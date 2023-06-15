@@ -75,16 +75,12 @@ def resolve_dunning(doc, state):
 	when a Payment Entry is submitted.
 	"""
 	for reference in doc.references:
-		if reference.reference_doctype == "Sales Invoice" and reference.outstanding_amount <= 0:
-			unresolved_dunnings = frappe.get_all(
-				"Dunning",
-				filters={
-					"sales_invoice": reference.reference_name,
-					"status": ("!=", "Resolved"),
-					"docstatus": ("!=", 2),
-				},
-				pluck="name",
-			)
+		# Consider partial and full payments
+		if (
+			reference.reference_doctype == "Sales Invoice"
+			and reference.outstanding_amount < reference.total_amount
+		):
+			unresolved_dunnings = get_unresolved_dunnings(reference.reference_name)
 
 			for dunning_name in unresolved_dunnings:
 				resolve = True
@@ -102,6 +98,23 @@ def resolve_dunning(doc, state):
 				if resolve:
 					dunning.status = "Resolved"
 					dunning.save()
+
+
+def get_unresolved_dunnings(sales_invoice):
+	dunning = frappe.qb.DocType("Dunning")
+	overdue_payment = frappe.qb.DocType("Overdue Payment")
+
+	return (
+		frappe.qb.from_(dunning)
+		.join(overdue_payment)
+		.on(overdue_payment.parent == dunning.name)
+		.select(dunning.name)
+		.where(
+			(dunning.status != "Resolved")
+			& (dunning.docstatus != 2)
+			& (overdue_payment.sales_invoice == sales_invoice)
+		)
+	).run(as_dict=True)
 
 
 @frappe.whitelist()
