@@ -445,7 +445,7 @@ class BuyingController(SubcontractingController):
 				continue
 
 			if d.warehouse:
-				pr_qty = flt(d.qty) * flt(d.conversion_factor)
+				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 
 				if pr_qty:
 
@@ -507,7 +507,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+							"actual_qty": flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")),
 							"serial_no": cstr(d.rejected_serial_no).strip(),
 							"incoming_rate": 0.0,
 						},
