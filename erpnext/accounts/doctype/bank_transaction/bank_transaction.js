@@ -17,6 +17,26 @@ frappe.ui.form.on("Bank Transaction", {
 			frm.call('remove_payment_entries')
 			.then( () => frm.refresh() );
 		});
+
+		if (
+			["bank_party_account_number", "bank_party_iban"].some(
+				(field) => frm.doc[field]
+			)
+		) {
+			frm.add_custom_button(
+				__("Bank Account"),
+				() => {
+					frappe.new_doc("Bank Account", {
+						iban: frm.doc.bank_party_iban,
+						bank_account_no: frm.doc.bank_party_account_number,
+						account_name: frm.doc.bank_party_name,
+						party: frm.doc.party,
+						party_type: frm.doc.party_type,
+					});
+				},
+				__("Make")
+			);
+		}
 	},
 	bank_account: function (frm) {
 		set_bank_statement_filter(frm);
