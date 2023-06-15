@@ -75,16 +75,23 @@ def resolve_dunning(doc, state):
 	when a Payment Entry is submitted.
 	"""
 	for reference in doc.references:
-		# Consider partial and full payments
-		if (
-			reference.reference_doctype == "Sales Invoice"
-			and reference.outstanding_amount < reference.total_amount
-		):
-			unresolved_dunnings = get_unresolved_dunnings(reference.reference_name)
+		# Consider partial and full payments:
+		# Submitting full payment: outstanding_amount will be 0
+		# Submitting 1st partial payment: outstanding_amount will be the pending installment
+		# Cancelling full payment: outstanding_amount will revert to total amount
+		# Cancelling last partial payment: outstanding_amount will revert to pending amount
+		submit_condition = reference.outstanding_amount < reference.total_amount
+		cancel_condition = reference.outstanding_amount <= reference.total_amount
 
-			for dunning_name in unresolved_dunnings:
+		if reference.reference_doctype == "Sales Invoice" and (
+			submit_condition if doc.docstatus == 1 else cancel_condition
+		):
+			state = "Resolved" if doc.docstatus == 2 else "Unresolved"
+			dunnings = get_linked_dunnings_as_per_state(reference.reference_name, state)
+
+			for dunning in dunnings:
 				resolve = True
-				dunning = frappe.get_doc("Dunning", dunning_name)
+				dunning = frappe.get_doc("Dunning", dunning.get("name"))
 				for overdue_payment in dunning.overdue_payments:
 					outstanding_inv = frappe.get_value(
 						"Sales Invoice", overdue_payment.sales_invoice, "outstanding_amount"
@@ -92,15 +99,13 @@ def resolve_dunning(doc, state):
 					outstanding_ps = frappe.get_value(
 						"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
 					)
-					if outstanding_ps > 0 and outstanding_inv > 0:
-						resolve = False
+					resolve = False if (outstanding_ps > 0 and outstanding_inv > 0) else True
 
-				if resolve:
-					dunning.status = "Resolved"
-					dunning.save()
+				dunning.status = "Resolved" if resolve else "Unresolved"
+				dunning.save()
 
 
-def get_unresolved_dunnings(sales_invoice):
+def get_linked_dunnings_as_per_state(sales_invoice, state):
 	dunning = frappe.qb.DocType("Dunning")
 	overdue_payment = frappe.qb.DocType("Overdue Payment")
 
@@ -110,7 +115,7 @@ def get_unresolved_dunnings(sales_invoice):
 		.on(overdue_payment.parent == dunning.name)
 		.select(dunning.name)
 		.where(
-			(dunning.status != "Resolved")
+			(dunning.status == state)
 			& (dunning.docstatus != 2)
 			& (overdue_payment.sales_invoice == sales_invoice)
 		)
