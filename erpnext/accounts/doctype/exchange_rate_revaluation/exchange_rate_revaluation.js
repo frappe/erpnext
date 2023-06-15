@@ -36,7 +36,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 	},
 
 	validate_rounding_loss: function(frm) {
-		let allowance = frm.doc.rounding_loss_allowance;
+		allowance = frm.doc.rounding_loss_allowance;
 		if (!(allowance > 0 && allowance < 1)) {
 			frappe.throw(__("Rounding Loss Allowance should be between 0 and 1"));
 		}
