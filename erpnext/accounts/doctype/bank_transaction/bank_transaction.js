@@ -13,10 +13,11 @@ frappe.ui.form.on("Bank Transaction", {
 		});
 	},
 	refresh(frm) {
-		frm.add_custom_button(__('Unreconcile Transaction'), () => {
-			frm.call('remove_payment_entries')
-			.then( () => frm.refresh() );
-		});
+		if (!frm.is_dirty() && frm.doc.payment_entries.length > 0) {
+			frm.add_custom_button(__("Unreconcile Transaction"), () => {
+				frm.call("remove_payment_entries").then(() => frm.refresh());
+			});
+		}
 
 		if (
 			["bank_party_account_number", "bank_party_iban"].some(
