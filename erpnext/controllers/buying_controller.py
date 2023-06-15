@@ -105,6 +105,8 @@ class BuyingController(SubcontractingController):
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
 			for row in self.items:
+
+				# override the rate with valuation rate
 				row.rate = get_incoming_rate(
 					{
 						"item_code": row.item_code,
