@@ -1114,7 +1114,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
 				item.has_serial_no = r.message.has_serial_no;
 				item.has_batch_no = r.message.has_batch_no;
-				item.outward = item.s_warehouse ? 1 : 0;
+				item.type_of_transaction = item.s_warehouse ? "Outward" : "Inward";
 
 				frappe.require(path, function() {
 					new erpnext.SerialBatchPackageSelector(

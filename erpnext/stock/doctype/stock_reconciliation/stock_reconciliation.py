@@ -193,7 +193,13 @@ class StockReconciliation(StockController):
 
 		def _changed(item):
 			if item.current_serial_and_batch_bundle:
-				self.calculate_difference_amount(item, frappe._dict({}))
+				bundle_data = frappe.get_all(
+					"Serial and Batch Bundle",
+					filters={"name": item.current_serial_and_batch_bundle},
+					fields=["total_qty as qty", "avg_rate as rate"],
+				)[0]
+
+				self.calculate_difference_amount(item, bundle_data)
 				return True
 
 			item_dict = get_stock_balance_for(
@@ -446,16 +452,17 @@ class StockReconciliation(StockController):
 
 			sl_entries.append(args)
 
-		args = self.get_sle_for_items(row)
-		args.update(
-			{
-				"actual_qty": row.qty,
-				"incoming_rate": row.valuation_rate,
-				"serial_and_batch_bundle": row.serial_and_batch_bundle,
-			}
-		)
+		if row.qty != 0:
+			args = self.get_sle_for_items(row)
+			args.update(
+				{
+					"actual_qty": row.qty,
+					"incoming_rate": row.valuation_rate,
+					"serial_and_batch_bundle": row.serial_and_batch_bundle,
+				}
+			)
 
-		sl_entries.append(args)
+			sl_entries.append(args)
 
 	def update_valuation_rate_for_serial_no(self):
 		for d in self.items:
