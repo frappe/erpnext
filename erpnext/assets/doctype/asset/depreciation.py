@@ -459,6 +459,7 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None,
 	) = get_asset_details(asset, finance_book)
 
 	gl_entries = [
+<<<<<<< HEAD
 		{
 			"account": fixed_asset_account,
 			"credit_in_account_currency": asset.gross_purchase_amount,
@@ -473,7 +474,33 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None,
 			"cost_center": depreciation_cost_center,
 			"posting_date": date,
 		},
+=======
+		asset.get_gl_dict(
+			{
+				"account": fixed_asset_account,
+				"credit_in_account_currency": asset.gross_purchase_amount,
+				"credit": asset.gross_purchase_amount,
+				"cost_center": depreciation_cost_center,
+				"posting_date": date,
+			},
+			item=asset,
+		),
+>>>>>>> bb39a2cac7 (fix: don't add GL Entry for Acc. Depr. while scrapping non-depreciable assets (#35714))
 	]
+
+	if accumulated_depr_amount:
+		gl_entries.append(
+			asset.get_gl_dict(
+				{
+					"account": accumulated_depr_account,
+					"debit_in_account_currency": accumulated_depr_amount,
+					"debit": accumulated_depr_amount,
+					"cost_center": depreciation_cost_center,
+					"posting_date": date,
+				},
+				item=asset,
+			),
+		)
 
 	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
 	if profit_amount:
