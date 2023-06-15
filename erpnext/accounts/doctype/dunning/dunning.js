@@ -72,7 +72,7 @@ frappe.ui.form.on("Dunning", {
 						company: frm.doc.company
 					},
 					allow_child_item_selection: true,
-					child_fielname: "payment_schedule",
+					child_fieldname: "payment_schedule",
 					child_columns: ["due_date", "outstanding"],
 				});
 			});

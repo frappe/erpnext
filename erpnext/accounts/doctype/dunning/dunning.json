@@ -75,7 +75,7 @@
    "print_hide": 1
   },
   {
-   "fetch_from": "sales_invoice.customer_name",
+   "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -184,21 +184,18 @@
    "label": "Address and Contact"
   },
   {
-   "fetch_from": "sales_invoice.address_display",
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
    "read_only": 1
   },
   {
-   "fetch_from": "sales_invoice.contact_display",
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "label": "Contact",
    "read_only": 1
   },
   {
-   "fetch_from": "sales_invoice.contact_mobile",
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
@@ -206,14 +203,12 @@
    "read_only": 1
   },
   {
-   "fetch_from": "sales_invoice.company_address_display",
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
    "label": "Company Address Display",
    "read_only": 1
   },
   {
-   "fetch_from": "sales_invoice.contact_email",
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
@@ -221,7 +216,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "sales_invoice.customer",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -387,7 +381,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:24:01.677026",
+ "modified": "2023-06-15 15:46:53.865712",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
