@@ -466,14 +466,18 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None,
 			"cost_center": depreciation_cost_center,
 			"posting_date": date,
 		},
-		{
-			"account": accumulated_depr_account,
-			"debit_in_account_currency": accumulated_depr_amount,
-			"debit": accumulated_depr_amount,
-			"cost_center": depreciation_cost_center,
-			"posting_date": date,
-		},
 	]
+
+	if accumulated_depr_amount:
+		gl_entries.append(
+			{
+				"account": accumulated_depr_account,
+				"debit_in_account_currency": accumulated_depr_amount,
+				"debit": accumulated_depr_amount,
+				"cost_center": depreciation_cost_center,
+				"posting_date": date,
+			},
+		)
 
 	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
 	if profit_amount:
