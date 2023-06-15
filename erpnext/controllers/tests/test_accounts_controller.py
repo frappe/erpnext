@@ -1,0 +1,501 @@
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+import unittest
+
+import frappe
+from frappe import qb
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, flt, nowdate
+
+from erpnext import get_default_cost_center
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.party import get_party_account
+from erpnext.stock.doctype.item.test_item import create_item
+
+
+def make_customer(customer_name, currency=None):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = customer_name
+		customer.type = "Individual"
+
+		if currency:
+			customer.default_currency = currency
+		customer.save()
+		return customer.name
+	else:
+		return customer_name
+
+
+class TestAccountsController(FrappeTestCase):
+	"""
+	Test Exchange Gain/Loss booking on various scenarios
+	"""
+
+	def setUp(self):
+		self.create_company()
+		self.create_account()
+		self.create_item()
+		self.create_customer()
+		self.clear_old_entries()
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def create_company(self):
+		company_name = "_Test Company MC"
+		self.company_abbr = abbr = "_CM"
+		if frappe.db.exists("Company", company_name):
+			company = frappe.get_doc("Company", company_name)
+		else:
+			company = frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": company_name,
+					"country": "India",
+					"default_currency": "INR",
+					"create_chart_of_accounts_based_on": "Standard Template",
+					"chart_of_accounts": "Standard",
+				}
+			)
+			company = company.save()
+
+		self.company = company.name
+		self.cost_center = company.cost_center
+		self.warehouse = "Stores - " + abbr
+		self.finished_warehouse = "Finished Goods - " + abbr
+		self.income_account = "Sales - " + abbr
+		self.expense_account = "Cost of Goods Sold - " + abbr
+		self.debit_to = "Debtors - " + abbr
+		self.debit_usd = "Debtors USD - " + abbr
+		self.cash = "Cash - " + abbr
+		self.creditors = "Creditors - " + abbr
+
+	def create_item(self):
+		item = create_item(
+			item_code="_Test Notebook", is_stock_item=0, company=self.company, warehouse=self.warehouse
+		)
+		self.item = item if isinstance(item, str) else item.item_code
+
+	def create_customer(self):
+		self.customer = make_customer("_Test MC Customer USD", "USD")
+
+	def create_account(self):
+		account_name = "Debtors USD"
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": account_name, "company": self.company}
+		):
+			acc = frappe.new_doc("Account")
+			acc.account_name = account_name
+			acc.parent_account = "Accounts Receivable - " + self.company_abbr
+			acc.company = self.company
+			acc.account_currency = "USD"
+			acc.account_type = "Receivable"
+			acc.insert()
+		else:
+			name = frappe.db.get_value(
+				"Account",
+				filters={"account_name": account_name, "company": self.company},
+				fieldname="name",
+				pluck=True,
+			)
+			acc = frappe.get_doc("Account", name)
+		self.debtors_usd = acc.name
+
+	def create_sales_invoice(
+		self, qty=1, rate=1, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+	):
+		"""
+		Helper function to populate default values in sales invoice
+		"""
+		sinv = create_sales_invoice(
+			qty=qty,
+			rate=rate,
+			company=self.company,
+			customer=self.customer,
+			item_code=self.item,
+			item_name=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_usd,
+			parent_cost_center=self.cost_center,
+			update_stock=0,
+			currency="USD",
+			conversion_rate=80,
+			is_pos=0,
+			is_return=0,
+			return_against=None,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=do_not_save,
+			do_not_submit=do_not_submit,
+		)
+		return sinv
+
+	def create_payment_entry(
+		self, amount=1, source_exc_rate=75, posting_date=nowdate(), customer=None
+	):
+		"""
+		Helper function to populate default values in payment entry
+		"""
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=customer or self.customer,
+			paid_from=self.debit_usd,
+			paid_to=self.cash,
+			paid_amount=amount,
+		)
+		payment.source_exchange_rate = source_exc_rate
+		payment.received_amount = source_exc_rate * amount
+		payment.posting_date = posting_date
+		return payment
+
+	def clear_old_entries(self):
+		doctype_list = [
+			"GL Entry",
+			"Payment Ledger Entry",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Payment Entry",
+			"Journal Entry",
+		]
+		for doctype in doctype_list:
+			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
+
+	def create_payment_reconciliation(self):
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = get_party_account(pr.party_type, pr.party, pr.company)
+		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
+		return pr
+
+	def create_journal_entry(
+		self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None
+	):
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = posting_date or nowdate()
+		je.company = self.company
+		je.user_remark = "test"
+		if not cost_center:
+			cost_center = self.cost_center
+		je.set(
+			"accounts",
+			[
+				{
+					"account": acc1,
+					"cost_center": cost_center,
+					"debit_in_account_currency": amount if amount > 0 else 0,
+					"credit_in_account_currency": abs(amount) if amount < 0 else 0,
+				},
+				{
+					"account": acc2,
+					"cost_center": cost_center,
+					"credit_in_account_currency": amount if amount > 0 else 0,
+					"debit_in_account_currency": abs(amount) if amount < 0 else 0,
+				},
+			],
+		)
+		return je
+
+	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
+		journals = []
+		if voucher_type and voucher_no:
+			journals = frappe.db.get_all(
+				"Journal Entry Account",
+				filters={"reference_type": voucher_type, "reference_name": voucher_no, "docstatus": 1},
+				fields=["parent"],
+			)
+		return journals
+
+	def test_01_payment_against_invoice(self):
+		# Invoice in Foreign Currency
+		si = self.create_sales_invoice(qty=1, rate=1)
+		# Payment
+		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 1},
+		)
+		pe = pe.save().submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+
+		# Exchange Gain/Loss Journal should've been created.
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_pe), 1)
+		self.assertEqual(exc_je_for_si[0], exc_je_for_pe[0])
+
+		# Cancel Payment
+		pe.cancel()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(exc_je_for_pe, [])
+
+	def test_02_advance_against_invoice(self):
+		# Advance Payment
+		adv = self.create_payment_entry(amount=1, source_exc_rate=85).save().submit()
+		adv.reload()
+
+		# Invoice in Foreign Currency
+		si = self.create_sales_invoice(qty=1, rate=1, do_not_submit=True)
+		si.append(
+			"advances",
+			{
+				"doctype": "Sales Invoice Advance",
+				"reference_type": adv.doctype,
+				"reference_name": adv.name,
+				"advance_amount": 1,
+				"allocated_amount": 1,
+				"ref_exchange_rate": 85,
+				"remarks": "Test",
+			},
+		)
+		si = si.save()
+		si = si.submit()
+
+		adv.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+
+		# Exchange Gain/Loss Journal should've been created.
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+
+		# Cancel Invoice
+		si.cancel()
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(exc_je_for_adv, [])
+
+	def test_03_partial_advance_and_payment_for_invoice(self):
+		"""
+		Invoice with partial advance payment, and a normal payment
+		"""
+		# Partial Advance
+		adv = self.create_payment_entry(amount=1, source_exc_rate=85).save().submit()
+		adv.reload()
+
+		# Invoice in Foreign Currency linked with advance
+		si = self.create_sales_invoice(qty=2, rate=1, do_not_submit=True)
+		si.append(
+			"advances",
+			{
+				"doctype": "Sales Invoice Advance",
+				"reference_type": adv.doctype,
+				"reference_name": adv.name,
+				"advance_amount": 1,
+				"allocated_amount": 1,
+				"ref_exchange_rate": 85,
+				"remarks": "Test",
+			},
+		)
+		si = si.save()
+		si = si.submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+
+		# Exchange Gain/Loss Journal should've been created for the partial advance
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+
+		# Payment
+		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 1},
+		)
+		pe = pe.save().submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+
+		# Exchange Gain/Loss Journal should've been created for the payment
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		# There should be 2 JE's now. One for the advance and one for the payment
+		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_pe), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_pe + exc_je_for_adv)
+
+		# Cancel Invoice
+		si.reload()
+		si.cancel()
+
+		# Exchange Gain/Loss Journal should been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(exc_je_for_pe, [])
+		self.assertEqual(exc_je_for_adv, [])
+
+	def test_04_partial_advance_and_payment_for_invoice_with_cancellation(self):
+		"""
+		Invoice with partial advance payment, and a normal payment. Cancel advance and payment.
+		"""
+		# Partial Advance
+		adv = self.create_payment_entry(amount=1, source_exc_rate=85).save().submit()
+		adv.reload()
+
+		# Invoice in Foreign Currency linked with advance
+		si = self.create_sales_invoice(qty=2, rate=1, do_not_submit=True)
+		si.append(
+			"advances",
+			{
+				"doctype": "Sales Invoice Advance",
+				"reference_type": adv.doctype,
+				"reference_name": adv.name,
+				"advance_amount": 1,
+				"allocated_amount": 1,
+				"ref_exchange_rate": 85,
+				"remarks": "Test",
+			},
+		)
+		si = si.save()
+		si = si.submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+
+		# Exchange Gain/Loss Journal should've been created for the partial advance
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+
+		# Payment
+		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 1},
+		)
+		pe = pe.save().submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+
+		# Exchange Gain/Loss Journal should've been created for the payment
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		# There should be 2 JE's now. One for the advance and one for the payment
+		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_pe), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_pe + exc_je_for_adv)
+
+		adv.reload()
+		adv.cancel()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+
+		# Exchange Gain/Loss Journal for advance should been cancelled
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_pe), 1)
+		self.assertEqual(exc_je_for_adv, [])
+
+	def test_05_same_payment_split_against_invoice(self):
+		# Invoice in Foreign Currency
+		si = self.create_sales_invoice(qty=2, rate=1)
+		# Payment
+		pe = self.create_payment_entry(amount=2, source_exc_rate=75).save()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 1},
+		)
+		pe = pe.save().submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+
+		# Exchange Gain/Loss Journal should've been created.
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_pe), 1)
+		self.assertEqual(exc_je_for_si[0], exc_je_for_pe[0])
+
+		# Reconcile the remaining amount
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debit_usd
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		# Test exact payment allocation
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_pe), 2)
+		self.assertEqual(exc_je_for_si, exc_je_for_pe)
+
+		# Cancel Payment
+		pe.reload()
+		pe.cancel()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 2)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(exc_je_for_pe, [])
