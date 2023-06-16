@@ -156,11 +156,11 @@ class PaymentEntry(AccountsController):
 		else:
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 			for d in self.get("references"):
-				if (flt(d.allocated_amount)) and flt(d.allocated_amount) > flt(d.outstanding_amount):
+				if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
 				# Check for negative outstanding invoices as well
-				if flt(d.allocated_amount) and flt(d.allocated_amount) < flt(d.outstanding_amount):
+				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
 	def validate_allocated_amount_with_latest_date(self):
@@ -202,11 +202,11 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
-			if (flt(d.allocated_amount)) and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
 				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) and flt(d.allocated_amount) < flt(latest.outstanding_amount):
+			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
 				frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
