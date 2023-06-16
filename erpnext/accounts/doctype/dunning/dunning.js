@@ -140,6 +140,9 @@ frappe.ui.form.on("Dunning", {
 			frm.trigger("conversion_rate");
 		}
 	},
+	customer: (frm) => {
+		erpnext.utils.get_party_details(frm);
+	},
 	conversion_rate: function (frm) {
 		if (frm.doc.currency === erpnext.get_currency(frm.doc.company)) {
 			frm.set_value("conversion_rate", 1.0);
