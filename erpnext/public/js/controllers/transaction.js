@@ -123,6 +123,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
 				return me.set_query_for_batch(doc, cdt, cdn);
 			});
+
+			let batch_field = this.frm.get_docfield('items', 'batch_no');
+			if (batch_field) {
+				batch_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item': row.doc.item_code
+					}
+				};
+			}
 		}
 
 		if(
