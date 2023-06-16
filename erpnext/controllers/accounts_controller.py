@@ -1021,7 +1021,7 @@ class AccountsController(TransactionBase):
 						)
 					)
 
-	def update_against_document_in_jv(self):
+	def update_against_document_in_jv(self, is_reconcile=True):
 		"""
 		Links invoice and advance voucher:
 		        1. cancel advance voucher
@@ -1078,7 +1078,7 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 
-			reconcile_against_document(lst, is_reconcile=True)
+			reconcile_against_document(lst, is_reconcile)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -2919,7 +2919,6 @@ def make_advance_liability_entry(
 		rev = "credit"
 		against = invoice.debit_to
 		party = invoice.customer
-		voucher_type = "Sales Invoice"
 	else:
 		invoice = frappe.get_doc("Purchase Invoice", invoice)
 		account = pe.paid_to
@@ -2927,9 +2926,8 @@ def make_advance_liability_entry(
 		rev = "debit"
 		against = invoice.credit_to
 		party = invoice.supplier
-		voucher_type = "Purchase Invoice"
 	gl_entries.append(
-		invoice.get_gl_dict(
+		pe.get_gl_dict(
 			{
 				"account": account,
 				"party_type": party_type,
@@ -2940,42 +2938,35 @@ def make_advance_liability_entry(
 				dr_or_cr + "_in_account_currency": allocated_amount,
 				rev: 0,
 				rev + "_in_account_currency": 0,
-				"against_voucher": pe.name,
-				"against_voucher_type": "Payment Entry",
 				"cost_center": invoice.cost_center,
 				"project": invoice.project,
-				"voucher_type": voucher_type,
-				"voucher_no": invoice.name,
+				"against_voucher_type": "Payment Entry",
+				"against_voucher": pe.name,
 			},
 			invoice.party_account_currency,
-			item=invoice,
+			item=pe,
 		)
 	)
 
 	(dr_or_cr, rev) = ("credit", "debit") if party_type == "Customer" else ("debit", "credit")
 	gl_entries.append(
-		invoice.get_gl_dict(
+		pe.get_gl_dict(
 			{
 				"account": against,
 				"party_type": party_type,
 				"party": party,
 				"due_date": invoice.due_date,
-				"against": account,
 				dr_or_cr: allocated_amount,
 				dr_or_cr + "_in_account_currency": allocated_amount,
 				rev: 0,
 				rev + "_in_account_currency": 0,
-				"against_voucher": invoice.return_against
-				if cint(invoice.is_return) and invoice.return_against
-				else invoice.name,
-				"against_voucher_type": invoice.doctype,
 				"cost_center": invoice.cost_center,
 				"project": invoice.project,
-				"voucher_type": "Payment Entry" if references else voucher_type,
-				"voucher_no": pe.name if references else invoice.name,
+				"against_voucher_type": invoice.doctype,
+				"against_voucher": invoice.name,
 			},
 			invoice.party_account_currency,
-			item=invoice,
+			item=pe,
 		)
 	)
 

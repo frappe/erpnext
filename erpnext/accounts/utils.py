@@ -437,7 +437,7 @@ def add_cc(args=None):
 
 
 def reconcile_against_document(
-	args, skip_ref_details_update_for_pe=False, is_reconcile=False
+	args, skip_ref_details_update_for_pe=False, is_reconcile=True
 ):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
