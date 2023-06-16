@@ -46,6 +46,17 @@ frappe.ui.form.on('Quotation', {
 				}
 			}
 		});
+
+		let sbb_field = frm.get_docfield('packed_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
 	},
 
 	refresh: function(frm) {

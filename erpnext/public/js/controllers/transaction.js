@@ -134,6 +134,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			});
+
+			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
+			if (sbb_field) {
+				sbb_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item_code': row.doc.item_code,
+					}
+				};
+			}
 		}
 
 		if(
