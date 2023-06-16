@@ -786,8 +786,8 @@ class PaymentEntry(AccountsController):
 		else:
 
 			# Use source/target exchange rate, so no difference amount is calculated.
-			# then update exchange gain/loss amount in refernece table
-			# if there is an amount, submit a JE for that
+			# then update exchange gain/loss amount in reference table
+			# if there is an exchange gain/loss amount in reference table, submit a JE for that
 
 			exchange_rate = 1
 			if self.payment_type == "Receive":
