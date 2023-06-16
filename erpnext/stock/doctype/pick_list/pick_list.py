@@ -360,6 +360,7 @@ class PickList(Document):
 					(pi_item.item_code.isin([x.item_code for x in items]))
 					& ((pi_item.picked_qty > 0) | (pi_item.stock_qty > 0))
 					& (pi.status != "Completed")
+					& (pi.status != "Cancelled")
 					& (pi_item.docstatus != 2)
 				)
 				.groupby(
