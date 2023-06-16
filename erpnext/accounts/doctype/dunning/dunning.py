@@ -11,12 +11,11 @@
 
 		-> Resolves dunning automatically
 """
-from __future__ import unicode_literals
-
 import json
 
 import frappe
 from frappe import _
+from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import getdate
 
 from erpnext.controllers.accounts_controller import AccountsController
@@ -27,6 +26,7 @@ class Dunning(AccountsController):
 		self.validate_same_currency()
 		self.validate_overdue_payments()
 		self.validate_totals()
+		self.set_party_details()
 		self.set_dunning_level()
 
 	def validate_same_currency(self):
@@ -55,6 +55,31 @@ class Dunning(AccountsController):
 		self.dunning_amount = self.total_interest + self.dunning_fee
 		self.base_dunning_amount = self.dunning_amount * self.conversion_rate
 		self.grand_total = self.total_outstanding + self.dunning_amount
+
+	def set_party_details(self):
+		from erpnext.accounts.party import _get_party_details
+
+		party_details = _get_party_details(
+			self.customer,
+			ignore_permissions=self.flags.ignore_permissions,
+			doctype=self.doctype,
+			company=self.company,
+			posting_date=self.get("posting_date"),
+			fetch_payment_terms_template=False,
+			party_address=self.customer_address,
+			company_address=self.get("company_address"),
+		)
+		for field in [
+			"customer_address",
+			"address_display",
+			"company_address",
+			"contact_person",
+			"contact_display",
+			"contact_mobile",
+		]:
+			self.set(field, party_details.get(field))
+
+		self.set("company_address_display", get_address_display(self.company_address))
 
 	def set_dunning_level(self):
 		for row in self.overdue_payments:
