@@ -526,7 +526,7 @@ def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net
 			"docstatus": 1,
 			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
 		},
-		"sum(tax_withholding_net_total)",
+		"sum(base_net_total)",
 	)
 
 	if is_valid_certificate(
