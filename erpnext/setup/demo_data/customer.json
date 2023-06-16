@@ -1,0 +1,17 @@
+[
+    {
+        "doctype": "Customer",
+        "customer_group": "Demo Customer Group",
+        "customer_name": "ABC Enterprises"
+    },
+    {
+        "doctype": "Customer",
+        "customer_group": "Demo Customer Group",
+        "customer_name": "XYZ Corporation"
+    },
+    {
+        "doctype": "Customer",
+        "customer_group": "Demo Customer Group",
+        "customer_name": "KJPR Pvt Ltd"
+    }
+]

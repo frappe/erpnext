@@ -70,7 +70,15 @@ treeviews = [
 	"Department",
 ]
 
-demo_doctypes = ["items"]
+demo_master_doctypes = [
+	"item_group",
+	"item",
+	"customer_group",
+	"supplier_group",
+	"customer",
+	"supplier",
+]
+demo_transaction_doctypes = ["purchase_invoice", "sales_invoice"]
 
 jinja = {
 	"methods": [

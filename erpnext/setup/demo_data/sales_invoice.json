@@ -1,0 +1,17 @@
+[
+    {
+        "conversion_rate": 1.0,
+        "customer": "ABC Enterprises",
+        "doctype": "Sales Invoice",
+        "items": [
+            {
+                "doctype": "Sales Invoice Item",
+                "item_code": "SKU004",
+                "parentfield": "items",
+                "qty": 20.0,
+                "rate": 500.0,
+                "conversion_factor": 1
+            }
+        ]
+    }
+]

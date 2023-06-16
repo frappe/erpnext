@@ -1,0 +1,17 @@
+[
+    {
+        "conversion_rate": 1.0,
+        "supplier": "DQ Industries",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU004",
+                "parentfield": "items",
+                "qty": 20.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    }
+]
