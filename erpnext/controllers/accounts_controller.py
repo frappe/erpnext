@@ -972,7 +972,7 @@ class AccountsController(TransactionBase):
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
 		"""
-		# Cancelling is existing exchange gain/loss journals is handled in on_cancel event
+		# Cancelling existing exchange gain/loss journals is handled in on_cancel event in accounts/utils.py
 		if self.docstatus == 1:
 			if self.get("doctype") == "Payment Entry":
 				gain_loss_to_book = [x for x in self.references if x.exchange_gain_loss != 0]
@@ -1027,6 +1027,10 @@ class AccountsController(TransactionBase):
 							"Account", party_account, "account_currency"
 						)
 						dr_or_cr = "debit" if d.exchange_gain_loss > 0 else "credit"
+
+						if d.reference_doctype == "Purchase Invoice":
+							dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
 						reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 						gain_loss_account = frappe.get_cached_value(
@@ -1080,7 +1084,6 @@ class AccountsController(TransactionBase):
 
 						journal_entry.save()
 						journal_entry.submit()
-				# frappe.throw("stopping...")
 
 	def update_against_document_in_jv(self):
 		"""
