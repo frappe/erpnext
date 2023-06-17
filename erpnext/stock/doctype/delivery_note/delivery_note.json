@@ -1399,11 +1399,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-04-21 11:15:23.931084",
-=======
  "modified": "2023-06-16 14:58:55.066602",
->>>>>>> 433489a9e6 (perf: Index pick list field in stock entry and DN (#35738))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
