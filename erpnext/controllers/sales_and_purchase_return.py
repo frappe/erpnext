@@ -617,6 +617,9 @@ def get_filters(
 	if reference_voucher_detail_no:
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
+	if item_row and item_row.get("warehouse"):
+		filters["warehouse"] = item_row.get("warehouse")
+
 	return filters
 
 
