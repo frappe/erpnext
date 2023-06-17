@@ -14,7 +14,7 @@
   "hide_currency_symbol",
   "disable_rounded_total",
   "disable_in_words",
-  "demo_company"
+  "original_default_company"
  ],
  "fields": [
   {
@@ -82,10 +82,10 @@
    "label": "Disable In Words"
   },
   {
-   "fieldname": "demo_company",
+   "fieldname": "original_default_company",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Demo Company",
+   "label": "Original Default Company",
    "options": "Company",
    "read_only": 1
   }
@@ -95,7 +95,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-16 13:03:45.016191",
+ "modified": "2023-06-17 13:07:40.074663",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

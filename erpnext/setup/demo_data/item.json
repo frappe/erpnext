@@ -36,6 +36,7 @@
     },
     {
         "doctype": "Item",
+        "item_group": "Demo Item Group",
         "item_code": "SKU006",
         "item_name": "Coffee Mug",
         "image": "https://media.istockphoto.com/id/821282266/photo/white-mug-isolated.jpg?s=612x612&w=0&k=20&c=LJCMPk0D83OKmJHahkiLzAB3OsKr83nMbL7KxSgfpfM="

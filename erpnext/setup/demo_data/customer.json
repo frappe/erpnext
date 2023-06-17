@@ -2,16 +2,19 @@
     {
         "doctype": "Customer",
         "customer_group": "Demo Customer Group",
+        "territory": "All Territories",
         "customer_name": "ABC Enterprises"
     },
     {
         "doctype": "Customer",
         "customer_group": "Demo Customer Group",
+        "territory": "All Territories",
         "customer_name": "XYZ Corporation"
     },
     {
         "doctype": "Customer",
         "customer_group": "Demo Customer Group",
+        "territory": "All Territories",
         "customer_name": "KJPR Pvt Ltd"
     }
 ]

@@ -18,12 +18,14 @@ def setup_demo_data():
 
 @frappe.whitelist()
 def clear_demo_data():
-	company = frappe.db.get_single_value("Global Defaults", "demo_company")
+	company = erpnext.get_default_company()
 	create_transaction_deletion_record(company)
+	clear_masters()
+	delete_company(company)
 
 
 def create_demo_company():
-	company = frappe.db.get_value("Company", {"docstatus": 0})
+	company = erpnext.get_default_company()
 	company_doc = frappe.get_doc("Company", company)
 
 	# Make a dummy company
@@ -37,19 +39,19 @@ def create_demo_company():
 	new_company.chart_of_accounts = company_doc.chart_of_accounts
 	new_company.insert()
 
-	frappe.db.set_single_value("Global Defaults", "demo_company", new_company.name)
+	frappe.db.set_single_value("Global Defaults", "original_default_company", company)
+
+	# Set Demo Company as default to
+	frappe.db.set_single_value("Global Defaults", "default_company", new_company.name)
 	return new_company.name
 
 
 def process_masters():
-	demo_doctypes = frappe.get_hooks("demo_master_doctypes") or []
-	path = os.path.join(os.path.dirname(__file__), "demo_data")
-	for doctype in demo_doctypes:
-		with open(os.path.join(path, doctype + ".json"), "r") as f:
-			data = f.read()
-			if data:
-				for item in json.loads(data):
-					create_demo_record(item)
+	for doctype in frappe.get_hooks("demo_master_doctypes"):
+		data = read_data_file_using_hooks(doctype)
+		if data:
+			for item in json.loads(data):
+				create_demo_record(item)
 
 
 def create_demo_record(doctype):
@@ -57,14 +59,11 @@ def create_demo_record(doctype):
 
 
 def make_transactions(company):
-	transaction_doctypes = frappe.get_hooks("demo_transaction_doctypes") or []
-	path = os.path.join(os.path.dirname(__file__), "demo_data")
-	for transaction in transaction_doctypes:
-		with open(os.path.join(path, transaction + ".json"), "r") as f:
-			data = f.read()
-			if data:
-				for item in json.loads(data):
-					create_transaction(item, company)
+	for doctype in frappe.get_hooks("demo_transaction_doctypes"):
+		data = read_data_file_using_hooks(doctype)
+		if data:
+			for item in json.loads(data):
+				create_transaction(item, company)
 
 
 def create_transaction(doctype, company):
@@ -93,3 +92,32 @@ def create_transaction_deletion_record(company):
 	transaction_deletion_record.company = company
 	transaction_deletion_record.save(ignore_permissions=True)
 	transaction_deletion_record.submit()
+
+
+def clear_masters():
+	for doctype in frappe.get_hooks("demo_master_doctypes")[::-1]:
+		data = read_data_file_using_hooks(doctype)
+		if data:
+			for item in json.loads(data):
+				clear_demo_record(item)
+
+
+def clear_demo_record(doctype):
+	doc_type = doctype.get("doctype")
+	del doctype["doctype"]
+	doc = frappe.get_doc(doc_type, doctype)
+	frappe.delete_doc(doc.doctype, doc.name, ignore_permissions=True)
+
+
+def delete_company(company):
+	original_company = frappe.db.get_single_value("Global Defaults", "original_default_company")
+	frappe.db.set_single_value("Global Defaults", "default_company", original_company)
+	frappe.delete_doc("Company", company, ignore_permissions=True)
+
+
+def read_data_file_using_hooks(doctype):
+	path = os.path.join(os.path.dirname(__file__), "demo_data")
+	with open(os.path.join(path, doctype + ".json"), "r") as f:
+		data = f.read()
+
+	return data
