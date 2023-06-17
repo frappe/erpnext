@@ -161,7 +161,7 @@ class JobCard(Document):
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
 		for row in self.sub_operations:
-			self.c += row.completed_qty
+			self.total_completed_qty += row.completed_qty
 
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
