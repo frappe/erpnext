@@ -2,12 +2,14 @@
  "actions": [],
  "creation": "2014-10-16 14:35:41.950175",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "details",
   "operation",
   "status",
   "completed_qty",
+  "process_loss_qty",
   "column_break_4",
   "bom",
   "workstation_type",
@@ -36,6 +38,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "columns": 2,
    "fieldname": "operation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -46,6 +49,7 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "bom",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -62,7 +66,7 @@
    "oldfieldtype": "Text"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "description": "Operation completed for how many finished goods?",
    "fieldname": "completed_qty",
    "fieldtype": "Float",
@@ -80,6 +84,7 @@
    "options": "Pending\nWork in Progress\nCompleted"
   },
   {
+   "columns": 1,
    "fieldname": "workstation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -115,7 +120,7 @@
    "fieldname": "time_in_mins",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Operation Time",
+   "label": "Time",
    "oldfieldname": "time_in_mins",
    "oldfieldtype": "Currency",
    "reqd": 1
@@ -203,12 +208,21 @@
    "fieldtype": "Link",
    "label": "Workstation Type",
    "options": "Workstation Type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-09 01:37:56.563068",
+ "modified": "2023-06-09 14:03:01.612909",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",

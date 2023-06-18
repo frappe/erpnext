@@ -47,8 +47,8 @@
   "required_items_section",
   "materials_and_operations_tab",
   "operations_section",
-  "operations",
   "transfer_material_against",
+  "operations",
   "time",
   "planned_start_date",
   "planned_end_date",
@@ -331,7 +331,6 @@
    "label": "Expected Delivery Date"
   },
   {
-   "collapsible": 1,
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
@@ -599,7 +598,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-06 12:35:12.149827",
+ "modified": "2023-06-09 13:20:09.154362",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
