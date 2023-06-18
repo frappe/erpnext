@@ -65,7 +65,11 @@ def search_by_term(search_term, warehouse, price_list):
 			"item_code": item_code,
 			"batch_no": batch_no,
 		},
+<<<<<<< HEAD
 		fields=["uom", "stock_uom", "currency", "price_list_rate", "batch_no"],
+=======
+		fields=["uom", "currency", "price_list_rate"],
+>>>>>>> 58a6bbcf6d (fix: unsupported operand type(s) for //: 'float' and 'NoneType' for POS Barcode search (#35710))
 	)
 
 	def __sort(p):
