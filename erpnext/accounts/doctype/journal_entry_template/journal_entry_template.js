@@ -28,7 +28,7 @@ frappe.ui.form.on("Journal Entry Template", {
 
 			if(!frm.doc.multi_currency) {
 				$.extend(filters, {
-					account_currency: frappe.get_doc(":Company", frm.doc.company).default_currency
+					account_currency: ['in', [frappe.get_doc(":Company", frm.doc.company).default_currency, null]]
 				});
 			}
 
