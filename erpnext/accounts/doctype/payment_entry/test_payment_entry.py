@@ -796,33 +796,28 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = 55
-
-		pe.append(
-			"deductions",
-			{
-				"account": "_Test Exchange Gain/Loss - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"amount": -500,
-			},
-		)
 		pe.save()
 
 		self.assertEqual(pe.unallocated_amount, 0)
 		self.assertEqual(pe.difference_amount, 0)
-
+		self.assertEqual(pe.references[0].exchange_gain_loss, 500)
 		pe.submit()
 
 		expected_gle = dict(
 			(d[0], d)
 			for d in [
-				["_Test Receivable USD - _TC", 0, 5000, si.name],
+				["_Test Receivable USD - _TC", 0, 5500, si.name],
 				["_Test Bank USD - _TC", 5500, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 0, 500, None],
 			]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+		# Exchange gain/loss should have been posted through a journal
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertEqual(exc_je_for_si, exc_je_for_pe)
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
