@@ -400,7 +400,7 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.insert()
 		mr.submit()
 
-		frappe.db.set_value("Stock Settings", None, "mr_qty_allowance", 20)
+		frappe.db.set_single_value("Stock Settings", "mr_qty_allowance", 20)
 
 		# map a stock entry
 

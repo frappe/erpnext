@@ -5,7 +5,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 	onload: function(frm) {
 		if (frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret) {
 			frappe.confirm(
-				__('Session not valid, Do you want to login?'),
+				__('Session not valid. Do you want to login?'),
 				function(){
 					frm.trigger("login");
 				},
@@ -14,11 +14,11 @@ frappe.ui.form.on('LinkedIn Settings', {
 				}
 			);
 		}
-		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/linkedin-settings'>${__('Click here')}</a>`]));
+		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/linkedin-settings'>${__('click here')}</a>`]));
 	},
 	refresh: function(frm) {
 		if (frm.doc.session_status=="Expired"){
-			let msg = __("Session Not Active. Save doc to login.");
+			let msg = __("Session not active. Save document to login.");
 			frm.dashboard.set_headline_alert(
 				`<div class="row">
 					<div class="col-xs-12">
@@ -37,7 +37,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			let msg,color;
 
 			if (days>0){
-				msg = __("Your Session will be expire in {0} days.", [days]);
+				msg = __("Your session will be expire in {0} days.", [days]);
 				color = "green";
 			}
 			else {

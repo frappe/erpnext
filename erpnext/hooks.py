@@ -39,7 +39,10 @@ setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
-before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
+before_install = [
+	"erpnext.setup.install.check_setup_wizard_not_completed",
+	"erpnext.setup.install.check_frappe_version",
+]
 after_install = "erpnext.setup.install.after_install"
 
 boot_session = "erpnext.startup.boot.boot_session"
@@ -66,6 +69,12 @@ treeviews = [
 	"Territory",
 	"Department",
 ]
+
+jinja = {
+	"methods": [
+		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
+	],
+}
 
 # website
 update_website_context = [

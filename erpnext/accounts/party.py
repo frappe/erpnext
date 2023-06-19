@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from typing import Optional
+
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.contacts.doctype.address.address import (
@@ -680,12 +682,12 @@ def set_taxes(
 	else:
 		args.update(get_party_details(party, party_type))
 
-	if party_type in ("Customer", "Lead"):
+	if party_type in ("Customer", "Lead", "Prospect"):
 		args.update({"tax_type": "Sales"})
 
-		if party_type == "Lead":
+		if party_type in ["Lead", "Prospect"]:
 			args["customer"] = None
-			del args["lead"]
+			del args[frappe.scrub(party_type)]
 	else:
 		args.update({"tax_type": "Purchase"})
 
@@ -883,7 +885,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 	return company_wise_info
 
 
-def get_party_shipping_address(doctype, name):
+def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 	"""
 	Returns an Address name (best guess) for the given doctype and name for which `address_type == 'Shipping'` is true.
 	and/or `is_shipping_address = 1`.
@@ -894,22 +896,23 @@ def get_party_shipping_address(doctype, name):
 	:param name: Party name
 	:return: String
 	"""
-	out = frappe.db.sql(
-		"SELECT dl.parent "
-		"from `tabDynamic Link` dl join `tabAddress` ta on dl.parent=ta.name "
-		"where "
-		"dl.link_doctype=%s "
-		"and dl.link_name=%s "
-		"and dl.parenttype='Address' "
-		"and ifnull(ta.disabled, 0) = 0 and"
-		"(ta.address_type='Shipping' or ta.is_shipping_address=1) "
-		"order by ta.is_shipping_address desc, ta.address_type desc limit 1",
-		(doctype, name),
+	shipping_addresses = frappe.get_all(
+		"Address",
+		filters=[
+			["Dynamic Link", "link_doctype", "=", doctype],
+			["Dynamic Link", "link_name", "=", name],
+			["disabled", "=", 0],
+		],
+		or_filters=[
+			["is_shipping_address", "=", 1],
+			["address_type", "=", "Shipping"],
+		],
+		pluck="name",
+		limit=1,
+		order_by="is_shipping_address DESC",
 	)
-	if out:
-		return out[0][0]
-	else:
-		return ""
+
+	return shipping_addresses[0] if shipping_addresses else None
 
 
 def get_partywise_advanced_payment_amount(
@@ -943,31 +946,32 @@ def get_partywise_advanced_payment_amount(
 		return frappe._dict(data)
 
 
-def get_default_contact(doctype, name):
+def get_default_contact(doctype: str, name: str) -> Optional[str]:
 	"""
-	Returns default contact for the given doctype and name.
-	Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
+	Returns contact name only if there is a primary contact for given doctype and name.
+
+	Else returns None
+
+	:param doctype: Party Doctype
+	:param name: Party name
+	:return: String
 	"""
-	out = frappe.db.sql(
-		"""
-			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
-			FROM `tabDynamic Link` dl
-			INNER JOIN `tabContact` c ON c.name = dl.parent
-			WHERE
-				dl.link_doctype=%s AND
-				dl.link_name=%s AND
-				dl.parenttype = 'Contact'
-			ORDER BY is_primary_contact DESC, is_billing_contact DESC
-		""",
-		(doctype, name),
+	contacts = frappe.get_all(
+		"Contact",
+		filters=[
+			["Dynamic Link", "link_doctype", "=", doctype],
+			["Dynamic Link", "link_name", "=", name],
+		],
+		or_filters=[
+			["is_primary_contact", "=", 1],
+			["is_billing_contact", "=", 1],
+		],
+		pluck="name",
+		limit=1,
+		order_by="is_primary_contact DESC, is_billing_contact DESC",
 	)
-	if out:
-		try:
-			return out[0][0]
-		except Exception:
-			return None
-	else:
-		return None
+
+	return contacts[0] if contacts else None
 
 
 def add_party_account(party_type, party, company, account):

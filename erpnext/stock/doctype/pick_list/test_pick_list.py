@@ -11,6 +11,11 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
@@ -139,6 +144,18 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pick_list.locations[1].qty, 10)
 
 	def test_pick_list_shows_serial_no_for_serialized_item(self):
+		serial_nos = ["SADD-0001", "SADD-0002", "SADD-0003", "SADD-0004", "SADD-0005"]
+
+		for serial_no in serial_nos:
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"company": "_Test Company",
+						"item_code": "_Test Serialized Item",
+						"serial_no": serial_no,
+					}
+				).insert()
 
 		stock_reconciliation = frappe.get_doc(
 			{
@@ -151,7 +168,20 @@ class TestPickList(FrappeTestCase):
 						"warehouse": "_Test Warehouse - _TC",
 						"valuation_rate": 100,
 						"qty": 5,
-						"serial_no": "123450\n123451\n123452\n123453\n123454",
+						"serial_and_batch_bundle": make_serial_batch_bundle(
+							frappe._dict(
+								{
+									"item_code": "_Test Serialized Item",
+									"warehouse": "_Test Warehouse - _TC",
+									"qty": 5,
+									"rate": 100,
+									"type_of_transaction": "Inward",
+									"do_not_submit": True,
+									"voucher_type": "Stock Reconciliation",
+									"serial_nos": serial_nos,
+								}
+							)
+						).name,
 					}
 				],
 			}
@@ -161,6 +191,10 @@ class TestPickList(FrappeTestCase):
 			stock_reconciliation.submit()
 		except EmptyStockReconciliationItemsError:
 			pass
+
+		so = make_sales_order(
+			item_code="_Test Serialized Item", warehouse="_Test Warehouse - _TC", qty=5, rate=1000
+		)
 
 		pick_list = frappe.get_doc(
 			{
@@ -175,18 +209,20 @@ class TestPickList(FrappeTestCase):
 						"qty": 1000,
 						"stock_qty": 1000,
 						"conversion_factor": 1,
-						"sales_order": "_T-Sales Order-1",
-						"sales_order_item": "_T-Sales Order-1_item",
+						"sales_order": so.name,
+						"sales_order_item": so.items[0].name,
 					}
 				],
 			}
 		)
 
-		pick_list.set_item_locations()
+		pick_list.save()
 		self.assertEqual(pick_list.locations[0].item_code, "_Test Serialized Item")
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
-		self.assertEqual(pick_list.locations[0].serial_no, "123450\n123451\n123452\n123453\n123454")
+		self.assertEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_nos
+		)
 
 	def test_pick_list_shows_batch_no_for_batched_item(self):
 		# check if oldest batch no is picked
@@ -245,8 +281,8 @@ class TestPickList(FrappeTestCase):
 		pr1 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
 		pr1.load_from_db()
-		oldest_batch_no = pr1.items[0].batch_no
-		oldest_serial_nos = pr1.items[0].serial_no
+		oldest_batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		oldest_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
 
 		pr2 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
@@ -267,8 +303,12 @@ class TestPickList(FrappeTestCase):
 		)
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].batch_no, oldest_batch_no)
-		self.assertEqual(pick_list.locations[0].serial_no, oldest_serial_nos)
+		self.assertEqual(
+			get_batch_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_batch_no
+		)
+		self.assertEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_serial_nos
+		)
 
 		pr1.cancel()
 		pr2.cancel()
@@ -697,114 +737,3 @@ class TestPickList(FrappeTestCase):
 		pl.cancel()
 		pl.reload()
 		self.assertEqual(pl.status, "Cancelled")
-
-	def test_consider_existing_pick_list(self):
-		def create_items(items_properties):
-			items = []
-
-			for properties in items_properties:
-				properties.update({"maintain_stock": 1})
-				item_code = make_item(properties=properties).name
-				properties.update({"item_code": item_code})
-				items.append(properties)
-
-			return items
-
-		def create_stock_entries(items):
-			warehouses = ["Stores - _TC", "Finished Goods - _TC"]
-
-			for item in items:
-				for warehouse in warehouses:
-					se = make_stock_entry(
-						item=item.get("item_code"),
-						to_warehouse=warehouse,
-						qty=5,
-					)
-
-		def get_item_list(items, qty, warehouse="All Warehouses - _TC"):
-			return [
-				{
-					"item_code": item.get("item_code"),
-					"qty": qty,
-					"warehouse": warehouse,
-				}
-				for item in items
-			]
-
-		def get_picked_items_details(pick_list_doc):
-			items_data = {}
-
-			for location in pick_list_doc.locations:
-				key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
-				serial_no = [x for x in location.serial_no.split("\n") if x] if location.serial_no else None
-				data = {"picked_qty": location.picked_qty}
-				if serial_no:
-					data["serial_no"] = serial_no
-				if location.item_code not in items_data:
-					items_data[location.item_code] = {key: data}
-				else:
-					items_data[location.item_code][key] = data
-
-			return items_data
-
-		# Step - 1: Setup - Create Items and Stock Entries
-		items_properties = [
-			{
-				"valuation_rate": 100,
-			},
-			{
-				"valuation_rate": 200,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-			},
-			{
-				"valuation_rate": 300,
-				"has_serial_no": 1,
-				"serial_no_series": "SNO.###",
-			},
-			{
-				"valuation_rate": 400,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"has_serial_no": 1,
-				"serial_no_series": "SNO.###",
-			},
-		]
-
-		items = create_items(items_properties)
-		create_stock_entries(items)
-
-		# Step - 2: Create Sales Order [1]
-		so1 = make_sales_order(item_list=get_item_list(items, qty=6))
-
-		# Step - 3: Create and Submit Pick List [1] for Sales Order [1]
-		pl1 = create_pick_list(so1.name)
-		pl1.submit()
-
-		# Step - 4: Create Sales Order [2] with same Item(s) as Sales Order [1]
-		so2 = make_sales_order(item_list=get_item_list(items, qty=4))
-
-		# Step - 5: Create Pick List [2] for Sales Order [2]
-		pl2 = create_pick_list(so2.name)
-		pl2.save()
-
-		# Step - 6: Assert
-		picked_items_details = get_picked_items_details(pl1)
-
-		for location in pl2.locations:
-			key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
-			item_data = picked_items_details.get(location.item_code, {}).get(key, {})
-			picked_qty = item_data.get("picked_qty", 0)
-			picked_serial_no = picked_items_details.get("serial_no", [])
-			bin_actual_qty = frappe.db.get_value(
-				"Bin", {"item_code": location.item_code, "warehouse": location.warehouse}, "actual_qty"
-			)
-
-			# Available Qty to pick should be equal to [Actual Qty - Picked Qty]
-			self.assertEqual(location.stock_qty, bin_actual_qty - picked_qty)
-
-			# Serial No should not be in the Picked Serial No list
-			if location.serial_no:
-				a = set(picked_serial_no)
-				b = set([x for x in location.serial_no.split("\n") if x])
-				self.assertSetEqual(b, b.difference(a))

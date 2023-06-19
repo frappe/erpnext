@@ -16,7 +16,7 @@ from erpnext.support.doctype.service_level_agreement.service_level_agreement imp
 class TestServiceLevelAgreement(unittest.TestCase):
 	def setUp(self):
 		self.create_company()
-		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 		lead = frappe.qb.DocType("Lead")
 		frappe.qb.from_(lead).delete().where(lead.company == self.company).run()
 

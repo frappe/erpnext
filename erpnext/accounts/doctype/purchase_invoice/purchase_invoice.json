@@ -443,12 +443,14 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1574,7 +1576,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-05 17:40:35.320635",
+ "modified": "2023-06-03 16:21:54.637245",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

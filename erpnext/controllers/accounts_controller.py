@@ -759,6 +759,7 @@ class AccountsController(TransactionBase):
 			}
 		)
 
+		update_gl_dict_with_regional_fields(self, gl_dict)
 		accounting_dimensions = get_accounting_dimensions()
 		dimension_dict = frappe._dict()
 
@@ -920,6 +921,9 @@ class AccountsController(TransactionBase):
 				is_inclusive = 1
 
 		return is_inclusive
+
+	def should_show_taxes_as_table_in_print(self):
+		return cint(frappe.db.get_single_value("Accounts Settings", "show_taxes_as_table_in_print"))
 
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
@@ -2514,7 +2518,7 @@ def set_order_defaults(
 	Returns a Sales/Purchase Order Item child item containing the default values
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc(child_doctype, p_doc, child_docname)
+	child_item = frappe.new_doc(child_doctype, parent_doc=p_doc, parentfield=child_docname)
 	item = frappe.get_doc("Item", trans_item.get("item_code"))
 
 	for field in ("item_code", "item_name", "description", "item_group"):

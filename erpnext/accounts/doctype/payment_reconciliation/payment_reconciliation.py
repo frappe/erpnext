@@ -6,7 +6,6 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import IfNull
 from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
 
 import erpnext
@@ -144,12 +143,29 @@ class PaymentReconciliation(Document):
 
 		return list(journal_entries)
 
+	def get_return_invoices(self):
+		voucher_type = "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
+		doc = qb.DocType(voucher_type)
+		self.return_invoices = (
+			qb.from_(doc)
+			.select(
+				ConstantColumn(voucher_type).as_("voucher_type"),
+				doc.name.as_("voucher_no"),
+				doc.return_against,
+			)
+			.where(
+				(doc.docstatus == 1)
+				& (doc[frappe.scrub(self.party_type)] == self.party)
+				& (doc.is_return == 1)
+			)
+			.run(as_dict=True)
+		)
+
 	def get_dr_or_cr_notes(self):
 
 		self.build_qb_filter_conditions(get_return_invoices=True)
 
 		ple = qb.DocType("Payment Ledger Entry")
-		voucher_type = "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
 
 		if erpnext.get_party_account_type(self.party_type) == "Receivable":
 			self.common_filter_conditions.append(ple.account_type == "Receivable")
@@ -157,19 +173,10 @@ class PaymentReconciliation(Document):
 			self.common_filter_conditions.append(ple.account_type == "Payable")
 		self.common_filter_conditions.append(ple.account == self.receivable_payable_account)
 
-		# get return invoices
-		doc = qb.DocType(voucher_type)
-		return_invoices = (
-			qb.from_(doc)
-			.select(ConstantColumn(voucher_type).as_("voucher_type"), doc.name.as_("voucher_no"))
-			.where(
-				(doc.docstatus == 1)
-				& (doc[frappe.scrub(self.party_type)] == self.party)
-				& (doc.is_return == 1)
-				& (IfNull(doc.return_against, "") == "")
-			)
-			.run(as_dict=True)
-		)
+		self.get_return_invoices()
+		return_invoices = [
+			x for x in self.return_invoices if x.return_against == None or x.return_against == ""
+		]
 
 		outstanding_dr_or_cr = []
 		if return_invoices:
@@ -220,6 +227,15 @@ class PaymentReconciliation(Document):
 			max_outstanding=self.maximum_invoice_amount if self.maximum_invoice_amount else None,
 			accounting_dimensions=self.accounting_dimension_filter_conditions,
 		)
+
+		cr_dr_notes = (
+			[x.voucher_no for x in self.return_invoices]
+			if self.party_type in ["Customer", "Supplier"]
+			else []
+		)
+		# Filter out cr/dr notes from outstanding invoices list
+		# Happens when non-standalone cr/dr notes are linked with another invoice through journal entry
+		non_reconciled_invoices = [x for x in non_reconciled_invoices if x.voucher_no not in cr_dr_notes]
 
 		if self.invoice_limit:
 			non_reconciled_invoices = non_reconciled_invoices[: self.invoice_limit]

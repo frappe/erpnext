@@ -21,8 +21,6 @@
   "allow_multi_currency_invoices_against_single_party_account",
   "journals_section",
   "merge_similar_account_heads",
-  "report_setting_section",
-  "use_custom_cash_flow",
   "deferred_accounting_settings_section",
   "book_deferred_entries_based_on",
   "column_break_18",
@@ -36,6 +34,7 @@
   "book_tax_discount_loss",
   "print_settings",
   "show_inclusive_tax_in_print",
+  "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
   "currency_exchange_section",
@@ -172,13 +171,6 @@
    "fieldname": "stale_days",
    "fieldtype": "Int",
    "label": "Stale Days"
-  },
-  {
-   "default": "0",
-   "description": "Only select this if you have set up the Cash Flow Mapper documents",
-   "fieldname": "use_custom_cash_flow",
-   "fieldtype": "Check",
-   "label": "Enable Custom Cash Flow Format"
   },
   {
    "default": "0",
@@ -339,11 +331,6 @@
    "label": "POS"
   },
   {
-   "fieldname": "report_setting_section",
-   "fieldtype": "Section Break",
-   "label": "Report Setting"
-  },
-  {
    "default": "0",
    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
@@ -390,6 +377,12 @@
    "fieldname": "auto_reconcile_payments",
    "fieldtype": "Check",
    "label": "Auto Reconcile Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
   }
  ],
  "icon": "icon-cog",
@@ -397,7 +390,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-04-21 13:11:37.130743",
+ "modified": "2023-06-13 18:47:46.430291",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

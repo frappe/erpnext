@@ -118,12 +118,11 @@ class PurchaseReceipt(BuyingController):
 		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
 
-		if self._action == "submit":
-			self.make_batches("warehouse")
-		else:
+		if self._action != "submit":
 			self.set_status()
 
 		self.po_required()
+		self.validate_items_quality_inspection()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -197,6 +196,26 @@ class PurchaseReceipt(BuyingController):
 				if not d.purchase_order:
 					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
+	def validate_items_quality_inspection(self):
+		for item in self.get("items"):
+			if item.quality_inspection:
+				qi = frappe.db.get_value(
+					"Quality Inspection",
+					item.quality_inspection,
+					["reference_type", "reference_name", "item_code"],
+					as_dict=True,
+				)
+
+				if qi.reference_type != self.doctype or qi.reference_name != self.name:
+					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Reference Type
+						{frappe.bold(self.doctype)} and Reference Name {frappe.bold(self.name)}."""
+					frappe.throw(_(msg))
+
+				if qi.item_code != item.item_code:
+					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Item Code
+						{frappe.bold(item.item_code)}."""
+					frappe.throw(_(msg))
+
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql(
 			"""select sum(qty) from `tabPurchase Receipt Item`
@@ -242,11 +261,6 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
 		self.update_stock_ledger()
-
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
@@ -283,7 +297,12 @@ class PurchaseReceipt(BuyingController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 

@@ -13,7 +13,7 @@ frappe.ui.form.on('Quotation', {
 		frm.set_query("quotation_to", function() {
 			return{
 				"filters": {
-					"name": ["in", ["Customer", "Lead"]],
+					"name": ["in", ["Customer", "Lead", "Prospect"]],
 				}
 			}
 		});
@@ -34,6 +34,29 @@ frappe.ui.form.on('Quotation', {
 				}
 			};
 		});
+
+		frm.set_query("serial_and_batch_bundle", "packed_items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('packed_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
 	},
 
 	refresh: function(frm) {
@@ -160,19 +183,16 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 
 	set_dynamic_field_label(){
-		if (this.frm.doc.quotation_to == "Customer")
-		{
+		if (this.frm.doc.quotation_to == "Customer") {
 			this.frm.set_df_property("party_name", "label", "Customer");
 			this.frm.fields_dict.party_name.get_query = null;
-		}
-
-		if (this.frm.doc.quotation_to == "Lead")
-		{
+		} else if (this.frm.doc.quotation_to == "Lead") {
 			this.frm.set_df_property("party_name", "label", "Lead");
-
 			this.frm.fields_dict.party_name.get_query = function() {
 				return{	query: "erpnext.controllers.queries.lead_query" }
 			}
+		} else if (this.frm.doc.quotation_to == "Prospect") {
+			this.frm.set_df_property("party_name", "label", "Prospect");
 		}
 	}
 

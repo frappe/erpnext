@@ -10,15 +10,18 @@ from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
-	create_stock_reconciliation,
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	BatchNegativeStockError,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+)
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class TestBatch(FrappeTestCase):
@@ -49,8 +52,10 @@ class TestBatch(FrappeTestCase):
 		).insert()
 		receipt.submit()
 
-		self.assertTrue(receipt.items[0].batch_no)
-		self.assertEqual(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), batch_qty)
+		receipt.load_from_db()
+		self.assertTrue(receipt.items[0].serial_and_batch_bundle)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		self.assertEqual(get_batch_qty(batch_no, receipt.items[0].warehouse), batch_qty)
 
 		return receipt
 
@@ -80,9 +85,12 @@ class TestBatch(FrappeTestCase):
 		stock_entry.insert()
 		stock_entry.submit()
 
-		self.assertTrue(stock_entry.items[0].batch_no)
+		stock_entry.load_from_db()
+
+		bundle = stock_entry.items[0].serial_and_batch_bundle
+		self.assertTrue(bundle)
 		self.assertEqual(
-			get_batch_qty(stock_entry.items[0].batch_no, stock_entry.items[0].t_warehouse), 90
+			get_batch_qty(get_batch_from_bundle(bundle), stock_entry.items[0].t_warehouse), 90
 		)
 
 	def test_delivery_note(self):
@@ -91,37 +99,71 @@ class TestBatch(FrappeTestCase):
 		receipt = self.test_purchase_receipt(batch_qty)
 		item_code = "ITEM-BATCH-1"
 
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		bundle_id = (
+			SerialBatchCreation(
+				{
+					"item_code": item_code,
+					"warehouse": receipt.items[0].warehouse,
+					"actual_qty": batch_qty,
+					"voucher_type": "Stock Entry",
+					"batches": frappe._dict({batch_no: batch_qty}),
+					"type_of_transaction": "Outward",
+					"company": receipt.company,
+				}
+			)
+			.make_serial_and_batch_bundle()
+			.name
+		)
+
 		delivery_note = frappe.get_doc(
 			dict(
 				doctype="Delivery Note",
 				customer="_Test Customer",
 				company=receipt.company,
 				items=[
-					dict(item_code=item_code, qty=batch_qty, rate=10, warehouse=receipt.items[0].warehouse)
+					dict(
+						item_code=item_code,
+						qty=batch_qty,
+						rate=10,
+						warehouse=receipt.items[0].warehouse,
+						serial_and_batch_bundle=bundle_id,
+					)
 				],
 			)
 		).insert()
 		delivery_note.submit()
 
+		receipt.load_from_db()
+		delivery_note.load_from_db()
+
 		# shipped from FEFO batch
 		self.assertEqual(
-			delivery_note.items[0].batch_no, get_batch_no(item_code, receipt.items[0].warehouse, batch_qty)
+			get_batch_from_bundle(delivery_note.items[0].serial_and_batch_bundle),
+			batch_no,
 		)
 
-	def test_delivery_note_fail(self):
+	def test_batch_negative_stock_error(self):
 		"""Test automatic batch selection for outgoing items"""
 		receipt = self.test_purchase_receipt(100)
-		delivery_note = frappe.get_doc(
-			dict(
-				doctype="Delivery Note",
-				customer="_Test Customer",
-				company=receipt.company,
-				items=[
-					dict(item_code="ITEM-BATCH-1", qty=5000, rate=10, warehouse=receipt.items[0].warehouse)
-				],
-			)
+
+		receipt.load_from_db()
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		sn_doc = SerialBatchCreation(
+			{
+				"item_code": "ITEM-BATCH-1",
+				"warehouse": receipt.items[0].warehouse,
+				"voucher_type": "Delivery Note",
+				"qty": 5000,
+				"avg_rate": 10,
+				"batches": frappe._dict({batch_no: 5000}),
+				"type_of_transaction": "Outward",
+				"company": receipt.company,
+			}
 		)
-		self.assertRaises(UnableToSelectBatchError, delivery_note.insert)
+
+		self.assertRaises(BatchNegativeStockError, sn_doc.make_serial_and_batch_bundle)
 
 	def test_stock_entry_outgoing(self):
 		"""Test automatic batch selection for outgoing stock entry"""
@@ -129,6 +171,24 @@ class TestBatch(FrappeTestCase):
 		batch_qty = 16
 		receipt = self.test_purchase_receipt(batch_qty)
 		item_code = "ITEM-BATCH-1"
+
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		bundle_id = (
+			SerialBatchCreation(
+				{
+					"item_code": item_code,
+					"warehouse": receipt.items[0].warehouse,
+					"actual_qty": batch_qty,
+					"voucher_type": "Stock Entry",
+					"batches": frappe._dict({batch_no: batch_qty}),
+					"type_of_transaction": "Outward",
+					"company": receipt.company,
+				}
+			)
+			.make_serial_and_batch_bundle()
+			.name
+		)
 
 		stock_entry = frappe.get_doc(
 			dict(
@@ -140,6 +200,7 @@ class TestBatch(FrappeTestCase):
 						item_code=item_code,
 						qty=batch_qty,
 						s_warehouse=receipt.items[0].warehouse,
+						serial_and_batch_bundle=bundle_id,
 					)
 				],
 			)
@@ -148,10 +209,11 @@ class TestBatch(FrappeTestCase):
 		stock_entry.set_stock_entry_type()
 		stock_entry.insert()
 		stock_entry.submit()
+		stock_entry.load_from_db()
 
-		# assert same batch is selected
 		self.assertEqual(
-			stock_entry.items[0].batch_no, get_batch_no(item_code, receipt.items[0].warehouse, batch_qty)
+			get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle),
+			get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
 		)
 
 	def test_batch_split(self):
@@ -159,11 +221,11 @@ class TestBatch(FrappeTestCase):
 		receipt = self.test_purchase_receipt()
 		from erpnext.stock.doctype.batch.batch import split_batch
 
-		new_batch = split_batch(
-			receipt.items[0].batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 22
-		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
 
-		self.assertEqual(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), 78)
+		new_batch = split_batch(batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 22)
+
+		self.assertEqual(get_batch_qty(batch_no, receipt.items[0].warehouse), 78)
 		self.assertEqual(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
 
 	def test_get_batch_qty(self):
@@ -174,7 +236,10 @@ class TestBatch(FrappeTestCase):
 
 		self.assertEqual(
 			get_batch_qty(item_code="ITEM-BATCH-2", warehouse="_Test Warehouse - _TC"),
-			[{"batch_no": "batch a", "qty": 90.0}, {"batch_no": "batch b", "qty": 90.0}],
+			[
+				{"batch_no": "batch a", "qty": 90.0, "warehouse": "_Test Warehouse - _TC"},
+				{"batch_no": "batch b", "qty": 90.0, "warehouse": "_Test Warehouse - _TC"},
+			],
 		)
 
 		self.assertEqual(get_batch_qty("batch a", "_Test Warehouse - _TC"), 90)
@@ -201,6 +266,19 @@ class TestBatch(FrappeTestCase):
 			)
 			batch.save()
 
+		sn_doc = SerialBatchCreation(
+			{
+				"item_code": item_name,
+				"warehouse": warehouse,
+				"voucher_type": "Stock Entry",
+				"qty": 90,
+				"avg_rate": 10,
+				"batches": frappe._dict({batch_name: 90}),
+				"type_of_transaction": "Inward",
+				"company": "_Test Company",
+			}
+		).make_serial_and_batch_bundle()
+
 		stock_entry = frappe.get_doc(
 			dict(
 				doctype="Stock Entry",
@@ -210,10 +288,10 @@ class TestBatch(FrappeTestCase):
 					dict(
 						item_code=item_name,
 						qty=90,
+						serial_and_batch_bundle=sn_doc.name,
 						t_warehouse=warehouse,
 						cost_center="Main - _TC",
 						rate=10,
-						batch_no=batch_name,
 						allow_zero_valuation_rate=1,
 					)
 				],
@@ -320,7 +398,8 @@ class TestBatch(FrappeTestCase):
 		batches = {}
 		for rate in rates:
 			se = make_stock_entry(item_code=item_code, qty=10, rate=rate, target=warehouse)
-			batches[se.items[0].batch_no] = rate
+			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			batches[batch_no] = rate
 
 		LOW, HIGH = list(batches.keys())
 
@@ -341,7 +420,9 @@ class TestBatch(FrappeTestCase):
 
 			sle = frappe.get_last_doc("Stock Ledger Entry", {"is_cancelled": 0, "voucher_no": se.name})
 
-			stock_value_difference = sle.actual_qty * batches[sle.batch_no]
+			stock_value_difference = (
+				sle.actual_qty * batches[get_batch_from_bundle(sle.serial_and_batch_bundle)]
+			)
 			self.assertAlmostEqual(sle.stock_value_difference, stock_value_difference)
 
 			stock_value += stock_value_difference
@@ -353,51 +434,12 @@ class TestBatch(FrappeTestCase):
 
 			self.assertEqual(json.loads(sle.stock_queue), [])  # queues don't apply on batched items
 
-	def test_moving_batch_valuation_rates(self):
-		item_code = "_TestBatchWiseVal"
-		warehouse = "_Test Warehouse - _TC"
-		self.make_batch_item(item_code)
-
-		def assertValuation(expected):
-			actual = get_valuation_rate(
-				item_code, warehouse, "voucher_type", "voucher_no", batch_no=batch_no
-			)
-			self.assertAlmostEqual(actual, expected)
-
-		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target=warehouse)
-		batch_no = se.items[0].batch_no
-		assertValuation(10)
-
-		# consumption should never affect current valuation rate
-		make_stock_entry(item_code=item_code, qty=20, source=warehouse)
-		assertValuation(10)
-
-		make_stock_entry(item_code=item_code, qty=30, source=warehouse)
-		assertValuation(10)
-
-		# 50 * 10 = 500 current value, add more item with higher valuation
-		make_stock_entry(item_code=item_code, qty=50, rate=20, target=warehouse, batch_no=batch_no)
-		assertValuation(15)
-
-		# consuming again shouldn't do anything
-		make_stock_entry(item_code=item_code, qty=20, source=warehouse)
-		assertValuation(15)
-
-		# reset rate with stock reconiliation
-		create_stock_reconciliation(
-			item_code=item_code, warehouse=warehouse, qty=10, rate=25, batch_no=batch_no
-		)
-		assertValuation(25)
-
-		make_stock_entry(item_code=item_code, qty=20, rate=20, target=warehouse, batch_no=batch_no)
-		assertValuation((20 * 20 + 10 * 25) / (10 + 20))
-
 	def test_update_batch_properties(self):
 		item_code = "_TestBatchWiseVal"
 		self.make_batch_item(item_code)
 
 		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target="_Test Warehouse - _TC")
-		batch_no = se.items[0].batch_no
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
 		batch = frappe.get_doc("Batch", batch_no)
 
 		expiry_date = add_to_date(batch.manufacturing_date, days=30)
@@ -426,8 +468,17 @@ class TestBatch(FrappeTestCase):
 		pr_1 = make_purchase_receipt(item_code=item_code, qty=1, batch_no=manually_created_batch)
 		pr_2 = make_purchase_receipt(item_code=item_code, qty=1)
 
-		self.assertNotEqual(pr_1.items[0].batch_no, pr_2.items[0].batch_no)
-		self.assertEqual("BATCHEXISTING002", pr_2.items[0].batch_no)
+		pr_1.load_from_db()
+		pr_2.load_from_db()
+
+		self.assertNotEqual(
+			get_batch_from_bundle(pr_1.items[0].serial_and_batch_bundle),
+			get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle),
+		)
+
+		self.assertEqual(
+			"BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle)
+		)
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):

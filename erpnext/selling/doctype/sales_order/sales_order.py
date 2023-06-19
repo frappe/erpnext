@@ -171,7 +171,8 @@ class SalesOrder(SellingController):
 						frappe.msgprint(
 							_("Expected Delivery Date should be after Sales Order Date"),
 							indicator="orange",
-							title=_("Warning"),
+							title=_("Invalid Delivery Date"),
+							raise_exception=True,
 						)
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
@@ -230,6 +231,7 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
+				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):
@@ -415,10 +417,17 @@ class SalesOrder(SellingController):
 	def update_picking_status(self):
 		total_picked_qty = 0.0
 		total_qty = 0.0
+		per_picked = 0.0
+
 		for so_item in self.items:
-			total_picked_qty += flt(so_item.picked_qty)
-			total_qty += flt(so_item.stock_qty)
-		per_picked = total_picked_qty / total_qty * 100
+			if cint(
+				frappe.get_cached_value("Item", so_item.item_code, "is_stock_item")
+			) or self.has_product_bundle(so_item.item_code):
+				total_picked_qty += flt(so_item.picked_qty)
+				total_qty += flt(so_item.stock_qty)
+
+		if total_picked_qty and total_qty:
+			per_picked = total_picked_qty / total_qty * 100
 
 		self.db_set("per_picked", flt(per_picked), update_modified=False)
 

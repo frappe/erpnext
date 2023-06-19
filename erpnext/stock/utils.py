@@ -12,6 +12,7 @@ from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = Dict[str, Optional[str]]
@@ -247,28 +248,40 @@ def _create_bin(item_code, warehouse):
 @frappe.whitelist()
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
-	from erpnext.stock.stock_ledger import (
-		get_batch_incoming_rate,
-		get_previous_sle,
-		get_valuation_rate,
-	)
+	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
 	if isinstance(args, str):
 		args = json.loads(args)
 
 	in_rate = None
-	if (args.get("serial_no") or "").strip():
-		in_rate = get_avg_purchase_rate(args.get("serial_no"))
-	elif args.get("batch_no") and frappe.db.get_value(
-		"Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True
-	):
-		in_rate = get_batch_incoming_rate(
-			item_code=args.get("item_code"),
+
+	item_details = frappe.get_cached_value(
+		"Item", args.get("item_code"), ["has_serial_no", "has_batch_no"], as_dict=1
+	)
+
+	if isinstance(args, dict):
+		args = frappe._dict(args)
+
+	if item_details and item_details.has_serial_no and args.get("serial_and_batch_bundle"):
+		args.actual_qty = args.qty
+		sn_obj = SerialNoValuation(
+			sle=args,
 			warehouse=args.get("warehouse"),
-			batch_no=args.get("batch_no"),
-			posting_date=args.get("posting_date"),
-			posting_time=args.get("posting_time"),
+			item_code=args.get("item_code"),
 		)
+
+		in_rate = sn_obj.get_incoming_rate()
+
+	elif item_details and item_details.has_batch_no and args.get("serial_and_batch_bundle"):
+		args.actual_qty = args.qty
+		batch_obj = BatchNoValuation(
+			sle=args,
+			warehouse=args.get("warehouse"),
+			item_code=args.get("item_code"),
+		)
+
+		in_rate = batch_obj.get_incoming_rate()
+
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
@@ -294,7 +307,6 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			currency=erpnext.get_company_currency(args.get("company")),
 			company=args.get("company"),
 			raise_error_if_no_rate=raise_error_if_no_rate,
-			batch_no=args.get("batch_no"),
 		)
 
 	return flt(in_rate)
@@ -440,17 +452,6 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	for data in update_dict_values:
 		row, key, value = data
 		row[key] = value
-
-
-def get_available_serial_nos(args):
-	return frappe.db.sql(
-		""" SELECT name from `tabSerial No`
-		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
-		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-	""",
-		args,
-		as_dict=1,
-	)
 
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
