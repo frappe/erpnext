@@ -8,6 +8,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
+from frappe.query_builder.functions import Sum
+
 
 
 class VariablePathNotFound(frappe.ValidationError):
@@ -415,6 +417,29 @@ def get_total_shipments(scorecard):
 				AND po_item.parent = po.name""",
 		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
 		as_dict=0,
+	)[0][0]
+
+	if not data:
+		data = 0
+	return data
+
+
+def get_ordered_qty(scorecard):
+	"""Gets the total number of ordered quntity (based on Purchase Orders)"""
+	supplier = frappe.qb.DocType("Supplier", scorecard.supplier)
+	po = frappe.qb.DocType("Purchase Order")
+
+	data = (
+		frappe.qb.from_(po)
+		.select(
+			Sum(po.total_qty)
+		)
+		.where(po.supplier == supplier.name)
+		.where(po.docstatus == 1)
+		.where(
+			(po.transaction_date >= scorecard.get("start_date")) & (po.transaction_date <= scorecard.get("end_date"))
+		)
+		.run(as_list=1)
 	)[0][0]
 
 	if not data:
