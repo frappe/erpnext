@@ -174,7 +174,6 @@ class PaymentEntry(AccountsController):
 				"party_account": self.paid_from if self.payment_type == "Receive" else self.paid_to,
 				"get_outstanding_invoices": True,
 				"get_orders_to_be_billed": True,
-				"get_negative_outstanding_invoices": True,
 			}
 		)
 
