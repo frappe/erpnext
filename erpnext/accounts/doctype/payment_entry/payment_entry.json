@@ -48,7 +48,8 @@
   "base_received_amount",
   "base_received_amount_after_tax",
   "section_break_14",
-  "get_outstanding_invoice",
+  "get_outstanding_invoices",
+  "get_outstanding_orders",
   "references",
   "section_break_34",
   "total_allocated_amount",
@@ -354,12 +355,6 @@
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
    "label": "Reference"
-  },
-  {
-   "depends_on": "eval:doc.docstatus==0",
-   "fieldname": "get_outstanding_invoice",
-   "fieldtype": "Button",
-   "label": "Get Outstanding Invoice"
   },
   {
    "fieldname": "references",
@@ -728,12 +723,24 @@
    "fieldname": "section_break_60",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "get_outstanding_invoices",
+   "fieldtype": "Button",
+   "label": "Get Outstanding Invoices"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "get_outstanding_orders",
+   "fieldtype": "Button",
+   "label": "Get Outstanding Orders"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-07 14:36:50.521884",
+ "modified": "2023-06-19 11:38:04.387219",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
