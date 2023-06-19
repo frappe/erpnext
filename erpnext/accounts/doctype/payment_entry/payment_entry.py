@@ -152,7 +152,7 @@ class PaymentEntry(AccountsController):
 			return
 
 		if self.party_type in ("Customer", "Supplier"):
-			self.validate_allocated_amount_with_latest_date()
+			self.validate_allocated_amount_with_latest_data()
 		else:
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 			for d in self.get("references"):
@@ -163,7 +163,7 @@ class PaymentEntry(AccountsController):
 				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
-	def validate_allocated_amount_with_latest_date(self):
+	def validate_allocated_amount_with_latest_data(self):
 		latest_references = get_outstanding_reference_documents(
 			{
 				"posting_date": self.posting_date,
