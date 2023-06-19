@@ -150,7 +150,7 @@ class PaymentEntry(AccountsController):
 			)
 
 	def validate_allocated_amount(self):
-		if self.payment_type == "Internal Transfer" or self.party_type in ("Donor"):
+		if self.payment_type == "Internal Transfer":
 			return
 
 		if self.party_type in ("Customer", "Supplier"):
