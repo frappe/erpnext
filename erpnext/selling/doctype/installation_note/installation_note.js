@@ -7,6 +7,27 @@ frappe.ui.form.on('Installation Note', {
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer', erpnext.queries.customer);
+		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
 	},
 	onload: function(frm) {
 		if(!frm.doc.status) {

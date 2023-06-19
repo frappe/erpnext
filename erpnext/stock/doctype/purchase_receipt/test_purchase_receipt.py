@@ -27,7 +27,7 @@ from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 
 class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
-		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 	def test_purchase_receipt_received_qty(self):
 		"""
@@ -1781,6 +1781,52 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.items[0].delivery_note_item = delivery_note_item
 		pr.save()
 
+	def test_purchase_return_valuation_with_rejected_qty(self):
+		item_code = "_Test Item Return Valuation"
+		create_item(item_code)
+
+		warehouse = create_warehouse("_Test Warehouse Return Valuation")
+		rejected_warehouse = create_warehouse("_Test Rejected Warehouse Return Valuation")
+
+		# Step 1: Create Purchase Receipt with valuation rate 100
+		make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		# Step 2: Create One more Purchase Receipt with valuation rate 200
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=200,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		# Step 3: Create Purchase Return for 2 qty
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items[0].qty = 2 * -1
+		pr_return.items[0].received_qty = 2 * -1
+		pr_return.items[0].rejected_qty = 0
+		pr_return.items[0].rejected_warehouse = ""
+		pr_return.save()
+		pr_return.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr_return.name, "docstatus": 1},
+			fields=["SUM(stock_value_difference) as stock_value_difference"],
+		)[0]
+
+		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1925,7 +1971,7 @@ def make_purchase_receipt(**args):
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
 
-	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+	frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
 	pr.posting_date = args.posting_date or today()

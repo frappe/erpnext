@@ -25,7 +25,7 @@ from erpnext.stock.serial_batch_bundle import SerialNoValuation
 
 class TestLandedCostVoucher(FrappeTestCase):
 	def test_landed_cost_voucher(self):
-		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",

@@ -5,7 +5,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, now, nowtime, today
+from frappe.utils import cint, flt, get_link_to_form, now, nowtime, today
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -79,9 +79,24 @@ class SerialBatchBundle:
 		self.set_serial_and_batch_bundle(sn_doc)
 
 	def validate_actual_qty(self, sn_doc):
+		link = get_link_to_form("Serial and Batch Bundle", sn_doc.name)
+
+		condition = {
+			"Inward": self.sle.actual_qty > 0,
+			"Outward": self.sle.actual_qty < 0,
+		}.get(sn_doc.type_of_transaction)
+
+		if not condition:
+			correct_type = "Inward"
+			if sn_doc.type_of_transaction == "Inward":
+				correct_type = "Outward"
+
+			msg = f"The type of transaction of Serial and Batch Bundle {link} is {bold(sn_doc.type_of_transaction)} but as per the Actual Qty {self.sle.actual_qty} for the item {bold(self.sle.item_code)} in the {self.sle.voucher_type} {self.sle.voucher_no} the type of transaction should be {bold(correct_type)}"
+			frappe.throw(_(msg), title=_("Incorrect Type of Transaction"))
+
 		precision = sn_doc.precision("total_qty")
 		if flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
-			msg = f"Total qty {flt(sn_doc.total_qty, precision)} of Serial and Batch Bundle {sn_doc.name} is not equal to Actual Qty {flt(self.sle.actual_qty, precision)} in the {self.sle.voucher_type} {self.sle.voucher_no}"
+			msg = f"Total qty {flt(sn_doc.total_qty, precision)} of Serial and Batch Bundle {link} is not equal to Actual Qty {flt(self.sle.actual_qty, precision)} in the {self.sle.voucher_type} {self.sle.voucher_no}"
 			frappe.throw(_(msg))
 
 	def validate_item(self):

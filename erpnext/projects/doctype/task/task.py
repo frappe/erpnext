@@ -304,6 +304,7 @@ def set_tasks_as_overdue():
 @frappe.whitelist()
 def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
+		target.parent_project = source.project
 		target.append(
 			"time_logs",
 			{

@@ -33,7 +33,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 	def setUpClass(cls):
 		create_batch_or_serial_no_items()
 		super().setUpClass()
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	def tearDown(self):
 		frappe.local.future_sle = {}

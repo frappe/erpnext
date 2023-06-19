@@ -77,6 +77,28 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		});
 
+		frm.set_query("serial_and_batch_bundle", "supplied_items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.rm_item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('supplied_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.rm_item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
+
 		let batch_no_field = frm.get_docfield('items', 'batch_no');
 		if (batch_no_field) {
 			batch_no_field.get_route_options_for_new_doc = function(row) {

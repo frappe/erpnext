@@ -520,6 +520,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -2154,7 +2155,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-04-28 14:15:59.901154",
+ "modified": "2023-06-03 16:22:16.219333",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

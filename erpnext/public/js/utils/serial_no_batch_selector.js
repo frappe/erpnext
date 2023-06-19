@@ -26,7 +26,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			title: this.item?.title || primary_label,
 			fields: this.get_dialog_fields(),
 			primary_action_label: primary_label,
-			primary_action: () => this.update_ledgers(),
+			primary_action: () => this.update_bundle_entries(),
 			secondary_action_label: __('Edit Full Form'),
 			secondary_action: () => this.edit_full_form(),
 		});
@@ -36,7 +36,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_serial_no_filters() {
-		let warehouse = this.item?.outward ?
+		let warehouse = this.item?.type_of_transaction === "Outward" ?
 			(this.item.warehouse || this.item.s_warehouse) : "";
 
 		return {
@@ -121,7 +121,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			});
 		}
 
-		if (this.item?.outward) {
+		if (this.item?.type_of_transaction === "Outward") {
 			fields = [...this.get_filter_fields(), ...fields];
 		} else {
 			fields = [...fields, ...this.get_attach_field()];
@@ -267,7 +267,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					label: __('Batch No'),
 					in_list_view: 1,
 					get_query: () => {
-						if (!this.item.outward) {
+						if (this.item.type_of_transaction !== "Outward") {
 							return {
 								filters: {
 									'item': this.item.item_code,
@@ -356,7 +356,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		this.dialog.fields_dict.entries.grid.refresh();
 	}
 
-	update_ledgers() {
+	update_bundle_entries() {
 		let entries = this.dialog.get_values().entries;
 		let warehouse = this.dialog.get_value('warehouse');
 
@@ -390,7 +390,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			_new.warehouse = this.get_warehouse();
 			_new.has_serial_no = this.item.has_serial_no;
 			_new.has_batch_no = this.item.has_batch_no;
-			_new.type_of_transaction = this.get_type_of_transaction();
+			_new.type_of_transaction = this.item.type_of_transaction;
 			_new.company = this.frm.doc.company;
 			_new.voucher_type = this.frm.doc.doctype;
 			bundle_id = _new.name;
@@ -401,13 +401,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_warehouse() {
-		return (this.item?.outward ?
+		return (this.item?.type_of_transaction === "Outward" ?
 			(this.item.warehouse || this.item.s_warehouse)
 			: (this.item.warehouse || this.item.t_warehouse));
-	}
-
-	get_type_of_transaction() {
-		return (this.item?.outward ? 'Outward' : 'Inward');
 	}
 
 	render_data() {
