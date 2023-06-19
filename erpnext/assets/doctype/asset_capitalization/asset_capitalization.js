@@ -112,6 +112,17 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				}
 			};
 		});
+
+		let sbb_field = me.frm.get_docfield('stock_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': me.frm.doc.doctype,
+				}
+			};
+		}
 	}
 
 	target_item_code() {
