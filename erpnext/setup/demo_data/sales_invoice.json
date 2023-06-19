@@ -3,6 +3,7 @@
         "conversion_rate": 1.0,
         "customer": "ABC Enterprises",
         "doctype": "Sales Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Sales Invoice Item",
@@ -18,6 +19,7 @@
         "conversion_rate": 1.0,
         "customer": "XYZ Corporation",
         "doctype": "Sales Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Sales Invoice Item",
@@ -41,6 +43,7 @@
         "conversion_rate": 1.0,
         "customer": "XYZ Corporation",
         "doctype": "Sales Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Sales Invoice Item",
@@ -72,6 +75,7 @@
         "conversion_rate": 1.0,
         "customer": "KJPR Pvt. Ltd.",
         "doctype": "Sales Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Sales Invoice Item",
@@ -87,6 +91,7 @@
         "conversion_rate": 1.0,
         "customer": "ABC Enterprises",
         "doctype": "Sales Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Sales Invoice Item",

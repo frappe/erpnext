@@ -9,6 +9,7 @@ import frappe
 from frappe.utils import add_days
 
 import erpnext
+from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
 @frappe.whitelist()
@@ -45,6 +46,9 @@ def create_demo_company():
 	frappe.db.set_single_value("Global Defaults", "demo_company", new_company.name)
 	frappe.db.set_default("company", new_company.name)
 
+	bank_account = create_bank_account({"company_name": new_company.name})
+	frappe.db.set_value("Company", new_company.name, "default_bank_account", bank_account.name)
+
 	return new_company.name
 
 
@@ -63,6 +67,7 @@ def create_demo_record(doctype):
 def make_transactions(company):
 	fiscal_year = frappe.db.get_single_value("Global Defaults", "current_fiscal_year")
 	start_date = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	for doctype in frappe.get_hooks("demo_transaction_doctypes"):
 		data = read_data_file_using_hooks(doctype)
@@ -72,11 +77,21 @@ def make_transactions(company):
 
 
 def create_transaction(doctype, company, start_date):
+	warehouse = get_warehouse(company)
+	posting_date = (
+		start_date if doctype.get("doctype") == "Purchase Invoice" else get_random_date(start_date)
+	)
+	bank_account = frappe.db.get_value("Company", company, "default_bank_account")
+	bank_field = "paid_to" if doctype.get("party_type") == "Customer" else "paid_from"
+
 	doctype.update(
 		{
 			"company": company,
 			"set_posting_time": 1,
-			"posting_date": get_random_date(start_date),
+			"posting_date": posting_date,
+			"set_warehouse": warehouse,
+			bank_field: bank_account,
+			"reference_date": posting_date,
 		}
 	)
 
@@ -84,7 +99,7 @@ def create_transaction(doctype, company, start_date):
 		"Company", company, ["default_income_account", "default_expense_account"]
 	)
 
-	for item in doctype.get("items"):
+	for item in doctype.get("items") or []:
 		item.update(
 			{
 				"cost_center": erpnext.get_default_cost_center(company),
@@ -125,6 +140,7 @@ def clear_demo_record(doctype):
 
 
 def delete_company(company):
+	frappe.db.set_single_value("Global Defaults", "demo_company", "")
 	frappe.delete_doc("Company", company, ignore_permissions=True)
 
 
@@ -134,3 +150,10 @@ def read_data_file_using_hooks(doctype):
 		data = f.read()
 
 	return data
+
+
+def get_warehouse(company):
+	abbr = frappe.db.get_value("Company", company, "abbr")
+	warehouse = "Stores - {0}".format(abbr)
+
+	return warehouse

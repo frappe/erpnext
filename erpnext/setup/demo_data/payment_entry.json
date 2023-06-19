@@ -1,0 +1,12 @@
+[
+    {
+        "doctype": "Payment Entry",
+        "party_type": "Customer",
+        "party": "ABC Enterprises",
+        "paid_amount": 67000,
+        "received_amount": 67000,
+        "reference_no": "#ref0001",
+        "source_exchange_rate": 1,
+        "target_exchange_rate": 1
+    }
+]

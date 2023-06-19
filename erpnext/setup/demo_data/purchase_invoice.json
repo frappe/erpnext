@@ -3,6 +3,7 @@
         "conversion_rate": 1.0,
         "supplier": "DQ Industries",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -18,6 +19,7 @@
         "conversion_rate": 1.0,
         "supplier": "MA Inc.",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -33,6 +35,7 @@
         "conversion_rate": 1.0,
         "supplier": "KC Corp.",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -48,6 +51,7 @@
         "conversion_rate": 1.0,
         "supplier": "DQ Industries",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -63,6 +67,7 @@
         "conversion_rate": 1.0,
         "supplier": "MA Inc.",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -78,6 +83,7 @@
         "conversion_rate": 1.0,
         "supplier": "KC Corp.",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -93,6 +99,7 @@
         "conversion_rate": 1.0,
         "supplier": "DQ Industries",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -108,6 +115,7 @@
         "conversion_rate": 1.0,
         "supplier": "MA Inc.",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -123,6 +131,7 @@
         "conversion_rate": 1.0,
         "supplier": "KC Corp.",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
@@ -138,6 +147,7 @@
         "conversion_rate": 1.0,
         "supplier": "DQ Industries",
         "doctype": "Purchase Invoice",
+        "update_stock": 1,
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
