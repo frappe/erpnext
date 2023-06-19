@@ -1367,62 +1367,17 @@ def get_outstanding_reference_documents(args):
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
 
-<<<<<<< HEAD
-	outstanding_invoices = get_outstanding_invoices(
-		args.get("party_type"),
-		args.get("party"),
-		args.get("party_account"),
-		args.get("company"),
-		filters=args,
-		condition=condition,
-	)
-
-	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
-
-	for d in outstanding_invoices:
-		d["exchange_rate"] = 1
-		if party_account_currency != company_currency:
-			if d.voucher_type in ("Sales Invoice", "Purchase Invoice", "Expense Claim"):
-				d["exchange_rate"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
-			elif d.voucher_type == "Journal Entry":
-				d["exchange_rate"] = get_exchange_rate(
-					party_account_currency, company_currency, d.posting_date
-				)
-		if d.voucher_type in ("Purchase Invoice"):
-			d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
-
-	# Get all SO / PO which are not fully billed or against which full advance not paid
-	orders_to_be_billed = []
-	if args.get("party_type") != "Student":
-		orders_to_be_billed = get_orders_to_be_billed(
-			args.get("posting_date"),
-			args.get("party_type"),
-			args.get("party"),
-			args.get("company"),
-			party_account_currency,
-			company_currency,
-			filters=args,
-		)
-
-	# Get negative outstanding sales /purchase invoices
-	negative_outstanding_invoices = []
-	if args.get("party_type") not in ["Student", "Employee"] and not args.get("voucher_no"):
-		negative_outstanding_invoices = get_negative_outstanding_invoices(
-=======
 	outstanding_invoices = []
 	negative_outstanding_invoices = []
 
 	if args.get("get_outstanding_invoices"):
 		outstanding_invoices = get_outstanding_invoices(
->>>>>>> c1da3ddbbf (fix: fix get outstanding invoices btn and add get outstanding orders btn (#35776))
 			args.get("party_type"),
 			args.get("party"),
 			args.get("party_account"),
-			common_filter=common_filter,
-			posting_date=posting_and_due_date,
-			min_outstanding=args.get("outstanding_amt_greater_than"),
-			max_outstanding=args.get("outstanding_amt_less_than"),
-			accounting_dimensions=accounting_dimensions_filter,
+			args.get("company"),
+			filters=args,
+			condition=condition,
 		)
 
 		outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
