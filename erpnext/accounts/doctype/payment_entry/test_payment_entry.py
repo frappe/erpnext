@@ -31,6 +31,16 @@ class TestPaymentEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
+	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
+		journals = []
+		if voucher_type and voucher_no:
+			journals = frappe.db.get_all(
+				"Journal Entry Account",
+				filters={"reference_type": voucher_type, "reference_name": voucher_no, "docstatus": 1},
+				fields=["parent"],
+			)
+		return journals
+
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
