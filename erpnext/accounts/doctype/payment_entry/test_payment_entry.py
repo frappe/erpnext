@@ -601,20 +601,14 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.target_exchange_rate = 45.263
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-
-		pe.append(
-			"deductions",
-			{
-				"account": "_Test Exchange Gain/Loss - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"amount": 94.80,
-			},
-		)
-
 		pe.save()
 
 		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
 		self.assertEqual(flt(pe.unallocated_amount, 2), 0.0)
+
+		# the exchange gain/loss amount is captured in reference table and a separate Journal will be submitted for them
+		# payment entry will not be generating difference amount
+		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
