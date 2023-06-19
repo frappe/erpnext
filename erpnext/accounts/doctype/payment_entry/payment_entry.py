@@ -362,7 +362,7 @@ class PaymentEntry(AccountsController):
 			else:
 				if ref_doc:
 					if self.paid_from_account_currency == ref_doc.currency:
-						self.source_exchange_rate = ref_doc.get("exchange_rate")
+						self.source_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.source_exchange_rate:
 				self.source_exchange_rate = get_exchange_rate(
@@ -375,7 +375,7 @@ class PaymentEntry(AccountsController):
 		elif self.paid_to and not self.target_exchange_rate:
 			if ref_doc:
 				if self.paid_to_account_currency == ref_doc.currency:
-					self.target_exchange_rate = ref_doc.get("exchange_rate")
+					self.target_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.target_exchange_rate:
 				self.target_exchange_rate = get_exchange_rate(
@@ -1895,7 +1895,6 @@ def get_payment_entry(
 	payment_type=None,
 	reference_date=None,
 ):
-	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
@@ -2036,7 +2035,7 @@ def get_payment_entry(
 	update_accounting_dimensions(pe, doc)
 
 	if party_account and bank:
-		pe.set_exchange_rate(ref_doc=reference_doc)
+		pe.set_exchange_rate(ref_doc=doc)
 		pe.set_amounts()
 
 		if discount_amount:
