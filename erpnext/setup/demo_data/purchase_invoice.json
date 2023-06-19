@@ -6,9 +6,144 @@
         "items": [
             {
                 "doctype": "Purchase Invoice Item",
+                "item_code": "SKU001",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "MA Inc.",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU002",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "KC Corp.",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU003",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "DQ Industries",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
                 "item_code": "SKU004",
                 "parentfield": "items",
-                "qty": 20.0,
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "MA Inc.",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU005",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "KC Corp.",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU006",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "DQ Industries",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU007",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "MA Inc.",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU008",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "KC Corp.",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU009",
+                "parentfield": "items",
+                "qty": 100.0,
+                "rate": 400.0,
+                "conversion_factor": 1
+            }
+        ]
+    },
+    {
+        "conversion_rate": 1.0,
+        "supplier": "DQ Industries",
+        "doctype": "Purchase Invoice",
+        "items": [
+            {
+                "doctype": "Purchase Invoice Item",
+                "item_code": "SKU010",
+                "parentfield": "items",
+                "qty": 100.0,
                 "rate": 400.0,
                 "conversion_factor": 1
             }
