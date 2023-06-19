@@ -150,9 +150,22 @@ class PaymentEntry(AccountsController):
 			)
 
 	def validate_allocated_amount(self):
-		if self.payment_type == "Internal Transfer" or self.party_type in ("Donor"):
+		if self.payment_type == "Internal Transfer":
 			return
 
+		if self.party_type in ("Customer", "Supplier"):
+			self.validate_allocated_amount_with_latest_data()
+		else:
+			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
+			for d in self.get("references"):
+				if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(d.outstanding_amount):
+					frappe.throw(fail_message.format(d.idx))
+
+				# Check for negative outstanding invoices as well
+				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
+					frappe.throw(fail_message.format(d.idx))
+
+	def validate_allocated_amount_with_latest_data(self):
 		latest_references = get_outstanding_reference_documents(
 			{
 				"posting_date": self.posting_date,
@@ -170,7 +183,7 @@ class PaymentEntry(AccountsController):
 			d = frappe._dict(d)
 			latest_lookup.update({(d.voucher_type, d.voucher_no): d})
 
-		for d in self.get("references").copy():
+		for d in self.get("references"):
 			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
 
 			# The reference has already been fully paid
@@ -189,18 +202,14 @@ class PaymentEntry(AccountsController):
 					).format(d.reference_doctype, d.reference_name)
 				)
 
-			d.outstanding_amount = latest.outstanding_amount
-
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
-			if (flt(d.allocated_amount)) > 0:
-				if flt(d.allocated_amount) > flt(d.outstanding_amount):
-					frappe.throw(fail_message.format(d.idx))
+			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) < 0:
-				if flt(d.allocated_amount) < flt(d.outstanding_amount):
-					frappe.throw(fail_message.format(d.idx))
+			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
