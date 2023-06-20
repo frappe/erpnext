@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 
 
 class StockReservationEntry(Document):
@@ -292,6 +293,29 @@ def get_sre_reserved_qty_details_for_voucher_detail_no(
 		return reserved_qty_details[0]
 
 	return reserved_qty_details
+
+
+def get_sre_reserved_qty_for_voucher_detail_no(
+	voucher_type: str, voucher_no: str, voucher_detail_no: str
+) -> float:
+	"""Returns `Reserved Qty` against the Voucher."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	data = (
+		frappe.qb.from_(sre)
+		.select(
+			(Sum(sre.reserved_qty) - Sum(sre.delivered_qty)),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.voucher_detail_no == voucher_detail_no)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+	).run(as_list=True)
+
+	return flt(data[0][0])
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
