@@ -1,6 +1,17 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 // For license information, please see license.txt
 
+var highlight_qty = 10;
+frappe.db.exists('DocType', 'Stock Custom Settings')
+    .then(result => {
+        if(result){
+			frappe.db.get_single_value('Stock Custom Settings', 'highlight_threshold')
+				.then(qty => {
+					highlight_qty = qty;
+				});
+		}
+    })
+
 frappe.query_reports["Stock Balance"] = {
 	"filters": [
 		{
@@ -103,6 +114,9 @@ frappe.query_reports["Stock Balance"] = {
 		}
 		else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
+		}
+		else if (column.fieldname == "bal_qty" && data && data.bal_qty < highlight_qty) {
+			value = "<span style='color:red'>" + value + "</span>";
 		}
 
 		return value;
