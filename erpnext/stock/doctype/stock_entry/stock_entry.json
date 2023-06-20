@@ -122,7 +122,8 @@
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
    "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -619,7 +620,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-02 05:21:39.060501",
+ "modified": "2023-06-19 18:23:40.748114",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
