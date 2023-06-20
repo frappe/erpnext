@@ -620,11 +620,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-05-02 05:21:39.060501",
-=======
  "modified": "2023-06-19 18:23:40.748114",
->>>>>>> 4f941ac5c0 (perf: index `purpose` in `Stock Entry`)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
