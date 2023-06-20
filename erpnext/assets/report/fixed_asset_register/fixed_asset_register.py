@@ -202,39 +202,15 @@ def prepare_chart_data(data, filters):
 def get_assets_linked_to_fb(filters):
 	afb = frappe.qb.DocType("Asset Finance Book")
 
-<<<<<<< HEAD
-	return flt(depr_amount, 2)
-
-
-def get_finance_book_value_map(filters):
-	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
-
-	return frappe._dict(
-		frappe.db.sql(
-			""" Select
-		parent, SUM(depreciation_amount)
-		FROM `tabDepreciation Schedule`
-		WHERE
-			parentfield='schedules'
-			AND schedule_date<=%s
-			AND journal_entry IS NOT NULL
-			AND ifnull(finance_book, '')=%s
-		GROUP BY parent""",
-			(date, cstr(filters.finance_book or "")),
-		)
-=======
 	query = frappe.qb.from_(afb).select(
 		afb.parent,
->>>>>>> 0d12588583 (fix: date and finance book fixes in fixed asset register (#35751))
 	)
 
 	if filters.include_default_book_assets:
 		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
 		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
-			frappe.throw(
-				_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-			)
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default Book Assets'"))
 
 		query = query.where(
 			(afb.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
