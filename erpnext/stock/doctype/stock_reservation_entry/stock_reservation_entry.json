@@ -141,16 +141,18 @@
    "width": "150px"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "reserved_qty",
    "fieldtype": "Float",
    "in_filter": 1,
    "in_list_view": 1,
    "label": "Reserved Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
-   "read_only": 1,
+   "read_only_depends_on": "eval: doc.reservation_based_on == \"Serial and Batch\"",
    "width": "150px"
   },
   {
@@ -168,6 +170,7 @@
    "fieldtype": "Float",
    "label": "Delivered Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -185,6 +188,7 @@
    "fieldtype": "Float",
    "label": "Available Qty to Reserve",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -193,6 +197,7 @@
    "fieldtype": "Float",
    "label": "Voucher Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -263,7 +268,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-12 15:00:07.603816",
+ "modified": "2023-06-20 20:54:47.763900",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
