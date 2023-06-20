@@ -100,15 +100,16 @@
   },
   {
    "default": "0.05",
-   "description": "Only values between 0 and 1 are allowed. \nEx: If allowance is set at 0.07, accounts that have balance of 0.07 in either of the currencies will be considered as zero balance account",
+   "description": "Only values between [0,1) are allowed. Like {0.00, 0.04, 0.09, ...}\nEx: If allowance is set at 0.07, accounts that have balance of 0.07 in either of the currencies will be considered as zero balance account",
    "fieldname": "rounding_loss_allowance",
    "fieldtype": "Float",
-   "label": "Rounding Loss Allowance"
+   "label": "Rounding Loss Allowance",
+   "precision": "9"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-12 21:02:09.818208",
+ "modified": "2023-06-20 07:29:06.972434",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Exchange Rate Revaluation",
