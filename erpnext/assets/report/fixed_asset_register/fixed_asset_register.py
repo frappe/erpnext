@@ -103,14 +103,23 @@ def get_data(filters):
 
 	assets_linked_to_fb = get_assets_linked_to_fb(filters)
 
-	depreciation_amount_map = get_asset_depreciation_amount_map(filters)
+	company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+	if filters.include_default_book_entries and company_fb:
+		finance_book = company_fb
+	elif filters.finance_book:
+		finance_book = filters.finance_book
+	else:
+		finance_book = None
+
+	depreciation_amount_map = get_asset_depreciation_amount_map(filters, finance_book)
 
 	for asset in assets_record:
 		if assets_linked_to_fb and asset.asset_id not in assets_linked_to_fb:
 			continue
 
 		asset_value = get_asset_value_after_depreciation(
-			asset.asset_id, filters.finance_book
+			asset.asset_id, finance_book
 		) or get_asset_value_after_depreciation(asset.asset_id)
 
 		row = {
@@ -223,17 +232,8 @@ def get_depreciation_amount_of_asset(asset, depreciation_amount_map):
 	return depreciation_amount_map.get(asset.asset_id) or 0.0
 
 
-def get_asset_depreciation_amount_map(filters):
+def get_asset_depreciation_amount_map(filters, finance_book):
 	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
-
-	company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
-
-	if filters.include_default_book_entries and company_fb:
-		finance_book = company_fb
-	elif filters.finance_book:
-		finance_book = filters.finance_book
-	else:
-		finance_book = None
 
 	asset = frappe.qb.DocType("Asset")
 	gle = frappe.qb.DocType("GL Entry")
