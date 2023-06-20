@@ -22,7 +22,7 @@ class ExchangeRateRevaluation(Document):
 		self.set_total_gain_loss()
 
 	def validate_rounding_loss_allowance(self):
-		if not (self.rounding_loss_allowance > 0 and self.rounding_loss_allowance < 1):
+		if not (self.rounding_loss_allowance >= 0 and self.rounding_loss_allowance < 1):
 			frappe.throw(_("Rounding Loss Allowance should be between 0 and 1"))
 
 	def set_total_gain_loss(self):
