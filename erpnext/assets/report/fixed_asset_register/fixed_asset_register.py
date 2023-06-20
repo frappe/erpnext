@@ -248,7 +248,7 @@ def get_asset_depreciation_amount_map(filters):
 		.on((aca.parent == asset.asset_category) & (aca.company_name == asset.company))
 		.join(company)
 		.on(company.name == asset.company)
-		.select(asset.name.as_("asset"), Sum(gle.debit).as_("value"))
+		.select(asset.name.as_("asset"), Sum(gle.debit).as_("depreciation_amount"))
 		.where(
 			gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account)
 		)
