@@ -2155,11 +2155,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2023-04-28 14:15:59.901154",
-=======
  "modified": "2023-06-19 16:02:05.309332",
->>>>>>> 4fbff20954 (fix: make credit note and debit note exclusive (#35781))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
