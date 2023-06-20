@@ -373,6 +373,24 @@ class ExchangeRateRevaluation(Document):
 						"credit": 0,
 					}
 				)
+
+				journal_entry_accounts.append(journal_account)
+
+				journal_entry_accounts.append(
+					{
+						"account": unrealized_exchange_gain_loss_account,
+						"balance": get_balance_on(unrealized_exchange_gain_loss_account),
+						"debit": 0,
+						"credit": 0,
+						"debit_in_account_currency": abs(d.gain_loss) if d.gain_loss < 0 else 0,
+						"credit_in_account_currency": abs(d.gain_loss) if d.gain_loss > 0 else 0,
+						"cost_center": erpnext.get_default_cost_center(self.company),
+						"exchange_rate": 1,
+						"reference_type": "Exchange Rate Revaluation",
+						"reference_name": self.name,
+					}
+				)
+
 			elif d.get("balance_in_base_currency") and not d.get("new_balance_in_base_currency"):
 				# Base currency has balance
 				dr_or_cr = "credit" if d.get("balance_in_base_currency") > 0 else "debit"
@@ -388,22 +406,22 @@ class ExchangeRateRevaluation(Document):
 					}
 				)
 
-			journal_entry_accounts.append(journal_account)
+				journal_entry_accounts.append(journal_account)
 
-		journal_entry_accounts.append(
-			{
-				"account": unrealized_exchange_gain_loss_account,
-				"balance": get_balance_on(unrealized_exchange_gain_loss_account),
-				"debit": abs(self.gain_loss_booked) if self.gain_loss_booked < 0 else 0,
-				"credit": abs(self.gain_loss_booked) if self.gain_loss_booked > 0 else 0,
-				"debit_in_account_currency": abs(self.gain_loss_booked) if self.gain_loss_booked < 0 else 0,
-				"credit_in_account_currency": self.gain_loss_booked if self.gain_loss_booked > 0 else 0,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"exchange_rate": 1,
-				"reference_type": "Exchange Rate Revaluation",
-				"reference_name": self.name,
-			}
-		)
+				journal_entry_accounts.append(
+					{
+						"account": unrealized_exchange_gain_loss_account,
+						"balance": get_balance_on(unrealized_exchange_gain_loss_account),
+						"debit": abs(d.gain_loss) if d.gain_loss < 0 else 0,
+						"credit": abs(d.gain_loss) if d.gain_loss > 0 else 0,
+						"debit_in_account_currency": 0,
+						"credit_in_account_currency": 0,
+						"cost_center": erpnext.get_default_cost_center(self.company),
+						"exchange_rate": 1,
+						"reference_type": "Exchange Rate Revaluation",
+						"reference_name": self.name,
+					}
+				)
 
 		journal_entry.set("accounts", journal_entry_accounts)
 		journal_entry.set_total_debit_credit()
