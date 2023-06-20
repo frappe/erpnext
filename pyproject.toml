@@ -12,6 +12,7 @@ dependencies = [
     "pycountry~=22.3.5",
     "Unidecode~=1.3.6",
     "barcodenumber~=0.5.0",
+    "rapidfuzz~=2.15.0",
 
     # integration dependencies
     "gocardless-pro~=1.22.0",
