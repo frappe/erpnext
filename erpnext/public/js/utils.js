@@ -551,24 +551,21 @@ erpnext.utils.update_child_items = function(opts) {
 		label: __('UOM'),
 		reqd: 1,
 		onchange: function () {
-			frappe.call({
-				method: "erpnext.stock.get_item_details.get_conversion_factor",
-				args: { item_code: this.doc.item_code, uom: this.value },
-				callback: r => {
-					if(!r.exc) {
-						if (this.doc.conversion_factor == r.message.conversion_factor) return;
-
-						const docname = this.doc.docname;
-						dialog.fields_dict.trans_items.df.data.some(doc => {
-							if (doc.docname == docname) {
-								doc.conversion_factor = r.message.conversion_factor;
-								dialog.fields_dict.trans_items.grid.refresh();
-								return true;
-							}
-						})
+			const items = cur_dialog.fields.filter(
+				(f) => f.fieldname === "trans_items"
+			)[0]?.data;
+			items.forEach(doc => {
+				frappe.call({
+					method: "erpnext.stock.get_item_details.get_conversion_factor",
+					args: { item_code: doc.item_code, uom: doc.uom },
+					callback: r => {
+						if (!r.exc) {
+							if (doc.conversion_factor != r.message.conversion_factor) doc.conversion_factor = r.message.conversion_factor;
+						}
 					}
-				}
-			});
+				});
+			})
+			cur_dialog.refresh();
 		}
 	}, {
 		fieldtype:'Float',
