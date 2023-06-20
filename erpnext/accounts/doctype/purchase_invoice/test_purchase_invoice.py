@@ -1698,12 +1698,16 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.submit()
 
 		self.assertEqual(pi.advances[0].allocated_amount, 500)
+
+		# Check GL Entry against payment doctype
 		expected_gle = [
-			["Creditors - _TC", 500, 1000, nowdate()],
+			["Cash - _TC", 0.0, 500, nowdate()],
+			["Creditors - _TC", 500, 0.0, nowdate()],
+			["Creditors - _TC", 500, 0.0, nowdate()],
 			["Debtors - _TC", 0.0, 500, nowdate()],
-			["Stock Received But Not Billed - _TC", 1000, 0.0, nowdate()],
 		]
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
+
+		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
 		self.assertEqual(pi.outstanding_amount, 500)
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
@@ -1735,18 +1739,18 @@ def set_advance_flag(company, flag, default_account):
 	)
 
 
-def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="Purchase Invoice"):
 	gl = frappe.qb.DocType("GL Entry")
 	q = (
 		frappe.qb.from_(gl)
 		.select(gl.account, gl.debit, gl.credit, gl.posting_date)
 		.where(
-			(gl.voucher_type == "Sales Invoice")
+			(gl.voucher_type == voucher_type)
 			& (gl.voucher_no == voucher_no)
 			& (gl.posting_date >= posting_date)
 			& (gl.is_cancelled == 0)
 		)
-		.orderby(gl.posting_date, gl.account)
+		.orderby(gl.posting_date, gl.account, gl.creation)
 	)
 	gl_entries = q.run(as_dict=True)
 

@@ -3312,7 +3312,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_advance_entries_as_liability(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-		from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 
 		set_advance_flag(company="_Test Company", flag=1, default_account="Creditors - _TC")
 
@@ -3344,12 +3343,16 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		self.assertEqual(si.advances[0].allocated_amount, 500)
+
+		# Check GL Entry against payment doctype
 		expected_gle = [
+			["Cash - _TC", 1000, 0.0, nowdate()],
 			["Creditors - _TC", 500, 0.0, nowdate()],
-			["Debtors - _TC", 500, 500, nowdate()],
-			["Sales - _TC", 0.0, 500, nowdate()],
+			["Debtors - _TC", 0.0, 1000, nowdate()],
+			["Debtors - _TC", 0.0, 500, nowdate()],
 		]
-		check_gl_entries(self, si.name, expected_gle, nowdate())
+
+		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
 		self.assertEqual(si.outstanding_amount, 0)
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
@@ -3401,18 +3404,18 @@ def get_sales_invoice_for_e_invoice():
 	return si
 
 
-def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="Sales Invoice"):
 	gl = frappe.qb.DocType("GL Entry")
 	q = (
 		frappe.qb.from_(gl)
 		.select(gl.account, gl.debit, gl.credit, gl.posting_date)
 		.where(
-			(gl.voucher_type == "Sales Invoice")
+			(gl.voucher_type == voucher_type)
 			& (gl.voucher_no == voucher_no)
 			& (gl.posting_date >= posting_date)
 			& (gl.is_cancelled == 0)
 		)
-		.orderby(gl.posting_date, gl.account)
+		.orderby(gl.posting_date, gl.account, gl.creation)
 	)
 	gl_entries = q.run(as_dict=True)
 

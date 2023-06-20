@@ -436,9 +436,7 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(
-	args, skip_ref_details_update_for_pe=False, is_reconcile=True
-):  # nosemgrep
+def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -474,7 +472,7 @@ def reconcile_against_document(
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
-		gl_map = doc.build_gl_map(is_reconcile)
+		gl_map = doc.build_gl_map()
 		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
 		# Only update outstanding for newly linked vouchers

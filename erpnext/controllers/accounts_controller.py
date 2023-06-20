@@ -1025,7 +1025,7 @@ class AccountsController(TransactionBase):
 						)
 					)
 
-	def update_against_document_in_jv(self, is_reconcile=True):
+	def update_against_document_in_jv(self):
 		"""
 		Links invoice and advance voucher:
 		        1. cancel advance voucher
@@ -1082,7 +1082,7 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 
-			reconcile_against_document(lst, is_reconcile)
+			reconcile_against_document(lst)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
