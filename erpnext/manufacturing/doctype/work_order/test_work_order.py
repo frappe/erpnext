@@ -1700,6 +1700,7 @@ class TestWorkOrder(FrappeTestCase):
 			filters={"item_code": item_code, "work_order": wo_order.name},
 		)
 
+		serial_nos = [d.name for d in serial_nos]
 		self.assertEqual(len(serial_nos), 5)
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
