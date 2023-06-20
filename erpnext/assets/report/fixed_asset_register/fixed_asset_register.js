@@ -51,8 +51,8 @@ frappe.query_reports["Fixed Asset Register"] = {
 			options: "Finance Book",
 		},
 		{
-			"fieldname": "include_default_book_entries",
-			"label": __("Include Default Book Entries"),
+			"fieldname": "include_default_book_assets",
+			"label": __("Include Default Book Assets"),
 			"fieldtype": "Check",
 			"default": 1
 		},

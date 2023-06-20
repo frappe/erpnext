@@ -105,7 +105,7 @@ def get_data(filters):
 
 	company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
-	if filters.include_default_book_entries and company_fb:
+	if filters.include_default_book_assets and company_fb:
 		finance_book = company_fb
 	elif filters.finance_book:
 		finance_book = filters.finance_book
@@ -206,7 +206,7 @@ def get_assets_linked_to_fb(filters):
 		afb.parent,
 	)
 
-	if filters.include_default_book_entries:
+	if filters.include_default_book_assets:
 		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
 		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
