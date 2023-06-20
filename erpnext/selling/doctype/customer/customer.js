@@ -63,6 +63,12 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		});
+
+		frm.set_query("user", "portal_users", function() {
+			return {
+				query: "erpnext.selling.doctype.customer.customer.get_users_with_customer_role",
+			};
+		});
 	},
 	customer_primary_address: function(frm){
 		if(frm.doc.customer_primary_address){

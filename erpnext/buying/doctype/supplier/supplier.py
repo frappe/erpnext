@@ -62,6 +62,13 @@ class Supplier(TransactionBase):
 
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
+		self.validate_portal_users()
+
+	def validate_portal_users(self):
+		for portal_user in self.portal_users:
+			user_roles = frappe.get_roles(portal_user.user)
+			if "Supplier" not in user_roles:
+				frappe.throw(_("Portal Users must have Supplier Role."))
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
@@ -153,3 +160,22 @@ def get_supplier_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		""",
 		{"supplier": supplier, "txt": "%%%s%%" % txt},
 	)
+
+
+def get_users_query():
+	user = frappe.qb.DocType("User")
+	hasRole = frappe.qb.DocType("Has Role")
+	q = (
+		frappe.qb.from_(user)
+		.inner_join(hasRole)
+		.on(user.name == hasRole.parent)
+		.select(user.name, user.full_name)
+		.where(hasRole.role == "Supplier")
+	)
+	return q
+
+
+@frappe.whitelist()
+def get_users_with_supplier_role(doctype, txt, searchfield, start, page_len, filters):
+	q = get_users_query()
+	return q.run()

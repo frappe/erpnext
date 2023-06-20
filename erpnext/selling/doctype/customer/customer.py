@@ -93,6 +93,14 @@ class Customer(TransactionBase):
 			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
+		self.validate_portal_users()
+
+	def validate_portal_users(self):
+		for portal_user in self.portal_users:
+			user_roles = frappe.get_roles(portal_user.user)
+			if "Customer" not in user_roles:
+				frappe.throw(_("Portal Users must have Customer Role."))
+
 	@frappe.whitelist()
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
@@ -696,3 +704,22 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
 		.run()
 	)
+
+
+def get_users_query():
+	user = frappe.qb.DocType("User")
+	hasRole = frappe.qb.DocType("Has Role")
+	q = (
+		frappe.qb.from_(user)
+		.inner_join(hasRole)
+		.on(user.name == hasRole.parent)
+		.select(user.name, user.full_name)
+		.where(hasRole.role == "Customer")
+	)
+	return q
+
+
+@frappe.whitelist()
+def get_users_with_customer_role(doctype, txt, searchfield, start, page_len, filters):
+	q = get_users_query()
+	return q.run()

@@ -68,7 +68,9 @@
   "on_hold",
   "hold_type",
   "column_break_59",
-  "release_date"
+  "release_date",
+  "portal_users_tab",
+  "portal_users"
  ],
  "fields": [
   {
@@ -445,6 +447,17 @@
   {
    "fieldname": "column_break_59",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "portal_users_tab",
+   "fieldtype": "Tab Break",
+   "label": "Portal Users"
+  },
+  {
+   "fieldname": "portal_users",
+   "fieldtype": "Table",
+   "label": "Supplier Portal Users",
+   "options": "Portal Users"
   }
  ],
  "icon": "fa fa-user",
@@ -457,7 +470,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-05-09 15:34:13.408932",
+ "modified": "2023-06-20 14:06:07.366654",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -489,7 +502,6 @@
    "read": 1,
    "report": 1,
    "role": "Purchase Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
