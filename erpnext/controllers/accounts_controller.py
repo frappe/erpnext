@@ -892,9 +892,10 @@ class AccountsController(TransactionBase):
 			amount_field = "debit_in_account_currency"
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
-		party_account = [
-			get_party_account(party_type, party=party, company=self.company, include_advance=True)[1]
-		]
+
+		party_account = get_party_account(
+			party_type, party=party, company=self.company, include_advance=True
+		)
 
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
 
@@ -2203,37 +2204,59 @@ def get_advance_payment_entries(
 	condition=None,
 ):
 
-	q = build_query(
-		party_type,
-		party,
-		party_account,
-		order_doctype,
-		order_list,
-		include_unallocated,
-		against_all_orders,
-		limit,
-		condition,
-	)
+	payment_entries = []
+	payment_entry = frappe.qb.DocType("Payment Entry")
 
-	payment_entries = q.run(as_dict=True)
+	if order_list or against_all_orders:
+		q = get_common_query(
+			party_type,
+			party,
+			party_account,
+			limit,
+			condition,
+		)
+		payment_ref = frappe.qb.DocType("Payment Entry Reference")
 
-	return list(payment_entries)
+		q = q.inner_join(payment_ref).on(payment_entry.name == payment_ref.parent)
+		q = q.select(
+			(payment_ref.allocated_amount).as_("amount"),
+			(payment_ref.name).as_("reference_row"),
+			(payment_ref.reference_name).as_("against_order"),
+			payment_ref.reference_doctype == order_doctype,
+		)
+
+		if order_list:
+			q = q.where(payment_ref.reference_name.isin(order_list))
+
+		allocated = list(q.run(as_dict=True))
+		payment_entries += allocated
+
+	if include_unallocated:
+		q = get_common_query(
+			party_type,
+			party,
+			party_account,
+			limit,
+			condition,
+		)
+		q = q.select((payment_entry.unallocated_amount).as_("amount"))
+		q = q.where(payment_entry.unallocated_amount > 0)
+
+		unallocated = list(q.run(as_dict=True))
+		payment_entries += unallocated
+
+	return payment_entries
 
 
-def build_query(
+def get_common_query(
 	party_type,
 	party,
 	party_account,
-	order_doctype,
-	order_list,
-	include_unallocated,
-	against_all_orders,
 	limit,
 	condition,
 ):
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entry = frappe.qb.DocType("Payment Entry")
-	payment_ref = frappe.qb.DocType("Payment Entry Reference")
 
 	q = (
 		frappe.qb.from_(payment_entry)
@@ -2259,68 +2282,53 @@ def build_query(
 		q = q.where(payment_entry.paid_to.isin(party_account))
 
 	if payment_type == "Receive":
-		q = q.select(payment_entry.source_exchange_rate)
+		q = q.select((payment_entry.source_exchange_rate).as_("exchange_rate"))
 	else:
-		q.select(payment_entry.target_exchange_rate)
+		q = q.select((payment_entry.target_exchange_rate).as_("exchange_rate"))
 
-	if include_unallocated:
-		q = q.select((payment_entry.unallocated_amount).as_("amount"))
-		q = q.where(payment_entry.unallocated_amount > 0)
-
-		if condition:
-			q = q.where(payment_entry.company == condition["company"])
-			q = (
-				q.where(payment_entry.posting_date >= condition["from_payment_date"])
-				if condition.get("from_payment_date")
-				else q
-			)
-			q = (
-				q.where(payment_entry.posting_date <= condition["to_payment_date"])
-				if condition.get("to_payment_date")
-				else q
-			)
-			if condition.get("get_payments") == True:
-				q = (
-					q.where(payment_entry.cost_center == condition["cost_center"])
-					if condition.get("cost_center")
-					else q
-				)
-				q = (
-					q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"])
-					if condition.get("minimum_payment_amount")
-					else q
-				)
-				q = (
-					q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"])
-					if condition.get("maximum_payment_amount")
-					else q
-				)
-			else:
-				q = (
-					q.where(payment_entry.total_debit >= condition["minimum_payment_amount"])
-					if condition.get("minimum_payment_amount")
-					else q
-				)
-				q = (
-					q.where(payment_entry.total_debit <= condition["maximum_payment_amount"])
-					if condition.get("maximum_payment_amount")
-					else q
-				)
-
-	elif order_list or against_all_orders:
-		q = q.inner_join(payment_ref).on(payment_entry.name == payment_ref.parent)
-		q = q.select(
-			(payment_ref.allocated_amount).as_("amount"),
-			(payment_ref.name).as_("reference_row"),
-			(payment_ref.reference_name).as_("against_order"),
-			payment_ref.reference_doctype == order_doctype,
+	if condition:
+		q = q.where(payment_entry.company == condition["company"])
+		q = (
+			q.where(payment_entry.posting_date >= condition["from_payment_date"])
+			if condition.get("from_payment_date")
+			else q
 		)
-
-		if order_list:
-			q = q.where(payment_ref.reference_name.isin(order_list))
+		q = (
+			q.where(payment_entry.posting_date <= condition["to_payment_date"])
+			if condition.get("to_payment_date")
+			else q
+		)
+		if condition.get("get_payments") == True:
+			q = (
+				q.where(payment_entry.cost_center == condition["cost_center"])
+				if condition.get("cost_center")
+				else q
+			)
+			q = (
+				q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"])
+				if condition.get("minimum_payment_amount")
+				else q
+			)
+			q = (
+				q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"])
+				if condition.get("maximum_payment_amount")
+				else q
+			)
+		else:
+			q = (
+				q.where(payment_entry.total_debit >= condition["minimum_payment_amount"])
+				if condition.get("minimum_payment_amount")
+				else q
+			)
+			q = (
+				q.where(payment_entry.total_debit <= condition["maximum_payment_amount"])
+				if condition.get("maximum_payment_amount")
+				else q
+			)
 
 	q = q.orderby(payment_entry.posting_date)
 	q = q.limit(limit) if limit else q
+
 	return q
 
 

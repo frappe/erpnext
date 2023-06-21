@@ -410,7 +410,11 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 
 	if include_advance and party_type in ["Customer", "Supplier"]:
 		advance_account = get_party_advance_account(party_type, party, company)
-		return [account, advance_account]
+		if advance_account:
+			return [account, advance_account]
+		else:
+			return [account]
+
 	return account
 
 
