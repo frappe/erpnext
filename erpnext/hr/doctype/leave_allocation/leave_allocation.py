@@ -333,7 +333,6 @@ def get_leave_allocation_for_period(
 	).run()[0][0] or 0.0
 
 
-@frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
 	"""Returns carry forwarded leaves for the given employee"""
 	unused_leaves = 0.0
