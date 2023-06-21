@@ -159,15 +159,15 @@ def make_depreciation_entry(asset_depr_schedule_name, date=None):
 			je.flags.ignore_permissions = True
 			je.flags.planned_depr_entry = True
 			je.save()
-			if not je.meta.get_workflow():
-				je.submit()
 
 			d.db_set("journal_entry", je.name)
 
-			idx = cint(asset_depr_schedule_doc.finance_book_id)
-			row = asset.get("finance_books")[idx - 1]
-			row.value_after_depreciation -= d.depreciation_amount
-			row.db_update()
+			if not je.meta.get_workflow():
+				je.submit()
+				idx = cint(asset_depr_schedule_doc.finance_book_id)
+				row = asset.get("finance_books")[idx - 1]
+				row.value_after_depreciation -= d.depreciation_amount
+				row.db_update()
 
 	asset.db_set("depr_entry_posting_status", "Successful")
 
