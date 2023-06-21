@@ -268,7 +268,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-20 20:54:47.763900",
+ "modified": "2023-06-21 15:14:00.890554",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
@@ -292,5 +292,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
