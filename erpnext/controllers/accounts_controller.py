@@ -2273,11 +2273,11 @@ def get_common_query(
 	)
 
 	if party_type == "Customer":
-		q = q.select(payment_entry.paid_from_account_currency)
+		q = q.select((payment_entry.paid_from_account_currency).as_("currency"))
 		q = q.select(payment_entry.paid_from)
 		q = q.where(payment_entry.paid_from.isin(party_account))
 	else:
-		q = q.select(payment_entry.paid_to_account_currency)
+		q = q.select((payment_entry.paid_to_account_currency).as_("currency"))
 		q = q.select(payment_entry.paid_to)
 		q = q.where(payment_entry.paid_to.isin(party_account))
 
