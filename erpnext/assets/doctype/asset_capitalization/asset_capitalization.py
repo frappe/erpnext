@@ -53,7 +53,6 @@ class AssetCapitalization(StockController):
 		self.validate_posting_time()
 		self.set_missing_values(for_validate=True)
 		self.validate_target_item()
-		self.validate_target_asset()
 		self.validate_consumed_stock_item()
 		self.validate_consumed_asset_item()
 		self.validate_service_item()
@@ -64,10 +63,10 @@ class AssetCapitalization(StockController):
 
 	def before_submit(self):
 		self.validate_source_mandatory()
-
-	def on_submit(self):
 		if self.entry_type == "Capitalization":
 			self.create_target_asset()
+
+	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 
@@ -146,17 +145,6 @@ class AssetCapitalization(StockController):
 			frappe.throw(_("Target Warehouse is mandatory for Decapitalization"))
 
 		self.validate_item(target_item)
-
-	def validate_target_asset(self):
-		if self.target_asset:
-			target_asset = self.get_asset_for_validation(self.target_asset)
-
-			if target_asset.item_code != self.target_item_code:
-				frappe.throw(
-					_("Asset {0} does not belong to Item {1}").format(self.target_asset, self.target_item_code)
-				)
-
-			self.validate_asset(target_asset)
 
 	def validate_consumed_stock_item(self):
 		for d in self.stock_items:
