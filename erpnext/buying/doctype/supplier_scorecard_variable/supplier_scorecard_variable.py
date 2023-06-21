@@ -425,26 +425,20 @@ def get_total_shipments(scorecard):
 
 
 def get_ordered_qty(scorecard):
-	"""Gets the total number of ordered quntity (based on Purchase Orders)"""
-	supplier = frappe.qb.DocType("Supplier", scorecard.supplier)
-	po = frappe.qb.DocType("Purchase Order")
+    """Returns the total number of ordered quantity (based on Purchase Orders)"""
 
-	data = (
-		frappe.qb.from_(po)
-		.select(
-			Sum(po.total_qty)
-		)
-		.where(po.supplier == supplier.name)
-		.where(po.docstatus == 1)
-		.where(
-			(po.transaction_date >= scorecard.get("start_date")) & (po.transaction_date <= scorecard.get("end_date"))
-		)
-		.run(as_list=1)
-	)[0][0]
+    po = frappe.qb.DocType("Purchase Order")
 
-	if not data:
-		data = 0
-	return data
+    return (
+        frappe.qb.from_(po)
+        .select(Sum(po.total_qty))
+        .where(
+            (po.supplier == scorecard.supplier)
+            & (po.docstatus == 1)
+            & (po.transaction_date >= scorecard.get("start_date"))
+            & (po.transaction_date <= scorecard.get("end_date"))
+        )
+    ).run(as_list=True)[0][0] or 0
 
 
 def get_rfq_total_number(scorecard):
