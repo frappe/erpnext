@@ -12,7 +12,6 @@ from frappe.utils import cint, flt
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -138,19 +137,17 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
+		self.set_serial_and_batch_bundle_from_pick_list()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
-
-		if self._action != "submit" and not self.is_return:
-			set_batch_nos(self, "warehouse", throw=True)
-			set_batch_nos(self, "warehouse", throw=True, child_table="packed_items")
-
 		self.update_current_stock()
 
 		if not self.installation_status:
 			self.installation_status = "Not Installed"
+
+		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
@@ -190,6 +187,24 @@ class DeliveryNote(SellingController):
 					["Sales Invoice", "against_sales_invoice", "si_detail"],
 				]
 			)
+
+	def set_serial_and_batch_bundle_from_pick_list(self):
+		if not self.pick_list:
+			return
+
+		for item in self.items:
+			if item.pick_list_item:
+				filters = {
+					"item_code": item.item_code,
+					"voucher_type": "Pick List",
+					"voucher_no": self.pick_list,
+					"voucher_detail_no": item.pick_list_item,
+				}
+
+				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
+
+				if bundle_id:
+					item.serial_and_batch_bundle = bundle_id
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -243,6 +258,8 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		self.update_stock_reservation_entries()
+
 		if not self.is_return:
 			self.check_credit_limit()
 		elif self.issue_credit_note:
@@ -270,7 +287,96 @@ class DeliveryNote(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
+
+	def update_stock_reservation_entries(self) -> None:
+		"""Updates Delivered Qty in Stock Reservation Entries."""
+
+		# Don't update Delivered Qty on Return or Cancellation.
+		if self.is_return or self._action == "cancel":
+			return
+
+		for item in self.get("items"):
+			# Skip if `Sales Order` or `Sales Order Item` reference is not set.
+			if not item.against_sales_order or not item.so_detail:
+				continue
+
+			sre_list = frappe.db.get_all(
+				"Stock Reservation Entry",
+				{
+					"docstatus": 1,
+					"voucher_type": "Sales Order",
+					"voucher_no": item.against_sales_order,
+					"voucher_detail_no": item.so_detail,
+					"warehouse": item.warehouse,
+					"status": ["not in", ["Delivered", "Cancelled"]],
+				},
+				order_by="creation",
+			)
+
+			# Skip if no Stock Reservation Entries.
+			if not sre_list:
+				continue
+
+			available_qty_to_deliver = item.stock_qty
+			for sre in sre_list:
+				if available_qty_to_deliver <= 0:
+					break
+
+				sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+
+				# `Delivered Qty` should be less than or equal to `Reserved Qty`.
+				qty_to_be_deliver = min(sre_doc.reserved_qty - sre_doc.delivered_qty, available_qty_to_deliver)
+
+				sre_doc.delivered_qty += qty_to_be_deliver
+				sre_doc.db_update()
+
+				# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
+				sre_doc.update_status()
+
+				available_qty_to_deliver -= qty_to_be_deliver
+
+	def validate_against_stock_reservation_entries(self):
+		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher_detail_no,
+		)
+
+		# Don't validate if Return
+		if self.is_return:
+			return
+
+		for item in self.get("items"):
+			# Skip if `Sales Order` or `Sales Order Item` reference is not set.
+			if not item.against_sales_order or not item.so_detail:
+				continue
+
+			sre_data = get_sre_reserved_qty_details_for_voucher_detail_no(
+				"Sales Order", item.against_sales_order, item.so_detail
+			)
+
+			# Skip if stock is not reserved.
+			if not sre_data:
+				continue
+
+			# Set `Warehouse` from SRE if not set.
+			if not item.warehouse:
+				item.warehouse = sre_data[0]
+			else:
+				# Throw if `Warehouse` is different from SRE.
+				if item.warehouse != sre_data[0]:
+					frappe.throw(
+						_("Row #{0}: Stock is reserved for Item {1} in Warehouse {2}.").format(
+							item.idx, frappe.bold(item.item_code), frappe.bold(sre_data[0])
+						),
+						title=_("Stock Reservation Warehouse Mismatch"),
+					)
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -957,8 +1063,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"field_map": {
 					source_document_warehouse_field: target_document_warehouse_field,
 					"name": "delivery_note_item",
-					"batch_no": "batch_no",
-					"serial_no": "serial_no",
 					"purchase_order": "purchase_order",
 					"purchase_order_item": "purchase_order_item",
 					"material_request": "material_request",

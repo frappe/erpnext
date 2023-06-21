@@ -39,7 +39,10 @@ setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
-before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
+before_install = [
+	"erpnext.setup.install.check_setup_wizard_not_completed",
+	"erpnext.setup.install.check_frappe_version",
+]
 after_install = "erpnext.setup.install.after_install"
 
 boot_session = "erpnext.startup.boot.boot_session"
@@ -67,6 +70,12 @@ treeviews = [
 	"Department",
 ]
 
+jinja = {
+	"methods": [
+		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
+	],
+}
+
 # website
 update_website_context = [
 	"erpnext.e_commerce.shopping_cart.utils.update_website_context",
@@ -74,13 +83,7 @@ update_website_context = [
 my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
-calendars = [
-	"Task",
-	"Work Order",
-	"Leave Application",
-	"Sales Order",
-	"Holiday List",
-]
+calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "ToDo"]
 
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
 

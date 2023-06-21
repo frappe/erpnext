@@ -237,10 +237,6 @@ def apply_pricing_rule(args, doc=None):
 	item_list = args.get("items")
 	args.pop("items")
 
-	set_serial_nos_based_on_fifo = frappe.db.get_single_value(
-		"Stock Settings", "automatically_set_serial_nos_based_on_fifo"
-	)
-
 	item_code_list = tuple(item.get("item_code") for item in item_list)
 	query_items = frappe.get_all(
 		"Item",
@@ -258,26 +254,7 @@ def apply_pricing_rule(args, doc=None):
 		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
-		if (
-			serialized_items.get(item.get("item_code"))
-			and not item.get("serial_no")
-			and set_serial_nos_based_on_fifo
-			and not args.get("is_return")
-		):
-			out[0].update(get_serial_no_for_item(args_copy))
-
 	return out
-
-
-def get_serial_no_for_item(args):
-	from erpnext.stock.get_item_details import get_serial_no
-
-	item_details = frappe._dict(
-		{"doctype": args.doctype, "name": args.name, "serial_no": args.serial_no}
-	)
-	if args.get("parenttype") in ("Sales Invoice", "Delivery Note") and flt(args.stock_qty) > 0:
-		item_details.serial_no = get_serial_no(args)
-	return item_details
 
 
 def update_pricing_rule_uom(pricing_rule, args):

@@ -65,7 +65,7 @@ def search_by_term(search_term, warehouse, price_list):
 			"item_code": item_code,
 			"batch_no": batch_no,
 		},
-		fields=["uom", "stock_uom", "currency", "price_list_rate", "batch_no"],
+		fields=["uom", "currency", "price_list_rate", "batch_no"],
 	)
 
 	def __sort(p):

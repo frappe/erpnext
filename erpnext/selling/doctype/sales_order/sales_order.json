@@ -42,6 +42,7 @@
   "scan_barcode",
   "column_break_28",
   "set_warehouse",
+  "reserve_stock",
   "items_section",
   "items",
   "section_break_31",
@@ -397,6 +398,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1474,6 +1476,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Phone",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1625,13 +1628,24 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: (doc.docstatus == 0 || doc.reserve_stock)",
+   "description": "If checked, Stock Reservation Entries will be created on <b>Submit</b>",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-20 11:14:01.036202",
+ "modified": "2023-06-03 16:16:23.411247",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1664,7 +1678,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "submit": 1,
    "write": 1

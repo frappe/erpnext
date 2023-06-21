@@ -15,7 +15,7 @@ def execute():
 			web_item = frappe.db.get_value("Website Item", {"item_code": row.parent})
 			web_item_doc = frappe.get_doc("Website Item", web_item)
 
-			child_doc = frappe.new_doc(docfield.options, web_item_doc, field)
+			child_doc = frappe.new_doc(docfield.options, parent_doc=web_item_doc, parentfield=field)
 
 			for field in ["name", "creation", "modified", "idx"]:
 				row[field] = None

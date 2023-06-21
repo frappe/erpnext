@@ -190,12 +190,12 @@ Shopping Cart Settings,Compras Ajustes,
 Raw Material Cost,Costo de la Materia Prima,
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Existe una categoría de cliente con el mismo nombre, por favor cambie el nombre del cliente o cambie el nombre de la categoría"
 Quotation {0} is cancelled,Cotización {0} se cancela,
-Quality Inspection required for Item {0},Inspección de la calidad requerida para el articulo {0}
-What does it do?,¿Qué hace?
-Actual Time (in Hours),Tiempo actual (En horas)
+Quality Inspection required for Item {0},Inspección de la calidad requerida para el articulo {0},
+What does it do?,¿Qué hace?,
+Actual Time in Hours (via Timesheet),Tiempo actual en horas,
 Make Sales Order,Hacer Orden de Venta,
-Doc Type,Tipo Doc.
-List a few of your customers. They could be organizations or individuals.,Enumere algunos de sus clientes. Pueden ser organizaciones o individuos.
+Doc Type,Tipo Doc.,
+List a few of your customers. They could be organizations or individuals.,Enumere algunos de sus clientes. Pueden ser organizaciones o individuos.,
 Ref Code,Código Referencia,
 Default Selling Cost Center,Centros de coste por defecto,
 Leave Block List Allowed,Lista de Bloqueo de Vacaciones Permitida,

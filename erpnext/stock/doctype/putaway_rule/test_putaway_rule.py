@@ -7,6 +7,11 @@ from frappe.tests.utils import FrappeTestCase
 from erpnext.stock.doctype.batch.test_batch import make_new_batch
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -382,42 +387,49 @@ class TestPutawayRule(FrappeTestCase):
 		make_new_batch(batch_id="BOTTL-BATCH-1", item_code="Water Bottle")
 
 		pr = make_purchase_receipt(item_code="Water Bottle", qty=5, do_not_submit=1)
-		pr.items[0].batch_no = "BOTTL-BATCH-1"
 		pr.save()
 		pr.submit()
+		pr.load_from_db()
 
-		serial_nos = frappe.get_list(
-			"Serial No", filters={"purchase_document_no": pr.name, "status": "Active"}
-		)
-		serial_nos = [d.name for d in serial_nos]
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
 
 		stock_entry = make_stock_entry(
 			item_code="Water Bottle",
 			source="_Test Warehouse - _TC",
 			qty=5,
+			serial_no=serial_nos,
 			target="Finished Goods - _TC",
 			purpose="Material Transfer",
 			apply_putaway_rule=1,
 			do_not_save=1,
 		)
-		stock_entry.items[0].batch_no = "BOTTL-BATCH-1"
-		stock_entry.items[0].serial_no = "\n".join(serial_nos)
 		stock_entry.save()
+		stock_entry.load_from_db()
 
 		self.assertEqual(stock_entry.items[0].t_warehouse, self.warehouse_1)
 		self.assertEqual(stock_entry.items[0].qty, 3)
 		self.assertEqual(stock_entry.items[0].putaway_rule, rule_1.name)
-		self.assertEqual(stock_entry.items[0].serial_no, "\n".join(serial_nos[:3]))
-		self.assertEqual(stock_entry.items[0].batch_no, "BOTTL-BATCH-1")
+		self.assertEqual(
+			get_serial_nos_from_bundle(stock_entry.items[0].serial_and_batch_bundle), serial_nos[0:3]
+		)
+		self.assertEqual(get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle), batch_no)
 
 		self.assertEqual(stock_entry.items[1].t_warehouse, self.warehouse_2)
 		self.assertEqual(stock_entry.items[1].qty, 2)
 		self.assertEqual(stock_entry.items[1].putaway_rule, rule_2.name)
-		self.assertEqual(stock_entry.items[1].serial_no, "\n".join(serial_nos[3:]))
-		self.assertEqual(stock_entry.items[1].batch_no, "BOTTL-BATCH-1")
+		self.assertEqual(
+			get_serial_nos_from_bundle(stock_entry.items[1].serial_and_batch_bundle), serial_nos[3:5]
+		)
+		self.assertEqual(get_batch_from_bundle(stock_entry.items[1].serial_and_batch_bundle), batch_no)
 
 		self.assertUnchangedItemsOnResave(stock_entry)
 
+		for row in stock_entry.items:
+			if row.serial_and_batch_bundle:
+				frappe.delete_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+
+		stock_entry.load_from_db()
 		stock_entry.delete()
 		pr.cancel()
 		rule_1.delete()

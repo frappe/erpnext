@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, add_to_date, flt, now
+from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -15,11 +15,17 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
+from erpnext.stock.serial_batch_bundle import SerialNoValuation
 
 
 class TestLandedCostVoucher(FrappeTestCase):
 	def test_landed_cost_voucher(self):
-		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -297,9 +303,8 @@ class TestLandedCostVoucher(FrappeTestCase):
 				self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 	def test_landed_cost_voucher_for_serialized_item(self):
-		frappe.db.sql(
-			"delete from `tabSerial No` where name in ('SN001', 'SN002', 'SN003', 'SN004', 'SN005')"
-		)
+		frappe.db.set_value("Item", "_Test Serialized Item", "serial_no_series", "SNJJ.###")
+
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
@@ -310,17 +315,42 @@ class TestLandedCostVoucher(FrappeTestCase):
 		)
 
 		pr.items[0].item_code = "_Test Serialized Item"
-		pr.items[0].serial_no = "SN001\nSN002\nSN003\nSN004\nSN005"
 		pr.submit()
+		pr.load_from_db()
 
-		serial_no_rate = frappe.db.get_value("Serial No", "SN001", "purchase_rate")
+		serial_no = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)[0]
+
+		sn_obj = SerialNoValuation(
+			sle=frappe._dict(
+				{
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"item_code": "_Test Serialized Item",
+					"warehouse": "Stores - TCP1",
+					"serial_nos": [serial_no],
+				}
+			)
+		)
+
+		serial_no_rate = sn_obj.get_incoming_rate_of_serial_no(serial_no)
 
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
-		serial_no = frappe.db.get_value("Serial No", "SN001", ["warehouse", "purchase_rate"], as_dict=1)
+		sn_obj = SerialNoValuation(
+			sle=frappe._dict(
+				{
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"item_code": "_Test Serialized Item",
+					"warehouse": "Stores - TCP1",
+					"serial_nos": [serial_no],
+				}
+			)
+		)
 
-		self.assertEqual(serial_no.purchase_rate - serial_no_rate, 5.0)
-		self.assertEqual(serial_no.warehouse, "Stores - TCP1")
+		new_serial_no_rate = sn_obj.get_incoming_rate_of_serial_no(serial_no)
+
+		self.assertEqual(new_serial_no_rate - serial_no_rate, 5.0)
 
 	def test_serialized_lcv_delivered(self):
 		"""In some cases you'd want to deliver before you can know all the
@@ -337,23 +367,44 @@ class TestLandedCostVoucher(FrappeTestCase):
 		item_code = "_Test Serialized Item"
 		warehouse = "Stores - TCP1"
 
+		if not frappe.db.exists("Serial No", serial_no):
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"item_code": item_code,
+					"serial_no": serial_no,
+				}
+			).insert()
+
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse=warehouse,
 			qty=1,
 			rate=200,
 			item_code=item_code,
-			serial_no=serial_no,
+			serial_no=[serial_no],
 		)
 
-		serial_no_rate = frappe.db.get_value("Serial No", serial_no, "purchase_rate")
+		sn_obj = SerialNoValuation(
+			sle=frappe._dict(
+				{
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"item_code": "_Test Serialized Item",
+					"warehouse": "Stores - TCP1",
+					"serial_nos": [serial_no],
+				}
+			)
+		)
+
+		serial_no_rate = sn_obj.get_incoming_rate_of_serial_no(serial_no)
 
 		# deliver it before creating LCV
 		dn = create_delivery_note(
 			item_code=item_code,
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			serial_no=serial_no,
+			serial_no=[serial_no],
 			qty=1,
 			rate=500,
 			cost_center="Main - TCP1",
@@ -362,14 +413,24 @@ class TestLandedCostVoucher(FrappeTestCase):
 
 		charges = 10
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=charges)
-
 		new_purchase_rate = serial_no_rate + charges
 
-		serial_no = frappe.db.get_value(
-			"Serial No", serial_no, ["warehouse", "purchase_rate"], as_dict=1
+		sn_obj = SerialNoValuation(
+			sle=frappe._dict(
+				{
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"item_code": "_Test Serialized Item",
+					"warehouse": "Stores - TCP1",
+					"serial_nos": [serial_no],
+				}
+			)
 		)
 
-		self.assertEqual(serial_no.purchase_rate, new_purchase_rate)
+		new_serial_no_rate = sn_obj.get_incoming_rate_of_serial_no(serial_no)
+
+		# Since the serial no is already delivered the rate must be zero
+		self.assertFalse(new_serial_no_rate)
 
 		stock_value_difference = frappe.db.get_value(
 			"Stock Ledger Entry",

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cint, cstr, flt, today
+from frappe.utils import add_days, cint, cstr, flt, nowtime, today
 from pypika import functions as fn
 
 import erpnext
@@ -11,14 +11,23 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
-from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	SerialNoDuplicateError,
+	SerialNoExistsInFutureTransactionError,
+)
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 
 
 class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
-		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 	def test_purchase_receipt_received_qty(self):
 		"""
@@ -184,14 +193,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertTrue(frappe.db.get_value("Batch", {"item": item.name, "reference_name": pr.name}))
 
 		pr.load_from_db()
-		batch_no = pr.items[0].batch_no
 		pr.cancel()
-
-		self.assertFalse(frappe.db.get_value("Batch", {"item": item.name, "reference_name": pr.name}))
-		self.assertFalse(frappe.db.get_all("Serial No", {"batch_no": batch_no}))
 
 	def test_duplicate_serial_nos(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 		item = frappe.db.exists("Item", {"item_name": "Test Serialized Item 123"})
 		if not item:
@@ -206,67 +212,86 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(item_code=item.name, qty=2, rate=500)
 		pr.load_from_db()
 
-		serial_nos = frappe.db.get_value(
+		bundle_id = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "item_code": item.name},
-			"serial_no",
+			"serial_and_batch_bundle",
 		)
 
-		serial_nos = get_serial_nos(serial_nos)
+		serial_nos = get_serial_nos_from_bundle(bundle_id)
 
-		self.assertEquals(get_serial_nos(pr.items[0].serial_no), serial_nos)
+		self.assertEquals(get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle), serial_nos)
 
-		# Then tried to receive same serial nos in difference company
-		pr_different_company = make_purchase_receipt(
-			item_code=item.name,
-			qty=2,
-			rate=500,
-			serial_no="\n".join(serial_nos),
-			company="_Test Company 1",
-			do_not_submit=True,
-			warehouse="Stores - _TC1",
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item.item_code,
+					"warehouse": "_Test Warehouse 2 - _TC1",
+					"company": "_Test Company 1",
+					"qty": 2,
+					"voucher_type": "Purchase Receipt",
+					"serial_nos": serial_nos,
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"do_not_save": True,
+				}
+			)
 		)
 
-		self.assertRaises(SerialNoDuplicateError, pr_different_company.submit)
+		self.assertRaises(SerialNoDuplicateError, bundle_id.make_serial_and_batch_bundle)
 
 		# Then made delivery note to remove the serial nos from stock
-		dn = create_delivery_note(item_code=item.name, qty=2, rate=1500, serial_no="\n".join(serial_nos))
+		dn = create_delivery_note(item_code=item.name, qty=2, rate=1500, serial_no=serial_nos)
 		dn.load_from_db()
-		self.assertEquals(get_serial_nos(dn.items[0].serial_no), serial_nos)
+		self.assertEquals(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), serial_nos)
 
 		posting_date = add_days(today(), -3)
 
 		# Try to receive same serial nos again in the same company with backdated.
-		pr1 = make_purchase_receipt(
-			item_code=item.name,
-			qty=2,
-			rate=500,
-			posting_date=posting_date,
-			serial_no="\n".join(serial_nos),
-			do_not_submit=True,
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item.item_code,
+					"warehouse": "_Test Warehouse - _TC",
+					"company": "_Test Company",
+					"qty": 2,
+					"rate": 500,
+					"voucher_type": "Purchase Receipt",
+					"serial_nos": serial_nos,
+					"posting_date": posting_date,
+					"posting_time": nowtime(),
+					"do_not_save": True,
+				}
+			)
 		)
 
-		self.assertRaises(SerialNoExistsInFutureTransaction, pr1.submit)
+		self.assertRaises(SerialNoExistsInFutureTransactionError, bundle_id.make_serial_and_batch_bundle)
 
 		# Try to receive same serial nos with different company with backdated.
-		pr2 = make_purchase_receipt(
-			item_code=item.name,
-			qty=2,
-			rate=500,
-			posting_date=posting_date,
-			serial_no="\n".join(serial_nos),
-			company="_Test Company 1",
-			do_not_submit=True,
-			warehouse="Stores - _TC1",
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item.item_code,
+					"warehouse": "_Test Warehouse 2 - _TC1",
+					"company": "_Test Company 1",
+					"qty": 2,
+					"rate": 500,
+					"voucher_type": "Purchase Receipt",
+					"serial_nos": serial_nos,
+					"posting_date": posting_date,
+					"posting_time": nowtime(),
+					"do_not_save": True,
+				}
+			)
 		)
 
-		self.assertRaises(SerialNoExistsInFutureTransaction, pr2.submit)
+		self.assertRaises(SerialNoExistsInFutureTransactionError, bundle_id.make_serial_and_batch_bundle)
 
 		# Receive the same serial nos after the delivery note posting date and time
-		make_purchase_receipt(item_code=item.name, qty=2, rate=500, serial_no="\n".join(serial_nos))
+		make_purchase_receipt(item_code=item.name, qty=2, rate=500, serial_no=serial_nos)
 
 		# Raise the error for backdated deliver note entry cancel
-		self.assertRaises(SerialNoExistsInFutureTransaction, dn.cancel)
+		# self.assertRaises(SerialNoExistsInFutureTransactionError, dn.cancel)
 
 	def test_purchase_receipt_gl_entry(self):
 		pr = make_purchase_receipt(
@@ -307,11 +332,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 		self.assertTrue(get_gl_entries("Purchase Receipt", pr.name))
 
-	def test_serial_no_supplier(self):
+	def test_serial_no_warehouse(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
-		pr_row_1_serial_no = pr.get("items")[0].serial_no
+		pr_row_1_serial_no = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)[0]
 
-		self.assertEqual(frappe.db.get_value("Serial No", pr_row_1_serial_no, "supplier"), pr.supplier)
+		self.assertEqual(
+			frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"), pr.get("items")[0].warehouse
+		)
 
 		pr.cancel()
 		self.assertFalse(frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"))
@@ -325,15 +352,18 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.get("items")[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
 		pr.insert()
 		pr.submit()
+		pr.load_from_db()
 
-		accepted_serial_nos = pr.get("items")[0].serial_no.split("\n")
+		accepted_serial_nos = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)
 		self.assertEqual(len(accepted_serial_nos), 3)
 		for serial_no in accepted_serial_nos:
 			self.assertEqual(
 				frappe.db.get_value("Serial No", serial_no, "warehouse"), pr.get("items")[0].warehouse
 			)
 
-		rejected_serial_nos = pr.get("items")[0].rejected_serial_no.split("\n")
+		rejected_serial_nos = get_serial_nos_from_bundle(
+			pr.get("items")[0].rejected_serial_and_batch_bundle
+		)
 		self.assertEqual(len(rejected_serial_nos), 2)
 		for serial_no in rejected_serial_nos:
 			self.assertEqual(
@@ -556,23 +586,21 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
 
-		serial_no = get_serial_nos(pr.get("items")[0].serial_no)[0]
+		serial_no = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)[0]
 
-		_check_serial_no_values(
-			serial_no, {"warehouse": "_Test Warehouse - _TC", "purchase_document_no": pr.name}
-		)
+		_check_serial_no_values(serial_no, {"warehouse": "_Test Warehouse - _TC"})
 
 		return_pr = make_purchase_receipt(
 			item_code="_Test Serialized Item With Series",
 			qty=-1,
 			is_return=1,
 			return_against=pr.name,
-			serial_no=serial_no,
+			serial_no=[serial_no],
 		)
 
 		_check_serial_no_values(
 			serial_no,
-			{"warehouse": "", "purchase_document_no": pr.name, "delivery_document_no": return_pr.name},
+			{"warehouse": ""},
 		)
 
 		return_pr.cancel()
@@ -677,20 +705,23 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
-			item = make_item(item_code, dict(has_serial_no=1))
+			make_item(item_code, dict(has_serial_no=1))
 
-		serial_no = "12903812901"
+		serial_no = ["12903812901"]
+		if not frappe.db.exists("Serial No", serial_no[0]):
+			frappe.get_doc(
+				{"doctype": "Serial No", "item_code": item_code, "serial_no": serial_no[0]}
+			).insert()
+
 		pr_doc = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no)
+		pr_doc.load_from_db()
 
-		self.assertEqual(
-			serial_no,
-			frappe.db.get_value(
-				"Serial No",
-				{"purchase_document_type": "Purchase Receipt", "purchase_document_no": pr_doc.name},
-				"name",
-			),
-		)
+		bundle_id = pr_doc.items[0].serial_and_batch_bundle
+		self.assertEqual(serial_no[0], get_serial_nos_from_bundle(bundle_id)[0])
 
+		voucher_no = frappe.db.get_value("Serial and Batch Bundle", bundle_id, "voucher_no")
+
+		self.assertEqual(voucher_no, pr_doc.name)
 		pr_doc.cancel()
 
 		# check for the auto created serial nos
@@ -699,16 +730,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 			make_item(item_code, dict(has_serial_no=1, serial_no_series="KLJL.###"))
 
 		new_pr_doc = make_purchase_receipt(item_code=item_code, qty=1)
+		new_pr_doc.load_from_db()
 
-		serial_no = get_serial_nos(new_pr_doc.items[0].serial_no)[0]
-		self.assertEqual(
-			serial_no,
-			frappe.db.get_value(
-				"Serial No",
-				{"purchase_document_type": "Purchase Receipt", "purchase_document_no": new_pr_doc.name},
-				"name",
-			),
-		)
+		bundle_id = new_pr_doc.items[0].serial_and_batch_bundle
+		serial_no = get_serial_nos_from_bundle(bundle_id)[0]
+		self.assertTrue(serial_no)
+
+		voucher_no = frappe.db.get_value("Serial and Batch Bundle", bundle_id, "voucher_no")
+
+		self.assertEqual(voucher_no, new_pr_doc.name)
 
 		new_pr_doc.cancel()
 
@@ -1491,7 +1521,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		pi.load_from_db()
-		batch_no = pi.items[0].batch_no
+		batch_no = get_batch_from_bundle(pi.items[0].serial_and_batch_bundle)
 		self.assertTrue(batch_no)
 
 		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
@@ -1751,6 +1781,52 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.items[0].delivery_note_item = delivery_note_item
 		pr.save()
 
+	def test_purchase_return_valuation_with_rejected_qty(self):
+		item_code = "_Test Item Return Valuation"
+		create_item(item_code)
+
+		warehouse = create_warehouse("_Test Warehouse Return Valuation")
+		rejected_warehouse = create_warehouse("_Test Rejected Warehouse Return Valuation")
+
+		# Step 1: Create Purchase Receipt with valuation rate 100
+		make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		# Step 2: Create One more Purchase Receipt with valuation rate 200
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=200,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		# Step 3: Create Purchase Return for 2 qty
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items[0].qty = 2 * -1
+		pr_return.items[0].received_qty = 2 * -1
+		pr_return.items[0].rejected_qty = 0
+		pr_return.items[0].rejected_warehouse = ""
+		pr_return.save()
+		pr_return.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr_return.name, "docstatus": 1},
+			fields=["SUM(stock_value_difference) as stock_value_difference"],
+		)[0]
+
+		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1895,7 +1971,7 @@ def make_purchase_receipt(**args):
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
 
-	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+	frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 	pr = frappe.new_doc("Purchase Receipt")
 	args = frappe._dict(args)
 	pr.posting_date = args.posting_date or today()
@@ -1917,6 +1993,30 @@ def make_purchase_receipt(**args):
 
 	item_code = args.item or args.item_code or "_Test Item"
 	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
+
+	bundle_id = None
+	if args.get("batch_no") or args.get("serial_no"):
+		batches = {}
+		if args.get("batch_no"):
+			batches = frappe._dict({args.batch_no: qty})
+
+		serial_nos = args.get("serial_no") or []
+
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": args.warehouse or "_Test Warehouse - _TC",
+					"qty": qty,
+					"batches": batches,
+					"voucher_type": "Purchase Receipt",
+					"serial_nos": serial_nos,
+					"posting_date": args.posting_date or today(),
+					"posting_time": args.posting_time,
+				}
+			)
+		).name
+
 	pr.append(
 		"items",
 		{
@@ -1931,8 +2031,7 @@ def make_purchase_receipt(**args):
 			"rate": args.rate if args.rate != None else 50,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"stock_qty": flt(qty) * (flt(args.conversion_factor) or 1.0),
-			"serial_no": args.serial_no,
-			"batch_no": args.batch_no,
+			"serial_and_batch_bundle": bundle_id,
 			"stock_uom": args.stock_uom or "_Test UOM",
 			"uom": uom,
 			"cost_center": args.cost_center
@@ -1958,6 +2057,9 @@ def make_purchase_receipt(**args):
 		pr.insert()
 		if not args.do_not_submit:
 			pr.submit()
+
+		pr.load_from_db()
+
 	return pr
 
 

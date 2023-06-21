@@ -6,6 +6,7 @@ frappe.provide("erpnext.assets");
 
 erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.stock.StockController {
 	setup() {
+		this.frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
 		this.setup_posting_date_time_check();
 	}
 
@@ -64,6 +65,18 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			};
 		});
 
+		me.frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
 		me.frm.set_query("item_code", "stock_items", function() {
 			return erpnext.queries.item({"is_stock_item": 1});
 		});
@@ -99,6 +112,17 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				}
 			};
 		});
+
+		let sbb_field = me.frm.get_docfield('stock_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': me.frm.doc.doctype,
+				}
+			};
+		}
 	}
 
 	target_item_code() {

@@ -33,7 +33,11 @@
   "unallocated_amount",
   "party_section",
   "party_type",
-  "party"
+  "party",
+  "column_break_3czf",
+  "bank_party_name",
+  "bank_party_account_number",
+  "bank_party_iban"
  ],
  "fields": [
   {
@@ -63,7 +67,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nPending\nSettled\nUnreconciled\nReconciled"
+   "options": "\nPending\nSettled\nUnreconciled\nReconciled\nCancelled"
   },
   {
    "fieldname": "bank_account",
@@ -202,11 +206,30 @@
    "fieldtype": "Data",
    "label": "Transaction Type",
    "length": 50
+  },
+  {
+   "fieldname": "column_break_3czf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_party_name",
+   "fieldtype": "Data",
+   "label": "Party Name/Account Holder (Bank Statement)"
+  },
+  {
+   "fieldname": "bank_party_iban",
+   "fieldtype": "Data",
+   "label": "Party IBAN (Bank Statement)"
+  },
+  {
+   "fieldname": "bank_party_account_number",
+   "fieldtype": "Data",
+   "label": "Party Account No. (Bank Statement)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-29 18:36:50.475964",
+ "modified": "2023-06-06 13:58:12.821411",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
