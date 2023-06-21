@@ -493,6 +493,7 @@ class AssetCapitalization(StockController):
 	def create_target_asset(self):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
 		asset_doc = frappe.new_doc("Asset")
+		asset_doc.company = self.company
 		asset_doc.item_code = self.target_item_code
 		asset_doc.is_existing_asset = 1
 		asset_doc.location = self.target_asset_location
@@ -511,7 +512,7 @@ class AssetCapitalization(StockController):
 
 		frappe.msgprint(
 			_(
-				"Asset {0} has been created. Please set the relevant depreciation details if any and submit it."
+				"Asset {0} has been created. Please set the depreciation details if any and submit it."
 			).format(get_link_to_form("Asset", asset_doc.name))
 		)
 

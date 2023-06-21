@@ -14,7 +14,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	refresh() {
-		erpnext.hide_company();
 		this.show_general_ledger();
 		if ((this.frm.doc.stock_items && this.frm.doc.stock_items.length) || !this.frm.doc.target_is_fixed_asset) {
 			this.show_stock_ledger();
