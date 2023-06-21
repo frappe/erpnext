@@ -105,10 +105,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		return this.get_target_item_details();
 	}
 
-	target_asset() {
-		return this.get_target_asset_details();
-	}
-
 	item_code(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		if (cdt === "Asset Capitalization Stock Item") {
@@ -212,26 +208,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				child: me.frm.doc,
 				args: {
 					item_code: me.frm.doc.target_item_code,
-					company: me.frm.doc.company,
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						me.frm.refresh_fields();
-					}
-				}
-			});
-		}
-	}
-
-	get_target_asset_details() {
-		var me = this;
-
-		if (me.frm.doc.target_asset) {
-			return me.frm.call({
-				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_asset_details",
-				child: me.frm.doc,
-				args: {
-					asset: me.frm.doc.target_asset,
 					company: me.frm.doc.company,
 				},
 				callback: function (r) {
