@@ -17,10 +17,14 @@ class StockReservationEntry(Document):
 		self.validate_for_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
+		self.validate_reserved_qty()
 
 	def on_submit(self) -> None:
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
+
+	def on_update_after_submit(self) -> None:
+		self.validate_reserved_qty()
 
 	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
@@ -63,6 +67,46 @@ class StockReservationEntry(Document):
 				_("Stock cannot be reserved in group warehouse {0}.").format(frappe.bold(self.warehouse)),
 				title=_("Invalid Warehouse"),
 			)
+
+	def validate_reserved_qty(self) -> None:
+		"""Validates `Reserved Qty`"""
+
+		self.db_set(
+			"available_qty",
+			get_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),
+		)
+		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
+			self.voucher_type, self.voucher_no, self.voucher_detail_no, ignore_sre=self.name
+		)
+		max_qty_can_be_reserved = min(self.available_qty, (self.voucher_qty - total_reserved_qty))
+
+		qty_to_be_reserved = 0
+		if self.reservation_based_on == "Qty":
+			if self.sb_entries:
+				self.sb_entries = []
+
+			qty_to_be_reserved = self.reserved_qty
+		elif self.reservation_based_on == "Serial and Batch":
+			for entry in self.sb_entries:
+				if self.has_serial_no and entry.qty != 1:
+					frappe.throw(_(f"Row #{entry.idx}: Qty should be 1 for Serialized Item."))
+
+				qty_to_be_reserved += entry.qty
+
+			if not qty_to_be_reserved:
+				frappe.throw(
+					_("Please select Serial/Batch No to reserve or change Reservation Based On to Qty.")
+				)
+
+		if qty_to_be_reserved > max_qty_can_be_reserved:
+			frappe.throw(
+				_(f"Cannot reserve more than {frappe.bold(max_qty_can_be_reserved)} {self.stock_uom}.")
+			)
+		if qty_to_be_reserved <= self.delivered_qty:
+			frappe.throw(_("Reserved Qty should be greater than Delivered Qty."))
+
+		if self.reservation_based_on == "Serial and Batch":
+			self.db_set("reserved_qty", qty_to_be_reserved)
 
 	def update_status(self, status: str = None, update_modified: bool = True) -> None:
 		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
@@ -132,7 +176,7 @@ def validate_stock_reservation_settings(voucher: object) -> None:
 		)
 
 
-def get_available_qty_to_reserve(item_code: str, warehouse: str) -> float:
+def get_available_qty_to_reserve(item_code: str, warehouse: str, ignore_sre=None) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item and Warehouse combination."""
 
 	from erpnext.stock.utils import get_stock_balance
@@ -141,16 +185,22 @@ def get_available_qty_to_reserve(item_code: str, warehouse: str) -> float:
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		reserved_qty = (
+		query = (
 			frappe.qb.from_(sre)
 			.select(Sum(sre.reserved_qty - sre.delivered_qty))
 			.where(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
 				& (sre.warehouse == warehouse)
+				& (sre.reserved_qty >= sre.delivered_qty)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
 			)
-		).run()[0][0] or 0.0
+		)
+
+		if ignore_sre:
+			query = query.where(sre.name != ignore_sre)
+
+		reserved_qty = query.run()[0][0] or 0.0
 
 		if reserved_qty:
 			return available_qty - reserved_qty
@@ -296,12 +346,12 @@ def get_sre_reserved_qty_details_for_voucher_detail_no(
 
 
 def get_sre_reserved_qty_for_voucher_detail_no(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str
+	voucher_type: str, voucher_no: str, voucher_detail_no: str, ignore_sre=None
 ) -> float:
 	"""Returns `Reserved Qty` against the Voucher."""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	data = (
+	query = (
 		frappe.qb.from_(sre)
 		.select(
 			(Sum(sre.reserved_qty) - Sum(sre.delivered_qty)),
@@ -313,9 +363,14 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 			& (sre.voucher_detail_no == voucher_detail_no)
 			& (sre.status.notin(["Delivered", "Cancelled"]))
 		)
-	).run(as_list=True)
+	)
 
-	return flt(data[0][0])
+	if ignore_sre:
+		query = query.where(sre.name != ignore_sre)
+
+	reserved_qty = query.run(as_list=True)
+
+	return flt(reserved_qty[0][0])
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
