@@ -152,7 +152,7 @@
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
-   "read_only_depends_on": "eval: doc.reservation_based_on == \"Serial and Batch\"",
+   "read_only_depends_on": "eval: (doc.reservation_based_on == \"Serial and Batch\" || doc.status == \"Delivered\")",
    "width": "150px"
   },
   {
@@ -245,7 +245,8 @@
    "depends_on": "eval: (doc.has_serial_no || doc.has_batch_no) && doc.reservation_based_on == \"Serial and Batch\"",
    "fieldname": "sb_entries",
    "fieldtype": "Table",
-   "options": "Serial and Batch Entry"
+   "options": "Serial and Batch Entry",
+   "read_only_depends_on": "eval: doc.status == \"Delivered\""
   },
   {
    "fieldname": "serial_and_batch_reservation_section",
@@ -260,7 +261,8 @@
    "fieldtype": "Select",
    "label": "Reservation Based On",
    "no_copy": 1,
-   "options": "Qty\nSerial and Batch"
+   "options": "Qty\nSerial and Batch",
+   "read_only_depends_on": "eval: doc.status == \"Delivered\""
   }
  ],
  "hide_toolbar": 1,
@@ -268,7 +270,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-21 15:14:00.890554",
+ "modified": "2023-06-21 16:12:56.884254",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
