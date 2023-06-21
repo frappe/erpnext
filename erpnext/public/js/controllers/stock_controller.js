@@ -94,13 +94,42 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 						"docname": me.frm.doc.name
 					},
 					"callback": function(response) {
-						me.get_datatable(response.message.gl_columns, response.message.gl_data, me.frm.get_field("accounting_ledger_preview_html").wrapper);
-						me.get_datatable(response.message.sl_columns, response.message.sl_data, me.frm.get_field("stock_ledger_preview_html").wrapper);
-						me.frm.scroll_to_field("accounting_ledger_preview_html");
+						me.make_dialog(response.message);
 					}
 				})
 			}, __("View"));
 		}
+	}
+
+	make_dialog(data) {
+		let me = this;
+		let gl_columns = data.gl_columns;
+		let gl_data = data.gl_data;
+		let sl_columns = data.sl_columns;
+		let sl_data = data.sl_data;
+
+		let dialog = new frappe.ui.Dialog({
+			"size": "extra-large",
+			"title": __("Ledger Preview"),
+			"fields": [
+				{
+					"fieldtype": "HTML",
+					"fieldname": "accounting_ledger_preview_html",
+					"label": __("Accounting Ledger"),
+				},
+				{
+					"fieldtype": "HTML",
+					"fieldname": "stock_ledger_preview_html",
+					"label": __("Stock Ledger"),
+				}
+			]
+		});
+
+		setTimeout(function() {
+			me.get_datatable(gl_columns, gl_data, dialog.get_field("accounting_ledger_preview_html").wrapper);
+		}, 200);
+
+		dialog.show();
 	}
 
 	get_datatable(columns, data, wrapper) {

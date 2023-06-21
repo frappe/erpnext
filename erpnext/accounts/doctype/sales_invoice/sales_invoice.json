@@ -211,12 +211,7 @@
   "is_discounted",
   "remarks",
   "repost_required",
-  "connections_tab",
-  "ledger_preview",
-  "accounting_ledger_section",
-  "accounting_ledger_preview_html",
-  "stock_ledger_section",
-  "stock_ledger_preview_html"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -2147,29 +2142,6 @@
    "fieldname": "use_company_roundoff_cost_center",
    "fieldtype": "Check",
    "label": "Use Company default Cost Center for Round off"
-  },
-  {
-   "fieldname": "ledger_preview",
-   "fieldtype": "Tab Break",
-   "label": "Ledger Preview"
-  },
-  {
-   "fieldname": "accounting_ledger_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Ledger"
-  },
-  {
-   "fieldname": "accounting_ledger_preview_html",
-   "fieldtype": "HTML"
-  },
-  {
-   "fieldname": "stock_ledger_section",
-   "fieldtype": "Section Break",
-   "label": "Stock Ledger"
-  },
-  {
-   "fieldname": "stock_ledger_preview_html",
-   "fieldtype": "HTML"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2182,7 +2154,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-06-11 11:18:14.024258",
+ "modified": "2023-06-21 16:02:18.988799",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
