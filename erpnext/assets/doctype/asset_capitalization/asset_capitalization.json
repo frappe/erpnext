@@ -86,13 +86,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.target_asset",
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Asset",
    "no_copy": 1,
-   "options": "Asset"
+   "options": "Asset",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.entry_type=='Capitalization'",
@@ -342,7 +342,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-21 20:28:24.575271",
+ "modified": "2023-06-21 23:00:01.040851",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",

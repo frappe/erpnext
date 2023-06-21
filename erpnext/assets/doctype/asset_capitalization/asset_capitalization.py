@@ -86,10 +86,6 @@ class AssetCapitalization(StockController):
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
-		# Remove asset if item not a fixed asset
-		if not self.target_is_fixed_asset:
-			self.target_asset = None
-
 		for d in self.stock_items:
 			args = self.as_dict()
 			args.update(d.as_dict())
@@ -141,9 +137,6 @@ class AssetCapitalization(StockController):
 
 		if not target_item.is_stock_item:
 			self.target_warehouse = None
-		if not target_item.is_fixed_asset:
-			self.target_asset = None
-			self.target_fixed_asset_account = None
 		if not target_item.has_batch_no:
 			self.target_batch_no = None
 		if not target_item.has_serial_no:
@@ -521,6 +514,8 @@ class AssetCapitalization(StockController):
 		asset_doc.purchase_receipt_amount = total_target_asset_value
 		asset_doc.flags.ignore_validate = True
 		asset_doc.insert()
+
+		self.target_asset = asset_doc.name
 
 		self.target_fixed_asset_account = get_asset_category_account(
 			"fixed_asset_account", item=self.target_item_code, company=asset_doc.company

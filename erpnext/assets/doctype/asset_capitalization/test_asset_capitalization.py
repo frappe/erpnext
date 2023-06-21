@@ -343,6 +343,7 @@ def create_asset_capitalization(**args):
 			"posting_time": args.posting_time or now.strftime("%H:%M:%S.%f"),
 			"target_item_code": target_item_code,
 			"target_asset": target_asset.name,
+			"target_asset_location": "Test Location",
 			"target_warehouse": target_warehouse,
 			"target_qty": flt(args.target_qty) or 1,
 			"target_batch_no": args.target_batch_no,
