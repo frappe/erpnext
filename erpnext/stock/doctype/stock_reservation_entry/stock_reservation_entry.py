@@ -25,6 +25,9 @@ class StockReservationEntry(Document):
 
 	def on_update_after_submit(self) -> None:
 		self.validate_reserved_qty()
+		self.update_reserved_qty_in_voucher()
+		self.update_status()
+		self.reload()
 
 	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
