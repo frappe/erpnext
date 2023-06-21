@@ -138,7 +138,7 @@ def make_depreciation_entry(asset_name, date=None):
 			je.save()
 
 			d.db_set("journal_entry", je.name)
-			
+
 			if not je.meta.get_workflow():
 				je.submit()
 				idx = cint(d.finance_book_id)
