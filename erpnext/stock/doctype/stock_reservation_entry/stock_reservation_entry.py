@@ -24,6 +24,7 @@ class StockReservationEntry(Document):
 		self.update_status()
 
 	def on_update_after_submit(self) -> None:
+		self.can_be_updated()
 		self.validate_reserved_qty()
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
@@ -111,26 +112,6 @@ class StockReservationEntry(Document):
 		if self.reservation_based_on == "Serial and Batch":
 			self.db_set("reserved_qty", qty_to_be_reserved)
 
-	def update_status(self, status: str = None, update_modified: bool = True) -> None:
-		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
-
-		if not status:
-			if self.docstatus == 2:
-				status = "Cancelled"
-			elif self.docstatus == 1:
-				if self.reserved_qty == self.delivered_qty:
-					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
-					status = "Partially Delivered"
-				elif self.reserved_qty == self.voucher_qty:
-					status = "Reserved"
-				else:
-					status = "Partially Reserved"
-			else:
-				status = "Draft"
-
-		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
-
 	def update_reserved_qty_in_voucher(
 		self, reserved_qty_field: str = "stock_reserved_qty", update_modified: bool = True
 	) -> None:
@@ -158,6 +139,32 @@ class StockReservationEntry(Document):
 				reserved_qty,
 				update_modified=update_modified,
 			)
+
+	def update_status(self, status: str = None, update_modified: bool = True) -> None:
+		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if self.reserved_qty == self.delivered_qty:
+					status = "Delivered"
+				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+					status = "Partially Delivered"
+				elif self.reserved_qty == self.voucher_qty:
+					status = "Reserved"
+				else:
+					status = "Partially Reserved"
+			else:
+				status = "Draft"
+
+		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
+
+	def can_be_updated(self) -> None:
+		"""Raises an exception if `Stock Reservation Entry` is not allowed to be updated."""
+
+		if self.status == "Delivered":
+			frappe.throw(_(f"Delivered {self.doctype} cannot be updated, create a new one instead."))
 
 
 def validate_stock_reservation_settings(voucher: object) -> None:
