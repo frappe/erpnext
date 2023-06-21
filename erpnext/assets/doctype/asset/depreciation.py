@@ -162,19 +162,12 @@ def make_depreciation_entry(asset_depr_schedule_name, date=None):
 
 			d.db_set("journal_entry", je.name)
 
-<<<<<<< HEAD
-			idx = cint(asset_depr_schedule_doc.finance_book_id)
-			row = asset.get("finance_books")[idx - 1]
-			row.value_after_depreciation -= d.depreciation_amount
-			row.db_update()
-=======
 			if not je.meta.get_workflow():
 				je.submit()
-				idx = cint(d.finance_book_id)
-				finance_books = asset.get("finance_books")[idx - 1]
-				finance_books.value_after_depreciation -= d.depreciation_amount
-				finance_books.db_update()
->>>>>>> 000ebe4479 (Fixes issue of asset value_after_depreciation field getting updated twice if workflow is enabled in Journal Entry (#35821))
+				idx = cint(asset_depr_schedule_doc.finance_book_id)
+				row = asset.get("finance_books")[idx - 1]
+				row.value_after_depreciation -= d.depreciation_amount
+				row.db_update()
 
 	asset.db_set("depr_entry_posting_status", "Successful")
 
