@@ -87,7 +87,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				"project": d.project,
 				"company": d.company,
 				"purchase_order": d.purchase_order,
-				"purchase_receipt": d.purchase_receipt,
+				"purchase_receipt": purchase_receipt,
 				"expense_account": expense_account,
 				"stock_qty": d.stock_qty,
 				"stock_uom": d.stock_uom,
@@ -241,7 +241,7 @@ def get_columns(additional_table_columns, filters):
 		},
 		{
 			"label": _("Purchase Receipt"),
-			"fieldname": "Purchase Receipt",
+			"fieldname": "purchase_receipt",
 			"fieldtype": "Link",
 			"options": "Purchase Receipt",
 			"width": 100,
