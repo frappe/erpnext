@@ -343,6 +343,9 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
+	if not asset.calculate_depreciation:
+		return
+
 	row = -1
 	finance_book = asset.get("schedules")[0].get("finance_book")
 	for schedule in asset.get("schedules"):
