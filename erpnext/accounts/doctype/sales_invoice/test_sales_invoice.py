@@ -3252,9 +3252,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		expected_gle = [
+			["_Test Exchange Gain/Loss - _TC", 500.0, 0.0, nowdate()],
 			["_Test Receivable USD - _TC", 7500.0, 0.0, nowdate()],
 			["_Test Receivable USD - _TC", 0.0, 500.0, nowdate()],
-			["Exchange Gain/Loss - _TC", 500.0, 0.0, nowdate()],
 			["Sales - _TC", 0.0, 7500.0, nowdate()],
 		]
 
