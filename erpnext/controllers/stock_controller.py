@@ -846,20 +846,31 @@ class StockController(AccountsController):
 
 
 @frappe.whitelist()
-def show_ledger_preview(company, doctype, docname):
-	frappe.db.savepoint("show_ledger_preview")
+def show_accounting_ledger_preview(company, doctype, docname):
+	frappe.db.savepoint("show_accounting_ledger_preview")
+
+	filters = {"company": company, "include_dimensions": 1}
+	doc = frappe.get_doc(doctype, docname)
+
+	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
+
+	frappe.db.rollback(save_point="show_accounting_ledger_preview")
+
+	return {"gl_columns": gl_columns, "gl_data": gl_data}
+
+
+@frappe.whitelist()
+def show_stock_ledger_preview(company, doctype, docname):
+	frappe.db.savepoint("show_stock_ledger_preview")
 
 	filters = {"company": company}
 	doc = frappe.get_doc(doctype, docname)
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
-	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
 
-	frappe.db.rollback(save_point="show_ledger_preview")
+	frappe.db.rollback(save_point="show_stock_ledger_preview")
 
 	return {
-		"gl_columns": gl_columns,
-		"gl_data": gl_data,
 		"sl_columns": sl_columns,
 		"sl_data": sl_data,
 	}
@@ -877,11 +888,16 @@ def get_accounting_ledger_preview(doc, filters):
 		"against",
 		"party",
 		"party_type",
+		"cost_center",
 		"against_voucher_type",
 		"against_voucher",
 	]
 
 	doc.docstatus = 1
+
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+		doc.update_stock_ledger()
+
 	doc.make_gl_entries()
 	columns = get_gl_columns(filters)
 	gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
@@ -915,12 +931,12 @@ def get_stock_ledger_preview(doc, filters):
 		"qty_after_transaction",
 		"warehouse",
 		"incoming_rate",
-		"valuation_rate",
+		"in_out_rate",
 		"stock_value",
 		"stock_value_difference",
 	]
 
-	if doc.update_stock or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
 		doc.docstatus = 1
 		doc.update_stock_ledger()
 		columns = get_sl_columns(filters)
@@ -944,6 +960,8 @@ def get_sl_entries_for_preview(doctype, docname, fields):
 		else:
 			entry["out_qty"] = abs(entry.actual_qty)
 			entry["in_qty"] = 0
+
+		entry["in_out_rate"] = entry["valuation_rate"]
 
 	return sl_entries
 

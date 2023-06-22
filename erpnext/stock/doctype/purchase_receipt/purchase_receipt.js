@@ -121,6 +121,10 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	refresh() {
 		var me = this;
 		super.refresh();
+
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
+		erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
+
 		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			//removed for temporary
