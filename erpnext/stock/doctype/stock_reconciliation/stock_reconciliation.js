@@ -30,6 +30,29 @@ frappe.ui.form.on("Stock Reconciliation", {
 			};
 		});
 
+		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
+
 		if (frm.doc.company) {
 			erpnext.queries.setup_queries(frm, "Warehouse", function() {
 				return erpnext.queries.warehouse(frm.doc);
@@ -273,6 +296,10 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 			frappe.model.set_value(cdt, cdn, "warehouse", frm.doc.set_warehouse);
 		}
 	},
+
+	add_serial_batch_bundle(frm, cdt, cdn) {
+		erpnext.utils.pick_serial_and_batch_bundle(frm, cdt, cdn, "Inward");
+	}
 
 });
 

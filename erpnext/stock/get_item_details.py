@@ -191,7 +191,6 @@ def process_string_args(args):
 	return args
 
 
-@frappe.whitelist()
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
 		item_code = frappe.db.get_value("Item Barcode", {"barcode": barcode}, fieldname=["parent"])

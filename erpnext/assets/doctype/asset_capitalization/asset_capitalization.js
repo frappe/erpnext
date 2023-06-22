@@ -15,7 +15,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	refresh() {
-		erpnext.hide_company();
 		this.show_general_ledger();
 		if ((this.frm.doc.stock_items && this.frm.doc.stock_items.length) || !this.frm.doc.target_is_fixed_asset) {
 			this.show_stock_ledger();
@@ -65,6 +64,18 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			};
 		});
 
+		me.frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
 		me.frm.set_query("item_code", "stock_items", function() {
 			return erpnext.queries.item({"is_stock_item": 1});
 		});
@@ -100,14 +111,21 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				}
 			};
 		});
+
+		let sbb_field = me.frm.get_docfield('stock_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': me.frm.doc.doctype,
+				}
+			};
+		}
 	}
 
 	target_item_code() {
 		return this.get_target_item_details();
-	}
-
-	target_asset() {
-		return this.get_target_asset_details();
 	}
 
 	item_code(doc, cdt, cdn) {
@@ -213,26 +231,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				child: me.frm.doc,
 				args: {
 					item_code: me.frm.doc.target_item_code,
-					company: me.frm.doc.company,
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						me.frm.refresh_fields();
-					}
-				}
-			});
-		}
-	}
-
-	get_target_asset_details() {
-		var me = this;
-
-		if (me.frm.doc.target_asset) {
-			return me.frm.call({
-				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_asset_details",
-				child: me.frm.doc,
-				args: {
-					asset: me.frm.doc.target_asset,
 					company: me.frm.doc.company,
 				},
 				callback: function (r) {

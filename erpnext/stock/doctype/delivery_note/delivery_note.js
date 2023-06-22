@@ -200,6 +200,9 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 			}
 		}
 
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
+		erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
+
 		if (doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {

@@ -5,6 +5,7 @@
 from typing import Literal
 
 import frappe
+from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now, today
@@ -468,6 +469,119 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(ste.job_card, job_card_name)
 		self.assertEqual(ste.from_bom, 1.0)
 		self.assertEqual(ste.bom_no, work_order.bom_no)
+
+	def test_job_card_proccess_qty_and_completed_qty(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import (
+			create_routing,
+			setup_bom,
+			setup_operations,
+		)
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		operations = [
+			{"operation": "Test Operation A1", "workstation": "Test Workstation A", "time_in_mins": 30},
+			{"operation": "Test Operation B1", "workstation": "Test Workstation A", "time_in_mins": 20},
+		]
+
+		make_test_records("UOM")
+
+		warehouse = create_warehouse("Test Warehouse 123 for Job Card")
+
+		setup_operations(operations)
+
+		item_code = "Test Job Card Process Qty Item"
+		for item in [item_code, item_code + "RM 1", item_code + "RM 2"]:
+			if not frappe.db.exists("Item", item):
+				make_item(
+					item,
+					{
+						"item_name": item,
+						"stock_uom": "Nos",
+						"is_stock_item": 1,
+					},
+				)
+
+		routing_doc = create_routing(routing_name="Testing Route", operations=operations)
+		bom_doc = setup_bom(
+			item_code=item_code,
+			routing=routing_doc.name,
+			raw_materials=[item_code + "RM 1", item_code + "RM 2"],
+			source_warehouse=warehouse,
+		)
+
+		for row in bom_doc.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target=row.source_warehouse,
+				qty=10,
+				basic_rate=100,
+			)
+
+		wo_doc = make_wo_order_test_record(
+			production_item=item_code,
+			bom_no=bom_doc.name,
+			skip_transfer=1,
+			wip_warehouse=warehouse,
+			source_warehouse=warehouse,
+		)
+
+		for row in routing_doc.operations:
+			self.assertEqual(row.sequence_id, row.idx)
+
+		first_job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 1},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc = frappe.get_doc("Job Card", first_job_card)
+		jc.time_logs[0].completed_qty = 8
+		jc.save()
+		jc.submit()
+
+		self.assertEqual(jc.process_loss_qty, 2)
+		self.assertEqual(jc.for_quantity, 10)
+
+		second_job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 2},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc2 = frappe.get_doc("Job Card", second_job_card)
+		jc2.time_logs[0].completed_qty = 10
+
+		self.assertRaises(frappe.ValidationError, jc2.save)
+
+		jc2.load_from_db()
+		jc2.time_logs[0].completed_qty = 8
+		jc2.save()
+		jc2.submit()
+
+		self.assertEqual(jc2.for_quantity, 10)
+		self.assertEqual(jc2.process_loss_qty, 2)
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 10))
+		s.submit()
+
+		self.assertEqual(s.process_loss_qty, 2)
+
+		wo_doc.reload()
+		for row in wo_doc.operations:
+			self.assertEqual(row.completed_qty, 8)
+			self.assertEqual(row.process_loss_qty, 2)
+
+		self.assertEqual(wo_doc.produced_qty, 8)
+		self.assertEqual(wo_doc.process_loss_qty, 2)
+		self.assertEqual(wo_doc.status, "Completed")
 
 
 def create_bom_with_multiple_operations():

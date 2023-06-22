@@ -944,7 +944,7 @@ class update_entries_after(object):
 
 			for item in sr.items:
 				# Skip for Serial and Batch Items
-				if item.serial_no or item.batch_no:
+				if item.name != sle.voucher_detail_no or item.serial_no or item.batch_no:
 					continue
 
 				previous_sle = get_previous_sle(
@@ -962,6 +962,7 @@ class update_entries_after(object):
 				item.current_amount = flt(item.current_qty) * flt(item.current_valuation_rate)
 
 				item.amount = flt(item.qty) * flt(item.valuation_rate)
+				item.quantity_difference = item.qty - item.current_qty
 				item.amount_difference = item.amount - item.current_amount
 			else:
 				sr.difference_amount = sum([item.amount_difference for item in sr.items])

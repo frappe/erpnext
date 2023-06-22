@@ -127,12 +127,24 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 	},
 
 	toggle_fields(frm) {
+		if (frm.doc.has_serial_no) {
+			frm.doc.entries.forEach(row => {
+				if (Math.abs(row.qty) !== 1) {
+					frappe.model.set_value(row.doctype, row.name, "qty", 1);
+				}
+			})
+		}
+
 		frm.fields_dict.entries.grid.update_docfield_property(
 			'serial_no', 'read_only', !frm.doc.has_serial_no
 		);
 
 		frm.fields_dict.entries.grid.update_docfield_property(
 			'batch_no', 'read_only', !frm.doc.has_batch_no
+		);
+
+		frm.fields_dict.entries.grid.update_docfield_property(
+			'qty', 'read_only', frm.doc.has_serial_no
 		);
 	},
 
@@ -149,6 +161,23 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 					'istable': 0,
 					'issingle': 0,
 					'is_submittable': 1,
+					'name': ['in', [
+						"Asset Capitalization",
+						"Asset Repair",
+						"Delivery Note",
+						"Installation Note",
+						"Job Card",
+						"Maintenance Schedule",
+						"POS Invoice",
+						"Pick List",
+						"Purchase Invoice",
+						"Purchase Receipt",
+						"Quotation",
+						"Sales Invoice",
+						"Stock Entry",
+						"Stock Reconciliation",
+						"Subcontracting Receipt",
+					]],
 				}
 			};
 		});
@@ -182,6 +211,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			return {
 				filters: {
 					item: frm.doc.item_code,
+					disabled: 0,
 				}
 			};
 		});
@@ -198,9 +228,9 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 
 
 frappe.ui.form.on("Serial and Batch Entry", {
-	ledgers_add(frm, cdt, cdn) {
+	entries_add(frm, cdt, cdn) {
 		if (frm.doc.warehouse) {
-			locals[cdt][cdn].warehouse = frm.doc.warehouse;
+			frappe.model.set_value(cdt, cdn, 'warehouse', frm.doc.warehouse);
 		}
 	},
 })

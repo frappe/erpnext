@@ -326,6 +326,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1239,7 +1240,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-07 20:18:25.458185",
+ "modified": "2023-06-03 16:23:20.781368",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

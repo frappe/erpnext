@@ -162,6 +162,7 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		product_info = get_item_variant_price_dict(exact_match[0], cart_settings)
 
 		if product_info:
+			product_info["is_stock_item"] = frappe.get_cached_value("Item", exact_match[0], "is_stock_item")
 			product_info["allow_items_not_in_stock"] = cint(cart_settings.allow_items_not_in_stock)
 	else:
 		product_info = None
