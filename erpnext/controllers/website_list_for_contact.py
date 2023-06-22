@@ -230,29 +230,27 @@ def get_customers_suppliers(doctype, user):
 
 	has_customer_field = meta.has_field(customer_field_name)
 	has_supplier_field = meta.has_field("supplier")
-
-	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
-		contacts = frappe.db.sql(
-			"""
-			select
-				`tabContact`.email_id,
-				`tabDynamic Link`.link_doctype,
-				`tabDynamic Link`.link_name
-			from
-				`tabContact`, `tabDynamic Link`
-			where
-				`tabContact`.name=`tabDynamic Link`.parent and `tabContact`.email_id =%s
-			""",
-			user,
-			as_dict=1,
-		)
-		customers = [c.link_name for c in contacts if c.link_doctype == "Customer"]
-		suppliers = [c.link_name for c in contacts if c.link_doctype == "Supplier"]
+	if has_common(["Supplier"], frappe.get_roles(user)):
+		suppliers = get_parents_for_user()
+	if has_common(["Customer"], frappe.get_roles(user)):
+		customers = get_parents_for_user()
 	elif frappe.has_permission(doctype, "read", user=user):
 		customer_list = frappe.get_list("Customer")
 		customers = suppliers = [customer.name for customer in customer_list]
 
 	return customers if has_customer_field else None, suppliers if has_supplier_field else None
+
+
+def get_parents_for_user():
+	portal_users = frappe.qb.DocType("Portal Users")
+	q = (
+		frappe.qb.from_(portal_users)
+		.select(portal_users.parent)
+		.where(portal_users.user == frappe.session.user)
+	)
+	res = q.run(as_dict=True)
+	res = [i["parent"] for i in res]
+	return res
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
