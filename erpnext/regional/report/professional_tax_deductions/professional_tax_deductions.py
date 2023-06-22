@@ -21,16 +21,14 @@ def get_columns(filters):
 	columns = [
 		{
 			"label": _("Employee"),
-			"options": "Employee",
 			"fieldname": "employee",
 			"fieldtype": "Link",
+			"options": "Employee",
 			"width": 200,
 		},
 		{
 			"label": _("Employee Name"),
-			"options": "Employee",
 			"fieldname": "employee_name",
-			"fieldtype": "Link",
 			"width": 160,
 		},
 		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 140},
