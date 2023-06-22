@@ -8,10 +8,6 @@ import frappe
 # import erpnext
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form
-<<<<<<< HEAD
-=======
-from six import string_types
->>>>>>> fb823b53d1 (fix: asset capitalization (#35832))
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
@@ -23,9 +19,6 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reverse_depreciation_entry_made_after_disposal,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	make_new_active_asset_depr_schedules_and_cancel_current_ones,
-)
 from erpnext.controllers.stock_controller import StockController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -420,17 +413,13 @@ class AssetCapitalization(StockController):
 			asset = frappe.get_doc("Asset", item.asset)
 
 			if asset.calculate_depreciation:
-<<<<<<< HEAD
+				self.are_all_asset_items_non_depreciable = False
 				notes = _(
 					"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
 				).format(
 					get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.get("name"))
 				)
 				depreciate_asset(asset, self.posting_date, notes)
-=======
-				self.are_all_asset_items_non_depreciable = False
-				depreciate_asset(asset, self.posting_date)
->>>>>>> fb823b53d1 (fix: asset capitalization (#35832))
 				asset.reload()
 
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -512,35 +501,6 @@ class AssetCapitalization(StockController):
 
 	def create_target_asset(self):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
-<<<<<<< HEAD
-		if self.docstatus == 1 and self.entry_type == "Capitalization":
-			asset_doc = frappe.get_doc("Asset", self.target_asset)
-			asset_doc.purchase_date = self.posting_date
-			asset_doc.gross_purchase_amount = total_target_asset_value
-			asset_doc.purchase_receipt_amount = total_target_asset_value
-			notes = _(
-				"This schedule was created when target Asset {0} was updated through Asset Capitalization {1}."
-			).format(
-				get_link_to_form(asset_doc.doctype, asset_doc.name), get_link_to_form(self.doctype, self.name)
-			)
-			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset_doc, notes)
-			asset_doc.flags.ignore_validate_update_after_submit = True
-			asset_doc.save()
-		elif self.docstatus == 2:
-			for item in self.asset_items:
-				asset = self.get_asset(item)
-				asset.db_set("disposal_date", None)
-				self.set_consumed_asset_status(asset)
-
-				if asset.calculate_depreciation:
-					reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
-					notes = _(
-						"This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
-					).format(
-						get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
-					)
-					reset_depreciation_schedule(asset, self.posting_date, notes)
-=======
 		asset_doc = frappe.new_doc("Asset")
 		asset_doc.company = self.company
 		asset_doc.item_code = self.target_item_code
@@ -554,7 +514,6 @@ class AssetCapitalization(StockController):
 		asset_doc.insert()
 
 		self.target_asset = asset_doc.name
->>>>>>> fb823b53d1 (fix: asset capitalization (#35832))
 
 		self.target_fixed_asset_account = get_asset_category_account(
 			"fixed_asset_account", item=self.target_item_code, company=asset_doc.company
@@ -574,7 +533,12 @@ class AssetCapitalization(StockController):
 
 			if asset.calculate_depreciation:
 				reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
-				reset_depreciation_schedule(asset, self.posting_date)
+				notes = _(
+					"This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
+				).format(
+					get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
+				)
+				reset_depreciation_schedule(asset, self.posting_date, notes)
 
 	def set_consumed_asset_status(self, asset):
 		if self.docstatus == 1:

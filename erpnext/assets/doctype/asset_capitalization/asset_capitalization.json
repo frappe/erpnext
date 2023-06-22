@@ -342,11 +342,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-10-12 15:09:40.771332",
-=======
  "modified": "2023-06-22 14:17:07.995120",
->>>>>>> fb823b53d1 (fix: asset capitalization (#35832))
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
