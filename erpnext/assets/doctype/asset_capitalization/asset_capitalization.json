@@ -189,7 +189,7 @@
    "fieldname": "target_qty",
    "fieldtype": "Float",
    "label": "Target Qty",
-   "read_only_depends_on": "target_is_fixed_asset"
+   "read_only_depends_on": "eval:doc.entry_type=='Capitalization'"
   },
   {
    "fetch_from": "target_item_code.stock_uom",
@@ -342,7 +342,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-21 23:00:01.040851",
+ "modified": "2023-06-22 14:17:07.995120",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
