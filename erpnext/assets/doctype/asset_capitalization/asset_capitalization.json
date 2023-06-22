@@ -11,13 +11,14 @@
   "naming_series",
   "entry_type",
   "target_item_code",
+  "target_asset",
   "target_item_name",
   "target_is_fixed_asset",
   "target_has_batch_no",
   "target_has_serial_no",
   "column_break_9",
-  "target_asset",
   "target_asset_name",
+  "target_asset_location",
   "target_warehouse",
   "target_qty",
   "target_stock_uom",
@@ -85,14 +86,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.entry_type=='Capitalization'",
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Asset",
-   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization'",
    "no_copy": 1,
-   "options": "Asset"
+   "options": "Asset",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.entry_type=='Capitalization'",
@@ -108,11 +108,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "asset.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
+   "remember_last_selected_value": 1,
    "reqd": 1
   },
   {
@@ -158,7 +158,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length)",
+   "depends_on": "eval:doc.entry_type=='Capitalization' && (doc.docstatus == 0 || (doc.stock_items && doc.stock_items.length))",
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
    "label": "Consumed Stock Items"
@@ -189,7 +189,7 @@
    "fieldname": "target_qty",
    "fieldtype": "Float",
    "label": "Target Qty",
-   "read_only_depends_on": "target_is_fixed_asset"
+   "read_only_depends_on": "eval:doc.entry_type=='Capitalization'"
   },
   {
    "fetch_from": "target_item_code.stock_uom",
@@ -227,7 +227,7 @@
    "depends_on": "eval:doc.docstatus == 0 || (doc.asset_items && doc.asset_items.length)",
    "fieldname": "section_break_26",
    "fieldtype": "Section Break",
-   "label": "Consumed Asset Items"
+   "label": "Consumed Assets"
   },
   {
    "fieldname": "asset_items",
@@ -266,7 +266,7 @@
    "options": "Finance Book"
   },
   {
-   "depends_on": "eval:doc.docstatus == 0 || (doc.service_items && doc.service_items.length)",
+   "depends_on": "eval:doc.entry_type=='Capitalization' && (doc.docstatus == 0 || (doc.service_items && doc.service_items.length))",
    "fieldname": "service_expenses_section",
    "fieldtype": "Section Break",
    "label": "Service Expenses"
@@ -329,12 +329,24 @@
    "label": "Target Fixed Asset Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.entry_type=='Capitalization'",
+   "fieldname": "target_asset_location",
+   "fieldtype": "Link",
+   "label": "Target Asset Location",
+   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization'",
+   "options": "Location"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-10-12 15:09:40.771332",
+=======
+ "modified": "2023-06-22 14:17:07.995120",
+>>>>>>> fb823b53d1 (fix: asset capitalization (#35832))
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
