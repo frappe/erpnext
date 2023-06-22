@@ -345,7 +345,7 @@ class DeliveryNote(SellingController):
 		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_reserved_qty_details_for_voucher_detail_no,
+			get_sre_reserved_warehouses_for_voucher,
 		)
 
 		# Don't validate if Return
@@ -357,26 +357,30 @@ class DeliveryNote(SellingController):
 			if not item.against_sales_order or not item.so_detail:
 				continue
 
-			sre_data = get_sre_reserved_qty_details_for_voucher_detail_no(
+			reserved_warehouses = get_sre_reserved_warehouses_for_voucher(
 				"Sales Order", item.against_sales_order, item.so_detail
 			)
 
 			# Skip if stock is not reserved.
-			if not sre_data:
+			if not reserved_warehouses:
 				continue
 
 			# Set `Warehouse` from SRE if not set.
 			if not item.warehouse:
-				item.warehouse = sre_data[0]
+				item.warehouse = reserved_warehouses[0]
 			else:
-				# Throw if `Warehouse` is different from SRE.
-				if item.warehouse != sre_data[0]:
-					frappe.throw(
-						_("Row #{0}: Stock is reserved for Item {1} in Warehouse {2}.").format(
-							item.idx, frappe.bold(item.item_code), frappe.bold(sre_data[0])
-						),
-						title=_("Stock Reservation Warehouse Mismatch"),
+				# Throw if `Warehouse` not in Reserved Warehouses.
+				if item.warehouse not in reserved_warehouses:
+					msg = (
+						f"Row #{item.idx}: Stock is reserved for item {frappe.bold(item.item_code)} in warehouse"
 					)
+
+					if len(reserved_warehouses) == 1:
+						msg += f" {frappe.bold(reserved_warehouses[0])}."
+					else:
+						msg += f" {frappe.bold(', '.join(reserved_warehouses[:-1]))} and {frappe.bold(reserved_warehouses[-1])}."
+
+					frappe.throw(_(msg), title=_("Stock Reservation Warehouse Mismatch"))
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
