@@ -213,10 +213,43 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	}
 
 	make_purchase_return() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
-			frm: cur_frm
+		let me = this;
+
+		let has_rejected_items = cur_frm.doc.items.filter((item) => {
+			if (item.rejected_qty > 0) {
+				return true;
+			}
 		})
+
+		if (has_rejected_items && has_rejected_items.length > 0) {
+			frappe.prompt([
+				{
+					label: __("Return Qty from Rejected Warehouse"),
+					fieldtype: "Check",
+					fieldname: "return_for_rejected_warehouse",
+					default: 1
+				},
+			], function(values){
+				if (values.return_for_rejected_warehouse) {
+					frappe.call({
+						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return_against_rejected_warehouse",
+						args: {
+							source_name: cur_frm.doc.name
+						},
+						callback: function(r) {
+							if(r.message) {
+								frappe.model.sync(r.message);
+								frappe.set_route("Form", r.message.doctype, r.message.name);
+							}
+						}
+					})
+				} else {
+					cur_frm.cscript._make_purchase_return();
+				}
+			}, __("Return Qty"), __("Make Return Entry"));
+		} else {
+			cur_frm.cscript._make_purchase_return();
+		}
 	}
 
 	close_purchase_receipt() {
@@ -325,6 +358,13 @@ frappe.ui.form.on('Purchase Receipt Item', {
 		validate_sample_quantity(frm, cdt, cdn);
 	},
 });
+
+cur_frm.cscript._make_purchase_return = function() {
+	frappe.model.open_mapped_doc({
+		method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
+		frm: cur_frm
+	});
+}
 
 cur_frm.cscript['Make Stock Entry'] = function() {
 	frappe.model.open_mapped_doc({
