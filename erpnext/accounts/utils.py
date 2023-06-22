@@ -500,7 +500,7 @@ def check_if_advance_entry_modified(args):
 
 		q = (
 			frappe.qb.from_(journal_entry)
-			.innerjoin(journal_acc)
+			.inner_join(journal_acc)
 			.on(journal_entry.name == journal_acc.parent)
 		)
 

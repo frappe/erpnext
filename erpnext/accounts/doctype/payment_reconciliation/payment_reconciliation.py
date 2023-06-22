@@ -59,7 +59,10 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(non_reconciled_payments)
 
 	def get_payment_entries(self):
-		party_account = [self.receivable_payable_account, self.default_advance_account]
+		if self.default_advance_account:
+			party_account = [self.receivable_payable_account, self.default_advance_account]
+		else:
+			party_account = [self.receivable_payable_account]
 
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
 		condition = frappe._dict(
@@ -352,7 +355,10 @@ class PaymentReconciliation(Document):
 		for row in self.get("allocation"):
 			reconciled_entry = []
 			if row.invoice_number and row.allocated_amount:
-				if row.invoice_type in ["Sales Invoice", "Purchase Invoice"]:
+				if (
+					row.invoice_type in ["Sales Invoice", "Purchase Invoice"]
+					and row.reference_type == "Payment Entry"
+				):
 					gl_entries = []
 					make_advance_liability_entry(
 						gl_entries, row.reference_name, row.allocated_amount, row.invoice_number, self.party_type

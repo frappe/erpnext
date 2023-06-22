@@ -949,10 +949,8 @@ class PaymentEntry(AccountsController):
 		if self.party_account:
 			if self.payment_type == "Receive":
 				against_account = self.paid_to
-				dr_or_cr = "credit"
 			else:
 				against_account = self.paid_from
-				dr_or_cr = "debit"
 
 			party_dict = self.get_gl_dict(
 				{
@@ -965,6 +963,11 @@ class PaymentEntry(AccountsController):
 				},
 				item=self,
 			)
+
+			dr_or_cr = (
+				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
+			)
+
 			is_advance = self.is_advance_entry()
 
 			for d in self.get("references"):

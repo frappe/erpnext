@@ -2156,11 +2156,7 @@ def get_advance_journal_entries(
 			ConstantColumn("Journal Entry").as_("reference_type"),
 			(journal_entry.name).as_("reference_name"),
 			(journal_entry.remark).as_("remarks"),
-			(
-				journal_acc.debit_in_account_currency
-				if party_type == "Supplier"
-				else journal_acc.credit_in_account_currency
-			).as_("amount"),
+			(journal_acc[amount_field]).as_("amount"),
 			(journal_acc.name).as_("reference_row"),
 			(journal_acc.reference_name).as_("against_order"),
 			(journal_acc.exchange_rate),
@@ -2179,12 +2175,13 @@ def get_advance_journal_entries(
 	else:
 		q = q.where(journal_acc.debit_in_account_currency > 0)
 
+	if include_unallocated:
+		q = q.where((journal_acc.reference_name.isnull()) | (journal_acc.reference_name == ""))
+
 	if order_list:
-		q = q.where(journal_acc.reference_type == order_doctype)
-		if include_unallocated:
-			q = q.where(journal_acc.reference_name.isin(order_list) | (journal_acc.reference_name == ""))
-		else:
-			q = q.where(journal_acc.reference_name.isin(order_list))
+		q = q.where(
+			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference).isin(order_list))
+		)
 
 	q = q.orderby(journal_entry.posting_date)
 
@@ -2222,15 +2219,14 @@ def get_advance_payment_entries(
 			(payment_ref.allocated_amount).as_("amount"),
 			(payment_ref.name).as_("reference_row"),
 			(payment_ref.reference_name).as_("against_order"),
-			payment_ref.reference_doctype == order_doctype,
 		)
 
+		q = q.where(payment_ref.reference_doctype == order_doctype)
 		if order_list:
 			q = q.where(payment_ref.reference_name.isin(order_list))
 
 		allocated = list(q.run(as_dict=True))
 		payment_entries += allocated
-
 	if include_unallocated:
 		q = get_common_query(
 			party_type,
@@ -2244,7 +2240,6 @@ def get_advance_payment_entries(
 
 		unallocated = list(q.run(as_dict=True))
 		payment_entries += unallocated
-
 	return payment_entries
 
 
