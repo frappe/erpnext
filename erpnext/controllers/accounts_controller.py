@@ -2180,7 +2180,7 @@ def get_advance_journal_entries(
 
 	if order_list:
 		q = q.where(
-			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference).isin(order_list))
+			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference_type).isin(order_list))
 		)
 
 	q = q.orderby(journal_entry.posting_date)
