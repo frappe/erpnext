@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 
 class StockReservationEntry(Document):
@@ -17,6 +17,7 @@ class StockReservationEntry(Document):
 		self.validate_for_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
+		self.validate_uom_is_integer()
 		self.validate_reserved_qty()
 
 	def on_submit(self) -> None:
@@ -25,6 +26,7 @@ class StockReservationEntry(Document):
 
 	def on_update_after_submit(self) -> None:
 		self.can_be_updated()
+		self.validate_uom_is_integer()
 		self.validate_reserved_qty()
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
@@ -71,6 +73,12 @@ class StockReservationEntry(Document):
 				_("Stock cannot be reserved in group warehouse {0}.").format(frappe.bold(self.warehouse)),
 				title=_("Invalid Warehouse"),
 			)
+
+	def validate_uom_is_integer(self):
+		if cint(frappe.db.get_value("UOM", self.stock_uom, "must_be_whole_number", cache=True)):
+			if cint(self.reserved_qty) != flt(self.reserved_qty, self.precision("reserved_qty")):
+				msg = f"Reserved Qty ({flt(self.reserved_qty, self.precision('reserved_qty'))}) cannot be a fraction. To allow this, disable '{frappe.bold(_('Must be Whole Number'))}' in UOM {frappe.bold(self.stock_uom)}."
+				frappe.throw(_(msg))
 
 	def validate_reserved_qty(self) -> None:
 		"""Validates `Reserved Qty`"""
