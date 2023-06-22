@@ -51,7 +51,8 @@ class Supplier(TransactionBase):
 
 		self.create_primary_contact()
 		self.create_primary_address()
-		self.add_role_for_user()
+		if self.portal_users:
+			self.add_role_for_user()
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:

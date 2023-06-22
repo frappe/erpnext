@@ -169,7 +169,8 @@ class Customer(TransactionBase):
 			self.link_lead_address_and_contact()
 
 		self.update_customer_groups()
-		self.add_role_for_user()
+		if self.portal_users:
+			self.add_role_for_user()
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
