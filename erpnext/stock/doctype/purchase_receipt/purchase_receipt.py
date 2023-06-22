@@ -1137,6 +1137,13 @@ def get_returned_qty_map(purchase_receipt):
 
 
 @frappe.whitelist()
+def make_purchase_return_against_rejected_warehouse(source_name):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+	return make_return_doc("Purchase Receipt", source_name, return_against_rejected_qty=True)
+
+
+@frappe.whitelist()
 def make_purchase_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
