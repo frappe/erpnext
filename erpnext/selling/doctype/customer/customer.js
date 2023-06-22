@@ -66,7 +66,9 @@ frappe.ui.form.on("Customer", {
 
 		frm.set_query("user", "portal_users", function() {
 			return {
-				query: "erpnext.selling.doctype.customer.customer.get_users_with_customer_role",
+				filters: {
+					"ignore_user_type": true,
+				}
 			};
 		});
 	},

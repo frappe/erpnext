@@ -457,7 +457,7 @@
    "fieldname": "portal_users",
    "fieldtype": "Table",
    "label": "Supplier Portal Users",
-   "options": "Portal Users"
+   "options": "Portal User"
   }
  ],
  "icon": "fa fa-user",
@@ -470,7 +470,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-06-20 14:06:07.366654",
+ "modified": "2023-06-22 13:21:10.050024",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

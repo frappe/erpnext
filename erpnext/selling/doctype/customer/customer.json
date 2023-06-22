@@ -567,7 +567,7 @@
    "fieldname": "portal_users",
    "fieldtype": "Table",
    "label": "Customer Portal Users",
-   "options": "Portal Users"
+   "options": "Portal User"
   }
  ],
  "icon": "fa fa-user",
@@ -581,7 +581,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-06-20 15:55:21.487412",
+ "modified": "2023-06-22 13:21:10.678382",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

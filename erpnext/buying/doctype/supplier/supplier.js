@@ -45,7 +45,9 @@ frappe.ui.form.on("Supplier", {
 
 		frm.set_query("user", "portal_users", function(doc) {
 			return {
-				query: "erpnext.buying.doctype.supplier.supplier.get_users_with_supplier_role",
+				filters: {
+					"ignore_user_type": true,
+				}
 			};
 		});
 	},
