@@ -14,7 +14,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	refresh() {
-		erpnext.hide_company();
 		this.show_general_ledger();
 		if ((this.frm.doc.stock_items && this.frm.doc.stock_items.length) || !this.frm.doc.target_is_fixed_asset) {
 			this.show_stock_ledger();
@@ -103,10 +102,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	target_item_code() {
 		return this.get_target_item_details();
-	}
-
-	target_asset() {
-		return this.get_target_asset_details();
 	}
 
 	item_code(doc, cdt, cdn) {
@@ -212,26 +207,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				child: me.frm.doc,
 				args: {
 					item_code: me.frm.doc.target_item_code,
-					company: me.frm.doc.company,
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						me.frm.refresh_fields();
-					}
-				}
-			});
-		}
-	}
-
-	get_target_asset_details() {
-		var me = this;
-
-		if (me.frm.doc.target_asset) {
-			return me.frm.call({
-				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_asset_details",
-				child: me.frm.doc,
-				args: {
-					asset: me.frm.doc.target_asset,
 					company: me.frm.doc.company,
 				},
 				callback: function (r) {
