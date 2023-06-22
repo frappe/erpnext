@@ -342,12 +342,10 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
-<<<<<<< HEAD
 	from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
-=======
+
 	if not asset.calculate_depreciation:
 		return
->>>>>>> 69780da099 (chore: asset scrap and restore fixes [v14] (#35851))
 
 	row = -1
 	finance_book = asset.get("schedules")[0].get("finance_book")
