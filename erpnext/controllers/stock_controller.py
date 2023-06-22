@@ -847,28 +847,24 @@ class StockController(AccountsController):
 
 @frappe.whitelist()
 def show_accounting_ledger_preview(company, doctype, docname):
-	frappe.db.savepoint("show_accounting_ledger_preview")
-
 	filters = {"company": company, "include_dimensions": 1}
 	doc = frappe.get_doc(doctype, docname)
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
 
-	frappe.db.rollback(save_point="show_accounting_ledger_preview")
+	frappe.db.rollback()
 
 	return {"gl_columns": gl_columns, "gl_data": gl_data}
 
 
 @frappe.whitelist()
 def show_stock_ledger_preview(company, doctype, docname):
-	frappe.db.savepoint("show_stock_ledger_preview")
-
 	filters = {"company": company}
 	doc = frappe.get_doc(doctype, docname)
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
 
-	frappe.db.rollback(save_point="show_stock_ledger_preview")
+	frappe.db.rollback()
 
 	return {
 		"sl_columns": sl_columns,
