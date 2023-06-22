@@ -533,6 +533,14 @@ class SalesOrder(SellingController):
 			validate_stock_reservation_settings,
 		)
 
+		# Skip for group warehouse
+		if self.set_warehouse and cint(
+			frappe.get_cached_value("Warehouse", self.set_warehouse, "is_group")
+		):
+			return frappe.msgprint(
+				_(f"Stock cannot be reserved in the group warehouse {frappe.bold(self.set_warehouse)}.")
+			)
+
 		validate_stock_reservation_settings(self)
 
 		allow_partial_reservation = frappe.db.get_single_value(
