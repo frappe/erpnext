@@ -502,24 +502,19 @@ def check_if_advance_entry_modified(args):
 			frappe.qb.from_(journal_entry)
 			.inner_join(journal_acc)
 			.on(journal_entry.name == journal_acc.parent)
-		)
-
-		if args.get("dr_or_cr") == "debit_in_account_currency":
-			q = q.select(journal_acc.debit_in_account_currency)
-		else:
-			q = q.select(journal_acc.credit_in_account_currency)
-
-		q = q.where(
-			(journal_acc.account == args.get("account"))
-			& ((journal_acc.party_type == args.get("party_type")))
-			& ((journal_acc.party == args.get("party")))
-			& (
-				(journal_acc.reference_type == None)
-				| (journal_acc.reference_type.isin(["", "Sales Order", "Purchase Order"]))
+			.select(journal_acc[args.get("dr_or_cr")])
+			.where(
+				(journal_acc.account == args.get("account"))
+				& ((journal_acc.party_type == args.get("party_type")))
+				& ((journal_acc.party == args.get("party")))
+				& (
+					(journal_acc.reference_type.isnull())
+					| (journal_acc.reference_type.isin(["", "Sales Order", "Purchase Order"]))
+				)
+				& ((journal_entry.name == args.get("voucher_no")))
+				& ((journal_acc.name == args.get("voucher_detail_no")))
+				& ((journal_entry.docstatus == 1))
 			)
-			& ((journal_entry.name == args.get("voucher_no")))
-			& ((journal_acc.name == args.get("voucher_detail_no")))
-			& ((journal_entry.docstatus == 1))
 		)
 
 	else:
