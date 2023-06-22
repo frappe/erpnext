@@ -102,6 +102,15 @@ class StockReservationEntry(Document):
 			self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty)
 		)
 
+		if max_qty_can_be_reserved <= 0 and self.voucher_type == "Sales Order":
+			msg = f"Item {frappe.bold(self.item_code)} is already delivered for Sales Order {frappe.bold(self.voucher_no)}."
+
+			if self.docstatus == 1:
+				self.cancel()
+				return frappe.msgprint(_(msg))
+			else:
+				frappe.throw(_(msg))
+
 		qty_to_be_reserved = 0
 		if self.reservation_based_on == "Qty":
 			if self.sb_entries:
