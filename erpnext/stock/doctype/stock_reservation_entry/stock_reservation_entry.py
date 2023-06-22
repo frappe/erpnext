@@ -82,7 +82,17 @@ class StockReservationEntry(Document):
 		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
 			self.voucher_type, self.voucher_no, self.voucher_detail_no, ignore_sre=self.name
 		)
-		max_qty_can_be_reserved = min(self.available_qty, (self.voucher_qty - total_reserved_qty))
+
+		voucher_delivered_qty = 0
+		if self.voucher_type == "Sales Order":
+			delivered_qty, conversion_factor = frappe.db.get_value(
+				"Sales Order Item", self.voucher_detail_no, ["delivered_qty", "conversion_factor"]
+			)
+			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
+
+		max_qty_can_be_reserved = min(
+			self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty)
+		)
 
 		qty_to_be_reserved = 0
 		if self.reservation_based_on == "Qty":
