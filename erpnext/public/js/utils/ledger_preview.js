@@ -6,6 +6,7 @@ erpnext.accounts.ledger_preview = {
 		if(!frm.is_new() && frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.call({
+					"type": "GET",
 					"method": "erpnext.controllers.stock_controller.show_accounting_ledger_preview",
 					"args": {
 						"company": frm.doc.company,
@@ -25,6 +26,7 @@ erpnext.accounts.ledger_preview = {
 		if(!frm.is_new() && frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Stock Ledger'), function() {
 				frappe.call({
+					"type": "GET",
 					"method": "erpnext.controllers.stock_controller.show_stock_ledger_preview",
 					"args": {
 						"company": frm.doc.company,
