@@ -330,12 +330,10 @@ class JournalEntry(AccountsController):
 				d.db_update()
 
 	def unlink_asset_reference(self):
-		if self.voucher_type != "Depreciation Entry":
-			return
-
 		for d in self.get("accounts"):
 			if (
-				d.reference_type == "Asset"
+				self.voucher_type == "Depreciation Entry"
+				and d.reference_type == "Asset"
 				and d.reference_name
 				and d.account_type == "Depreciation"
 				and d.debit
@@ -362,6 +360,15 @@ class JournalEntry(AccountsController):
 				else:
 					asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 				asset.set_status()
+			elif self.voucher_type == "Journal Entry" and d.reference_type == "Asset" and d.reference_name:
+				journal_entry_for_scrap = frappe.db.get_value(
+					"Asset", d.reference_name, "journal_entry_for_scrap"
+				)
+
+				if journal_entry_for_scrap == self.name:
+					frappe.throw(
+						_("Journal Entry for Asset scrapping cannot be cancelled. Please restore the Asset.")
+					)
 
 	def unlink_inter_company_jv(self):
 		if (
