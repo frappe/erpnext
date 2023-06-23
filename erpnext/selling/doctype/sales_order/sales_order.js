@@ -200,6 +200,8 @@ frappe.ui.form.on("Sales Order", {
 					fieldname: "items",
 					fieldtype: "Table",
 					label: __("Items to Reserve"),
+					allow_bulk_edit: false,
+					cannot_add_rows: true,
 					data: [],
 					fields: [
 						{
