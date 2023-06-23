@@ -182,7 +182,7 @@ def get_html(doc, filters, entry, col, res, ageing):
 	template_path = (
 		"erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html"
 		if doc.report == "General Ledger"
-		else "erpnext/accounts/report/accounts_receivable/accounts_receivable.html"
+		else "erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html"
 	)
 
 	if doc.letter_head:

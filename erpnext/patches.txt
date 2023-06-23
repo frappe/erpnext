@@ -333,4 +333,8 @@ erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
 erpnext.patches.v14_0.cleanup_workspaces
+<<<<<<< HEAD
 erpnext.patches.v14_0.enable_allow_existing_serial_no
+=======
+erpnext.patches.v14_0.set_report_in_process_SOA 
+>>>>>>> 555c126eb9 (fix: add patch for setting default value of report field)
