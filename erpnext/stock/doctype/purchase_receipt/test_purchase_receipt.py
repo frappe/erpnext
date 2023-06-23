@@ -72,6 +72,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
 
 	def test_make_purchase_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
+
+		create_payment_term("_Test Payment Term 1 for Purchase Invoice")
+		create_payment_term("_Test Payment Term 2 for Purchase Invoice")
+
 		if not frappe.db.exists(
 			"Payment Terms Template", "_Test Payment Terms Template For Purchase Invoice"
 		):
@@ -83,12 +88,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 					"terms": [
 						{
 							"doctype": "Payment Terms Template Detail",
+							"payment_term": "_Test Payment Term 1 for Purchase Invoice",
 							"invoice_portion": 50.00,
 							"credit_days_based_on": "Day(s) after invoice date",
 							"credit_days": 00,
 						},
 						{
 							"doctype": "Payment Terms Template Detail",
+							"payment_term": "_Test Payment Term 2 for Purchase Invoice",
 							"invoice_portion": 50.00,
 							"credit_days_based_on": "Day(s) after invoice date",
 							"credit_days": 30,
