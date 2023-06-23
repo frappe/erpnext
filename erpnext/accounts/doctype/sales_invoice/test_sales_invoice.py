@@ -6,7 +6,6 @@ import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
-from frappe.model.naming import make_autoname
 from frappe.tests.utils import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
@@ -35,7 +34,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 	get_qty_after_transaction,
 	make_stock_entry,
@@ -3314,7 +3312,14 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_advance_entries_as_liability(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
-		set_advance_flag(company="_Test Company", flag=1, default_account="Creditors - _TC")
+		account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Advances Received",
+			company="_Test Company",
+			account_type="Receivable",
+		)
+
+		set_advance_flag(company="_Test Company", flag=1, default_account=account)
 
 		pe = create_payment_entry(
 			company="_Test Company",
@@ -3347,13 +3352,15 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# Check GL Entry against payment doctype
 		expected_gle = [
+			["Advances Received - _TC", 500, 0.0, nowdate()],
 			["Cash - _TC", 1000, 0.0, nowdate()],
-			["Creditors - _TC", 500, 0.0, nowdate()],
 			["Debtors - _TC", 0.0, 1000, nowdate()],
 			["Debtors - _TC", 0.0, 500, nowdate()],
 		]
 
 		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
+
+		si.load_from_db()
 		self.assertEqual(si.outstanding_amount, 0)
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
@@ -3364,7 +3371,7 @@ def set_advance_flag(company, flag, default_account):
 		"Company",
 		company,
 		{
-			"book_advance_payments_as_liability": flag,
+			"book_advance_payments_in_separate_party_account": flag,
 			"default_advance_received_account": default_account,
 		},
 	)

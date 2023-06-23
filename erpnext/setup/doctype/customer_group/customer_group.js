@@ -41,6 +41,7 @@ frappe.ui.form.on("Customer Group", {
 			return {
 				filters: {
 					"root_type": 'Liability',
+					"account_type": "Receivable",
 					"company": locals[cdt][cdn].company,
 					"is_group": 0
 				}

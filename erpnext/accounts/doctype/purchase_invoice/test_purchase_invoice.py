@@ -1664,10 +1664,17 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
-	def test_advance_entries_as_liability(self):
+	def test_advance_entries_as_asset(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
-		set_advance_flag(company="_Test Company", flag=1, default_account="Debtors - _TC")
+		account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Paid",
+			company="_Test Company",
+			account_type="Receivable",
+		)
+
+		set_advance_flag(company="_Test Company", flag=1, default_account=account)
 
 		pe = create_payment_entry(
 			company="_Test Company",
@@ -1701,13 +1708,15 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		# Check GL Entry against payment doctype
 		expected_gle = [
+			["Advances Paid - _TC", 0.0, 500, nowdate()],
 			["Cash - _TC", 0.0, 500, nowdate()],
 			["Creditors - _TC", 500, 0.0, nowdate()],
 			["Creditors - _TC", 500, 0.0, nowdate()],
-			["Debtors - _TC", 0.0, 500, nowdate()],
 		]
 
 		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
+
+		pi.load_from_db()
 		self.assertEqual(pi.outstanding_amount, 500)
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
@@ -1733,7 +1742,7 @@ def set_advance_flag(company, flag, default_account):
 		"Company",
 		company,
 		{
-			"book_advance_payments_as_liability": flag,
+			"book_advance_payments_in_separate_party_account": flag,
 			"default_advance_paid_account": default_account,
 		},
 	)

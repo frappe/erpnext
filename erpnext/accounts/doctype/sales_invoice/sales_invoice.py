@@ -32,10 +32,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
-from erpnext.controllers.accounts_controller import (
-	check_advance_liability_entry,
-	validate_account_head,
-)
+from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -1055,21 +1052,12 @@ class SalesInvoice(SellingController):
 		elif self.docstatus == 2 and cint(self.update_stock) and cint(auto_accounting_for_stock):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
 
 		self.make_customer_gl_entry(gl_entries)
-
-		check_advance_liability_entry(
-			gl_entries,
-			company=self.company,
-			advances=self.advances,
-			invoice=self.name,
-			party_type="Customer",
-		)
-
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)

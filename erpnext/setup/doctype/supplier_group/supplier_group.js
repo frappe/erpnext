@@ -41,6 +41,7 @@ frappe.ui.form.on("Supplier Group", {
 			return {
 				filters: {
 					"root_type": 'Asset',
+					"account_type": "Payable",
 					"company": locals[cdt][cdn].company,
 					"is_group": 0
 				}

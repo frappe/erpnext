@@ -501,7 +501,12 @@ def get_round_off_account_and_cost_center(
 
 
 def make_reverse_gl_entries(
-	gl_entries=None, voucher_type=None, voucher_no=None, adv_adj=False, update_outstanding="Yes"
+	gl_entries=None,
+	voucher_type=None,
+	voucher_no=None,
+	adv_adj=False,
+	update_outstanding="Yes",
+	partial_cancel=False,
 ):
 	"""
 	Get original gl entries of the voucher
@@ -528,7 +533,8 @@ def make_reverse_gl_entries(
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
-		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
+		if not partial_cancel:
+			set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
 			new_gle = copy.deepcopy(entry)

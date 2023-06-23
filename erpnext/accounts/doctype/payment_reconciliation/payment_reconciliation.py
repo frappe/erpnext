@@ -12,16 +12,12 @@ import erpnext
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	is_any_doc_running,
 )
-from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
 	reconcile_against_document,
 )
-from erpnext.controllers.accounts_controller import (
-	get_advance_payment_entries,
-	make_advance_liability_entry,
-)
+from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 
 class PaymentReconciliation(Document):
@@ -355,15 +351,6 @@ class PaymentReconciliation(Document):
 		for row in self.get("allocation"):
 			reconciled_entry = []
 			if row.invoice_number and row.allocated_amount:
-				if (
-					row.invoice_type in ["Sales Invoice", "Purchase Invoice"]
-					and row.reference_type == "Payment Entry"
-				):
-					gl_entries = []
-					make_advance_liability_entry(
-						gl_entries, row.reference_name, row.allocated_amount, row.invoice_number, self.party_type
-					)
-					make_gl_entries(gl_entries)
 				if row.reference_type in ["Sales Invoice", "Purchase Invoice"]:
 					reconciled_entry = dr_or_cr_notes
 				else:

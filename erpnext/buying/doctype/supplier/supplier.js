@@ -22,7 +22,8 @@ frappe.ui.form.on("Supplier", {
 			let d = locals[cdt][cdn];
 			return {
 				filters: {
-					"account_type": "Receivable",
+					"account_type": "Payable",
+					"root_type": "Asset",
 					"company": d.company,
 					"is_group": 0
 				}
