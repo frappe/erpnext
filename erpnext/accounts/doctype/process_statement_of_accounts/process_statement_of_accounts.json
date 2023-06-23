@@ -326,7 +326,8 @@
    "fieldname": "report",
    "fieldtype": "Select",
    "label": "Report",
-   "options": "General Ledger\nAccounts Receivable"
+   "options": "General Ledger\nAccounts Receivable",
+   "reqd": 1
   },
   {
    "default": "Today",
@@ -372,7 +373,7 @@
   }
  ],
  "links": [],
- "modified": "2023-06-19 18:37:10.040570",
+ "modified": "2023-06-23 10:13:15.051950",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
