@@ -169,72 +169,102 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	create_stock_reservation_entries(frm) {
-		let items_data = [];
-
-		const dialog = frappe.prompt({fieldname: 'items', fieldtype: 'Table', label: __('Items to Reserve'),
+		const dialog = new frappe.ui.Dialog({
+			title: __("Stock Reservation"),
 			fields: [
 				{
-					fieldtype: 'Data',
-					fieldname: 'name',
-					label: __('Name'),
-					reqd: 1,
-					read_only: 1,
-				},
-				{
-					fieldtype: 'Link',
-					fieldname: 'item_code',
-					label: __('Item Code'),
-					options: 'Item',
-					reqd: 1,
-					read_only: 1,
-					in_list_view: 1,
-				},
-				{
-					fieldtype: 'Link',
-					fieldname: 'warehouse',
-					label: __('Warehouse'),
-					options: 'Warehouse',
-					reqd: 1,
-					in_list_view: 1,
-					get_query: function () {
+					fieldname: "set_warehouse",
+					fieldtype: "Link",
+					label: __("Set Warehouse"),
+					options: "Warehouse",
+					default: frm.doc.set_warehouse,
+					get_query: () => {
 						return {
 							filters: [
 								["Warehouse", "is_group", "!=", 1]
 							]
 						};
 					},
-				},
-				{
-					fieldtype: 'Float',
-					fieldname: 'qty_to_reserve',
-					label: __('Qty'),
-					reqd: 1,
-					in_list_view: 1
-				}
-			],
-			data: items_data,
-			in_place_edit: true,
-			get_data: function() {
-				return items_data;
-			}
-		}, function(data) {
-			if (data.items.length > 0) {
-				frappe.call({
-					doc: frm.doc,
-					method: 'create_stock_reservation_entries',
-					args: {
-						items_details: data.items,
-						notify: true
+					onchange: () => {
+						if (dialog.get_value("set_warehouse")) {
+							dialog.fields_dict.items.df.data.forEach((row) => {
+								row.warehouse = dialog.get_value("set_warehouse");
+							});
+							dialog.fields_dict.items.grid.refresh();
+						}
 					},
-					freeze: true,
-					freeze_message: __('Reserving Stock...'),
-					callback: (r) => {
-						frm.doc.__onload.has_unreserved_stock = false;
-						frm.reload_doc();
-					}
-				});
-			}
-		}, __("Stock Reservation"), __("Reserve Stock"));
+				},
+				{fieldtype: "Column Break"},
+				{fieldtype: "Section Break"},
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					label: __("Items to Reserve"),
+					data: [],
+					fields: [
+						{
+							fieldname: "name",
+							fieldtype: "Data",
+							label: __("Name"),
+							reqd: 1,
+							read_only: 1,
+						},
+						{
+							fieldname: "item_code",
+							fieldtype: "Link",
+							label: __("Item Code"),
+							options: "Item",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "warehouse",
+							fieldtype: "Link",
+							label: __("Warehouse"),
+							options: "Warehouse",
+							reqd: 1,
+							in_list_view: 1,
+							get_query: () => {
+								return {
+									filters: [
+										["Warehouse", "is_group", "!=", 1]
+									]
+								};
+							},
+						},
+						{
+							fieldname: "qty_to_reserve",
+							fieldtype: "Float",
+							label: __("Qty"),
+							reqd: 1,
+							in_list_view: 1
+						}
+					],
+				},
+			],
+			primary_action_label: __("Reserve Stock"),
+			primary_action: (data) => {
+				if (data.items.length > 0) {
+					frappe.call({
+						doc: frm.doc,
+						method: "create_stock_reservation_entries",
+						args: {
+							items_details: data.items,
+							notify: true
+						},
+						freeze: true,
+						freeze_message: __("Reserving Stock..."),
+						callback: (r) => {
+							frm.doc.__onload.has_unreserved_stock = false;
+							frm.reload_doc();
+						}
+					});
+				}
+
+				dialog.hide();
+			},
+		});
 
 		frm.doc.items.forEach(item => {
 			if (item.reserve_stock) {
@@ -252,6 +282,7 @@ frappe.ui.form.on("Sales Order", {
 		});
 
 		dialog.fields_dict.items.grid.refresh();
+		dialog.show();
 	},
 
 	cancel_stock_reservation_entries(frm) {
