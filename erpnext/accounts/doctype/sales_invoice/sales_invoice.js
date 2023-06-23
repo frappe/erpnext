@@ -88,8 +88,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		}
 
 		this.show_general_ledger();
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
 
-		if(doc.update_stock) this.show_stock_ledger();
+		if(doc.update_stock){
+			this.show_stock_ledger();
+			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
+		}
 
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {

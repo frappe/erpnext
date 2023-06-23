@@ -845,6 +845,149 @@ class StockController(AccountsController):
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
 
+@frappe.whitelist()
+def show_accounting_ledger_preview(company, doctype, docname):
+	filters = {"company": company, "include_dimensions": 1}
+	doc = frappe.get_doc(doctype, docname)
+
+	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
+
+	frappe.db.rollback()
+
+	return {"gl_columns": gl_columns, "gl_data": gl_data}
+
+
+@frappe.whitelist()
+def show_stock_ledger_preview(company, doctype, docname):
+	filters = {"company": company}
+	doc = frappe.get_doc(doctype, docname)
+
+	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
+
+	frappe.db.rollback()
+
+	return {
+		"sl_columns": sl_columns,
+		"sl_data": sl_data,
+	}
+
+
+def get_accounting_ledger_preview(doc, filters):
+	from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+
+	gl_columns, gl_data = [], []
+	fields = [
+		"posting_date",
+		"account",
+		"debit",
+		"credit",
+		"against",
+		"party",
+		"party_type",
+		"cost_center",
+		"against_voucher_type",
+		"against_voucher",
+	]
+
+	doc.docstatus = 1
+
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+		doc.update_stock_ledger()
+
+	doc.make_gl_entries()
+	columns = get_gl_columns(filters)
+	gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
+
+	gl_columns = get_columns(columns, fields)
+	gl_data = get_data(fields, gl_entries)
+
+	return gl_columns, gl_data
+
+
+def get_stock_ledger_preview(doc, filters):
+	from erpnext.stock.report.stock_ledger.stock_ledger import get_columns as get_sl_columns
+
+	sl_columns, sl_data = [], []
+	fields = [
+		"item_code",
+		"stock_uom",
+		"actual_qty",
+		"qty_after_transaction",
+		"warehouse",
+		"incoming_rate",
+		"valuation_rate",
+		"stock_value",
+		"stock_value_difference",
+	]
+	columns_fields = [
+		"item_code",
+		"stock_uom",
+		"in_qty",
+		"out_qty",
+		"qty_after_transaction",
+		"warehouse",
+		"incoming_rate",
+		"in_out_rate",
+		"stock_value",
+		"stock_value_difference",
+	]
+
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+		doc.docstatus = 1
+		doc.update_stock_ledger()
+		columns = get_sl_columns(filters)
+		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
+
+		sl_columns = get_columns(columns, columns_fields)
+		sl_data = get_data(columns_fields, sl_entries)
+
+	return sl_columns, sl_data
+
+
+def get_sl_entries_for_preview(doctype, docname, fields):
+	sl_entries = frappe.get_all(
+		"Stock Ledger Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields
+	)
+
+	for entry in sl_entries:
+		if entry.actual_qty > 0:
+			entry["in_qty"] = entry.actual_qty
+			entry["out_qty"] = 0
+		else:
+			entry["out_qty"] = abs(entry.actual_qty)
+			entry["in_qty"] = 0
+
+		entry["in_out_rate"] = entry["valuation_rate"]
+
+	return sl_entries
+
+
+def get_gl_entries_for_preview(doctype, docname, fields):
+	return frappe.get_all(
+		"GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields
+	)
+
+
+def get_columns(raw_columns, fields):
+	return [
+		{"name": d.get("label"), "editable": False, "width": 110}
+		for d in raw_columns
+		if not d.get("hidden") and d.get("fieldname") in fields
+	]
+
+
+def get_data(raw_columns, raw_data):
+	datatable_data = []
+	for row in raw_data:
+		data_row = []
+		for column in raw_columns:
+			data_row.append(row.get(column) or "")
+
+		datatable_data.append(data_row)
+
+	return datatable_data
+
+
 def repost_required_for_queue(doc: StockController) -> bool:
 	"""check if stock document contains repeated item-warehouse with queue based valuation.
 

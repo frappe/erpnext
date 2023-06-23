@@ -78,7 +78,9 @@
   "salary_mode",
   "bank_details_section",
   "bank_name",
+  "column_break_heye",
   "bank_ac_no",
+  "iban",
   "personal_details",
   "marital_status",
   "family_background",
@@ -804,17 +806,26 @@
   {
    "fieldname": "column_break_104",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_heye",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.salary_mode == 'Bank'",
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-09-13 10:27:14.579197",
+ "modified": "2023-03-30 15:57:05.174592",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
