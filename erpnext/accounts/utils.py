@@ -474,7 +474,9 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
 		gl_map = doc.build_gl_map()
 		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
-		doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
+
+		if voucher_type == "Payment Entry":
+			doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
 
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
@@ -732,7 +734,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 
 		for pe in linked_pe:
 			try:
-				pe_doc = frappe.get_doc("Payment Entry", pe, cache=True)
+				pe_doc = frappe.get_doc("Payment Entry", pe)
 				pe_doc.set_amounts()
 				pe_doc.make_advance_gl_entries(against_voucher_type=ref_type, against_voucher=ref_no, cancel=1)
 				pe_doc.clear_unallocated_reference_document_rows()
