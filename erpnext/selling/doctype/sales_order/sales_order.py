@@ -534,8 +534,10 @@ class SalesOrder(SellingController):
 		)
 
 		# Skip for group warehouse
-		if self.set_warehouse and cint(
-			frappe.get_cached_value("Warehouse", self.set_warehouse, "is_group")
+		if (
+			self.get("_action") == "submit"
+			and self.set_warehouse
+			and cint(frappe.get_cached_value("Warehouse", self.set_warehouse, "is_group"))
 		):
 			return frappe.msgprint(
 				_(f"Stock cannot be reserved in the group warehouse {frappe.bold(self.set_warehouse)}.")
