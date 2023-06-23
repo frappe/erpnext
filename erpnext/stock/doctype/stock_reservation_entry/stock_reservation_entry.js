@@ -51,14 +51,22 @@ frappe.ui.form.on("Stock Reservation Entry", {
 			}
 		});
 
-		frm.set_query("batch_no", "sb_entries", function(doc) {
-			return {
-				filters: {
-					item: doc.item_code,
-					batch_qty: [">", 0],
-					disabled: 0,
-				}
+		frm.set_query("batch_no", "sb_entries", function(doc, cdt, cdn) {
+			let filters = {
+				item: doc.item_code,
+				batch_qty: [">", 0],
+				disabled: 0,
 			}
+
+			if (!doc.has_serial_no) {
+				var selected_batch_nos = doc.sb_entries.map(row => {
+					return row.batch_no;
+				});
+
+				filters.name = ["not in", selected_batch_nos];
+			}
+
+			return { filters: filters }
 		});
 	},
 
