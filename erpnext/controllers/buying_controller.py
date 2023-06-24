@@ -709,7 +709,7 @@ class BuyingController(SubcontractingController):
 				"asset_quantity": row.qty if is_grouped_asset else 0,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
-				"cost_center": row.cost_center or None
+				"cost_center": row.cost_center,
 			}
 		)
 
