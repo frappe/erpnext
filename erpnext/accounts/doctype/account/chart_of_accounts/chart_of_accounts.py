@@ -43,23 +43,20 @@ def create_charts(
 						"Balance Sheet" if root_type in ["Asset", "Liability", "Equity"] else "Profit and Loss"
 					)
 
-					account = frappe.get_doc(
-						{
-							"doctype": "Account",
-							"account_name": child.get("account_name") if from_coa_importer else account_name,
-							"company": company,
-							"parent_account": parent,
-							"is_group": is_group,
-							"root_type": root_type,
-							"report_type": report_type,
-							"account_number": account_number,
-							"account_type": child.get("account_type"),
-							"account_info": child.get("account_info"),
-							"account_currency": child.get("account_currency")
-							or frappe.get_cached_value("Company", company, "default_currency"),
-							"tax_rate": child.get("tax_rate"),
-						}
+					account = frappe.new_doc("Account")
+					account.account_name = child.get("account_name") if from_coa_importer else account_name
+					account.company = company
+					account.parent_account = parent
+					account.is_group = is_group
+					account.root_type = root_type
+					account.report_type = report_type
+					account.account_number = account_number
+					account.account_type = child.get("account_type")
+					account.account_info = child.get("account_info")
+					account.account_currency = child.get("account_currency") or frappe.get_cached_value(
+						"Company", company, "default_currency"
 					)
+					account.tax_rate = child.get("tax_rate")
 
 					if root_account or frappe.local.flags.allow_unverified_charts:
 						account.flags.ignore_mandatory = True
