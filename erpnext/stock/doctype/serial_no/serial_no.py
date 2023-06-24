@@ -307,6 +307,11 @@ def validate_serial_no(sle, item_det):
 			allow_existing_serial_no = cint(
 				frappe.get_cached_value("Stock Settings", "None", "allow_existing_serial_no")
 			)
+
+			work_order = None
+			if sle.voucher_no and sle.voucher_type == "Stock Entry":
+				work_order = frappe.get_cached_value("Stock Entry", sle.voucher_no, "work_order")
+
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value(
@@ -324,6 +329,7 @@ def validate_serial_no(sle, item_det):
 							"purchase_document_no",
 							"company",
 							"status",
+							"work_order",
 						],
 						as_dict=1,
 					)
@@ -334,6 +340,9 @@ def validate_serial_no(sle, item_det):
 								_("Serial No {0} does not belong to Item {1}").format(serial_no, sle.item_code),
 								SerialNoItemError,
 							)
+
+					if sr.work_order and work_order and sr.work_order == work_order:
+						allow_existing_serial_no = True
 
 					if not allow_existing_serial_no and sle.voucher_type in [
 						"Stock Entry",

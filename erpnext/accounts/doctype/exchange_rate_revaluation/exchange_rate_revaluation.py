@@ -22,7 +22,7 @@ class ExchangeRateRevaluation(Document):
 		self.set_total_gain_loss()
 
 	def validate_rounding_loss_allowance(self):
-		if not (self.rounding_loss_allowance > 0 and self.rounding_loss_allowance < 1):
+		if not (self.rounding_loss_allowance >= 0 and self.rounding_loss_allowance < 1):
 			frappe.throw(_("Rounding Loss Allowance should be between 0 and 1"))
 
 	def set_total_gain_loss(self):
@@ -186,7 +186,7 @@ class ExchangeRateRevaluation(Document):
 				# round off balance based on currency precision
 				# and consider debit-credit difference allowance
 				currency_precision = get_currency_precision()
-				rounding_loss_allowance = rounding_loss_allowance or 0.05
+				rounding_loss_allowance = float(rounding_loss_allowance) or 0.05
 				for acc in account_details:
 					acc.balance_in_account_currency = flt(acc.balance_in_account_currency, currency_precision)
 					if abs(acc.balance_in_account_currency) <= rounding_loss_allowance:
@@ -373,6 +373,24 @@ class ExchangeRateRevaluation(Document):
 						"credit": 0,
 					}
 				)
+
+				journal_entry_accounts.append(journal_account)
+
+				journal_entry_accounts.append(
+					{
+						"account": unrealized_exchange_gain_loss_account,
+						"balance": get_balance_on(unrealized_exchange_gain_loss_account),
+						"debit": 0,
+						"credit": 0,
+						"debit_in_account_currency": abs(d.gain_loss) if d.gain_loss < 0 else 0,
+						"credit_in_account_currency": abs(d.gain_loss) if d.gain_loss > 0 else 0,
+						"cost_center": erpnext.get_default_cost_center(self.company),
+						"exchange_rate": 1,
+						"reference_type": "Exchange Rate Revaluation",
+						"reference_name": self.name,
+					}
+				)
+
 			elif d.get("balance_in_base_currency") and not d.get("new_balance_in_base_currency"):
 				# Base currency has balance
 				dr_or_cr = "credit" if d.get("balance_in_base_currency") > 0 else "debit"
@@ -388,22 +406,22 @@ class ExchangeRateRevaluation(Document):
 					}
 				)
 
-			journal_entry_accounts.append(journal_account)
+				journal_entry_accounts.append(journal_account)
 
-		journal_entry_accounts.append(
-			{
-				"account": unrealized_exchange_gain_loss_account,
-				"balance": get_balance_on(unrealized_exchange_gain_loss_account),
-				"debit": abs(self.gain_loss_booked) if self.gain_loss_booked < 0 else 0,
-				"credit": abs(self.gain_loss_booked) if self.gain_loss_booked > 0 else 0,
-				"debit_in_account_currency": abs(self.gain_loss_booked) if self.gain_loss_booked < 0 else 0,
-				"credit_in_account_currency": self.gain_loss_booked if self.gain_loss_booked > 0 else 0,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"exchange_rate": 1,
-				"reference_type": "Exchange Rate Revaluation",
-				"reference_name": self.name,
-			}
-		)
+				journal_entry_accounts.append(
+					{
+						"account": unrealized_exchange_gain_loss_account,
+						"balance": get_balance_on(unrealized_exchange_gain_loss_account),
+						"debit": abs(d.gain_loss) if d.gain_loss < 0 else 0,
+						"credit": abs(d.gain_loss) if d.gain_loss > 0 else 0,
+						"debit_in_account_currency": 0,
+						"credit_in_account_currency": 0,
+						"cost_center": erpnext.get_default_cost_center(self.company),
+						"exchange_rate": 1,
+						"reference_type": "Exchange Rate Revaluation",
+						"reference_name": self.name,
+					}
+				)
 
 		journal_entry.set("accounts", journal_entry_accounts)
 		journal_entry.set_total_debit_credit()
@@ -552,7 +570,7 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 @frappe.whitelist()
 def get_account_details(
-	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance=None
+	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance: float = None
 ):
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
