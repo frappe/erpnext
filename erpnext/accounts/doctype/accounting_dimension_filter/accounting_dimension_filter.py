@@ -13,7 +13,7 @@ class AccountingDimensionFilter(Document):
 		# If restriction is not applied on values, then remove all the dimensions and set allow_or_restrict to Restrict
 		if not self.apply_restriction_on_values:
 			self.allow_or_restrict = "Restrict"
-			self.set('dimensions', [])
+			self.set("dimensions", [])
 			
 	def validate(self):
 		self.validate_applicable_accounts()
