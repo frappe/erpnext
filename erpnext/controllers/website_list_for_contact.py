@@ -242,15 +242,14 @@ def get_customers_suppliers(doctype, user):
 
 
 def get_parents_for_user(parenttype: str) -> list[str]:
-	portal_users = frappe.qb.DocType("Portal User")
-	q = (
-		frappe.qb.from_(portal_users)
-		.select(portal_users.parent)
-		.where(portal_users.user == frappe.session.user)
-		.where(portal_users.parenttype == parenttype)
-	)
-	suppliers_or_customers = q.run(pluck="name")
-	return suppliers_or_customers
+	portal_user = frappe.qb.DocType("Portal User")
+
+	return (
+		frappe.qb.from_(portal_user)
+		.select(portal_user.parent)
+		.where(portal_user.user == frappe.session.user)
+		.where(portal_user.parenttype == parenttype)
+	).run(pluck="name")
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
