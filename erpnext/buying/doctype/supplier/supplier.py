@@ -48,15 +48,19 @@ class Supplier(TransactionBase):
 	def on_update(self):
 		self.create_primary_contact()
 		self.create_primary_address()
-		if self.portal_users:
-			self.add_role_for_user()
+		self.add_role_for_user()
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
-			portal_user_doc = frappe.get_doc("User", portal_user.user)
-			portal_user_doc.add_roles("Supplier")
-			portal_user_doc.save()
-		frappe.msgprint(_("Added Supplier Role for Portal Users."), alert=True)
+			user_doc = frappe.get_doc("User", portal_user.user)
+			roles = {r.role for r in user_doc.roles}
+			if "Supplier" in roles:
+				continue
+
+			user_doc.add_roles("Supplier")
+			frappe.msgprint(
+				_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True
+			)
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()

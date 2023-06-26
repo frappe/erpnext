@@ -169,15 +169,19 @@ class Customer(TransactionBase):
 			self.link_lead_address_and_contact()
 
 		self.update_customer_groups()
-		if self.portal_users:
-			self.add_role_for_user()
+		self.add_role_for_user()
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
-			portal_user_doc = frappe.get_doc("User", portal_user.user)
-			portal_user_doc.add_roles("Customer")
-			portal_user.save()
-		frappe.msgprint(_("Added Customer Role for Portal Users."), alert=True)
+			user_doc = frappe.get_doc("User", portal_user.user)
+			roles = {r.role for r in user_doc.roles}
+			if "Customer" in roles:
+				continue
+
+			user_doc.add_roles("Customer")
+			frappe.msgprint(
+				_("Added Customer Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True
+			)
 
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
