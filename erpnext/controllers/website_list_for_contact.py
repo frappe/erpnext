@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.modules.utils import get_module_app
-from frappe.utils import flt, has_common
+from frappe.utils import flt
 from frappe.utils.user import is_website_user
 
 
@@ -230,9 +230,12 @@ def get_customers_suppliers(doctype, user):
 
 	has_customer_field = meta.has_field(customer_field_name)
 	has_supplier_field = meta.has_field("supplier")
-	if has_common(["Supplier"], frappe.get_roles(user)):
+
+	roles = set(frappe.get_roles(user))
+
+	if "Supplier" in roles:
 		suppliers = get_parents_for_user()
-	if has_common(["Customer"], frappe.get_roles(user)):
+	if "Customer" in roles:
 		customers = get_parents_for_user()
 	elif frappe.has_permission(doctype, "read", user=user):
 		customer_list = frappe.get_list("Customer")
