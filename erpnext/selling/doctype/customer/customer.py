@@ -22,6 +22,7 @@ from erpnext.accounts.party import (  # noqa
 	get_timeline_data,
 	validate_party_accounts,
 )
+from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -173,15 +174,7 @@ class Customer(TransactionBase):
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
-			user_doc = frappe.get_doc("User", portal_user.user)
-			roles = {r.role for r in user_doc.roles}
-			if "Customer" in roles:
-				continue
-
-			user_doc.add_roles("Customer")
-			frappe.msgprint(
-				_("Added Customer Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True
-			)
+			add_role_for_portal_user(portal_user, "Customer")
 
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]

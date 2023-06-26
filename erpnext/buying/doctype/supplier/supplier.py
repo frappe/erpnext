@@ -16,6 +16,7 @@ from erpnext.accounts.party import (  # noqa
 	get_timeline_data,
 	validate_party_accounts,
 )
+from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -52,15 +53,29 @@ class Supplier(TransactionBase):
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
-			user_doc = frappe.get_doc("User", portal_user.user)
-			roles = {r.role for r in user_doc.roles}
-			if "Supplier" in roles:
-				continue
+			add_role_for_portal_user(portal_user, "Supplier")
 
-			user_doc.add_roles("Supplier")
+	def _add_supplier_role(self, portal_user):
+		if not portal_user.is_new():
+			return
+
+		user_doc = frappe.get_doc("User", portal_user.user)
+		roles = {r.role for r in user_doc.roles}
+
+		if "Supplier" in roles:
+			return
+
+		if "System Manager" not in frappe.get_roles():
 			frappe.msgprint(
-				_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True
+				_("Please add 'Supplier' role to user {0}.").format(portal_user.user),
+				alert=True,
 			)
+			return
+
+		user_doc.add_roles("Supplier")
+		frappe.msgprint(
+			_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True
+		)
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
