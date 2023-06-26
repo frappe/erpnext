@@ -336,7 +336,6 @@ class PaymentReconciliation(Document):
 
 		entry_list = []
 		dr_or_cr_notes = []
-		difference_entries = []
 		for row in self.get("allocation"):
 			reconciled_entry = []
 			if row.invoice_number and row.allocated_amount:
@@ -348,16 +347,17 @@ class PaymentReconciliation(Document):
 				payment_details = self.get_payment_details(row, dr_or_cr)
 				reconciled_entry.append(payment_details)
 
-				if payment_details.difference_amount:
-					difference_entries.append(
-						self.make_difference_entry(payment_details, do_not_save_and_submit=bool(dr_or_cr_notes))
-					)
+				if payment_details.difference_amount and row.reference_type not in [
+					"Sales Invoice",
+					"Purchase Invoice",
+				]:
+					self.make_difference_entry(payment_details)
 
 		if entry_list:
 			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes, difference_entries, self.company)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
 	@frappe.whitelist()
 	def reconcile(self):
@@ -385,7 +385,7 @@ class PaymentReconciliation(Document):
 
 		self.get_unreconciled_entries()
 
-	def make_difference_entry(self, row, do_not_save_and_submit=False):
+	def make_difference_entry(self, row):
 		journal_entry = frappe.new_doc("Journal Entry")
 		journal_entry.voucher_type = "Exchange Gain Or Loss"
 		journal_entry.company = self.company
@@ -433,9 +433,8 @@ class PaymentReconciliation(Document):
 
 		journal_entry.append("accounts", journal_account)
 
-		if not do_not_save_and_submit:
-			journal_entry.save()
-			journal_entry.submit()
+		journal_entry.save()
+		journal_entry.submit()
 
 		return journal_entry
 
@@ -603,13 +602,16 @@ class PaymentReconciliation(Document):
 		return condition
 
 
-def reconcile_dr_cr_note(dr_cr_notes, difference_entries, company):
-	def find_difference_entry(voucher_type, voucher_no):
-		for jv in difference_entries:
-			accounts = iter(jv.accounts)
-			for account in accounts:
-				if account.reference_type == voucher_type and account.reference_name == voucher_no:
-					return next(accounts)
+def reconcile_dr_cr_note(dr_cr_notes, company):
+	def get_difference_row(inv):
+		if inv.difference_amount != 0 and inv.difference_account:
+			difference_row = {
+				"account": inv.difference_account,
+				inv.dr_or_cr: abs(inv.difference_amount) if inv.difference_amount > 0 else 0,
+				reconcile_dr_or_cr: abs(inv.difference_amount) if inv.difference_amount < 0 else 0,
+				"cost_center": erpnext.get_default_cost_center(company),
+			}
+			return difference_row
 
 	for inv in dr_cr_notes:
 		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
@@ -656,7 +658,7 @@ def reconcile_dr_cr_note(dr_cr_notes, difference_entries, company):
 			}
 		)
 
-		if difference_entry := find_difference_entry(inv.against_voucher_type, inv.against_voucher):
+		if difference_entry := get_difference_row(inv):
 			jv.append("accounts", difference_entry)
 
 		jv.flags.ignore_mandatory = True
