@@ -573,7 +573,9 @@ def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 			"supplier": ("in", parties),
 			"apply_tds": 1,
 			"docstatus": 1,
+			"tax_withholding_category": ldc.tax_withholding_category,
 			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
+			"company": ldc.company,
 		},
 		"sum(tax_withholding_net_total)",
 	)
@@ -603,7 +605,7 @@ def is_valid_certificate(
 ):
 	valid = False
 
-	available_amount = flt(certificate_limit) - flt(deducted_amount) - flt(current_amount)
+	available_amount = flt(certificate_limit) - flt(deducted_amount)
 
 	if (getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)) and available_amount > 0:
 		valid = True
