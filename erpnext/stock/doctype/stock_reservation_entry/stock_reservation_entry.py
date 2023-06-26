@@ -18,7 +18,8 @@ class StockReservationEntry(Document):
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 		self.validate_uom_is_integer()
-		self.validate_reserved_qty()
+		self.validate_reservation_based_on_qty()
+		self.validate_reservation_based_on_serial_and_batch()
 
 	def on_submit(self) -> None:
 		self.update_reserved_qty_in_voucher()
@@ -27,7 +28,8 @@ class StockReservationEntry(Document):
 	def on_update_after_submit(self) -> None:
 		self.can_be_updated()
 		self.validate_uom_is_integer()
-		self.validate_reserved_qty()
+		self.validate_reservation_based_on_qty()
+		self.validate_reservation_based_on_serial_and_batch()
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
 		self.reload()
@@ -80,44 +82,27 @@ class StockReservationEntry(Document):
 				msg = f"Reserved Qty ({flt(self.reserved_qty, self.precision('reserved_qty'))}) cannot be a fraction. To allow this, disable '{frappe.bold(_('Must be Whole Number'))}' in UOM {frappe.bold(self.stock_uom)}."
 				frappe.throw(_(msg))
 
-	def validate_reserved_qty(self) -> None:
-		"""Validates `Reserved Qty`"""
+	def validate_reservation_based_on_qty(self) -> None:
+		"""Validates `Reserved Qty` when `Reservation Based On` is `Qty`."""
 
-		self.db_set(
-			"available_qty",
-			get_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),
-		)
-		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
-			self.voucher_type, self.voucher_no, self.voucher_detail_no, ignore_sre=self.name
-		)
-
-		voucher_delivered_qty = 0
-		if self.voucher_type == "Sales Order":
-			delivered_qty, conversion_factor = frappe.db.get_value(
-				"Sales Order Item", self.voucher_detail_no, ["delivered_qty", "conversion_factor"]
-			)
-			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
-
-		max_qty_can_be_reserved = min(
-			self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty)
-		)
-
-		if max_qty_can_be_reserved <= 0 and self.voucher_type == "Sales Order":
-			msg = f"Item {frappe.bold(self.item_code)} is already delivered for Sales Order {frappe.bold(self.voucher_no)}."
-
-			if self.docstatus == 1:
-				self.cancel()
-				return frappe.msgprint(_(msg))
-			else:
-				frappe.throw(_(msg))
-
-		qty_to_be_reserved = 0
 		if self.reservation_based_on == "Qty":
 			if self.sb_entries:
-				self.sb_entries = []
+				self.sb_entries.clear()
 
-			qty_to_be_reserved = self.reserved_qty
-		elif self.reservation_based_on == "Serial and Batch":
+			self.validate_with_max_reserved_qty(self.reserved_qty)
+
+	def validate_reservation_based_on_serial_and_batch(self) -> None:
+		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
+
+		if self.reservation_based_on == "Serial and Batch":
+			if not self.has_serial_no and not self.has_batch_no:
+				if self.sb_entries:
+					self.sb_entries.clear()
+
+				frappe.throw(_("Please select Reservation Based On as Qty."))
+
+			qty_to_be_reserved = 0
+
 			for entry in self.sb_entries:
 				if self.has_serial_no and entry.qty != 1:
 					frappe.throw(_(f"Row #{entry.idx}: Qty should be 1 for Serialized Item."))
@@ -129,15 +114,10 @@ class StockReservationEntry(Document):
 					_("Please select Serial/Batch No to reserve or change Reservation Based On to Qty.")
 				)
 
-		if qty_to_be_reserved > max_qty_can_be_reserved:
-			frappe.throw(
-				_(f"Cannot reserve more than {frappe.bold(max_qty_can_be_reserved)} {self.stock_uom}.")
-			)
-		if qty_to_be_reserved <= self.delivered_qty:
-			frappe.throw(_("Reserved Qty should be greater than Delivered Qty."))
+			self.validate_with_max_reserved_qty(qty_to_be_reserved)
 
-		if self.reservation_based_on == "Serial and Batch":
-			self.db_set("reserved_qty", qty_to_be_reserved)
+			if self.reservation_based_on == "Serial and Batch":
+				self.db_set("reserved_qty", qty_to_be_reserved)
 
 	def update_reserved_qty_in_voucher(
 		self, reserved_qty_field: str = "stock_reserved_qty", update_modified: bool = True
@@ -192,6 +172,44 @@ class StockReservationEntry(Document):
 
 		if self.status == "Delivered":
 			frappe.throw(_(f"Delivered {self.doctype} cannot be updated, create a new one instead."))
+
+	def validate_with_max_reserved_qty(self, qty_to_be_reserved: float) -> None:
+		"""Validates `Reserved Qty` with `Max Reserved Qty`."""
+
+		self.db_set(
+			"available_qty",
+			get_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),
+		)
+
+		total_reserved_qty = get_sre_reserved_qty_for_voucher_detail_no(
+			self.voucher_type, self.voucher_no, self.voucher_detail_no, ignore_sre=self.name
+		)
+
+		voucher_delivered_qty = 0
+		if self.voucher_type == "Sales Order":
+			delivered_qty, conversion_factor = frappe.db.get_value(
+				"Sales Order Item", self.voucher_detail_no, ["delivered_qty", "conversion_factor"]
+			)
+			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
+
+		max_reserved_qty = min(
+			self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty)
+		)
+
+		if max_reserved_qty <= 0 and self.voucher_type == "Sales Order":
+			msg = f"Item {frappe.bold(self.item_code)} is already delivered for Sales Order {frappe.bold(self.voucher_no)}."
+
+			if self.docstatus == 1:
+				self.cancel()
+				return frappe.msgprint(_(msg))
+			else:
+				frappe.throw(_(msg))
+
+		if qty_to_be_reserved > max_reserved_qty:
+			frappe.throw(_(f"Cannot reserve more than {frappe.bold(max_reserved_qty)} {self.stock_uom}."))
+
+		if qty_to_be_reserved <= self.delivered_qty:
+			frappe.throw(_("Reserved Qty should be greater than Delivered Qty."))
 
 
 def validate_stock_reservation_settings(voucher: object) -> None:
