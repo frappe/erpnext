@@ -968,13 +968,89 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
-	def make_exchange_gain_loss_journal(self) -> None:
+	def make_exchange_gain_loss_journal(self, args=None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
 		"""
 		# Cancelling existing exchange gain/loss journals is handled in on_cancel event in accounts/utils.py
 		if self.docstatus == 1:
+			if self.get("doctype") == "Journal Entry":
+				if args:
+					for arg in args:
+						print(arg)
+						if arg.get("difference_amount") != 0 and arg.get("difference_account"):
+							journal_entry = frappe.new_doc("Journal Entry")
+							journal_entry.voucher_type = "Exchange Gain Or Loss"
+							journal_entry.company = self.company
+							journal_entry.posting_date = nowdate()
+							journal_entry.multi_currency = 1
+
+							party_account = arg.account
+							party_account_currency = frappe.get_cached_value(
+								"Account", party_account, "account_currency"
+							)
+							dr_or_cr = "debit" if arg.difference_amount > 0 else "credit"
+
+							if arg.reference_doctype == "Purchase Invoice":
+								dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
+							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
+							gain_loss_account = arg.difference_account
+
+							if not gain_loss_account:
+								frappe.throw(
+									_("Please set default Exchange Gain/Loss Account in Company {}").format(
+										self.get("company")
+									)
+								)
+
+							gain_loss_account_currency = get_account_currency(gain_loss_account)
+							if gain_loss_account_currency != self.company_currency:
+								frappe.throw(
+									_("Currency for {0} must be {1}").format(gain_loss_account, self.company_currency)
+								)
+
+							journal_account = frappe._dict(
+								{
+									"account": party_account,
+									"party_type": arg.party_type,
+									"party": arg.party,
+									"account_currency": party_account_currency,
+									"exchange_rate": 0,
+									"cost_center": erpnext.get_default_cost_center(self.company),
+									"reference_type": arg.against_voucher_type,
+									"reference_name": arg.against_voucher,
+									"reference_detail_no": arg.idx,
+									dr_or_cr: abs(arg.difference_amount),
+									dr_or_cr + "_in_account_currency": 0,
+								}
+							)
+
+							journal_entry.append("accounts", journal_account)
+
+							journal_account = frappe._dict(
+								{
+									"account": gain_loss_account,
+									"account_currency": gain_loss_account_currency,
+									"exchange_rate": 1,
+									"cost_center": erpnext.get_default_cost_center(self.company),
+									# TODO: figure out a way to pass reference
+									# "reference_type": self.doctype,
+									# "reference_name": self.name,
+									# "reference_detail_no": arg.idx,
+									reverse_dr_or_cr + "_in_account_currency": abs(arg.difference_amount),
+									reverse_dr_or_cr: abs(arg.difference_amount),
+								}
+							)
+
+							journal_entry.append("accounts", journal_account)
+
+							journal_entry.save()
+							journal_entry.submit()
+
 			if self.get("doctype") == "Payment Entry":
+				# For Payment Entry, exchange_gain_loss field in the `reference` table is the trigger for journal creation
 				gain_loss_to_book = [x for x in self.references if x.exchange_gain_loss != 0]
 				booked = []
 				if gain_loss_to_book:
