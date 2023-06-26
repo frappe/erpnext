@@ -4,7 +4,7 @@ import frappe
 def execute():
 	contact = frappe.qb.DocType("Contact")
 	dynamic_link = frappe.qb.DocType("Dynamic Link")
-	q = (
+	contacts = (
 		frappe.qb.from_(contact)
 		.inner_join(dynamic_link)
 		.on(contact.name == dynamic_link.parent)
@@ -17,8 +17,8 @@ def execute():
 			(dynamic_link.parenttype == "Contact")
 			& (dynamic_link.link_doctype.isin(["Supplier", "Customer"]))
 		)
-	)
-	contacts = q.run(as_dict=True)
+	).run(as_dict=True)
+
 	for contact in contacts:
 		user = frappe.db.get_value("User", {"email": contact.portal_user}, "name")
 		if user:
