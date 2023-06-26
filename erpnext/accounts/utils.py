@@ -459,6 +459,9 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
 				update_reference_in_journal_entry(entry, doc, do_not_save=True)
+				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
+				# amount and account in args
+				doc.make_exchange_gain_loss_journal(args)
 			else:
 				update_reference_in_payment_entry(
 					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
