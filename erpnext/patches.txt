@@ -340,3 +340,4 @@ execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Template', ignore_missin
 execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Accounts', ignore_missing=True)
 erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v14_0.auto_populate_portal_users_in_supplier_customer_doctypes
+erpnext.patches.v14_0.set_report_in_process_SOA

@@ -9905,3 +9905,7 @@ Select Alternative Items for Sales Order,Alternativpositionen f체r Auftragsbest�
 Select an item from each set to be used in the Sales Order.,"W채hlen Sie aus den Alternativen jeweils einen Artikel aus, der in die Auftragsbest채tigung 체bernommen werden soll.",
 Is Alternative,Ist Alternative,
 Alternative Items,Alternativpositionen,
+Add Template,Vorlage einf체gen,
+Prepend the template to the email message,Vorlage oberhalb der Email-Nachricht einf체gen,
+Clear & Add Template,Leeren und Vorlage einf체gen,
+Clear the email message and add the template,Email-Feld leeren und Vorlage einf체gen,

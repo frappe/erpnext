@@ -10,6 +10,7 @@
   "disabled",
   "column_break_2",
   "company",
+  "apply_restriction_on_values",
   "allow_or_restrict",
   "section_break_4",
   "accounts",
@@ -24,94 +25,80 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Accounting Dimension",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "column_break_2",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_4",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "hide_border": 1
   },
   {
    "fieldname": "column_break_6",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.apply_restriction_on_values == 1;",
    "fieldname": "allow_or_restrict",
    "fieldtype": "Select",
    "label": "Allow Or Restrict Dimension",
    "options": "Allow\nRestrict",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "accounts",
    "fieldtype": "Table",
    "label": "Applicable On Account",
    "options": "Applicable On Account",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
-   "depends_on": "eval:doc.accounting_dimension",
+   "depends_on": "eval:doc.accounting_dimension && doc.apply_restriction_on_values",
    "fieldname": "dimensions",
    "fieldtype": "Table",
    "label": "Applicable Dimension",
-   "options": "Allowed Dimension",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "mandatory_depends_on": "eval:doc.apply_restriction_on_values == 1;",
+   "options": "Allowed Dimension"
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Disabled"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "dimension_filter_help",
    "fieldtype": "HTML",
-   "label": "Dimension Filter Help",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Dimension Filter Help"
   },
   {
    "fieldname": "section_break_10",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_restriction_on_values",
+   "fieldtype": "Check",
+   "label": "Apply restriction on dimension values"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-03 12:04:58.678402",
+ "modified": "2023-06-07 14:59:41.869117",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -154,5 +141,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
