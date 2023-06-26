@@ -83,6 +83,7 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.add_role_for_user()
 
 		# set loyalty program tier
 		if frappe.db.exists("Customer", self.name):
@@ -170,7 +171,6 @@ class Customer(TransactionBase):
 			self.link_lead_address_and_contact()
 
 		self.update_customer_groups()
-		self.add_role_for_user()
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:

@@ -49,7 +49,6 @@ class Supplier(TransactionBase):
 	def on_update(self):
 		self.create_primary_contact()
 		self.create_primary_address()
-		self.add_role_for_user()
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
@@ -87,6 +86,7 @@ class Supplier(TransactionBase):
 
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
+		self.add_role_for_user()
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
