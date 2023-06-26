@@ -46,9 +46,6 @@ class Supplier(TransactionBase):
 			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def on_update(self):
-		if not self.naming_series:
-			self.naming_series = ""
-
 		self.create_primary_contact()
 		self.create_primary_address()
 		if self.portal_users:
