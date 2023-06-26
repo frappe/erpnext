@@ -12,15 +12,17 @@
   {
    "fieldname": "user",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "User",
    "options": "User",
+   "reqd": 1,
    "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-23 14:47:48.700287",
+ "modified": "2023-06-26 14:15:34.695605",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Portal User",

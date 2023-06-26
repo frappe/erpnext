@@ -70,7 +70,8 @@
   "column_break_59",
   "release_date",
   "portal_users_tab",
-  "portal_users"
+  "portal_users",
+  "column_break_1mqv"
  ],
  "fields": [
   {
@@ -458,6 +459,10 @@
    "fieldtype": "Table",
    "label": "Supplier Portal Users",
    "options": "Portal User"
+  },
+  {
+   "fieldname": "column_break_1mqv",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -470,7 +475,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-06-22 13:21:10.050024",
+ "modified": "2023-06-26 14:20:00.961554",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
