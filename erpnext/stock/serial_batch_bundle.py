@@ -819,7 +819,7 @@ class SerialBatchCreation:
 		if self.get("serial_nos"):
 			serial_no_wise_batch = frappe._dict({})
 			if self.has_batch_no:
-				serial_no_wise_batch = self.get_serial_nos_batch(self.serial_nos)
+				serial_no_wise_batch = get_serial_nos_batch(self.serial_nos)
 
 			qty = -1 if self.type_of_transaction == "Outward" else 1
 			for serial_no in self.serial_nos:
@@ -843,16 +843,6 @@ class SerialBatchCreation:
 						"incoming_rate": self.get("incoming_rate"),
 					},
 				)
-
-	def get_serial_nos_batch(self, serial_nos):
-		return frappe._dict(
-			frappe.get_all(
-				"Serial No",
-				fields=["name", "batch_no"],
-				filters={"name": ("in", serial_nos)},
-				as_list=1,
-			)
-		)
 
 	def create_batch(self):
 		from erpnext.stock.doctype.batch.batch import make_batch
@@ -931,3 +921,14 @@ def get_serial_or_batch_items(items):
 		serial_or_batch_items = [d.name for d in serial_or_batch_items]
 
 	return serial_or_batch_items
+
+
+def get_serial_nos_batch(serial_nos):
+	return frappe._dict(
+		frappe.get_all(
+			"Serial No",
+			fields=["name", "batch_no"],
+			filters={"name": ("in", serial_nos)},
+			as_list=1,
+		)
+	)

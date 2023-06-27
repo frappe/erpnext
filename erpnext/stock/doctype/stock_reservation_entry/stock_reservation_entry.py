@@ -18,7 +18,10 @@ class StockReservationEntry(Document):
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 		self.validate_uom_is_integer()
+
+	def before_submit(self) -> None:
 		self.validate_reservation_based_on_qty()
+		self.auto_reserve_serial_and_batch()
 		self.validate_reservation_based_on_serial_and_batch()
 
 	def on_submit(self) -> None:
@@ -90,6 +93,57 @@ class StockReservationEntry(Document):
 				self.sb_entries.clear()
 
 			self.validate_with_max_reserved_qty(self.reserved_qty)
+
+	def auto_reserve_serial_and_batch(self) -> None:
+		if (
+			(self.get("_action") == "submit")
+			and (self.has_serial_no or self.has_batch_no)
+			and cint(frappe.db.get_single_value("Stock Settings", "auto_reserve_serial_and_batch"))
+		):
+			from erpnext.stock.doctype.batch.batch import get_available_batches
+			from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+			from erpnext.stock.serial_batch_bundle import get_serial_nos_batch
+
+			self.reservation_based_on = "Serial and Batch"
+			kwargs = frappe._dict(
+				{
+					"item_code": self.item_code,
+					"warehouse": self.warehouse,
+					"qty": abs(self.reserved_qty) or 0,
+					"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+				}
+			)
+
+			serial_nos, batch_nos = [], []
+			if self.has_serial_no:
+				serial_nos = get_serial_nos_for_outward(kwargs)
+			if self.has_batch_no:
+				batch_nos = get_available_batches(kwargs)
+
+			if serial_nos:
+				serial_no_wise_batch = frappe._dict({})
+
+				if self.has_batch_no:
+					serial_no_wise_batch = get_serial_nos_batch(serial_nos)
+
+				for serial_no in serial_nos:
+					self.append(
+						"sb_entries",
+						{
+							"serial_no": serial_no,
+							"qty": 1,
+							"batch_no": serial_no_wise_batch.get(serial_no),
+						},
+					)
+			elif batch_nos:
+				for batch_no, batch_qty in batch_nos.items():
+					self.append(
+						"sb_entries",
+						{
+							"batch_no": batch_no,
+							"qty": batch_qty,
+						},
+					)
 
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
