@@ -242,7 +242,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			source_name: this.frm.doc.supplier,
 			target: this.frm,
 			setters: {
-				company: me.frm.doc.company
+				company: this.frm.doc.company
 			},
 			get_query_filters: {
 				docstatus: ["!=", 2],
