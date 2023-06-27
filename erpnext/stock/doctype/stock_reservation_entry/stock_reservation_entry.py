@@ -133,6 +133,7 @@ class StockReservationEntry(Document):
 							"serial_no": serial_no,
 							"qty": 1,
 							"batch_no": serial_no_wise_batch.get(serial_no),
+							"warehouse": self.warehouse,
 						},
 					)
 			elif batch_nos:
@@ -142,6 +143,7 @@ class StockReservationEntry(Document):
 						{
 							"batch_no": batch_no,
 							"qty": batch_qty,
+							"warehouse": self.warehouse,
 						},
 					)
 
@@ -160,6 +162,9 @@ class StockReservationEntry(Document):
 			for entry in self.sb_entries:
 				if self.has_serial_no and entry.qty != 1:
 					frappe.throw(_(f"Row #{entry.idx}: Qty should be 1 for Serialized Item."))
+
+				if not entry.warehouse:
+					frappe.throw(_(f"Row #{entry.idx}: Warehouse is mandatory."))
 
 				qty_to_be_reserved += entry.qty
 
