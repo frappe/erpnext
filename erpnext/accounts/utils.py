@@ -636,6 +636,7 @@ def update_reference_in_payment_entry(
 		new_row.docstatus = 1
 		new_row.update(reference_details)
 
+<<<<<<< HEAD
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
@@ -652,6 +653,8 @@ def update_reference_in_payment_entry(
 
 		payment_entry.set_gain_or_loss(account_details=account_details)
 
+=======
+>>>>>>> 1bcb728c85 (refactor: remove call for setting deductions in payment entry)
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
