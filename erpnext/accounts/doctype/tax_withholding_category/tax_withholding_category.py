@@ -558,7 +558,7 @@ def is_valid_certificate(
 ):
 	valid = False
 
-	available_amount = flt(certificate_limit) - flt(deducted_amount) - flt(current_amount)
+	available_amount = flt(certificate_limit) - flt(deducted_amount)
 
 	if (getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)) and available_amount > 0:
 		valid = True
