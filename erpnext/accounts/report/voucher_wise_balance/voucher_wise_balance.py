@@ -49,7 +49,7 @@ def get_data(filters):
 		.groupby(gle.voucher_no)
 	)
 	query = apply_filters(query, filters, gle)
-	gl_entries = query.run(as_dict=True, debug=True)
+	gl_entries = query.run(as_dict=True)
 	unmatched = [entry for entry in gl_entries if entry.debit != entry.credit]
 	return unmatched
 
