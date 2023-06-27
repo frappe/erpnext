@@ -518,7 +518,6 @@ def get_invoice_total_without_tcs(inv, tax_details):
 
 def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net_total):
 	tds_amount = 0
-<<<<<<< HEAD
 
 	limit_consumed = flt(
 		frappe.db.get_all(
@@ -532,19 +531,6 @@ def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net
 			},
 			fields=["sum(base_net_total) as limit_consumed"],
 		)[0].get("limit_consumed")
-=======
-	limit_consumed = frappe.db.get_value(
-		"Purchase Invoice",
-		{
-			"supplier": ("in", parties),
-			"apply_tds": 1,
-			"docstatus": 1,
-			"tax_withholding_category": ldc.tax_withholding_category,
-			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
-			"company": ldc.company,
-		},
-		"sum(tax_withholding_net_total)",
->>>>>>> 1f9ef6c48f (fix: TDS amount calculation post LDC breach)
 	)
 
 	if is_valid_certificate(
