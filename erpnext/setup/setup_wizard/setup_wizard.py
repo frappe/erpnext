@@ -56,7 +56,14 @@ def setup_company(args):
 
 def setup_defaults(args):
 	fixtures.install_defaults(frappe._dict(args))
+	# Remove This before merging and set is_hidden = 1 to workspaces manually.
+	ds = frappe.get_doc("Domain Settings")
+	Workspace = frappe.qb.DocType("Workspace")
+	frappe.qb.update(Workspace).set("is_hidden", 1).run()
 
+	for ws in frappe.parse_json(ds.workspace_data) or []:
+		name = frappe._dict(ws).name
+		frappe.db.set_value("Workspace", name, "is_hidden", 0);
 
 def fin(args):
 	frappe.local.message_log = []

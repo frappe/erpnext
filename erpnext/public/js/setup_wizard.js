@@ -6,12 +6,220 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 		return;
 	}
 };
-
+let modal_cards = [];
 frappe.setup.on("before_load", function () {
+	frappe.require('slides.bundle.css');
 	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
 });
 
+const set_cards = async () => {
+	const get_ws = ({name, hidden}) => {
+		return {name: name, type: "Workspace", label_field: "name", hidden}
+	};
+	// set description in workspace documents.
+	// Replace with actual data
+	modal_cards["accounting"] = await create_cards(["Accounting", "Buying", "Selling", "Stock"].map((name) => get_ws({name, hidden: ["Selling"].includes(name)})));
+	modal_cards["manufacturing"] = await create_cards(["Manufacturing", "Stock", "Accounting", "Buying",].map((name) => get_ws({name, hidden: ["Buying"].includes(name)})));
+};
+
+async function before_show() {
+	let {name: primary_name, type: primary_type} = frappe.setup.data.primary_domain;
+	this.cards.sort((a, b) => primary_name === a.name ? -1 : 1);
+	if (this.cards_state.active_cards?.findIndex((a) => a.name == primary_name) == -1) {
+		this.cards_state.active_cards.push(frappe.setup.data.primary_domain);
+		this.refresh();
+		await set_cards();
+		default_enabled(primary_type, primary_name);
+	} else {
+		this.refresh();
+	}
+	this.onboarding_dialog = new frappe.setup.CardsDialog({
+		title: __("Workspace Selector"),
+		primary_action_label: __("Save"),
+		primary_action: () => {
+			this.onboarding_dialog.hide();
+			this.refresh();
+		},
+		
+	});
+	this.onboarding_dialog.wrapper.classList.add("onboarding-dialog");
+	this.slides_footer.find(".next-div > button").filter(function() { return $(this).css("display") != "none" }).on("click", () => {
+		const domains = [];
+		const workspaces = [];
+		this.cards_state.active_cards.forEach((c) => {
+				modal_cards[c.name]?.forEach((d) => {
+					if (d.enabled) {
+						d.domain = c.name;
+						!domains.includes(d.domain) && domains.push(d.domain);
+						workspaces.push(d);
+					}
+				})
+		});
+		frappe.call({
+			method: "frappe.core.doctype.domain_settings.domain_settings.set_onboarding_data",
+			args: {
+				primary_domain: frappe.setup.data.primary_domain.name,
+				domains: JSON.stringify(domains),
+				workspaces: JSON.stringify(workspaces),
+			}
+		});
+	});
+};
+
+const create_cards = async (card_info) => {
+	const card_list = [];
+	for (let i = 0; i < card_info.length; i++) {
+		const { type, name, label_field, hidden = false } = card_info[i];
+		let d = await frappe.db.get_doc(type, name);
+		card_list.push({
+			name: d[label_field],
+			description: d.description || "",
+			depends_on: d.depends_on?.split("\n")
+			.map((c) => c.split(" ")) || [],
+			is_hidden: hidden,
+			default_enabled: d.default_enabled,
+			type: type,
+		});
+	}
+	return card_list;
+};
+
+const default_enabled = (card_type, card_name) => {
+	const default_enabled = modal_cards[card_name]?.filter((d) => d.default_enabled);
+		default_enabled?.forEach((d) => {
+			let c = modal_cards[card_name].find((c) => c.name == d.name)
+			c.enabled = true;
+			c.depends_on?.forEach((dc) => {
+				let d = modal_cards[card_name].find((c) => c.type == dc[0] && c.name == dc[1]);
+				d.enabled = true;
+				if (!d.required_by){
+					d.required_by = [[c.type, c.name]];
+				} else {
+					if (d.required_by.findIndex((r) => r[0] == card_type && r[1] == card_name) == -1){
+						d.required_by.push([c.type, c.name])
+					}
+				}
+			});
+		});
+};
+
+const on_click = (slides, card) => {
+	let index = slides.cards_state.active_cards.findIndex((a) => a.name == card.name);
+	if (index == -1) {
+		slides.cards_state.active_cards.push({ name: card.name, type: card.type || "" });
+		default_enabled(card.type, card.name);
+		slides.refresh();
+	} else {
+		slides.onboarding_dialog.set_title(card.label || card.name);
+		slides.onboarding_dialog.show();
+		slides.onboarding_dialog.cards_selector.card_list = modal_cards[card.name];
+		slides.onboarding_dialog.cards_selector.active_parent = card;
+		slides.onboarding_dialog.cards_selector.active_parent["slides"] = slides;
+		slides.onboarding_dialog.cards_refresh();
+	}
+}
+
+const on_disable = (card) => {
+	card.slides.cards_state.active_cards = card.slides.cards_state.active_cards.filter((c) => c.name != card.name) || [];
+	card.slides.refresh();
+	card.slides.onboarding_dialog.hide();
+}
+
 erpnext.setup.slides_settings = [
+	{
+		name: 'main_domain',
+		title: __("What are you looking for?"),
+		desc: __("Choose what describes your business needs the best."),
+		icon: "fa fa-building",
+		fields: [
+			{
+				fieldname: 'main_domain',
+				label: __('Primary Goal'),
+				fieldtype: 'Autocomplete',
+				reqd: 1,
+				options: [
+					{ label: __('Accounting'), value: 'accounting' },
+					{ label: __('Manufacturing'), value: 'manufacturing' },
+					{ label: __('Inventory / Stock'), value: 'stock_inventory' },
+				],
+			}
+		],
+		onload: function (slide) {
+			slide.get_input("main_domain").on("change", function () {
+				frappe.setup.data.primary_domain = {
+					name: slide.form.fields_dict.main_domain.get_value() || "",
+					type: "domain",
+				};
+			});
+		},
+	},
+	{
+		name: 'setup_workspace',
+		title: __("Setup your Workspace"),
+		desc: __("All of the features are enabled in ERPNext.\n This will setup workspaces with the features you need most."),
+		before_show,
+		cards: [
+			{
+				name: "accounting",
+				label: __('Accounting'),
+				description: __("Accounting module solves financial management challenges, streamlining bookkeeping, invoicing, and reporting for improved financial control and informed decision-making."),
+				type: "domain",
+				features: [
+					"Invoicing and Billing",
+					"Accounts Payable",
+					"Accounts Receivable",
+					"General Ledger",
+					"Financial Reports",
+				],
+				button: {
+					label: __("Create Workspace"),
+					active_label: __("Manage"),
+					on_click,
+				},
+				on_disable
+			},
+			{
+				name: "manufacturing",
+				label: __('Manufacturing'),
+				description: __("Manufacturing module solves production, inventory, and shop floor challenges, driving operational optimization and cost reduction."),
+				type: "domain",
+				hue_change: 340,
+				features: [
+					"Bill of Materials",
+					"Production Planning",
+					"Shop Floor Management",
+					"Quality Control",
+					"Costing",
+				],
+				button: {
+					label: __("Create Workspace"),
+					active_label: __("Manage"),
+					on_click,
+				},
+				on_disable
+			},
+			{
+				name: "stock_inventory",
+				label: __('Stock / Inventory'),
+				description: __("Stock / Inventory module optimizes stock tracking, order fulfillment, and demand forecasting, ensuring streamlined supply chain operations and optimized inventory levels."),
+				type: "domain",
+				hue_change: 320,
+				features: [
+					"Stock Management",
+					"Order Management",
+					"Inventory Valuation",
+					"Inventory Reports",
+					"Item Variants",
+				],
+				button: {
+					label: __("Create Workspace"),
+					active_label: __("Disable"),
+					on_click,
+				},
+				on_disable
+			},
+		],
+	},
 	{
 		// Organization
 		name: 'organization',
@@ -41,6 +249,7 @@ erpnext.setup.slides_settings = [
 		],
 
 		onload: function (slide) {
+			this.slide = slide;
 			this.bind_events(slide);
 			this.load_chart_of_accounts(slide);
 			this.set_fy_dates(slide);

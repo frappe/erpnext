@@ -1,0 +1,92 @@
+.onboarding-dialog {
+    margin-top: 30px !important;
+    .modal-content {
+        max-height: calc(98vh - 125px) !important;
+        min-height: calc(98vh - 125px) !important;
+
+        .modal-body {
+            overflow: auto !important;
+            margin-bottom: 5px;
+
+            .module-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-column-gap: 36px;
+                grid-row-gap: 36px;
+                margin: 24px;
+
+                .module-card {
+                    min-height: 100px;
+                    min-width: 200px;
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                    border-radius: 16px;
+                    padding: 18px;
+                    padding-bottom: 16px;
+                    background: var(--fg-color);
+                    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.4), 0px 1px 3px rgba(0, 0, 0, 0.05);
+                    border-radius: var(--border-radius-md);
+                    
+                    .module-header {
+                        margin-bottom: 8px;
+                        flex: 1;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        height: 24px;
+                        max-height: 24px;
+                        border-bottom: 1px solid var(--gray-200);
+                        h5 {
+                            padding-bottom: 8px;
+
+                            &::first-letter {
+                                text-transform:capitalize;
+                            }
+
+                        }
+                        .icon-show {
+                            display: none;
+                        }
+                    }
+                    .module-body {
+                        flex: auto;
+                        border-top: none;
+                        padding: 0;
+                        margin: 0;
+                        .module-desc {
+                            font-size: 0.8rem;
+                            color: var(--gray-600);
+                        }
+                    }
+
+                    &:hover, &.active {
+                        padding: 17px;
+                        padding-bottom: 15px;
+                        border: 1px solid var(--primary);
+                    }
+                    &.active {
+                        .module-header {
+                            h5 {
+                                color: var(--blue-700);
+                            }
+                            .icon-show {
+                                display: unset;
+                                font-size: 0.9rem;
+                                color: var(--primary);
+                                padding-bottom: 16px;
+                            }
+                        }
+                        .module-footer p {
+                            color: var(--text-on-blue);
+                        }
+                        .module-body .module-desc {
+                            color: var(--blue-800);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
