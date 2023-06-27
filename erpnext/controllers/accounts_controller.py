@@ -1038,8 +1038,8 @@ class AccountsController(TransactionBase):
 									# "reference_type": self.doctype,
 									# "reference_name": self.name,
 									# "reference_detail_no": arg.idx,
-									reverse_dr_or_cr + "_in_account_currency": abs(arg.get("difference_amount")),
 									reverse_dr_or_cr: abs(arg.get("difference_amount")),
+									reverse_dr_or_cr + "_in_account_currency": 0,
 								}
 							)
 
