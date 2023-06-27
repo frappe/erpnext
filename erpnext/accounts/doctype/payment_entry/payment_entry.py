@@ -1019,15 +1019,12 @@ class PaymentEntry(AccountsController):
 
 				gl_entries.append(gle)
 
-	def make_advance_gl_entries(self, against_voucher_type=None, against_voucher=None, cancel=0):
+	def make_advance_gl_entries(self, cancel=0):
 		if self.book_advance_payments_in_separate_party_account:
 			gl_entries = []
 			for d in self.get("references"):
 				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-					if not (against_voucher_type and against_voucher) or (
-						d.reference_doctype == against_voucher_type and d.reference_name == against_voucher
-					):
-						self.make_invoice_liability_entry(gl_entries, d)
+					self.make_invoice_liability_entry(gl_entries, d)
 
 			if cancel:
 				for entry in gl_entries:

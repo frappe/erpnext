@@ -476,7 +476,7 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
 		if voucher_type == "Payment Entry":
-			doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
+			doc.make_advance_gl_entries()
 
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
