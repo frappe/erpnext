@@ -1150,7 +1150,7 @@ class AccountsController(TransactionBase):
 								"reference_type": self.doctype,
 								"reference_name": self.name,
 								"reference_detail_no": d.idx,
-								reverse_dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
+								reverse_dr_or_cr + "_in_account_currency": 0,
 								reverse_dr_or_cr: abs(d.exchange_gain_loss),
 							}
 						)
