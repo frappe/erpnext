@@ -73,6 +73,59 @@ class TestUtils(unittest.TestCase):
 		sorted_vouchers = sort_stock_vouchers_by_posting_date(list(reversed(vouchers)))
 		self.assertEqual(sorted_vouchers, vouchers)
 
+<<<<<<< HEAD
+=======
+	def test_update_reference_in_payment_entry(self):
+		item = make_item().name
+
+		purchase_invoice = make_purchase_invoice(
+			item=item, supplier="_Test Supplier USD", currency="USD", conversion_rate=82.32, do_not_submit=1
+		)
+		purchase_invoice.credit_to = "_Test Payable USD - _TC"
+		purchase_invoice.submit()
+
+		payment_entry = get_payment_entry(purchase_invoice.doctype, purchase_invoice.name)
+		payment_entry.paid_amount = 15725
+		payment_entry.deductions = []
+		payment_entry.save()
+
+		# below is the difference between base_received_amount and base_paid_amount
+		self.assertEqual(payment_entry.difference_amount, -4855.0)
+
+		payment_entry.target_exchange_rate = 62.9
+		payment_entry.save()
+
+		# below is due to change in exchange rate
+		self.assertEqual(payment_entry.references[0].exchange_gain_loss, -4855.0)
+
+		payment_entry.references = []
+		self.assertEqual(payment_entry.difference_amount, 0.0)
+		payment_entry.submit()
+
+		payment_reconciliation = frappe.new_doc("Payment Reconciliation")
+		payment_reconciliation.company = payment_entry.company
+		payment_reconciliation.party_type = "Supplier"
+		payment_reconciliation.party = purchase_invoice.supplier
+		payment_reconciliation.receivable_payable_account = payment_entry.paid_to
+		payment_reconciliation.get_unreconciled_entries()
+		payment_reconciliation.allocate_entries(
+			{
+				"payments": [d.__dict__ for d in payment_reconciliation.payments],
+				"invoices": [d.__dict__ for d in payment_reconciliation.invoices],
+			}
+		)
+		for d in payment_reconciliation.invoices:
+			# Reset invoice outstanding_amount because allocate_entries will zero this value out.
+			d.outstanding_amount = d.amount
+		for d in payment_reconciliation.allocation:
+			d.difference_account = "Exchange Gain/Loss - _TC"
+		payment_reconciliation.reconcile()
+
+		payment_entry.load_from_db()
+		self.assertEqual(len(payment_entry.references), 1)
+		self.assertEqual(payment_entry.difference_amount, 0)
+
+>>>>>>> 72bc5b3a11 (refactor(test): difference amount no updated for exchange gain/loss)
 
 ADDRESS_RECORDS = [
 	{
