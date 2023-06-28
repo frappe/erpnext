@@ -92,6 +92,26 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 
 		this.toggle_editable_price_list_rate();
+
+		this.frm.page.add_menu_item(
+			__("Discard"),
+			() => {
+				this.frm.set_value("status", "Discarded");
+				this.frm.save();
+			}
+		);
+
+		if (this.frm.doc.status === "Discarded") {
+			this.frm.disable_form();
+			this.frm.add_custom_button(
+				__("Restore"),
+				() => {
+					this.frm.set_value("status", "Draft");
+					this.frm.save();
+					window.location.reload(); // undo disable_form()
+				}
+			);
+		}
 	}
 
 	customer() {

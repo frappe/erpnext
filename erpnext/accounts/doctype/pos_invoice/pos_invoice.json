@@ -1346,7 +1346,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nConsolidated\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
+   "options": "\nDraft\nReturn\nCredit Note Issued\nConsolidated\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nDiscarded",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1555,7 +1555,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:23:41.083409",
+ "modified": "2023-06-28 14:53:47.579085",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

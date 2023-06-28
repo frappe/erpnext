@@ -5,6 +5,8 @@ frappe.listview_settings['Sales Order'] = {
 		if (doc.status === "Closed") {
 			// Closed
 			return [__("Closed"), "green", "status,=,Closed"];
+		} else if (doc.status === "Discarded") {
+			return [__("Discarded"), "gray", "status,=,Discarded"];
 		} else if (doc.status === "On Hold") {
 			// on hold
 			return [__("On Hold"), "orange", "status,=,On Hold"];

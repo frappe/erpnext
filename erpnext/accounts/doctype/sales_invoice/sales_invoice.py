@@ -1754,7 +1754,7 @@ class SalesInvoice(SellingController):
 				):
 					self.status += " and Discounted"
 
-			else:
+			elif self.status != "Discarded":
 				self.status = "Draft"
 
 		if update:

@@ -171,7 +171,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nQuotation\nConverted\nLost\nReplied\nClosed",
+   "options": "Open\nQuotation\nConverted\nLost\nReplied\nClosed\nDiscarded",
    "print_hide": 1,
    "reqd": 1
   },
@@ -622,7 +622,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2022-10-13 12:42:21.545636",
+ "modified": "2023-06-28 14:58:00.742343",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

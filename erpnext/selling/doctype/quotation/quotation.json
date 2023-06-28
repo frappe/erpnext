@@ -897,7 +897,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Draft\nOpen\nReplied\nPartially Ordered\nOrdered\nLost\nCancelled\nExpired",
+   "options": "Draft\nOpen\nReplied\nPartially Ordered\nOrdered\nLost\nCancelled\nExpired\nDiscarded",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -1073,7 +1073,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:21:04.980033",
+ "modified": "2023-06-28 14:14:23.036465",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

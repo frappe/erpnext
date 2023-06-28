@@ -29,10 +29,8 @@ frappe.listview_settings['Quotation'] = {
 			return [__("Partially Ordered"), "yellow", "status,=,Partially Ordered"];
 		} else if(doc.status==="Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];
-		} else if(doc.status==="Lost") {
-			return [__("Lost"), "gray", "status,=,Lost"];
-		} else if(doc.status==="Expired") {
-			return [__("Expired"), "gray", "status,=,Expired"];
+		} else if(["Lost", "Expired", "Discarded"].includes(doc.status)) {
+			return [__(doc.status), "gray", `status,=,${doc.status}`];
 		}
 	}
 };

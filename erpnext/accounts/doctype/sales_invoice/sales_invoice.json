@@ -1662,7 +1662,7 @@
    "label": "Status",
    "length": 30,
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nUnpaid and Discounted\nPartly Paid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer",
+   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nUnpaid and Discounted\nPartly Paid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nInternal Transfer\nDiscarded",
    "print_hide": 1,
    "read_only": 1
   },
@@ -2157,7 +2157,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-06-21 16:02:18.988799",
+ "modified": "2023-06-28 14:15:43.139045",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
