@@ -41,12 +41,7 @@ class AssetMovement(Document):
 				if d.target_location:
 					frappe.throw(
 						_(
-<<<<<<< HEAD
-							"Issuing cannot be done to a location. \
-						Please enter employee who has issued Asset {0}"
-=======
 							"Issuing cannot be done to a location. Please enter employee to issue the Asset {0} to"
->>>>>>> e16c14863b (fix: asset movement (#35918))
 						).format(d.asset),
 						title="Incorrect Movement Purpose",
 					)
