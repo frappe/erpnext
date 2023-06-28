@@ -365,7 +365,8 @@
    "default": "0",
    "fieldname": "collect_progress",
    "fieldtype": "Check",
-   "label": "Collect Progress"
+   "label": "Collect Progress",
+   "search_index": 1
   },
   {
    "depends_on": "collect_progress",
@@ -452,7 +453,11 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
+<<<<<<< HEAD
  "modified": "2023-02-14 04:54:25.819620",
+=======
+ "modified": "2023-06-28 18:57:11.603497",
+>>>>>>> 9e1736e027 (fix: index collect_progress and project date (#35920))
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
