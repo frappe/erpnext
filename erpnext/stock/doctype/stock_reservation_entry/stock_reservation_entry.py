@@ -169,6 +169,13 @@ class StockReservationEntry(Document):
 					frappe.throw(_(f"Row #{entry.idx}: Qty should be 1 for Serialized Item."))
 
 				if self.has_batch_no:
+					if cint(frappe.db.get_value("Batch", entry.batch_no, "disabled")):
+						frappe.throw(
+							_(
+								f"Row #{entry.idx}: Stock cannot be reserved for Item {frappe.bold(self.item_code)} against a disabled Batch {frappe.bold(entry.batch_no)}."
+							)
+						)
+
 					available_qty_to_reserve = get_available_qty_to_reserve(
 						self.item_code, entry.warehouse, entry.batch_no, ignore_sre=self.name
 					)
