@@ -515,6 +515,9 @@ class ProductionPlan(Document):
 		self.show_list_created_message("Work Order", wo_list)
 		self.show_list_created_message("Purchase Order", po_list)
 
+		if not wo_list:
+			frappe.msgprint(_("No Work Orders were created"))
+
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
 		items_data = self.get_production_items()
 
@@ -617,6 +620,9 @@ class ProductionPlan(Document):
 
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
+
+		if item.get("qty") <= 0:
+			return
 
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)

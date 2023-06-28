@@ -72,6 +72,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
 
 	def test_make_purchase_invoice(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
+
+		create_payment_term("_Test Payment Term 1 for Purchase Invoice")
+		create_payment_term("_Test Payment Term 2 for Purchase Invoice")
+
 		if not frappe.db.exists(
 			"Payment Terms Template", "_Test Payment Terms Template For Purchase Invoice"
 		):
@@ -83,12 +88,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 					"terms": [
 						{
 							"doctype": "Payment Terms Template Detail",
+							"payment_term": "_Test Payment Term 1 for Purchase Invoice",
 							"invoice_portion": 50.00,
 							"credit_days_based_on": "Day(s) after invoice date",
 							"credit_days": 00,
 						},
 						{
 							"doctype": "Payment Terms Template Detail",
+							"payment_term": "_Test Payment Term 2 for Purchase Invoice",
 							"invoice_portion": 50.00,
 							"credit_days_based_on": "Day(s) after invoice date",
 							"credit_days": 30,
@@ -1780,6 +1787,79 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.load_from_db()
 		pr.items[0].delivery_note_item = delivery_note_item
 		pr.save()
+
+	def test_purchase_return_valuation_with_rejected_qty(self):
+		item_code = "_Test Item Return Valuation"
+		create_item(item_code)
+
+		warehouse = create_warehouse("_Test Warehouse Return Valuation")
+		rejected_warehouse = create_warehouse("_Test Rejected Warehouse Return Valuation")
+
+		# Step 1: Create Purchase Receipt with valuation rate 100
+		make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		# Step 2: Create One more Purchase Receipt with valuation rate 200
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=200,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		# Step 3: Create Purchase Return for 2 qty
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items[0].qty = 2 * -1
+		pr_return.items[0].received_qty = 2 * -1
+		pr_return.items[0].rejected_qty = 0
+		pr_return.items[0].rejected_warehouse = ""
+		pr_return.save()
+		pr_return.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr_return.name, "docstatus": 1},
+			fields=["SUM(stock_value_difference) as stock_value_difference"],
+		)[0]
+
+		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
+
+	def test_return_from_rejected_warehouse(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		item_code = "_Test Item Return from Rejected Warehouse"
+		create_item(item_code)
+
+		warehouse = create_warehouse("_Test Warehouse Return Qty Warehouse")
+		rejected_warehouse = create_warehouse("_Test Rejected Warehouse Return Qty Warehouse")
+
+		# Step 1: Create Purchase Receipt with valuation rate 100
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=100,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		pr_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		self.assertEqual(pr_return.items[0].warehouse, rejected_warehouse)
+		self.assertEqual(pr_return.items[0].qty, 2.0 * -1)
+		self.assertEqual(pr_return.items[0].rejected_qty, 0.0)
+		self.assertEqual(pr_return.items[0].rejected_warehouse, "")
 
 
 def prepare_data_for_internal_transfer():
