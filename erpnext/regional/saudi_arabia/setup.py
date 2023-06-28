@@ -35,6 +35,7 @@ def add_print_formats():
 
 
 def add_permissions():
+	frappe.reload_doc("regional", "doctype", "ksa_vat_setting", force=True)
 	"""Add Permissions for KSA VAT Setting."""
 	add_permission("KSA VAT Setting", "All", 0)
 	for role in ("Accounts Manager", "Accounts User", "System Manager"):

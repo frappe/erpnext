@@ -136,15 +136,15 @@ def make_depreciation_entry(asset_name, date=None):
 			je.flags.ignore_permissions = True
 			je.flags.planned_depr_entry = True
 			je.save()
-			if not je.meta.get_workflow():
-				je.submit()
 
 			d.db_set("journal_entry", je.name)
 
-			idx = cint(d.finance_book_id)
-			finance_books = asset.get("finance_books")[idx - 1]
-			finance_books.value_after_depreciation -= d.depreciation_amount
-			finance_books.db_update()
+			if not je.meta.get_workflow():
+				je.submit()
+				idx = cint(d.finance_book_id)
+				finance_books = asset.get("finance_books")[idx - 1]
+				finance_books.value_after_depreciation -= d.depreciation_amount
+				finance_books.db_update()
 
 	asset.db_set("depr_entry_posting_status", "Successful")
 
@@ -343,6 +343,9 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
 	from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+	if not asset.calculate_depreciation:
+		return
 
 	row = -1
 	finance_book = asset.get("schedules")[0].get("finance_book")

@@ -115,7 +115,11 @@ def get_data(filters):
 	depreciation_amount_map = get_asset_depreciation_amount_map(filters, finance_book)
 
 	for asset in assets_record:
-		if assets_linked_to_fb and asset.asset_id not in assets_linked_to_fb:
+		if (
+			assets_linked_to_fb
+			and asset.calculate_depreciation
+			and asset.asset_id not in assets_linked_to_fb
+		):
 			continue
 
 		asset_value = get_asset_value_after_depreciation(

@@ -74,7 +74,6 @@ class LeavePolicyAssignment(Document):
 				).format(frappe.bold(get_link_to_form("Leave Type", leave_type.name)))
 				frappe.msgprint(msg, indicator="orange", alert=True)
 
-	@frappe.whitelist()
 	def grant_leave_alloc_for_employee(self):
 		if self.leaves_allocated:
 			frappe.throw(_("Leave already have been assigned for this Leave Policy Assignment"))

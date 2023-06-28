@@ -13,10 +13,11 @@ frappe.ui.form.on("Warehouse", {
 			};
 		});
 
-		frm.set_query("parent_warehouse", function () {
+		frm.set_query("parent_warehouse", function (doc) {
 			return {
 				filters: {
 					is_group: 1,
+					company: doc.company,
 				},
 			};
 		});
