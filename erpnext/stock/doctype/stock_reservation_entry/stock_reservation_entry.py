@@ -160,11 +160,32 @@ class StockReservationEntry(Document):
 			qty_to_be_reserved = 0
 
 			for entry in self.sb_entries:
+				if not entry.warehouse:
+					frappe.throw(
+						_(f"Row #{entry.idx}: Warehouse is mandatory for Item {frappe.bold(self.item_code)}.")
+					)
+
 				if self.has_serial_no and entry.qty != 1:
 					frappe.throw(_(f"Row #{entry.idx}: Qty should be 1 for Serialized Item."))
 
-				if not entry.warehouse:
-					frappe.throw(_(f"Row #{entry.idx}: Warehouse is mandatory."))
+				if self.has_batch_no:
+					available_qty_to_reserve = get_available_qty_to_reserve_for_batch(
+						self.item_code, entry.warehouse, entry.batch_no, ignore_sre=self.name
+					)
+
+					if not available_qty_to_reserve or available_qty_to_reserve < 0:
+						frappe.throw(
+							_(
+								f"Row #{entry.idx}: Stock not availabe to reserve for Item {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(entry.warehouse)}."
+							)
+						)
+
+					if available_qty_to_reserve < entry.qty:
+						frappe.throw(
+							_(
+								f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(entry.warehouse)}."
+							)
+						)
 
 				qty_to_be_reserved += entry.qty
 
@@ -309,6 +330,45 @@ def get_available_qty_to_reserve(item_code: str, warehouse: str, ignore_sre=None
 				& (sre.reserved_qty >= sre.delivered_qty)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
 			)
+		)
+
+		if ignore_sre:
+			query = query.where(sre.name != ignore_sre)
+
+		reserved_qty = query.run()[0][0] or 0.0
+
+		if reserved_qty:
+			return available_qty - reserved_qty
+
+	return available_qty
+
+
+def get_available_qty_to_reserve_for_batch(
+	item_code: str, warehouse: str, batch_no: str, ignore_sre=None
+) -> float:
+	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
+
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+	available_qty = get_batch_qty(item_code=item_code, warehouse=warehouse, batch_no=batch_no)
+
+	if available_qty:
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+
+		query = (
+			frappe.qb.from_(sre)
+			.left_join(sb_entry)
+			.on(sre.name == sb_entry.parent)
+			.select(Sum(sb_entry.qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code == item_code)
+				& (sre.warehouse == warehouse)
+				& (sre.reserved_qty >= sre.delivered_qty)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+			)
+			.where(sb_entry.batch_no == batch_no)
 		)
 
 		if ignore_sre:
