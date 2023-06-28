@@ -6,6 +6,7 @@
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
+			'Proforma Invoice': 'Proforma Invoice',
 			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
 			'Sales Invoice': 'Sales Invoice',
@@ -342,6 +343,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					// order type has been customised then show all the action buttons
 					const order_is_a_custom_sale = ["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
+					//Proforma Invoice
+					this.frm.add_custom_button(__('Proforma Invoice'), () => {}, __('Create'));
+
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
@@ -352,6 +356,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					if(flt(doc.per_billed, 6) < 100) {
 						this.frm.add_custom_button(__('Sales Invoice'), () => me.make_sales_invoice(), __('Create'));
 					}
+
 
 					// material request
 					if(!doc.order_type || (order_is_a_sale || order_is_a_custom_sale) && flt(doc.per_delivered, 6) < 100) {
