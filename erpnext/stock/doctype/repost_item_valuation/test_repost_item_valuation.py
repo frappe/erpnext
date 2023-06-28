@@ -392,3 +392,33 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		pr.cancel()
 		self.assertTrue(pr.docstatus == 2)
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
+
+	def test_repost_item_valuation_for_closing_stock_balance(self):
+		from erpnext.stock.doctype.closing_stock_balance.closing_stock_balance import (
+			prepare_closing_stock_balance,
+		)
+
+		doc = frappe.new_doc("Closing Stock Balance")
+		doc.company = "_Test Company"
+		doc.from_date = today()
+		doc.to_date = today()
+		doc.submit()
+
+		prepare_closing_stock_balance(doc.name)
+		doc.load_from_db()
+		self.assertEqual(doc.docstatus, 1)
+		self.assertEqual(doc.status, "Completed")
+
+		riv = frappe.new_doc("Repost Item Valuation")
+		riv.update(
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"based_on": "Item and Warehouse",
+				"posting_date": today(),
+				"posting_time": "00:01:00",
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, riv.save)
+		doc.cancel()

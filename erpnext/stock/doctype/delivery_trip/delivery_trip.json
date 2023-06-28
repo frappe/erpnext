@@ -66,8 +66,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
-   "options": "Driver",
-   "reqd": 1
+   "options": "Driver"
   },
   {
    "fetch_from": "driver.full_name",
@@ -189,10 +188,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-30 21:21:36.610142",
+ "modified": "2023-06-27 11:22:27.927637",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -228,5 +228,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "driver_name"
 }

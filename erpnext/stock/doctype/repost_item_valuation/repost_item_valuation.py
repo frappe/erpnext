@@ -12,6 +12,7 @@ from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
 import erpnext
+from erpnext.accounts.general_ledger import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
@@ -43,10 +44,48 @@ class RepostItemValuation(Document):
 		self.validate_accounts_freeze()
 
 	def validate_period_closing_voucher(self):
+		# Period Closing Voucher
 		year_end_date = self.get_max_year_end_date(self.company)
 		if year_end_date and getdate(self.posting_date) <= getdate(year_end_date):
-			msg = f"Due to period closing, you cannot repost item valuation before {year_end_date}"
+			date = frappe.format(year_end_date, "Date")
+			msg = f"Due to period closing, you cannot repost item valuation before {date}"
 			frappe.throw(_(msg))
+
+		# Accounting Period
+		if self.voucher_type:
+			validate_accounting_period(
+				[
+					frappe._dict(
+						{
+							"posting_date": self.posting_date,
+							"company": self.company,
+							"voucher_type": self.voucher_type,
+						}
+					)
+				]
+			)
+
+		# Closing Stock Balance
+		closing_stock = self.get_closing_stock_balance()
+		if closing_stock and closing_stock[0].name:
+			name = get_link_to_form("Closing Stock Balance", closing_stock[0].name)
+			to_date = frappe.format(closing_stock[0].to_date, "Date")
+			msg = f"Due to closing stock balance {name}, you cannot repost item valuation before {to_date}"
+			frappe.throw(_(msg))
+
+	def get_closing_stock_balance(self):
+		filters = {
+			"company": self.company,
+			"status": "Completed",
+			"docstatus": 1,
+			"to_date": (">=", self.posting_date),
+		}
+
+		for field in ["warehouse", "item_code"]:
+			if self.get(field):
+				filters.update({field: ("in", ["", self.get(field)])})
+
+		return frappe.get_all("Closing Stock Balance", fields=["name", "to_date"], filters=filters)
 
 	@staticmethod
 	def get_max_year_end_date(company):

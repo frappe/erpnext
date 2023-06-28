@@ -334,3 +334,4 @@ erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
 erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v14_0.enable_allow_existing_serial_no
+erpnext.patches.v14_0.set_report_in_process_SOA 
