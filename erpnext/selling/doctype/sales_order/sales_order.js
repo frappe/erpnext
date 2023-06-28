@@ -270,8 +270,7 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.doc.items.forEach(item => {
 			if (item.reserve_stock) {
-				let unreserved_qty = (flt(item.stock_qty) - (flt(item.delivered_qty) * flt(item.conversion_factor)) - flt(item.stock_reserved_qty))
-
+				let unreserved_qty = (flt(item.stock_qty) - (item.stock_reserved_qty ? flt(item.stock_reserved_qty) : (flt(item.delivered_qty) * flt(item.conversion_factor))))
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
 						'name': item.name,
