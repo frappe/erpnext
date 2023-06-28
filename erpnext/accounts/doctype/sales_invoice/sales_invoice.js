@@ -149,8 +149,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				);
 
 				if (payment_is_overdue) {
-					cur_frm.add_custom_button(__('Dunning'), function () {
-						cur_frm.events.create_dunning(cur_frm);
+					this.frm.add_custom_button(__('Dunning'), () => {
+						this.frm.events.create_dunning(this.frm);
 					}, __('Create'));
 				}
 			}
