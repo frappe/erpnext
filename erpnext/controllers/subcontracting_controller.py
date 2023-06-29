@@ -169,33 +169,6 @@ class SubcontractingController(StockController):
 				self.qty_to_be_received[(row.item_code, row.parent)] += row.qty
 
 	def __get_transferred_items(self):
-<<<<<<< HEAD
-		fields = [f"`tabStock Entry`.`{self.subcontract_data.order_field}`"]
-		alias_dict = {
-			"item_code": "rm_item_code",
-			"subcontracted_item": "main_item_code",
-			"basic_rate": "rate",
-		}
-
-		child_table_fields = [
-			"item_code",
-			"item_name",
-			"description",
-			"qty",
-			"basic_rate",
-			"amount",
-			"serial_no",
-			"uom",
-			"subcontracted_item",
-			"stock_uom",
-			"batch_no",
-			"conversion_factor",
-			"s_warehouse",
-			"t_warehouse",
-			"item_group",
-			self.subcontract_data.rm_detail_field,
-		]
-=======
 		se = frappe.qb.DocType("Stock Entry")
 		se_detail = frappe.qb.DocType("Stock Entry Detail")
 
@@ -205,7 +178,6 @@ class SubcontractingController(StockController):
 			.on(se.name == se_detail.parent)
 			.select(
 				se[self.subcontract_data.order_field],
-				se.name.as_("voucher_no"),
 				se_detail.item_code.as_("rm_item_code"),
 				se_detail.item_name,
 				se_detail.description,
@@ -217,7 +189,6 @@ class SubcontractingController(StockController):
 				se_detail.basic_rate.as_("rate"),
 				se_detail.amount,
 				se_detail.serial_no,
-				se_detail.serial_and_batch_bundle,
 				se_detail.uom,
 				se_detail.subcontracted_item.as_("main_item_code"),
 				se_detail.stock_uom,
@@ -237,7 +208,6 @@ class SubcontractingController(StockController):
 				)
 			)
 		)
->>>>>>> 2a60884abc (fix: reduce return qty while calculating transferred qty)
 
 		if self.backflush_based_on == "BOM":
 			query = query.select(se_detail.original_item)
