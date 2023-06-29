@@ -169,45 +169,50 @@ class SubcontractingController(StockController):
 				self.qty_to_be_received[(row.item_code, row.parent)] += row.qty
 
 	def __get_transferred_items(self):
-		fields = [f"`tabStock Entry`.`{self.subcontract_data.order_field}`"]
-		alias_dict = {
-			"item_code": "rm_item_code",
-			"subcontracted_item": "main_item_code",
-			"basic_rate": "rate",
-		}
+		se = frappe.qb.DocType("Stock Entry")
+		se_detail = frappe.qb.DocType("Stock Entry Detail")
 
-		child_table_fields = [
-			"item_code",
-			"item_name",
-			"description",
-			"qty",
-			"basic_rate",
-			"amount",
-			"serial_no",
-			"uom",
-			"subcontracted_item",
-			"stock_uom",
-			"batch_no",
-			"conversion_factor",
-			"s_warehouse",
-			"t_warehouse",
-			"item_group",
-			self.subcontract_data.rm_detail_field,
-		]
+		query = (
+			frappe.qb.from_(se)
+			.inner_join(se_detail)
+			.on(se.name == se_detail.parent)
+			.select(
+				se[self.subcontract_data.order_field],
+				se_detail.item_code.as_("rm_item_code"),
+				se_detail.item_name,
+				se_detail.description,
+				(
+					frappe.qb.terms.Case()
+					.when(((se.purpose == "Material Transfer") & (se.is_return == 1)), -1 * se_detail.qty)
+					.else_(se_detail.qty)
+				).as_("qty"),
+				se_detail.basic_rate.as_("rate"),
+				se_detail.amount,
+				se_detail.serial_no,
+				se_detail.uom,
+				se_detail.subcontracted_item.as_("main_item_code"),
+				se_detail.stock_uom,
+				se_detail.batch_no,
+				se_detail.conversion_factor,
+				se_detail.s_warehouse,
+				se_detail.t_warehouse,
+				se_detail.item_group,
+				se_detail[self.subcontract_data.rm_detail_field],
+			)
+			.where(
+				(se.docstatus == 1)
+				& (se[self.subcontract_data.order_field].isin(self.subcontract_orders))
+				& (
+					(se.purpose == "Send to Subcontractor")
+					| ((se.purpose == "Material Transfer") & (se.is_return == 1))
+				)
+			)
+		)
 
 		if self.backflush_based_on == "BOM":
-			child_table_fields.append("original_item")
+			query = query.select(se_detail.original_item)
 
-		for field in child_table_fields:
-			fields.append(f"`tabStock Entry Detail`.`{field}` As {alias_dict.get(field, field)}")
-
-		filters = [
-			["Stock Entry", "docstatus", "=", 1],
-			["Stock Entry", "purpose", "=", "Send to Subcontractor"],
-			["Stock Entry", self.subcontract_data.order_field, "in", self.subcontract_orders],
-		]
-
-		return frappe.get_all("Stock Entry", fields=fields, filters=filters)
+		return query.run(as_dict=True)
 
 	def __set_alternative_item_details(self, row):
 		if row.get("original_item"):
