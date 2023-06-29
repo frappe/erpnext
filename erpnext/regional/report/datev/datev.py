@@ -135,14 +135,9 @@ def execute(filters=None):
 		temp, opening = frappe.get_value(
 			"DATEV Settings",
 			filters.get("company"),
-			["temporary_against_account_number", "opening_against_account_number"]
+			["temporary_against_account_number", "opening_against_account_number"],
 		)
-		filters.update(
-			{
-				"against_account": temp,
-				"opening_account": opening or temp,
-			}
-		)
+		filters.update({"against_account": temp, "opening_account": opening or temp})
 		data = get_transactions(filters, as_dict=0)
 
 	return COLUMNS, data
@@ -551,7 +546,8 @@ def download_datev_csv(filters):
 			"skr": "04" if "SKR04" in coa else ("03" if "SKR03" in coa else ""),
 			"account_number_length": datev_settings.account_number_length,
 			"against_account": datev_settings.temporary_against_account_number,
-			"opening_account": datev_settings.opening_against_account_number or datev_settings.temporary_against_account_number,
+			"opening_account": datev_settings.opening_against_account_number
+			or datev_settings.temporary_against_account_number,
 		}
 	)
 
