@@ -20,6 +20,7 @@ class StockReservationEntry(Document):
 		self.validate_uom_is_integer()
 
 	def before_submit(self) -> None:
+		self.set_reservation_based_on()
 		self.validate_reservation_based_on_qty()
 		self.auto_reserve_serial_and_batch()
 		self.validate_reservation_based_on_serial_and_batch()
@@ -31,6 +32,7 @@ class StockReservationEntry(Document):
 	def on_update_after_submit(self) -> None:
 		self.can_be_updated()
 		self.validate_uom_is_integer()
+		self.set_reservation_based_on()
 		self.validate_reservation_based_on_qty()
 		self.validate_reservation_based_on_serial_and_batch()
 		self.update_reserved_qty_in_voucher()
@@ -84,6 +86,17 @@ class StockReservationEntry(Document):
 			if cint(self.reserved_qty) != flt(self.reserved_qty, self.precision("reserved_qty")):
 				msg = f"Reserved Qty ({flt(self.reserved_qty, self.precision('reserved_qty'))}) cannot be a fraction. To allow this, disable '{frappe.bold(_('Must be Whole Number'))}' in UOM {frappe.bold(self.stock_uom)}."
 				frappe.throw(_(msg))
+
+	def set_reservation_based_on(self) -> None:
+		"""Sets `Reservation Based On` based on `Has Serial No` and `Has Batch No`."""
+
+		if (self.reservation_based_on == "Serial and Batch") and (
+			not self.has_serial_no and not self.has_batch_no
+		):
+			if self.sb_entries:
+				self.sb_entries.clear()
+
+			self.reservation_based_on = "Qty"
 
 	def validate_reservation_based_on_qty(self) -> None:
 		"""Validates `Reserved Qty` when `Reservation Based On` is `Qty`."""
@@ -151,24 +164,37 @@ class StockReservationEntry(Document):
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
 
 		if self.reservation_based_on == "Serial and Batch":
-			if not self.has_serial_no and not self.has_batch_no:
-				if self.sb_entries:
-					self.sb_entries.clear()
+			available_serial_nos = set()
 
-				frappe.throw(_("Please select Reservation Based On as Qty."))
+			if self.has_serial_no:
+				available_serial_nos = get_available_serial_nos_to_reserve(
+					self.item_code, self.warehouse, self.has_batch_no, ignore_sre=self.name
+				)
 
-			qty_to_be_reserved = 0
-
-			for entry in self.sb_entries:
-				if not entry.warehouse:
+				if not available_serial_nos:
 					frappe.throw(
-						_(f"Row #{entry.idx}: Warehouse is mandatory for Item {frappe.bold(self.item_code)}.")
+						_(
+							f"Stock not available for Item {frappe.bold(self.item_code)} in Warehouse {frappe.bold(self.warehouse)}."
+						)
 					)
 
-				if self.has_serial_no and entry.qty != 1:
-					frappe.throw(_(f"Row #{entry.idx}: Qty should be 1 for Serialized Item."))
+			qty_to_be_reserved = 0
+			for entry in self.sb_entries:
+				entry.warehouse = self.warehouse
 
-				if self.has_batch_no:
+				if self.has_serial_no:
+					entry.qty = 1
+
+					key = (
+						(entry.serial_no, self.warehouse, entry.batch_no)
+						if self.has_batch_no
+						else (entry.serial_no, self.warehouse)
+					)
+					if key not in available_serial_nos:
+						msg = f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} for Item {frappe.bold(self.item_code)} is not available in {f'Batch {frappe.bold(entry.batch_no)} and ' if self.has_batch_no else ''}Warehouse {frappe.bold(self.warehouse)}."
+						frappe.throw(_(msg))
+
+				elif self.has_batch_no:
 					if cint(frappe.db.get_value("Batch", entry.batch_no, "disabled")):
 						frappe.throw(
 							_(
@@ -177,20 +203,20 @@ class StockReservationEntry(Document):
 						)
 
 					available_qty_to_reserve = get_available_qty_to_reserve(
-						self.item_code, entry.warehouse, entry.batch_no, ignore_sre=self.name
+						self.item_code, self.warehouse, entry.batch_no, ignore_sre=self.name
 					)
 
-					if not available_qty_to_reserve or available_qty_to_reserve < 0:
+					if available_qty_to_reserve <= 0:
 						frappe.throw(
 							_(
-								f"Row #{entry.idx}: Stock not availabe to reserve for Item {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(entry.warehouse)}."
+								f"Row #{entry.idx}: Stock not availabe to reserve for Item {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
 							)
 						)
 
-					if available_qty_to_reserve < entry.qty:
+					if entry.qty > available_qty_to_reserve:
 						frappe.throw(
 							_(
-								f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(entry.warehouse)}."
+								f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
 							)
 						)
 
@@ -198,13 +224,11 @@ class StockReservationEntry(Document):
 
 			if not qty_to_be_reserved:
 				frappe.throw(
-					_("Please select Serial/Batch No to reserve or change Reservation Based On to Qty.")
+					_("Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty.")
 				)
 
 			self.validate_with_max_reserved_qty(qty_to_be_reserved)
-
-			if self.reservation_based_on == "Serial and Batch":
-				self.db_set("reserved_qty", qty_to_be_reserved)
+			self.db_set("reserved_qty", qty_to_be_reserved)
 
 	def update_reserved_qty_in_voucher(
 		self, reserved_qty_field: str = "stock_reserved_qty", update_modified: bool = True
@@ -323,15 +347,14 @@ def get_available_qty_to_reserve(
 ) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
 
-	available_qty = 0.0
-	if batch_no:
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+	from erpnext.stock.utils import get_stock_balance
 
-		available_qty = get_batch_qty(item_code=item_code, warehouse=warehouse, batch_no=batch_no)
-	else:
-		from erpnext.stock.utils import get_stock_balance
-
-		available_qty = get_stock_balance(item_code, warehouse)
+	available_qty = (
+		get_batch_qty(item_code=item_code, warehouse=warehouse, batch_no=batch_no)
+		if batch_no
+		else get_stock_balance(item_code, warehouse)
+	)
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -363,6 +386,59 @@ def get_available_qty_to_reserve(
 			return available_qty - reserved_qty
 
 	return available_qty
+
+
+def get_available_serial_nos_to_reserve(
+	item_code: str, warehouse: str, has_batch_no: bool = False, ignore_sre=None
+) -> set[tuple]:
+	"""Returns Available Serial Nos to Reserve (Available Serial Nos - Reserved Serial Nos)` for Item, Warehouse and Batch combination."""
+
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		get_available_serial_nos,
+	)
+
+	available_serial_nos = get_available_serial_nos(
+		frappe._dict(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"has_batch_no": has_batch_no,
+			}
+		)
+	)
+
+	available_serial_nos_set = set()
+	if available_serial_nos:
+		available_serial_nos_set = {tuple(d.values()) for d in available_serial_nos}
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		query = (
+			frappe.qb.from_(sre)
+			.left_join(sb_entry)
+			.on(sre.name == sb_entry.parent)
+			.select(sb_entry.serial_no, sre.warehouse)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code == item_code)
+				& (sre.warehouse == warehouse)
+				& (sre.reserved_qty >= sre.delivered_qty)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
+			)
+		)
+
+		if has_batch_no:
+			query = query.select(sb_entry.batch_no)
+
+		if ignore_sre:
+			query = query.where(sre.name != ignore_sre)
+
+		reserved_serial_nos = query.run()
+
+		if reserved_serial_nos:
+			return available_serial_nos_set - set(reserved_serial_nos)
+
+	return available_serial_nos_set
 
 
 def get_stock_reservation_entries_for_voucher(
