@@ -344,7 +344,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					const order_is_a_custom_sale = ["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					//Proforma Invoice
-					this.frm.add_custom_button(__('Proforma Invoice'), () => {}, __('Create'));
+					this.frm.add_custom_button(__('Proforma Invoice'), () => this.make_proforma_invoice(), __('Create'));
 
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
@@ -451,6 +451,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			frm: this.frm
 		})
 	}
+
 
 	make_work_order() {
 		var me = this;
@@ -706,6 +707,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			args: {
 				delivery_dates
 			}
+		})
+	}
+	// Proforma Invoice
+	make_proforma_invoice() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_proforma_invoice",
+			frm: this.frm,
 		})
 	}
 
