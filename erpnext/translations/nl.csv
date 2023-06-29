@@ -875,7 +875,7 @@ Donor,schenker,
 Donor Type information.,Donor Type informatie.,
 Donor information.,Donorinformatie.,
 Download JSON,JSON downloaden,
-Draft,Droogte,
+Draft,Concept,
 Drop Ship,Drop Ship,
 Drug,drug,
 Due / Reference Date cannot be after {0},Verval- / Referentiedatum kan niet na {0} zijn,
@@ -4279,7 +4279,7 @@ Failed to setup defaults for country {0}. Please contact support@erpnext.com,Kan
 Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.,Rij # {0}: artikel {1} is geen geserialiseerd / batch artikel. Het kan geen serienummer / batchnummer hebben.,
 Please set {0},Stel {0} in,
 Please set {0},Stel {0} in,supplier
-Draft,Droogte,"docstatus,=,0"
+Draft,Concept,"docstatus,=,0"
 Cancelled,Geannuleerd,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Stel het instructeursysteem in onder onderwijs&gt; onderwijsinstellingen,
 Please set Naming Series for {0} via Setup > Settings > Naming Series,Stel Naming Series in op {0} via Instellingen&gt; Instellingen&gt; Naming Series,
@@ -8191,7 +8191,7 @@ Actual Batch Quantity,Werkelijke batchhoeveelheid,
 Prevdoc DocType,Prevdoc DocType,
 Parent Detail docname,Bovenliggende Detail docname,
 "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Genereren van pakbonnen voor pakketten te leveren. Gebruikt voor pakket nummer, inhoud van de verpakking en het gewicht te melden.",
-Indicates that the package is a part of this delivery (Only Draft),Geeft aan dat het pakket een onderdeel is van deze levering (alleen ontwerp),
+Indicates that the package is a part of this delivery (Only Draft),Geeft aan dat het pakket een onderdeel is van deze levering (alleen concept),
 MAT-PAC-.YYYY.-,MAT-PAC-.YYYY.-,
 From Package No.,Van Pakket No,
 Identification of the package for the delivery (for print),Identificatie van het pakket voor de levering (voor afdrukken),
