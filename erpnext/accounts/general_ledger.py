@@ -526,7 +526,11 @@ def make_reverse_gl_entries(
 
 	if gl_entries:
 		create_payment_ledger_entry(
-			gl_entries, cancel=1, adv_adj=adv_adj, update_outstanding=update_outstanding
+			gl_entries,
+			cancel=1,
+			adv_adj=adv_adj,
+			update_outstanding=update_outstanding,
+			partial_cancel=partial_cancel,
 		)
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
