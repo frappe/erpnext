@@ -55,6 +55,14 @@ frappe.ui.form.on("Supplier", {
 				}
 			};
 		});
+
+		frm.set_query("user", "portal_users", function(doc) {
+			return {
+				filters: {
+					"ignore_user_type": true,
+				}
+			};
+		});
 	},
 
 	refresh: function (frm) {

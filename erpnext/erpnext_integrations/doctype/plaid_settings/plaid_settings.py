@@ -161,7 +161,6 @@ def add_account_subtype(account_subtype):
 		frappe.throw(frappe.get_traceback())
 
 
-@frappe.whitelist()
 def sync_transactions(bank, bank_account):
 	"""Sync transactions based on the last integration date as the start date, after sync is completed
 	add the transaction date of the oldest transaction as the last integration date."""

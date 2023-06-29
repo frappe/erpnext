@@ -1855,7 +1855,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		if not total_amount:
 			if party_account_currency == company_currency:
 				# for handling cases that don't have multi-currency (base field)
-				total_amount = ref_doc.get("grand_total") or ref_doc.get("base_grand_total")
+				total_amount = ref_doc.get("base_grand_total") or ref_doc.get("grand_total")
 				exchange_rate = 1
 			else:
 				total_amount = ref_doc.get("grand_total")

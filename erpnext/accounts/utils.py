@@ -237,11 +237,6 @@ def get_balance_on(
 		if not (frappe.flags.ignore_account_permission or ignore_account_permission):
 			acc.check_permission("read")
 
-		if report_type == "Profit and Loss":
-			# for pl accounts, get balance within a fiscal year
-			cond.append(
-				"posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" % year_start_date
-			)
 		# different filter for group and ledger - improved performance
 		if acc.is_group:
 			cond.append(

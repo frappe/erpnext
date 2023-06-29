@@ -6,10 +6,14 @@ def execute():
 
 	assets = get_details_of_draft_or_submitted_depreciable_assets()
 
-	for asset in assets:
-		finance_book_rows = get_details_of_asset_finance_books_rows(asset.name)
+	asset_finance_books_map = get_asset_finance_books_map()
 
-		for fb_row in finance_book_rows:
+	asset_depreciation_schedules_map = get_asset_depreciation_schedules_map()
+
+	for asset in assets:
+		depreciation_schedules = asset_depreciation_schedules_map[asset.name]
+
+		for fb_row in asset_finance_books_map[asset.name]:
 			asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
 
 			asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(asset, fb_row)
@@ -19,7 +23,11 @@ def execute():
 			if asset.docstatus == 1:
 				asset_depr_schedule_doc.submit()
 
-			update_depreciation_schedules(asset.name, asset_depr_schedule_doc.name, fb_row.idx)
+			depreciation_schedules_of_fb_row = [
+				ds for ds in depreciation_schedules if ds["finance_book_id"] == str(fb_row.idx)
+			]
+
+			update_depreciation_schedules(depreciation_schedules_of_fb_row, asset_depr_schedule_doc.name)
 
 
 def get_details_of_draft_or_submitted_depreciable_assets():
@@ -41,12 +49,33 @@ def get_details_of_draft_or_submitted_depreciable_assets():
 	return records
 
 
-def get_details_of_asset_finance_books_rows(asset_name):
+def group_records_by_asset_name(records):
+	grouped_dict = {}
+
+	for item in records:
+		key = list(item.keys())[0]
+		value = item[key]
+
+		if value not in grouped_dict:
+			grouped_dict[value] = []
+
+		del item["asset_name"]
+
+		grouped_dict[value].append(item)
+
+	return grouped_dict
+
+
+def get_asset_finance_books_map():
 	afb = frappe.qb.DocType("Asset Finance Book")
+	asset = frappe.qb.DocType("Asset")
 
 	records = (
 		frappe.qb.from_(afb)
+		.join(asset)
+		.on(afb.parent == asset.name)
 		.select(
+			asset.name.as_("asset_name"),
 			afb.finance_book,
 			afb.idx,
 			afb.depreciation_method,
@@ -55,23 +84,44 @@ def get_details_of_asset_finance_books_rows(asset_name):
 			afb.rate_of_depreciation,
 			afb.expected_value_after_useful_life,
 		)
-		.where(afb.parent == asset_name)
+		.where(asset.docstatus < 2)
+		.orderby(afb.idx)
 	).run(as_dict=True)
 
-	return records
+	asset_finance_books_map = group_records_by_asset_name(records)
+
+	return asset_finance_books_map
 
 
-def update_depreciation_schedules(asset_name, asset_depr_schedule_name, fb_row_idx):
+def get_asset_depreciation_schedules_map():
 	ds = frappe.qb.DocType("Depreciation Schedule")
+	asset = frappe.qb.DocType("Asset")
 
-	depr_schedules = (
+	records = (
 		frappe.qb.from_(ds)
-		.select(ds.name)
-		.where((ds.parent == asset_name) & (ds.finance_book_id == str(fb_row_idx)))
+		.join(asset)
+		.on(ds.parent == asset.name)
+		.select(
+			asset.name.as_("asset_name"),
+			ds.name,
+			ds.finance_book_id,
+		)
+		.where(asset.docstatus < 2)
 		.orderby(ds.idx)
 	).run(as_dict=True)
 
-	for idx, depr_schedule in enumerate(depr_schedules, start=1):
+	asset_depreciation_schedules_map = group_records_by_asset_name(records)
+
+	return asset_depreciation_schedules_map
+
+
+def update_depreciation_schedules(
+	depreciation_schedules,
+	asset_depr_schedule_name,
+):
+	ds = frappe.qb.DocType("Depreciation Schedule")
+
+	for idx, depr_schedule in enumerate(depreciation_schedules, start=1):
 		(
 			frappe.qb.update(ds)
 			.set(ds.idx, idx)

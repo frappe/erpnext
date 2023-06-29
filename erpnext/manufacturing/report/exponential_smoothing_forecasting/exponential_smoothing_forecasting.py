@@ -99,7 +99,9 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		parent = frappe.qb.DocType(self.doctype)
 		child = frappe.qb.DocType(self.child_doctype)
 
-		date_field = "posting_date" if self.doctype == "Delivery Note" else "transaction_date"
+		date_field = (
+			"posting_date" if self.doctype in ("Delivery Note", "Sales Invoice") else "transaction_date"
+		)
 
 		query = (
 			frappe.qb.from_(parent)
