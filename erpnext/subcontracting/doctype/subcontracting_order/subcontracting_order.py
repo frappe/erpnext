@@ -163,9 +163,10 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
 					for item in self.supplied_items:
-						if item.returned_qty:
-							status = "Closed"
+						if not item.returned_qty or (item.supplied_qty - item.consumed_qty - item.returned_qty) > 0:
 							break
+					else:
+						status = "Closed"
 				else:
 					total_required_qty = total_supplied_qty = 0
 					for item in self.supplied_items:
