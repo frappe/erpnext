@@ -22,7 +22,5 @@ class DATEVSettings(Document):
 			and len(self.opening_against_account_number) != self.account_number_length
 		):
 			throw(
-				_("Opening Against Account Number must be {0} digits long").format(
-					self.account_number_length
-				)
+				_("Opening Against Account Number must be {0} digits long").format(self.account_number_length)
 			)
