@@ -179,9 +179,14 @@ class PaymentEntry(AccountsController):
 
 		# Group latest_references by (voucher_type, voucher_no)
 		latest_lookup = {}
-		for d in latest_references:
-			d = frappe._dict(d)
-			latest_lookup.update({(d.voucher_type, d.voucher_no): d})
+		if latest_references:
+			for d in latest_references:
+				d = frappe._dict(d)
+				latest_lookup.update({(d.voucher_type, d.voucher_no): d})
+		else:
+			frappe.throw(
+				"No references in the references table."
+			)
 
 		for d in self.get("references"):
 			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
