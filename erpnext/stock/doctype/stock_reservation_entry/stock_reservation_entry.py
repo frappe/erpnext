@@ -182,6 +182,7 @@ class StockReservationEntry(Document):
 					)
 
 			qty_to_be_reserved = 0
+			selected_batch_nos = []
 			for entry in self.sb_entries:
 				entry.warehouse = self.warehouse
 
@@ -227,6 +228,13 @@ class StockReservationEntry(Document):
 									f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
 								)
 							)
+
+					if entry.batch_no in selected_batch_nos:
+						frappe.throw(
+							_(f"Row #{entry.idx}: Batch No {frappe.bold(entry.batch_no)} is already selected.")
+						)
+					else:
+						selected_batch_nos.append(entry.batch_no)
 
 				qty_to_be_reserved += entry.qty
 
