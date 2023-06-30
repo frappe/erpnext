@@ -304,8 +304,15 @@ class StockReservationEntry(Document):
 	def can_be_updated(self) -> None:
 		"""Raises an exception if `Stock Reservation Entry` is not allowed to be updated."""
 
-		if self.status == "Delivered":
-			frappe.throw(_(f"Delivered {self.doctype} cannot be updated, create a new one instead."))
+		if self.status in ("Partially Delivered", "Delivered"):
+			frappe.throw(
+				_(
+					f"{self.status} {self.doctype} cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
+				)
+			)
+
+		if self.delivered_qty > 0:
+			frappe.throw(_("Stock Reservation Entry cannot be updated as it has been delivered."))
 
 	def validate_with_max_reserved_qty(self, qty_to_be_reserved: float) -> None:
 		"""Validates `Reserved Qty` with `Max Reserved Qty`."""
