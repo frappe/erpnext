@@ -182,7 +182,7 @@ class StockReservationEntry(Document):
 					)
 
 			qty_to_be_reserved = 0
-			selected_batch_nos = []
+			selected_batch_nos, selected_serial_nos = [], []
 			for entry in self.sb_entries:
 				entry.warehouse = self.warehouse
 
@@ -197,6 +197,13 @@ class StockReservationEntry(Document):
 					if key not in available_serial_nos:
 						msg = f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} for Item {frappe.bold(self.item_code)} is not available in {f'Batch {frappe.bold(entry.batch_no)} and ' if self.has_batch_no else ''}Warehouse {frappe.bold(self.warehouse)} or might be reserved in another {frappe.bold('Stock Reservation Entry')}."
 						frappe.throw(_(msg))
+
+					if entry.serial_no in selected_serial_nos:
+						frappe.throw(
+							_(f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} is already selected.")
+						)
+					else:
+						selected_serial_nos.append(entry.serial_no)
 
 				elif self.has_batch_no:
 					if cint(frappe.db.get_value("Batch", entry.batch_no, "disabled")):
