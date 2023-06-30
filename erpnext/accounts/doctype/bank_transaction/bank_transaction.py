@@ -343,14 +343,7 @@ def get_paid_amount(payment_entry, currency, gl_bank_account):
 
 
 def set_voucher_clearance(doctype, docname, clearance_date, self):
-	if doctype in [
-		"Payment Entry",
-		"Journal Entry",
-		"Purchase Invoice",
-		"Expense Claim",
-		"Loan Repayment",
-		"Loan Disbursement",
-	]:
+	if doctype in get_doctypes_for_bank_reconciliation():
 		if (
 			doctype == "Payment Entry"
 			and frappe.db.get_value("Payment Entry", docname, "payment_type") == "Internal Transfer"

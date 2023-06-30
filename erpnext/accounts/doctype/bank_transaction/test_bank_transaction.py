@@ -16,6 +16,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_paymen
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.tests.utils import if_lending_app_installed
 
 test_dependencies = ["Item", "Cost Center"]
 
@@ -23,14 +24,13 @@ test_dependencies = ["Item", "Cost Center"]
 class TestBankTransaction(FrappeTestCase):
 	def setUp(self):
 		for dt in [
-			"Loan Repayment",
 			"Bank Transaction",
 			"Payment Entry",
 			"Payment Entry Reference",
 			"POS Profile",
 		]:
 			frappe.db.delete(dt)
-
+		clear_loan_transactions()
 		make_pos_profile()
 		add_transactions()
 		add_vouchers()
@@ -160,8 +160,9 @@ class TestBankTransaction(FrappeTestCase):
 			is not None
 		)
 
+	@if_lending_app_installed
 	def test_matching_loan_repayment(self):
-		from erpnext.loan_management.doctype.loan.test_loan import create_loan_accounts
+		from lending.loan_management.doctype.loan.test_loan import create_loan_accounts
 
 		create_loan_accounts()
 		bank_account = frappe.get_doc(
@@ -188,6 +189,11 @@ class TestBankTransaction(FrappeTestCase):
 
 		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
 		self.assertEqual(linked_payments[0][2], repayment_entry.name)
+
+
+@if_lending_app_installed
+def clear_loan_transactions():
+	frappe.db.delete("Loan Repayment")
 
 
 def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
@@ -400,16 +406,18 @@ def add_vouchers():
 	si.submit()
 
 
+@if_lending_app_installed
 def create_loan_and_repayment():
-	from erpnext.loan_management.doctype.loan.test_loan import (
+	from lending.loan_management.doctype.loan.test_loan import (
 		create_loan,
 		create_loan_type,
 		create_repayment_entry,
 		make_loan_disbursement_entry,
 	)
-	from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	from lending.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
 		process_loan_interest_accrual_for_term_loans,
 	)
+
 	from erpnext.setup.doctype.employee.test_employee import make_employee
 
 	create_loan_type(
