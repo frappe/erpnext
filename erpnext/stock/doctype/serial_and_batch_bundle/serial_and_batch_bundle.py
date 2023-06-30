@@ -1076,8 +1076,8 @@ def get_available_serial_nos(kwargs):
 	if kwargs.warehouse:
 		filters["warehouse"] = kwargs.warehouse
 
-	# Since SLEs are not present against POS invoices, need to ignore serial nos present in the POS invoice
-	ignore_serial_nos = get_reserved_serial_nos_for_pos(kwargs)
+	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
+	ignore_serial_nos = get_reserved_serial_nos(kwargs)
 
 	# To ignore serial nos in the same record for the draft state
 	if kwargs.get("ignore_serial_nos"):
@@ -1158,6 +1158,18 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 	return serial_nos
 
 
+def get_reserved_serial_nos(kwargs):
+	ignore_serial_nos = []
+
+	# Extend the list by serial nos reserved in POS Invoice
+	ignore_serial_nos.extend(get_reserved_serial_nos_for_pos(kwargs))
+
+	# Extend the list by serial nos reserved via SRE
+	ignore_serial_nos.extend(get_reserved_serial_nos_for_sre(kwargs))
+
+	return ignore_serial_nos
+
+
 def get_reserved_serial_nos_for_pos(kwargs):
 	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1222,6 +1234,31 @@ def get_reserved_serial_nos_for_pos(kwargs):
 		)
 
 	return list(set(ignore_serial_nos) - set(returned_serial_nos))
+
+
+def get_reserved_serial_nos_for_sre(kwargs):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sb_entry.serial_no)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == kwargs.item_code)
+			& (sre.reserved_qty >= sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+	)
+
+	if kwargs.warehouse:
+		query = query.where(sre.warehouse == kwargs.warehouse)
+
+	if kwargs.ignore_voucher_no:
+		query = query.where(sre.name != kwargs.ignore_voucher_no)
+
+	return [row[0] for row in query.run()]
 
 
 def get_auto_batch_nos(kwargs):

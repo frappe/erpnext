@@ -194,7 +194,7 @@ class StockReservationEntry(Document):
 						else (entry.serial_no, self.warehouse)
 					)
 					if key not in available_serial_nos:
-						msg = f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} for Item {frappe.bold(self.item_code)} is not available in {f'Batch {frappe.bold(entry.batch_no)} and ' if self.has_batch_no else ''}Warehouse {frappe.bold(self.warehouse)}."
+						msg = f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} for Item {frappe.bold(self.item_code)} is not available in {f'Batch {frappe.bold(entry.batch_no)} and ' if self.has_batch_no else ''}Warehouse {frappe.bold(self.warehouse)} or might be reserved in another {frappe.bold('Stock Reservation Entry')}."
 						frappe.throw(_(msg))
 
 				elif self.has_batch_no:
@@ -219,6 +219,8 @@ class StockReservationEntry(Document):
 					if entry.qty > available_qty_to_reserve:
 						if allow_partial_reservation:
 							entry.qty = available_qty_to_reserve
+							if self.get("_action") == "update_after_submit":
+								entry.db_update()
 						else:
 							frappe.throw(
 								_(
@@ -409,6 +411,7 @@ def get_available_serial_nos_to_reserve(
 				"item_code": item_code,
 				"warehouse": warehouse,
 				"has_batch_no": has_batch_no,
+				"ignore_voucher_no": ignore_sre,
 			}
 		)
 	)
