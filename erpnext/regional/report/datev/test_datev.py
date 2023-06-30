@@ -139,7 +139,9 @@ def make_datev_settings(company):
 				"client": company.name,
 				"client_number": "12345",
 				"consultant_number": "67890",
+				"account_number_length": 4,
 				"temporary_against_account_number": "9999",
+				"opening_against_account_number": "9000",
 			}
 		).insert()
 
@@ -152,7 +154,8 @@ class TestDatev(TestCase):
 			"company": self.company.name,
 			"from_date": today(),
 			"to_date": today(),
-			"temporary_against_account_number": "9999",
+			"against_account": "9999",
+			"opening_account": "9000",
 		}
 
 		make_datev_settings(self.company)
