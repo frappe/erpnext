@@ -1724,7 +1724,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# Party Account currency must be in USD, as there is existing GLE with USD
 		si4 = create_sales_invoice(
 			customer="_Test Customer USD",
-			debit_to="_Test Receivable - _TC",
+			debit_to="Debtors - _TC",
 			currency="USD",
 			conversion_rate=50,
 			do_not_submit=True,
@@ -1737,7 +1737,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si3.cancel()
 		si5 = create_sales_invoice(
 			customer="_Test Customer USD",
-			debit_to="_Test Receivable - _TC",
+			debit_to="Debtors - _TC",
 			currency="USD",
 			conversion_rate=50,
 			do_not_submit=True,
@@ -1816,7 +1816,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"reference_date": nowdate(),
 				"received_amount": 300,
 				"paid_amount": 300,
-				"paid_from": "_Test Receivable - _TC",
+				"paid_from": "Debtors - _TC",
 				"paid_to": "_Test Cash - _TC",
 			}
 		)
