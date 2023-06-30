@@ -217,7 +217,6 @@ Failed to setup taxes,無法設置稅收
 Copy From Item Group,從項目群組複製
 Opening Entry,開放報名
 Account Pay Only,科目只需支付
-Repay Over Number of Periods,償還期的超過數
 Additional Costs,額外費用
 Account with existing transaction can not be converted to group.,科目與現有的交易不能被轉換到群組。
 Product Enquiry,產品查詢
@@ -317,7 +316,6 @@ Preference,偏愛
 Individual,個人
 Academics User,學術界用戶
 Amount In Figure,量圖
-Loan Info,貸款信息
 Plan for maintenance visits.,規劃維護訪問。
 Supplier Scorecard Period,供應商記分卡期
 Share Transfer,股份轉讓
@@ -684,7 +682,6 @@ Pending activities for today,今天待定活動
 Salary Component for timesheet based payroll.,薪酬部分基於時間表工資。
 Applicable for external driver,適用於外部驅動器
 Used for Production Plan,用於生產計劃
-Total Payment,總付款
 Cannot cancel transaction for Completed Work Order.,無法取消已完成工單的交易。
 Time Between Operations (in mins),作業間隔時間（以分鐘計）
 PO already created for all sales order items,已為所有銷售訂單項創建採購訂單
@@ -863,7 +860,6 @@ AWS Access Key ID,AWS訪問密鑰ID,
 Billed Amt,已結算額
 Training Result Employee,訓練結果員工
 A logical Warehouse against which stock entries are made.,對這些庫存分錄帳進行的邏輯倉庫。
-Total Payable Interest,合計應付利息
 Total Outstanding: {0},總計：{0}
 Sales Invoice Timesheet,銷售發票時間表
 Reference No & Reference Date is required for {0},參考號與參考日期須為{0}
@@ -962,11 +958,9 @@ Cost Center Number,成本中心編號
 Could not find path for ,找不到路徑
 Opening (Dr),開啟（Dr）
 Work End Date,工作結束日期
-Applicant,申請人
 Posting timestamp must be after {0},登錄時間戳記必須晚於{0}
 To make recurring documents,複製文件
 GST Itemised Purchase Register,GST成品採購登記冊
-Total Interest Payable,合計應付利息
 Landed Cost Taxes and Charges,到岸成本稅費
 Actual Start Time,實際開始時間
 Deferred Expense Account,遞延費用科目
@@ -1147,7 +1141,6 @@ Default settings for Shopping Cart,對購物車的預設設定
 Add Timeslots,添加時代
 Please set Account in Warehouse {0} or Default Inventory Account in Company {1},請在倉庫{0}中設科目或在公司{1}中設置默認庫存科目
 Asset scrapped via Journal Entry {0},通過資產日記帳分錄報廢{0}
-Interest Income Account,利息收入科目
 Max benefits should be greater than zero to dispense benefits,最大的好處應該大於零來分配好處
 Review Invitation Sent,審核邀請已發送
 Shift Assignment,班次分配
@@ -1466,7 +1459,6 @@ Appointment Reminder,預約提醒
 Please enter Account for Change Amount,對於漲跌額請輸入帳號
 Student Batch Name,學生批名
 Holiday List Name,假日列表名稱
-Balance Loan Amount,平衡貸款額
 Added to details,添加到細節
 Schedule Course,課程時間表
 Applicable on Material Request,適用於材料請求
@@ -1568,7 +1560,6 @@ Making Stock Entries,製作Stock條目
 Cannot promote Employee with status Left,無法提升狀態為Left的員工
 Net Weight UOM,淨重計量單位
 Default Supplier,預設的供應商
-Repayment Schedule,還款計劃
 Shipping Rule Condition,送貨規則條件
 End Date can not be less than Start Date,結束日期不能小於開始日期
 Invoice can't be made for zero billing hour,在零計費時間內無法開具發票
@@ -1718,7 +1709,6 @@ Group same items,組相同的項目
 Disable Rounded Total,禁用圓角總
 Sync in Progress,同步進行中
 Parent Department,家長部門
-Repayment Info,還款信息
 'Entries' cannot be empty,“分錄”不能是空的
 Maintenance Role,維護角色
 Duplicate row {0} with same {1},重複的行{0}同{1}
@@ -2074,7 +2064,6 @@ Item Attribute,項目屬性
 Expense Claim {0} already exists for the Vehicle Log,報銷{0}已經存在車輛日誌
 Source Location,來源地點
 Institute Name,學院名稱
-Please enter repayment Amount,請輸入還款金額
 There can be multiple tiered collection factor based on the total spent. But the conversion factor for redemption will always be same for all the tier.,根據總花費可以有多個分層收集因子。但兌換的兌換係數對於所有等級總是相同的。
 Item Variants,項目變體
 Services,服務
@@ -2131,7 +2120,6 @@ Block Holidays on important days.,重要的日子中封鎖假期。
 Please input all required Result Value(s),請輸入所有必需的結果值（s）
 Accounts Receivable Summary,應收帳款匯總
 Linked Invoices,鏈接的發票
-Monthly Repayment Amount,每月還款額
 Opening Invoices,打開發票
 Contract Details,合同細節
 Leave Details,留下細節
@@ -2162,7 +2150,6 @@ Production Plan Sales Order,生產計劃銷售訂單
 "No active BOM found for item {0}. Delivery by \
 						Serial No cannot be ensured",未找到項{0}的有效BOM。無法確保交貨\串口號
 Sales Partner Target,銷售合作夥伴目標
-Maximum Loan Amount,最高貸款額度
 Pricing Rule,定價規則
 Duplicate roll number for student {0},學生{0}的重複卷號
 Duplicate roll number for student {0},學生{0}的重複卷號
@@ -2182,7 +2169,6 @@ Leaves Allocated Successfully for {0},{0}的排假成功
 No Items to pack,無項目包裝
 From Value,從價值
 Manufacturing Quantity is mandatory,生產數量是必填的
-Repayment Method,還款方式
 "If checked, the Home page will be the default Item Group for the website",如果選中，主頁將是網站的默認項目組
 Reading 4,4閱讀
 "Students are at the heart of the system, add all your students",學生在系統的心臟，添加所有的學生
@@ -2252,7 +2238,6 @@ Supplier Part Number,供應商零件編號
 Conversion rate cannot be 0 or 1,轉化率不能為0或1,
 All the mandatory Task for employee creation hasn't been done yet.,所有員工創建的強制性任務尚未完成。
 Credit Controller,信用控制器
-Applicant Type,申請人類型
 03-Deficiency in services,03-服務不足
 Default Medical Code Standard,默認醫療代碼標準
 Purchase Receipt {0} is not submitted,採購入庫單{0}未提交
@@ -2589,7 +2574,6 @@ There were errors.,有錯誤。
 Employee {0} has already applied for {1} between {2} and {3} : ,員工{0}已在{2}和{3}之間申請{1}：
 Guardian Interests,守護興趣
 Update Account Name / Number,更新帳戶名稱/號碼
-Current Value,當前值
 Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year,多個會計年度的日期{0}存在。請設置公司財年
 Instructor Records to be created by,導師記錄由
 {0} created,{0}已新增
@@ -2639,7 +2623,6 @@ Image List,圖像列表
 Attribute Name,屬性名稱
 Generate Invoice At Beginning Of Period,在期初生成發票
 Show In Website,顯示在網站
-Total Payable Amount,合計應付額
 Expected Time (in hours),預期時間（以小時計）
 Check in (group),檢查（組）
 Qty to Order,訂購數量
@@ -2718,7 +2701,6 @@ Show on Website,在網站上顯示
 Start on,開始
 Hub Category,中心類別
 Vehicle Number,車號
-Loan Amount,貸款額度
 Add Letterhead,添加信頭
 Self-Driving Vehicle,自駕車
 Supplier Scorecard Standing,供應商記分卡站立
@@ -2756,7 +2738,6 @@ Abbr can not be blank or space,縮寫不能為空白或輸入空白鍵
 Patient Medical Record,病人醫療記錄
 Group to Non-Group,集團以非組
 Sports,體育
-Loan Name,貸款名稱
 Total Actual,實際總計
 Student Siblings,學生兄弟姐妹
 Subscription Plan Detail,訂閱計劃詳情
@@ -2921,7 +2902,6 @@ Serialized Inventory,序列化庫存
 Invalid {0} for Inter Company Invoice.,Inter公司發票無效的{0}。
 Department Analytics,部門分析
 Email not found in default contact,在默認聯繫人中找不到電子郵件
-Account Info,帳戶信息
 Default Billing Rate,默認計費率
 {0} Student Groups created.,{0}創建學生組。
 {0} Student Groups created.,{0}創建學生組。
@@ -2988,7 +2968,6 @@ To Time,要時間
 ) for {0},）為{0}
 Approving Role (above authorized value),批准角色（上述授權值）
 Credit To account must be a Payable account,信用科目必須是應付帳款
-Total Amount Paid,總金額支付
 Insurance End Date,保險終止日期
 Please select Student Admission which is mandatory for the paid student applicant,請選擇付費學生申請者必須入學的學生
 BOM recursion: {0} cannot be parent or child of {2},BOM遞歸： {0}不能父母或兒童{2}
@@ -3096,7 +3075,6 @@ No active or default Salary Structure found for employee {0} for the given dates
 Allow Users,允許用戶
 Customer Mobile No,客戶手機號碼
 Cash Flow Mapping Template Details,現金流量映射模板細節
-Loan Management,貸款管理
 Track separate Income and Expense for product verticals or divisions.,跟踪獨立收入和支出進行產品垂直或部門。
 Item Reorder,項目重新排序
 Show Salary Slip,顯示工資單
@@ -3554,7 +3532,6 @@ Student Admissions,學生入學
 {0} {1} is disabled,{0} {1}被禁用
 Billing Currency,結算貨幣
 Extra Large,特大號
-Loan Application,申請貸款
 Scientific Name,科學名稱
 Service Unit Type,服務單位類型
 Branch Code,分行代碼
@@ -3733,7 +3710,6 @@ Work Orders Created: {0},創建的工單：{0}
 Sales Team1,銷售團隊1,
 Item {0} does not exist,項目{0}不存在
 Customer Address,客戶地址
-Loan Details,貸款詳情
 Failed to setup post company fixtures,未能設置公司固定裝置
 Default Inventory Account,默認庫存科目
 The folio numbers are not matching,作品集編號不匹配
@@ -4015,7 +3991,6 @@ Attendance Record {0} exists against Student {1},考勤記錄{0}存在針對學�
 Reference #{0} dated {1},參考＃ {0}於{1}
 Depreciation Eliminated due to disposal of assets,折舊淘汰因處置資產
 New Employee ID,新員工ID,
-Member,會員
 Work Order Item,工作訂單項目
 Item Code,產品編號
 Warranty / AMC Details,保修/ AMC詳情
@@ -4143,7 +4118,6 @@ Opening Balance Equity,期初餘額權益
 N,ñ
 Remaining,剩餘
 Appraisal,評價
-Loan Account,貸款科目
 GST Details,消費稅細節
 This is based on transactions against this Healthcare Practitioner.,這是基於針對此醫療保健從業者的交易。
 Email sent to supplier {0},電子郵件發送到供應商{0}
@@ -4309,7 +4283,6 @@ Allow Stock Consumption,允許庫存消耗
 Insurance Details,保險詳情
 Payable,支付
 Share Type,分享類型
-Please enter Repayment Periods,請輸入還款期
 Debtors ({0}),債務人（{0}）
 Margin,餘量
 New Customers,新客戶
@@ -4393,7 +4366,6 @@ Member Name,成員名字
 Valuation type charges can not marked as Inclusive,估值類型罪名不能標記為包容性
 Update Stock,庫存更新
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,不同計量單位的項目會導致不正確的（總）淨重值。確保每個項目的淨重是在同一個計量單位。
-Payment Details,付款詳情
 BOM Rate,BOM率
 "Stopped Work Order cannot be cancelled, Unstop it first to cancel",停止的工作訂單不能取消，先取消它
 Journal Entry for Scrap,日記帳分錄報廢
@@ -4563,7 +4535,7 @@ Total Allocated Leaves,總分配的葉子
 Progress % for a task cannot be more than 100.,為任務進度百分比不能超過100個。
 Before reconciliation,調整前
 Taxes and Charges Added (Company Currency),稅收和收費上架（公司貨幣）
-Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,商品稅行{0}必須有科目類型為"稅" 或 "收入" 或 "支出" 或 "課稅的"
+Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,"商品稅行{0}必須有科目類型為""稅"" 或 ""收入"" 或 ""支出"" 或 ""課稅的"""
 Partly Billed,天色帳單
 Item {0} must be a Fixed Asset Item,項{0}必須是固定資產項目
 Make Variants,變種
@@ -4628,7 +4600,6 @@ You are in offline mode. You will not be able to reload until you have network.,
 Grant,格蘭特
 No Student Groups created.,沒有學生團體創建的。
 Serial No,序列號
-Monthly Repayment Amount cannot be greater than Loan Amount,每月還款額不能超過貸款金額較大
 Please enter Maintaince Details first,請先輸入維護細節
 Row #{0}: Expected Delivery Date cannot be before Purchase Order Date,行＃{0}：預計交貨日期不能在採購訂單日期之前
 Print Language,打印語言
@@ -4845,7 +4816,6 @@ No Customers yet!,還沒有客戶！
 Healthcare Service Unit,醫療服務單位
 Cash Flow Statement,現金流量表
 No material request created,沒有創建重要請求
-Loan Amount cannot exceed Maximum Loan Amount of {0},貸款額不能超過最高貸款額度{0}
 License,執照
 Please remove this Invoice {0} from C-Form {1},請刪除此發票{0}從C-表格{1}
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,請選擇結轉，如果你還需要包括上一會計年度的資產負債葉本財年
@@ -5113,7 +5083,6 @@ Navigating,導航
 Planning,規劃
 Signee,簽署人
 Issued,發行
-Repayment Start Date,還款開始日期
 Student Activity,學生活動
 Supplier Id,供應商編號
 Payment Gateway Details,支付網關細節
@@ -5457,7 +5426,6 @@ Quality Management,品質管理
 Item {0} has been disabled,項{0}已被禁用
 Total Billable Amount (via Timesheet),總計費用金額（通過時間表）
 Previous Business Day,前一個營業日
-Repay Fixed Amount per Period,償還每期固定金額
 Health Insurance No,健康保險No,
 Tax Exemption Proofs,免稅證明
 Please enter quantity for Item {0},請輸入項目{0}的量
@@ -5513,7 +5481,6 @@ Both Trial Period Start Date and Trial Period End Date must be set,必須設置�
 Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,支付計劃中的總付款金額必須等於大/圓
 Plan,計劃
 Bank Statement balance as per General Ledger,銀行對賬單餘額按總帳
-Applicant Name,申請人名稱
 Customer / Item Name,客戶／品項名稱
 "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
 
@@ -6059,7 +6026,6 @@ Student Details,學生細節
 Stock Qty,庫存數量
 Stock Qty,庫存數量
 Default Shipping Account,默認運輸科目
-Repayment Period in Months,在月還款期
 Error: Not a valid id?,錯誤：沒有有效的身份證？
 Update Series Number,更新序列號
 Equity,公平
@@ -6316,7 +6282,6 @@ Source Warehouse Address,來源倉庫地址
 Voucher Type,憑證類型
 Max Retry Limit,最大重試限制
 Price List not found or disabled,價格表未找到或被禁用
-Approved,批准
 Price,價格
 Employee relieved on {0} must be set as 'Left',員工解除對{0}必須設定為“左”
 Last Sync On,上次同步開啟
@@ -6434,7 +6399,6 @@ Driving License Category,駕駛執照類別
 Actual Qty is mandatory,實際數量是強制性
 "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.",{0}目前擁有{1}供應商記分卡，而採購訂單應謹慎提供給供應商。
 Asset Maintenance Team,資產維護團隊
-Loan Type,貸款類型
 Scheduling Tool,調度工具
 Item to be manufactured or repacked,產品被製造或重新包裝
 Syntax error in condition: {0},條件中的語法錯誤：{0}
@@ -6534,7 +6498,6 @@ Update Items,更新項目
 Ref Date,參考日期
 Reason for Leaving,離職原因
 Operating Cost(Company Currency),營業成本（公司貨幣）
-Sanctioned Amount,制裁金額
 Shelf Life In Days,保質期天數
 Is Opening,是開幕
 Expense Approvers,費用審批人
