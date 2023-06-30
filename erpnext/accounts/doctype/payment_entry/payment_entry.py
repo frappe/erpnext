@@ -420,7 +420,10 @@ class PaymentEntry(AccountsController):
 						elif self.party_type == "Employee":
 							ref_party_account = ref_doc.payable_account
 
-						if ref_party_account != self.party_account:
+						if (
+							ref_party_account != self.party_account
+							and not self.book_advance_payments_in_separate_party_account
+						):
 							frappe.throw(
 								_("{0} {1} is associated with {2}, but Party Account is {3}").format(
 									d.reference_doctype, d.reference_name, ref_party_account, self.party_account
@@ -1482,7 +1485,7 @@ def get_outstanding_reference_documents(args, validate=False):
 		outstanding_invoices = get_outstanding_invoices(
 			args.get("party_type"),
 			args.get("party"),
-			args.get("party_account"),
+			get_party_account(args.get("party_type"), args.get("party"), args.get("company")),
 			common_filter=common_filter,
 			posting_date=posting_and_due_date,
 			min_outstanding=args.get("outstanding_amt_greater_than"),
