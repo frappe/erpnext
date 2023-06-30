@@ -164,8 +164,11 @@ class StockReservationEntry(Document):
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
 
 		if self.reservation_based_on == "Serial and Batch":
-			available_serial_nos = set()
+			allow_partial_reservation = frappe.db.get_single_value(
+				"Stock Settings", "allow_partial_reservation"
+			)
 
+			available_serial_nos = set()
 			if self.has_serial_no:
 				available_serial_nos = get_available_serial_nos_to_reserve(
 					self.item_code, self.warehouse, self.has_batch_no, ignore_sre=self.name
@@ -214,11 +217,14 @@ class StockReservationEntry(Document):
 						)
 
 					if entry.qty > available_qty_to_reserve:
-						frappe.throw(
-							_(
-								f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
+						if allow_partial_reservation:
+							entry.qty = available_qty_to_reserve
+						else:
+							frappe.throw(
+								_(
+									f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
+								)
 							)
-						)
 
 				qty_to_be_reserved += entry.qty
 
