@@ -15,7 +15,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			"fieldtype": "MultiSelectList",
 			get_data: function(txt) {
 				return frappe.db.get_link_options('Project', txt, {
-					company: ["in", [frappe.query_report.get_filter_value("company"), ""]],
+					company: frappe.query_report.get_filter_value("company")
 				});
 			},
 		},
