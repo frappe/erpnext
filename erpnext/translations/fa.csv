@@ -232,8 +232,6 @@ Applicable For,قابل استفاده برای,
 "Applicable if the company is SpA, SApA or SRL",اگر شرکت SpA ، SApA یا SRL باشد ، قابل اجرا است,
 Applicable if the company is a limited liability company,اگر شرکت یک شرکت با مسئولیت محدود باشد قابل اجرا است,
 Applicable if the company is an Individual or a Proprietorship,اگر شرکت یک فرد یا مالکیت مالکیت باشد ، قابل اجرا است,
-Applicant,درخواست کننده,
-Applicant Type,نوع متقاضی,
 Application of Funds (Assets),استفاده از وجوه (دارایی),
 Application period cannot be across two allocation records,دوره درخواست نمی تواند در دو رکورد تخصیص باشد,
 Application period cannot be outside leave allocation period,دوره نرم افزار می تواند دوره تخصیص مرخصی در خارج نیست,
@@ -1471,10 +1469,6 @@ List of all share transactions,فهرست همه تراکنشهای اشتراک
 List of available Shareholders with folio numbers,لیست سهامداران موجود با شماره های برگه,
 Loading Payment System,سیستم پرداخت بارگیری,
 Loan,وام,
-Loan Amount cannot exceed Maximum Loan Amount of {0},وام مبلغ می توانید حداکثر مبلغ وام از تجاوز نمی {0},
-Loan Application,درخواست وام,
-Loan Management,مدیریت وام,
-Loan Repayment,بازپرداخت وام,
 Loan Start Date and Loan Period are mandatory to save the Invoice Discounting,تاریخ شروع وام و دوره وام برای صرفه جویی در تخفیف فاکتور الزامی است,
 Loans (Liabilities),وام (بدهی),
 Loans and Advances (Assets),وام و پیشرفت (دارایی),
@@ -1611,7 +1605,6 @@ Moderate Sensitivity,حساسیت متوسط,
 Monday,دوشنبه,
 Monthly,ماهیانه,
 Monthly Distribution,توزیع ماهانه,
-Monthly Repayment Amount cannot be greater than Loan Amount,میزان بازپرداخت ماهانه نمی تواند بیشتر از وام مبلغ,
 More,بیش,
 More Information,اطلاعات بیشتر,
 More than one selection for {0} not allowed,بیش از یک انتخاب برای {0} مجاز نیست,
@@ -1884,11 +1877,9 @@ Pay Remaining,باقی مانده است,
 Pay {0} {1},پرداخت {0} {1},
 Payable,قابل پرداخت,
 Payable Account,قابل پرداخت حساب,
-Payable Amount,مبلغ قابل پرداخت,
 Payment,پرداخت,
 Payment Cancelled. Please check your GoCardless Account for more details,پرداخت لغو شد برای اطلاعات بیشتر، لطفا حساب GoCardless خود را بررسی کنید,
 Payment Confirmation,تاییدیه پرداخت,
-Payment Date,تاریخ پرداخت,
 Payment Days,روز پرداخت,
 Payment Document,سند پرداخت,
 Payment Due Date,پرداخت با توجه تاریخ,
@@ -1982,7 +1973,6 @@ Please enter Production Item first,لطفا ابتدا وارد مورد تول�
 Please enter Purchase Receipt first,لطفا ابتدا وارد رسید خرید,
 Please enter Receipt Document,لطفا سند دریافت وارد کنید,
 Please enter Reference date,لطفا تاریخ مرجع وارد,
-Please enter Repayment Periods,لطفا دوره بازپرداخت وارد کنید,
 Please enter Reqd by Date,لطفا Reqd را با تاریخ وارد کنید,
 Please enter Woocommerce Server URL,لطفا URL سرور Woocommerce را وارد کنید,
 Please enter Write Off Account,لطفا وارد حساب فعال,
@@ -1994,7 +1984,6 @@ Please enter message before sending,لطفا قبل از ارسال پیام ر�
 Please enter parent cost center,لطفا پدر و مادر مرکز هزینه وارد,
 Please enter quantity for Item {0},لطفا مقدار برای آیتم را وارد کنید {0},
 Please enter relieving date.,لطفا تاریخ تسکین وارد کنید.,
-Please enter repayment Amount,لطفا مقدار بازپرداخت وارد کنید,
 Please enter valid Financial Year Start and End Dates,لطفا معتبر مالی سال تاریخ شروع و پایان را وارد کنید,
 Please enter valid email address,لطفا آدرس ایمیل معتبر وارد کنید,
 Please enter {0} first,لطفا ابتدا وارد {0},
@@ -2160,7 +2149,6 @@ Pricing Rule {0} is updated,قانون قیمت گذاری {0} به روز می 
 Pricing Rules are further filtered based on quantity.,مشاهده قوانین قیمت گذاری بیشتر بر اساس مقدار فیلتر شده است.,
 Primary Address Details,جزئیات آدرس اصلی,
 Primary Contact Details,اطلاعات تماس اولیه,
-Principal Amount,مقدار اصلی,
 Print Format,چاپ فرمت,
 Print IRS 1099 Forms,فرم های IRS 1099 را چاپ کنید,
 Print Report Card,کارت گزارش چاپ,
@@ -2550,7 +2538,6 @@ Sample,نمونه,
 Sample Collection,مجموعه نمونه,
 Sample quantity {0} cannot be more than received quantity {1},مقدار نمونه {0} نمیتواند بیش از مقدار دریافتی باشد {1},
 Sanctioned,تحریم,
-Sanctioned Amount,مقدار تحریم,
 Sanctioned Amount cannot be greater than Claim Amount in Row {0}.,مقدار تحریم نیست می تواند بیشتر از مقدار ادعای در ردیف {0}.,
 Sand,شن,
 Saturday,روز شنبه,
@@ -3541,7 +3528,6 @@ Target Details,جزئیات هدف,
 {0} already has a Parent Procedure {1}.,{0} در حال حاضر یک روش والدین {1} دارد.,
 API,API,
 Annual,سالیانه,
-Approved,تایید,
 Change,تغییر,
 Contact Email,تماس با ایمیل,
 Export Type,نوع صادرات,
@@ -3571,7 +3557,6 @@ A new appointment has been created for you with {0},قرار ملاقات جدی
 Account Value,ارزش حساب,
 Account is mandatory to get payment entries,حساب برای دریافت ورودی های پرداخت الزامی است,
 Account is not set for the dashboard chart {0},حساب برای نمودار داشبورد {0 set تنظیم نشده است,
-Account {0} does not belong to company {1},حساب {0} به شرکت {1} تعلق ندارد,
 Account {0} does not exists in the dashboard chart {1},حساب {0 in در نمودار داشبورد {1 exists موجود نیست,
 Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry,حساب: <b>{0}</b> سرمایه در حال انجام است و توسط Journal Entry قابل به روزرسانی نیست,
 Account: {0} is not permitted under Payment Entry,حساب: {0 under در ورود پرداخت مجاز نیست,
@@ -3582,7 +3567,6 @@ Accounting Period overlaps with {0},دوره حسابداری با {0} همپو�
 Activity,فعالیت,
 Add / Manage Email Accounts.,افزودن / مدیریت ایمیل ها,
 Add Child,اضافه کردن کودک,
-Add Loan Security,امنیت وام را اضافه کنید,
 Add Multiple,اضافه کردن چند,
 Add Participants,شرکت کنندگان اضافه کردن,
 Add to Featured Item,به آیتم مورد علاقه اضافه کنید,
@@ -3593,15 +3577,12 @@ Added {0} ({1}),اضافه شده {0} ({1}),
 Address Line 1,خط 1 آدرس,
 Addresses,نشانی ها,
 Admission End Date should be greater than Admission Start Date.,تاریخ پایان پذیرش باید بیشتر از تاریخ شروع پذیرش باشد.,
-Against Loan,در برابر وام,
-Against Loan:,در برابر وام:,
 All,همه,
 All bank transactions have been created,تمام معاملات بانکی ایجاد شده است,
 All the depreciations has been booked,همه استهلاک ها رزرو شده اند,
 Allocation Expired!,تخصیص منقضی شده است!,
 Allow Resetting Service Level Agreement from Support Settings.,تنظیم مجدد توافق نامه سطح خدمات از تنظیمات پشتیبانی مجاز است.,
 Amount of {0} is required for Loan closure,مبلغ {0 برای بسته شدن وام مورد نیاز است,
-Amount paid cannot be zero,مبلغ پرداخت شده نمی تواند صفر باشد,
 Applied Coupon Code,کد کوپن کاربردی,
 Apply Coupon Code,کد کوپن را اعمال کنید,
 Appointment Booking,رزرو قرار ملاقات,
@@ -3649,7 +3630,6 @@ Cancelled,لغو شد,
 Cannot Calculate Arrival Time as Driver Address is Missing.,نمی توان زمان رسیدن را به دلیل گم شدن آدرس راننده محاسبه کرد.,
 Cannot Optimize Route as Driver Address is Missing.,نمی توان مسیر را بهینه کرد زیرا آدرس راننده وجود ندارد.,
 Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled.,کار {0} به عنوان وظیفه وابسته به آن {1 complete امکان پذیر نیست / لغو نیست.,
-Cannot create loan until application is approved,تا زمانی که درخواست تأیید نشود ، نمی توانید وام ایجاد کنید,
 Cannot find a matching Item. Please select some other value for {0}.,می توانید یک آیتم تطبیق پیدا کند. لطفا برخی از ارزش های دیگر برای {0} را انتخاب کنید.,
 "Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings",برای مورد {0} در ردیف {1} بیش از 2 {بیش از ill امکان پذیر نیست. برای اجازه بیش از صدور صورت حساب ، لطفاً در تنظیمات حساب میزان کمک هزینه را تعیین کنید,
 "Capacity Planning Error, planned start time can not be same as end time",خطای برنامه ریزی ظرفیت ، زمان شروع برنامه ریزی شده نمی تواند برابر با زمان پایان باشد,
@@ -3812,20 +3792,9 @@ Leaves Taken,برگ برداشت,
 Less Than Amount,مقدار کمتری از مقدار,
 Liabilities,بدهی,
 Loading...,در حال بارگذاری ...,
-Loan Amount exceeds maximum loan amount of {0} as per proposed securities,مبلغ وام بیش از حداکثر میزان وام {0} به ازای اوراق بهادار پیشنهادی است,
 Loan Applications from customers and employees.,برنامه های وام از مشتریان و کارمندان.,
-Loan Disbursement,پرداخت وام,
 Loan Processes,فرآیندهای وام,
-Loan Security,امنیت وام,
-Loan Security Pledge,تعهد امنیتی وام,
-Loan Security Pledge Created : {0},تعهد امنیتی وام ایجاد شده: {0,
-Loan Security Price,قیمت امنیت وام,
-Loan Security Price overlapping with {0},همپوشانی قیمت امنیت وام با {0},
-Loan Security Unpledge,اعتراض امنیتی وام,
-Loan Security Value,ارزش امنیتی وام,
 Loan Type for interest and penalty rates,نوع وام برای نرخ بهره و مجازات,
-Loan amount cannot be greater than {0},مبلغ وام نمی تواند بیشتر از {0 باشد,
-Loan is mandatory,وام الزامی است,
 Loans,وام,
 Loans provided to customers and employees.,وامهایی که به مشتریان و کارمندان داده می شود.,
 Location,محل,
@@ -3894,7 +3863,6 @@ Pause,وقفه,
 Pay,پرداخت,
 Payment Document Type,نوع سند پرداخت,
 Payment Name,نام پرداخت,
-Penalty Amount,میزان مجازات,
 Pending,در انتظار,
 Performance,کارایی,
 Period based On,دوره بر اساس,
@@ -3916,10 +3884,8 @@ Please enter the designation,لطفاً عنوان را وارد کنید,
 Please login as a Marketplace User to edit this item.,لطفاً برای ویرایش این مورد به عنوان یک کاربر Marketplace وارد شوید.,
 Please login as a Marketplace User to report this item.,لطفا برای گزارش این مورد به عنوان یک کاربر Marketplace وارد شوید.,
 Please select <b>Template Type</b> to download template,لطفا <b>الگو را</b> برای بارگیری قالب انتخاب کنید,
-Please select Applicant Type first,لطفا ابتدا متقاضی نوع را انتخاب کنید,
 Please select Customer first,لطفاً ابتدا مشتری را انتخاب کنید,
 Please select Item Code first,لطفا ابتدا کد مورد را انتخاب کنید,
-Please select Loan Type for company {0},لطفا نوع وام را برای شرکت {0 انتخاب کنید,
 Please select a Delivery Note,لطفاً یک یادداشت تحویل را انتخاب کنید,
 Please select a Sales Person for item: {0},لطفاً یک شخص فروش را برای کالا انتخاب کنید: {0,
 Please select another payment method. Stripe does not support transactions in currency '{0}',لطفا روش پرداخت دیگری را انتخاب کنید. خط خطی انجام تراکنش در ارز را پشتیبانی نمی کند &#39;{0}&#39;,
@@ -3935,8 +3901,6 @@ Please set {0},لطفا {0 set تعیین کنید,customer
 Please setup a default bank account for company {0},لطفاً یک حساب بانکی پیش فرض برای شرکت {0 تنظیم کنید,
 Please specify,لطفا مشخص کنید,
 Please specify a {0},لطفاً {0 را مشخص کنید,lead
-Pledge Status,وضعیت تعهد,
-Pledge Time,زمان تعهد,
 Printing,چاپ,
 Priority,اولویت,
 Priority has been changed to {0}.,اولویت به {0 تغییر یافته است.,
@@ -3944,7 +3908,6 @@ Priority {0} has been repeated.,اولویت {0} تکرار شده است.,
 Processing XML Files,پردازش فایلهای XML,
 Profitability,سودآوری,
 Project,پروژه,
-Proposed Pledges are mandatory for secured Loans,وعده های پیشنهادی برای وام های مطمئن الزامی است,
 Provide the academic year and set the starting and ending date.,سال تحصیلی را تهیه کنید و تاریخ شروع و پایان را تعیین کنید.,
 Public token is missing for this bank,نشان عمومی برای این بانک وجود ندارد,
 Publish,انتشار,
@@ -3960,7 +3923,6 @@ Purchase Orders,سفارشات خرید,
 Purchase Receipt doesn't have any Item for which Retain Sample is enabled.,رسید خرید هیچ موردی را ندارد که نمونه حفظ آن فعال باشد.,
 Purchase Return,بازگشت خرید,
 Qty of Finished Goods Item,مقدار کالای تمام شده کالا,
-Qty or Amount is mandatroy for loan security,Qty یا مقدار برای تأمین امنیت وام است,
 Quality Inspection required for Item {0} to submit,بازرسی کیفیت مورد نیاز برای ارسال Item 0 مورد نیاز است,
 Quantity to Manufacture,مقدار تولید,
 Quantity to Manufacture can not be zero for the operation {0},مقدار تولید برای عملیات صفر نمی تواند {0 باشد,
@@ -3981,8 +3943,6 @@ Release date must be in the future,تاریخ انتشار باید در آین�
 Relieving Date must be greater than or equal to Date of Joining,Relieve Date باید بیشتر یا مساوی تاریخ عضویت باشد,
 Rename,تغییر نام,
 Rename Not Allowed,تغییر نام مجاز نیست,
-Repayment Method is mandatory for term loans,روش بازپرداخت برای وام های کوتاه مدت الزامی است,
-Repayment Start Date is mandatory for term loans,تاریخ شروع بازپرداخت برای وام های کوتاه مدت الزامی است,
 Report Item,گزارش مورد,
 Report this Item,گزارش این مورد,
 Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty رزرو شده برای قراردادهای فرعی: مقدار مواد اولیه برای ساخت وسایل فرعی.,
@@ -4015,8 +3975,6 @@ Row {0}:Sibling Date of Birth cannot be greater than today.,ردیف {0: تار�
 Row({0}): {1} is already discounted in {2},ردیف ({0}): 1 {در حال حاضر با 2 {تخفیف,
 Rows Added in {0},ردیف اضافه شده در {0},
 Rows Removed in {0},ردیف ها در {0 oved حذف شدند,
-Sanctioned Amount limit crossed for {0} {1},حد مجاز مجاز تحریم برای {0 {1,
-Sanctioned Loan Amount already exists for {0} against company {1},مبلغ وام تحریم شده در حال حاضر برای {0} در برابر شرکت 1 {وجود دارد,
 Save,ذخیره,
 Save Item,ذخیره مورد,
 Saved Items,موارد ذخیره شده,
@@ -4135,7 +4093,6 @@ Use a name that is different from previous project name,از نامی استفا
 User {0} is disabled,کاربر {0} غیر فعال است,
 Users and Permissions,کاربران و ویرایش,
 Vacancies cannot be lower than the current openings,جای خالی نمی تواند کمتر از دهانه های فعلی باشد,
-Valid From Time must be lesser than Valid Upto Time.,معتبر از زمان باید کمتر از زمان معتبر معتبر باشد.,
 Valuation Rate required for Item {0} at row {1},نرخ ارزیابی مورد نیاز برای {0} در ردیف {1,
 Values Out Of Sync,ارزشهای خارج از همگام سازی,
 Vehicle Type is required if Mode of Transport is Road,در صورتی که نحوه حمل و نقل جاده ای باشد ، نوع خودرو مورد نیاز است,
@@ -4211,7 +4168,6 @@ Actual,واقعی,
 Add to Cart,اضافه کردن به سبد,
 Days Since Last Order,روزهایی از آخرین سفارش,
 In Stock,در انبار,
-Loan Amount is mandatory,مبلغ وام الزامی است,
 Mode Of Payment,نحوه پرداخت,
 No students Found,هیچ دانشجویی یافت نشد,
 Not in Stock,در انبار,
@@ -4240,7 +4196,6 @@ From date cannot be greater than To date,از تاریخ نمی تواند بی�
 Group by,گروه توسط,
 In stock,در انبار,
 Item name,نام آیتم,
-Loan amount is mandatory,مبلغ وام الزامی است,
 Minimum Qty,حداقل تعداد,
 More details,جزئیات بیشتر,
 Nature of Supplies,طبیعت لوازم,
@@ -4409,9 +4364,6 @@ Time logs are required for {0} {1},گزارش های زمانی برای {0} {1}
 Total Completed Qty,تعداد کل تکمیل شده است,
 Qty to Manufacture,تعداد برای تولید,
 Repay From Salary can be selected only for term loans,بازپرداخت از حقوق فقط برای وام های مدت دار قابل انتخاب است,
-No valid Loan Security Price found for {0},هیچ قیمت امنیتی وام معتبری برای {0} یافت نشد,
-Loan Account and Payment Account cannot be same,حساب وام و حساب پرداخت نمی توانند یکسان باشند,
-Loan Security Pledge can only be created for secured loans,وام تضمین وام فقط برای وام های تضمینی ایجاد می شود,
 Social Media Campaigns,کمپین های رسانه های اجتماعی,
 From Date can not be greater than To Date,از تاریخ نمی تواند بیشتر از تاریخ باشد,
 Please set a Customer linked to the Patient,لطفاً مشتری متصل به بیمار را تنظیم کنید,
@@ -6437,7 +6389,6 @@ Salary Component Type,نوع مشمول حقوق و دستمزد,
 HR User,HR کاربر,
 Appointment Letter,نامه انتصاب,
 Job Applicant,درخواستگر کار,
-Applicant Name,نام متقاضی,
 Appointment Date,تاریخ انتصاب,
 Appointment Letter Template,الگوی نامه انتصاب,
 Body,بدن,
@@ -7059,99 +7010,12 @@ Registered,ثبت شده,
 Sync in Progress,همگام سازی در حال پیشرفت,
 Hub Seller Name,فروشنده نام توپی,
 Custom Data,داده های سفارشی,
-Member,عضو,
-Partially Disbursed,نیمه پرداخت شده,
-Loan Closure Requested,درخواست بسته شدن وام,
 Repay From Salary,بازپرداخت از حقوق و دستمزد,
-Loan Details,وام جزییات,
-Loan Type,نوع وام,
-Loan Amount,مبلغ وام,
-Is Secured Loan,وام مطمئن است,
-Rate of Interest (%) / Year,نرخ بهره (٪) / سال,
-Disbursement Date,تاریخ پرداخت,
-Disbursed Amount,مبلغ پرداخت شده,
-Is Term Loan,وام مدت است,
-Repayment Method,روش بازپرداخت,
-Repay Fixed Amount per Period,بازپرداخت مقدار ثابت در هر دوره,
-Repay Over Number of Periods,بازپرداخت تعداد بیش از دوره های,
-Repayment Period in Months,دوره بازپرداخت در ماه,
-Monthly Repayment Amount,میزان بازپرداخت ماهانه,
-Repayment Start Date,تاریخ شروع بازپرداخت,
-Loan Security Details,جزئیات امنیت وام,
-Maximum Loan Value,ارزش وام حداکثر,
-Account Info,اطلاعات حساب,
-Loan Account,حساب وام,
-Interest Income Account,حساب درآمد حاصل از بهره,
-Penalty Income Account,مجازات حساب درآمد,
-Repayment Schedule,برنامه بازپرداخت,
-Total Payable Amount,مجموع مبلغ قابل پرداخت,
-Total Principal Paid,کل مبلغ پرداخت شده,
-Total Interest Payable,منافع کل قابل پرداخت,
-Total Amount Paid,کل مبلغ پرداخت شده,
-Loan Manager,مدیر وام,
-Loan Info,وام اطلاعات,
-Rate of Interest,نرخ بهره,
-Proposed Pledges,تعهدات پیشنهادی,
-Maximum Loan Amount,حداکثر مبلغ وام,
-Repayment Info,اطلاعات بازپرداخت,
-Total Payable Interest,مجموع بهره قابل پرداخت,
-Against Loan ,در برابر وام,
-Loan Interest Accrual,بهره وام تعهدی,
-Amounts,مقدار,
-Pending Principal Amount,در انتظار مبلغ اصلی,
-Payable Principal Amount,مبلغ اصلی قابل پرداخت,
-Paid Principal Amount,مبلغ اصلی پرداخت شده,
-Paid Interest Amount,مبلغ سود پرداخت شده,
-Process Loan Interest Accrual,بهره وام فرآیند تعهدی,
-Repayment Schedule Name,نام برنامه بازپرداخت,
 Regular Payment,پرداخت منظم,
 Loan Closure,بسته شدن وام,
-Payment Details,جزئیات پرداخت,
-Interest Payable,بهره قابل پرداخت,
-Amount Paid,مبلغ پرداخت شده,
-Principal Amount Paid,مبلغ اصلی پرداخت شده,
-Repayment Details,جزئیات بازپرداخت,
-Loan Repayment Detail,جزئیات بازپرداخت وام,
-Loan Security Name,نام امنیتی وام,
-Unit Of Measure,واحد اندازه گیری,
-Loan Security Code,کد امنیتی وام,
-Loan Security Type,نوع امنیتی وام,
-Haircut %,اصلاح مو ٪,
-Loan  Details,جزئیات وام,
-Unpledged,بدون استفاده,
-Pledged,قول داده,
-Partially Pledged,تا حدی تعهد شده,
-Securities,اوراق بهادار,
-Total Security Value,ارزش امنیتی کل,
-Loan Security Shortfall,کمبود امنیت وام,
-Loan ,وام,
-Shortfall Time,زمان کمبود,
-America/New_York,آمریکا / New_York,
-Shortfall Amount,مقدار کمبود,
-Security Value ,ارزش امنیتی,
-Process Loan Security Shortfall,کمبود امنیت وام فرآیند,
-Loan To Value Ratio,نسبت وام به ارزش,
-Unpledge Time,زمان قطع شدن,
-Loan Name,نام وام,
 Rate of Interest (%) Yearly,نرخ بهره (٪) سالانه,
-Penalty Interest Rate (%) Per Day,مجازات نرخ بهره (٪) در روز,
-Penalty Interest Rate is levied on the pending interest amount on a daily basis in case of delayed repayment ,در صورت تأخیر در بازپرداخت ، نرخ بهره مجازات به میزان روزانه مبلغ بهره در نظر گرفته می شود,
-Grace Period in Days,دوره گریس در روزها,
-No. of days from due date until which penalty won't be charged in case of delay in loan repayment,تعداد روزها از تاریخ سررسید تا زمانی که مجازات در صورت تاخیر در بازپرداخت وام دریافت نمی شود,
-Pledge,سوگند - تعهد,
-Post Haircut Amount,مبلغ کوتاه کردن مو,
-Process Type,نوع فرآیند,
-Update Time,زمان بروزرسانی,
-Proposed Pledge,تعهد پیشنهادی,
-Total Payment,مبلغ کل قابل پرداخت,
-Balance Loan Amount,تعادل وام مبلغ,
-Is Accrued,رمزگذاری شده است,
 Salary Slip Loan,وام وام لغزش,
 Loan Repayment Entry,ورودی بازپرداخت وام,
-Sanctioned Loan Amount,مبلغ وام تحریم شده,
-Sanctioned Amount Limit,حد مجاز مجاز تحریم,
-Unpledge,ناخواسته,
-Haircut,اصلاح مو,
 MAT-MSH-.YYYY.-,MAT-MSH- .YYYY.-,
 Generate Schedule,تولید برنامه,
 Schedules,برنامه,
@@ -7885,7 +7749,6 @@ Check this if you want to force the user to select a series before saving. There
 Update Series,به روز رسانی سری,
 Change the starting / current sequence number of an existing series.,تغییر شروع / شماره توالی فعلی از یک سری موجود است.,
 Prefix,پیشوند,
-Current Value,ارزش فعلی,
 This is the number of the last created transaction with this prefix,این تعداد از آخرین معامله ایجاد شده با این پیشوند است,
 Update Series Number,به روز رسانی سری شماره,
 Quotation Lost Reason,نقل قول را فراموش کرده اید دلیل,
@@ -8516,8 +8379,6 @@ Reserved,رزرو شده,
 Itemwise Recommended Reorder Level,Itemwise توصیه ترتیب مجدد سطح,
 Lead Details,مشخصات راهبر,
 Lead Owner Efficiency,بهره وری مالک سرب,
-Loan Repayment and Closure,بازپرداخت وام وام,
-Loan Security Status,وضعیت امنیتی وام,
 Lost Opportunity,فرصت از دست رفته,
 Maintenance Schedules,برنامه های  نگهداری و تعمیرات,
 Material Requests for which Supplier Quotations are not created,درخواست مواد که نقل قول تامین کننده ایجاد نمی,
@@ -8608,7 +8469,6 @@ Total Counts Completed,تعداد کل انجام شده,
 Counts Targeted: {0},تعداد مورد نظر: {0},
 Payment Account is mandatory,حساب پرداخت اجباری است,
 "If checked, the full amount will be deducted from taxable income before calculating income tax without any declaration or proof submission.",در صورت بررسی ، قبل از محاسبه مالیات بر درآمد ، بدون هیچ گونه اظهارنامه یا اثبات اثبات ، کل مبلغ از درآمد مشمول مالیات کسر می شود.,
-Disbursement Details,جزئیات پرداخت,
 Material Request Warehouse,انبار درخواست مواد,
 Select warehouse for material requests,انبار را برای درخواست های مواد انتخاب کنید,
 Transfer Materials For Warehouse {0},انتقال مواد برای انبار {0},
@@ -8996,9 +8856,6 @@ MICR Code,کد MICR,
 Repay unclaimed amount from salary,مبلغ مطالبه نشده از حقوق را بازپرداخت کنید,
 Deduction from salary,کسر از حقوق,
 Expired Leaves,برگهای منقضی شده,
-Reference No,شماره مرجع,
-Haircut percentage is the percentage difference between market value of the Loan Security and the value ascribed to that Loan Security when used as collateral for that loan.,درصد کاهش مو به درصد اختلاف بین ارزش بازار ضمانت وام و ارزشی است که به عنوان وثیقه وام هنگام استفاده به عنوان وثیقه آن وام به آن تعلق می گیرد.,
-Loan To Value Ratio expresses the ratio of the loan amount to the value of the security pledged. A loan security shortfall will be triggered if this falls below the specified value for any loan ,نسبت وام به ارزش ، نسبت مبلغ وام به ارزش وثیقه تعهد شده را بیان می کند. اگر این مقدار کمتر از مقدار تعیین شده برای هر وام باشد ، کسری امنیت وام ایجاد می شود,
 If this is not checked the loan by default will be considered as a Demand Loan,اگر این مورد بررسی نشود ، وام به طور پیش فرض به عنوان وام تقاضا در نظر گرفته می شود,
 This account is used for booking loan repayments from the borrower and also disbursing loans to the borrower,این حساب برای رزرو بازپرداخت وام از وام گیرنده و همچنین پرداخت وام به وام گیرنده استفاده می شود,
 This account is capital account which is used to allocate capital for loan disbursal account ,این حساب حساب سرمایه ای است که برای تخصیص سرمایه برای حساب پرداخت وام استفاده می شود,
@@ -9462,13 +9319,6 @@ Items Required,موارد مورد نیاز,
 Operation {0} does not belong to the work order {1},عملیات {0} به دستور کار تعلق ندارد {1},
 Print UOM after Quantity,UOM را بعد از Quantity چاپ کنید,
 Set default {0} account for perpetual inventory for non stock items,حساب پیش فرض {0} را برای موجودی دائمی اقلام غیر سهام تنظیم کنید,
-Loan Security {0} added multiple times,امنیت وام {0} چندین بار اضافه شده است,
-Loan Securities with different LTV ratio cannot be pledged against one loan,اوراق بهادار وام با نسبت LTV متفاوت را نمی توان در مقابل یک وام تعهد کرد,
-Qty or Amount is mandatory for loan security!,برای امنیت وام تعداد یا مبلغ اجباری است!,
-Only submittted unpledge requests can be approved,فقط درخواست های بی قید ارسال شده قابل تأیید است,
-Interest Amount or Principal Amount is mandatory,مبلغ بهره یا مبلغ اصلی اجباری است,
-Disbursed Amount cannot be greater than {0},مبلغ پرداختی نمی تواند بیشتر از {0} باشد,
-Row {0}: Loan Security {1} added multiple times,ردیف {0}: امنیت وام {1} چندین بار اضافه شده است,
 Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save,ردیف شماره {0}: مورد کودک نباید یک بسته محصول باشد. لطفاً مورد {1} را حذف کرده و ذخیره کنید,
 Credit limit reached for customer {0},سقف اعتبار برای مشتری {0} رسیده است,
 Could not auto create Customer due to the following missing mandatory field(s):,به دلیل وجود فیلد (های) اجباری زیر ، مشتری به طور خودکار ایجاد نمی شود:,
