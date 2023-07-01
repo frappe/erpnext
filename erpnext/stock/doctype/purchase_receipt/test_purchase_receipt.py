@@ -1834,6 +1834,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
 
+<<<<<<< HEAD
 	def test_return_from_rejected_warehouse(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return_against_rejected_warehouse,
@@ -1860,6 +1861,122 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr_return.items[0].qty, 2.0 * -1)
 		self.assertEqual(pr_return.items[0].rejected_qty, 0.0)
 		self.assertEqual(pr_return.items[0].rejected_warehouse, "")
+=======
+	def test_purchase_receipt_with_backdated_landed_cost_voucher(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = "_Test Purchase Item With Landed Cost"
+		create_item(item_code)
+
+		warehouse = create_warehouse("_Test Purchase Warehouse With Landed Cost")
+		warehouse1 = create_warehouse("_Test Purchase Warehouse With Landed Cost 1")
+		warehouse2 = create_warehouse("_Test Purchase Warehouse With Landed Cost 2")
+		warehouse3 = create_warehouse("_Test Purchase Warehouse With Landed Cost 3")
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="10:59:59",
+			qty=100,
+			rate=275.00,
+		)
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.posting_date = add_days(today(), -9)
+		pr_return.items[0].qty = 2 * -1
+		pr_return.items[0].received_qty = 2 * -1
+		pr_return.submit()
+
+		ste1 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -8),
+			source=warehouse,
+			target=warehouse1,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste1.reload()
+		self.assertEqual(ste1.items[0].valuation_rate, 275.00)
+
+		ste2 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -7),
+			source=warehouse,
+			target=warehouse2,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste2.reload()
+		self.assertEqual(ste2.items[0].valuation_rate, 275.00)
+
+		ste3 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -6),
+			source=warehouse,
+			target=warehouse3,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste3.reload()
+		self.assertEqual(ste3.items[0].valuation_rate, 275.00)
+
+		ste4 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -5),
+			source=warehouse1,
+			target=warehouse,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste4.reload()
+		self.assertEqual(ste4.items[0].valuation_rate, 275.00)
+
+		ste5 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -4),
+			source=warehouse,
+			target=warehouse1,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste5.reload()
+		self.assertEqual(ste5.items[0].valuation_rate, 275.00)
+
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=2500 * -1)
+
+		pr.reload()
+		valuation_rate = pr.items[0].valuation_rate
+
+		ste1.reload()
+		self.assertEqual(ste1.items[0].valuation_rate, valuation_rate)
+
+		ste2.reload()
+		self.assertEqual(ste2.items[0].valuation_rate, valuation_rate)
+
+		ste3.reload()
+		self.assertEqual(ste3.items[0].valuation_rate, valuation_rate)
+
+		ste4.reload()
+		self.assertEqual(ste4.items[0].valuation_rate, valuation_rate)
+
+		ste5.reload()
+		self.assertEqual(ste5.items[0].valuation_rate, valuation_rate)
+>>>>>>> c0c693d8b0 (fix: reposting has not changed valuation rate)
 
 
 def prepare_data_for_internal_transfer():
