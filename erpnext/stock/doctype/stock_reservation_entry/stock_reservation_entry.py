@@ -402,7 +402,7 @@ def get_available_qty_to_reserve(
 				query.left_join(sb_entry)
 				.on(sre.name == sb_entry.parent)
 				.select(Sum(sb_entry.qty))
-				.where(sb_entry.batch_no == batch_no)
+				.where((sb_entry.batch_no == batch_no) & (sre.reservation_based_on == "Serial and Batch"))
 			)
 		else:
 			query = query.select(Sum(sre.reserved_qty - sre.delivered_qty))
@@ -455,6 +455,7 @@ def get_available_serial_nos_to_reserve(
 				& (sre.warehouse == warehouse)
 				& (sre.reserved_qty >= sre.delivered_qty)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
+				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)
 
