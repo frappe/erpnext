@@ -68,13 +68,6 @@ class FiscalYear(Document):
 		frappe.cache().delete_value("fiscal_years")
 
 	def on_trash(self):
-		global_defaults = frappe.get_doc("Global Defaults")
-		if global_defaults.current_fiscal_year == self.name:
-			frappe.throw(
-				_(
-					"You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings"
-				).format(self.name)
-			)
 		frappe.cache().delete_value("fiscal_years")
 
 	def validate_overlap(self):
