@@ -1,153 +1,252 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2023-06-28 13:18:59.610192",
- "default_view": "List",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "naming_series",
-  "customer",
-  "company",
-  "column_break_igkp",
-  "sales_order_name",
-  "transaction_date",
-  "delivery_date",
-  "section_break_hzln",
-  "items",
-  "section_break_5tm7",
-  "total_qty",
-  "column_break_ibmo",
-  "base_total",
-  "base_net_total",
-  "amended_from"
- ],
- "fields": [
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Series",
-   "options": "PER-INV-.YYYY.-",
-   "reqd": 1
-  },
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_igkp",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Today",
-   "fieldname": "transaction_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "delivery_date",
-   "fieldtype": "Date",
-   "label": "Delivery Date"
-  },
-  {
-   "fieldname": "section_break_5tm7",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Items",
-   "options": "Proforma Invoice Item",
-   "width": "200"
-  },
-  {
-   "default": "0",
-   "fieldname": "total_qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Total Quantity",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_ibmo",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "base_total",
-   "fieldtype": "Currency",
-   "label": "Total (Company Currency)",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "base_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Net Total",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "sales_order_name",
-   "fieldtype": "Link",
-   "label": "Sales Order Name",
-   "options": "Sales Order"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Proforma Invoice",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_hzln",
-   "fieldtype": "Section Break"
-  }
- ],
- "index_web_pages_for_search": 1,
- "is_submittable": 1,
- "links": [],
- "modified": "2023-06-29 20:31:01.670215",
- "modified_by": "Administrator",
- "module": "Selling",
- "name": "Proforma Invoice",
- "naming_rule": "By \"Naming Series\" field",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "naming_series:",
+  "creation": "2023-06-28 13:18:59.610192",
+  "default_view": "List",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "customer",
+    "company",
+    "column_break_igkp",
+    "sales_order_name",
+    "transaction_date",
+    "delivery_date",
+    "section_break_hzln",
+    "items",
+    "total_qty",
+    "total_net_weight",
+    "base_total",
+    "base_net_total",
+    "total",
+    "net_total",
+    "tax_category",
+    "taxes_and_charges",
+    "taxes",
+    "base_total_taxes_and_charges",
+    "total_taxes_and_charges",
+    "totals",
+    "base_grand_total",
+    "base_rounding_adjustment",
+    "base_rounded_total",
+    "base_in_words",
+    "grand_total",
+    "rounding_adjustment",
+    "rounded_total",
+    "in_words",
+    "advance_paid",
+    "disable_rounded_total",
+    "apply_discount_on",
+    "base_discount_amount",
+    "coupon_code",
+    "additional_discount_percentage",
+    "discount_amount",
+    "sec_tax_breakup",
+    "other_charges_calculation",
+    "contact_info",
+    "billing_address_column",
+    "customer_address",
+    "address_display",
+    "customer_group",
+    "territory",
+    "contact_person",
+    "contact_display",
+    "contact_phone",
+    "contact_mobile",
+    "contact_email",
+    "shipping_address_column",
+    "shipping_address_name",
+    "shipping_address",
+    "dispatch_address_name",
+    "dispatch_address",
+    "col_break46",
+    "company_address",
+    "company_address_display",
+    "payment_terms_template",
+    "payment_schedule",
+    "tc_name",
+    "terms",
+    "more_info",
+    "status",
+    "delivery_status",
+    "per_delivered",
+    "per_billed",
+    "per_picked",
+    "billing_status",
+    "printing_details",
+    "letter_head",
+    "group_same_items",
+    "select_print_heading",
+    "language",
+    "connections_tab"
+  ],
+  "fields": [
+    {
+      "allow_on_submit": 1,
+      "default": "{customer_name}",
+      "fieldname": "title",
+      "fieldtype": "Data",
+      "hidden": 1,
+      "hide_days": 1,
+      "hide_seconds": 1,
+      "label": "Title",
+      "no_copy": 1,
+      "print_hide": 1
+    },
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Series",
+      "options": "PER-INV-.YYYY.-",
+      "reqd": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer"
+    },
+    {
+      "bold": 1,
+      "fetch_from": "customer.customer_name",
+      "fieldname": "customer_name",
+      "fieldtype": "Data",
+      "hide_days": 1,
+      "hide_seconds": 1,
+      "in_global_search": 1,
+      "label": "Customer Name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "column_break_igkp",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "Today",
+      "fieldname": "posting_date",
+      "fieldtype": "Date",
+      "hide_days": 1,
+      "hide_seconds": 1,
+      "in_standard_filter": 1,
+      "label": "Date",
+      "no_copy": 1,
+      "reqd": 1,
+      "search_index": 1,
+      "width": "160px"
+    },
+    {
+      "fieldname": "delivery_date",
+      "fieldtype": "Date",
+      "label": "Delivery Date"
+    },
+    {
+      "fieldname": "section_break_5tm7",
+      "fieldtype": "Section Break"
+    },
+    {
+      "collapsible": 1,
+      "fieldname": "accounting_dimensions_section",
+      "fieldtype": "Section Break",
+      "label": "Accounting Dimensions"
+    },
+    {
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "label": "Cost Center",
+      "options": "Cost Center"
+    },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Proforma Invoice Item",
+      "width": "200"
+    },
+    {
+      "default": "0",
+      "fieldname": "total_qty",
+      "fieldtype": "Float",
+      "in_list_view": 1,
+      "label": "Total Quantity",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_ibmo",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "0",
+      "fieldname": "base_total",
+      "fieldtype": "Currency",
+      "label": "Total (Company Currency)",
+      "options": "Company:company:default_currency",
+      "read_only": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "base_net_total",
+      "fieldtype": "Currency",
+      "hidden": 1,
+      "label": "Net Total",
+      "options": "Company:company:default_currency",
+      "read_only": 1
+    },
+    {
+      "fieldname": "sales_order_name",
+      "fieldtype": "Link",
+      "label": "Sales Order Name",
+      "options": "Sales Order"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Proforma Invoice",
+      "print_hide": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_break_hzln",
+      "fieldtype": "Section Break"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2023-06-29 20:31:01.670215",
+  "modified_by": "Administrator",
+  "module": "Selling",
+  "name": "Proforma Invoice",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
 }

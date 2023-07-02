@@ -805,6 +805,53 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
+def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False):
+	def update_item(source, target, source_parent):
+		target.amount = flt(source.amount)
+		target.qty = flt(source.qty)
+		target.delivery_date = source.delivery_date
+
+		if target.item_code:
+			item = get_item_defaults(target.item_code, source_parent.company)
+			item_group = get_item_group_defaults(target.item_code, source_parent.company)
+
+	doclist = get_mapped_doc(
+		"Sales Order",
+		source_name,
+		{
+			"Sales Order": {
+				# "doctype": "Proforma Invoice",
+				"doctype": "Profor",
+				"field_map": {"delivery_date": "delivery_date"},
+			},
+			"Sales Order Item": {
+				"doctype": "Proforma Invoice Item",
+				"field_map": {
+					# Sales Order Item field name : Proforma Invoice Item field name
+					"name": "so_item",
+					"parent": "sales_order",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.qty
+				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
+			},
+		},
+		target_doc,
+		ignore_permissions=ignore_permissions,
+	)
+
+	automatically_fetch_payment_terms = cint(
+		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+	)
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
+
+	doclist.set_onload("ignore_price_list", True)
+
+	return doclist
+
+
+@frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
@@ -958,54 +1005,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 	doclist.set_onload("ignore_price_list", True)
 
-	return doclist
-
-
-@frappe.whitelist()
-def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False):
-	def update_item(source, target, source_parent):
-		target.amount = flt(source.amount) - flt(source.billed_amt)
-		target.qty = (
-			target.amount / flt(source.rate)
-			if (source.rate and source.billed_amt)
-			else source.qty - source.returned_qty
-		)
-
-		if target.item_code:
-			item = get_item_defaults(target.item_code, source_parent.company)
-			item_group = get_item_group_defaults(target.item_code, source_parent.company)
-
-	doclist = get_mapped_doc(
-		"Sales Order",
-		source_name,
-		{
-			"Sales Order": {
-				"doctype": "Proforma Invoice",
-			},
-			"Sales Order Item": {
-				"doctype": "Proforma Invoice Item",
-				"field_map": {
-					"name": "so_item",
-					"parent": "sales_order",
-				},
-				"postprocess": update_item,
-				"condition": lambda doc: doc.qty
-				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
-			},
-		},
-		target_doc,
-		ignore_permissions=ignore_permissions,
-	)
-
-	automatically_fetch_payment_terms = cint(
-		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
-	)
-	if automatically_fetch_payment_terms:
-		doclist.set_payment_schedule()
-
-	doclist.set_onload("ignore_price_list", True)
-
-	print("Hello")
 	return doclist
 
 

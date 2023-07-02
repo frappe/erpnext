@@ -12,6 +12,7 @@ frappe.provide("erpnext.selling");
 erpnext.selling.SellingController = class SellingController extends erpnext.TransactionController {
 	setup() {
 		super.setup();
+		console.log("Hey SC")
 	}
 
 	onload() {
