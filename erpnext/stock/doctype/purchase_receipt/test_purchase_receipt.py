@@ -1834,7 +1834,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
 
-<<<<<<< HEAD
 	def test_return_from_rejected_warehouse(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return_against_rejected_warehouse,
@@ -1861,7 +1860,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr_return.items[0].qty, 2.0 * -1)
 		self.assertEqual(pr_return.items[0].rejected_qty, 0.0)
 		self.assertEqual(pr_return.items[0].rejected_warehouse, "")
-=======
+
 	def test_purchase_receipt_with_backdated_landed_cost_voucher(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
@@ -1976,7 +1975,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		ste5.reload()
 		self.assertEqual(ste5.items[0].valuation_rate, valuation_rate)
->>>>>>> c0c693d8b0 (fix: reposting has not changed valuation rate)
 
 
 def prepare_data_for_internal_transfer():
