@@ -93,6 +93,7 @@
   "exchange_rate_revaluation_settings_section",
   "auto_exchange_rate_revaluation",
   "auto_err_frequency",
+  "submit_err_jv",
   "budget_detail",
   "exception_budget_approver_role",
   "registration_info",
@@ -748,7 +749,16 @@
    "fieldtype": "Select",
    "label": "Frequency",
    "options": "Daily\nWeekly"
+<<<<<<< HEAD
 >>>>>>> 6644311c8b (refactor: checkbox for enabling auto ERR creation)
+=======
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_err_jv",
+   "fieldtype": "Check",
+   "label": "Submit ERR Journals?"
+>>>>>>> 4f51c5a433 (refactor: submit and make JV through background job)
   }
  ],
  "icon": "fa fa-building",
@@ -757,10 +767,14 @@
  "is_tree": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-08-16 16:09:02.327724",
 =======
  "modified": "2023-07-03 14:29:56.262188",
 >>>>>>> 6644311c8b (refactor: checkbox for enabling auto ERR creation)
+=======
+ "modified": "2023-07-07 05:41:41.537256",
+>>>>>>> 4f51c5a433 (refactor: submit and make JV through background job)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
