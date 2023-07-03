@@ -767,6 +767,39 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 		self.assertEqual(rounded_total, 400)
 
+	def test_pos_batch_reservation(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_auto_batch_nos,
+		)
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+
+		create_batch_item_with_batch("_BATCH ITEM Test For Reserve", "TestBatch-RS 02")
+		make_stock_entry(
+			target="_Test Warehouse - _TC",
+			item_code="_BATCH ITEM Test For Reserve",
+			qty=20,
+			basic_rate=100,
+			batch_no="TestBatch-RS 02",
+		)
+
+		pos_inv1 = create_pos_invoice(
+			item="_BATCH ITEM Test For Reserve", rate=300, qty=15, batch_no="TestBatch-RS 02"
+		)
+		pos_inv1.save()
+		pos_inv1.submit()
+
+		batches = get_auto_batch_nos(
+			frappe._dict(
+				{"item_code": "_BATCH ITEM Test For Reserve", "warehouse": "_Test Warehouse - _TC"}
+			)
+		)
+
+		for batch in batches:
+			if batch.batch_no == "TestBatch-RS 02" and batch.warehouse == "_Test Warehouse - _TC":
+				self.assertEqual(batch.qty, 5)
+
 	def test_pos_batch_item_qty_validation(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			BatchNegativeStockError,
