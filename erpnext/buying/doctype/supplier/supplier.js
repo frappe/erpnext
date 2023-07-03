@@ -8,7 +8,7 @@ frappe.ui.form.on("Supplier", {
 			frm.set_value("represents_company", "");
 		}
 		frm.set_query('account', 'accounts', function (doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
+			let d = locals[cdt][cdn];
 			return {
 				filters: {
 					'account_type': 'Payable',
@@ -17,6 +17,19 @@ frappe.ui.form.on("Supplier", {
 				}
 			}
 		});
+
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					"account_type": "Payable",
+					"root_type": "Asset",
+					"company": d.company,
+					"is_group": 0
+				}
+			}
+		});
+
 		frm.set_query("default_bank_account", function() {
 			return {
 				filters: {

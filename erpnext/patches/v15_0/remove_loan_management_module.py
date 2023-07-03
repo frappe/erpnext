@@ -7,7 +7,7 @@ def execute():
 
 	frappe.delete_doc("Module Def", "Loan Management", ignore_missing=True, force=True)
 
-	frappe.delete_doc("Workspace", "Loan Management", ignore_missing=True, force=True)
+	frappe.delete_doc("Workspace", "Loans", ignore_missing=True, force=True)
 
 	print_formats = frappe.get_all(
 		"Print Format", {"module": "Loan Management", "standard": "Yes"}, pluck="name"

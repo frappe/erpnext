@@ -70,6 +70,11 @@
   "payment_terms",
   "cost_center",
   "default_finance_book",
+  "advance_payments_section",
+  "book_advance_payments_in_separate_party_account",
+  "column_break_fwcf",
+  "default_advance_received_account",
+  "default_advance_paid_account",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
   "enable_provisional_accounting_for_non_stock_items",
@@ -694,6 +699,38 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "fieldname": "advance_payments_section",
+   "fieldtype": "Section Break",
+   "label": "Advance Payments"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "fieldname": "default_advance_received_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Received Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "fieldname": "default_advance_paid_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Paid Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_fwcf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>",
+   "fieldname": "book_advance_payments_in_separate_party_account",
+   "fieldtype": "Check",
+   "label": "Book Advance Payments in Separate Party Account"
   }
  ],
  "icon": "fa fa-building",
@@ -701,7 +738,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-08-16 16:09:02.327724",
+ "modified": "2023-06-23 18:22:27.219706",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
