@@ -98,6 +98,7 @@
   "exchange_rate_revaluation_settings_section",
   "auto_exchange_rate_revaluation",
   "auto_err_frequency",
+  "submit_err_jv",
   "budget_detail",
   "exception_budget_approver_role",
   "registration_info",
@@ -751,6 +752,12 @@
    "fieldtype": "Select",
    "label": "Frequency",
    "options": "Daily\nWeekly"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_err_jv",
+   "fieldtype": "Check",
+   "label": "Submit ERR Journals?"
   }
  ],
  "icon": "fa fa-building",
@@ -758,7 +765,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-07-03 14:29:56.262188",
+ "modified": "2023-07-07 05:41:41.537256",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
