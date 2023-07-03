@@ -806,23 +806,53 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False):
+	# from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+
+	def postprocess(source, target):
+		# set_missing_values(source, target)
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
+
+	def set_missing_values(source, target):
+		# target.run_method("set_missing_values")
+		# target.run_method("set_po_nos")
+		# target.run_method("calculate_taxes_and_totals")
+
+		if source.company_address:
+			target.update({"company_address": source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
+		if target.company_address:
+			target.update(get_fetch_values("Proforma Invoice", "company_address", target.company_address))
+
+		# make_packing_list(target)
+
 	def update_item(source, target, source_parent):
-		target.amount = flt(source.amount)
-		target.qty = flt(source.qty)
+		# target.amount = flt(source.amount)
+		# target.qty = flt(source.qty)
 		target.delivery_date = source.delivery_date
+		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 		if target.item_code:
 			item = get_item_defaults(target.item_code, source_parent.company)
 			item_group = get_item_group_defaults(target.item_code, source_parent.company)
+			target.cost_center = (
+				frappe.db.get_value("Project", source_parent.project, "cost_center")
+				or item.get("buying_cost_center")
+				or item_group.get("buying_cost_center")
+			)
 
 	doclist = get_mapped_doc(
 		"Sales Order",
 		source_name,
 		{
 			"Sales Order": {
-				# "doctype": "Proforma Invoice",
-				"doctype": "Profor",
-				"field_map": {"delivery_date": "delivery_date"},
+				"doctype": "Proforma Invoice",
+				"field_map": {"delivery_date": "delivery_date", "name": "sales_order_name"},
 			},
 			"Sales Order Item": {
 				"doctype": "Proforma Invoice Item",
@@ -837,7 +867,8 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 			},
 		},
 		target_doc,
-		ignore_permissions=ignore_permissions,
+		postprocess,
+		# ignore_permissions=ignore_permissions,
 	)
 
 	automatically_fetch_payment_terms = cint(

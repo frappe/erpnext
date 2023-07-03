@@ -6,10 +6,9 @@
 erpnext.selling.ProformaInvoiceController = class SalesOrderController extends erpnext.selling.SellingController {
 	setup(frm) {
 		super.setup();
-		console.log("PROFORMA ")
+		console.log(frm)
 	}
 	refresh(frm) {
-		console.log("HEy")
 	}
 }
 
