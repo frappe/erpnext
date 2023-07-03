@@ -204,6 +204,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
+   "no_copy": 1,
    "oldfieldname": "received_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -993,7 +994,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-10-12 03:37:59.516609",
+=======
+ "modified": "2023-07-02 18:40:48.152637",
+>>>>>>> 5448859254 (fix: Update no copy for received_qty field (#35965))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
