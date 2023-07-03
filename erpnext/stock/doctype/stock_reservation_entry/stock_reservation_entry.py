@@ -168,7 +168,7 @@ class StockReservationEntry(Document):
 				"Stock Settings", "allow_partial_reservation"
 			)
 
-			available_serial_nos = set()
+			available_serial_nos = []
 			if self.has_serial_no:
 				available_serial_nos = get_available_serial_nos_to_reserve(
 					self.item_code, self.warehouse, self.has_batch_no, ignore_sre=self.name
@@ -420,7 +420,7 @@ def get_available_qty_to_reserve(
 
 def get_available_serial_nos_to_reserve(
 	item_code: str, warehouse: str, has_batch_no: bool = False, ignore_sre=None
-) -> set[tuple]:
+) -> list[tuple]:
 	"""Returns Available Serial Nos to Reserve (Available Serial Nos - Reserved Serial Nos)` for Item, Warehouse and Batch combination."""
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -438,9 +438,9 @@ def get_available_serial_nos_to_reserve(
 		)
 	)
 
-	available_serial_nos_set = set()
+	available_serial_nos_list = []
 	if available_serial_nos:
-		available_serial_nos_set = {tuple(d.values()) for d in available_serial_nos}
+		available_serial_nos_list = [tuple(d.values()) for d in available_serial_nos]
 
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
@@ -468,9 +468,9 @@ def get_available_serial_nos_to_reserve(
 		reserved_serial_nos = query.run()
 
 		if reserved_serial_nos:
-			return available_serial_nos_set - set(reserved_serial_nos)
+			return list(set(available_serial_nos_list) - set(reserved_serial_nos))
 
-	return available_serial_nos_set
+	return available_serial_nos_list
 
 
 def get_stock_reservation_entries_for_voucher(
