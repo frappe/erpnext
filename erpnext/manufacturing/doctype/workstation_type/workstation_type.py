@@ -20,6 +20,8 @@ class WorkstationType(Document):
 
 
 def get_workstations(workstation_type):
-	workstations = frappe.get_all("Workstation", filters={"workstation_type": workstation_type})
+	workstations = frappe.get_all(
+		"Workstation", filters={"workstation_type": workstation_type}, order_by="creation"
+	)
 
 	return [workstation.name for workstation in workstations]

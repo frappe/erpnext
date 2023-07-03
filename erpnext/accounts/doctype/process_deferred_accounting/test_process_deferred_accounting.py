@@ -44,6 +44,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		acc_settings.save()
 
 		process_deferred_accounting = doc = frappe.get_doc(
+
 			dict(
 				doctype="Process Deferred Accounting",
 				posting_date="2023-07-01",
@@ -64,6 +65,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2023-07-01")
+
 
 	def test_pda_submission_and_cancellation(self):
 		pda = frappe.get_doc(
