@@ -1088,6 +1088,7 @@
    "fieldtype": "Button",
    "label": "Get Advances Paid",
    "oldfieldtype": "Button",
+   "options": "set_advances",
    "print_hide": 1
   },
   {

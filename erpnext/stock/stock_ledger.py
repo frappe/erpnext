@@ -646,6 +646,7 @@ class update_entries_after(object):
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)
 		val = frappe._dict({"sle": dependant_sle})
+
 		if key not in self.distinct_item_warehouses:
 			self.distinct_item_warehouses[key] = val
 			self.new_items_found = True
@@ -655,6 +656,9 @@ class update_entries_after(object):
 			)
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
 				val.sle_changed = True
+				self.distinct_item_warehouses[key] = val
+				self.new_items_found = True
+			elif self.distinct_item_warehouses[key].get("reposting_status"):
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
 
@@ -1362,6 +1366,8 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 		[
 			"item_code",
 			"warehouse",
+			"actual_qty",
+			"qty_after_transaction",
 			"posting_date",
 			"posting_time",
 			"timestamp(posting_date, posting_time) as timestamp",

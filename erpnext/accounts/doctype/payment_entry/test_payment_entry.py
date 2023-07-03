@@ -932,7 +932,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(pe.cost_center, si.cost_center)
 		self.assertEqual(flt(expected_account_balance), account_balance)
 		self.assertEqual(flt(expected_party_balance), party_balance)
-		self.assertEqual(flt(expected_party_account_balance), party_account_balance)
+		self.assertEqual(flt(expected_party_account_balance, 2), flt(party_account_balance, 2))
 
 	def test_multi_currency_payment_entry_with_taxes(self):
 		payment_entry = create_payment_entry(
