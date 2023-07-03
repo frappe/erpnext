@@ -17,7 +17,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 	def test_creation_of_ledger_entry_on_submit(self):
 		"""test creation of gl entries on submission of document"""
 		deferred_account = create_account(
-			account_name="Deferred Revenue",
+			account_name="Deferred Revenue for Accounts Frozen",
 			parent_account="Current Liabilities - _TC",
 			company="_Test Company",
 		)
@@ -64,6 +64,10 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2023-07-01")
+		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
+		acc_settings.accounts_frozen_till_date = ""
+		acc_settings.book_deferred_entries_based_on = "Days"
+		acc_settings.save()
 
 	def test_pda_submission_and_cancellation(self):
 		pda = frappe.get_doc(
