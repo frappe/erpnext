@@ -93,6 +93,9 @@ class PaymentReconciliation(Document):
 	def get_jv_entries(self):
 		condition = self.get_conditions()
 
+		if self.payment_name:
+			condition += f" and t1.name like '%%{self.payment_name}%%'"
+
 		if self.get("cost_center"):
 			condition += f" and t2.cost_center = '{self.cost_center}' "
 
