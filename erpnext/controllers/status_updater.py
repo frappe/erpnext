@@ -165,6 +165,7 @@ class StatusUpdater(Document):
 	"""
 
 	def update_prevdoc_status(self):
+		print(self.status_updater)
 		self.update_qty()
 		self.validate_qty()
 
@@ -468,7 +469,8 @@ class StatusUpdater(Document):
 					from `tab%(target_dt)s` where parent='%(name)s' and parenttype='%(target_parent_dt)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
 				where name='%(name)s'"""
-				% args
+				% args,
+				# debug = 1
 			)
 
 			# update field

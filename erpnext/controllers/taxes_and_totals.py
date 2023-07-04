@@ -544,6 +544,7 @@ class calculate_taxes_and_totals(object):
 			"Delivery Note",
 			"Sales Invoice",
 			"POS Invoice",
+			"Proforma Invoice",
 		]:
 			self.doc.base_grand_total = (
 				flt(self.doc.grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total"))

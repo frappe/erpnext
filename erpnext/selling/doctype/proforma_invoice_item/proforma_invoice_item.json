@@ -13,7 +13,14 @@
   "amount",
   "rem_qty",
   "sales_order",
-  "so_item"
+  "so_item",
+  "discount_percentage",
+  "price_list_rate",
+  "pricing_rules",
+  "discount_amount",
+  "base_price_list_rate",
+  "base_rate",
+  "net_rate"
  ],
  "fields": [
   {
@@ -68,12 +75,47 @@
    "fieldname": "so_item",
    "fieldtype": "Data",
    "label": "SO Item"
+  },
+  {
+   "fieldname": "discount_percentage",
+   "fieldtype": "Int",
+   "label": "Discount Percentage"
+  },
+  {
+   "fieldname": "price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Price List Rate"
+  },
+  {
+   "fieldname": "pricing_rules",
+   "fieldtype": "Small Text",
+   "label": "Pricing Rules"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount"
+  },
+  {
+   "fieldname": "base_price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Base Price List Rate"
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Data",
+   "label": "Base Rate"
+  },
+  {
+   "fieldname": "net_rate",
+   "fieldtype": "Data",
+   "label": "Net Rate"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-29 19:38:46.804834",
+ "modified": "2023-07-04 17:07:53.208355",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Proforma Invoice Item",

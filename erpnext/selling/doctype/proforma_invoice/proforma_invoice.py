@@ -3,33 +3,29 @@
 
 # import frappe
 # from frappe import _
-from frappe.model.document import Document
 
 # from frappe.utils import flt
 
-# from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
+from erpnext.controllers.selling_controller import SellingController
 
 
-class ProformaInvoice(Document):
+class ProformaInvoice(SellingController):
 	# pass
 	def __init__(self, *args, **kwargs):
 		super(ProformaInvoice, self).__init__(*args, **kwargs)
-		# self.status_updater = [
-		# 	{
-		# 		"source_dt": "Sales Invoice Item",
-		# 		"target_field": "billed_amt", # field of Sales Order Item
-		# 		"target_ref_field": "amount", # field of Sales Invoice Item
-		# 		"target_dt": "Sales Order Item",
-		# 		"join_field": "so_detail",
-		# 		"target_parent_dt": "Sales Order",
-		# 		"target_parent_field": "per_billed",
-		# 		"source_field": "amount",
-		# 		"percent_join_field": "sales_order",
-		# 		"status_field": "billing_status",
-		# 		"keyword": "Billed",
-		# 		"overflow_type": "billing",
-		# 	}
-		# ]
+		self.status_updater = [
+			{
+				"source_dt": "Proforma Invoice Item",
+				"target_field": "proforma_qty",  # field of Sales Order Item
+				"target_ref_field": "qty",  # field of Proforma Invoice Item
+				"source_field": "qty",
+				"target_dt": "Sales Order Item",
+				"join_field": "so_item",  # field of Proforma Invoice Item
+				"target_parent_dt": "Sales Order",
+				"percent_join_field": "sales_order"
+				# "target_parent_field": "per_billed",
+			}
+		]
 
 	# def before_save(self):
 	# 	total_rate = 0
@@ -61,5 +57,5 @@ class ProformaInvoice(Document):
 	# 	self.total_qty = total_qty
 	# 	self.base_total = total
 
-	# def on_submit(self):
-	# 	pass
+	def on_submit(self):
+		self.update_prevdoc_status()
