@@ -46,6 +46,7 @@ from erpnext.payroll.doctype.payroll_period.payroll_period import (
 	get_payroll_period,
 	get_period_factor,
 )
+from erpnext.payroll.utils import prepare_error_msg, sanitize_expression
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -726,32 +727,53 @@ class SalarySlip(TransactionBase):
 
 		return data, default_data
 
-	def eval_condition_and_formula(self, d, data):
+	def eval_condition_and_formula(self, struct_row, data):
 		try:
-			condition = d.condition.strip().replace("\n", " ") if d.condition else None
+			condition = sanitize_expression(struct_row.condition)
 			if condition:
 				if not frappe.safe_eval(condition, self.whitelisted_globals, data):
 					return None
-			amount = d.amount
-			if d.amount_based_on_formula:
-				formula = d.formula.strip().replace("\n", " ") if d.formula else None
+			amount = struct_row.amount
+			if struct_row.amount_based_on_formula:
+				formula = sanitize_expression(struct_row.formula)
 				if formula:
-					amount = flt(frappe.safe_eval(formula, self.whitelisted_globals, data), d.precision("amount"))
+					amount = flt(
+						frappe.safe_eval(formula, self.whitelisted_globals, data), struct_row.precision("amount")
+					)
 			if amount:
-				data[d.abbr] = amount
+				data[struct_row.abbr] = amount
 
 			return amount
 
-		except NameError as err:
-			frappe.throw(
-				_("{0} <br> This error can be due to missing or deleted field.").format(err),
-				title=_("Name error"),
+		except NameError as ne:
+			message = prepare_error_msg(
+				row=struct_row,
+				error=ne,
+				expression=formula or condition,
+				description=_("This error can be due to missing or deleted field."),
 			)
-		except SyntaxError as err:
-			frappe.throw(_("Syntax error in formula or condition: {0}").format(err))
+
+			frappe.throw(message, title=_("Name error"))
+
+		except SyntaxError as se:
+			message = prepare_error_msg(
+				row=struct_row,
+				error=se,
+				expression=formula or condition,
+				description=_("Please check the syntax of your formula."),
+			)
+
+			frappe.throw(message, title=_("Syntax error"))
+
 		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}").format(e))
-			raise
+			message = prepare_error_msg(
+				row=struct_row,
+				error=e,
+				expression=formula or condition,
+				description=_("This error can be due to invalid formula or condition."),
+			)
+
+			frappe.throw(message, title=_("Error in formula or condition"))
 
 	def add_employee_benefits(self, payroll_period):
 		for struct_row in self._salary_structure_doc.get("earnings"):
