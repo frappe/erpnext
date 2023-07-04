@@ -90,7 +90,49 @@ def get_data(filters):
 	if filters.get("project"):
 		query = query.where(po_item.project == filters.get("project"))
 
+<<<<<<< HEAD
 	data = query.run(as_dict=True)
+=======
+	return conditions
+
+
+def get_data(conditions, filters):
+	data = frappe.db.sql(
+		"""
+		SELECT
+			po.transaction_date as date,
+			poi.schedule_date as required_date,
+			poi.project,
+			po.name as purchase_order,
+			po.status, po.supplier, poi.item_code,
+			poi.qty, poi.received_qty,
+			(poi.qty - poi.received_qty) AS pending_qty,
+			IFNULL(pii.qty, 0) as billed_qty,
+			poi.base_amount as amount,
+			(poi.received_qty * poi.base_rate) as received_qty_amount,
+			(poi.billed_amt * IFNULL(po.conversion_rate, 1)) as billed_amount,
+			(poi.base_amount - (poi.billed_amt * IFNULL(po.conversion_rate, 1))) as pending_amount,
+			po.set_warehouse as warehouse,
+			po.company, poi.name
+		FROM
+			`tabPurchase Order` po,
+			`tabPurchase Order Item` poi
+		LEFT JOIN `tabPurchase Invoice Item` pii
+			ON pii.po_detail = poi.name
+		WHERE
+			poi.parent = po.name
+			and po.status not in ('Stopped', 'Closed')
+			and po.docstatus = 1
+			{0}
+		GROUP BY poi.name
+		ORDER BY po.transaction_date ASC, poi.item_code ASC
+	""".format(
+			conditions
+		),
+		filters,
+		as_dict=1,
+	)
+>>>>>>> 0ef0ff470f (fix: Further sort purchase_order_analysis to get consistent response)
 
 	return data
 
