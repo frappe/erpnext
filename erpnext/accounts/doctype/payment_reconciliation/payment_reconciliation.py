@@ -174,15 +174,12 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions.append(ple.account == self.receivable_payable_account)
 
 		self.get_return_invoices()
-		return_invoices = [
-			x for x in self.return_invoices if x.return_against == None or x.return_against == ""
-		]
 
 		outstanding_dr_or_cr = []
-		if return_invoices:
+		if self.return_invoices:
 			ple_query = QueryPaymentLedger()
 			return_outstanding = ple_query.get_voucher_outstandings(
-				vouchers=return_invoices,
+				vouchers=self.return_invoices,
 				common_filter=self.common_filter_conditions,
 				posting_date=self.ple_posting_date_filter,
 				min_outstanding=-(self.minimum_payment_amount) if self.minimum_payment_amount else None,
