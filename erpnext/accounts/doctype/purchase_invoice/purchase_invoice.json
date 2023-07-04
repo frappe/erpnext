@@ -547,6 +547,7 @@
    "depends_on": "update_stock",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
@@ -1573,7 +1574,11 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-04-29 12:57:50.832598",
+=======
+ "modified": "2023-07-04 17:22:59.145031",
+>>>>>>> d618aaef32 (fix: accepted warehouse and rejected warehouse can't be same)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -421,6 +421,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "options": "Warehouse"
   },
@@ -881,7 +882,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-02 18:39:41.495723",
+ "modified": "2023-07-04 17:22:21.501152",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
