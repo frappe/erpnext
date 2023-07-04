@@ -350,6 +350,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 		self.assertFalse(frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"))
 
+	def test_rejected_warehouse_filter(self):
+		pr = frappe.copy_doc(test_records[0])
+		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
+		pr.get("items")[0].qty = 3
+		pr.get("items")[0].rejected_qty = 2
+		pr.get("items")[0].received_qty = 5
+		pr.get("items")[0].rejected_warehouse = pr.get("items")[0].warehouse
+		self.assertRaises(frappe.ValidationError, pr.save)
+
 	def test_rejected_serial_no(self):
 		pr = frappe.copy_doc(test_records[0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
