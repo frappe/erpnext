@@ -260,6 +260,7 @@ class StatusUpdater(Document):
 								self.limits_crossed_error(args, item, "qty")
 
 						elif item[args["target_ref_field"]]:
+							print("AARGGGG", args)
 							self.check_overflow_with_allowance(item, args)
 
 	def check_overflow_with_allowance(self, item, args):

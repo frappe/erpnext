@@ -6,10 +6,24 @@
 erpnext.selling.ProformaInvoiceController = class SalesOrderController extends erpnext.selling.SellingController {
 	setup(frm) {
 		super.setup();
-		console.log(frm)
+		frm.custom_make_buttons = {
+			'Delivery Note': 'Delivery Note',
+			'Sales Invoice': 'Sales Invoice',
+		}
 	}
+
 	refresh(frm) {
+		super.refresh()
+		// super.
+		if (frm.docstatus==1) {
+			this.frm.add_custom_button(__('Sales Invoice'), () => {console.log("Clicked")
+			}, __('Create'));
+			this.frm.add_custom_button(__('Delivery Note'), () => {console.log("Clicked")}, __('Create'));
+		}
+		this.frm.page.set_inner_btn_group_as_primary(__('Create'));
+
 	}
+
 }
 
 extend_cscript(cur_frm.cscript, new erpnext.selling.ProformaInvoiceController({frm: cur_frm}));

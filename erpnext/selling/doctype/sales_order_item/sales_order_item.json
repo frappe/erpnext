@@ -101,7 +101,8 @@
   "purchase_order",
   "column_break_89",
   "material_request_item",
-  "purchase_order_item"
+  "purchase_order_item",
+  "proforma_qty"
  ],
  "fields": [
   {
@@ -882,12 +883,17 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "proforma_qty",
+   "fieldtype": "Int",
+   "label": "Proforma Quantity"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-04-04 10:44:05.707488",
+ "modified": "2023-07-04 12:07:41.401946",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
