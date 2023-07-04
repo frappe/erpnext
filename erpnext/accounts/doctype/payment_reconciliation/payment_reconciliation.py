@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
 
@@ -146,6 +147,15 @@ class PaymentReconciliation(Document):
 	def get_return_invoices(self):
 		voucher_type = "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
 		doc = qb.DocType(voucher_type)
+
+		conditions = []
+		conditions.append(doc.docstatus == 1)
+		conditions.append(doc[frappe.scrub(self.party_type)] == self.party)
+		conditions.append(doc.is_return == 1)
+
+		if self.payment_name:
+			conditions.append(doc.name.like(f"%{self.payment_name}%"))
+
 		self.return_invoices = (
 			qb.from_(doc)
 			.select(
@@ -153,11 +163,7 @@ class PaymentReconciliation(Document):
 				doc.name.as_("voucher_no"),
 				doc.return_against,
 			)
-			.where(
-				(doc.docstatus == 1)
-				& (doc[frappe.scrub(self.party_type)] == self.party)
-				& (doc.is_return == 1)
-			)
+			.where(Criterion.all(conditions))
 			.run(as_dict=True)
 		)
 
