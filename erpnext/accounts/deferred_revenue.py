@@ -387,7 +387,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			return
 
 		gl_posting_date = end_date
-
+		prev_posting_date = None
 		# check if books nor frozen till endate:
 		if accounts_frozen_upto and getdate(end_date) <= getdate(accounts_frozen_upto):
 			gl_posting_date = get_last_day(add_days(accounts_frozen_upto, 1))
