@@ -91,4 +91,69 @@ def get_entries(filters):
 		as_list=1,
 	)
 
+<<<<<<< HEAD
 	return sorted(journal_entries + payment_entries, key=lambda k: k[2] or getdate(nowdate()))
+=======
+	# Loan Disbursement
+	loan_disbursement = frappe.qb.DocType("Loan Disbursement")
+
+	query = (
+		frappe.qb.from_(loan_disbursement)
+		.select(
+			ConstantColumn("Loan Disbursement").as_("payment_document_type"),
+			loan_disbursement.name.as_("payment_entry"),
+			loan_disbursement.disbursement_date.as_("posting_date"),
+			loan_disbursement.reference_number.as_("cheque_no"),
+			loan_disbursement.clearance_date.as_("clearance_date"),
+			loan_disbursement.applicant.as_("against"),
+			-loan_disbursement.disbursed_amount.as_("amount"),
+		)
+		.where(loan_disbursement.docstatus == 1)
+		.where(loan_disbursement.disbursement_date >= filters["from_date"])
+		.where(loan_disbursement.disbursement_date <= filters["to_date"])
+		.where(loan_disbursement.disbursement_account == filters["account"])
+		.orderby(loan_disbursement.disbursement_date, order=frappe.qb.desc)
+		.orderby(loan_disbursement.name, order=frappe.qb.desc)
+	)
+
+	if filters.get("from_date"):
+		query = query.where(loan_disbursement.disbursement_date >= filters["from_date"])
+	if filters.get("to_date"):
+		query = query.where(loan_disbursement.disbursement_date <= filters["to_date"])
+
+	loan_disbursements = query.run(as_list=1)
+
+	# Loan Repayment
+	loan_repayment = frappe.qb.DocType("Loan Repayment")
+
+	query = (
+		frappe.qb.from_(loan_repayment)
+		.select(
+			ConstantColumn("Loan Repayment").as_("payment_document_type"),
+			loan_repayment.name.as_("payment_entry"),
+			loan_repayment.posting_date.as_("posting_date"),
+			loan_repayment.reference_number.as_("cheque_no"),
+			loan_repayment.clearance_date.as_("clearance_date"),
+			loan_repayment.applicant.as_("against"),
+			loan_repayment.amount_paid.as_("amount"),
+		)
+		.where(loan_repayment.docstatus == 1)
+		.where(loan_repayment.posting_date >= filters["from_date"])
+		.where(loan_repayment.posting_date <= filters["to_date"])
+		.where(loan_repayment.payment_account == filters["account"])
+		.orderby(loan_repayment.posting_date, order=frappe.qb.desc)
+		.orderby(loan_repayment.name, order=frappe.qb.desc)
+	)
+
+	if filters.get("from_date"):
+		query = query.where(loan_repayment.posting_date >= filters["from_date"])
+	if filters.get("to_date"):
+		query = query.where(loan_repayment.posting_date <= filters["to_date"])
+
+	loan_repayments = query.run(as_list=1)
+
+	return sorted(
+		journal_entries + payment_entries + loan_disbursements + loan_repayments,
+		key=lambda k: k[2].strftime("%H%M%S") or getdate(nowdate()),
+	)
+>>>>>>> 937e1fb024 (fix: handle loan_repayment's posting_date datetime in bank_clearance_summary report (#36004))
