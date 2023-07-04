@@ -132,8 +132,12 @@ def execute(filters=None):
 	"""Entry point for frappe."""
 	data = []
 	if filters and validate(filters):
-		fn = "temporary_against_account_number"
-		filters[fn] = frappe.get_value("DATEV Settings", filters.get("company"), fn)
+		temp, opening = frappe.get_value(
+			"DATEV Settings",
+			filters.get("company"),
+			["temporary_against_account_number", "opening_against_account_number"],
+		)
+		filters.update({"against_account": temp, "opening_account": opening or temp})
 		data = get_transactions(filters, as_dict=0)
 
 	return COLUMNS, data
@@ -315,7 +319,7 @@ def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 			acc.account_number as 'Konto',
 
 			/* against number or, if empty, party against number */
-			%(temporary_against_account_number)s as 'Gegenkonto (ohne BU-Schlüssel)',
+			CASE gl.is_opening when 'Yes' then %(opening_account)s else %(against_account)s end as 'Gegenkonto (ohne BU-Schlüssel)',
 
 			'' as 'BU-Schlüssel',
 
@@ -530,18 +534,22 @@ def download_datev_csv(filters):
 		filters = json.loads(filters)
 
 	validate(filters)
+
 	company = filters.get("company")
-
 	fiscal_year = get_fiscal_year(date=filters.get("from_date"), company=company)
-	filters["fiscal_year_start"] = fiscal_year[1]
-
-	# set chart of accounts used
 	coa = frappe.get_value("Company", company, "chart_of_accounts")
-	filters["skr"] = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
-
 	datev_settings = frappe.get_doc("DATEV Settings", company)
-	filters["account_number_length"] = datev_settings.account_number_length
-	filters["temporary_against_account_number"] = datev_settings.temporary_against_account_number
+
+	filters.update(
+		{
+			"fiscal_year_start": fiscal_year[1],
+			"skr": "04" if "SKR04" in coa else ("03" if "SKR03" in coa else ""),
+			"account_number_length": datev_settings.account_number_length,
+			"against_account": datev_settings.temporary_against_account_number,
+			"opening_account": datev_settings.opening_against_account_number
+			or datev_settings.temporary_against_account_number,
+		}
+	)
 
 	transactions = get_transactions(filters)
 	account_names = get_account_names(filters)

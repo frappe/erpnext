@@ -176,6 +176,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -872,7 +873,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-12 03:37:29.032732",
+ "modified": "2023-07-02 18:39:41.495723",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
