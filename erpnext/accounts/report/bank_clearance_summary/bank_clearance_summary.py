@@ -152,5 +152,5 @@ def get_entries(filters):
 
 	return sorted(
 		journal_entries + payment_entries + loan_disbursements + loan_repayments,
-		key=lambda k: k[2] or getdate(nowdate()),
+		key=lambda k: k[2].strftime("%H%M%S") or getdate(nowdate()),
 	)
