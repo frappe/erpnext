@@ -13,6 +13,7 @@
   "party_type",
   "party",
   "due_date",
+  "voucher_detail_no",
   "cost_center",
   "finance_book",
   "voucher_type",
@@ -142,12 +143,17 @@
    "fieldname": "remarks",
    "fieldtype": "Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-22 15:32:56.629430",
+ "modified": "2023-06-29 12:24:20.500632",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",

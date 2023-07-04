@@ -487,6 +487,16 @@ class TestWorkOrder(FrappeTestCase):
 
 		for i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
+			for row in doc.scheduled_time_logs:
+				doc.append(
+					"time_logs",
+					{
+						"from_time": row.from_time,
+						"to_time": row.to_time,
+						"time_in_mins": row.time_in_mins,
+					},
+				)
+
 			doc.time_logs[0].completed_qty = 1
 			doc.submit()
 
@@ -957,7 +967,7 @@ class TestWorkOrder(FrappeTestCase):
 			item=item, company=company, planned_start_date=add_days(now(), 60), qty=20, skip_transfer=1
 		)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
-		update_job_card(job_card, 10)
+		update_job_card(job_card, 10, 1)
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
@@ -975,7 +985,7 @@ class TestWorkOrder(FrappeTestCase):
 
 		make_job_card(wo_order.name, operations)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name, "docstatus": 0}, "name")
-		update_job_card(job_card, 10)
+		update_job_card(job_card, 10, 2)
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
@@ -1671,9 +1681,32 @@ class TestWorkOrder(FrappeTestCase):
 		)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
 		job_card_doc = frappe.get_doc("Job Card", job_card)
+		for row in job_card_doc.scheduled_time_logs:
+			job_card_doc.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+					"completed_qty": 20,
+				},
+			)
+
+		job_card_doc.save()
 
 		# Make another Job Card for the same Work Order
 		job_card2 = frappe.copy_doc(job_card_doc)
+		job_card2.append(
+			"time_logs",
+			{
+				"from_time": row.from_time,
+				"to_time": row.to_time,
+				"time_in_mins": row.time_in_mins,
+			},
+		)
+
+		job_card2.time_logs[0].completed_qty = 20
+
 		self.assertRaises(frappe.ValidationError, job_card2.save)
 
 		frappe.db.set_single_value(
@@ -1841,7 +1874,7 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 	make_bom(item=item.name, source_warehouse="Stores - _TC", raw_materials=[sn_batch_item_doc.name])
 
 
-def update_job_card(job_card, jc_qty=None):
+def update_job_card(job_card, jc_qty=None, days=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"}, "name")
 	job_card_doc = frappe.get_doc("Job Card", job_card)
 	job_card_doc.set(
@@ -1855,15 +1888,32 @@ def update_job_card(job_card, jc_qty=None):
 	if jc_qty:
 		job_card_doc.for_quantity = jc_qty
 
-	job_card_doc.append(
-		"time_logs",
-		{
-			"from_time": now(),
-			"employee": employee,
-			"time_in_mins": 60,
-			"completed_qty": job_card_doc.for_quantity,
-		},
-	)
+	for row in job_card_doc.scheduled_time_logs:
+		job_card_doc.append(
+			"time_logs",
+			{
+				"from_time": row.from_time,
+				"to_time": row.to_time,
+				"employee": employee,
+				"time_in_mins": 60,
+				"completed_qty": 0.0,
+			},
+		)
+
+	if not job_card_doc.time_logs and days:
+		planned_start_time = add_days(now(), days=days)
+		job_card_doc.append(
+			"time_logs",
+			{
+				"from_time": planned_start_time,
+				"to_time": add_to_date(planned_start_time, minutes=60),
+				"employee": employee,
+				"time_in_mins": 60,
+				"completed_qty": 0.0,
+			},
+		)
+
+	job_card_doc.time_logs[0].completed_qty = job_card_doc.for_quantity
 
 	job_card_doc.submit()
 
