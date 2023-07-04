@@ -15,20 +15,21 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 	get_group_by_conditions,
 	get_tax_accounts,
 )
+from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 
 
 def execute(filters=None):
 	return _execute(filters)
 
 
-def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
+def _execute(filters=None, additional_table_columns=None):
 	if not filters:
 		filters = {}
 	columns = get_columns(additional_table_columns, filters)
 
 	company_currency = erpnext.get_company_currency(filters.company)
 
-	item_list = get_items(filters, additional_query_columns)
+	item_list = get_items(filters, get_query_columns(additional_table_columns))
 	aii_account_map = get_aii_accounts()
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(
@@ -79,27 +80,19 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			"posting_date": d.posting_date,
 			"supplier": d.supplier,
 			"supplier_name": d.supplier_name,
+			**get_values_for_columns(additional_table_columns, d),
+			"credit_to": d.credit_to,
+			"mode_of_payment": d.mode_of_payment,
+			"project": d.project,
+			"company": d.company,
+			"purchase_order": d.purchase_order,
+			"purchase_receipt": purchase_receipt,
+			"expense_account": expense_account,
+			"stock_qty": d.stock_qty,
+			"stock_uom": d.stock_uom,
+			"rate": d.base_net_amount / d.stock_qty if d.stock_qty else d.base_net_amount,
+			"amount": d.base_net_amount,
 		}
-
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.update({col: d.get(col)})
-
-		row.update(
-			{
-				"credit_to": d.credit_to,
-				"mode_of_payment": d.mode_of_payment,
-				"project": d.project,
-				"company": d.company,
-				"purchase_order": d.purchase_order,
-				"purchase_receipt": purchase_receipt,
-				"expense_account": expense_account,
-				"stock_qty": d.stock_qty,
-				"stock_uom": d.stock_uom,
-				"rate": d.base_net_amount / d.stock_qty if d.stock_qty else d.base_net_amount,
-				"amount": d.base_net_amount,
-			}
-		)
 
 		total_tax = 0
 		for tax in tax_columns:
@@ -317,11 +310,6 @@ def get_conditions(filters):
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 
-	if additional_query_columns:
-		additional_query_columns = ", " + ", ".join(additional_query_columns)
-	else:
-		additional_query_columns = ""
-
 	return frappe.db.sql(
 		"""
 		select
@@ -340,11 +328,10 @@ def get_items(filters, additional_query_columns):
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`, `tabItem`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
 			`tabItem`.name = `tabPurchase Invoice Item`.`item_code` and
-			`tabPurchase Invoice`.docstatus = 1 %s
+			`tabPurchase Invoice`.docstatus = 1 {1}
 	""".format(
-			additional_query_columns
-		)
-		% (conditions),
+			additional_query_columns, conditions
+		),
 		filters,
 		as_dict=1,
 	)
