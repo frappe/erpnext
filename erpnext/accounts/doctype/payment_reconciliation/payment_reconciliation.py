@@ -75,6 +75,9 @@ class PaymentReconciliation(Document):
 			}
 		)
 
+		if self.payment_name:
+			condition.update({"name": self.payment_name})
+
 		payment_entries = get_advance_payment_entries(
 			self.party_type,
 			self.party,
