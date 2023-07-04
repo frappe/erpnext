@@ -16,6 +16,8 @@ from erpnext.stock.doctype.item.test_item import create_item
 class TestProcessDeferredAccounting(unittest.TestCase):
 	def test_creation_of_ledger_entry_on_submit(self):
 		"""test creation of gl entries on submission of document"""
+		change_acc_settings(acc_frozen_upto="2023-05-31", book_deferred_entries_based_on="Months")
+
 		deferred_account = create_account(
 			account_name="Deferred Revenue for Accounts Frozen",
 			parent_account="Current Liabilities - _TC",
@@ -38,11 +40,6 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		si.save()
 		si.submit()
 
-		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-		acc_settings.accounts_frozen_till_date = "31-05-2023"
-		acc_settings.book_deferred_entries_based_on = "Months"
-		acc_settings.save()
-
 		process_deferred_accounting = doc = frappe.get_doc(
 			dict(
 				doctype="Process Deferred Accounting",
@@ -57,17 +54,16 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		process_deferred_accounting.submit()
 
 		expected_gle = [
-			[deferred_account, 1000, 0.0, "2023-06-30"],
+			["Debtors - _TC", 3000, 0.0, "2023-07-01"],
+			[deferred_account, 0.0, 3000, "2023-07-01"],
 			["Sales - _TC", 0.0, 1000, "2023-06-30"],
 			[deferred_account, 1000, 0.0, "2023-06-30"],
 			["Sales - _TC", 0.0, 1000, "2023-06-30"],
+			[deferred_account, 1000, 0.0, "2023-06-30"],
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2023-07-01")
-		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-		acc_settings.accounts_frozen_till_date = ""
-		acc_settings.book_deferred_entries_based_on = "Days"
-		acc_settings.save()
+		change_acc_settings()
 
 	def test_pda_submission_and_cancellation(self):
 		pda = frappe.get_doc(
@@ -81,3 +77,10 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		)
 		pda.submit()
 		pda.cancel()
+
+
+def change_acc_settings(acc_frozen_upto="", book_deferred_entries_based_on="Days"):
+	acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
+	acc_settings.acc_frozen_upto = acc_frozen_upto
+	acc_settings.book_deferred_entries_based_on = book_deferred_entries_based_on
+	acc_settings.save()
