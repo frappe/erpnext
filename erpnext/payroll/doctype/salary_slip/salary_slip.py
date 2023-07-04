@@ -46,6 +46,7 @@ from erpnext.payroll.doctype.payroll_period.payroll_period import (
 	get_payroll_period,
 	get_period_factor,
 )
+from erpnext.payroll.utils import sanitize_condition_and_formula, prepare_error_msg
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -728,13 +729,13 @@ class SalarySlip(TransactionBase):
 
 	def eval_condition_and_formula(self, d, data):
 		try:
-			condition = d.condition.strip().replace("\n", " ") if d.condition else None
+			condition = sanitize_condition_and_formula(d.condition)
 			if condition:
 				if not frappe.safe_eval(condition, self.whitelisted_globals, data):
 					return None
 			amount = d.amount
 			if d.amount_based_on_formula:
-				formula = d.formula.strip().replace("\n", " ") if d.formula else None
+				formula = sanitize_condition_and_formula(d.formula)
 				if formula:
 					amount = flt(frappe.safe_eval(formula, self.whitelisted_globals, data), d.precision("amount"))
 			if amount:
@@ -742,16 +743,29 @@ class SalarySlip(TransactionBase):
 
 			return amount
 
-		except NameError as err:
-			frappe.throw(
-				_("{0} <br> This error can be due to missing or deleted field.").format(err),
+		except NameError as ne:
+			prepare_error_msg(
+				row=d,
+				error=ne,
 				title=_("Name error"),
+				description=_("This error can be due to missing or deleted field."),
 			)
-		except SyntaxError as err:
-			frappe.throw(_("Syntax error in formula or condition: {0}").format(err))
+
+		except SyntaxError as se:
+			prepare_error_msg(
+				row=d,
+				error=se,
+				title=_("Syntax error"),
+				description=_("Please check the syntax of your formula."),
+			)
+
 		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}").format(e))
-			raise
+			prepare_error_msg(
+				row=d,
+				error=e,
+				title=_("Error in formula or condition"),
+				description=_("This error can be due to invalid formula or condition."),
+			)
 
 	def add_employee_benefits(self, payroll_period):
 		for struct_row in self._salary_structure_doc.get("earnings"):
