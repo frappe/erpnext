@@ -84,7 +84,7 @@ def get_data(conditions, filters):
 			and po.docstatus = 1
 			{0}
 		GROUP BY poi.name
-		ORDER BY po.transaction_date ASC
+		ORDER BY po.transaction_date ASC, poi.item_code ASC
 	""".format(
 			conditions
 		),
