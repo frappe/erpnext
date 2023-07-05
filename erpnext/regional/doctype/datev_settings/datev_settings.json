@@ -14,7 +14,8 @@
   "section_break_4",
   "account_number_length",
   "column_break_6",
-  "temporary_against_account_number"
+  "temporary_against_account_number",
+  "opening_against_account_number"
  ],
  "fields": [
   {
@@ -70,14 +71,23 @@
   },
   {
    "allow_in_quick_entry": 1,
+   "default": "9999",
+   "description": "Will be used as against account for all normal ledger entries",
    "fieldname": "temporary_against_account_number",
    "fieldtype": "Data",
    "label": "Temporary Against Account Number",
    "reqd": 1
+  },
+  {
+   "default": "9000",
+   "description": "Will be used as against account for opening ledger entries",
+   "fieldname": "opening_against_account_number",
+   "fieldtype": "Data",
+   "label": "Opening Against Account Number"
   }
  ],
  "links": [],
- "modified": "2020-11-19 19:00:09.088816",
+ "modified": "2023-06-30 00:56:59.556731",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "DATEV Settings",
