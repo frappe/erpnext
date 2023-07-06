@@ -819,8 +819,23 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
+def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_details_for_voucher,
+		get_ssb_bundle_for_voucher,
+	)
+
+	kwargs = frappe._dict(kwargs)
+	mapper = {
+		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+	}
+
+	sre_dict = {}
+	if kwargs.for_reserved_stock:
+		sre_dict = get_sre_details_for_voucher("Sales Order", source_name)
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
@@ -843,6 +858,17 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
+		if kwargs.for_reserved_stock and source.name in sre_dict:
+			item_sre = sre_dict[source.name]
+			target.qty = (flt(item_sre.reserved_qty) - flt(item_sre.delivered_qty)) * flt(
+				source.get("conversion_factor", 1)
+			)
+
+			if item_sre.reservation_based_on == "Serial and Batch" and (
+				item_sre.has_serial_no or item_sre.has_batch_no
+			):
+				target.serial_and_batch_bundle = get_ssb_bundle_for_voucher(item_sre)
+
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
 
@@ -853,15 +879,13 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				or item_group.get("buying_cost_center")
 			)
 
-	mapper = {
-		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
-		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-	}
-
-	if not skip_item_mapping:
+	if not kwargs.skip_item_mapping:
 
 		def condition(doc):
+			if kwargs.for_reserved_stock:
+				if doc.name not in sre_dict:
+					return False
+
 			# make_mapped_doc sets js `args` into `frappe.flags.args`
 			if frappe.flags.args and frappe.flags.args.delivery_dates:
 				if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:

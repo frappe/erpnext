@@ -639,6 +639,85 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	return flt(reserved_qty[0][0])
 
 
+def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> dict[dict]:
+	"""A wrapper for get_stock_reservation_entries_for_voucher() to return a dict of SREs, where the key is `voucher_detail_no`."""
+
+	fields = [
+		"name",
+		"item_code",
+		"warehouse",
+		"voucher_type",
+		"voucher_no",
+		"voucher_detail_no",
+		"reserved_qty",
+		"delivered_qty",
+		"has_serial_no",
+		"has_batch_no",
+		"reservation_based_on",
+	]
+
+	sre_list = get_stock_reservation_entries_for_voucher(voucher_type, voucher_no, fields=fields)
+
+	result = frappe._dict()
+	if sre_list:
+		for sre in sre_list:
+			result[sre.voucher_detail_no] = sre
+
+	return result
+
+
+def get_serial_batch_entries_for_voucher(
+	voucher_type: str, voucher_no: str, voucher_detail_no: str
+) -> list[dict]:
+	"""Returns a list of `Serial and Batch Entries` for the provided voucher."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+
+	return (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.serial_no,
+			sb_entry.batch_no,
+			(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.voucher_detail_no == voucher_detail_no)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+		.where(sb_entry.qty > sb_entry.delivered_qty)
+		.orderby(sb_entry.creation)
+	).run(as_dict=True)
+
+
+def get_ssb_bundle_for_voucher(sre: dict) -> object | None:
+	"""Returns a new `Serial and Batch Bundle` against the provided SRE."""
+
+	sb_entries = get_serial_batch_entries_for_voucher(
+		sre["voucher_type"], sre["voucher_no"], sre["voucher_detail_no"]
+	)
+
+	if sb_entries:
+		bundle = frappe.new_doc("Serial and Batch Bundle")
+		bundle.type_of_transaction = "Outward"
+		bundle.voucher_type = "Delivery Note"
+
+		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
+			setattr(bundle, field, sre[field])
+
+		for sb_entry in sb_entries:
+			bundle.append("entries", sb_entry)
+
+		bundle.save()
+
+		return bundle.name
+
+
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str = None) -> bool:
 	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
 
