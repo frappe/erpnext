@@ -828,7 +828,9 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		get_ssb_bundle_for_voucher,
 	)
 
-	kwargs = frappe._dict(kwargs)
+	if not kwargs:
+		kwargs = {}
+
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
 		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
@@ -836,7 +838,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	}
 
 	sre_dict = {}
-	if kwargs.for_reserved_stock:
+	if kwargs.get("for_reserved_stock"):
 		sre_dict = get_sre_details_for_voucher("Sales Order", source_name)
 
 	def set_missing_values(source, target):
@@ -860,7 +862,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
-		if kwargs.for_reserved_stock and source.name in sre_dict:
+		if kwargs.get("for_reserved_stock") and source.name in sre_dict:
 			item_sre = sre_dict[source.name]
 			target.qty = (flt(item_sre.reserved_qty) - flt(item_sre.delivered_qty)) * flt(
 				source.get("conversion_factor", 1)
@@ -881,10 +883,10 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				or item_group.get("buying_cost_center")
 			)
 
-	if not kwargs.skip_item_mapping:
+	if not kwargs.get("skip_item_mapping"):
 
 		def condition(doc):
-			if kwargs.for_reserved_stock:
+			if kwargs.get("for_reserved_stock"):
 				if doc.name not in sre_dict:
 					return False
 
