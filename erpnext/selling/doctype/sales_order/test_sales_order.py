@@ -43,11 +43,8 @@ class TestSalesOrder(FrappeTestCase):
 	@classmethod
 	def tearDownClass(cls) -> None:
 		# reset config to previous state
-		frappe.db.set_value(
-			"Accounts Settings",
-			"Accounts Settings",
-			"unlink_advance_payment_on_cancelation_of_order",
-			cls.unlink_setting,
+		frappe.db.set_single_value(
+			"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", cls.unlink_setting
 		)
 		super().tearDownClass()
 
@@ -705,7 +702,7 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(so.taxes[0].total, 110)
 
 		old_stock_settings_value = frappe.db.get_single_value("Stock Settings", "default_warehouse")
-		frappe.db.set_value("Stock Settings", None, "default_warehouse", "_Test Warehouse - _TC")
+		frappe.db.set_single_value("Stock Settings", "default_warehouse", "_Test Warehouse - _TC")
 
 		items = json.dumps(
 			[
@@ -741,7 +738,7 @@ class TestSalesOrder(FrappeTestCase):
 		so.delete()
 		new_item_with_tax.delete()
 		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
-		frappe.db.set_value("Stock Settings", None, "default_warehouse", old_stock_settings_value)
+		frappe.db.set_single_value("Stock Settings", "default_warehouse", old_stock_settings_value)
 
 	def test_warehouse_user(self):
 		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")
@@ -820,7 +817,7 @@ class TestSalesOrder(FrappeTestCase):
 	def test_auto_insert_price(self):
 		make_item("_Test Item for Auto Price List", {"is_stock_item": 0})
 		make_item("_Test Item for Auto Price List with Discount Percentage", {"is_stock_item": 0})
-		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
 
 		item_price = frappe.db.get_value(
 			"Item Price", {"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}
@@ -861,7 +858,7 @@ class TestSalesOrder(FrappeTestCase):
 		)
 
 		# do not update price list
-		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
 		item_price = frappe.db.get_value(
 			"Item Price", {"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}
@@ -882,7 +879,7 @@ class TestSalesOrder(FrappeTestCase):
 			None,
 		)
 
-		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
@@ -1257,8 +1254,8 @@ class TestSalesOrder(FrappeTestCase):
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
-		frappe.db.set_value(
-			"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
+		frappe.db.set_single_value(
+			"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
 		)
 
 		so = make_sales_order()
@@ -1312,8 +1309,8 @@ class TestSalesOrder(FrappeTestCase):
 		so = make_sales_order()
 
 		# disable unlinking of payment entry
-		frappe.db.set_value(
-			"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
+		frappe.db.set_single_value(
+			"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
 		)
 
 		# create a payment entry against sales order
@@ -1772,7 +1769,14 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(pe.references[1].reference_name, so.name)
 		self.assertEqual(pe.references[1].allocated_amount, 300)
 
-	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
 	def test_stock_reservation_against_sales_order(self) -> None:
 		from random import randint, uniform
 
@@ -2073,7 +2077,7 @@ def make_sales_order(**args):
 
 
 def create_dn_against_so(so, delivered_qty=0):
-	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	dn = make_delivery_note(so)
 	dn.get("items")[0].qty = delivered_qty or 5

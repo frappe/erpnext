@@ -398,6 +398,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1475,6 +1476,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Phone",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1643,7 +1645,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-22 09:55:37.008190",
+ "modified": "2023-06-03 16:16:23.411247",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

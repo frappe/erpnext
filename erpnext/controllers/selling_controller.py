@@ -43,7 +43,6 @@ class SellingController(StockController):
 				self.set_serial_and_batch_bundle(table_field)
 
 	def set_missing_values(self, for_validate=False):
-
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
@@ -62,7 +61,7 @@ class SellingController(StockController):
 		elif self.doctype == "Quotation" and self.party_name:
 			if self.quotation_to == "Customer":
 				customer = self.party_name
-			else:
+			elif self.quotation_to == "Lead":
 				lead = self.party_name
 
 		if customer:

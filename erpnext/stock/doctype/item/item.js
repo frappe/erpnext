@@ -590,7 +590,7 @@ $.extend(erpnext.item, {
 			let selected_attributes = {};
 			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
 				if(i===0) return;
-				let attribute_name = $(col).find('.control-label').html().trim();
+				let attribute_name = $(col).find('.column-label').html().trim();
 				selected_attributes[attribute_name] = [];
 				let checked_opts = $(col).find('.checkbox input');
 				checked_opts.each((i, opt) => {
@@ -771,12 +771,6 @@ $.extend(erpnext.item, {
 					let modal = field.$input.parents('.modal-dialog')[0];
 					if (modal) {
 						$(modal).removeClass("modal-dialog-scrollable");
-					}
-				})
-				.on("awesomplete-close", () => {
-					let modal = field.$input.parents('.modal-dialog')[0];
-					if (modal) {
-						$(modal).addClass("modal-dialog-scrollable");
 					}
 				});
 		});

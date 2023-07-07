@@ -232,27 +232,24 @@ def get_customers_suppliers(doctype, user):
 	has_supplier_field = meta.has_field("supplier")
 
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
-		contacts = frappe.db.sql(
-			"""
-			select
-				`tabContact`.email_id,
-				`tabDynamic Link`.link_doctype,
-				`tabDynamic Link`.link_name
-			from
-				`tabContact`, `tabDynamic Link`
-			where
-				`tabContact`.name=`tabDynamic Link`.parent and `tabContact`.email_id =%s
-			""",
-			user,
-			as_dict=1,
-		)
-		customers = [c.link_name for c in contacts if c.link_doctype == "Customer"]
-		suppliers = [c.link_name for c in contacts if c.link_doctype == "Supplier"]
+		suppliers = get_parents_for_user("Supplier")
+		customers = get_parents_for_user("Customer")
 	elif frappe.has_permission(doctype, "read", user=user):
 		customer_list = frappe.get_list("Customer")
 		customers = suppliers = [customer.name for customer in customer_list]
 
 	return customers if has_customer_field else None, suppliers if has_supplier_field else None
+
+
+def get_parents_for_user(parenttype: str) -> list[str]:
+	portal_user = frappe.qb.DocType("Portal User")
+
+	return (
+		frappe.qb.from_(portal_user)
+		.select(portal_user.parent)
+		.where(portal_user.user == frappe.session.user)
+		.where(portal_user.parenttype == parenttype)
+	).run(pluck="name")
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
@@ -282,3 +279,28 @@ def get_customer_field_name(doctype):
 		return "party_name"
 	else:
 		return "customer"
+
+
+def add_role_for_portal_user(portal_user, role):
+	"""When a new portal user is added, give appropriate roles to user if
+	posssible, else warn user to add roles."""
+	if not portal_user.is_new():
+		return
+
+	user_doc = frappe.get_doc("User", portal_user.user)
+	roles = {r.role for r in user_doc.roles}
+
+	if role in roles:
+		return
+
+	if "System Manager" not in frappe.get_roles():
+		frappe.msgprint(
+			_("Please add {1} role to user {0}.").format(portal_user.user, role),
+			alert=True,
+		)
+		return
+
+	user_doc.add_roles(role)
+	frappe.msgprint(
+		_("Added {1} Role to User {0}.").format(frappe.bold(user_doc.name), role), alert=True
+	)

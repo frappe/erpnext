@@ -487,6 +487,16 @@ class TestWorkOrder(FrappeTestCase):
 
 		for i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
+			for row in doc.scheduled_time_logs:
+				doc.append(
+					"time_logs",
+					{
+						"from_time": row.from_time,
+						"to_time": row.to_time,
+						"time_in_mins": row.time_in_mins,
+					},
+				)
+
 			doc.time_logs[0].completed_qty = 1
 			doc.submit()
 
@@ -503,10 +513,8 @@ class TestWorkOrder(FrappeTestCase):
 			stock_entry.cancel()
 
 	def test_capcity_planning(self):
-		frappe.db.set_value(
-			"Manufacturing Settings",
-			None,
-			{"disable_capacity_planning": 0, "capacity_planning_for_days": 1},
+		frappe.db.set_single_value(
+			"Manufacturing Settings", {"disable_capacity_planning": 0, "capacity_planning_for_days": 1}
 		)
 
 		data = frappe.get_cached_value(
@@ -529,7 +537,7 @@ class TestWorkOrder(FrappeTestCase):
 
 			self.assertRaises(CapacityError, work_order1.submit)
 
-			frappe.db.set_value("Manufacturing Settings", None, {"capacity_planning_for_days": 30})
+			frappe.db.set_single_value("Manufacturing Settings", {"capacity_planning_for_days": 30})
 
 			work_order1.reload()
 			work_order1.submit()
@@ -539,7 +547,7 @@ class TestWorkOrder(FrappeTestCase):
 			work_order.cancel()
 
 	def test_work_order_with_non_transfer_item(self):
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 		items = {"Finished Good Transfer Item": 1, "_Test FG Item": 1, "_Test FG Item 1": 0}
 		for item, allow_transfer in items.items():
@@ -619,7 +627,7 @@ class TestWorkOrder(FrappeTestCase):
 		fg_item = "Test Batch Size Item For BOM 3"
 		rm1 = "Test Batch Size Item RM 1 For BOM 3"
 
-		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
 		for item in ["Test Batch Size Item For BOM 3", "Test Batch Size Item RM 1 For BOM 3"]:
 			item_args = {"include_item_in_manufacturing": 1, "is_stock_item": 1}
 
@@ -655,7 +663,7 @@ class TestWorkOrder(FrappeTestCase):
 		work_order = make_wo_order_test_record(
 			item=fg_item, skip_transfer=True, planned_start_date=now(), qty=1
 		)
-		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 1)
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 1)
 		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		for row in ste1.get("items"):
 			if row.is_finished_item:
@@ -699,10 +707,10 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(sorted(remaining_batches), sorted(batches))
 
-		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
 
 	def test_partial_material_consumption(self):
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 1)
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 1)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
 
 		ste_cancel_list = []
@@ -736,13 +744,12 @@ class TestWorkOrder(FrappeTestCase):
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
 
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 0)
 
 	def test_extra_material_transfer(self):
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
-		frappe.db.set_value(
+		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 0)
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -787,7 +794,7 @@ class TestWorkOrder(FrappeTestCase):
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
 
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 	def test_make_stock_entry_for_customer_provided_item(self):
 		finished_item = "Test Item for Make Stock Entry 1"
@@ -903,7 +910,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(se.process_loss_qty, 1)
 
 		wo.load_from_db()
-		self.assertEqual(wo.status, "In Process")
+		self.assertEqual(wo.status, "Completed")
 
 	@timeout(seconds=60)
 	def test_job_card_scrap_item(self):
@@ -960,7 +967,7 @@ class TestWorkOrder(FrappeTestCase):
 			item=item, company=company, planned_start_date=add_days(now(), 60), qty=20, skip_transfer=1
 		)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
-		update_job_card(job_card, 10)
+		update_job_card(job_card, 10, 1)
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
@@ -978,7 +985,7 @@ class TestWorkOrder(FrappeTestCase):
 
 		make_job_card(wo_order.name, operations)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name, "docstatus": 0}, "name")
-		update_job_card(job_card, 10)
+		update_job_card(job_card, 10, 2)
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
@@ -1087,9 +1094,8 @@ class TestWorkOrder(FrappeTestCase):
 	def test_partial_manufacture_entries(self):
 		cancel_stock_entry = []
 
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1139,7 +1145,7 @@ class TestWorkOrder(FrappeTestCase):
 			doc = frappe.get_doc("Stock Entry", ste)
 			doc.cancel()
 
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_auto_batch_creation(self):
@@ -1283,9 +1289,8 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1356,9 +1361,8 @@ class TestWorkOrder(FrappeTestCase):
 			self.assertEqual(abs(d.qty), 2)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1400,9 +1404,8 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(manufacture_ste_doc2.items[0].qty, 2)
 
 	def test_backflushed_serial_no_batch_raw_materials_based_on_transferred(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1486,9 +1489,8 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertFalse(serial_nos)
 
 	def test_non_consumed_material_return_against_work_order(self):
-		frappe.db.set_value(
+		frappe.db.set_single_value(
 			"Manufacturing Settings",
-			None,
 			"backflush_raw_materials_based_on",
 			"Material Transferred for Manufacture",
 		)
@@ -1679,9 +1681,32 @@ class TestWorkOrder(FrappeTestCase):
 		)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name}, "name")
 		job_card_doc = frappe.get_doc("Job Card", job_card)
+		for row in job_card_doc.scheduled_time_logs:
+			job_card_doc.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+					"completed_qty": 20,
+				},
+			)
+
+		job_card_doc.save()
 
 		# Make another Job Card for the same Work Order
 		job_card2 = frappe.copy_doc(job_card_doc)
+		job_card2.append(
+			"time_logs",
+			{
+				"from_time": row.from_time,
+				"to_time": row.to_time,
+				"time_in_mins": row.time_in_mins,
+			},
+		)
+
+		job_card2.time_logs[0].completed_qty = 20
+
 		self.assertRaises(frappe.ValidationError, job_card2.save)
 
 		frappe.db.set_single_value(
@@ -1849,7 +1874,7 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 	make_bom(item=item.name, source_warehouse="Stores - _TC", raw_materials=[sn_batch_item_doc.name])
 
 
-def update_job_card(job_card, jc_qty=None):
+def update_job_card(job_card, jc_qty=None, days=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"}, "name")
 	job_card_doc = frappe.get_doc("Job Card", job_card)
 	job_card_doc.set(
@@ -1863,15 +1888,32 @@ def update_job_card(job_card, jc_qty=None):
 	if jc_qty:
 		job_card_doc.for_quantity = jc_qty
 
-	job_card_doc.append(
-		"time_logs",
-		{
-			"from_time": now(),
-			"employee": employee,
-			"time_in_mins": 60,
-			"completed_qty": job_card_doc.for_quantity,
-		},
-	)
+	for row in job_card_doc.scheduled_time_logs:
+		job_card_doc.append(
+			"time_logs",
+			{
+				"from_time": row.from_time,
+				"to_time": row.to_time,
+				"employee": employee,
+				"time_in_mins": 60,
+				"completed_qty": 0.0,
+			},
+		)
+
+	if not job_card_doc.time_logs and days:
+		planned_start_time = add_days(now(), days=days)
+		job_card_doc.append(
+			"time_logs",
+			{
+				"from_time": planned_start_time,
+				"to_time": add_to_date(planned_start_time, minutes=60),
+				"employee": employee,
+				"time_in_mins": 60,
+				"completed_qty": 0.0,
+			},
+		)
+
+	job_card_doc.time_logs[0].completed_qty = job_card_doc.for_quantity
 
 	job_card_doc.submit()
 

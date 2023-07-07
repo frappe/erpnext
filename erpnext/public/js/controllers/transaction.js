@@ -130,9 +130,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						'item_code': item_row.item_code,
 						'voucher_type': doc.doctype,
 						'voucher_no': ["in", [doc.name, ""]],
+						'is_cancelled': 0,
 					}
 				}
 			});
+
+			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
+			if (sbb_field) {
+				sbb_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item_code': row.doc.item_code,
+					}
+				};
+			}
 		}
 
 		if(
@@ -183,7 +193,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_query("expense_account", "items", function(doc) {
 				return {
 					filters: {
-						"company": doc.company
+						"company": doc.company,
+						"report_type": "Profit and Loss",
+						"is_group": 0
 					}
 				};
 			});
@@ -2339,13 +2351,10 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
 		if (in_list(["Sales Invoice", "Delivery Note"], frm.doc.doctype)) {
-			item_row.outward = frm.doc.is_return ? 0 : 1;
+			item_row.type_of_transaction = frm.doc.is_return ? "Inward" : "Outward";
 		} else {
-			item_row.outward = frm.doc.is_return ? 1 : 0;
+			item_row.type_of_transaction = frm.doc.is_return ? "Outward" : "Inward";
 		}
-
-		item_row.type_of_transaction = (item_row.outward === 1
-			? "Outward":"Inward");
 
 		new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 			if (r) {

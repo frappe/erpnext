@@ -443,12 +443,14 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1086,6 +1088,7 @@
    "fieldtype": "Button",
    "label": "Get Advances Paid",
    "oldfieldtype": "Button",
+   "options": "set_advances",
    "print_hide": 1
   },
   {
@@ -1364,12 +1367,12 @@
    "depends_on": "eval:doc.update_stock && doc.is_internal_supplier",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set From Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
-   "ignore_user_permissions": 1,
    "width": "50px"
   },
   {
@@ -1573,7 +1576,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-29 12:57:50.832598",
+ "modified": "2023-06-03 16:21:54.637245",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

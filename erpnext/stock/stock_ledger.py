@@ -646,6 +646,7 @@ class update_entries_after(object):
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)
 		val = frappe._dict({"sle": dependant_sle})
+
 		if key not in self.distinct_item_warehouses:
 			self.distinct_item_warehouses[key] = val
 			self.new_items_found = True
@@ -655,6 +656,9 @@ class update_entries_after(object):
 			)
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
 				val.sle_changed = True
+				self.distinct_item_warehouses[key] = val
+				self.new_items_found = True
+			elif self.distinct_item_warehouses[key].get("reposting_status"):
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
 
@@ -944,7 +948,7 @@ class update_entries_after(object):
 
 			for item in sr.items:
 				# Skip for Serial and Batch Items
-				if item.serial_no or item.batch_no:
+				if item.name != sle.voucher_detail_no or item.serial_no or item.batch_no:
 					continue
 
 				previous_sle = get_previous_sle(
@@ -962,6 +966,7 @@ class update_entries_after(object):
 				item.current_amount = flt(item.current_qty) * flt(item.current_valuation_rate)
 
 				item.amount = flt(item.qty) * flt(item.valuation_rate)
+				item.quantity_difference = item.qty - item.current_qty
 				item.amount_difference = item.amount - item.current_amount
 			else:
 				sr.difference_amount = sum([item.amount_difference for item in sr.items])
@@ -1361,6 +1366,8 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 		[
 			"item_code",
 			"warehouse",
+			"actual_qty",
+			"qty_after_transaction",
 			"posting_date",
 			"posting_time",
 			"timestamp(posting_date, posting_time) as timestamp",

@@ -76,6 +76,13 @@ class TestProductionPlan(FrappeTestCase):
 			"Work Order", fields=["name"], filters={"production_plan": pln.name}, as_list=1
 		)
 
+		pln.make_work_order()
+		nwork_orders = frappe.get_all(
+			"Work Order", fields=["name"], filters={"production_plan": pln.name}, as_list=1
+		)
+
+		self.assertTrue(len(work_orders), len(nwork_orders))
+
 		self.assertTrue(len(work_orders), len(pln.po_items))
 
 		for name in material_requests:

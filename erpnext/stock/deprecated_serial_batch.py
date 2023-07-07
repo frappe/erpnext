@@ -125,6 +125,9 @@ class DeprecatedBatchNoValuation:
 			if batch_no not in self.non_batchwise_valuation_batches:
 				continue
 
+			if not self.non_batchwise_balance_qty:
+				continue
+
 			self.batch_avg_rate[batch_no] = (
 				self.non_batchwise_balance_value / self.non_batchwise_balance_qty
 			)

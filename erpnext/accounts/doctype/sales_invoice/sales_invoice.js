@@ -88,8 +88,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		}
 
 		this.show_general_ledger();
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
 
-		if(doc.update_stock) this.show_stock_ledger();
+		if(doc.update_stock){
+			this.show_stock_ledger();
+			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
+		}
 
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {
@@ -667,19 +671,6 @@ frappe.ui.form.on('Sales Invoice', {
 			return{
 				query: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet",
 				filters: {'project': doc.project}
-			}
-		}
-
-		// expense account
-		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
-			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
-				return {
-					filters: {
-						'report_type': 'Profit and Loss',
-						'company': doc.company,
-						"is_group": 0
-					}
-				}
 			}
 		}
 

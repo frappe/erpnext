@@ -1074,8 +1074,8 @@ def make_bom_for_subcontracted_items():
 
 
 def set_backflush_based_on(based_on):
-	frappe.db.set_value(
-		"Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", based_on
+	frappe.db.set_single_value(
+		"Buying Settings", "backflush_raw_materials_of_subcontract_based_on", based_on
 	)
 
 

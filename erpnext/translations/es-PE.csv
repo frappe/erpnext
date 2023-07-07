@@ -309,7 +309,6 @@ Shipping Rule Label,Regla Etiqueta de envío,
 This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set,Este artículo es una plantilla y no se puede utilizar en las transacciones. Atributos artículo se copiarán en las variantes menos que se establece 'No Copy'
 Target  Amount,Monto Objtetivo,
 S.O. No.,S.O. No.
-Sanctioned Amount,importe sancionado,
 "If the account is frozen, entries are allowed to restricted users.","Si la cuenta está congelada , las entradas se les permite a los usuarios restringidos."
 Sales Taxes and Charges,Los impuestos y cargos de venta,
 Warehouse {0} can not be deleted as quantity exists for Item {1},Almacén {0} no se puede eliminar mientras exista cantidad de artículo {1}
