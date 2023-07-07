@@ -797,10 +797,15 @@ class AccountsController(TransactionBase):
 		return gl_dict
 
 	def validate_qty_is_not_zero(self):
-		if self.doctype != "Purchase Receipt":
-			for item in self.items:
-				if not item.qty:
-					frappe.throw(_("Item quantity can not be zero"))
+		if self.doctype == "Purchase Receipt":
+			return
+
+		for item in self.items:
+			if not item.qty and not item.get("is_unit_price_item"):
+				frappe.throw(
+					_("Row #{0}: Item quantity can not be zero").format(item.idx),
+					title=_("Invalid Quantity"),
+				)
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]

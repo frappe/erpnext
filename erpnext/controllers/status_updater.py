@@ -543,7 +543,7 @@ class StatusUpdater(Document):
 				)[0][0]
 			)
 
-			per_billed = (min(ref_doc_qty, billed_qty) / ref_doc_qty) * 100
+			per_billed = (min(ref_doc_qty, billed_qty) / (ref_doc_qty or 1)) * 100
 
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
