@@ -28,7 +28,7 @@ def clear_demo_data():
 
 
 def create_demo_company():
-	company = erpnext.get_default_company()
+	company = frappe.db.get_all("Company")[0].name
 	company_doc = frappe.get_doc("Company", company)
 
 	# Make a dummy company

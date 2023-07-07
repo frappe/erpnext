@@ -20,6 +20,7 @@
 		"public/js/queries.js",
 		"public/js/sms_manager.js",
 		"public/js/utils/party.js",
+		"public/js/utils/demo.js",
 		"public/js/controllers/stock_controller.js",
 		"public/js/payment/payments.js",
 		"public/js/controllers/taxes_and_totals.js",

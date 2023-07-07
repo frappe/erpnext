@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 
+from ..demo import setup_demo_data
 from .operations import install_fixtures as fixtures
 
 
@@ -37,6 +38,11 @@ def get_setup_stages(args=None):
 				],
 			},
 			{
+				"status": _("Setting up demo data"),
+				"fail_msg": _("Failed to setup demo data"),
+				"tasks": [{"fn": setup_demo, "args": args, "fail_msg": _("Failed to login")}],
+			},
+			{
 				"status": _("Wrapping up"),
 				"fail_msg": _("Failed to login"),
 				"tasks": [{"fn": fin, "args": args, "fail_msg": _("Failed to login")}],
@@ -61,6 +67,11 @@ def setup_defaults(args):
 def fin(args):
 	frappe.local.message_log = []
 	login_as_first_user(args)
+
+
+def setup_demo(args):
+	if args.get("setup_demo"):
+		setup_demo_data()
 
 
 def login_as_first_user(args):
