@@ -28,7 +28,7 @@ def execute(filters=None):
 			"gst_category",
 			"export_type",
 			"ecommerce_gstin",
-			"gst_hsn_code",
+			"`tabPurchase Invoice Item`.gst_hsn_code",
 			"bill_no",
 			"bill_date",
 		],
