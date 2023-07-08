@@ -39,7 +39,7 @@ def execute(filters=None):
 		"gst_category",
 		"export_type",
 		"ecommerce_gstin",
-		"gst_hsn_code",
+		"`tabSales Invoice Item`.gst_hsn_code",
 	]
 
 	additional_conditions = get_conditions(filters, additional_query_columns)
