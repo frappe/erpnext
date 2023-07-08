@@ -235,7 +235,7 @@ class PaymentEntry(AccountsController):
 			# The reference has already been partly paid
 			elif (
 				latest.outstanding_amount < latest.invoice_amount
-				and flt(d.outstanding_amount, d.precision("outstanding_amount")) != latest.outstanding_amount
+				and flt(d.outstanding_amount, d.precision("outstanding_amount")) != flt(latest.outstanding_amount, d.precision("outstanding_amount"))
 			):
 				frappe.throw(
 					_(
