@@ -127,6 +127,7 @@ class DeliveryNote(SellingController):
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
+		self.validate_proforma_invoice()
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.set_status()
@@ -149,6 +150,16 @@ class DeliveryNote(SellingController):
 
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+	def validate_proforma_invoice(self):
+		for item in self.items:
+			print(item.against_sales_order)
+			#  frappe.db.exists("Proforma Invoice Item",item.against_sales_order)
+			proforma_exists = frappe.db.exists(
+				{"doctype": "Proforma Invoice Item", "sales_order": item.against_sales_order}
+			)
+			if proforma_exists:
+				frappe.throw(_("Proforma is Created for this Sales Order, Go To Proforma Invoice"))
 
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc(

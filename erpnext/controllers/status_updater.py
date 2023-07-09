@@ -165,7 +165,6 @@ class StatusUpdater(Document):
 	"""
 
 	def update_prevdoc_status(self):
-		print(self.status_updater)
 		self.update_qty()
 		self.validate_qty()
 

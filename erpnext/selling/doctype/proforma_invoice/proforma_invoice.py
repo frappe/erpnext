@@ -10,7 +10,6 @@ from erpnext.controllers.selling_controller import SellingController
 
 
 class ProformaInvoice(SellingController):
-	# pass
 	def __init__(self, *args, **kwargs):
 		super(ProformaInvoice, self).__init__(*args, **kwargs)
 		self.status_updater = [
@@ -18,12 +17,11 @@ class ProformaInvoice(SellingController):
 				"source_dt": "Proforma Invoice Item",
 				"target_field": "proforma_qty",  # field of Sales Order Item
 				"target_ref_field": "qty",  # field of Proforma Invoice Item
-				"source_field": "qty",
+				"source_field": "qty",  # field of Proforma Invoice Item
 				"target_dt": "Sales Order Item",
 				"join_field": "so_item",  # field of Proforma Invoice Item
 				"target_parent_dt": "Sales Order",
-				"percent_join_field": "sales_order"
-				# "target_parent_field": "per_billed",
+				"percent_join_field": "sales_order",
 			}
 		]
 
