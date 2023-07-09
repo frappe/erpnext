@@ -6,9 +6,15 @@ import json
 from functools import reduce
 
 import frappe
+<<<<<<< HEAD
 from frappe import ValidationError, _, scrub, throw
 from frappe.utils import cint, comma_or, flt, get_link_to_form, getdate, nowdate
 from six import iteritems, string_types
+=======
+from frappe import ValidationError, _, qb, scrub, throw
+from frappe.utils import cint, comma_or, flt, getdate, nowdate
+from frappe.utils.data import comma_and, fmt_money
+>>>>>>> af28f95c60 (refactor(Payment Entry): translatable strings (#36017))
 
 import erpnext
 from erpnext.accounts.doctype.bank_account.bank_account import (
@@ -98,6 +104,45 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule()
 		self.set_status()
 
+<<<<<<< HEAD
+=======
+	def set_liability_account(self):
+		if not self.book_advance_payments_in_separate_party_account:
+			return
+
+		account_type = frappe.get_value(
+			"Account", {"name": self.party_account, "company": self.company}, "account_type"
+		)
+
+		if (account_type == "Payable" and self.party_type == "Customer") or (
+			account_type == "Receivable" and self.party_type == "Supplier"
+		):
+			return
+
+		if self.unallocated_amount == 0:
+			for d in self.references:
+				if d.reference_doctype in ["Sales Order", "Purchase Order"]:
+					break
+			else:
+				return
+
+		liability_account = get_party_account(
+			self.party_type, self.party, self.company, include_advance=True
+		)[1]
+
+		self.set(self.party_account_field, liability_account)
+
+		frappe.msgprint(
+			_(
+				"Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}."
+			).format(
+				frappe.bold(self.party_account),
+				frappe.bold(liability_account),
+			),
+			alert=True,
+		)
+
+>>>>>>> af28f95c60 (refactor(Payment Entry): translatable strings (#36017))
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		self.make_gl_entries(cancel=1)
@@ -191,7 +236,7 @@ class PaymentEntry(AccountsController):
 			# The reference has already been fully paid
 			if not latest:
 				frappe.throw(
-					_("{0} {1} has already been fully paid.").format(d.reference_doctype, d.reference_name)
+					_("{0} {1} has already been fully paid.").format(_(d.reference_doctype), d.reference_name)
 				)
 			# The reference has already been partly paid
 			elif (
@@ -201,7 +246,7 @@ class PaymentEntry(AccountsController):
 				frappe.throw(
 					_(
 						"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
-					).format(d.reference_doctype, d.reference_name)
+					).format(_(d.reference_doctype), d.reference_name)
 				)
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
@@ -319,7 +364,7 @@ class PaymentEntry(AccountsController):
 	def validate_party_details(self):
 		if self.party:
 			if not frappe.db.exists(self.party_type, self.party):
-				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
+				frappe.throw(_("{0} {1} does not exist").format(_(self.party_type), self.party))
 
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
@@ -376,7 +421,9 @@ class PaymentEntry(AccountsController):
 				continue
 			if d.reference_doctype not in valid_reference_doctypes:
 				frappe.throw(
-					_("Reference Doctype must be one of {0}").format(comma_or(valid_reference_doctypes))
+					_("Reference Doctype must be one of {0}").format(
+						comma_or((_(d) for d in valid_reference_doctypes))
+					)
 				)
 
 			elif d.reference_name:
@@ -389,7 +436,7 @@ class PaymentEntry(AccountsController):
 						if self.party != ref_doc.get(scrub(self.party_type)):
 							frappe.throw(
 								_("{0} {1} is not associated with {2} {3}").format(
-									d.reference_doctype, d.reference_name, self.party_type, self.party
+									_(d.reference_doctype), d.reference_name, _(self.party_type), self.party
 								)
 							)
 					else:
@@ -410,18 +457,18 @@ class PaymentEntry(AccountsController):
 						if ref_party_account != self.party_account:
 							frappe.throw(
 								_("{0} {1} is associated with {2}, but Party Account is {3}").format(
-									d.reference_doctype, d.reference_name, ref_party_account, self.party_account
+									_(d.reference_doctype), d.reference_name, ref_party_account, self.party_account
 								)
 							)
 
 						if ref_doc.doctype == "Purchase Invoice" and ref_doc.get("on_hold"):
 							frappe.throw(
-								_("{0} {1} is on hold").format(d.reference_doctype, d.reference_name),
-								title=_("Invalid Invoice"),
+								_("{0} {1} is on hold").format(_(d.reference_doctype), d.reference_name),
+								title=_("Invalid Purchase Invoice"),
 							)
 
 					if ref_doc.docstatus != 1:
-						frappe.throw(_("{0} {1} must be submitted").format(d.reference_doctype, d.reference_name))
+						frappe.throw(_("{0} {1} must be submitted").format(_(d.reference_doctype), d.reference_name))
 
 	def validate_paid_invoices(self):
 		no_oustanding_refs = {}
@@ -437,14 +484,13 @@ class PaymentEntry(AccountsController):
 				if outstanding_amount <= 0 and not is_return:
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
 
-		for k, v in no_oustanding_refs.items():
+		for reference_doctype, references in no_oustanding_refs.items():
 			frappe.msgprint(
 				_(
-					"{} - {} now has {} as it had no outstanding amount left before submitting the Payment Entry."
+					"References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 				).format(
-					_(k),
-					frappe.bold(", ".join(d.reference_name for d in v)),
-					frappe.bold(_("negative outstanding amount")),
+					frappe.bold(comma_and((d.reference_name for d in references))),
+					_(reference_doctype),
 				)
 				+ "<br><br>"
 				+ _("If this is undesirable please cancel the corresponding Payment Entry."),
@@ -479,7 +525,7 @@ class PaymentEntry(AccountsController):
 					if not valid:
 						frappe.throw(
 							_("Against Journal Entry {0} does not have any unmatched {1} entry").format(
-								d.reference_name, dr_or_cr
+								d.reference_name, _(dr_or_cr)
 							)
 						)
 
@@ -546,7 +592,7 @@ class PaymentEntry(AccountsController):
 				if allocated_amount > outstanding:
 					frappe.throw(
 						_("Row #{0}: Cannot allocate more than {1} against payment term {2}").format(
-							idx, outstanding, key[0]
+							idx, fmt_money(outstanding), key[0]
 						)
 					)
 
@@ -811,8 +857,32 @@ class PaymentEntry(AccountsController):
 			self.payment_type == "Receive" and self.party_type == "Supplier"
 		):
 
+<<<<<<< HEAD
 			total_negative_outstanding = sum(
 				abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+=======
+		total_negative_outstanding = sum(
+			abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+		)
+
+		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
+		additional_charges = sum(flt(d.amount) for d in self.deductions)
+
+		if not total_negative_outstanding:
+			if self.party_type == "Customer":
+				msg = _("Cannot pay to Customer without any negative outstanding invoice")
+			else:
+				msg = _("Cannot receive from Supplier without any negative outstanding invoice")
+
+			frappe.throw(msg, InvalidPaymentEntry)
+
+		elif paid_amount - additional_charges > total_negative_outstanding:
+			frappe.throw(
+				_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
+					fmt_money(total_negative_outstanding)
+				),
+				InvalidPaymentEntry,
+>>>>>>> af28f95c60 (refactor(Payment Entry): translatable strings (#36017))
 			)
 
 			paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
@@ -1429,11 +1499,21 @@ def get_outstanding_reference_documents(args):
 		elif args.get("get_orders_to_be_billed"):
 			ref_document_type = "orders"
 
+<<<<<<< HEAD
 		frappe.msgprint(
 			_(
 				"No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 			).format(
 				ref_document_type, _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
+=======
+		if not validate:
+			frappe.msgprint(
+				_(
+					"No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
+				).format(
+					_(ref_document_type), _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
+				)
+>>>>>>> af28f95c60 (refactor(Payment Entry): translatable strings (#36017))
 			)
 		)
 
@@ -1642,7 +1722,7 @@ def get_negative_outstanding_invoices(
 def get_party_details(company, party_type, party, date, cost_center=None):
 	bank_account = ""
 	if not frappe.db.exists(party_type, party):
-		frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
+		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
 	party_account = get_party_account(party_type, party, company)
 
@@ -1927,7 +2007,7 @@ def get_payment_entry(
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
 		100.0 + over_billing_allowance
 	):
-		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
+		frappe.throw(_("Can only make payment against unbilled {0}").format(_(dt)))
 
 	party_type = set_party_type(dt)
 	party_account = set_party_account(dt, dn, doc, party_type)
