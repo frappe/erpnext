@@ -931,6 +931,29 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Total Debit must be equal to Total Credit.
 		pr.reconcile()
 
+	def test_get_negative_outstanding_invoices(self):
+		self.company = "_Test Company"
+		self.party_type = "Customer"
+		self.customer = "_Test PR Customer"
+
+		si = create_sales_invoice(customer=self.customer)
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+
+		credit = create_sales_invoice(
+			is_return=1, return_against=si.name, qty=-si.total_qty, customer=self.customer
+		)
+		si.reload()
+		self.assertLess(si.outstanding_amount, 0)
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+
+		self.assertIn(si.name, [d.reference_name for d in pr.payments])
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
