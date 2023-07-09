@@ -66,7 +66,7 @@ class SerialandBatchBundle(Document):
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
 		kwargs = {"item_code": self.item_code, "warehouse": self.warehouse}
 		if self.voucher_type == "POS Invoice":
-			kwargs["ignore_voucher_no"] = self.voucher_no
+			kwargs["ignore_voucher_nos"] = [self.voucher_no]
 
 		available_serial_nos = get_available_serial_nos(frappe._dict(kwargs))
 
@@ -1205,7 +1205,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 			["POS Invoice", "consolidated_invoice", "is", "not set"],
 			["POS Invoice", "docstatus", "=", 1],
 			["POS Invoice Item", "item_code", "=", kwargs.item_code],
-			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
+			["POS Invoice", "name", "not in", kwargs.ignore_voucher_nos],
 		],
 	)
 
@@ -1273,8 +1273,8 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 	if kwargs.warehouse:
 		query = query.where(sre.warehouse == kwargs.warehouse)
 
-	if kwargs.ignore_voucher_no:
-		query = query.where(sre.name != kwargs.ignore_voucher_no)
+	if kwargs.ignore_voucher_nos:
+		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
 	return [row[0] for row in query.run()]
 
@@ -1295,7 +1295,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			["POS Invoice", "consolidated_invoice", "is", "not set"],
 			["POS Invoice", "docstatus", "=", 1],
 			["POS Invoice Item", "item_code", "=", kwargs.item_code],
-			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
+			["POS Invoice", "name", "not in", kwargs.ignore_voucher_nos],
 		],
 	)
 
@@ -1360,8 +1360,8 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.warehouse:
 		query = query.where(sre.warehouse == kwargs.warehouse)
 
-	if kwargs.ignore_voucher_no:
-		query = query.where(sre.name != kwargs.ignore_voucher_no)
+	if kwargs.ignore_voucher_nos:
+		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
 	data = query.run(as_dict=True)
 

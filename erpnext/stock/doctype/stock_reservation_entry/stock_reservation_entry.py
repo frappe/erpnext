@@ -382,7 +382,7 @@ def get_available_qty_to_reserve(
 
 	if batch_no:
 		return get_batch_qty(
-			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=ignore_sre
+			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=[ignore_sre]
 		)
 
 	available_qty = get_stock_balance(item_code, warehouse)
@@ -427,7 +427,7 @@ def get_available_serial_nos_to_reserve(
 				"item_code": item_code,
 				"warehouse": warehouse,
 				"has_batch_no": has_batch_no,
-				"ignore_voucher_no": ignore_sre,
+				"ignore_voucher_nos": [ignore_sre],
 			}
 		)
 	)
