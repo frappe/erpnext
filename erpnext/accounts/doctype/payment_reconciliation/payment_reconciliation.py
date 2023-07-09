@@ -33,6 +33,10 @@ class PaymentReconciliation(Document):
 		self.get_invoice_entries()
 
 	def get_nonreconciled_payment_entries(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import (
+			get_negative_outstanding_invoices,
+		)
+
 		self.check_mandatory_to_fetch()
 
 		payment_entries = self.get_payment_entries()
@@ -40,10 +44,30 @@ class PaymentReconciliation(Document):
 
 		if self.party_type in ["Customer", "Supplier"]:
 			dr_or_cr_notes = self.get_dr_or_cr_notes()
+			negative_invoices = get_negative_outstanding_invoices(
+				self.party_type,
+				self.party,
+				self.receivable_payable_account,
+				frappe.get_value("Account", self.receivable_payable_account, "account_currency"),
+				frappe.get_value("Company", self.company, "default_currency"),
+				self.cost_center,
+				"and name not in('" + "'".join([d.reference_name for d in dr_or_cr_notes]) + "')",
+			)
+
+			for i, invoice in enumerate(negative_invoices):
+				negative_invoices[i] = {
+					"reference_type": invoice.voucher_type,
+					"reference_name": invoice.voucher_no,
+					"posting_date": invoice.posting_date,
+					"amount": abs(invoice.outstanding_amount),
+					"currency": invoice.currency,
+					"exchange_rate": invoice.exchange_rate,
+				}
 		else:
 			dr_or_cr_notes = []
+			negative_invoices = []
 
-		non_reconciled_payments = payment_entries + journal_entries + dr_or_cr_notes
+		non_reconciled_payments = payment_entries + journal_entries + dr_or_cr_notes + negative_invoices
 
 		if self.payment_limit:
 			non_reconciled_payments = non_reconciled_payments[: self.payment_limit]
