@@ -47,11 +47,10 @@ class StockReservationEntry(Document):
 		"""Raises exception if document is amended."""
 
 		if self.amended_from:
-			frappe.throw(
-				_(
-					f"Cannot amend {self.doctype} {frappe.bold(self.amended_from)}, please create a new one instead."
-				)
+			msg = _("Cannot amend {0} {1}, please create a new one instead.").format(
+				self.doctype, frappe.bold(self.amended_from)
 			)
+			frappe.throw(msg)
 
 	def validate_mandatory(self) -> None:
 		"""Raises exception if mandatory fields are not set."""
@@ -70,22 +69,27 @@ class StockReservationEntry(Document):
 		]
 		for d in mandatory:
 			if not self.get(d):
-				frappe.throw(_("{0} is required").format(self.meta.get_label(d)))
+				msg = _("{0} is required").format(self.meta.get_label(d))
+				frappe.throw(msg)
 
 	def validate_for_group_warehouse(self) -> None:
 		"""Raises exception if `Warehouse` is a Group Warehouse."""
 
 		if frappe.get_cached_value("Warehouse", self.warehouse, "is_group"):
-			frappe.throw(
-				_("Stock cannot be reserved in group warehouse {0}.").format(frappe.bold(self.warehouse)),
-				title=_("Invalid Warehouse"),
-			)
+			msg = _("Stock cannot be reserved in group warehouse {0}.").format(frappe.bold(self.warehouse))
+			frappe.throw(msg, title=_("Invalid Warehouse"))
 
 	def validate_uom_is_integer(self):
 		if cint(frappe.db.get_value("UOM", self.stock_uom, "must_be_whole_number", cache=True)):
 			if cint(self.reserved_qty) != flt(self.reserved_qty, self.precision("reserved_qty")):
-				msg = f"Reserved Qty ({flt(self.reserved_qty, self.precision('reserved_qty'))}) cannot be a fraction. To allow this, disable '{frappe.bold(_('Must be Whole Number'))}' in UOM {frappe.bold(self.stock_uom)}."
-				frappe.throw(_(msg))
+				msg = _(
+					"Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {3}."
+				).format(
+					flt(self.reserved_qty, self.precision("reserved_qty")),
+					frappe.bold(_("Must be Whole Number")),
+					frappe.bold(self.stock_uom),
+				)
+				frappe.throw(msg)
 
 	def set_reservation_based_on(self) -> None:
 		"""Sets `Reservation Based On` based on `Has Serial No` and `Has Batch No`."""
@@ -93,18 +97,12 @@ class StockReservationEntry(Document):
 		if (self.reservation_based_on == "Serial and Batch") and (
 			not self.has_serial_no and not self.has_batch_no
 		):
-			if self.sb_entries:
-				self.sb_entries.clear()
-
-			self.reservation_based_on = "Qty"
+			self.db_set("reservation_based_on", "Qty")
 
 	def validate_reservation_based_on_qty(self) -> None:
 		"""Validates `Reserved Qty` when `Reservation Based On` is `Qty`."""
 
 		if self.reservation_based_on == "Qty":
-			if self.sb_entries:
-				self.sb_entries.clear()
-
 			self.validate_with_max_reserved_qty(self.reserved_qty)
 
 	def auto_reserve_serial_and_batch(self) -> None:
@@ -175,11 +173,10 @@ class StockReservationEntry(Document):
 				)
 
 				if not available_serial_nos:
-					frappe.throw(
-						_(
-							f"Stock not available for Item {frappe.bold(self.item_code)} in Warehouse {frappe.bold(self.warehouse)}."
-						)
+					msg = _("Stock not available for Item {0} in Warehouse {1}.").format(
+						frappe.bold(self.item_code), frappe.bold(self.warehouse)
 					)
+					frappe.throw(msg)
 
 			qty_to_be_reserved = 0
 			selected_batch_nos, selected_serial_nos = [], []
@@ -195,34 +192,52 @@ class StockReservationEntry(Document):
 						else (entry.serial_no, self.warehouse)
 					)
 					if key not in available_serial_nos:
-						msg = f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} for Item {frappe.bold(self.item_code)} is not available in {f'Batch {frappe.bold(entry.batch_no)} and ' if self.has_batch_no else ''}Warehouse {frappe.bold(self.warehouse)} or might be reserved in another {frappe.bold('Stock Reservation Entry')}."
-						frappe.throw(_(msg))
+						msg = _(
+							"Row #{0}: Serial No {1} for Item {2} is not available in {3} {4} or might be reserved in another {5}."
+						).format(
+							entry.idx,
+							frappe.bold(entry.serial_no),
+							frappe.bold(self.item_code),
+							_("Batch {0} and Warehouse").format(frappe.bold(entry.batch_no))
+							if self.has_batch_no
+							else _("Warehouse"),
+							frappe.bold(self.warehouse),
+							frappe.bold("Stock Reservation Entry"),
+						)
+
+						frappe.throw(msg)
 
 					if entry.serial_no in selected_serial_nos:
-						frappe.throw(
-							_(f"Row #{entry.idx}: Serial No {frappe.bold(entry.serial_no)} is already selected.")
+						msg = _("Row #{0}: Serial No {1} is already selected.").format(
+							entry.idx, frappe.bold(entry.serial_no)
 						)
+						frappe.throw(msg)
 					else:
 						selected_serial_nos.append(entry.serial_no)
 
 				elif self.has_batch_no:
 					if cint(frappe.db.get_value("Batch", entry.batch_no, "disabled")):
-						frappe.throw(
-							_(
-								f"Row #{entry.idx}: Stock cannot be reserved for Item {frappe.bold(self.item_code)} against a disabled Batch {frappe.bold(entry.batch_no)}."
-							)
+						msg = _(
+							"Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
+						).format(
+							entry.idx, frappe.bold(self.item_code), frappe.bold(entry.batch_no)
 						)
+						frappe.throw(msg)
 
 					available_qty_to_reserve = get_available_qty_to_reserve(
 						self.item_code, self.warehouse, entry.batch_no, ignore_sre=self.name
 					)
 
 					if available_qty_to_reserve <= 0:
-						frappe.throw(
-							_(
-								f"Row #{entry.idx}: Stock not availabe to reserve for Item {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
-							)
+						msg = _(
+							"Row #{0}: Stock not availabe to reserve for Item {1} against Batch {2} in Warehouse {3}."
+						).format(
+							entry.idx,
+							frappe.bold(self.item_code),
+							frappe.bold(entry.batch_no),
+							frappe.bold(self.warehouse),
 						)
+						frappe.throw(msg)
 
 					if entry.qty > available_qty_to_reserve:
 						if allow_partial_reservation:
@@ -230,25 +245,30 @@ class StockReservationEntry(Document):
 							if self.get("_action") == "update_after_submit":
 								entry.db_update()
 						else:
-							frappe.throw(
-								_(
-									f"Row #{entry.idx}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {frappe.bold(available_qty_to_reserve)} for Iem {frappe.bold(self.item_code)} against Batch {frappe.bold(entry.batch_no)} in Warehouse {frappe.bold(self.warehouse)}."
-								)
+							msg = _(
+								"Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
+							).format(
+								entry.idx,
+								frappe.bold(available_qty_to_reserve),
+								frappe.bold(self.item_code),
+								frappe.bold(entry.batch_no),
+								frappe.bold(self.warehouse),
 							)
+							frappe.throw(msg)
 
 					if entry.batch_no in selected_batch_nos:
-						frappe.throw(
-							_(f"Row #{entry.idx}: Batch No {frappe.bold(entry.batch_no)} is already selected.")
+						msg = _("Row #{0}: Batch No {1} is already selected.").format(
+							entry.idx, frappe.bold(entry.batch_no)
 						)
+						frappe.throw(msg)
 					else:
 						selected_batch_nos.append(entry.batch_no)
 
 				qty_to_be_reserved += entry.qty
 
 			if not qty_to_be_reserved:
-				frappe.throw(
-					_("Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty.")
-				)
+				msg = _("Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty.")
+				frappe.throw(msg)
 
 			self.validate_with_max_reserved_qty(qty_to_be_reserved)
 			self.db_set("reserved_qty", qty_to_be_reserved)
@@ -305,14 +325,14 @@ class StockReservationEntry(Document):
 		"""Raises an exception if `Stock Reservation Entry` is not allowed to be updated."""
 
 		if self.status in ("Partially Delivered", "Delivered"):
-			frappe.throw(
-				_(
-					f"{self.status} {self.doctype} cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
-				)
-			)
+			msg = _(
+				"{0} {1} cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
+			).format(self.status, self.doctype)
+			frappe.throw(msg)
 
 		if self.delivered_qty > 0:
-			frappe.throw(_("Stock Reservation Entry cannot be updated as it has been delivered."))
+			msg = _("Stock Reservation Entry cannot be updated as it has been delivered.")
+			frappe.throw(msg)
 
 	def validate_with_max_reserved_qty(self, qty_to_be_reserved: float) -> None:
 		"""Validates `Reserved Qty` with `Max Reserved Qty`."""
@@ -338,38 +358,44 @@ class StockReservationEntry(Document):
 		)
 
 		if max_reserved_qty <= 0 and self.voucher_type == "Sales Order":
-			msg = f"Item {frappe.bold(self.item_code)} is already delivered for Sales Order {frappe.bold(self.voucher_no)}."
+			msg = _("Item {0} is already delivered for Sales Order {1}.").format(
+				frappe.bold(self.item_code), frappe.bold(self.voucher_no)
+			)
 
 			if self.docstatus == 1:
 				self.cancel()
-				return frappe.msgprint(_(msg))
+				return frappe.msgprint(msg)
 			else:
-				frappe.throw(_(msg))
+				frappe.throw(msg)
 
 		if qty_to_be_reserved > max_reserved_qty:
-			frappe.throw(_(f"Cannot reserve more than {frappe.bold(max_reserved_qty)} {self.stock_uom}."))
+			msg = _("Cannot reserve more than {0} {1}.").format(
+				frappe.bold(max_reserved_qty), self.stock_uom
+			)
+			frappe.throw(msg)
 
 		if qty_to_be_reserved <= self.delivered_qty:
-			frappe.throw(_("Reserved Qty should be greater than Delivered Qty."))
+			msg = _("Reserved Qty should be greater than Delivered Qty.")
+			frappe.throw(msg)
 
 
 def validate_stock_reservation_settings(voucher: object) -> None:
 	"""Raises an exception if `Stock Reservation` is not enabled or `Voucher Type` is not allowed."""
 
 	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
-		frappe.throw(
-			_("Please enable {0} in the {1}.").format(
-				frappe.bold("Stock Reservation"), frappe.bold("Stock Settings")
-			)
+		msg = _("Please enable {0} in the {1}.").format(
+			frappe.bold("Stock Reservation"), frappe.bold("Stock Settings")
 		)
+		frappe.throw(msg)
 
 	# Voucher types allowed for stock reservation
 	allowed_voucher_types = ["Sales Order"]
 
 	if voucher.doctype not in allowed_voucher_types:
-		frappe.throw(
-			_("Stock Reservation can only be created against {0}.").format(", ".join(allowed_voucher_types))
+		msg = _("Stock Reservation can only be created against {0}.").format(
+			", ".join(allowed_voucher_types)
 		)
+		frappe.throw(msg)
 
 
 def get_available_qty_to_reserve(
@@ -738,4 +764,5 @@ def cancel_stock_reservation_entries(
 			frappe.get_doc("Stock Reservation Entry", sre.name).cancel()
 
 		if notify:
-			frappe.msgprint(_("Stock Reservation Entries Cancelled"), alert=True, indicator="red")
+			msg = _("Stock Reservation Entries Cancelled")
+			frappe.msgprint(msg, alert=True, indicator="red")

@@ -371,16 +371,16 @@ class DeliveryNote(SellingController):
 			else:
 				# Throw if `Warehouse` not in Reserved Warehouses.
 				if item.warehouse not in reserved_warehouses:
-					msg = (
-						f"Row #{item.idx}: Stock is reserved for item {frappe.bold(item.item_code)} in warehouse"
+					msg = _("Row #{0}: Stock is reserved for item {1} in warehouse {2}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(reserved_warehouses[0])
+						if len(reserved_warehouses) == 1
+						else _("{0} and {1}").format(
+							frappe.bold(", ".join(reserved_warehouses[:-1])), frappe.bold(reserved_warehouses[-1])
+						),
 					)
-
-					if len(reserved_warehouses) == 1:
-						msg += f" {frappe.bold(reserved_warehouses[0])}."
-					else:
-						msg += f" {frappe.bold(', '.join(reserved_warehouses[:-1]))} and {frappe.bold(reserved_warehouses[-1])}."
-
-					frappe.throw(_(msg), title=_("Stock Reservation Warehouse Mismatch"))
+					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit

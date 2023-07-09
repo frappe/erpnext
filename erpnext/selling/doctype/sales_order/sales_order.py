@@ -542,7 +542,9 @@ class SalesOrder(SellingController):
 			and cint(frappe.get_cached_value("Warehouse", self.set_warehouse, "is_group"))
 		):
 			return frappe.msgprint(
-				_(f"Stock cannot be reserved in the group warehouse {frappe.bold(self.set_warehouse)}.")
+				_("Stock cannot be reserved in the group warehouse {0}.").format(
+					frappe.bold(self.set_warehouse)
+				)
 			)
 
 		validate_stock_reservation_settings(self)
