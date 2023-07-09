@@ -380,32 +380,26 @@ def get_available_qty_to_reserve(
 	from erpnext.stock.doctype.batch.batch import get_batch_qty
 	from erpnext.stock.utils import get_stock_balance
 
-	available_qty = (
-		get_batch_qty(item_code=item_code, warehouse=warehouse, batch_no=batch_no)
-		if batch_no
-		else get_stock_balance(item_code, warehouse)
-	)
+	if batch_no:
+		return get_batch_qty(
+			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=ignore_sre
+		)
+
+	available_qty = get_stock_balance(item_code, warehouse)
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		query = frappe.qb.from_(sre).where(
-			(sre.docstatus == 1)
-			& (sre.item_code == item_code)
-			& (sre.warehouse == warehouse)
-			& (sre.reserved_qty >= sre.delivered_qty)
-			& (sre.status.notin(["Delivered", "Cancelled"]))
-		)
-
-		if batch_no:
-			sb_entry = frappe.qb.DocType("Serial and Batch Entry")
-			query = (
-				query.left_join(sb_entry)
-				.on(sre.name == sb_entry.parent)
-				.select(Sum(sb_entry.qty))
-				.where((sb_entry.batch_no == batch_no) & (sre.reservation_based_on == "Serial and Batch"))
+		query = (
+			frappe.qb.from_(sre)
+			.select(Sum(sre.reserved_qty - sre.delivered_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.item_code == item_code)
+				& (sre.warehouse == warehouse)
+				& (sre.reserved_qty >= sre.delivered_qty)
+				& (sre.status.notin(["Delivered", "Cancelled"]))
 			)
-		else:
-			query = query.select(Sum(sre.reserved_qty - sre.delivered_qty))
+		)
 
 		if ignore_sre:
 			query = query.where(sre.name != ignore_sre)
