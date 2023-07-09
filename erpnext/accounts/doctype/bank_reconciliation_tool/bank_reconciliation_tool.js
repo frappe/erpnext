@@ -19,7 +19,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 
 	onload: function (frm) {
 		// Set default filter dates
-		today = frappe.datetime.get_today()
+		let today = frappe.datetime.get_today()
 		frm.doc.bank_statement_from_date = frappe.datetime.add_months(today, -1);
 		frm.doc.bank_statement_to_date = today;
 		frm.trigger('bank_account');
