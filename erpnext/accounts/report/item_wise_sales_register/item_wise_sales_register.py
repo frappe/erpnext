@@ -9,6 +9,7 @@ from frappe.utils import cstr, flt
 from frappe.utils.xlsxutils import handle_html
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
+from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
 )
@@ -18,19 +19,14 @@ def execute(filters=None):
 	return _execute(filters)
 
 
-def _execute(
-	filters=None,
-	additional_table_columns=None,
-	additional_query_columns=None,
-	additional_conditions=None,
-):
+def _execute(filters=None, additional_table_columns=None, additional_conditions=None):
 	if not filters:
 		filters = {}
 	columns = get_columns(additional_table_columns, filters)
 
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
-	item_list = get_items(filters, additional_query_columns, additional_conditions)
+	item_list = get_items(filters, get_query_columns(additional_table_columns), additional_conditions)
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 
@@ -79,29 +75,21 @@ def _execute(
 			"customer": d.customer,
 			"customer_name": customer_record.customer_name,
 			"customer_group": customer_record.customer_group,
+			**get_values_for_columns(additional_table_columns, d),
+			"debit_to": d.debit_to,
+			"mode_of_payment": ", ".join(mode_of_payments.get(d.parent, [])),
+			"territory": d.territory,
+			"project": d.project,
+			"company": d.company,
+			"sales_order": d.sales_order,
+			"delivery_note": d.delivery_note,
+			"income_account": d.unrealized_profit_loss_account
+			if d.is_internal_customer == 1
+			else d.income_account,
+			"cost_center": d.cost_center,
+			"stock_qty": d.stock_qty,
+			"stock_uom": d.stock_uom,
 		}
-
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.update({col: d.get(col)})
-
-		row.update(
-			{
-				"debit_to": d.debit_to,
-				"mode_of_payment": ", ".join(mode_of_payments.get(d.parent, [])),
-				"territory": d.territory,
-				"project": d.project,
-				"company": d.company,
-				"sales_order": d.sales_order,
-				"delivery_note": d.delivery_note,
-				"income_account": d.unrealized_profit_loss_account
-				if d.is_internal_customer == 1
-				else d.income_account,
-				"cost_center": d.cost_center,
-				"stock_qty": d.stock_qty,
-				"stock_uom": d.stock_uom,
-			}
-		)
 
 		if d.stock_uom != d.uom and d.stock_qty:
 			row.update({"rate": (d.base_net_rate * d.qty) / d.stock_qty, "amount": d.base_net_amount})
@@ -394,11 +382,6 @@ def get_group_by_conditions(filters, doctype):
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	conditions = get_conditions(filters, additional_conditions)
 
-	if additional_query_columns:
-		additional_query_columns = ", " + ", ".join(additional_query_columns)
-	else:
-		additional_query_columns = ""
-
 	return frappe.db.sql(
 		"""
 		select
@@ -424,7 +407,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			`tabItem`.name = `tabSales Invoice Item`.`item_code` and
 			`tabSales Invoice`.docstatus = 1 {1}
 		""".format(
-			additional_query_columns or "", conditions
+			additional_query_columns, conditions
 		),
 		filters,
 		as_dict=1,
