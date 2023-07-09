@@ -93,45 +93,6 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule()
 		self.set_status()
 
-<<<<<<< HEAD
-=======
-	def set_liability_account(self):
-		if not self.book_advance_payments_in_separate_party_account:
-			return
-
-		account_type = frappe.get_value(
-			"Account", {"name": self.party_account, "company": self.company}, "account_type"
-		)
-
-		if (account_type == "Payable" and self.party_type == "Customer") or (
-			account_type == "Receivable" and self.party_type == "Supplier"
-		):
-			return
-
-		if self.unallocated_amount == 0:
-			for d in self.references:
-				if d.reference_doctype in ["Sales Order", "Purchase Order"]:
-					break
-			else:
-				return
-
-		liability_account = get_party_account(
-			self.party_type, self.party, self.company, include_advance=True
-		)[1]
-
-		self.set(self.party_account_field, liability_account)
-
-		frappe.msgprint(
-			_(
-				"Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}."
-			).format(
-				frappe.bold(self.party_account),
-				frappe.bold(liability_account),
-			),
-			alert=True,
-		)
-
->>>>>>> af28f95c60 (refactor(Payment Entry): translatable strings (#36017))
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
@@ -1462,21 +1423,11 @@ def get_outstanding_reference_documents(args):
 		elif args.get("get_orders_to_be_billed"):
 			ref_document_type = "orders"
 
-<<<<<<< HEAD
 		frappe.msgprint(
 			_(
 				"No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 			).format(
-				ref_document_type, _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
-=======
-		if not validate:
-			frappe.msgprint(
-				_(
-					"No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
-				).format(
-					_(ref_document_type), _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
-				)
->>>>>>> af28f95c60 (refactor(Payment Entry): translatable strings (#36017))
+				_(ref_document_type), _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
 			)
 		)
 
