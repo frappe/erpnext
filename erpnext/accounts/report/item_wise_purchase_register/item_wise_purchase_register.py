@@ -15,6 +15,7 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 	get_group_by_conditions,
 	get_tax_accounts,
 )
+from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details
 
 
 def execute(filters=None):
@@ -39,16 +40,6 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			tax_doctype="Purchase Taxes and Charges",
 		)
 
-		scrubbed_tax_fields = {}
-
-		for tax in tax_columns:
-			scrubbed_tax_fields.update(
-				{
-					tax + " Rate": frappe.scrub(tax + " Rate"),
-					tax + " Amount": frappe.scrub(tax + " Amount"),
-				}
-			)
-
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
 	data = []
@@ -59,7 +50,11 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if filters.get("group_by"):
 		grand_total = get_grand_total(filters, "Purchase Invoice")
 
+	item_details = get_item_details()
+
 	for d in item_list:
+		item_record = item_details.get(d.item_code)
+
 		purchase_receipt = None
 		if d.purchase_receipt:
 			purchase_receipt = d.purchase_receipt
@@ -72,8 +67,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row = {
 			"item_code": d.item_code,
-			"item_name": d.pi_item_name if d.pi_item_name else d.i_item_name,
-			"item_group": d.pi_item_group if d.pi_item_group else d.i_item_group,
+			"item_name": item_record.item_name if item_record else d.item_name,
+			"item_group": item_record.item_group if item_record else d.item_group,
 			"description": d.description,
 			"invoice": d.parent,
 			"posting_date": d.posting_date,
@@ -106,8 +101,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
 			row.update(
 				{
-					scrubbed_tax_fields[tax + " Rate"]: item_tax.get("tax_rate", 0),
-					scrubbed_tax_fields[tax + " Amount"]: item_tax.get("tax_amount", 0),
+					frappe.scrub(tax + " Rate"): item_tax.get("tax_rate", 0),
+					frappe.scrub(tax + " Amount"): item_tax.get("tax_amount", 0),
 				}
 			)
 			total_tax += flt(item_tax.get("tax_amount"))
@@ -330,17 +325,15 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total,
 			`tabPurchase Invoice`.unrealized_profit_loss_account,
 			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description,
-			`tabPurchase Invoice Item`.`item_name` as pi_item_name, `tabPurchase Invoice Item`.`item_group` as pi_item_group,
-			`tabItem`.`item_name` as i_item_name, `tabItem`.`item_group` as i_item_group,
+			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
 			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
-		from `tabPurchase Invoice`, `tabPurchase Invoice Item`, `tabItem`
+		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
-			`tabItem`.name = `tabPurchase Invoice Item`.`item_code` and
-			`tabPurchase Invoice`.docstatus = 1 %s
+		`tabPurchase Invoice`.docstatus = 1 %s
 	""".format(
 			additional_query_columns
 		)
