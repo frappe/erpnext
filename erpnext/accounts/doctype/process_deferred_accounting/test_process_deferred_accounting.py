@@ -62,12 +62,9 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 			[deferred_account, 1000, 0.0, "2023-06-30"],
 		]
 
-<<<<<<< HEAD
 		check_gl_entries(self, si.name, expected_gle, "2019-01-10")
-=======
 		check_gl_entries(self, si.name, expected_gle, "2023-07-01")
 		change_acc_settings()
->>>>>>> 674af15696 (fix: deferred accounting entries on accounts frozen (#35978))
 
 	def test_pda_submission_and_cancellation(self):
 		pda = frappe.get_doc(
