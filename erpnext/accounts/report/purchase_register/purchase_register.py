@@ -29,7 +29,7 @@ def _execute(filters=None, additional_table_columns=None):
 		invoice_list += get_payments(filters, additional_query_columns)
 >>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
-		invoice_list, additional_table_columns
+		invoice_list, additional_table_columns, filters.get("include_payments")
 	)
 
 	if not invoice_list:
@@ -117,7 +117,7 @@ def _execute(filters=None, additional_table_columns=None):
 	return columns, data
 
 
-def get_columns(invoice_list, additional_table_columns):
+def get_columns(invoice_list, additional_table_columns, include_payments):
 	"""return columns based on filters"""
 	columns = [
 		_("Invoice") + ":Link/Purchase Invoice:120",
@@ -157,16 +157,18 @@ def get_columns(invoice_list, additional_table_columns):
 			tuple([inv.name for inv in invoice_list]),
 		)
 
-		tax_accounts = frappe.db.sql_list(
-			"""select distinct account_head
-			from (select account_head, parent, docstatus from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-			and category in ('Total', 'Valuation and Total') union select account_head, parent, docstatus
-			from `tabAdvance Taxes and Charges` where parenttype = 'Payment Entry' and charge_type in ('On Paid Amount', 'Actual')) a
-			where docstatus = 1 and (account_head is not null and account_head != '')
-			and parent in (%s) order by account_head"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
+		purchase_taxes_query = get_taxes_query(
+			invoice_list, "Purchase Taxes and Charges", "Purchase Invoice"
 		)
+		purchase_tax_accounts = purchase_taxes_query.run(as_dict=True, pluck="account_head")
+		tax_accounts = purchase_tax_accounts
+
+		if include_payments:
+			advance_taxes_query = get_taxes_query(
+				invoice_list, "Advance Taxes and Charges", "Payment Entry"
+			)
+			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
+			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
 		unrealized_profit_loss_accounts = frappe.db.sql_list(
 			"""SELECT distinct unrealized_profit_loss_account
@@ -202,6 +204,27 @@ def get_columns(invoice_list, additional_table_columns):
 	)
 
 	return columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts
+
+
+def get_taxes_query(invoice_list, doctype, parenttype):
+	taxes = frappe.qb.DocType(doctype)
+
+	query = (
+		frappe.qb.from_(taxes)
+		.select(taxes.account_head)
+		.distinct()
+		.where(
+			(taxes.parenttype == parenttype)
+			& (taxes.docstatus == 1)
+			& (taxes.account_head.isnotnull())
+			& (taxes.parent.isin([inv.name for inv in invoice_list]))
+		)
+		.orderby(taxes.account_head)
+	)
+
+	if doctype == "Purchase Taxes and Charges":
+		return query.where(taxes.category.isin(["Total", "Valuation and Total"]))
+	return query.where(taxes.charge_type.isin(["On Paid", "Actual"]))
 
 
 def get_conditions(filters, payments=False):
