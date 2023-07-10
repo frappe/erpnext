@@ -358,12 +358,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	refresh() {
+
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
 		this.validate_has_items();
+		erpnext.utils.view_serial_batch_nos(this.frm);
 	}
 
 	scan_barcode() {
