@@ -336,6 +336,21 @@ class DeliveryNote(SellingController):
 				sre_doc.delivered_qty += qty_to_be_deliver
 				sre_doc.db_update()
 
+				if sre_doc.reservation_based_on == "Serial and Batch":
+					sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+					if sre_doc.has_serial_no:
+						delivered_serial_nos = [d.serial_no for d in sbb.entries]
+						for entry in sre_doc.sb_entries:
+							if entry.serial_no in delivered_serial_nos:
+								entry.delivered_qty = 1
+								entry.db_update()
+					else:
+						delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
+						for entry in sre_doc.sb_entries:
+							if entry.batch_no in delivered_batch_qty:
+								entry.delivered_qty += min(entry.qty, delivered_batch_qty[entry.batch_no])
+								entry.db_update()
+
 				# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
 				sre_doc.update_status()
 
