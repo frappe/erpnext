@@ -21,9 +21,12 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	if not filters:
 		filters = frappe._dict({})
 
+	include_payments = filters.get("include_payments")
 	invoice_list = get_invoices(filters, additional_query_columns)
+	if filters.get("include_payments"):
+		invoice_list += get_payments(filters, additional_query_columns)
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
-		invoice_list, additional_table_columns
+		invoice_list, additional_table_columns, include_payments
 	)
 
 	if not invoice_list:
@@ -33,13 +36,15 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	invoice_income_map = get_invoice_income_map(invoice_list)
 	internal_invoice_map = get_internal_invoice_map(invoice_list)
 	invoice_income_map, invoice_tax_map = get_invoice_tax_map(
-		invoice_list, invoice_income_map, income_accounts
+		invoice_list, invoice_income_map, income_accounts, include_payments
 	)
 	# Cost Center & Warehouse Map
 	invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
+	customers = list(set(d.customer for d in invoice_list))
+	customer_details = get_customer_details(customers)
 
 	data = []
 	for inv in invoice_list:
@@ -62,9 +67,9 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 
 		row.update(
 			{
-				"customer_group": inv.get("customer_group"),
-				"territory": inv.get("territory"),
-				"tax_id": inv.get("tax_id"),
+				"customer_group": customer_details.get(inv.customer)[0],
+				"territory": customer_details.get(inv.customer)[1],
+				"tax_id": customer_details.get(inv.customer)[2],
 				"receivable_account": inv.debit_to,
 				"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
 				"project": inv.project,
@@ -128,7 +133,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	return columns, data
 
 
-def get_columns(invoice_list, additional_table_columns):
+def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	"""return columns based on filters"""
 	columns = [
 		{
@@ -237,14 +242,16 @@ def get_columns(invoice_list, additional_table_columns):
 			tuple(inv.name for inv in invoice_list),
 		)
 
-		tax_accounts = frappe.db.sql_list(
-			"""select distinct account_head
-			from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
-			and docstatus = 1 and base_tax_amount_after_discount_amount != 0
-			and parent in (%s) order by account_head"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
-		)
+		sales_taxes_query = get_taxes_query(invoice_list, "Sales Taxes and Charges", "Sales Invoice")
+		sales_tax_accounts = sales_taxes_query.run(as_dict=True, pluck="account_head")
+		tax_accounts = sales_tax_accounts
+
+		if include_payments:
+			advance_taxes_query = get_taxes_query(
+				invoice_list, "Advance Taxes and Charges", "Payment Entry"
+			)
+			advance_tax_accounts = advance_taxes_query.run(as_dict=True, debug=True, pluck="account_head")
+			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
 		unrealized_profit_loss_accounts = frappe.db.sql_list(
 			"""SELECT distinct unrealized_profit_loss_account
@@ -343,7 +350,28 @@ def get_columns(invoice_list, additional_table_columns):
 	return columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts
 
 
-def get_conditions(filters):
+def get_taxes_query(invoice_list, doctype, parenttype):
+	taxes = frappe.qb.DocType(doctype)
+
+	query = (
+		frappe.qb.from_(taxes)
+		.select(taxes.account_head)
+		.distinct()
+		.where(
+			(taxes.parenttype == parenttype)
+			& (taxes.docstatus == 1)
+			& (taxes.account_head.isnotnull())
+			& (taxes.parent.isin([inv.name for inv in invoice_list]))
+		)
+		.orderby(taxes.account_head)
+	)
+
+	if doctype == "Sales Taxes and Charges":
+		return query.where(taxes.charge_type.isin(["Total", "Valuation and Total"]))
+	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
+
+
+def get_conditions(filters, payments=False):
 	conditions = ""
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False) or []
@@ -353,7 +381,7 @@ def get_conditions(filters):
 		conditions += " and company=%(company)s"
 
 	if filters.get("customer") and "customer" not in accounting_dimensions_list:
-		conditions += " and customer = %(customer)s"
+		conditions += " and party = %(customer)s" if payments else " and customer = %(customer)s"
 
 	if filters.get("from_date"):
 		conditions += " and posting_date >= %(from_date)s"
@@ -422,6 +450,28 @@ def get_invoices(filters, additional_query_columns):
 	)
 
 
+def get_payments(filters, additional_query_columns):
+	if additional_query_columns:
+		additional_query_columns = ", " + ", ".join(additional_query_columns)
+
+	conditions = get_conditions(filters, payments=True)
+	return frappe.db.sql(
+		"""
+		select 'Payment Entry' as doctype, name, posting_date, paid_to as debit_to,
+		party as customer, party_name as customer_name, remarks,
+		paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
+		mode_of_payment {0}, project
+		from `tabPayment Entry`
+		where party_type = 'Customer' %s
+		order by posting_date desc, name desc""".format(
+			additional_query_columns or ""
+		)
+		% conditions,
+		filters,
+		as_dict=1,
+	)
+
+
 def get_invoice_income_map(invoice_list):
 	income_details = frappe.db.sql(
 		"""select parent, income_account, sum(base_net_amount) as amount
@@ -457,7 +507,7 @@ def get_internal_invoice_map(invoice_list):
 	return internal_invoice_map
 
 
-def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
+def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, include_payments=False):
 	tax_details = frappe.db.sql(
 		"""select parent, account_head,
 		sum(base_tax_amount_after_discount_amount) as tax_amount
@@ -466,6 +516,22 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,
 	)
+
+	if include_payments:
+		advance_tax_details = frappe.db.sql(
+			"""
+			select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount)
+			else sum(base_tax_amount) * -1 end as tax_amount
+			from `tabAdvance Taxes and Charges`
+			where parent in (%s) and charge_type in ('On Paid Amount', 'Actual')
+				and base_tax_amount != 0
+			group by parent, account_head, add_deduct_tax
+		"""
+			% ", ".join(["%s"] * len(invoice_list)),
+			tuple(inv.name for inv in invoice_list),
+			as_dict=1,
+		)
+		tax_details += advance_tax_details
 
 	invoice_tax_map = {}
 	for d in tax_details:
@@ -556,3 +622,19 @@ def get_mode_of_payments(invoice_list):
 			mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
 
 	return mode_of_payments
+
+
+def get_customer_details(customers):
+	customer_details = {}
+	for customer in frappe.db.sql(
+		"""select name, customer_group, territory, tax_id from `tabCustomer`
+		where name in (%s)"""
+		% ", ".join(["%s"] * len(customers)),
+		tuple(customers),
+		as_dict=1,
+	):
+		customer_details.setdefault(
+			customer.name, [customer.customer_group, customer.territory, customer.tax_id]
+		)
+
+	return customer_details

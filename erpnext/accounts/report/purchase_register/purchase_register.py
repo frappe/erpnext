@@ -20,11 +20,12 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters:
 		filters = {}
 
+	include_payments = filters.get("include_payments")
 	invoice_list = get_invoices(filters, additional_query_columns)
-	if filters.get("include_payments") and filters.include_payments:
+	if filters.get("include_payments"):
 		invoice_list += get_payments(filters, additional_query_columns)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
-		invoice_list, additional_table_columns, filters.get("include_payments")
+		invoice_list, additional_table_columns, include_payments
 	)
 
 	if not invoice_list:
@@ -34,7 +35,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
 	internal_invoice_map = get_internal_invoice_map(invoice_list)
 	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(
-		invoice_list, invoice_expense_map, expense_accounts
+		invoice_list, invoice_expense_map, expense_accounts, include_payments
 	)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	suppliers = list(set(d.supplier for d in invoice_list))
@@ -101,7 +102,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	return columns, data
 
 
-def get_columns(invoice_list, additional_table_columns, include_payments):
+def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	"""return columns based on filters"""
 	columns = [
 		_("Invoice") + ":Link/Purchase Invoice:120",
@@ -208,7 +209,7 @@ def get_taxes_query(invoice_list, doctype, parenttype):
 
 	if doctype == "Purchase Taxes and Charges":
 		return query.where(taxes.category.isin(["Total", "Valuation and Total"]))
-	return query.where(taxes.charge_type.isin(["On Paid", "Actual"]))
+	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
 
 
 def get_conditions(filters, payments=False):
@@ -301,10 +302,9 @@ def get_payments(filters, additional_query_columns):
 	conditions = get_conditions(filters, payments=True)
 	return frappe.db.sql(
 		"""
-		select
-			'Payment Entry' as doctype, name, posting_date, paid_to as credit_to, party as supplier, party_name as supplier_name,
-			remarks, paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
-			mode_of_payment {0}, project
+		select 'Payment Entry' as doctype, name, posting_date, paid_to as credit_to,
+		party as supplier, party_name as supplier_name, remarks, paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
+		mode_of_payment {0}, project
 		from `tabPayment Entry`
 		where party_type = 'Supplier' %s
 		order by posting_date desc, name desc""".format(
@@ -355,7 +355,9 @@ def get_internal_invoice_map(invoice_list):
 	return internal_invoice_map
 
 
-def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
+def get_invoice_tax_map(
+	invoice_list, invoice_expense_map, expense_accounts, include_payments=False
+):
 	tax_details = frappe.db.sql(
 		"""
 		select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount_after_discount_amount)
@@ -370,20 +372,21 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 		as_dict=1,
 	)
 
-	advance_tax_details = frappe.db.sql(
+	if include_payments:
+		advance_tax_details = frappe.db.sql(
+			"""
+			select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount)
+			else sum(base_tax_amount) * -1 end as tax_amount
+			from `tabAdvance Taxes and Charges`
+			where parent in (%s) and charge_type in ('On Paid Amount', 'Actual')
+				and base_tax_amount != 0
+			group by parent, account_head, add_deduct_tax
 		"""
-		select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount)
-		else sum(base_tax_amount) * -1 end as tax_amount
-		from `tabAdvance Taxes and Charges`
-		where parent in (%s) and charge_type in ('On Paid Amount', 'Actual')
-			and base_tax_amount != 0
-		group by parent, account_head, add_deduct_tax
-	"""
-		% ", ".join(["%s"] * len(invoice_list)),
-		tuple(inv.name for inv in invoice_list),
-		as_dict=1,
-	)
-	tax_details += advance_tax_details
+			% ", ".join(["%s"] * len(invoice_list)),
+			tuple(inv.name for inv in invoice_list),
+			as_dict=1,
+		)
+		tax_details += advance_tax_details
 
 	invoice_tax_map = {}
 	for d in tax_details:
