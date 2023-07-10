@@ -347,12 +347,6 @@ class PaymentReconciliation(Document):
 				payment_details = self.get_payment_details(row, dr_or_cr)
 				reconciled_entry.append(payment_details)
 
-				# if payment_details.difference_amount and row.reference_type not in [
-				# 	"Sales Invoice",
-				# 	"Purchase Invoice",
-				# ]:
-				# 	self.make_difference_entry(payment_details)
-
 		if entry_list:
 			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
 
