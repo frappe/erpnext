@@ -630,11 +630,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-11-16 14:18:57.001239",
-=======
- "modified": "2023-07-06 18:43:16.171842",
->>>>>>> d618aaef32 (fix: accepted warehouse and rejected warehouse can't be same)
+ "modified": "2023-07-06 18:44:16.171842",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
