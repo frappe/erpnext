@@ -11,7 +11,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+=======
+from erpnext.accounts.report.utils import get_party_details, get_taxes_query
+>>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
 
 
 def execute(filters=None):
@@ -49,7 +53,7 @@ def _execute(filters, additional_table_columns=None):
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 	customers = list(set(d.customer for d in invoice_list))
-	customer_details = get_customer_details(customers)
+	customer_details = get_party_details("Customer", customers)
 
 	data = []
 	for inv in invoice_list:
@@ -88,9 +92,9 @@ def _execute(filters, additional_table_columns=None):
 
 		row.update(
 			{
-				"customer_group": customer_details.get(inv.customer)[0],
-				"territory": customer_details.get(inv.customer)[1],
-				"tax_id": customer_details.get(inv.customer)[2],
+				"customer_group": customer_details.get(inv.customer).get("customer_group"),
+				"territory": customer_details.get(inv.customer).get("territory"),
+				"tax_id": customer_details.get(inv.customer).get("tax_id"),
 				"receivable_account": inv.debit_to,
 				"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
 				"project": inv.project,
@@ -272,7 +276,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 			advance_taxes_query = get_taxes_query(
 				invoice_list, "Advance Taxes and Charges", "Payment Entry"
 			)
-			advance_tax_accounts = advance_taxes_query.run(as_dict=True, debug=True, pluck="account_head")
+			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
 		unrealized_profit_loss_accounts = frappe.db.sql_list(
@@ -370,27 +374,6 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	)
 
 	return columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts
-
-
-def get_taxes_query(invoice_list, doctype, parenttype):
-	taxes = frappe.qb.DocType(doctype)
-
-	query = (
-		frappe.qb.from_(taxes)
-		.select(taxes.account_head)
-		.distinct()
-		.where(
-			(taxes.parenttype == parenttype)
-			& (taxes.docstatus == 1)
-			& (taxes.account_head.isnotnull())
-			& (taxes.parent.isin([inv.name for inv in invoice_list]))
-		)
-		.orderby(taxes.account_head)
-	)
-
-	if doctype == "Sales Taxes and Charges":
-		return query.where(taxes.charge_type.isin(["Total", "Valuation and Total"]))
-	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
 
 
 def get_conditions(filters, payments=False):
@@ -641,19 +624,3 @@ def get_mode_of_payments(invoice_list):
 			mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
 
 	return mode_of_payments
-
-
-def get_customer_details(customers):
-	customer_details = {}
-	for customer in frappe.db.sql(
-		"""select name, customer_group, territory, tax_id from `tabCustomer`
-		where name in (%s)"""
-		% ", ".join(["%s"] * len(customers)),
-		tuple(customers),
-		as_dict=1,
-	):
-		customer_details.setdefault(
-			customer.name, [customer.customer_group, customer.territory, customer.tax_id]
-		)
-
-	return customer_details
