@@ -477,11 +477,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-11-16 14:21:26.125815",
-=======
- "modified": "2023-07-06 18:43:45.599761",
->>>>>>> d618aaef32 (fix: accepted warehouse and rejected warehouse can't be same)
+ "modified": "2023-07-06 18:44:45.599761",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
