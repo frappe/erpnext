@@ -78,7 +78,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 				"remarks": inv.remarks,
 				"sales_order": ", ".join(sales_order),
 				"delivery_note": ", ".join(delivery_note),
-				"cost_center": ", ".join(cost_center),
+				"cost_center": ", ".join(cost_center) if inv.doctype == "Sales Invoice" else inv.cost_center,
 				"warehouse": ", ".join(warehouse),
 				"currency": company_currency,
 			}
@@ -131,7 +131,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 
 		data.append(row)
 
-	return columns, data
+	return columns, sorted(data, key=lambda x: x["posting_date"])
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
@@ -416,7 +416,7 @@ def get_invoices(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	return frappe.db.sql(
 		"""
-		select name, posting_date, debit_to, project, customer,
+		select 'Sales Invoice' as doctype, name, posting_date, debit_to, project, customer,
 		customer_name, owner, remarks, territory, tax_id, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
 		is_internal_customer, represents_company, company {0}
@@ -440,7 +440,7 @@ def get_payments(filters, additional_query_columns):
 		select 'Payment Entry' as doctype, name, posting_date, paid_to as debit_to,
 		party as customer, party_name as customer_name, remarks,
 		paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
-		mode_of_payment {0}, project
+		mode_of_payment {0}, project, cost_center
 		from `tabPayment Entry`
 		where party_type = 'Customer' %s
 		order by posting_date desc, name desc""".format(
