@@ -1574,11 +1574,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-04-29 12:57:50.832598",
-=======
- "modified": "2023-07-04 17:22:59.145031",
->>>>>>> d618aaef32 (fix: accepted warehouse and rejected warehouse can't be same)
+ "modified": "2023-07-04 17:23:59.145031",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
