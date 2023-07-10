@@ -816,7 +816,7 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 	def set_missing_values(source, target):
 		# target.run_method("set_missing_values")
 		# target.run_method("set_po_nos")
-		# target.run_method("calculate_taxes_and_totals")
+		target.run_method("calculate_taxes_and_totals")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -835,7 +835,8 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 		target.delivery_date = source.delivery_date
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		# target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.qty = flt(source.qty) - flt(source.proforma_qty)
 
 		if target.item_code:
 			item = get_item_defaults(target.item_code, source_parent.company)
@@ -864,6 +865,83 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 				"postprocess": update_item,
 				"condition": lambda doc: doc.qty
 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
+			},
+		},
+		target_doc,
+		postprocess,
+		# ignore_permissions=ignore_permissions,
+	)
+
+	automatically_fetch_payment_terms = cint(
+		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+	)
+	if automatically_fetch_payment_terms:
+		doclist.set_payment_schedule()
+
+	doclist.set_onload("ignore_price_list", True)
+
+	return doclist
+
+
+@frappe.whitelist()
+def make_delivery_note_against_proforma_invoice(
+	source_name, target_doc=None, ignore_permissions=False
+):
+	def postprocess(source, target):
+		# set_missing_values(source, target)
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
+
+	def set_missing_values(source, target):
+		# target.run_method("set_missing_values")
+		# target.run_method("set_po_nos")
+		target.run_method("cos")
+
+		if source.company_address:
+			target.update({"company_address": source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
+		if target.company_address:
+			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
+
+		# make_packing_list(target)
+
+	def update_item(source, target, source_parent):
+		# print(source)
+		target.delivery_date = source.delivery_date
+		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		# target.qty = flt(source.qty) - flt(source.proforma_qty)
+
+		if target.item_code:
+			item = get_item_defaults(target.item_code, source_parent.company)
+			item_group = get_item_group_defaults(target.item_code, source_parent.company)
+			target.cost_center = (
+				frappe.db.get_value("Project", source_parent.project, "cost_center")
+				or item.get("buying_cost_center")
+				or item_group.get("buying_cost_center")
+			)
+
+	doclist = get_mapped_doc(
+		"Proforma Invoice",
+		source_name,
+		{
+			"Proforma Invoice": {
+				"doctype": "Delivery Note",
+				"field_map": {"delivery_date": "delivery_date"},
+			},
+			"Proforma Invoice Item": {
+				"doctype": "Delivery Note Item",
+				"field_map": {
+					# Proforma Invoice Item field name : DN Item field name
+					"so_item": "so_detail",
+					"sales_order": "against_sales_order",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.qty,
 			},
 		},
 		target_doc,

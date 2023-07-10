@@ -15,10 +15,10 @@ class ProformaInvoice(SellingController):
 		self.status_updater = [
 			{
 				"source_dt": "Proforma Invoice Item",
-				"target_field": "proforma_qty",  # field of Sales Order Item
-				"target_ref_field": "qty",  # field of Proforma Invoice Item
-				"source_field": "qty",  # field of Proforma Invoice Item
 				"target_dt": "Sales Order Item",
+				"target_field": "proforma_qty",  # field of Sales Order Item
+				"source_field": "qty",  # field of Proforma Invoice Item
+				"target_ref_field": "qty",  # field of Proforma Invoice Item
 				"join_field": "so_item",  # field of Proforma Invoice Item
 				"target_parent_dt": "Sales Order",
 				"percent_join_field": "sales_order",

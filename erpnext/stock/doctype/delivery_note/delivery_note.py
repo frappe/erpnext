@@ -52,6 +52,15 @@ class DeliveryNote(SellingController):
 				"overflow_type": "delivery",
 				"no_allowance": 1,
 			},
+			{
+				"source_dt": "Delivery Note Item",
+				"target_dt": "Proforma Invoice Item",
+				"target_field": "delivered_qty",  # field of Proforma InvoiceItem
+				"source_field": "qty",  # field of DN Item
+				"target_ref_field": "qty",  # field of DN Item
+				"join_field": "so_item",  # field of DN Item
+				"target_parent_dt": "DN",
+			},
 		]
 		if cint(self.is_return):
 			self.status_updater.extend(
@@ -127,7 +136,7 @@ class DeliveryNote(SellingController):
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
-		self.validate_proforma_invoice()
+		# self.validate_proforma_invoice()
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.set_status()
@@ -153,8 +162,6 @@ class DeliveryNote(SellingController):
 
 	def validate_proforma_invoice(self):
 		for item in self.items:
-			print(item.against_sales_order)
-			#  frappe.db.exists("Proforma Invoice Item",item.against_sales_order)
 			proforma_exists = frappe.db.exists(
 				{"doctype": "Proforma Invoice Item", "sales_order": item.against_sales_order}
 			)
