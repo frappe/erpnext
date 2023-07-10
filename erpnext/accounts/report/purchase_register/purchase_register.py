@@ -127,7 +127,7 @@ def _execute(filters=None, additional_table_columns=None):
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
-	return columns, data
+	return columns, sorted(data, key=lambda x: x[1])
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
