@@ -25,14 +25,13 @@ erpnext.selling.ProformaInvoiceController = class SalesOrderController extends e
 
 	}
 	make_proforma_invoice() {
-		console.log("Clicked Func")
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note_against_proforma_invoice",
+			method: "erpnext.selling.doctype.proforma_invoice.proforma_invoice.make_delivery_note_against_proforma_invoice",
 			frm: this.frm,
 		})
 	}
 }
-
+// erpnext/erpnext/selling/doctype/proforma_invoice/proforma_invoice.js
 extend_cscript(cur_frm.cscript, new erpnext.selling.ProformaInvoiceController({frm: cur_frm}));
 
 // frappe.ui.form.on("Proforma Invoice", {

@@ -105,7 +105,9 @@
   "dimension_col_break",
   "project",
   "section_break_72",
-  "page_break"
+  "page_break",
+  "pi_item",
+  "proforma_invoice"
  ],
  "fields": [
   {
@@ -885,13 +887,23 @@
    "label": "Batch No",
    "options": "Batch",
    "read_only": 1
+  },
+  {
+   "fieldname": "pi_item",
+   "fieldtype": "Data",
+   "label": "PI_item"
+  },
+  {
+   "fieldname": "proforma_invoice",
+   "fieldtype": "Data",
+   "label": "Proforma Invoice"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-02 21:05:14.175640",
+ "modified": "2023-07-10 15:31:58.403666",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

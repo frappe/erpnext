@@ -55,11 +55,12 @@ class DeliveryNote(SellingController):
 			{
 				"source_dt": "Delivery Note Item",
 				"target_dt": "Proforma Invoice Item",
-				"target_field": "delivered_qty",  # field of Proforma InvoiceItem
+				"target_field": "delivered_qty",  # field of Proforma Invoice Item
 				"source_field": "qty",  # field of DN Item
 				"target_ref_field": "qty",  # field of DN Item
-				"join_field": "so_item",  # field of DN Item
-				"target_parent_dt": "DN",
+				"join_field": "pi_item",  # field of DN Item
+				"target_parent_dt": "Proforma Invoice",
+				"percent_join_field": "proforma_invoice",
 			},
 		]
 		if cint(self.is_return):

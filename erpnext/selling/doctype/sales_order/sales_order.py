@@ -833,9 +833,9 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 		# target.amount = flt(source.amount)
 		# target.qty = flt(source.qty)
 		target.delivery_date = source.delivery_date
-		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		# target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.base_amount = (flt(source.qty) - flt(source.proforma_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.proforma_qty)) * flt(source.rate)
+		print("SOURCE", source)
 		target.qty = flt(source.qty) - flt(source.proforma_qty)
 
 		if target.item_code:
@@ -853,7 +853,11 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 		{
 			"Sales Order": {
 				"doctype": "Proforma Invoice",
-				"field_map": {"delivery_date": "delivery_date", "name": "sales_order_name"},
+				"field_map": {
+					"delivery_date": "delivery_date",
+					"name": "sales_order_name",
+					"customer": "customer",
+				},
 			},
 			"Sales Order Item": {
 				"doctype": "Proforma Invoice Item",
