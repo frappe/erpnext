@@ -55,12 +55,28 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(non_reconciled_payments)
 
 	def get_payment_entries(self):
+		if self.default_advance_account:
+			party_account = [self.receivable_payable_account, self.default_advance_account]
+		else:
+			party_account = [self.receivable_payable_account]
+
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
-		condition = self.get_conditions(get_payments=True)
+		condition = frappe._dict(
+			{
+				"company": self.get("company"),
+				"get_payments": True,
+				"cost_center": self.get("cost_center"),
+				"from_payment_date": self.get("from_payment_date"),
+				"to_payment_date": self.get("to_payment_date"),
+				"maximum_payment_amount": self.get("maximum_payment_amount"),
+				"minimum_payment_amount": self.get("minimum_payment_amount"),
+			}
+		)
+
 		payment_entries = get_advance_payment_entries(
 			self.party_type,
 			self.party,
-			self.receivable_payable_account,
+			party_account,
 			order_doctype,
 			against_all_orders=True,
 			limit=self.payment_limit,
@@ -253,6 +269,10 @@ class PaymentReconciliation(Document):
 		return difference_amount
 
 	@frappe.whitelist()
+	def is_auto_process_enabled(self):
+		return frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments")
+
+	@frappe.whitelist()
 	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
 		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
 		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
@@ -343,7 +363,10 @@ class PaymentReconciliation(Document):
 				payment_details = self.get_payment_details(row, dr_or_cr)
 				reconciled_entry.append(payment_details)
 
-				if payment_details.difference_amount:
+				if payment_details.difference_amount and row.reference_type not in [
+					"Sales Invoice",
+					"Purchase Invoice",
+				]:
 					self.make_difference_entry(payment_details)
 
 		if entry_list:
@@ -428,6 +451,8 @@ class PaymentReconciliation(Document):
 
 		journal_entry.save()
 		journal_entry.submit()
+
+		return journal_entry
 
 	def get_payment_details(self, row, dr_or_cr):
 		return frappe._dict(
@@ -594,6 +619,16 @@ class PaymentReconciliation(Document):
 
 
 def reconcile_dr_cr_note(dr_cr_notes, company):
+	def get_difference_row(inv):
+		if inv.difference_amount != 0 and inv.difference_account:
+			difference_row = {
+				"account": inv.difference_account,
+				inv.dr_or_cr: abs(inv.difference_amount) if inv.difference_amount > 0 else 0,
+				reconcile_dr_or_cr: abs(inv.difference_amount) if inv.difference_amount < 0 else 0,
+				"cost_center": erpnext.get_default_cost_center(company),
+			}
+			return difference_row
+
 	for inv in dr_cr_notes:
 		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
 
@@ -638,5 +673,9 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				],
 			}
 		)
+
+		if difference_entry := get_difference_row(inv):
+			jv.append("accounts", difference_entry)
+
 		jv.flags.ignore_mandatory = True
 		jv.submit()

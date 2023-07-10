@@ -312,7 +312,35 @@ def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
 
 
 def get_serial_or_batch_nos(bundle):
-	return frappe.get_all("Serial and Batch Entry", fields=["*"], filters={"parent": bundle})
+	# For print format
+
+	bundle_data = frappe.get_cached_value(
+		"Serial and Batch Bundle", bundle, ["has_serial_no", "has_batch_no"], as_dict=True
+	)
+
+	fields = []
+	if bundle_data.has_serial_no:
+		fields.append("serial_no")
+
+	if bundle_data.has_batch_no:
+		fields.extend(["batch_no", "qty"])
+
+	data = frappe.get_all("Serial and Batch Entry", fields=fields, filters={"parent": bundle})
+
+	if bundle_data.has_serial_no and not bundle_data.has_batch_no:
+		return ", ".join([d.serial_no for d in data])
+
+	elif bundle_data.has_batch_no:
+		html = "<table class= 'table table-borderless' style='margin-top: 0px;margin-bottom: 0px;'>"
+		for d in data:
+			if d.serial_no:
+				html += f"<tr><td>{d.batch_no}</th><th>{d.serial_no}</th	><th>{abs(d.qty)}</th></tr>"
+			else:
+				html += f"<tr><td>{d.batch_no}</td><td>{abs(d.qty)}</td></tr>"
+
+		html += "</table>"
+
+		return html
 
 
 class SerialNoValuation(DeprecatedSerialNoValuation):

@@ -4,10 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
-from pypika import CustomFunction
 
 from erpnext.accounts.utils import get_balance_on
 
@@ -113,20 +110,27 @@ def get_columns():
 
 
 def get_entries(filters):
+	entries = []
+
+	for method_name in frappe.get_hooks("get_entries_for_bank_reconciliation_statement"):
+		entries += frappe.get_attr(method_name)(filters) or []
+
+	return sorted(
+		entries,
+		key=lambda k: getdate(k["posting_date"]),
+	)
+
+
+def get_entries_for_bank_reconciliation_statement(filters):
 	journal_entries = get_journal_entries(filters)
 
 	payment_entries = get_payment_entries(filters)
-
-	loan_entries = get_loan_entries(filters)
 
 	pos_entries = []
 	if filters.include_pos_transactions:
 		pos_entries = get_pos_entries(filters)
 
-	return sorted(
-		list(payment_entries) + list(journal_entries + list(pos_entries) + list(loan_entries)),
-		key=lambda k: getdate(k["posting_date"]),
-	)
+	return list(journal_entries) + list(payment_entries) + list(pos_entries)
 
 
 def get_journal_entries(filters):
@@ -188,47 +192,19 @@ def get_pos_entries(filters):
 	)
 
 
-def get_loan_entries(filters):
-	loan_docs = []
-	for doctype in ["Loan Disbursement", "Loan Repayment"]:
-		loan_doc = frappe.qb.DocType(doctype)
-		ifnull = CustomFunction("IFNULL", ["value", "default"])
-
-		if doctype == "Loan Disbursement":
-			amount_field = (loan_doc.disbursed_amount).as_("credit")
-			posting_date = (loan_doc.disbursement_date).as_("posting_date")
-			account = loan_doc.disbursement_account
-		else:
-			amount_field = (loan_doc.amount_paid).as_("debit")
-			posting_date = (loan_doc.posting_date).as_("posting_date")
-			account = loan_doc.payment_account
-
-		query = (
-			frappe.qb.from_(loan_doc)
-			.select(
-				ConstantColumn(doctype).as_("payment_document"),
-				(loan_doc.name).as_("payment_entry"),
-				(loan_doc.reference_number).as_("reference_no"),
-				(loan_doc.reference_date).as_("ref_date"),
-				amount_field,
-				posting_date,
-			)
-			.where(loan_doc.docstatus == 1)
-			.where(account == filters.get("account"))
-			.where(posting_date <= getdate(filters.get("report_date")))
-			.where(ifnull(loan_doc.clearance_date, "4000-01-01") > getdate(filters.get("report_date")))
-		)
-
-		if doctype == "Loan Repayment" and frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-			query = query.where((loan_doc.repay_from_salary == 0))
-
-		entries = query.run(as_dict=1)
-		loan_docs.extend(entries)
-
-	return loan_docs
-
-
 def get_amounts_not_reflected_in_system(filters):
+	amount = 0.0
+
+	# get amounts from all the apps
+	for method_name in frappe.get_hooks(
+		"get_amounts_not_reflected_in_system_for_bank_reconciliation_statement"
+	):
+		amount += frappe.get_attr(method_name)(filters) or 0.0
+
+	return amount
+
+
+def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filters):
 	je_amount = frappe.db.sql(
 		"""
 		select sum(jvd.debit_in_account_currency - jvd.credit_in_account_currency)
@@ -252,42 +228,7 @@ def get_amounts_not_reflected_in_system(filters):
 
 	pe_amount = flt(pe_amount[0][0]) if pe_amount else 0.0
 
-	loan_amount = get_loan_amount(filters)
-
-	return je_amount + pe_amount + loan_amount
-
-
-def get_loan_amount(filters):
-	total_amount = 0
-	for doctype in ["Loan Disbursement", "Loan Repayment"]:
-		loan_doc = frappe.qb.DocType(doctype)
-		ifnull = CustomFunction("IFNULL", ["value", "default"])
-
-		if doctype == "Loan Disbursement":
-			amount_field = Sum(loan_doc.disbursed_amount)
-			posting_date = (loan_doc.disbursement_date).as_("posting_date")
-			account = loan_doc.disbursement_account
-		else:
-			amount_field = Sum(loan_doc.amount_paid)
-			posting_date = (loan_doc.posting_date).as_("posting_date")
-			account = loan_doc.payment_account
-
-		query = (
-			frappe.qb.from_(loan_doc)
-			.select(amount_field)
-			.where(loan_doc.docstatus == 1)
-			.where(account == filters.get("account"))
-			.where(posting_date > getdate(filters.get("report_date")))
-			.where(ifnull(loan_doc.clearance_date, "4000-01-01") <= getdate(filters.get("report_date")))
-		)
-
-		if doctype == "Loan Repayment" and frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-			query = query.where((loan_doc.repay_from_salary == 0))
-
-		amount = query.run()[0][0]
-		total_amount += flt(amount)
-
-	return total_amount
+	return je_amount + pe_amount
 
 
 def get_balance_row(label, amount, account_currency):

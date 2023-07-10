@@ -320,6 +320,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: !doc.is_debit_note",
    "fieldname": "is_return",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -1960,6 +1961,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: !doc.is_return",
    "description": "Issue a debit note with 0 qty against an existing Sales Invoice",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
@@ -2155,7 +2157,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-06-03 16:22:16.219333",
+ "modified": "2023-06-21 16:02:18.988799",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

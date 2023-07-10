@@ -38,6 +38,16 @@ class TestRouting(FrappeTestCase):
 			"Job Card", filters={"work_order": wo_doc.name}, order_by="sequence_id desc"
 		):
 			job_card_doc = frappe.get_doc("Job Card", data.name)
+			for row in job_card_doc.scheduled_time_logs:
+				job_card_doc.append(
+					"time_logs",
+					{
+						"from_time": row.from_time,
+						"to_time": row.to_time,
+						"time_in_mins": row.time_in_mins,
+					},
+				)
+
 			job_card_doc.time_logs[0].completed_qty = 10
 			if job_card_doc.sequence_id != 1:
 				self.assertRaises(OperationSequenceError, job_card_doc.save)

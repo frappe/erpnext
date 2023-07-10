@@ -541,6 +541,16 @@ class TestJobCard(FrappeTestCase):
 		)[0].name
 
 		jc = frappe.get_doc("Job Card", first_job_card)
+		for row in jc.scheduled_time_logs:
+			jc.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+				},
+			)
+
 		jc.time_logs[0].completed_qty = 8
 		jc.save()
 		jc.submit()
@@ -557,11 +567,30 @@ class TestJobCard(FrappeTestCase):
 		)[0].name
 
 		jc2 = frappe.get_doc("Job Card", second_job_card)
+		for row in jc2.scheduled_time_logs:
+			jc2.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+				},
+			)
 		jc2.time_logs[0].completed_qty = 10
 
 		self.assertRaises(frappe.ValidationError, jc2.save)
 
 		jc2.load_from_db()
+		for row in jc2.scheduled_time_logs:
+			jc2.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+				},
+			)
+
 		jc2.time_logs[0].completed_qty = 8
 		jc2.save()
 		jc2.submit()
