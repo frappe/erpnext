@@ -1431,7 +1431,7 @@ def get_outstanding_reference_documents(args, validate=False):
 
 	if args.get("party_type") == "Member":
 		return
-	
+
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
 
