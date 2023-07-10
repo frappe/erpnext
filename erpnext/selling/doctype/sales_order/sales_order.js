@@ -107,6 +107,10 @@ frappe.ui.form.on("Sales Order", {
 				})
 			}
 		}
+
+		if (frm.doc.docstatus > 0) {
+			frm.set_df_property("reserve_stock", "description", null);
+		}
 	},
 
 	get_items_from_internal_purchase_order(frm) {
