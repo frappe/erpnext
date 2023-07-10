@@ -83,7 +83,12 @@ frappe.ui.form.on("Sales Order", {
 
 			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
 			if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
-				frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
+				frm.add_custom_button(__('Unreserve'), () => {
+					frappe.confirm(
+						__('The reserved stock will be released. Are you certain you wish to proceed?'),
+						() => frm.events.cancel_stock_reservation_entries(frm)
+					)
+				}, __('Stock Reservation'));
 			}
 		}
 
