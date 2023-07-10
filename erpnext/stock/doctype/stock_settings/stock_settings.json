@@ -389,6 +389,7 @@
   },
   {
    "default": "1",
+   "depends_on": "eval: doc.enable_stock_reservation",
    "description": "If enabled, Serial and Batch Nos will be auto-reserved based on <b>Pick Serial / Batch Based On</b>",
    "fieldname": "auto_reserve_serial_and_batch",
    "fieldtype": "Check",
@@ -405,7 +406,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-27 18:02:17.296724",
+ "modified": "2023-07-10 10:06:02.291504",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
