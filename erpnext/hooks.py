@@ -420,6 +420,10 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
+		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_daily",
+	],
+	"weekly": [
+		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
@@ -523,6 +527,7 @@ accounting_dimension_doctypes = [
 	"Subcontracting Order Item",
 	"Subcontracting Receipt",
 	"Subcontracting Receipt Item",
+	"Account Closing Balance",
 ]
 
 # get matching queries for Bank Reconciliation

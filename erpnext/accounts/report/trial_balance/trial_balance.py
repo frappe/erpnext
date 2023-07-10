@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt, formatdate, getdate
+from frappe.query_builder.functions import Sum
+from frappe.utils import add_days, cstr, flt, formatdate, getdate
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -39,7 +40,7 @@ def validate_filters(filters):
 	if not filters.fiscal_year:
 		frappe.throw(_("Fiscal Year {0} is required").format(filters.fiscal_year))
 
-	fiscal_year = frappe.db.get_value(
+	fiscal_year = frappe.get_cached_value(
 		"Fiscal Year", filters.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True
 	)
 	if not fiscal_year:
@@ -138,13 +139,26 @@ def get_opening_balances(filters):
 
 
 def get_rootwise_opening_balances(filters, report_type):
-	additional_conditions = ""
-	if not filters.show_unclosed_fy_pl_balances:
-		additional_conditions = (
-			" and posting_date >= %(year_start_date)s" if report_type == "Profit and Loss" else ""
+	gle = []
+
+	last_period_closing_voucher = frappe.db.get_all(
+		"Period Closing Voucher",
+		filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", filters.from_date)},
+		fields=["posting_date", "name"],
+		order_by="posting_date desc",
+		limit=1,
+	)
+
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+	if last_period_closing_voucher:
+		gle = get_opening_balance(
+			"Account Closing Balance",
+			filters,
+			report_type,
+			accounting_dimensions,
+			period_closing_voucher=last_period_closing_voucher[0].name,
 		)
-<<<<<<< HEAD
-=======
 		if getdate(last_period_closing_voucher[0].posting_date) < getdate(
 			add_days(filters.from_date, -1)
 		):
@@ -214,54 +228,46 @@ def get_opening_balance(
 		and doctype == "GL Entry"
 	):
 		opening_balance = opening_balance.where(closing_balance.posting_date >= filters.year_start_date)
->>>>>>> 4d07e20b05 (fix: Opening balance in presentation currency in Trial Balance report (#36036))
 
 	if not flt(filters.with_period_closing_entry):
-		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+		if doctype == "Account Closing Balance":
+			opening_balance = opening_balance.where(closing_balance.is_period_closing_voucher_entry == 0)
+		else:
+			opening_balance = opening_balance.where(
+				closing_balance.voucher_type != "Period Closing Voucher"
+			)
 
 	if filters.cost_center:
 		lft, rgt = frappe.db.get_value("Cost Center", filters.cost_center, ["lft", "rgt"])
-		additional_conditions += """ and cost_center in (select name from `tabCost Center`
-			where lft >= %s and rgt <= %s)""" % (
-			lft,
-			rgt,
+		cost_center = frappe.qb.DocType("Cost Center")
+		opening_balance = opening_balance.where(
+			closing_balance.cost_center.in_(
+				frappe.qb.from_(cost_center)
+				.select("name")
+				.where((cost_center.lft >= lft) & (cost_center.rgt <= rgt))
+			)
 		)
 
 	if filters.project:
-		additional_conditions += " and project = %(project)s"
-
-	company_fb = frappe.db.get_value("Company", filters.company, "default_finance_book")
+		opening_balance = opening_balance.where(closing_balance.project == filters.project)
 
 	if filters.get("include_default_book_entries"):
-		if filters.get("finance_book"):
-			if company_fb and cstr(filters.get("finance_book")) != cstr(company_fb):
-				frappe.throw(
-					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-				)
-			else:
-				additional_conditions += (
-					" AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
-				)
-		else:
-			additional_conditions += " AND (finance_book in (%(company_fb)s, '') OR finance_book IS NULL)"
+		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+			frappe.throw(
+				_("To use a different finance book, please uncheck 'Include Default Book Entries'")
+			)
+
+		opening_balance = opening_balance.where(
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
+			| (closing_balance.finance_book.isnull())
+		)
 	else:
-		if filters.get("finance_book"):
-			additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
-		else:
-			additional_conditions += " AND (finance_book in ('') OR finance_book IS NULL)"
-
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-
-	query_filters = {
-		"company": filters.company,
-		"from_date": filters.from_date,
-		"to_date": filters.to_date,
-		"report_type": report_type,
-		"year_start_date": filters.year_start_date,
-		"project": filters.project,
-		"finance_book": filters.finance_book,
-		"company_fb": company_fb,
-	}
+		opening_balance = opening_balance.where(
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), ""]))
+			| (closing_balance.finance_book.isnull())
+		)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
@@ -270,42 +276,20 @@ def get_opening_balance(
 					filters[dimension.fieldname] = get_dimension_with_children(
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
-					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
+					opening_balance = opening_balance.where(
+						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
+					)
 				else:
-					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
+					opening_balance = opening_balance.where(
+						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
+					)
 
-				query_filters.update({dimension.fieldname: filters.get(dimension.fieldname)})
+	gle = opening_balance.run(as_dict=1)
 
-<<<<<<< HEAD
-	gle = frappe.db.sql(
-		"""
-		select
-			account, sum(debit) as opening_debit, sum(credit) as opening_credit
-		from `tabGL Entry`
-		where
-			company=%(company)s
-			{additional_conditions}
-			and (posting_date < %(from_date)s or (ifnull(is_opening, 'No') = 'Yes' and posting_date <= %(to_date)s))
-			and account in (select name from `tabAccount` where report_type=%(report_type)s)
-			and is_cancelled = 0
-		group by account""".format(
-			additional_conditions=additional_conditions
-		),
-		query_filters,
-		as_dict=True,
-	)
-
-	opening = frappe._dict()
-	for d in gle:
-		opening.setdefault(d.account, d)
-
-	return opening
-=======
 	if filters and filters.get("presentation_currency"):
 		convert_to_presentation_currency(gle, get_currency(filters))
 
 	return gle
->>>>>>> 4d07e20b05 (fix: Opening balance in presentation currency in Trial Balance report (#36036))
 
 
 def calculate_values(accounts, gl_entries_by_account, opening_balances):

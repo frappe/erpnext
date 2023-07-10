@@ -51,13 +51,25 @@ GL_REPOSTING_CHUNK = 100
 
 @frappe.whitelist()
 def get_fiscal_year(
-	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False
+	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
-	return get_fiscal_years(date, fiscal_year, label, verbose, company, as_dict=as_dict)[0]
+	fiscal_years = get_fiscal_years(
+		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
+	)
+	if boolean:
+		return fiscal_years
+	else:
+		return fiscal_years[0]
 
 
 def get_fiscal_years(
-	transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False
+	transaction_date=None,
+	fiscal_year=None,
+	label="Date",
+	verbose=1,
+	company=None,
+	as_dict=False,
+	boolean=False,
 ):
 	fiscal_years = frappe.cache().hget("fiscal_years", company) or []
 
@@ -121,8 +133,12 @@ def get_fiscal_years(
 	if company:
 		error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
 
+	if boolean:
+		return False
+
 	if verbose == 1:
 		frappe.msgprint(error_msg)
+
 	raise FiscalYearError(error_msg)
 
 
@@ -1386,6 +1402,50 @@ def check_and_delete_linked_reports(report):
 	if icons:
 		for icon in icons:
 			frappe.delete_doc("Desktop Icon", icon)
+
+
+def create_err_and_its_journals(companies: list = None) -> None:
+	if companies:
+		for company in companies:
+			err = frappe.new_doc("Exchange Rate Revaluation")
+			err.company = company.name
+			err.posting_date = nowdate()
+			err.rounding_loss_allowance = 0.0
+
+			err.fetch_and_calculate_accounts_data()
+			if err.accounts:
+				err.save().submit()
+				response = err.make_jv_entries()
+
+				if company.submit_err_jv:
+					jv = response.get("revaluation_jv", None)
+					jv and frappe.get_doc("Journal Entry", jv).submit()
+					jv = response.get("zero_balance_jv", None)
+					jv and frappe.get_doc("Journal Entry", jv).submit()
+
+
+def auto_create_exchange_rate_revaluation_daily() -> None:
+	"""
+	Executed by background job
+	"""
+	companies = frappe.db.get_all(
+		"Company",
+		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": "Daily"},
+		fields=["name", "submit_err_jv"],
+	)
+	create_err_and_its_journals(companies)
+
+
+def auto_create_exchange_rate_revaluation_weekly() -> None:
+	"""
+	Executed by background job
+	"""
+	companies = frappe.db.get_all(
+		"Company",
+		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": "Weekly"},
+		fields=["name", "submit_err_jv"],
+	)
+	create_err_and_its_journals(companies)
 
 
 def get_payment_ledger_entries(gl_entries, cancel=0):

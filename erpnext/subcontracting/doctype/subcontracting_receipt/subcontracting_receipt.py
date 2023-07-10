@@ -190,12 +190,22 @@ class SubcontractingReceipt(SubcontractingController):
 			self.total = total_amount
 
 	def validate_rejected_warehouse(self):
-		if not self.rejected_warehouse:
-			for item in self.items:
-				if item.rejected_qty:
+		for item in self.items:
+			if flt(item.rejected_qty) and not item.rejected_warehouse:
+				if self.rejected_warehouse:
+					item.rejected_warehouse = self.rejected_warehouse
+
+				if not item.rejected_warehouse:
 					frappe.throw(
-						_("Rejected Warehouse is mandatory against rejected Item {0}").format(item.item_code)
+						_("Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}").format(
+							item.idx, item.item_code
+						)
 					)
+
+			if item.get("rejected_warehouse") and (item.get("rejected_warehouse") == item.get("warehouse")):
+				frappe.throw(
+					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
+				)
 
 	def validate_available_qty_for_consumption(self):
 		for item in self.get("supplied_items"):
