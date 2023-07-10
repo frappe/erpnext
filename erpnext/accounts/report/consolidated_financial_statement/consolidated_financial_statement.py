@@ -655,7 +655,7 @@ def set_gl_entries_by_account(
 		if filters and filters.get("presentation_currency") != d.default_currency:
 			currency_info["company"] = d.name
 			currency_info["company_currency"] = d.default_currency
-			convert_to_presentation_currency(gl_entries, currency_info, filters.get("company"))
+			convert_to_presentation_currency(gl_entries, currency_info)
 
 		for entry in gl_entries:
 			if entry.account_number:
