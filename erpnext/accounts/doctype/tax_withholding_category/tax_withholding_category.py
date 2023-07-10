@@ -100,11 +100,14 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	tax_details = get_tax_withholding_details(tax_withholding_category, posting_date, inv.company)
 
 	if not tax_details:
-		frappe.throw(
-			_("Please set associated account in Tax Withholding Category {0} against Company {1}").format(
-				tax_withholding_category, inv.company
-			)
+		frappe.msgprint(
+			_(
+				"Skipping Tax Withholding Category {0} as there is no associated account set for Company {1} in it."
+			).format(tax_withholding_category, inv.company)
 		)
+		if inv.doctype == "Purchase Invoice":
+			return {}, [], {}
+		return {}
 
 	if party_type == "Customer" and not tax_details.cumulative_threshold:
 		# TCS is only chargeable on sum of invoiced value
