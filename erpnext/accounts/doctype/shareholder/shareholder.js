@@ -3,8 +3,6 @@
 
 frappe.ui.form.on('Shareholder', {
 	refresh: function(frm) {
-		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Shareholder' };
-
 		frm.toggle_display(['contact_html'], !frm.doc.__islocal);
 
 		if (frm.doc.__islocal) {

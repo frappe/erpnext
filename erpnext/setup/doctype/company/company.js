@@ -81,8 +81,6 @@ frappe.ui.form.on("Company", {
 			disbale_coa_fields(frm);
 			frappe.contacts.render_address_and_contact(frm);
 
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
-
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
 					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
