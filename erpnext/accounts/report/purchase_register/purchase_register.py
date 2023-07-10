@@ -21,7 +21,13 @@ def _execute(filters=None, additional_table_columns=None):
 	if not filters:
 		filters = {}
 
+<<<<<<< HEAD
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
+=======
+	invoice_list = get_invoices(filters, additional_query_columns)
+	if filters.get("include_payments") and filters.include_payments:
+		invoice_list += get_payments(filters, additional_query_columns)
+>>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns
 	)
@@ -48,6 +54,7 @@ def _execute(filters=None, additional_table_columns=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
+<<<<<<< HEAD
 		row = [
 			inv.name,
 			inv.posting_date,
@@ -56,9 +63,20 @@ def _execute(filters=None, additional_table_columns=None):
 			*get_values_for_columns(additional_table_columns, inv).values(),
 			supplier_details.get(inv.supplier),  # supplier_group
 			inv.tax_id,
+=======
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
+
+		if additional_query_columns:
+			for col in additional_query_columns:
+				row.append(inv.get(col))
+
+		row += [
+			supplier_details.get(inv.supplier)[0],  # supplier_group
+			supplier_details.get(inv.supplier)[1],
+>>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
 			inv.credit_to,
 			inv.mode_of_payment,
-			", ".join(project),
+			", ".join(project) if inv.doctype == "Purchase Invoice" else inv.project,
 			inv.bill_no,
 			inv.bill_date,
 			inv.remarks,
@@ -141,9 +159,10 @@ def get_columns(invoice_list, additional_table_columns):
 
 		tax_accounts = frappe.db.sql_list(
 			"""select distinct account_head
-			from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-			and docstatus = 1 and (account_head is not null and account_head != '')
-			and category in ('Total', 'Valuation and Total')
+			from (select account_head, parent, docstatus from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
+			and category in ('Total', 'Valuation and Total') union select account_head, parent, docstatus
+			from `tabAdvance Taxes and Charges` where parenttype = 'Payment Entry' and charge_type in ('On Paid Amount', 'Actual')) a
+			where docstatus = 1 and (account_head is not null and account_head != '')
 			and parent in (%s) order by account_head"""
 			% ", ".join(["%s"] * len(invoice_list)),
 			tuple(inv.name for inv in invoice_list),
@@ -185,13 +204,13 @@ def get_columns(invoice_list, additional_table_columns):
 	return columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts
 
 
-def get_conditions(filters):
+def get_conditions(filters, payments=False):
 	conditions = ""
 
 	if filters.get("company"):
 		conditions += " and company=%(company)s"
 	if filters.get("supplier"):
-		conditions += " and supplier = %(supplier)s"
+		conditions += " and party = %(supplier)s" if payments else " and supplier = %(supplier)s"
 
 	if filters.get("from_date"):
 		conditions += " and posting_date>=%(from_date)s"
@@ -202,16 +221,19 @@ def get_conditions(filters):
 		conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
 
 	if filters.get("cost_center"):
-		conditions += """ and exists(select name from `tabPurchase Invoice Item`
-			 where parent=`tabPurchase Invoice`.name
-			 	and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
+		if payments:
+			conditions += " and cost_center = %(cost_center)s"
+		else:
+			conditions += """ and exists(select name from `tabPurchase Invoice Item`
+				where parent=`tabPurchase Invoice`.name
+					and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
 
-	if filters.get("warehouse"):
+	if filters.get("warehouse") and not payments:
 		conditions += """ and exists(select name from `tabPurchase Invoice Item`
 			 where parent=`tabPurchase Invoice`.name
 			 	and ifnull(`tabPurchase Invoice Item`.warehouse, '') = %(warehouse)s)"""
 
-	if filters.get("item_group"):
+	if filters.get("item_group") and not payments:
 		conditions += """ and exists(select name from `tabPurchase Invoice Item`
 			 where parent=`tabPurchase Invoice`.name
 			 	and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s)"""
@@ -248,7 +270,7 @@ def get_invoices(filters, additional_query_columns):
 	return frappe.db.sql(
 		"""
 		select
-			name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
+			'Purchase Invoice' as doctype, name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
 			remarks, base_net_total, base_grand_total, outstanding_amount,
 			mode_of_payment {0}
 		from `tabPurchase Invoice`
@@ -256,6 +278,28 @@ def get_invoices(filters, additional_query_columns):
 		order by posting_date desc, name desc""".format(
 			additional_query_columns, conditions
 		),
+		filters,
+		as_dict=1,
+	)
+
+
+def get_payments(filters, additional_query_columns):
+	if additional_query_columns:
+		additional_query_columns = ", " + ", ".join(additional_query_columns)
+
+	conditions = get_conditions(filters, payments=True)
+	return frappe.db.sql(
+		"""
+		select
+			'Payment Entry' as doctype, name, posting_date, paid_to as credit_to, party as supplier, party_name as supplier_name,
+			remarks, paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
+			mode_of_payment {0}, project
+		from `tabPayment Entry`
+		where party_type = 'Supplier' %s
+		order by posting_date desc, name desc""".format(
+			additional_query_columns or ""
+		)
+		% conditions,
 		filters,
 		as_dict=1,
 	)
@@ -314,6 +358,21 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,
 	)
+
+	advance_tax_details = frappe.db.sql(
+		"""
+		select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount)
+		else sum(base_tax_amount) * -1 end as tax_amount
+		from `tabAdvance Taxes and Charges`
+		where parent in (%s) and charge_type in ('On Paid Amount', 'Actual')
+			and base_tax_amount != 0
+		group by parent, account_head, add_deduct_tax
+	"""
+		% ", ".join(["%s"] * len(invoice_list)),
+		tuple(inv.name for inv in invoice_list),
+		as_dict=1,
+	)
+	tax_details += advance_tax_details
 
 	invoice_tax_map = {}
 	for d in tax_details:
@@ -387,12 +446,12 @@ def get_account_details(invoice_list):
 def get_supplier_details(suppliers):
 	supplier_details = {}
 	for supp in frappe.db.sql(
-		"""select name, supplier_group from `tabSupplier`
+		"""select name, supplier_group, tax_id from `tabSupplier`
 		where name in (%s)"""
 		% ", ".join(["%s"] * len(suppliers)),
 		tuple(suppliers),
 		as_dict=1,
 	):
-		supplier_details.setdefault(supp.name, supp.supplier_group)
+		supplier_details.setdefault(supp.name, [supp.supplier_group, supp.tax_id])
 
 	return supplier_details

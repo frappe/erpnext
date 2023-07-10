@@ -52,6 +52,12 @@ frappe.query_reports["Purchase Register"] = {
 			"label": __("Item Group"),
 			"fieldtype": "Link",
 			"options": "Item Group"
+		},
+		{
+			"fieldname": "include_payments",
+			"label": __("Include Payments"),
+			"fieldtype": "Check",
+			"default": 0
 		}
 	]
 }
