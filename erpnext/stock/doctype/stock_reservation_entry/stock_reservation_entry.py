@@ -659,36 +659,36 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	return flt(reserved_qty[0][0])
 
 
-def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> dict[dict]:
-	"""A wrapper for get_stock_reservation_entries_for_voucher() to return a dict of SREs, where the key is `voucher_detail_no`."""
+def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict]:
+	"""Returns a list of SREs for the provided voucher."""
 
-	fields = [
-		"name",
-		"item_code",
-		"warehouse",
-		"voucher_type",
-		"voucher_no",
-		"voucher_detail_no",
-		"reserved_qty",
-		"delivered_qty",
-		"has_serial_no",
-		"has_batch_no",
-		"reservation_based_on",
-	]
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	return (
+		frappe.qb.from_(sre)
+		.select(
+			sre.name,
+			sre.item_code,
+			sre.warehouse,
+			sre.voucher_type,
+			sre.voucher_no,
+			sre.voucher_detail_no,
+			(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
+			sre.has_serial_no,
+			sre.has_batch_no,
+			sre.reservation_based_on,
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.reserved_qty > sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+		.orderby(sre.creation)
+	).run(as_dict=True)
 
-	sre_list = get_stock_reservation_entries_for_voucher(voucher_type, voucher_no, fields=fields)
 
-	result = frappe._dict()
-	if sre_list:
-		for sre in sre_list:
-			result[sre.voucher_detail_no] = sre
-
-	return result
-
-
-def get_serial_batch_entries_for_voucher(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str
-) -> list[dict]:
+def get_serial_batch_entries_for_voucher(sre_name: str) -> list[dict]:
 	"""Returns a list of `Serial and Batch Entries` for the provided voucher."""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -704,11 +704,7 @@ def get_serial_batch_entries_for_voucher(
 			(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
 		)
 		.where(
-			(sre.docstatus == 1)
-			& (sre.voucher_type == voucher_type)
-			& (sre.voucher_no == voucher_no)
-			& (sre.voucher_detail_no == voucher_detail_no)
-			& (sre.status.notin(["Delivered", "Cancelled"]))
+			(sre.docstatus == 1) & (sre.name == sre_name) & (sre.status.notin(["Delivered", "Cancelled"]))
 		)
 		.where(sb_entry.qty > sb_entry.delivered_qty)
 		.orderby(sb_entry.creation)
@@ -718,9 +714,7 @@ def get_serial_batch_entries_for_voucher(
 def get_ssb_bundle_for_voucher(sre: dict) -> object | None:
 	"""Returns a new `Serial and Batch Bundle` against the provided SRE."""
 
-	sb_entries = get_serial_batch_entries_for_voucher(
-		sre["voucher_type"], sre["voucher_no"], sre["voucher_detail_no"]
-	)
+	sb_entries = get_serial_batch_entries_for_voucher(sre["name"])
 
 	if sb_entries:
 		bundle = frappe.new_doc("Serial and Batch Bundle")

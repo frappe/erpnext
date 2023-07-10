@@ -401,6 +401,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
+
+						if (doc.__onload && doc.__onload.has_reserved_stock) {
+							this.frm.add_custom_button(__('Delivery Note (Reserved Stock)'), () => this.make_delivery_note_based_on_delivery_date(true), __('Create'));
+						}
+
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
@@ -699,7 +704,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		d.show();
 	}
 
-	make_delivery_note_based_on_delivery_date() {
+	make_delivery_note_based_on_delivery_date(for_reserved_stock=false) {
 		var me = this;
 
 		var delivery_dates = this.frm.doc.items.map(i => i.delivery_date);
@@ -741,22 +746,23 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 				if(!dates) return;
 
-				me.make_delivery_note(dates);
+				me.make_delivery_note(dates, for_reserved_stock);
 				dialog.hide();
 			});
 			dialog.show();
 		} else {
-			this.make_delivery_note();
+			this.make_delivery_note([], for_reserved_stock);
 		}
 	}
 
-	make_delivery_note(delivery_dates) {
+	make_delivery_note(delivery_dates, for_reserved_stock=false) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 			frm: this.frm,
 			args: {
-				delivery_dates
-			}
+				delivery_dates,
+				for_reserved_stock: for_reserved_stock
+			},
 		})
 	}
 

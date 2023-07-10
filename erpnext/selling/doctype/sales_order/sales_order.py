@@ -831,7 +831,12 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	)
 
 	if not kwargs:
-		kwargs = {}
+		kwargs = {
+			"for_reserved_stock": frappe.flags.args and frappe.flags.args.for_reserved_stock,
+			"skip_item_mapping": False,
+		}
+
+	kwargs = frappe._dict(kwargs)
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
@@ -839,9 +844,32 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
-	sre_dict = {}
-	if kwargs.get("for_reserved_stock"):
-		sre_dict = get_sre_details_for_voucher("Sales Order", source_name)
+	sre_list = []
+	if kwargs.for_reserved_stock:
+		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
+
+	def condition(doc):
+		# make_mapped_doc sets js `args` into `frappe.flags.args`
+		if frappe.flags.args and frappe.flags.args.delivery_dates:
+			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
+				return False
+
+		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
+
+	def update_item(source, target, source_parent):
+		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
+
+		item = get_item_defaults(target.item_code, source_parent.company)
+		item_group = get_item_group_defaults(target.item_code, source_parent.company)
+
+		if item:
+			target.cost_center = (
+				frappe.db.get_value("Project", source_parent.project, "cost_center")
+				or item.get("buying_cost_center")
+				or item_group.get("buying_cost_center")
+			)
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
@@ -859,45 +887,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 		make_packing_list(target)
 
-	def update_item(source, target, source_parent):
-		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
-
-		if kwargs.get("for_reserved_stock") and source.name in sre_dict:
-			item_sre = sre_dict[source.name]
-			target.qty = (flt(item_sre.reserved_qty) - flt(item_sre.delivered_qty)) * flt(
-				source.get("conversion_factor", 1)
-			)
-
-			if item_sre.reservation_based_on == "Serial and Batch" and (
-				item_sre.has_serial_no or item_sre.has_batch_no
-			):
-				target.serial_and_batch_bundle = get_ssb_bundle_for_voucher(item_sre)
-
-		item = get_item_defaults(target.item_code, source_parent.company)
-		item_group = get_item_group_defaults(target.item_code, source_parent.company)
-
-		if item:
-			target.cost_center = (
-				frappe.db.get_value("Project", source_parent.project, "cost_center")
-				or item.get("buying_cost_center")
-				or item_group.get("buying_cost_center")
-			)
-
-	if not kwargs.get("skip_item_mapping"):
-
-		def condition(doc):
-			if kwargs.get("for_reserved_stock"):
-				if doc.name not in sre_dict:
-					return False
-
-			# make_mapped_doc sets js `args` into `frappe.flags.args`
-			if frappe.flags.args and frappe.flags.args.delivery_dates:
-				if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
-					return False
-			return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
-
+	if not kwargs.skip_item_mapping and not kwargs.for_reserved_stock:
 		mapper["Sales Order Item"] = {
 			"doctype": "Delivery Note Item",
 			"field_map": {
@@ -905,12 +895,44 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
-			"postprocess": update_item,
 			"condition": condition,
+			"postprocess": update_item,
 		}
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 	target_doc.set_onload("ignore_price_list", True)
+
+	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
+		so = frappe.get_doc("Sales Order", source_name)
+
+		def update_dn_item(source, target, source_parent):
+			update_item(source, target, so)
+
+		for idx, sre in enumerate(sre_list):
+			dn_item = get_mapped_doc(
+				"Sales Order Item",
+				sre.voucher_detail_no,
+				{
+					"Sales Order Item": {
+						"doctype": "Delivery Note Item",
+						"field_map": {
+							"rate": "rate",
+							"name": "so_detail",
+							"parent": "against_sales_order",
+						},
+						"condition": condition,
+						"postprocess": update_dn_item,
+					}
+				},
+			)
+
+			dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+
+			if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+				dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+
+			dn_item.idx = idx + 1
+			target_doc.append("items", dn_item)
 
 	return target_doc
 
