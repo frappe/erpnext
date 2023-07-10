@@ -151,3 +151,41 @@ def get_invoiced_item_gross_margin(
 		result = sum(d.gross_profit for d in result)
 
 	return result
+
+
+def get_party_details(party_type, party_list):
+	party_details = {}
+	party = frappe.qb.DocType(party_type)
+	query = frappe.qb.from_(party).select(party.name, party.tax_id).where(party.name.isin(party_list))
+	if party_type == "Supplier":
+		query = query.select(party.supplier_group)
+	else:
+		query = query.select(party.customer_group, party.territory)
+
+	party_detail_list = query.run(as_dict=True)
+	for party_dict in party_detail_list:
+		party_details[party_dict.name] = party_dict
+	return party_details
+
+
+def get_taxes_query(invoice_list, doctype, parenttype):
+	taxes = frappe.qb.DocType(doctype)
+
+	query = (
+		frappe.qb.from_(taxes)
+		.select(taxes.account_head)
+		.distinct()
+		.where(
+			(taxes.parenttype == parenttype)
+			& (taxes.docstatus == 1)
+			& (taxes.account_head.isnotnull())
+			& (taxes.parent.isin([inv.name for inv in invoice_list]))
+		)
+		.orderby(taxes.account_head)
+	)
+
+	if doctype == "Purchase Taxes and Charges":
+		return query.where(taxes.category.isin(["Total", "Valuation and Total"]))
+	elif doctype == "Sales Taxes and Charges":
+		return query.where(taxes.charge_type.isin(["Total", "Valuation and Total"]))
+	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))

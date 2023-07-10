@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 
 
 def execute(filters=None):
@@ -39,7 +40,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	suppliers = list(set(d.supplier for d in invoice_list))
-	supplier_details = get_supplier_details(suppliers)
+	supplier_details = get_party_details("Supplier", suppliers)
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 
@@ -57,8 +58,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				row.append(inv.get(col))
 
 		row += [
-			supplier_details.get(inv.supplier)[0],  # supplier_group
-			supplier_details.get(inv.supplier)[1],
+			supplier_details.get(inv.supplier).get("supplier_group"),  # supplier_group
+			supplier_details.get(inv.supplier).get("tax_id"),
 			inv.credit_to,
 			inv.mode_of_payment,
 			", ".join(project) if inv.doctype == "Purchase Invoice" else inv.project,
@@ -189,27 +190,6 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	)
 
 	return columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts
-
-
-def get_taxes_query(invoice_list, doctype, parenttype):
-	taxes = frappe.qb.DocType(doctype)
-
-	query = (
-		frappe.qb.from_(taxes)
-		.select(taxes.account_head)
-		.distinct()
-		.where(
-			(taxes.parenttype == parenttype)
-			& (taxes.docstatus == 1)
-			& (taxes.account_head.isnotnull())
-			& (taxes.parent.isin([inv.name for inv in invoice_list]))
-		)
-		.orderby(taxes.account_head)
-	)
-
-	if doctype == "Purchase Taxes and Charges":
-		return query.where(taxes.category.isin(["Total", "Valuation and Total"]))
-	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
 
 
 def get_conditions(filters, payments=False):
@@ -455,17 +435,3 @@ def get_account_details(invoice_list):
 		account_map[acc.name] = acc.parent_account
 
 	return account_map
-
-
-def get_supplier_details(suppliers):
-	supplier_details = {}
-	for supp in frappe.db.sql(
-		"""select name, supplier_group, tax_id from `tabSupplier`
-		where name in (%s)"""
-		% ", ".join(["%s"] * len(suppliers)),
-		tuple(suppliers),
-		as_dict=1,
-	):
-		supplier_details.setdefault(supp.name, [supp.supplier_group, supp.tax_id])
-
-	return supplier_details
