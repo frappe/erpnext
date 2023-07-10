@@ -72,7 +72,7 @@ class PeriodClosingVoucher(AccountsController):
 		).run()
 
 	def validate_account_head(self):
-		closing_account_type = frappe.db.get_value("Account", self.closing_account_head, "root_type")
+		closing_account_type = frappe.get_cached_value("Account", self.closing_account_head, "root_type")
 
 		if closing_account_type not in ["Liability", "Equity"]:
 			frappe.throw(
@@ -262,59 +262,10 @@ class PeriodClosingVoucher(AccountsController):
 		if group_by_account:
 			qb_dimension_fields.append("account")
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-		return frappe.db.sql(
-			"""
-			select
-<<<<<<< HEAD
-				t1.account_currency,
-				{dimension_fields},
-				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as bal_in_account_currency,
-				sum(t1.debit) - sum(t1.credit) as bal_in_company_currency
-			from `tabGL Entry` t1
-			where
-				t1.is_cancelled = 0
-				and t1.account in (select name from `tabAccount` where report_type = 'Profit and Loss' and docstatus < 2 and company = %s)
-=======
-				t1.account,
-				t2.account_currency,
-				{dimension_fields},
-				{balance_fields}
-			from `tabGL Entry` t1, `tabAccount` t2
-			where
-				t1.is_cancelled = 0
-				and t1.account = t2.name
-				and t2.report_type in ("{report_type}")
-				and t2.docstatus < 2
-				and t2.company = %s
->>>>>>> c3f39c3f32 (feat: Cascade closing balances on PCV submit)
-				and t1.posting_date between %s and %s
-			group by {dimension_fields}
-		""".format(
-				dimension_fields=", ".join(dimension_fields),
-<<<<<<< HEAD
-=======
-				balance_fields=", ".join(balance_fields),
-				report_type='", "'.join(report_type),
->>>>>>> c3f39c3f32 (feat: Cascade closing balances on PCV submit)
-			),
-			(self.company, self.get("year_start_date"), self.posting_date),
-			as_dict=1,
-=======
-		account = frappe.qb.DocType("Account")
-		accounts_query = (
-			frappe.qb.from_(account)
-			.select(account.name)
-			.where((account.company == self.company) & (account.is_group == 0) & (account.docstatus < 2))
->>>>>>> 7fa7d6b5e4 (chore: Rewrite query using query builder)
-		)
-=======
 		account_filters = {
 			"company": self.company,
 			"is_group": 0,
 		}
->>>>>>> 00fe3042b2 (chore: Simplify query)
 
 		if report_type:
 			account_filters.update({"report_type": report_type})

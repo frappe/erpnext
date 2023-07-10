@@ -250,39 +250,8 @@ def get_opening_balance(
 	company_fb = frappe.db.get_value("Company", filters.company, "default_finance_book")
 
 	if filters.get("include_default_book_entries"):
-<<<<<<< HEAD
-		if filters.get("finance_book"):
-			if company_fb and cstr(filters.get("finance_book")) != cstr(company_fb):
-				frappe.throw(
-					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-				)
-			else:
-				additional_conditions += (
-					" AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
-				)
-		else:
-			additional_conditions += " AND (finance_book in (%(company_fb)s, '') OR finance_book IS NULL)"
-	else:
-		if filters.get("finance_book"):
-			additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
-		else:
-			additional_conditions += " AND (finance_book in ('') OR finance_book IS NULL)"
-
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-
-	query_filters = {
-		"company": filters.company,
-		"from_date": filters.from_date,
-		"to_date": filters.to_date,
-		"report_type": report_type,
-		"year_start_date": filters.year_start_date,
-		"project": filters.project,
-		"finance_book": filters.finance_book,
-		"company_fb": company_fb,
-	}
-=======
 		opening_balance = opening_balance.where(
-			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(filters.company_fb), ""]))
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 			| (closing_balance.finance_book.isnull())
 		)
 	else:
@@ -290,7 +259,6 @@ def get_opening_balance(
 			(closing_balance.finance_book.isin([cstr(filters.finance_book), ""]))
 			| (closing_balance.finance_book.isnull())
 		)
->>>>>>> e5f603c9d9 (perf: Apply closing balance in Trial Balance report)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:

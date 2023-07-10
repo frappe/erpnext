@@ -428,14 +428,6 @@ def set_gl_entries_by_account(
 
 	ignore_opening_entries = False
 	if accounts_list:
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-		if filters.get("include_default_book_entries"):
-			gl_filters["company_fb"] = frappe.db.get_value("Company", company, "default_finance_book")
-=======
-=======
->>>>>>> 44053db010 (chore: Remove unnecessary list comprehension)
 		# For balance sheet
 		if not from_date:
 			from_date = filters["period_start_date"]
@@ -457,11 +449,7 @@ def set_gl_entries_by_account(
 					last_period_closing_voucher[0].name,
 				)
 				from_date = add_days(last_period_closing_voucher[0].posting_date, 1)
-<<<<<<< HEAD
->>>>>>> 0157fa15eb (chore: Use account closing balance in set gl entries)
-=======
 				ignore_opening_entries = True
->>>>>>> f9397a87ac (fix: Ignore opening entries if PCV posted)
 
 		gl_entries += get_accounting_entries(
 			"GL Entry",
@@ -474,7 +462,7 @@ def set_gl_entries_by_account(
 		)
 
 		if filters and filters.get("presentation_currency"):
-			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get("company"))
+			convert_to_presentation_currency(gl_entries, get_currency(filters))
 
 		for entry in gl_entries:
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)
@@ -550,37 +538,22 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 			query = query.where(gl_entry.cost_center.isin(filters.cost_center))
 
 		if filters.get("include_default_book_entries"):
-<<<<<<< HEAD
-			if filters.get("finance_book"):
-				if filters.get("company_fb") and cstr(filters.get("finance_book")) != cstr(
-					filters.get("company_fb")
-				):
-					frappe.throw(
-						_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-					)
-				else:
-					additional_conditions.append(
-						"(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
-					)
-			else:
-				additional_conditions.append("(finance_book in (%(company_fb)s, '') OR finance_book IS NULL)")
-		else:
-			if filters.get("finance_book"):
-				additional_conditions.append(
-					"(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
+			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+			if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
 				)
-			else:
-				additional_conditions.append("(finance_book in ('') OR finance_book IS NULL)")
-=======
+
 			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(filters.company_fb), ""]))
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 				| (gl_entry.finance_book.isnull())
 			)
 		else:
 			query = query.where(
-				(gl_entry.finance_book.isin([cstr(filters.company_fb), ""])) | (gl_entry.finance_book.isnull())
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), ""]))
+				| (gl_entry.finance_book.isnull())
 			)
->>>>>>> 0157fa15eb (chore: Use account closing balance in set gl entries)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
