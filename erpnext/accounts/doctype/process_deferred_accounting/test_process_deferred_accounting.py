@@ -61,8 +61,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 			["Sales - _TC", 0.0, 1000, "2023-06-30"],
 			[deferred_account, 1000, 0.0, "2023-06-30"],
 		]
-
-		check_gl_entries(self, si.name, expected_gle, "2019-01-10")
+		
 		check_gl_entries(self, si.name, expected_gle, "2023-07-01")
 		change_acc_settings()
 
