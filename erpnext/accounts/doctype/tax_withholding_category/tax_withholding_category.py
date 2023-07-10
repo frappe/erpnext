@@ -3,8 +3,10 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, qb
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
 
 
@@ -346,26 +348,33 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 def get_advance_vouchers(
 	parties, company=None, from_date=None, to_date=None, party_type="Supplier"
 ):
-	# for advance vouchers, debit and credit is reversed
-	dr_or_cr = "debit" if party_type == "Supplier" else "credit"
+	"""
+	Use Payment Ledger to fetch unallocated Advance Payments
+	"""
 
-	filters = {
-		dr_or_cr: [">", 0],
-		"is_opening": "No",
-		"is_cancelled": 0,
-		"party_type": party_type,
-		"party": ["in", parties],
-	}
+	ple = qb.DocType("Payment Ledger Entry")
 
-	if party_type == "Customer":
-		filters.update({"against_voucher": ["is", "not set"]})
+	conditions = []
+
+	conditions.append(ple.amount.lt(0))
+	conditions.append(ple.delinked == 0)
+	conditions.append(ple.party_type == party_type)
+	conditions.append(ple.party.isin(parties))
+	conditions.append(ple.voucher_no == ple.against_voucher_no)
 
 	if company:
-		filters["company"] = company
-	if from_date and to_date:
-		filters["posting_date"] = ["between", (from_date, to_date)]
+		conditions.append(ple.company == company)
 
-	return frappe.get_all("GL Entry", filters=filters, distinct=1, pluck="voucher_no") or [""]
+	if from_date and to_date:
+		conditions.append(ple.posting_date[from_date:to_date])
+
+	advances = (
+		qb.from_(ple).select(ple.voucher_no).distinct().where(Criterion.all(conditions)).run(as_list=1)
+	)
+	if advances:
+		advances = [x[0] for x in advances]
+
+	return advances
 
 
 def get_taxes_deducted_on_advances_allocated(inv, tax_details):
@@ -499,6 +508,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 
 def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	tcs_amount = 0
+	ple = qb.DocType("Payment Ledger Entry")
 
 	# sum of debit entries made from sales invoices
 	invoiced_amt = (
@@ -516,18 +526,20 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	)
 
 	# sum of credit entries made from PE / JV with unset 'against voucher'
+
+	conditions = []
+	conditions.append(ple.amount.lt(0))
+	conditions.append(ple.delinked == 0)
+	conditions.append(ple.party.isin(parties))
+	conditions.append(ple.voucher_no == ple.against_voucher_no)
+	conditions.append(ple.company == inv.company)
+
+	advances = (
+		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run(as_list=1)
+	)
+
 	advance_amt = (
-		frappe.db.get_value(
-			"GL Entry",
-			{
-				"is_cancelled": 0,
-				"party": ["in", parties],
-				"company": inv.company,
-				"voucher_no": ["in", adv_vouchers],
-			},
-			"sum(credit)",
-		)
-		or 0.0
+		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run()[0][0] or 0.0
 	)
 
 	# sum of credit entries made from sales invoice
