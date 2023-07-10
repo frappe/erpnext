@@ -1326,17 +1326,9 @@ def get_outstanding_reference_documents(args):
 	if args.get("party_type") == "Member":
 		return
 
-<<<<<<< HEAD
-=======
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
 
-	ple = qb.DocType("Payment Ledger Entry")
-	common_filter = []
-	accounting_dimensions_filter = []
-	posting_and_due_date = []
-
->>>>>>> 361a357088 (fix: payment entry `voucher_type` error (#35779))
 	# confirm that Supplier is not blocked
 	if args.get("party_type") == "Supplier":
 		supplier_status = get_supplier_block_status(args["party"])
