@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import get_link_to_form
 
+
 def sanitize_expression(string: Optional[str] = None) -> Optional[str]:
 	"""
 	Sanitizes an expression string by removing leading/trailing spaces, newlines, and line boundaries.
