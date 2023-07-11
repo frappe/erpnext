@@ -493,43 +493,6 @@ def get_available_serial_nos_to_reserve(
 	return available_serial_nos_list
 
 
-def get_stock_reservation_entries_for_voucher(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str = None, fields: list[str] = None
-) -> list[dict]:
-	"""Returns list of Stock Reservation Entries against a Voucher."""
-
-	if not fields or not isinstance(fields, list):
-		fields = [
-			"name",
-			"item_code",
-			"warehouse",
-			"voucher_detail_no",
-			"reserved_qty",
-			"delivered_qty",
-			"stock_uom",
-		]
-
-	sre = frappe.qb.DocType("Stock Reservation Entry")
-	query = (
-		frappe.qb.from_(sre)
-		.where(
-			(sre.docstatus == 1)
-			& (sre.voucher_type == voucher_type)
-			& (sre.voucher_no == voucher_no)
-			& (sre.status.notin(["Delivered", "Cancelled"]))
-		)
-		.orderby(sre.creation)
-	)
-
-	for field in fields:
-		query = query.select(sre[field])
-
-	if voucher_detail_no:
-		query = query.where(sre.voucher_detail_no == voucher_detail_no)
-
-	return query.run(as_dict=True)
-
-
 def get_sre_reserved_qty_details_for_item_and_warehouse(
 	item_code_list: list, warehouse_list: list
 ) -> dict:
@@ -743,20 +706,62 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 	return False
 
 
-@frappe.whitelist()
 def cancel_stock_reservation_entries(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str = None, notify: bool = True
+	voucher_type: str = None,
+	voucher_no: str = None,
+	voucher_detail_no: str = None,
+	sre_list: list[dict] = None,
+	notify: bool = True,
 ) -> None:
-	"""Cancel Stock Reservation Entries for the given voucher."""
+	"""Cancel Stock Reservation Entries."""
 
-	sre_list = get_stock_reservation_entries_for_voucher(
-		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
-	)
+	if not sre_list and (voucher_type and voucher_no):
+		sre_list = get_stock_reservation_entries_for_voucher(
+			voucher_type, voucher_no, voucher_detail_no, fields=["name"]
+		)
 
 	if sre_list:
 		for sre in sre_list:
-			frappe.get_doc("Stock Reservation Entry", sre.name).cancel()
+			frappe.get_doc("Stock Reservation Entry", sre["name"]).cancel()
 
 		if notify:
 			msg = _("Stock Reservation Entries Cancelled")
 			frappe.msgprint(msg, alert=True, indicator="red")
+
+
+@frappe.whitelist()
+def get_stock_reservation_entries_for_voucher(
+	voucher_type: str, voucher_no: str, voucher_detail_no: str = None, fields: list[str] = None
+) -> list[dict]:
+	"""Returns list of Stock Reservation Entries against a Voucher."""
+
+	if not fields or not isinstance(fields, list):
+		fields = [
+			"name",
+			"item_code",
+			"warehouse",
+			"voucher_detail_no",
+			"reserved_qty",
+			"delivered_qty",
+			"stock_uom",
+		]
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == voucher_type)
+			& (sre.voucher_no == voucher_no)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+		.orderby(sre.creation)
+	)
+
+	for field in fields:
+		query = query.select(sre[field])
+
+	if voucher_detail_no:
+		query = query.where(sre.voucher_detail_no == voucher_detail_no)
+
+	return query.run(as_dict=True)

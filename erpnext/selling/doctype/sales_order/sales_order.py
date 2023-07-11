@@ -31,7 +31,6 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
@@ -275,7 +274,7 @@ class SalesOrder(SellingController):
 		self.db_set("status", "Cancelled")
 
 		self.update_blanket_order()
-		cancel_stock_reservation_entries("Sales Order", self.name)
+		self.cancel_stock_reservation_entries()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
@@ -677,6 +676,16 @@ class SalesOrder(SellingController):
 
 		if sre_count and notify:
 			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, sre_list=None, notify=True):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
+		)
 
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:

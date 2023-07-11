@@ -69,12 +69,7 @@ frappe.ui.form.on("Sales Order", {
 
 			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
 			if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
-				frm.add_custom_button(__('Unreserve'), () => {
-					frappe.confirm(
-						__('The reserved stock will be released. Are you certain you wish to proceed?'),
-						() => frm.events.cancel_stock_reservation_entries(frm)
-					)
-				}, __('Stock Reservation'));
+				frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
 			}
 		}
 
@@ -257,7 +252,7 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Reserve Stock"),
 			primary_action: (data) => {
-				if (data.items.length > 0) {
+				if (data.items && data.items.length > 0) {
 					frappe.call({
 						doc: frm.doc,
 						method: "create_stock_reservation_entries",
@@ -297,19 +292,102 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	cancel_stock_reservation_entries(frm) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Stock Unreservation"),
+			fields: [
+				{
+					fieldname: "stock_reservation_entries",
+					fieldtype: "Table",
+					label: __("Reserved Stock"),
+					allow_bulk_edit: false,
+					cannot_add_rows: true,
+					in_place_edit: true,
+					data: [],
+					fields: [
+						{
+							fieldname: "name",
+							fieldtype: "Link",
+							label: __("SRE"),
+							options: "Stock Reservation Entry",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "item_code",
+							fieldtype: "Link",
+							label: __("Item Code"),
+							options: "Item",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "warehouse",
+							fieldtype: "Link",
+							label: __("Warehouse"),
+							options: "Warehouse",
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "qty",
+							fieldtype: "Float",
+							label: __("Qty"),
+							reqd: 1,
+							read_only: 1,
+							in_list_view: 1
+						}
+					]
+				}
+			],
+			primary_action_label: __("Unreserve Stock"),
+			primary_action: (data) => {
+				if (data.stock_reservation_entries && data.stock_reservation_entries.length > 0) {
+					frappe.call({
+						doc: frm.doc,
+						method: "cancel_stock_reservation_entries",
+						args: {
+							sre_list: data.stock_reservation_entries,
+						},
+						freeze: true,
+						freeze_message: __('Unreserving Stock...'),
+						callback: (r) => {
+							frm.doc.__onload.has_reserved_stock = false;
+							frm.reload_doc();
+						}
+					});
+				}
+
+				dialog.hide();
+			},
+		});
+
 		frappe.call({
-			method: 'erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries',
+			method: 'erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.get_stock_reservation_entries_for_voucher',
 			args: {
 				voucher_type: frm.doctype,
-				voucher_no: frm.docname
+				voucher_no: frm.docname,
 			},
-			freeze: true,
-			freeze_message: __('Unreserving Stock...'),
 			callback: (r) => {
-				frm.doc.__onload.has_reserved_stock = false;
-				frm.reload_doc();
+				if (!r.exc && r.message) {
+					r.message.forEach(sre => {
+						if (flt(sre.reserved_qty) > flt(sre.delivered_qty)) {
+							dialog.fields_dict.stock_reservation_entries.df.data.push({
+								'name': sre.name,
+								'item_code': sre.item_code,
+								'warehouse': sre.warehouse,
+								'qty': (flt(sre.reserved_qty) - flt(sre.delivered_qty))
+							});
+						}
+					});
+				}
 			}
-		})
+		}).then(r => {
+			dialog.fields_dict.stock_reservation_entries.grid.refresh();
+			dialog.show();
+		});
 	}
 });
 
