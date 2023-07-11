@@ -43,6 +43,8 @@ def _execute(filters=None, additional_table_columns=None):
 >>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
 	invoice_list = get_invoices(filters, additional_query_columns)
 	if filters.get("include_payments"):
+		if not filters.get("supplier"):
+			frappe.throw(_("Please select a supplier for fetching payments."))
 		invoice_list += get_payments(filters, additional_query_columns)
 >>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
@@ -322,7 +324,6 @@ def get_payments(filters, additional_query_columns):
 		party="supplier",
 		party_name="supplier_name",
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
-		party_type="Supplier",
 		conditions=conditions,
 	)
 	payment_entries = get_payment_entries(filters, args)

@@ -230,13 +230,13 @@ def get_journal_entries(filters, args):
 		je.bill_no, je.bill_date, je.remark, je.total_amount as base_net_total,
 		je.total_amount as base_grand_total, je.mode_of_payment, jea.project {3}
 		from `tabJournal Entry` je left join `tabJournal Entry Account` jea on jea.parent=je.name
-		where je.voucher_type='Journal Entry' and jea.party_type='{4}' {5}
+		where je.voucher_type='Journal Entry' and jea.party='{4}' {5}
 		order by je.posting_date desc, je.name desc""".format(
 			args.account,
 			args.party,
 			args.party_name,
 			args.additional_query_columns,
-			args.party_type,
+			filters.get(args.party),
 			args.conditions,
 		),
 		filters,
@@ -252,13 +252,13 @@ def get_payment_entries(filters, args):
 		paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
 		mode_of_payment, project, cost_center {3}
 		from `tabPayment Entry`
-		where party_type='{4}' {5}
+		where party='{4}' {5}
 		order by posting_date desc, name desc""".format(
 			args.account,
 			args.party,
 			args.party_name,
 			args.additional_query_columns,
-			args.party_type,
+			filters.get(args.party),
 			args.conditions,
 		),
 		filters,

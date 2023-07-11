@@ -41,6 +41,8 @@ def _execute(filters, additional_table_columns=None):
 	include_payments = filters.get("include_payments")
 	invoice_list = get_invoices(filters, additional_query_columns)
 	if filters.get("include_payments"):
+		if not filters.get("customer"):
+			frappe.throw(_("Please select a customer for fetching payments."))
 		invoice_list += get_payments(filters, additional_query_columns)
 >>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
@@ -477,7 +479,6 @@ def get_payments(filters, additional_query_columns):
 		party="customer",
 		party_name="customer_name",
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
-		party_type="Customer",
 		conditions=conditions,
 	)
 	payment_entries = get_payment_entries(filters, args)
