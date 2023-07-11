@@ -31,6 +31,8 @@ def _execute(filters=None, additional_table_columns=None):
 	include_payments = filters.get("include_payments")
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 	if include_payments:
+		if not filters.get("supplier"):
+			frappe.throw(_("Please select a supplier for fetching payments."))
 		invoice_list += get_payments(filters, get_query_columns(additional_table_columns))
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
@@ -289,7 +291,6 @@ def get_payments(filters, additional_query_columns):
 		party="supplier",
 		party_name="supplier_name",
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
-		party_type="Supplier",
 		conditions=conditions,
 	)
 	payment_entries = get_payment_entries(filters, args)
