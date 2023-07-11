@@ -53,20 +53,14 @@ def prepare_error_msg(*, row: dict, error: str, expression: str, description: st
 	    description = "Check the syntax of the expression."
 	    error_msg = prepare_error_msg(row=row, error=error, expression=expression, description=description)
 	"""
-	# Create a dictionary to store the error message data
-	data = frappe._dict(
-		{
-			"doctype": row.parenttype,
-			"doclink": get_link_to_form(row.parenttype, row.parent),
-			"parentfield": row.parentfield.title(),
-			"row_id": row.idx,
-			"expression": expression,
-			"error": error,
-			"description": description or "",
-		}
+	msg = _("Error in {0} while evaluating the {1} {2} at row {3}").format(
+		row.parentfield.title(), row.parenttype, get_link_to_form(row.parenttype, row.parent), row.idx
+	)
+	msg += "<br><br>{0}: {1}<br><br>{2}: {3}".format(
+		frappe.bold(_("Expression:")), expression, frappe.bold(_("Error:")), error
 	)
 
-	# Format and return the error message string
-	return _(
-		"Error in {parentfield}, while evaluating the {doctype} {doclink} at row {row_id}. <br><br> <b>Expression:</b> {expression}. <br><br> <b>Error:</b> {error} <br><br> <b>Hint:</b> {description}"
-	).format(**data)
+	if description:
+		msg += "<br><br>{0}: {1}".format(frappe.bold(_("Hint:")), description)
+
+	return msg
