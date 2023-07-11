@@ -1908,6 +1908,32 @@ class TestPurchaseReceipt(FrappeTestCase):
 		ste5.reload()
 		self.assertEqual(ste5.items[0].valuation_rate, 275.00)
 
+		ste6 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -3),
+			source=warehouse1,
+			target=warehouse,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste6.reload()
+		self.assertEqual(ste6.items[0].valuation_rate, 275.00)
+
+		ste7 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -3),
+			source=warehouse,
+			target=warehouse1,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste7.reload()
+		self.assertEqual(ste7.items[0].valuation_rate, 275.00)
+
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=2500 * -1)
 
 		pr.reload()
@@ -1927,6 +1953,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		ste5.reload()
 		self.assertEqual(ste5.items[0].valuation_rate, valuation_rate)
+
+		ste6.reload()
+		self.assertEqual(ste6.items[0].valuation_rate, valuation_rate)
+
+		ste7.reload()
+		self.assertEqual(ste7.items[0].valuation_rate, valuation_rate)
 
 
 def prepare_data_for_internal_transfer():
