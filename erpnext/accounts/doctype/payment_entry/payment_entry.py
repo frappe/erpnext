@@ -206,6 +206,7 @@ class PaymentEntry(AccountsController):
 			elif latest.outstanding_amount < latest.invoice_amount and flt(
 				d.outstanding_amount, d.precision("outstanding_amount")
 			) != flt(latest.outstanding_amount, d.precision("outstanding_amount")):
+
 				frappe.throw(
 					_(
 						"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
