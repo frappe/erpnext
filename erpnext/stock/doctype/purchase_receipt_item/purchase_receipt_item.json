@@ -495,6 +495,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "oldfieldname": "rejected_warehouse",
@@ -1022,7 +1023,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-02 18:40:48.152637",
+ "modified": "2023-07-04 17:22:02.830029",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
