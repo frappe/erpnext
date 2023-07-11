@@ -752,7 +752,3 @@ def add_return_modes(doc, pos_profile):
 		]:
 			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
 			append_payment(payment_mode[0])
-
-
-def on_doctype_update():
-	frappe.db.add_index("POS Invoice", ["return_against"])

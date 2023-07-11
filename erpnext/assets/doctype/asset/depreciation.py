@@ -33,6 +33,7 @@ def post_depreciation_entries(date=None):
 		date = today()
 
 	failed_asset_names = []
+	error_log_names = []
 
 	for asset_name in get_depreciable_assets(date):
 		try:
@@ -41,10 +42,12 @@ def post_depreciation_entries(date=None):
 		except Exception as e:
 			frappe.db.rollback()
 			failed_asset_names.append(asset_name)
+			error_log = frappe.log_error(e)
+			error_log_names.append(error_log.name)
 
 	if failed_asset_names:
 		set_depr_entry_posting_status_for_failed_assets(failed_asset_names)
-		notify_depr_entry_posting_error(failed_asset_names)
+		notify_depr_entry_posting_error(failed_asset_names, error_log_names)
 
 	frappe.db.commit()
 
@@ -216,7 +219,7 @@ def set_depr_entry_posting_status_for_failed_assets(failed_asset_names):
 		frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Failed")
 
 
-def notify_depr_entry_posting_error(failed_asset_names):
+def notify_depr_entry_posting_error(failed_asset_names, error_log_names):
 	recipients = get_users_with_role("Accounts Manager")
 
 	if not recipients:
@@ -224,7 +227,8 @@ def notify_depr_entry_posting_error(failed_asset_names):
 
 	subject = _("Error while posting depreciation entries")
 
-	asset_links = get_comma_separated_asset_links(failed_asset_names)
+	asset_links = get_comma_separated_links(failed_asset_names, "Asset")
+	error_log_links = get_comma_separated_links(error_log_names, "Error Log")
 
 	message = (
 		_("Hello,")
@@ -234,23 +238,26 @@ def notify_depr_entry_posting_error(failed_asset_names):
 		)
 		+ "."
 		+ "<br><br>"
-		+ _(
-			"Please raise a support ticket and share this email, or forward this email to your development team so that they can find the issue in the developer console by manually creating the depreciation entry via the asset's depreciation schedule table."
+		+ _("Here are the error logs for the aforementioned failed depreciation entries: {0}").format(
+			error_log_links
 		)
+		+ "."
+		+ "<br><br>"
+		+ _("Please share this email with your support team so that they can find and fix the issue.")
 	)
 
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
 
-def get_comma_separated_asset_links(asset_names):
-	asset_links = []
+def get_comma_separated_links(names, doctype):
+	links = []
 
-	for asset_name in asset_names:
-		asset_links.append(get_link_to_form("Asset", asset_name))
+	for name in names:
+		links.append(get_link_to_form(doctype, name))
 
-	asset_links = ", ".join(asset_links)
+	links = ", ".join(links)
 
-	return asset_links
+	return links
 
 
 @frappe.whitelist()
