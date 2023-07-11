@@ -487,11 +487,12 @@ class JournalEntry(AccountsController):
 				)
 
 				if not against_entries:
-					frappe.throw(
-						_(
-							"Journal Entry {0} does not have account {1} or already matched against other voucher"
-						).format(d.reference_name, d.account)
-					)
+					if self.voucher_type != "Exchange Gain Or Loss":
+						frappe.throw(
+							_(
+								"Journal Entry {0} does not have account {1} or already matched against other voucher"
+							).format(d.reference_name, d.account)
+						)
 				else:
 					dr_or_cr = "debit" if d.credit > 0 else "credit"
 					valid = False

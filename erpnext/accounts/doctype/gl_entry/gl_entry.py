@@ -58,7 +58,18 @@ class GLEntry(Document):
 			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
 
+<<<<<<< HEAD
 			if frappe.db.get_value("Account", self.account, "account_type") not in [
+=======
+			if (
+				self.voucher_type == "Journal Entry"
+				and frappe.get_cached_value("Journal Entry", self.voucher_no, "voucher_type")
+				== "Exchange Gain Or Loss"
+			):
+				return
+
+			if frappe.get_cached_value("Account", self.account, "account_type") not in [
+>>>>>>> f119a1e115 (refactor: linkage between journal as payment and gain/loss journal)
 				"Receivable",
 				"Payable",
 			]:

@@ -1033,9 +1033,9 @@ class AccountsController(TransactionBase):
 									"cost_center": erpnext.get_default_cost_center(self.company),
 									# TODO: figure out a way to pass reference
 									# throws 'Journal Entry doesn't have {account} or doesn't have matched account'
-									# "reference_type": self.doctype,
-									# "reference_name": self.name,
-									# "reference_detail_no": arg.idx,
+									"reference_type": self.doctype,
+									"reference_name": self.name,
+									"reference_detail_no": arg.idx,
 									reverse_dr_or_cr: abs(arg.get("difference_amount")),
 									reverse_dr_or_cr + "_in_account_currency": 0,
 								}
