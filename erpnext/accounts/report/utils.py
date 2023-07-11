@@ -189,3 +189,47 @@ def get_taxes_query(invoice_list, doctype, parenttype):
 	elif doctype == "Sales Taxes and Charges":
 		return query.where(taxes.charge_type.isin(["Total", "Valuation and Total"]))
 	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
+
+
+def get_journal_entries(filters, args):
+	return frappe.db.sql(
+		"""
+		select je.voucher_type as doctype, je.name, je.posting_date,
+		jea.account as {0}, jea.party as {1}, jea.party as {2},
+		je.bill_no, je.bill_date, je.remark, je.total_amount as base_net_total,
+		je.total_amount as base_grand_total, je.mode_of_payment, jea.project {3}
+		from `tabJournal Entry` je left join `tabJournal Entry Account` jea on jea.parent=je.name
+		where je.voucher_type='Journal Entry' and jea.party_type='{4}' {5}
+		order by je.posting_date desc, je.name desc""".format(
+			args.account,
+			args.party,
+			args.party_name,
+			args.additional_query_columns,
+			args.party_type,
+			args.conditions,
+		),
+		filters,
+		as_dict=1,
+	)
+
+
+def get_payment_entries(filters, args):
+	return frappe.db.sql(
+		"""
+		select 'Payment Entry' as doctype, name, posting_date, paid_to as {0},
+		party as {1}, party_name as {2}, remarks,
+		paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
+		mode_of_payment, project, cost_center {3}
+		from `tabPayment Entry`
+		where party_type='{4}' {5}
+		order by posting_date desc, name desc""".format(
+			args.account,
+			args.party,
+			args.party_name,
+			args.additional_query_columns,
+			args.party_type,
+			args.conditions,
+		),
+		filters,
+		as_dict=1,
+	)
