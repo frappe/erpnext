@@ -11,6 +11,7 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.doctype.item.test_item import create_item
@@ -20,7 +21,7 @@ def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = customer_name
-		customer.type = "Individual"
+		customer.customer_type = "Individual"
 
 		if currency:
 			customer.default_currency = currency
@@ -30,7 +31,22 @@ def make_customer(customer_name, currency=None):
 		return customer_name
 
 
-class TestAccountsController(FrappeTestCase):
+def make_supplier(supplier_name, currency=None):
+	if not frappe.db.exists("Supplier", supplier_name):
+		supplier = frappe.new_doc("Supplier")
+		supplier.supplier_name = supplier_name
+		supplier.supplier_type = "Individual"
+
+		if currency:
+			supplier.default_currency = currency
+		supplier.save()
+		return supplier.name
+	else:
+		return supplier_name
+
+
+# class TestAccountsController(FrappeTestCase):
+class TestAccountsController(unittest.TestCase):
 	"""
 	Test Exchange Gain/Loss booking on various scenarios
 	"""
@@ -39,11 +55,12 @@ class TestAccountsController(FrappeTestCase):
 		self.create_company()
 		self.create_account()
 		self.create_item()
-		self.create_customer()
+		self.create_parties()
 		self.clear_old_entries()
 
 	def tearDown(self):
-		frappe.db.rollback()
+		# frappe.db.rollback()
+		pass
 
 	def create_company(self):
 		company_name = "_Test Company MC"
@@ -80,8 +97,15 @@ class TestAccountsController(FrappeTestCase):
 		)
 		self.item = item if isinstance(item, str) else item.item_code
 
+	def create_parties(self):
+		self.create_customer()
+		self.create_supplier()
+
 	def create_customer(self):
 		self.customer = make_customer("_Test MC Customer USD", "USD")
+
+	def create_supplier(self):
+		self.supplier = make_supplier("_Test MC Supplier USD", "USD")
 
 	def create_account(self):
 		account_name = "Debtors USD"
@@ -215,7 +239,7 @@ class TestAccountsController(FrappeTestCase):
 		return journals
 
 	def test_01_payment_against_invoice(self):
-		# Invoice in Foreign Currency
+		# Sales Invoice in Foreign Currency
 		si = self.create_sales_invoice(qty=1, rate=1)
 		# Payment
 		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
