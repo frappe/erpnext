@@ -526,6 +526,7 @@ erpnext.utils.update_child_items = function(opts) {
 	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
 	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
+	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
 
 	this.data = frm.doc[opts.child_docname].map((d) => {
@@ -656,6 +657,17 @@ erpnext.utils.update_child_items = function(opts) {
 			},
 		],
 		primary_action: function() {
+			if (frm.doctype == "Sales Order" && has_reserved_stock) {
+				this.hide();
+				frappe.confirm(
+					__('The reserved stock will be released when you update items. Are you certain you wish to proceed?'),
+					() => this.update_items(),
+				)
+			} else {
+				this.update_items();
+			}
+		},
+		update_items: function() {
 			const trans_items = this.get_values()["trans_items"].filter((item) => !!item.item_code);
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',

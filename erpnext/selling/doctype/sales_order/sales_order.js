@@ -52,27 +52,13 @@ frappe.ui.form.on("Sales Order", {
 		if(frm.doc.docstatus === 1) {
 			if (frm.doc.status !== 'Closed' && flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
 				frm.add_custom_button(__('Update Items'), () => {
-					if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
-						frappe.confirm(
-							__('The reserved stock will be released when you update items. Are you certain you wish to proceed?'),
-							function(){
-								erpnext.utils.update_child_items({
-									frm: frm,
-									child_docname: "items",
-									child_doctype: "Sales Order Detail",
-									cannot_add_row: false,
-								})
-							},
-						)
-					}
-					else {
-						erpnext.utils.update_child_items({
-							frm: frm,
-							child_docname: "items",
-							child_doctype: "Sales Order Detail",
-							cannot_add_row: false,
-						})
-					}
+					erpnext.utils.update_child_items({
+						frm: frm,
+						child_docname: "items",
+						child_doctype: "Sales Order Detail",
+						cannot_add_row: false,
+						has_reserved_stock: frm.doc.__onload && frm.doc.__onload.has_reserved_stock
+					})
 				});
 
 				// Stock Reservation > Reserve button will be only visible if the SO has unreserved stock.
