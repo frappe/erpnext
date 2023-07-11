@@ -697,10 +697,9 @@ class ProductionPlan(Document):
 			material_request.flags.ignore_permissions = 1
 			material_request.run_method("set_missing_values")
 
+			material_request.save()
 			if self.get("submit_material_request"):
 				material_request.submit()
-			else:
-				material_request.save()
 
 		frappe.flags.mute_messages = False
 
