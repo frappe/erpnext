@@ -16,18 +16,32 @@ erpnext.selling.ProformaInvoiceController = class SalesOrderController extends e
 		super.refresh()
 		// super.
 		if (frm.docstatus==1) {
-			this.frm.add_custom_button(__('Sales Invoice'), () => {console.log("Clicked")
+			const isDelivered = (item) => item.qty === item.delivered_qty
+
+			this.frm.add_custom_button(__('Sales Invoice'), () => {
+				console.log(this.frm.doc.items);
 			}, __('Create'));
-			this.frm.add_custom_button(__('Delivery Note'), () => this.make_proforma_invoice(), __('Create'));
+
+			!this.frm.doc.items.every(isDelivered) &&
+				this.frm.add_custom_button(__('Delivery Note'), () => {
+					this.make_proforma_invoice(frm);
+				}, __('Create'));
+
 		}
 
 		this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 
 	}
 	make_proforma_invoice() {
+
+		this.frm.doc.items.forEach((item)=> item.qty === item.delivered_qty && frappe.throw(__(`All Items already delivered for item ${item.item_name}`)))
+
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.proforma_invoice.proforma_invoice.make_delivery_note_against_proforma_invoice",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 			frm: this.frm,
+			args: {
+				"doctype": "Proforma Invoice"
+			}
 		})
 	}
 }

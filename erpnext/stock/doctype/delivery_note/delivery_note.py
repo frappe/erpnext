@@ -163,10 +163,7 @@ class DeliveryNote(SellingController):
 
 	def validate_proforma_invoice(self):
 		for item in self.items:
-			proforma_exists = frappe.db.exists(
-				{"doctype": "Proforma Invoice Item", "sales_order": item.against_sales_order}
-			)
-			if proforma_exists:
+			if item.get("proforma_invoice"):
 				frappe.throw(_("Proforma is Created for this Sales Order, Go To Proforma Invoice"))
 
 	def validate_with_previous_doc(self):

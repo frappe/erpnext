@@ -835,7 +835,6 @@ def make_proforma_invoice(source_name, target_doc=None, ignore_permissions=False
 		target.delivery_date = source.delivery_date
 		target.base_amount = (flt(source.qty) - flt(source.proforma_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.proforma_qty)) * flt(source.rate)
-		print("SOURCE", source)
 		target.qty = flt(source.qty) - flt(source.proforma_qty)
 
 		if target.item_code:
@@ -966,6 +965,7 @@ def make_delivery_note_against_proforma_invoice(
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
+	doctype = frappe.flags.args.doctype or "Sales Order"
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 	def set_missing_values(source, target):
@@ -999,22 +999,25 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				or item_group.get("buying_cost_center")
 			)
 
-	mapper = {
-		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
-		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-	}
-
 	if not skip_item_mapping:
 
 		def condition(doc):
 			# make_mapped_doc sets js `args` into `frappe.flags.args`
-			if frappe.flags.args and frappe.flags.args.delivery_dates:
-				if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
-					return False
-			return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
+			if doctype == "Sales Order":
+				if frappe.flags.args and frappe.flags.args.delivery_dates:
+					if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
+						return False
+				return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
+			else:
+				return doc.qty - doc.delivered_qty > 0
 
-		mapper["Sales Order Item"] = {
+		mapper = {
+			doctype: {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+		}
+
+		mapper[doctype + " Item"] = {
 			"doctype": "Delivery Note Item",
 			"field_map": {
 				"rate": "rate",
@@ -1024,11 +1027,18 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 			"postprocess": update_item,
 			"condition": condition,
 		}
+		if doctype == "Proforma Invoice":
+			mapper[doctype + " Item"]["field_map"] = {
+				# Proforma Invoice Item field name : DN Item field name
+				"so_item": "so_detail",
+				"sales_order": "against_sales_order",
+				"name": "pi_item",
+				"parent": "proforma_invoice",
+			}
 
-	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
-	target_doc.set_onload("ignore_price_list", True)
-
-	return target_doc
+		target_doc = get_mapped_doc(doctype, source_name, mapper, target_doc, set_missing_values)
+		target_doc.set_onload("ignore_price_list", True)
+		return target_doc
 
 
 @frappe.whitelist()
