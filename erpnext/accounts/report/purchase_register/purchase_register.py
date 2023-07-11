@@ -11,10 +11,19 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 <<<<<<< HEAD
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 =======
 from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 >>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
+=======
+from erpnext.accounts.report.utils import (
+	get_journal_entries,
+	get_party_details,
+	get_payment_entries,
+	get_taxes_query,
+)
+>>>>>>> d5aa0e325e (feat: fetch JV with PE)
 
 
 def execute(filters=None):
@@ -63,6 +72,7 @@ def _execute(filters=None, additional_table_columns=None):
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		row = [
 			inv.name,
 			inv.posting_date,
@@ -73,6 +83,9 @@ def _execute(filters=None, additional_table_columns=None):
 			inv.tax_id,
 =======
 		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
+=======
+		row = [inv.doctype, inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
+>>>>>>> d5aa0e325e (feat: fetch JV with PE)
 
 		if additional_query_columns:
 			for col in additional_query_columns:
@@ -127,13 +140,14 @@ def _execute(filters=None, additional_table_columns=None):
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
-	return columns, sorted(data, key=lambda x: x[1])
+	return columns, sorted(data, key=lambda x: x[2])
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Purchase Invoice:120",
+		_("Voucher Type") + ":Data:120",
+		_("Voucher No") + ":Dynamic Link/voucher_type:120",
 		_("Posting Date") + ":Date:80",
 		_("Supplier Id") + "::120",
 		_("Supplier Name") + "::120",
@@ -144,7 +158,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 
 	columns += [
 		_("Supplier Group") + ":Link/Supplier Group:120",
-		_("Tax Id") + "::80",
+		_("Tax Id") + "::50",
 		_("Payable Account") + ":Link/Account:120",
 		_("Mode of Payment") + ":Link/Mode of Payment:80",
 		_("Project") + ":Link/Project:80",
@@ -303,20 +317,17 @@ def get_payments(filters, additional_query_columns):
 		additional_query_columns = ", " + ", ".join(additional_query_columns)
 
 	conditions = get_conditions(filters, payments=True)
-	return frappe.db.sql(
-		"""
-		select 'Payment Entry' as doctype, name, posting_date, paid_to as credit_to,
-		party as supplier, party_name as supplier_name, remarks, paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
-		mode_of_payment {0}, project
-		from `tabPayment Entry`
-		where party_type = 'Supplier' %s
-		order by posting_date desc, name desc""".format(
-			additional_query_columns or ""
-		)
-		% conditions,
-		filters,
-		as_dict=1,
+	args = frappe._dict(
+		account="credit_to",
+		party="supplier",
+		party_name="supplier_name",
+		additional_query_columns="" if not additional_query_columns else additional_query_columns,
+		party_type="Supplier",
+		conditions=conditions,
 	)
+	payment_entries = get_payment_entries(filters, args)
+	journal_entries = get_journal_entries(filters, args)
+	return payment_entries + journal_entries
 
 
 def get_invoice_expense_map(invoice_list):

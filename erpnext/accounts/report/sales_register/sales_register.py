@@ -12,10 +12,19 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 <<<<<<< HEAD
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 =======
 from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 >>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
+=======
+from erpnext.accounts.report.utils import (
+	get_journal_entries,
+	get_party_details,
+	get_payment_entries,
+	get_taxes_query,
+)
+>>>>>>> d5aa0e325e (feat: fetch JV with PE)
 
 
 def execute(filters=None):
@@ -64,6 +73,7 @@ def _execute(filters, additional_table_columns=None):
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
 		row = {
+			"voucher_type": inv.doctype,
 			"invoice": inv.name,
 			"posting_date": inv.posting_date,
 			"customer": inv.customer,
@@ -163,10 +173,15 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	"""return columns based on filters"""
 	columns = [
 		{
-			"label": _("Invoice"),
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120,
+		},
+		{
+			"label": _("Voucher"),
 			"fieldname": "invoice",
-			"fieldtype": "Link",
-			"options": "Sales Invoice",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
 			"width": 120,
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 80},
@@ -198,13 +213,13 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 			"options": "Territory",
 			"width": 80,
 		},
-		{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 120},
+		{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 80},
 		{
 			"label": _("Receivable Account"),
 			"fieldname": "receivable_account",
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 80,
+			"width": 100,
 		},
 		{
 			"label": _("Mode Of Payment"),
@@ -219,7 +234,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 			"options": "Project",
 			"width": 80,
 		},
-		{"label": _("Owner"), "fieldname": "owner", "fieldtype": "Data", "width": 150},
+		{"label": _("Owner"), "fieldname": "owner", "fieldtype": "Data", "width": 100},
 		{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 150},
 		{
 			"label": _("Sales Order"),
@@ -457,21 +472,17 @@ def get_payments(filters, additional_query_columns):
 		additional_query_columns = ", " + ", ".join(additional_query_columns)
 
 	conditions = get_conditions(filters, payments=True)
-	return frappe.db.sql(
-		"""
-		select 'Payment Entry' as doctype, name, posting_date, paid_to as debit_to,
-		party as customer, party_name as customer_name, remarks,
-		paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
-		mode_of_payment {0}, project, cost_center
-		from `tabPayment Entry`
-		where party_type = 'Customer' %s
-		order by posting_date desc, name desc""".format(
-			additional_query_columns or ""
-		)
-		% conditions,
-		filters,
-		as_dict=1,
+	args = frappe._dict(
+		account="debit_to",
+		party="customer",
+		party_name="customer_name",
+		additional_query_columns="" if not additional_query_columns else additional_query_columns,
+		party_type="Customer",
+		conditions=conditions,
 	)
+	payment_entries = get_payment_entries(filters, args)
+	journal_entries = get_journal_entries(filters, args)
+	return payment_entries + journal_entries
 
 
 def get_invoice_income_map(invoice_list):
