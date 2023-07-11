@@ -204,7 +204,7 @@ class StockController(AccountsController):
 				if not expense_account:
 					frappe.throw(
 						_(
-							"Please set default expense account in company {0} for booking rounding gain and loss during stock transfer"
+							"Please set default cost of goods sold account in company {0} for booking rounding gain and loss during stock transfer"
 						).format(frappe.bold(self.company))
 					)
 
