@@ -904,11 +904,16 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
 		so = frappe.get_doc("Sales Order", source_name)
+		so_items = {d.name: d for d in so.items}
 
 		def update_dn_item(source, target, source_parent):
 			update_item(source, target, so)
 
-		for idx, sre in enumerate(sre_list):
+		idx = 1
+		for sre in sre_list:
+			if not condition(so_items[sre.voucher_detail_no]):
+				continue
+
 			dn_item = get_mapped_doc(
 				"Sales Order Item",
 				sre.voucher_detail_no,
@@ -920,7 +925,6 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 							"name": "so_detail",
 							"parent": "against_sales_order",
 						},
-						"condition": condition,
 						"postprocess": update_dn_item,
 					}
 				},
@@ -931,8 +935,10 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 			if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
 				dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
 
-			dn_item.idx = idx + 1
+			dn_item.idx = idx
 			target_doc.append("items", dn_item)
+
+			idx += 1
 
 	return target_doc
 
