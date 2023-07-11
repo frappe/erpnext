@@ -87,9 +87,8 @@ class JournalEntry(AccountsController):
 		self.update_invoice_discounting()
 
 	def on_cancel(self):
-		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-
-		unlink_ref_doc_from_payment_entries(self)
+		# References for this Journal are removed on the `on_cancel` event in accounts_controller
+		super(JournalEntry, self).on_cancel()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",

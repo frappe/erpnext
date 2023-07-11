@@ -991,10 +991,11 @@ class AccountsController(TransactionBase):
 							party_account_currency = frappe.get_cached_value(
 								"Account", party_account, "account_currency"
 							)
-							dr_or_cr = "debit" if arg.get("difference_amount") > 0 else "credit"
 
-							if arg.reference_doctype == "Purchase Invoice":
-								dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+							dr_or_cr = "debit" if arg.get("party_type") == "Customer" else "credit"
+
+							# if arg.reference_doctype == "Purchase Invoice":
+							# 	dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
@@ -1038,6 +1039,7 @@ class AccountsController(TransactionBase):
 									"exchange_rate": 1,
 									"cost_center": erpnext.get_default_cost_center(self.company),
 									# TODO: figure out a way to pass reference
+									# TODO: add reference_detail_no field in payment ledger
 									# throws 'Journal Entry doesn't have {account} or doesn't have matched account'
 									"reference_type": self.doctype,
 									"reference_name": self.name,
@@ -1163,6 +1165,7 @@ class AccountsController(TransactionBase):
 
 						journal_entry.save()
 						journal_entry.submit()
+			# frappe.throw("stopping...")
 
 	def update_against_document_in_jv(self):
 		"""
@@ -1229,7 +1232,7 @@ class AccountsController(TransactionBase):
 			unlink_ref_doc_from_payment_entries,
 		)
 
-		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
 			# Cancel Exchange Gain/Loss Journal before unlinking
 			cancel_exchange_gain_loss_journal(self)
 

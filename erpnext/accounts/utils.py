@@ -655,7 +655,7 @@ def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
 	"""
 	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
 	"""
-	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
+	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
 		journals = frappe.db.get_all(
 			"Journal Entry Account",
 			filters={
