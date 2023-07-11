@@ -5,6 +5,7 @@ import unittest
 
 import frappe
 from frappe import qb
+from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, nowdate
 
@@ -48,7 +49,15 @@ def make_supplier(supplier_name, currency=None):
 # class TestAccountsController(FrappeTestCase):
 class TestAccountsController(unittest.TestCase):
 	"""
-	Test Exchange Gain/Loss booking on various scenarios
+	Test Exchange Gain/Loss booking on various scenarios.
+	Test Cases are numbered for better readbility
+
+	10 series - Sales Invoice against Payment Entries
+	20 series - Sales Invoice against Journals
+	30 series - Sales Invoice against Credit Notes
+	40 series - Purchase Invoice against Payment Entries
+	50 series - Purchase Invoice against Journals
+	60 series - Purchase Invoice against Debit Notes
 	"""
 
 	def setUp(self):
@@ -130,7 +139,13 @@ class TestAccountsController(unittest.TestCase):
 		self.debtors_usd = acc.name
 
 	def create_sales_invoice(
-		self, qty=1, rate=1, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self,
+		qty=1,
+		rate=1,
+		conversion_rate=80,
+		posting_date=nowdate(),
+		do_not_save=False,
+		do_not_submit=False,
 	):
 		"""
 		Helper function to populate default values in sales invoice
@@ -148,7 +163,7 @@ class TestAccountsController(unittest.TestCase):
 			parent_cost_center=self.cost_center,
 			update_stock=0,
 			currency="USD",
-			conversion_rate=80,
+			conversion_rate=conversion_rate,
 			is_pos=0,
 			is_return=0,
 			return_against=None,
@@ -238,96 +253,140 @@ class TestAccountsController(unittest.TestCase):
 			)
 		return journals
 
-	def test_01_payment_against_invoice(self):
-		# Sales Invoice in Foreign Currency
-		si = self.create_sales_invoice(qty=1, rate=1)
-		# Payment
-		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
-		pe.append(
-			"references",
-			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 1},
+	def assert_ledger_outstanding(
+		self,
+		voucher_type: str,
+		voucher_no: str,
+		outstanding: float,
+		outstanding_in_account_currency: float,
+	) -> None:
+		"""
+		Assert outstanding amount based on ledger on both company/base currency and account currency
+		"""
+
+		ple = qb.DocType("Payment Ledger Entry")
+		current_outstanding = (
+			qb.from_(ple)
+			.select(
+				Sum(ple.amount).as_("outstanding"),
+				Sum(ple.amount_in_account_currency).as_("outstanding_in_account_currency"),
+			)
+			.where(
+				(ple.against_voucher_type == voucher_type)
+				& (ple.against_voucher_no == voucher_no)
+				& (ple.delinked == 0)
+			)
+			.run(as_dict=True)[0]
 		)
-		pe = pe.save().submit()
+		self.assertEqual(outstanding, current_outstanding.outstanding)
+		self.assertEqual(
+			outstanding_in_account_currency, current_outstanding.outstanding_in_account_currency
+		)
 
-		si.reload()
-		self.assertEqual(si.outstanding_amount, 0)
+	def test_10_payment_against_sales_invoice(self):
+		# Sales Invoice in Foreign Currency
+		rate = 80
+		rate_in_account_currency = 1
 
-		# Exchange Gain/Loss Journal should've been created.
-		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
-		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+		si = self.create_sales_invoice(qty=1, rate=rate_in_account_currency)
 
-		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 1)
-		self.assertEqual(len(exc_je_for_pe), 1)
-		self.assertEqual(exc_je_for_si[0], exc_je_for_pe[0])
+		# Test payments with different exchange rates
+		for exc_rate in [75.9, 83.1, 80.01]:
+			with self.subTest(exc_rate=exc_rate):
+				pe = self.create_payment_entry(amount=1, source_exc_rate=exc_rate).save()
+				pe.append(
+					"references",
+					{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 1},
+				)
+				pe = pe.save().submit()
 
-		# Cancel Payment
-		pe.cancel()
+				# Outstanding in both currencies should be '0'
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
-		si.reload()
-		self.assertEqual(si.outstanding_amount, 1)
+				# Exchange Gain/Loss Journal should've been created.
+				exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+				exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+				self.assertNotEqual(exc_je_for_si, [])
+				self.assertEqual(len(exc_je_for_si), 1)
+				self.assertEqual(len(exc_je_for_pe), 1)
+				self.assertEqual(exc_je_for_si[0], exc_je_for_pe[0])
 
-		# Exchange Gain/Loss Journal should've been cancelled
-		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
-		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+				# Cancel Payment
+				pe.cancel()
 
-		self.assertEqual(exc_je_for_si, [])
-		self.assertEqual(exc_je_for_pe, [])
+				# outstanding should be same as grand total
+				si.reload()
+				self.assertEqual(si.outstanding_amount, rate_in_account_currency)
+				self.assert_ledger_outstanding(si.doctype, si.name, rate, rate_in_account_currency)
 
-	def test_02_advance_against_invoice(self):
+				# Exchange Gain/Loss Journal should've been cancelled
+				exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+				exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+				self.assertEqual(exc_je_for_si, [])
+				self.assertEqual(exc_je_for_pe, [])
+
+	def test_11_advance_against_sales_invoice(self):
 		# Advance Payment
 		adv = self.create_payment_entry(amount=1, source_exc_rate=85).save().submit()
 		adv.reload()
 
-		# Invoice in Foreign Currency
-		si = self.create_sales_invoice(qty=1, rate=1, do_not_submit=True)
-		si.append(
-			"advances",
-			{
-				"doctype": "Sales Invoice Advance",
-				"reference_type": adv.doctype,
-				"reference_name": adv.name,
-				"advance_amount": 1,
-				"allocated_amount": 1,
-				"ref_exchange_rate": 85,
-				"remarks": "Test",
-			},
-		)
-		si = si.save()
-		si = si.submit()
+		# Sales Invoices in different exchange rates
+		for exc_rate in [75.9, 83.1, 80.01]:
+			with self.subTest(exc_rate=exc_rate):
+				si = self.create_sales_invoice(qty=1, conversion_rate=exc_rate, rate=1, do_not_submit=True)
+				si.append(
+					"advances",
+					{
+						"doctype": "Sales Invoice Advance",
+						"reference_type": adv.doctype,
+						"reference_name": adv.name,
+						"advance_amount": 1,
+						"allocated_amount": 1,
+						"ref_exchange_rate": 85,
+						"remarks": "Test",
+					},
+				)
+				si = si.save()
+				si = si.submit()
 
-		adv.reload()
-		self.assertEqual(si.outstanding_amount, 0)
+				# Outstanding in both currencies should be '0'
+				adv.reload()
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
-		# Exchange Gain/Loss Journal should've been created.
-		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
-		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+				# Exchange Gain/Loss Journal should've been created.
+				exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+				exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+				self.assertNotEqual(exc_je_for_si, [])
+				self.assertEqual(len(exc_je_for_si), 1)
+				self.assertEqual(len(exc_je_for_adv), 1)
+				self.assertEqual(exc_je_for_si, exc_je_for_adv)
 
-		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 1)
-		self.assertEqual(len(exc_je_for_adv), 1)
-		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+				# Cancel Invoice
+				si.cancel()
 
-		# Cancel Invoice
-		si.cancel()
+				# Exchange Gain/Loss Journal should've been cancelled
+				exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+				exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+				self.assertEqual(exc_je_for_si, [])
+				self.assertEqual(exc_je_for_adv, [])
 
-		# Exchange Gain/Loss Journal should've been cancelled
-		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
-		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
-
-		self.assertEqual(exc_je_for_si, [])
-		self.assertEqual(exc_je_for_adv, [])
-
-	def test_03_partial_advance_and_payment_for_invoice(self):
+	def test_12_partial_advance_and_payment_for_sales_invoice(self):
 		"""
-		Invoice with partial advance payment, and a normal payment
+		Sales invoice with partial advance payment, and a normal payment reconciled
 		"""
 		# Partial Advance
 		adv = self.create_payment_entry(amount=1, source_exc_rate=85).save().submit()
 		adv.reload()
 
-		# Invoice in Foreign Currency linked with advance
-		si = self.create_sales_invoice(qty=2, rate=1, do_not_submit=True)
+		# sales invoice with advance(partial amount)
+		rate = 80
+		rate_in_account_currency = 1
+		si = self.create_sales_invoice(
+			qty=2, conversion_rate=80, rate=rate_in_account_currency, do_not_submit=True
+		)
 		si.append(
 			"advances",
 			{
@@ -343,19 +402,20 @@ class TestAccountsController(unittest.TestCase):
 		si = si.save()
 		si = si.submit()
 
+		# Outstanding should be there in both currencies
 		si.reload()
-		self.assertEqual(si.outstanding_amount, 1)
+		self.assertEqual(si.outstanding_amount, 1)  # account currency
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
 
 		# Exchange Gain/Loss Journal should've been created for the partial advance
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
-
 		self.assertNotEqual(exc_je_for_si, [])
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_adv), 1)
 		self.assertEqual(exc_je_for_si, exc_je_for_adv)
 
-		# Payment
+		# Payment for remaining amount
 		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
 		pe.append(
 			"references",
@@ -363,13 +423,14 @@ class TestAccountsController(unittest.TestCase):
 		)
 		pe = pe.save().submit()
 
+		# Outstanding in both currencies should be '0'
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
 		# Exchange Gain/Loss Journal should've been created for the payment
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
-
 		self.assertNotEqual(exc_je_for_si, [])
 		# There should be 2 JE's now. One for the advance and one for the payment
 		self.assertEqual(len(exc_je_for_si), 2)
@@ -384,21 +445,20 @@ class TestAccountsController(unittest.TestCase):
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
-
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 		self.assertEqual(exc_je_for_adv, [])
 
-	def test_04_partial_advance_and_payment_for_invoice_with_cancellation(self):
+	def test_13_partial_advance_and_payment_for_invoice_with_cancellation(self):
 		"""
-		Invoice with partial advance payment, and a normal payment. Cancel advance and payment.
+		Invoice with partial advance payment, and a normal payment. Then cancel advance and payment.
 		"""
 		# Partial Advance
 		adv = self.create_payment_entry(amount=1, source_exc_rate=85).save().submit()
 		adv.reload()
 
-		# Invoice in Foreign Currency linked with advance
-		si = self.create_sales_invoice(qty=2, rate=1, do_not_submit=True)
+		# invoice with advance(partial amount)
+		si = self.create_sales_invoice(qty=2, conversion_rate=80, rate=1, do_not_submit=True)
 		si.append(
 			"advances",
 			{
@@ -414,19 +474,20 @@ class TestAccountsController(unittest.TestCase):
 		si = si.save()
 		si = si.submit()
 
+		# Outstanding should be there in both currencies
 		si.reload()
-		self.assertEqual(si.outstanding_amount, 1)
+		self.assertEqual(si.outstanding_amount, 1)  # account currency
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
 
 		# Exchange Gain/Loss Journal should've been created for the partial advance
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
-
 		self.assertNotEqual(exc_je_for_si, [])
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_adv), 1)
 		self.assertEqual(exc_je_for_si, exc_je_for_adv)
 
-		# Payment
+		# Payment(remaining amount)
 		pe = self.create_payment_entry(amount=1, source_exc_rate=75).save()
 		pe.append(
 			"references",
@@ -434,13 +495,14 @@ class TestAccountsController(unittest.TestCase):
 		)
 		pe = pe.save().submit()
 
+		# Outstanding should be '0' in both currencies
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
 		# Exchange Gain/Loss Journal should've been created for the payment
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
-
 		self.assertNotEqual(exc_je_for_si, [])
 		# There should be 2 JE's now. One for the advance and one for the payment
 		self.assertEqual(len(exc_je_for_si), 2)
@@ -450,21 +512,22 @@ class TestAccountsController(unittest.TestCase):
 		adv.reload()
 		adv.cancel()
 
+		# Outstanding should be there in both currencies, since advance is cancelled.
 		si.reload()
-		self.assertEqual(si.outstanding_amount, 1)
+		self.assertEqual(si.outstanding_amount, 1)  # account currency
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
 
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
-
 		# Exchange Gain/Loss Journal for advance should been cancelled
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_pe), 1)
 		self.assertEqual(exc_je_for_adv, [])
 
-	def test_05_same_payment_split_against_invoice(self):
+	def test_14_same_payment_split_against_invoice(self):
 		# Invoice in Foreign Currency
-		si = self.create_sales_invoice(qty=2, rate=1)
+		si = self.create_sales_invoice(qty=2, conversion_rate=80, rate=1)
 		# Payment
 		pe = self.create_payment_entry(amount=2, source_exc_rate=75).save()
 		pe.append(
@@ -473,13 +536,14 @@ class TestAccountsController(unittest.TestCase):
 		)
 		pe = pe.save().submit()
 
+		# There should be outstanding in both currencies
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 1)
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
 
 		# Exchange Gain/Loss Journal should've been created.
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
-
 		self.assertNotEqual(exc_je_for_si, [])
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_pe), 1)
@@ -491,25 +555,27 @@ class TestAccountsController(unittest.TestCase):
 		pr.party_type = "Customer"
 		pr.party = self.customer
 		pr.receivable_payable_account = self.debit_usd
-
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 1)
 		self.assertEqual(len(pr.payments), 1)
-
-		# Test exact payment allocation
 		invoices = [x.as_dict() for x in pr.invoices]
 		payments = [x.as_dict() for x in pr.payments]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
-
 		pr.reconcile()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 0)
 
+		# Exc gain/loss journal should have been creaetd for the reconciled amount
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
 		self.assertEqual(len(exc_je_for_si), 2)
 		self.assertEqual(len(exc_je_for_pe), 2)
 		self.assertEqual(exc_je_for_si, exc_je_for_pe)
+
+		# There should be no outstanding
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
 		# Cancel Payment
 		pe.reload()
@@ -517,6 +583,7 @@ class TestAccountsController(unittest.TestCase):
 
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 2)
+		self.assert_ledger_outstanding(si.doctype, si.name, 160.0, 2.0)
 
 		# Exchange Gain/Loss Journal should've been cancelled
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
