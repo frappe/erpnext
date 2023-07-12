@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+
 from erpnext.accounts.report.utils import (
 	get_journal_entries,
 	get_party_details,
@@ -17,21 +18,24 @@ from erpnext.accounts.report.utils import (
 	get_taxes_query,
 )
 
+from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+
 
 def execute(filters=None):
 	return _execute(filters)
 
 
-def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
+def _execute(filters=None, additional_table_columns=None):
 	if not filters:
 		filters = {}
 
 	include_payments = filters.get("include_payments")
-	invoice_list = get_invoices(filters, additional_query_columns)
+	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 	if filters.get("include_payments"):
 		if not filters.get("supplier"):
 			frappe.throw(_("Please select a supplier for fetching payments."))
 		invoice_list += get_payments(filters, additional_query_columns)
+
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
@@ -58,14 +62,14 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
-		row = [inv.doctype, inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
-
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.append(inv.get(col))
-
-		row += [
-			supplier_details.get(inv.supplier).get("supplier_group"),  # supplier_group
+		row = [
+      inv.doctype,
+			inv.name,
+			inv.posting_date,
+			inv.supplier,
+			inv.supplier_name,
+			*get_values_for_columns(additional_table_columns, inv).values(),
+			supplier_details.get(inv.supplier).get("supplier_group"),
 			supplier_details.get(inv.supplier).get("tax_id"),
 			inv.credit_to,
 			inv.mode_of_payment,
@@ -262,9 +266,6 @@ def get_conditions(filters, payments=False):
 
 
 def get_invoices(filters, additional_query_columns):
-	if additional_query_columns:
-		additional_query_columns = ", " + ", ".join(additional_query_columns)
-
 	conditions = get_conditions(filters)
 	return frappe.db.sql(
 		"""
@@ -273,11 +274,10 @@ def get_invoices(filters, additional_query_columns):
 			remarks, base_net_total, base_grand_total, outstanding_amount,
 			mode_of_payment {0}
 		from `tabPurchase Invoice`
-		where docstatus = 1 %s
+		where docstatus = 1 {1}
 		order by posting_date desc, name desc""".format(
-			additional_query_columns or ""
-		)
-		% conditions,
+			additional_query_columns, conditions
+		),
 		filters,
 		as_dict=1,
 	)

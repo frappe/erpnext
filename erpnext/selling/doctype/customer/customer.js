@@ -20,8 +20,8 @@ frappe.ui.form.on("Customer", {
 		frm.set_query('customer_group', {'is_group': 0});
 		frm.set_query('default_price_list', { 'selling': 1});
 		frm.set_query('account', 'accounts', function(doc, cdt, cdn) {
-			var d  = locals[cdt][cdn];
-			var filters = {
+			let d  = locals[cdt][cdn];
+			let filters = {
 				'account_type': 'Receivable',
 				'company': d.company,
 				"is_group": 0
@@ -34,6 +34,19 @@ frappe.ui.form.on("Customer", {
 				filters: filters
 			}
 		});
+
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					"account_type": 'Receivable',
+					"root_type": "Liability",
+					"company": d.company,
+					"is_group": 0
+				}
+			}
+		});
+
 
 		if (frm.doc.__islocal == 1) {
 			frm.set_value("represents_company", "");
@@ -117,8 +130,6 @@ frappe.ui.form.on("Customer", {
 		} else {
 			erpnext.toggle_naming_series();
 		}
-
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
 
 		if(!frm.doc.__islocal) {
 			frappe.contacts.render_address_and_contact(frm);

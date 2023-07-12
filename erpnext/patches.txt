@@ -331,6 +331,6 @@ execute:frappe.delete_doc('DocType', 'Cash Flow Mapper', ignore_missing=True)
 execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Template', ignore_missing=True)
 execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Accounts', ignore_missing=True)
 erpnext.patches.v14_0.cleanup_workspaces
-erpnext.patches.v15_0.remove_loan_management_module
+erpnext.patches.v15_0.remove_loan_management_module #2023-07-03
 erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users

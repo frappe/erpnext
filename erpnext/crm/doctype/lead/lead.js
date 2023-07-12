@@ -30,11 +30,6 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		var me = this;
 		let doc = this.frm.doc;
 		erpnext.toggle_naming_series();
-		frappe.dynamic_link = {
-			doc: doc,
-			fieldname: 'name',
-			doctype: 'Lead'
-		};
 
 		if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.make_customer, __("Create"));

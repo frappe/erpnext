@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import flt, formatdate, get_datetime_str
+from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
 
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
@@ -78,7 +78,7 @@ def get_rate_as_at(date, from_currency, to_currency):
 	return rate
 
 
-def convert_to_presentation_currency(gl_entries, currency_info, company):
+def convert_to_presentation_currency(gl_entries, currency_info):
 	"""
 	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
 	in `currency_info`.
@@ -93,7 +93,6 @@ def convert_to_presentation_currency(gl_entries, currency_info, company):
 	account_currencies = list(set(entry["account_currency"] for entry in gl_entries))
 
 	for entry in gl_entries:
-		account = entry["account"]
 		debit = flt(entry["debit"])
 		credit = flt(entry["credit"])
 		debit_in_account_currency = flt(entry["debit_in_account_currency"])
@@ -233,3 +232,32 @@ def get_payment_entries(filters, args):
 		filters,
 		as_dict=1,
 	)
+
+
+def get_query_columns(report_columns):
+	if not report_columns:
+		return ""
+
+	columns = []
+	for column in report_columns:
+		fieldname = column["fieldname"]
+
+		if doctype := column.get("_doctype"):
+			columns.append(f"`{get_table_name(doctype)}`.`{fieldname}`")
+		else:
+			columns.append(fieldname)
+
+	return ", " + ", ".join(columns)
+
+
+def get_values_for_columns(report_columns, report_row):
+	values = {}
+
+	if not report_columns:
+		return values
+
+	for column in report_columns:
+		fieldname = column["fieldname"]
+		values[fieldname] = report_row.get(fieldname)
+
+	return values

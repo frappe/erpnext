@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+
 from erpnext.accounts.report.utils import (
 	get_journal_entries,
 	get_party_details,
@@ -18,21 +19,24 @@ from erpnext.accounts.report.utils import (
 	get_taxes_query,
 )
 
+from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+
 
 def execute(filters=None):
 	return _execute(filters)
 
 
-def _execute(filters, additional_table_columns=None, additional_query_columns=None):
+def _execute(filters, additional_table_columns=None):
 	if not filters:
 		filters = frappe._dict({})
 
 	include_payments = filters.get("include_payments")
-	invoice_list = get_invoices(filters, additional_query_columns)
+	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 	if filters.get("include_payments"):
 		if not filters.get("customer"):
 			frappe.throw(_("Please select a customer for fetching payments."))
 		invoice_list += get_payments(filters, additional_query_columns)
+
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
@@ -68,29 +72,21 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			"posting_date": inv.posting_date,
 			"customer": inv.customer,
 			"customer_name": inv.customer_name,
+			**get_values_for_columns(additional_table_columns, inv),
+			"customer_group": customer_details.get(inv.customer).get("customer_group"),
+			"territory": customer_details.get(inv.customer).get("territory"),
+			"tax_id": customer_details.get(inv.customer).get("tax_id"),
+			"receivable_account": inv.debit_to,
+			"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
+			"project": inv.project,
+			"owner": inv.owner,
+			"remarks": inv.remarks,
+			"sales_order": ", ".join(sales_order),
+			"delivery_note": ", ".join(delivery_note),
+			"cost_center": ", ".join(cost_center),
+			"warehouse": ", ".join(warehouse),
+			"currency": company_currency,
 		}
-
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.update({col: inv.get(col)})
-
-		row.update(
-			{
-				"customer_group": customer_details.get(inv.customer).get("customer_group"),
-				"territory": customer_details.get(inv.customer).get("territory"),
-				"tax_id": customer_details.get(inv.customer).get("tax_id"),
-				"receivable_account": inv.debit_to,
-				"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
-				"project": inv.project,
-				"owner": inv.owner,
-				"remarks": inv.remarks,
-				"sales_order": ", ".join(sales_order),
-				"delivery_note": ", ".join(delivery_note),
-				"cost_center": ", ".join(cost_center) if inv.doctype == "Sales Invoice" else inv.cost_center,
-				"warehouse": ", ".join(warehouse),
-				"currency": company_currency,
-			}
-		)
 
 		# map income values
 		base_net_total = 0
@@ -423,9 +419,6 @@ def get_conditions(filters, payments=False):
 
 
 def get_invoices(filters, additional_query_columns):
-	if additional_query_columns:
-		additional_query_columns = ", " + ", ".join(additional_query_columns)
-
 	conditions = get_conditions(filters)
 	return frappe.db.sql(
 		"""
@@ -434,10 +427,10 @@ def get_invoices(filters, additional_query_columns):
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
 		is_internal_customer, represents_company, company {0}
 		from `tabSales Invoice`
-		where docstatus = 1 %s order by posting_date desc, name desc""".format(
-			additional_query_columns or ""
-		)
-		% conditions,
+		where docstatus = 1 {1}
+		order by posting_date desc, name desc""".format(
+			additional_query_columns, conditions
+		),
 		filters,
 		as_dict=1,
 	)
