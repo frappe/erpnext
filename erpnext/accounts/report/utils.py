@@ -1,5 +1,6 @@
 import frappe
 from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
 from pypika import Order
 
@@ -228,7 +229,7 @@ def get_taxes_query(invoice_list, doctype, parenttype):
 	if doctype == "Purchase Taxes and Charges":
 		return query.where(taxes.category.isin(["Total", "Valuation and Total"]))
 	elif doctype == "Sales Taxes and Charges":
-		return query.where(taxes.charge_type.isin(["Total", "Valuation and Total"]))
+		return query
 	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
 <<<<<<< HEAD
 >>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
@@ -261,7 +262,7 @@ def get_journal_entries(filters, accounting_dimensions, args):
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
 	query = get_conditions(filters, query, [je], accounting_dimensions, payments=True)
-	journal_entries = query.run(as_dict=True, debug=True)
+	journal_entries = query.run(as_dict=True)
 	return journal_entries
 
 
@@ -290,7 +291,7 @@ def get_payment_entries(filters, accounting_dimensions, args):
 >>>>>>> d5aa0e325e (feat: fetch JV with PE)
 =======
 	query = get_conditions(filters, query, [pe], accounting_dimensions, payments=True)
-	payment_entries = query.run(as_dict=True, debug=True)
+	payment_entries = query.run(as_dict=True)
 	return payment_entries
 
 
@@ -340,4 +341,29 @@ def get_conditions(filters, query, docs, accounting_dimensions, payments=False):
 				fieldname = dimension.fieldname
 				query = query.where(parent_doc.fieldname.isin(filters.fieldname))
 	return query
+<<<<<<< HEAD
 >>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
+=======
+
+
+def get_advance_taxes_and_charges(invoice_list):
+	adv_taxes = frappe.qb.DocType("Advance Taxes and Charges")
+	return (
+		frappe.qb.from_(adv_taxes)
+		.select(
+			adv_taxes.parent,
+			adv_taxes.account_head,
+			(
+				frappe.qb.terms.Case()
+				.when(adv_taxes.add_deduct_tax == "Add", Sum(adv_taxes.base_tax_amount))
+				.else_(Sum(adv_taxes.base_tax_amount) * -1)
+			).as_("tax_amount"),
+		)
+		.where(
+			(adv_taxes.parent.isin([inv.name for inv in invoice_list]))
+			& (adv_taxes.charge_type.isin(["On Paid Amount", "Actual"]))
+			& (adv_taxes.base_tax_amount != 0)
+		)
+		.groupby(adv_taxes.parent, adv_taxes.account_head, adv_taxes.add_deduct_tax)
+	).run(as_dict=True, debug=True)
+>>>>>>> f5027fdcaf (refactor: move fn to fetch advance taxes to utils & use qb)
