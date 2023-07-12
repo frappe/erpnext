@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.report.utils import (
+	filter_invoices_based_on_dimensions,
 	get_advance_taxes_and_charges,
 	get_conditions,
 	get_journal_entries,
@@ -38,6 +39,10 @@ def _execute(filters, additional_table_columns=None):
 		if not filters.get("customer"):
 			frappe.throw(_("Please select a customer for fetching payments."))
 		invoice_list += get_payments(filters, additional_table_columns)
+
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	if len(invoice_list) > 0 and accounting_dimensions:
+		invoice_list = filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoice_list)
 
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
@@ -365,7 +370,6 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 
 
 def get_invoices(filters, additional_query_columns):
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
 	si = frappe.qb.DocType("Sales Invoice")
 	invoice_item = frappe.qb.DocType("Sales Invoice Item")
 	invoice_payment = frappe.qb.DocType("Sales Invoice Payment")
@@ -401,7 +405,7 @@ def get_invoices(filters, additional_query_columns):
 	)
 	if filters.get("customer"):
 		query = query.where(si.customer == filters.customer)
-	query = get_conditions(filters, query, [si, invoice_item, invoice_payment], accounting_dimensions)
+	query = get_conditions(filters, query, [si, invoice_item, invoice_payment])
 	invoices = query.run(as_dict=True)
 	return invoices
 
@@ -416,9 +420,8 @@ def get_payments(filters, additional_query_columns):
 		party_name="customer_name",
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
 	)
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	payment_entries = get_payment_entries(filters, accounting_dimensions, args)
-	journal_entries = get_journal_entries(filters, accounting_dimensions, args)
+	payment_entries = get_payment_entries(filters, args)
+	journal_entries = get_journal_entries(filters, args)
 	return payment_entries + journal_entries
 
 
