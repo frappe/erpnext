@@ -16,9 +16,22 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldname": "based_on",
 				"label": __("Based On"),
 				"fieldtype": "Select",
-				"options": ["Cost Center", "Project"],
+				"options": ["Cost Center", "Project", "Accounting Dimension"],
 				"default": "Cost Center",
 				"reqd": 1
+			},
+			{
+				"fieldname": "accounting_dimension",
+				"label": __("Accounting Dimension"),
+				"fieldtype": "Link",
+				"options": "Accounting Dimension",
+				"get_query": () =>{
+					return {
+						filters: {
+							"disabled": 0
+						}
+					}
+				}
 			},
 			{
 				"fieldname": "fiscal_year",

@@ -16,8 +16,8 @@ value_fields = ("income", "expense", "gross_profit_loss")
 
 
 def execute(filters=None):
-	if not filters.get("based_on"):
-		filters["based_on"] = "Cost Center"
+	if filters.get("based_on") == "Accounting Dimension" and not filters.get("accounting_dimension"):
+		frappe.throw(_("Select Accounting Dimension."))
 
 	based_on = filters.based_on.replace(" ", "_").lower()
 	validate_filters(filters)
@@ -37,6 +37,8 @@ def get_accounts_data(based_on, company):
 		)
 	elif based_on == "project":
 		return frappe.get_all("Project", fields=["name"], filters={"company": company}, order_by="name")
+	elif based_on == "accounting_dimension":
+		return frappe.get_all("Accounting Dimension", fields=["name"], order_by="name")
 	else:
 		filters = {}
 		doctype = frappe.unscrub(based_on)
@@ -60,7 +62,9 @@ def get_data(accounts, filters, based_on):
 		filters.get("company"),
 		filters.get("from_date"),
 		filters.get("to_date"),
-		based_on,
+		based_on
+		if based_on != "accounting_dimension"
+		else filters.accounting_dimension.replace(" ", "_").lower(),
 		gl_entries_by_account,
 		ignore_closing_entries=not flt(filters.get("with_period_closing_entry")),
 	)
