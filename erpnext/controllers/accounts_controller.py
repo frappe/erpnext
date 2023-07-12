@@ -992,15 +992,14 @@ class AccountsController(TransactionBase):
 								"Account", party_account, "account_currency"
 							)
 
-							dr_or_cr = "debit" if arg.get("party_type") == "Customer" else "credit"
-
-							# if arg.reference_doctype == "Purchase Invoice":
-							# 	dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+							if arg.get("difference_amount") > 0:
+								dr_or_cr = "debit" if arg.get("party_type") == "Customer" else "credit"
+							else:
+								dr_or_cr = "credit" if arg.get("party_type") == "Customer" else "debit"
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 							gain_loss_account = arg.get("difference_account")
-
 							if not gain_loss_account:
 								frappe.throw(
 									_("Please set default Exchange Gain/Loss Account in Company {}").format(
