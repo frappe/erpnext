@@ -1,7 +1,12 @@
 import frappe
+from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_dimension_with_children,
+)
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
 from erpnext.setup.utils import get_exchange_rate
 
@@ -153,6 +158,9 @@ def get_invoiced_item_gross_margin(
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
 def get_query_columns(report_columns):
 	if not report_columns:
 		return ""
@@ -180,7 +188,12 @@ def get_values_for_columns(report_columns, report_row):
 		values[fieldname] = report_row.get(fieldname)
 
 	return values
+<<<<<<< HEAD
 =======
+=======
+
+
+>>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
 def get_party_details(party_type, party_list):
 	party_details = {}
 	party = frappe.qb.DocType(party_type)
@@ -222,46 +235,109 @@ def get_taxes_query(invoice_list, doctype, parenttype):
 =======
 
 
-def get_journal_entries(filters, args):
-	return frappe.db.sql(
-		"""
-		select je.voucher_type as doctype, je.name, je.posting_date,
-		jea.account as {0}, jea.party as {1}, jea.party as {2},
-		je.bill_no, je.bill_date, je.remark, je.total_amount as base_net_total,
-		je.total_amount as base_grand_total, je.mode_of_payment, jea.project {3}
-		from `tabJournal Entry` je left join `tabJournal Entry Account` jea on jea.parent=je.name
-		where je.voucher_type='Journal Entry' and jea.party='{4}' {5}
-		order by je.posting_date desc, je.name desc""".format(
-			args.account,
-			args.party,
-			args.party_name,
-			args.additional_query_columns,
-			filters.get(args.party),
-			args.conditions,
-		),
-		filters,
-		as_dict=1,
+def get_journal_entries(filters, accounting_dimensions, args):
+	je = frappe.qb.DocType("Journal Entry")
+	journal_account = frappe.qb.DocType("Journal Entry Account")
+	query = (
+		frappe.qb.from_(je)
+		.inner_join(journal_account)
+		.on(je.name == journal_account.parent)
+		.select(
+			je.voucher_type.as_("doctype"),
+			je.name,
+			je.posting_date,
+			journal_account.account.as_(args.account),
+			journal_account.party.as_(args.party),
+			journal_account.party.as_(args.party_name),
+			je.bill_no,
+			je.bill_date,
+			je.remark.as_("remarks"),
+			je.total_amount.as_("base_net_total"),
+			je.total_amount.as_("base_grand_total"),
+			je.mode_of_payment,
+			journal_account.project,
+		)
+		.where((je.voucher_type == "Journal Entry") & (journal_account.party == filters.get(args.party)))
+		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
+	query = get_conditions(filters, query, [je], accounting_dimensions, payments=True)
+	journal_entries = query.run(as_dict=True, debug=True)
+	return journal_entries
 
 
-def get_payment_entries(filters, args):
-	return frappe.db.sql(
-		"""
-		select 'Payment Entry' as doctype, name, posting_date, paid_to as {0},
-		party as {1}, party_name as {2}, remarks,
-		paid_amount as base_net_total, paid_amount_after_tax as base_grand_total,
-		mode_of_payment, project, cost_center {3}
-		from `tabPayment Entry`
-		where party='{4}' {5}
-		order by posting_date desc, name desc""".format(
-			args.account,
-			args.party,
-			args.party_name,
-			args.additional_query_columns,
-			filters.get(args.party),
-			args.conditions,
-		),
-		filters,
-		as_dict=1,
+def get_payment_entries(filters, accounting_dimensions, args):
+	pe = frappe.qb.DocType("Payment Entry")
+	query = (
+		frappe.qb.from_(pe)
+		.select(
+			ConstantColumn("Payment Entry").as_("doctype"),
+			pe.name,
+			pe.posting_date,
+			pe.paid_to.as_(args.account),
+			pe.party.as_(args.party),
+			pe.party_name.as_(args.party_name),
+			pe.remarks,
+			pe.paid_amount.as_("base_net_total"),
+			pe.paid_amount_after_tax.as_("base_grand_total"),
+			pe.mode_of_payment,
+			pe.project,
+			pe.cost_center,
+		)
+		.where((pe.party == filters.get(args.party)))
+		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
+<<<<<<< HEAD
 >>>>>>> d5aa0e325e (feat: fetch JV with PE)
+=======
+	query = get_conditions(filters, query, [pe], accounting_dimensions, payments=True)
+	payment_entries = query.run(as_dict=True, debug=True)
+	return payment_entries
+
+
+def get_conditions(filters, query, docs, accounting_dimensions, payments=False):
+	parent_doc = docs[0]
+	if not payments:
+		child_doc = docs[1]
+
+	if parent_doc.get_table_name() == "tabSales Invoice":
+		if filters.get("owner"):
+			query = query.where(parent_doc.owner == filters.owner)
+		if filters.get("mode_of_payment"):
+			payment_doc = docs[2]
+			query = query.where(payment_doc.mode_of_payment == filters.mode_of_payment)
+		if not payments:
+			if filters.get("brand"):
+				query = query.where(child_doc.brand == filters.brand)
+	else:
+		if filters.get("mode_of_payment"):
+			query = query.where(parent_doc.mode_of_payment == filters.mode_of_payment)
+
+	if filters.get("company"):
+		query = query.where(parent_doc.company == filters.company)
+	if filters.get("from_date"):
+		query = query.where(parent_doc.posting_date >= filters.from_date)
+	if filters.get("to_date"):
+		query = query.where(parent_doc.posting_date <= filters.to_date)
+
+	if payments:
+		if filters.get("cost_center"):
+			query = query.where(parent_doc.cost_center == filters.cost_center)
+	else:
+		if filters.get("cost_center"):
+			query = query.where(child_doc.cost_center == filters.cost_center)
+		if filters.get("warehouse"):
+			query = query.where(child_doc.warehouse == filters.warehouse)
+		if filters.get("item_group"):
+			query = query.where(child_doc.item_group == filters.item_group)
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+					filters[dimension.fieldname] = get_dimension_with_children(
+						dimension.document_type, filters.get(dimension.fieldname)
+					)
+				fieldname = dimension.fieldname
+				query = query.where(parent_doc.fieldname.isin(filters.fieldname))
+	return query
+>>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)

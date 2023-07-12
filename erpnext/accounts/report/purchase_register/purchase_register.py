@@ -4,11 +4,12 @@
 
 import frappe
 from frappe import _, msgprint
+from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
+from pypika import Order
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
 )
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -21,6 +22,7 @@ from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 =======
 >>>>>>> 1e8b8b5b29 (fix: linting issues)
 from erpnext.accounts.report.utils import (
+	get_conditions,
 	get_journal_entries,
 	get_party_details,
 	get_payment_entries,
@@ -252,99 +254,53 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	return columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts
 
 
-def get_conditions(filters, payments=False):
-	conditions = ""
-
-	if filters.get("company"):
-		conditions += " and company=%(company)s"
-	if filters.get("supplier"):
-		conditions += " and party = %(supplier)s" if payments else " and supplier = %(supplier)s"
-
-	if filters.get("from_date"):
-		conditions += " and posting_date>=%(from_date)s"
-	if filters.get("to_date"):
-		conditions += " and posting_date<=%(to_date)s"
-
-	if filters.get("mode_of_payment"):
-		conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
-
-	if filters.get("cost_center"):
-		if payments:
-			conditions += " and cost_center = %(cost_center)s"
-		else:
-			conditions += """ and exists(select name from `tabPurchase Invoice Item`
-				where parent=`tabPurchase Invoice`.name
-					and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
-
-	if filters.get("warehouse") and not payments:
-		conditions += """ and exists(select name from `tabPurchase Invoice Item`
-			 where parent=`tabPurchase Invoice`.name
-			 	and ifnull(`tabPurchase Invoice Item`.warehouse, '') = %(warehouse)s)"""
-
-	if filters.get("item_group") and not payments:
-		conditions += """ and exists(select name from `tabPurchase Invoice Item`
-			 where parent=`tabPurchase Invoice`.name
-			 	and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s)"""
-
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-
-	if accounting_dimensions:
-		common_condition = """
-			and exists(select name from `tabPurchase Invoice Item`
-				where parent=`tabPurchase Invoice`.name
-			"""
-		for dimension in accounting_dimensions:
-			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
-					)
-
-					conditions += (
-						common_condition
-						+ "and ifnull(`tabPurchase Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
-					)
-				else:
-					conditions += (
-						common_condition
-						+ "and ifnull(`tabPurchase Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
-					)
-
-	return conditions
-
-
 def get_invoices(filters, additional_query_columns):
-	conditions = get_conditions(filters)
-	return frappe.db.sql(
-		"""
-		select
-			'Purchase Invoice' as doctype, name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
-			remarks, base_net_total, base_grand_total, outstanding_amount,
-			mode_of_payment {0}
-		from `tabPurchase Invoice`
-		where docstatus = 1 {1}
-		order by posting_date desc, name desc""".format(
-			additional_query_columns, conditions
-		),
-		filters,
-		as_dict=1,
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	pi = frappe.qb.DocType("Purchase Invoice")
+	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	query = (
+		frappe.qb.from_(pi)
+		.inner_join(invoice_item)
+		.on(pi.name == invoice_item.parent)
+		.select(
+			ConstantColumn("Purchase Invoice").as_("doctype"),
+			pi.name,
+			pi.posting_date,
+			pi.credit_to,
+			pi.supplier,
+			pi.supplier_name,
+			pi.tax_id,
+			pi.bill_no,
+			pi.bill_date,
+			pi.remarks,
+			pi.base_net_total,
+			pi.base_grand_total,
+			pi.outstanding_amount,
+			pi.mode_of_payment,
+		)
+		.where((pi.docstatus == 1))
+		.orderby(pi.posting_date, pi.name, order=Order.desc)
 	)
+	if filters.get("supplier"):
+		query = query.where(pi.supplier == filters.supplier)
+	query = get_conditions(filters, query, [pi, invoice_item], accounting_dimensions)
+	invoices = query.run(as_dict=True, debug=True)
+	return invoices
 
 
 def get_payments(filters, additional_query_columns):
 	if additional_query_columns:
 		additional_query_columns = ", " + ", ".join(additional_query_columns)
 
-	conditions = get_conditions(filters, payments=True)
 	args = frappe._dict(
 		account="credit_to",
 		party="supplier",
 		party_name="supplier_name",
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
-		conditions=conditions,
 	)
-	payment_entries = get_payment_entries(filters, args)
-	journal_entries = get_journal_entries(filters, args)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	payment_entries = get_payment_entries(filters, accounting_dimensions, args)
+	journal_entries = get_journal_entries(filters, accounting_dimensions, args)
 	return payment_entries + journal_entries
 
 
