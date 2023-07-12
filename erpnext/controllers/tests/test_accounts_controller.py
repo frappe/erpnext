@@ -216,12 +216,21 @@ class TestAccountsController(unittest.TestCase):
 		return pr
 
 	def create_journal_entry(
-		self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None
+		self,
+		acc1=None,
+		acc1_exc_rate=None,
+		acc2_exc_rate=None,
+		acc2=None,
+		acc1_amount=0,
+		acc2_amount=0,
+		posting_date=None,
+		cost_center=None,
 	):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = posting_date or nowdate()
 		je.company = self.company
 		je.user_remark = "test"
+		je.multi_currency = True
 		if not cost_center:
 			cost_center = self.cost_center
 		je.set(
@@ -229,15 +238,21 @@ class TestAccountsController(unittest.TestCase):
 			[
 				{
 					"account": acc1,
+					"exchange_rate": acc1_exc_rate or 1,
 					"cost_center": cost_center,
-					"debit_in_account_currency": amount if amount > 0 else 0,
-					"credit_in_account_currency": abs(amount) if amount < 0 else 0,
+					"debit_in_account_currency": acc1_amount if acc1_amount > 0 else 0,
+					"credit_in_account_currency": abs(acc1_amount) if acc1_amount < 0 else 0,
+					"debit": acc1_amount * acc1_exc_rate if acc1_amount > 0 else 0,
+					"credit": abs(acc1_amount * acc1_exc_rate) if acc1_amount < 0 else 0,
 				},
 				{
 					"account": acc2,
+					"exchange_rate": acc2_exc_rate or 1,
 					"cost_center": cost_center,
-					"credit_in_account_currency": amount if amount > 0 else 0,
-					"debit_in_account_currency": abs(amount) if amount < 0 else 0,
+					"credit_in_account_currency": acc2_amount if acc2_amount > 0 else 0,
+					"debit_in_account_currency": abs(acc2_amount) if acc2_amount < 0 else 0,
+					"credit": acc2_amount * acc2_exc_rate if acc2_amount > 0 else 0,
+					"debit": abs(acc2_amount * acc2_exc_rate) if acc2_amount < 0 else 0,
 				},
 			],
 		)
@@ -590,3 +605,61 @@ class TestAccountsController(unittest.TestCase):
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
+
+	def test_21_journal_against_sales_invoice(self):
+		# Invoice in Foreign Currency
+		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1)
+		# Payment
+		je = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=75,
+			acc2=self.cash,
+			acc1_amount=-1,
+			acc2_amount=-75,
+			acc2_exc_rate=1,
+		)
+		je.accounts[0].party_type = "Customer"
+		je.accounts[0].party = self.customer
+		je = je.save().submit()
+
+		# Reconcile the remaining amount
+		pr = self.create_payment_reconciliation()
+		# pr.receivable_payable_account = self.debit_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		# There should be no outstanding in both currencies
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+
+		# Exchange Gain/Loss Journal should've been created.
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_je = self.get_journals_for(je.doctype, je.name)
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(
+			len(exc_je_for_si), 2
+		)  # payment also has reference. so, there are 2 journals referencing invoice
+		self.assertEqual(len(exc_je_for_je), 1)
+		self.assertIn(exc_je_for_je[0], exc_je_for_si)
+
+		# Cancel Payment
+		je.reload()
+		je.cancel()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_je = self.get_journals_for(je.doctype, je.name)
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(exc_je_for_je, [])
