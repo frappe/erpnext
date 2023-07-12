@@ -11,6 +11,7 @@ from frappe.utils import add_days, cstr, flt, nowdate, nowtime, today
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.utils import get_balance_on
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import (
 	automatically_fetch_payment_terms,
 	compare_payment_schedules,
@@ -1004,6 +1005,22 @@ class TestDeliveryNote(FrappeTestCase):
 		compare_payment_schedules(self, so, si)
 
 		automatically_fetch_payment_terms(enable=0)
+
+	def test_overriden_payment_terms_are_fetched_when_creating_sales_invoice(self):
+		"""Test that a sales invoice will fetch the payment terms from sales order instead of default."""
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "_Test Customer Default Payment Terms"
+		customer.payment_terms = "_Test Payment Term Template"
+		customer.insert()
+
+		so = make_sales_order(customer=customer.name, do_not_save=1)
+		so.payment_terms_template = "_Test Payment Term Template 1"
+		so.submit()
+
+		dn = make_delivery_note(so.name).submit()
+		si = make_sales_invoice(dn.name)
+
+		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 
 	def test_returned_qty_in_return_dn(self):
 		# SO ---> SI ---> DN
