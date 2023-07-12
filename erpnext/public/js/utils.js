@@ -632,7 +632,6 @@ erpnext.utils.update_child_items = function(opts) {
 		fields.splice(3, 0, {
 			fieldtype: 'Float',
 			fieldname: "conversion_factor",
-			in_list_view: 1,
 			label: __("Conversion Factor"),
 			precision: get_precision('conversion_factor')
 		})
