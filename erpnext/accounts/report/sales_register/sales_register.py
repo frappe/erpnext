@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.report.utils import (
+	get_advance_taxes_and_charges,
 	get_conditions,
 	get_journal_entries,
 	get_party_details,
@@ -42,6 +43,7 @@ def _execute(filters, additional_table_columns=None):
 		invoice_list, additional_table_columns, include_payments
 	)
 
+	print("Accounts", tax_accounts)
 	if not invoice_list:
 		msgprint(_("No record found"))
 		return columns, invoice_list
@@ -120,6 +122,7 @@ def _execute(filters, additional_table_columns=None):
 					or 2
 				)
 				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc), tax_amount_precision)
+				print(tax_amount)
 				total_tax += tax_amount
 				row.update({frappe.scrub(tax_acc): tax_amount})
 
@@ -399,7 +402,7 @@ def get_invoices(filters, additional_query_columns):
 	if filters.get("customer"):
 		query = query.where(si.customer == filters.customer)
 	query = get_conditions(filters, query, [si, invoice_item, invoice_payment], accounting_dimensions)
-	invoices = query.run(as_dict=True, debug=True)
+	invoices = query.run(as_dict=True)
 	return invoices
 
 
@@ -465,20 +468,7 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, inclu
 	)
 
 	if include_payments:
-		advance_tax_details = frappe.db.sql(
-			"""
-			select parent, account_head, case add_deduct_tax when "Add" then sum(base_tax_amount)
-			else sum(base_tax_amount) * -1 end as tax_amount
-			from `tabAdvance Taxes and Charges`
-			where parent in (%s) and charge_type in ('On Paid Amount', 'Actual')
-				and base_tax_amount != 0
-			group by parent, account_head, add_deduct_tax
-		"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
-			as_dict=1,
-		)
-		tax_details += advance_tax_details
+		tax_details += get_advance_taxes_and_charges(invoice_list)
 
 	invoice_tax_map = {}
 	for d in tax_details:
