@@ -48,7 +48,6 @@ def _execute(filters, additional_table_columns=None):
 		invoice_list, additional_table_columns, include_payments
 	)
 
-	print("Accounts", tax_accounts)
 	if not invoice_list:
 		msgprint(_("No record found"))
 		return columns, invoice_list
@@ -127,7 +126,6 @@ def _execute(filters, additional_table_columns=None):
 					or 2
 				)
 				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc), tax_amount_precision)
-				print(tax_amount)
 				total_tax += tax_amount
 				row.update({frappe.scrub(tax_acc): tax_amount})
 
