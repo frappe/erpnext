@@ -5,13 +5,15 @@
 import frappe
 from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
+from pypika import Order
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
 )
 from erpnext.accounts.report.utils import (
+	get_conditions,
 	get_journal_entries,
 	get_party_details,
 	get_payment_entries,
@@ -359,96 +361,61 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	return columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts
 
 
-def get_conditions(filters, payments=False):
-	conditions = ""
-
-	accounting_dimensions = get_accounting_dimensions(as_list=False) or []
-	accounting_dimensions_list = [d.fieldname for d in accounting_dimensions]
-
-	if filters.get("company"):
-		conditions += " and company=%(company)s"
-
-	if filters.get("customer") and "customer" not in accounting_dimensions_list:
-		conditions += " and party = %(customer)s" if payments else " and customer = %(customer)s"
-
-	if filters.get("from_date"):
-		conditions += " and posting_date >= %(from_date)s"
-	if filters.get("to_date"):
-		conditions += " and posting_date <= %(to_date)s"
-
-	if filters.get("owner"):
-		conditions += " and owner = %(owner)s"
-
-	def get_sales_invoice_item_field_condition(field, table="Sales Invoice Item") -> str:
-		if not filters.get(field) or field in accounting_dimensions_list:
-			return ""
-		return f""" and exists(select name from `tab{table}`
-				where parent=`tabSales Invoice`.name
-					and ifnull(`tab{table}`.{field}, '') = %({field})s)"""
-
-	conditions += get_sales_invoice_item_field_condition("mode_of_payment", "Sales Invoice Payment")
-	conditions += get_sales_invoice_item_field_condition("cost_center")
-	conditions += get_sales_invoice_item_field_condition("warehouse")
-	conditions += get_sales_invoice_item_field_condition("brand")
-	conditions += get_sales_invoice_item_field_condition("item_group")
-
-	if accounting_dimensions:
-		common_condition = """
-			and exists(select name from `tabSales Invoice Item`
-				where parent=`tabSales Invoice`.name
-			"""
-		for dimension in accounting_dimensions:
-			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
-					)
-
-					conditions += (
-						common_condition
-						+ "and ifnull(`tabSales Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
-					)
-				else:
-					conditions += (
-						common_condition
-						+ "and ifnull(`tabSales Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
-					)
-
-	return conditions
-
-
 def get_invoices(filters, additional_query_columns):
-	conditions = get_conditions(filters)
-	return frappe.db.sql(
-		"""
-		select 'Sales Invoice' as doctype, name, posting_date, debit_to, project, customer,
-		customer_name, owner, remarks, territory, tax_id, customer_group,
-		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
-		is_internal_customer, represents_company, company {0}
-		from `tabSales Invoice`
-		where docstatus = 1 {1}
-		order by posting_date desc, name desc""".format(
-			additional_query_columns, conditions
-		),
-		filters,
-		as_dict=1,
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	si = frappe.qb.DocType("Sales Invoice")
+	invoice_item = frappe.qb.DocType("Sales Invoice Item")
+	invoice_payment = frappe.qb.DocType("Sales Invoice Payment")
+	query = (
+		frappe.qb.from_(si)
+		.inner_join(invoice_item)
+		.on(si.name == invoice_item.parent)
+		.left_join(invoice_payment)
+		.on(si.name == invoice_payment.parent)
+		.select(
+			ConstantColumn("Sales Invoice").as_("doctype"),
+			si.name,
+			si.posting_date,
+			si.debit_to,
+			si.project,
+			si.customer,
+			si.customer_name,
+			si.owner,
+			si.remarks,
+			si.territory,
+			si.tax_id,
+			si.customer_group,
+			si.base_net_total,
+			si.base_grand_total,
+			si.base_rounded_total,
+			si.outstanding_amount,
+			si.is_internal_customer,
+			si.represents_company,
+			si.company,
+		)
+		.where((si.docstatus == 1))
+		.orderby(si.posting_date, si.name, order=Order.desc)
 	)
+	if filters.get("customer"):
+		query = query.where(si.customer == filters.customer)
+	query = get_conditions(filters, query, [si, invoice_item, invoice_payment], accounting_dimensions)
+	invoices = query.run(as_dict=True, debug=True)
+	return invoices
 
 
 def get_payments(filters, additional_query_columns):
 	if additional_query_columns:
 		additional_query_columns = ", " + ", ".join(additional_query_columns)
 
-	conditions = get_conditions(filters, payments=True)
 	args = frappe._dict(
 		account="debit_to",
 		party="customer",
 		party_name="customer_name",
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
-		conditions=conditions,
 	)
-	payment_entries = get_payment_entries(filters, args)
-	journal_entries = get_journal_entries(filters, args)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	payment_entries = get_payment_entries(filters, accounting_dimensions, args)
+	journal_entries = get_journal_entries(filters, accounting_dimensions, args)
 	return payment_entries + journal_entries
 
 
