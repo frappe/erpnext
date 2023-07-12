@@ -10,15 +10,14 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-
 from erpnext.accounts.report.utils import (
 	get_journal_entries,
 	get_party_details,
 	get_payment_entries,
+	get_query_columns,
 	get_taxes_query,
+	get_values_for_columns,
 )
-
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 
 
 def execute(filters=None):
@@ -34,7 +33,7 @@ def _execute(filters=None, additional_table_columns=None):
 	if filters.get("include_payments"):
 		if not filters.get("supplier"):
 			frappe.throw(_("Please select a supplier for fetching payments."))
-		invoice_list += get_payments(filters, additional_query_columns)
+		invoice_list += get_payments(filters, additional_table_columns)
 
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
@@ -63,7 +62,7 @@ def _execute(filters=None, additional_table_columns=None):
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
 		row = [
-      inv.doctype,
+			inv.doctype,
 			inv.name,
 			inv.posting_date,
 			inv.supplier,
