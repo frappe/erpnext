@@ -13,18 +13,26 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 =======
 from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 >>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
 =======
+=======
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 from erpnext.accounts.report.utils import (
 	get_journal_entries,
 	get_party_details,
 	get_payment_entries,
+	get_query_columns,
 	get_taxes_query,
+	get_values_for_columns,
 )
+<<<<<<< HEAD
 >>>>>>> d5aa0e325e (feat: fetch JV with PE)
+=======
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 
 
 def execute(filters=None):
@@ -43,8 +51,13 @@ def _execute(filters, additional_table_columns=None):
 	if filters.get("include_payments"):
 		if not filters.get("customer"):
 			frappe.throw(_("Please select a customer for fetching payments."))
+<<<<<<< HEAD
 		invoice_list += get_payments(filters, additional_query_columns)
 >>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
+=======
+		invoice_list += get_payments(filters, additional_table_columns)
+
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)

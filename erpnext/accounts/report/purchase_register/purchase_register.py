@@ -12,18 +12,26 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
 =======
 from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 >>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
 =======
+=======
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 from erpnext.accounts.report.utils import (
 	get_journal_entries,
 	get_party_details,
 	get_payment_entries,
+	get_query_columns,
 	get_taxes_query,
+	get_values_for_columns,
 )
+<<<<<<< HEAD
 >>>>>>> d5aa0e325e (feat: fetch JV with PE)
+=======
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 
 
 def execute(filters=None):
@@ -45,8 +53,13 @@ def _execute(filters=None, additional_table_columns=None):
 	if filters.get("include_payments"):
 		if not filters.get("supplier"):
 			frappe.throw(_("Please select a supplier for fetching payments."))
+<<<<<<< HEAD
 		invoice_list += get_payments(filters, additional_query_columns)
 >>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
+=======
+		invoice_list += get_payments(filters, additional_table_columns)
+
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
@@ -76,6 +89,10 @@ def _execute(filters=None, additional_table_columns=None):
 <<<<<<< HEAD
 <<<<<<< HEAD
 		row = [
+<<<<<<< HEAD
+=======
+			inv.doctype,
+>>>>>>> 1e8b8b5b29 (fix: linting issues)
 			inv.name,
 			inv.posting_date,
 			inv.supplier,
