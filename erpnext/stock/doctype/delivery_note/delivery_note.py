@@ -648,6 +648,10 @@ def get_returned_qty_map(delivery_note):
 	return returned_qty_map
 
 
+class AmbiguousPaymentTermsTemplate(frappe.ValidationError):
+	pass
+
+
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc("Delivery Note", source_name)
@@ -657,6 +661,24 @@ def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
+		try:
+			parent_payment_term_templates = frappe.get_all(
+				"Sales Order",
+				{
+					"name": ["IN", [d.against_sales_order for d in doc.items]],
+				},
+				["payment_terms_template"],
+				pluck="payment_terms_template",
+			)
+
+			if len(parent_payment_term_templates) != 1:
+				raise AmbiguousPaymentTermsTemplate
+
+			target.payment_terms_template = parent_payment_term_templates.pop()
+		except AmbiguousPaymentTermsTemplate:
+			# payment terms template will get set within set_missing_values
+			pass
+
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
