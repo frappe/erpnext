@@ -59,7 +59,27 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
-			}
+			},
+			{
+				"source_dt": "Sales Invoice Item",
+				"target_dt": "Proforma Invoice Item",
+				"source_field": "qty",  # field of SI Item
+				"target_field": "invoiced_qty",  # field of Proforma Invoice Item
+				"target_ref_field": "qty",  # field of SI Item
+				"join_field": "pi_item",  # field of SI Item
+				"target_parent_dt": "Proforma Invoice",
+				"percent_join_field": "proforma_invoice",
+			},
+			{
+				"source_dt": "Sales Invoice Item",
+				"target_dt": "Proforma Invoice Item",
+				"source_field": "amount",  # field of SI Item
+				"target_field": "billed_amt",  # field of Proforma Invoice Item
+				"target_ref_field": "amount",  # field of SI Item
+				"join_field": "pi_item",  # field of SI Item
+				"target_parent_dt": "Proforma Invoice",
+				"percent_join_field": "proforma_invoice",
+			},
 		]
 
 	def set_indicator(self):

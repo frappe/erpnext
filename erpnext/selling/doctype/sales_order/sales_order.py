@@ -1043,6 +1043,8 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+	doctype = frappe.flags.args.doctype or "Sales Order"
+
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
@@ -1078,6 +1080,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			if (source.rate and source.billed_amt)
 			else source.qty - source.returned_qty
 		)
+		if doctype == "Proforma Invoice":
+			target.qty = source.qty - source.invoiced_qty
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
@@ -1089,36 +1093,49 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			if cost_center:
 				target.cost_center = cost_center
 
-	doclist = get_mapped_doc(
-		"Sales Order",
-		source_name,
-		{
-			"Sales Order": {
-				"doctype": "Sales Invoice",
-				"field_map": {
-					"party_account_currency": "party_account_currency",
-					"payment_terms_template": "payment_terms_template",
-				},
-				"field_no_map": ["payment_terms_template"],
-				"validation": {"docstatus": ["=", 1]},
+	mapper = {
+		doctype: {
+			"doctype": "Sales Invoice",
+			"field_map": {
+				"party_account_currency": "party_account_currency",
+				"payment_terms_template": "payment_terms_template",
 			},
-			"Sales Order Item": {
-				"doctype": "Sales Invoice Item",
-				"field_map": {
-					"name": "so_detail",
-					"parent": "sales_order",
-				},
-				"postprocess": update_item,
-				"condition": lambda doc: doc.qty
-				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
-			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
-			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+			"field_no_map": ["payment_terms_template"],
+			"validation": {"docstatus": ["=", 1]},
 		},
+		doctype
+		+ " Item": {
+			"doctype": "Sales Invoice Item",
+			"field_map": {
+				"name": "so_detail",
+				"parent": "sales_order",
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: doc.qty
+			and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
+		},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+	}
+	if doctype == "Proforma Invoice":
+		mapper[doctype + " Item"]["field_map"] = {
+			# Proforma Invoice Item field name : DN Item field name
+			"so_item": "so_detail",
+			"sales_order": "sales_order",
+			"name": "pi_item",
+			"parent": "proforma_invoice",
+		}
+
+	doclist = get_mapped_doc(
+		doctype,
+		source_name,
+		mapper,
 		target_doc,
 		postprocess,
 		ignore_permissions=ignore_permissions,
 	)
+	if doctype == "Proforma Invoice":
+		pass
 
 	automatically_fetch_payment_terms = cint(
 		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")

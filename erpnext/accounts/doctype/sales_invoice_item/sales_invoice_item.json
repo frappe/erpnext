@@ -107,7 +107,9 @@
   "dimension_col_break",
   "project",
   "section_break_54",
-  "page_break"
+  "page_break",
+  "pi_item",
+  "proforma_invoice"
  ],
  "fields": [
   {
@@ -895,12 +897,22 @@
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1
+  },
+  {
+   "fieldname": "pi_item",
+   "fieldtype": "Data",
+   "label": "PI Item"
+  },
+  {
+   "fieldname": "proforma_invoice",
+   "fieldtype": "Data",
+   "label": "Proforma Invoice"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-12 13:42:24.303113",
+ "modified": "2023-07-12 12:16:38.951002",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
