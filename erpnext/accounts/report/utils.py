@@ -236,7 +236,7 @@ def get_taxes_query(invoice_list, doctype, parenttype):
 =======
 
 
-def get_journal_entries(filters, accounting_dimensions, args):
+def get_journal_entries(filters, args):
 	je = frappe.qb.DocType("Journal Entry")
 	journal_account = frappe.qb.DocType("Journal Entry Account")
 	query = (
@@ -261,12 +261,12 @@ def get_journal_entries(filters, accounting_dimensions, args):
 		.where((je.voucher_type == "Journal Entry") & (journal_account.party == filters.get(args.party)))
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
-	query = get_conditions(filters, query, [je], accounting_dimensions, payments=True)
+	query = get_conditions(filters, query, [je], payments=True)
 	journal_entries = query.run(as_dict=True)
 	return journal_entries
 
 
-def get_payment_entries(filters, accounting_dimensions, args):
+def get_payment_entries(filters, args):
 	pe = frappe.qb.DocType("Payment Entry")
 	query = (
 		frappe.qb.from_(pe)
@@ -288,14 +288,18 @@ def get_payment_entries(filters, accounting_dimensions, args):
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> d5aa0e325e (feat: fetch JV with PE)
 =======
 	query = get_conditions(filters, query, [pe], accounting_dimensions, payments=True)
+=======
+	query = get_conditions(filters, query, [pe], payments=True)
+>>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
 	payment_entries = query.run(as_dict=True)
 	return payment_entries
 
 
-def get_conditions(filters, query, docs, accounting_dimensions, payments=False):
+def get_conditions(filters, query, docs, payments=False):
 	parent_doc = docs[0]
 	if not payments:
 		child_doc = docs[1]
@@ -330,16 +334,6 @@ def get_conditions(filters, query, docs, accounting_dimensions, payments=False):
 			query = query.where(child_doc.warehouse == filters.warehouse)
 		if filters.get("item_group"):
 			query = query.where(child_doc.item_group == filters.item_group)
-
-	if accounting_dimensions:
-		for dimension in accounting_dimensions:
-			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
-					)
-				fieldname = dimension.fieldname
-				query = query.where(parent_doc.fieldname.isin(filters.fieldname))
 	return query
 <<<<<<< HEAD
 >>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
@@ -365,5 +359,26 @@ def get_advance_taxes_and_charges(invoice_list):
 			& (adv_taxes.base_tax_amount != 0)
 		)
 		.groupby(adv_taxes.parent, adv_taxes.account_head, adv_taxes.add_deduct_tax)
+<<<<<<< HEAD
 	).run(as_dict=True, debug=True)
 >>>>>>> f5027fdcaf (refactor: move fn to fetch advance taxes to utils & use qb)
+=======
+	).run(as_dict=True)
+
+
+def filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoices):
+	invoices_with_acc_dimensions = []
+	for inv in invoices:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+					filters[dimension.fieldname] = get_dimension_with_children(
+						dimension.document_type, filters.get(dimension.fieldname)
+					)
+				fieldname = dimension.fieldname
+				if inv.fieldname != filters[fieldname]:
+					break
+		else:
+			invoices_with_acc_dimensions.append(inv)
+	return invoices_with_acc_dimensions
+>>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
