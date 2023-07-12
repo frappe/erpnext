@@ -18,7 +18,15 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldtype": "Select",
 				"options": ["Cost Center", "Project", "Accounting Dimension"],
 				"default": "Cost Center",
-				"reqd": 1
+				"reqd": 1,
+				"on_change": function(query_report){
+					let based_on = query_report.get_values().based_on;
+					if(based_on!='Accounting Dimension'){
+						frappe.query_report.set_filter_value({
+							accounting_dimension: ''
+						});
+					}
+				}
 			},
 			{
 				"fieldname": "accounting_dimension",
