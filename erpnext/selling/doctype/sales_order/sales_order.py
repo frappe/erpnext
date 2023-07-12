@@ -847,15 +847,15 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	kwargs = frappe._dict(kwargs)
 
+	sre_list = []
+	if kwargs.for_reserved_stock:
+		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
+
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
 		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
-
-	sre_list = []
-	if kwargs.for_reserved_stock:
-		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
 
 	def condition(doc):
 		# make_mapped_doc sets js `args` into `frappe.flags.args`
@@ -896,58 +896,60 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 		make_packing_list(target)
 
-	if not kwargs.skip_item_mapping and not kwargs.for_reserved_stock:
-		mapper["Sales Order Item"] = {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
-			},
-			"condition": condition,
-			"postprocess": update_item,
-		}
+	target_doc = frappe.new_doc("Delivery Note")
+
+	if not kwargs.skip_item_mapping:
+		if not kwargs.for_reserved_stock:
+			mapper["Sales Order Item"] = {
+				"doctype": "Delivery Note Item",
+				"field_map": {
+					"rate": "rate",
+					"name": "so_detail",
+					"parent": "against_sales_order",
+				},
+				"condition": condition,
+				"postprocess": update_item,
+			}
+		else:
+			so = frappe.get_doc("Sales Order", source_name)
+			so_items = {d.name: d for d in so.items}
+
+			def update_dn_item(source, target, source_parent):
+				update_item(source, target, so)
+
+			idx = 1
+			for sre in sre_list:
+				if not condition(so_items[sre.voucher_detail_no]):
+					continue
+
+				dn_item = get_mapped_doc(
+					"Sales Order Item",
+					sre.voucher_detail_no,
+					{
+						"Sales Order Item": {
+							"doctype": "Delivery Note Item",
+							"field_map": {
+								"rate": "rate",
+								"name": "so_detail",
+								"parent": "against_sales_order",
+							},
+							"postprocess": update_dn_item,
+						}
+					},
+				)
+
+				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+
+				dn_item.idx = idx
+				target_doc.append("items", dn_item)
+
+				idx += 1
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 	target_doc.set_onload("ignore_price_list", True)
-
-	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
-		so = frappe.get_doc("Sales Order", source_name)
-		so_items = {d.name: d for d in so.items}
-
-		def update_dn_item(source, target, source_parent):
-			update_item(source, target, so)
-
-		idx = 1
-		for sre in sre_list:
-			if not condition(so_items[sre.voucher_detail_no]):
-				continue
-
-			dn_item = get_mapped_doc(
-				"Sales Order Item",
-				sre.voucher_detail_no,
-				{
-					"Sales Order Item": {
-						"doctype": "Delivery Note Item",
-						"field_map": {
-							"rate": "rate",
-							"name": "so_detail",
-							"parent": "against_sales_order",
-						},
-						"postprocess": update_dn_item,
-					}
-				},
-			)
-
-			dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
-
-			if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
-				dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
-
-			dn_item.idx = idx
-			target_doc.append("items", dn_item)
-
-			idx += 1
 
 	return target_doc
 
