@@ -1511,6 +1511,16 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 def create_pick_list(source_name, target_doc=None):
 	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
+	def validate_sales_order():
+		so = frappe.get_doc("Sales Order", source_name)
+		for item in so.items:
+			if item.stock_reserved_qty > 0:
+				frappe.throw(
+					_(
+						"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
+					).format(frappe.bold(source_name))
+				)
+
 	def update_item_quantity(source, target, source_parent) -> None:
 		picked_qty = flt(source.picked_qty) / (flt(source.conversion_factor) or 1)
 		qty_to_be_picked = flt(source.qty) - max(picked_qty, flt(source.delivered_qty))
@@ -1533,6 +1543,8 @@ def create_pick_list(source_name, target_doc=None):
 			and item.delivered_by_supplier != 1
 			and not is_product_bundle(item.item_code)
 		)
+
+	validate_sales_order()
 
 	doc = get_mapped_doc(
 		"Sales Order",
