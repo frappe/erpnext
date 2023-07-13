@@ -19,6 +19,7 @@
   "party_type",
   "party",
   "party_name",
+  "book_advance_payments_in_separate_party_account",
   "column_break_11",
   "bank_account",
   "party_bank_account",
@@ -735,12 +736,21 @@
    "fieldname": "get_outstanding_orders",
    "fieldtype": "Button",
    "label": "Get Outstanding Orders"
+  },
+  {
+   "default": "0",
+   "fetch_from": "company.book_advance_payments_in_separate_party_account",
+   "fieldname": "book_advance_payments_in_separate_party_account",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Book Advance Payments in Separate Party Account",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-19 11:38:04.387219",
+ "modified": "2023-06-23 18:07:38.023010",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

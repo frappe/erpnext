@@ -8,7 +8,7 @@ frappe.ui.form.on("Supplier", {
 			frm.set_value("represents_company", "");
 		}
 		frm.set_query('account', 'accounts', function (doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
+			let d = locals[cdt][cdn];
 			return {
 				filters: {
 					'account_type': 'Payable',
@@ -17,6 +17,19 @@ frappe.ui.form.on("Supplier", {
 				}
 			}
 		});
+
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					"account_type": "Payable",
+					"root_type": "Asset",
+					"company": d.company,
+					"is_group": 0
+				}
+			}
+		});
+
 		frm.set_query("default_bank_account", function() {
 			return {
 				filters: {
@@ -42,11 +55,17 @@ frappe.ui.form.on("Supplier", {
 				}
 			};
 		});
+
+		frm.set_query("user", "portal_users", function(doc) {
+			return {
+				filters: {
+					"ignore_user_type": true,
+				}
+			};
+		});
 	},
 
 	refresh: function (frm) {
-		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Supplier' }
-
 		if (frappe.defaults.get_default("supp_master_name") != "Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {

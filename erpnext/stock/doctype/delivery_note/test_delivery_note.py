@@ -318,6 +318,37 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.per_returned, 100)
 		self.assertEqual(dn.status, "Return Issued")
 
+	def test_delivery_note_return_valuation_on_different_warehuose(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
+		item_code = "Test Return Valuation For DN"
+		make_item("Test Return Valuation For DN", {"is_stock_item": 1})
+		return_warehouse = create_warehouse("Returned Test Warehouse", company=company)
+
+		make_stock_entry(item_code=item_code, target="Stores - TCP1", qty=5, basic_rate=150)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			company=company,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		dn.submit()
+		self.assertEqual(dn.items[0].incoming_rate, 150)
+
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		return_dn = make_return_doc(dn.doctype, dn.name)
+		return_dn.items[0].warehouse = return_warehouse
+		return_dn.save().submit()
+
+		self.assertEqual(return_dn.items[0].incoming_rate, 150)
+
 	def test_return_single_item_from_bundled_items(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
