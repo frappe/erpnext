@@ -62,7 +62,10 @@ def execute():
 				entry["closing_date"] = pcv_doc.posting_date
 				entry["period_closing_voucher"] = pcv_doc.name
 
-			make_closing_entries(gl_entries + closing_entries, voucher_name=pcv.name)
+			entries = gl_entries + closing_entries
+			if entries:
+				make_closing_entries(entries, voucher_name=pcv.name)
+
 			company_wise_order[pcv.company].append(pcv.posting_date)
 
 			i += 1
