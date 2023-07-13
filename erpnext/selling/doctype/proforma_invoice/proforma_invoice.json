@@ -19,7 +19,6 @@
   "delivery_date",
   "sales_order_name",
   "customer_name",
-  "order_type",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -204,19 +203,6 @@
    "read_only": 1
   },
   {
-   "default": "Sales",
-   "fieldname": "order_type",
-   "fieldtype": "Select",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Order Type",
-   "oldfieldname": "order_type",
-   "oldfieldtype": "Select",
-   "options": "\nSales\nMaintenance\nShopping Cart",
-   "print_hide": 1,
-   "reqd": 1
-  },
-  {
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
@@ -383,6 +369,7 @@
   },
   {
    "allow_bulk_edit": 1,
+   "allow_on_submit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -400,6 +387,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "hide_days": 1,
@@ -424,6 +412,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -434,6 +423,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -453,6 +443,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -462,6 +453,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -556,6 +548,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -575,6 +568,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -595,6 +589,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -620,6 +615,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
@@ -634,6 +630,7 @@
    "width": "150px"
   },
   {
+   "allow_on_submit": 1,
    "description": "In Words will be visible once you save the Sales Order.",
    "fieldname": "base_in_words",
    "fieldtype": "Data",
@@ -696,6 +693,7 @@
    "width": "150px"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "in_words",
    "fieldtype": "Data",
    "hide_days": 1,
@@ -1382,7 +1380,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-10 12:26:29.661685",
+ "modified": "2023-07-13 11:18:57.847541",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Proforma Invoice",

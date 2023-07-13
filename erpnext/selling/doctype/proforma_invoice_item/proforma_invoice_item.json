@@ -52,6 +52,7 @@
    "label": "Delivery Date"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -68,6 +69,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "qty",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -142,6 +144,7 @@
    "label": "Base Amount"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "net_amount",
    "fieldtype": "Currency",
    "label": "Net Amount"
@@ -204,7 +207,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-12 15:55:35.190419",
+ "modified": "2023-07-12 23:54:10.764928",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Proforma Invoice Item",

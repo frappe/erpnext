@@ -24,3 +24,6 @@ class ProformaInvoice(SellingController):
 
 	def on_submit(self):
 		self.update_prevdoc_status()
+
+	def on_update_after_submit(self):
+		self.update_prevdoc_status()
