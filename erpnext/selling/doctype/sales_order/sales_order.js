@@ -453,8 +453,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						}
 					}
 
-					if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
-						this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+					if (!doc.__onload || !doc.__onload.has_reserved_stock) {
+						if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
+							this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+						}
 					}
 
 					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
