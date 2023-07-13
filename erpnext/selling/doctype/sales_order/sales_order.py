@@ -902,7 +902,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 	def update_item(source, target, source_parent):
 		pending_amount = flt(source.amount) - flt(source.billed_amt)
-		target.amount = 0 if source.get("is_unit_price_item") else pending_amount
+		# 0 Amount rows (as seen in Unit Price Items) should be mapped as it is
+		target.amount = pending_amount if flt(source.amount) else 0
 
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = (
