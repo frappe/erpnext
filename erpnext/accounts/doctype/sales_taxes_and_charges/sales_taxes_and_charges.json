@@ -117,6 +117,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
    "fieldname": "tax_amount",
    "fieldtype": "Currency",
@@ -125,6 +126,7 @@
    "options": "currency"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
    "fieldname": "total",
    "fieldtype": "Currency",
@@ -134,6 +136,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_amount_after_discount_amount",
    "fieldtype": "Currency",
    "label": "Tax Amount After Discount Amount",
@@ -145,6 +148,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_tax_amount",
    "fieldtype": "Currency",
    "label": "Amount (Company Currency)",
@@ -154,6 +158,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total",
    "fieldtype": "Currency",
    "label": "Total (Company Currency)",
@@ -163,6 +168,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:parent.discount_amount",
    "fieldname": "base_tax_amount_after_discount_amount",
    "fieldtype": "Currency",
@@ -219,7 +225,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-13 11:10:43.532471",
+ "modified": "2023-07-13 11:46:20.783007",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",

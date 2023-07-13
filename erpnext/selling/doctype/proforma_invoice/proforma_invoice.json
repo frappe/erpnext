@@ -654,6 +654,7 @@
    "width": "50%"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -679,6 +680,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "bold": 1,
    "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
@@ -1380,7 +1382,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-13 11:18:57.847541",
+ "modified": "2023-07-13 11:37:51.382302",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Proforma Invoice",
