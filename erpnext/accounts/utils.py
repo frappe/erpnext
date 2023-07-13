@@ -576,7 +576,11 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	# new row with references
 	new_row = journal_entry.append("accounts")
 
-	new_row.update((frappe.copy_doc(jv_detail)).as_dict())
+	# Copy field values into new row
+	[
+		new_row.set(field, jv_detail.get(field))
+		for field in frappe.get_meta("Journal Entry Account").get_fieldnames_with_value()
+	]
 
 	new_row.set(d["dr_or_cr"], d["allocated_amount"])
 	new_row.set(
