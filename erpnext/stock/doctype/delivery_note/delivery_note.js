@@ -147,6 +147,9 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 						}
 						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+							args: {
+								for_reserved_stock: 1
+							},
 							source_doctype: "Sales Order",
 							target: me.frm,
 							setters: {
@@ -161,38 +164,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 							}
 						})
 					}, __("Get Items From"));
-
-					frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
-						if (value) {
-							this.frm.add_custom_button(__('Stock Reservation'),
-							function() {
-								if (!me.frm.doc.customer) {
-									frappe.throw({
-										title: __("Mandatory"),
-										message: __("Please Select a Customer")
-									});
-								}
-								erpnext.utils.map_current_doc({
-									method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-									args: {
-										for_reserved_stock: 1
-									},
-									source_doctype: "Sales Order",
-									target: me.frm,
-									setters: {
-										customer: me.frm.doc.customer,
-									},
-									get_query_filters: {
-										docstatus: 1,
-										status: ["not in", ["Closed", "On Hold"]],
-										per_delivered: ["<", 99.99],
-										company: me.frm.doc.company,
-										project: me.frm.doc.project || undefined,
-									}
-								})
-							}, __("Get Items From"));
-						}
-					});
 			}
 		}
 

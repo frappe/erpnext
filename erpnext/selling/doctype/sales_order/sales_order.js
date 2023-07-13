@@ -466,12 +466,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
-						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
-
-						if (doc.__onload && doc.__onload.has_reserved_stock) {
-							this.frm.add_custom_button(__('Delivery Note (Reserved Stock)'), () => this.make_delivery_note_based_on_delivery_date(true), __('Create'));
-						}
-
+						// this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(doc.__onload && doc.__onload.has_reserved_stock), __('Create'));
+						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(true), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
@@ -829,6 +825,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				delivery_dates,
 				for_reserved_stock: for_reserved_stock
 			},
+			freeze: true,
+			freeze_message: __("Creating Delivery Note ...")
 		})
 	}
 

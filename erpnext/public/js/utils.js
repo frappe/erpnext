@@ -755,6 +755,8 @@ erpnext.utils.map_current_doc = function(opts) {
 				"target_doc": cur_frm.doc,
 				"args": opts.args
 			},
+			freeze: true,
+			freeze_message: __("Mapping {0} ...", [opts.source_doctype]),
 			callback: function(r) {
 				if(!r.exc) {
 					var doc = frappe.model.sync(r.message);

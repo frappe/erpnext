@@ -836,6 +836,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_sre_details_for_voucher,
+		get_sre_reserved_qty_details_for_voucher,
 		get_ssb_bundle_for_voucher,
 	)
 
@@ -847,9 +848,9 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	kwargs = frappe._dict(kwargs)
 
-	sre_list = []
+	sre_details: dict[float] = {}
 	if kwargs.for_reserved_stock:
-		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
+		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
@@ -857,7 +858,27 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
+		target.run_method("calculate_taxes_and_totals")
+
+		if source.company_address:
+			target.update({"company_address": source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
+		if target.company_address:
+			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
+
+		make_packing_list(target)
+
 	def condition(doc):
+		if doc.name in sre_details:
+			del sre_details[doc.name]
+			return False
+
 		# make_mapped_doc sets js `args` into `frappe.flags.args`
 		if frappe.flags.args and frappe.flags.args.delivery_dates:
 			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
@@ -880,44 +901,31 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				or item_group.get("buying_cost_center")
 			)
 
-	def set_missing_values(source, target):
-		target.run_method("set_missing_values")
-		target.run_method("set_po_nos")
-		target.run_method("calculate_taxes_and_totals")
-
-		if source.company_address:
-			target.update({"company_address": source.company_address})
-		else:
-			# set company address
-			target.update(get_company_address(target.company))
-
-		if target.company_address:
-			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
-
-		make_packing_list(target)
-
-	target_doc = frappe.new_doc("Delivery Note")
-
 	if not kwargs.skip_item_mapping:
-		if not kwargs.for_reserved_stock:
-			mapper["Sales Order Item"] = {
-				"doctype": "Delivery Note Item",
-				"field_map": {
-					"rate": "rate",
-					"name": "so_detail",
-					"parent": "against_sales_order",
-				},
-				"condition": condition,
-				"postprocess": update_item,
-			}
-		else:
-			so = frappe.get_doc("Sales Order", source_name)
-			so_items = {d.name: d for d in so.items}
+		mapper["Sales Order Item"] = {
+			"doctype": "Delivery Note Item",
+			"field_map": {
+				"rate": "rate",
+				"name": "so_detail",
+				"parent": "against_sales_order",
+			},
+			"condition": condition,
+			"postprocess": update_item,
+		}
+
+	so = frappe.get_doc("Sales Order", source_name)
+	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc)
+
+	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
+		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
+
+		if sre_list:
 
 			def update_dn_item(source, target, source_parent):
 				update_item(source, target, so)
 
-			idx = 1
+			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
+
 			for sre in sre_list:
 				if not condition(so_items[sre.voucher_detail_no]):
 					continue
@@ -943,12 +951,12 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
 					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
 
-				dn_item.idx = idx
 				target_doc.append("items", dn_item)
+			else:
+				for idx, item in enumerate(target_doc.items):
+					item.idx = idx + 1
 
-				idx += 1
-
-	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
+	set_missing_values(so, target_doc)
 	target_doc.set_onload("ignore_price_list", True)
 
 	return target_doc
