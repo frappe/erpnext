@@ -6,6 +6,7 @@ import json
 from datetime import date
 
 import frappe
+from babel import Locale
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import formatdate, getdate, today
@@ -39,7 +40,15 @@ class HolidayList(Document):
 
 	@frappe.whitelist()
 	def get_supported_countries(self):
-		return list_supported_countries()
+		subdivisions_by_country = list_supported_countries()
+		countries = [
+			{"value": country, "label": local_country_name(country)}
+			for country in subdivisions_by_country.keys()
+		]
+		return {
+			"countries": countries,
+			"subdivisions_by_country": subdivisions_by_country,
+		}
 
 	@frappe.whitelist()
 	def get_local_holidays(self):
@@ -157,3 +166,8 @@ def is_holiday(holiday_list, date=None):
 		)
 	else:
 		return False
+
+
+def local_country_name(country_code: str) -> str:
+	"""Return the localized country name for the given country code."""
+	return Locale.parse(frappe.local.lang).territories.get(country_code, country_code)
