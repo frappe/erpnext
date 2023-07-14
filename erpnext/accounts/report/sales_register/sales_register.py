@@ -9,12 +9,8 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika import Order
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
-	get_accounting_dimensions,
-)
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
-	filter_invoices_based_on_dimensions,
 	get_advance_taxes_and_charges,
 	get_conditions,
 	get_journal_entries,
@@ -41,10 +37,6 @@ def _execute(filters, additional_table_columns=None):
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 	if filters.get("include_payments"):
 		invoice_list += get_payments(filters, additional_table_columns)
-
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	if len(invoice_list) > 0 and accounting_dimensions:
-		invoice_list = filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoice_list)
 
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments

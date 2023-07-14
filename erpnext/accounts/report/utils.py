@@ -6,6 +6,7 @@ from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
 	get_dimension_with_children,
 )
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
@@ -321,6 +322,9 @@ def get_conditions(filters, query, docs, payments=False):
 			query = query.where(child_doc.warehouse == filters.warehouse)
 		if filters.get("item_group"):
 			query = query.where(child_doc.item_group == filters.item_group)
+
+	if parent_doc.get_table_name() != "tabJournal Entry":
+		query = filter_invoices_based_on_dimensions(filters, query, parent_doc)
 	return query
 
 
@@ -346,9 +350,9 @@ def get_advance_taxes_and_charges(invoice_list):
 	).run(as_dict=True)
 
 
-def filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoices):
-	invoices_with_acc_dimensions = []
-	for inv in invoices:
+def filter_invoices_based_on_dimensions(filters, query, parent_doc):
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
 				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
@@ -356,11 +360,8 @@ def filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoices
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
 				fieldname = dimension.fieldname
-				if inv.fieldname != filters[fieldname]:
-					break
-		else:
-			invoices_with_acc_dimensions.append(inv)
-	return invoices_with_acc_dimensions
+				query = query.where(parent_doc[fieldname] == filters.fieldname)
+	return query
 
 
 def get_opening_row(party_type, party, from_date, company):
