@@ -11,6 +11,7 @@ from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	InvalidPaymentEntry,
 	get_payment_entry,
+	get_reference_details,
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	make_purchase_invoice,
@@ -45,6 +46,38 @@ class TestPaymentEntry(FrappeTestCase):
 
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 1000)
+
+		pe.cancel()
+
+		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
+		self.assertEqual(so_advance_paid, 0)
+
+	def test_payment_against_sales_order_usd_to_inr(self):
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_submit=True
+		)
+		so.conversion_rate = 50
+		so.submit()
+		pe = get_payment_entry("Sales Order", so.name)
+		pe.source_exchange_rate = 55
+		pe.received_amount = 5500
+		pe.insert()
+		pe.submit()
+
+		# there should be no difference amount
+		pe.reload()
+		self.assertEqual(pe.difference_amount, 0)
+		self.assertEqual(pe.deductions, [])
+
+		expected_gle = dict(
+			(d[0], d)
+			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], ["Cash - _TC", 5500.0, 0, None]]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
+		self.assertEqual(so_advance_paid, 100)
 
 		pe.cancel()
 
@@ -899,7 +932,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(pe.cost_center, si.cost_center)
 		self.assertEqual(flt(expected_account_balance), account_balance)
 		self.assertEqual(flt(expected_party_balance), party_balance)
-		self.assertEqual(flt(expected_party_account_balance), party_account_balance)
+		self.assertEqual(flt(expected_party_account_balance, 2), flt(party_account_balance, 2))
 
 	def test_multi_currency_payment_entry_with_taxes(self):
 		payment_entry = create_payment_entry(
@@ -980,6 +1013,53 @@ class TestPaymentEntry(FrappeTestCase):
 	def test_payment_entry_for_employee(self):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
 		create_payment_entry(party_type="Employee", party=employee, save=True)
+
+	def test_duplicate_payment_entry_allocate_amount(self):
+		si = create_sales_invoice()
+
+		pe_draft = get_payment_entry("Sales Invoice", si.name)
+		pe_draft.insert()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.submit()
+
+		self.assertRaises(frappe.ValidationError, pe_draft.submit)
+
+	def test_duplicate_payment_entry_partial_allocate_amount(self):
+		si = create_sales_invoice()
+
+		pe_draft = get_payment_entry("Sales Invoice", si.name)
+		pe_draft.insert()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		pe.received_amount = si.total / 2
+		pe.references[0].allocated_amount = si.total / 2
+		pe.submit()
+
+		self.assertRaises(frappe.ValidationError, pe_draft.submit)
+
+	def test_details_update_on_reference_table(self):
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_submit=True
+		)
+		so.conversion_rate = 50
+		so.submit()
+		pe = get_payment_entry("Sales Order", so.name)
+		pe.references.clear()
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_from_account_currency = "INR"
+		pe.source_exchange_rate = 50
+		pe.save()
+
+		ref_details = get_reference_details(so.doctype, so.name, pe.paid_from_account_currency)
+		expected_response = {
+			"total_amount": 5000.0,
+			"outstanding_amount": 5000.0,
+			"exchange_rate": 1.0,
+			"due_date": None,
+			"bill_no": None,
+		}
+		self.assertDictEqual(ref_details, expected_response)
 
 
 def create_payment_entry(**args):

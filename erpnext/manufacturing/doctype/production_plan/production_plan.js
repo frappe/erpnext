@@ -99,7 +99,7 @@ frappe.ui.form.on('Production Plan', {
 					}, __('Create'));
 				}
 
-				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
+				if (frm.doc.mr_items && frm.doc.mr_items.length && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
 					frm.add_custom_button(__("Material Request"), ()=> {
 						frm.trigger("make_material_request");
 					}, __('Create'));
@@ -336,10 +336,6 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_items_for_material_requests(frm, warehouses) {
-		let set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 'from_warehouse',
-			'min_order_qty', 'required_bom_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'ordered_qty',
-			'reserved_qty_for_production', 'material_request_type'];
-
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
 			freeze: true,
@@ -352,11 +348,11 @@ frappe.ui.form.on('Production Plan', {
 					frm.set_value('mr_items', []);
 					r.message.forEach(row => {
 						let d = frm.add_child('mr_items');
-						set_fields.forEach(field => {
-							if (row[field]) {
+						for (let field in row) {
+							if (field !== 'name') {
 								d[field] = row[field];
 							}
-						});
+						}
 					});
 				}
 				refresh_field('mr_items');
@@ -455,10 +451,14 @@ frappe.ui.form.on("Material Request Plan Item", {
 					for_warehouse: row.warehouse
 				},
 				callback: function(r) {
-					let {projected_qty, actual_qty} = r.message;
+					if (r.message) {
+						let {projected_qty, actual_qty} = r.message[0];
 
-					frappe.model.set_value(cdt, cdn, 'projected_qty', projected_qty);
-					frappe.model.set_value(cdt, cdn, 'actual_qty', actual_qty);
+						frappe.model.set_value(cdt, cdn, {
+							'projected_qty': projected_qty,
+							'actual_qty': actual_qty
+						});
+					}
 				}
 			})
 		}

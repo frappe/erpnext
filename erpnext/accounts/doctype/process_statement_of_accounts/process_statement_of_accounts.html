@@ -1,6 +1,6 @@
 <div class="page-break">
 	<div id="header-html" class="hidden-pdf">
-		{% if letter_head %}
+		{% if letter_head.content %}
 		<div class="letter-head text-center">{{ letter_head.content }}</div>
 		<hr style="height:2px;border-width:0;color:black;background-color:black;">
 		{% endif %}
@@ -15,7 +15,12 @@
 	</div>
 	<h2 class="text-center">{{ _("STATEMENTS OF ACCOUNTS") }}</h2>
 	<div>
-		<h5 style="float: left;">{{ _("Customer: ") }} <b>{{filters.party_name[0] }}</b></h5>
+		{% if filters.party[0] == filters.party_name[0] %}
+			<h5 style="float: left;">{{ _("Customer: ") }} <b>{{ filters.party_name[0] }}</b></h5>
+		{% else %}
+			<h5 style="float: left;">{{ _("Customer: ") }} <b>{{ filters.party[0] }}</b></h5>
+			<h5 style="float: left; margin-left:15px">{{ _("Customer Name: ") }} <b>{{filters.party_name[0] }}</b></h5>
+		{% endif %}
 		<h5 style="float: right;">
 			{{ _("Date: ") }}
 			<b>{{ frappe.format(filters.from_date, 'Date')}}

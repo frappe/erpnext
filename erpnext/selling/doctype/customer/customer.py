@@ -22,6 +22,7 @@ from erpnext.accounts.party import (  # noqa
 	get_timeline_data,
 	validate_party_accounts,
 )
+from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -82,6 +83,7 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.add_role_for_user()
 
 		# set loyalty program tier
 		if frappe.db.exists("Customer", self.name):
@@ -169,6 +171,10 @@ class Customer(TransactionBase):
 			self.link_lead_address_and_contact()
 
 		self.update_customer_groups()
+
+	def add_role_for_user(self):
+		for portal_user in self.portal_users:
+			add_role_for_portal_user(portal_user, "Customer")
 
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
@@ -454,11 +460,11 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		customer_outstanding += flt(extra_amount)
 
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
-		msgprint(
-			_("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-				customer, customer_outstanding, credit_limit
-			)
+		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
+			customer, customer_outstanding, credit_limit
 		)
+
+		message += "<br><br>"
 
 		# If not authorized person raise exception
 		credit_controller_role = frappe.db.get_single_value("Accounts Settings", "credit_controller")
@@ -480,7 +486,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				"<li>".join(credit_controller_users_formatted)
 			)
 
-			message = _(
+			message += _(
 				"Please contact any of the following users to extend the credit limits for {0}: {1}"
 			).format(customer, user_list)
 
@@ -488,7 +494,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			# prompt them to send out an email to the controller users
 			frappe.msgprint(
 				message,
-				title="Notify",
+				title=_("Credit Limit Crossed"),
 				raise_exception=1,
 				primary_action={
 					"label": "Send Email",
@@ -519,7 +525,6 @@ def get_customer_outstanding(
 	customer, company, ignore_outstanding_sales_order=False, cost_center=None
 ):
 	# Outstanding based on GL Entries
-
 	cond = ""
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center", cost_center, ["lft", "rgt"])
@@ -617,11 +622,15 @@ def get_credit_limit(customer, company):
 
 		if not credit_limit:
 			customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
-			credit_limit = frappe.db.get_value(
+
+			result = frappe.db.get_values(
 				"Customer Credit Limit",
 				{"parent": customer_group, "parenttype": "Customer Group", "company": company},
-				"credit_limit",
+				fieldname=["credit_limit", "bypass_credit_limit_check"],
+				as_dict=True,
 			)
+			if result and not result[0].bypass_credit_limit_check:
+				credit_limit = result[0].credit_limit
 
 	if not credit_limit:
 		credit_limit = frappe.get_cached_value("Company", company, "credit_limit")

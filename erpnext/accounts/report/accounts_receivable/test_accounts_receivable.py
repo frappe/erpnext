@@ -210,6 +210,67 @@ class TestAccountsReceivable(FrappeTestCase):
 			],
 		)
 
+	def test_payment_against_credit_note(self):
+		"""
+		Payment against credit/debit note should be considered against the parent invoice
+		"""
+		company = "_Test Company 2"
+		customer = "_Test Customer 2"
+
+		si1 = make_sales_invoice()
+
+		pe = get_payment_entry("Sales Invoice", si1.name, bank_account="Cash - _TC2")
+		pe.paid_from = "Debtors - _TC2"
+		pe.insert()
+		pe.submit()
+
+		cr_note = make_credit_note(si1.name)
+
+		si2 = make_sales_invoice()
+
+		# manually link cr_note with si2 using journal entry
+		je = frappe.new_doc("Journal Entry")
+		je.company = company
+		je.voucher_type = "Credit Note"
+		je.posting_date = today()
+
+		debit_account = "Debtors - _TC2"
+		debit_entry = {
+			"account": debit_account,
+			"party_type": "Customer",
+			"party": customer,
+			"debit": 100,
+			"debit_in_account_currency": 100,
+			"reference_type": cr_note.doctype,
+			"reference_name": cr_note.name,
+			"cost_center": "Main - _TC2",
+		}
+		credit_entry = {
+			"account": debit_account,
+			"party_type": "Customer",
+			"party": customer,
+			"credit": 100,
+			"credit_in_account_currency": 100,
+			"reference_type": si2.doctype,
+			"reference_name": si2.name,
+			"cost_center": "Main - _TC2",
+		}
+
+		je.append("accounts", debit_entry)
+		je.append("accounts", credit_entry)
+		je = je.save().submit()
+
+		filters = {
+			"company": company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+		report = execute(filters)
+		self.assertEqual(report[1], [])
+
 
 def make_sales_invoice(no_payment_schedule=False, do_not_submit=False):
 	frappe.set_user("Administrator")
@@ -256,7 +317,7 @@ def make_payment(docname):
 
 
 def make_credit_note(docname):
-	create_sales_invoice(
+	credit_note = create_sales_invoice(
 		company="_Test Company 2",
 		customer="_Test Customer 2",
 		currency="EUR",
@@ -269,3 +330,5 @@ def make_credit_note(docname):
 		is_return=1,
 		return_against=docname,
 	)
+
+	return credit_note

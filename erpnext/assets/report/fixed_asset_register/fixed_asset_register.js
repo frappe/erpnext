@@ -20,56 +20,6 @@ frappe.query_reports["Fixed Asset Register"] = {
 			default: 'In Location'
 		},
 		{
-			"fieldname":"filter_based_on",
-			"label": __("Period Based On"),
-			"fieldtype": "Select",
-			"options": ["Fiscal Year", "Date Range"],
-			"default": "Fiscal Year",
-			"reqd": 1
-		},
-		{
-			"fieldname":"from_date",
-			"label": __("Start Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), -12),
-			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
-			"reqd": 1
-		},
-		{
-			"fieldname":"to_date",
-			"label": __("End Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.nowdate(),
-			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
-			"reqd": 1
-		},
-		{
-			"fieldname":"from_fiscal_year",
-			"label": __("Start Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
-			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
-			"reqd": 1
-		},
-		{
-			"fieldname":"to_fiscal_year",
-			"label": __("End Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
-			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
-			"reqd": 1
-		},
-		{
-			"fieldname":"date_based_on",
-			"label": __("Date Based On"),
-			"fieldtype": "Select",
-			"options": ["Purchase Date", "Available For Use Date"],
-			"default": "Purchase Date",
-			"reqd": 1
-		},
-		{
 			fieldname:"asset_category",
 			label: __("Asset Category"),
 			fieldtype: "Link",
@@ -90,21 +40,66 @@ frappe.query_reports["Fixed Asset Register"] = {
 			reqd: 1
 		},
 		{
+			fieldname:"only_existing_assets",
+			label: __("Only existing assets"),
+			fieldtype: "Check"
+		},
+		{
 			fieldname:"finance_book",
 			label: __("Finance Book"),
 			fieldtype: "Link",
 			options: "Finance Book",
-			depends_on: "eval: doc.only_depreciable_assets == 1",
 		},
 		{
-			fieldname:"only_depreciable_assets",
-			label: __("Only depreciable assets"),
-			fieldtype: "Check"
+			"fieldname": "include_default_book_assets",
+			"label": __("Include Default Book Assets"),
+			"fieldtype": "Check",
+			"default": 1
 		},
 		{
-			fieldname:"only_existing_assets",
-			label: __("Only existing assets"),
-			fieldtype: "Check"
+			"fieldname":"filter_based_on",
+			"label": __("Period Based On"),
+			"fieldtype": "Select",
+			"options": ["--Select a period--", "Fiscal Year", "Date Range"],
+			"default": "--Select a period--",
+		},
+		{
+			"fieldname":"from_date",
+			"label": __("Start Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), -12),
+			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("End Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.nowdate(),
+			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
+		},
+		{
+			"fieldname":"from_fiscal_year",
+			"label": __("Start Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
+		},
+		{
+			"fieldname":"to_fiscal_year",
+			"label": __("End Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
+		},
+		{
+			"fieldname":"date_based_on",
+			"label": __("Date Based On"),
+			"fieldtype": "Select",
+			"options": ["Purchase Date", "Available For Use Date"],
+			"default": "Purchase Date",
+			"depends_on": "eval: doc.filter_based_on == 'Date Range' || doc.filter_based_on == 'Fiscal Year'",
 		},
 	]
 };

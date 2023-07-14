@@ -326,6 +326,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -437,6 +438,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "oldfieldname": "rejected_warehouse",
@@ -1113,6 +1115,7 @@
    "depends_on": "eval: doc.is_internal_supplier",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set From Warehouse",
    "options": "Warehouse"
   },
@@ -1238,7 +1241,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:40:32.447752",
+ "modified": "2023-07-04 17:23:17.025390",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

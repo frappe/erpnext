@@ -113,7 +113,7 @@
   {
    "fieldname": "default_receivable_account",
    "fieldtype": "Section Break",
-   "label": "Default Receivable Account"
+   "label": "Default Accounts"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -139,7 +139,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-24 11:15:17.142746",
+ "modified": "2023-06-02 13:40:34.435822",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -171,7 +171,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },

@@ -19,8 +19,8 @@
   "column_break_17",
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
-  "report_setting_section",
-  "use_custom_cash_flow",
+  "journals_section",
+  "merge_similar_account_heads",
   "deferred_accounting_settings_section",
   "book_deferred_entries_based_on",
   "column_break_18",
@@ -34,10 +34,13 @@
   "book_tax_discount_loss",
   "print_settings",
   "show_inclusive_tax_in_print",
+  "show_taxes_as_table_in_print",
   "column_break_12",
   "show_payment_schedule_in_print",
   "currency_exchange_section",
   "allow_stale",
+  "section_break_jpd0",
+  "auto_reconcile_payments",
   "stale_days",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
@@ -57,9 +60,11 @@
   "acc_frozen_upto",
   "column_break_25",
   "frozen_accounts_modifier",
-  "report_settings_sb",
   "tab_break_dpet",
-  "show_balance_in_coa"
+  "show_balance_in_coa",
+  "banking_tab",
+  "enable_party_matching",
+  "enable_fuzzy_matching"
  ],
  "fields": [
   {
@@ -171,19 +176,8 @@
    "label": "Stale Days"
   },
   {
-   "fieldname": "report_settings_sb",
-   "fieldtype": "Section Break",
-   "label": "Report Settings"
-  },
-  {
    "default": "0",
-   "description": "Only select this if you have set up the Cash Flow Mapper documents",
-   "fieldname": "use_custom_cash_flow",
-   "fieldtype": "Check",
-   "label": "Enable Custom Cash Flow Format"
-  },
-  {
-   "default": "0",
+   "description": "Payment Terms from orders will be fetched into the invoices as is",
    "fieldname": "automatically_fetch_payment_terms",
    "fieldtype": "Check",
    "label": "Automatically Fetch Payment Terms from Order"
@@ -340,11 +334,6 @@
    "label": "POS"
   },
   {
-   "fieldname": "report_setting_section",
-   "fieldtype": "Section Break",
-   "label": "Report Setting"
-  },
-  {
    "default": "0",
    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
@@ -368,6 +357,55 @@
    "fieldname": "book_tax_discount_loss",
    "fieldtype": "Check",
    "label": "Book Tax Loss on Early Payment Discount"
+  },
+  {
+   "fieldname": "journals_section",
+   "fieldtype": "Section Break",
+   "label": "Journals"
+  },
+  {
+   "default": "0",
+   "description": "Rows with Same Account heads will be merged on Ledger",
+   "fieldname": "merge_similar_account_heads",
+   "fieldtype": "Check",
+   "label": "Merge Similar Account Heads"
+  },
+  {
+   "fieldname": "section_break_jpd0",
+   "fieldtype": "Section Break",
+   "label": "Payment Reconciliations"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_reconcile_payments",
+   "fieldtype": "Check",
+   "label": "Auto Reconcile Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
+  },
+  {
+   "fieldname": "banking_tab",
+   "fieldtype": "Tab Break",
+   "label": "Banking"
+  },
+  {
+   "default": "0",
+   "description": "Auto match and set the Party in Bank Transactions",
+   "fieldname": "enable_party_matching",
+   "fieldtype": "Check",
+   "label": "Enable Automatic Party Matching"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_party_matching",
+   "description": "Approximately match the description/party name against parties",
+   "fieldname": "enable_fuzzy_matching",
+   "fieldtype": "Check",
+   "label": "Enable Fuzzy Matching"
   }
  ],
  "icon": "icon-cog",
@@ -375,7 +413,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-28 09:50:20.375233",
+ "modified": "2023-06-15 16:35:45.123456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

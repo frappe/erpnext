@@ -19,9 +19,6 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reverse_depreciation_entry_made_after_disposal,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	make_new_active_asset_depr_schedules_and_cancel_current_ones,
-)
 from erpnext.controllers.stock_controller import StockController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -45,7 +42,6 @@ force_fields = [
 	"target_has_batch_no",
 	"target_stock_uom",
 	"stock_uom",
-	"target_fixed_asset_account",
 	"fixed_asset_account",
 	"valuation_rate",
 ]
@@ -56,7 +52,6 @@ class AssetCapitalization(StockController):
 		self.validate_posting_time()
 		self.set_missing_values(for_validate=True)
 		self.validate_target_item()
-		self.validate_target_asset()
 		self.validate_consumed_stock_item()
 		self.validate_consumed_asset_item()
 		self.validate_service_item()
@@ -65,19 +60,29 @@ class AssetCapitalization(StockController):
 		self.calculate_totals()
 		self.set_title()
 
+	def on_update(self):
+		if self.stock_items:
+			self.set_serial_and_batch_bundle(table_name="stock_items")
+
 	def before_submit(self):
 		self.validate_source_mandatory()
+		if self.entry_type == "Capitalization":
+			self.create_target_asset()
 
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
-		self.update_target_asset()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.update_stock_ledger()
 		self.make_gl_entries()
-		self.update_target_asset()
+		self.restore_consumed_asset_items()
 
 	def set_title(self):
 		self.title = self.target_asset_name or self.target_item_name or self.target_item_code
@@ -85,15 +90,6 @@ class AssetCapitalization(StockController):
 	def set_missing_values(self, for_validate=False):
 		target_item_details = get_target_item_details(self.target_item_code, self.company)
 		for k, v in target_item_details.items():
-			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
-				self.set(k, v)
-
-		# Remove asset if item not a fixed asset
-		if not self.target_is_fixed_asset:
-			self.target_asset = None
-
-		target_asset_details = get_target_asset_details(self.target_asset, self.company)
-		for k, v in target_asset_details.items():
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
@@ -148,9 +144,6 @@ class AssetCapitalization(StockController):
 
 		if not target_item.is_stock_item:
 			self.target_warehouse = None
-		if not target_item.is_fixed_asset:
-			self.target_asset = None
-			self.target_fixed_asset_account = None
 		if not target_item.has_batch_no:
 			self.target_batch_no = None
 		if not target_item.has_serial_no:
@@ -160,17 +153,6 @@ class AssetCapitalization(StockController):
 			frappe.throw(_("Target Warehouse is mandatory for Decapitalization"))
 
 		self.validate_item(target_item)
-
-	def validate_target_asset(self):
-		if self.target_asset:
-			target_asset = self.get_asset_for_validation(self.target_asset)
-
-			if target_asset.item_code != self.target_item_code:
-				frappe.throw(
-					_("Asset {0} does not belong to Item {1}").format(self.target_asset, self.target_item_code)
-				)
-
-			self.validate_asset(target_asset)
 
 	def validate_consumed_stock_item(self):
 		for d in self.stock_items:
@@ -316,9 +298,7 @@ class AssetCapitalization(StockController):
 		for d in self.stock_items:
 			sle = self.get_sl_entries(
 				d,
-				{
-					"actual_qty": -flt(d.stock_qty),
-				},
+				{"actual_qty": -flt(d.stock_qty), "serial_and_batch_bundle": d.serial_and_batch_bundle},
 			)
 			sl_entries.append(sle)
 
@@ -328,8 +308,6 @@ class AssetCapitalization(StockController):
 				{
 					"item_code": self.target_item_code,
 					"warehouse": self.target_warehouse,
-					"batch_no": self.target_batch_no,
-					"serial_no": self.target_serial_no,
 					"actual_qty": flt(self.target_qty),
 					"incoming_rate": flt(self.target_incoming_rate),
 				},
@@ -381,7 +359,11 @@ class AssetCapitalization(StockController):
 			gl_entries, target_account, target_against, precision
 		)
 
+		if not self.stock_items and not self.service_items and self.are_all_asset_items_non_depreciable:
+			return []
+
 		self.get_gl_entries_for_target_item(gl_entries, target_against, precision)
+
 		return gl_entries
 
 	def get_target_account(self):
@@ -424,11 +406,14 @@ class AssetCapitalization(StockController):
 	def get_gl_entries_for_consumed_asset_items(
 		self, gl_entries, target_account, target_against, precision
 	):
+		self.are_all_asset_items_non_depreciable = True
+
 		# Consumed Assets
 		for item in self.asset_items:
-			asset = self.get_asset(item)
+			asset = frappe.get_doc("Asset", item.asset)
 
 			if asset.calculate_depreciation:
+				self.are_all_asset_items_non_depreciable = False
 				notes = _(
 					"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
 				).format(
@@ -443,6 +428,7 @@ class AssetCapitalization(StockController):
 				item.get("finance_book") or self.get("finance_book"),
 				self.get("doctype"),
 				self.get("name"),
+				self.get("posting_date"),
 			)
 
 			asset.db_set("disposal_date", self.posting_date)
@@ -513,40 +499,46 @@ class AssetCapitalization(StockController):
 					)
 				)
 
-	def update_target_asset(self):
+	def create_target_asset(self):
 		total_target_asset_value = flt(self.total_value, self.precision("total_value"))
-		if self.docstatus == 1 and self.entry_type == "Capitalization":
-			asset_doc = frappe.get_doc("Asset", self.target_asset)
-			asset_doc.purchase_date = self.posting_date
-			asset_doc.gross_purchase_amount = total_target_asset_value
-			asset_doc.purchase_receipt_amount = total_target_asset_value
-			notes = _(
-				"This schedule was created when target Asset {0} was updated through Asset Capitalization {1}."
-			).format(
-				get_link_to_form(asset_doc.doctype, asset_doc.name), get_link_to_form(self.doctype, self.name)
-			)
-			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset_doc, notes)
-			asset_doc.flags.ignore_validate_update_after_submit = True
-			asset_doc.save()
-		elif self.docstatus == 2:
-			for item in self.asset_items:
-				asset = self.get_asset(item)
-				asset.db_set("disposal_date", None)
-				self.set_consumed_asset_status(asset)
+		asset_doc = frappe.new_doc("Asset")
+		asset_doc.company = self.company
+		asset_doc.item_code = self.target_item_code
+		asset_doc.is_existing_asset = 1
+		asset_doc.location = self.target_asset_location
+		asset_doc.available_for_use_date = self.posting_date
+		asset_doc.purchase_date = self.posting_date
+		asset_doc.gross_purchase_amount = total_target_asset_value
+		asset_doc.purchase_receipt_amount = total_target_asset_value
+		asset_doc.flags.ignore_validate = True
+		asset_doc.insert()
 
-				if asset.calculate_depreciation:
-					reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
-					notes = _(
-						"This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
-					).format(
-						get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
-					)
-					reset_depreciation_schedule(asset, self.posting_date, notes)
+		self.target_asset = asset_doc.name
 
-	def get_asset(self, item):
-		asset = frappe.get_doc("Asset", item.asset)
-		self.check_finance_books(item, asset)
-		return asset
+		self.target_fixed_asset_account = get_asset_category_account(
+			"fixed_asset_account", item=self.target_item_code, company=asset_doc.company
+		)
+
+		frappe.msgprint(
+			_(
+				"Asset {0} has been created. Please set the depreciation details if any and submit it."
+			).format(get_link_to_form("Asset", asset_doc.name))
+		)
+
+	def restore_consumed_asset_items(self):
+		for item in self.asset_items:
+			asset = frappe.get_doc("Asset", item.asset)
+			asset.db_set("disposal_date", None)
+			self.set_consumed_asset_status(asset)
+
+			if asset.calculate_depreciation:
+				reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
+				notes = _(
+					"This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
+				).format(
+					get_link_to_form(asset.doctype, asset.name), get_link_to_form(self.doctype, self.name)
+				)
+				reset_depreciation_schedule(asset, self.posting_date, notes)
 
 	def set_consumed_asset_status(self, asset):
 		if self.docstatus == 1:
@@ -592,33 +584,6 @@ def get_target_item_details(item_code=None, company=None):
 		item_group_defaults,
 		brand_defaults,
 	)
-
-	return out
-
-
-@frappe.whitelist()
-def get_target_asset_details(asset=None, company=None):
-	out = frappe._dict()
-
-	# Get Asset Details
-	asset_details = frappe._dict()
-	if asset:
-		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code"], as_dict=1)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(asset))
-
-		# Re-set item code from Asset
-		out.target_item_code = asset_details.item_code
-
-	# Set Asset Details
-	out.asset_name = asset_details.asset_name
-
-	if asset_details.item_code:
-		out.target_fixed_asset_account = get_asset_category_account(
-			"fixed_asset_account", item=asset_details.item_code, company=company
-		)
-	else:
-		out.target_fixed_asset_account = None
 
 	return out
 

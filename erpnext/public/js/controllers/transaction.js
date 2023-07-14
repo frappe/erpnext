@@ -6,6 +6,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	setup() {
 		super.setup();
 		let me = this;
+
+		this.frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
+
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
@@ -119,10 +122,27 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		});
 
-		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
-			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
-				return me.set_query_for_batch(doc, cdt, cdn);
+		if(this.frm.fields_dict["items"].grid.get_field('serial_and_batch_bundle')) {
+			this.frm.set_query("serial_and_batch_bundle", "items", function(doc, cdt, cdn) {
+				let item_row = locals[cdt][cdn];
+				return {
+					filters: {
+						'item_code': item_row.item_code,
+						'voucher_type': doc.doctype,
+						'voucher_no': ["in", [doc.name, ""]],
+						'is_cancelled': 0,
+					}
+				}
 			});
+
+			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
+			if (sbb_field) {
+				sbb_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item_code': row.doc.item_code,
+					}
+				};
+			}
 		}
 
 		if(
@@ -173,7 +193,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_query("expense_account", "items", function(doc) {
 				return {
 					filters: {
-						"company": doc.company
+						"company": doc.company,
+						"report_type": "Profit and Loss",
+						"is_group": 0
 					}
 				};
 			});
@@ -422,7 +444,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
 
-		} else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
+		} else if((this.frm.doc.doctype === 'Purchase Receipt') ||
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
@@ -494,7 +516,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+									if ((me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) && me.frm.doc.represents_company === me.frm.doc.company) {
 										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
 											me.frm.doc.doctype, me.frm.doc.company);
 									} else {
@@ -514,6 +536,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 												if (r.message &&
 												(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
+												} else {
+													show_batch_dialog = false;
 												}
 											});
 								},
@@ -528,7 +552,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 											});
 								},
 								() => {
-									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
+									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {
 										var d = locals[cdt][cdn];
 										$.each(r.message, function(k, v) {
 											if(!d[k]) d[k] = v;
@@ -538,12 +562,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 											d.batch_no = undefined;
 										}
 
+										frappe.flags.dialog_set = true;
 										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
 											if (!me.frm.doc.set_warehouse)
 												me.frm.script_manager.trigger('warehouse', item.doctype, item.name);
 											me.apply_price_list(item, true);
 										}, undefined, !frappe.flags.hide_serial_batch_dialog);
+									} else {
+										frappe.flags.dialog_set = false;
 									}
 								},
 								() => me.conversion_factor(doc, cdt, cdn, true),
@@ -670,6 +697,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				}
 			}
 		}
+	}
+
+	on_submit() {
+		refresh_field("items");
 	}
 
 	update_qty(cdt, cdn) {
@@ -1920,7 +1951,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	prompt_user_for_reference_date(){
-		var me = this;
+		let me = this;
 		frappe.prompt({
 			label: __("Cheque/Reference Date"),
 			fieldname: "reference_date",
@@ -1947,7 +1978,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let has_payment_schedule = this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length;
 		if(!is_eligible || !has_payment_schedule) return false;
 
-		let has_discount = this.frm.doc.payment_schedule.some(row => row.discount_date);
+		let has_discount = this.frm.doc.payment_schedule.some(row => row.discount);
 		return has_discount;
 	}
 
@@ -2272,12 +2303,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 };
 
-erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_dialog) {
+erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close, show_dialog) {
 	let warehouse, receiving_stock, existing_stock;
+
+	let warehouse_field = "warehouse";
 	if (frm.doc.is_return) {
 		if (["Purchase Receipt", "Purchase Invoice"].includes(frm.doc.doctype)) {
 			existing_stock = true;
-			warehouse = d.warehouse;
+			warehouse = item_row.warehouse;
 		} else if (["Delivery Note", "Sales Invoice"].includes(frm.doc.doctype)) {
 			receiving_stock = true;
 		}
@@ -2287,11 +2320,24 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 				receiving_stock = true;
 			} else {
 				existing_stock = true;
-				warehouse = d.s_warehouse;
+				warehouse = item_row.s_warehouse;
+			}
+
+			if (in_list([
+					"Material Transfer",
+					"Send to Subcontractor",
+					"Material Issue",
+					"Material Consumption for Manufacture",
+					"Material Transfer for Manufacture"
+				], frm.doc.purpose)
+			) {
+				warehouse_field = "s_warehouse";
+			} else {
+				warehouse_field = "t_warehouse";
 			}
 		} else {
 			existing_stock = true;
-			warehouse = d.warehouse;
+			warehouse = item_row.warehouse;
 		}
 	}
 
@@ -2304,16 +2350,26 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 	}
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchSelector({
-			frm: frm,
-			item: d,
-			warehouse_details: {
-				type: "Warehouse",
-				name: warehouse
-			},
-			callback: callback,
-			on_close: on_close
-		}, show_dialog);
+		if (in_list(["Sales Invoice", "Delivery Note"], frm.doc.doctype)) {
+			item_row.type_of_transaction = frm.doc.is_return ? "Inward" : "Outward";
+		} else {
+			item_row.type_of_transaction = frm.doc.is_return ? "Outward" : "Inward";
+		}
+
+		new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+			if (r) {
+				let update_values = {
+					"serial_and_batch_bundle": r.name,
+					"qty": Math.abs(r.total_qty)
+				}
+
+				if (r.warehouse) {
+					update_values[warehouse_field] = r.warehouse;
+				}
+
+				frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+			}
+		});
 	});
 }
 

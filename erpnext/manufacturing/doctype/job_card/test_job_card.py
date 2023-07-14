@@ -5,15 +5,17 @@
 from typing import Literal
 
 import frappe
+from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
-from frappe.utils.data import add_to_date, now
+from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
 	make_corrective_job_card,
+	make_material_request,
 )
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
@@ -272,6 +274,42 @@ class TestJobCard(FrappeTestCase):
 		transfer_entry_2.insert()
 		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	def test_job_card_excess_material_transfer_with_no_reference(self):
+
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+
+		self.generate_required_stock(self.work_order)
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
+
+		# fully transfer both RMs
+		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
+		row = transfer_entry_1.items[0]
+
+		# Add new row without reference of the job card item
+		transfer_entry_1.append(
+			"items",
+			{
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"item_group": row.item_group,
+				"qty": row.qty,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"stock_uom": row.stock_uom,
+				"basic_rate": row.basic_rate,
+				"basic_amount": row.basic_amount,
+				"expense_account": row.expense_account,
+				"cost_center": row.cost_center,
+				"s_warehouse": row.s_warehouse,
+				"t_warehouse": row.t_warehouse,
+			},
+		)
+
+		self.assertRaises(frappe.ValidationError, transfer_entry_1.insert)
+
 	def test_job_card_partial_material_transfer(self):
 		"Test partial material transfer against Job Card"
 		self.transfer_material_against = "Job Card"
@@ -305,6 +343,12 @@ class TestJobCard(FrappeTestCase):
 
 		job_card.reload()
 		self.assertEqual(job_card.transferred_qty, 2)
+
+		transfer_entry_2.cancel()
+		transfer_entry.cancel()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0.0)
 
 	def test_job_card_material_transfer_correctness(self):
 		"""
@@ -406,6 +450,167 @@ class TestJobCard(FrappeTestCase):
 
 		jc.docstatus = 2
 		assertStatus("Cancelled")
+
+	def test_job_card_material_request_and_bom_details(self):
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+
+		create_bom_with_multiple_operations()
+		work_order = make_wo_with_transfer_against_jc()
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": work_order.name}, "name")
+
+		mr = make_material_request(job_card_name)
+		mr.schedule_date = today()
+		mr.submit()
+
+		ste = make_stock_entry(mr.name)
+		self.assertEqual(ste.purpose, "Material Transfer for Manufacture")
+		self.assertEqual(ste.work_order, work_order.name)
+		self.assertEqual(ste.job_card, job_card_name)
+		self.assertEqual(ste.from_bom, 1.0)
+		self.assertEqual(ste.bom_no, work_order.bom_no)
+
+	def test_job_card_proccess_qty_and_completed_qty(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import (
+			create_routing,
+			setup_bom,
+			setup_operations,
+		)
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		operations = [
+			{"operation": "Test Operation A1", "workstation": "Test Workstation A", "time_in_mins": 30},
+			{"operation": "Test Operation B1", "workstation": "Test Workstation A", "time_in_mins": 20},
+		]
+
+		make_test_records("UOM")
+
+		warehouse = create_warehouse("Test Warehouse 123 for Job Card")
+
+		setup_operations(operations)
+
+		item_code = "Test Job Card Process Qty Item"
+		for item in [item_code, item_code + "RM 1", item_code + "RM 2"]:
+			if not frappe.db.exists("Item", item):
+				make_item(
+					item,
+					{
+						"item_name": item,
+						"stock_uom": "Nos",
+						"is_stock_item": 1,
+					},
+				)
+
+		routing_doc = create_routing(routing_name="Testing Route", operations=operations)
+		bom_doc = setup_bom(
+			item_code=item_code,
+			routing=routing_doc.name,
+			raw_materials=[item_code + "RM 1", item_code + "RM 2"],
+			source_warehouse=warehouse,
+		)
+
+		for row in bom_doc.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target=row.source_warehouse,
+				qty=10,
+				basic_rate=100,
+			)
+
+		wo_doc = make_wo_order_test_record(
+			production_item=item_code,
+			bom_no=bom_doc.name,
+			skip_transfer=1,
+			wip_warehouse=warehouse,
+			source_warehouse=warehouse,
+		)
+
+		for row in routing_doc.operations:
+			self.assertEqual(row.sequence_id, row.idx)
+
+		first_job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 1},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc = frappe.get_doc("Job Card", first_job_card)
+		for row in jc.scheduled_time_logs:
+			jc.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+				},
+			)
+
+		jc.time_logs[0].completed_qty = 8
+		jc.save()
+		jc.submit()
+
+		self.assertEqual(jc.process_loss_qty, 2)
+		self.assertEqual(jc.for_quantity, 10)
+
+		second_job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 2},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc2 = frappe.get_doc("Job Card", second_job_card)
+		for row in jc2.scheduled_time_logs:
+			jc2.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+				},
+			)
+		jc2.time_logs[0].completed_qty = 10
+
+		self.assertRaises(frappe.ValidationError, jc2.save)
+
+		jc2.load_from_db()
+		for row in jc2.scheduled_time_logs:
+			jc2.append(
+				"time_logs",
+				{
+					"from_time": row.from_time,
+					"to_time": row.to_time,
+					"time_in_mins": row.time_in_mins,
+				},
+			)
+
+		jc2.time_logs[0].completed_qty = 8
+		jc2.save()
+		jc2.submit()
+
+		self.assertEqual(jc2.for_quantity, 10)
+		self.assertEqual(jc2.process_loss_qty, 2)
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 10))
+		s.submit()
+
+		self.assertEqual(s.process_loss_qty, 2)
+
+		wo_doc.reload()
+		for row in wo_doc.operations:
+			self.assertEqual(row.completed_qty, 8)
+			self.assertEqual(row.process_loss_qty, 2)
+
+		self.assertEqual(wo_doc.produced_qty, 8)
+		self.assertEqual(wo_doc.process_loss_qty, 2)
+		self.assertEqual(wo_doc.status, "Completed")
 
 
 def create_bom_with_multiple_operations():

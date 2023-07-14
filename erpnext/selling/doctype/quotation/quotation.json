@@ -291,6 +291,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -416,7 +417,6 @@
    "fieldname": "items_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
-   "label": "Items",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -424,6 +424,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "quotation_details",
    "oldfieldtype": "Table",
    "options": "Quotation Item",
@@ -1072,7 +1073,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:32:28.671332",
+ "modified": "2023-06-03 16:21:04.980033",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

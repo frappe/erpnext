@@ -102,9 +102,6 @@ class PurchaseInvoice(BuyingController):
 		# validate service stop date to lie in between start and end date
 		validate_service_stop_date(self)
 
-		if self._action == "submit" and self.update_stock:
-			self.make_batches("warehouse")
-
 		self.validate_release_date()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
@@ -512,10 +509,6 @@ class PurchaseInvoice(BuyingController):
 
 			if self.is_old_subcontracting_flow:
 				self.set_consumed_qty_in_subcontract_order()
-
-			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-			update_serial_nos_after_submit(self, "items")
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -978,7 +971,7 @@ class PurchaseInvoice(BuyingController):
 
 	def make_precision_loss_gl_entry(self, gl_entries):
 		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-			self.company, "Purchase Invoice", self.name
+			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 		)
 
 		precision_loss = self.get("base_net_total") - flt(
@@ -992,7 +985,9 @@ class PurchaseInvoice(BuyingController):
 						"account": round_off_account,
 						"against": self.supplier,
 						"credit": precision_loss,
-						"cost_center": self.cost_center or round_off_cost_center,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else self.cost_center or round_off_cost_center,
 						"remarks": _("Net total calculation precision loss"),
 					}
 				)
@@ -1386,7 +1381,7 @@ class PurchaseInvoice(BuyingController):
 			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
 		):
 			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-				self.company, "Purchase Invoice", self.name
+				self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 			)
 
 			gl_entries.append(
@@ -1396,7 +1391,9 @@ class PurchaseInvoice(BuyingController):
 						"against": self.supplier,
 						"debit_in_account_currency": self.rounding_adjustment,
 						"debit": self.base_rounding_adjustment,
-						"cost_center": self.cost_center or round_off_cost_center,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else (self.cost_center or round_off_cost_center),
 					},
 					item=self,
 				)
@@ -1444,6 +1441,7 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
+			"Serial and Batch Bundle",
 		)
 		self.update_advance_tax_references(cancel=1)
 

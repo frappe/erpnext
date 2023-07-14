@@ -52,6 +52,7 @@ def make_stock_entry(**args):
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	"""
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	def process_serial_numbers(serial_nos_list):
 		serial_nos_list = [
@@ -131,16 +132,36 @@ def make_stock_entry(**args):
 	# We can find out the serial number using the batch source document
 	serial_number = args.serial_no
 
-	if not args.serial_no and args.qty and args.batch_no:
-		serial_number_list = frappe.get_list(
-			doctype="Stock Ledger Entry",
-			fields=["serial_no"],
-			filters={"batch_no": args.batch_no, "warehouse": args.from_warehouse},
+	bundle_id = None
+	if args.serial_no or args.batch_no or args.batches:
+		batches = frappe._dict({})
+		if args.batch_no:
+			batches = frappe._dict({args.batch_no: args.qty})
+		elif args.batches:
+			batches = args.batches
+
+		bundle_id = (
+			SerialBatchCreation(
+				{
+					"item_code": args.item,
+					"warehouse": args.source or args.target,
+					"voucher_type": "Stock Entry",
+					"total_qty": args.qty * (-1 if args.source else 1),
+					"batches": batches,
+					"serial_nos": args.serial_no,
+					"type_of_transaction": "Outward" if args.source else "Inward",
+					"company": s.company,
+					"posting_date": s.posting_date,
+					"posting_time": s.posting_time,
+					"rate": args.rate or args.basic_rate,
+					"do_not_submit": True,
+				}
+			)
+			.make_serial_and_batch_bundle()
+			.name
 		)
-		serial_number = process_serial_numbers(serial_number_list)
 
 	args.serial_no = serial_number
-
 	s.append(
 		"items",
 		{
@@ -148,6 +169,7 @@ def make_stock_entry(**args):
 			"s_warehouse": args.source,
 			"t_warehouse": args.target,
 			"qty": args.qty,
+			"serial_and_batch_bundle": bundle_id,
 			"basic_rate": args.rate or args.basic_rate,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"transfer_qty": flt(args.qty) * (flt(args.conversion_factor) or 1.0),
@@ -164,4 +186,7 @@ def make_stock_entry(**args):
 		s.insert()
 		if not args.do_not_submit:
 			s.submit()
+
+		s.load_from_db()
+
 	return s

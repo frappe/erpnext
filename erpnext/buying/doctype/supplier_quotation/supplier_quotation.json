@@ -230,6 +230,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -310,7 +311,6 @@
    "fieldname": "items_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
-   "label": "Items",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -318,6 +318,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Supplier Quotation Item",
@@ -844,7 +845,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:35:39.740974",
+ "modified": "2023-06-03 16:20:15.880114",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

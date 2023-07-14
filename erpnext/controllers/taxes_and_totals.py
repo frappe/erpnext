@@ -976,6 +976,8 @@ def get_itemised_tax_breakup_html(doc):
 
 @frappe.whitelist()
 def get_round_off_applicable_accounts(company, account_list):
+	# required to set correct region
+	frappe.flags.company = company
 	account_list = get_regional_round_off_accounts(company, account_list)
 
 	return account_list

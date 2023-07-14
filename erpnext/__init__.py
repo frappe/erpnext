@@ -1,8 +1,9 @@
+import functools
 import inspect
 
 import frappe
 
-__version__ = "14.0.0-dev"
+__version__ = "15.0.0-dev"
 
 
 def get_default_company(user=None):
@@ -120,12 +121,14 @@ def get_region(company=None):
 
 	You can also set global company flag in `frappe.flags.company`
 	"""
-	if company or frappe.flags.company:
-		return frappe.get_cached_value("Company", company or frappe.flags.company, "country")
-	elif frappe.flags.country:
-		return frappe.flags.country
-	else:
-		return frappe.get_system_settings("country")
+
+	if not company:
+		company = frappe.local.flags.company
+
+	if company:
+		return frappe.get_cached_value("Company", company, "country")
+
+	return frappe.flags.country or frappe.get_system_settings("country")
 
 
 def allow_regional(fn):
@@ -136,6 +139,7 @@ def allow_regional(fn):
 	def myfunction():
 	  pass"""
 
+	@functools.wraps(fn)
 	def caller(*args, **kwargs):
 		overrides = frappe.get_hooks("regional_overrides", {}).get(get_region())
 		function_path = f"{inspect.getmodule(fn).__name__}.{fn.__name__}"

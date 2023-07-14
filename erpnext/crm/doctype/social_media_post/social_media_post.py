@@ -74,7 +74,7 @@ class SocialMediaPost(Document):
 
 
 def process_scheduled_social_media_posts():
-	posts = frappe.get_list(
+	posts = frappe.get_all(
 		"Social Media Post",
 		filters={"post_status": "Scheduled", "docstatus": 1},
 		fields=["name", "scheduled_time"],

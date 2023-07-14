@@ -79,6 +79,7 @@
   "purchase_order",
   "purchase_invoice",
   "column_break_40",
+  "allow_zero_valuation_rate",
   "is_fixed_asset",
   "asset_location",
   "asset_category",
@@ -91,14 +92,19 @@
   "delivery_note_item",
   "putaway_rule",
   "section_break_45",
-  "allow_zero_valuation_rate",
-  "bom",
-  "serial_no",
+  "add_serial_batch_bundle",
+  "serial_and_batch_bundle",
   "col_break5",
-  "include_exploded_items",
-  "batch_no",
+  "add_serial_batch_for_rejected_qty",
+  "rejected_serial_and_batch_bundle",
+  "section_break_3vxt",
+  "serial_no",
   "rejected_serial_no",
-  "item_tax_rate",
+  "column_break_tolu",
+  "batch_no",
+  "subcontract_bom_section",
+  "include_exploded_items",
+  "bom",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -110,6 +116,7 @@
   "manufacturer_part_no",
   "accounting_details_section",
   "expense_account",
+  "item_tax_rate",
   "column_break_102",
   "provisional_expense_account",
   "accounting_dimensions_section",
@@ -206,6 +213,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
+   "no_copy": 1,
    "oldfieldname": "received_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -494,6 +502,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "oldfieldname": "rejected_warehouse",
@@ -565,37 +574,8 @@
   },
   {
    "fieldname": "section_break_45",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "label": "Serial No",
-   "no_copy": 1,
-   "oldfieldname": "serial_no",
-   "oldfieldtype": "Text"
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "batch_no",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Batch No",
-   "no_copy": 1,
-   "oldfieldname": "batch_no",
-   "oldfieldtype": "Link",
-   "options": "Batch",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "rejected_serial_no",
-   "fieldtype": "Small Text",
-   "label": "Rejected Serial No",
-   "no_copy": 1,
-   "print_hide": 1
+   "fieldtype": "Section Break",
+   "label": "Serial and Batch No"
   },
   {
    "fieldname": "item_tax_template",
@@ -1016,12 +996,70 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
+   "fieldname": "subcontract_bom_section",
+   "fieldtype": "Section Break",
+   "label": "Subcontract BOM"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Text",
+   "label": "Serial No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rejected_serial_no",
+   "fieldtype": "Text",
+   "label": "Rejected Serial No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rejected_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Rejected Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle"
+  },
+  {
+   "fieldname": "add_serial_batch_for_rejected_qty",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No (Rejected Qty)"
+  },
+  {
+   "fieldname": "section_break_3vxt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_tolu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 15:43:04.470104",
+ "modified": "2023-07-04 17:22:02.830029",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

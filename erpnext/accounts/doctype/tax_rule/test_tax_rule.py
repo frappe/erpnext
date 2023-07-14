@@ -15,7 +15,7 @@ test_records = frappe.get_test_records("Tax Rule")
 class TestTaxRule(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		frappe.db.set_value("Shopping Cart Settings", None, "enabled", 0)
+		frappe.db.set_single_value("Shopping Cart Settings", "enabled", 0)
 
 	@classmethod
 	def tearDownClass(cls):

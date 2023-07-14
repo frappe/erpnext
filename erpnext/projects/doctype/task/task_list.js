@@ -25,20 +25,38 @@ frappe.listview_settings['Task'] = {
 		}
 		return [__(doc.status), colors[doc.status], "status,=," + doc.status];
 	},
-	gantt_custom_popup_html: function(ganttobj, task) {
-		var html = `<h5><a style="text-decoration:underline"\
-			href="/app/task/${ganttobj.id}""> ${ganttobj.name} </a></h5>`;
+	gantt_custom_popup_html: function (ganttobj, task) {
+		let html = `
+			<a class="text-white mb-2 inline-block cursor-pointer"
+				href="/app/task/${ganttobj.id}"">
+				${ganttobj.name}
+			</a>
+		`;
 
-		if(task.project) html += `<p>Project: ${task.project}</p>`;
-		html += `<p>Progress: ${ganttobj.progress}</p>`;
+		if (task.project) {
+			html += `<p class="mb-1">${__("Project")}:
+				<a class="text-white inline-block"
+					href="/app/project/${task.project}"">
+					${task.project}
+				</a>
+			</p>`;
+		}
+		html += `<p class="mb-1">
+			${__("Progress")}:
+			<span class="text-white">${ganttobj.progress}%</span>
+		</p>`;
 
-		if(task._assign_list) {
-			html += task._assign_list.reduce(
-				(html, user) => html + frappe.avatar(user)
-			, '');
+		if (task._assign) {
+			const assign_list = JSON.parse(task._assign);
+			const assignment_wrapper = `
+				<span>Assigned to:</span>
+				<span class="text-white">
+					${assign_list.map((user) => frappe.user_info(user).fullname).join(", ")}
+				</span>
+			`;
+			html += assignment_wrapper;
 		}
 
-		return html;
-	}
-
+		return `<div class="p-3" style="min-width: 220px">${html}</div>`;
+	},
 };

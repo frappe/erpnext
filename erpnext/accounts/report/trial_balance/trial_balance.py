@@ -17,6 +17,7 @@ from erpnext.accounts.report.financial_statements import (
 	filter_out_zero_value_rows,
 	set_gl_entries_by_account,
 )
+from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 
 value_fields = (
 	"opening_debit",
@@ -158,6 +159,8 @@ def get_rootwise_opening_balances(filters, report_type):
 			accounting_dimensions,
 			period_closing_voucher=last_period_closing_voucher[0].name,
 		)
+
+		# Report getting generate from the mid of a fiscal year
 		if getdate(last_period_closing_voucher[0].posting_date) < getdate(
 			add_days(filters.from_date, -1)
 		):
@@ -178,8 +181,8 @@ def get_rootwise_opening_balances(filters, report_type):
 				"opening_credit": 0.0,
 			},
 		)
-		opening[d.account]["opening_debit"] += flt(d.opening_debit)
-		opening[d.account]["opening_credit"] += flt(d.opening_credit)
+		opening[d.account]["opening_debit"] += flt(d.debit)
+		opening[d.account]["opening_credit"] += flt(d.credit)
 
 	return opening
 
@@ -194,8 +197,11 @@ def get_opening_balance(
 		frappe.qb.from_(closing_balance)
 		.select(
 			closing_balance.account,
-			Sum(closing_balance.debit).as_("opening_debit"),
-			Sum(closing_balance.credit).as_("opening_credit"),
+			closing_balance.account_currency,
+			Sum(closing_balance.debit).as_("debit"),
+			Sum(closing_balance.credit).as_("credit"),
+			Sum(closing_balance.debit_in_account_currency).as_("debit_in_account_currency"),
+			Sum(closing_balance.credit_in_account_currency).as_("credit_in_account_currency"),
 		)
 		.where(
 			(closing_balance.company == filters.company)
@@ -216,7 +222,10 @@ def get_opening_balance(
 		if start_date:
 			opening_balance = opening_balance.where(closing_balance.posting_date >= start_date)
 			opening_balance = opening_balance.where(closing_balance.is_opening == "No")
-		opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
+		else:
+			opening_balance = opening_balance.where(
+				(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
+			)
 
 	if (
 		not filters.show_unclosed_fy_pl_balances
@@ -248,8 +257,15 @@ def get_opening_balance(
 		opening_balance = opening_balance.where(closing_balance.project == filters.project)
 
 	if filters.get("include_default_book_entries"):
+		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+			frappe.throw(
+				_("To use a different finance book, please uncheck 'Include Default Book Entries'")
+			)
+
 		opening_balance = opening_balance.where(
-			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(filters.company_fb), ""]))
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
 			| (closing_balance.finance_book.isnull())
 		)
 	else:
@@ -274,6 +290,9 @@ def get_opening_balance(
 					)
 
 	gle = opening_balance.run(as_dict=1)
+
+	if filters and filters.get("presentation_currency"):
+		convert_to_presentation_currency(gle, get_currency(filters))
 
 	return gle
 

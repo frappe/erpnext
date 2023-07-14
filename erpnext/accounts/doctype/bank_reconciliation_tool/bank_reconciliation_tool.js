@@ -19,7 +19,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 
 	onload: function (frm) {
 		// Set default filter dates
-		today = frappe.datetime.get_today()
+		let today = frappe.datetime.get_today()
 		frm.doc.bank_statement_from_date = frappe.datetime.add_months(today, -1);
 		frm.doc.bank_statement_to_date = today;
 		frm.trigger('bank_account');
@@ -81,7 +81,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frm.add_custom_button(__('Get Unreconciled Entries'), function() {
 			frm.trigger("make_reconciliation_tool");
 		});
-		frm.change_custom_button_type('Get Unreconciled Entries', null, 'primary');
+		frm.change_custom_button_type(__('Get Unreconciled Entries'), null, 'primary');
 
 	},
 

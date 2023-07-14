@@ -698,6 +698,45 @@ class TestBOM(FrappeTestCase):
 		bom.update_cost()
 		self.assertFalse(bom.flags.cost_updated)
 
+	def test_do_not_include_manufacturing_and_fixed_items(self):
+		from erpnext.manufacturing.doctype.bom.bom import item_query
+
+		if not frappe.db.exists("Asset Category", "Computers-Test"):
+			doc = frappe.get_doc({"doctype": "Asset Category", "asset_category_name": "Computers-Test"})
+			doc.flags.ignore_mandatory = True
+			doc.insert()
+
+		for item_code, properties in {
+			"_Test RM Item 1 Do Not Include In Manufacture": {
+				"is_stock_item": 1,
+				"include_item_in_manufacturing": 0,
+			},
+			"_Test RM Item 2 Fixed Asset Item": {
+				"is_fixed_asset": 1,
+				"is_stock_item": 0,
+				"asset_category": "Computers-Test",
+			},
+			"_Test RM Item 3 Manufacture Item": {"is_stock_item": 1, "include_item_in_manufacturing": 1},
+		}.items():
+			make_item(item_code, properties)
+
+		data = item_query(
+			"Item",
+			txt="_Test RM Item",
+			searchfield="name",
+			start=0,
+			page_len=20000,
+			filters={"include_item_in_manufacturing": 1, "is_fixed_asset": 0},
+		)
+
+		items = []
+		for row in data:
+			items.append(row[0])
+
+		self.assertTrue("_Test RM Item 1 Do Not Include In Manufacture" not in items)
+		self.assertTrue("_Test RM Item 2 Fixed Asset Item" not in items)
+		self.assertTrue("_Test RM Item 3 Manufacture Item" in items)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

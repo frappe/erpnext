@@ -125,14 +125,27 @@ def validate_expense_against_budget(args, expense_amount=0):
 	if not args.account:
 		return
 
-	for budget_against in ["project", "cost_center"] + get_accounting_dimensions():
+	default_dimensions = [
+		{
+			"fieldname": "project",
+			"document_type": "Project",
+		},
+		{
+			"fieldname": "cost_center",
+			"document_type": "Cost Center",
+		},
+	]
+
+	for dimension in default_dimensions + get_accounting_dimensions(as_list=False):
+		budget_against = dimension.get("fieldname")
+
 		if (
 			args.get(budget_against)
 			and args.account
 			and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"})
 		):
 
-			doctype = frappe.unscrub(budget_against)
+			doctype = dimension.get("document_type")
 
 			if frappe.get_cached_value("DocType", doctype, "is_tree"):
 				lft, rgt = frappe.db.get_value(doctype, args.get(budget_against), ["lft", "rgt"])

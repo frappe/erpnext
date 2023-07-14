@@ -232,8 +232,6 @@ Applicable For,قابل للتطبيق ل,
 "Applicable if the company is SpA, SApA or SRL",قابل للتطبيق إذا كانت الشركة SpA أو SApA أو SRL,
 Applicable if the company is a limited liability company,قابل للتطبيق إذا كانت الشركة شركة ذات مسؤولية محدودة,
 Applicable if the company is an Individual or a Proprietorship,قابل للتطبيق إذا كانت الشركة فردية أو مملوكة,
-Applicant,مقدم الطلب,
-Applicant Type,نوع مقدم الطلب,
 Application of Funds (Assets),استخدام الاموال (الأصول),
 Application period cannot be across two allocation records,فترة الطلب لا يمكن ان تكون خلال سجلين مخصصين,
 Application period cannot be outside leave allocation period,فترة الاجازة لا يمكن أن تكون خارج فترة الاجازة المسموحة للموظف.\n<br>\nApplication period cannot be outside leave allocation period,
@@ -1471,10 +1469,6 @@ List of all share transactions,قائمة بجميع معاملات الأسهم
 List of available Shareholders with folio numbers,قائمة المساهمين المتاحين بأرقام الأوراق,
 Loading Payment System,تحميل نظام الدفع,
 Loan,قرض,
-Loan Amount cannot exceed Maximum Loan Amount of {0},مبلغ القرض لا يمكن أن يتجاوز الحد الأقصى للقرض {0}\n<br>\nLoan Amount cannot exceed Maximum Loan Amount of {0},
-Loan Application,طلب القرض,
-Loan Management,إدارة القروض,
-Loan Repayment,سداد القروض,
 Loan Start Date and Loan Period are mandatory to save the Invoice Discounting,تاريخ بدء القرض وفترة القرض إلزامية لحفظ خصم الفاتورة,
 Loans (Liabilities),القروض (الخصوم),
 Loans and Advances (Assets),القروض والسلفيات (الأصول),
@@ -1611,7 +1605,6 @@ Moderate Sensitivity,حساسية معتدلة,
 Monday,يوم الاثنين,
 Monthly,شهريا,
 Monthly Distribution,التوزيع الشهري,
-Monthly Repayment Amount cannot be greater than Loan Amount,قيمة السداد الشهري لا يمكن أن يكون أكبر من قيمة القرض,
 More,أكثر,
 More Information,المزيد من المعلومات,
 More than one selection for {0} not allowed,أكثر من اختيار واحد لـ {0} غير مسموح به,
@@ -1884,11 +1877,9 @@ Pay Remaining,دفع المتبقية,
 Pay {0} {1},ادفع {0} {1},
 Payable,واجب الدفع,
 Payable Account,حساب الدائنين,
-Payable Amount,المبلغ المستحق,
 Payment,دفع,
 Payment Cancelled. Please check your GoCardless Account for more details,دفع ملغى. يرجى التحقق من حسابك في GoCardless لمزيد من التفاصيل,
 Payment Confirmation,تأكيد الدفعة,
-Payment Date,تاريخ الدفعة,
 Payment Days,أيام الدفع,
 Payment Document,وثيقة الدفع,
 Payment Due Date,تاريخ استحقاق السداد,
@@ -1982,7 +1973,6 @@ Please enter Production Item first,الرجاء إدخال بند الإنتاج
 Please enter Purchase Receipt first,الرجاء إدخال إيصال الشراء أولا\n<br>\nPlease enter Purchase Receipt first,
 Please enter Receipt Document,الرجاء إدخال مستند الاستلام\n<br>\nPlease enter Receipt Document,
 Please enter Reference date,الرجاء إدخال تاريخ المرجع\n<br>\nPlease enter Reference date,
-Please enter Repayment Periods,الرجاء إدخال فترات السداد,
 Please enter Reqd by Date,الرجاء إدخال ريد حسب التاريخ,
 Please enter Woocommerce Server URL,الرجاء إدخال عنوان URL لخادم Woocommerce,
 Please enter Write Off Account,الرجاء إدخال حساب الشطب,
@@ -1994,7 +1984,6 @@ Please enter message before sending,الرجاء إدخال الرسالة قب�
 Please enter parent cost center,الرجاء إدخال مركز تكلفة الأب,
 Please enter quantity for Item {0},الرجاء إدخال الكمية للعنصر {0},
 Please enter relieving date.,من فضلك ادخل تاريخ ترك العمل.,
-Please enter repayment Amount,الرجاء إدخال مبلغ السداد\n<br>\nPlease enter repayment Amount,
 Please enter valid Financial Year Start and End Dates,الرجاء إدخال تاريخ بداية السنة المالية وتاريخ النهاية,
 Please enter valid email address,الرجاء إدخال عنوان بريد إلكتروني صالح,
 Please enter {0} first,الرجاء إدخال {0} أولاً,
@@ -2160,7 +2149,6 @@ Pricing Rule {0} is updated,يتم تحديث قاعدة التسعير {0},
 Pricing Rules are further filtered based on quantity.,كما تتم فلترت قواعد التسعير على أساس الكمية.,
 Primary Address Details,تفاصيل العنوان الرئيسي,
 Primary Contact Details,تفاصيل الاتصال الأساسية,
-Principal Amount,المبلغ الرئيسي,
 Print Format,تنسيق الطباعة,
 Print IRS 1099 Forms,طباعة نماذج مصلحة الضرائب 1099,
 Print Report Card,طباعة بطاقة التقرير,
@@ -2550,7 +2538,6 @@ Sample,عينة,
 Sample Collection,جمع العينات,
 Sample quantity {0} cannot be more than received quantity {1},كمية العينة {0} لا يمكن أن تكون أكثر من الكمية المستلمة {1},
 Sanctioned,مقرر,
-Sanctioned Amount,القيمة المقرر صرفه,
 Sanctioned Amount cannot be greater than Claim Amount in Row {0}.,لا يمكن أن يكون المبلغ الموافق عليه أكبر من مبلغ المطالبة في الصف {0}.,
 Sand,رمل,
 Saturday,السبت,
@@ -3541,7 +3528,6 @@ Target Details,تفاصيل الهدف,
 {0} already has a Parent Procedure {1}.,{0} يحتوي بالفعل على إجراء الأصل {1}.,
 API,API,
 Annual,سنوي,
-Approved,موافق عليه,
 Change,تغيير,
 Contact Email,عنوان البريد الإلكتروني,
 Export Type,نوع التصدير,
@@ -3571,7 +3557,6 @@ A new appointment has been created for you with {0},تم إنشاء موعد ج�
 Account Value,قيمة الحساب,
 Account is mandatory to get payment entries,الحساب إلزامي للحصول على إدخالات الدفع,
 Account is not set for the dashboard chart {0},لم يتم تعيين الحساب لمخطط لوحة المعلومات {0},
-Account {0} does not belong to company {1},الحساب {0} لا ينتمي إلى شركة {1},
 Account {0} does not exists in the dashboard chart {1},الحساب {0} غير موجود في مخطط لوحة المعلومات {1},
 Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry,الحساب: <b>{0}</b> عبارة &quot;Capital work&quot; قيد التقدم ولا يمكن تحديثها بواسطة &quot;إدخال دفتر اليومية&quot;,
 Account: {0} is not permitted under Payment Entry,الحساب: {0} غير مسموح به بموجب إدخال الدفع,
@@ -3582,7 +3567,6 @@ Accounting Period overlaps with {0},فترة المحاسبة تتداخل مع 
 Activity,نشاط,
 Add / Manage Email Accounts.,إضافة / إدارة حسابات البريد الإلكتروني.,
 Add Child,إضافة الطفل,
-Add Loan Security,إضافة قرض الضمان,
 Add Multiple,إضافة متعددة,
 Add Participants,أضف مشاركين,
 Add to Featured Item,إضافة إلى البند المميز,
@@ -3593,15 +3577,12 @@ Added {0} ({1}),وأضاف {0} ({1}),
 Address Line 1,العنوان سطر 1,
 Addresses,عناوين,
 Admission End Date should be greater than Admission Start Date.,يجب أن يكون تاريخ انتهاء القبول أكبر من تاريخ بدء القبول.,
-Against Loan,ضد القرض,
-Against Loan:,ضد القرض:,
 All,الكل,
 All bank transactions have been created,تم إنشاء جميع المعاملات المصرفية,
 All the depreciations has been booked,تم حجز جميع الإهلاكات,
 Allocation Expired!,تخصيص انتهت!,
 Allow Resetting Service Level Agreement from Support Settings.,السماح بإعادة ضبط اتفاقية مستوى الخدمة من إعدادات الدعم.,
 Amount of {0} is required for Loan closure,المبلغ {0} مطلوب لإغلاق القرض,
-Amount paid cannot be zero,لا يمكن أن يكون المبلغ المدفوع صفرًا,
 Applied Coupon Code,رمز القسيمة المطبق,
 Apply Coupon Code,تطبيق رمز القسيمة,
 Appointment Booking,حجز موعد,
@@ -3649,7 +3630,6 @@ Cancelled,ألغيت,
 Cannot Calculate Arrival Time as Driver Address is Missing.,لا يمكن حساب وقت الوصول حيث أن عنوان برنامج التشغيل مفقود.,
 Cannot Optimize Route as Driver Address is Missing.,لا يمكن تحسين المسار لأن عنوان برنامج التشغيل مفقود.,
 Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled.,لا يمكن إكمال المهمة {0} لأن المهمة التابعة {1} ليست مكتملة / ملغاة.,
-Cannot create loan until application is approved,لا يمكن إنشاء قرض حتى تتم الموافقة على الطلب,
 Cannot find a matching Item. Please select some other value for {0}.,لا يمكن العثور على بند مطابق. يرجى اختيار قيمة أخرى ل {0}.,
 "Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings",لا يمكن زيادة حجم العنصر {0} في الصف {1} أكثر من {2}. للسماح بالإفراط في الفوترة ، يرجى تعيين بدل في إعدادات الحسابات,
 "Capacity Planning Error, planned start time can not be same as end time",خطأ في تخطيط السعة ، لا يمكن أن يكون وقت البدء المخطط له هو نفسه وقت الانتهاء,
@@ -3812,20 +3792,9 @@ Leaves Taken,يترك اتخذت,
 Less Than Amount,أقل من المبلغ,
 Liabilities,المطلوبات,
 Loading...,تحميل ...,
-Loan Amount exceeds maximum loan amount of {0} as per proposed securities,يتجاوز مبلغ القرض الحد الأقصى لمبلغ القرض {0} وفقًا للأوراق المالية المقترحة,
 Loan Applications from customers and employees.,طلبات القروض من العملاء والموظفين.,
-Loan Disbursement,إنفاق تمويل,
 Loan Processes,عمليات القرض,
-Loan Security,ضمان القرض,
-Loan Security Pledge,تعهد ضمان القرض,
-Loan Security Pledge Created : {0},تعهد ضمان القرض: {0},
-Loan Security Price,سعر ضمان القرض,
-Loan Security Price overlapping with {0},سعر ضمان القرض متداخل مع {0},
-Loan Security Unpledge,قرض ضمان unpledge,
-Loan Security Value,قيمة ضمان القرض,
 Loan Type for interest and penalty rates,نوع القرض لأسعار الفائدة والعقوبة,
-Loan amount cannot be greater than {0},لا يمكن أن يكون مبلغ القرض أكبر من {0},
-Loan is mandatory,القرض إلزامي,
 Loans,القروض,
 Loans provided to customers and employees.,القروض المقدمة للعملاء والموظفين.,
 Location,الموقع,
@@ -3894,7 +3863,6 @@ Pause,وقفة,
 Pay,دفع,
 Payment Document Type,نوع مستند الدفع,
 Payment Name,اسم الدفع,
-Penalty Amount,مبلغ العقوبة,
 Pending,معلق,
 Performance,أداء,
 Period based On,فترة بناء على,
@@ -3916,10 +3884,8 @@ Please enter the designation,الرجاء إدخال التسمية,
 Please login as a Marketplace User to edit this item.,الرجاء تسجيل الدخول كمستخدم Marketplace لتعديل هذا العنصر.,
 Please login as a Marketplace User to report this item.,يرجى تسجيل الدخول كمستخدم Marketplace للإبلاغ عن هذا العنصر.,
 Please select <b>Template Type</b> to download template,يرجى تحديد <b>نوع</b> القالب لتنزيل القالب,
-Please select Applicant Type first,يرجى اختيار نوع مقدم الطلب أولاً,
 Please select Customer first,يرجى اختيار العميل أولا,
 Please select Item Code first,يرجى اختيار رمز البند أولاً,
-Please select Loan Type for company {0},يرجى اختيار نوع القرض للشركة {0},
 Please select a Delivery Note,يرجى اختيار مذكرة التسليم,
 Please select a Sales Person for item: {0},يرجى اختيار مندوب مبيعات للعنصر: {0},
 Please select another payment method. Stripe does not support transactions in currency '{0}',يرجى تحديد طريقة دفع أخرى. Stripe لا يدعم المعاملات بالعملة '{0}',
@@ -3935,8 +3901,6 @@ Please set {0},الرجاء إدخال {0}\n<br>\nPlease set {0},customer
 Please setup a default bank account for company {0},يرجى إعداد حساب بنكي افتراضي للشركة {0},
 Please specify,رجاء حدد,
 Please specify a {0},الرجاء تحديد {0},lead
-Pledge Status,حالة التعهد,
-Pledge Time,وقت التعهد,
 Printing,طبع,
 Priority,أفضلية,
 Priority has been changed to {0}.,تم تغيير الأولوية إلى {0}.,
@@ -3944,7 +3908,6 @@ Priority {0} has been repeated.,تم تكرار الأولوية {0}.,
 Processing XML Files,معالجة ملفات XML,
 Profitability,الربحية,
 Project,مشروع,
-Proposed Pledges are mandatory for secured Loans,التعهدات المقترحة إلزامية للقروض المضمونة,
 Provide the academic year and set the starting and ending date.,تقديم السنة الدراسية وتحديد تاريخ البداية والنهاية.,
 Public token is missing for this bank,الرمز العام مفقود لهذا البنك,
 Publish,نشر,
@@ -3960,7 +3923,6 @@ Purchase Orders,طلبات الشراء,
 Purchase Receipt doesn't have any Item for which Retain Sample is enabled.,لا يحتوي إيصال الشراء على أي عنصر تم تمكين الاحتفاظ عينة به.,
 Purchase Return,شراء العودة,
 Qty of Finished Goods Item,الكمية من السلع تامة الصنع,
-Qty or Amount is mandatroy for loan security,الكمية أو المبلغ هو mandatroy لضمان القرض,
 Quality Inspection required for Item {0} to submit,فحص الجودة مطلوب للبند {0} لتقديمه,
 Quantity to Manufacture,كمية لتصنيع,
 Quantity to Manufacture can not be zero for the operation {0},لا يمكن أن تكون الكمية للتصنيع صفراً للتشغيل {0},
@@ -3981,8 +3943,6 @@ Release date must be in the future,يجب أن يكون تاريخ الإصدا�
 Relieving Date must be greater than or equal to Date of Joining,يجب أن يكون تاريخ التخفيف أكبر من أو يساوي تاريخ الانضمام,
 Rename,إعادة تسمية,
 Rename Not Allowed,إعادة تسمية غير مسموح به,
-Repayment Method is mandatory for term loans,طريقة السداد إلزامية للقروض لأجل,
-Repayment Start Date is mandatory for term loans,تاريخ بدء السداد إلزامي للقروض لأجل,
 Report Item,بلغ عن شيء,
 Report this Item,الإبلاغ عن هذا البند,
 Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,الكمية المحجوزة للعقد من الباطن: كمية المواد الخام اللازمة لصنع سلع من الباطن.,
@@ -4015,8 +3975,6 @@ Row {0}:Sibling Date of Birth cannot be greater than today.,الصف {0}: لا �
 Row({0}): {1} is already discounted in {2},الصف ({0}): {1} مخصوم بالفعل في {2},
 Rows Added in {0},تمت إضافة الصفوف في {0},
 Rows Removed in {0},تمت إزالة الصفوف في {0},
-Sanctioned Amount limit crossed for {0} {1},تم تجاوز حد المبلغ المعتمد لـ {0} {1},
-Sanctioned Loan Amount already exists for {0} against company {1},مبلغ القرض المعتمد موجود بالفعل لـ {0} ضد الشركة {1},
 Save,حفظ,
 Save Item,حفظ البند,
 Saved Items,العناصر المحفوظة,
@@ -4135,7 +4093,6 @@ Use a name that is different from previous project name,استخدم اسمًا 
 User {0} is disabled,المستخدم {0} تم تعطيل,
 Users and Permissions,المستخدمين والصلاحيات,
 Vacancies cannot be lower than the current openings,لا يمكن أن تكون الوظائف الشاغرة أقل من الفتحات الحالية,
-Valid From Time must be lesser than Valid Upto Time.,يجب أن يكون &quot;صالح من الوقت&quot; أقل من &quot;وقت صلاحية صالح&quot;.,
 Valuation Rate required for Item {0} at row {1},معدل التقييم مطلوب للبند {0} في الصف {1},
 Values Out Of Sync,القيم خارج المزامنة,
 Vehicle Type is required if Mode of Transport is Road,نوع المركبة مطلوب إذا كان وضع النقل هو الطريق,
@@ -4211,7 +4168,6 @@ Actual,الفعلية,
 Add to Cart,أضف إلى السلة,
 Days Since Last Order,أيام منذ آخر طلب,
 In Stock,متوفر,
-Loan Amount is mandatory,مبلغ القرض إلزامي,
 Mode Of Payment,طريقة الدفع,
 No students Found,لم يتم العثور على الطلاب,
 Not in Stock,غير متوفر,
@@ -4240,7 +4196,6 @@ From date cannot be greater than To date,(من تاريخ) لا يمكن أن ي
 Group by,المجموعة حسب,
 In stock,في المخزن,
 Item name,اسم السلعة,
-Loan amount is mandatory,مبلغ القرض إلزامي,
 Minimum Qty,الكمية الدنيا,
 More details,مزيد من التفاصيل,
 Nature of Supplies,طبيعة الامدادات,
@@ -4409,9 +4364,6 @@ Time logs are required for {0} {1},سجلات الوقت مطلوبة لـ {0} {
 Total Completed Qty,إجمالي الكمية المكتملة,
 Qty to Manufacture,الكمية للتصنيع,
 Repay From Salary can be selected only for term loans,يمكن اختيار السداد من الراتب للقروض لأجل فقط,
-No valid Loan Security Price found for {0},لم يتم العثور على سعر ضمان قرض صالح لـ {0},
-Loan Account and Payment Account cannot be same,لا يمكن أن يكون حساب القرض وحساب الدفع متماثلين,
-Loan Security Pledge can only be created for secured loans,لا يمكن إنشاء تعهد ضمان القرض إلا للقروض المضمونة,
 Social Media Campaigns,حملات التواصل الاجتماعي,
 From Date can not be greater than To Date,لا يمكن أن يكون من تاريخ أكبر من تاريخ,
 Please set a Customer linked to the Patient,يرجى تعيين عميل مرتبط بالمريض,
@@ -6437,7 +6389,6 @@ Salary Component Type,نوع مكون الراتب,
 HR User,مستخدم الموارد البشرية,
 Appointment Letter,رسالة موعد,
 Job Applicant,طالب الوظيفة,
-Applicant Name,اسم طالب الوظيفة,
 Appointment Date,تاريخ الموعد,
 Appointment Letter Template,قالب رسالة التعيين,
 Body,الجسم,
@@ -7059,99 +7010,12 @@ Registered,مسجل,
 Sync in Progress,المزامنة قيد التقدم,
 Hub Seller Name,اسم البائع المحور,
 Custom Data,البيانات المخصصة,
-Member,عضو,
-Partially Disbursed,صرف جزئ,
-Loan Closure Requested,مطلوب قرض الإغلاق,
 Repay From Salary,سداد من الراتب,
-Loan Details,تفاصيل القرض,
-Loan Type,نوع القرض,
-Loan Amount,قيمة القرض,
-Is Secured Loan,هو قرض مضمون,
-Rate of Interest (%) / Year,معدل الفائدة (٪) / السنة,
-Disbursement Date,تاريخ الصرف,
-Disbursed Amount,المبلغ المصروف,
-Is Term Loan,هو قرض لأجل,
-Repayment Method,طريقة السداد,
-Repay Fixed Amount per Period,سداد قيمة ثابتة لكل فترة,
-Repay Over Number of Periods,سداد على عدد فترات,
-Repayment Period in Months,فترة السداد بالأشهر,
-Monthly Repayment Amount,قيمة السداد الشهري,
-Repayment Start Date,تاريخ بداية السداد,
-Loan Security Details,تفاصيل ضمان القرض,
-Maximum Loan Value,الحد الأقصى لقيمة القرض,
-Account Info,معلومات الحساب,
-Loan Account,حساب القرض,
-Interest Income Account,الحساب الخاص بإيرادات الفائدة,
-Penalty Income Account,حساب دخل الجزاء,
-Repayment Schedule,الجدول الزمني للسداد,
-Total Payable Amount,المبلغ الكلي المستحق,
-Total Principal Paid,إجمالي المبلغ المدفوع,
-Total Interest Payable,مجموع الفائدة الواجب دفعها,
-Total Amount Paid,مجموع المبلغ المدفوع,
-Loan Manager,مدير القرض,
-Loan Info,معلومات قرض,
-Rate of Interest,معدل الفائدة,
-Proposed Pledges,التعهدات المقترحة,
-Maximum Loan Amount,أعلى قيمة للقرض,
-Repayment Info,معلومات السداد,
-Total Payable Interest,مجموع الفوائد الدائنة,
-Against Loan ,مقابل القرض,
-Loan Interest Accrual,استحقاق فائدة القرض,
-Amounts,مبالغ,
-Pending Principal Amount,في انتظار المبلغ الرئيسي,
-Payable Principal Amount,المبلغ الرئيسي المستحق,
-Paid Principal Amount,المبلغ الأساسي المدفوع,
-Paid Interest Amount,مبلغ الفائدة المدفوعة,
-Process Loan Interest Accrual,استحقاق الفائدة من قرض العملية,
-Repayment Schedule Name,اسم جدول السداد,
 Regular Payment,الدفع المنتظم,
 Loan Closure,إغلاق القرض,
-Payment Details,تفاصيل الدفع,
-Interest Payable,الفوائد المستحقة الدفع,
-Amount Paid,القيمة المدفوعة,
-Principal Amount Paid,المبلغ الرئيسي المدفوع,
-Repayment Details,تفاصيل السداد,
-Loan Repayment Detail,تفاصيل سداد القرض,
-Loan Security Name,اسم ضمان القرض,
-Unit Of Measure,وحدة القياس,
-Loan Security Code,رمز ضمان القرض,
-Loan Security Type,نوع ضمان القرض,
-Haircut %,حلاقة شعر ٪,
-Loan  Details,تفاصيل القرض,
-Unpledged,Unpledged,
-Pledged,تعهد,
-Partially Pledged,تعهد جزئي,
-Securities,ضمانات,
-Total Security Value,إجمالي قيمة الأمن,
-Loan Security Shortfall,قرض أمن النقص,
-Loan ,قرض,
-Shortfall Time,وقت العجز,
-America/New_York,أمريكا / نيويورك,
-Shortfall Amount,عجز المبلغ,
-Security Value ,قيمة الأمن,
-Process Loan Security Shortfall,النقص في عملية قرض القرض,
-Loan To Value Ratio,نسبة القروض إلى قيمة,
-Unpledge Time,الوقت unpledge,
-Loan Name,اسم قرض,
 Rate of Interest (%) Yearly,معدل الفائدة (٪) سنوي,
-Penalty Interest Rate (%) Per Day,عقوبة سعر الفائدة (٪) في اليوم الواحد,
-Penalty Interest Rate is levied on the pending interest amount on a daily basis in case of delayed repayment ,يتم فرض معدل الفائدة الجزائية على مبلغ الفائدة المعلق على أساس يومي في حالة التأخر في السداد,
-Grace Period in Days,فترة السماح بالأيام,
-No. of days from due date until which penalty won't be charged in case of delay in loan repayment,عدد الأيام من تاريخ الاستحقاق التي لن يتم فرض غرامة عليها في حالة التأخير في سداد القرض,
-Pledge,التعهد,
-Post Haircut Amount,بعد قص شعر,
-Process Type,نوع العملية,
-Update Time,تحديث الوقت,
-Proposed Pledge,التعهد المقترح,
-Total Payment,إجمالي الدفعة,
-Balance Loan Amount,رصيد مبلغ القرض,
-Is Accrued,المستحقة,
 Salary Slip Loan,قرض كشف الراتب,
 Loan Repayment Entry,إدخال سداد القرض,
-Sanctioned Loan Amount,مبلغ القرض المحكوم عليه,
-Sanctioned Amount Limit,الحد الأقصى للعقوبة,
-Unpledge,Unpledge,
-Haircut,حلاقة شعر,
 MAT-MSH-.YYYY.-,MAT-MSH-.YYYY.-,
 Generate Schedule,إنشاء جدول,
 Schedules,جداول,
@@ -7479,15 +7343,15 @@ From Template,من القالب,
 Project will be accessible on the website to these users,والمشروع أن تكون متاحة على الموقع الإلكتروني لهؤلاء المستخدمين,
 Copied From,تم نسخها من,
 Start and End Dates,تواريخ البدء والانتهاء,
-Actual Time (in Hours),الوقت الفعلي (بالساعات),
+Actual Time in Hours (via Timesheet),الوقت الفعلي (بالساعات),
 Costing and Billing,التكلفة و الفواتير,
-Total Costing Amount (via Timesheets),إجمالي مبلغ التكلفة (عبر الجداول الزمنية),
-Total Expense Claim (via Expense Claims),مجموع المطالبة المصاريف (عبر مطالبات النفقات),
+Total Costing Amount (via Timesheet),إجمالي مبلغ التكلفة (عبر الجداول الزمنية),
+Total Expense Claim (via Expense Claim),مجموع المطالبة المصاريف (عبر مطالبات النفقات),
 Total Purchase Cost (via Purchase Invoice),مجموع تكلفة الشراء (عن طريق شراء الفاتورة),
 Total Sales Amount (via Sales Order),إجمالي مبلغ المبيعات (عبر أمر المبيعات),
-Total Billable Amount (via Timesheets),إجمالي المبلغ القابل للفوترة (عبر الجداول الزمنية),
-Total Billed Amount (via Sales Invoices),إجمالي مبلغ الفاتورة (عبر فواتير المبيعات),
-Total Consumed Material Cost  (via Stock Entry),إجمالي تكلفة المواد المستهلكة (عبر إدخال المخزون),
+Total Billable Amount (via Timesheet),إجمالي المبلغ القابل للفوترة (عبر الجداول الزمنية),
+Total Billed Amount (via Sales Invoice),إجمالي مبلغ الفاتورة (عبر فواتير المبيعات),
+Total Consumed Material Cost (via Stock Entry),إجمالي تكلفة المواد المستهلكة (عبر إدخال المخزون),
 Gross Margin,هامش الربح الإجمالي,
 Gross Margin %,هامش إجمالي٪,
 Monitor Progress,التقدم المرئى,
@@ -7521,12 +7385,10 @@ Task Description,وصف المهمة,
 Dependencies,تبعيات,
 Dependent Tasks,المهام التابعة,
 Depends on Tasks,تعتمد على المهام,
-Actual Start Date (via Time Sheet),تاريخ البدء الفعلي (عبر ورقة الوقت),
-Actual Time (in hours),الوقت الفعلي (بالساعات),
-Actual End Date (via Time Sheet),تاريخ الإنتهاء الفعلي (عبر ورقة الوقت),
-Total Costing Amount (via Time Sheet),إجمالي حساب التكاليف المبلغ (عبر ورقة الوقت),
+Actual Start Date (via Timesheet),تاريخ البدء الفعلي (عبر ورقة الوقت),
+Actual Time in Hours (via Timesheet),الوقت الفعلي (بالساعات),
+Actual End Date (via Timesheet),تاريخ الإنتهاء الفعلي (عبر ورقة الوقت),
 Total Expense Claim (via Expense Claim),مجموع المطالبة المصاريف (عبر مطالبات مصاريف),
-Total Billing Amount (via Time Sheet),المبلغ الكلي الفواتير (عبر ورقة الوقت),
 Review Date,مراجعة تاريخ,
 Closing Date,تاريخ الاغلاق,
 Task Depends On,المهمة تعتمد على,
@@ -7887,7 +7749,6 @@ Check this if you want to force the user to select a series before saving. There
 Update Series,تحديث الرقم المتسلسل,
 Change the starting / current sequence number of an existing series.,تغيير رقم تسلسل بدء / الحالي من سلسلة الموجودة.,
 Prefix,بادئة,
-Current Value,القيمة الحالية,
 This is the number of the last created transaction with this prefix,هذا هو عدد المعاملات التي تم إنشاؤها باستخدام مشاركة هذه البادئة,
 Update Series Number,تحديث الرقم المتسلسل,
 Quotation Lost Reason,سبب خسارة المناقصة,
@@ -8518,8 +8379,6 @@ Reserved,محجوز,
 Itemwise Recommended Reorder Level,مستوى إعادة ترتيب يوصى به وفقاً للصنف,
 Lead Details,تفاصيل الزبون المحتمل,
 Lead Owner Efficiency,يؤدي كفاءة المالك,
-Loan Repayment and Closure,سداد القرض وإغلاقه,
-Loan Security Status,حالة ضمان القرض,
 Lost Opportunity,فرصة ضائعة,
 Maintenance Schedules,جداول الصيانة,
 Material Requests for which Supplier Quotations are not created,طلبات المواد التي لم ينشأ لها عروض أسعار من الموردين,
@@ -8610,7 +8469,6 @@ Total Counts Completed,إجمالي الأعداد المنجزة,
 Counts Targeted: {0},الأعداد المستهدفة: {0},
 Payment Account is mandatory,حساب الدفع إلزامي,
 "If checked, the full amount will be deducted from taxable income before calculating income tax without any declaration or proof submission.",إذا تم تحديده ، فسيتم خصم المبلغ بالكامل من الدخل الخاضع للضريبة قبل حساب ضريبة الدخل دون تقديم أي إعلان أو إثبات.,
-Disbursement Details,تفاصيل الصرف,
 Material Request Warehouse,مستودع طلب المواد,
 Select warehouse for material requests,حدد المستودع لطلبات المواد,
 Transfer Materials For Warehouse {0},نقل المواد للمستودع {0},
@@ -8998,9 +8856,6 @@ MICR Code,كود MICR,
 Repay unclaimed amount from salary,سداد المبلغ غير المطالب به من الراتب,
 Deduction from salary,خصم من الراتب,
 Expired Leaves,أوراق منتهية الصلاحية,
-Reference No,رقم المرجع,
-Haircut percentage is the percentage difference between market value of the Loan Security and the value ascribed to that Loan Security when used as collateral for that loan.,نسبة الحلاقة هي النسبة المئوية للفرق بين القيمة السوقية لسند القرض والقيمة المنسوبة إلى ضمان القرض هذا عند استخدامها كضمان لهذا القرض.,
-Loan To Value Ratio expresses the ratio of the loan amount to the value of the security pledged. A loan security shortfall will be triggered if this falls below the specified value for any loan ,تعبر نسبة القرض إلى القيمة عن نسبة مبلغ القرض إلى قيمة الضمان المرهون. سيحدث عجز في تأمين القرض إذا انخفض عن القيمة المحددة لأي قرض,
 If this is not checked the loan by default will be considered as a Demand Loan,إذا لم يتم التحقق من ذلك ، فسيتم اعتبار القرض بشكل افتراضي كقرض تحت الطلب,
 This account is used for booking loan repayments from the borrower and also disbursing loans to the borrower,يستخدم هذا الحساب لحجز أقساط سداد القرض من المقترض وأيضًا صرف القروض للمقترض,
 This account is capital account which is used to allocate capital for loan disbursal account ,هذا الحساب هو حساب رأس المال الذي يستخدم لتخصيص رأس المال لحساب صرف القرض,
@@ -9464,13 +9319,6 @@ Items Required,العناصر المطلوبة,
 Operation {0} does not belong to the work order {1},العملية {0} لا تنتمي إلى أمر العمل {1},
 Print UOM after Quantity,اطبع UOM بعد الكمية,
 Set default {0} account for perpetual inventory for non stock items,تعيين حساب {0} الافتراضي للمخزون الدائم للعناصر غير المخزنة,
-Loan Security {0} added multiple times,تمت إضافة ضمان القرض {0} عدة مرات,
-Loan Securities with different LTV ratio cannot be pledged against one loan,لا يمكن رهن سندات القرض ذات نسبة القيمة الدائمة المختلفة لقرض واحد,
-Qty or Amount is mandatory for loan security!,الكمية أو المبلغ إلزامي لضمان القرض!,
-Only submittted unpledge requests can be approved,يمكن الموافقة على طلبات إلغاء التعهد المقدمة فقط,
-Interest Amount or Principal Amount is mandatory,مبلغ الفائدة أو المبلغ الأساسي إلزامي,
-Disbursed Amount cannot be greater than {0},لا يمكن أن يكون المبلغ المصروف أكبر من {0},
-Row {0}: Loan Security {1} added multiple times,الصف {0}: تمت إضافة ضمان القرض {1} عدة مرات,
 Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save,الصف رقم {0}: يجب ألا يكون العنصر الفرعي عبارة عن حزمة منتج. يرجى إزالة العنصر {1} وحفظه,
 Credit limit reached for customer {0},تم بلوغ حد الائتمان للعميل {0},
 Could not auto create Customer due to the following missing mandatory field(s):,تعذر إنشاء العميل تلقائيًا بسبب الحقول الإلزامية التالية المفقودة:,

@@ -581,6 +581,11 @@
 						"title": "Bauleistungen nach § 13b UStG",
 						"is_default": 0,
 						"taxes": []
+					},
+					{
+						"title": "Nullsteuersatz nach § 12 Abs. 3 UStG",
+						"is_default": 0,
+						"taxes": []
 					}
 				],
 				"purchase_tax_templates": [
@@ -1337,6 +1342,11 @@
 					},
 					{
 						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Nullsteuersatz nach § 12 Abs. 3 UStG",
 						"is_default": 0,
 						"taxes": []
 					}
@@ -2097,6 +2107,11 @@
 						"title": "Bauleistungen nach § 13b UStG",
 						"is_default": 0,
 						"taxes": []
+					},
+					{
+						"title": "Nullsteuersatz nach § 12 Abs. 3 UStG",
+						"is_default": 0,
+						"taxes": []
 					}
 				],
 				"purchase_tax_templates": [
@@ -2847,6 +2862,11 @@
 					},
 					{
 						"title": "Bauleistungen nach § 13b UStG",
+						"is_default": 0,
+						"taxes": []
+					},
+					{
+						"title": "Nullsteuersatz nach § 12 Abs. 3 UStG",
 						"is_default": 0,
 						"taxes": []
 					}

@@ -96,7 +96,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.work_order || doc.docstatus == 1",
    "fieldname": "employee_detail",
    "fieldtype": "Section Break",
    "label": "Employee Detail"
@@ -311,7 +310,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-14 04:55:41.735991",
+ "modified": "2023-04-20 15:59:11.107831",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",

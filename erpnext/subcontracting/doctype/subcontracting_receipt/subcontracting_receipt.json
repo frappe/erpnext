@@ -205,6 +205,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -250,6 +251,7 @@
    "description": "Sets 'Rejected Warehouse' in each row of the Items table.",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
@@ -629,7 +631,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-16 14:18:57.001239",
+ "modified": "2023-07-06 18:43:16.171842",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

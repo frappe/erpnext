@@ -11,7 +11,10 @@ from frappe.utils import cint, cstr, flt
 import erpnext
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_available_serial_nos,
+)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_stock_balance
 
@@ -37,6 +40,8 @@ class StockReconciliation(StockController):
 		if not self.cost_center:
 			self.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 		self.validate_posting_time()
+		self.set_current_serial_and_batch_bundle()
+		self.set_new_serial_and_batch_bundle()
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
@@ -47,37 +52,162 @@ class StockReconciliation(StockController):
 		self.validate_putaway_capacity()
 
 		if self._action == "submit":
-			self.make_batches("warehouse")
+			self.validate_reserved_stock()
+
+	def on_update(self):
+		self.set_serial_and_batch_bundle(ignore_validate=True)
 
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 
-		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-
-		update_serial_nos_after_submit(self, "items")
-
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.validate_reserved_stock()
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
+
+	def set_current_serial_and_batch_bundle(self):
+		"""Set Serial and Batch Bundle for each item"""
+		for item in self.items:
+			item_details = frappe.get_cached_value(
+				"Item", item.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+			)
+
+			if not (item_details.has_serial_no or item_details.has_batch_no):
+				continue
+
+			if not item.current_serial_and_batch_bundle:
+				serial_and_batch_bundle = frappe.get_doc(
+					{
+						"doctype": "Serial and Batch Bundle",
+						"item_code": item.item_code,
+						"warehouse": item.warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"voucher_type": self.doctype,
+						"type_of_transaction": "Outward",
+					}
+				)
+			else:
+				serial_and_batch_bundle = frappe.get_doc(
+					"Serial and Batch Bundle", item.current_serial_and_batch_bundle
+				)
+
+				serial_and_batch_bundle.set("entries", [])
+
+			if item_details.has_serial_no:
+				serial_nos_details = get_available_serial_nos(
+					frappe._dict(
+						{
+							"item_code": item.item_code,
+							"warehouse": item.warehouse,
+							"posting_date": self.posting_date,
+							"posting_time": self.posting_time,
+						}
+					)
+				)
+
+				for serial_no_row in serial_nos_details:
+					serial_and_batch_bundle.append(
+						"entries",
+						{
+							"serial_no": serial_no_row.serial_no,
+							"qty": -1,
+							"warehouse": serial_no_row.warehouse,
+							"batch_no": serial_no_row.batch_no,
+						},
+					)
+
+			if item_details.has_batch_no:
+				batch_nos_details = get_available_batches(
+					frappe._dict(
+						{
+							"item_code": item.item_code,
+							"warehouse": item.warehouse,
+							"posting_date": self.posting_date,
+							"posting_time": self.posting_time,
+						}
+					)
+				)
+
+				for batch_no, qty in batch_nos_details.items():
+					serial_and_batch_bundle.append(
+						"entries",
+						{
+							"batch_no": batch_no,
+							"qty": qty * -1,
+							"warehouse": item.warehouse,
+						},
+					)
+
+			if not serial_and_batch_bundle.entries:
+				continue
+
+			item.current_serial_and_batch_bundle = serial_and_batch_bundle.save().name
+			item.current_qty = abs(serial_and_batch_bundle.total_qty)
+			item.current_valuation_rate = abs(serial_and_batch_bundle.avg_rate)
+
+	def set_new_serial_and_batch_bundle(self):
+		for item in self.items:
+			if item.current_serial_and_batch_bundle and not item.serial_and_batch_bundle:
+				current_doc = frappe.get_doc("Serial and Batch Bundle", item.current_serial_and_batch_bundle)
+
+				item.qty = abs(current_doc.total_qty)
+				item.valuation_rate = abs(current_doc.avg_rate)
+
+				bundle_doc = frappe.copy_doc(current_doc)
+				bundle_doc.warehouse = item.warehouse
+				bundle_doc.type_of_transaction = "Inward"
+
+				for row in bundle_doc.entries:
+					if row.qty < 0:
+						row.qty = abs(row.qty)
+
+					if row.stock_value_difference < 0:
+						row.stock_value_difference = abs(row.stock_value_difference)
+
+					row.is_outward = 0
+
+				bundle_doc.calculate_qty_and_amount()
+				bundle_doc.flags.ignore_permissions = True
+				bundle_doc.save()
+				item.serial_and_batch_bundle = bundle_doc.name
+			elif item.serial_and_batch_bundle and not item.qty and not item.valuation_rate:
+				bundle_doc = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+
+				item.qty = bundle_doc.total_qty
+				item.valuation_rate = bundle_doc.avg_rate
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
 		self.difference_amount = 0.0
 
 		def _changed(item):
+			if item.current_serial_and_batch_bundle:
+				bundle_data = frappe.get_all(
+					"Serial and Batch Bundle",
+					filters={"name": item.current_serial_and_batch_bundle},
+					fields=["total_qty as qty", "avg_rate as rate"],
+				)[0]
+
+				self.calculate_difference_amount(item, bundle_data)
+				return True
+
 			item_dict = get_stock_balance_for(
 				item.item_code, item.warehouse, self.posting_date, self.posting_time, batch_no=item.batch_no
 			)
 
-			if (
-				(item.qty is None or item.qty == item_dict.get("qty"))
-				and (item.valuation_rate is None or item.valuation_rate == item_dict.get("rate"))
-				and (not item.serial_no or (item.serial_no == item_dict.get("serial_nos")))
+			if (item.qty is None or item.qty == item_dict.get("qty")) and (
+				item.valuation_rate is None or item.valuation_rate == item_dict.get("rate")
 			):
 				return False
 			else:
@@ -88,18 +218,9 @@ class StockReconciliation(StockController):
 				if item.valuation_rate is None:
 					item.valuation_rate = item_dict.get("rate")
 
-				if item_dict.get("serial_nos"):
-					item.current_serial_no = item_dict.get("serial_nos")
-					if self.purpose == "Stock Reconciliation" and not item.serial_no and item.qty:
-						item.serial_no = item.current_serial_no
-
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
-				self.difference_amount += flt(item.qty, item.precision("qty")) * flt(
-					item.valuation_rate or item_dict.get("rate"), item.precision("valuation_rate")
-				) - flt(item_dict.get("qty"), item.precision("qty")) * flt(
-					item_dict.get("rate"), item.precision("valuation_rate")
-				)
+				self.calculate_difference_amount(item, item_dict)
 				return True
 
 		items = list(filter(lambda d: _changed(d), self.items))
@@ -115,6 +236,13 @@ class StockReconciliation(StockController):
 			for i, item in enumerate(self.items):
 				item.idx = i + 1
 			frappe.msgprint(_("Removed items with no change in quantity or value."))
+
+	def calculate_difference_amount(self, item, item_dict):
+		self.difference_amount += flt(item.qty, item.precision("qty")) * flt(
+			item.valuation_rate or item_dict.get("rate"), item.precision("valuation_rate")
+		) - flt(item_dict.get("qty"), item.precision("qty")) * flt(
+			item_dict.get("rate"), item.precision("valuation_rate")
+		)
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
@@ -208,21 +336,51 @@ class StockReconciliation(StockController):
 			validate_end_of_life(item_code, item.end_of_life, item.disabled)
 			validate_is_stock_item(item_code, item.is_stock_item)
 
-			# item should not be serialized
-			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
-				raise frappe.ValidationError(
-					_("Serial no(s) required for serialized item {0}").format(item_code)
-				)
-
-			# item managed batch-wise not allowed
-			if item.has_batch_no and not row.batch_no and not item.create_new_batch:
-				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
-
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus)
 
 		except Exception as e:
 			self.validation_messages.append(_("Row #") + " " + ("%d: " % (row.idx)) + cstr(e))
+
+	def validate_reserved_stock(self) -> None:
+		"""Raises an exception if there is any reserved stock for the items in the Stock Reconciliation."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_item_and_warehouse as get_sre_reserved_qty_details,
+		)
+
+		item_code_list, warehouse_list = [], []
+		for item in self.items:
+			item_code_list.append(item.item_code)
+			warehouse_list.append(item.warehouse)
+
+		sre_reserved_qty_details = get_sre_reserved_qty_details(item_code_list, warehouse_list)
+
+		if sre_reserved_qty_details:
+			data = []
+			for (item_code, warehouse), reserved_qty in sre_reserved_qty_details.items():
+				data.append([item_code, warehouse, reserved_qty])
+
+			msg = ""
+			if len(data) == 1:
+				msg = _(
+					"{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
+				).format(bold(data[0][2]), bold(data[0][0]), bold(data[0][1]), self._action)
+			else:
+				items_html = ""
+				for d in data:
+					items_html += "<li>{0} units of Item {1} in Warehouse {2}</li>".format(
+						bold(d[2]), bold(d[0]), bold(d[1])
+					)
+
+				msg = _(
+					"The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
+				).format(self._action, items_html)
+
+			frappe.throw(
+				msg,
+				title=_("Stock Reservation"),
+			)
 
 	def update_stock_ledger(self):
 		"""find difference between current and expected entries
@@ -230,18 +388,15 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_previous_sle
 
 		sl_entries = []
-		has_serial_no = False
-		has_batch_no = False
 		for row in self.items:
-			item = frappe.get_doc("Item", row.item_code)
-			if item.has_batch_no:
-				has_batch_no = True
+			item = frappe.get_cached_value(
+				"Item", row.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+			)
 
 			if item.has_serial_no or item.has_batch_no:
-				has_serial_no = True
-				self.get_sle_for_serialized_items(row, sl_entries, item)
+				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
-				if row.serial_no or row.batch_no:
+				if row.serial_and_batch_bundle:
 					frappe.throw(
 						_(
 							"Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it."
@@ -279,100 +434,35 @@ class StockReconciliation(StockController):
 				sl_entries.append(self.get_sle_for_items(row))
 
 		if sl_entries:
-			if has_serial_no:
-				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
-
-			allow_negative_stock = False
-			if has_batch_no:
-				allow_negative_stock = True
-
+			allow_negative_stock = cint(
+				frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+			)
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
-		if has_serial_no and sl_entries:
-			self.update_valuation_rate_for_serial_no()
-
-	def get_sle_for_serialized_items(self, row, sl_entries, item):
-		from erpnext.stock.stock_ledger import get_previous_sle
-
-		serial_nos = get_serial_nos(row.serial_no)
-
-		# To issue existing serial nos
-		if row.current_qty and (row.current_serial_no or row.batch_no):
+	def get_sle_for_serialized_items(self, row, sl_entries):
+		if row.current_serial_and_batch_bundle:
 			args = self.get_sle_for_items(row)
 			args.update(
 				{
 					"actual_qty": -1 * row.current_qty,
-					"serial_no": row.current_serial_no,
-					"batch_no": row.batch_no,
+					"serial_and_batch_bundle": row.current_serial_and_batch_bundle,
 					"valuation_rate": row.current_valuation_rate,
 				}
 			)
 
-			if row.current_serial_no:
-				args.update(
-					{
-						"qty_after_transaction": 0,
-					}
-				)
-
 			sl_entries.append(args)
 
-		qty_after_transaction = 0
-		for serial_no in serial_nos:
-			args = self.get_sle_for_items(row, [serial_no])
-
-			previous_sle = get_previous_sle(
-				{
-					"item_code": row.item_code,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"serial_no": serial_no,
-				}
-			)
-
-			if previous_sle and row.warehouse != previous_sle.get("warehouse"):
-				# If serial no exists in different warehouse
-
-				warehouse = previous_sle.get("warehouse", "") or row.warehouse
-
-				if not qty_after_transaction:
-					qty_after_transaction = get_stock_balance(
-						row.item_code, warehouse, self.posting_date, self.posting_time
-					)
-
-				qty_after_transaction -= 1
-
-				new_args = args.copy()
-				new_args.update(
-					{
-						"actual_qty": -1,
-						"qty_after_transaction": qty_after_transaction,
-						"warehouse": warehouse,
-						"valuation_rate": previous_sle.get("valuation_rate"),
-					}
-				)
-
-				sl_entries.append(new_args)
-
-		if row.qty:
+		if row.qty != 0:
 			args = self.get_sle_for_items(row)
-
-			if item.has_serial_no and item.has_batch_no:
-				args["qty_after_transaction"] = row.qty
-
 			args.update(
 				{
 					"actual_qty": row.qty,
 					"incoming_rate": row.valuation_rate,
-					"valuation_rate": row.valuation_rate,
+					"serial_and_batch_bundle": row.serial_and_batch_bundle,
 				}
 			)
 
 			sl_entries.append(args)
-
-		if serial_nos == get_serial_nos(row.current_serial_no):
-			# update valuation rate
-			self.update_valuation_rate_for_serial_nos(row, serial_nos)
 
 	def update_valuation_rate_for_serial_no(self):
 		for d in self.items:
@@ -410,8 +500,6 @@ class StockReconciliation(StockController):
 				"company": self.company,
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
-				"serial_no": "\n".join(serial_nos) if serial_nos else "",
-				"batch_no": row.batch_no,
 				"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
 			}
 		)
@@ -419,17 +507,19 @@ class StockReconciliation(StockController):
 		if not row.batch_no:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
-		if self.docstatus == 2 and not row.batch_no:
+		if self.docstatus == 2:
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
 				data.previous_qty_after_transaction = flt(row.qty)
 				data.valuation_rate = flt(row.current_valuation_rate)
+				data.serial_and_batch_bundle = row.current_serial_and_batch_bundle
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
 				data.stock_value_difference = -1 * flt(row.amount_difference)
 			else:
 				data.actual_qty = row.qty
 				data.qty_after_transaction = 0.0
+				data.serial_and_batch_bundle = row.serial_and_batch_bundle
 				data.valuation_rate = flt(row.valuation_rate)
 				data.stock_value_difference = -1 * flt(row.amount_difference)
 
@@ -442,15 +532,7 @@ class StockReconciliation(StockController):
 
 		has_serial_no = False
 		for row in self.items:
-			if row.serial_no or row.batch_no or row.current_serial_no:
-				has_serial_no = True
-				serial_nos = ""
-				if row.current_serial_no:
-					serial_nos = get_serial_nos(row.current_serial_no)
-
-				sl_entries.append(self.get_sle_for_items(row, serial_nos))
-			else:
-				sl_entries.append(self.get_sle_for_items(row))
+			sl_entries.append(self.get_sle_for_items(row))
 
 		if sl_entries:
 			if has_serial_no:
@@ -571,24 +653,40 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 	def recalculate_current_qty(self, item_code, batch_no):
+		from erpnext.stock.stock_ledger import get_valuation_rate
+
+		sl_entries = []
 		for row in self.items:
-			if not (row.item_code == item_code and row.batch_no == batch_no):
+			if (
+				not (row.item_code == item_code and row.batch_no == batch_no)
+				and not row.serial_and_batch_bundle
+			):
 				continue
 
-			row.current_qty = get_batch_qty_for_stock_reco(
+			if row.current_serial_and_batch_bundle:
+				self.recalculate_qty_for_serial_and_batch_bundle(row)
+				continue
+
+			current_qty = get_batch_qty_for_stock_reco(
 				item_code, row.warehouse, batch_no, self.posting_date, self.posting_time, self.name
 			)
 
-			qty, val_rate = get_stock_balance(
-				item_code,
-				row.warehouse,
-				self.posting_date,
-				self.posting_time,
-				with_valuation_rate=True,
+			precesion = row.precision("current_qty")
+			if flt(current_qty, precesion) == flt(row.current_qty, precesion):
+				continue
+
+			val_rate = get_valuation_rate(
+				item_code, row.warehouse, self.doctype, self.name, company=self.company, batch_no=batch_no
 			)
 
 			row.current_valuation_rate = val_rate
+			if not row.current_qty and current_qty:
+				sle = self.get_sle_for_items(row)
+				sle.actual_qty = current_qty * -1
+				sle.valuation_rate = val_rate
+				sl_entries.append(sle)
 
+			row.current_qty = current_qty
 			row.db_set(
 				{
 					"current_qty": row.current_qty,
@@ -596,6 +694,30 @@ class StockReconciliation(StockController):
 					"current_amount": flt(row.current_qty * row.current_valuation_rate),
 				}
 			)
+
+		if sl_entries:
+			self.make_sl_entries(sl_entries)
+
+	def recalculate_qty_for_serial_and_batch_bundle(self, row):
+		doc = frappe.get_doc("Serial and Batch Bundle", row.current_serial_and_batch_bundle)
+		precision = doc.entries[0].precision("qty")
+
+		for d in doc.entries:
+			qty = (
+				get_batch_qty(
+					d.batch_no,
+					doc.warehouse,
+					posting_date=doc.posting_date,
+					posting_time=doc.posting_time,
+					ignore_voucher_nos=[doc.voucher_no],
+				)
+				or 0
+			) * -1
+
+			if flt(d.qty, precision) == flt(qty, precision):
+				continue
+
+			d.db_set("qty", qty)
 
 
 def get_batch_qty_for_stock_reco(

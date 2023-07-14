@@ -66,8 +66,10 @@ class Task(NestedSet):
 				task_date = self.get(fieldname)
 				if task_date and date_diff(project_end_date, getdate(task_date)) < 0:
 					frappe.throw(
-						_("Task's {0} cannot be after Project's Expected End Date.").format(
-							_(self.meta.get_label(fieldname))
+						_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
+							frappe.bold(frappe.get_desk_link("Task", self.name)),
+							_(self.meta.get_label(fieldname)),
+							frappe.bold(frappe.get_desk_link("Project", self.project)),
 						),
 						frappe.exceptions.InvalidDates,
 					)
@@ -302,6 +304,7 @@ def set_tasks_as_overdue():
 @frappe.whitelist()
 def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
+		target.parent_project = source.project
 		target.append(
 			"time_logs",
 			{

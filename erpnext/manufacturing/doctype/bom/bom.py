@@ -1317,7 +1317,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not field in searchfields
 	]
 
-	query_filters = {"disabled": 0, "end_of_life": (">", today())}
+	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
 
 	or_cond_filters = {}
 	if txt:
@@ -1339,8 +1339,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not has_variants:
 			query_filters["has_variants"] = 0
 
-	if filters and filters.get("is_stock_item"):
-		query_filters["is_stock_item"] = 1
+	if filters:
+		for fieldname, value in filters.items():
+			query_filters[fieldname] = value
 
 	return frappe.get_list(
 		"Item",

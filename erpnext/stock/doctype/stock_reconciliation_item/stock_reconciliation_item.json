@@ -17,8 +17,11 @@
   "amount",
   "allow_zero_valuation_rate",
   "serial_no_and_batch_section",
+  "add_serial_batch_bundle",
+  "serial_and_batch_bundle",
   "batch_no",
   "column_break_11",
+  "current_serial_and_batch_bundle",
   "serial_no",
   "section_break_3",
   "current_qty",
@@ -99,8 +102,9 @@
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "label": "Serial No"
+   "fieldtype": "Long Text",
+   "label": "Serial No",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_11",
@@ -120,7 +124,7 @@
   },
   {
    "fieldname": "current_serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Long Text",
    "label": "Current Serial No",
    "no_copy": 1,
    "print_hide": 1,
@@ -168,7 +172,8 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -185,11 +190,31 @@
    "fieldtype": "Data",
    "label": "Has Item Scanned",
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial / Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "current_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Current Serial / Batch Bundle",
+   "options": "Serial and Batch Bundle",
+   "read_only": 1
+  },
+  {
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-11-02 13:01:23.580937",
+ "modified": "2023-06-15 11:45:55.808942",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

@@ -5,7 +5,6 @@
 
 erpnext/accounts/               @deepeshgarg007 @ruthra-kumar
 erpnext/assets/                 @anandbaburajan @deepeshgarg007
-erpnext/loan_management/        @deepeshgarg007
 erpnext/regional                @deepeshgarg007 @ruthra-kumar
 erpnext/selling                 @deepeshgarg007 @ruthra-kumar
 erpnext/support/                @deepeshgarg007
@@ -22,4 +21,4 @@ erpnext/controllers/            @deepeshgarg007 @rohitwaghchaure
 erpnext/patches/                @deepeshgarg007 
 
 .github/                        @deepeshgarg007
-pyproject.toml                  @ankush
+pyproject.toml                  @phot0n
