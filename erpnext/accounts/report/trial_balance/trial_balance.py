@@ -159,6 +159,8 @@ def get_rootwise_opening_balances(filters, report_type):
 			accounting_dimensions,
 			period_closing_voucher=last_period_closing_voucher[0].name,
 		)
+
+		# Report getting generate from the mid of a fiscal year
 		if getdate(last_period_closing_voucher[0].posting_date) < getdate(
 			add_days(filters.from_date, -1)
 		):
@@ -220,7 +222,10 @@ def get_opening_balance(
 		if start_date:
 			opening_balance = opening_balance.where(closing_balance.posting_date >= start_date)
 			opening_balance = opening_balance.where(closing_balance.is_opening == "No")
-		opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
+		else:
+			opening_balance = opening_balance.where(
+				(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
+			)
 
 	if (
 		not filters.show_unclosed_fy_pl_balances
