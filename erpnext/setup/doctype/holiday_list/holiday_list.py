@@ -53,7 +53,7 @@ class HolidayList(Document):
 	@frappe.whitelist()
 	def get_local_holidays(self):
 		if not self.country:
-			throw(_("Please select Country"))
+			throw(_("Please select a country"))
 
 		existing_holidays = self.get_holidays()
 		from_date = getdate(self.from_date)
