@@ -336,4 +336,4 @@ erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v14_0.enable_allow_existing_serial_no
 erpnext.patches.v14_0.set_report_in_process_SOA 
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
-erpnext.patches.v14_0.update_closing_balances #14-07-2023
+erpnext.patches.v14_0.update_closing_balances #15-07-2023
