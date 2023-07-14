@@ -173,7 +173,7 @@ def get_query_columns(report_columns):
 		else:
 			columns.append(fieldname)
 
-	return ", " + ", ".join(columns)
+	return columns
 
 
 def get_values_for_columns(report_columns, report_row):

@@ -35,7 +35,7 @@ def _execute(filters=None, additional_table_columns=None):
 		frappe.throw(_("Please select a supplier for fetching payments."))
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 	if filters.get("include_payments"):
-		invoice_list += get_payments(filters, additional_table_columns)
+		invoice_list += get_payments(filters)
 
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
@@ -156,7 +156,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		_("Supplier Name") + "::120",
 	]
 
-	if additional_table_columns:
+	if additional_table_columns and not include_payments:
 		columns += additional_table_columns
 
 	if not include_payments:
@@ -279,6 +279,9 @@ def get_invoices(filters, additional_query_columns):
 		.where((pi.docstatus == 1))
 		.orderby(pi.posting_date, pi.name, order=Order.desc)
 	)
+	if additional_query_columns:
+		for col in additional_query_columns:
+			query = query.select(col)
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters.supplier)
 	query = get_conditions(filters, query, [pi, invoice_item])
@@ -291,10 +294,7 @@ def get_invoices(filters, additional_query_columns):
 	return invoices
 
 
-def get_payments(filters, additional_query_columns):
-	if additional_query_columns:
-		additional_query_columns = ", " + ", ".join(additional_query_columns)
-
+def get_payments(filters):
 	args = frappe._dict(
 		account="credit_to",
 		party="supplier",
@@ -302,7 +302,6 @@ def get_payments(filters, additional_query_columns):
 		party_account=get_party_account(
 			"Supplier", filters.supplier, filters.company, include_advance=True
 		),
-		additional_query_columns="" if not additional_query_columns else additional_query_columns,
 	)
 	payment_entries = get_payment_entries(filters, args)
 	journal_entries = get_journal_entries(filters, args)
