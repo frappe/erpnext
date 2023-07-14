@@ -416,7 +416,7 @@ def set_gl_entries_by_account(
 	filters,
 	gl_entries_by_account,
 	ignore_closing_entries=False,
-	ignore_opening_entries=False
+	ignore_opening_entries=False,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
