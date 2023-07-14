@@ -115,13 +115,13 @@
   },
   {
    "fieldname": "country",
-   "fieldtype": "Select",
+   "fieldtype": "Autocomplete",
    "label": "Country"
   },
   {
    "depends_on": "country",
    "fieldname": "subdivision",
-   "fieldtype": "Select",
+   "fieldtype": "Autocomplete",
    "label": "Subdivision"
   },
   {
@@ -141,7 +141,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2023-07-14 11:29:12.537263",
+ "modified": "2023-07-14 13:28:53.156421",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday List",
