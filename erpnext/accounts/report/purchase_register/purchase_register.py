@@ -127,7 +127,7 @@ def _execute(filters=None, additional_table_columns=None):
 		row.update(
 			{
 				"total_tax": total_tax,
-				"garnd_total": inv.base_grand_total,
+				"grand_total": inv.base_grand_total,
 				"rounded_total": inv.base_rounded_total,
 				"outstanding_amount": inv.outstanding_amount,
 			}
@@ -193,6 +193,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 
 	if not include_payments:
 		columns += [
+			_("Grand Total") + ":Currency/currency:120",
 			_("Rounded Total") + ":Currency/currency:120",
 			_("Outstanding Amount") + ":Currency/currency:120",
 		]
