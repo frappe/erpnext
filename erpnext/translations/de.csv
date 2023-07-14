@@ -3598,11 +3598,8 @@ Accounting Period overlaps with {0},Abrechnungszeitraum überschneidet sich mit 
 Activity,Aktivität,
 Add / Manage Email Accounts.,Hinzufügen/Verwalten von E-Mail-Konten,
 Add Child,Unterpunkt hinzufügen,
-<<<<<<< HEAD
 Add Loan Security,Darlehenssicherheit hinzufügen,
-=======
 Add Local Holidays,Lokale Feiertage hinzufügen,
->>>>>>> 509061f05b (fix: German translations of Holiday List)
 Add Multiple,Mehrere hinzufügen,
 Add Participants,Teilnehmer hinzufügen,
 Add to Featured Item,Zum empfohlenen Artikel hinzufügen,
@@ -6714,21 +6711,12 @@ More Details,Mehr Details,
 Expense Claim Account,Kostenabrechnung Konto,
 Expense Claim Advance,Auslagenvorschuss,
 Unclaimed amount,Nicht beanspruchter Betrag,
-<<<<<<< HEAD
-Expense Claim Detail,Aufwandsabrechnungsdetail,
-Expense Date,Datum der Aufwendung,
-Expense Claim Type,Art der Aufwandsabrechnung,
-Holiday List Name,Urlaubslistenname,
-Total Holidays,Insgesamt Feiertage,
-Add Weekly Holidays,Wöchentliche Feiertage hinzufügen,
-=======
 Expense Claim Detail,Auslage,
 Expense Date,Datum der Auslage,
 Expense Claim Type,Art der Auslagenabrechnung,
 Holiday List Name,Name der Feiertagsliste,
 Total Holidays,Insgesamt freie Tage,
 Add Weekly Holidays,Wöchentlich freie Tage hinzufügen,
->>>>>>> 509061f05b (fix: German translations of Holiday List)
 Weekly Off,Wöchentlich frei,
 Add to Holidays,Zu freien Tagen hinzufügen,
 Holidays,Arbeitsfreie Tage,
