@@ -9,11 +9,10 @@ frappe.ui.form.on("Holiday List", {
 
 		frm.call("get_supported_countries").then(r => {
 			frm.subdivisions_by_country = r.message.subdivisions_by_country;
-			frm.set_df_property(
-				"country",
-				"options",
-				r.message.countries.sort((a, b) => a.label.localeCompare(b.label))
-			);
+			const countries = r.message.countries.sort((a, b) => a.label.localeCompare(b.label));
+			countries.unshift({ value: "", label: __("Select Country ...") });
+
+			frm.set_df_property("country", "options", countries);
 
 			if (frm.doc.country) {
 				frm.trigger("set_subdivisions");
@@ -34,9 +33,10 @@ frappe.ui.form.on("Holiday List", {
 		}
 	},
 	set_subdivisions: function(frm) {
-		const subdivisions = frm.subdivisions_by_country[frm.doc.country];
+		const subdivisions = [...frm.subdivisions_by_country[frm.doc.country]];
 		if (subdivisions && subdivisions.length > 0) {
-			frm.set_df_property("subdivision", "options", frm.subdivisions_by_country[frm.doc.country]);
+			subdivisions.unshift({ value: "", label: __("Select Subdivision ...") });
+			frm.set_df_property("subdivision", "options", subdivisions);
 			frm.set_df_property("subdivision", "hidden", 0);
 		} else {
 			frm.set_df_property("subdivision", "options", "");
