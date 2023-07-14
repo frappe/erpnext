@@ -276,7 +276,7 @@ def get_dimensions(with_cost_center_and_project=False):
 			with_cost_center_and_project = True
 		else:
 			with_cost_center_and_project = False
-	
+
 	if with_cost_center_and_project:
 		dimension_filters.extend(
 			[
