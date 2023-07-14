@@ -5,12 +5,13 @@
 import frappe
 from frappe import _, msgprint
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 from pypika import Order
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -21,11 +22,15 @@ from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 =======
 =======
 >>>>>>> 1e8b8b5b29 (fix: linting issues)
+=======
+from erpnext.accounts.party import get_party_account
+>>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 from erpnext.accounts.report.utils import (
 	filter_invoices_based_on_dimensions,
 	get_advance_taxes_and_charges,
 	get_conditions,
 	get_journal_entries,
+	get_opening_row,
 	get_party_details,
 	get_payment_entries,
 	get_query_columns,
@@ -48,6 +53,12 @@ def _execute(filters=None, additional_table_columns=None):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+	include_payments = filters.get("include_payments")
+	if filters.get("include_payments") and not filters.get("supplier"):
+		frappe.throw(_("Please select a supplier for fetching payments."))
+>>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 =======
 =======
@@ -55,12 +66,15 @@ def _execute(filters=None, additional_table_columns=None):
 >>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
 	invoice_list = get_invoices(filters, additional_query_columns)
 	if filters.get("include_payments"):
+<<<<<<< HEAD
 		if not filters.get("supplier"):
 			frappe.throw(_("Please select a supplier for fetching payments."))
 <<<<<<< HEAD
 		invoice_list += get_payments(filters, additional_query_columns)
 >>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
 =======
+=======
+>>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 		invoice_list += get_payments(filters, additional_table_columns)
 
 <<<<<<< HEAD
@@ -90,6 +104,21 @@ def _execute(filters=None, additional_table_columns=None):
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 
+	res = []
+	if include_payments:
+		opening_row = get_opening_row(
+			"Supplier", filters.supplier, getdate(filters.from_date), filters.company
+		)[0]
+		print(opening_row)
+		res.append(
+			{
+				"payable_account": opening_row.account,
+				"debit": flt(opening_row.debit),
+				"credit": flt(opening_row.credit),
+				"balance": flt(opening_row.balance),
+			}
+		)
+		running_balance = flt(opening_row.balance)
 	data = []
 	for inv in invoice_list:
 		# invoice details
@@ -97,6 +126,7 @@ def _execute(filters=None, additional_table_columns=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 		row = [
@@ -140,6 +170,25 @@ def _execute(filters=None, additional_table_columns=None):
 			", ".join(purchase_receipt),
 			company_currency,
 		]
+=======
+		row = {
+			"voucher_type": inv.doctype,
+			"voucher_no": inv.name,
+			"posting_date": inv.posting_date,
+			"supplier_id": inv.supplier,
+			"supplier_name": inv.supplier_name,
+			**get_values_for_columns(additional_table_columns, inv),
+			"supplier_group": supplier_details.get(inv.supplier).get("supplier_group"),
+			"tax_id": supplier_details.get(inv.supplier).get("tax_id"),
+			"payable_account": inv.credit_to,
+			"mode_of_payment": inv.mode_of_payment,
+			"project": ", ".join(project) if inv.doctype == "Purchase Invoice" else inv.project,
+			"remarks": inv.remarks,
+			"purchase_order": ", ".join(purchase_order),
+			"purchase_receipt": ", ".join(purchase_receipt),
+			"currency": company_currency,
+		}
+>>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 
 		# map expense values
 		base_net_total = 0
@@ -149,14 +198,16 @@ def _execute(filters=None, additional_table_columns=None):
 			else:
 				expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
 			base_net_total += expense_amount
-			row.append(expense_amount)
+			row.update({frappe.scrub(expense_acc): expense_amount})
 
 		# Add amount in unrealized account
 		for account in unrealized_profit_loss_accounts:
-			row.append(flt(internal_invoice_map.get((inv.name, account))))
+			row.update(
+				{frappe.scrub(account + "_unrealized"): flt(internal_invoice_map.get((inv.name, account)))}
+			)
 
 		# net total
-		row.append(base_net_total or inv.base_net_total)
+		row.update({"net_total": base_net_total or inv.base_net_total})
 
 		# tax account
 		total_tax = 0
@@ -164,13 +215,29 @@ def _execute(filters=None, additional_table_columns=None):
 			if tax_acc not in expense_accounts:
 				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc))
 				total_tax += tax_amount
-				row.append(tax_amount)
+				row.update({frappe.scrub(tax_acc): tax_amount})
 
 		# total tax, grand total, rounded total & outstanding amount
-		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
+		row.update(
+			{
+				"total_tax": total_tax,
+				"garnd_total": inv.base_grand_total,
+				"rounded_total": inv.base_rounded_total,
+				"outstanding_amount": inv.outstanding_amount,
+			}
+		)
+
+		if inv.doctype == "Purchase Invoice":
+			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+		else:
+			row.update({"debit": 0.0, "credit": inv.base_grand_total})
+		if include_payments:
+			running_balance += row["debit"] - row["credit"]
+			row.update({"balance": running_balance})
 		data.append(row)
 
-	return columns, sorted(data, key=lambda x: x[2])
+	res += sorted(data, key=lambda x: x["posting_date"])
+	return columns, res, None, None, None, include_payments
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
@@ -186,20 +253,48 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	if additional_table_columns:
 		columns += additional_table_columns
 
-	columns += [
-		_("Supplier Group") + ":Link/Supplier Group:120",
-		_("Tax Id") + "::50",
-		_("Payable Account") + ":Link/Account:120",
-		_("Mode of Payment") + ":Link/Mode of Payment:80",
-		_("Project") + ":Link/Project:80",
-		_("Bill No") + "::120",
-		_("Bill Date") + ":Date:80",
-		_("Remarks") + "::150",
-		_("Purchase Order") + ":Link/Purchase Order:100",
-		_("Purchase Receipt") + ":Link/Purchase Receipt:100",
-		{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Data", "width": 80},
-	]
+	if not include_payments:
+		columns += [
+			_("Supplier Group") + ":Link/Supplier Group:120",
+			_("Tax Id") + "::50",
+			_("Payable Account") + ":Link/Account:120",
+			_("Mode of Payment") + ":Link/Mode of Payment:80",
+			_("Project") + ":Link/Project:80",
+			_("Bill No") + "::120",
+			_("Bill Date") + ":Date:80",
+			_("Purchase Order") + ":Link/Purchase Order:100",
+			_("Purchase Receipt") + ":Link/Purchase Receipt:100",
+			{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Data", "width": 80},
+		]
+	else:
+		columns += [
+			_("Payable Account") + ":Link/Account:120",
+			_("Debit") + ":Currency/currency:120",
+			_("Credit") + ":Currency/currency:120",
+			_("Balance") + ":Currency/currency:120",
+		]
 
+	account_columns, accounts = get_account_columns(invoice_list, include_payments)
+
+	columns = (
+		columns
+		+ account_columns[0]
+		+ account_columns[1]
+		+ [_("Net Total") + ":Currency/currency:120"]
+		+ account_columns[2]
+		+ [_("Total Tax") + ":Currency/currency:120"]
+	)
+
+	if not include_payments:
+		columns += [
+			_("Rounded Total") + ":Currency/currency:120",
+			_("Outstanding Amount") + ":Currency/currency:120",
+		]
+	columns += [_("Remarks") + "::120"]
+	return columns, accounts[0], accounts[2], accounts[1]
+
+
+def get_account_columns(invoice_list, include_payments):
 	expense_accounts = []
 	tax_accounts = []
 	unrealized_profit_loss_accounts = []
@@ -246,21 +341,10 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		if account not in expense_accounts
 	]
 
-	columns = (
-		columns
-		+ expense_columns
-		+ unrealized_profit_loss_account_columns
-		+ [_("Net Total") + ":Currency/currency:120"]
-		+ tax_columns
-		+ [
-			_("Total Tax") + ":Currency/currency:120",
-			_("Grand Total") + ":Currency/currency:120",
-			_("Rounded Total") + ":Currency/currency:120",
-			_("Outstanding Amount") + ":Currency/currency:120",
-		]
-	)
+	columns = [expense_columns, unrealized_profit_loss_account_columns, tax_columns]
+	accounts = [expense_accounts, unrealized_profit_loss_accounts, tax_accounts]
 
-	return columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts
+	return columns, accounts
 
 
 def get_invoices(filters, additional_query_columns):
@@ -292,6 +376,11 @@ def get_invoices(filters, additional_query_columns):
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters.supplier)
 	query = get_conditions(filters, query, [pi, invoice_item])
+	if filters.get("include_payments"):
+		party_account = get_party_account(
+			"Supplier", filters.get("supplier"), filters.get("company"), include_advance=True
+		)
+		query = query.where(pi.credit_to.isin(party_account))
 	invoices = query.run(as_dict=True)
 	return invoices
 
@@ -304,6 +393,9 @@ def get_payments(filters, additional_query_columns):
 		account="credit_to",
 		party="supplier",
 		party_name="supplier_name",
+		party_account=get_party_account(
+			"Supplier", filters.supplier, filters.company, include_advance=True
+		),
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
 	)
 	payment_entries = get_payment_entries(filters, args)

@@ -67,7 +67,7 @@ frappe.query_reports["Sales Register"] = {
 		},
 		{
 			"fieldname": "include_payments",
-			"label": __("Include Payments"),
+			"label": __("Show Ledger View"),
 			"fieldtype": "Check",
 			"default": 0
 		}
