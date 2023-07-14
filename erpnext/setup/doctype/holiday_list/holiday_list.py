@@ -56,7 +56,6 @@ class HolidayList(Document):
 			throw(_("Please select Country"))
 
 		existing_holidays = self.get_holidays()
-		system_language = frappe.db.get_single_value("System Settings", "language")
 		from_date = getdate(self.from_date)
 		to_date = getdate(self.to_date)
 
@@ -64,7 +63,7 @@ class HolidayList(Document):
 			self.country,
 			subdiv=self.subdivision,
 			years=[from_date.year, to_date.year],
-			language=system_language,
+			language=frappe.local.lang,
 		).items():
 			if holiday_date in existing_holidays:
 				continue
