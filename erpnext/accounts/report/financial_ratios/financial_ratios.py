@@ -23,7 +23,6 @@ def execute(filters=None):
 
 	columns, data = [], []
 	columns = get_columns(filters, period_list)
-	print(columns)
 	assets = get_data(
 		filters.company,
 		"Asset",
@@ -93,8 +92,7 @@ def get_columns(filters, period_list):
 			{
 				"fieldname": period.key,
 				"label": period.label,
-				"fieldtype": "Currency",
-				"options": "currency",
+				"fieldtype": "Float",
 				"width": 150,
 			}
 		)
