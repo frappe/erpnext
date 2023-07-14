@@ -61,7 +61,6 @@ def _execute(filters=None, additional_table_columns=None):
 		opening_row = get_opening_row(
 			"Supplier", filters.supplier, getdate(filters.from_date), filters.company
 		)[0]
-		print(opening_row)
 		res.append(
 			{
 				"payable_account": opening_row.account,
