@@ -621,7 +621,7 @@ class ProductionPlan(Document):
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
-		if item.get("qty") <= 0:
+		if flt(item.get("qty")) <= 0:
 			return
 
 		wo = frappe.new_doc("Work Order")
