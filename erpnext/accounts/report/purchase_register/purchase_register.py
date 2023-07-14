@@ -8,6 +8,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika import Order
 
+<<<<<<< HEAD
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
@@ -23,10 +24,11 @@ from erpnext.accounts.report.utils import get_party_details, get_taxes_query
 =======
 >>>>>>> 1e8b8b5b29 (fix: linting issues)
 =======
+=======
+>>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 from erpnext.accounts.party import get_party_account
 >>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 from erpnext.accounts.report.utils import (
-	filter_invoices_based_on_dimensions,
 	get_advance_taxes_and_charges,
 	get_conditions,
 	get_journal_entries,
@@ -78,6 +80,7 @@ def _execute(filters=None, additional_table_columns=None):
 		invoice_list += get_payments(filters, additional_table_columns)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 1e8b8b5b29 (fix: linting issues)
 =======
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
@@ -85,6 +88,8 @@ def _execute(filters=None, additional_table_columns=None):
 		invoice_list = filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoice_list)
 
 >>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
+=======
+>>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
