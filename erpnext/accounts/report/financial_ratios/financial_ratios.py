@@ -22,8 +22,8 @@ def execute(filters=None):
 	)
 
 	columns, data = [], []
-	columns = get_columns(filters)
-	data = get_query_data(filters)
+	columns = get_columns(filters, period_list)
+	print(columns)
 	assets = get_data(
 		filters.company,
 		"Asset",
@@ -69,34 +69,34 @@ def execute(filters=None):
 		if liability.get("total") and not liability.get("parent_account"):
 			total_liablity = liability["total"]
 
-	# if liabilities.get('root_type') == 'Liability':
-	print(total_liablity)
-
 	data = [
-		{"ratio": "Current Ratio", "ratio_value": current_ratio},
-		{"ratio": "Quick Ratio", "ratio_value": quick_ratio},
+		{"ratio": "Current Ratio", "mar_2024": current_ratio},
+		{"ratio": "Quick Ratio", "mar_2024": quick_ratio},
 	]
 
 	return columns, data
 
 
-def get_columns(filters):
+def get_columns(filters, period_list):
 
-	return [
+	columns = [
 		{
 			"label": _("Ratios"),
 			"fieldname": "ratio",
 			"fieldtype": "Data",
 			"width": 200,
 		},
-		{
-			"label": _("2023-2024"),
-			"fieldname": "ratio_value",
-			"fieldtype": "Data",
-			"width": 200,
-		},
 	]
 
+	for period in period_list:
+		columns.append(
+			{
+				"fieldname": period.key,
+				"label": period.label,
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 150,
+			}
+		)
 
-def get_query_data(filters):
-	pass
+	return columns
