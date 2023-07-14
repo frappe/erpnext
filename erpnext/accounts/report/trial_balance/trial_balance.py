@@ -117,6 +117,7 @@ def get_data(filters):
 		filters,
 		gl_entries_by_account,
 		ignore_closing_entries=not flt(filters.with_period_closing_entry),
+		ignore_opening_entries=True,
 	)
 
 	calculate_values(accounts, gl_entries_by_account, opening_balances)
