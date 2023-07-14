@@ -326,14 +326,7 @@ erpnext.patches.v14_0.change_autoname_for_tax_withheld_vouchers
 erpnext.patches.v14_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v14_0.set_pick_list_status
 erpnext.patches.v13_0.update_docs_link
-<<<<<<< HEAD
 erpnext.patches.v14_0.enable_all_leads
-=======
-erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
-erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
-erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
-erpnext.patches.v14_0.update_closing_balances #14-07-2023
->>>>>>> b4bd978791 (fix: Account balance patch and query fixes (#36117))
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 # below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
@@ -343,4 +336,4 @@ erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v14_0.enable_allow_existing_serial_no
 erpnext.patches.v14_0.set_report_in_process_SOA 
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
-erpnext.patches.v14_0.update_closing_balances
+erpnext.patches.v14_0.update_closing_balances #14-07-2023
