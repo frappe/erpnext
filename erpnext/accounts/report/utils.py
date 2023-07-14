@@ -9,6 +9,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
+from erpnext.accounts.party import get_party_account
 from erpnext.setup.utils import get_exchange_rate
 
 __exchange_rates = {}
@@ -247,7 +248,11 @@ def get_journal_entries(filters, args):
 			je.mode_of_payment,
 			journal_account.project,
 		)
-		.where((je.voucher_type == "Journal Entry") & (journal_account.party == filters.get(args.party)))
+		.where(
+			(je.voucher_type == "Journal Entry")
+			& (journal_account.party == filters.get(args.party))
+			& (journal_account.account.isin(args.party_account))
+		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
 	query = get_conditions(filters, query, [je], payments=True)
@@ -273,7 +278,7 @@ def get_payment_entries(filters, args):
 			pe.project,
 			pe.cost_center,
 		)
-		.where((pe.party == filters.get(args.party)))
+		.where((pe.party == filters.get(args.party)) & (pe.paid_to.isin(args.party_account)))
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
 	query = get_conditions(filters, query, [pe], payments=True)
@@ -356,3 +361,18 @@ def filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoices
 		else:
 			invoices_with_acc_dimensions.append(inv)
 	return invoices_with_acc_dimensions
+
+
+def get_opening_row(party_type, party, from_date, company):
+	party_account = get_party_account(party_type, party, company, include_advance=True)
+	gle = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gle)
+		.select(
+			ConstantColumn("Opening").as_("account"),
+			Sum(gle.debit).as_("debit"),
+			Sum(gle.credit).as_("credit"),
+			(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
+		)
+		.where((gle.account.isin(party_account)) & (gle.posting_date < from_date))
+	).run(as_dict=True)

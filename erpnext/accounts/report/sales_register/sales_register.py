@@ -6,17 +6,19 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 from pypika import Order
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
 	filter_invoices_based_on_dimensions,
 	get_advance_taxes_and_charges,
 	get_conditions,
 	get_journal_entries,
+	get_opening_row,
 	get_party_details,
 	get_payment_entries,
 	get_query_columns,
@@ -34,10 +36,10 @@ def _execute(filters, additional_table_columns=None):
 		filters = frappe._dict({})
 
 	include_payments = filters.get("include_payments")
+	if filters.get("include_payments") and not filters.get("customer"):
+		frappe.throw(_("Please select a customer for fetching payments."))
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
 	if filters.get("include_payments"):
-		if not filters.get("customer"):
-			frappe.throw(_("Please select a customer for fetching payments."))
 		invoice_list += get_payments(filters, additional_table_columns)
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
@@ -65,6 +67,20 @@ def _execute(filters, additional_table_columns=None):
 	customers = list(set(d.customer for d in invoice_list))
 	customer_details = get_party_details("Customer", customers)
 
+	res = []
+	if include_payments:
+		opening_row = get_opening_row(
+			"Customer", filters.customer, getdate(filters.from_date), filters.company
+		)[0]
+		res.append(
+			{
+				"receivable_account": opening_row,
+				"debit": flt(opening_row.debit),
+				"credit": flt(opening_row.credit),
+				"balance": flt(opening_row.balance),
+			}
+		)
+		running_balance = flt(opening_row.balance)
 	data = []
 	for inv in invoice_list:
 		# invoice details
@@ -75,7 +91,7 @@ def _execute(filters, additional_table_columns=None):
 
 		row = {
 			"voucher_type": inv.doctype,
-			"invoice": inv.name,
+			"voucher_no": inv.name,
 			"posting_date": inv.posting_date,
 			"customer": inv.customer,
 			"customer_name": inv.customer_name,
@@ -140,9 +156,17 @@ def _execute(filters, additional_table_columns=None):
 			}
 		)
 
+		if inv.doctype == "Sales Invoice":
+			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+		else:
+			row.update({"debit": 0.0, "credit": inv.base_grand_total})
+		if include_payments:
+			running_balance += row["debit"] - row["credit"]
+			row.update({"balance": running_balance})
 		data.append(row)
 
-	return columns, sorted(data, key=lambda x: x["posting_date"])
+	res += sorted(data, key=lambda x: x["posting_date"])
+	return columns, res, None, None, None, include_payments
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
@@ -155,7 +179,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		},
 		{
 			"label": _("Voucher"),
-			"fieldname": "invoice",
+			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
 			"options": "voucher_type",
 			"width": 120,
@@ -174,80 +198,147 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	if additional_table_columns:
 		columns += additional_table_columns
 
-	columns += [
+	if not include_payments:
+		columns += [
+			{
+				"label": _("Customer Group"),
+				"fieldname": "customer_group",
+				"fieldtype": "Link",
+				"options": "Customer Group",
+				"width": 120,
+			},
+			{
+				"label": _("Territory"),
+				"fieldname": "territory",
+				"fieldtype": "Link",
+				"options": "Territory",
+				"width": 80,
+			},
+			{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 80},
+			{
+				"label": _("Receivable Account"),
+				"fieldname": "receivable_account",
+				"fieldtype": "Link",
+				"options": "Account",
+				"width": 100,
+			},
+			{
+				"label": _("Mode Of Payment"),
+				"fieldname": "mode_of_payment",
+				"fieldtype": "Data",
+				"width": 120,
+			},
+			{
+				"label": _("Project"),
+				"fieldname": "project",
+				"fieldtype": "Link",
+				"options": "Project",
+				"width": 80,
+			},
+			{"label": _("Owner"), "fieldname": "owner", "fieldtype": "Data", "width": 100},
+			{
+				"label": _("Sales Order"),
+				"fieldname": "sales_order",
+				"fieldtype": "Link",
+				"options": "Sales Order",
+				"width": 100,
+			},
+			{
+				"label": _("Delivery Note"),
+				"fieldname": "delivery_note",
+				"fieldtype": "Link",
+				"options": "Delivery Note",
+				"width": 100,
+			},
+			{
+				"label": _("Cost Center"),
+				"fieldname": "cost_center",
+				"fieldtype": "Link",
+				"options": "Cost Center",
+				"width": 100,
+			},
+			{
+				"label": _("Warehouse"),
+				"fieldname": "warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 100,
+			},
+			{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Data", "width": 80},
+		]
+	else:
+		columns += [
+			_("Receivable Account") + ":Link/Account:120",
+			_("Debit") + ":Currency/currency:120",
+			_("Credit") + ":Currency/currency:120",
+			_("Balance") + ":Currency/currency:120",
+		]
+
+	account_columns, accounts = get_account_columns(invoice_list, include_payments)
+
+	net_total_column = [
 		{
-			"label": _("Customer Group"),
-			"fieldname": "customer_group",
-			"fieldtype": "Link",
-			"options": "Customer Group",
+			"label": _("Net Total"),
+			"fieldname": "net_total",
+			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120,
-		},
-		{
-			"label": _("Territory"),
-			"fieldname": "territory",
-			"fieldtype": "Link",
-			"options": "Territory",
-			"width": 80,
-		},
-		{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 80},
-		{
-			"label": _("Receivable Account"),
-			"fieldname": "receivable_account",
-			"fieldtype": "Link",
-			"options": "Account",
-			"width": 100,
-		},
-		{
-			"label": _("Mode Of Payment"),
-			"fieldname": "mode_of_payment",
-			"fieldtype": "Data",
-			"width": 120,
-		},
-		{
-			"label": _("Project"),
-			"fieldname": "project",
-			"fieldtype": "Link",
-			"options": "Project",
-			"width": 80,
-		},
-		{"label": _("Owner"), "fieldname": "owner", "fieldtype": "Data", "width": 100},
-		{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 150},
-		{
-			"label": _("Sales Order"),
-			"fieldname": "sales_order",
-			"fieldtype": "Link",
-			"options": "Sales Order",
-			"width": 100,
-		},
-		{
-			"label": _("Delivery Note"),
-			"fieldname": "delivery_note",
-			"fieldtype": "Link",
-			"options": "Delivery Note",
-			"width": 100,
-		},
-		{
-			"label": _("Cost Center"),
-			"fieldname": "cost_center",
-			"fieldtype": "Link",
-			"options": "Cost Center",
-			"width": 100,
-		},
-		{
-			"label": _("Warehouse"),
-			"fieldname": "warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"width": 100,
-		},
-		{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Data", "width": 80},
+		}
 	]
 
+	total_columns = [
+		{
+			"label": _("Tax Total"),
+			"fieldname": "tax_total",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		}
+	]
+	if not include_payments:
+		total_columns += [
+			{
+				"label": _("Grand Total"),
+				"fieldname": "grand_total",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			},
+			{
+				"label": _("Rounded Total"),
+				"fieldname": "rounded_total",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			},
+			{
+				"label": _("Outstanding Amount"),
+				"fieldname": "outstanding_amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			},
+		]
+
+	columns = (
+		columns
+		+ account_columns[0]
+		+ account_columns[2]
+		+ net_total_column
+		+ account_columns[1]
+		+ total_columns
+	)
+	columns += [{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 150}]
+	return columns, accounts[0], accounts[1], accounts[2]
+
+
+def get_account_columns(invoice_list, include_payments):
 	income_accounts = []
 	tax_accounts = []
+	unrealized_profit_loss_accounts = []
+
 	income_columns = []
 	tax_columns = []
-	unrealized_profit_loss_accounts = []
 	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
@@ -314,57 +405,10 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 			}
 		)
 
-	net_total_column = [
-		{
-			"label": _("Net Total"),
-			"fieldname": "net_total",
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
-		}
-	]
+	columns = [income_columns, unrealized_profit_loss_account_columns, tax_columns]
+	accounts = [income_accounts, unrealized_profit_loss_accounts, tax_accounts]
 
-	total_columns = [
-		{
-			"label": _("Tax Total"),
-			"fieldname": "tax_total",
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
-		},
-		{
-			"label": _("Grand Total"),
-			"fieldname": "grand_total",
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
-		},
-		{
-			"label": _("Rounded Total"),
-			"fieldname": "rounded_total",
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
-		},
-		{
-			"label": _("Outstanding Amount"),
-			"fieldname": "outstanding_amount",
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120,
-		},
-	]
-
-	columns = (
-		columns
-		+ income_columns
-		+ unrealized_profit_loss_account_columns
-		+ net_total_column
-		+ tax_columns
-		+ total_columns
-	)
-
-	return columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts
+	return columns, accounts
 
 
 def get_invoices(filters, additional_query_columns):
@@ -416,6 +460,9 @@ def get_payments(filters, additional_query_columns):
 		account="debit_to",
 		party="customer",
 		party_name="customer_name",
+		party_account=get_party_account(
+			"Customer", filters.customer, filters.company, include_advance=True
+		),
 		additional_query_columns="" if not additional_query_columns else additional_query_columns,
 	)
 	payment_entries = get_payment_entries(filters, args)
