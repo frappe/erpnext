@@ -34,7 +34,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 				this.frm.set_value("disable_rounded_total", disable);
 		}
 
-		/* eslint-disable */
+
 		// no idea where me is coming from
 		if(this.frm.get_field('shipping_address')) {
 			this.frm.set_query("shipping_address", function() {
