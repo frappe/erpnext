@@ -67,6 +67,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	company: function(frm) {
+		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
@@ -220,9 +221,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
 			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
 		}
-	},
-	company: function(frm) {
-		frm.trigger("toggle_display_account_head");
 	},
 	toggle_display_account_head: function(frm) {
 		frm.toggle_display(['expense_account', 'cost_center'],
