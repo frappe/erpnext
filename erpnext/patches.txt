@@ -334,3 +334,4 @@ erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v15_0.remove_loan_management_module #2023-07-03
 erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
+erpnext.patches.v15_0.remove_exotel_integration

@@ -231,17 +231,6 @@
    "type": "Card Break"
   },
   {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Exotel Settings",
-   "link_count": 0,
-   "link_to": "Exotel Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Woocommerce Settings",
@@ -252,7 +241,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:25.984717",
+ "modified": "2023-05-24 14:47:26.984717",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
