@@ -913,7 +913,51 @@ class JournalEntry(AccountsController):
 						item=d,
 					)
 				)
+
+				self.make_acc_dimensions_offsetting_entry(gl_map, d)
+
 		return gl_map
+
+	def make_acc_dimensions_offsetting_entry(self, gl_map, d):
+		accounting_dimensions = frappe.db.get_list("Accounting Dimension", {"disabled": 0}, pluck="name")
+		for dimension in accounting_dimensions:
+			dimension_details = frappe.db.get_values(
+				"Accounting Dimension Detail",
+				{"parent": dimension},
+				["automatically_post_balancing_accounting_entry", "offsetting_account"],
+			)[0]
+			if dimension_details[0] == 1:
+				offsetting_account = dimension_details[1]
+				gl_map.append(
+					self.get_gl_dict(
+						{
+							"account": offsetting_account,
+							"party_type": d.party_type,
+							"due_date": self.due_date,
+							"party": d.party,
+							"against": d.against_account,
+							"debit": flt(d.credit, d.precision("credit")),
+							"credit": flt(d.debit, d.precision("credit")),
+							"account_currency": d.account_currency,
+							"debit_in_account_currency": flt(
+								d.credit_in_account_currency, d.precision("credit_in_account_currency")
+							),
+							"credit_in_account_currency": flt(
+								d.debit_in_account_currency, d.precision("debit_in_account_currency")
+							),
+							"against_voucher_type": d.reference_type,
+							"against_voucher": d.reference_name,
+							"remarks": _(
+								"Offsetting for Accounting Dimension - {dimension}".format(dimension=dimension)
+							),
+							"voucher_detail_no": d.reference_detail_no,
+							"cost_center": d.cost_center,
+							"project": d.project,
+							"finance_book": self.finance_book,
+						},
+						item=d,
+					)
+				)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
