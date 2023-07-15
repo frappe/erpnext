@@ -957,11 +957,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "make_attachments_public": 1,
-<<<<<<< HEAD
- "modified": "2022-09-13 04:08:17.431731",
-=======
  "modified": "2023-07-14 17:18:18.658942",
->>>>>>> 04400eb2e4 (perf: index `disabled` in `Item`)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
