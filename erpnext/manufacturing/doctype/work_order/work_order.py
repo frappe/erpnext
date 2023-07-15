@@ -1026,7 +1026,7 @@ class WorkOrder(Document):
 			consumed_qty = frappe.db.sql(
 				"""
 				SELECT
-					SUM(qty)
+					SUM(detail.qty)
 				FROM
 					`tabStock Entry` entry,
 					`tabStock Entry Detail` detail

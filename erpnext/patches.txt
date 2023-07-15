@@ -317,7 +317,7 @@ erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v15_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
-erpnext.patches.v14_0.update_closing_balances #17-05-2023
+erpnext.patches.v14_0.update_closing_balances #14-07-2023
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 # below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
@@ -331,7 +331,8 @@ execute:frappe.delete_doc('DocType', 'Cash Flow Mapper', ignore_missing=True)
 execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Template', ignore_missing=True)
 execute:frappe.delete_doc('DocType', 'Cash Flow Mapping Accounts', ignore_missing=True)
 erpnext.patches.v14_0.cleanup_workspaces
-erpnext.patches.v15_0.remove_loan_management_module
+erpnext.patches.v15_0.remove_loan_management_module #2023-07-03
 erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
 execute:frappe.defaults.clear_default("fiscal_year")
+erpnext.patches.v15_0.remove_exotel_integration

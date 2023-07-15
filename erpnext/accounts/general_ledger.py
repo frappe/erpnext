@@ -223,6 +223,7 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		"party_type",
 		"project",
 		"finance_book",
+		"voucher_no",
 	]
 
 	if dimensions:
@@ -500,7 +501,12 @@ def get_round_off_account_and_cost_center(
 
 
 def make_reverse_gl_entries(
-	gl_entries=None, voucher_type=None, voucher_no=None, adv_adj=False, update_outstanding="Yes"
+	gl_entries=None,
+	voucher_type=None,
+	voucher_no=None,
+	adv_adj=False,
+	update_outstanding="Yes",
+	partial_cancel=False,
 ):
 	"""
 	Get original gl entries of the voucher
@@ -520,14 +526,19 @@ def make_reverse_gl_entries(
 
 	if gl_entries:
 		create_payment_ledger_entry(
-			gl_entries, cancel=1, adv_adj=adv_adj, update_outstanding=update_outstanding
+			gl_entries,
+			cancel=1,
+			adv_adj=adv_adj,
+			update_outstanding=update_outstanding,
+			partial_cancel=partial_cancel,
 		)
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
-		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
+		if not partial_cancel:
+			set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
 			new_gle = copy.deepcopy(entry)
