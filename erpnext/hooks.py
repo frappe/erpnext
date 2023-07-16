@@ -611,3 +611,8 @@ global_search_doctypes = {
 additional_timeline_content = {
 	"*": ["erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs"]
 }
+
+
+extend_bootinfo = [
+	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
+]
