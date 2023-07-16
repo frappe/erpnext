@@ -113,6 +113,23 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	view_serial_batch_nos: function(frm) {
+		let bundle_ids = frm.doc.items.filter(d => d.serial_and_batch_bundle);
+
+		if (bundle_ids?.length) {
+			frm.add_custom_button(__('Serial / Batch Nos'), () => {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"voucher_type": frm.doc.doctype,
+					"from_date": frm.doc.posting_date || frm.doc.transaction_date,
+					"to_date": frm.doc.posting_date || frm.doc.transaction_date,
+					"company": frm.doc.company,
+				};
+				frappe.set_route("query-report", "Serial and Batch Summary");
+			}, __('View'));
+		}
+	},
+
 	add_indicator_for_multicompany: function(frm, info) {
 		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
