@@ -621,7 +621,7 @@ class ProductionPlan(Document):
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
-		if item.get("qty") <= 0:
+		if flt(item.get("qty")) <= 0:
 			return
 
 		wo = frappe.new_doc("Work Order")
@@ -697,10 +697,9 @@ class ProductionPlan(Document):
 			material_request.flags.ignore_permissions = 1
 			material_request.run_method("set_missing_values")
 
+			material_request.save()
 			if self.get("submit_material_request"):
 				material_request.submit()
-			else:
-				material_request.save()
 
 		frappe.flags.mute_messages = False
 

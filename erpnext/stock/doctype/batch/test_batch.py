@@ -59,6 +59,73 @@ class TestBatch(FrappeTestCase):
 
 		return receipt
 
+	def test_batch_stock_levels(self, batch_qty=100):
+		"""Test automated batch creation from Purchase Receipt"""
+		self.make_batch_item("ITEM-BATCH-1")
+
+		receipt = frappe.get_doc(
+			dict(
+				doctype="Purchase Receipt",
+				supplier="_Test Supplier",
+				company="_Test Company",
+				items=[dict(item_code="ITEM-BATCH-1", qty=10, rate=10, warehouse="Stores - _TC")],
+			)
+		).insert()
+		receipt.submit()
+
+		receipt.load_from_db()
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		bundle_id = (
+			SerialBatchCreation(
+				{
+					"item_code": "ITEM-BATCH-1",
+					"warehouse": "_Test Warehouse - _TC",
+					"actual_qty": 20,
+					"voucher_type": "Purchase Receipt",
+					"batches": frappe._dict({batch_no: 20}),
+					"type_of_transaction": "Inward",
+					"company": receipt.company,
+				}
+			)
+			.make_serial_and_batch_bundle()
+			.name
+		)
+
+		receipt2 = frappe.get_doc(
+			dict(
+				doctype="Purchase Receipt",
+				supplier="_Test Supplier",
+				company="_Test Company",
+				items=[
+					dict(
+						item_code="ITEM-BATCH-1",
+						qty=20,
+						rate=10,
+						warehouse="_Test Warehouse - _TC",
+						serial_and_batch_bundle=bundle_id,
+					)
+				],
+			)
+		).insert()
+		receipt2.submit()
+
+		receipt.load_from_db()
+		receipt2.load_from_db()
+
+		self.assertTrue(receipt.items[0].serial_and_batch_bundle)
+		self.assertTrue(receipt2.items[0].serial_and_batch_bundle)
+
+		batchwise_qty = frappe._dict({})
+		for receipt in [receipt, receipt2]:
+			batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+			key = (batch_no, receipt.items[0].warehouse)
+			batchwise_qty[key] = receipt.items[0].qty
+
+		batches = get_batch_qty(batch_no)
+		for d in batches:
+			self.assertEqual(d.qty, batchwise_qty[(d.batch_no, d.warehouse)])
+
 	def test_stock_entry_incoming(self):
 		"""Test batch creation via Stock Entry (Work Order)"""
 

@@ -73,7 +73,7 @@ def get_entries(filters):
 
 	return sorted(
 		entries,
-		key=lambda k: k[2] or getdate(nowdate()),
+		key=lambda k: k[2].strftime("%H%M%S") or getdate(nowdate()),
 	)
 
 

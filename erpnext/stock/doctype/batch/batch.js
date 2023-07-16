@@ -47,8 +47,6 @@ frappe.ui.form.on('Batch', {
 						return;
 					}
 
-					debugger
-
 					const section = frm.dashboard.add_section('', __("Stock Levels"));
 
 					// sort by qty
