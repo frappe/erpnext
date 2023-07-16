@@ -62,29 +62,20 @@ class AssetMovement(Document):
 					frappe.throw(_("Source and Target Location cannot be same"))
 
 			if self.purpose == "Receipt":
-				# only when asset is bought and first entry is made
-				if not d.source_location and not (d.target_location or d.to_employee):
+				if not (d.source_location or d.from_employee) and not (d.target_location or d.to_employee):
 					frappe.throw(
 						_("Target Location or To Employee is required while receiving Asset {0}").format(d.asset)
 					)
-				elif d.source_location:
-					# when asset is received from an employee
-					if d.target_location and not d.from_employee:
-						frappe.throw(
-							_("From employee is required while receiving Asset {0} to a target location").format(
-								d.asset
-							)
-						)
-					if d.from_employee and not d.target_location:
-						frappe.throw(
-							_("Target Location is required while receiving Asset {0} from an employee").format(d.asset)
-						)
-					if d.to_employee and d.target_location:
-						frappe.throw(
-							_(
-								"Asset {0} cannot be received at a location and given to employee in a single movement"
-							).format(d.asset)
-						)
+				elif d.from_employee and not d.target_location:
+					frappe.throw(
+						_("Target Location is required while receiving Asset {0} from an employee").format(d.asset)
+					)
+				elif d.to_employee and d.target_location:
+					frappe.throw(
+						_(
+							"Asset {0} cannot be received at a location and given to an employee in a single movement"
+						).format(d.asset)
+					)
 
 	def validate_employee(self):
 		for d in self.assets:

@@ -773,7 +773,7 @@ class Item(Document):
 
 		rows = ""
 		for docname, attr_list in not_included.items():
-			link = "<a href='/app/Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			link = f"<a href='/app/item/{docname}'>{frappe.bold(docname)}</a>"
 			rows += table_row(link, body(attr_list))
 
 		error_description = _(
