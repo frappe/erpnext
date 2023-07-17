@@ -30,6 +30,7 @@ def make_gl_entries(
 	from_repost=False,
 ):
 	if gl_map:
+		make_acc_dimensions_offsetting_entry(gl_map)
 		if not cancel:
 			validate_accounting_period(gl_map)
 			validate_disabled_accounts(gl_map)
@@ -52,6 +53,50 @@ def make_gl_entries(
 				)
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
+
+def make_acc_dimensions_offsetting_entry(gl_map):
+	accounting_dimensions_to_offset = get_accounting_dimensions_for_offsetting_entry(gl_map)
+	if len(accounting_dimensions_to_offset) == 0:
+		return
+
+	offsetting_entries = []
+	for gle in gl_map:
+		for dimension in accounting_dimensions_to_offset:
+			dimension_details = frappe.db.get_values(
+				"Accounting Dimension Detail",
+				{"parent": dimension, "company": gle.company},
+				["automatically_post_balancing_accounting_entry", "offsetting_account"],
+			)
+			dimension_details = dimension_details[0] if len(dimension_details) > 0 else None
+			if dimension_details and dimension_details[0] == 1:
+				offsetting_account = dimension_details[1]
+				offsetting_entry = gle.copy()
+				offsetting_entry.update(
+					{
+						"account": offsetting_account,
+						"debit": flt(gle.credit),
+						"credit": flt(gle.debit),
+						"debit_in_account_currency": flt(gle.credit_in_account_currency),
+						"credit_in_account_currency": flt(gle.debit_in_account_currency),
+						"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension),
+						"against_voucher": None,
+					}
+				)
+				offsetting_entry["against_voucher_type"] = None
+				offsetting_entries.append(offsetting_entry)
+	gl_map += offsetting_entries
+
+
+def get_accounting_dimensions_for_offsetting_entry(gl_map):
+	acc_dimensions = frappe.db.get_list("Accounting Dimension", {"disabled": 0}, pluck="name")
+	accounting_dimensions_to_offset = []
+	for acc_dimension in acc_dimensions:
+		fieldname = acc_dimension.lower().replace(" ", "_")
+		values = set([entry[fieldname] for entry in gl_map])
+		if len(values) > 1:
+			accounting_dimensions_to_offset.append(acc_dimension)
+	return accounting_dimensions_to_offset
 
 
 def validate_disabled_accounts(gl_map):
