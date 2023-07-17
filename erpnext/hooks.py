@@ -83,7 +83,7 @@ update_website_context = [
 my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
-calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "ToDo"]
+calendars = ["Task", "Work Order", "Sales Order", "Holiday List", "ToDo"]
 
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
 
@@ -354,6 +354,11 @@ doc_events = {
 	},
 }
 
+# function should expect the variable and doc as arguments
+naming_series_variables = {
+	"FY": "erpnext.accounts.utils.parse_naming_series_variable",
+}
+
 # On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
 # to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
 # if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
@@ -415,17 +420,18 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
+		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_daily",
+	],
+	"weekly": [
+		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.auto_update_latest_price_in_all_boms",
-		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
-		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
-		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_demand_loans",
 	],
 }
 
@@ -471,9 +477,6 @@ bank_reconciliation_doctypes = [
 	"Payment Entry",
 	"Journal Entry",
 	"Purchase Invoice",
-	"Sales Invoice",
-	"Loan Repayment",
-	"Loan Disbursement",
 ]
 
 accounting_dimension_doctypes = [
@@ -521,10 +524,21 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 ]
 
-# get matching queries for Bank Reconciliation
 get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
 )
+
+get_matching_vouchers_for_bank_reconciliation = "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_vouchers_for_bank_reconciliation"
+
+get_amounts_not_reflected_in_system_for_bank_reconciliation_statement = "erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement.get_amounts_not_reflected_in_system_for_bank_reconciliation_statement"
+
+get_payment_entries_for_bank_clearance = (
+	"erpnext.accounts.doctype.bank_clearance.bank_clearance.get_payment_entries_for_bank_clearance"
+)
+
+get_entries_for_bank_clearance_summary = "erpnext.accounts.report.bank_clearance_summary.bank_clearance_summary.get_entries_for_bank_clearance_summary"
+
+get_entries_for_bank_reconciliation_statement = "erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement.get_entries_for_bank_reconciliation_statement"
 
 regional_overrides = {
 	"France": {
@@ -593,7 +607,6 @@ global_search_doctypes = {
 		{"doctype": "Branch", "index": 35},
 		{"doctype": "Department", "index": 36},
 		{"doctype": "Designation", "index": 38},
-		{"doctype": "Loan", "index": 44},
 		{"doctype": "Maintenance Schedule", "index": 45},
 		{"doctype": "Maintenance Visit", "index": 46},
 		{"doctype": "Warranty Claim", "index": 47},
@@ -603,3 +616,8 @@ global_search_doctypes = {
 additional_timeline_content = {
 	"*": ["erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs"]
 }
+
+
+extend_bootinfo = [
+	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
+]

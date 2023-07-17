@@ -30,7 +30,7 @@ frappe.query_reports["Exponential Smoothing Forecasting"] = {
 			"fieldname":"based_on_document",
 			"label": __("Based On Document"),
 			"fieldtype": "Select",
-			"options": ["Sales Order", "Delivery Note", "Quotation"],
+			"options": ["Sales Order", "Sales Invoice", "Delivery Note", "Quotation"],
 			"default": "Sales Order",
 			"reqd": 1
 		},

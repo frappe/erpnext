@@ -193,7 +193,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_query("expense_account", "items", function(doc) {
 				return {
 					filters: {
-						"company": doc.company
+						"company": doc.company,
+						"report_type": "Profit and Loss",
+						"is_group": 0
 					}
 				};
 			});
@@ -356,12 +358,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	refresh() {
+
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
 		this.validate_has_items();
+		erpnext.utils.view_serial_batch_nos(this.frm);
 	}
 
 	scan_barcode() {

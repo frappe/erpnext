@@ -925,6 +925,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
+		erpnext.utils.view_serial_batch_nos(this.frm);
 		if (this.frm.doc.docstatus===1 && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			this.show_general_ledger();
 		}

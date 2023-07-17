@@ -155,6 +155,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(frm);
 	},
 
 	validate_company: (frm) => {
@@ -316,6 +317,10 @@ frappe.ui.form.on('Payment Entry', {
 					frm.set_value(field, null);
 				})
 		}
+	},
+
+	company: function(frm){
+		frm.trigger('party');
 	},
 
 	party: function(frm) {
@@ -732,7 +737,6 @@ frappe.ui.form.on('Payment Entry', {
 				if(r.message) {
 					var total_positive_outstanding = 0;
 					var total_negative_outstanding = 0;
-
 					$.each(r.message, function(i, d) {
 						var c = frm.add_child("references");
 						c.reference_doctype = d.voucher_type;
@@ -743,6 +747,7 @@ frappe.ui.form.on('Payment Entry', {
 						c.bill_no = d.bill_no;
 						c.payment_term = d.payment_term;
 						c.allocated_amount = d.allocated_amount;
+						c.account = d.account;
 
 						if(!in_list(frm.events.get_order_doctypes(frm), d.voucher_type)) {
 							if(flt(d.outstanding_amount) > 0)

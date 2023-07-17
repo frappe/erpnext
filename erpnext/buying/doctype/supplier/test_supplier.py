@@ -7,6 +7,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.test_runner import make_test_records
 
 from erpnext.accounts.party import get_due_date
+from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.exceptions import PartyDisabled
 
 test_dependencies = ["Payment Term", "Payment Terms Template"]
@@ -195,6 +196,9 @@ class TestSupplier(FrappeTestCase):
 def create_supplier(**args):
 	args = frappe._dict(args)
 
+	if not args.supplier_name:
+		args.supplier_name = frappe.generate_hash()
+
 	if frappe.db.exists("Supplier", args.supplier_name):
 		return frappe.get_doc("Supplier", args.supplier_name)
 
@@ -209,3 +213,25 @@ def create_supplier(**args):
 	).insert()
 
 	return doc
+
+
+class TestSupplierPortal(FrappeTestCase):
+	def test_portal_user_can_access_supplier_data(self):
+
+		supplier = create_supplier()
+
+		user = frappe.generate_hash() + "@example.com"
+		frappe.new_doc(
+			"User",
+			first_name="Supplier Portal User",
+			email=user,
+			send_welcome_email=False,
+		).insert()
+
+		supplier.append("portal_users", {"user": user})
+		supplier.save()
+
+		frappe.set_user(user)
+		_, suppliers = get_customers_suppliers("Purchase Order", user)
+
+		self.assertIn(supplier.name, suppliers)

@@ -549,6 +549,7 @@
    "depends_on": "update_stock",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
@@ -1088,6 +1089,7 @@
    "fieldtype": "Button",
    "label": "Get Advances Paid",
    "oldfieldtype": "Button",
+   "options": "set_advances",
    "print_hide": 1
   },
   {
@@ -1575,7 +1577,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:21:54.637245",
+ "modified": "2023-07-04 17:22:59.145031",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

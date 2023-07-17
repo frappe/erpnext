@@ -320,7 +320,9 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	return data[0]
 
 
-def make_return_doc(doctype: str, source_name: str, target_doc=None):
+def make_return_doc(
+	doctype: str, source_name: str, target_doc=None, return_against_rejected_qty=False
+):
 	from frappe.model.mapper import get_mapped_doc
 
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
@@ -471,7 +473,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 
-			if hasattr(target_doc, "stock_qty"):
+			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
 				target_doc.stock_qty = -1 * flt(
 					source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0)
 				)
@@ -489,6 +491,13 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 				target_doc.purchase_order_item = source_doc.purchase_order_item
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.purchase_receipt_item = source_doc.name
+
+			if doctype == "Purchase Receipt" and return_against_rejected_qty:
+				target_doc.qty = -1 * flt(source_doc.rejected_qty - (returned_qty_map.get("qty") or 0))
+				target_doc.rejected_qty = 0.0
+				target_doc.rejected_warehouse = ""
+				target_doc.warehouse = source_doc.rejected_warehouse
+				target_doc.received_qty = target_doc.qty
 
 		elif doctype == "Purchase Invoice":
 			returned_qty_map = get_returned_qty_map_for_row(
@@ -660,7 +669,11 @@ def get_filters(
 	if reference_voucher_detail_no:
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
-	if item_row and item_row.get("warehouse"):
+	if (
+		voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+		and item_row
+		and item_row.get("warehouse")
+	):
 		filters["warehouse"] = item_row.get("warehouse")
 
 	return filters
