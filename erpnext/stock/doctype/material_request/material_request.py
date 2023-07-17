@@ -121,8 +121,8 @@ class MaterialRequest(BuyingController):
 			self.title = _("{0} Request for {1}").format(self.material_request_type, items)[:100]
 
 	def on_submit(self):
-		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		self.update_requested_qty()
 		if self.material_request_type == "Purchase":
 			self.validate_budget()
 
@@ -181,8 +181,8 @@ class MaterialRequest(BuyingController):
 				)
 
 	def on_cancel(self):
-		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		self.update_requested_qty()
 
 	def get_mr_items_ordered_qty(self, mr_items):
 		mr_items_ordered_qty = {}
@@ -273,7 +273,13 @@ class MaterialRequest(BuyingController):
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(item_code, warehouse, {"indented_qty": get_indented_qty(item_code, warehouse)})
+			update_bin_qty(
+				item_code,
+				warehouse,
+				{
+					"indented_qty": get_indented_qty(item_code, warehouse),
+				},
+			)
 
 	def update_requested_qty_in_production_plan(self):
 		production_plans = []
