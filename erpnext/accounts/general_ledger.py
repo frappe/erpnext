@@ -93,7 +93,7 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map):
 	accounting_dimensions_to_offset = []
 	for acc_dimension in acc_dimensions:
 		fieldname = acc_dimension.lower().replace(" ", "_")
-		values = set([entry[fieldname] for entry in gl_map])
+		values = set([entry.get(fieldname) for entry in gl_map])
 		if len(values) > 1:
 			accounting_dimensions_to_offset.append(acc_dimension)
 	return accounting_dimensions_to_offset
