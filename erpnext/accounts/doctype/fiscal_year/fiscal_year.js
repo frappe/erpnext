@@ -8,17 +8,6 @@ frappe.ui.form.on('Fiscal Year', {
 				frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1));
 		}
 	},
-	refresh: function (frm) {
-		if (!frm.doc.__islocal && (frm.doc.name != frappe.sys_defaults.fiscal_year)) {
-			frm.add_custom_button(__("Set as Default"), () => frm.events.set_as_default(frm));
-			frm.set_intro(__("To set this Fiscal Year as Default, click on 'Set as Default'"));
-		} else {
-			frm.set_intro("");
-		}
-	},
-	set_as_default: function(frm) {
-		return frm.call('set_as_default');
-	},
 	year_start_date: function(frm) {
 		if (!frm.doc.is_short_year) {
 			let year_end_date =

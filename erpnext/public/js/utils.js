@@ -350,6 +350,23 @@ $.extend(erpnext.utils, {
 		}
 
 	},
+
+	get_fiscal_year: function(date) {
+		let fiscal_year = '';
+		frappe.call({
+			method: "erpnext.accounts.utils.get_fiscal_year",
+			args: {
+				date: date
+			},
+			async: false,
+			callback: function(r) {
+				if (r.message) {
+					fiscal_year = r.message[0];
+				}
+			}
+		});
+		return fiscal_year;
+	}
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
