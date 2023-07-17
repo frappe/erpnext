@@ -10,7 +10,6 @@ import "./controllers/transaction";
 import "./templates/item_selector.html";
 import "./utils/item_selector";
 import "./help_links";
-import "./agriculture/ternary_plot";
 import "./templates/item_quick_entry.html";
 import "./utils/contact_address_quick_entry";
 import "./utils/customer_quick_entry";
