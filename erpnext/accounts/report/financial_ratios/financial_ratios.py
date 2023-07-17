@@ -63,7 +63,7 @@ def execute(filters=None):
 		only_current_fiscal_year=False,
 		filters=filters,
 	)
-	print(expense)
+	# print(expense)
 
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
 
@@ -73,10 +73,15 @@ def execute(filters=None):
 	total_asset = {}
 	total_liability = {}
 	net_sales = {}
-	profit_after_tax = {}
-	total_quick_asset = 0
+	net_sales = {}
+	total_income = {}
+	total_expense = {}
+	cogs = {}
 
 	for year in years:
+		total_quick_asset = 0
+		total_net_sales = 0
+		total_cogs = 0
 		for asset in assets:
 			if not asset.get("parent_account") and asset.get("is_group"):
 				total_asset[year] = asset[year]
@@ -92,9 +97,27 @@ def execute(filters=None):
 			if liability.get("account_type") == "Current Liability" and liability.get("is_group"):
 				current_liability[year] = liability[year]
 
+		for i in income:
+			if not i.get("parent_account") and i.get("is_group"):
+				total_income[year] = i[year]
+			if i.get("account_type") == "Direct Income":
+				total_net_sales += i[year]
+				net_sales[year] = total_net_sales
+
+		for e in expense:
+			if not e.get("parent_account") and e.get("is_group"):
+				total_expense[year] = e[year]
+			if e.get("account_type") == "Cost of Goods Sold":
+				total_cogs += e[year]
+				cogs[year] = total_cogs
+
 	current_ratio = {"ratio": "Current Ratio"}
 	quick_ratio = {"ratio": "Quick Ratio"}
 	debt_equity_ratio = {"ratio": "Debt Equity Ratio"}
+	gross_profit_ratio = {"ratio": "Gross Profit Ratio"}
+	net_profit_ratio = {"ratio": "Net Profit Ratio"}
+	return_on_asset_ratio = {"ratio": "Return on Asset Ratio"}
+	return_on_equity_ratio = {"ratio": "Return on Equity Ratio"}
 
 	for year in years:
 		share_holder_fund = 0
@@ -106,15 +129,38 @@ def execute(filters=None):
 			quick_ratio[year] = 0
 
 		share_holder_fund = total_asset[year] - total_liability[year]
+		profit_after_tax = total_income[year] + total_expense[year]
+
 		if share_holder_fund != 0:
 			debt_equity_ratio[year] = flt(total_liability[year] / share_holder_fund, precision=precision)
+			return_on_equity_ratio[year] = flt(profit_after_tax / share_holder_fund, precision=precision)
 		else:
 			debt_equity_ratio[year] = 0
+			return_on_equity_ratio[year] = 0
+
+		if net_sales[year] != 0:
+			net_profit_ratio[year] = flt(profit_after_tax / net_sales[year], precision=precision)
+			gross_profit_ratio[year] = flt(
+				(net_sales[year] - cogs[year]) / net_sales[year], precision=precision
+			)
+
+		else:
+			net_profit_ratio[year] = 0
+			gross_profit_ratio[year] = 0
+
+		if total_asset[year] != 0:
+			return_on_asset_ratio[year] = flt(profit_after_tax / total_asset[year], precision=precision)
+		else:
+			return_on_asset_ratio[year] = 0
 
 	data = [
 		current_ratio,
 		quick_ratio,
 		debt_equity_ratio,
+		gross_profit_ratio,
+		net_profit_ratio,
+		return_on_asset_ratio,
+		return_on_equity_ratio,
 	]
 
 	return columns, data
