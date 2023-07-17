@@ -14,25 +14,6 @@ class FiscalYearIncorrectDate(frappe.ValidationError):
 
 
 class FiscalYear(Document):
-<<<<<<< HEAD
-	@frappe.whitelist()
-	def set_as_default(self):
-		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
-		global_defaults = frappe.get_doc("Global Defaults")
-		global_defaults.check_permission("write")
-		global_defaults.on_update()
-
-		# clear cache
-		frappe.clear_cache()
-
-		msgprint(
-			_(
-				"{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect."
-			).format(self.name)
-		)
-
-=======
->>>>>>> 6270607c6d (fix: Remove current fiscal year from Global Defaults (#35960))
 	def validate(self):
 		self.validate_dates()
 		self.validate_overlap()
