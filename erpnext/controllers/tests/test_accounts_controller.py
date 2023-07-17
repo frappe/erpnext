@@ -37,6 +37,7 @@ def make_supplier(supplier_name, currency=None):
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = supplier_name
 		supplier.supplier_type = "Individual"
+		supplier.supplier_group = "All Supplier Groups"
 
 		if currency:
 			supplier.default_currency = currency
@@ -55,9 +56,6 @@ class TestAccountsController(unittest.TestCase):
 	10 series - Sales Invoice against Payment Entries
 	20 series - Sales Invoice against Journals
 	30 series - Sales Invoice against Credit Notes
-	40 series - Purchase Invoice against Payment Entries
-	50 series - Purchase Invoice against Journals
-	60 series - Purchase Invoice against Debit Notes
 	"""
 
 	def setUp(self):

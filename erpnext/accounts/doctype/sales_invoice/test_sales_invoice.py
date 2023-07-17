@@ -3213,14 +3213,9 @@ class TestSalesInvoice(unittest.TestCase):
 			account.disabled = 0
 			account.save()
 
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancel_of_invoice": 1})
 	def test_gain_loss_with_advance_entry(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-
-		unlink_enabled = frappe.db.get_value(
-			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice"
-		)
-
-		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1)
 
 		jv = make_journal_entry("_Test Receivable USD - _TC", "_Test Bank - _TC", -7000, save=False)
 
@@ -3263,10 +3258,6 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, nowdate())
-
-		frappe.db.set_single_value(
-			"Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
-		)
 
 	def test_batch_expiry_for_sales_invoice_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
