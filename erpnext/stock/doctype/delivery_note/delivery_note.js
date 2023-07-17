@@ -9,6 +9,10 @@ frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 frappe.provide("erpnext.accounts.dimensions");
 
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Delivery Note");
+
+
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {

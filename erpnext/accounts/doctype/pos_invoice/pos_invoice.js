@@ -4,6 +4,7 @@
 {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
 
+erpnext.accounts.pos.setup("POS Invoice");
 erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnext.selling.SellingController {
 	settings = {};
 

@@ -5,6 +5,9 @@
 
 frappe.provide("erpnext.stock");
 
+erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Purchase Receipt");
+
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
 		frm.make_methods = {

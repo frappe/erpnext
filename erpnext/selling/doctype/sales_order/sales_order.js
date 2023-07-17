@@ -3,6 +3,9 @@
 
 {% include 'erpnext/selling/sales_common.js' %}
 
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Sales Order");
+
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
