@@ -113,6 +113,23 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	view_serial_batch_nos: function(frm) {
+		let bundle_ids = frm.doc.items.filter(d => d.serial_and_batch_bundle);
+
+		if (bundle_ids?.length) {
+			frm.add_custom_button(__('Serial / Batch Nos'), () => {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"voucher_type": frm.doc.doctype,
+					"from_date": frm.doc.posting_date || frm.doc.transaction_date,
+					"to_date": frm.doc.posting_date || frm.doc.transaction_date,
+					"company": frm.doc.company,
+				};
+				frappe.set_route("query-report", "Serial and Batch Summary");
+			}, __('View'));
+		}
+	},
+
 	add_indicator_for_multicompany: function(frm, info) {
 		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
@@ -381,6 +398,23 @@ $.extend(erpnext.utils, {
 					});
 				});
 		});
+	},
+
+	get_fiscal_year: function(date) {
+		let fiscal_year = '';
+		frappe.call({
+			method: "erpnext.accounts.utils.get_fiscal_year",
+			args: {
+				date: date
+			},
+			async: false,
+			callback: function(r) {
+				if (r.message) {
+					fiscal_year = r.message[0];
+				}
+			}
+		});
+		return fiscal_year;
 	}
 });
 
@@ -632,7 +666,6 @@ erpnext.utils.update_child_items = function(opts) {
 		fields.splice(3, 0, {
 			fieldtype: 'Float',
 			fieldname: "conversion_factor",
-			in_list_view: 1,
 			label: __("Conversion Factor"),
 			precision: get_precision('conversion_factor')
 		})
@@ -640,6 +673,7 @@ erpnext.utils.update_child_items = function(opts) {
 
 	new frappe.ui.Dialog({
 		title: __("Update Items"),
+		size: "extra-large",
 		fields: [
 			{
 				fieldname: "trans_items",
@@ -854,95 +888,87 @@ $(document).on('app_ready', function() {
 
 // Show SLA dashboard
 $(document).on('app_ready', function() {
-	frappe.call({
-		method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_sla_doctypes',
-		callback: function(r) {
-			if (!r.message)
-				return;
+	$.each(frappe.boot.service_level_agreement_doctypes, function(_i, d) {
+		frappe.ui.form.on(d, {
+			onload: function(frm) {
+				if (!frm.doc.service_level_agreement)
+					return;
 
-			$.each(r.message, function(_i, d) {
-				frappe.ui.form.on(d, {
-					onload: function(frm) {
-						if (!frm.doc.service_level_agreement)
-							return;
-
-						frappe.call({
-							method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters',
-							args: {
-								doctype: frm.doc.doctype,
-								name: frm.doc.service_level_agreement,
-								customer: frm.doc.customer
-							},
-							callback: function (r) {
-								if (r && r.message) {
-									frm.set_query('priority', function() {
-										return {
-											filters: {
-												'name': ['in', r.message.priority],
-											}
-										};
-									});
-									frm.set_query('service_level_agreement', function() {
-										return {
-											filters: {
-												'name': ['in', r.message.service_level_agreements],
-											}
-										};
-									});
-								}
-							}
-						});
+				frappe.call({
+					method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters',
+					args: {
+						doctype: frm.doc.doctype,
+						name: frm.doc.service_level_agreement,
+						customer: frm.doc.customer
 					},
-
-					refresh: function(frm) {
-						if (frm.doc.status !== 'Closed' && frm.doc.service_level_agreement
-							&& ['First Response Due', 'Resolution Due'].includes(frm.doc.agreement_status)) {
-							frappe.call({
-								'method': 'frappe.client.get',
-								args: {
-									doctype: 'Service Level Agreement',
-									name: frm.doc.service_level_agreement
-								},
-								callback: function(data) {
-									let statuses = data.message.pause_sla_on;
-									const hold_statuses = [];
-									$.each(statuses, (_i, entry) => {
-										hold_statuses.push(entry.status);
-									});
-									if (hold_statuses.includes(frm.doc.status)) {
-										frm.dashboard.clear_headline();
-										let message = {'indicator': 'orange', 'msg': __('SLA is on hold since {0}', [moment(frm.doc.on_hold_since).fromNow(true)])};
-										frm.dashboard.set_headline_alert(
-											'<div class="row">' +
-												'<div class="col-xs-12">' +
-													'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
-												'</div>' +
-											'</div>'
-										);
-									} else {
-										set_time_to_resolve_and_response(frm, data.message.apply_sla_for_resolution);
+					callback: function (r) {
+						if (r && r.message) {
+							frm.set_query('priority', function() {
+								return {
+									filters: {
+										'name': ['in', r.message.priority],
 									}
-								}
+								};
 							});
-						} else if (frm.doc.service_level_agreement) {
-							frm.dashboard.clear_headline();
-
-							let agreement_status = (frm.doc.agreement_status == 'Fulfilled') ?
-								{'indicator': 'green', 'msg': 'Service Level Agreement has been fulfilled'} :
-								{'indicator': 'red', 'msg': 'Service Level Agreement Failed'};
-
-							frm.dashboard.set_headline_alert(
-								'<div class="row">' +
-									'<div class="col-xs-12">' +
-										'<span class="indicator whitespace-nowrap '+ agreement_status.indicator +'"><span class="hidden-xs">'+ agreement_status.msg +'</span></span> ' +
-									'</div>' +
-								'</div>'
-							);
+							frm.set_query('service_level_agreement', function() {
+								return {
+									filters: {
+										'name': ['in', r.message.service_level_agreements],
+									}
+								};
+							});
 						}
-					},
+					}
 				});
-			});
-		}
+			},
+
+			refresh: function(frm) {
+				if (frm.doc.status !== 'Closed' && frm.doc.service_level_agreement
+					&& ['First Response Due', 'Resolution Due'].includes(frm.doc.agreement_status)) {
+					frappe.call({
+						'method': 'frappe.client.get',
+						args: {
+							doctype: 'Service Level Agreement',
+							name: frm.doc.service_level_agreement
+						},
+						callback: function(data) {
+							let statuses = data.message.pause_sla_on;
+							const hold_statuses = [];
+							$.each(statuses, (_i, entry) => {
+								hold_statuses.push(entry.status);
+							});
+							if (hold_statuses.includes(frm.doc.status)) {
+								frm.dashboard.clear_headline();
+								let message = {'indicator': 'orange', 'msg': __('SLA is on hold since {0}', [moment(frm.doc.on_hold_since).fromNow(true)])};
+								frm.dashboard.set_headline_alert(
+									'<div class="row">' +
+										'<div class="col-xs-12">' +
+											'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
+										'</div>' +
+									'</div>'
+								);
+							} else {
+								set_time_to_resolve_and_response(frm, data.message.apply_sla_for_resolution);
+							}
+						}
+					});
+				} else if (frm.doc.service_level_agreement) {
+					frm.dashboard.clear_headline();
+
+					let agreement_status = (frm.doc.agreement_status == 'Fulfilled') ?
+						{'indicator': 'green', 'msg': 'Service Level Agreement has been fulfilled'} :
+						{'indicator': 'red', 'msg': 'Service Level Agreement Failed'};
+
+					frm.dashboard.set_headline_alert(
+						'<div class="row">' +
+							'<div class="col-xs-12">' +
+								'<span class="indicator whitespace-nowrap '+ agreement_status.indicator +'"><span class="hidden-xs">'+ agreement_status.msg +'</span></span> ' +
+							'</div>' +
+						'</div>'
+					);
+				}
+			},
+		});
 	});
 });
 

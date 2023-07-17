@@ -193,7 +193,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
-   "options": "SBB-.####"
+   "options": "SABB-.########"
   },
   {
    "default": "0",
@@ -244,7 +244,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-10 20:02:42.964309",
+ "modified": "2023-07-16 10:53:04.045605",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
