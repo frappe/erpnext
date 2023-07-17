@@ -923,10 +923,11 @@ class JournalEntry(AccountsController):
 		for dimension in accounting_dimensions:
 			dimension_details = frappe.db.get_values(
 				"Accounting Dimension Detail",
-				{"parent": dimension},
+				{"parent": dimension, "company": self.company},
 				["automatically_post_balancing_accounting_entry", "offsetting_account"],
-			)[0]
-			if dimension_details[0] == 1:
+			)
+			dimension_details = dimension_details[0] if len(dimension_details) > 0 else None
+			if dimension_details and dimension_details[0] == 1:
 				offsetting_account = dimension_details[1]
 				gl_map.append(
 					self.get_gl_dict(
@@ -947,9 +948,7 @@ class JournalEntry(AccountsController):
 							),
 							"against_voucher_type": d.reference_type,
 							"against_voucher": d.reference_name,
-							"remarks": _(
-								"Offsetting for Accounting Dimension - {dimension}".format(dimension=dimension)
-							),
+							"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension),
 							"voucher_detail_no": d.reference_detail_no,
 							"cost_center": d.cost_center,
 							"project": d.project,
