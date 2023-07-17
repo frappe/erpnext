@@ -45,6 +45,7 @@ class Account(NestedSet):
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
+		self.validate_parent_child_account_type()
 		self.validate_root_details()
 		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
 		self.validate_group_or_ledger()
@@ -54,6 +55,18 @@ class Account(NestedSet):
 		self.validate_balance_must_be_debit_or_credit()
 		self.validate_account_currency()
 		self.validate_root_company_and_sync_account_to_children()
+
+	def validate_parent_child_account_type(self):
+		if self.parent_account:
+			if self.account_type in [
+				"Direct Income",
+				"Indirect Income",
+				"Current Asset",
+				"Current Liability",
+			]:
+				parent_account_type = frappe.db.get_value("Account", self.parent_account, ["account_type"])
+				if parent_account_type == self.account_type:
+					throw(_(f"Only Parent can be of type {self.account_type}"))
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""

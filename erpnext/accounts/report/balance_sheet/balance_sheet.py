@@ -15,7 +15,6 @@ from erpnext.accounts.report.financial_statements import (
 
 
 def execute(filters=None):
-	# print(filters)
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,
@@ -25,7 +24,6 @@ def execute(filters=None):
 		filters.periodicity,
 		company=filters.company,
 	)
-	print(period_list)
 
 	filters.period_start_date = period_list[0]["year_start_date"]
 
@@ -42,7 +40,6 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 	)
-	print(filters.accumulated_values)
 
 	liability = get_data(
 		filters.company,

@@ -55,6 +55,16 @@ def execute(filters=None):
 		only_current_fiscal_year=False,
 		filters=filters,
 	)
+	expense = get_data(
+		filters.company,
+		"Expense",
+		"Debit",
+		period_list,
+		only_current_fiscal_year=False,
+		filters=filters,
+	)
+	print(expense)
+
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
 
 	current_asset = {}
@@ -62,23 +72,25 @@ def execute(filters=None):
 	quick_asset = {}
 	total_asset = {}
 	total_liability = {}
+	net_sales = {}
+	profit_after_tax = {}
 	total_quick_asset = 0
 
-	for y in years:
+	for year in years:
 		for asset in assets:
 			if not asset.get("parent_account") and asset.get("is_group"):
-				total_asset[y] = asset[y]
+				total_asset[year] = asset[year]
 			if asset.get("account_type") == "Current Asset" and asset.get("is_group"):
-				current_asset[y] = asset[y]
+				current_asset[year] = asset[year]
 			if asset.get("account_type") in ["Bank", "Cash", "Receivable"] and not asset.get("is_group"):
-				total_quick_asset += asset[y]
-				quick_asset[y] = total_quick_asset
+				total_quick_asset += asset[year]
+				quick_asset[year] = total_quick_asset
 
 		for liability in liabilities:
 			if not liability.get("parent_account") and liability.get("is_group"):
-				total_liability[y] = liability[y]
+				total_liability[year] = liability[year]
 			if liability.get("account_type") == "Current Liability" and liability.get("is_group"):
-				current_liability[y] = liability[y]
+				current_liability[year] = liability[year]
 
 	current_ratio = {"ratio": "Current Ratio"}
 	quick_ratio = {"ratio": "Quick Ratio"}
