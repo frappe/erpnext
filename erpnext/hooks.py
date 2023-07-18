@@ -75,7 +75,6 @@ webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform
 calendars = [
 	"Task",
 	"Work Order",
-	"Leave Application",
 	"Sales Order",
 	"Holiday List",
 ]
