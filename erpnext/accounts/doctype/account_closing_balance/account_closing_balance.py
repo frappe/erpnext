@@ -14,10 +14,8 @@ class AccountClosingBalance(Document):
 	pass
 
 
-def make_closing_entries(closing_entries, voucher_name):
+def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 	accounting_dimensions = get_accounting_dimensions()
-	company = closing_entries[0].get("company")
-	closing_date = closing_entries[0].get("closing_date")
 
 	previous_closing_entries = get_previous_closing_entries(
 		company, closing_date, accounting_dimensions
