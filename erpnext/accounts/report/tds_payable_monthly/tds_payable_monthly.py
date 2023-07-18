@@ -96,8 +96,9 @@ def get_result(
 
 def get_supplier_pan_map():
 	supplier_map = frappe._dict()
+	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
 	suppliers = frappe.db.get_all(
-		"Supplier", fields=["name", "pan", "supplier_type", "supplier_name", "tax_withholding_category"]
+		"Supplier", fields=["name", pan, "supplier_type", "supplier_name", "tax_withholding_category"]
 	)
 
 	for d in suppliers:
