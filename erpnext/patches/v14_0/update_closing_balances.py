@@ -69,7 +69,6 @@ def execute():
 
 				entries = gl_entries + closing_entries
 
-				if entries:
-					make_closing_entries(entries, voucher_name=pcv.name)
-					i += 1
-					company_wise_order[pcv.company].append(pcv.posting_date)
+				make_closing_entries(entries, pcv.name, pcv.company, pcv.posting_date)
+				company_wise_order[pcv.company].append(pcv.posting_date)
+				i += 1
