@@ -44,7 +44,7 @@ class StockReservationEntry(Document):
 		self.update_status()
 
 	def validate_amended_doc(self) -> None:
-		"""Raises exception if document is amended."""
+		"""Raises an exception if document is amended."""
 
 		if self.amended_from:
 			msg = _("Cannot amend {0} {1}, please create a new one instead.").format(
@@ -53,7 +53,7 @@ class StockReservationEntry(Document):
 			frappe.throw(msg)
 
 	def validate_mandatory(self) -> None:
-		"""Raises exception if mandatory fields are not set."""
+		"""Raises an exception if mandatory fields are not set."""
 
 		mandatory = [
 			"item_code",
@@ -73,13 +73,15 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 	def validate_for_group_warehouse(self) -> None:
-		"""Raises exception if `Warehouse` is a Group Warehouse."""
+		"""Raises an exception if `Warehouse` is a Group Warehouse."""
 
 		if frappe.get_cached_value("Warehouse", self.warehouse, "is_group"):
 			msg = _("Stock cannot be reserved in group warehouse {0}.").format(frappe.bold(self.warehouse))
 			frappe.throw(msg, title=_("Invalid Warehouse"))
 
-	def validate_uom_is_integer(self):
+	def validate_uom_is_integer(self) -> None:
+		"""Validates `Reserved Qty` with Stock UOM."""
+
 		if cint(frappe.db.get_value("UOM", self.stock_uom, "must_be_whole_number", cache=True)):
 			if cint(self.reserved_qty) != flt(self.reserved_qty, self.precision("reserved_qty")):
 				msg = _(
@@ -105,7 +107,9 @@ class StockReservationEntry(Document):
 		if self.reservation_based_on == "Qty":
 			self.validate_with_max_reserved_qty(self.reserved_qty)
 
-	def auto_reserve_serial_and_batch(self) -> None:
+	def auto_reserve_serial_and_batch(self, based_on: str = None) -> None:
+		"""Auto pick Serial and Batch Nos to reserve when `Reservation Based On` is `Serial and Batch`."""
+
 		if (
 			(self.get("_action") == "submit")
 			and (self.has_serial_no or self.has_batch_no)
@@ -121,7 +125,8 @@ class StockReservationEntry(Document):
 					"item_code": self.item_code,
 					"warehouse": self.warehouse,
 					"qty": abs(self.reserved_qty) or 0,
-					"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+					"based_on": based_on
+					or frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 				}
 			)
 
@@ -270,6 +275,7 @@ class StockReservationEntry(Document):
 				msg = _("Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty.")
 				frappe.throw(msg)
 
+			# Should be called after validating Serial and Batch Nos.
 			self.validate_with_max_reserved_qty(qty_to_be_reserved)
 			self.db_set("reserved_qty", qty_to_be_reserved)
 

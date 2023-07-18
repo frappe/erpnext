@@ -342,7 +342,7 @@ class DeliveryNote(SellingController):
 						delivered_serial_nos = [d.serial_no for d in sbb.entries]
 						for entry in sre_doc.sb_entries:
 							if entry.serial_no in delivered_serial_nos:
-								entry.delivered_qty = 1
+								entry.delivered_qty = 1  # Qty will always be 1 for Serial No.
 								entry.db_update()
 					else:
 						delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}

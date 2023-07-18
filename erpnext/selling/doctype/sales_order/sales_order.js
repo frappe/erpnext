@@ -94,6 +94,7 @@ frappe.ui.form.on("Sales Order", {
 			}
 		}
 
+		// Hide `Reserve Stock` field description in submitted or cancelled Sales Order.
 		if (frm.doc.docstatus > 0) {
 			frm.set_df_property("reserve_stock", "description", null);
 		}
@@ -276,6 +277,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.doc.items.forEach(item => {
 			if (item.reserve_stock) {
 				let unreserved_qty = (flt(item.stock_qty) - (item.stock_reserved_qty ? flt(item.stock_reserved_qty) : (flt(item.delivered_qty) * flt(item.conversion_factor))))
+
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
 						'name': item.name,
@@ -454,6 +456,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					if (!doc.__onload || !doc.__onload.has_reserved_stock) {
+						// Don't show the `Reserve` button if the Sales Order has Picked Items.
 						if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
 							this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
 						}
@@ -466,7 +469,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
-						// this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(doc.__onload && doc.__onload.has_reserved_stock), __('Create'));
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(true), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}

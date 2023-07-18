@@ -51,6 +51,8 @@ class PickList(Document):
 		self.validate_picked_items()
 
 	def validate_sales_order(self):
+		"""Raises an exception if the `Sales Order` has reserved stock."""
+
 		if self.purpose != "Delivery":
 			return
 

@@ -87,6 +87,7 @@ frappe.ui.form.on("Stock Reservation Entry", {
 			"batch_no", "read_only", !frm.doc.has_batch_no
 		);
 
+		// Qty will always be 1 for Serial No.
 		frm.fields_dict.sb_entries.grid.update_docfield_property(
 			"qty", "read_only", frm.doc.has_serial_no
 		);

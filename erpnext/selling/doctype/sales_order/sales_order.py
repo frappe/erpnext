@@ -526,7 +526,7 @@ class SalesOrder(SellingController):
 		return False
 
 	@frappe.whitelist()
-	def create_stock_reservation_entries(self, items_details=None, notify=True):
+	def create_stock_reservation_entries(self, items_details=None, notify=True) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -534,7 +534,7 @@ class SalesOrder(SellingController):
 			validate_stock_reservation_settings,
 		)
 
-		# Skip for group warehouse
+		# Skip for Group Warehouse.
 		if (
 			self.get("_action") == "submit"
 			and self.set_warehouse
@@ -678,7 +678,9 @@ class SalesOrder(SellingController):
 			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
 	@frappe.whitelist()
-	def cancel_stock_reservation_entries(self, sre_list=None, notify=True):
+	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+		"""Cancel Stock Reservation Entries for Sales Order Items."""
+
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)
@@ -843,12 +845,12 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	if not kwargs:
 		kwargs = {
 			"for_reserved_stock": frappe.flags.args and frappe.flags.args.for_reserved_stock,
-			"skip_item_mapping": False,
+			"skip_item_mapping": frappe.flags.args and frappe.flags.args.skip_item_mapping,
 		}
 
 	kwargs = frappe._dict(kwargs)
 
-	sre_details: dict[float] = {}
+	sre_details = {}
 	if kwargs.for_reserved_stock:
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
@@ -914,7 +916,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		}
 
 	so = frappe.get_doc("Sales Order", source_name)
-	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc)
+	target_doc = get_mapped_doc("Sales Order", so.name, mapper, target_doc)
 
 	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
 		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
@@ -953,9 +955,11 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 				target_doc.append("items", dn_item)
 			else:
+				# Correct rows index.
 				for idx, item in enumerate(target_doc.items):
 					item.idx = idx + 1
 
+	# Should be called after mapping items.
 	set_missing_values(so, target_doc)
 	target_doc.set_onload("ignore_price_list", True)
 
@@ -1552,6 +1556,7 @@ def create_pick_list(source_name, target_doc=None):
 			and not is_product_bundle(item.item_code)
 		)
 
+	# Don't allow a Pick List to be created against a Sales Order that has reserved stock.
 	validate_sales_order()
 
 	doc = get_mapped_doc(

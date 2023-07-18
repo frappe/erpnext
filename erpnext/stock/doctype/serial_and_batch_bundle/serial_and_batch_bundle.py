@@ -1175,7 +1175,9 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 	return serial_nos
 
 
-def get_reserved_serial_nos(kwargs):
+def get_reserved_serial_nos(kwargs) -> list:
+	"""Returns a list of `Serial No` reserved in POS Invoice and Stock Reservation Entry."""
+
 	ignore_serial_nos = []
 
 	# Extend the list by serial nos reserved in POS Invoice
@@ -1254,6 +1256,8 @@ def get_reserved_serial_nos_for_pos(kwargs):
 
 
 def get_reserved_serial_nos_for_sre(kwargs) -> list:
+	"""Returns a list of `Serial No` reserved in Stock Reservation Entry."""
+
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	query = (
@@ -1280,6 +1284,8 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 
 
 def get_reserved_batches_for_pos(kwargs) -> dict:
+	"""Returns a dict of `Batch No` followed by the `Qty` reserved in POS Invoices."""
+
 	pos_batches = frappe._dict()
 	pos_invoices = frappe.get_all(
 		"POS Invoice",
@@ -1338,6 +1344,8 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 
 def get_reserved_batches_for_sre(kwargs) -> dict:
+	"""Returns a dict of `Batch No` followed by the `Qty` reserved in Stock Reservation Entry."""
+
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	query = (
