@@ -1736,6 +1736,72 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
 
+	def test_offsetting_entries_for_accounting_dimensions(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		create_account(
+			account_name="Offsetting",
+			company="_Test Company",
+			parent_account="Temporary Accounts - _TC",
+		)
+
+		clear_dimension_defaults("Branch")
+		accounting_dimension = frappe.get_doc("Accounting Dimension", "Branch")
+		accounting_dimension.disabled = 0
+		accounting_dimension.append(
+			"dimension_defaults",
+			{
+				"company": "_Test Company",
+				"automatically_post_balancing_accounting_entry": 1,
+				"offsetting_account": "Offsetting - _TC",
+			},
+		)
+		accounting_dimension.save()
+
+		branch1 = frappe.new_doc("Branch")
+		branch1.branch = "Location 1"
+		branch1.insert(ignore_if_duplicate=True)
+		branch2 = frappe.new_doc("Branch")
+		branch2.branch = "Location 2"
+		branch2.insert(ignore_if_duplicate=True)
+
+		pi = make_purchase_invoice(
+			company="_Test Company",
+			customer="_Test Supplier",
+			do_not_save=True,
+			do_not_submit=True,
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
+		)
+		pi.branch = branch1.branch
+		pi.items[0].branch = branch2.branch
+		pi.save()
+		pi.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate(), {"branch": branch2.branch}],
+			["Creditors - _TC", 0.0, 1000, nowdate(), {"branch": branch1.branch}],
+			["Offsetting - _TC", 1000, 0.0, nowdate(), {"branch": branch1.branch}],
+			["Offsetting - _TC", 0.0, 1000, nowdate(), {"branch": branch2.branch}],
+		]
+
+		check_gl_entries(
+			self,
+			pi.name,
+			expected_gle,
+			nowdate(),
+			voucher_type="Purchase Invoice",
+			check_acc_dimensions=True,
+		)
+		clear_dimension_defaults("Branch")
+
+
+def clear_dimension_defaults(dimension_name):
+	accounting_dimension = frappe.get_doc("Accounting Dimension", dimension_name)
+	accounting_dimension.dimension_defaults = []
+	accounting_dimension.save()
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
@@ -1748,9 +1814,16 @@ def set_advance_flag(company, flag, default_account):
 	)
 
 
-def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="Purchase Invoice"):
+def check_gl_entries(
+	doc,
+	voucher_no,
+	expected_gle,
+	posting_date,
+	voucher_type="Purchase Invoice",
+	check_acc_dimensions=False,
+):
 	gl = frappe.qb.DocType("GL Entry")
-	q = (
+	query = (
 		frappe.qb.from_(gl)
 		.select(gl.account, gl.debit, gl.credit, gl.posting_date)
 		.where(
@@ -1761,13 +1834,19 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 		)
 		.orderby(gl.posting_date, gl.account, gl.creation)
 	)
-	gl_entries = q.run(as_dict=True)
+	if check_acc_dimensions:
+		for col in list(expected_gle[0][4].keys()):
+			query = query.select(col)
+	gl_entries = query.run(as_dict=True)
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+		if check_acc_dimensions:
+			for acc_dimension in expected_gle[i][4]:
+				doc.assertEqual(expected_gle[i][4][acc_dimension], gle[acc_dimension])
 
 
 def create_tax_witholding_category(category_name, company, account):
