@@ -278,9 +278,33 @@ standard_queries = {
 	"Customer": "erpnext.controllers.queries.customer_query",
 }
 
+period_closing_doctypes = [
+	"Sales Invoice",
+	"Purchase Invoice",
+	"Journal Entry",
+	"Bank Clearance",
+	"Stock Entry",
+	"Dunning",
+	"Invoice Discounting",
+	"Payment Entry",
+	"Period Closing Voucher",
+	"Process Deferred Accounting",
+	"Asset",
+	"Asset Capitalization",
+	"Asset Repair",
+	"Delivery Note",
+	"Landed Cost Voucher",
+	"Purchase Receipt",
+	"Stock Reconciliation",
+	"Subcontracting Receipt",
+]
+
 doc_events = {
 	"*": {
 		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
+	},
+	tuple(period_closing_doctypes): {
+		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
@@ -470,15 +494,6 @@ communication_doctypes = ["Customer", "Supplier"]
 advance_payment_doctypes = ["Sales Order", "Purchase Order"]
 
 invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
-
-period_closing_doctypes = [
-	"Sales Invoice",
-	"Purchase Invoice",
-	"Journal Entry",
-	"Bank Clearance",
-	"Asset",
-	"Stock Entry",
-]
 
 bank_reconciliation_doctypes = [
 	"Payment Entry",
