@@ -54,7 +54,8 @@ def make_gl_entries(
 
 def make_acc_dimensions_offsetting_entry(gl_map):
 	accounting_dimensions_to_offset = get_accounting_dimensions_for_offsetting_entry(gl_map)
-	if len(accounting_dimensions_to_offset) == 0:
+	no_of_dimensions = len(accounting_dimensions_to_offset)
+	if no_of_dimensions == 0:
 		return
 
 	offsetting_entries = []
@@ -72,10 +73,10 @@ def make_acc_dimensions_offsetting_entry(gl_map):
 				offsetting_entry.update(
 					{
 						"account": offsetting_account,
-						"debit": flt(gle.credit),
-						"credit": flt(gle.debit),
-						"debit_in_account_currency": flt(gle.credit_in_account_currency),
-						"credit_in_account_currency": flt(gle.debit_in_account_currency),
+						"debit": flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0,
+						"credit": flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0,
+						"debit_in_account_currency": flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0,
+						"credit_in_account_currency": flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0,
 						"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension),
 						"against_voucher": None,
 					}
