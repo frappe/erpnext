@@ -226,10 +226,12 @@ class PaymentEntry(AccountsController):
 		latest_lookup = {}
 		for d in latest_references:
 			d = frappe._dict(d)
-			latest_lookup.update({(d.voucher_type, d.voucher_no): d})
+			latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
 
 		for d in self.get("references"):
-			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
+			latest = (latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()).get(
+				d.payment_term
+			)
 
 			# The reference has already been fully paid
 			if not latest:
@@ -250,6 +252,18 @@ class PaymentEntry(AccountsController):
 
 			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
 				frappe.throw(fail_message.format(d.idx))
+
+			if d.payment_term and (
+				(flt(d.allocated_amount)) > 0
+				and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+			):
+				frappe.throw(
+					_(
+						"Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
+					).format(
+						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
+					)
+				)
 
 			# Check for negative outstanding invoices as well
 			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
@@ -1589,6 +1603,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 										"posting_date": d.posting_date,
 										"invoice_amount": flt(d.invoice_amount),
 										"outstanding_amount": flt(d.outstanding_amount),
+										"payment_term_outstanding": flt(payment_term.outstanding),
 										"payment_amount": payment_term.payment_amount,
 										"payment_term": payment_term.payment_term,
 										"account": d.account,
@@ -2371,6 +2386,7 @@ def get_reference_as_per_payment_terms(
 					"due_date": doc.get("due_date"),
 					"total_amount": grand_total,
 					"outstanding_amount": outstanding_amount,
+					"payment_term_outstanding": payment_term_outstanding,
 					"payment_term": payment_term.payment_term,
 					"allocated_amount": payment_term_outstanding,
 				}
