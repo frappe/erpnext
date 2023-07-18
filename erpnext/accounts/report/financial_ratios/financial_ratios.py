@@ -73,7 +73,6 @@ def execute(filters=None):
 	total_asset = {}
 	total_liability = {}
 	net_sales = {}
-	net_sales = {}
 	total_income = {}
 	total_expense = {}
 	cogs = {}
@@ -82,34 +81,41 @@ def execute(filters=None):
 		total_quick_asset = 0
 		total_net_sales = 0
 		total_cogs = 0
-		for asset in assets:
-			if not asset.get("parent_account") and asset.get("is_group"):
-				total_asset[year] = asset[year]
-			if asset.get("account_type") == "Current Asset" and asset.get("is_group"):
-				current_asset[year] = asset[year]
-			if asset.get("account_type") in ["Bank", "Cash", "Receivable"] and not asset.get("is_group"):
-				total_quick_asset += asset[year]
-				quick_asset[year] = total_quick_asset
 
-		for liability in liabilities:
-			if not liability.get("parent_account") and liability.get("is_group"):
-				total_liability[year] = liability[year]
-			if liability.get("account_type") == "Current Liability" and liability.get("is_group"):
-				current_liability[year] = liability[year]
+		update_balances(
+			current_asset,
+			total_asset,
+			"Current Asset",
+			year,
+			assets,
+			"Asset",
+			quick_asset,
+			total_quick_asset,
+		)
 
-		for i in income:
-			if not i.get("parent_account") and i.get("is_group"):
-				total_income[year] = i[year]
-			if i.get("account_type") == "Direct Income":
-				total_net_sales += i[year]
-				net_sales[year] = total_net_sales
+		update_balances(
+			current_liability, total_liability, "Current Liability", year, liabilities, "Liability"
+		)
 
-		for e in expense:
-			if not e.get("parent_account") and e.get("is_group"):
-				total_expense[year] = e[year]
-			if e.get("account_type") == "Cost of Goods Sold":
-				total_cogs += e[year]
-				cogs[year] = total_cogs
+		update_balances(
+			ratio_dict=cogs,
+			total_dict=total_expense,
+			account_type="Cost of Goods Sold",
+			year=year,
+			root_type_data=expense,
+			root_type="Expense",
+			total_net=total_cogs,
+		)
+
+		update_balances(
+			ratio_dict=net_sales,
+			total_dict=total_income,
+			account_type="Direct Income",
+			year=year,
+			root_type_data=income,
+			root_type="Income",
+			total_net=total_net_sales,
+		)
 
 	current_ratio = {"ratio": "Current Ratio"}
 	quick_ratio = {"ratio": "Quick Ratio"}
@@ -170,8 +176,48 @@ def execute(filters=None):
 	# PAT = net income - tax
 
 
-def get_year_wise_total(years, root_type):
-	pass
+def update_balances(
+	ratio_dict,
+	total_dict,
+	account_type,
+	year,
+	root_type_data,
+	root_type,
+	net_dict=None,
+	total_net=None,
+):
+
+	for entry in root_type_data:
+		if root_type == "Asset":
+			if not entry.get("parent_account") and entry.get("is_group"):
+				total_dict[year] = entry[year]
+			if entry.get("account_type") == account_type and entry.get("is_group"):
+				ratio_dict[year] = entry[year]
+			if entry.get("account_type") in ["Bank", "Cash", "Receivable"] and not entry.get("is_group"):
+				total_net += entry[year]
+				net_dict[year] = total_net
+
+		elif root_type == "Liability":
+			if not entry.get("parent_account") and entry.get("is_group"):
+				total_dict[year] = entry[year]
+			if entry.get("account_type") == account_type and entry.get("is_group"):
+				ratio_dict[year] = entry[year]
+
+		elif root_type == "Income":
+			if not entry.get("parent_account") and entry.get("is_group"):
+				total_dict[year] = entry[year]
+
+			if entry.get("account_type") == account_type and entry.get("is_group"):
+				total_net += entry[year]
+				ratio_dict[year] = total_net
+
+		elif root_type == "Expense":
+			if not entry.get("parent_account") and entry.get("is_group"):
+				total_dict[year] = entry[year]
+
+			if entry.get("account_type") == account_type:
+				total_net += entry[year]
+				ratio_dict[year] = total_net
 
 
 def get_columns(filters, period_list):
