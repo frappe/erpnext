@@ -83,8 +83,9 @@ def get_final_result(supplier_category_wise_map):
 
 
 def get_columns(filters):
+	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
 	columns = [
-		{"label": _("PAN"), "fieldname": "pan", "fieldtype": "Data", "width": 90},
+		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 90},
 		{
 			"label": _("Supplier"),
 			"options": "Supplier",
