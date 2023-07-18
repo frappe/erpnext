@@ -5,12 +5,14 @@ def get_data():
 	return {
 		"fieldname": "delivery_note",
 		"non_standard_fieldnames": {
+			"Sales Invoice": "delivery_note",
 			"Stock Entry": "delivery_note_no",
 			"Quality Inspection": "reference_name",
 			"Auto Repeat": "reference_document",
 		},
 		"internal_links": {
 			"Sales Order": ["items", "against_sales_order"],
+			"Sales Invoice": ["items", "against_sales_invoice"],
 			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
 		},
