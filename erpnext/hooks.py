@@ -72,17 +72,12 @@ update_website_context = [
 my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
-<<<<<<< HEAD
 calendars = [
 	"Task",
 	"Work Order",
-	"Leave Application",
 	"Sales Order",
 	"Holiday List",
 ]
-=======
-calendars = ["Task", "Work Order", "Sales Order", "Holiday List", "ToDo"]
->>>>>>> 2607847061 (refactor: Leave Application should not be in hook.py (#36008))
 
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
 
