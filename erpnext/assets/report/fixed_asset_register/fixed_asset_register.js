@@ -82,7 +82,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 			"label": __("Start Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
@@ -90,7 +90,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 			"label": __("End Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
 		},
 		{

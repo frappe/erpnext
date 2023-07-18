@@ -15,7 +15,7 @@
 			{% for item, taxes in itemised_tax.items() %}
 				<tr>
 					<td>{{ item }}</td>
-					<td class='text-right'>
+					<td class="text-right">
 						{% if doc.get('is_return') %}
 							{{ frappe.utils.fmt_money((itemised_taxable_amount.get(item, 0))|abs, None, doc.currency) }}
 						{% else %}
@@ -25,7 +25,7 @@
 					{% for tax_account in tax_accounts %}
 						{% set tax_details = taxes.get(tax_account) %}
 						{% if tax_details %}
-							<td class='text-right'>
+							<td class="text-right">
 								{% if tax_details.tax_rate or not tax_details.tax_amount %}
 									({{ tax_details.tax_rate }}%)
 								{% endif %}

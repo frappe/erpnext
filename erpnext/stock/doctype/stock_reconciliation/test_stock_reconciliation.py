@@ -314,6 +314,30 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Inactive")
 		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
 
+	def test_stock_reco_balance_qty_for_serial_and_batch_item(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = create_item("_TestBatchSerialItemReco_1")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.has_serial_no = 1
+		item.batch_number_series = "TBS-BATCH1-.##"
+		item.serial_no_series = "TBS1-.####"
+		item.save()
+
+		warehouse = "_Test Warehouse for Stock Reco2"
+		warehouse = create_warehouse(warehouse)
+
+		make_stock_entry(item_code=item.name, target=warehouse, qty=10, basic_rate=100)
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse, qty=10, rate=200)
+
+		qty_after_transaction = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": sr.name, "is_cancelled": 0}, "qty_after_transaction"
+		)
+
+		self.assertEqual(qty_after_transaction, 20)
+
 	def test_stock_reco_for_serial_and_batch_item_with_future_dependent_entry(self):
 		"""
 		Behaviour: 1) Create Stock Reconciliation, which will be the origin document
