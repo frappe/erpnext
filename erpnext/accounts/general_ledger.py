@@ -88,7 +88,7 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
 		frappe.qb.from_(acc_dimension)
 		.inner_join(dimension_detail)
 		.on(acc_dimension.name == dimension_detail.parent)
-		.select(acc_dimension.name, dimension_detail.offsetting_account)
+		.select(acc_dimension.fieldname, dimension_detail.offsetting_account)
 		.where(
 			(acc_dimension.disabled == 0)
 			& (dimension_detail.company == company)
@@ -97,8 +97,7 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
 	).run(as_dict=True)
 	accounting_dimensions_to_offset = []
 	for acc_dimension in acc_dimensions:
-		fieldname = acc_dimension.name.lower().replace(" ", "_")
-		values = set([entry.get(fieldname) for entry in gl_map])
+		values = set([entry.get(acc_dimension.fieldname) for entry in gl_map])
 		if len(values) > 1:
 			accounting_dimensions_to_offset.append(acc_dimension)
 	return accounting_dimensions_to_offset
