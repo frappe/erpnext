@@ -1736,6 +1736,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		from erpnext.accounts.report.trial_balance.test_trial_balance import (
 			clear_dimension_defaults,
 			create_accounting_dimension,
+			disable_dimension,
 		)
 
 		create_account(
@@ -1783,6 +1784,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			check_acc_dimensions=True,
 		)
 		clear_dimension_defaults("Branch")
+		disable_dimension()
 
 
 def set_advance_flag(company, flag, default_account):
