@@ -411,6 +411,6 @@ def get_opening_row(party_type, party, from_date, company):
 			Sum(gle.credit).as_("credit"),
 			(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
 		)
-		.where((gle.account.isin(party_account)) & (gle.posting_date < from_date))
+		.where((gle.account.isin(party_account)) & (gle.party == party) & (gle.posting_date < from_date))
 	).run(as_dict=True)
 >>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
