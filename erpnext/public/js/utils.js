@@ -352,6 +352,10 @@ $.extend(erpnext.utils, {
 	},
 
 	get_fiscal_year: function(date) {
+		if(!date) {
+			date = frappe.datetime.get_today();
+		}
+
 		let fiscal_year = '';
 		frappe.call({
 			method: "erpnext.accounts.utils.get_fiscal_year",
