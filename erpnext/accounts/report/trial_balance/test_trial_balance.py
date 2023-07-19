@@ -63,6 +63,7 @@ class TestTrialBalance(FrappeTestCase):
 		self.assertEqual(total_row["debit"], total_row["credit"])
 
 	def tearDown(self):
+		clear_dimension_defaults("Branch")
 		disable_dimension()
 
 
@@ -91,8 +92,6 @@ def create_accounting_dimension(**args):
 		accounting_dimension = frappe.get_doc("Accounting Dimension", document_type)
 		accounting_dimension.disabled = 0
 
-	clear_dimension_defaults(document_type)
-	accounting_dimension.load_from_db()
 	accounting_dimension.append(
 		"dimension_defaults",
 		{
