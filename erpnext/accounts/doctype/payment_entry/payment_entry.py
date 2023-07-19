@@ -182,10 +182,12 @@ class PaymentEntry(AccountsController):
 		latest_lookup = {}
 		for d in latest_references:
 			d = frappe._dict(d)
-			latest_lookup.update({(d.voucher_type, d.voucher_no): d})
+			latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
 
 		for d in self.get("references"):
-			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
+			latest = (latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()).get(
+				d.payment_term
+			)
 
 			# The reference has already been fully paid
 			if not latest:
@@ -207,6 +209,18 @@ class PaymentEntry(AccountsController):
 
 			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
 				frappe.throw(fail_message.format(d.idx))
+
+			if d.payment_term and (
+				(flt(d.allocated_amount)) > 0
+				and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+			):
+				frappe.throw(
+					_(
+						"Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
+					).format(
+						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
+					)
+				)
 
 			# Check for negative outstanding invoices as well
 			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
@@ -1378,7 +1392,9 @@ def get_outstanding_reference_documents(args):
 			accounting_dimensions=accounting_dimensions_filter,
 		)
 
-		outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
+		outstanding_invoices = split_invoices_based_on_payment_terms(
+			outstanding_invoices, args.get("company")
+		)
 
 		for d in outstanding_invoices:
 			d["exchange_rate"] = 1
@@ -1437,8 +1453,27 @@ def get_outstanding_reference_documents(args):
 	return data
 
 
-def split_invoices_based_on_payment_terms(outstanding_invoices):
+def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 	invoice_ref_based_on_payment_terms = {}
+
+	company_currency = (
+		frappe.db.get_value("Company", company, "default_currency") if company else None
+	)
+	exc_rates = frappe._dict()
+	for doctype in ["Sales Invoice", "Purchase Invoice"]:
+		invoices = [x.voucher_no for x in outstanding_invoices if x.voucher_type == doctype]
+		for x in frappe.db.get_all(
+			doctype,
+			filters={"name": ["in", invoices]},
+			fields=["name", "currency", "conversion_rate", "party_account_currency"],
+		):
+			exc_rates[x.name] = frappe._dict(
+				conversion_rate=x.conversion_rate,
+				currency=x.currency,
+				party_account_currency=x.party_account_currency,
+				company_currency=company_currency,
+			)
+
 	for idx, d in enumerate(outstanding_invoices):
 		if d.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
 			payment_term_template = frappe.db.get_value(
@@ -1455,6 +1490,14 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 
 					for payment_term in payment_schedule:
 						if payment_term.outstanding > 0.1:
+							doc_details = exc_rates.get(payment_term.parent, None)
+							is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
+								doc_details.party_account_currency != doc_details.company_currency
+							)
+							payment_term_outstanding = flt(payment_term.outstanding)
+							if not is_multi_currency_acc:
+								payment_term_outstanding = doc_details.conversion_rate * flt(payment_term.outstanding)
+
 							invoice_ref_based_on_payment_terms.setdefault(idx, [])
 							invoice_ref_based_on_payment_terms[idx].append(
 								frappe._dict(
@@ -1466,6 +1509,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 										"posting_date": d.posting_date,
 										"invoice_amount": flt(d.invoice_amount),
 										"outstanding_amount": flt(d.outstanding_amount),
+										"payment_term_outstanding": payment_term_outstanding,
 										"payment_amount": payment_term.payment_amount,
 										"payment_term": payment_term.payment_term,
 									}
@@ -2240,6 +2284,7 @@ def get_reference_as_per_payment_terms(
 					"due_date": doc.get("due_date"),
 					"total_amount": grand_total,
 					"outstanding_amount": outstanding_amount,
+					"payment_term_outstanding": payment_term_outstanding,
 					"payment_term": payment_term.payment_term,
 					"allocated_amount": payment_term_outstanding,
 				}
