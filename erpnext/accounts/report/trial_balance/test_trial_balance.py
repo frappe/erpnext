@@ -84,14 +84,14 @@ def create_company(**args):
 def create_accounting_dimension(**args):
 	args = frappe._dict(args)
 	document_type = args.document_type or "Branch"
-	if not frappe.db.exists("Accounting Dimension", {"document_type": "Branch"}):
-		accounting_dimension = frappe.get_doc(
-			{"doctype": "Accounting Dimension", "document_type": document_type}
-		).insert()
-	else:
+	if frappe.db.exists("Accounting Dimension", document_type):
 		accounting_dimension = frappe.get_doc("Accounting Dimension", document_type)
 		accounting_dimension.disabled = 0
-
+	else:
+		accounting_dimension = frappe.new_doc("Accounting Dimension")
+		accounting_dimension.document_type = document_type
+		accounting_dimension.insert()
+	accounting_dimension.save()
 	accounting_dimension.append(
 		"dimension_defaults",
 		{
@@ -101,7 +101,6 @@ def create_accounting_dimension(**args):
 		},
 	)
 	accounting_dimension.save()
-	return accounting_dimension.name
 
 
 def disable_dimension(**args):

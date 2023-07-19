@@ -1750,7 +1750,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			parent_account="Temporary Accounts - _TC",
 		)
 
-		create_accounting_dimension()
+		create_accounting_dimension(company="_Test Company", offsetting_account="Offsetting - _TC")
 
 		branch1 = frappe.new_doc("Branch")
 		branch1.branch = "Location 1"
