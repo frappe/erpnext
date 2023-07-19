@@ -66,7 +66,7 @@ class Account(NestedSet):
 			]:
 				parent_account_type = frappe.db.get_value("Account", self.parent_account, ["account_type"])
 				if parent_account_type == self.account_type:
-					throw(_(f"Only Parent can be of type {self.account_type}"))
+					throw(_("Only Parent can be of type {0}".format(self.account_type)))
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""

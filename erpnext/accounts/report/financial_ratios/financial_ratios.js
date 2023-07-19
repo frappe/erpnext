@@ -52,4 +52,24 @@ frappe.query_reports["Financial Ratios"] = {
 			hidden: 1,
 		},
 	],
+	"formatter": function(value, row, column, data, default_formatter) {
+
+		let heading_ratios = ["Liquidity Ratios", "Solvency Ratios"]
+
+		if (heading_ratios.includes(value)) {
+			value = $(`<span>${value}</span>`);
+			let $value = $(value).css("font-weight", "bold");
+			value = $value.wrap("<p></p>").parent().html();
+			// console.log(value, row, column, data);
+
+		}
+
+		if (heading_ratios.includes(row[1].content) && column.fieldtype == "Float") {
+			column.fieldtype = "Data";
+		}
+
+		value = default_formatter(value, row, column, data);
+
+		return value;
+	},
 };

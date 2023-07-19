@@ -179,6 +179,7 @@ def get_balance_on(
 	in_account_currency=True,
 	cost_center=None,
 	ignore_account_permission=False,
+	account_type=None,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -200,6 +201,18 @@ def get_balance_on(
 
 	if account:
 		acc = frappe.get_doc("Account", account)
+
+	account_name = []
+	if account_type:
+		accounts = frappe.db.get_all(
+			"Account",
+			filters={"company": company, "account_type": account_type, "is_group": 0},
+			fields=["name", "lft", "rgt"],
+			order_by="lft",
+		)
+		for a in accounts:
+			account_name.append(a["name"])
+		account_name = tuple(account_name)
 
 	try:
 		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
@@ -254,6 +267,15 @@ def get_balance_on(
 		else:
 			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
 
+	if account_type:
+
+		cond.append(
+			"""exists (
+				select name from `tabAccount` ac where gle.account in %s
+			)"""
+			% (account_name,)
+		)
+
 	if party_type and party:
 		cond.append(
 			"""gle.party_type = %s and gle.party = %s """
@@ -263,7 +285,7 @@ def get_balance_on(
 	if company:
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
-	if account or (party_type and party):
+	if account or (party_type and party) or account_type:
 		if in_account_currency:
 			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
 		else:
@@ -276,7 +298,6 @@ def get_balance_on(
 				select_field, " and ".join(cond)
 			)
 		)[0][0]
-
 		# if bal is None, return 0
 		return flt(bal)
 

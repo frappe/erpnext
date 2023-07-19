@@ -3,6 +3,7 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	"filters": get_filters(),
 	"formatter": function(value, row, column, data, default_formatter) {
+		// console.log(value,row,column,data)
 		if (data && column.fieldname=="account") {
 			value = data.account_name || value;
 
