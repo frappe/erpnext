@@ -39,10 +39,10 @@ class TestTrialBalance(FrappeTestCase):
 
 		branch1 = frappe.new_doc("Branch")
 		branch1.branch = "Location 1"
-		branch1.insert()
+		branch1.insert(ignore_if_duplicate=True)
 		branch2 = frappe.new_doc("Branch")
 		branch2.branch = "Location 2"
-		branch2.insert()
+		branch2.insert(ignore_if_duplicate=True)
 
 		si = create_sales_invoice(
 			company=self.company,
@@ -91,6 +91,8 @@ def create_accounting_dimension(**args):
 		accounting_dimension = frappe.get_doc("Accounting Dimension", document_type)
 		accounting_dimension.disabled = 0
 
+	clear_dimension_defaults(document_type)
+	accounting_dimension.load_from_db()
 	accounting_dimension.append(
 		"dimension_defaults",
 		{
@@ -109,3 +111,9 @@ def disable_dimension(**args):
 	dimension = frappe.get_doc("Accounting Dimension", document_type)
 	dimension.disabled = 1
 	dimension.save()
+
+
+def clear_dimension_defaults(dimension_name):
+	accounting_dimension = frappe.get_doc("Accounting Dimension", dimension_name)
+	accounting_dimension.dimension_defaults = []
+	accounting_dimension.save()

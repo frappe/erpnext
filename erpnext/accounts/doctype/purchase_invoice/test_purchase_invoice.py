@@ -1738,6 +1738,10 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.report.trial_balance.test_trial_balance import (
+			clear_dimension_defaults,
+			create_accounting_dimension,
+		)
 
 		create_account(
 			account_name="Offsetting",
@@ -1745,18 +1749,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			parent_account="Temporary Accounts - _TC",
 		)
 
-		clear_dimension_defaults("Branch")
-		accounting_dimension = frappe.get_doc("Accounting Dimension", "Branch")
-		accounting_dimension.disabled = 0
-		accounting_dimension.append(
-			"dimension_defaults",
-			{
-				"company": "_Test Company",
-				"automatically_post_balancing_accounting_entry": 1,
-				"offsetting_account": "Offsetting - _TC",
-			},
-		)
-		accounting_dimension.save()
+		create_accounting_dimension()
 
 		branch1 = frappe.new_doc("Branch")
 		branch1.branch = "Location 1"
@@ -1795,12 +1788,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			check_acc_dimensions=True,
 		)
 		clear_dimension_defaults("Branch")
-
-
-def clear_dimension_defaults(dimension_name):
-	accounting_dimension = frappe.get_doc("Accounting Dimension", dimension_name)
-	accounting_dimension.dimension_defaults = []
-	accounting_dimension.save()
 
 
 def set_advance_flag(company, flag, default_account):
