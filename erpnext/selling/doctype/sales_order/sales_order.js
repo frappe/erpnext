@@ -61,8 +61,8 @@ frappe.ui.form.on("Sales Order", {
 					})
 				});
 
-				// Stock Reservation > Reserve button will be only visible if the SO has unreserved stock.
-				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+				// Stock Reservation > Reserve button should only be visible if the SO has unreserved stock and no Pick List is created against the SO.
+				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock && flt(frm.doc.per_picked) === 0) {
 					frm.add_custom_button(__('Reserve'), () => frm.events.create_stock_reservation_entries(frm), __('Stock Reservation'));
 				}
 			}

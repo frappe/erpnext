@@ -568,6 +568,14 @@ class SalesOrder(SellingController):
 			if not item.get("reserve_stock"):
 				continue
 
+			# Stock should be reserved from the Pick List if has Picked Qty.
+			if flt(item.picked_qty) > 0:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} has been picked, please create a Stock Reservation from the Pick List."
+					).format(item.idx, frappe.bold(item.item_code))
+				)
+
 			is_stock_item, has_serial_no, has_batch_no = frappe.get_cached_value(
 				"Item", item.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"]
 			)
