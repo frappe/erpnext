@@ -1111,9 +1111,10 @@ def get_autoname_with_number(number_value, doc_title, company):
 
 
 def parse_naming_series_variable(doc, variable):
-	if variable == "FY":
-		return get_fiscal_year(date=doc.get("posting_date"), company=doc.get("company"))[0]
-
+        if variable == "FY" and doc.doctype == "Purchase Order":
+                return get_fiscal_year(date=doc.get("transaction_date"), company=doc.get("company"))[0]
+        else:
+                return get_fiscal_year(date=doc.get("posting_date"), company=doc.get("company"))[0]
 
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root, chart=None):
