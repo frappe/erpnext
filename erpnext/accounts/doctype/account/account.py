@@ -63,6 +63,8 @@ class Account(NestedSet):
 				"Indirect Income",
 				"Current Asset",
 				"Current Liability",
+				"Direct Expense",
+				"Indirect Expense",
 			]:
 				parent_account_type = frappe.db.get_value("Account", self.parent_account, ["account_type"])
 				if parent_account_type == self.account_type:

@@ -98,9 +98,11 @@ def get_ratios_data(filters, period_list, columns):
 
 	avg_debtors = {}
 	avg_creditors = {}
+	avg_stock = {}
 
-	avg_ratio_balances(avg_debtors, "Receivable", period_list, precision, filters)
-	avg_ratio_balances(avg_creditors, "Payable", period_list, precision, filters)
+	avg_ratio_balance(avg_debtors, "Receivable", period_list, precision, filters)
+	avg_ratio_balance(avg_creditors, "Payable", period_list, precision, filters)
+	avg_ratio_balance(avg_stock, "Stock", period_list, precision, filters)
 
 	current_asset = {}
 	current_liability = {}
@@ -111,6 +113,7 @@ def get_ratios_data(filters, period_list, columns):
 	total_income = {}
 	total_expense = {}
 	cogs = {}
+	direct_expense = {}
 
 	for year in years:
 		total_quick_asset = 0
@@ -143,6 +146,15 @@ def get_ratios_data(filters, period_list, columns):
 		)
 
 		update_balances(
+			ratio_dict=direct_expense,
+			total_dict=total_expense,
+			account_type="Direct Expense",
+			year=year,
+			root_type_data=expense,
+			root_type="Expense",
+		)
+
+		update_balances(
 			ratio_dict=net_sales,
 			total_dict=total_income,
 			account_type="Direct Income",
@@ -152,6 +164,7 @@ def get_ratios_data(filters, period_list, columns):
 			total_net=total_net_sales,
 		)
 
+	print("DEEE", direct_expense)
 	current_ratio = {"ratio": "Current Ratio"}
 	quick_ratio = {"ratio": "Quick Ratio"}
 	debt_equity_ratio = {"ratio": "Debt Equity Ratio"}
@@ -160,9 +173,11 @@ def get_ratios_data(filters, period_list, columns):
 	return_on_asset_ratio = {"ratio": "Return on Asset Ratio"}
 	return_on_equity_ratio = {"ratio": "Return on Equity Ratio"}
 	fixed_asset_turnover_ratio = {"ratio": "Fixed Asset Turnover Ratio"}
+	debtor_turnover_ratio = {"ratio": "Debtor Turnover Ratio"}
+	creditor_turnover_ratio = {"ratio": "Creditor Turnover Ratio"}
+	inventory_turnover_ratio = {"ratio": "Inventory Turnover Ratio"}
 
 	for year in years:
-		share_holder_fund = 0
 
 		current_ratio[year] = calculate_ratio(current_asset[year], current_liability[year], precision)
 		quick_ratio[year] = calculate_ratio(quick_asset[year], current_liability[year], precision)
@@ -177,10 +192,16 @@ def get_ratios_data(filters, period_list, columns):
 		gross_profit_ratio[year] = calculate_ratio(
 			net_sales[year] - cogs[year], net_sales[year], precision
 		)
-
 		return_on_asset_ratio[year] = calculate_ratio(profit_after_tax, total_asset[year], precision)
 
+		inventory_turnover_ratio[year] = calculate_ratio(cogs[year], avg_stock[year], precision)
+		debtor_turnover_ratio[year] = calculate_ratio(net_sales[year], avg_debtors[year], precision)
+		creditor_turnover_ratio[year] = calculate_ratio(
+			direct_expense[year] * -1, avg_creditors[year], precision
+		)
 		fixed_asset_turnover_ratio[year] = calculate_ratio(net_sales[year], total_asset[year], precision)
+
+	print(avg_creditors)
 
 	data = [
 		{"ratio": "Liquidity Ratios"},
@@ -193,6 +214,9 @@ def get_ratios_data(filters, period_list, columns):
 		return_on_asset_ratio,
 		return_on_equity_ratio,
 		{"ratio": "Turnover Ratios"},
+		inventory_turnover_ratio,
+		debtor_turnover_ratio,
+		creditor_turnover_ratio,
 		fixed_asset_turnover_ratio,
 	]
 
@@ -238,12 +262,16 @@ def update_balances(
 			if not entry.get("parent_account") and entry.get("is_group"):
 				total_dict[year] = entry[year]
 
-			if entry.get("account_type") == account_type:
-				total_net += entry[year]
-				ratio_dict[year] = total_net
+			if account_type == "Cost of Goods Sold":
+				if entry.get("account_type") == account_type:
+					total_net += entry[year]
+					ratio_dict[year] = total_net
+			else:
+				if entry.get("account_type") == account_type and entry.get("is_group"):
+					ratio_dict[year] = entry[year]
 
 
-def avg_ratio_balances(avg_value_dict, account_type, period_list, precision, filters):
+def avg_ratio_balance(avg_value_dict, account_type, period_list, precision, filters):
 
 	for period in period_list:
 		opening_date = add_days(period["from_date"], -1)
