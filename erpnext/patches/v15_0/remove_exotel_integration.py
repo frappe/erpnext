@@ -1,5 +1,3 @@
-from contextlib import suppress
-
 import click
 import frappe
 from frappe import _
@@ -13,12 +11,14 @@ def execute():
 	if "exotel_integration" in frappe.get_installed_apps():
 		return
 
-	with suppress(Exception):
+	try:
 		exotel = frappe.get_doc(SETTINGS_DOCTYPE)
 		if exotel.enabled:
 			notify_existing_users()
 
 		frappe.delete_doc("DocType", SETTINGS_DOCTYPE)
+	except Exception:
+		frappe.log_error("Failed to remove Exotel Integration.")
 
 
 def notify_existing_users():
