@@ -16,6 +16,7 @@
   "qty",
   "stock_qty",
   "picked_qty",
+  "stock_reserved_qty",
   "column_break_11",
   "uom",
   "conversion_factor",
@@ -153,8 +154,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Sales Order Item",
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "serial_no_and_batch_section",
@@ -205,11 +205,22 @@
    "fieldname": "pick_serial_and_batch",
    "fieldtype": "Button",
    "label": "Pick Serial / Batch No"
+  },
+  {
+   "default": "0",
+   "fieldname": "stock_reserved_qty",
+   "fieldtype": "Float",
+   "label": "Stock Reserved Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-06-16 14:05:51.719959",
+ "modified": "2023-07-20 09:20:14.122731",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
