@@ -164,7 +164,6 @@ def get_ratios_data(filters, period_list, columns):
 			total_net=total_net_sales,
 		)
 
-	print("DEEE", direct_expense)
 	current_ratio = {"ratio": "Current Ratio"}
 	quick_ratio = {"ratio": "Quick Ratio"}
 	debt_equity_ratio = {"ratio": "Debt Equity Ratio"}
@@ -197,7 +196,10 @@ def get_ratios_data(filters, period_list, columns):
 		inventory_turnover_ratio[year] = calculate_ratio(cogs[year], avg_stock[year], precision)
 		debtor_turnover_ratio[year] = calculate_ratio(net_sales[year], avg_debtors[year], precision)
 		creditor_turnover_ratio[year] = calculate_ratio(
-			direct_expense[year] * -1, avg_creditors[year], precision
+			# Multiplied with -1 as default value of expense in negative
+			direct_expense[year] * -1,
+			avg_creditors[year],
+			precision,
 		)
 		fixed_asset_turnover_ratio[year] = calculate_ratio(net_sales[year], total_asset[year], precision)
 
