@@ -1061,6 +1061,26 @@ class TestPaymentEntry(FrappeTestCase):
 		}
 		self.assertDictEqual(ref_details, expected_response)
 
+	def test_overallocation_validation_on_payment_terms(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template()
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+
+		si.reload()
+		si.payment_schedule[0].payment_amount
+
+		pe = get_payment_entry(si.doctype, si.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+		pe.paid_amount = 400
+		pe.references[0].allocated_amount = 200
+		pe.references[1].allocated_amount = 200
+
+		self.assertRaises(frappe.ValidationError, pe.save)
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
