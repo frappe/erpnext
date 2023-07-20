@@ -115,6 +115,16 @@ frappe.ui.form.on('Pick List', {
 					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
 				}
 			});
+
+			if (frm.doc.purpose === 'Delivery' && frm.doc.status === 'Open') {
+				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					frm.add_custom_button(__('Reserve'), () => frm.events.create_stock_reservation_entries(frm), __('Stock Reservation'));
+				}
+
+				if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
+					frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
+				}
+			}
 		}
 	},
 	work_order: (frm) => {
@@ -209,6 +219,36 @@ frappe.ui.form.on('Pick List', {
 		};
 		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
 		barcode_scanner.process_scan();
+	},
+	create_stock_reservation_entries: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "create_stock_reservation_entries",
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __("Reserving Stock..."),
+			callback: (r) => {
+				frm.doc.__onload.has_unreserved_stock = false;
+				frm.reload_doc();
+			}
+		});
+	},
+	cancel_stock_reservation_entries: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "cancel_stock_reservation_entries",
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __('Unreserving Stock...'),
+			callback: (r) => {
+				frm.doc.__onload.has_reserved_stock = false;
+				frm.reload_doc();
+			}
+		});
 	}
 });
 

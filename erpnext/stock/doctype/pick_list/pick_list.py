@@ -29,6 +29,14 @@ from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class PickList(Document):
+	def onload(self) -> None:
+		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
+
+		if self.has_reserved_stock():
+			self.set_onload("has_reserved_stock", True)
+
 	def validate(self):
 		self.validate_for_qty()
 
@@ -205,6 +213,36 @@ class PickList(Document):
 
 		for sales_order in sales_orders:
 			frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
+
+	@frappe.whitelist()
+	def create_stock_reservation_entries(self, notify=True) -> None:
+		"""Creates Stock Reservation Entries for Sales Order Items against Pick List."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			create_stock_reservation_entries_for_so_items,
+		)
+
+		so_details = {}
+		for location in self.locations:
+			if location.sales_order and location.sales_order_item:
+				so_details.setdefault(location.sales_order, []).append(location)
+
+		if so_details:
+			for so, locations in so_details.items():
+				so_doc = frappe.get_doc("Sales Order", so)
+				create_stock_reservation_entries_for_so_items(
+					so=so_doc, items_details=locations, against_pick_list=True, notify=notify
+				)
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, notify=True) -> None:
+		"""Cancel Stock Reservation Entries for Sales Order Items created against Pick List."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(against_pick_list=self.name, notify=notify)
 
 	def validate_picked_qty(self, data):
 		over_delivery_receipt_allowance = 100 + flt(
@@ -467,6 +505,26 @@ class PickList(Document):
 			else:
 				possible_bundles.append(0)
 		return int(flt(min(possible_bundles), precision or 6))
+
+	def has_unreserved_stock(self):
+		if self.purpose == "Delivery":
+			for location in self.locations:
+				if (
+					location.sales_order
+					and location.sales_order_item
+					and (flt(location.picked_qty) - flt(location.stock_reserved_qty)) > 0
+				):
+					return True
+
+		return False
+
+	def has_reserved_stock(self):
+		if self.purpose == "Delivery":
+			for location in self.locations:
+				if location.sales_order and location.sales_order_item and flt(location.stock_reserved_qty) > 0:
+					return True
+
+		return False
 
 
 def update_pick_list_status(pick_list):

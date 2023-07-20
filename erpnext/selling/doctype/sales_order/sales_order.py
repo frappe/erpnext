@@ -533,7 +533,7 @@ class SalesOrder(SellingController):
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		create_stock_reservation_entries(self, items_details=items_details, notify=notify)
+		create_stock_reservation_entries(so=self, items_details=items_details, notify=notify)
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
