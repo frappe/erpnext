@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
+from frappe.utils.user import is_website_user
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
@@ -319,15 +320,24 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 def get_project_list(
 	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
 ):
+	user = frappe.session.user
 	customers, suppliers = get_customers_suppliers("Project", frappe.session.user)
+
+	ignore_permissions = False
+	if is_website_user():
+		if not filters:
+			filters = []
+
+		if customers:
+			filters.append([doctype, "customer", "in", customers])
+
+		ignore_permissions = True
+
 	meta = frappe.get_meta(doctype)
-	if not filters:
-		filters = []
 
 	fields = "distinct *"
 
 	or_filters = []
-	filters.append([doctype, "customer", "in", customers])
 
 	if txt:
 		if meta.search_fields:
@@ -354,18 +364,26 @@ def get_project_list(
 		limit_start=limit_start,
 		limit_page_length=limit_page_length,
 		order_by=order_by,
+		ignore_permissions=ignore_permissions,
 	)
 
 
 def get_list_context(context=None):
-	return {
-		"show_sidebar": True,
-		"show_search": True,
-		"no_breadcrumbs": True,
-		"title": _("Projects"),
-		"get_list": get_project_list,
-		"row_template": "templates/includes/projects/project_row.html",
-	}
+	from erpnext.controllers.website_list_for_contact import get_list_context
+
+	list_context = get_list_context(context)
+	list_context.update(
+		{
+			"show_sidebar": True,
+			"show_search": True,
+			"no_breadcrumbs": True,
+			"title": _("Projects"),
+			"get_list": get_project_list,
+			"row_template": "templates/includes/projects/project_row.html",
+		}
+	)
+
+	return list_context
 
 
 @frappe.whitelist()
