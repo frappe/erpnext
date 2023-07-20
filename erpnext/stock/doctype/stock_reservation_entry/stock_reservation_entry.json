@@ -16,10 +16,14 @@
   "voucher_type",
   "voucher_no",
   "voucher_detail_no",
+  "column_break_7dxj",
+  "against_pick_list",
+  "against_pick_list_item",
   "section_break_xt4m",
+  "stock_uom",
+  "column_break_grdt",
   "available_qty",
   "voucher_qty",
-  "stock_uom",
   "column_break_o6ex",
   "reserved_qty",
   "delivered_qty",
@@ -92,6 +96,7 @@
    "options": "voucher_type",
    "print_width": "150px",
    "read_only": 1,
+   "search_index": 1,
    "width": "150px"
   },
   {
@@ -124,7 +129,8 @@
    "label": "Project",
    "no_copy": 1,
    "options": "Project",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -263,6 +269,34 @@
    "no_copy": 1,
    "options": "Qty\nSerial and Batch",
    "read_only_depends_on": "eval: (doc.delivered_qty > 0)"
+  },
+  {
+   "fieldname": "against_pick_list",
+   "fieldtype": "Link",
+   "label": "Against Pick List",
+   "no_copy": 1,
+   "options": "Pick List",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "against_pick_list_item",
+   "fieldtype": "Data",
+   "label": "Against Pick List Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_7dxj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_grdt",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -270,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-30 19:30:58.542909",
+ "modified": "2023-07-20 06:42:40.677463",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
