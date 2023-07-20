@@ -13,6 +13,7 @@ from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
+from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
@@ -318,6 +319,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 def get_project_list(
 	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
 ):
+	customers, suppliers = get_customers_suppliers("Project", frappe.session.user)
 	meta = frappe.get_meta(doctype)
 	if not filters:
 		filters = []
@@ -325,6 +327,7 @@ def get_project_list(
 	fields = "distinct *"
 
 	or_filters = []
+	filters.append([doctype, "customer", "in", customers])
 
 	if txt:
 		if meta.search_fields:
