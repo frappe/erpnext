@@ -98,6 +98,13 @@ class PickList(Document):
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
 
+	def on_update_after_submit(self) -> None:
+		if self.has_reserved_stock():
+			msg = _(
+				"The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
+			)
+			frappe.throw(msg)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "Serial and Batch Bundle"
 
@@ -224,7 +231,7 @@ class PickList(Document):
 
 		so_details = {}
 		for location in self.locations:
-			if location.sales_order and location.sales_order_item:
+			if location.warehouse and location.sales_order and location.sales_order_item:
 				so_details.setdefault(location.sales_order, []).append(location)
 
 		if so_details:
