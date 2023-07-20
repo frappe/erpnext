@@ -7,6 +7,7 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "overdue_payment")
 	frappe.reload_doc("accounts", "doctype", "dunning")
 
+	# Migrate schema of all uncancelled dunnings
 	filters = {"docstatus": ("!=", 2)}
 
 	can_edit_accounts_after = get_accounts_closing_date()
@@ -49,7 +50,8 @@ def execute():
 		dunning.flags.ignore_validate_update_after_submit = True
 		dunning.save()
 
-		if dunning.status != "Resolved":
+		# Reverse entries only if dunning is submitted and not resolved
+		if dunning.docstatus == 1 and dunning.status != "Resolved":
 			# With the new logic, dunning amount gets recorded as additional income
 			# at time of payment. We don't want to record the dunning amount twice,
 			# so we reverse previous GL Entries that recorded the dunning amount at
