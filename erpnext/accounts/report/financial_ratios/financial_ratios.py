@@ -68,27 +68,12 @@ def execute(filters=None):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
 
 	avg_debtors = {}
-	for y in years:
-		avg_debtors[y] = ""
-	for period in period_list:
-		opening_date = add_days(period["from_date"], -1)
-		closing_date = period["to_date"]
+	avg_creditors = {}
 
-		closing_balance = get_balance_on(
-			date=closing_date,
-			company=filters.company,
-			account_type="Receivable",
-		)
-		opening_balance = get_balance_on(
-			date=opening_date,
-			company=filters.company,
-			account_type="Receivable",
-		)
-		avg_debtors[period["key"]] = flt(
-			(flt(closing_balance) + flt(opening_balance)) / 2, precision=precision
-		)
+	# avg_ratio_balances(avg_debtors,"Receivable",period_list,precision,filters)
+	avg_ratio_balances(avg_creditors, "Payable", period_list, precision, filters)
 
-	print(avg_debtors)
+	print(avg_creditors)
 
 	current_asset = {}
 	current_liability = {}
@@ -147,6 +132,7 @@ def execute(filters=None):
 	net_profit_ratio = {"ratio": "Net Profit Ratio"}
 	return_on_asset_ratio = {"ratio": "Return on Asset Ratio"}
 	return_on_equity_ratio = {"ratio": "Return on Equity Ratio"}
+	fixed_asset_turnover_ratio = {"ratio": "Fixed Asset Turnover Ratio"}
 
 	# for year in years:
 	# 	share_holder_fund = 0
@@ -201,6 +187,8 @@ def execute(filters=None):
 
 		return_on_asset_ratio[year] = calculate_ratio(profit_after_tax, total_asset[year], precision)
 
+		fixed_asset_turnover_ratio[year] = calculate_ratio(net_sales[year], total_asset[year], precision)
+
 	data = [
 		{"ratio": "Liquidity Ratios"},
 		current_ratio,
@@ -211,6 +199,8 @@ def execute(filters=None):
 		net_profit_ratio,
 		return_on_asset_ratio,
 		return_on_equity_ratio,
+		{"ratio": "Turnover Ratios"},
+		fixed_asset_turnover_ratio,
 	]
 
 	return columns, data
@@ -261,6 +251,27 @@ def update_balances(
 			if entry.get("account_type") == account_type:
 				total_net += entry[year]
 				ratio_dict[year] = total_net
+
+
+def avg_ratio_balances(avg_value_dict, account_type, period_list, precision, filters):
+
+	for period in period_list:
+		opening_date = add_days(period["from_date"], -1)
+		closing_date = period["to_date"]
+
+		closing_balance = get_balance_on(
+			date=closing_date,
+			company=filters.company,
+			account_type=account_type,
+		)
+		opening_balance = get_balance_on(
+			date=opening_date,
+			company=filters.company,
+			account_type=account_type,
+		)
+		avg_value_dict[period["key"]] = flt(
+			(flt(closing_balance) + flt(opening_balance)) / 2, precision=precision
+		)
 
 
 def calculate_ratio(value, denominator, precision):

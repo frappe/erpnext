@@ -269,12 +269,21 @@ def get_balance_on(
 
 	if account_type:
 
-		cond.append(
-			"""exists (
-				select name from `tabAccount` ac where gle.account in %s
-			)"""
-			% (account_name,)
-		)
+		if len(account_name) == 1:
+			account_name = "'" + list(account_name)[0] + "'"
+			cond.append(
+				"""exists (
+					select name from `tabAccount` ac where gle.account = %s
+				)"""
+				% (account_name)
+			)
+		elif len(account_name) > 1:
+			cond.append(
+				"""exists (
+					select name from `tabAccount` ac where gle.account in %s
+				)"""
+				% (account_name,)
+			)
 
 	if party_type and party:
 		cond.append(
@@ -286,6 +295,7 @@ def get_balance_on(
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party) or account_type:
+
 		if in_account_currency:
 			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
 		else:
