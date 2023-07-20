@@ -1061,25 +1061,94 @@ class TestPaymentEntry(FrappeTestCase):
 		}
 		self.assertDictEqual(ref_details, expected_response)
 
+	@change_settings(
+		"Accounts Settings",
+		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
+	)
 	def test_overallocation_validation_on_payment_terms(self):
-		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		"""
+		Validate Allocation on Payment Entry based on Payment Schedule. Upon overallocation, validation error must be thrown.
+
+		"""
 		create_payment_terms_template()
-		si.payment_terms_template = "Test Receivable Template"
-		si.save().submit()
 
-		si.reload()
-		si.payment_schedule[0].payment_amount
+		# Validate allocation on base/company currency
+		si1 = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si1.payment_terms_template = "Test Receivable Template"
+		si1.save().submit()
 
-		pe = get_payment_entry(si.doctype, si.name).save()
+		si1.reload()
+		pe = get_payment_entry(si1.doctype, si1.name).save()
 		# Allocated amount should be according to the payment schedule
-		for idx, schedule in enumerate(si.payment_schedule):
+		for idx, schedule in enumerate(si1.payment_schedule):
 			with self.subTest(idx=idx):
 				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+		pe.save()
+
+		# Overallocation validation should trigger
 		pe.paid_amount = 400
 		pe.references[0].allocated_amount = 200
 		pe.references[1].allocated_amount = 200
-
 		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si1.cancel()
+		si1.delete()
+
+		# Validate allocation on foreign currency
+		si2 = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			do_not_save=1,
+		)
+		si2.payment_terms_template = "Test Receivable Template"
+		si2.save().submit()
+
+		si2.reload()
+		pe = get_payment_entry(si2.doctype, si2.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si2.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 200
+		pe.references[0].allocated_amount = 100
+		pe.references[1].allocated_amount = 100
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si2.cancel()
+		si2.delete()
+
+		# Validate allocation in base/company currency on a foreign currency document
+		# when invoice is made is foreign currency, but posted to base/company currency account
+		si3 = create_sales_invoice(
+			customer="_Test Customer USD",
+			currency="USD",
+			conversion_rate=80,
+			do_not_save=1,
+		)
+		si3.payment_terms_template = "Test Receivable Template"
+		si3.save().submit()
+
+		si3.reload()
+		pe = get_payment_entry(si3.doctype, si3.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si3.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 400
+		pe.references[0].allocated_amount = 200
+		pe.references[1].allocated_amount = 200
+		self.assertRaises(frappe.ValidationError, pe.save)
+		# pe.delete()
+		# si3.cancel()
+		# si3.delete()
 
 
 def create_payment_entry(**args):
