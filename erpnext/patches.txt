@@ -336,3 +336,4 @@ erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
 execute:frappe.defaults.clear_default("fiscal_year")
 erpnext.patches.v15_0.remove_exotel_integration
+erpnext.patches.v14_0.single_to_multi_dunning
