@@ -365,6 +365,12 @@ class StockReservationEntry(Document):
 			).format(self.status, self.doctype)
 			frappe.throw(msg)
 
+		if self.against_pick_list:
+			msg = _(
+				"Stock Reservation Entry created against a Pick List cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
+			)
+			frappe.throw(msg)
+
 		if self.delivered_qty > 0:
 			msg = _("Stock Reservation Entry cannot be updated as it has been delivered.")
 			frappe.throw(msg)

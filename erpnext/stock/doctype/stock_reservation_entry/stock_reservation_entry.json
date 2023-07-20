@@ -158,7 +158,7 @@
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
-   "read_only_depends_on": "eval: ((doc.reservation_based_on == \"Serial and Batch\") || (doc.delivered_qty > 0))",
+   "read_only_depends_on": "eval: ((doc.reservation_based_on == \"Serial and Batch\") || (doc.against_pick_list) || (doc.delivered_qty > 0))",
    "width": "150px"
   },
   {
@@ -304,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-20 06:42:40.677463",
+ "modified": "2023-07-20 12:39:47.703163",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

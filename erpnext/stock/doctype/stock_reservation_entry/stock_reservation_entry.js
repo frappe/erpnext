@@ -91,6 +91,8 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		frm.fields_dict.sb_entries.grid.update_docfield_property(
 			"qty", "read_only", frm.doc.has_serial_no
 		);
+
+		frm.set_df_property("sb_entries", "allow_on_submit", frm.doc.against_pick_list ? 0 : 1);
 	},
 
 	hide_rate_related_fields(frm) {
