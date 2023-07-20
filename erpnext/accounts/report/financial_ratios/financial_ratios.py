@@ -24,7 +24,36 @@ def execute(filters=None):
 	)
 
 	columns = get_columns(filters, period_list)
+	data = get_ratios_data(filters, period_list, columns)
 
+	return columns, data
+
+
+def get_columns(filters, period_list):
+
+	columns = [
+		{
+			"label": _("Ratios"),
+			"fieldname": "ratio",
+			"fieldtype": "Data",
+			"width": 200,
+		},
+	]
+
+	for period in period_list:
+		columns.append(
+			{
+				"fieldname": period.key,
+				"label": period.label,
+				"fieldtype": "Float",
+				"width": 150,
+			}
+		)
+
+	return columns
+
+
+def get_ratios_data(filters, period_list, columns):
 	years = []
 	for c in columns:
 		if not c.get("fieldname") == "ratio":
@@ -70,10 +99,8 @@ def execute(filters=None):
 	avg_debtors = {}
 	avg_creditors = {}
 
-	# avg_ratio_balances(avg_debtors,"Receivable",period_list,precision,filters)
+	avg_ratio_balances(avg_debtors, "Receivable", period_list, precision, filters)
 	avg_ratio_balances(avg_creditors, "Payable", period_list, precision, filters)
-
-	print(avg_creditors)
 
 	current_asset = {}
 	current_liability = {}
@@ -134,40 +161,6 @@ def execute(filters=None):
 	return_on_equity_ratio = {"ratio": "Return on Equity Ratio"}
 	fixed_asset_turnover_ratio = {"ratio": "Fixed Asset Turnover Ratio"}
 
-	# for year in years:
-	# 	share_holder_fund = 0
-	# 	if current_liability[year] != 0:
-	# 		current_ratio[year] = flt(current_asset[year] / current_liability[year], precision)
-	# 		quick_ratio[year] = flt(quick_asset[year] / current_liability[year], precision=precision)
-	# 	else:
-	# 		current_ratio[year] = 0
-	# 		quick_ratio[year] = 0
-
-	# 	share_holder_fund = total_asset[year] - total_liability[year]
-	# 	profit_after_tax = total_income[year] + total_expense[year]
-
-	# 	if share_holder_fund != 0:
-	# 		debt_equity_ratio[year] = flt(total_liability[year] / share_holder_fund, precision=precision)
-	# 		return_on_equity_ratio[year] = flt(profit_after_tax / share_holder_fund, precision=precision)
-	# 	else:
-	# 		debt_equity_ratio[year] = 0
-	# 		return_on_equity_ratio[year] = 0
-
-	# 	if net_sales[year] != 0:
-	# 		net_profit_ratio[year] = flt(profit_after_tax / net_sales[year], precision=precision)
-	# 		gross_profit_ratio[year] = flt(
-	# 			(net_sales[year] - cogs[year]) / net_sales[year], precision=precision
-	# 		)
-
-	# 	else:
-	# 		net_profit_ratio[year] = 0
-	# 		gross_profit_ratio[year] = 0
-
-	# 	if total_asset[year] != 0:
-	# 		return_on_asset_ratio[year] = flt(profit_after_tax / total_asset[year], precision=precision)
-	# 	else:
-	# 		return_on_asset_ratio[year] = 0
-
 	for year in years:
 		share_holder_fund = 0
 
@@ -203,10 +196,7 @@ def execute(filters=None):
 		fixed_asset_turnover_ratio,
 	]
 
-	return columns, data
-
-	# Net sales Direct Income
-	# In Liability account type == tax ka total is Tax
+	return data
 
 
 def update_balances(
@@ -278,27 +268,3 @@ def calculate_ratio(value, denominator, precision):
 	if denominator != 0:
 		return flt(value / denominator, precision)
 	return 0
-
-
-def get_columns(filters, period_list):
-
-	columns = [
-		{
-			"label": _("Ratios"),
-			"fieldname": "ratio",
-			"fieldtype": "Data",
-			"width": 200,
-		},
-	]
-
-	for period in period_list:
-		columns.append(
-			{
-				"fieldname": period.key,
-				"label": period.label,
-				"fieldtype": "Float",
-				"width": 150,
-			}
-		)
-
-	return columns
