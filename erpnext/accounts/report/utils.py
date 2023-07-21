@@ -379,6 +379,6 @@ def get_opening_row(party_type, party, from_date, company):
 			(gle.account.isin(party_account))
 			& (gle.party == party)
 			& (gle.posting_date < from_date)
-			& (gle.docstatus == 1)
+			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
