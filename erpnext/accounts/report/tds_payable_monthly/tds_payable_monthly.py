@@ -39,7 +39,7 @@ def get_result(
 
 	out = []
 	for name, details in gle_map.items():
-		tax_deducted, total_amount_credited = 0, 0
+		tax_amount, total_amount = 0, 0
 		tax_withholding_category = tax_category_map.get(name)
 		rate = tax_rate_map.get(tax_withholding_category)
 
@@ -58,14 +58,14 @@ def get_result(
 				rate = tax_rate_map.get(tax_withholding_category)
 
 			if entry.account in tds_accounts:
-				tax_deducted += entry.credit - entry.debit
+				tax_amount += entry.credit - entry.debit
 
 			if invoice_net_total_map.get(name):
-				total_amount_credited = invoice_net_total_map.get(name)
+				total_amount = invoice_net_total_map.get(name)
 			else:
-				total_amount_credited += entry.credit
+				total_amount += entry.credit
 
-		if tax_deducted:
+		if tax_amount:
 			if party_map.get(party, {}).get("party_type") == "Supplier":
 				party_name = "supplier_name"
 				party_type = "supplier_type"
@@ -90,8 +90,8 @@ def get_result(
 					"section_code": tax_withholding_category,
 					"entity_type": party_map.get(party, {}).get(party_type),
 					"rate": rate,
-					"total_amount_credited": total_amount_credited,
-					"tax_deducted": tax_deducted,
+					"total_amount": total_amount,
+					"tax_amount": tax_amount,
 					"transaction_date": posting_date,
 					"transaction_type": voucher_type,
 					"ref_no": name,
@@ -179,14 +179,14 @@ def get_columns(filters):
 			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
 			{"label": _("Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 90},
 			{
-				"label": _("Total Amount Credited"),
-				"fieldname": "total_amount_credited",
+				"label": _("Total Amount"),
+				"fieldname": "total_amount",
 				"fieldtype": "Float",
 				"width": 90,
 			},
 			{
-				"label": _("Amount of Tax Deducted"),
-				"fieldname": "tax_deducted",
+				"label": _("Tax Amount"),
+				"fieldname": "tax_amount",
 				"fieldtype": "Float",
 				"width": 90,
 			},
