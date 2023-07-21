@@ -251,11 +251,27 @@ def _execute(filters=None, additional_table_columns=None):
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	"""return columns based on filters"""
 	columns = [
-		_("Voucher Type") + ":Data:120",
-		_("Voucher No") + ":Dynamic Link/voucher_type:120",
-		_("Posting Date") + ":Date:80",
-		_("Supplier Id") + "::120",
-		_("Supplier Name") + "::120",
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120,
+		},
+		{
+			"label": _("Voucher"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 120,
+		},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 80},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier_id",
+			"fieldtype": "Link",
+			"options": "Supplier",
+			"width": 120,
+		},
+		{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 120},
 	]
 
 	if additional_table_columns and not include_payments:
@@ -263,23 +279,64 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 
 	if not include_payments:
 		columns += [
-			_("Supplier Group") + ":Link/Supplier Group:120",
-			_("Tax Id") + "::50",
-			_("Payable Account") + ":Link/Account:120",
-			_("Mode of Payment") + ":Link/Mode of Payment:80",
-			_("Project") + ":Link/Project:80",
-			_("Bill No") + "::120",
-			_("Bill Date") + ":Date:80",
-			_("Purchase Order") + ":Link/Purchase Order:100",
-			_("Purchase Receipt") + ":Link/Purchase Receipt:100",
+			{
+				"label": _("Supplier Group"),
+				"fieldname": "supplier_group",
+				"fieldtype": "Link",
+				"options": "Supplier Group",
+				"width": 120,
+			},
+			{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 80},
+			{
+				"label": _("Payable Account"),
+				"fieldname": "payable_account",
+				"fieldtype": "Link",
+				"options": "Account",
+				"width": 100,
+			},
+			{
+				"label": _("Mode Of Payment"),
+				"fieldname": "mode_of_payment",
+				"fieldtype": "Data",
+				"width": 120,
+			},
+			{
+				"label": _("Project"),
+				"fieldname": "project",
+				"fieldtype": "Link",
+				"options": "Project",
+				"width": 80,
+			},
+			{"label": _("Bill No"), "fieldname": "bill_no", "fieldtype": "Data", "width": 120},
+			{"label": _("Bill Date"), "fieldname": "bill_date", "fieldtype": "Date", "width": 80},
+			{
+				"label": _("Purchase Order"),
+				"fieldname": "purchase_order",
+				"fieldtype": "Link",
+				"options": "Purchase Order",
+				"width": 100,
+			},
+			{
+				"label": _("Purchase Receipt"),
+				"fieldname": "purchase_receipt",
+				"fieldtype": "Link",
+				"options": "Purchase Receipt",
+				"width": 100,
+			},
 			{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Data", "width": 80},
 		]
 	else:
 		columns += [
-			_("Payable Account") + ":Link/Account:120",
-			_("Debit") + ":Currency/currency:120",
-			_("Credit") + ":Currency/currency:120",
-			_("Balance") + ":Currency/currency:120",
+			{
+				"fieldname": "payable_account",
+				"label": _("Payable Account"),
+				"fieldtype": "Link",
+				"options": "Account",
+				"width": 120,
+			},
+			{"fieldname": "debit", "label": _("Debit"), "fieldtype": "Currency", "width": 120},
+			{"fieldname": "credit", "label": _("Credit"), "fieldtype": "Currency", "width": 120},
+			{"fieldname": "balance", "label": _("Balance"), "fieldtype": "Currency", "width": 120},
 		]
 
 	account_columns, accounts = get_account_columns(invoice_list, include_payments)
@@ -288,18 +345,52 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		columns
 		+ account_columns[0]
 		+ account_columns[1]
-		+ [_("Net Total") + ":Currency/currency:120"]
+		+ [
+			{
+				"label": _("Net Total"),
+				"fieldname": "net_total",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			}
+		]
 		+ account_columns[2]
-		+ [_("Total Tax") + ":Currency/currency:120"]
+		+ [
+			{
+				"label": _("Total Tax"),
+				"fieldname": "total_tax",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			}
+		]
 	)
 
 	if not include_payments:
 		columns += [
-			_("Grand Total") + ":Currency/currency:120",
-			_("Rounded Total") + ":Currency/currency:120",
-			_("Outstanding Amount") + ":Currency/currency:120",
+			{
+				"label": _("Grand Total"),
+				"fieldname": "grand_total",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			},
+			{
+				"label": _("Rounded Total"),
+				"fieldname": "rounded_total",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			},
+			{
+				"label": _("Outstanding Amount"),
+				"fieldname": "outstanding_amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			},
 		]
-	columns += [_("Remarks") + "::120"]
+	columns += [{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 120}]
 	return columns, accounts[0], accounts[2], accounts[1]
 
 
@@ -307,6 +398,10 @@ def get_account_columns(invoice_list, include_payments):
 	expense_accounts = []
 	tax_accounts = []
 	unrealized_profit_loss_accounts = []
+
+	expense_columns = []
+	tax_columns = []
+	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
 		expense_accounts = frappe.db.sql_list(
@@ -340,15 +435,39 @@ def get_account_columns(invoice_list, include_payments):
 			tuple(inv.name for inv in invoice_list),
 		)
 
-	expense_columns = [(account + ":Currency/currency:120") for account in expense_accounts]
-	unrealized_profit_loss_account_columns = [
-		(account + ":Currency/currency:120") for account in unrealized_profit_loss_accounts
-	]
-	tax_columns = [
-		(account + ":Currency/currency:120")
-		for account in tax_accounts
-		if account not in expense_accounts
-	]
+	for account in expense_accounts:
+		expense_columns.append(
+			{
+				"label": account,
+				"fieldname": frappe.scrub(account),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			}
+		)
+
+	for account in tax_accounts:
+		if account not in expense_accounts:
+			tax_columns.append(
+				{
+					"label": account,
+					"fieldname": frappe.scrub(account),
+					"fieldtype": "Currency",
+					"options": "currency",
+					"width": 120,
+				}
+			)
+
+	for account in unrealized_profit_loss_accounts:
+		unrealized_profit_loss_account_columns.append(
+			{
+				"label": account,
+				"fieldname": frappe.scrub(account),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120,
+			}
+		)
 
 	columns = [expense_columns, unrealized_profit_loss_account_columns, tax_columns]
 	accounts = [expense_accounts, unrealized_profit_loss_accounts, tax_accounts]
@@ -387,7 +506,9 @@ def get_invoices(filters, additional_query_columns):
 			query = query.select(col)
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters.supplier)
-	query = get_conditions(filters, query, [pi, invoice_item])
+	query = get_conditions(
+		filters, query, doctype="Purchase Invoice", child_doctype="Purchase Invoice Item"
+	)
 	if filters.get("include_payments"):
 		party_account = get_party_account(
 			"Supplier", filters.get("supplier"), filters.get("company"), include_advance=True
