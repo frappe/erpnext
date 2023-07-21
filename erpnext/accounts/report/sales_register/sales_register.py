@@ -260,10 +260,16 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 		]
 	else:
 		columns += [
-			_("Receivable Account") + ":Link/Account:120",
-			_("Debit") + ":Currency/currency:120",
-			_("Credit") + ":Currency/currency:120",
-			_("Balance") + ":Currency/currency:120",
+			{
+				"fieldname": "receivable_account",
+				"label": _("Receivable Account"),
+				"fieldtype": "Link",
+				"options": "Account",
+				"width": 120,
+			},
+			{"fieldname": "debit", "label": _("Debit"), "fieldtype": "Currency", "width": 120},
+			{"fieldname": "credit", "label": _("Credit"), "fieldtype": "Currency", "width": 120},
+			{"fieldname": "balance", "label": _("Balance"), "fieldtype": "Currency", "width": 120},
 		]
 
 	account_columns, accounts = get_account_columns(invoice_list, include_payments)
@@ -442,7 +448,9 @@ def get_invoices(filters, additional_query_columns):
 			query = query.select(col)
 	if filters.get("customer"):
 		query = query.where(si.customer == filters.customer)
-	query = get_conditions(filters, query, [si, invoice_item, invoice_payment])
+	query = get_conditions(
+		filters, query, doctype="Sales Invoice", child_doctype="Sales Invoice Item"
+	)
 	invoices = query.run(as_dict=True)
 	return invoices
 
