@@ -999,8 +999,8 @@ def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 
 
 @erpnext.allow_regional
-def get_itemised_tax_breakup_data(doc, with_tax_account=False):
-	return _get_itemised_tax_breakup_data(doc, with_tax_account=False)
+def get_itemised_tax_breakup_data(doc):
+	return _get_itemised_tax_breakup_data(doc)
 
 
 def _get_itemised_tax_breakup_data(doc, with_tax_account=False):
