@@ -256,7 +256,7 @@ def get_journal_entries(filters, args):
 		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
-	query = get_conditions(filters, query, [je], payments=True)
+	query = get_conditions(filters, query, doctype="Journal Entry", payments=True)
 	journal_entries = query.run(as_dict=True)
 	return journal_entries
 
@@ -282,21 +282,21 @@ def get_payment_entries(filters, args):
 		.where((pe.party == filters.get(args.party)) & (pe.paid_to.isin(args.party_account)))
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
-	query = get_conditions(filters, query, [pe], payments=True)
+	query = get_conditions(filters, query, doctype="Payment Entry", payments=True)
 	payment_entries = query.run(as_dict=True)
 	return payment_entries
 
 
-def get_conditions(filters, query, docs, payments=False):
-	parent_doc = docs[0]
-	if not payments:
-		child_doc = docs[1]
+def get_conditions(filters, query, doctype, child_doctype=None, payments=False):
+	parent_doc = frappe.qb.DocType(doctype)
+	if child_doctype:
+		child_doc = frappe.qb.DocType(child_doctype)
 
 	if parent_doc.get_table_name() == "tabSales Invoice":
 		if filters.get("owner"):
 			query = query.where(parent_doc.owner == filters.owner)
 		if filters.get("mode_of_payment"):
-			payment_doc = docs[2]
+			payment_doc = frappe.qb.DocType("Sales Invoice Payment")
 			query = query.where(payment_doc.mode_of_payment == filters.mode_of_payment)
 		if not payments:
 			if filters.get("brand"):
@@ -375,5 +375,10 @@ def get_opening_row(party_type, party, from_date, company):
 			Sum(gle.credit).as_("credit"),
 			(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
 		)
-		.where((gle.account.isin(party_account)) & (gle.party == party) & (gle.posting_date < from_date))
+		.where(
+			(gle.account.isin(party_account))
+			& (gle.party == party)
+			& (gle.posting_date < from_date)
+			& (gle.docstatus == 1)
+		)
 	).run(as_dict=True)
