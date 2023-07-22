@@ -122,13 +122,10 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query('payment_term', 'references', function(frm, cdt, cdn) {
 			const child = locals[cdt][cdn];
 			if (in_list(['Purchase Invoice', 'Sales Invoice'], child.reference_doctype) && child.reference_name) {
-				let payment_term_list = frappe.get_list('Payment Schedule', {'parent': child.reference_name});
-
-				payment_term_list = payment_term_list.map(pt => pt.payment_term);
-
 				return {
+					query: "erpnext.controllers.queries.get_payment_terms_for_references",
 					filters: {
-						'name': ['in', payment_term_list]
+						'reference': child.reference_name
 					}
 				}
 			}

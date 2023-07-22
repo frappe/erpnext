@@ -228,10 +228,17 @@ class PaymentEntry(AccountsController):
 			d = frappe._dict(d)
 			latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
 
-		for d in self.get("references"):
-			latest = (latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()).get(
-				d.payment_term
-			)
+		for idx, d in enumerate(self.get("references"), start=1):
+			latest = latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()
+
+			if (d.payment_term is None or d.payment_term == "") and d.payment_term not in latest.keys():
+				frappe.throw(
+					_(
+						"{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
+					).format(frappe.bold(d.reference_name), frappe.bold(idx))
+				)
+
+			latest = latest.get(d.payment_term)
 
 			# The reference has already been fully paid
 			if not latest:
@@ -1633,6 +1640,9 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 										"invoice_amount": flt(d.invoice_amount),
 										"outstanding_amount": flt(d.outstanding_amount),
 										"payment_term_outstanding": payment_term_outstanding,
+										"allocated_amount": payment_term_outstanding
+										if payment_term_outstanding
+										else d.outstanding_amount,
 										"payment_amount": payment_term.payment_amount,
 										"payment_term": payment_term.payment_term,
 										"account": d.account,
