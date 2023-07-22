@@ -1070,6 +1070,7 @@ class TestPaymentEntry(FrappeTestCase):
 		Validate Allocation on Payment Entry based on Payment Schedule. Upon overallocation, validation error must be thrown.
 
 		"""
+		customer = create_customer()
 		create_payment_terms_template()
 
 		# Validate allocation on base/company currency
@@ -1082,7 +1083,7 @@ class TestPaymentEntry(FrappeTestCase):
 		# Allocated amount should be according to the payment schedule
 		for idx, schedule in enumerate(si1.payment_schedule):
 			with self.subTest(idx=idx):
-				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+				self.assertEqual(flt(schedule.payment_amount), flt(pe.references[idx].allocated_amount))
 		pe.save()
 
 		# Overallocation validation should trigger
@@ -1110,7 +1111,7 @@ class TestPaymentEntry(FrappeTestCase):
 		# Allocated amount should be according to the payment schedule
 		for idx, schedule in enumerate(si2.payment_schedule):
 			with self.subTest(idx=idx):
-				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+				self.assertEqual(flt(schedule.payment_amount), flt(pe.references[idx].allocated_amount))
 		pe.save()
 
 		# Overallocation validation should trigger
@@ -1123,9 +1124,9 @@ class TestPaymentEntry(FrappeTestCase):
 		si2.delete()
 
 		# Validate allocation in base/company currency on a foreign currency document
-		# when invoice is made is foreign currency, but posted to base/company currency account
+		# when invoice is made is foreign currency, but posted to base/company currency debtors account
 		si3 = create_sales_invoice(
-			customer="_Test Customer USD",
+			customer=customer,
 			currency="USD",
 			conversion_rate=80,
 			do_not_save=1,
@@ -1138,17 +1139,17 @@ class TestPaymentEntry(FrappeTestCase):
 		# Allocated amount should be according to the payment schedule
 		for idx, schedule in enumerate(si3.payment_schedule):
 			with self.subTest(idx=idx):
-				self.assertEqual(schedule.payment_amount, pe.references[idx].allocated_amount)
+				self.assertEqual(flt(schedule.base_payment_amount), flt(pe.references[idx].allocated_amount))
 		pe.save()
 
 		# Overallocation validation should trigger
-		pe.paid_amount = 400
-		pe.references[0].allocated_amount = 200
-		pe.references[1].allocated_amount = 200
+		pe.paid_amount = 16000
+		pe.references[0].allocated_amount = 8000
+		pe.references[1].allocated_amount = 8000
 		self.assertRaises(frappe.ValidationError, pe.save)
-		# pe.delete()
-		# si3.cancel()
-		# si3.delete()
+		pe.delete()
+		si3.cancel()
+		si3.delete()
 
 
 def create_payment_entry(**args):
@@ -1239,3 +1240,17 @@ def create_payment_terms_template_with_discount(
 def create_payment_term(name):
 	if not frappe.db.exists("Payment Term", name):
 		frappe.get_doc({"doctype": "Payment Term", "payment_term_name": name}).insert()
+
+
+def create_customer(name="_Test Customer 2 USD", currency="USD"):
+	customer = None
+	if frappe.db.exists("Customer", name):
+		customer = name
+	else:
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = name
+		customer.default_currency = currency
+		customer.type = "Individual"
+		customer.save()
+		customer = customer.name
+	return customer
