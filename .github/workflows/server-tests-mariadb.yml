@@ -7,11 +7,9 @@ on:
       - '**.css'
       - '**.md'
       - '**.html'
-  push:
-    branches: [ develop ]
-    paths-ignore:
-      - '**.js'
-      - '**.md'
+  schedule:
+    # Run everday at midnight UTC / 5:30 IST
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       user:

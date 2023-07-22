@@ -850,7 +850,7 @@ def get_held_invoices(party_type, party):
 
 	if party_type == "Supplier":
 		held_invoices = frappe.db.sql(
-			"select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()",
+			"select name from `tabPurchase Invoice` where on_hold = 1 and release_date IS NOT NULL and release_date > CURDATE()",
 			as_dict=1,
 		)
 		held_invoices = set(d["name"] for d in held_invoices)
@@ -1108,6 +1108,12 @@ def get_autoname_with_number(number_value, doc_title, company):
 		parts.insert(0, cstr(number_value).strip())
 
 	return " - ".join(parts)
+
+
+def parse_naming_series_variable(doc, variable):
+	if variable == "FY":
+		date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
+		return get_fiscal_year(date=date, company=doc.get("company"))[0]
 
 
 @frappe.whitelist()

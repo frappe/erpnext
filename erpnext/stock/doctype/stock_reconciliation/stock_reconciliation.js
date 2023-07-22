@@ -337,6 +337,7 @@ erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.st
 	refresh() {
 		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
+			erpnext.utils.view_serial_batch_nos(this.frm);
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}

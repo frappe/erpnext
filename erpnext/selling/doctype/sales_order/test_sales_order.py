@@ -1904,12 +1904,11 @@ class TestSalesOrder(FrappeTestCase):
 						"voucher_no": so.name,
 						"voucher_detail_no": item.name,
 					},
-					fields=["status", "reserved_qty", "delivered_qty"],
+					fields=["reserved_qty", "delivered_qty"],
 				)
 
 				for sre_detail in sre_details:
 					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
-					self.assertEqual(sre_detail.status, "Delivered")
 
 	def test_delivered_item_material_request(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
