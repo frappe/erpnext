@@ -410,7 +410,17 @@ class StockReservationEntry(Document):
 				frappe.throw(msg)
 
 		if qty_to_be_reserved > max_reserved_qty:
-			msg = _("Cannot reserve more than {0} {1}.").format(
+			msg = """
+				Cannot reserve more than Max Reserved Qty {0} {1}.<br /><br />
+				The <b>Max Reserved Qty</b> is calculated as follows:<br />
+				<ul>
+					<li><b>Available Qty To Reserve</b> = (Actual Stock Qty - Reserved Stock Qty)</li>
+					<li><b>Voucher Qty</b> = Voucher Item Qty</li>
+					<li><b>Delivered Qty</b> = Qty delivered against the Voucher Item</li>
+					<li><b>Total Reserved Qty</b> = Qty reserved against the Voucher Item</li>
+					<li><b>Max Reserved Qty</b> = Minimum of (Available Qty To Reserve, (Voucher Qty - Delivered Qty - Total Reserved Qty))</li>
+				</ul>
+			""".format(
 				frappe.bold(max_reserved_qty), self.stock_uom
 			)
 			frappe.throw(msg)
