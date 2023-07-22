@@ -29,7 +29,8 @@ repos:
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                erpnext/public/js/controllers/.*
+                erpnext/public/js/controllers/.*|
+                erpnext/templates/pages/order.js
             )$
 
   - repo: https://github.com/PyCQA/flake8

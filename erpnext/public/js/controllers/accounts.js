@@ -208,7 +208,7 @@ erpnext.accounts.taxes = {
 
 erpnext.accounts.payment_triggers = {
 	setup: function(doctype) {
-		frappe.form.ui.on(doctype, {
+		frappe.ui.form.on(doctype, {
 			allocate_advances_automatically(frm) {
 				frm.trigger('fetch_advances');
 			},
