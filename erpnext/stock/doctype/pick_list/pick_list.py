@@ -106,7 +106,11 @@ class PickList(Document):
 			frappe.throw(msg)
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = "Serial and Batch Bundle"
+		self.ignore_linked_doctypes = [
+			"Serial and Batch Bundle",
+			"Stock Reservation Entry",
+			"Delivery Note",
+		]
 
 		self.update_status()
 		self.update_bundle_picked_qty()
