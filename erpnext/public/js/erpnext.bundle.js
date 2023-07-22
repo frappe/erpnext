@@ -25,5 +25,6 @@ import "./utils/crm_activities";
 import "./templates/crm_activities.html";
 import "./templates/crm_notes.html";
 import "./controllers/accounts.js"
+import "./utils/landed_taxes_and_charges_common.js";
 
 // import { sum } from 'frappe/public/utils/util.js'
