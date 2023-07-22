@@ -1136,10 +1136,11 @@ class TestPaymentEntry(FrappeTestCase):
 
 		si3.reload()
 		pe = get_payment_entry(si3.doctype, si3.name).save()
-		# Allocated amount should be according to the payment schedule
-		for idx, schedule in enumerate(si3.payment_schedule):
+		# Allocated amount should be equal to payment term outstanding
+		self.assertEqual(len(pe.references), 2)
+		for idx, ref in enumerate(pe.references):
 			with self.subTest(idx=idx):
-				self.assertEqual(flt(schedule.base_payment_amount), flt(pe.references[idx].allocated_amount))
+				self.assertEqual(ref.payment_term_outstanding, ref.allocated_amount)
 		pe.save()
 
 		# Overallocation validation should trigger
