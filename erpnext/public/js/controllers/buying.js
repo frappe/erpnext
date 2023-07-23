@@ -2,8 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.buying");
-
-// cur_frm.email_field = "contact_email";
 // cur_frm.add_fetch('project', 'cost_center', 'cost_center');
 
 erpnext.buying = {
@@ -11,6 +9,7 @@ erpnext.buying = {
 		erpnext.buying.BuyingController = class BuyingController extends erpnext.TransactionController {
 			setup() {
 				super.setup();
+				this.frm.email_field = "contact_email";
 			}
 
 			onload(doc, cdt, cdn) {

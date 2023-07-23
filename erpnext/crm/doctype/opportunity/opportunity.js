@@ -1,9 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 frappe.provide("erpnext.crm");
-
-cur_frm.email_field = "contact_email";
-
 erpnext.pre_sales.set_as_lost("Quotation");
 erpnext.sales_common.setup_selling_controller();
 
@@ -22,6 +19,8 @@ frappe.ui.form.on("Opportunity", {
 				}
 			}
 		});
+
+		frm.email_field = "contact_email";
 	},
 
 	validate: function(frm) {

@@ -1,7 +1,7 @@
 frappe.ui.form.on("Sales Invoice", {
     refresh: (frm) => {
         if(frm.doc.docstatus == 1) {
-            frm.add_custom_button('Generate E-Invoice', () => {
+            frm.add_custom_button(__('Generate E-Invoice'), () => {
                 frm.call({
                     method: "erpnext.regional.italy.utils.generate_single_invoice",
                     args: {

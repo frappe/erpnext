@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// cur_frm.email_field = "contact_email";
-
 frappe.provide("erpnext.selling");
 
 erpnext.sales_common = {
@@ -10,6 +8,7 @@ erpnext.sales_common = {
 		erpnext.selling.SellingController = class SellingController extends erpnext.TransactionController {
 			setup() {
 				super.setup();
+				this.frm.email_field = "contact_email";
 			}
 
 			onload() {
@@ -61,7 +60,7 @@ erpnext.sales_common = {
 					this.frm.set_query("item_code", "items", function() {
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer, 'has_variants': 0}
+							filters: {'is_sales_item': 1, 'customer': me.frm.doc.customer, 'has_variants': 0}
 						}
 					});
 				}
@@ -260,9 +259,9 @@ erpnext.sales_common = {
 			}
 
 			set_product_bundle_help(doc) {
-				if(!cur_frm.fields_dict.packing_list) return;
+				if(!this.frm.fields_dict.packing_list) return;
 				if ((doc.packed_items || []).length) {
-					$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
+					$(this.frm.fields_dict.packing_list.row.wrapper).toggle(true);
 
 					if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 						var help_msg = "<div class='alert alert-warning'>" +
@@ -271,7 +270,7 @@ erpnext.sales_common = {
 						frappe.meta.get_docfield(doc.doctype, 'product_bundle_help', doc.name).options = help_msg;
 					}
 				} else {
-					$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
+					$(this.frm.fields_dict.packing_list.row.wrapper).toggle(false);
 					if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 						frappe.meta.get_docfield(doc.doctype, 'product_bundle_help', doc.name).options = '';
 					}
