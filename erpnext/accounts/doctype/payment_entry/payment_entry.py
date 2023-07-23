@@ -207,6 +207,16 @@ class PaymentEntry(AccountsController):
 				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
+	def term_based_allocation_enabled_for_reference(
+		self, reference_doctype: str, reference_name: str
+	) -> bool:
+		if reference_doctype and reference_name:
+			if template := frappe.db.get_value(reference_doctype, reference_name, "payment_terms_template"):
+				return frappe.db.get_value(
+					"Payment Terms Template", template, "allocate_payment_based_on_payment_terms"
+				)
+		return False
+
 	def validate_allocated_amount_with_latest_data(self):
 		latest_references = get_outstanding_reference_documents(
 			{
@@ -231,14 +241,20 @@ class PaymentEntry(AccountsController):
 		for idx, d in enumerate(self.get("references"), start=1):
 			latest = latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()
 
-			if (d.payment_term is None or d.payment_term == "") and d.payment_term not in latest.keys():
+			# If term based allocation is enabled, throw
+			if (
+				d.payment_term is None or d.payment_term == ""
+			) and self.term_based_allocation_enabled_for_reference(
+				d.reference_doctype, d.reference_name
+			):
 				frappe.throw(
 					_(
 						"{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
 					).format(frappe.bold(d.reference_name), frappe.bold(idx))
 				)
 
-			latest = latest.get(d.payment_term)
+			# if no payment template is used by invoice and has a custom term(no `payment_term`), then invoice outstanding will be in 'None' key
+			latest = latest.get(d.payment_term) or latest.get(None)
 
 			# The reference has already been fully paid
 			if not latest:
