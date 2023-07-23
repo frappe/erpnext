@@ -30,7 +30,8 @@ repos:
                 .*node_modules.*|
                 .*boilerplate.*|
                 erpnext/public/js/controllers/.*|
-                erpnext/templates/pages/order.js
+                erpnext/templates/pages/order.js|
+                erpnext/templates/includes/.*
             )$
 
   - repo: https://github.com/PyCQA/flake8

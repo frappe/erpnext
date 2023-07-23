@@ -96,7 +96,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 	}
 
 	onScriptLoaded(me) {
-		me.linkHandler = Plaid.create({
+		me.linkHandler = Plaid.create({ // eslint-disable-line no-undef
 			clientName: me.client_name,
 			product: me.product,
 			env: me.plaid_env,
