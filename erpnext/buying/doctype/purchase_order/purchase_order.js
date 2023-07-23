@@ -3,11 +3,10 @@
 
 frappe.provide("erpnext.buying");
 frappe.provide("erpnext.accounts.dimensions");
-{% include 'erpnext/public/js/controllers/buying.js' %};
 
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Order");
-
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {

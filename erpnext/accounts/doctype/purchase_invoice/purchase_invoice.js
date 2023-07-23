@@ -2,11 +2,11 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
-{% include 'erpnext/public/js/controllers/buying.js' %};
 
 erpnext.accounts.payment_triggers.setup("Purchase Invoice");
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Invoice");
+erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
@@ -550,8 +550,8 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	mode_of_payment: function(frm) {
-		get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
-			frm.set_value('cash_bank_account', account);
+		erpnext.accounts.pos.get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account) {
+			frm.set_value("cash_bank_account", account);
 		})
 	},
 

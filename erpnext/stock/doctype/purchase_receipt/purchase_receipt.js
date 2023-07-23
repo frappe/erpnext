@@ -1,12 +1,11 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/public/js/controllers/buying.js' %};
-
 frappe.provide("erpnext.stock");
 
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Receipt");
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
