@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %};
-
 cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.stock");
@@ -11,6 +9,7 @@ frappe.provide("erpnext.accounts.dimensions");
 
 erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Delivery Note");
+erpnext.sales_common.setup_selling_controller();
 
 
 frappe.ui.form.on("Delivery Note", {

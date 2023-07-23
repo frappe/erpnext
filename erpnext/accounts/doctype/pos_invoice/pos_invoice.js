@@ -1,8 +1,8 @@
 // Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-{% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
+erpnext.sales_common.setup_selling_controller();
 
 erpnext.accounts.pos.setup("POS Invoice");
 erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnext.selling.SellingController {
