@@ -897,6 +897,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
+		frm.refresh_field("timesheets");
+		frm.trigger("calculate_timesheet_totals");
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {
@@ -936,9 +938,6 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
 		row.project_name = time_log.project_name;
-
-		frm.refresh_field("timesheets");
-		frm.trigger("calculate_timesheet_totals");
 	},
 
 	calculate_timesheet_totals: function(frm) {
