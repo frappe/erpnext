@@ -187,12 +187,6 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
 
-				if(!this.frm.doc.auto_repeat) {
-					cur_frm.add_custom_button(__('Subscription'), function() {
-						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
-					}, __('Create'))
-				}
-
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}

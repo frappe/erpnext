@@ -248,12 +248,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 							function() { me.make_payment_request() }, __('Create'));
 					}
 
-					if(!doc.auto_repeat) {
-						cur_frm.add_custom_button(__('Subscription'), function() {
-							erpnext.utils.make_subscription(doc.doctype, doc.name)
-						}, __('Create'))
-					}
-
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
 						let internal = me.frm.doc.is_internal_supplier;

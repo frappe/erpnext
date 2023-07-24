@@ -232,12 +232,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 				__("Status"))
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
-
-		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
-			cur_frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(doc.doctype, doc.name)
-			}, __('Create'))
-		}
 	}
 
 	make_shipment() {

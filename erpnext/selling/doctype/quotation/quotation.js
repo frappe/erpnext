@@ -124,12 +124,6 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 					});
 				}
 
-			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
-			}
-
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
