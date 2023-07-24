@@ -66,13 +66,13 @@ def _execute(filters, additional_table_columns=None):
 		)[0]
 		res.append(
 			{
-				"receivable_account": opening_row,
+				"receivable_account": opening_row.account,
 				"debit": flt(opening_row.debit),
 				"credit": flt(opening_row.credit),
 				"balance": flt(opening_row.balance),
 			}
 		)
-		running_balance = flt(opening_row.balance)
+
 	data = []
 	for inv in invoice_list:
 		# invoice details
@@ -152,12 +152,16 @@ def _execute(filters, additional_table_columns=None):
 			row.update({"debit": inv.base_grand_total, "credit": 0.0})
 		else:
 			row.update({"debit": 0.0, "credit": inv.base_grand_total})
-		if include_payments:
-			running_balance += row["debit"] - row["credit"]
-			row.update({"balance": running_balance})
 		data.append(row)
 
 	res += sorted(data, key=lambda x: x["posting_date"])
+
+	if include_payments:
+		running_balance = flt(opening_row.balance)
+		for row in range(1, len(res)):
+			running_balance += res[row]["debit"] - res[row]["credit"]
+			res[row].update({"balance": running_balance})
+
 	return columns, res, None, None, None, include_payments
 
 
