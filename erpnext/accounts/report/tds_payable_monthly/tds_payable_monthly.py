@@ -95,7 +95,6 @@ def get_result(
 					"transaction_date": posting_date,
 					"transaction_type": voucher_type,
 					"ref_no": name,
-					"party_type": party_map.get(party, {}).get("party_type"),
 				}
 			)
 			out.append(row)
@@ -149,12 +148,7 @@ def get_columns(filters):
 	columns = [
 		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 90},
 		{
-			"label": _("Party Type"),
-			"fieldname": "party_type",
-			"width": 180,
-		},
-		{
-			"label": _("Party"),
+			"label": _(filters.get("party_type")),
 			"fieldname": "party",
 			"fieldtype": "Dynamic Link",
 			"options": "party_type",
@@ -176,8 +170,13 @@ def get_columns(filters):
 				"fieldtype": "Link",
 				"width": 180,
 			},
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
-			{"label": _("Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 90},
+			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 120},
+			{
+				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
+				"fieldname": "rate",
+				"fieldtype": "Percent",
+				"width": 90,
+			},
 			{
 				"label": _("Total Amount"),
 				"fieldname": "total_amount",
@@ -185,7 +184,7 @@ def get_columns(filters):
 				"width": 90,
 			},
 			{
-				"label": _("Tax Amount"),
+				"label": _("TDS Amount") if filters.get("party_type") == "Supplier" else _("TCS Amount"),
 				"fieldname": "tax_amount",
 				"fieldtype": "Float",
 				"width": 90,
@@ -196,13 +195,13 @@ def get_columns(filters):
 				"fieldtype": "Date",
 				"width": 90,
 			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 90},
+			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 100},
 			{
 				"label": _("Reference No."),
 				"fieldname": "ref_no",
 				"fieldtype": "Dynamic Link",
 				"options": "transaction_type",
-				"width": 90,
+				"width": 180,
 			},
 		]
 	)
