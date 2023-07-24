@@ -900,6 +900,10 @@ def create_stock_reservation_entries_for_so_items(
 
 			# Skip the item if `Partial Reservation` is disabled in the Stock Settings.
 			if not allow_partial_reservation:
+				if qty_to_be_reserved == flt(item.get("qty_to_reserve")):
+					msg = _("Enable Allow Partial Reservation in the Stock Settings to reserve partial stock.")
+					frappe.msgprint(msg, title=_("Partial Stock Reservation"), indicator="yellow")
+
 				continue
 
 		sre = frappe.new_doc("Stock Reservation Entry")
