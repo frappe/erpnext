@@ -167,7 +167,11 @@ class PaymentEntry(AccountsController):
 	def term_based_allocation_enabled_for_reference(
 		self, reference_doctype: str, reference_name: str
 	) -> bool:
-		if reference_doctype and reference_name:
+		if (
+			reference_doctype
+			and reference_doctype in ["Sales Invoice", "Sales Order", "Purchase Order", "Purchase Invoice"]
+			and reference_name
+		):
 			if template := frappe.db.get_value(reference_doctype, reference_name, "payment_terms_template"):
 				return frappe.db.get_value(
 					"Payment Terms Template", template, "allocate_payment_based_on_payment_terms"
