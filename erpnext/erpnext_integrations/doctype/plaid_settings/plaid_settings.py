@@ -4,11 +4,11 @@
 import json
 
 import frappe
+import plaid
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
 from frappe.utils import add_months, formatdate, getdate, today
-from plaid.errors import ItemError
 
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
@@ -18,8 +18,8 @@ class PlaidSettings(Document):
 	@staticmethod
 	@frappe.whitelist()
 	def get_link_token():
-		plaid = PlaidConnector()
-		return plaid.get_link_token()
+		plaid_connector = PlaidConnector()
+		return plaid_connector.get_link_token()
 
 
 @frappe.whitelist()
@@ -39,8 +39,8 @@ def get_plaid_configuration():
 def add_institution(token, response):
 	response = json.loads(response)
 
-	plaid = PlaidConnector()
-	access_token = plaid.get_access_token(token)
+	plaid_connector = PlaidConnector()
+	access_token = plaid_connector.get_access_token(token)
 	bank = None
 
 	if not frappe.db.exists("Bank", response["institution"]["name"]):
@@ -208,15 +208,16 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 		access_token = frappe.db.get_value("Bank", bank, "plaid_access_token")
 		account_id = None
 
-	plaid = PlaidConnector(access_token)
+	plaid_connector = PlaidConnector(access_token)
 
 	transactions = []
 	try:
-		transactions = plaid.get_transactions(
+		transactions = plaid_connector.get_transactions(
 			start_date=start_date, end_date=end_date, account_id=account_id
 		)
-	except ItemError as e:
-		if e.code == "ITEM_LOGIN_REQUIRED":
+	except plaid.ApiException as e:
+		response = json.loads(e.body)
+		if response["error_code"] == "ITEM_LOGIN_REQUIRED":
 			msg = _("There was an error syncing transactions.") + " "
 			msg += _("Please refresh or reset the Plaid linking of the Bank {}.").format(bank) + " "
 			frappe.log_error(message=msg, title=_("Plaid Link Refresh Required"))
