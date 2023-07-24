@@ -964,7 +964,7 @@ def get_itemised_tax_breakup_html(doc):
 	# get tax breakup data
 	itemised_tax_data = get_itemised_tax_breakup_data(doc)
 
-	get_rounded_tax_amount(itemised_tax_data, doc.precision("tax_amount", "taxes"), tax_accounts)
+	get_rounded_tax_amount(itemised_tax_data, doc.precision("tax_amount", "taxes"))
 
 	update_itemised_tax_data(doc)
 	frappe.flags.company = None
@@ -1006,21 +1006,17 @@ def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_data(doc):
-	return _get_itemised_tax_breakup_data(doc)
-
-
-def _get_itemised_tax_breakup_data(doc, with_tax_account=False):
-	itemised_tax = get_itemised_tax(doc.taxes, with_tax_account=with_tax_account)
+	itemised_tax = get_itemised_tax(doc.taxes)
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
 
 	itemised_tax_data = []
 	for item_code, taxes in itemised_tax.items():
-		for _item_code, taxable_amount in itemised_taxable_amount.items():
-			if item_code == _item_code:
-				itemised_tax_data.append(
-					frappe._dict({"item": item_code, "taxable_amount": taxable_amount, **taxes})
-				)
+		itemised_tax_data.append(
+			frappe._dict(
+				{"item": item_code, "taxable_amount": itemised_taxable_amount.get(item_code), **taxes}
+			)
+		)
 
 	return itemised_tax_data
 
@@ -1065,12 +1061,12 @@ def get_itemised_taxable_amount(items):
 	return itemised_taxable_amount
 
 
-def get_rounded_tax_amount(itemised_tax, precision, tax_accounts):
+def get_rounded_tax_amount(itemised_tax, precision):
 	# Rounding based on tax_amount precision
-	for _itemised_tax in itemised_tax:
-		for key, value in _itemised_tax.items():
-			if key in tax_accounts:
-				value["tax_amount"] = flt(value["tax_amount"], precision)
+	for taxes in itemised_tax:
+		for row in taxes.values():
+			if isinstance(row, dict) and isinstance(row["tax_amount"], float):
+				row["tax_amount"] = flt(row["tax_amount"], precision)
 
 
 class init_landed_taxes_and_totals(object):
