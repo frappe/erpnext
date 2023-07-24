@@ -986,19 +986,36 @@ def create_pos_invoice(**args):
 			msg = f"Serial No {args.serial_no} not available for Item {args.item}"
 			frappe.throw(_(msg))
 
-	pos_inv.append(
-		"items",
-		{
-			"item_code": args.item or args.item_code or "_Test Item",
-			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 1,
-			"rate": args.rate if args.get("rate") is not None else 100,
-			"income_account": args.income_account or "Sales - _TC",
-			"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
-			"cost_center": args.cost_center or "_Test Cost Center - _TC",
-			"serial_and_batch_bundle": bundle_id,
-		},
-	)
+	# append in pos invoice items without item_code by checking flag without_item_code
+	if args.without_item_code:
+		pos_inv.append(
+			"items",
+			{
+				"item_name": args.item_name or "_Test Item",
+				"description": args.item_name or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty or 1,
+				"rate": args.rate if args.get("rate") is not None else 100,
+				"income_account": args.income_account or "Sales - _TC",
+				"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+				"cost_center": args.cost_center or "_Test Cost Center - _TC",
+			},
+		)
+
+	else:
+		pos_inv.append(
+			"items",
+			{
+				"item_code": args.item or args.item_code or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty or 1,
+				"rate": args.rate if args.get("rate") is not None else 100,
+				"income_account": args.income_account or "Sales - _TC",
+				"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+				"cost_center": args.cost_center or "_Test Cost Center - _TC",
+				"serial_and_batch_bundle": bundle_id,
+			},
+		)
 
 	if not args.do_not_save:
 		pos_inv.insert()
