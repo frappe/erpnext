@@ -17,7 +17,7 @@ dependencies = [
 
     # integration dependencies
     "googlemaps",
-    "plaid-python~=7.2.1",
+    "plaid-python~=14.1.0",
     "python-youtube~=0.8.0",
 
     # Not used directly - required by PyQRCode for PNG generation
