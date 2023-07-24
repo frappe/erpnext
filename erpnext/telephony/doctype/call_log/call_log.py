@@ -16,6 +16,33 @@ ONGOING_CALL_STATUSES = ["Ringing", "In Progress"]
 
 
 class CallLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.core.doctype.dynamic_link.dynamic_link import DynamicLink
+		from frappe.types import DF
+
+		call_received_by: DF.Link | None
+		customer: DF.Link | None
+		duration: DF.Duration | None
+		employee_user_id: DF.Link | None
+		end_time: DF.Datetime | None
+		id: DF.Data | None
+		links: DF.Table[DynamicLink]
+		medium: DF.Data | None
+		recording_url: DF.Data | None
+		start_time: DF.Datetime | None
+		status: DF.Literal[
+			"Ringing", "In Progress", "Completed", "Failed", "Busy", "No Answer", "Queued", "Canceled"
+		]
+		summary: DF.SmallText | None
+		to: DF.Data | None
+		type: DF.Literal["Incoming", "Outgoing"]
+		type_of_call: DF.Link | None
+	# end: auto-generated types
 	def validate(self):
 		deduplicate_dynamic_links(self)
 

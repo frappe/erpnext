@@ -18,6 +18,23 @@ import erpnext
 
 
 class ImportSupplierInvoice(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		company: DF.Link
+		default_buying_price_list: DF.Link
+		invoice_series: DF.Literal["ACC-PINV-.YYYY.-"]
+		item_code: DF.Link
+		status: DF.Data | None
+		supplier_group: DF.Link
+		tax_account: DF.Link
+		zip_file: DF.Attach | None
+	# end: auto-generated types
 	def validate(self):
 		if not frappe.db.get_value("Stock Settings", fieldname="stock_uom"):
 			frappe.throw(_("Please set default UOM in Stock Settings"))

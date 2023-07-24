@@ -17,6 +17,33 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class InvoiceDiscounting(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.discounted_invoice.discounted_invoice import DiscountedInvoice
+
+		accounts_receivable_credit: DF.Link
+		accounts_receivable_discounted: DF.Link
+		accounts_receivable_unpaid: DF.Link
+		amended_from: DF.Link | None
+		bank_account: DF.Link
+		bank_charges: DF.Currency
+		bank_charges_account: DF.Link
+		company: DF.Link
+		invoices: DF.Table[DiscountedInvoice]
+		loan_end_date: DF.Date | None
+		loan_period: DF.Int
+		loan_start_date: DF.Date | None
+		posting_date: DF.Date
+		short_term_loan: DF.Link
+		status: DF.Literal["Draft", "Sanctioned", "Disbursed", "Settled", "Cancelled"]
+		total_amount: DF.Currency
+	# end: auto-generated types
 	def validate(self):
 		self.validate_mandatory()
 		self.validate_invoices()

@@ -9,6 +9,43 @@ from frappe.utils import cstr, flt
 
 
 class AuthorizationRule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		approving_role: DF.Link | None
+		approving_user: DF.Link | None
+		based_on: DF.Literal[
+			"",
+			"Grand Total",
+			"Average Discount",
+			"Customerwise Discount",
+			"Itemwise Discount",
+			"Not Applicable",
+		]
+		company: DF.Link | None
+		customer_or_item: DF.Literal["Customer", "Item"]
+		master_name: DF.DynamicLink | None
+		system_role: DF.Link | None
+		system_user: DF.Link | None
+		to_designation: DF.Link | None
+		to_emp: DF.Link | None
+		transaction: DF.Literal[
+			"",
+			"Sales Order",
+			"Purchase Order",
+			"Quotation",
+			"Delivery Note",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Purchase Receipt",
+		]
+		value: DF.Float
+	# end: auto-generated types
 	def check_duplicate_entry(self):
 		exists = frappe.db.sql(
 			"""select name, docstatus from `tabAuthorization Rule`

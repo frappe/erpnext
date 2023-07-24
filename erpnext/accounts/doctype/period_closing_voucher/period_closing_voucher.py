@@ -15,6 +15,24 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class PeriodClosingVoucher(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		closing_account_head: DF.Link
+		company: DF.Link
+		error_message: DF.Text | None
+		fiscal_year: DF.Link
+		gle_processing_status: DF.Literal["In Progress", "Completed", "Failed"]
+		posting_date: DF.Date
+		remarks: DF.SmallText
+		transaction_date: DF.Date | None
+	# end: auto-generated types
 	def validate(self):
 		self.validate_account_head()
 		self.validate_posting_date()

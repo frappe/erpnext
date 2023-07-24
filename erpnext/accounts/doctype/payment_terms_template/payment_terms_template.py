@@ -9,6 +9,22 @@ from frappe.utils import flt
 
 
 class PaymentTermsTemplate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.payment_terms_template_detail.payment_terms_template_detail import (
+			PaymentTermsTemplateDetail,
+		)
+
+		allocate_payment_based_on_payment_terms: DF.Check
+		template_name: DF.Data | None
+		terms: DF.Table[PaymentTermsTemplateDetail]
+	# end: auto-generated types
 	def validate(self):
 		self.validate_invoice_portion()
 		self.validate_terms()

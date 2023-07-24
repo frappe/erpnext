@@ -15,6 +15,21 @@ from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import 
 
 
 class PlaidSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		automatic_sync: DF.Check
+		enable_european_access: DF.Check
+		enabled: DF.Check
+		plaid_client_id: DF.Data | None
+		plaid_env: DF.Literal["sandbox", "development", "production"]
+		plaid_secret: DF.Password | None
+	# end: auto-generated types
 	@staticmethod
 	@frappe.whitelist()
 	def get_link_token():

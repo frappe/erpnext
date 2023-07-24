@@ -32,6 +32,30 @@ class OverlapError(frappe.ValidationError):
 
 
 class Workstation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.workstation_working_hour.workstation_working_hour import (
+			WorkstationWorkingHour,
+		)
+
+		description: DF.Text | None
+		holiday_list: DF.Link | None
+		hour_rate: DF.Currency
+		hour_rate_consumable: DF.Currency
+		hour_rate_electricity: DF.Currency
+		hour_rate_labour: DF.Currency
+		hour_rate_rent: DF.Currency
+		production_capacity: DF.Int
+		working_hours: DF.Table[WorkstationWorkingHour]
+		workstation_name: DF.Data
+		workstation_type: DF.Link | None
+	# end: auto-generated types
 	def before_save(self):
 		self.set_data_based_on_workstation_type()
 		self.set_hour_rate()

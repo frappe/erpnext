@@ -34,6 +34,35 @@ def callback(*args, **kwargs):
 
 
 class QuickBooksMigrator(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		access_token: DF.SmallText | None
+		api_endpoint: DF.Data
+		authorization_endpoint: DF.Data
+		authorization_url: DF.Data
+		client_id: DF.Data
+		client_secret: DF.Data
+		code: DF.Data | None
+		company: DF.Link | None
+		default_cost_center: DF.Link | None
+		default_shipping_account: DF.Link | None
+		default_warehouse: DF.Link | None
+		quickbooks_company_id: DF.Data | None
+		redirect_url: DF.Data
+		refresh_token: DF.SmallText | None
+		scope: DF.Data
+		status: DF.Literal[
+			"Connecting to QuickBooks", "Connected to QuickBooks", "In Progress", "Complete", "Failed"
+		]
+		token_endpoint: DF.Data
+		undeposited_funds_account: DF.Link | None
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(QuickBooksMigrator, self).__init__(*args, **kwargs)
 		self.oauth = OAuth2Session(

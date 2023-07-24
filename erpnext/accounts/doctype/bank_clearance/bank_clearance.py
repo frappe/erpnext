@@ -13,6 +13,27 @@ form_grid_templates = {"journal_entries": "templates/form_grid/bank_reconciliati
 
 
 class BankClearance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.bank_clearance_detail.bank_clearance_detail import (
+			BankClearanceDetail,
+		)
+
+		account: DF.Link
+		account_currency: DF.Link | None
+		bank_account: DF.Link | None
+		from_date: DF.Date
+		include_pos_transactions: DF.Check
+		include_reconciled_entries: DF.Check
+		payment_entries: DF.Table[BankClearanceDetail]
+		to_date: DF.Date
+	# end: auto-generated types
 	@frappe.whitelist()
 	def get_payment_entries(self):
 		if not (self.from_date and self.to_date):

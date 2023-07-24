@@ -6,4 +6,23 @@ from frappe.model.document import Document
 
 
 class SalesInvoicePayment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account: DF.Link | None
+		amount: DF.Currency
+		base_amount: DF.Currency
+		clearance_date: DF.Date | None
+		default: DF.Check
+		mode_of_payment: DF.Link
+		parent: DF.Data
+		parentfield: DF.Data
+		parenttype: DF.Data
+		type: DF.ReadOnly | None
+	# end: auto-generated types
 	pass

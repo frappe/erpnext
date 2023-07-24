@@ -20,6 +20,51 @@ class ShoppingCartSetupError(frappe.ValidationError):
 
 
 class ECommerceSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.portal.doctype.website_attribute.website_attribute import WebsiteAttribute
+		from erpnext.portal.doctype.website_filter_field.website_filter_field import WebsiteFilterField
+
+		allow_items_not_in_stock: DF.Check
+		company: DF.Link | None
+		default_customer_group: DF.Link | None
+		enable_attribute_filters: DF.Check
+		enable_checkout: DF.Check
+		enable_field_filters: DF.Check
+		enable_recommendations: DF.Check
+		enable_reviews: DF.Check
+		enable_variants: DF.Check
+		enable_wishlist: DF.Check
+		enabled: DF.Check
+		filter_attributes: DF.Table[WebsiteAttribute]
+		filter_fields: DF.Table[WebsiteFilterField]
+		hide_price_for_guest: DF.Check
+		hide_variants: DF.Check
+		is_redisearch_enabled: DF.Check
+		is_redisearch_loaded: DF.Check
+		payment_gateway_account: DF.Link | None
+		payment_success_url: DF.Literal["", "Orders", "Invoices", "My Account"]
+		price_list: DF.Link | None
+		products_per_page: DF.Int
+		quotation_series: DF.Literal
+		redirect_on_action: DF.Data | None
+		save_quotations_as_draft: DF.Check
+		search_index_fields: DF.SmallText | None
+		show_apply_coupon_code_in_website: DF.Check
+		show_attachments: DF.Check
+		show_contact_us_button: DF.Check
+		show_price: DF.Check
+		show_price_in_quotation: DF.Check
+		show_quantity_in_website: DF.Check
+		show_stock_availability: DF.Check
+		slideshow: DF.Link | None
+	# end: auto-generated types
 	def onload(self):
 		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
 

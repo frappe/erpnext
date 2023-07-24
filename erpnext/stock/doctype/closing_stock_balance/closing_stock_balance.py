@@ -15,6 +15,26 @@ from erpnext.stock.report.stock_balance.stock_balance import execute
 
 
 class ClosingStockBalance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		company: DF.Link | None
+		from_date: DF.Date | None
+		include_uom: DF.Link | None
+		item_code: DF.Link | None
+		item_group: DF.Link | None
+		naming_series: DF.Literal["CBAL-.#####"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Canceled"]
+		to_date: DF.Date | None
+		warehouse: DF.Link | None
+		warehouse_type: DF.Link | None
+	# end: auto-generated types
 	def before_save(self):
 		self.set_status()
 

@@ -10,6 +10,28 @@ from frappe.utils import add_days, add_months, add_years, getdate, nowdate
 
 
 class AssetMaintenance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_maintenance_task.asset_maintenance_task import (
+			AssetMaintenanceTask,
+		)
+
+		asset_category: DF.ReadOnly | None
+		asset_maintenance_tasks: DF.Table[AssetMaintenanceTask]
+		asset_name: DF.Link
+		company: DF.Link
+		item_code: DF.ReadOnly | None
+		item_name: DF.ReadOnly | None
+		maintenance_manager: DF.Data | None
+		maintenance_manager_name: DF.ReadOnly | None
+		maintenance_team: DF.Link
+	# end: auto-generated types
 	def validate(self):
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):

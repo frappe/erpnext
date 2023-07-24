@@ -15,6 +15,32 @@ class ShareDontExists(ValidationError):
 
 
 class ShareTransfer(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		amount: DF.Currency
+		asset_account: DF.Link | None
+		company: DF.Link
+		date: DF.Date
+		equity_or_liability_account: DF.Link
+		from_folio_no: DF.Data | None
+		from_no: DF.Int
+		from_shareholder: DF.Link | None
+		no_of_shares: DF.Int
+		rate: DF.Currency
+		remarks: DF.LongText | None
+		share_type: DF.Link
+		to_folio_no: DF.Data | None
+		to_no: DF.Int
+		to_shareholder: DF.Link | None
+		transfer_type: DF.Literal["", "Issue", "Purchase", "Transfer"]
+	# end: auto-generated types
 	def on_submit(self):
 		if self.transfer_type == "Issue":
 			shareholder = self.get_company_shareholder()

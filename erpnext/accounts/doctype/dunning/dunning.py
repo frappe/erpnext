@@ -22,6 +22,51 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class Dunning(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.overdue_payment.overdue_payment import OverduePayment
+
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		base_dunning_amount: DF.Currency
+		body_text: DF.TextEditor | None
+		closing_text: DF.TextEditor | None
+		company: DF.Link
+		company_address: DF.Link | None
+		company_address_display: DF.SmallText | None
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.SmallText | None
+		contact_person: DF.Link | None
+		conversion_rate: DF.Float
+		cost_center: DF.Link | None
+		currency: DF.Link | None
+		customer: DF.Link
+		customer_address: DF.Link | None
+		customer_name: DF.Data | None
+		dunning_amount: DF.Currency
+		dunning_fee: DF.Currency
+		dunning_type: DF.Link | None
+		grand_total: DF.Currency
+		income_account: DF.Link | None
+		language: DF.Link | None
+		letter_head: DF.Link | None
+		naming_series: DF.Literal["DUNN-.MM.-.YY.-"]
+		overdue_payments: DF.Table[OverduePayment]
+		posting_date: DF.Date
+		posting_time: DF.Time | None
+		rate_of_interest: DF.Float
+		spacer: DF.Data | None
+		status: DF.Literal["Draft", "Resolved", "Unresolved", "Cancelled"]
+		total_interest: DF.Currency
+		total_outstanding: DF.Currency
+	# end: auto-generated types
 	def validate(self):
 		self.validate_same_currency()
 		self.validate_overdue_payments()

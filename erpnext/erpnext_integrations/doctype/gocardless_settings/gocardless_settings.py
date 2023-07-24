@@ -15,6 +15,19 @@ from erpnext.utilities import payment_app_import_guard
 
 
 class GoCardlessSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		access_token: DF.Data
+		gateway_name: DF.Data
+		use_sandbox: DF.Check
+		webhooks_secret: DF.Data | None
+	# end: auto-generated types
 	supported_currencies = ["EUR", "DKK", "GBP", "SEK", "AUD", "NZD", "CAD", "USD"]
 
 	def validate(self):

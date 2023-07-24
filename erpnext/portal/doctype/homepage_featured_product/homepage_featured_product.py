@@ -6,4 +6,22 @@ from frappe.model.document import Document
 
 
 class HomepageFeaturedProduct(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		description: DF.TextEditor | None
+		image: DF.AttachImage | None
+		item_code: DF.Link
+		item_name: DF.Data
+		parent: DF.Data
+		parentfield: DF.Data
+		parenttype: DF.Data
+		route: DF.SmallText | None
+		thumbnail: DF.AttachImage | None
+	# end: auto-generated types
 	pass

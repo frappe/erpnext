@@ -10,6 +10,21 @@ from erpnext.utilities.bulk_transaction import task, update_logger
 
 
 class BulkTransactionLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.bulk_transaction.doctype.bulk_transaction_log_detail.bulk_transaction_log_detail import (
+			BulkTransactionLogDetail,
+		)
+
+		log_date: DF.Date | None
+		logger_data: DF.Table[BulkTransactionLogDetail]
+	# end: auto-generated types
 	pass
 
 

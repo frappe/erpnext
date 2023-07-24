@@ -20,6 +20,29 @@ INVALID_VALUES = ("", None)
 
 
 class BankStatementImport(DataImport):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		bank: DF.Link | None
+		bank_account: DF.Link
+		company: DF.Link
+		google_sheets_url: DF.Data | None
+		import_file: DF.Attach | None
+		import_type: DF.Literal["", "Insert New Records", "Update Existing Records"]
+		mute_emails: DF.Check
+		reference_doctype: DF.Link
+		show_failed_logs: DF.Check
+		statement_import_log: DF.Code | None
+		status: DF.Literal["Pending", "Success", "Partial Success", "Error"]
+		submit_after_import: DF.Check
+		template_options: DF.Code | None
+		template_warnings: DF.Code | None
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(BankStatementImport, self).__init__(*args, **kwargs)
 

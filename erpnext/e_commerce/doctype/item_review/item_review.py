@@ -20,6 +20,23 @@ class UnverifiedReviewer(frappe.ValidationError):
 
 
 class ItemReview(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		comment: DF.SmallText | None
+		customer: DF.Link | None
+		item: DF.Link | None
+		published_on: DF.Data | None
+		rating: DF.Rating
+		review_title: DF.Data | None
+		user: DF.Link | None
+		website_item: DF.Link
+	# end: auto-generated types
 	def after_insert(self):
 		# regenerate cache on review creation
 		reviews_dict = get_queried_reviews(self.website_item)

@@ -11,6 +11,33 @@ from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate
 
 
 class AssetMaintenanceLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		actions_performed: DF.TextEditor | None
+		amended_from: DF.Link | None
+		asset_maintenance: DF.Link | None
+		asset_name: DF.ReadOnly | None
+		assign_to_name: DF.ReadOnly | None
+		certificate_attachement: DF.Attach | None
+		completion_date: DF.Date | None
+		description: DF.ReadOnly | None
+		due_date: DF.Date | None
+		has_certificate: DF.Check
+		item_code: DF.ReadOnly | None
+		item_name: DF.ReadOnly | None
+		maintenance_status: DF.Literal["Planned", "Completed", "Cancelled", "Overdue"]
+		maintenance_type: DF.ReadOnly | None
+		naming_series: DF.Literal["ACC-AML-.YYYY.-"]
+		periodicity: DF.Data | None
+		task: DF.Link | None
+		task_name: DF.Data | None
+	# end: auto-generated types
 	def validate(self):
 		if getdate(self.due_date) < getdate(nowdate()) and self.maintenance_status not in [
 			"Completed",

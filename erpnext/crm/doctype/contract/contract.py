@@ -9,6 +9,41 @@ from frappe.utils import getdate, nowdate
 
 
 class Contract(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.crm.doctype.contract_fulfilment_checklist.contract_fulfilment_checklist import (
+			ContractFulfilmentChecklist,
+		)
+
+		amended_from: DF.Link | None
+		contract_template: DF.Link | None
+		contract_terms: DF.TextEditor
+		document_name: DF.DynamicLink | None
+		document_type: DF.Literal[
+			"", "Quotation", "Project", "Sales Order", "Purchase Order", "Sales Invoice", "Purchase Invoice"
+		]
+		end_date: DF.Date | None
+		fulfilment_deadline: DF.Date | None
+		fulfilment_status: DF.Literal["N/A", "Unfulfilled", "Partially Fulfilled", "Fulfilled", "Lapsed"]
+		fulfilment_terms: DF.Table[ContractFulfilmentChecklist]
+		ip_address: DF.Data | None
+		is_signed: DF.Check
+		party_name: DF.DynamicLink
+		party_type: DF.Literal["Customer", "Supplier", "Employee"]
+		party_user: DF.Link | None
+		requires_fulfilment: DF.Check
+		signed_by_company: DF.Link | None
+		signed_on: DF.Datetime | None
+		signee: DF.Data | None
+		start_date: DF.Date | None
+		status: DF.Literal["Unsigned", "Active", "Inactive"]
+	# end: auto-generated types
 	def autoname(self):
 		name = self.party_name
 

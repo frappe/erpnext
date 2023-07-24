@@ -18,6 +18,49 @@ from frappe.utils.user import is_website_user
 
 
 class Issue(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		agreement_status: DF.Literal["First Response Due", "Resolution Due", "Fulfilled", "Failed"]
+		attachment: DF.Attach | None
+		avg_response_time: DF.Duration | None
+		company: DF.Link | None
+		contact: DF.Link | None
+		content_type: DF.Data | None
+		customer: DF.Link | None
+		customer_name: DF.Data | None
+		description: DF.TextEditor | None
+		email_account: DF.Link | None
+		first_responded_on: DF.Datetime | None
+		first_response_time: DF.Duration | None
+		issue_split_from: DF.Link | None
+		issue_type: DF.Link | None
+		lead: DF.Link | None
+		naming_series: DF.Literal["ISS-.YYYY.-"]
+		on_hold_since: DF.Datetime | None
+		opening_date: DF.Date | None
+		opening_time: DF.Time | None
+		priority: DF.Link | None
+		project: DF.Link | None
+		raised_by: DF.Data | None
+		resolution_by: DF.Datetime | None
+		resolution_date: DF.Datetime | None
+		resolution_details: DF.TextEditor | None
+		resolution_time: DF.Duration | None
+		response_by: DF.Datetime | None
+		service_level_agreement: DF.Link | None
+		service_level_agreement_creation: DF.Datetime | None
+		status: DF.Literal["Open", "Replied", "On Hold", "Resolved", "Closed"]
+		subject: DF.Data
+		total_hold_time: DF.Duration | None
+		user_resolution_time: DF.Duration | None
+		via_customer_portal: DF.Check
+	# end: auto-generated types
 	def validate(self):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True

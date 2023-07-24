@@ -14,6 +14,29 @@ from frappe.utils.scheduler import is_scheduler_inactive
 
 
 class POSInvoiceMergeLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+			POSInvoiceReference,
+		)
+
+		amended_from: DF.Link | None
+		consolidated_credit_note: DF.Link | None
+		consolidated_invoice: DF.Link | None
+		customer: DF.Link
+		customer_group: DF.Link | None
+		merge_invoices_based_on: DF.Literal["Customer", "Customer Group"]
+		pos_closing_entry: DF.Link | None
+		pos_invoices: DF.Table[POSInvoiceReference]
+		posting_date: DF.Date
+		posting_time: DF.Time
+	# end: auto-generated types
 	def validate(self):
 		self.validate_customer()
 		self.validate_pos_invoice_status()

@@ -16,6 +16,28 @@ from erpnext import get_default_currency
 
 
 class SalesPerson(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.target_detail.target_detail import TargetDetail
+
+		commission_rate: DF.Data | None
+		department: DF.Link | None
+		employee: DF.Link | None
+		enabled: DF.Check
+		is_group: DF.Check
+		lft: DF.Int
+		old_parent: DF.Data | None
+		parent_sales_person: DF.Link | None
+		rgt: DF.Int
+		sales_person_name: DF.Data
+		targets: DF.Table[TargetDetail]
+	# end: auto-generated types
 	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):

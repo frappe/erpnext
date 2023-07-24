@@ -13,6 +13,22 @@ from frappe.utils.file_manager import get_file_path
 
 
 class LinkedInSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		access_token: DF.Data | None
+		account_name: DF.Data | None
+		company_id: DF.Data
+		consumer_key: DF.Data
+		consumer_secret: DF.Password
+		person_urn: DF.Data | None
+		session_status: DF.Literal["Expired", "Active"]
+	# end: auto-generated types
 	@frappe.whitelist()
 	def get_authorization_url(self):
 		params = urlencode(

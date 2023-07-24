@@ -12,6 +12,29 @@ from frappe.utils.nestedset import get_root_of
 
 
 class WoocommerceSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		api_consumer_key: DF.Data | None
+		api_consumer_secret: DF.Data | None
+		company: DF.Link
+		creation_user: DF.Link
+		delivery_after_days: DF.Int
+		enable_sync: DF.Check
+		endpoint: DF.Code | None
+		f_n_f_account: DF.Link
+		sales_order_series: DF.Literal
+		secret: DF.Code | None
+		tax_account: DF.Link
+		uom: DF.Link | None
+		warehouse: DF.Link | None
+		woocommerce_server_url: DF.Data | None
+	# end: auto-generated types
 	def validate(self):
 		self.validate_settings()
 		self.create_delete_custom_fields()

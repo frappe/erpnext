@@ -19,6 +19,57 @@ class BalanceMismatchError(frappe.ValidationError):
 
 
 class Account(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account_currency: DF.Link | None
+		account_name: DF.Data
+		account_number: DF.Data | None
+		account_type: DF.Literal[
+			"",
+			"Accumulated Depreciation",
+			"Asset Received But Not Billed",
+			"Bank",
+			"Cash",
+			"Chargeable",
+			"Capital Work in Progress",
+			"Cost of Goods Sold",
+			"Depreciation",
+			"Equity",
+			"Expense Account",
+			"Expenses Included In Asset Valuation",
+			"Expenses Included In Valuation",
+			"Fixed Asset",
+			"Income Account",
+			"Payable",
+			"Receivable",
+			"Round Off",
+			"Stock",
+			"Stock Adjustment",
+			"Stock Received But Not Billed",
+			"Service Received But Not Billed",
+			"Tax",
+			"Temporary",
+		]
+		balance_must_be: DF.Literal["", "Debit", "Credit"]
+		company: DF.Link
+		disabled: DF.Check
+		freeze_account: DF.Literal["No", "Yes"]
+		include_in_gross: DF.Check
+		is_group: DF.Check
+		lft: DF.Int
+		old_parent: DF.Data | None
+		parent_account: DF.Link
+		report_type: DF.Literal["", "Balance Sheet", "Profit and Loss"]
+		rgt: DF.Int
+		root_type: DF.Literal["", "Asset", "Liability", "Income", "Expense", "Equity"]
+		tax_rate: DF.Float
+	# end: auto-generated types
 	nsm_parent_field = "parent_account"
 
 	def on_update(self):

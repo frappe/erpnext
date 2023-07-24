@@ -21,6 +21,37 @@ import erpnext
 
 
 class AssetDepreciationSchedule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
+			DepreciationSchedule,
+		)
+
+		amended_from: DF.Link | None
+		asset: DF.Link
+		depreciation_method: DF.Literal[
+			"", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"
+		]
+		depreciation_schedule: DF.Table[DepreciationSchedule]
+		expected_value_after_useful_life: DF.Currency
+		finance_book: DF.Link | None
+		finance_book_id: DF.Int
+		frequency_of_depreciation: DF.Int
+		gross_purchase_amount: DF.Currency
+		naming_series: DF.Literal["ACC-ADS-.YYYY.-"]
+		notes: DF.SmallText | None
+		number_of_depreciations_booked: DF.Int
+		opening_accumulated_depreciation: DF.Currency
+		rate_of_depreciation: DF.Percent
+		status: DF.Literal["Draft", "Active", "Cancelled"]
+		total_number_of_depreciations: DF.Int
+	# end: auto-generated types
 	def before_save(self):
 		if not self.finance_book_id:
 			self.prepare_draft_asset_depr_schedule_data_from_asset_name_and_fb_name(

@@ -22,6 +22,35 @@ class DuplicateBudgetError(frappe.ValidationError):
 
 
 class Budget(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.budget_account.budget_account import BudgetAccount
+
+		accounts: DF.Table[BudgetAccount]
+		action_if_accumulated_monthly_budget_exceeded: DF.Literal["", "Stop", "Warn", "Ignore"]
+		action_if_accumulated_monthly_budget_exceeded_on_mr: DF.Literal["", "Stop", "Warn", "Ignore"]
+		action_if_accumulated_monthly_budget_exceeded_on_po: DF.Literal["", "Stop", "Warn", "Ignore"]
+		action_if_annual_budget_exceeded: DF.Literal["", "Stop", "Warn", "Ignore"]
+		action_if_annual_budget_exceeded_on_mr: DF.Literal["", "Stop", "Warn", "Ignore"]
+		action_if_annual_budget_exceeded_on_po: DF.Literal["", "Stop", "Warn", "Ignore"]
+		amended_from: DF.Link | None
+		applicable_on_booking_actual_expenses: DF.Check
+		applicable_on_material_request: DF.Check
+		applicable_on_purchase_order: DF.Check
+		budget_against: DF.Literal["", "Cost Center", "Project"]
+		company: DF.Link
+		cost_center: DF.Link | None
+		fiscal_year: DF.Link
+		monthly_distribution: DF.Link | None
+		naming_series: DF.Data | None
+		project: DF.Link | None
+	# end: auto-generated types
 	def validate(self):
 		if not self.get(frappe.scrub(self.budget_against)):
 			frappe.throw(_("{0} is mandatory").format(self.budget_against))

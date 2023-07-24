@@ -8,6 +8,40 @@ from frappe.model.document import Document
 
 
 class ChequePrintTemplate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		acc_no_dist_from_left_edge: DF.Float
+		acc_no_dist_from_top_edge: DF.Float
+		acc_pay_dist_from_left_edge: DF.Float
+		acc_pay_dist_from_top_edge: DF.Float
+		amt_in_figures_from_left_edge: DF.Float
+		amt_in_figures_from_top_edge: DF.Float
+		amt_in_word_width: DF.Float
+		amt_in_words_from_left_edge: DF.Float
+		amt_in_words_from_top_edge: DF.Float
+		amt_in_words_line_spacing: DF.Float
+		bank_name: DF.Data
+		cheque_height: DF.Float
+		cheque_size: DF.Literal["", "Regular", "A4"]
+		cheque_width: DF.Float
+		date_dist_from_left_edge: DF.Float
+		date_dist_from_top_edge: DF.Float
+		has_print_format: DF.Check
+		is_account_payable: DF.Check
+		message_to_show: DF.Data | None
+		payer_name_from_left_edge: DF.Float
+		payer_name_from_top_edge: DF.Float
+		scanned_cheque: DF.Attach | None
+		signatory_from_left_edge: DF.Float
+		signatory_from_top_edge: DF.Float
+		starting_position_from_top_edge: DF.Float
+	# end: auto-generated types
 	pass
 
 

@@ -18,6 +18,54 @@ class CircularReferenceError(frappe.ValidationError):
 
 
 class Task(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
+
+		act_end_date: DF.Date | None
+		act_start_date: DF.Date | None
+		actual_time: DF.Float
+		closing_date: DF.Date | None
+		color: DF.Color | None
+		company: DF.Link | None
+		completed_by: DF.Link | None
+		completed_on: DF.Date | None
+		department: DF.Link | None
+		depends_on: DF.Table[TaskDependsOn]
+		depends_on_tasks: DF.Code | None
+		description: DF.TextEditor | None
+		duration: DF.Int
+		exp_end_date: DF.Date | None
+		exp_start_date: DF.Date | None
+		expected_time: DF.Float
+		is_group: DF.Check
+		is_milestone: DF.Check
+		is_template: DF.Check
+		issue: DF.Link | None
+		lft: DF.Int
+		old_parent: DF.Data | None
+		parent_task: DF.Link | None
+		priority: DF.Literal["Low", "Medium", "High", "Urgent"]
+		progress: DF.Percent
+		project: DF.Link | None
+		review_date: DF.Date | None
+		rgt: DF.Int
+		start: DF.Int
+		status: DF.Literal[
+			"Open", "Working", "Pending Review", "Overdue", "Template", "Completed", "Cancelled"
+		]
+		subject: DF.Data
+		task_weight: DF.Float
+		total_billing_amount: DF.Currency
+		total_costing_amount: DF.Currency
+		type: DF.Link | None
+	# end: auto-generated types
 	nsm_parent_field = "parent_task"
 
 	def get_customer_details(self):

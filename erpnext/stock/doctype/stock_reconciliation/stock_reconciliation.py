@@ -28,6 +28,33 @@ class EmptyStockReconciliationItemsError(frappe.ValidationError):
 
 
 class StockReconciliation(StockController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import (
+			StockReconciliationItem,
+		)
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		cost_center: DF.Link | None
+		difference_amount: DF.Currency
+		expense_account: DF.Link | None
+		items: DF.Table[StockReconciliationItem]
+		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
+		posting_date: DF.Date
+		posting_time: DF.Time
+		purpose: DF.Literal["", "Opening Stock", "Stock Reconciliation"]
+		scan_barcode: DF.Data | None
+		scan_mode: DF.Check
+		set_posting_time: DF.Check
+		set_warehouse: DF.Link | None
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(StockReconciliation, self).__init__(*args, **kwargs)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]

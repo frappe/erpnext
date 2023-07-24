@@ -12,6 +12,31 @@ from frappe.model.document import Document
 
 
 class BankAccount(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account: DF.Link | None
+		account_name: DF.Data
+		account_subtype: DF.Link | None
+		account_type: DF.Link | None
+		bank: DF.Link
+		bank_account_no: DF.Data | None
+		branch_code: DF.Data | None
+		company: DF.Link | None
+		iban: DF.Data | None
+		integration_id: DF.Data | None
+		is_company_account: DF.Check
+		is_default: DF.Check
+		last_integration_date: DF.Date | None
+		mask: DF.Data | None
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+	# end: auto-generated types
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)

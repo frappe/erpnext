@@ -21,6 +21,45 @@ from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 
 class PaymentReconciliation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.payment_reconciliation_allocation.payment_reconciliation_allocation import (
+			PaymentReconciliationAllocation,
+		)
+		from erpnext.accounts.doctype.payment_reconciliation_invoice.payment_reconciliation_invoice import (
+			PaymentReconciliationInvoice,
+		)
+		from erpnext.accounts.doctype.payment_reconciliation_payment.payment_reconciliation_payment import (
+			PaymentReconciliationPayment,
+		)
+
+		allocation: DF.Table[PaymentReconciliationAllocation]
+		bank_cash_account: DF.Link | None
+		company: DF.Link
+		cost_center: DF.Link | None
+		default_advance_account: DF.Link | None
+		from_invoice_date: DF.Date | None
+		from_payment_date: DF.Date | None
+		invoice_limit: DF.Int
+		invoices: DF.Table[PaymentReconciliationInvoice]
+		maximum_invoice_amount: DF.Currency
+		maximum_payment_amount: DF.Currency
+		minimum_invoice_amount: DF.Currency
+		minimum_payment_amount: DF.Currency
+		party: DF.DynamicLink
+		party_type: DF.Link
+		payment_limit: DF.Int
+		payments: DF.Table[PaymentReconciliationPayment]
+		receivable_payable_account: DF.Link
+		to_invoice_date: DF.Date | None
+		to_payment_date: DF.Date | None
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(PaymentReconciliation, self).__init__(*args, **kwargs)
 		self.common_filter_conditions = []

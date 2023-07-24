@@ -12,6 +12,32 @@ from frappe.utils import cint, get_datetime, get_link_to_form
 
 
 class DeliveryTrip(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		delivery_stops: DF.Table[DeliveryStop]
+		departure_time: DF.Datetime
+		driver: DF.Link | None
+		driver_address: DF.Link | None
+		driver_email: DF.Data | None
+		driver_name: DF.Data | None
+		email_notification_sent: DF.Check
+		employee: DF.Link | None
+		naming_series: DF.Literal["MAT-DT-.YYYY.-"]
+		status: DF.Literal["Draft", "Scheduled", "In Transit", "Completed", "Cancelled"]
+		total_distance: DF.Float
+		uom: DF.Link | None
+		vehicle: DF.Link
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(DeliveryTrip, self).__init__(*args, **kwargs)
 

@@ -14,6 +14,25 @@ from frappe.utils.verified_command import get_signed_params
 
 
 class Appointment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		appointment_with: DF.Link | None
+		calendar_event: DF.Link | None
+		customer_details: DF.LongText | None
+		customer_email: DF.Data
+		customer_name: DF.Data
+		customer_phone_number: DF.Data | None
+		customer_skype: DF.Data | None
+		party: DF.DynamicLink | None
+		scheduled_time: DF.Datetime
+		status: DF.Literal["Open", "Unverified", "Closed"]
+	# end: auto-generated types
 	def find_lead_by_email(self):
 		lead_list = frappe.get_list(
 			"Lead", filters={"email_id": self.customer_email}, ignore_permissions=True

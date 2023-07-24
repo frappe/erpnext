@@ -27,6 +27,38 @@ class SerialNoWarehouseError(ValidationError):
 
 
 class SerialNo(StockController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amc_expiry_date: DF.Date | None
+		asset: DF.Link | None
+		asset_status: DF.Literal["", "Issue", "Receipt", "Transfer"]
+		batch_no: DF.Link | None
+		brand: DF.Link | None
+		company: DF.Link
+		delivery_document_type: DF.Link | None
+		description: DF.Text | None
+		employee: DF.Link | None
+		item_code: DF.Link
+		item_group: DF.Link | None
+		item_name: DF.Data | None
+		location: DF.Link | None
+		maintenance_status: DF.Literal[
+			"", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"
+		]
+		purchase_rate: DF.Float
+		serial_no: DF.Data
+		status: DF.Literal["", "Active", "Inactive", "Expired"]
+		warehouse: DF.Link | None
+		warranty_expiry_date: DF.Date | None
+		warranty_period: DF.Int
+		work_order: DF.Link | None
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False

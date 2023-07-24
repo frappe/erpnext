@@ -10,6 +10,24 @@ from frappe.utils import cint, create_batch
 
 
 class TransactionDeletionRecord(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.transaction_deletion_record_item.transaction_deletion_record_item import (
+			TransactionDeletionRecordItem,
+		)
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		doctypes: DF.Table[TransactionDeletionRecordItem]
+		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
+		status: DF.Literal["Draft", "Completed"]
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
 		self.batch_size = 5000

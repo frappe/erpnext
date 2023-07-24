@@ -10,6 +10,22 @@ from frappe.utils import add_days, getdate, today
 
 
 class EmailCampaign(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		campaign_name: DF.Link
+		email_campaign_for: DF.Literal["", "Lead", "Contact", "Email Group"]
+		end_date: DF.Date | None
+		recipient: DF.DynamicLink
+		sender: DF.Link | None
+		start_date: DF.Date
+		status: DF.Literal["", "Scheduled", "In Progress", "Completed", "Unsubscribed"]
+	# end: auto-generated types
 	def validate(self):
 		self.set_date()
 		# checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.

@@ -14,6 +14,88 @@ form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 
 class SupplierQuotation(BuyingController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
+		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
+			PurchaseTaxesandCharges,
+		)
+		from erpnext.buying.doctype.supplier_quotation_item.supplier_quotation_item import (
+			SupplierQuotationItem,
+		)
+
+		additional_discount_percentage: DF.Float
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
+		auto_repeat: DF.Link | None
+		base_discount_amount: DF.Currency
+		base_grand_total: DF.Currency
+		base_in_words: DF.Data | None
+		base_net_total: DF.Currency
+		base_rounded_total: DF.Currency
+		base_rounding_adjustment: DF.Currency
+		base_taxes_and_charges_added: DF.Currency
+		base_taxes_and_charges_deducted: DF.Currency
+		base_total: DF.Currency
+		base_total_taxes_and_charges: DF.Currency
+		buying_price_list: DF.Link | None
+		company: DF.Link
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.SmallText | None
+		contact_person: DF.Link | None
+		conversion_rate: DF.Float
+		currency: DF.Link
+		disable_rounded_total: DF.Check
+		discount_amount: DF.Currency
+		grand_total: DF.Currency
+		group_same_items: DF.Check
+		ignore_pricing_rule: DF.Check
+		in_words: DF.Data | None
+		incoterm: DF.Link | None
+		is_subcontracted: DF.Check
+		items: DF.Table[SupplierQuotationItem]
+		language: DF.Data | None
+		letter_head: DF.Link | None
+		named_place: DF.Data | None
+		naming_series: DF.Literal["PUR-SQTN-.YYYY.-"]
+		net_total: DF.Currency
+		opportunity: DF.Link | None
+		other_charges_calculation: DF.LongText | None
+		plc_conversion_rate: DF.Float
+		price_list_currency: DF.Link | None
+		pricing_rules: DF.Table[PricingRuleDetail]
+		quotation_number: DF.Data | None
+		rounded_total: DF.Currency
+		rounding_adjustment: DF.Currency
+		select_print_heading: DF.Link | None
+		shipping_rule: DF.Link | None
+		status: DF.Literal["", "Draft", "Submitted", "Stopped", "Cancelled", "Expired"]
+		supplier: DF.Link
+		supplier_address: DF.Link | None
+		supplier_name: DF.Data | None
+		tax_category: DF.Link | None
+		taxes: DF.Table[PurchaseTaxesandCharges]
+		taxes_and_charges: DF.Link | None
+		taxes_and_charges_added: DF.Currency
+		taxes_and_charges_deducted: DF.Currency
+		tc_name: DF.Link | None
+		terms: DF.TextEditor | None
+		title: DF.Data | None
+		total: DF.Currency
+		total_net_weight: DF.Float
+		total_qty: DF.Float
+		total_taxes_and_charges: DF.Currency
+		transaction_date: DF.Date
+		valid_till: DF.Date | None
+	# end: auto-generated types
 	def validate(self):
 		super(SupplierQuotation, self).validate()
 

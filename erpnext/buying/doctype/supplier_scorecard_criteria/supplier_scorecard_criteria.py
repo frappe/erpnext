@@ -14,6 +14,19 @@ class InvalidFormulaVariable(frappe.ValidationError):
 
 
 class SupplierScorecardCriteria(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		criteria_name: DF.Data
+		formula: DF.SmallText
+		max_score: DF.Float
+		weight: DF.Percent
+	# end: auto-generated types
 	def validate(self):
 		self.validate_variables()
 		self.validate_formula()

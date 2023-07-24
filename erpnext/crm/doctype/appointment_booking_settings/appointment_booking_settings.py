@@ -10,6 +10,31 @@ from frappe.model.document import Document
 
 
 class AppointmentBookingSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.automation.doctype.assignment_rule_user.assignment_rule_user import (
+			AssignmentRuleUser,
+		)
+		from frappe.types import DF
+
+		from erpnext.crm.doctype.appointment_booking_slots.appointment_booking_slots import (
+			AppointmentBookingSlots,
+		)
+
+		advance_booking_days: DF.Int
+		agent_list: DF.TableMultiSelect[AssignmentRuleUser]
+		appointment_duration: DF.Int
+		availability_of_slots: DF.Table[AppointmentBookingSlots]
+		email_reminders: DF.Check
+		enable_scheduling: DF.Check
+		holiday_list: DF.Link
+		number_of_agents: DF.Int
+		success_redirect_url: DF.Data | None
+	# end: auto-generated types
 	agent_list = []  # Hack
 	min_date = "01/01/1970 "
 	format_string = "%d/%m/%Y %H:%M:%S"

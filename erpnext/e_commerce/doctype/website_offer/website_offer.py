@@ -7,6 +7,21 @@ from frappe.model.document import Document
 
 
 class WebsiteOffer(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		offer_details: DF.TextEditor | None
+		offer_subtitle: DF.Data | None
+		offer_title: DF.Data | None
+		parent: DF.Data
+		parentfield: DF.Data
+		parenttype: DF.Data
+	# end: auto-generated types
 	pass
 
 

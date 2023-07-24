@@ -10,6 +10,24 @@ from frappe.utils import add_days, add_years, cstr, getdate
 
 
 class FiscalYear(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.fiscal_year_company.fiscal_year_company import FiscalYearCompany
+
+		auto_created: DF.Check
+		companies: DF.Table[FiscalYearCompany]
+		disabled: DF.Check
+		is_short_year: DF.Check
+		year: DF.Data
+		year_end_date: DF.Date
+		year_start_date: DF.Date
+	# end: auto-generated types
 	def validate(self):
 		self.validate_dates()
 		self.validate_overlap()

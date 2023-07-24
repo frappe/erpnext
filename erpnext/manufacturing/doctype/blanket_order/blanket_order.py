@@ -13,6 +13,30 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 
 
 class BlanketOrder(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.blanket_order_item.blanket_order_item import BlanketOrderItem
+
+		amended_from: DF.Link | None
+		blanket_order_type: DF.Literal["", "Selling", "Purchasing"]
+		company: DF.Link
+		customer: DF.Link | None
+		customer_name: DF.Data | None
+		from_date: DF.Date
+		items: DF.Table[BlanketOrderItem]
+		naming_series: DF.Literal["MFG-BLR-.YYYY.-"]
+		supplier: DF.Link | None
+		supplier_name: DF.Data | None
+		tc_name: DF.Link | None
+		terms: DF.TextEditor | None
+		to_date: DF.Date
+	# end: auto-generated types
 	def validate(self):
 		self.validate_dates()
 		self.validate_duplicate_items()

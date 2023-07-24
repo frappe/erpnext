@@ -23,6 +23,17 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 
 
 class ChartofAccountsImporter(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		company: DF.Link | None
+		import_file: DF.Attach | None
+	# end: auto-generated types
 	def validate(self):
 		if self.import_file:
 			get_coa(

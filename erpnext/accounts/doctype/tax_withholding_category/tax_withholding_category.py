@@ -11,6 +11,26 @@ from frappe.utils import cint, flt, getdate
 
 
 class TaxWithholdingCategory(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.tax_withholding_account.tax_withholding_account import (
+			TaxWithholdingAccount,
+		)
+		from erpnext.accounts.doctype.tax_withholding_rate.tax_withholding_rate import TaxWithholdingRate
+
+		accounts: DF.Table[TaxWithholdingAccount]
+		category_name: DF.Data | None
+		consider_party_ledger_amount: DF.Check
+		rates: DF.Table[TaxWithholdingRate]
+		round_off_tax_amount: DF.Check
+		tax_on_excess_amount: DF.Check
+	# end: auto-generated types
 	def validate(self):
 		self.validate_dates()
 		self.validate_accounts()

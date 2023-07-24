@@ -8,6 +8,27 @@ from frappe.model.document import Document
 
 
 class AccountingDimensionFilter(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.allowed_dimension.allowed_dimension import AllowedDimension
+		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import (
+			ApplicableOnAccount,
+		)
+
+		accounting_dimension: DF.Literal
+		accounts: DF.Table[ApplicableOnAccount]
+		allow_or_restrict: DF.Literal["Allow", "Restrict"]
+		apply_restriction_on_values: DF.Check
+		company: DF.Link
+		dimensions: DF.Table[AllowedDimension]
+		disabled: DF.Check
+	# end: auto-generated types
 	def before_save(self):
 		# If restriction is not applied on values, then remove all the dimensions and set allow_or_restrict to Restrict
 		if not self.apply_restriction_on_values:

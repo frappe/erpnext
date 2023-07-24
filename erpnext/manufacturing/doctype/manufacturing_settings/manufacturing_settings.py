@@ -9,6 +9,31 @@ from frappe.utils import cint
 
 
 class ManufacturingSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		add_corrective_operation_cost_in_finished_good_valuation: DF.Check
+		allow_overtime: DF.Check
+		allow_production_on_holidays: DF.Check
+		backflush_raw_materials_based_on: DF.Literal["BOM", "Material Transferred for Manufacture"]
+		capacity_planning_for_days: DF.Int
+		default_fg_warehouse: DF.Link | None
+		default_scrap_warehouse: DF.Link | None
+		default_wip_warehouse: DF.Link | None
+		disable_capacity_planning: DF.Check
+		job_card_excess_transfer: DF.Check
+		make_serial_no_batch_from_work_order: DF.Check
+		material_consumption: DF.Check
+		mins_between_operations: DF.Int
+		overproduction_percentage_for_sales_order: DF.Percent
+		overproduction_percentage_for_work_order: DF.Percent
+		update_bom_costs_automatically: DF.Check
+	# end: auto-generated types
 	pass
 
 

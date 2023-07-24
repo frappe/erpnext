@@ -10,6 +10,15 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class AuthorizationControl(TransactionBase):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+	# end: auto-generated types
 	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, item, company):
 		amt_list, appr_users, appr_roles = [], [], []
 		users, roles = "", ""

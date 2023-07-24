@@ -14,6 +14,22 @@ from tweepy.error import TweepError
 
 
 class TwitterSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		access_token: DF.Data | None
+		access_token_secret: DF.Data | None
+		account_name: DF.Data | None
+		consumer_key: DF.Data
+		consumer_secret: DF.Password
+		profile_pic: DF.AttachImage | None
+		session_status: DF.Literal["Expired", "Active"]
+	# end: auto-generated types
 	@frappe.whitelist()
 	def get_authorize_url(self):
 		callback_url = (

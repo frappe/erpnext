@@ -16,6 +16,22 @@ class ClosedAccountingPeriod(frappe.ValidationError):
 
 
 class AccountingPeriod(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.closed_document.closed_document import ClosedDocument
+
+		closed_documents: DF.Table[ClosedDocument]
+		company: DF.Link
+		end_date: DF.Date
+		period_name: DF.Data
+		start_date: DF.Date
+	# end: auto-generated types
 	def validate(self):
 		self.validate_overlap()
 

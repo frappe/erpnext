@@ -16,6 +16,41 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class AssetRepair(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
+			AssetRepairConsumedItem,
+		)
+
+		actions_performed: DF.LongText | None
+		amended_from: DF.Link | None
+		asset: DF.Link
+		asset_name: DF.ReadOnly | None
+		capitalize_repair_cost: DF.Check
+		company: DF.Link | None
+		completion_date: DF.Datetime | None
+		cost_center: DF.Link | None
+		description: DF.LongText | None
+		downtime: DF.Data | None
+		failure_date: DF.Datetime
+		increase_in_asset_life: DF.Int
+		naming_series: DF.Literal["ACC-ASR-.YYYY.-"]
+		project: DF.Link | None
+		purchase_invoice: DF.Link | None
+		repair_cost: DF.Currency
+		repair_status: DF.Literal["Pending", "Completed", "Cancelled"]
+		stock_consumption: DF.Check
+		stock_entry: DF.Link | None
+		stock_items: DF.Table[AssetRepairConsumedItem]
+		total_repair_cost: DF.Currency
+		warehouse: DF.Link | None
+	# end: auto-generated types
 	def validate(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 		self.update_status()

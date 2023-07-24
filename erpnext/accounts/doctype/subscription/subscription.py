@@ -27,6 +27,49 @@ from erpnext.accounts.party import get_party_account_currency
 
 
 class Subscription(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.subscription_invoice.subscription_invoice import (
+			SubscriptionInvoice,
+		)
+		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
+			SubscriptionPlanDetail,
+		)
+
+		additional_discount_amount: DF.Currency
+		additional_discount_percentage: DF.Percent
+		apply_additional_discount: DF.Literal["", "Grand Total", "Net Total"]
+		cancel_at_period_end: DF.Check
+		cancelation_date: DF.Date | None
+		company: DF.Link | None
+		cost_center: DF.Link | None
+		current_invoice_end: DF.Date | None
+		current_invoice_start: DF.Date | None
+		days_until_due: DF.Int
+		end_date: DF.Date | None
+		follow_calendar_months: DF.Check
+		generate_invoice_at_period_start: DF.Check
+		generate_new_invoices_past_due_date: DF.Check
+		invoices: DF.Table[SubscriptionInvoice]
+		party: DF.DynamicLink
+		party_type: DF.Link
+		plans: DF.Table[SubscriptionPlanDetail]
+		purchase_tax_template: DF.Link | None
+		sales_tax_template: DF.Link | None
+		start_date: DF.Date | None
+		status: DF.Literal[
+			"", "Trialling", "Active", "Past Due Date", "Cancelled", "Unpaid", "Completed"
+		]
+		submit_invoice: DF.Check
+		trial_period_end: DF.Date | None
+		trial_period_start: DF.Date | None
+	# end: auto-generated types
 	def before_insert(self):
 		# update start just before the subscription doc is created
 		self.update_subscription_period(self.start_date)

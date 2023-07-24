@@ -10,6 +10,46 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class WarrantyClaim(TransactionBase):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		address_display: DF.SmallText | None
+		amc_expiry_date: DF.Date | None
+		amended_from: DF.Link | None
+		company: DF.Link
+		complaint: DF.TextEditor
+		complaint_date: DF.Date
+		complaint_raised_by: DF.Data | None
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.Data | None
+		contact_person: DF.Link | None
+		customer: DF.Link
+		customer_address: DF.Link | None
+		customer_group: DF.Link | None
+		customer_name: DF.Data | None
+		description: DF.SmallText | None
+		from_company: DF.Data | None
+		item_code: DF.Link | None
+		item_name: DF.Data | None
+		naming_series: DF.Literal["SER-WRN-.YYYY.-"]
+		resolution_date: DF.Datetime | None
+		resolution_details: DF.Text | None
+		resolved_by: DF.Link | None
+		serial_no: DF.Link | None
+		service_address: DF.SmallText | None
+		status: DF.Literal["", "Open", "Closed", "Work In Progress", "Cancelled"]
+		territory: DF.Link | None
+		warranty_amc_status: DF.Literal[
+			"", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"
+		]
+		warranty_expiry_date: DF.Date | None
+	# end: auto-generated types
 	def validate(self):
 		if session["user"] != "Guest" and not self.customer:
 			frappe.throw(_("Customer is required"))

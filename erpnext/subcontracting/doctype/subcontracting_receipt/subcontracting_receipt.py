@@ -11,6 +11,74 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 
 
 class SubcontractingReceipt(SubcontractingController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
+			LandedCostTaxesandCharges,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_receipt_item.subcontracting_receipt_item import (
+			SubcontractingReceiptItem,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_receipt_supplied_item.subcontracting_receipt_supplied_item import (
+			SubcontractingReceiptSuppliedItem,
+		)
+
+		additional_costs: DF.Table[LandedCostTaxesandCharges]
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		auto_repeat: DF.Link | None
+		bill_date: DF.Date | None
+		bill_no: DF.Data | None
+		billing_address: DF.Link | None
+		billing_address_display: DF.SmallText | None
+		company: DF.Link
+		contact_display: DF.SmallText | None
+		contact_email: DF.SmallText | None
+		contact_mobile: DF.SmallText | None
+		contact_person: DF.Link | None
+		cost_center: DF.Link | None
+		distribute_additional_costs_based_on: DF.Literal["Qty", "Amount"]
+		in_words: DF.Data | None
+		instructions: DF.SmallText | None
+		is_return: DF.Check
+		items: DF.Table[SubcontractingReceiptItem]
+		language: DF.Data | None
+		letter_head: DF.Link | None
+		lr_date: DF.Date | None
+		lr_no: DF.Data | None
+		naming_series: DF.Literal["MAT-SCR-.YYYY.-", "MAT-SCR-RET-.YYYY.-"]
+		per_returned: DF.Percent
+		posting_date: DF.Date
+		posting_time: DF.Time
+		project: DF.Link | None
+		range: DF.Data | None
+		rejected_warehouse: DF.Link | None
+		remarks: DF.SmallText | None
+		represents_company: DF.Link | None
+		return_against: DF.Link | None
+		select_print_heading: DF.Link | None
+		set_posting_time: DF.Check
+		set_warehouse: DF.Link | None
+		shipping_address: DF.Link | None
+		shipping_address_display: DF.SmallText | None
+		status: DF.Literal["", "Draft", "Completed", "Return", "Return Issued", "Cancelled", "Closed"]
+		supplied_items: DF.Table[SubcontractingReceiptSuppliedItem]
+		supplier: DF.Link
+		supplier_address: DF.Link | None
+		supplier_name: DF.Data | None
+		supplier_warehouse: DF.Link | None
+		title: DF.Data | None
+		total: DF.Currency
+		total_additional_costs: DF.Currency
+		total_qty: DF.Float
+		transporter_name: DF.Data | None
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(SubcontractingReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [

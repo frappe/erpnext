@@ -25,6 +25,71 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Opportunity(TransactionBase, CRMNote):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.crm.doctype.competitor_detail.competitor_detail import CompetitorDetail
+		from erpnext.crm.doctype.crm_note.crm_note import CRMNote
+		from erpnext.crm.doctype.opportunity_item.opportunity_item import OpportunityItem
+		from erpnext.crm.doctype.opportunity_lost_reason_detail.opportunity_lost_reason_detail import (
+			OpportunityLostReasonDetail,
+		)
+
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		annual_revenue: DF.Currency
+		base_opportunity_amount: DF.Currency
+		base_total: DF.Currency
+		campaign: DF.Link | None
+		city: DF.Data | None
+		company: DF.Link
+		competitors: DF.TableMultiSelect[CompetitorDetail] | None
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.Data | None
+		contact_person: DF.Link | None
+		conversion_rate: DF.Float
+		country: DF.Link | None
+		currency: DF.Link | None
+		customer_address: DF.Link | None
+		customer_group: DF.Link | None
+		customer_name: DF.Data | None
+		expected_closing: DF.Date | None
+		first_response_time: DF.Duration | None
+		industry: DF.Link | None
+		items: DF.Table[OpportunityItem]
+		job_title: DF.Data | None
+		language: DF.Link | None
+		lost_reasons: DF.TableMultiSelect[OpportunityLostReasonDetail] | None
+		market_segment: DF.Link | None
+		naming_series: DF.Literal["CRM-OPP-.YYYY.-"]
+		no_of_employees: DF.Literal["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]
+		notes: DF.Table[CRMNote]
+		opportunity_amount: DF.Currency
+		opportunity_from: DF.Link
+		opportunity_owner: DF.Link | None
+		opportunity_type: DF.Link | None
+		order_lost_reason: DF.SmallText | None
+		party_name: DF.DynamicLink
+		phone: DF.Data | None
+		phone_ext: DF.Data | None
+		probability: DF.Percent
+		sales_stage: DF.Link | None
+		source: DF.Link | None
+		state: DF.Data | None
+		status: DF.Literal["Open", "Quotation", "Converted", "Lost", "Replied", "Closed"]
+		territory: DF.Link | None
+		title: DF.Data | None
+		total: DF.Currency
+		transaction_date: DF.Date
+		website: DF.Data | None
+		whatsapp: DF.Data | None
+	# end: auto-generated types
 	def onload(self):
 		ref_doc = frappe.get_doc(self.opportunity_from, self.party_name)
 		load_address_and_contact(ref_doc)

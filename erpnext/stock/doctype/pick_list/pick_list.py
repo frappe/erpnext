@@ -29,6 +29,33 @@ from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class PickList(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		customer: DF.Link | None
+		customer_name: DF.Data | None
+		for_qty: DF.Float
+		group_same_items: DF.Check
+		locations: DF.Table[PickListItem]
+		material_request: DF.Link | None
+		naming_series: DF.Literal["STO-PICK-.YYYY.-"]
+		parent_warehouse: DF.Link | None
+		prompt_qty: DF.Check
+		purpose: DF.Literal["Material Transfer for Manufacture", "Material Transfer", "Delivery"]
+		scan_barcode: DF.Data | None
+		scan_mode: DF.Check
+		status: DF.Literal["Draft", "Open", "Completed", "Cancelled"]
+		work_order: DF.Link | None
+	# end: auto-generated types
 	def validate(self):
 		self.validate_for_qty()
 

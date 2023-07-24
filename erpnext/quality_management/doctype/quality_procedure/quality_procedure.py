@@ -8,6 +8,28 @@ from frappe.utils.nestedset import NestedSet
 
 
 class QualityProcedure(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.quality_management.doctype.quality_procedure_process.quality_procedure_process import (
+			QualityProcedureProcess,
+		)
+
+		is_group: DF.Check
+		lft: DF.Int
+		old_parent: DF.Data | None
+		parent_quality_procedure: DF.Link | None
+		process_owner: DF.Link | None
+		process_owner_full_name: DF.Data | None
+		processes: DF.Table[QualityProcedureProcess]
+		quality_procedure_name: DF.Data
+		rgt: DF.Int
+	# end: auto-generated types
 	nsm_parent_field = "parent_quality_procedure"
 
 	def before_save(self):

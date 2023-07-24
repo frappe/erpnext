@@ -16,6 +16,42 @@ from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 
 
 class ItemGroup(NestedSet, WebsiteGenerator):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.portal.doctype.website_attribute.website_attribute import WebsiteAttribute
+		from erpnext.portal.doctype.website_filter_field.website_filter_field import WebsiteFilterField
+		from erpnext.stock.doctype.item_default.item_default import ItemDefault
+		from erpnext.stock.doctype.item_tax.item_tax import ItemTax
+		from erpnext.stock.doctype.item_website_specification.item_website_specification import (
+			ItemWebsiteSpecification,
+		)
+
+		description: DF.TextEditor | None
+		filter_attributes: DF.Table[WebsiteAttribute]
+		filter_fields: DF.Table[WebsiteFilterField]
+		image: DF.AttachImage | None
+		include_descendants: DF.Check
+		is_group: DF.Check
+		item_group_defaults: DF.Table[ItemDefault]
+		item_group_name: DF.Data
+		lft: DF.Int
+		old_parent: DF.Link | None
+		parent_item_group: DF.Link | None
+		rgt: DF.Int
+		route: DF.Data | None
+		show_in_website: DF.Check
+		slideshow: DF.Link | None
+		taxes: DF.Table[ItemTax]
+		website_specifications: DF.Table[ItemWebsiteSpecification]
+		website_title: DF.Data | None
+		weightage: DF.Int
+	# end: auto-generated types
 	nsm_parent_field = "parent_item_group"
 	website = frappe._dict(
 		condition_field="show_in_website",

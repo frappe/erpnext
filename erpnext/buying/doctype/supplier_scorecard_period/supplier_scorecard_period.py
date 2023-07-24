@@ -14,6 +14,31 @@ from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_crite
 
 
 class SupplierScorecardPeriod(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.buying.doctype.supplier_scorecard_scoring_criteria.supplier_scorecard_scoring_criteria import (
+			SupplierScorecardScoringCriteria,
+		)
+		from erpnext.buying.doctype.supplier_scorecard_scoring_variable.supplier_scorecard_scoring_variable import (
+			SupplierScorecardScoringVariable,
+		)
+
+		amended_from: DF.Link | None
+		criteria: DF.Table[SupplierScorecardScoringCriteria]
+		end_date: DF.Date
+		naming_series: DF.Literal["PU-SSP-.YYYY.-"]
+		scorecard: DF.Link
+		start_date: DF.Date
+		supplier: DF.Link
+		total_score: DF.Percent
+		variables: DF.Table[SupplierScorecardScoringVariable]
+	# end: auto-generated types
 	def validate(self):
 		self.validate_criteria_weights()
 		self.calculate_variables()

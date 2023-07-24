@@ -10,6 +10,24 @@ from erpnext.accounts.utils import validate_field_number
 
 
 class CostCenter(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		company: DF.Link
+		cost_center_name: DF.Data
+		cost_center_number: DF.Data | None
+		disabled: DF.Check
+		is_group: DF.Check
+		lft: DF.Int
+		old_parent: DF.Link | None
+		parent_cost_center: DF.Link
+		rgt: DF.Int
+	# end: auto-generated types
 	nsm_parent_field = "parent_cost_center"
 
 	def autoname(self):

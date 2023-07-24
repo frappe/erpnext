@@ -16,6 +16,25 @@ from erpnext.controllers.accounts_controller import (
 
 
 class SalesTaxesandChargesTemplate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
+			SalesTaxesandCharges,
+		)
+
+		company: DF.Link
+		disabled: DF.Check
+		is_default: DF.Check
+		tax_category: DF.Link | None
+		taxes: DF.Table[SalesTaxesandCharges]
+		title: DF.Data
+	# end: auto-generated types
 	def validate(self):
 		valdiate_taxes_and_charges_template(self)
 

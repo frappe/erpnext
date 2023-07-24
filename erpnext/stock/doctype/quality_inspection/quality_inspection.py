@@ -14,6 +14,47 @@ from erpnext.stock.doctype.quality_inspection_template.quality_inspection_templa
 
 
 class QualityInspection(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.quality_inspection_reading.quality_inspection_reading import (
+			QualityInspectionReading,
+		)
+
+		amended_from: DF.Link | None
+		batch_no: DF.Link | None
+		bom_no: DF.Link | None
+		description: DF.SmallText | None
+		inspected_by: DF.Link
+		inspection_type: DF.Literal["", "Incoming", "Outgoing", "In Process"]
+		item_code: DF.Link
+		item_name: DF.Data | None
+		item_serial_no: DF.Link | None
+		manual_inspection: DF.Check
+		naming_series: DF.Literal["MAT-QA-.YYYY.-"]
+		quality_inspection_template: DF.Link | None
+		readings: DF.Table[QualityInspectionReading]
+		reference_name: DF.DynamicLink
+		reference_type: DF.Literal[
+			"",
+			"Purchase Receipt",
+			"Purchase Invoice",
+			"Delivery Note",
+			"Sales Invoice",
+			"Stock Entry",
+			"Job Card",
+		]
+		remarks: DF.Text | None
+		report_date: DF.Date
+		sample_size: DF.Float
+		status: DF.Literal["", "Accepted", "Rejected"]
+		verified_by: DF.Data | None
+	# end: auto-generated types
 	def validate(self):
 		if not self.readings and self.item_code:
 			self.get_item_specification_details()

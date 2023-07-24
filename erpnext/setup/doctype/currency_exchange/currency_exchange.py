@@ -10,6 +10,21 @@ from frappe.utils import cint, formatdate, get_datetime_str, nowdate
 
 
 class CurrencyExchange(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		date: DF.Date
+		exchange_rate: DF.Float
+		for_buying: DF.Check
+		for_selling: DF.Check
+		from_currency: DF.Link
+		to_currency: DF.Link
+	# end: auto-generated types
 	def autoname(self):
 		purpose = ""
 		if not self.date:

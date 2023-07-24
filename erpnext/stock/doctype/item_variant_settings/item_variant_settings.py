@@ -8,6 +8,20 @@ from frappe.model.document import Document
 
 
 class ItemVariantSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.variant_field.variant_field import VariantField
+
+		allow_rename_attribute_value: DF.Check
+		do_not_update_variants: DF.Check
+		fields: DF.Table[VariantField]
+	# end: auto-generated types
 	invalid_fields_for_copy_fields_in_variants = ["barcodes"]
 
 	def set_default_fields(self):

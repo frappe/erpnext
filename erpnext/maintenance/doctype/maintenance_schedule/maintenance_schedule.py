@@ -11,6 +11,39 @@ from erpnext.utilities.transaction_base import TransactionBase, delete_events
 
 
 class MaintenanceSchedule(TransactionBase):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.maintenance.doctype.maintenance_schedule_detail.maintenance_schedule_detail import (
+			MaintenanceScheduleDetail,
+		)
+		from erpnext.maintenance.doctype.maintenance_schedule_item.maintenance_schedule_item import (
+			MaintenanceScheduleItem,
+		)
+
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		company: DF.Link
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.Data | None
+		contact_person: DF.Link | None
+		customer: DF.Link | None
+		customer_address: DF.Link | None
+		customer_group: DF.Link | None
+		customer_name: DF.Data | None
+		items: DF.Table[MaintenanceScheduleItem]
+		naming_series: DF.Literal["MAT-MSH-.YYYY.-"]
+		schedules: DF.Table[MaintenanceScheduleDetail]
+		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
+		territory: DF.Link | None
+		transaction_date: DF.Date
+	# end: auto-generated types
 	@frappe.whitelist()
 	def generate_schedule(self):
 		if self.docstatus != 0:

@@ -8,6 +8,21 @@ from frappe.model.document import Document
 
 
 class ItemManufacturer(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		description: DF.SmallText | None
+		is_default: DF.Check
+		item_code: DF.Link
+		item_name: DF.Data | None
+		manufacturer: DF.Link
+		manufacturer_part_no: DF.Data
+	# end: auto-generated types
 	def validate(self):
 		self.validate_duplicate_entry()
 		self.manage_default_item_manufacturer()

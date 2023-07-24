@@ -28,6 +28,42 @@ exclude_from_linked_with = True
 
 
 class GLEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account: DF.Link | None
+		account_currency: DF.Link | None
+		against: DF.Text | None
+		against_voucher: DF.DynamicLink | None
+		against_voucher_type: DF.Link | None
+		company: DF.Link | None
+		cost_center: DF.Link | None
+		credit: DF.Currency
+		credit_in_account_currency: DF.Currency
+		debit: DF.Currency
+		debit_in_account_currency: DF.Currency
+		due_date: DF.Date | None
+		finance_book: DF.Link | None
+		fiscal_year: DF.Link | None
+		is_advance: DF.Literal["No", "Yes"]
+		is_cancelled: DF.Check
+		is_opening: DF.Literal["No", "Yes"]
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+		posting_date: DF.Date | None
+		project: DF.Link | None
+		remarks: DF.Text | None
+		to_rename: DF.Check
+		transaction_date: DF.Date | None
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+	# end: auto-generated types
 	def autoname(self):
 		"""
 		Temporarily name doc for fast insertion

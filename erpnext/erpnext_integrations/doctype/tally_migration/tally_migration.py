@@ -40,6 +40,38 @@ def new_doc(document):
 
 
 class TallyMigration(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		addresses: DF.Attach | None
+		chart_of_accounts: DF.Attach | None
+		day_book_data: DF.Attach | None
+		default_cost_center: DF.Link | None
+		default_round_off_account: DF.Link | None
+		default_uom: DF.Link | None
+		default_warehouse: DF.Link | None
+		erpnext_company: DF.Data | None
+		failed_import_log: DF.Code | None
+		fixed_errors_log: DF.Code | None
+		is_day_book_data_imported: DF.Check
+		is_day_book_data_processed: DF.Check
+		is_master_data_imported: DF.Check
+		is_master_data_processed: DF.Check
+		items: DF.Attach | None
+		master_data: DF.Attach | None
+		parties: DF.Attach | None
+		status: DF.Data | None
+		tally_company: DF.Data | None
+		tally_creditors_account: DF.Data
+		tally_debtors_account: DF.Data
+		uoms: DF.Attach | None
+		vouchers: DF.Attach | None
+	# end: auto-generated types
 	def validate(self):
 		failed_import_log = json.loads(self.failed_import_log)
 		sorted_failed_import_log = sorted(failed_import_log, key=lambda row: row["doc"]["creation"])

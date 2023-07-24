@@ -27,6 +27,43 @@ exclude_from_linked_with = True
 
 
 class StockLedgerEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		actual_qty: DF.Float
+		batch_no: DF.Data | None
+		company: DF.Link | None
+		dependant_sle_voucher_detail_no: DF.Data | None
+		fiscal_year: DF.Data | None
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		incoming_rate: DF.Currency
+		is_cancelled: DF.Check
+		item_code: DF.Link | None
+		outgoing_rate: DF.Currency
+		posting_date: DF.Date | None
+		posting_time: DF.Time | None
+		project: DF.Link | None
+		qty_after_transaction: DF.Float
+		recalculate_rate: DF.Check
+		serial_and_batch_bundle: DF.Link | None
+		serial_no: DF.LongText | None
+		stock_queue: DF.Text | None
+		stock_uom: DF.Link | None
+		stock_value: DF.Currency
+		stock_value_difference: DF.Currency
+		to_rename: DF.Check
+		valuation_rate: DF.Currency
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+		warehouse: DF.Link | None
+	# end: auto-generated types
 	def autoname(self):
 		"""
 		Temporarily name doc for fast insertion

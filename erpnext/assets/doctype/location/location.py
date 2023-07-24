@@ -13,6 +13,26 @@ EARTH_RADIUS = 6378137
 
 
 class Location(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		area: DF.Float
+		area_uom: DF.Link | None
+		is_container: DF.Check
+		is_group: DF.Check
+		latitude: DF.Float
+		lft: DF.Int
+		location_name: DF.Data
+		longitude: DF.Float
+		old_parent: DF.Data | None
+		parent_location: DF.Link | None
+		rgt: DF.Int
+	# end: auto-generated types
 	nsm_parent_field = "parent_location"
 
 	def validate(self):

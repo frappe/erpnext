@@ -8,6 +8,31 @@ from frappe.query_builder.functions import Sum
 
 
 class StockReservationEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		available_qty: DF.Float
+		company: DF.Link | None
+		delivered_qty: DF.Float
+		item_code: DF.Link | None
+		project: DF.Link | None
+		reserved_qty: DF.Float
+		status: DF.Literal[
+			"Draft", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered", "Cancelled"
+		]
+		stock_uom: DF.Link | None
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_qty: DF.Float
+		voucher_type: DF.Literal["", "Sales Order"]
+		warehouse: DF.Link | None
+	# end: auto-generated types
 	def validate(self) -> None:
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 

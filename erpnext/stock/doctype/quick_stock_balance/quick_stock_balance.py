@@ -10,6 +10,23 @@ from erpnext.stock.utils import get_stock_balance, get_stock_value_on
 
 
 class QuickStockBalance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		date: DF.Date
+		item: DF.Link
+		item_barcode: DF.Data | None
+		item_description: DF.SmallText | None
+		item_name: DF.Data | None
+		qty: DF.Float
+		value: DF.Currency
+		warehouse: DF.Link
+	# end: auto-generated types
 	pass
 
 

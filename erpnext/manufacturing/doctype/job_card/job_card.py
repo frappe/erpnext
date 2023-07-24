@@ -51,6 +51,81 @@ class JobCardOverTransferError(frappe.ValidationError):
 
 
 class JobCard(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.job_card_item.job_card_item import JobCardItem
+		from erpnext.manufacturing.doctype.job_card_operation.job_card_operation import JobCardOperation
+		from erpnext.manufacturing.doctype.job_card_scheduled_time.job_card_scheduled_time import (
+			JobCardScheduledTime,
+		)
+		from erpnext.manufacturing.doctype.job_card_scrap_item.job_card_scrap_item import (
+			JobCardScrapItem,
+		)
+		from erpnext.manufacturing.doctype.job_card_time_log.job_card_time_log import JobCardTimeLog
+
+		actual_end_date: DF.Datetime | None
+		actual_start_date: DF.Datetime | None
+		amended_from: DF.Link | None
+		barcode: DF.Barcode | None
+		batch_no: DF.Link | None
+		bom_no: DF.Link | None
+		company: DF.Link
+		current_time: DF.Int
+		employee: DF.TableMultiSelect[JobCardTimeLog] | None
+		expected_end_date: DF.Datetime | None
+		expected_start_date: DF.Datetime | None
+		for_job_card: DF.Link | None
+		for_operation: DF.Link | None
+		for_quantity: DF.Float
+		hour_rate: DF.Currency
+		is_corrective_job_card: DF.Check
+		item_name: DF.ReadOnly | None
+		items: DF.Table[JobCardItem]
+		job_started: DF.Check
+		naming_series: DF.Literal["PO-JOB.#####"]
+		operation: DF.Link
+		operation_id: DF.Data | None
+		operation_row_number: DF.Literal
+		posting_date: DF.Date | None
+		process_loss_qty: DF.Float
+		production_item: DF.Link | None
+		project: DF.Link | None
+		quality_inspection: DF.Link | None
+		quality_inspection_template: DF.Link | None
+		remarks: DF.SmallText | None
+		requested_qty: DF.Float
+		scheduled_time_logs: DF.Table[JobCardScheduledTime]
+		scrap_items: DF.Table[JobCardScrapItem]
+		sequence_id: DF.Int
+		serial_and_batch_bundle: DF.Link | None
+		serial_no: DF.SmallText | None
+		started_time: DF.Datetime | None
+		status: DF.Literal[
+			"Open",
+			"Work In Progress",
+			"Material Transferred",
+			"On Hold",
+			"Submitted",
+			"Cancelled",
+			"Completed",
+		]
+		sub_operations: DF.Table[JobCardOperation]
+		time_logs: DF.Table[JobCardTimeLog]
+		time_required: DF.Float
+		total_completed_qty: DF.Float
+		total_time_in_mins: DF.Float
+		transferred_qty: DF.Float
+		wip_warehouse: DF.Link
+		work_order: DF.Link
+		workstation: DF.Link
+		workstation_type: DF.Link | None
+	# end: auto-generated types
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value(
 			"Manufacturing Settings", "job_card_excess_transfer"

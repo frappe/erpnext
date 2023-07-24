@@ -29,6 +29,53 @@ from erpnext.utilities.product import get_price
 
 
 class WebsiteItem(WebsiteGenerator):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.e_commerce.doctype.recommended_items.recommended_items import RecommendedItems
+		from erpnext.e_commerce.doctype.website_item_tabbed_section.website_item_tabbed_section import (
+			WebsiteItemTabbedSection,
+		)
+		from erpnext.e_commerce.doctype.website_offer.website_offer import WebsiteOffer
+		from erpnext.setup.doctype.website_item_group.website_item_group import WebsiteItemGroup
+		from erpnext.stock.doctype.item_website_specification.item_website_specification import (
+			ItemWebsiteSpecification,
+		)
+
+		brand: DF.Link | None
+		description: DF.TextEditor | None
+		has_variants: DF.Check
+		item_code: DF.Link
+		item_group: DF.Link | None
+		item_name: DF.Data | None
+		naming_series: DF.Literal["WEB-ITM-.####"]
+		offers: DF.Table[WebsiteOffer]
+		on_backorder: DF.Check
+		published: DF.Check
+		ranking: DF.Int
+		recommended_items: DF.Table[RecommendedItems]
+		route: DF.SmallText | None
+		short_description: DF.SmallText | None
+		show_tabbed_section: DF.Check
+		slideshow: DF.Link | None
+		stock_uom: DF.Link | None
+		tabs: DF.Table[WebsiteItemTabbedSection]
+		thumbnail: DF.Data | None
+		variant_of: DF.Link | None
+		web_item_name: DF.Data
+		web_long_description: DF.TextEditor | None
+		website_content: DF.HTMLEditor | None
+		website_image: DF.AttachImage | None
+		website_image_alt: DF.Data | None
+		website_item_groups: DF.Table[WebsiteItemGroup]
+		website_specifications: DF.Table[ItemWebsiteSpecification]
+		website_warehouse: DF.Link | None
+	# end: auto-generated types
 	website = frappe._dict(
 		page_title_field="web_item_name",
 		condition_field="published",

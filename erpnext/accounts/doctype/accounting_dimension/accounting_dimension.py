@@ -13,6 +13,24 @@ from frappe.utils import cstr
 
 
 class AccountingDimension(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.accounting_dimension_detail.accounting_dimension_detail import (
+			AccountingDimensionDetail,
+		)
+
+		dimension_defaults: DF.Table[AccountingDimensionDetail]
+		disabled: DF.Check
+		document_type: DF.Link
+		fieldname: DF.Data | None
+		label: DF.Data | None
+	# end: auto-generated types
 	def before_insert(self):
 		self.set_fieldname_and_label()
 

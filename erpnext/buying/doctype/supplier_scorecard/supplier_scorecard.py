@@ -16,6 +16,37 @@ from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period 
 
 
 class SupplierScorecard(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.buying.doctype.supplier_scorecard_scoring_criteria.supplier_scorecard_scoring_criteria import (
+			SupplierScorecardScoringCriteria,
+		)
+		from erpnext.buying.doctype.supplier_scorecard_scoring_standing.supplier_scorecard_scoring_standing import (
+			SupplierScorecardScoringStanding,
+		)
+
+		criteria: DF.Table[SupplierScorecardScoringCriteria]
+		employee: DF.Link | None
+		indicator_color: DF.Data | None
+		notify_employee: DF.Check
+		notify_supplier: DF.Check
+		period: DF.Literal["Per Week", "Per Month", "Per Year"]
+		prevent_pos: DF.Check
+		prevent_rfqs: DF.Check
+		standings: DF.Table[SupplierScorecardScoringStanding]
+		status: DF.Data | None
+		supplier: DF.Link | None
+		supplier_score: DF.Data | None
+		warn_pos: DF.Check
+		warn_rfqs: DF.Check
+		weighting_function: DF.SmallText
+	# end: auto-generated types
 	def validate(self):
 		self.validate_standings()
 		self.validate_criteria_weights()

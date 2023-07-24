@@ -13,6 +13,72 @@ from erpnext.stock.utils import get_bin
 
 
 class SubcontractingOrder(SubcontractingController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
+			LandedCostTaxesandCharges,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_order_item.subcontracting_order_item import (
+			SubcontractingOrderItem,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_order_service_item.subcontracting_order_service_item import (
+			SubcontractingOrderServiceItem,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_order_supplied_item.subcontracting_order_supplied_item import (
+			SubcontractingOrderSuppliedItem,
+		)
+
+		additional_costs: DF.Table[LandedCostTaxesandCharges]
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		billing_address: DF.Link | None
+		billing_address_display: DF.SmallText | None
+		company: DF.Link
+		contact_display: DF.SmallText | None
+		contact_email: DF.SmallText | None
+		contact_mobile: DF.SmallText | None
+		contact_person: DF.Link | None
+		cost_center: DF.Link | None
+		distribute_additional_costs_based_on: DF.Literal["Qty", "Amount"]
+		items: DF.Table[SubcontractingOrderItem]
+		letter_head: DF.Link | None
+		naming_series: DF.Literal["SC-ORD-.YYYY.-"]
+		per_received: DF.Percent
+		project: DF.Link | None
+		purchase_order: DF.Link
+		schedule_date: DF.Date | None
+		select_print_heading: DF.Link | None
+		service_items: DF.Table[SubcontractingOrderServiceItem]
+		set_reserve_warehouse: DF.Link | None
+		set_warehouse: DF.Link | None
+		shipping_address: DF.Link | None
+		shipping_address_display: DF.SmallText | None
+		status: DF.Literal[
+			"Draft",
+			"Open",
+			"Partially Received",
+			"Completed",
+			"Material Transferred",
+			"Partial Material Transferred",
+			"Cancelled",
+		]
+		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
+		supplier: DF.Link
+		supplier_address: DF.Link | None
+		supplier_name: DF.Data
+		supplier_warehouse: DF.Link
+		title: DF.Data | None
+		total: DF.Currency
+		total_additional_costs: DF.Currency
+		total_qty: DF.Float
+		transaction_date: DF.Date
+	# end: auto-generated types
 	def before_validate(self):
 		super(SubcontractingOrder, self).before_validate()
 

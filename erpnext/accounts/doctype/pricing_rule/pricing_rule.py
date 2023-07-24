@@ -18,6 +18,114 @@ other_fields = ["other_item_code", "other_item_group", "other_brand"]
 
 
 class PricingRule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pricing_rule_brand.pricing_rule_brand import PricingRuleBrand
+		from erpnext.accounts.doctype.pricing_rule_item_code.pricing_rule_item_code import (
+			PricingRuleItemCode,
+		)
+		from erpnext.accounts.doctype.pricing_rule_item_group.pricing_rule_item_group import (
+			PricingRuleItemGroup,
+		)
+
+		applicable_for: DF.Literal[
+			"",
+			"Customer",
+			"Customer Group",
+			"Territory",
+			"Sales Partner",
+			"Campaign",
+			"Supplier",
+			"Supplier Group",
+		]
+		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
+		apply_discount_on_rate: DF.Check
+		apply_multiple_pricing_rules: DF.Check
+		apply_on: DF.Literal["", "Item Code", "Item Group", "Brand", "Transaction"]
+		apply_recursion_over: DF.Float
+		apply_rule_on_other: DF.Literal["", "Item Code", "Item Group", "Brand"]
+		brands: DF.Table[PricingRuleBrand]
+		buying: DF.Check
+		campaign: DF.Link | None
+		company: DF.Link | None
+		condition: DF.Code | None
+		coupon_code_based: DF.Check
+		currency: DF.Link
+		customer: DF.Link | None
+		customer_group: DF.Link | None
+		disable: DF.Check
+		discount_amount: DF.Currency
+		discount_percentage: DF.Float
+		for_price_list: DF.Link | None
+		free_item: DF.Link | None
+		free_item_rate: DF.Currency
+		free_item_uom: DF.Link | None
+		free_qty: DF.Float
+		is_cumulative: DF.Check
+		is_recursive: DF.Check
+		item_groups: DF.Table[PricingRuleItemGroup]
+		items: DF.Table[PricingRuleItemCode]
+		margin_rate_or_amount: DF.Float
+		margin_type: DF.Literal["", "Percentage", "Amount"]
+		max_amt: DF.Currency
+		max_qty: DF.Float
+		min_amt: DF.Currency
+		min_qty: DF.Float
+		mixed_conditions: DF.Check
+		naming_series: DF.Literal["PRLE-.####"]
+		other_brand: DF.Link | None
+		other_item_code: DF.Link | None
+		other_item_group: DF.Link | None
+		price_or_product_discount: DF.Literal["Price", "Product"]
+		priority: DF.Literal[
+			"",
+			"1",
+			"2",
+			"3",
+			"4",
+			"5",
+			"6",
+			"7",
+			"8",
+			"9",
+			"10",
+			"11",
+			"12",
+			"13",
+			"14",
+			"15",
+			"16",
+			"17",
+			"18",
+			"19",
+			"20",
+		]
+		promotional_scheme: DF.Link | None
+		promotional_scheme_id: DF.Data | None
+		rate: DF.Currency
+		rate_or_discount: DF.Literal["", "Rate", "Discount Percentage", "Discount Amount"]
+		recurse_for: DF.Float
+		round_free_qty: DF.Check
+		rule_description: DF.SmallText | None
+		sales_partner: DF.Link | None
+		same_item: DF.Check
+		selling: DF.Check
+		supplier: DF.Link | None
+		supplier_group: DF.Link | None
+		territory: DF.Link | None
+		threshold_percentage: DF.Percent
+		title: DF.Data
+		valid_from: DF.Date | None
+		valid_upto: DF.Date | None
+		validate_applied_rule: DF.Check
+		warehouse: DF.Link | None
+	# end: auto-generated types
 	def validate(self):
 		self.validate_mandatory()
 		self.validate_duplicate_apply_on()

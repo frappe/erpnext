@@ -29,6 +29,40 @@ from erpnext.support.doctype.issue.issue import get_holidays
 
 
 class ServiceLevelAgreement(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.support.doctype.pause_sla_on_status.pause_sla_on_status import PauseSLAOnStatus
+		from erpnext.support.doctype.service_day.service_day import ServiceDay
+		from erpnext.support.doctype.service_level_priority.service_level_priority import (
+			ServiceLevelPriority,
+		)
+		from erpnext.support.doctype.sla_fulfilled_on_status.sla_fulfilled_on_status import (
+			SLAFulfilledOnStatus,
+		)
+
+		apply_sla_for_resolution: DF.Check
+		condition: DF.Code | None
+		default_priority: DF.Link | None
+		default_service_level_agreement: DF.Check
+		document_type: DF.Link
+		enabled: DF.Check
+		end_date: DF.Date | None
+		entity: DF.DynamicLink | None
+		entity_type: DF.Literal["", "Customer", "Customer Group", "Territory"]
+		holiday_list: DF.Link
+		pause_sla_on: DF.Table[PauseSLAOnStatus]
+		priorities: DF.Table[ServiceLevelPriority]
+		service_level: DF.Data
+		sla_fulfilled_on: DF.Table[SLAFulfilledOnStatus]
+		start_date: DF.Date | None
+		support_and_resolution: DF.Table[ServiceDay]
+	# end: auto-generated types
 	def validate(self):
 		self.validate_selected_doctype()
 		self.validate_doc()

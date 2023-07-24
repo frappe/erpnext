@@ -8,6 +8,23 @@ from frappe.model.document import Document
 
 
 class ItemTaxTemplate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.item_tax_template_detail.item_tax_template_detail import (
+			ItemTaxTemplateDetail,
+		)
+
+		company: DF.Link
+		disabled: DF.Check
+		taxes: DF.Table[ItemTaxTemplateDetail]
+		title: DF.Data
+	# end: auto-generated types
 	def validate(self):
 		self.validate_tax_accounts()
 

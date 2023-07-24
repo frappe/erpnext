@@ -10,6 +10,27 @@ from frappe.model.document import Document
 
 
 class SocialMediaPost(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		campaign_name: DF.Link | None
+		image: DF.AttachImage | None
+		linkedin: DF.Check
+		linkedin_post: DF.Text | None
+		linkedin_post_id: DF.Data | None
+		post_status: DF.Literal["", "Scheduled", "Posted", "Cancelled", "Deleted", "Error"]
+		scheduled_time: DF.Datetime | None
+		text: DF.SmallText | None
+		title: DF.Data
+		twitter: DF.Check
+		twitter_post_id: DF.Data | None
+	# end: auto-generated types
 	def validate(self):
 		if not self.twitter and not self.linkedin:
 			frappe.throw(_("Select atleast one Social Media Platform to Share on."))

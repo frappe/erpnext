@@ -19,6 +19,26 @@ from erpnext.utilities import payment_app_import_guard
 
 
 class MpesaSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account_balance: DF.LongText | None
+		business_shortcode: DF.Data | None
+		consumer_key: DF.Data
+		consumer_secret: DF.Password
+		initiator_name: DF.Data | None
+		online_passkey: DF.Password
+		payment_gateway_name: DF.Data
+		sandbox: DF.Check
+		security_credential: DF.SmallText | None
+		till_number: DF.Data
+		transaction_limit: DF.Float
+	# end: auto-generated types
 	supported_currencies = ["KES"]
 
 	def validate_transaction_currency(self, currency):

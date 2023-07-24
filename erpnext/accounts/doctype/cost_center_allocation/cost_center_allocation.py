@@ -28,6 +28,24 @@ class InvalidDateError(frappe.ValidationError):
 
 
 class CostCenterAllocation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.cost_center_allocation_percentage.cost_center_allocation_percentage import (
+			CostCenterAllocationPercentage,
+		)
+
+		allocation_percentages: DF.Table[CostCenterAllocationPercentage]
+		amended_from: DF.Link | None
+		company: DF.Link
+		main_cost_center: DF.Link
+		valid_from: DF.Date
+	# end: auto-generated types
 	def __init__(self, *args, **kwargs):
 		super(CostCenterAllocation, self).__init__(*args, **kwargs)
 		self._skip_from_date_validation = False

@@ -7,6 +7,19 @@ from frappe.model.document import Document
 
 
 class Wishlist(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.e_commerce.doctype.wishlist_item.wishlist_item import WishlistItem
+
+		items: DF.Table[WishlistItem]
+		user: DF.Link
+	# end: auto-generated types
 	pass
 
 

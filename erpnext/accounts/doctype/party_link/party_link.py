@@ -7,6 +7,19 @@ from frappe.model.document import Document
 
 
 class PartyLink(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		primary_party: DF.DynamicLink | None
+		primary_role: DF.Link
+		secondary_party: DF.DynamicLink | None
+		secondary_role: DF.Link | None
+	# end: auto-generated types
 	def validate(self):
 		if self.primary_role not in ["Customer", "Supplier"]:
 			frappe.throw(

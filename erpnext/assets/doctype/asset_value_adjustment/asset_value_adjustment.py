@@ -19,6 +19,26 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 
 
 class AssetValueAdjustment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		asset: DF.Link
+		asset_category: DF.ReadOnly | None
+		company: DF.Link | None
+		cost_center: DF.Link | None
+		current_asset_value: DF.Currency
+		date: DF.Date
+		difference_amount: DF.Currency
+		finance_book: DF.Link | None
+		journal_entry: DF.Link | None
+		new_asset_value: DF.Currency
+	# end: auto-generated types
 	def validate(self):
 		self.validate_date()
 		self.set_current_asset_value()

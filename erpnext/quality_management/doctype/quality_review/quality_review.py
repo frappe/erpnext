@@ -7,6 +7,25 @@ from frappe.model.document import Document
 
 
 class QualityReview(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.quality_management.doctype.quality_review_objective.quality_review_objective import (
+			QualityReviewObjective,
+		)
+
+		additional_information: DF.Text | None
+		date: DF.Date | None
+		goal: DF.Link
+		procedure: DF.Link | None
+		reviews: DF.Table[QualityReviewObjective]
+		status: DF.Literal["Open", "Passed", "Failed"]
+	# end: auto-generated types
 	def validate(self):
 		# fetch targets from goal
 		if not self.reviews:

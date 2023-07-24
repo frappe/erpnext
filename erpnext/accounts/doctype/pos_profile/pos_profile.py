@@ -9,6 +9,56 @@ from frappe.utils import get_link_to_form, now
 
 
 class POSProfile(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pos_customer_group.pos_customer_group import POSCustomerGroup
+		from erpnext.accounts.doctype.pos_item_group.pos_item_group import POSItemGroup
+		from erpnext.accounts.doctype.pos_payment_method.pos_payment_method import POSPaymentMethod
+		from erpnext.accounts.doctype.pos_profile_user.pos_profile_user import POSProfileUser
+
+		account_for_change_amount: DF.Link | None
+		allow_discount_change: DF.Check
+		allow_rate_change: DF.Check
+		applicable_for_users: DF.Table[POSProfileUser]
+		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
+		auto_add_item_to_cart: DF.Check
+		campaign: DF.Link | None
+		company: DF.Link
+		company_address: DF.Link | None
+		cost_center: DF.Link | None
+		country: DF.ReadOnly | None
+		currency: DF.Link
+		customer: DF.Link | None
+		customer_groups: DF.Table[POSCustomerGroup]
+		disable_rounded_total: DF.Check
+		disabled: DF.Check
+		expense_account: DF.Link | None
+		hide_images: DF.Check
+		hide_unavailable_items: DF.Check
+		ignore_pricing_rule: DF.Check
+		income_account: DF.Link | None
+		item_groups: DF.Table[POSItemGroup]
+		letter_head: DF.Link | None
+		payments: DF.Table[POSPaymentMethod]
+		print_format: DF.Link | None
+		select_print_heading: DF.Link | None
+		selling_price_list: DF.Link | None
+		tax_category: DF.Link | None
+		taxes_and_charges: DF.Link | None
+		tc_name: DF.Link | None
+		update_stock: DF.Check
+		validate_stock_on_save: DF.Check
+		warehouse: DF.Link
+		write_off_account: DF.Link
+		write_off_cost_center: DF.Link
+		write_off_limit: DF.Currency
+	# end: auto-generated types
 	def validate(self):
 		self.validate_default_profile()
 		self.validate_all_link_fields()

@@ -27,6 +27,40 @@ class ConflictingTaxRule(frappe.ValidationError):
 
 
 class TaxRule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		billing_city: DF.Data | None
+		billing_country: DF.Link | None
+		billing_county: DF.Data | None
+		billing_state: DF.Data | None
+		billing_zipcode: DF.Data | None
+		company: DF.Link | None
+		customer: DF.Link | None
+		customer_group: DF.Link | None
+		from_date: DF.Date | None
+		item: DF.Link | None
+		item_group: DF.Link | None
+		priority: DF.Int
+		purchase_tax_template: DF.Link | None
+		sales_tax_template: DF.Link | None
+		shipping_city: DF.Data | None
+		shipping_country: DF.Link | None
+		shipping_county: DF.Data | None
+		shipping_state: DF.Data | None
+		shipping_zipcode: DF.Data | None
+		supplier: DF.Link | None
+		supplier_group: DF.Link | None
+		tax_category: DF.Link | None
+		tax_type: DF.Literal["Sales", "Purchase"]
+		to_date: DF.Date | None
+		use_for_shopping_cart: DF.Check
+	# end: auto-generated types
 	def __setup__(self):
 		self.flags.ignore_these_exceptions_in_test = [ConflictingTaxRule]
 
