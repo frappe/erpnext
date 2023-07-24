@@ -579,7 +579,7 @@ erpnext.PointOfSale.Controller = class {
 			console.log(error);
 		} finally {
 			frappe.dom.unfreeze();
-			return item_row;
+			return item_row; // eslint-disable-line no-unsafe-finally
 		}
 	}
 

@@ -1,8 +1,10 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-{% include 'erpnext/selling/sales_common.js' %}
+erpnext.accounts.taxes.setup_tax_validations("Sales Taxes and Charges Template");
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.pre_sales.set_as_lost("Quotation");
+erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on('Quotation', {
 	setup: function(frm) {

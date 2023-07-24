@@ -473,7 +473,7 @@ frappe.ui.form.on('Asset', {
 		}
 		const item = purchase_doc.items.find(item => item.item_code === frm.doc.item_code);
 		if (!item) {
-			doctype_field = frappe.scrub(doctype)
+			let doctype_field = frappe.scrub(doctype)
 			frm.set_value(doctype_field, '');
 			frappe.msgprint({
 				title: __('Invalid {0}', [__(doctype)]),

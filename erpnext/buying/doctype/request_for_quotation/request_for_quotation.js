@@ -1,10 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-{% include 'erpnext/public/js/controllers/buying.js' %};
-
 cur_frm.add_fetch('contact', 'email_id', 'email_id')
+
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
@@ -436,7 +435,7 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 
 				//Remove blanks
 				for (var j = 0; j < frm.doc.suppliers.length; j++) {
-					if(!frm.doc.suppliers[j].hasOwnProperty("supplier")) {
+					if(!Object.prototype.hasOwnProperty.call(frm.doc.suppliers[j], "supplier")) {
 						frm.get_field("suppliers").grid.grid_rows[j].remove();
 					}
 				}
@@ -445,10 +444,11 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 					if(r.message) {
 						for (var i = 0; i < r.message.length; i++) {
 							var exists = false;
+							let supplier = "";
 							if (r.message[i].constructor === Array){
-								var supplier = r.message[i][0];
+								supplier = r.message[i][0];
 							} else {
-								var supplier = r.message[i].name;
+								supplier = r.message[i].name;
 							}
 
 							for (var j = 0; j < doc.suppliers.length;j++) {
