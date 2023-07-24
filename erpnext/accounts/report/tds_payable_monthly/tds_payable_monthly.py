@@ -33,7 +33,7 @@ def validate_filters(filters):
 def get_result(
 	filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, invoice_net_total_map
 ):
-	party_map = get_party_pan_map()
+	party_map = get_party_pan_map(filters.get("party_type"))
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
 
@@ -103,23 +103,23 @@ def get_result(
 	return out
 
 
-def get_party_pan_map():
+def get_party_pan_map(party_type):
 	party_map = frappe._dict()
-	fields = ["name", "supplier_type", "supplier_name", "tax_withholding_category"]
-	if frappe.db.has_column("Supplier", "pan"):
-		fields.append("pan")
-	suppliers = frappe.db.get_all("Supplier", fields=fields)
 
-	fields = ["name", "customer_type", "customer_name", "tax_withholding_category"]
-	if frappe.db.has_column("Customer", "pan"):
+	fields = ["name", "tax_withholding_category"]
+	if party_type == "Supplier":
+		fields += ["supplier_type", "supplier_name"]
+	else:
+		fields += ["customer_type", "customer_name"]
+
+	if frappe.db.has_column(party_type, "pan"):
 		fields.append("pan")
-	customers = frappe.db.get_all("Customer", fields=fields)
-	for d in suppliers:
-		d.party_type = "Supplier"
-		party_map[d.name] = d
-	for d in customers:
-		d.party_type = "Customer"
-		party_map[d.name] = d
+
+	party_details = frappe.db.get_all(party_type, fields=fields)
+
+	for party in party_details:
+		party.party_type = party_type
+		party_map[party.name] = party
 
 	return party_map
 
@@ -232,6 +232,9 @@ def get_tds_docs(filters):
 		"is_cancelled": 0,
 		"against": ("not in", bank_accounts),
 	}
+
+	party = frappe.get_all(filters.get("party_type"), pluck="name")
+	query_filters.update({"against": ("in", party)})
 
 	if filters.get("party"):
 		del query_filters["account"]

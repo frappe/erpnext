@@ -15,7 +15,11 @@ frappe.query_reports["TDS Payable Monthly"] = {
 			"fieldname":"party_type",
 			"label": __("Party Type"),
 			"fieldtype": "Select",
-			"options": ["Supplier", "Customer"]
+			"options": ["Supplier", "Customer"],
+			"reqd": 1,
+			"on_change": function(){
+				frappe.query_report.set_filter_value("party", "");
+			}
 		},
 		{
 			"fieldname":"party",
