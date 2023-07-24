@@ -408,6 +408,15 @@ class JournalEntry(AccountsController):
 							d.idx, d.account
 						)
 					)
+				elif (
+					d.party_type
+					and frappe.db.get_value("Party Type", d.party_type, "account_type") != account_type
+				):
+					frappe.throw(
+						_("Row {0}: Account {1} and Party Type {2} have different account types").format(
+							d.idx, d.account, d.party_type
+						)
+					)
 
 	def check_credit_limit(self):
 		customers = list(

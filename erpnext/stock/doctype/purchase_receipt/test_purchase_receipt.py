@@ -350,6 +350,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 		self.assertFalse(frappe.db.get_value("Serial No", pr_row_1_serial_no, "warehouse"))
 
+	def test_rejected_warehouse_filter(self):
+		pr = frappe.copy_doc(test_records[0])
+		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
+		pr.get("items")[0].qty = 3
+		pr.get("items")[0].rejected_qty = 2
+		pr.get("items")[0].received_qty = 5
+		pr.get("items")[0].rejected_warehouse = pr.get("items")[0].warehouse
+		self.assertRaises(frappe.ValidationError, pr.save)
+
 	def test_rejected_serial_no(self):
 		pr = frappe.copy_doc(test_records[0])
 		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
@@ -1956,6 +1965,32 @@ class TestPurchaseReceipt(FrappeTestCase):
 		ste5.reload()
 		self.assertEqual(ste5.items[0].valuation_rate, 275.00)
 
+		ste6 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -3),
+			source=warehouse1,
+			target=warehouse,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste6.reload()
+		self.assertEqual(ste6.items[0].valuation_rate, 275.00)
+
+		ste7 = make_stock_entry(
+			purpose="Material Transfer",
+			posting_date=add_days(today(), -3),
+			source=warehouse,
+			target=warehouse1,
+			item_code=item_code,
+			qty=20,
+			company=pr.company,
+		)
+
+		ste7.reload()
+		self.assertEqual(ste7.items[0].valuation_rate, 275.00)
+
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=2500 * -1)
 
 		pr.reload()
@@ -1975,6 +2010,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		ste5.reload()
 		self.assertEqual(ste5.items[0].valuation_rate, valuation_rate)
+
+		ste6.reload()
+		self.assertEqual(ste6.items[0].valuation_rate, valuation_rate)
+
+		ste7.reload()
+		self.assertEqual(ste7.items[0].valuation_rate, valuation_rate)
 
 
 def prepare_data_for_internal_transfer():

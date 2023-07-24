@@ -10,7 +10,6 @@ from frappe.utils import cint
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
-	"fiscal_year": "current_fiscal_year",
 	"company": "default_company",
 	"currency": "default_currency",
 	"country": "country",
@@ -28,22 +27,6 @@ class GlobalDefaults(Document):
 		"""update defaults"""
 		for key in keydict:
 			frappe.db.set_default(key, self.get(keydict[key], ""))
-
-		# update year start date and year end date from fiscal_year
-		if self.current_fiscal_year:
-			if fiscal_year := frappe.get_all(
-				"Fiscal Year",
-				filters={"name": self.current_fiscal_year},
-				fields=["year_start_date", "year_end_date"],
-				limit=1,
-				order_by=None,
-			):
-				ysd = fiscal_year[0].year_start_date or ""
-				yed = fiscal_year[0].year_end_date or ""
-
-				if ysd and yed:
-					frappe.db.set_default("year_start_date", ysd.strftime("%Y-%m-%d"))
-					frappe.db.set_default("year_end_date", yed.strftime("%Y-%m-%d"))
 
 		# enable default currency
 		if self.default_currency:
