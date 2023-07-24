@@ -3213,7 +3213,7 @@ class TestSalesInvoice(unittest.TestCase):
 			account.disabled = 0
 			account.save()
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancel_of_invoice": 1})
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_gain_loss_with_advance_entry(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
