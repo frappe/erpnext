@@ -926,6 +926,7 @@ def create_pos_invoice(**args):
 
 	pos_inv.set_missing_values()
 
+<<<<<<< HEAD
 	pos_inv.append(
 		"items",
 		{
@@ -940,6 +941,72 @@ def create_pos_invoice(**args):
 			"batch_no": args.batch_no,
 		},
 	)
+=======
+	bundle_id = None
+	if args.get("batch_no") or args.get("serial_no"):
+		type_of_transaction = args.type_of_transaction or "Outward"
+
+		if pos_inv.is_return:
+			type_of_transaction = "Inward"
+
+		qty = args.get("qty") or 1
+		qty *= -1 if type_of_transaction == "Outward" else 1
+		batches = {}
+		if args.get("batch_no"):
+			batches = frappe._dict({args.batch_no: qty})
+
+		bundle_id = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": args.item or args.item_code or "_Test Item",
+					"warehouse": args.warehouse or "_Test Warehouse - _TC",
+					"qty": qty,
+					"batches": batches,
+					"voucher_type": "Delivery Note",
+					"serial_nos": args.serial_no,
+					"posting_date": pos_inv.posting_date,
+					"posting_time": pos_inv.posting_time,
+					"type_of_transaction": type_of_transaction,
+					"do_not_submit": True,
+				}
+			)
+		).name
+
+		if not bundle_id:
+			msg = f"Serial No {args.serial_no} not available for Item {args.item}"
+			frappe.throw(_(msg))
+
+	# append in pos invoice items without item_code by checking flag without_item_code
+	if args.without_item_code:
+		pos_inv.append(
+			"items",
+			{
+				"item_name": args.item_name or "_Test Item",
+				"description": args.item_name or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty or 1,
+				"rate": args.rate if args.get("rate") is not None else 100,
+				"income_account": args.income_account or "Sales - _TC",
+				"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+				"cost_center": args.cost_center or "_Test Cost Center - _TC",
+			},
+		)
+
+	else:
+		pos_inv.append(
+			"items",
+			{
+				"item_code": args.item or args.item_code or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty or 1,
+				"rate": args.rate if args.get("rate") is not None else 100,
+				"income_account": args.income_account or "Sales - _TC",
+				"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+				"cost_center": args.cost_center or "_Test Cost Center - _TC",
+				"serial_and_batch_bundle": bundle_id,
+			},
+		)
+>>>>>>> 82b36e2ec8 (fix: added test for pos closing without item code)
 
 	if not args.do_not_save:
 		pos_inv.insert()
