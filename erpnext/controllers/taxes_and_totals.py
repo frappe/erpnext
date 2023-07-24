@@ -18,6 +18,7 @@ from erpnext.controllers.accounts_controller import (
 	validate_taxes_and_charges,
 )
 from erpnext.stock.get_item_details import _get_item_tax_template
+from erpnext.utilities.regional import temporary_flag
 
 
 class calculate_taxes_and_totals(object):
@@ -942,7 +943,6 @@ class calculate_taxes_and_totals(object):
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:
 		return
-	frappe.flags.company = doc.company
 
 	# get headers
 	tax_accounts = []
@@ -952,15 +952,11 @@ def get_itemised_tax_breakup_html(doc):
 		if tax.description not in tax_accounts:
 			tax_accounts.append(tax.description)
 
-	headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
-
-	# get tax breakup data
-	itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
-
-	get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
-
-	update_itemised_tax_data(doc)
-	frappe.flags.company = None
+	with temporary_flag("company", doc.company):
+		headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
+		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
+		get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
+		update_itemised_tax_data(doc)
 
 	return frappe.render_template(
 		"templates/includes/itemised_tax_breakup.html",
@@ -977,10 +973,8 @@ def get_itemised_tax_breakup_html(doc):
 @frappe.whitelist()
 def get_round_off_applicable_accounts(company, account_list):
 	# required to set correct region
-	frappe.flags.company = company
-	account_list = get_regional_round_off_accounts(company, account_list)
-
-	return account_list
+	with temporary_flag("company", company):
+		return get_regional_round_off_accounts(company, account_list)
 
 
 @erpnext.allow_regional
