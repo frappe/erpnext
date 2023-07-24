@@ -81,7 +81,7 @@ frappe.ui.form.on("Sales Order", {
 			if (frm.is_new()) {
 				frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
 					if (value) {
-						frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission").then((value) => {
+						frappe.db.get_single_value("Stock Settings", "auto_reserve_stock_on_sales_order_submission").then((value) => {
 							// If `Reserve Stock on Sales Order Submission` is enabled in Stock Settings, set Reserve Stock to 1 else 0.
 							frm.set_value("reserve_stock", value ? 1 : 0);
 						})

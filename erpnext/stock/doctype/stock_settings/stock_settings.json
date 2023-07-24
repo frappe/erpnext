@@ -34,7 +34,7 @@
   "stock_reservation_tab",
   "enable_stock_reservation",
   "column_break_rx3e",
-  "reserve_stock_on_sales_order_submission",
+  "auto_reserve_stock_on_sales_order_submission",
   "allow_partial_reservation",
   "serial_and_batch_reservation_section",
   "auto_reserve_serial_and_batch",
@@ -345,14 +345,6 @@
    "label": "Enable Stock Reservation"
   },
   {
-   "default": "0",
-   "depends_on": "eval: doc.enable_stock_reservation",
-   "description": "If enabled, <b>Stock Reservation Entries</b> will be created on submission of <b>Sales Order</b>",
-   "fieldname": "reserve_stock_on_sales_order_submission",
-   "fieldtype": "Check",
-   "label": "Reserve Stock on Sales Order Submission"
-  },
-  {
    "fieldname": "column_break_rx3e",
    "fieldtype": "Column Break"
   },
@@ -399,6 +391,14 @@
    "fieldname": "serial_and_batch_reservation_section",
    "fieldtype": "Section Break",
    "label": "Serial and Batch Reservation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "If enabled, <b>Stock Reservation Entries</b> will be created on submission of <b>Sales Order</b>",
+   "fieldname": "auto_reserve_stock_on_sales_order_submission",
+   "fieldtype": "Check",
+   "label": "Auto Reserve Stock on Sales Order Submission"
   }
  ],
  "icon": "icon-cog",
@@ -406,7 +406,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-07-10 10:06:02.291504",
+ "modified": "2023-07-24 08:57:44.151022",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
