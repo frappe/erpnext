@@ -33,6 +33,7 @@ import erpnext
 from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
+from erpnext.utilities.regional import temporary_flag
 
 PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
 SALES_TRANSACTION_TYPES = {
@@ -261,9 +262,8 @@ def set_address_details(
 	)
 
 	if doctype in TRANSACTION_TYPES:
-		# required to set correct region
-		frappe.flags.company = company
-		get_regional_address_details(party_details, doctype, company)
+		with temporary_flag("company", company):
+			get_regional_address_details(party_details, doctype, company)
 
 	return party_address, shipping_address
 
