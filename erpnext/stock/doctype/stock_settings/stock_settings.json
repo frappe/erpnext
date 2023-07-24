@@ -340,6 +340,7 @@
   },
   {
    "default": "0",
+   "description": "Allows to keep aside a specific quantity of inventory for a particular order.",
    "fieldname": "enable_stock_reservation",
    "fieldtype": "Check",
    "label": "Enable Stock Reservation"
@@ -406,7 +407,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-07-24 08:57:44.151022",
+ "modified": "2023-07-24 09:45:47.543037",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
