@@ -8,7 +8,7 @@ frappe.query_reports["Batch Item Expiry Status"] = {
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default": frappe.sys_defaults.year_start_date,
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[1],
 			"reqd": 1,
 		},
 		{

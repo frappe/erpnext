@@ -37,14 +37,14 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("From Posting Date"),
 			fieldname:"from_date",
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_start_date"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[1],
 			reqd: 1
 		},
 		{
 			label: __("To Posting Date"),
 			fieldname:"to_date",
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_end_date"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[2],
 			reqd: 1,
 		},
 		{
