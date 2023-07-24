@@ -410,10 +410,10 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "status",
@@ -433,7 +433,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2021-12-23 10:44:30.299450",
+ "modified": "2023-04-14 15:58:46.139887",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -461,7 +461,6 @@
    "read": 1,
    "report": 1,
    "role": "Stock Manager",
-   "set_user_permissions": 1,
    "write": 1
   },
   {

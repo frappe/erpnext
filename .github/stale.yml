@@ -13,7 +13,7 @@ exemptProjects: true
 exemptMilestones: true
 
 pulls:
-  daysUntilStale: 15
+  daysUntilStale: 14
   daysUntilClose: 3
   exemptLabels:
     - hotfix

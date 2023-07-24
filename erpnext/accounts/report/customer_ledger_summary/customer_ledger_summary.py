@@ -26,12 +26,49 @@ class PartyLedgerSummaryReport(object):
 		)
 
 		self.get_gl_entries()
+		self.get_additional_columns()
 		self.get_return_invoices()
 		self.get_party_adjustment_amounts()
 
 		columns = self.get_columns()
 		data = self.get_data()
 		return columns, data
+
+	def get_additional_columns(self):
+		"""
+		Additional Columns for 'User Permission' based access control
+		"""
+		from frappe import qb
+
+		if self.filters.party_type == "Customer":
+			self.territories = frappe._dict({})
+			self.customer_group = frappe._dict({})
+
+			customer = qb.DocType("Customer")
+			result = (
+				frappe.qb.from_(customer)
+				.select(
+					customer.name, customer.territory, customer.customer_group, customer.default_sales_partner
+				)
+				.where((customer.disabled == 0))
+				.run(as_dict=True)
+			)
+
+			for x in result:
+				self.territories[x.name] = x.territory
+				self.customer_group[x.name] = x.customer_group
+		else:
+			self.supplier_group = frappe._dict({})
+			supplier = qb.DocType("Supplier")
+			result = (
+				frappe.qb.from_(supplier)
+				.select(supplier.name, supplier.supplier_group)
+				.where((supplier.disabled == 0))
+				.run(as_dict=True)
+			)
+
+			for x in result:
+				self.supplier_group[x.name] = x.supplier_group
 
 	def get_columns(self):
 		columns = [
@@ -116,6 +153,35 @@ class PartyLedgerSummaryReport(object):
 			},
 		]
 
+		# Hidden columns for handling 'User Permissions'
+		if self.filters.party_type == "Customer":
+			columns += [
+				{
+					"label": _("Territory"),
+					"fieldname": "territory",
+					"fieldtype": "Link",
+					"options": "Territory",
+					"hidden": 1,
+				},
+				{
+					"label": _("Customer Group"),
+					"fieldname": "customer_group",
+					"fieldtype": "Link",
+					"options": "Customer Group",
+					"hidden": 1,
+				},
+			]
+		else:
+			columns += [
+				{
+					"label": _("Supplier Group"),
+					"fieldname": "supplier_group",
+					"fieldtype": "Link",
+					"options": "Supplier Group",
+					"hidden": 1,
+				}
+			]
+
 		return columns
 
 	def get_data(self):
@@ -142,6 +208,12 @@ class PartyLedgerSummaryReport(object):
 					}
 				),
 			)
+
+			if self.filters.party_type == "Customer":
+				self.party_data[gle.party].update({"territory": self.territories.get(gle.party)})
+				self.party_data[gle.party].update({"customer_group": self.customer_group.get(gle.party)})
+			else:
+				self.party_data[gle.party].update({"supplier_group": self.supplier_group.get(gle.party)})
 
 			amount = gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
 			self.party_data[gle.party].closing_balance += amount

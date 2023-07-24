@@ -18,6 +18,22 @@ class POSInvoiceMergeLog(Document):
 	def validate(self):
 		self.validate_customer()
 		self.validate_pos_invoice_status()
+		self.validate_duplicate_pos_invoices()
+
+	def validate_duplicate_pos_invoices(self):
+		pos_occurences = {}
+		for idx, inv in enumerate(self.pos_invoices, 1):
+			pos_occurences.setdefault(inv.pos_invoice, []).append(idx)
+
+		error_list = []
+		for key, value in pos_occurences.items():
+			if len(value) > 1:
+				error_list.append(
+					_("{} is added multiple times on rows: {}".format(frappe.bold(key), frappe.bold(value)))
+				)
+
+		if error_list:
+			frappe.throw(error_list, title=_("Duplicate POS Invoices found"), as_list=True)
 
 	def validate_customer(self):
 		if self.merge_invoices_based_on == "Customer Group":
@@ -426,6 +442,8 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Failed")
+			if type(error_message) == list:
+				error_message = frappe.json.dumps(error_message)
 			closing_entry.db_set("error_message", error_message)
 		raise
 

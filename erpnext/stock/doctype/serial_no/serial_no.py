@@ -304,6 +304,14 @@ def validate_serial_no(sle, item_det):
 					_("Duplicate Serial No entered for Item {0}").format(sle.item_code), SerialNoDuplicateError
 				)
 
+			allow_existing_serial_no = cint(
+				frappe.get_cached_value("Stock Settings", "None", "allow_existing_serial_no")
+			)
+
+			work_order = None
+			if sle.voucher_no and sle.voucher_type == "Stock Entry":
+				work_order = frappe.get_cached_value("Stock Entry", sle.voucher_no, "work_order")
+
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value(
@@ -321,6 +329,7 @@ def validate_serial_no(sle, item_det):
 							"purchase_document_no",
 							"company",
 							"status",
+							"work_order",
 						],
 						as_dict=1,
 					)
@@ -331,6 +340,26 @@ def validate_serial_no(sle, item_det):
 								_("Serial No {0} does not belong to Item {1}").format(serial_no, sle.item_code),
 								SerialNoItemError,
 							)
+
+					if sr.work_order and work_order and sr.work_order == work_order:
+						allow_existing_serial_no = True
+
+					if not allow_existing_serial_no and sle.voucher_type in [
+						"Stock Entry",
+						"Purchase Receipt",
+						"Purchase Invoice",
+					]:
+						msg = ""
+
+						if sle.voucher_type == "Stock Entry":
+							se_purpose = frappe.db.get_value("Stock Entry", sle.voucher_no, "purpose")
+							if se_purpose in ["Manufacture", "Material Receipt"]:
+								msg = f"Cannot create a {sle.voucher_type} ({se_purpose}) for the Item {frappe.bold(sle.item_code)} with the existing Serial No {frappe.bold(serial_no)}."
+						else:
+							msg = f"Cannot create a {sle.voucher_type} for the Item {frappe.bold(sle.item_code)} with the existing Serial No {frappe.bold(serial_no)}."
+
+						if msg:
+							frappe.throw(_(msg), SerialNoDuplicateError)
 
 					if cint(sle.actual_qty) > 0 and has_serial_no_exists(sr, sle):
 						doc_name = frappe.bold(get_link_to_form(sr.purchase_document_type, sr.purchase_document_no))
@@ -766,13 +795,13 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 
 @frappe.whitelist()
 def auto_fetch_serial_number(
-	qty: float,
+	qty: int,
 	item_code: str,
 	warehouse: str,
 	posting_date: Optional[str] = None,
 	batch_nos: Optional[Union[str, List[str]]] = None,
 	for_doctype: Optional[str] = None,
-	exclude_sr_nos: Optional[List[str]] = None,
+	exclude_sr_nos=None,
 ) -> List[str]:
 
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})

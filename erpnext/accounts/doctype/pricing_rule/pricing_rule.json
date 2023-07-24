@@ -469,10 +469,10 @@
    "options": "UOM"
   },
   {
-   "description": "If rate is zero them item will be treated as \"Free Item\"",
+   "description": "If rate is zero then item will be treated as \"Free Item\"",
    "fieldname": "free_item_rate",
    "fieldtype": "Currency",
-   "label": "Rate"
+   "label": "Free Item Rate"
   },
   {
    "collapsible": 1,
@@ -608,7 +608,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2022-10-13 19:05:35.056304",
+ "modified": "2023-02-14 04:53:34.887358",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

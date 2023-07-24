@@ -34,7 +34,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		super.onload();
 
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log',
-			'POS Closing Entry', 'Journal Entry', 'Payment Entry'];
+							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger"];
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -64,6 +64,25 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
+		if (this.frm.doc.repost_required && this.frm.doc.docstatus===1) {
+			this.frm.set_intro(__("Accounting entries for this invoice needs to be reposted. Please click on 'Repost' button to update."));
+			this.frm.add_custom_button(__('Repost Accounting Entries'),
+				() => {
+					this.frm.call({
+						doc: this.frm.doc,
+						method: 'repost_accounting_entries',
+						freeze: true,
+						freeze_message: __('Reposting...'),
+						callback: (r) => {
+							if (!r.exc) {
+								frappe.msgprint(__('Accounting Entries are reposted'));
+								me.frm.refresh();
+							}
+						}
+					});
+				}).removeClass('btn-default').addClass('btn-warning');
+		}
+
 		if (this.frm.doc.is_return) {
 			this.frm.return_print_format = "Sales Invoice Return";
 		}
@@ -74,9 +93,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {
-			cur_frm.add_custom_button(__('Payment'),
-				this.make_payment_entry, __('Create'));
-			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+			this.frm.add_custom_button(
+				__('Payment'),
+				() => this.make_payment_entry(),
+				__('Create')
+			);
+			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if(doc.docstatus==1 && !doc.is_return) {
@@ -318,6 +340,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	make_inter_company_invoice() {
+		let me = this;
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
 			frm: me.frm
@@ -653,19 +676,6 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		}
 
-		// expense account
-		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
-			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
-				return {
-					filters: {
-						'report_type': 'Profit and Loss',
-						'company': doc.company,
-						"is_group": 0
-					}
-				}
-			}
-		}
-
 		// discount account
 		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
 			return {
@@ -883,6 +893,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
+		frm.refresh_field("timesheets");
+		frm.trigger("calculate_timesheet_totals");
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {
@@ -922,9 +934,6 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
 		row.project_name = time_log.project_name;
-
-		frm.refresh_field("timesheets");
-		frm.trigger("calculate_timesheet_totals");
 	},
 
 	calculate_timesheet_totals: function(frm) {
@@ -1034,7 +1043,7 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 		]
 	});
 
-	dialog.set_primary_action(__("Set"), function() {
+	dialog.set_primary_action(__("Set Loyalty Program"), function() {
 		dialog.hide();
 		return frappe.call({
 			method: "frappe.client.set_value",

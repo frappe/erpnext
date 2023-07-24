@@ -338,6 +338,37 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.per_returned, 100)
 		self.assertEqual(dn.status, "Return Issued")
 
+	def test_delivery_note_return_valuation_on_different_warehuose(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
+		item_code = "Test Return Valuation For DN"
+		make_item("Test Return Valuation For DN", {"is_stock_item": 1})
+		return_warehouse = create_warehouse("Returned Test Warehouse", company=company)
+
+		make_stock_entry(item_code=item_code, target="Stores - TCP1", qty=5, basic_rate=150)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			company=company,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		dn.submit()
+		self.assertEqual(dn.items[0].incoming_rate, 150)
+
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		return_dn = make_return_doc(dn.doctype, dn.name)
+		return_dn.items[0].warehouse = return_warehouse
+		return_dn.save().submit()
+
+		self.assertEqual(return_dn.items[0].incoming_rate, 150)
+
 	def test_return_single_item_from_bundled_items(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
@@ -489,6 +520,46 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 
 		self.assertEqual(gle_warehouse_amount, 1400)
+
+	def test_bin_details_of_packed_item(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# test Update Items with product bundle
+		if not frappe.db.exists("Item", "_Test Product Bundle Item New"):
+			bundle_item = make_item("_Test Product Bundle Item New", {"is_stock_item": 0})
+			bundle_item.append(
+				"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+			)
+			bundle_item.save(ignore_permissions=True)
+
+		make_item("_Packed Item New 1", {"is_stock_item": 1})
+		make_product_bundle("_Test Product Bundle Item New", ["_Packed Item New 1"], 2)
+
+		si = create_delivery_note(
+			item_code="_Test Product Bundle Item New",
+			update_stock=1,
+			warehouse="_Test Warehouse - _TC",
+			transaction_date=add_days(nowdate(), -1),
+			do_not_submit=1,
+		)
+
+		make_stock_entry(item="_Packed Item New 1", target="_Test Warehouse - _TC", qty=120, rate=100)
+
+		bin_details = frappe.db.get_value(
+			"Bin",
+			{"item_code": "_Packed Item New 1", "warehouse": "_Test Warehouse - _TC"},
+			["actual_qty", "projected_qty", "ordered_qty"],
+			as_dict=1,
+		)
+
+		si.transaction_date = nowdate()
+		si.save()
+
+		packed_item = si.packed_items[0]
+		self.assertEqual(flt(bin_details.actual_qty), flt(packed_item.actual_qty))
+		self.assertEqual(flt(bin_details.projected_qty), flt(packed_item.projected_qty))
+		self.assertEqual(flt(bin_details.ordered_qty), flt(packed_item.ordered_qty))
 
 	def test_return_for_serialized_items(self):
 		se = make_serialized_item()
@@ -649,6 +720,11 @@ class TestDeliveryNote(FrappeTestCase):
 
 		update_delivery_note_status(dn.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
+
+		# Check cancelling closed delivery note
+		dn.load_from_db()
+		dn.cancel()
+		self.assertEqual(dn.status, "Cancelled")
 
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI

@@ -62,11 +62,13 @@
   "set_reserve_warehouse",
   "supplied_items",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_53",
-  "tax_category",
-  "column_break_50",
   "shipping_rule",
+  "column_break_50",
+  "incoterm",
+  "named_place",
   "section_break_52",
   "taxes",
   "totals",
@@ -106,7 +108,7 @@
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "company_shipping_address_section",
+  "shipping_address_section",
   "shipping_address",
   "column_break_99",
   "shipping_address_display",
@@ -155,7 +157,7 @@
   "party_account_currency",
   "inter_company_order_reference",
   "is_old_subcontracting_flow",
-  "dashboard"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -383,7 +385,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "label": "Company Shipping Address",
+   "label": "Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -493,6 +495,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Purchase Order Item",
@@ -1098,8 +1101,7 @@
   {
    "fieldname": "before_items_section",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "Items"
+   "hide_border": 1
   },
   {
    "fieldname": "items_col_break",
@@ -1183,12 +1185,6 @@
    "label": "More Info"
   },
   {
-   "fieldname": "dashboard",
-   "fieldtype": "Tab Break",
-   "label": "Dashboard",
-   "show_dashboard": 1
-  },
-  {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
@@ -1206,11 +1202,6 @@
    "label": "Address & Contact"
   },
   {
-   "fieldname": "company_shipping_address_section",
-   "fieldtype": "Section Break",
-   "label": "Company Shipping Address"
-  },
-  {
    "fieldname": "company_billing_address_section",
    "fieldtype": "Section Break",
    "label": "Company Billing Address"
@@ -1224,6 +1215,7 @@
   },
   {
    "default": "0",
+   "depends_on": "apply_tds",
    "fieldname": "tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -1233,12 +1225,13 @@
    "read_only": 1
   },
   {
+   "depends_on": "apply_tds",
    "fieldname": "base_tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Base Tax Withholding Net Total",
    "no_copy": 1,
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1249,13 +1242,36 @@
   {
    "fieldname": "column_break_103",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
+  },
+  {
+   "fieldname": "shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Address"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 12:34:36.033363",
+ "modified": "2023-05-24 11:16:41.195340",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

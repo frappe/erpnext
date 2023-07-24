@@ -10,7 +10,10 @@ from frappe.utils import cint, date_diff, flt, formatdate, getdate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.assets.doctype.asset.asset import get_depreciation_amount
+from erpnext.assets.doctype.asset.asset import (
+	get_asset_value_after_depreciation,
+	get_depreciation_amount,
+)
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 
 
@@ -42,7 +45,7 @@ class AssetValueAdjustment(Document):
 
 	def set_current_asset_value(self):
 		if not self.current_asset_value and self.asset:
-			self.current_asset_value = get_current_asset_value(self.asset, self.finance_book)
+			self.current_asset_value = get_asset_value_after_depreciation(self.asset, self.finance_book)
 
 	def make_depreciation_entry(self):
 		asset = frappe.get_doc("Asset", self.asset)
@@ -113,7 +116,9 @@ class AssetValueAdjustment(Document):
 			if d.depreciation_method in ("Straight Line", "Manual"):
 				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
 				total_days = date_diff(end_date, self.date)
-				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
+				rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
+					total_days
+				)
 				from_date = self.date
 			else:
 				no_of_depreciations = len(
@@ -142,12 +147,3 @@ class AssetValueAdjustment(Document):
 		for asset_data in asset.schedules:
 			if not asset_data.journal_entry:
 				asset_data.db_update()
-
-
-@frappe.whitelist()
-def get_current_asset_value(asset, finance_book=None):
-	cond = {"parent": asset, "parenttype": "Asset"}
-	if finance_book:
-		cond.update({"finance_book": finance_book})
-
-	return frappe.db.get_value("Asset Finance Book", cond, "value_after_depreciation")

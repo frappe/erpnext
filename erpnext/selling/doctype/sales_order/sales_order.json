@@ -30,10 +30,6 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "column_break_77",
-  "source",
-  "campaign",
-  "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -58,11 +54,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_38",
-  "tax_category",
-  "column_break_49",
   "shipping_rule",
+  "column_break_49",
+  "incoterm",
+  "named_place",
   "section_break_40",
   "taxes",
   "section_break_43",
@@ -160,7 +158,9 @@
   "is_internal_customer",
   "represents_company",
   "column_break_152",
+  "source",
   "inter_company_order_reference",
+  "campaign",
   "party_account_currency",
   "connections_tab"
  ],
@@ -1163,12 +1163,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_77",
-   "fieldtype": "Column Break",
-   "hide_days": 1,
-   "hide_seconds": 1
-  },
-  {
    "fieldname": "source",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1611,10 +1605,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "custom_dimensions_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "additional_info_section",
    "fieldtype": "Section Break",
@@ -1623,13 +1613,25 @@
   {
    "fieldname": "column_break_152",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:06:10.469796",
+ "modified": "2023-04-20 11:14:01.036202",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

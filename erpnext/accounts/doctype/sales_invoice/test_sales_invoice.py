@@ -1166,6 +1166,46 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
+	def test_bin_details_of_packed_item(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# test Update Items with product bundle
+		if not frappe.db.exists("Item", "_Test Product Bundle Item New"):
+			bundle_item = make_item("_Test Product Bundle Item New", {"is_stock_item": 0})
+			bundle_item.append(
+				"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+			)
+			bundle_item.save(ignore_permissions=True)
+
+		make_item("_Packed Item New 1", {"is_stock_item": 1})
+		make_product_bundle("_Test Product Bundle Item New", ["_Packed Item New 1"], 2)
+
+		si = create_sales_invoice(
+			item_code="_Test Product Bundle Item New",
+			update_stock=1,
+			warehouse="_Test Warehouse - _TC",
+			transaction_date=add_days(nowdate(), -1),
+			do_not_submit=1,
+		)
+
+		make_stock_entry(item="_Packed Item New 1", target="_Test Warehouse - _TC", qty=120, rate=100)
+
+		bin_details = frappe.db.get_value(
+			"Bin",
+			{"item_code": "_Packed Item New 1", "warehouse": "_Test Warehouse - _TC"},
+			["actual_qty", "projected_qty", "ordered_qty"],
+			as_dict=1,
+		)
+
+		si.transaction_date = nowdate()
+		si.save()
+
+		packed_item = si.packed_items[0]
+		self.assertEqual(flt(bin_details.actual_qty), flt(packed_item.actual_qty))
+		self.assertEqual(flt(bin_details.projected_qty), flt(packed_item.projected_qty))
+		self.assertEqual(flt(bin_details.ordered_qty), flt(packed_item.ordered_qty))
+
 	def test_pos_si_without_payment(self):
 		make_pos_profile()
 
@@ -2729,6 +2769,31 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 
+		# Update Invoice post submit and then check GL Entries again
+
+		si.load_from_db()
+		si.items[0].income_account = "Service - _TC"
+		si.additional_discount_account = "_Test Account Sales - _TC"
+		si.taxes[0].account_head = "TDS Payable - _TC"
+		si.save()
+
+		si.load_from_db()
+		self.assertTrue(si.repost_required)
+
+		si.repost_accounting_entries()
+
+		expected_gle = [
+			["_Test Account Sales - _TC", 22.0, 0.0, nowdate()],
+			["Debtors - _TC", 88, 0.0, nowdate()],
+			["Service - _TC", 0.0, 100.0, nowdate()],
+			["TDS Payable - _TC", 0.0, 10.0, nowdate()],
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+
+		si.load_from_db()
+		self.assertFalse(si.repost_required)
+
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
 		Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
@@ -3286,6 +3351,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		"""select account, debit, credit, posting_date
 		from `tabGL Entry`
 		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		and is_cancelled = 0
 		order by posting_date asc, account asc""",
 		(voucher_no, posting_date),
 		as_dict=1,

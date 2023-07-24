@@ -637,13 +637,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			gle_filters={"account": "Stock In Hand - TCP1"},
 		)
 
-		# assert loss booked in COGS
-		self.assertGLEs(
-			return_pi,
-			[{"credit": 0, "debit": 200}],
-			gle_filters={"account": "Cost of Goods Sold - TCP1"},
-		)
-
 	def test_return_with_lcv(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
@@ -1523,6 +1516,94 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
+	def test_adjust_incoming_rate(self):
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		frappe.db.set_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1
+		)
+
+		# Increase the cost of the item
+
+		pr = make_purchase_receipt(qty=1, rate=100)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 100)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.rate = 150
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 150)
+
+		# Reduce the cost of the item
+
+		pr = make_purchase_receipt(qty=1, rate=100)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 100)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.rate = 50
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 50)
+
+		frappe.db.set_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0
+		)
+
+		# Don't adjust incoming rate
+
+		pr = make_purchase_receipt(qty=1, rate=100)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 100)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.rate = 50
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 100)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+
 	def test_item_less_defaults(self):
 
 		pi = frappe.new_doc("Purchase Invoice")
@@ -1573,6 +1654,21 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		return_pi.save().submit()
 
 		self.assertTrue(return_pi.docstatus == 1)
+
+	def test_gl_entries_for_standalone_debit_note(self):
+		make_purchase_invoice(qty=5, rate=500, update_stock=True)
+
+		returned_inv = make_purchase_invoice(qty=-5, rate=5, update_stock=True, is_return=True)
+
+		# override the rate with valuation rate
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["stock_value_difference", "actual_qty"],
+			filters={"voucher_no": returned_inv.name},
+		)[0]
+
+		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
+		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
 
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):

@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, qb, query_builder
 from frappe.query_builder import Criterion, functions
+from frappe.utils.dateutils import getdate
 
 
 def get_columns():
@@ -208,6 +209,7 @@ def get_so_with_invoices(filters):
 		)
 		.where(
 			(so.docstatus == 1)
+			& (so.status.isin(["To Deliver and Bill", "To Bill"]))
 			& (so.payment_terms_template != "NULL")
 			& (so.company == conditions.company)
 			& (so.transaction_date[conditions.start_date : conditions.end_date])
@@ -291,12 +293,26 @@ def filter_on_calculated_status(filters, sales_orders):
 	return sales_orders
 
 
+def filter_for_immediate_upcoming_term(filters, sales_orders):
+	if filters.only_immediate_upcoming_term and sales_orders:
+		immediate_term_found = set()
+		filtered_data = []
+		for order in sales_orders:
+			if order.name not in immediate_term_found and order.due_date > getdate():
+				filtered_data.append(order)
+				immediate_term_found.add(order.name)
+		return filtered_data
+	return sales_orders
+
+
 def execute(filters=None):
 	columns = get_columns()
 	sales_orders, so_invoices = get_so_with_invoices(filters)
 	sales_orders, so_invoices = set_payment_terms_statuses(sales_orders, so_invoices, filters)
 
 	sales_orders = filter_on_calculated_status(filters, sales_orders)
+
+	sales_orders = filter_for_immediate_upcoming_term(filters, sales_orders)
 
 	prepare_chart(sales_orders)
 

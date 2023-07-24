@@ -118,6 +118,10 @@ erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
 	}
 
 	plaid_success(token, response) {
-		frappe.show_alert({ message: __('Plaid Link Updated'), indicator: 'green' });
+		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.update_bank_account_ids', {
+			response: response,
+		}).then(() => {
+			frappe.show_alert({ message: __('Plaid Link Updated'), indicator: 'green' });
+		});
 	}
 };

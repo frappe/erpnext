@@ -59,7 +59,7 @@ frappe.query_reports["Gross Profit"] = {
 		if (column.fieldname == "sales_invoice" && column.options == "Item" && data && data.indent == 0) {
 			column._options = "Sales Invoice";
 		} else {
-			column._options = "Item";
+			column._options = "";
 		}
 		value = default_formatter(value, row, column, data);
 

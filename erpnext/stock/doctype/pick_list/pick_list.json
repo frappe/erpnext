@@ -26,7 +26,8 @@
   "locations",
   "amended_from",
   "print_settings_section",
-  "group_same_items"
+  "group_same_items",
+  "status"
  ],
  "fields": [
   {
@@ -168,11 +169,26 @@
    "fieldtype": "Data",
    "label": "Customer Name",
    "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nOpen\nCompleted\nCancelled",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-19 11:03:04.442174",
+ "modified": "2023-01-24 10:33:43.244476",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

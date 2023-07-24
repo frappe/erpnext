@@ -28,9 +28,14 @@ class InvalidDateError(frappe.ValidationError):
 
 
 class CostCenterAllocation(Document):
+	def __init__(self, *args, **kwargs):
+		super(CostCenterAllocation, self).__init__(*args, **kwargs)
+		self._skip_from_date_validation = False
+
 	def validate(self):
 		self.validate_total_allocation_percentage()
-		self.validate_from_date_based_on_existing_gle()
+		if not self._skip_from_date_validation:
+			self.validate_from_date_based_on_existing_gle()
 		self.validate_backdated_allocation()
 		self.validate_main_cost_center()
 		self.validate_child_cost_centers()

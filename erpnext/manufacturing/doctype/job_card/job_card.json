@@ -38,6 +38,7 @@
   "time_logs",
   "section_break_13",
   "total_completed_qty",
+  "process_loss_qty",
   "column_break_15",
   "total_time_in_mins",
   "section_break_8",
@@ -435,11 +436,17 @@
    "fieldname": "expected_end_date",
    "fieldtype": "Datetime",
    "label": "Expected End Date"
+  },
+  {
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-09 15:02:44.490731",
+ "modified": "2023-06-09 12:04:55.534264",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

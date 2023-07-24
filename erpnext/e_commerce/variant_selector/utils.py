@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
 	get_shopping_cart_settings,
@@ -162,9 +162,31 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		product_info = get_item_variant_price_dict(exact_match[0], cart_settings)
 
 		if product_info:
+			product_info["is_stock_item"] = frappe.get_cached_value("Item", exact_match[0], "is_stock_item")
 			product_info["allow_items_not_in_stock"] = cint(cart_settings.allow_items_not_in_stock)
 	else:
 		product_info = None
+
+	product_id = ""
+	website_warehouse = ""
+	if exact_match or filtered_items:
+		if exact_match and len(exact_match) == 1:
+			product_id = exact_match[0]
+		elif filtered_items_count == 1:
+			product_id = list(filtered_items)[0]
+
+	if product_id:
+		website_warehouse = frappe.get_cached_value(
+			"Website Item", {"item_code": product_id}, "website_warehouse"
+		)
+
+	available_qty = 0.0
+	if website_warehouse:
+		available_qty = flt(
+			frappe.db.get_value(
+				"Bin", {"item_code": product_id, "warehouse": website_warehouse}, "actual_qty"
+			)
+		)
 
 	return {
 		"next_attribute": next_attribute,
@@ -173,6 +195,7 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		"filtered_items": filtered_items if filtered_items_count < 10 else [],
 		"exact_match": exact_match,
 		"product_info": product_info,
+		"available_qty": available_qty,
 	}
 
 

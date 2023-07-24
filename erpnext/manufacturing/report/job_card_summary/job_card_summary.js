@@ -17,7 +17,7 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: frappe.defaults.get_user_default("fiscal_year"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 			on_change: function(query_report) {
 				var fiscal_year = query_report.get_values().fiscal_year;
@@ -54,11 +54,11 @@ frappe.query_reports["Job Card Summary"] = {
 			options: ["", "Open", "Work In Progress", "Completed", "On Hold"]
 		},
 		{
-			label: __("Sales Orders"),
-			fieldname: "sales_order",
+			label: __("Work Orders"),
+			fieldname: "work_order",
 			fieldtype: "MultiSelectList",
 			get_data: function(txt) {
-				return frappe.db.get_link_options('Sales Order', txt);
+				return frappe.db.get_link_options('Work Order', txt);
 			}
 		},
 		{

@@ -25,8 +25,8 @@ class SellingController(StockController):
 	def onload(self):
 		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
-			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code, item.warehouse))
+			for item in self.get("items") + (self.get("packed_items") or []):
+				item.update(get_bin_details(item.item_code, item.warehouse, include_child_warehouses=True))
 
 	def validate(self):
 		super(SellingController, self).validate()
@@ -40,9 +40,9 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.validate_auto_repeat_subscription_dates()
 
 	def set_missing_values(self, for_validate=False):
-
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
@@ -61,7 +61,7 @@ class SellingController(StockController):
 		elif self.doctype == "Quotation" and self.party_name:
 			if self.quotation_to == "Customer":
 				customer = self.party_name
-			else:
+			elif self.quotation_to == "Lead":
 				lead = self.party_name
 
 		if customer:
@@ -138,7 +138,7 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if not self.meta.get_field("commission_rate"):
+		if not self.meta.get_field("commission_rate") or self.docstatus.is_submitted():
 			return
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
@@ -170,7 +170,7 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.amount_eligible_for_commission * sales_person.allocated_percentage / 100.0,
+				flt(self.amount_eligible_for_commission) * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person),
 			)
 
@@ -441,30 +441,31 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					if d.doctype == "Packed Item":
-						incoming_rate = flt(
-							flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-							d.precision("incoming_rate"),
-						)
-						if d.incoming_rate != incoming_rate:
-							d.incoming_rate = incoming_rate
-					else:
-						rate = flt(
-							flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-							d.precision("rate"),
-						)
-						if d.rate != rate:
-							d.rate = rate
-							frappe.msgprint(
-								_(
-									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-								).format(d.idx),
-								alert=1,
+					if self.doctype == "Delivery Note" or self.get("update_stock"):
+						if d.doctype == "Packed Item":
+							incoming_rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("incoming_rate"),
 							)
+							if d.incoming_rate != incoming_rate:
+								d.incoming_rate = incoming_rate
+						else:
+							rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("rate"),
+							)
+							if d.rate != rate:
+								d.rate = rate
+								frappe.msgprint(
+									_(
+										"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+									).format(d.idx),
+									alert=1,
+								)
 
-						d.discount_percentage = 0.0
-						d.discount_amount = 0.0
-						d.margin_rate_or_amount = 0.0
+							d.discount_percentage = 0.0
+							d.discount_amount = 0.0
+							d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document

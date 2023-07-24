@@ -6,6 +6,7 @@ import unittest
 import frappe
 
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
@@ -45,7 +46,10 @@ class TestPaymentRequest(unittest.TestCase):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
 	def test_payment_request_linkings(self):
-		so_inr = make_sales_order(currency="INR")
+		so_inr = make_sales_order(currency="INR", do_not_save=True)
+		so_inr.disable_rounded_total = 1
+		so_inr.save()
+
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so_inr.name,
@@ -70,6 +74,29 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEqual(pr.reference_doctype, "Sales Invoice")
 		self.assertEqual(pr.reference_name, si_usd.name)
 		self.assertEqual(pr.currency, "USD")
+
+	def test_payment_entry_against_purchase_invoice(self):
+		si_usd = make_purchase_invoice(
+			customer="_Test Supplier USD",
+			debit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+		)
+
+		pr = make_payment_request(
+			dt="Purchase Invoice",
+			dn=si_usd.name,
+			recipient_id="user@example.com",
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - USD",
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		pe = pr.create_payment_entry()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "Paid")
 
 	def test_payment_entry(self):
 		frappe.db.set_value(

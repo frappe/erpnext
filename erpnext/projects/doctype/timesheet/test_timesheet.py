@@ -161,6 +161,37 @@ class TestTimesheet(unittest.TestCase):
 		to_time = timesheet.time_logs[0].to_time
 		self.assertEqual(to_time, add_to_date(from_time, hours=2, as_datetime=True))
 
+	def test_per_billed_hours(self):
+		"""If amounts are 0, per_billed should be calculated based on hours."""
+		ts = frappe.new_doc("Timesheet")
+		ts.total_billable_amount = 0
+		ts.total_billed_amount = 0
+		ts.total_billable_hours = 2
+
+		ts.total_billed_hours = 0.5
+		ts.calculate_percentage_billed()
+		self.assertEqual(ts.per_billed, 25)
+
+		ts.total_billed_hours = 2
+		ts.calculate_percentage_billed()
+		self.assertEqual(ts.per_billed, 100)
+
+	def test_per_billed_amount(self):
+		"""If amounts are > 0, per_billed should be calculated based on amounts, regardless of hours."""
+		ts = frappe.new_doc("Timesheet")
+		ts.total_billable_hours = 2
+		ts.total_billed_hours = 1
+		ts.total_billable_amount = 200
+		ts.total_billed_amount = 50
+		ts.calculate_percentage_billed()
+		self.assertEqual(ts.per_billed, 25)
+
+		ts.total_billed_hours = 3
+		ts.total_billable_amount = 200
+		ts.total_billed_amount = 200
+		ts.calculate_percentage_billed()
+		self.assertEqual(ts.per_billed, 100)
+
 
 def make_timesheet(
 	employee,

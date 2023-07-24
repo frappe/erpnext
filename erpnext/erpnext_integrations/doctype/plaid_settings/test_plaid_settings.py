@@ -125,6 +125,8 @@ class TestPlaidSettings(unittest.TestCase):
 			"unofficial_currency_code": None,
 			"name": "INTRST PYMNT",
 			"transaction_type": "place",
+			"transaction_code": "direct debit",
+			"check_number": "3456789",
 			"amount": -4.22,
 			"location": {
 				"city": None,

@@ -16,8 +16,8 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			|| (frm.doc.party_name && in_list(['Quotation', 'Opportunity'], frm.doc.doctype))) {
 
 			let party_type = "Customer";
-			if (frm.doc.quotation_to && frm.doc.quotation_to === "Lead") {
-				party_type = "Lead";
+			if (frm.doc.quotation_to && in_list(["Lead", "Prospect"], frm.doc.quotation_to)) {
+				party_type = frm.doc.quotation_to;
 			}
 
 			args = {

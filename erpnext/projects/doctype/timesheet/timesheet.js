@@ -5,6 +5,8 @@ frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frappe.require("/assets/erpnext/js/projects/timer.js");
 
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice'];
+
 		frm.fields_dict.employee.get_query = function() {
 			return {
 				filters:{

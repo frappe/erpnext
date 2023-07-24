@@ -83,6 +83,9 @@
   "actual_qty",
   "installed_qty",
   "item_tax_rate",
+  "column_break_atna",
+  "packed_qty",
+  "received_qty",
   "accounting_details_section",
   "expense_account",
   "allow_zero_valuation_rate",
@@ -627,7 +630,8 @@
    "no_copy": 1,
    "options": "Sales Order",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "against_sales_invoice",
@@ -636,7 +640,8 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "so_detail",
@@ -659,7 +664,8 @@
    "label": "Against Sales Invoice Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "installed_qty",
@@ -831,13 +837,37 @@
    "fieldname": "material_request_item",
    "fieldtype": "Data",
    "label": "Material Request Item"
+  },
+  {
+   "fieldname": "column_break_atna",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: parent.is_internal_customer",
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.packed_qty",
+   "fieldname": "packed_qty",
+   "fieldtype": "Float",
+   "label": "Packed Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-09 12:17:50.850142",
+ "modified": "2023-05-01 21:05:14.175640",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

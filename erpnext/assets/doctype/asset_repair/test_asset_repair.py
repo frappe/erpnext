@@ -6,7 +6,10 @@ import unittest
 import frappe
 from frappe.utils import flt, nowdate
 
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset.asset import (
+	get_asset_account,
+	get_asset_value_after_depreciation,
+)
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
@@ -106,20 +109,20 @@ class TestAssetRepair(unittest.TestCase):
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
-		initial_asset_value = get_asset_value(asset)
+		initial_asset_value = get_asset_value_after_depreciation(asset.name)
 		asset_repair = create_asset_repair(asset=asset, stock_consumption=1, submit=1)
 		asset.reload()
 
-		increase_in_asset_value = get_asset_value(asset) - initial_asset_value
+		increase_in_asset_value = get_asset_value_after_depreciation(asset.name) - initial_asset_value
 		self.assertEqual(asset_repair.stock_items[0].total_value, increase_in_asset_value)
 
 	def test_increase_in_asset_value_due_to_repair_cost_capitalisation(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
-		initial_asset_value = get_asset_value(asset)
+		initial_asset_value = get_asset_value_after_depreciation(asset.name)
 		asset_repair = create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
 		asset.reload()
 
-		increase_in_asset_value = get_asset_value(asset) - initial_asset_value
+		increase_in_asset_value = get_asset_value_after_depreciation(asset.name) - initial_asset_value
 		self.assertEqual(asset_repair.repair_cost, increase_in_asset_value)
 
 	def test_purchase_invoice(self):
@@ -242,10 +245,6 @@ class TestAssetRepair(unittest.TestCase):
 			asset.schedules[-1].accumulated_depreciation_amount,
 			asset.finance_books[0].value_after_depreciation,
 		)
-
-
-def get_asset_value(asset):
-	return asset.finance_books[0].value_after_depreciation
 
 
 def num_of_depreciations(asset):

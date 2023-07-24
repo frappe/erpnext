@@ -314,6 +314,30 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Inactive")
 		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
 
+	def test_stock_reco_balance_qty_for_serial_and_batch_item(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = create_item("_TestBatchSerialItemReco_1")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.has_serial_no = 1
+		item.batch_number_series = "TBS-BATCH1-.##"
+		item.serial_no_series = "TBS1-.####"
+		item.save()
+
+		warehouse = "_Test Warehouse for Stock Reco2"
+		warehouse = create_warehouse(warehouse)
+
+		make_stock_entry(item_code=item.name, target=warehouse, qty=10, basic_rate=100)
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse, qty=10, rate=200)
+
+		qty_after_transaction = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": sr.name, "is_cancelled": 0}, "qty_after_transaction"
+		)
+
+		self.assertEqual(qty_after_transaction, 20)
+
 	def test_stock_reco_for_serial_and_batch_item_with_future_dependent_entry(self):
 		"""
 		Behaviour: 1) Create Stock Reconciliation, which will be the origin document
@@ -530,7 +554,9 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		# check if cancellation of stock reco is blocked
 		self.assertRaises(NegativeStockError, sr.cancel)
 
-		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
+		repost_exists = bool(
+			frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name, "status": "Queued"})
+		)
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
 
 	def test_intermediate_sr_bin_update(self):
@@ -643,6 +669,155 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"Serial No", filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"}
 		)
 		self.assertEqual(len(active_sr_no), 0)
+
+	def test_serial_no_batch_no_item(self):
+		item = self.make_item(
+			"Test Serial No Batch No Item",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"serial_no_series": "SRS9.####",
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=1,
+			rate=100,
+		)
+
+		sl_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name},
+			["actual_qty", "qty_after_transaction"],
+			as_dict=1,
+		)
+
+		self.assertEqual(flt(sl_entry.actual_qty), 1.0)
+		self.assertEqual(flt(sl_entry.qty_after_transaction), 1.0)
+
+	def test_backdated_stock_reco_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(
+			"Test New Batch Item ABCV",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# Added 100 Qty, Balace Qty 100
+		se1 = make_stock_entry(
+			item_code=item_code, posting_time="09:00:00", target=warehouse, qty=100, basic_rate=700
+		)
+
+		# Removed 50 Qty, Balace Qty 50
+		se2 = make_stock_entry(
+			item_code=item_code,
+			batch_no=se1.items[0].batch_no,
+			posting_time="10:00:00",
+			source=warehouse,
+			qty=50,
+			basic_rate=700,
+		)
+
+		# Stock Reco for 100, Balace Qty 100
+		stock_reco = create_stock_reconciliation(
+			item_code=item_code,
+			posting_time="11:00:00",
+			warehouse=warehouse,
+			batch_no=se1.items[0].batch_no,
+			qty=100,
+			rate=100,
+		)
+
+		# Removed 50 Qty, Balace Qty 50
+		make_stock_entry(
+			item_code=item_code,
+			batch_no=se1.items[0].batch_no,
+			posting_time="12:00:00",
+			source=warehouse,
+			qty=50,
+			basic_rate=700,
+		)
+
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": stock_reco.name}))
+
+		# Cancel the backdated Stock Entry se2,
+		# Since Stock Reco entry in the future the Balace Qty should remain as it's (50)
+
+		se2.cancel()
+
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": stock_reco.name}))
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", {"voucher_no": stock_reco.name}, "status"),
+			"Completed",
+		)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
+			fields=["qty_after_transaction"],
+			order_by="posting_time desc, creation desc",
+		)
+
+		self.assertEqual(flt(sle[0].qty_after_transaction), flt(50.0))
+
+	def test_update_stock_reconciliation_while_reposting(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		# Stock Value => 100 * 100 = 10000
+		se = make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=100,
+			basic_rate=100,
+			posting_time="10:00:00",
+		)
+
+		# Stock Value => 100 * 200 = 20000
+		# Value Change => 20000 - 10000 = 10000
+		sr1 = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=100,
+			rate=200,
+			posting_time="12:00:00",
+		)
+		self.assertEqual(sr1.difference_amount, 10000)
+
+		# Stock Value => 50 * 50 = 2500
+		# Value Change => 2500 - 10000 = -7500
+		sr2 = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=50,
+			rate=50,
+			posting_time="11:00:00",
+		)
+		self.assertEqual(sr2.difference_amount, -7500)
+
+		sr1.load_from_db()
+		self.assertEqual(sr1.difference_amount, 17500)
+
+		sr2.cancel()
+		sr1.load_from_db()
+		self.assertEqual(sr1.difference_amount, 10000)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

@@ -64,11 +64,13 @@
   "tax_withholding_net_total",
   "base_tax_withholding_net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_58",
-  "tax_category",
-  "column_break_49",
   "shipping_rule",
+  "column_break_49",
+  "incoterm",
+  "named_place",
   "section_break_51",
   "taxes",
   "totals",
@@ -87,6 +89,7 @@
   "column_break8",
   "grand_total",
   "rounding_adjustment",
+  "use_company_roundoff_cost_center",
   "rounded_total",
   "in_words",
   "total_advance",
@@ -116,6 +119,7 @@
   "paid_amount",
   "advances_section",
   "allocate_advances_automatically",
+  "only_include_allocated_payments",
   "get_advances",
   "advances",
   "advance_tax",
@@ -543,6 +547,7 @@
    "depends_on": "update_stock",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
@@ -1365,6 +1370,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
+   "ignore_user_permissions": 1,
    "width": "50px"
   },
   {
@@ -1424,6 +1430,7 @@
   },
   {
    "default": "0",
+   "depends_on": "apply_tds",
    "fieldname": "tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -1433,12 +1440,13 @@
    "read_only": 1
   },
   {
+   "depends_on": "apply_tds",
    "fieldname": "base_tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Base Tax Withholding Net Total",
    "no_copy": 1,
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1534,17 +1542,42 @@
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text",
    "print_hide": 1
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
+  },
+  {
+   "default": "0",
+   "depends_on": "allocate_advances_automatically",
+   "description": "Advance payments allocated against orders will only be fetched",
+   "fieldname": "only_include_allocated_payments",
+   "fieldtype": "Check",
+   "label": "Only Include Allocated Payments"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_company_roundoff_cost_center",
+   "fieldtype": "Check",
+   "label": "Use Company Default Round Off Cost Center"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-22 12:44:29.935567",
+ "modified": "2023-07-04 17:23:59.145031",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

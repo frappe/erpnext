@@ -10,14 +10,21 @@
   "party",
   "column_break_2",
   "account_currency",
+  "account_balances",
   "balance_in_account_currency",
+  "column_break_46yz",
+  "new_balance_in_account_currency",
   "balances",
   "current_exchange_rate",
-  "balance_in_base_currency",
-  "column_break_9",
+  "column_break_xown",
   "new_exchange_rate",
+  "column_break_9",
+  "balance_in_base_currency",
+  "column_break_ukce",
   "new_balance_in_base_currency",
-  "gain_loss"
+  "section_break_ngrs",
+  "gain_loss",
+  "zero_balance"
  ],
  "fields": [
   {
@@ -66,6 +73,7 @@
    "fieldname": "current_exchange_rate",
    "fieldtype": "Float",
    "label": "Current Exchange Rate",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -78,13 +86,14 @@
   },
   {
    "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "new_exchange_rate",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "New Exchange Rate",
+   "precision": "9",
    "reqd": 1
   },
   {
@@ -102,11 +111,45 @@
    "label": "Gain/Loss",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "This Account has '0' balance in either Base Currency or Account Currency",
+   "fieldname": "zero_balance",
+   "fieldtype": "Check",
+   "label": "Zero Balance"
+  },
+  {
+   "fieldname": "new_balance_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "New Balance In Account Currency",
+   "options": "account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "account_balances",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_46yz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xown",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ukce",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ngrs",
+   "fieldtype": "Section Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-11-17 10:26:18.302728",
+ "modified": "2023-06-22 12:39:56.446722",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Exchange Rate Revaluation Account",

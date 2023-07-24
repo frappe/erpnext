@@ -8,6 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
 
 from erpnext import get_company_currency
@@ -73,6 +74,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 			args["bill_date"] = doc.get("bill_date")
 
 	out = get_basic_details(args, item, overwrite_warehouse)
+
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -88,7 +90,14 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
+	# Never try to find a customer price if customer is set in these Doctype
+	current_customer = args.customer
+	if args.get("doctype") in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+		args.customer = None
+
 	out.update(get_price_list_rate(args, item))
+
+	args.customer = current_customer
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
@@ -102,9 +111,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	elif out.get("warehouse"):
 		if doc and doc.get("doctype") == "Purchase Order":
 			# calculate company_total_stock only for po
-			bin_details = get_bin_details(args.item_code, out.warehouse, args.company)
+			bin_details = get_bin_details(
+				args.item_code, out.warehouse, args.company, include_child_warehouses=True
+			)
 		else:
-			bin_details = get_bin_details(args.item_code, out.warehouse)
+			bin_details = get_bin_details(args.item_code, out.warehouse, include_child_warehouses=True)
 
 		out.update(bin_details)
 
@@ -113,7 +124,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		if args.get(key) is None:
 			args[key] = value
 
-	data = get_pricing_rule_for_item(args, out.price_list_rate, doc, for_validate=for_validate)
+	data = get_pricing_rule_for_item(args, doc=doc, for_validate=for_validate)
 
 	out.update(data)
 
@@ -234,8 +245,10 @@ def validate_item_details(args, item):
 
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.transaction_type == "selling" and cint(item.has_variants):
-		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+	if cint(item.has_variants):
+		msg = f"Item {item.name} is a template, please select one of its variants"
+
+		throw(_(msg), title=_("Template Item Selected"))
 
 	elif args.transaction_type == "buying" and args.doctype != "Material Request":
 		if args.get("is_subcontracted"):
@@ -409,7 +422,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	args.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
-	if args.get("doctype") in purchase_doctypes:
+	if args.get("doctype") in purchase_doctypes and not frappe.db.get_single_value(
+		"Buying Settings", "disable_last_purchase_rate"
+	):
 		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 
 		out.last_purchase_rate = item_last_purchase_rate(
@@ -513,12 +528,8 @@ def get_barcode_data(items_list):
 
 	itemwise_barcode = {}
 	for item in items_list:
-		barcodes = frappe.db.sql(
-			"""
-			select barcode from `tabItem Barcode` where parent = %s
-		""",
-			item.item_code,
-			as_dict=1,
+		barcodes = frappe.db.get_all(
+			"Item Barcode", filters={"parent": item.item_code}, fields="barcode"
 		)
 
 		for barcode in barcodes:
@@ -610,7 +621,9 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key=lambda i: i.valid_from, reverse=True)
+		taxes = sorted(
+			taxes_with_validity, key=lambda i: i.valid_from or tax.maximum_net_rate, reverse=True
+		)
 	else:
 		taxes = taxes_with_no_validity
 
@@ -811,6 +824,9 @@ def get_price_list_rate(args, item_doc, out=None):
 			flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 		)
 
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return out
+
 		if not out.price_list_rate and args.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
@@ -828,9 +844,9 @@ def insert_item_price(args):
 	):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (
-				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				(flt(args.rate) + flt(args.discount_amount)) / args.get("conversion_factor")
 				if args.get("conversion_factor")
-				else (args.rate + args.discount_amount)
+				else (flt(args.rate) + flt(args.discount_amount))
 			)
 
 			item_price = frappe.db.get_value(
@@ -875,34 +891,36 @@ def get_item_price(args, item_code, ignore_party=False):
 	:param item_code: str, Item Doctype field item_code
 	"""
 
-	args["item_code"] = item_code
-
-	conditions = """where item_code=%(item_code)s
-		and price_list=%(price_list)s
-		and ifnull(uom, '') in ('', %(uom)s)"""
-
-	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
+	ip = frappe.qb.DocType("Item Price")
+	query = (
+		frappe.qb.from_(ip)
+		.select(ip.name, ip.price_list_rate, ip.uom)
+		.where(
+			(ip.item_code == item_code)
+			& (ip.price_list == args.get("price_list"))
+			& (IfNull(ip.uom, "").isin(["", args.get("uom")]))
+			& (IfNull(ip.batch_no, "").isin(["", args.get("batch_no")]))
+		)
+		.orderby(ip.valid_from, order=frappe.qb.desc)
+		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
+		.orderby(ip.uom, order=frappe.qb.desc)
+	)
 
 	if not ignore_party:
 		if args.get("customer"):
-			conditions += " and customer=%(customer)s"
+			query = query.where(ip.customer == args.get("customer"))
 		elif args.get("supplier"):
-			conditions += " and supplier=%(supplier)s"
+			query = query.where(ip.supplier == args.get("supplier"))
 		else:
-			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
 
 	if args.get("transaction_date"):
-		conditions += """ and %(transaction_date)s between
-			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+		query = query.where(
+			(IfNull(ip.valid_from, "2000-01-01") <= args["transaction_date"])
+			& (IfNull(ip.valid_upto, "2500-12-31") >= args["transaction_date"])
+		)
 
-	return frappe.db.sql(
-		""" select name, price_list_rate, uom
-		from `tabItem Price` {conditions}
-		order by valid_from desc, ifnull(batch_no, '') desc, uom desc """.format(
-			conditions=conditions
-		),
-		args,
-	)
+	return query.run()
 
 
 def get_price_list_rate_for(args, item_code):
@@ -1060,7 +1078,9 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(args.item_code, res.warehouse).get("actual_qty")
+			res.actual_qty = get_bin_details(
+				args.item_code, res.warehouse, include_child_warehouses=True
+			).get("actual_qty")
 
 	return res
 
@@ -1073,91 +1093,68 @@ def get_pos_profile(company, pos_profile=None, user=None):
 	if not user:
 		user = frappe.session["user"]
 
-	condition = "pfu.user = %(user)s AND pfu.default=1"
-	if user and company:
-		condition = "pfu.user = %(user)s AND pf.company = %(company)s AND pfu.default=1"
+	pf = frappe.qb.DocType("POS Profile")
+	pfu = frappe.qb.DocType("POS Profile User")
 
-	pos_profile = frappe.db.sql(
-		"""SELECT pf.*
-		FROM
-			`tabPOS Profile` pf LEFT JOIN `tabPOS Profile User` pfu
-		ON
-				pf.name = pfu.parent
-		WHERE
-			{cond} AND pf.disabled = 0
-	""".format(
-			cond=condition
-		),
-		{"user": user, "company": company},
-		as_dict=1,
+	query = (
+		frappe.qb.from_(pf)
+		.left_join(pfu)
+		.on(pf.name == pfu.parent)
+		.select(pf.star)
+		.where((pfu.user == user) & (pfu.default == 1))
 	)
 
+	if company:
+		query = query.where(pf.company == company)
+
+	pos_profile = query.run(as_dict=True)
+
 	if not pos_profile and company:
-		pos_profile = frappe.db.sql(
-			"""SELECT pf.*
-			FROM
-				`tabPOS Profile` pf LEFT JOIN `tabPOS Profile User` pfu
-			ON
-					pf.name = pfu.parent
-			WHERE
-				pf.company = %(company)s AND pf.disabled = 0
-		""",
-			{"company": company},
-			as_dict=1,
-		)
+		pos_profile = (
+			frappe.qb.from_(pf)
+			.left_join(pfu)
+			.on(pf.name == pfu.parent)
+			.select(pf.star)
+			.where((pf.company == company) & (pf.disabled == 0))
+		).run(as_dict=True)
 
 	return pos_profile and pos_profile[0] or None
 
 
 def get_serial_nos_by_fifo(args, sales_order=None):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
-		return "\n".join(
-			frappe.db.sql_list(
-				"""select name from `tabSerial No`
-			where item_code=%(item_code)s and warehouse=%(warehouse)s and
-			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
-			order by timestamp(purchase_date, purchase_time)
-			asc limit %(qty)s""",
-				{
-					"item_code": args.item_code,
-					"warehouse": args.warehouse,
-					"qty": abs(cint(args.stock_qty)),
-					"sales_order": sales_order,
-				},
-			)
+		sn = frappe.qb.DocType("Serial No")
+		query = (
+			frappe.qb.from_(sn)
+			.select(sn.name)
+			.where((sn.item_code == args.item_code) & (sn.warehouse == args.warehouse))
+			.orderby(CombineDatetime(sn.purchase_date, sn.purchase_time))
+			.limit(abs(cint(args.stock_qty)))
 		)
 
+		if sales_order:
+			query = query.where(sn.sales_order == sales_order)
+		if args.batch_no:
+			query = query.where(sn.batch_no == args.batch_no)
 
-def get_serial_no_batchwise(args, sales_order=None):
-	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
-		return "\n".join(
-			frappe.db.sql_list(
-				"""select name from `tabSerial No`
-			where item_code=%(item_code)s and warehouse=%(warehouse)s and
-			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
-			and batch_no=IF(%(batch_no)s IS NULL, batch_no, %(batch_no)s) order
-			by timestamp(purchase_date, purchase_time) asc limit %(qty)s""",
-				{
-					"item_code": args.item_code,
-					"warehouse": args.warehouse,
-					"batch_no": args.batch_no,
-					"qty": abs(cint(args.stock_qty)),
-					"sales_order": sales_order,
-				},
-			)
-		)
+		serial_nos = query.run(as_list=True)
+		serial_nos = [s[0] for s in serial_nos]
+
+		return "\n".join(serial_nos)
 
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
 	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
 	filters = {"parent": item_code, "uom": uom}
+
 	if variant_of:
 		filters["parent"] = ("in", (item_code, variant_of))
 	conversion_factor = frappe.db.get_value("UOM Conversion Detail", filters, "conversion_factor")
 	if not conversion_factor:
 		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
 		conversion_factor = get_uom_conv_factor(uom, stock_uom)
+
 	return {"conversion_factor": conversion_factor or 1.0}
 
 
@@ -1171,26 +1168,44 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None):
-	bin_details = frappe.db.get_value(
-		"Bin",
-		{"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty", "reserved_qty"],
-		as_dict=True,
-		cache=True,
-	) or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
+	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+
+	if warehouse:
+		from frappe.query_builder.functions import Coalesce, Sum
+
+		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
+
+		bin = frappe.qb.DocType("Bin")
+		bin_details = (
+			frappe.qb.from_(bin)
+			.select(
+				Coalesce(Sum(bin.projected_qty), 0).as_("projected_qty"),
+				Coalesce(Sum(bin.actual_qty), 0).as_("actual_qty"),
+				Coalesce(Sum(bin.reserved_qty), 0).as_("reserved_qty"),
+			)
+			.where((bin.item_code == item_code) & (bin.warehouse.isin(warehouses)))
+		).run(as_dict=True)[0]
+
 	if company:
 		bin_details["company_total_stock"] = get_company_total_stock(item_code, company)
+
 	return bin_details
 
 
 def get_company_total_stock(item_code, company):
-	return frappe.db.sql(
-		"""SELECT sum(actual_qty) from
-		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name)
-		WHERE `tabWarehouse`.company = %s and `tabBin`.item_code = %s""",
-		(company, item_code),
-	)[0][0]
+	bin = frappe.qb.DocType("Bin")
+	wh = frappe.qb.DocType("Warehouse")
+
+	return (
+		frappe.qb.from_(bin)
+		.inner_join(wh)
+		.on(bin.warehouse == wh.name)
+		.select(Sum(bin.actual_qty))
+		.where((wh.company == company) & (bin.item_code == item_code))
+	).run()[0][0]
 
 
 @frappe.whitelist()
@@ -1199,6 +1214,7 @@ def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 		{"item_code": item_code, "warehouse": warehouse, "stock_qty": stock_qty, "serial_no": serial_no}
 	)
 	serial_no = get_serial_no(args)
+
 	return {"serial_no": serial_no}
 
 
@@ -1218,6 +1234,7 @@ def get_bin_details_and_serial_nos(
 		bin_details_and_serial_nos.update(
 			get_serial_no_details(item_code, warehouse, stock_qty, serial_no)
 		)
+
 	return bin_details_and_serial_nos
 
 
@@ -1232,6 +1249,7 @@ def get_batch_qty_and_serial_no(batch_no, stock_qty, warehouse, item_code, has_s
 		)
 		serial_no = get_serial_no(args)
 		batch_qty_and_serial_no.update({"serial_no": serial_no})
+
 	return batch_qty_and_serial_no
 
 
@@ -1304,8 +1322,7 @@ def apply_price_list(args, as_doc=False):
 def apply_price_list_on_item(args):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
-
-	item_details.update(get_pricing_rule_for_item(args, item_details.price_list_rate))
+	item_details.update(get_pricing_rule_for_item(args))
 
 	return item_details
 
@@ -1388,12 +1405,12 @@ def get_valuation_rate(item_code, company, warehouse=None):
 		) or {"valuation_rate": 0}
 
 	elif not item.get("is_stock_item"):
-		valuation_rate = frappe.db.sql(
-			"""select sum(base_net_amount) / sum(qty*conversion_factor)
-			from `tabPurchase Invoice Item`
-			where item_code = %s and docstatus=1""",
-			item_code,
-		)
+		pi_item = frappe.qb.DocType("Purchase Invoice Item")
+		valuation_rate = (
+			frappe.qb.from_(pi_item)
+			.select((Sum(pi_item.base_net_amount) / Sum(pi_item.qty * pi_item.conversion_factor)))
+			.where((pi_item.docstatus == 1) & (pi_item.item_code == item_code))
+		).run()
 
 		if valuation_rate:
 			return {"valuation_rate": valuation_rate[0][0] or 0.0}
@@ -1419,7 +1436,7 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 	if args.get("warehouse") and args.get("stock_qty") and args.get("item_code"):
 		has_serial_no = frappe.get_value("Item", {"item_code": args.item_code}, "has_serial_no")
 		if args.get("batch_no") and has_serial_no == 1:
-			return get_serial_no_batchwise(args, sales_order)
+			return get_serial_nos_by_fifo(args, sales_order)
 		elif has_serial_no == 1:
 			args = json.dumps(
 				{
@@ -1451,31 +1468,35 @@ def get_blanket_order_details(args):
 		args = frappe._dict(json.loads(args))
 
 	blanket_order_details = None
-	condition = ""
-	if args.item_code:
-		if args.customer and args.doctype == "Sales Order":
-			condition = " and bo.customer=%(customer)s"
-		elif args.supplier and args.doctype == "Purchase Order":
-			condition = " and bo.supplier=%(supplier)s"
-		if args.blanket_order:
-			condition += " and bo.name =%(blanket_order)s"
-		if args.transaction_date:
-			condition += " and bo.to_date>=%(transaction_date)s"
 
-		blanket_order_details = frappe.db.sql(
-			"""
-				select boi.rate as blanket_order_rate, bo.name as blanket_order
-				from `tabBlanket Order` bo, `tabBlanket Order Item` boi
-				where bo.company=%(company)s and boi.item_code=%(item_code)s
-					and bo.docstatus=1 and bo.name = boi.parent {0}
-			""".format(
-				condition
-			),
-			args,
-			as_dict=True,
+	if args.item_code:
+		bo = frappe.qb.DocType("Blanket Order")
+		bo_item = frappe.qb.DocType("Blanket Order Item")
+
+		query = (
+			frappe.qb.from_(bo)
+			.from_(bo_item)
+			.select(bo_item.rate.as_("blanket_order_rate"), bo.name.as_("blanket_order"))
+			.where(
+				(bo.company == args.company)
+				& (bo_item.item_code == args.item_code)
+				& (bo.docstatus == 1)
+				& (bo.name == bo_item.parent)
+			)
 		)
 
+		if args.customer and args.doctype == "Sales Order":
+			query = query.where(bo.customer == args.customer)
+		elif args.supplier and args.doctype == "Purchase Order":
+			query = query.where(bo.supplier == args.supplier)
+		if args.blanket_order:
+			query = query.where(bo.name == args.blanket_order)
+		if args.transaction_date:
+			query = query.where(bo.to_date >= args.transaction_date)
+
+		blanket_order_details = query.run(as_dict=True)
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ""
+
 	return blanket_order_details
 
 
@@ -1485,13 +1506,17 @@ def get_so_reservation_for_item(args):
 		if get_reserved_qty_for_so(args.get("against_sales_order"), args.get("item_code")):
 			reserved_so = args.get("against_sales_order")
 	elif args.get("against_sales_invoice"):
-		sales_order = frappe.db.sql(
-			"""select sales_order from `tabSales Invoice Item` where
-		parent=%s and item_code=%s""",
-			(args.get("against_sales_invoice"), args.get("item_code")),
+		sales_order = frappe.db.get_all(
+			"Sales Invoice Item",
+			filters={
+				"parent": args.get("against_sales_invoice"),
+				"item_code": args.get("item_code"),
+				"docstatus": 1,
+			},
+			fields="sales_order",
 		)
 		if sales_order and sales_order[0]:
-			if get_reserved_qty_for_so(sales_order[0][0], args.get("item_code")):
+			if get_reserved_qty_for_so(sales_order[0].sales_order, args.get("item_code")):
 				reserved_so = sales_order[0]
 	elif args.get("sales_order"):
 		if get_reserved_qty_for_so(args.get("sales_order"), args.get("item_code")):
@@ -1500,13 +1525,14 @@ def get_so_reservation_for_item(args):
 
 
 def get_reserved_qty_for_so(sales_order, item_code):
-	reserved_qty = frappe.db.sql(
-		"""select sum(qty) from `tabSales Order Item`
-	where parent=%s and item_code=%s and ensure_delivery_based_on_produced_serial_no=1
-	""",
-		(sales_order, item_code),
+	reserved_qty = frappe.db.get_value(
+		"Sales Order Item",
+		filters={
+			"parent": sales_order,
+			"item_code": item_code,
+			"ensure_delivery_based_on_produced_serial_no": 1,
+		},
+		fieldname="sum(qty)",
 	)
-	if reserved_qty and reserved_qty[0][0]:
-		return reserved_qty[0][0]
-	else:
-		return 0
+
+	return reserved_qty or 0

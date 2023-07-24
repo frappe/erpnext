@@ -10,6 +10,7 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
@@ -120,8 +121,8 @@ class MaterialRequest(BuyingController):
 			self.title = _("{0} Request for {1}").format(self.material_request_type, items)[:100]
 
 	def on_submit(self):
-		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		self.update_requested_qty()
 		if self.material_request_type == "Purchase":
 			self.validate_budget()
 
@@ -180,8 +181,36 @@ class MaterialRequest(BuyingController):
 				)
 
 	def on_cancel(self):
-		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		self.update_requested_qty()
+
+	def get_mr_items_ordered_qty(self, mr_items):
+		mr_items_ordered_qty = {}
+		mr_items = [d.name for d in self.get("items") if d.name in mr_items]
+
+		doctype = qty_field = None
+		if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
+			doctype = frappe.qb.DocType("Stock Entry Detail")
+			qty_field = doctype.transfer_qty
+		elif self.material_request_type == "Manufacture":
+			doctype = frappe.qb.DocType("Work Order")
+			qty_field = doctype.qty
+
+		if doctype and qty_field:
+			query = (
+				frappe.qb.from_(doctype)
+				.select(doctype.material_request_item, Sum(qty_field))
+				.where(
+					(doctype.material_request == self.name)
+					& (doctype.material_request_item.isin(mr_items))
+					& (doctype.docstatus == 1)
+				)
+				.groupby(doctype.material_request_item)
+			)
+
+			mr_items_ordered_qty = frappe._dict(query.run())
+
+		return mr_items_ordered_qty
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
@@ -190,18 +219,13 @@ class MaterialRequest(BuyingController):
 		if not mr_items:
 			mr_items = [d.name for d in self.get("items")]
 
+		mr_items_ordered_qty = self.get_mr_items_ordered_qty(mr_items)
+		mr_qty_allowance = frappe.db.get_single_value("Stock Settings", "mr_qty_allowance")
+
 		for d in self.get("items"):
 			if d.name in mr_items:
 				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
-					d.ordered_qty = flt(
-						frappe.db.sql(
-							"""select sum(transfer_qty)
-						from `tabStock Entry Detail` where material_request = %s
-						and material_request_item = %s and docstatus = 1""",
-							(self.name, d.name),
-						)[0][0]
-					)
-					mr_qty_allowance = frappe.db.get_single_value("Stock Settings", "mr_qty_allowance")
+					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
 
 					if mr_qty_allowance:
 						allowed_qty = d.qty + (d.qty * (mr_qty_allowance / 100))
@@ -220,14 +244,7 @@ class MaterialRequest(BuyingController):
 						)
 
 				elif self.material_request_type == "Manufacture":
-					d.ordered_qty = flt(
-						frappe.db.sql(
-							"""select sum(qty)
-						from `tabWork Order` where material_request = %s
-						and material_request_item = %s and docstatus = 1""",
-							(self.name, d.name),
-						)[0][0]
-					)
+					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
@@ -256,7 +273,13 @@ class MaterialRequest(BuyingController):
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(item_code, warehouse, {"indented_qty": get_indented_qty(item_code, warehouse)})
+			update_bin_qty(
+				item_code,
+				warehouse,
+				{
+					"indented_qty": get_indented_qty(item_code, warehouse),
+				},
+			)
 
 	def update_requested_qty_in_production_plan(self):
 		production_plans = []
@@ -590,15 +613,30 @@ def make_stock_entry(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
+		target.from_warehouse = source.set_from_warehouse
+		target.to_warehouse = source.set_warehouse
+
 		if source.job_card:
 			target.purpose = "Material Transfer for Manufacture"
 
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
 
-		target.set_missing_values()
-		target.set_stock_entry_type()
+		target.set_transfer_qty()
+		target.set_actual_qty()
+		target.calculate_rate_and_amount(raise_error_if_no_rate=False)
+		target.stock_entry_type = target.purpose
 		target.set_job_card_data()
+
+		if source.job_card:
+			job_card_details = frappe.get_all(
+				"Job Card", filters={"name": source.job_card}, fields=["bom_no", "for_quantity"]
+			)
+
+			if job_card_details and job_card_details[0]:
+				target.bom_no = job_card_details[0].bom_no
+				target.fg_completed_qty = job_card_details[0].for_quantity
+				target.from_bom = 1
 
 	doclist = get_mapped_doc(
 		"Material Request",
@@ -717,3 +755,15 @@ def create_pick_list(source_name, target_doc=None):
 	doc.set_item_locations()
 
 	return doc
+
+
+@frappe.whitelist()
+def make_in_transit_stock_entry(source_name, in_transit_warehouse):
+	ste_doc = make_stock_entry(source_name)
+	ste_doc.add_to_transit = 1
+	ste_doc.to_warehouse = in_transit_warehouse
+
+	for row in ste_doc.items:
+		row.t_warehouse = in_transit_warehouse
+
+	return ste_doc

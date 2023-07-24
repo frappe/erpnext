@@ -70,6 +70,7 @@
   "column_break_51",
   "purchase_receipt_amount",
   "default_finance_book",
+  "depr_entry_posting_status",
   "amended_from"
  ],
  "fields": [
@@ -80,6 +81,9 @@
    "options": "ACC-ASS-.YYYY.-"
   },
   {
+   "depends_on": "item_code",
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "asset_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -488,6 +492,16 @@
    "fieldtype": "Int",
    "label": "Asset Quantity",
    "read_only_depends_on": "eval:!doc.is_existing_asset"
+  },
+  {
+   "fieldname": "depr_entry_posting_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Depreciation Entry Posting Status",
+   "no_copy": 1,
+   "options": "\nSuccessful\nFailed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -502,15 +516,21 @@
   {
    "group": "Repair",
    "link_doctype": "Asset Repair",
-   "link_fieldname": "asset_name"
+   "link_fieldname": "asset"
   },
   {
    "group": "Value",
    "link_doctype": "Asset Value Adjustment",
    "link_fieldname": "asset"
+  },
+  {
+   "group": "Journal Entry",
+   "link_doctype": "Journal Entry",
+   "link_fieldname": "reference_name",
+   "table_fieldname": "accounts"
   }
  ],
- "modified": "2022-07-20 10:15:12.887372",
+ "modified": "2023-03-30 15:07:41.542374",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

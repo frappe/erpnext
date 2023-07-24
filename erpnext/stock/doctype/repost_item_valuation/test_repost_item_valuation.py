@@ -6,8 +6,7 @@ from unittest.mock import MagicMock, call
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import nowdate
-from frappe.utils.data import add_to_date, today
+from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
@@ -85,6 +84,33 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 				in_configured_timeslot(repost_settings, case.get("current_time")),
 				msg=f"Exepcted false from : {case}",
 			)
+
+	def test_clear_old_logs(self):
+		# create 10 logs
+		for i in range(1, 20):
+			repost_doc = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				item_code="_Test Item",
+				warehouse="_Test Warehouse - _TC",
+				based_on="Item and Warehouse",
+				posting_date=nowdate(),
+				status="Skipped",
+				posting_time="00:01:00",
+			).insert(ignore_permissions=True)
+
+			repost_doc.load_from_db()
+			repost_doc.modified = add_days(now(), days=-i * 10)
+			repost_doc.db_update_all()
+
+		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
+		self.assertTrue(len(logs) > 10)
+
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
+
+		RepostItemValuation.clear_old_logs(days=1)
+
+		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
+		self.assertTrue(len(logs) == 0)
 
 	def test_create_item_wise_repost_item_valuation_entries(self):
 		pr = make_purchase_receipt(
@@ -327,3 +353,72 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		# outstanding should not be affected
 		sinv.reload()
 		self.assertEqual(sinv.outstanding_amount, 100)
+
+	def test_account_freeze_validation(self):
+		today = nowdate()
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			item_code="_Test Item",
+			warehouse="_Test Warehouse - _TC",
+			based_on="Item and Warehouse",
+			posting_date=today,
+			posting_time="00:01:00",
+		)
+		riv.flags.dont_run_in_test = True  # keep it queued
+
+		accounts_settings = frappe.get_doc("Accounts Settings")
+		accounts_settings.acc_frozen_upto = today
+		accounts_settings.frozen_accounts_modifier = ""
+		accounts_settings.save()
+
+		self.assertRaises(frappe.ValidationError, riv.save)
+
+		accounts_settings.acc_frozen_upto = ""
+		accounts_settings.save()
+
+	def test_create_repost_entry_for_cancelled_document(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			get_multiple_items=True,
+		)
+
+		self.assertTrue(pr.docstatus == 1)
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
+
+		pr.load_from_db()
+
+		pr.cancel()
+		self.assertTrue(pr.docstatus == 2)
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
+
+	def test_repost_item_valuation_for_closing_stock_balance(self):
+		from erpnext.stock.doctype.closing_stock_balance.closing_stock_balance import (
+			prepare_closing_stock_balance,
+		)
+
+		doc = frappe.new_doc("Closing Stock Balance")
+		doc.company = "_Test Company"
+		doc.from_date = today()
+		doc.to_date = today()
+		doc.submit()
+
+		prepare_closing_stock_balance(doc.name)
+		doc.load_from_db()
+		self.assertEqual(doc.docstatus, 1)
+		self.assertEqual(doc.status, "Completed")
+
+		riv = frappe.new_doc("Repost Item Valuation")
+		riv.update(
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"based_on": "Item and Warehouse",
+				"posting_date": today(),
+				"posting_time": "00:01:00",
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, riv.save)
+		doc.cancel()

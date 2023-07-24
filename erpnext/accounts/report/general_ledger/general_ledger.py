@@ -204,7 +204,7 @@ def get_gl_entries(filters, accounting_dimensions):
 	)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters.get("company"))
+		return convert_to_presentation_currency(gl_entries, currency_map)
 	else:
 		return gl_entries
 
@@ -239,18 +239,28 @@ def get_conditions(filters):
 	):
 		conditions.append("(posting_date >=%(from_date)s or is_opening = 'Yes')")
 
-	conditions.append("(posting_date <=%(to_date)s)")
+	conditions.append("(posting_date <=%(to_date)s or is_opening = 'Yes')")
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
 
-	if filters.get("finance_book"):
-		if filters.get("include_default_book_entries"):
-			conditions.append(
-				"(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
-			)
+	if filters.get("include_default_book_entries"):
+		if filters.get("finance_book"):
+			if filters.get("company_fb") and cstr(filters.get("finance_book")) != cstr(
+				filters.get("company_fb")
+			):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
+				)
+			else:
+				conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 		else:
-			conditions.append("finance_book in (%(finance_book)s)")
+			conditions.append("(finance_book in (%(company_fb)s, '') OR finance_book IS NULL)")
+	else:
+		if filters.get("finance_book"):
+			conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
+		else:
+			conditions.append("(finance_book in ('') OR finance_book IS NULL)")
 
 	if not filters.get("show_cancelled_entries"):
 		conditions.append("is_cancelled = 0")
@@ -524,7 +534,7 @@ def get_columns(filters):
 			"options": "GL Entry",
 			"hidden": 1,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 90},
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
 		{
 			"label": _("Account"),
 			"fieldname": "account",
@@ -536,13 +546,13 @@ def get_columns(filters):
 			"label": _("Debit ({0})").format(currency),
 			"fieldname": "debit",
 			"fieldtype": "Float",
-			"width": 100,
+			"width": 130,
 		},
 		{
 			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
 			"fieldtype": "Float",
-			"width": 100,
+			"width": 130,
 		},
 		{
 			"label": _("Balance ({0})").format(currency),

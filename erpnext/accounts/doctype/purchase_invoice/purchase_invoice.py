@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, throw
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
@@ -116,7 +117,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_expense_account()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
 		self.create_remarks()
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
@@ -231,7 +232,9 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return
+			cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate"))
+			and not self.is_return
+			and not self.is_internal_supplier
 		):
 			self.validate_rate_with_reference_doc(
 				[
@@ -578,6 +581,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
+		self.make_precision_loss_gl_entry(gl_entries)
 
 		if self.check_asset_cwip_enabled():
 			self.get_asset_gl_entry(gl_entries)
@@ -972,6 +976,30 @@ class PurchaseInvoice(BuyingController):
 							item.item_tax_amount, item.precision("item_tax_amount")
 						)
 
+	def make_precision_loss_gl_entry(self, gl_entries):
+		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
+		)
+
+		precision_loss = self.get("base_net_total") - flt(
+			self.get("net_total") * self.conversion_rate, self.precision("net_total")
+		)
+
+		if precision_loss:
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": round_off_account,
+						"against": self.supplier,
+						"credit": precision_loss,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else self.cost_center or round_off_cost_center,
+						"remarks": _("Net total calculation precision loss"),
+					}
+				)
+			)
+
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
 		eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
@@ -1360,7 +1388,7 @@ class PurchaseInvoice(BuyingController):
 			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
 		):
 			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-				self.company, "Purchase Invoice", self.name
+				self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 			)
 
 			gl_entries.append(
@@ -1370,7 +1398,9 @@ class PurchaseInvoice(BuyingController):
 						"against": self.supplier,
 						"debit_in_account_currency": self.rounding_adjustment,
 						"debit": self.base_rounding_adjustment,
-						"cost_center": self.cost_center or round_off_cost_center,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else (self.cost_center or round_off_cost_center),
 					},
 					item=self,
 				)
@@ -1414,6 +1444,8 @@ class PurchaseInvoice(BuyingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 		)
@@ -1461,19 +1493,16 @@ class PurchaseInvoice(BuyingController):
 	def update_billing_status_in_pr(self, update_modified=True):
 		updated_pr = []
 		po_details = []
+
+		pr_details_billed_amt = self.get_pr_details_billed_amt()
+
 		for d in self.get("items"):
 			if d.pr_detail:
-				billed_amt = frappe.db.sql(
-					"""select sum(amount) from `tabPurchase Invoice Item`
-					where pr_detail=%s and docstatus=1""",
-					d.pr_detail,
-				)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value(
 					"Purchase Receipt Item",
 					d.pr_detail,
 					"billed_amt",
-					billed_amt,
+					flt(pr_details_billed_amt.get(d.pr_detail)),
 					update_modified=update_modified,
 				)
 				updated_pr.append(d.purchase_receipt)
@@ -1483,11 +1512,35 @@ class PurchaseInvoice(BuyingController):
 		if po_details:
 			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
+		adjust_incoming_rate = frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		)
+
 		for pr in set(updated_pr):
 			from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
 
 			pr_doc = frappe.get_doc("Purchase Receipt", pr)
-			update_billing_percentage(pr_doc, update_modified=update_modified)
+			update_billing_percentage(
+				pr_doc, update_modified=update_modified, adjust_incoming_rate=adjust_incoming_rate
+			)
+
+	def get_pr_details_billed_amt(self):
+		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice
+
+		pr_details_billed_amt = {}
+		pr_details = [d.get("pr_detail") for d in self.get("items") if d.get("pr_detail")]
+		if pr_details:
+			doctype = frappe.qb.DocType("Purchase Invoice Item")
+			query = (
+				frappe.qb.from_(doctype)
+				.select(doctype.pr_detail, Sum(doctype.amount))
+				.where(doctype.pr_detail.isin(pr_details) & doctype.docstatus == 1)
+				.groupby(doctype.pr_detail)
+			)
+
+			pr_details_billed_amt = frappe._dict(query.run(as_list=1))
+
+		return pr_details_billed_amt
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None

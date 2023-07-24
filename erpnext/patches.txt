@@ -195,7 +195,6 @@ erpnext.patches.v13_0.update_project_template_tasks
 erpnext.patches.v13_0.convert_qi_parameter_to_link_field
 erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
 erpnext.patches.v13_0.update_payment_terms_outstanding
-erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v13_0.update_vehicle_no_reqd_condition
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
@@ -269,6 +268,7 @@ erpnext.patches.v13_0.show_india_localisation_deprecation_warning
 erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
+erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -291,6 +291,7 @@ erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.delete_amazon_mws_doctype
 erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
 erpnext.patches.v13_0.update_accounts_in_loan_docs
+erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v14_0.update_batch_valuation_flag
 erpnext.patches.v14_0.delete_non_profit_doctypes
 erpnext.patches.v13_0.add_cost_center_in_loans
@@ -305,7 +306,6 @@ erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
 execute:frappe.delete_doc("DocType", "Naming Series")
 erpnext.patches.v13_0.job_card_status_on_hold
 erpnext.patches.v14_0.copy_is_subcontracted_value_to_is_old_subcontracting_flow
-erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.migrate_existing_lead_notes_as_per_the_new_format
 erpnext.patches.v14_0.remove_india_localisation # 14-07-2022
@@ -314,8 +314,28 @@ erpnext.patches.v14_0.remove_hr_and_payroll_modules # 20-07-2022
 erpnext.patches.v14_0.fix_crm_no_of_employees
 erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes
 erpnext.patches.v14_0.fix_subcontracting_receipt_gl_entries
-erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
-erpnext.patches.v14_0.create_accounting_dimensions_for_asset_capitalization
 erpnext.patches.v13_0.update_schedule_type_in_loans
+erpnext.patches.v13_0.drop_unused_sle_index_parts
+erpnext.patches.v14_0.create_accounting_dimensions_for_asset_capitalization
 erpnext.patches.v14_0.update_partial_tds_fields
+erpnext.patches.v14_0.create_incoterms_and_migrate_shipment
+erpnext.patches.v14_0.setup_clear_repost_logs
+erpnext.patches.v14_0.create_accounting_dimensions_for_payment_request
+erpnext.patches.v14_0.update_entry_type_for_journal_entry
+erpnext.patches.v14_0.change_autoname_for_tax_withheld_vouchers
+erpnext.patches.v14_0.update_asset_value_for_manual_depr_entries
+erpnext.patches.v14_0.set_pick_list_status
+erpnext.patches.v13_0.update_docs_link
+erpnext.patches.v14_0.enable_all_leads
+execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+# below migration patches should always run last
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.patches.v14_0.update_company_in_ldc
+erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
+erpnext.patches.v14_0.cleanup_workspaces
+erpnext.patches.v14_0.enable_allow_existing_serial_no
+erpnext.patches.v14_0.set_report_in_process_SOA 
+erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
+erpnext.patches.v14_0.update_closing_balances #15-07-2023
+execute:frappe.defaults.clear_default("fiscal_year")
 erpnext.patches.v14_0.single_to_multi_dunning

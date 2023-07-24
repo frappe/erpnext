@@ -14,9 +14,17 @@ def execute(filters=None):
 	filters.naming_series = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 
 	columns = get_columns(filters)
-	tds_docs, tds_accounts, tax_category_map, journal_entry_party_map = get_tds_docs(filters)
+	(
+		tds_docs,
+		tds_accounts,
+		tax_category_map,
+		journal_entry_party_map,
+		invoice_total_map,
+	) = get_tds_docs(filters)
 
-	res = get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map)
+	res = get_result(
+		filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, invoice_total_map
+	)
 	final_result = group_by_supplier_and_category(res)
 
 	return columns, final_result

@@ -83,6 +83,7 @@ class TestItem(FrappeTestCase):
 	def test_get_item_details(self):
 		# delete modified item price record and make as per test_records
 		frappe.db.sql("""delete from `tabItem Price`""")
+		frappe.db.sql("""delete from `tabBin`""")
 
 		to_check = {
 			"item_code": "_Test Item",
@@ -103,9 +104,25 @@ class TestItem(FrappeTestCase):
 			"batch_no": None,
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
+			"reserved_qty": 1,
+			"actual_qty": 5,
+			"projected_qty": 14,
 		}
 
 		make_test_objects("Item Price")
+		make_test_objects(
+			"Bin",
+			[
+				{
+					"item_code": "_Test Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"reserved_qty": 1,
+					"actual_qty": 5,
+					"ordered_qty": 10,
+					"projected_qty": 14,
+				}
+			],
+		)
 
 		company = "_Test Company"
 		currency = frappe.get_cached_value("Company", company, "default_currency")
@@ -129,7 +146,7 @@ class TestItem(FrappeTestCase):
 		)
 
 		for key, value in to_check.items():
-			self.assertEqual(value, details.get(key))
+			self.assertEqual(value, details.get(key), key)
 
 	def test_item_tax_template(self):
 		expected_item_tax_template = [

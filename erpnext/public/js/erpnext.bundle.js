@@ -13,6 +13,7 @@ import "./help_links";
 import "./agriculture/ternary_plot";
 import "./templates/item_quick_entry.html";
 import "./utils/item_quick_entry";
+import "./utils/contact_address_quick_entry";
 import "./utils/customer_quick_entry";
 import "./utils/supplier_quick_entry";
 import "./call_popup/call_popup";

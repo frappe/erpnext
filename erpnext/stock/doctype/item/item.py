@@ -164,10 +164,7 @@ class Item(Document):
 		if not self.is_stock_item or self.has_serial_no or self.has_batch_no:
 			return
 
-		if not self.valuation_rate and self.standard_rate:
-			self.valuation_rate = self.standard_rate
-
-		if not self.valuation_rate and not self.is_customer_provided_item:
+		if not self.valuation_rate and not self.standard_rate and not self.is_customer_provided_item:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -192,7 +189,7 @@ class Item(Document):
 					item_code=self.name,
 					target=default_warehouse,
 					qty=self.opening_stock,
-					rate=self.valuation_rate,
+					rate=self.valuation_rate or self.standard_rate,
 					company=default.company,
 					posting_date=getdate(),
 					posting_time=nowtime(),
@@ -279,7 +276,7 @@ class Item(Document):
 				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
 
 	def update_template_tables(self):
-		template = frappe.get_doc("Item", self.variant_of)
+		template = frappe.get_cached_doc("Item", self.variant_of)
 
 		# add item taxes from template
 		for d in template.get("taxes"):
@@ -353,10 +350,15 @@ class Item(Document):
 		check_list = []
 		for d in self.get("taxes"):
 			if d.item_tax_template:
-				if d.item_tax_template in check_list:
-					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
+				if (d.item_tax_template, d.tax_category) in check_list:
+					frappe.throw(
+						_("{0} entered twice {1} in Item Taxes").format(
+							frappe.bold(d.item_tax_template),
+							"for tax category {0}".format(frappe.bold(d.tax_category)) if d.tax_category else "",
+						)
+					)
 				else:
-					check_list.append(d.item_tax_template)
+					check_list.append((d.item_tax_template, d.tax_category))
 
 	def validate_barcode(self):
 		from stdnum import ean
@@ -712,6 +714,7 @@ class Item(Document):
 						template=self,
 						now=frappe.flags.in_test,
 						timeout=600,
+						enqueue_after_commit=True,
 					)
 
 	def validate_has_variants(self):

@@ -10,6 +10,7 @@ from frappe.utils import cint
 
 from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 
 from .default_success_action import get_default_success_action
 
@@ -25,9 +26,13 @@ def after_install():
 	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
 	create_default_energy_point_rules()
+	create_incoterms()
+	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
+	setup_log_settings()
+	hide_workspaces()
 	frappe.db.commit()
 
 
@@ -152,13 +157,13 @@ def add_standard_navbar_items():
 		{
 			"item_label": "Documentation",
 			"item_type": "Route",
-			"route": "https://erpnext.com/docs/user/manual",
+			"route": "https://docs.erpnext.com/docs/v14/user/manual/en/introduction",
 			"is_standard": 1,
 		},
 		{
 			"item_label": "User Forum",
 			"item_type": "Route",
-			"route": "https://discuss.erpnext.com",
+			"route": "https://discuss.frappe.io",
 			"is_standard": 1,
 		},
 		{
@@ -195,3 +200,54 @@ def add_standard_navbar_items():
 
 def add_app_name():
 	frappe.db.set_value("System Settings", None, "app_name", "ERPNext")
+
+
+def setup_log_settings():
+	log_settings = frappe.get_single("Log Settings")
+	log_settings.append("logs_to_clear", {"ref_doctype": "Repost Item Valuation", "days": 60})
+
+	log_settings.save(ignore_permissions=True)
+
+
+def hide_workspaces():
+	for ws in ["Integration", "Settings"]:
+		frappe.db.set_value("Workspace", ws, "public", 0)
+
+
+def create_default_role_profiles():
+	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		role_profile = frappe.new_doc("Role Profile")
+		role_profile.role_profile = role_profile_name
+		for role in roles:
+			role_profile.append("roles", {"role": role})
+
+		role_profile.insert(ignore_permissions=True)
+
+
+DEFAULT_ROLE_PROFILES = {
+	"Inventory": [
+		"Stock User",
+		"Stock Manager",
+		"Item Manager",
+	],
+	"Manufacturing": [
+		"Stock User",
+		"Manufacturing User",
+		"Manufacturing Manager",
+	],
+	"Accounts": [
+		"Accounts User",
+		"Accounts Manager",
+	],
+	"Sales": [
+		"Sales User",
+		"Stock User",
+		"Sales Manager",
+	],
+	"Purchase": [
+		"Item Manager",
+		"Stock User",
+		"Purchase User",
+		"Purchase Manager",
+	],
+}

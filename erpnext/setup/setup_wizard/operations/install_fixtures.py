@@ -4,6 +4,7 @@
 
 import json
 import os
+from pathlib import Path
 
 import frappe
 from frappe import _
@@ -16,28 +17,10 @@ from frappe.utils import cstr, getdate
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
 
-default_lead_sources = [
-	"Existing Customer",
-	"Reference",
-	"Advertisement",
-	"Cold Calling",
-	"Exhibition",
-	"Supplier Reference",
-	"Mass Mailing",
-	"Customer's Vendor",
-	"Campaign",
-	"Walk In",
-]
 
-default_sales_partner_type = [
-	"Channel Partner",
-	"Distributor",
-	"Dealer",
-	"Agent",
-	"Retailer",
-	"Implementation Partner",
-	"Reseller",
-]
+def read_lines(filename: str) -> list[str]:
+	"""Return a list of lines from a file in the data directory."""
+	return (Path(__file__).parent.parent / "data" / filename).read_text().splitlines()
 
 
 def install(country=None):
@@ -85,7 +68,11 @@ def install(country=None):
 		# Stock Entry Type
 		{"doctype": "Stock Entry Type", "name": "Material Issue", "purpose": "Material Issue"},
 		{"doctype": "Stock Entry Type", "name": "Material Receipt", "purpose": "Material Receipt"},
-		{"doctype": "Stock Entry Type", "name": "Material Transfer", "purpose": "Material Transfer"},
+		{
+			"doctype": "Stock Entry Type",
+			"name": "Material Transfer",
+			"purpose": "Material Transfer",
+		},
 		{"doctype": "Stock Entry Type", "name": "Manufacture", "purpose": "Manufacture"},
 		{"doctype": "Stock Entry Type", "name": "Repack", "purpose": "Repack"},
 		{
@@ -103,22 +90,6 @@ def install(country=None):
 			"name": "Material Consumption for Manufacture",
 			"purpose": "Material Consumption for Manufacture",
 		},
-		# Designation
-		{"doctype": "Designation", "designation_name": _("CEO")},
-		{"doctype": "Designation", "designation_name": _("Manager")},
-		{"doctype": "Designation", "designation_name": _("Analyst")},
-		{"doctype": "Designation", "designation_name": _("Engineer")},
-		{"doctype": "Designation", "designation_name": _("Accountant")},
-		{"doctype": "Designation", "designation_name": _("Secretary")},
-		{"doctype": "Designation", "designation_name": _("Associate")},
-		{"doctype": "Designation", "designation_name": _("Administrative Officer")},
-		{"doctype": "Designation", "designation_name": _("Business Development Manager")},
-		{"doctype": "Designation", "designation_name": _("HR Manager")},
-		{"doctype": "Designation", "designation_name": _("Project Manager")},
-		{"doctype": "Designation", "designation_name": _("Head of Marketing and Sales")},
-		{"doctype": "Designation", "designation_name": _("Software Developer")},
-		{"doctype": "Designation", "designation_name": _("Designer")},
-		{"doctype": "Designation", "designation_name": _("Researcher")},
 		# territory: with two default territories, one for home country and one named Rest of the World
 		{
 			"doctype": "Territory",
@@ -291,28 +262,18 @@ def install(country=None):
 		{"doctype": "Market Segment", "market_segment": _("Lower Income")},
 		{"doctype": "Market Segment", "market_segment": _("Middle Income")},
 		{"doctype": "Market Segment", "market_segment": _("Upper Income")},
-		# Sales Stages
-		{"doctype": "Sales Stage", "stage_name": _("Prospecting")},
-		{"doctype": "Sales Stage", "stage_name": _("Qualification")},
-		{"doctype": "Sales Stage", "stage_name": _("Needs Analysis")},
-		{"doctype": "Sales Stage", "stage_name": _("Value Proposition")},
-		{"doctype": "Sales Stage", "stage_name": _("Identifying Decision Makers")},
-		{"doctype": "Sales Stage", "stage_name": _("Perception Analysis")},
-		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
-		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")},
 		# Warehouse Type
 		{"doctype": "Warehouse Type", "name": "Transit"},
 	]
 
-	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
-
-	records += [{"doctype": "Industry Type", "industry": d} for d in get_industry_types()]
-	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
-	records += [{"doctype": "Lead Source", "source_name": _(d)} for d in default_lead_sources]
-
-	records += [
-		{"doctype": "Sales Partner Type", "sales_partner_type": _(d)} for d in default_sales_partner_type
-	]
+	for doctype, title_field, filename in (
+		("Designation", "designation_name", "designation.txt"),
+		("Sales Stage", "stage_name", "sales_stage.txt"),
+		("Industry Type", "industry", "industry_type.txt"),
+		("Lead Source", "source_name", "lead_source.txt"),
+		("Sales Partner Type", "sales_partner_type", "sales_partner_type.txt"),
+	):
+		records += [{"doctype": doctype, title_field: title} for title in read_lines(filename)]
 
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(
@@ -335,16 +296,11 @@ def install(country=None):
 	make_default_records()
 	make_records(records)
 	set_up_address_templates(default_country=country)
-	set_more_defaults()
-	update_global_search_doctypes()
-
-
-def set_more_defaults():
-	# Do more setup stuff that can be done here with no dependencies
 	update_selling_defaults()
 	update_buying_defaults()
 	add_uom_data()
 	update_item_variant_settings()
+	update_global_search_doctypes()
 
 
 def update_selling_defaults():
@@ -381,7 +337,7 @@ def add_uom_data():
 	)
 	for d in uoms:
 		if not frappe.db.exists("UOM", _(d.get("uom_name"))):
-			uom_doc = frappe.get_doc(
+			frappe.get_doc(
 				{
 					"doctype": "UOM",
 					"uom_name": _(d.get("uom_name")),
@@ -402,9 +358,10 @@ def add_uom_data():
 			frappe.get_doc({"doctype": "UOM Category", "category_name": _(d.get("category"))}).db_insert()
 
 		if not frappe.db.exists(
-			"UOM Conversion Factor", {"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))}
+			"UOM Conversion Factor",
+			{"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))},
 		):
-			uom_conversion = frappe.get_doc(
+			frappe.get_doc(
 				{
 					"doctype": "UOM Conversion Factor",
 					"category": _(d.get("category")),
@@ -412,7 +369,7 @@ def add_uom_data():
 					"to_uom": _(d.get("to_uom")),
 					"value": d.get("value"),
 				}
-			).insert(ignore_permissions=True)
+			).db_insert()
 
 
 def add_market_segments():
@@ -468,7 +425,7 @@ def install_company(args):
 	make_records(records)
 
 
-def install_defaults(args=None):
+def install_defaults(args=None):  # nosemgrep
 	records = [
 		# Price Lists
 		{
@@ -493,7 +450,7 @@ def install_defaults(args=None):
 
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
-	frappe.db.set_value("Stock Settings", None, "email_footer_address", args.get("company_name"))
+	frappe.db.set_single_value("Stock Settings", "email_footer_address", args.get("company_name"))
 
 	set_global_defaults(args)
 	update_stock_settings()
@@ -505,11 +462,9 @@ def install_defaults(args=None):
 
 def set_global_defaults(args):
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
-	current_fiscal_year = frappe.get_all("Fiscal Year")[0]
 
 	global_defaults.update(
 		{
-			"current_fiscal_year": current_fiscal_year.name,
 			"default_currency": args.get("currency"),
 			"default_company": args.get("company_name"),
 			"country": args.get("country"),
@@ -540,7 +495,8 @@ def create_bank_account(args):
 
 	company_name = args.get("company_name")
 	bank_account_group = frappe.db.get_value(
-		"Account", {"account_type": "Bank", "is_group": 1, "root_type": "Asset", "company": company_name}
+		"Account",
+		{"account_type": "Bank", "is_group": 1, "root_type": "Asset", "company": company_name},
 	)
 	if bank_account_group:
 		bank_account = frappe.get_doc(

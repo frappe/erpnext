@@ -88,12 +88,14 @@ class BOMUpdateLog(Document):
 				boms=boms,
 				timeout=40000,
 				now=frappe.flags.in_test,
+				enqueue_after_commit=True,
 			)
 		else:
 			frappe.enqueue(
 				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.process_boms_cost_level_wise",
 				update_doc=self,
 				now=frappe.flags.in_test,
+				enqueue_after_commit=True,
 			)
 
 
@@ -164,7 +166,7 @@ def queue_bom_cost_jobs(
 
 	while current_boms_list:
 		batch_no += 1
-		batch_size = 20_000
+		batch_size = 7_000
 		boms_to_process = current_boms_list[:batch_size]  # slice out batch of 20k BOMs
 
 		# update list to exclude 20K (queued) BOMs

@@ -414,6 +414,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 
 		delivery_note = create_delivery_note(pick_list.name)
+		pick_list.load_from_db()
 
 		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
@@ -445,10 +446,10 @@ class TestPickList(FrappeTestCase):
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 4)
 
-		# grouping should halve the number of items
+		# grouping should not happen if group_same_items is False
 		pl = frappe.get_doc(
 			doctype="Pick List",
-			group_same_items=True,
+			group_same_items=False,
 			locations=[
 				_dict(item_code="A", warehouse="X", qty=5, picked_qty=1),
 				_dict(item_code="B", warehouse="Y", qty=4, picked_qty=2),
@@ -456,6 +457,11 @@ class TestPickList(FrappeTestCase):
 				_dict(item_code="B", warehouse="Y", qty=2, picked_qty=2),
 			],
 		)
+		pl.before_print()
+		self.assertEqual(len(pl.locations), 4)
+
+		# grouping should halve the number of items
+		pl.group_same_items = True
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 2)
 
@@ -658,3 +664,147 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(dn.items[0].rate, 42)
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
+
+	def test_pick_list_status(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"maintain_stock": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.reload()
+		self.assertEqual(pl.status, "Draft")
+
+		pl.submit()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		dn = create_delivery_note(pl.name)
+		dn.save()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		dn.submit()
+		pl.reload()
+		self.assertEqual(pl.status, "Completed")
+
+		dn.cancel()
+		pl.reload()
+		self.assertEqual(pl.status, "Completed")
+
+		pl.cancel()
+		pl.reload()
+		self.assertEqual(pl.status, "Cancelled")
+
+	def test_consider_existing_pick_list(self):
+		def create_items(items_properties):
+			items = []
+
+			for properties in items_properties:
+				properties.update({"maintain_stock": 1})
+				item_code = make_item(properties=properties).name
+				properties.update({"item_code": item_code})
+				items.append(properties)
+
+			return items
+
+		def create_stock_entries(items):
+			warehouses = ["Stores - _TC", "Finished Goods - _TC"]
+
+			for item in items:
+				for warehouse in warehouses:
+					se = make_stock_entry(
+						item=item.get("item_code"),
+						to_warehouse=warehouse,
+						qty=5,
+					)
+
+		def get_item_list(items, qty, warehouse="All Warehouses - _TC"):
+			return [
+				{
+					"item_code": item.get("item_code"),
+					"qty": qty,
+					"warehouse": warehouse,
+				}
+				for item in items
+			]
+
+		def get_picked_items_details(pick_list_doc):
+			items_data = {}
+
+			for location in pick_list_doc.locations:
+				key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
+				serial_no = [x for x in location.serial_no.split("\n") if x] if location.serial_no else None
+				data = {"picked_qty": location.picked_qty}
+				if serial_no:
+					data["serial_no"] = serial_no
+				if location.item_code not in items_data:
+					items_data[location.item_code] = {key: data}
+				else:
+					items_data[location.item_code][key] = data
+
+			return items_data
+
+		# Step - 1: Setup - Create Items and Stock Entries
+		items_properties = [
+			{
+				"valuation_rate": 100,
+			},
+			{
+				"valuation_rate": 200,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+			},
+			{
+				"valuation_rate": 300,
+				"has_serial_no": 1,
+				"serial_no_series": "SNO.###",
+			},
+			{
+				"valuation_rate": 400,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SNO.###",
+			},
+		]
+
+		items = create_items(items_properties)
+		create_stock_entries(items)
+
+		# Step - 2: Create Sales Order [1]
+		so1 = make_sales_order(item_list=get_item_list(items, qty=6))
+
+		# Step - 3: Create and Submit Pick List [1] for Sales Order [1]
+		pl1 = create_pick_list(so1.name)
+		pl1.submit()
+
+		# Step - 4: Create Sales Order [2] with same Item(s) as Sales Order [1]
+		so2 = make_sales_order(item_list=get_item_list(items, qty=4))
+
+		# Step - 5: Create Pick List [2] for Sales Order [2]
+		pl2 = create_pick_list(so2.name)
+		pl2.save()
+
+		# Step - 6: Assert
+		picked_items_details = get_picked_items_details(pl1)
+
+		for location in pl2.locations:
+			key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
+			item_data = picked_items_details.get(location.item_code, {}).get(key, {})
+			picked_qty = item_data.get("picked_qty", 0)
+			picked_serial_no = picked_items_details.get("serial_no", [])
+			bin_actual_qty = frappe.db.get_value(
+				"Bin", {"item_code": location.item_code, "warehouse": location.warehouse}, "actual_qty"
+			)
+
+			# Available Qty to pick should be equal to [Actual Qty - Picked Qty]
+			self.assertEqual(location.stock_qty, bin_actual_qty - picked_qty)
+
+			# Serial No should not be in the Picked Serial No list
+			if location.serial_no:
+				a = set(picked_serial_no)
+				b = set([x for x in location.serial_no.split("\n") if x])
+				self.assertSetEqual(b, b.difference(a))

@@ -4,7 +4,7 @@
 
 import frappe
 from dateutil.relativedelta import relativedelta
-from frappe import _, msgprint
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_years, cstr, getdate
 
@@ -14,22 +14,6 @@ class FiscalYearIncorrectDate(frappe.ValidationError):
 
 
 class FiscalYear(Document):
-	@frappe.whitelist()
-	def set_as_default(self):
-		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
-		global_defaults = frappe.get_doc("Global Defaults")
-		global_defaults.check_permission("write")
-		global_defaults.on_update()
-
-		# clear cache
-		frappe.clear_cache()
-
-		msgprint(
-			_(
-				"{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect."
-			).format(self.name)
-		)
-
 	def validate(self):
 		self.validate_dates()
 		self.validate_overlap()
@@ -77,13 +61,6 @@ class FiscalYear(Document):
 		frappe.cache().delete_value("fiscal_years")
 
 	def on_trash(self):
-		global_defaults = frappe.get_doc("Global Defaults")
-		if global_defaults.current_fiscal_year == self.name:
-			frappe.throw(
-				_(
-					"You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings"
-				).format(self.name)
-			)
 		frappe.cache().delete_value("fiscal_years")
 
 	def validate_overlap(self):
@@ -169,5 +146,6 @@ def auto_create_fiscal_year():
 
 
 def get_from_and_to_date(fiscal_year):
-	fields = ["year_start_date as from_date", "year_end_date as to_date"]
-	return frappe.db.get_value("Fiscal Year", fiscal_year, fields, as_dict=1)
+	fields = ["year_start_date", "year_end_date"]
+	cached_results = frappe.get_cached_value("Fiscal Year", fiscal_year, fields, as_dict=1)
+	return dict(from_date=cached_results.year_start_date, to_date=cached_results.year_end_date)

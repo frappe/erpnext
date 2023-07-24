@@ -70,9 +70,6 @@ class Company(NestedSet):
 
 		self.abbr = self.abbr.strip()
 
-		# if self.get('__islocal') and len(self.abbr) > 5:
-		# 	frappe.throw(_("Abbreviation cannot have more than 5 characters"))
-
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
@@ -811,7 +808,7 @@ def get_default_company_address(name, sort_key="is_primary_address", existing_ad
 			return existing_address
 
 	if out:
-		return min(out, key=lambda x: x[1])[0]  # find min by sort_key
+		return max(out, key=lambda x: x[1])[0]  # find max by sort_key
 	else:
 		return None
 

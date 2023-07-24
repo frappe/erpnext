@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe import _, throw
+from frappe import _, bold, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
@@ -197,13 +197,19 @@ class AccountsController(TransactionBase):
 
 		validate_einvoice_fields(self)
 
-		if self.doctype != "Material Request":
+		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
 			apply_pricing_rule_on_transaction(self)
 
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
 	def on_trash(self):
+		# delete references in 'Repost Payment Ledger'
+		rpi = frappe.qb.DocType("Repost Payment Ledger Items")
+		frappe.qb.from_(rpi).delete().where(
+			(rpi.voucher_type == self.doctype) & (rpi.voucher_no == self.name)
+		).run()
+
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
 			ple = frappe.qb.DocType("Payment Ledger Entry")
@@ -239,6 +245,14 @@ class AccountsController(TransactionBase):
 					else:
 						item.set(field_map.get(self.doctype), default_deferred_account)
 
+	def validate_auto_repeat_subscription_dates(self):
+		if (
+			self.get("from_date")
+			and self.get("to_date")
+			and getdate(self.from_date) > getdate(self.to_date)
+		):
+			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
+
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
@@ -259,8 +273,8 @@ class AccountsController(TransactionBase):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
 		self.set_payment_schedule()
-		self.validate_payment_schedule_amount()
 		if not self.get("ignore_default_payment_terms_template"):
+			self.validate_payment_schedule_amount()
 			self.validate_due_date()
 		self.validate_advance_entries()
 
@@ -378,6 +392,9 @@ class AccountsController(TransactionBase):
 				)
 
 	def validate_inter_company_reference(self):
+		if self.get("is_return"):
+			return
+
 		if self.doctype not in ("Purchase Invoice", "Purchase Receipt"):
 			return
 
@@ -386,10 +403,19 @@ class AccountsController(TransactionBase):
 				self.get("inter_company_reference")
 				or self.get("inter_company_invoice_reference")
 				or self.get("inter_company_order_reference")
-			):
+			) and not self.get("is_return"):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
+
+			label = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+
+			field = frappe.scrub(label)
+
+			for row in self.get("items"):
+				if not row.get(field):
+					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
+					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
 
 	def disable_pricing_rule_on_internal_transfer(self):
 		if not self.get("ignore_pricing_rule") and self.is_internal_transfer():
@@ -501,6 +527,7 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			self.pricing_rules = []
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -576,7 +603,12 @@ class AccountsController(TransactionBase):
 					if bool(uom) != bool(stock_uom):  # xor
 						item.stock_uom = item.uom = uom or stock_uom
 
-					item.conversion_factor = get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+					# UOM cannot be zero so substitute as 1
+					item.conversion_factor = (
+						get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+						or item.get("conversion_factor")
+						or 1
+					)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -726,6 +758,7 @@ class AccountsController(TransactionBase):
 			}
 		)
 
+		update_gl_dict_with_regional_fields(self, gl_dict)
 		accounting_dimensions = get_accounting_dimensions()
 		dimension_dict = frappe._dict()
 
@@ -814,7 +847,9 @@ class AccountsController(TransactionBase):
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 
-		res = self.get_advance_entries()
+		res = self.get_advance_entries(
+			include_unallocated=not cint(self.get("only_include_allocated_payments"))
+		)
 
 		self.set("advances", [])
 		advance_allocated = 0
@@ -881,6 +916,9 @@ class AccountsController(TransactionBase):
 				is_inclusive = 1
 
 		return is_inclusive
+
+	def should_show_taxes_as_table_in_print(self):
+		return cint(frappe.db.get_single_value("Accounts Settings", "show_taxes_as_table_in_print"))
 
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
@@ -1213,7 +1251,7 @@ class AccountsController(TransactionBase):
 				)
 			)
 
-	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
+	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
 		from erpnext.controllers.status_updater import get_allowance_for
 
 		item_allowance = {}
@@ -1226,17 +1264,20 @@ class AccountsController(TransactionBase):
 
 		total_overbilled_amt = 0.0
 
+		reference_names = [d.get(item_ref_dn) for d in self.get("items") if d.get(item_ref_dn)]
+		reference_details = self.get_billing_reference_details(
+			reference_names, ref_dt + " Item", based_on
+		)
+
 		for item in self.get("items"):
 			if not item.get(item_ref_dn):
 				continue
 
-			ref_amt = flt(
-				frappe.db.get_value(ref_dt + " Item", item.get(item_ref_dn), based_on),
-				self.precision(based_on, item),
-			)
+			ref_amt = flt(reference_details.get(item.get(item_ref_dn)), self.precision(based_on, item))
+
 			if not ref_amt:
 				frappe.msgprint(
-					_("System will not check overbilling since amount for Item {0} in {1} is zero").format(
+					_("System will not check over billing since amount for Item {0} in {1} is zero").format(
 						item.item_code, ref_dt
 					),
 					title=_("Warning"),
@@ -1282,6 +1323,16 @@ class AccountsController(TransactionBase):
 				indicator="orange",
 				alert=True,
 			)
+
+	def get_billing_reference_details(self, reference_names, reference_doctype, based_on):
+		return frappe._dict(
+			frappe.get_all(
+				reference_doctype,
+				filters={"name": ("in", reference_names)},
+				fields=["name", based_on],
+				as_list=1,
+			)
+		)
 
 	def get_billed_amount_for_item(self, item, item_ref_dn, based_on):
 		"""
@@ -1572,6 +1623,7 @@ class AccountsController(TransactionBase):
 
 		base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 		grand_total = self.get("rounded_total") or self.grand_total
+		automatically_fetch_payment_terms = 0
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -1617,19 +1669,26 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
-		for d in self.get("payment_schedule"):
-			if d.invoice_portion:
-				d.payment_amount = flt(
-					grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
-				)
-				d.base_payment_amount = flt(
-					base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
-				)
-				d.outstanding = d.payment_amount
-			elif not d.invoice_portion:
-				d.base_payment_amount = flt(
-					d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
-				)
+		if not (
+			automatically_fetch_payment_terms
+			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
+		):
+			for d in self.get("payment_schedule"):
+				if d.invoice_portion:
+					d.payment_amount = flt(
+						grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
+					)
+					d.base_payment_amount = flt(
+						base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
+					)
+					d.outstanding = d.payment_amount
+				elif not d.invoice_portion:
+					d.base_payment_amount = flt(
+						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
+					)
+		else:
+			self.fetch_payment_terms_from_order(po_or_so, doctype)
+			self.ignore_default_payment_terms_template = 1
 
 	def get_order_details(self):
 		if self.doctype == "Sales Invoice":
@@ -1682,6 +1741,10 @@ class AccountsController(TransactionBase):
 				"invoice_portion": schedule.invoice_portion,
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
+				"payment_amount": schedule.payment_amount,
+				"base_payment_amount": schedule.base_payment_amount,
+				"outstanding": schedule.outstanding,
+				"paid_amount": schedule.paid_amount,
 			}
 
 			if schedule.discount_type == "Percentage":
@@ -1851,12 +1914,14 @@ class AccountsController(TransactionBase):
 		reconcilation_entry.party = secondary_party
 		reconcilation_entry.reference_type = self.doctype
 		reconcilation_entry.reference_name = self.name
-		reconcilation_entry.cost_center = self.cost_center
+		reconcilation_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(
+			self.company
+		)
 
 		advance_entry.account = primary_account
 		advance_entry.party_type = primary_party_type
 		advance_entry.party = primary_party
-		advance_entry.cost_center = self.cost_center
+		advance_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(self.company)
 		advance_entry.is_advance = "Yes"
 
 		if self.doctype == "Sales Invoice":
@@ -2303,7 +2368,7 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 		due_date = add_days(get_last_day(date), term.credit_days)
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
-		due_date = add_months(get_last_day(date), term.credit_months)
+		due_date = get_last_day(add_months(date, term.credit_months))
 	return due_date
 
 
@@ -2315,7 +2380,7 @@ def get_discount_date(term, posting_date=None, bill_date=None):
 	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
 		discount_validity = add_days(get_last_day(date), term.discount_validity)
 	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
-		discount_validity = add_months(get_last_day(date), term.discount_validity)
+		discount_validity = get_last_day(add_months(date, term.discount_validity))
 	return discount_validity
 
 
@@ -2773,4 +2838,9 @@ def validate_regional(doc):
 
 @erpnext.allow_regional
 def validate_einvoice_fields(doc):
+	pass
+
+
+@erpnext.allow_regional
+def update_gl_dict_with_regional_fields(doc, gl_dict):
 	pass

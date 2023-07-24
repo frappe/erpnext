@@ -201,8 +201,11 @@ class Account(NestedSet):
 				)
 
 	def validate_account_currency(self):
+		self.currency_explicitly_specified = True
+
 		if not self.account_currency:
 			self.account_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+			self.currency_explicitly_specified = False
 
 		gl_currency = frappe.db.get_value("GL Entry", {"account": self.name}, "account_currency")
 
@@ -248,8 +251,10 @@ class Account(NestedSet):
 					{
 						"company": company,
 						# parent account's currency should be passed down to child account's curreny
-						# if it is None, it picks it up from default company currency, which might be unintended
-						"account_currency": erpnext.get_company_currency(company),
+						# if currency explicitly specified by user, child will inherit. else, default currency will be used.
+						"account_currency": self.account_currency
+						if self.currency_explicitly_specified
+						else erpnext.get_company_currency(company),
 						"parent_account": parent_acc_name_map[company],
 					}
 				)
@@ -393,7 +398,13 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 	if ancestors and not allow_independent_account_creation:
 		for ancestor in ancestors:
-			if frappe.db.get_value("Account", {"account_name": old_acc_name, "company": ancestor}, "name"):
+			old_name = frappe.db.get_value(
+				"Account",
+				{"account_number": old_acc_number, "account_name": old_acc_name, "company": ancestor},
+				"name",
+			)
+
+			if old_name:
 				# same account in parent company exists
 				allow_child_account_creation = _("Allow Account Creation Against Child Company")
 

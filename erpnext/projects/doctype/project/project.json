@@ -289,7 +289,8 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "remember_last_selected_value": 1
+   "remember_last_selected_value": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_28",
@@ -408,7 +409,7 @@
    "depends_on": "eval:(doc.frequency == \"Daily\" && doc.collect_progress == true)",
    "fieldname": "daily_time_to_send",
    "fieldtype": "Time",
-   "label": "Time to send"
+   "label": "Daily Time to send"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Weekly\" && doc.collect_progress == true)",
@@ -421,7 +422,7 @@
    "depends_on": "eval:(doc.frequency == \"Weekly\" && doc.collect_progress == true)",
    "fieldname": "weekly_time_to_send",
    "fieldtype": "Time",
-   "label": "Time to send"
+   "label": "Weekly Time to send"
   },
   {
    "fieldname": "column_break_45",
@@ -451,7 +452,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2022-06-23 16:45:06.108499",
+ "modified": "2023-02-14 04:54:25.819620",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

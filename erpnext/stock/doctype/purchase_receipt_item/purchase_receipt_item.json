@@ -69,6 +69,7 @@
   "item_tax_amount",
   "rm_supp_cost",
   "landed_cost_voucher_amount",
+  "rate_difference_with_purchase_invoice",
   "billed_amt",
   "warehouse_and_reference",
   "warehouse",
@@ -205,6 +206,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
+   "no_copy": 1,
    "oldfieldname": "received_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -493,6 +495,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "oldfieldname": "rejected_warehouse",
@@ -859,7 +862,8 @@
    "label": "Purchase Receipt Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "collapsible": 1,
@@ -974,7 +978,8 @@
    "label": "Purchase Invoice Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "product_bundle",
@@ -1005,12 +1010,20 @@
    "fieldtype": "Check",
    "label": "Has Item Scanned",
    "read_only": 1
+  },
+  {
+   "fieldname": "rate_difference_with_purchase_invoice",
+   "fieldtype": "Currency",
+   "label": "Rate Difference with Purchase Invoice",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-02 12:49:28.746701",
+ "modified": "2023-07-04 17:22:02.830029",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

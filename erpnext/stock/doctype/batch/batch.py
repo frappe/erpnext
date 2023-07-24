@@ -6,7 +6,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.query_builder.functions import CombineDatetime, CurDate, Sum
+from frappe.utils import cint, flt, get_link_to_form, nowtime
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
 
@@ -176,45 +177,42 @@ def get_batch_qty(
 	:param warehouse: Optional - give qty for this warehouse
 	:param item_code: Optional - give qty for this item"""
 
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
 	out = 0
 	if batch_no and warehouse:
-		cond = ""
-		if posting_date and posting_time:
-			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(
-				posting_date, posting_time
+		query = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where((sle.is_cancelled == 0) & (sle.warehouse == warehouse) & (sle.batch_no == batch_no))
+		)
+
+		if posting_date:
+			if posting_time is None:
+				posting_time = nowtime()
+
+			query = query.where(
+				CombineDatetime(sle.posting_date, sle.posting_time)
+				<= CombineDatetime(posting_date, posting_time)
 			)
 
-		out = float(
-			frappe.db.sql(
-				"""select sum(actual_qty)
-			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(
-					cond
-				),
-				(warehouse, batch_no),
-			)[0][0]
-			or 0
-		)
+		out = query.run(as_list=True)[0][0] or 0
 
 	if batch_no and not warehouse:
-		out = frappe.db.sql(
-			"""select warehouse, sum(actual_qty) as qty
-			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and batch_no=%s
-			group by warehouse""",
-			batch_no,
-			as_dict=1,
-		)
+		out = (
+			frappe.qb.from_(sle)
+			.select(sle.warehouse, Sum(sle.actual_qty).as_("qty"))
+			.where((sle.is_cancelled == 0) & (sle.batch_no == batch_no))
+			.groupby(sle.warehouse)
+		).run(as_dict=True)
 
 	if not batch_no and item_code and warehouse:
-		out = frappe.db.sql(
-			"""select batch_no, sum(actual_qty) as qty
-			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and item_code = %s and warehouse=%s
-			group by batch_no""",
-			(item_code, warehouse),
-			as_dict=1,
-		)
+		out = (
+			frappe.qb.from_(sle)
+			.select(sle.batch_no, Sum(sle.actual_qty).as_("qty"))
+			.where((sle.is_cancelled == 0) & (sle.item_code == item_code) & (sle.warehouse == warehouse))
+			.groupby(sle.batch_no)
+		).run(as_dict=True)
 
 	return out
 
@@ -310,40 +308,44 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	cond = ""
+	batch = frappe.qb.DocType("Batch")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(batch)
+		.join(sle)
+		.on(batch.batch_id == sle.batch_no)
+		.select(
+			batch.batch_id,
+			Sum(sle.actual_qty).as_("qty"),
+		)
+		.where(
+			(sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+			& (sle.is_cancelled == 0)
+			& ((batch.expiry_date >= CurDate()) | (batch.expiry_date.isnull()))
+		)
+		.groupby(batch.batch_id)
+		.orderby(batch.expiry_date, batch.creation)
+	)
+
 	if serial_no and frappe.get_cached_value("Item", item_code, "has_batch_no"):
 		serial_nos = get_serial_nos(serial_no)
-		batch = frappe.get_all(
+		batches = frappe.get_all(
 			"Serial No",
 			fields=["distinct batch_no"],
 			filters={"item_code": item_code, "warehouse": warehouse, "name": ("in", serial_nos)},
 		)
 
-		if not batch:
+		if not batches:
 			validate_serial_no_with_batch(serial_nos, item_code)
 
-		if batch and len(batch) > 1:
+		if batches and len(batches) > 1:
 			return []
 
-		cond = " and `tabBatch`.name = %s" % (frappe.db.escape(batch[0].batch_no))
+		query = query.where(batch.name == batches[0].batch_no)
 
-	return frappe.db.sql(
-		"""
-		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
-		from `tabBatch`
-			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
-				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
-		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
-			and `tabStock Ledger Entry`.is_cancelled = 0
-			and (`tabBatch`.expiry_date >= CURRENT_DATE or `tabBatch`.expiry_date IS NULL) {0}
-		group by batch_id
-		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
-	""".format(
-			cond
-		),
-		(item_code, warehouse),
-		as_dict=True,
-	)
+	return query.run(as_dict=True)
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):
@@ -375,7 +377,7 @@ def get_pos_reserved_batch_qty(filters):
 
 	p = frappe.qb.DocType("POS Invoice").as_("p")
 	item = frappe.qb.DocType("POS Invoice Item").as_("item")
-	sum_qty = frappe.query_builder.functions.Sum(item.qty).as_("qty")
+	sum_qty = frappe.query_builder.functions.Sum(item.stock_qty).as_("qty")
 
 	reserved_batch_qty = (
 		frappe.qb.from_(p)

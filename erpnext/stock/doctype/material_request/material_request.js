@@ -108,10 +108,13 @@ frappe.ui.form.on('Material Request', {
 						() => frm.events.create_pick_list(frm), __('Create'));
 				}
 
-				if (frm.doc.material_request_type === "Material Transfer") {
+				if (frm.doc.material_request_type === 'Material Transfer') {
 					add_create_pick_list_button();
-					frm.add_custom_button(__("Transfer Material"),
+					frm.add_custom_button(__('Material Transfer'),
 						() => frm.events.make_stock_entry(frm), __('Create'));
+
+					frm.add_custom_button(__('Material Transfer (In Transit)'),
+						() => frm.events.make_in_transit_stock_entry(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Material Issue") {
@@ -333,6 +336,46 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
+	make_in_transit_stock_entry(frm) {
+		frappe.prompt(
+			[
+				{
+					label: __('In Transit Warehouse'),
+					fieldname: 'in_transit_warehouse',
+					fieldtype: 'Link',
+					options: 'Warehouse',
+					reqd: 1,
+					get_query: () => {
+						return{
+							filters: {
+								'company': frm.doc.company,
+								'is_group': 0,
+								'warehouse_type': 'Transit'
+							}
+						}
+					}
+				}
+			],
+			(values) => {
+				frappe.call({
+					method: "erpnext.stock.doctype.material_request.material_request.make_in_transit_stock_entry",
+					args: {
+						source_name: frm.doc.name,
+						in_transit_warehouse: values.in_transit_warehouse
+					},
+					callback: function(r) {
+						if (r.message) {
+							let doc = frappe.model.sync(r.message);
+							frappe.set_route('Form', doc[0].doctype, doc[0].name);
+						}
+					}
+				})
+			},
+			__('In Transit Transfer'),
+			__('Create Stock Entry')
+		)
+	},
+
 	create_pick_list: (frm) => {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
@@ -366,12 +409,10 @@ frappe.ui.form.on('Material Request', {
 
 frappe.ui.form.on("Material Request Item", {
 	qty: function (frm, doctype, name) {
-		var d = locals[doctype][name];
-		if (flt(d.qty) < flt(d.min_order_qty)) {
+		const item = locals[doctype][name];
+		if (flt(item.qty) < flt(item.min_order_qty)) {
 			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
-
-		const item = locals[doctype][name];
 		frm.events.get_item_data(frm, item, false);
 	},
 

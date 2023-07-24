@@ -15,6 +15,7 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
 	make_sales_invoice,
@@ -22,6 +23,7 @@ from erpnext.assets.doctype.asset.asset import (
 	update_maintenance_status,
 )
 from erpnext.assets.doctype.asset.depreciation import (
+	is_last_day_of_the_month,
 	post_depreciation_entries,
 	restore_asset,
 	scrap_asset,
@@ -264,7 +266,7 @@ class TestAsset(AssetSetup):
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
 			asset.precision("gross_purchase_amount"),
 		)
-		this_month_depr_amount = 9000.0 if get_last_day(date) == date else 0
+		this_month_depr_amount = 9000.0 if is_last_day_of_the_month(date) else 0
 
 		self.assertEquals(accumulated_depr_amount, 18000.0 + this_month_depr_amount)
 
@@ -324,6 +326,79 @@ class TestAsset(AssetSetup):
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
+
+	def test_gle_made_by_asset_sale_for_existing_asset(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-04-01",
+			purchase_date="2020-04-01",
+			expected_value_after_useful_life=0,
+			total_number_of_depreciations=5,
+			number_of_depreciations_booked=2,
+			frequency_of_depreciation=12,
+			depreciation_start_date="2023-03-31",
+			opening_accumulated_depreciation=24000,
+			gross_purchase_amount=60000,
+			submit=1,
+		)
+
+		expected_depr_values = [
+			["2023-03-31", 12000, 36000],
+			["2024-03-31", 12000, 48000],
+			["2025-03-31", 12000, 60000],
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_depr_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_depr_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_depr_values[i][2], schedule.accumulated_depreciation_amount)
+
+		post_depreciation_entries(date="2023-03-31")
+
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=40000, posting_date=getdate("2023-05-23")
+		)
+		asset.load_from_db()
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
+		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1742.47, 37742.47]]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertTrue(schedule.journal_entry)
+
+		expected_gle = (
+			(
+				"_Test Accumulated Depreciations - _TC",
+				37742.47,
+				0.0,
+			),
+			(
+				"_Test Fixed Asset - _TC",
+				0.0,
+				60000.0,
+			),
+			(
+				"_Test Gain/Loss on Asset Disposal - _TC",
+				0.0,
+				17742.47,
+			),
+			("Debtors - _TC", 40000.0, 0.0),
+		)
+
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no = %s
+			order by account""",
+			si.name,
+		)
+
+		self.assertSequenceEqual(gle, expected_gle)
 
 	def test_asset_with_maintenance_required_status_after_sale(self):
 		asset = create_asset(
@@ -647,7 +722,7 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		self.assertEqual(asset.status, "Draft")
-		expected_schedules = [["2032-12-31", 30000.0, 77095.89], ["2033-06-06", 12904.11, 90000.0]]
+		expected_schedules = [["2032-12-31", 42904.11, 90000.0]]
 		schedules = [
 			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in asset.get("schedules")
@@ -691,14 +766,14 @@ class TestDepreciationMethods(AssetSetup):
 			number_of_depreciations_booked=1,
 			opening_accumulated_depreciation=50000,
 			expected_value_after_useful_life=10000,
-			depreciation_start_date="2030-12-31",
+			depreciation_start_date="2031-12-31",
 			total_number_of_depreciations=3,
 			frequency_of_depreciation=12,
 		)
 
 		self.assertEqual(asset.status, "Draft")
 
-		expected_schedules = [["2030-12-31", 33333.50, 83333.50], ["2031-12-31", 6666.50, 90000.0]]
+		expected_schedules = [["2031-12-31", 33333.50, 83333.50], ["2032-12-31", 6666.50, 90000.0]]
 
 		schedules = [
 			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -816,12 +891,12 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2022-02-28", 647.25, 647.25],
-			["2022-03-31", 1210.71, 1857.96],
-			["2022-04-30", 1053.99, 2911.95],
-			["2022-05-31", 917.55, 3829.5],
-			["2022-06-30", 798.77, 4628.27],
-			["2022-07-15", 371.73, 5000.0],
+			["2022-02-28", 310.89, 310.89],
+			["2022-03-31", 654.45, 965.34],
+			["2022-04-30", 654.45, 1619.79],
+			["2022-05-31", 654.45, 2274.24],
+			["2022-06-30", 654.45, 2928.69],
+			["2022-07-15", 2071.31, 5000.0],
 		]
 
 		schedules = [
@@ -1441,6 +1516,92 @@ class TestDepreciationBasics(AssetSetup):
 		for i, schedule in enumerate(asset.schedules):
 			self.assertEqual(getdate(expected_dates[i]), getdate(schedule.schedule_date))
 
+	def test_manual_depreciation_for_existing_asset(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			is_existing_asset=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			submit=1,
+		)
+
+		self.assertEqual(asset.status, "Submitted")
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+		jv = make_journal_entry(
+			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
+		)
+		for d in jv.accounts:
+			d.reference_type = "Asset"
+			d.reference_name = asset.name
+		jv.voucher_type = "Depreciation Entry"
+		jv.insert()
+		jv.submit()
+
+		asset.reload()
+		self.assertEqual(asset.get_value_after_depreciation(), 99900)
+
+		jv.cancel()
+
+		asset.reload()
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+	def test_manual_depreciation_for_depreciable_asset(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=10,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+
+		self.assertEqual(asset.status, "Submitted")
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+		jv = make_journal_entry(
+			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
+		)
+		for d in jv.accounts:
+			d.reference_type = "Asset"
+			d.reference_name = asset.name
+		jv.voucher_type = "Depreciation Entry"
+		jv.insert()
+		jv.submit()
+
+		asset.reload()
+		self.assertEqual(asset.get_value_after_depreciation(), 99900)
+
+		jv.cancel()
+
+		asset.reload()
+		self.assertEqual(asset.get_value_after_depreciation(), 100000)
+
+	def test_manual_depreciation_with_incorrect_jv_voucher_type(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=10,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+
+		jv = make_journal_entry(
+			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
+		)
+		for d in jv.accounts:
+			d.reference_type = "Asset"
+			d.reference_name = asset.name
+			d.account_type = "Depreciation"
+		jv.voucher_type = "Journal Entry"
+
+		self.assertRaises(frappe.ValidationError, jv.insert)
+
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -1478,6 +1639,7 @@ def create_asset(**args):
 			"asset_owner": args.asset_owner or "Company",
 			"is_existing_asset": args.is_existing_asset or 1,
 			"asset_quantity": args.get("asset_quantity") or 1,
+			"depr_entry_posting_status": args.depr_entry_posting_status or "",
 		}
 	)
 

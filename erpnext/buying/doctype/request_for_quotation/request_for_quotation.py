@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Optional
 
 import frappe
 from frappe import _
@@ -112,7 +113,10 @@ class RequestforQuotation(BuyingController):
 
 	def get_link(self):
 		# RFQ link for supplier portal
-		return get_url("/app/request-for-quotation/" + self.name)
+		route = frappe.db.get_value(
+			"Portal Menu Item", {"reference_doctype": "Request for Quotation"}, ["route"]
+		)
+		return get_url("/app/{0}/".format(route) + self.name)
 
 	def update_supplier_part_no(self, supplier):
 		self.vendor = supplier
@@ -216,6 +220,7 @@ class RequestforQuotation(BuyingController):
 			recipients=data.email_id,
 			sender=sender,
 			attachments=attachments,
+			print_format=self.meta.default_print_format or "Standard",
 			send_email=True,
 			doctype=self.doctype,
 			name=self.name,
@@ -224,9 +229,7 @@ class RequestforQuotation(BuyingController):
 		frappe.msgprint(_("Email Sent to Supplier {0}").format(data.supplier))
 
 	def get_attachments(self):
-		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
-		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
-		return attachments
+		return [d.name for d in get_attachments(self.doctype, self.name)]
 
 	def update_rfq_supplier_status(self, sup_name=None):
 		for supplier in self.suppliers:
@@ -389,17 +392,26 @@ def create_rfq_items(sq_doc, supplier, data):
 
 
 @frappe.whitelist()
-def get_pdf(doctype, name, supplier):
-	doc = get_rfq_doc(doctype, name, supplier)
-	if doc:
-		download_pdf(doctype, name, doc=doc)
-
-
-def get_rfq_doc(doctype, name, supplier):
+def get_pdf(
+	name: str,
+	supplier: str,
+	print_format: Optional[str] = None,
+	language: Optional[str] = None,
+	letterhead: Optional[str] = None,
+):
+	doc = frappe.get_doc("Request for Quotation", name)
 	if supplier:
-		doc = frappe.get_doc(doctype, name)
 		doc.update_supplier_part_no(supplier)
-		return doc
+
+	# permissions get checked in `download_pdf`
+	download_pdf(
+		doc.doctype,
+		doc.name,
+		print_format,
+		doc=doc,
+		language=language,
+		letterhead=letterhead or None,
+	)
 
 
 @frappe.whitelist()

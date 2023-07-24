@@ -6,17 +6,24 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "report",
   "section_break_11",
   "from_date",
+  "posting_date",
   "company",
   "account",
   "group_by",
   "cost_center",
+  "territory",
   "column_break_14",
   "to_date",
   "finance_book",
   "currency",
   "project",
+  "payment_terms_template",
+  "sales_partner",
+  "sales_person",
+  "based_on_payment_terms",
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -34,6 +41,8 @@
   "terms_and_conditions",
   "section_break_1",
   "enable_auto_email",
+  "column_break_ocfq",
+  "sender",
   "section_break_18",
   "frequency",
   "filter_duration",
@@ -63,14 +72,14 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.enable_auto_email == 0;",
+   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
    "mandatory_depends_on": "eval:doc.frequency == '';"
   },
   {
-   "depends_on": "eval:doc.enable_auto_email == 0;",
+   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
@@ -83,6 +92,7 @@
    "options": "PSOA Cost Center"
   },
   {
+   "depends_on": "eval: (doc.report == 'General Ledger');",
    "fieldname": "project",
    "fieldtype": "Table MultiSelect",
    "label": "Project",
@@ -100,7 +110,7 @@
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "label": "General Ledger Filters"
+   "label": "Report Filters"
   },
   {
    "fieldname": "column_break_14",
@@ -160,12 +170,14 @@
   },
   {
    "default": "Group by Voucher (Consolidated)",
+   "depends_on": "eval:(doc.report == 'General Ledger');",
    "fieldname": "group_by",
    "fieldtype": "Select",
    "label": "Group By",
    "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)"
   },
   {
+   "depends_on": "eval: (doc.report == 'General Ledger');",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -284,10 +296,82 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_break",
+   "fieldtype": "Check",
+   "label": "Page Break After Each SoA"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: (doc.report == 'General Ledger');",
+   "fieldname": "show_net_values_in_party_account",
+   "fieldtype": "Check",
+   "label": "Show Net Values in Party Account"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "label": "Sender",
+   "options": "Email Account"
+  },
+  {
+   "fieldname": "column_break_ocfq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report",
+   "fieldtype": "Select",
+   "label": "Report",
+   "options": "General Ledger\nAccounts Receivable",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "sales_partner",
+   "fieldtype": "Link",
+   "label": "Sales Partner",
+   "options": "Sales Partner"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "based_on_payment_terms",
+   "fieldtype": "Check",
+   "label": "Based On Payment Terms"
   }
  ],
  "links": [],
- "modified": "2021-09-06 21:00:45.732505",
+ "modified": "2023-06-23 10:13:15.051950",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

@@ -13,12 +13,12 @@ from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applic
 
 
 def execute(filters=None):
-	columns = get_columns(filters)
+	columns = get_columns()
 	data = get_active_loan_details(filters)
 	return columns, data
 
 
-def get_columns(filters):
+def get_columns():
 	columns = [
 		{"label": _("Loan"), "fieldname": "loan", "fieldtype": "Link", "options": "Loan", "width": 160},
 		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 160},
@@ -66,6 +66,13 @@ def get_columns(filters):
 		{
 			"label": _("Accrued Interest"),
 			"fieldname": "accrued_interest",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		},
+		{
+			"label": _("Accrued Principal"),
+			"fieldname": "accrued_principal",
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120,
@@ -137,10 +144,15 @@ def get_columns(filters):
 
 
 def get_active_loan_details(filters):
-
-	filter_obj = {"status": ("!=", "Closed")}
+	filter_obj = {
+		"status": ("!=", "Closed"),
+		"docstatus": 1,
+	}
 	if filters.get("company"):
 		filter_obj.update({"company": filters.get("company")})
+
+	if filters.get("applicant"):
+		filter_obj.update({"applicant": filters.get("applicant")})
 
 	loan_details = frappe.get_all(
 		"Loan",
@@ -167,8 +179,8 @@ def get_active_loan_details(filters):
 
 	sanctioned_amount_map = get_sanctioned_amount_map()
 	penal_interest_rate_map = get_penal_interest_rate_map()
-	payments = get_payments(loan_list)
-	accrual_map = get_interest_accruals(loan_list)
+	payments = get_payments(loan_list, filters)
+	accrual_map = get_interest_accruals(loan_list, filters)
 	currency = erpnext.get_company_currency(filters.get("company"))
 
 	for loan in loan_details:
@@ -183,6 +195,7 @@ def get_active_loan_details(filters):
 				- flt(loan.written_off_amount),
 				"total_repayment": flt(payments.get(loan.loan)),
 				"accrued_interest": flt(accrual_map.get(loan.loan, {}).get("accrued_interest")),
+				"accrued_principal": flt(accrual_map.get(loan.loan, {}).get("accrued_principal")),
 				"interest_outstanding": flt(accrual_map.get(loan.loan, {}).get("interest_outstanding")),
 				"penalty": flt(accrual_map.get(loan.loan, {}).get("penalty")),
 				"penalty_interest": penal_interest_rate_map.get(loan.loan_type),
@@ -212,20 +225,35 @@ def get_sanctioned_amount_map():
 	)
 
 
-def get_payments(loans):
+def get_payments(loans, filters):
+	query_filters = {"against_loan": ("in", loans)}
+
+	if filters.get("from_date"):
+		query_filters.update({"posting_date": (">=", filters.get("from_date"))})
+
+	if filters.get("to_date"):
+		query_filters.update({"posting_date": ("<=", filters.get("to_date"))})
+
 	return frappe._dict(
 		frappe.get_all(
 			"Loan Repayment",
 			fields=["against_loan", "sum(amount_paid)"],
-			filters={"against_loan": ("in", loans)},
+			filters=query_filters,
 			group_by="against_loan",
 			as_list=1,
 		)
 	)
 
 
-def get_interest_accruals(loans):
+def get_interest_accruals(loans, filters):
 	accrual_map = {}
+	query_filters = {"loan": ("in", loans)}
+
+	if filters.get("from_date"):
+		query_filters.update({"posting_date": (">=", filters.get("from_date"))})
+
+	if filters.get("to_date"):
+		query_filters.update({"posting_date": ("<=", filters.get("to_date"))})
 
 	interest_accruals = frappe.get_all(
 		"Loan Interest Accrual",
@@ -236,8 +264,9 @@ def get_interest_accruals(loans):
 			"penalty_amount",
 			"paid_interest_amount",
 			"accrual_type",
+			"payable_principal_amount",
 		],
-		filters={"loan": ("in", loans)},
+		filters=query_filters,
 		order_by="posting_date desc",
 	)
 
@@ -246,6 +275,7 @@ def get_interest_accruals(loans):
 			entry.loan,
 			{
 				"accrued_interest": 0.0,
+				"accrued_principal": 0.0,
 				"undue_interest": 0.0,
 				"interest_outstanding": 0.0,
 				"last_accrual_date": "",
@@ -270,6 +300,7 @@ def get_interest_accruals(loans):
 			accrual_map[entry.loan]["undue_interest"] += entry.interest_amount - entry.paid_interest_amount
 
 		accrual_map[entry.loan]["accrued_interest"] += entry.interest_amount
+		accrual_map[entry.loan]["accrued_principal"] += entry.payable_principal_amount
 
 		if last_accrual_date and getdate(entry.posting_date) == last_accrual_date:
 			accrual_map[entry.loan]["penalty"] = entry.penalty_amount
