@@ -335,7 +335,6 @@ def get_items(filters, additional_query_columns):
 		),
 		filters,
 		as_dict=1,
-		debug=True,
 	)
 
 
