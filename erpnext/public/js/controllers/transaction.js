@@ -969,6 +969,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
 	}
 
+	apply_discount_on_item(doc, cdt, cdn, field) {
+		var item = frappe.get_doc(cdt, cdn);
+		if(!item.price_list_rate) {
+			item[field] = 0.0;
+		} else {
+			this.price_list_rate(doc, cdt, cdn);
+		}
+		this.set_gross_profit(item);
+	}
+
 	shipping_rule() {
 		var me = this;
 		if(this.frm.doc.shipping_rule) {
@@ -1639,6 +1649,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						() => {
 							if(args.items.length) {
 								me._set_values_for_item_list(r.message.children);
+								$.each(r.message.children || [], function(i, d) {
+									me.apply_discount_on_item(d, d.doctype, d.name, 'discount_percentage');
+								});
 							}
 						},
 						() => { me.in_apply_price_list = false; }
