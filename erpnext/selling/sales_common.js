@@ -145,6 +145,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		this.apply_discount_on_item(doc, cdt, cdn, 'discount_amount');
 	}
 
+<<<<<<< HEAD
 	apply_discount_on_item(doc, cdt, cdn, field) {
 		var item = frappe.get_doc(cdt, cdn);
 		if(!item.price_list_rate) {
@@ -156,6 +157,9 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	commission_rate() {
+=======
+	commission_rate: function() {
+>>>>>>> bde9e89582 (fix: apply discount on item after applying price list (#36125))
 		this.calculate_commission();
 	}
 
