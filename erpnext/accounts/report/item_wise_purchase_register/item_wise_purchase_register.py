@@ -309,7 +309,8 @@ def get_conditions(filters):
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
-	additional_query_columns = ",".join(additional_query_columns)
+	if additional_query_columns:
+		additional_query_columns = "," + ",".join(additional_query_columns)
 	return frappe.db.sql(
 		"""
 		select
@@ -324,7 +325,7 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment`, {0}
+			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`, `tabItem`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
 			`tabItem`.name = `tabPurchase Invoice Item`.`item_code` and
@@ -334,6 +335,7 @@ def get_items(filters, additional_query_columns):
 		),
 		filters,
 		as_dict=1,
+		debug=True,
 	)
 
 
