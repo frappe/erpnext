@@ -634,7 +634,11 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.against_voucher_type,
 						"reference_name": inv.against_voucher,
 						"cost_center": erpnext.get_default_cost_center(company),
+<<<<<<< HEAD
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
+=======
+						"exchange_rate": inv.exchange_rate,
+>>>>>>> c87332d5da (refactor: cr/dr note will be on single exchange rate)
 					},
 					{
 						"account": inv.account,
@@ -648,17 +652,23 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.voucher_type,
 						"reference_name": inv.voucher_no,
 						"cost_center": erpnext.get_default_cost_center(company),
+<<<<<<< HEAD
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
+=======
+						"exchange_rate": inv.exchange_rate,
+>>>>>>> c87332d5da (refactor: cr/dr note will be on single exchange rate)
 					},
 				],
 			}
 		)
 
-		if difference_entry := get_difference_row(inv):
-			jv.append("accounts", difference_entry)
-
 		jv.flags.ignore_mandatory = True
+<<<<<<< HEAD
 		jv.remark = None
 		jv.flags.skip_remarks_creation = True
 		jv.is_system_generated = True
+=======
+		jv.flags.ignore_exchange_rate = True
+>>>>>>> c87332d5da (refactor: cr/dr note will be on single exchange rate)
 		jv.submit()
+		jv.make_exchange_gain_loss_journal(args=[inv])
