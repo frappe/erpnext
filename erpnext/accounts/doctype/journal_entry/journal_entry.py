@@ -768,18 +768,23 @@ class JournalEntry(AccountsController):
 				)
 			):
 
-				# Modified to include the posting date for which to retreive the exchange rate
-				d.exchange_rate = get_exchange_rate(
-					self.posting_date,
-					d.account,
-					d.account_currency,
-					self.company,
-					d.reference_type,
-					d.reference_name,
-					d.debit,
-					d.credit,
-					d.exchange_rate,
-				)
+				ignore_exchange_rate = False
+				if self.get("flags") and self.flags.get("ignore_exchange_rate"):
+					ignore_exchange_rate = True
+
+				if not ignore_exchange_rate:
+					# Modified to include the posting date for which to retreive the exchange rate
+					d.exchange_rate = get_exchange_rate(
+						self.posting_date,
+						d.account,
+						d.account_currency,
+						self.company,
+						d.reference_type,
+						d.reference_name,
+						d.debit,
+						d.credit,
+						d.exchange_rate,
+					)
 
 			if not d.exchange_rate:
 				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))

@@ -650,6 +650,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.against_voucher_type,
 						"reference_name": inv.against_voucher,
 						"cost_center": erpnext.get_default_cost_center(company),
+						"exchange_rate": inv.exchange_rate,
 					},
 					{
 						"account": inv.account,
@@ -663,13 +664,13 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.voucher_type,
 						"reference_name": inv.voucher_no,
 						"cost_center": erpnext.get_default_cost_center(company),
+						"exchange_rate": inv.exchange_rate,
 					},
 				],
 			}
 		)
 
-		if difference_entry := get_difference_row(inv):
-			jv.append("accounts", difference_entry)
-
 		jv.flags.ignore_mandatory = True
+		jv.flags.ignore_exchange_rate = True
 		jv.submit()
+		jv.make_exchange_gain_loss_journal(args=[inv])
