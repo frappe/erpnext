@@ -31,14 +31,14 @@ class DeliveryTrip(Document):
 
 	def on_submit(self):
 		self.update_status()
-		self.update_delivery_notes()
+		self.update_sales_invoices()
 
 	def on_update_after_submit(self):
 		self.update_status()
 
 	def on_cancel(self):
 		self.update_status()
-		self.update_delivery_notes(delete=True)
+		self.update_sales_invoices(delete=True)
 
 	def validate_stop_addresses(self):
 		for stop in self.delivery_stops:
@@ -56,6 +56,38 @@ class DeliveryTrip(Document):
 				status = "In Transit"
 
 		self.db_set("status", status)
+	
+	def update_sales_invoices(self, delete=False):
+			"""
+			Update all connected Sales Invoices with Delivery Trip details
+			(Driver, Vehicle, etc.). If `delete` is `True`, then details
+			are removed.
+
+			Args:
+					delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
+			"""
+
+			sales_invoices = list(
+				set(stop.sales_invoice for stop in self.delivery_stops if stop.sales_invoice)
+			)
+
+			update_fields = {
+				"lr_no": self.name,
+				"lr_date": self.departure_time,
+			}
+
+			for sales_invoice in sales_invoices:
+				note_doc = frappe.get_doc("Sales Invoice", sales_invoice)
+
+				for field, value in update_fields.items():
+					value = None if delete else value
+					setattr(note_doc, field, value)
+
+				note_doc.flags.ignore_validate_update_after_submit = True
+				note_doc.save()
+
+			sales_invoices = [get_link_to_form("Sales Invoice", note) for note in sales_invoices]
+			frappe.msgprint(_("Sales Invoices {0} updated").format(", ".join(sales_invoices)))
 
 	def update_delivery_notes(self, delete=False):
 		"""
