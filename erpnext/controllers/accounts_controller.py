@@ -2231,7 +2231,12 @@ def get_advance_payment_entries(
 				and t2.reference_doctype = %s {2} {3}
 			order by t1.posting_date {4}
 		""".format(
-				currency_field, party_account_field, reference_condition, condition, limit_cond, exchange_rate_field
+				currency_field, 
+				party_account_field, 
+				reference_condition, 
+				condition, 
+				limit_cond, 
+				exchange_rate_field
 			),
 			[party_account, payment_type, party_type, party, order_doctype] + order_list,
 			as_dict=1,
