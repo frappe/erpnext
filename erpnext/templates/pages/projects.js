@@ -72,7 +72,7 @@ frappe.ready(function() {
 
 	var more_items = function(item, item_status){
 		if(item_status) {
-			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-completed-'+ item)
+			item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-completed-'+ item)
 				? 'completed' : 'open';
 		}
 		$.ajax({

@@ -15,6 +15,7 @@
   "default_currency",
   "country",
   "is_group",
+  "default_holiday_list",
   "cb0",
   "default_letter_head",
   "tax_id",
@@ -48,12 +49,6 @@
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
-  "hr_settings_section",
-  "default_holiday_list",
-  "default_expense_claim_payable_account",
-  "column_break_10",
-  "default_employee_advance_account",
-  "default_payroll_payable_account",
   "default_settings",
   "default_bank_account",
   "default_cash_account",
@@ -75,6 +70,11 @@
   "payment_terms",
   "cost_center",
   "default_finance_book",
+  "advance_payments_section",
+  "book_advance_payments_in_separate_party_account",
+  "column_break_fwcf",
+  "default_advance_received_account",
+  "default_advance_paid_account",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
   "enable_provisional_accounting_for_non_stock_items",
@@ -90,12 +90,15 @@
   "depreciation_expense_account",
   "series_for_depreciation_entry",
   "expenses_included_in_asset_valuation",
-  "repair_and_maintenance_account",
   "column_break_40",
   "disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
+  "exchange_rate_revaluation_settings_section",
+  "auto_exchange_rate_revaluation",
+  "auto_err_frequency",
+  "submit_err_jv",
   "budget_detail",
   "exception_budget_approver_role",
   "registration_info",
@@ -240,10 +243,6 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "country",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -375,13 +374,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "default_employee_advance_account",
-   "fieldtype": "Link",
-   "label": "Default Employee Advance Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "default_expense_account",
    "fieldtype": "Link",
@@ -414,24 +406,6 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Default Deferred Expense Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "default_payroll_payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Payroll Payable Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "default_expense_claim_payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Expense Claim Payable Account",
    "no_copy": 1,
    "options": "Account"
   },
@@ -702,11 +676,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
-   "label": "HR & Payroll Settings"
-  },
-  {
    "fieldname": "column_break_26",
    "fieldtype": "Column Break"
   },
@@ -715,12 +684,6 @@
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
    "label": "Fixed Asset Defaults"
-  },
-  {
-   "fieldname": "repair_and_maintenance_account",
-   "fieldtype": "Link",
-   "label": "Repair and Maintenance Account",
-   "options": "Account"
   },
   {
    "fieldname": "section_break_28",
@@ -740,6 +703,61 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "fieldname": "advance_payments_section",
+   "fieldtype": "Section Break",
+   "label": "Advance Payments"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "fieldname": "default_advance_received_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Received Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "fieldname": "default_advance_paid_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Paid Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_fwcf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>",
+   "fieldname": "book_advance_payments_in_separate_party_account",
+   "fieldtype": "Check",
+   "label": "Book Advance Payments in Separate Party Account"
+  },
+  {
+   "fieldname": "exchange_rate_revaluation_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Exchange Rate Revaluation Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_exchange_rate_revaluation",
+   "fieldtype": "Check",
+   "label": "Auto Create Exchange Rate Revaluation"
+  },
+  {
+   "fieldname": "auto_err_frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Daily\nWeekly"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_err_jv",
+   "fieldtype": "Check",
+   "label": "Submit ERR Journals?"
   }
  ],
  "icon": "fa fa-building",
@@ -747,7 +765,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-04-27 10:33:16.826067",
+ "modified": "2023-07-07 05:41:41.537256",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

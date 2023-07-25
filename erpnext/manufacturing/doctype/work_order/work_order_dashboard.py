@@ -7,6 +7,6 @@ def get_data():
 		"non_standard_fieldnames": {"Batch": "reference_name"},
 		"transactions": [
 			{"label": _("Transactions"), "items": ["Stock Entry", "Job Card", "Pick List"]},
-			{"label": _("Reference"), "items": ["Serial No", "Batch"]},
+			{"label": _("Reference"), "items": ["Serial No", "Batch", "Material Request"]},
 		],
 	}

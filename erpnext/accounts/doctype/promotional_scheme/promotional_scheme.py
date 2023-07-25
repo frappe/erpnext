@@ -34,8 +34,8 @@ pricing_rule_fields = [
 other_fields = [
 	"min_qty",
 	"max_qty",
-	"min_amt",
-	"max_amt",
+	"min_amount",
+	"max_amount",
 	"priority",
 	"warehouse",
 	"threshold_percentage",
@@ -246,7 +246,11 @@ def prepare_pricing_rule(
 def set_args(args, pr, doc, child_doc, discount_fields, child_doc_fields):
 	pr.update(args)
 	for field in other_fields + discount_fields:
-		pr.set(field, child_doc_fields.get(field))
+		target_field = field
+		if target_field in ["min_amount", "max_amount"]:
+			target_field = "min_amt" if field == "min_amount" else "max_amt"
+
+		pr.set(target_field, child_doc_fields.get(field))
 
 	pr.promotional_scheme_id = child_doc_fields.name
 	pr.promotional_scheme = doc.name

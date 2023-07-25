@@ -10,6 +10,34 @@ frappe.ui.form.on("Item", {
 		frm.add_fetch('attribute', 'to_range', 'to_range');
 		frm.add_fetch('attribute', 'increment', 'increment');
 		frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');
+
+		frm.make_methods = {
+			'Sales Order': () => {
+				open_form(frm, "Sales Order", "Sales Order Item", "items");
+			},
+			'Delivery Note': () => {
+				open_form(frm, "Delivery Note", "Delivery Note Item", "items");
+			},
+			'Sales Invoice': () => {
+				open_form(frm, "Sales Invoice", "Sales Invoice Item", "items");
+			},
+			'Purchase Order': () => {
+				open_form(frm, "Purchase Order", "Purchase Order Item", "items");
+			},
+			'Purchase Receipt': () => {
+				open_form(frm, "Purchase Receipt", "Purchase Receipt Item", "items");
+			},
+			'Purchase Invoice': () => {
+				open_form(frm, "Purchase Invoice", "Purchase Invoice Item", "items");
+			},
+			'Material Request': () => {
+				open_form(frm, "Material Request", "Material Request Item", "items");
+			},
+			'Stock Entry': () => {
+				open_form(frm, "Stock Entry", "Stock Entry Detail", "items");
+			},
+		};
+
 	},
 	onload: function(frm) {
 		erpnext.item.setup_queries(frm);
@@ -562,7 +590,7 @@ $.extend(erpnext.item, {
 			let selected_attributes = {};
 			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
 				if(i===0) return;
-				let attribute_name = $(col).find('label').html().trim();
+				let attribute_name = $(col).find('.column-label').html().trim();
 				selected_attributes[attribute_name] = [];
 				let checked_opts = $(col).find('.checkbox input');
 				checked_opts.each((i, opt) => {
@@ -744,12 +772,6 @@ $.extend(erpnext.item, {
 					if (modal) {
 						$(modal).removeClass("modal-dialog-scrollable");
 					}
-				})
-				.on("awesomplete-close", () => {
-					let modal = field.$input.parents('.modal-dialog')[0];
-					if (modal) {
-						$(modal).addClass("modal-dialog-scrollable");
-					}
 				});
 		});
 	},
@@ -858,3 +880,26 @@ frappe.tour['Item'] = [
 
 
 ];
+
+function open_form(frm, doctype, child_doctype, parentfield) {
+	frappe.model.with_doctype(doctype, () => {
+		let new_doc = frappe.model.get_new_doc(doctype);
+
+		let new_child_doc = frappe.model.add_child(new_doc, child_doctype, parentfield);
+		new_child_doc.item_code = frm.doc.name;
+		new_child_doc.item_name = frm.doc.item_name;
+		new_child_doc.uom = frm.doc.stock_uom;
+		new_child_doc.description = frm.doc.description;
+		if (!new_child_doc.qty) {
+			new_child_doc.qty = 1.0;
+		}
+
+		frappe.run_serially([
+			() => frappe.ui.form.make_quick_entry(doctype, null, null, new_doc),
+			() => {
+				frappe.flags.ignore_company_party_validation = true;
+				frappe.model.trigger("item_code", frm.doc.name, new_child_doc);
+			}
+		])
+	});
+}

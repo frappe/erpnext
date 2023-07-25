@@ -12,7 +12,9 @@ from decimal import Decimal
 import frappe
 from bs4 import BeautifulSoup as bs
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import (
+	create_custom_fields as _create_custom_fields,
+)
 from frappe.model.document import Document
 from frappe.utils.data import format_datetime
 
@@ -302,6 +304,7 @@ class TallyMigration(Document):
 		frappe.publish_realtime(
 			"tally_migration_progress_update",
 			{"title": title, "message": message, "count": count, "total": total},
+			user=self.modified_by,
 		)
 
 	def _import_master_data(self):
@@ -577,22 +580,25 @@ class TallyMigration(Document):
 				new_year.save()
 				oldest_year = new_year
 
-		def create_custom_fields(doctypes):
-			tally_guid_df = {
-				"fieldtype": "Data",
-				"fieldname": "tally_guid",
-				"read_only": 1,
-				"label": "Tally GUID",
-			}
-			tally_voucher_no_df = {
-				"fieldtype": "Data",
-				"fieldname": "tally_voucher_no",
-				"read_only": 1,
-				"label": "Tally Voucher Number",
-			}
-			for df in [tally_guid_df, tally_voucher_no_df]:
-				for doctype in doctypes:
-					create_custom_field(doctype, df)
+		def create_custom_fields():
+			_create_custom_fields(
+				{
+					("Journal Entry", "Purchase Invoice", "Sales Invoice"): [
+						{
+							"fieldtype": "Data",
+							"fieldname": "tally_guid",
+							"read_only": 1,
+							"label": "Tally GUID",
+						},
+						{
+							"fieldtype": "Data",
+							"fieldname": "tally_voucher_no",
+							"read_only": 1,
+							"label": "Tally Voucher Number",
+						},
+					]
+				}
+			)
 
 		def create_price_list():
 			frappe.get_doc(
@@ -628,7 +634,7 @@ class TallyMigration(Document):
 
 			create_fiscal_years(vouchers)
 			create_price_list()
-			create_custom_fields(["Journal Entry", "Purchase Invoice", "Sales Invoice"])
+			create_custom_fields()
 
 			total = len(vouchers)
 			is_last = False

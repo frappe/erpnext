@@ -6,7 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
-from frappe.utils.background_jobs import enqueue
+from frappe.utils.background_jobs import enqueue, is_job_enqueued
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -207,20 +207,20 @@ class OpeningInvoiceCreationTool(Document):
 		if len(invoices) < 50:
 			return start_import(invoices)
 		else:
-			from frappe.core.page.background_jobs.background_jobs import get_info
 			from frappe.utils.scheduler import is_scheduler_inactive
 
 			if is_scheduler_inactive() and not frappe.flags.in_test:
 				frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
-			enqueued_jobs = [d.get("job_name") for d in get_info()]
-			if self.name not in enqueued_jobs:
+			job_id = f"opening_invoice::{self.name}"
+
+			if not is_job_enqueued(job_id):
 				enqueue(
 					start_import,
 					queue="default",
 					timeout=6000,
 					event="opening_invoice_creation",
-					job_name=self.name,
+					job_id=job_id,
 					invoices=invoices,
 					now=frappe.conf.developer_mode or frappe.flags.in_test,
 				)
@@ -257,17 +257,15 @@ def start_import(invoices):
 
 
 def publish(index, total, doctype):
-	if total < 50:
-		return
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
 			title=_("Opening Invoice Creation In Progress"),
 			message=_("Creating {} out of {} {}").format(index + 1, total, doctype),
-			user=frappe.session.user,
 			count=index + 1,
 			total=total,
 		),
+		user=frappe.session.user,
 	)
 
 

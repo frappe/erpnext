@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Purchase Analytics"] = {
 	"filters": [
@@ -68,9 +68,6 @@ frappe.query_reports["Purchase Analytics"] = {
 		}
 
 	],
-	after_datatable_render: function(datatable_obj) {
-		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
-	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
@@ -84,8 +81,9 @@ frappe.query_reports["Purchase Analytics"] = {
 					const tree_type = frappe.query_report.filters[0].value;
 					if (data_doctype != tree_type) return;
 
-					row_name = data[2].content;
-					length = data.length;
+					let row_name = data[2].content;
+					let length = data.length;
+					let row_values = '';
 
 					if (tree_type == "Supplier") {
 						row_values = data
@@ -107,7 +105,7 @@ frappe.query_reports["Purchase Analytics"] = {
 							});
 					}
 
-					entry = {
+					let entry = {
 						name: row_name,
 						values: row_values,
 					};
@@ -130,11 +128,8 @@ frappe.query_reports["Purchase Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets,
 					};
-					chart_options = {
-						data: new_data,
-						type: "line",
-					};
-					frappe.query_report.render_chart(chart_options);
+					const new_options = Object.assign({}, frappe.query_report.chart_options, {data: new_data});
+					frappe.query_report.render_chart(new_options);
 
 					frappe.query_report.raw_chart_data = new_data;
 				},

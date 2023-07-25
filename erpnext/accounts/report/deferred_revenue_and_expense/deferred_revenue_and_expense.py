@@ -4,9 +4,10 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Column, functions
-from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, rounded
+from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, getdate, rounded
 
 from erpnext.accounts.report.financial_statements import get_period_list
+from erpnext.accounts.utils import get_fiscal_year
 
 
 class Deferred_Item(object):
@@ -226,7 +227,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 
 		# If no filters are provided, get user defaults
 		if not filters:
-			fiscal_year = frappe.get_doc("Fiscal Year", frappe.defaults.get_user_default("fiscal_year"))
+			fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date=getdate()))
 			self.filters = frappe._dict(
 				{
 					"company": frappe.defaults.get_user_default("Company"),
@@ -378,15 +379,14 @@ class Deferred_Revenue_and_Expense_Report(object):
 		ret += [{}]
 
 		# add total row
-		if ret is not []:
-			if self.filters.type == "Revenue":
-				total_row = frappe._dict({"name": "Total Deferred Income"})
-			elif self.filters.type == "Expense":
-				total_row = frappe._dict({"name": "Total Deferred Expense"})
+		if self.filters.type == "Revenue":
+			total_row = frappe._dict({"name": "Total Deferred Income"})
+		elif self.filters.type == "Expense":
+			total_row = frappe._dict({"name": "Total Deferred Expense"})
 
-			for idx, period in enumerate(self.period_list, 0):
-				total_row[period.key] = self.period_total[idx].total
-			ret.append(total_row)
+		for idx, period in enumerate(self.period_list, 0):
+			total_row[period.key] = self.period_total[idx].total
+		ret.append(total_row)
 
 		return ret
 
@@ -396,7 +396,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 				"labels": [period.label for period in self.period_list],
 				"datasets": [
 					{
-						"name": "Actual Posting",
+						"name": _("Actual Posting"),
 						"chartType": "bar",
 						"values": [x.actual for x in self.period_total],
 					}
@@ -410,7 +410,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 
 		if self.filters.with_upcoming_postings:
 			chart["data"]["datasets"].append(
-				{"name": "Expected", "chartType": "line", "values": [x.total for x in self.period_total]}
+				{"name": _("Expected"), "chartType": "line", "values": [x.total for x in self.period_total]}
 			)
 
 		return chart

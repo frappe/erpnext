@@ -42,7 +42,7 @@ class GLEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
 
-		if not self.flags.from_repost:
+		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.check_mandatory()
 			self.validate_cost_center()
 			self.check_pl_account()
@@ -51,23 +51,27 @@ class GLEntry(Document):
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
-		if not self.flags.from_repost:
+		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
 			self.validate_allowed_dimensions()
 			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
 
-			# Update outstanding amt on against voucher
-			if (
-				self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees"]
-				and self.against_voucher
-				and self.flags.update_outstanding == "Yes"
-				and not frappe.flags.is_reverse_depr_entry
-			):
-				update_outstanding_amt(
-					self.account, self.party_type, self.party, self.against_voucher_type, self.against_voucher
-				)
+			if frappe.get_cached_value("Account", self.account, "account_type") not in [
+				"Receivable",
+				"Payable",
+			]:
+				# Update outstanding amt on against voucher
+				if (
+					self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees"]
+					and self.against_voucher
+					and self.flags.update_outstanding == "Yes"
+					and not frappe.flags.is_reverse_depr_entry
+				):
+					update_outstanding_amt(
+						self.account, self.party_type, self.party, self.against_voucher_type, self.against_voucher
+					)
 
 	def check_mandatory(self):
 		mandatory = ["account", "voucher_type", "voucher_no", "company"]
@@ -91,7 +95,15 @@ class GLEntry(Document):
 				)
 
 		# Zero value transaction is not allowed
-		if not (flt(self.debit, self.precision("debit")) or flt(self.credit, self.precision("credit"))):
+		if not (
+			flt(self.debit, self.precision("debit"))
+			or flt(self.credit, self.precision("credit"))
+			or (
+				self.voucher_type == "Journal Entry"
+				and frappe.get_cached_value("Journal Entry", self.voucher_no, "voucher_type")
+				== "Exchange Gain Or Loss"
+			)
+		):
 			frappe.throw(
 				_("{0} {1}: Either debit or credit amount is required for {2}").format(
 					self.voucher_type, self.voucher_no, self.account
@@ -116,7 +128,7 @@ class GLEntry(Document):
 			frappe.throw(msg, title=_("Missing Cost Center"))
 
 	def validate_dimensions_for_pl_and_bs(self):
-		account_type = frappe.db.get_value("Account", self.account, "report_type")
+		account_type = frappe.get_cached_value("Account", self.account, "report_type")
 
 		for dimension in get_checks_for_pl_and_bs_accounts():
 			if (
@@ -184,7 +196,7 @@ class GLEntry(Document):
 	def check_pl_account(self):
 		if (
 			self.is_opening == "Yes"
-			and frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss"
+			and frappe.get_cached_value("Account", self.account, "report_type") == "Profit and Loss"
 			and not self.is_cancelled
 		):
 			frappe.throw(
@@ -277,7 +289,7 @@ class GLEntry(Document):
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
-		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
+		balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
 		if balance_must_be:
 			balance = frappe.db.sql(
 				"""select sum(debit) - sum(credit)
@@ -362,7 +374,7 @@ def update_outstanding_amt(
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 
-		# Didn't use db_set for optimisation purpose
+		# Didn't use db_set for optimization purpose
 		ref_doc.outstanding_amount = bal
 		frappe.db.set_value(against_voucher_type, against_voucher, "outstanding_amount", bal)
 

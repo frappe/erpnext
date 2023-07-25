@@ -595,6 +595,247 @@ class TestPricingRule(unittest.TestCase):
 		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
 		item.delete()
 
+	def test_item_price_with_blank_uom_pricing_rule(self):
+		properties = {
+			"item_code": "Item Blank UOM",
+			"stock_uom": "Nos",
+			"sales_uom": "Box",
+			"uoms": [dict(uom="Box", conversion_factor=10)],
+		}
+		item = make_item(properties=properties)
+
+		make_item_price("Item Blank UOM", "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Item Blank UOM Rule",
+			"apply_on": "Item Code",
+			"items": [
+				{
+					"item_code": "Item Blank UOM",
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Rate",
+			"rate": 101,
+			"company": "_Test Company",
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(
+			do_not_save=True, item_code="Item Blank UOM", uom="Box", conversion_factor=10
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# If UOM is blank consider it as stock UOM and apply pricing_rule on all UOM.
+		# rate is 101, Selling UOM is Box that have conversion_factor of 10 so 101 * 10 = 1010
+		self.assertEqual(si.items[0].price_list_rate, 1010)
+		self.assertEqual(si.items[0].rate, 1010)
+
+		si.delete()
+
+		si = create_sales_invoice(do_not_save=True, item_code="Item Blank UOM", uom="Nos")
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# UOM is blank so consider it as stock UOM and apply pricing_rule on all UOM.
+		# rate is 101, Selling UOM is Nos that have conversion_factor of 1 so 101 * 1 = 101
+		self.assertEqual(si.items[0].price_list_rate, 101)
+		self.assertEqual(si.items[0].rate, 101)
+
+		si.delete()
+		rule.delete()
+		frappe.get_doc("Item Price", {"item_code": "Item Blank UOM"}).delete()
+
+		item.delete()
+
+	def test_item_price_with_selling_uom_pricing_rule(self):
+		properties = {
+			"item_code": "Item UOM other than Stock",
+			"stock_uom": "Nos",
+			"sales_uom": "Box",
+			"uoms": [dict(uom="Box", conversion_factor=10)],
+		}
+		item = make_item(properties=properties)
+
+		make_item_price("Item UOM other than Stock", "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Item UOM other than Stock Rule",
+			"apply_on": "Item Code",
+			"items": [
+				{
+					"item_code": "Item UOM other than Stock",
+					"uom": "Box",
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Rate",
+			"rate": 101,
+			"company": "_Test Company",
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(
+			do_not_save=True, item_code="Item UOM other than Stock", uom="Box", conversion_factor=10
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# UOM is Box so apply pricing_rule only on Box UOM.
+		# Selling UOM is Box and as both UOM are same no need to multiply by conversion_factor.
+		self.assertEqual(si.items[0].price_list_rate, 101)
+		self.assertEqual(si.items[0].rate, 101)
+
+		si.delete()
+
+		si = create_sales_invoice(do_not_save=True, item_code="Item UOM other than Stock", uom="Nos")
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# UOM is Box so pricing_rule won't apply as selling_uom is Nos.
+		# As Pricing Rule is not applied price of 100 will be fetched from Item Price List.
+		self.assertEqual(si.items[0].price_list_rate, 100)
+		self.assertEqual(si.items[0].rate, 100)
+
+		si.delete()
+		rule.delete()
+		frappe.get_doc("Item Price", {"item_code": "Item UOM other than Stock"}).delete()
+
+		item.delete()
+
+	def test_item_group_price_with_blank_uom_pricing_rule(self):
+		group = frappe.get_doc(doctype="Item Group", item_group_name="_Test Pricing Rule Item Group")
+		group.save()
+		properties = {
+			"item_code": "Item with Group Blank UOM",
+			"item_group": "_Test Pricing Rule Item Group",
+			"stock_uom": "Nos",
+			"sales_uom": "Box",
+			"uoms": [dict(uom="Box", conversion_factor=10)],
+		}
+		item = make_item(properties=properties)
+
+		make_item_price("Item with Group Blank UOM", "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Item with Group Blank UOM Rule",
+			"apply_on": "Item Group",
+			"item_groups": [
+				{
+					"item_group": "_Test Pricing Rule Item Group",
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Rate",
+			"rate": 101,
+			"company": "_Test Company",
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(
+			do_not_save=True, item_code="Item with Group Blank UOM", uom="Box", conversion_factor=10
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# If UOM is blank consider it as stock UOM and apply pricing_rule on all UOM.
+		# rate is 101, Selling UOM is Box that have conversion_factor of 10 so 101 * 10 = 1010
+		self.assertEqual(si.items[0].price_list_rate, 1010)
+		self.assertEqual(si.items[0].rate, 1010)
+
+		si.delete()
+
+		si = create_sales_invoice(do_not_save=True, item_code="Item with Group Blank UOM", uom="Nos")
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# UOM is blank so consider it as stock UOM and apply pricing_rule on all UOM.
+		# rate is 101, Selling UOM is Nos that have conversion_factor of 1 so 101 * 1 = 101
+		self.assertEqual(si.items[0].price_list_rate, 101)
+		self.assertEqual(si.items[0].rate, 101)
+
+		si.delete()
+		rule.delete()
+		frappe.get_doc("Item Price", {"item_code": "Item with Group Blank UOM"}).delete()
+		item.delete()
+		group.delete()
+
+	def test_item_group_price_with_selling_uom_pricing_rule(self):
+		group = frappe.get_doc(doctype="Item Group", item_group_name="_Test Pricing Rule Item Group UOM")
+		group.save()
+		properties = {
+			"item_code": "Item with Group UOM other than Stock",
+			"item_group": "_Test Pricing Rule Item Group UOM",
+			"stock_uom": "Nos",
+			"sales_uom": "Box",
+			"uoms": [dict(uom="Box", conversion_factor=10)],
+		}
+		item = make_item(properties=properties)
+
+		make_item_price("Item with Group UOM other than Stock", "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Item with Group UOM other than Stock Rule",
+			"apply_on": "Item Group",
+			"item_groups": [
+				{
+					"item_group": "_Test Pricing Rule Item Group UOM",
+					"uom": "Box",
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Rate",
+			"rate": 101,
+			"company": "_Test Company",
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(
+			do_not_save=True,
+			item_code="Item with Group UOM other than Stock",
+			uom="Box",
+			conversion_factor=10,
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# UOM is Box so apply pricing_rule only on Box UOM.
+		# Selling UOM is Box and as both UOM are same no need to multiply by conversion_factor.
+		self.assertEqual(si.items[0].price_list_rate, 101)
+		self.assertEqual(si.items[0].rate, 101)
+
+		si.delete()
+
+		si = create_sales_invoice(
+			do_not_save=True, item_code="Item with Group UOM other than Stock", uom="Nos"
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		# UOM is Box so pricing_rule won't apply as selling_uom is Nos.
+		# As Pricing Rule is not applied price of 100 will be fetched from Item Price List.
+		self.assertEqual(si.items[0].price_list_rate, 100)
+		self.assertEqual(si.items[0].rate, 100)
+
+		si.delete()
+		rule.delete()
+		frappe.get_doc("Item Price", {"item_code": "Item with Group UOM other than Stock"}).delete()
+		item.delete()
+		group.delete()
+
 	def test_pricing_rule_for_different_currency(self):
 		make_item("Test Sanitizer Item")
 
@@ -766,6 +1007,107 @@ class TestPricingRule(unittest.TestCase):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 2")
 
+	def test_pricing_rule_for_other_items_cond_with_amount(self):
+		item = make_item("Water Flask New")
+		other_item = make_item("Other Water Flask New")
+		make_item_price(item.name, "_Test Price List", 100)
+		make_item_price(other_item.name, "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Water Flask Rule",
+			"apply_on": "Item Code",
+			"apply_rule_on_other": "Item Code",
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"other_item_code": other_item.name,
+			"items": [
+				{
+					"item_code": item.name,
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"min_amt": 200,
+			"discount_percentage": 10,
+			"company": "_Test Company",
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(do_not_save=True, item_code=item.name)
+		si.append(
+			"items",
+			{
+				"item_code": other_item.name,
+				"item_name": other_item.item_name,
+				"description": other_item.description,
+				"stock_uom": other_item.stock_uom,
+				"uom": other_item.stock_uom,
+				"cost_center": si.items[0].cost_center,
+				"expense_account": si.items[0].expense_account,
+				"warehouse": si.items[0].warehouse,
+				"conversion_factor": 1,
+				"qty": 1,
+			},
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[1].discount_percentage, 0)
+
+		si.items[0].qty = 2
+		si.save()
+
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].stock_qty, 2)
+		self.assertEqual(si.items[0].amount, 200)
+		self.assertEqual(si.items[0].price_list_rate, 100)
+		self.assertEqual(si.items[1].discount_percentage, 10)
+
+		si.delete()
+		rule.delete()
+
+	def test_pricing_rule_for_product_free_item_rounded_qty_and_recursion(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"rate": 0,
+			"min_qty": 3,
+			"max_qty": 7,
+			"price_or_product_discount": "Product",
+			"same_item": 1,
+			"free_qty": 1,
+			"round_free_qty": 1,
+			"is_recursive": 1,
+			"recurse_for": 2,
+			"company": "_Test Company",
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=5)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+		self.assertEqual(so.items[1].qty, 2)
+
+		so = make_sales_order(item_code="_Test Item", qty=7)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+		self.assertEqual(so.items[1].qty, 4)
+
 
 test_dependencies = ["Campaign"]
 
@@ -781,7 +1123,7 @@ def make_pricing_rule(**args):
 			"apply_on": args.apply_on or "Item Code",
 			"applicable_for": args.applicable_for,
 			"selling": args.selling or 0,
-			"currency": "USD",
+			"currency": "INR",
 			"apply_discount_on_rate": args.apply_discount_on_rate or 0,
 			"buying": args.buying or 0,
 			"min_qty": args.min_qty or 0.0,

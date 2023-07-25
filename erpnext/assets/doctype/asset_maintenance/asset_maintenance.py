@@ -42,22 +42,23 @@ class AssetMaintenance(Document):
 				maintenance_log.db_set("maintenance_status", "Cancelled")
 
 
-@frappe.whitelist()
 def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
 	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
 		"doctype": "Asset Maintenance",
-		"assign_to": [team_member],
+		"assign_to": team_member,
 		"name": asset_maintenance_name,
 		"description": maintenance_task,
 		"date": next_due_date,
 	}
 	if not frappe.db.sql(
 		"""select owner from `tabToDo`
-		where reference_type=%(doctype)s and reference_name=%(name)s and status="Open"
+		where reference_type=%(doctype)s and reference_name=%(name)s and status='Open'
 		and owner=%(assign_to)s""",
 		args,
 	):
+		# assign_to function expects a list
+		args["assign_to"] = [args["assign_to"]]
 		assign_to.add(args)
 
 
@@ -82,6 +83,8 @@ def calculate_next_due_date(
 		next_due_date = add_years(start_date, 1)
 	if periodicity == "2 Yearly":
 		next_due_date = add_years(start_date, 2)
+	if periodicity == "3 Yearly":
+		next_due_date = add_years(start_date, 3)
 	if periodicity == "Quarterly":
 		next_due_date = add_months(start_date, 3)
 	if end_date and (

@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
+  "posting_time",
   "merge_invoices_based_on",
   "column_break_3",
   "pos_closing_entry",
@@ -105,12 +106,19 @@
    "label": "Customer Group",
    "mandatory_depends_on": "eval:doc.merge_invoices_based_on == 'Customer Group'",
    "options": "Customer Group"
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-14 11:17:19.001142",
+ "modified": "2022-08-01 11:36:42.456429",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Merge Log",
@@ -173,5 +181,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

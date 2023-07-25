@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:PLE-{YY}-{MM}-{######}",
  "creation": "2022-05-09 19:35:03.334361",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -14,6 +13,7 @@
   "party_type",
   "party",
   "due_date",
+  "voucher_detail_no",
   "cost_center",
   "finance_book",
   "voucher_type",
@@ -23,7 +23,8 @@
   "amount",
   "account_currency",
   "amount_in_account_currency",
-  "delinked"
+  "delinked",
+  "remarks"
  ],
  "fields": [
   {
@@ -41,19 +42,22 @@
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
    "label": "Party Type",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "label": "Party",
-   "options": "party_type"
+   "options": "party_type",
+   "search_index": 1
   },
   {
    "fieldname": "voucher_type",
@@ -115,7 +119,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "search_index": 1
   },
   {
    "fieldname": "cost_center",
@@ -133,16 +138,25 @@
    "fieldtype": "Link",
    "label": "Finance Book",
    "options": "Finance Book"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-19 18:04:44.609115",
+ "modified": "2023-06-29 12:24:20.500632",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

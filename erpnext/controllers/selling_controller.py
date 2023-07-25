@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.contacts.doctype.address.address import get_address_display
-from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime
+from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -19,14 +19,11 @@ class SellingController(StockController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["selling_price_list", "price_list_currency"]
 
-	def get_feed(self):
-		return _("To {0} | {1} {2}").format(self.customer_name, self.currency, self.grand_total)
-
 	def onload(self):
 		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
-			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code, item.warehouse))
+			for item in self.get("items") + (self.get("packed_items") or []):
+				item.update(get_bin_details(item.item_code, item.warehouse, include_child_warehouses=True))
 
 	def validate(self):
 		super(SellingController, self).validate()
@@ -40,9 +37,12 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.validate_auto_repeat_subscription_dates()
+		for table_field in ["items", "packed_items"]:
+			if self.get(table_field):
+				self.set_serial_and_batch_bundle(table_field)
 
 	def set_missing_values(self, for_validate=False):
-
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
@@ -61,7 +61,7 @@ class SellingController(StockController):
 		elif self.doctype == "Quotation" and self.party_name:
 			if self.quotation_to == "Customer":
 				customer = self.party_name
-			else:
+			elif self.quotation_to == "Lead":
 				lead = self.party_name
 
 		if customer:
@@ -138,7 +138,7 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if not self.meta.get_field("commission_rate"):
+		if not self.meta.get_field("commission_rate") or self.docstatus.is_submitted():
 			return
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
@@ -170,7 +170,7 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.amount_eligible_for_commission * sales_person.allocated_percentage / 100.0,
+				flt(self.amount_eligible_for_commission) * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person),
 			)
 
@@ -301,8 +301,8 @@ class SellingController(StockController):
 									"item_code": p.item_code,
 									"qty": flt(p.qty),
 									"uom": p.uom,
-									"batch_no": cstr(p.batch_no).strip(),
-									"serial_no": cstr(p.serial_no).strip(),
+									"serial_and_batch_bundle": p.serial_and_batch_bundle
+									or get_serial_and_batch_bundle(p, self),
 									"name": d.name,
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
@@ -311,6 +311,7 @@ class SellingController(StockController):
 									"sales_invoice_item": d.get("sales_invoice_item"),
 									"dn_detail": d.get("dn_detail"),
 									"incoming_rate": p.get("incoming_rate"),
+									"item_row": p,
 								}
 							)
 						)
@@ -324,8 +325,7 @@ class SellingController(StockController):
 							"uom": d.uom,
 							"stock_uom": d.stock_uom,
 							"conversion_factor": d.conversion_factor,
-							"batch_no": cstr(d.get("batch_no")).strip(),
-							"serial_no": cstr(d.get("serial_no")).strip(),
+							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"name": d.name,
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,
@@ -334,9 +334,11 @@ class SellingController(StockController):
 							"sales_invoice_item": d.get("sales_invoice_item"),
 							"dn_detail": d.get("dn_detail"),
 							"incoming_rate": d.get("incoming_rate"),
+							"item_row": d,
 						}
 					)
 				)
+
 		return il
 
 	def has_product_bundle(self, item_code):
@@ -427,8 +429,7 @@ class SellingController(StockController):
 							"posting_date": self.get("posting_date") or self.get("transaction_date"),
 							"posting_time": self.get("posting_time") or nowtime(),
 							"qty": qty if cint(self.get("is_return")) else (-1 * qty),
-							"serial_no": d.get("serial_no"),
-							"batch_no": d.get("batch_no"),
+							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
@@ -439,24 +440,31 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					if d.doctype == "Packed Item":
-						incoming_rate = flt(d.incoming_rate * d.conversion_factor, d.precision("incoming_rate"))
-						if d.incoming_rate != incoming_rate:
-							d.incoming_rate = incoming_rate
-					else:
-						rate = flt(d.incoming_rate * d.conversion_factor, d.precision("rate"))
-						if d.rate != rate:
-							d.rate = rate
-							frappe.msgprint(
-								_(
-									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-								).format(d.idx),
-								alert=1,
+					if self.doctype == "Delivery Note" or self.get("update_stock"):
+						if d.doctype == "Packed Item":
+							incoming_rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("incoming_rate"),
 							)
+							if d.incoming_rate != incoming_rate:
+								d.incoming_rate = incoming_rate
+						else:
+							rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("rate"),
+							)
+							if d.rate != rate:
+								d.rate = rate
+								frappe.msgprint(
+									_(
+										"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+									).format(d.idx),
+									alert=1,
+								)
 
-						d.discount_percentage = 0.0
-						d.discount_amount = 0.0
-						d.margin_rate_or_amount = 0.0
+							d.discount_percentage = 0.0
+							d.discount_amount = 0.0
+							d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
@@ -504,6 +512,7 @@ class SellingController(StockController):
 				"actual_qty": -1 * flt(item_row.qty),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
+				"serial_and_batch_bundle": item_row.serial_and_batch_bundle,
 			},
 		)
 		if item_row.target_warehouse and not cint(self.is_return):
@@ -523,6 +532,11 @@ class SellingController(StockController):
 				sle.update({"outgoing_rate": item_row.incoming_rate})
 				if item_row.warehouse:
 					sle.dependant_sle_voucher_detail_no = item_row.name
+
+			if item_row.serial_and_batch_bundle:
+				sle["serial_and_batch_bundle"] = self.make_package_for_transfer(
+					item_row.serial_and_batch_bundle, item_row.target_warehouse
+				)
 
 		return sle
 
@@ -573,6 +587,7 @@ class SellingController(StockController):
 			"customer_address": "address_display",
 			"shipping_address_name": "shipping_address",
 			"company_address": "company_address_display",
+			"dispatch_address_name": "dispatch_address",
 		}
 
 		for address_field, address_display_field in address_dict.items():
@@ -615,13 +630,13 @@ class SellingController(StockController):
 				stock_items = [d.item_code, d.description, d.warehouse, ""]
 				non_stock_items = [d.item_code, d.description]
 
+			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
+			duplicate_items_msg += "<br><br>"
+			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+				frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
+				get_link_to_form("Selling Settings", "Selling Settings"),
+			)
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
-				duplicate_items_msg += "<br><br>"
-				duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
-					frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
-					get_link_to_form("Selling Settings", "Selling Settings"),
-				)
 				if stock_items in check_list:
 					frappe.throw(duplicate_items_msg)
 				else:
@@ -661,3 +676,40 @@ def set_default_income_account_for_item(obj):
 		if d.item_code:
 			if getattr(d, "income_account", None):
 				set_item_default(d.item_code, obj.company, "income_account", d.income_account)
+
+
+def get_serial_and_batch_bundle(child, parent):
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	if not frappe.db.get_single_value(
+		"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+	):
+		return
+
+	item_details = frappe.db.get_value(
+		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+	)
+
+	if not item_details.has_serial_no and not item_details.has_batch_no:
+		return
+
+	sn_doc = SerialBatchCreation(
+		{
+			"item_code": child.item_code,
+			"warehouse": child.warehouse,
+			"voucher_type": parent.doctype,
+			"voucher_no": parent.name,
+			"voucher_detail_no": child.name,
+			"posting_date": parent.posting_date,
+			"posting_time": parent.posting_time,
+			"qty": child.qty,
+			"type_of_transaction": "Outward" if child.qty > 0 else "Inward",
+			"company": parent.company,
+			"do_not_submit": "True",
+		}
+	)
+
+	doc = sn_doc.make_serial_and_batch_bundle()
+	child.db_set("serial_and_batch_bundle", doc.name)
+
+	return doc.name

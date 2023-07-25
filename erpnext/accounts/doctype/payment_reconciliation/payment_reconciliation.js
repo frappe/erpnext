@@ -29,6 +29,17 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			};
 		});
 
+		this.frm.set_query('default_advance_account', () => {
+			return {
+				filters: {
+					"company": this.frm.doc.company,
+					"is_group": 0,
+					"account_type": this.frm.doc.party_type == 'Customer' ? "Receivable": "Payable",
+					"root_type": this.frm.doc.party_type == 'Customer' ? "Liability": "Asset"
+				}
+			};
+		});
+
 		this.frm.set_query('bank_cash_account', () => {
 			return {
 				filters:[
@@ -65,23 +76,53 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.frm.add_custom_button(__('Get Unreconciled Entries'), () =>
 				this.frm.trigger("get_unreconciled_entries")
 			);
-			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'primary');
+			this.frm.change_custom_button_type(__('Get Unreconciled Entries'), null, 'primary');
 		}
 		if (this.frm.doc.invoices.length && this.frm.doc.payments.length) {
 			this.frm.add_custom_button(__('Allocate'), () =>
 				this.frm.trigger("allocate")
 			);
-			this.frm.change_custom_button_type('Allocate', null, 'primary');
-			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'default');
+			this.frm.change_custom_button_type(__('Allocate'), null, 'primary');
+			this.frm.change_custom_button_type(__('Get Unreconciled Entries'), null, 'default');
 		}
 		if (this.frm.doc.allocation.length) {
 			this.frm.add_custom_button(__('Reconcile'), () =>
 				this.frm.trigger("reconcile")
 			);
-			this.frm.change_custom_button_type('Reconcile', null, 'primary');
-			this.frm.change_custom_button_type('Get Unreconciled Entries', null, 'default');
-			this.frm.change_custom_button_type('Allocate', null, 'default');
+			this.frm.change_custom_button_type(__('Reconcile'), null, 'primary');
+			this.frm.change_custom_button_type(__('Get Unreconciled Entries'), null, 'default');
+			this.frm.change_custom_button_type(__('Allocate'), null, 'default');
 		}
+
+		// check for any running reconciliation jobs
+		if (this.frm.doc.receivable_payable_account) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: 'is_auto_process_enabled',
+				callback: (r) => {
+					if (r.message) {
+						this.frm.call({
+							'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
+							"args": {
+								for_filter: {
+									company: this.frm.doc.company,
+									party_type: this.frm.doc.party_type,
+									party: this.frm.doc.party,
+									receivable_payable_account: this.frm.doc.receivable_payable_account
+								}
+							}
+						}).then(r => {
+							if (r.message) {
+								let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message, true);
+								let msg = __("Payment Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
+								this.frm.dashboard.add_comment(msg, "yellow");
+							}
+						});
+					}
+				}
+			});
+		}
+
 	}
 
 	company() {
@@ -98,19 +139,20 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.trigger("clear_child_tables");
 
 		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
-			return frappe.call({
+			frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
 					company: this.frm.doc.company,
 					party_type: this.frm.doc.party_type,
-					party: this.frm.doc.party
+					party: this.frm.doc.party,
+					include_advance: 1
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						this.frm.set_value("receivable_payable_account", r.message);
+						this.frm.set_value("receivable_payable_account", r.message[0]);
+						this.frm.set_value("default_advance_account", r.message[1]);
 					}
 					this.frm.refresh();
-
 				}
 			});
 		}
@@ -170,7 +212,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	reconcile() {
-		var show_dialog = this.frm.doc.allocation.filter(d => d.difference_amount && !d.difference_account);
+		var show_dialog = this.frm.doc.allocation.filter(d => d.difference_amount);
 
 		if (show_dialog && show_dialog.length) {
 
@@ -179,8 +221,12 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				title: __("Select Difference Account"),
 				fields: [
 					{
-						fieldname: "allocation", fieldtype: "Table", label: __("Allocation"),
-						data: this.data, in_place_edit: true,
+						fieldname: "allocation",
+						fieldtype: "Table",
+						label: __("Allocation"),
+						data: this.data,
+						in_place_edit: true,
+						cannot_add_rows: true,
 						get_data: () => {
 							return this.data;
 						},
@@ -218,6 +264,10 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							read_only: 1
 						}]
 					},
+					{
+						fieldtype: 'HTML',
+						options: "<b> New Journal Entry will be posted for the difference amount </b>"
+					}
 				],
 				primary_action: () => {
 					const args = dialog.get_values()["allocation"];
@@ -234,7 +284,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 
 			this.frm.doc.allocation.forEach(d => {
-				if (d.difference_amount && !d.difference_account) {
+				if (d.difference_amount) {
 					dialog.fields_dict.allocation.df.data.push({
 						'docname': d.name,
 						'reference_name': d.reference_name,
@@ -263,5 +313,33 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		});
 	}
 };
+
+frappe.ui.form.on('Payment Reconciliation Allocation', {
+	allocated_amount: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		// filter invoice
+		let invoice = frm.doc.invoices.filter((x) => (x.invoice_number == row.invoice_number));
+		// filter payment
+		let payment = frm.doc.payments.filter((x) => (x.reference_name == row.reference_name));
+
+		frm.call({
+			doc: frm.doc,
+			method: 'calculate_difference_on_allocation_change',
+			args: {
+				payment_entry: payment,
+				invoice: invoice,
+				allocated_amount: row.allocated_amount
+			},
+			callback: (r) => {
+				if (r.message) {
+					row.difference_amount = r.message;
+					frm.refresh();
+				}
+			}
+		});
+	}
+});
+
+
 
 extend_cscript(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({frm: cur_frm}));

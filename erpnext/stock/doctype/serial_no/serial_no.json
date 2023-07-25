@@ -12,24 +12,15 @@
   "column_break0",
   "serial_no",
   "item_code",
-  "warehouse",
   "batch_no",
+  "warehouse",
+  "purchase_rate",
   "column_break1",
+  "status",
   "item_name",
   "description",
   "item_group",
   "brand",
-  "sales_order",
-  "purchase_details",
-  "column_break2",
-  "purchase_document_type",
-  "purchase_document_no",
-  "purchase_date",
-  "purchase_time",
-  "purchase_rate",
-  "column_break3",
-  "supplier",
-  "supplier_name",
   "asset_details",
   "asset",
   "asset_status",
@@ -38,14 +29,6 @@
   "employee",
   "delivery_details",
   "delivery_document_type",
-  "delivery_document_no",
-  "delivery_date",
-  "delivery_time",
-  "column_break5",
-  "customer",
-  "customer_name",
-  "invoice_details",
-  "sales_invoice",
   "warranty_amc_details",
   "column_break6",
   "warranty_expiry_date",
@@ -54,9 +37,8 @@
   "maintenance_status",
   "warranty_period",
   "more_info",
-  "serial_no_details",
   "company",
-  "status",
+  "column_break_2cmm",
   "work_order"
  ],
  "fields": [
@@ -91,39 +73,19 @@
    "reqd": 1
   },
   {
-   "description": "Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Warehouse",
-   "no_copy": 1,
-   "oldfieldname": "warehouse",
-   "oldfieldtype": "Link",
-   "options": "Warehouse",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "batch_no",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Batch No",
-   "options": "Batch",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break1",
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Text",
    "label": "Description",
@@ -148,84 +110,6 @@
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
    "options": "Brand",
-   "read_only": 1
-  },
-  {
-   "fieldname": "sales_order",
-   "fieldtype": "Link",
-   "label": "Sales Order",
-   "options": "Sales Order"
-  },
-  {
-   "fieldname": "purchase_details",
-   "fieldtype": "Section Break",
-   "label": "Purchase / Manufacture Details"
-  },
-  {
-   "fieldname": "column_break2",
-   "fieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
-   "fieldname": "purchase_document_type",
-   "fieldtype": "Link",
-   "label": "Creation Document Type",
-   "no_copy": 1,
-   "options": "DocType",
-   "read_only": 1
-  },
-  {
-   "fieldname": "purchase_document_no",
-   "fieldtype": "Dynamic Link",
-   "label": "Creation Document No",
-   "no_copy": 1,
-   "options": "purchase_document_type",
-   "read_only": 1
-  },
-  {
-   "fieldname": "purchase_date",
-   "fieldtype": "Date",
-   "label": "Creation Date",
-   "no_copy": 1,
-   "oldfieldname": "purchase_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "purchase_time",
-   "fieldtype": "Time",
-   "label": "Creation Time",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "purchase_rate",
-   "fieldtype": "Currency",
-   "label": "Incoming Rate",
-   "no_copy": 1,
-   "oldfieldname": "purchase_rate",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break3",
-   "fieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
-   "fieldname": "supplier",
-   "fieldtype": "Link",
-   "label": "Supplier",
-   "no_copy": 1,
-   "options": "Supplier"
-  },
-  {
-   "bold": 1,
-   "fieldname": "supplier_name",
-   "fieldtype": "Data",
-   "label": "Supplier Name",
-   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -284,67 +168,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "delivery_document_no",
-   "fieldtype": "Dynamic Link",
-   "label": "Delivery Document No",
-   "no_copy": 1,
-   "options": "delivery_document_type",
-   "read_only": 1
-  },
-  {
-   "fieldname": "delivery_date",
-   "fieldtype": "Date",
-   "label": "Delivery Date",
-   "no_copy": 1,
-   "oldfieldname": "delivery_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "delivery_time",
-   "fieldtype": "Time",
-   "label": "Delivery Time",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break5",
-   "fieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "no_copy": 1,
-   "oldfieldname": "customer",
-   "oldfieldtype": "Link",
-   "options": "Customer",
-   "print_hide": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "no_copy": 1,
-   "oldfieldname": "customer_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
-   "fieldname": "invoice_details",
-   "fieldtype": "Section Break",
-   "label": "Invoice Details"
-  },
-  {
-   "fieldname": "sales_invoice",
-   "fieldtype": "Link",
-   "label": "Sales Invoice",
-   "options": "Sales Invoice",
-   "read_only": 1
-  },
-  {
    "fieldname": "warranty_amc_details",
    "fieldtype": "Section Break",
    "label": "Warranty / AMC Details"
@@ -366,6 +189,7 @@
    "width": "150px"
   },
   {
+   "fetch_from": "item_code.warranty_period",
    "fieldname": "warranty_period",
    "fieldtype": "Int",
    "label": "Warranty Period (Days)",
@@ -401,39 +225,62 @@
    "label": "More Information"
   },
   {
-   "fieldname": "serial_no_details",
-   "fieldtype": "Text Editor",
-   "label": "Serial No Details"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Status",
-   "options": "\nActive\nInactive\nDelivered\nExpired",
-   "read_only": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "work_order",
    "fieldtype": "Link",
    "label": "Work Order",
    "options": "Work Order"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_rate",
+   "fieldtype": "Float",
+   "label": "Incoming Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive\nExpired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2cmm",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2021-12-23 10:44:30.299450",
+ "modified": "2023-04-16 15:58:46.139887",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -461,7 +308,6 @@
    "read": 1,
    "report": 1,
    "role": "Stock Manager",
-   "set_user_permissions": 1,
    "write": 1
   },
   {

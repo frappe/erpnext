@@ -164,8 +164,6 @@
   "debit_to",
   "party_account_currency",
   "is_opening",
-  "c_form_applicable",
-  "c_form_no",
   "column_break8",
   "remarks",
   "sales_team_section_break",
@@ -345,7 +343,8 @@
    "no_copy": 1,
    "options": "POS Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -443,6 +442,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1400,23 +1400,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "c_form_applicable",
-   "fieldtype": "Select",
-   "label": "C-Form Applicable",
-   "no_copy": 1,
-   "options": "No\nYes",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "c_form_no",
-   "fieldtype": "Link",
-   "label": "C-Form No",
-   "no_copy": 1,
-   "options": "C-Form",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break8",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -1572,11 +1555,10 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 13:00:24.166684",
+ "modified": "2023-06-03 16:23:41.083409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

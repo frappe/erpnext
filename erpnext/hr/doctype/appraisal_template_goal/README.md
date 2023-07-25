@@ -1,1 +1,0 @@
-Goal details for the parent Appraisal Template.

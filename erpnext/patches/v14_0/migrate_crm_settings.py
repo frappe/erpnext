@@ -11,8 +11,7 @@ def execute():
 
 	frappe.reload_doc("crm", "doctype", "crm_settings")
 	if settings:
-		frappe.db.set_value(
-			"CRM Settings",
+		frappe.db.set_single_value(
 			"CRM Settings",
 			{
 				"campaign_naming_by": settings.campaign_naming_by,

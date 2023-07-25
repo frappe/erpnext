@@ -419,6 +419,7 @@
    "depends_on": "eval:parent.material_request_type == \"Material Transfer\"",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Source Warehouse",
    "options": "Warehouse"
   },
@@ -451,16 +452,16 @@
    "fieldname": "job_card_item",
    "fieldtype": "Data",
    "hidden": 1,
+   "label": "Job Card Item",
    "no_copy": 1,
-   "print_hide": 1,
-   "label": "Job Card Item"
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-03-10 18:42:42.705190",
+ "modified": "2023-05-07 20:23:31.250252",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
@@ -469,5 +470,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

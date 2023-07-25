@@ -32,7 +32,7 @@ class TestPlaidSettings(unittest.TestCase):
 				frappe.delete_doc(doctype, d.name, force=True)
 
 	def test_plaid_disabled(self):
-		frappe.db.set_value("Plaid Settings", None, "enabled", 0)
+		frappe.db.set_single_value("Plaid Settings", "enabled", 0)
 		self.assertTrue(get_plaid_configuration() == "disabled")
 
 	def test_add_account_type(self):
@@ -125,6 +125,8 @@ class TestPlaidSettings(unittest.TestCase):
 			"unofficial_currency_code": None,
 			"name": "INTRST PYMNT",
 			"transaction_type": "place",
+			"transaction_code": "direct debit",
+			"check_number": "3456789",
 			"amount": -4.22,
 			"location": {
 				"city": None,

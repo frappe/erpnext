@@ -1,12 +1,16 @@
 frappe.provide("erpnext.accounts.bank_reconciliation");
 
 erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
-	constructor(company, bank_account) {
+	constructor(company, bank_account, bank_statement_from_date, bank_statement_to_date, filter_by_reference_date, from_reference_date, to_reference_date) {
 		this.bank_account = bank_account;
 		this.company = company;
 		this.make_dialog();
+		this.bank_statement_from_date = bank_statement_from_date;
+		this.bank_statement_to_date = bank_statement_to_date;
+		this.filter_by_reference_date = filter_by_reference_date;
+		this.from_reference_date = from_reference_date;
+		this.to_reference_date = to_reference_date;
 	}
-
 	show_dialog(bank_transaction_name, update_dt_cards) {
 		this.bank_transaction_name = bank_transaction_name;
 		this.update_dt_cards = update_dt_cards;
@@ -16,7 +20,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				doctype: "Bank Transaction",
 				filters: { name: this.bank_transaction_name },
 				fieldname: [
-					"date as reference_date",
+					"date",
 					"deposit",
 					"withdrawal",
 					"currency",
@@ -29,17 +33,30 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					"party",
 					"unallocated_amount",
 					"allocated_amount",
+					"transaction_type",
 				],
 			},
 			callback: (r) => {
 				if (r.message) {
 					this.bank_transaction = r.message;
 					r.message.payment_entry = 1;
+					r.message.journal_entry = 1;
 					this.dialog.set_values(r.message);
+					this.copy_data_to_voucher();
 					this.dialog.show();
 				}
 			},
 		});
+	}
+
+	copy_data_to_voucher() {
+		let copied = {
+			reference_number: this.bank_transaction.reference_number || this.bank_transaction.description,
+			posting_date: this.bank_transaction.date,
+			reference_date: this.bank_transaction.date,
+			mode_of_payment: this.bank_transaction.transaction_type,
+		};
+		this.dialog.set_values(copied);
 	}
 
 	get_linked_vouchers(document_types) {
@@ -49,35 +66,27 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			args: {
 				bank_transaction_name: this.bank_transaction_name,
 				document_types: document_types,
+				from_date: this.bank_statement_from_date,
+				to_date: this.bank_statement_to_date,
+				filter_by_reference_date: this.filter_by_reference_date,
+				from_reference_date:this.from_reference_date,
+				to_reference_date:this.to_reference_date
 			},
 
 			callback: (result) => {
 				const data = result.message;
 
-
 				if (data && data.length > 0) {
 					const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 					proposals_wrapper.show();
 					this.dialog.fields_dict.no_matching_vouchers.$wrapper.hide();
-					this.data = [];
-					data.forEach((row) => {
-						const reference_date = row[5] ? row[5] : row[8];
-						this.data.push([
-							row[1],
-							row[2],
-							reference_date,
-							format_currency(row[3], row[9]),
-							row[6],
-							row[4],
-						]);
-					});
+					this.data = data.map((row) => this.format_row(row));
 					this.get_dt_columns();
 					this.get_datatable(proposals_wrapper);
 				} else {
 					const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 					proposals_wrapper.hide();
 					this.dialog.fields_dict.no_matching_vouchers.$wrapper.show();
-
 				}
 				this.dialog.show();
 			},
@@ -87,36 +96,47 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	get_dt_columns() {
 		this.columns = [
 			{
-				name: "Document Type",
+				name: __("Document Type"),
 				editable: false,
 				width: 125,
 			},
 			{
-				name: "Document Name",
+				name: __("Document Name"),
 				editable: false,
-				width: 150,
+				width: 1,
 			},
 			{
-				name: "Reference Date",
+				name: __("Reference Date"),
 				editable: false,
 				width: 120,
+				format: frappe.form.formatters.Date,
 			},
 			{
-				name: "Amount",
+				name: __("Remaining"),
 				editable: false,
 				width: 100,
 			},
 			{
-				name: "Party",
+				name: __("Reference Number"),
 				editable: false,
-				width: 120,
+				width: 200,
 			},
-
 			{
-				name: "Reference Number",
+				name: __("Party"),
 				editable: false,
-				width: 140,
+				width: 100,
 			},
+		];
+	}
+
+	format_row(row) {
+		return [
+			row[1], // Document Type
+			frappe.form.formatters.Link(row[2], {options: row[1]}), // Document Name
+			row[5] || row[8], // Reference Date
+			format_currency(row[3], row[9]), // Remaining
+			row[4], // Reference Number
+			row[6], // Party
 		];
 	}
 
@@ -169,40 +189,40 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: __("Filters"),
 				depends_on: "eval:doc.action=='Match Against Voucher'",
 			},
-			{
-				fieldtype: "Check",
-				label: "Payment Entry",
-				fieldname: "payment_entry",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Journal Entry",
-				fieldname: "journal_entry",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Loan Repayment",
-				fieldname: "loan_repayment",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldname: "column_break_5",
-				fieldtype: "Column Break",
-			},
-			{
-				fieldtype: "Check",
-				label: "Sales Invoice",
-				fieldname: "sales_invoice",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Purchase Invoice",
-				fieldname: "purchase_invoice",
-				onchange: () => this.update_options(),
-			},
+		];
+
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_transaction.bank_transaction.get_doctypes_for_bank_reconciliation",
+			callback: (r) => {
+				$.each(r.message, (_i, entry) => {
+					if (_i % 3 == 0) {
+						fields.push({
+							fieldtype: "Column Break",
+						});
+					}
+					fields.push({
+						fieldtype: "Check",
+						label: entry,
+						fieldname: frappe.scrub(entry),
+						onchange: () => this.update_options(),
+					});
+				});
+
+				fields.push(...this.get_voucher_fields());
+
+				me.dialog = new frappe.ui.Dialog({
+					title: __("Reconcile the Bank Transaction"),
+					fields: fields,
+					size: "large",
+					primary_action: (values) =>
+						this.reconciliation_dialog_primary_action(values),
+				});
+			}
+		});
+	}
+
+	get_voucher_fields() {
+		return [
 			{
 				fieldtype: "Check",
 				label: "Show Only Exact Amount",
@@ -215,14 +235,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			},
 			{
 				fieldtype: "Check",
-				label: "Expense Claim",
-				fieldname: "expense_claim",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Loan Disbursement",
-				fieldname: "loan_disbursement",
+				label: "Bank Transaction",
+				fieldname: "bank_transaction",
 				onchange: () => this.update_options(),
 			},
 			{
@@ -238,7 +252,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			{
 				fieldtype: "HTML",
 				fieldname: "no_matching_vouchers",
-				options: "<div class=\"text-muted text-center\">No Matching Vouchers Found</div>"
+				options: __("<div class=\"text-muted text-center\">{0}</div>", [__("No Matching Vouchers Found")])
 			},
 			{
 				fieldtype: "Section Break",
@@ -290,7 +304,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Column Break",
 			},
 			{
-				default: "Journal Entry Type",
+				default: "Bank Entry",
 				fieldname: "journal_entry_type",
 				fieldtype: "Select",
 				label: "Journal Entry Type",
@@ -365,18 +379,30 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Section Break",
 				fieldname: "details_section",
 				label: "Transaction Details",
-				collapsible: 1,
+			},
+			{
+				fieldname: "date",
+				fieldtype: "Date",
+				label: "Date",
+				read_only: 1,
 			},
 			{
 				fieldname: "deposit",
 				fieldtype: "Currency",
 				label: "Deposit",
+				options: "account_currency",
 				read_only: 1,
 			},
 			{
 				fieldname: "withdrawal",
 				fieldtype: "Currency",
 				label: "Withdrawal",
+				options: "account_currency",
+				read_only: 1,
+			},
+			{
+				fieldname: "column_break_17",
+				fieldtype: "Column Break",
 				read_only: 1,
 			},
 			{
@@ -386,32 +412,28 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				read_only: 1,
 			},
 			{
-				fieldname: "column_break_17",
-				fieldtype: "Column Break",
-				read_only: 1,
-			},
-			{
 				fieldname: "allocated_amount",
 				fieldtype: "Currency",
 				label: "Allocated Amount",
+				options: "account_currency",
 				read_only: 1,
 			},
-
 			{
 				fieldname: "unallocated_amount",
 				fieldtype: "Currency",
 				label: "Unallocated Amount",
+				options: "account_currency",
 				read_only: 1,
 			},
+			{
+				fieldname: "account_currency",
+				fieldtype: "Link",
+				label: "Currency",
+				options: "Currency",
+				read_only: 1,
+				hidden: 1,
+			}
 		];
-
-		me.dialog = new frappe.ui.Dialog({
-			title: __("Reconcile the Bank Transaction"),
-			fields: fields,
-			size: "large",
-			primary_action: (values) =>
-				this.reconciliation_dialog_primary_action(values),
-		});
 	}
 
 	get_selected_attributes() {
@@ -468,10 +490,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				vouchers: vouchers,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" Matched";
+				const alert_string = __("Bank Transaction {0} Matched", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
@@ -495,10 +514,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				cost_center: values.cost_center,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" added as Payment Entry";
+				const alert_string = __("Bank Transaction {0} added as Payment Entry", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
@@ -522,10 +538,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				second_account: values.second_account,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" added as Journal Entry";
+				const alert_string = __("Bank Transaction {0} added as Journal Entry", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
@@ -544,10 +557,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				party: values.party,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" updated";
+				const alert_string = __("Bank Transaction {0} updated", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();

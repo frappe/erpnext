@@ -186,14 +186,14 @@ class ItemConfigure {
 		this.dialog.$status_area.empty();
 	}
 
-	get_html_for_item_found({ filtered_items_count, filtered_items, exact_match, product_info }) {
+	get_html_for_item_found({ filtered_items_count, filtered_items, exact_match, product_info, available_qty, settings }) {
 		const one_item = exact_match.length === 1
 			? exact_match[0]
 			: filtered_items_count === 1
 				? filtered_items[0]
 				: '';
 
-		const item_add_to_cart = one_item ? `
+		let item_add_to_cart = one_item ? `
 			<button data-item-code="${one_item}"
 				class="btn btn-primary btn-add-to-cart w-100"
 				data-action="btn_add_to_cart"
@@ -218,6 +218,10 @@ class ItemConfigure {
 						? '(' + product_info.price.formatted_price_sales_uom + ')'
 						: ''
 					}
+
+					${available_qty === 0 && product_info && product_info?.is_stock_item
+						? '<span class="text-danger">(' + __('Out of Stock') + ')</span>' : ''}
+
 				</div></div>
 				<a href data-action="btn_clear_values" data-item-code="${one_item}">
 					${__('Clear Values')}
@@ -232,6 +236,11 @@ class ItemConfigure {
 					</a>
 			</div>`;
 		/* eslint-disable indent */
+
+		if (!product_info?.allow_items_not_in_stock && available_qty === 0
+			&& product_info && product_info?.is_stock_item) {
+			item_add_to_cart = '';
+		}
 
 		return `
 			${item_found_status}
@@ -257,12 +266,15 @@ class ItemConfigure {
 
 	btn_clear_values() {
 		this.dialog.fields_list.forEach(f => {
-			f.df.options = f.df.options.map(option => {
-				option.disabled = false;
-				return option;
-			});
+			if (f.df?.options) {
+				f.df.options = f.df.options.map(option => {
+					option.disabled = false;
+					return option;
+				});
+			}
 		});
 		this.dialog.clear();
+		this.dialog.$status_area.empty();
 		this.on_attribute_selection();
 	}
 

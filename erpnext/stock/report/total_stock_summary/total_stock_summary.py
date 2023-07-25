@@ -4,60 +4,58 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 
 
 def execute(filters=None):
 
 	if not filters:
 		filters = {}
-	columns = get_columns()
+	columns = get_columns(filters)
 	stock = get_total_stock(filters)
 
 	return columns, stock
 
 
-def get_columns():
+def get_columns(filters):
 	columns = [
-		_("Company") + ":Link/Company:250",
-		_("Warehouse") + ":Link/Warehouse:150",
 		_("Item") + ":Link/Item:150",
 		_("Description") + "::300",
 		_("Current Qty") + ":Float:100",
 	]
 
+	if filters.get("group_by") == "Warehouse":
+		columns.insert(0, _("Warehouse") + ":Link/Warehouse:150")
+	else:
+		columns.insert(0, _("Company") + ":Link/Company:250")
+
 	return columns
 
 
 def get_total_stock(filters):
-	conditions = ""
-	columns = ""
+	bin = frappe.qb.DocType("Bin")
+	item = frappe.qb.DocType("Item")
+	wh = frappe.qb.DocType("Warehouse")
+
+	query = (
+		frappe.qb.from_(bin)
+		.inner_join(item)
+		.on(bin.item_code == item.item_code)
+		.inner_join(wh)
+		.on(wh.name == bin.warehouse)
+		.where(bin.actual_qty != 0)
+	)
 
 	if filters.get("group_by") == "Warehouse":
 		if filters.get("company"):
-			conditions += " AND warehouse.company = %s" % frappe.db.escape(
-				filters.get("company"), percent=False
-			)
+			query = query.where(wh.company == filters.get("company"))
 
-		conditions += " GROUP BY ledger.warehouse, item.item_code"
-		columns += "'' as company, ledger.warehouse"
+		query = query.select(bin.warehouse).groupby(bin.warehouse)
 	else:
-		conditions += " GROUP BY warehouse.company, item.item_code"
-		columns += " warehouse.company, '' as warehouse"
+		query = query.select(wh.company).groupby(wh.company)
 
-	return frappe.db.sql(
-		"""
-			SELECT
-				%s,
-				item.item_code,
-				item.description,
-				sum(ledger.actual_qty) as actual_qty
-			FROM
-				`tabBin` AS ledger
-			INNER JOIN `tabItem` AS item
-				ON ledger.item_code = item.item_code
-			INNER JOIN `tabWarehouse` warehouse
-				ON warehouse.name = ledger.warehouse
-			WHERE
-				ledger.actual_qty != 0 %s"""
-		% (columns, conditions)
-	)
+	query = query.select(
+		item.item_code, item.description, Sum(bin.actual_qty).as_("actual_qty")
+	).groupby(item.item_code)
+
+	return query.run()

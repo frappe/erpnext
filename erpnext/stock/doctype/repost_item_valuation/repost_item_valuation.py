@@ -3,13 +3,17 @@
 
 import frappe
 from frappe import _
+from frappe.desk.form.load import get_attachments
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime
+from frappe.query_builder import DocType, Interval
+from frappe.query_builder.functions import Max, Now
+from frappe.utils import cint, get_link_to_form, get_weekday, getdate, now, nowtime
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
 import erpnext
+from erpnext.accounts.general_ledger import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
@@ -21,10 +25,108 @@ RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
 
 class RepostItemValuation(Document):
+	@staticmethod
+	def clear_old_logs(days=None):
+		days = days or 90
+		table = DocType("Repost Item Valuation")
+		frappe.db.delete(
+			table,
+			filters=(
+				(table.modified < (Now() - Interval(days=days)))
+				& (table.status.isin(["Completed", "Skipped"]))
+			),
+		)
+
 	def validate(self):
+		self.validate_period_closing_voucher()
 		self.set_status(write=False)
 		self.reset_field_values()
 		self.set_company()
+		self.validate_accounts_freeze()
+
+	def validate_period_closing_voucher(self):
+		# Period Closing Voucher
+		year_end_date = self.get_max_year_end_date(self.company)
+		if year_end_date and getdate(self.posting_date) <= getdate(year_end_date):
+			date = frappe.format(year_end_date, "Date")
+			msg = f"Due to period closing, you cannot repost item valuation before {date}"
+			frappe.throw(_(msg))
+
+		# Accounting Period
+		if self.voucher_type:
+			validate_accounting_period(
+				[
+					frappe._dict(
+						{
+							"posting_date": self.posting_date,
+							"company": self.company,
+							"voucher_type": self.voucher_type,
+						}
+					)
+				]
+			)
+
+		# Closing Stock Balance
+		closing_stock = self.get_closing_stock_balance()
+		if closing_stock and closing_stock[0].name:
+			name = get_link_to_form("Closing Stock Balance", closing_stock[0].name)
+			to_date = frappe.format(closing_stock[0].to_date, "Date")
+			msg = f"Due to closing stock balance {name}, you cannot repost item valuation before {to_date}"
+			frappe.throw(_(msg))
+
+	def get_closing_stock_balance(self):
+		filters = {
+			"company": self.company,
+			"status": "Completed",
+			"docstatus": 1,
+			"to_date": (">=", self.posting_date),
+		}
+
+		for field in ["warehouse", "item_code"]:
+			if self.get(field):
+				filters.update({field: ("in", ["", self.get(field)])})
+
+		return frappe.get_all("Closing Stock Balance", fields=["name", "to_date"], filters=filters)
+
+	@staticmethod
+	def get_max_year_end_date(company):
+		data = frappe.get_all(
+			"Period Closing Voucher", fields=["fiscal_year"], filters={"docstatus": 1, "company": company}
+		)
+
+		if not data:
+			return
+
+		fiscal_years = [d.fiscal_year for d in data]
+		table = frappe.qb.DocType("Fiscal Year")
+
+		query = (
+			frappe.qb.from_(table)
+			.select(Max(table.year_end_date))
+			.where((table.name.isin(fiscal_years)) & (table.disabled == 0))
+		).run()
+
+		return query[0][0] if query else None
+
+	def validate_accounts_freeze(self):
+		acc_settings = frappe.db.get_value(
+			"Accounts Settings",
+			"Accounts Settings",
+			["acc_frozen_upto", "frozen_accounts_modifier"],
+			as_dict=1,
+		)
+		if not acc_settings.acc_frozen_upto:
+			return
+		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
+			if (
+				acc_settings.frozen_accounts_modifier
+				and frappe.session.user in get_users_with_role(acc_settings.frozen_accounts_modifier)
+			):
+				frappe.msgprint(_("Caution: This might alter frozen accounts."))
+				return
+			frappe.throw(
+				_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto)
+			)
 
 	def reset_field_values(self):
 		if self.based_on == "Transaction":
@@ -32,6 +134,12 @@ class RepostItemValuation(Document):
 			self.warehouse = None
 
 		self.allow_negative_stock = 1
+
+	def on_cancel(self):
+		self.clear_attachment()
+
+	def on_trash(self):
+		self.clear_attachment()
 
 	def set_company(self):
 		if self.based_on == "Transaction":
@@ -47,6 +155,14 @@ class RepostItemValuation(Document):
 			self.status = status
 		if write:
 			self.db_set("status", self.status)
+
+	def clear_attachment(self):
+		if attachments := get_attachments(self.doctype, self.name):
+			attachment = attachments[0]
+			frappe.delete_doc("File", attachment.name)
+
+		if self.reposting_data_file:
+			self.db_set("reposting_data_file", None)
 
 	def on_submit(self):
 		"""During tests reposts are executed immediately.
@@ -87,6 +203,7 @@ class RepostItemValuation(Document):
 		self.current_index = 0
 		self.distinct_item_and_warehouse = None
 		self.items_to_be_repost = None
+		self.gl_reposting_index = 0
 		self.db_update()
 
 	def deduplicate_similar_repost(self):
@@ -127,6 +244,9 @@ def repost(doc):
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
 			return
 
+		# This is to avoid TooManyWritesError in case of large reposts
+		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
+
 		doc.set_status("In Progress")
 		if not frappe.flags.in_test:
 			frappe.db.commit()
@@ -137,6 +257,11 @@ def repost(doc):
 		doc.set_status("Completed")
 
 	except Exception as e:
+		if frappe.flags.in_test:
+			# Don't silently fail in tests,
+			# there is no reason for reposts to fail in CI
+			raise
+
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		doc.log_error("Unable to repost item valuation")
@@ -146,7 +271,11 @@ def repost(doc):
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
 
-		if not isinstance(e, RecoverableErrors):
+		outgoing_email_account = frappe.get_cached_value(
+			"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
+		)
+
+		if outgoing_email_account and not isinstance(e, RecoverableErrors):
 			notify_error_to_stock_managers(doc, message)
 			doc.set_status("Failed")
 	finally:
@@ -192,6 +321,7 @@ def repost_gl_entries(doc):
 		directly_dependent_transactions + list(repost_affected_transaction),
 		doc.posting_date,
 		doc.company,
+		repost_doc=doc,
 	)
 
 
@@ -228,9 +358,7 @@ def _get_directly_dependent_vouchers(doc):
 
 
 def notify_error_to_stock_managers(doc, traceback):
-	recipients = get_users_with_role("Stock Manager")
-	if not recipients:
-		get_users_with_role("System Manager")
+	recipients = get_recipients()
 
 	subject = _("Error while reposting item valuation")
 	message = (
@@ -245,6 +373,17 @@ def notify_error_to_stock_managers(doc, traceback):
 		)
 	)
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+
+
+def get_recipients():
+	role = (
+		frappe.db.get_single_value("Stock Reposting Settings", "notify_reposting_error_to_role")
+		or "Stock Manager"
+	)
+
+	recipients = get_users_with_role(role)
+
+	return recipients
 
 
 def repost_entries():
@@ -272,7 +411,7 @@ def get_repost_item_valuation_entries():
 	return frappe.db.sql(
 		""" SELECT name from `tabRepost Item Valuation`
 		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
-		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
+		ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc
 	""",
 		now(),
 		as_dict=1,
@@ -300,3 +439,9 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 		return end_time >= now_time >= start_time
 	else:
 		return now_time >= start_time or now_time <= end_time
+
+
+@frappe.whitelist()
+def execute_repost_item_valuation():
+	"""Execute repost item valuation via scheduler."""
+	frappe.get_doc("Scheduled Job Type", "repost_item_valuation.repost_entries").enqueue(force=True)

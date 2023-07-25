@@ -334,6 +334,39 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 		jv.cancel()
 
+	def test_monthly_budget_against_main_cost_center(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from erpnext.accounts.doctype.cost_center_allocation.test_cost_center_allocation import (
+			create_cost_center_allocation,
+		)
+
+		cost_centers = [
+			"Main Budget Cost Center 1",
+			"Sub Budget Cost Center 1",
+			"Sub Budget Cost Center 2",
+		]
+
+		for cc in cost_centers:
+			create_cost_center(cost_center_name=cc, company="_Test Company")
+
+		create_cost_center_allocation(
+			"_Test Company",
+			"Main Budget Cost Center 1 - _TC",
+			{"Sub Budget Cost Center 1 - _TC": 60, "Sub Budget Cost Center 2 - _TC": 40},
+		)
+
+		make_budget(budget_against="Cost Center", cost_center="Main Budget Cost Center 1 - _TC")
+
+		jv = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC",
+			400000,
+			"Main Budget Cost Center 1 - _TC",
+			posting_date=nowdate(),
+		)
+
+		self.assertRaises(BudgetError, jv.submit)
+
 
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
 	if budget_against_field == "project":

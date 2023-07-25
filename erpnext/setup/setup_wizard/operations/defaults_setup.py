@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import cstr, getdate
 
 
+# nosemgrep
 def set_default_settings(args):
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
@@ -35,7 +36,6 @@ def set_default_settings(args):
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
-	stock_settings.automatically_set_serial_nos_based_on_fifo = 1
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 	stock_settings.save()
 
@@ -58,21 +58,6 @@ def set_default_settings(args):
 	delivery_settings = frappe.get_doc("Delivery Settings")
 	delivery_settings.dispatch_template = _("Dispatch Notification")
 	delivery_settings.save()
-
-	hr_settings = frappe.get_doc("HR Settings")
-	hr_settings.emp_created_by = "Naming Series"
-	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
-	hr_settings.leave_status_notification_template = _("Leave Status Notification")
-
-	hr_settings.send_interview_reminder = 1
-	hr_settings.interview_reminder_template = _("Interview Reminder")
-	hr_settings.remind_before = "00:15:00"
-
-	hr_settings.send_interview_feedback_reminder = 1
-	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
-
-	hr_settings.exit_questionnaire_notification_template = _("Exit Questionnaire Notification")
-	hr_settings.save()
 
 
 def set_no_copy_fields_in_variant_settings():

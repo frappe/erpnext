@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	frappe.query_reports["Consolidated Financial Statement"] = {
@@ -49,16 +49,32 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Start Year"),
 				"fieldtype": "Link",
 				"options": "Fiscal Year",
-				"default": frappe.defaults.get_user_default("fiscal_year"),
-				"reqd": 1
+				"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+				"reqd": 1,
+				on_change: () => {
+					frappe.model.with_doc("Fiscal Year", frappe.query_report.get_filter_value('from_fiscal_year'), function(r) {
+						let year_start_date = frappe.model.get_value("Fiscal Year", frappe.query_report.get_filter_value('from_fiscal_year'), "year_start_date");
+						frappe.query_report.set_filter_value({
+							period_start_date: year_start_date
+						});
+					});
+				}
 			},
 			{
 				"fieldname":"to_fiscal_year",
 				"label": __("End Year"),
 				"fieldtype": "Link",
 				"options": "Fiscal Year",
-				"default": frappe.defaults.get_user_default("fiscal_year"),
-				"reqd": 1
+				"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+				"reqd": 1,
+				on_change: () => {
+					frappe.model.with_doc("Fiscal Year", frappe.query_report.get_filter_value('to_fiscal_year'), function(r) {
+						let year_end_date = frappe.model.get_value("Fiscal Year", frappe.query_report.get_filter_value('to_fiscal_year'), "year_end_date");
+						frappe.query_report.set_filter_value({
+							period_end_date: year_end_date
+						});
+					});
+				}
 			},
 			{
 				"fieldname":"finance_book",
@@ -123,7 +139,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			return value;
 		},
 		onload: function() {
-			let fiscal_year = frappe.defaults.get_user_default("fiscal_year")
+			let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
 
 			frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
 				var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);

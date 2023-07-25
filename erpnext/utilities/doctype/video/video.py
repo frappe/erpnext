@@ -9,6 +9,8 @@ import frappe
 import pytz
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
+from frappe.utils.data import get_system_timezone
 from pyyoutube import Api
 
 
@@ -46,7 +48,7 @@ def is_tracking_enabled():
 def get_frequency(value):
 	# Return numeric value from frequency field, return 1 as fallback default value: 1 hour
 	if value != "Daily":
-		return frappe.utils.cint(value[:2].strip())
+		return cint(value[:2].strip())
 	elif value:
 		return 24
 	return 1
@@ -58,12 +60,12 @@ def update_youtube_data():
 		"Video Settings", "Video Settings", ["enable_youtube_tracking", "frequency"]
 	)
 
-	if not enable_youtube_tracking:
+	if not cint(enable_youtube_tracking):
 		return
 
 	frequency = get_frequency(frequency)
 	time = datetime.now()
-	timezone = pytz.timezone(frappe.utils.get_time_zone())
+	timezone = pytz.timezone(get_system_timezone())
 	site_time = time.astimezone(timezone)
 
 	if frequency == 30:
@@ -120,24 +122,12 @@ def batch_update_youtube_data():
 			video_stats = entry.to_dict().get("statistics")
 			video_id = entry.to_dict().get("id")
 			stats = {
-				"like_count": video_stats.get("likeCount"),
-				"view_count": video_stats.get("viewCount"),
-				"dislike_count": video_stats.get("dislikeCount"),
-				"comment_count": video_stats.get("commentCount"),
-				"video_id": video_id,
+				"like_count": cint(video_stats.get("likeCount")),
+				"view_count": cint(video_stats.get("viewCount")),
+				"dislike_count": cint(video_stats.get("dislikeCount")),
+				"comment_count": cint(video_stats.get("commentCount")),
 			}
-
-			frappe.db.sql(
-				"""
-				UPDATE `tabVideo`
-				SET
-					like_count  = %(like_count)s,
-					view_count = %(view_count)s,
-					dislike_count = %(dislike_count)s,
-					comment_count = %(comment_count)s
-				WHERE youtube_video_id = %(video_id)s""",
-				stats,
-			)
+			frappe.db.set_value("Video", video_id, stats)
 
 	video_list = frappe.get_all("Video", fields=["youtube_video_id"])
 	if len(video_list) > 50:

@@ -5,7 +5,7 @@
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cint, cstr, flt, get_time, now_datetime
+from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -29,64 +29,6 @@ class TransactionBase(StatusUpdater):
 				get_time(self.posting_time)
 			except ValueError:
 				frappe.throw(_("Invalid Posting Time"))
-
-	def add_calendar_event(self, opts, force=False):
-		if (
-			cstr(self.contact_by) != cstr(self._prev.contact_by)
-			or cstr(self.contact_date) != cstr(self._prev.contact_date)
-			or force
-			or (hasattr(self, "ends_on") and cstr(self.ends_on) != cstr(self._prev.ends_on))
-		):
-
-			self.delete_events()
-			self._add_calendar_event(opts)
-
-	def delete_events(self):
-		participations = frappe.get_all(
-			"Event Participants",
-			filters={
-				"reference_doctype": self.doctype,
-				"reference_docname": self.name,
-				"parenttype": "Event",
-			},
-			fields=["name", "parent"],
-		)
-
-		if participations:
-			for participation in participations:
-				total_participants = frappe.get_all(
-					"Event Participants", filters={"parenttype": "Event", "parent": participation.parent}
-				)
-
-				if len(total_participants) <= 1:
-					frappe.db.sql("delete from `tabEvent` where name='%s'" % participation.parent)
-
-				frappe.db.sql("delete from `tabEvent Participants` where name='%s'" % participation.name)
-
-	def _add_calendar_event(self, opts):
-		opts = frappe._dict(opts)
-
-		if self.contact_date:
-			event = frappe.get_doc(
-				{
-					"doctype": "Event",
-					"owner": opts.owner or self.owner,
-					"subject": opts.subject,
-					"description": opts.description,
-					"starts_on": self.contact_date,
-					"ends_on": opts.ends_on,
-					"event_type": "Private",
-				}
-			)
-
-			event.append(
-				"event_participants", {"reference_doctype": self.doctype, "reference_docname": self.name}
-			)
-
-			event.insert(ignore_permissions=True)
-
-			if frappe.db.exists("User", self.contact_by):
-				frappe.share.add("Event", event.name, self.contact_by, flags={"ignore_share_permission": True})
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
@@ -116,11 +58,11 @@ class TransactionBase(StatusUpdater):
 
 	def compare_values(self, ref_doc, fields, doc=None):
 		for reference_doctype, ref_dn_list in ref_doc.items():
+			prev_doc_detail_map = self.get_prev_doc_reference_details(
+				ref_dn_list, reference_doctype, fields
+			)
 			for reference_name in ref_dn_list:
-				prevdoc_values = frappe.db.get_value(
-					reference_doctype, reference_name, [d[0] for d in fields], as_dict=1
-				)
-
+				prevdoc_values = prev_doc_detail_map.get(reference_name)
 				if not prevdoc_values:
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
 
@@ -128,27 +70,43 @@ class TransactionBase(StatusUpdater):
 					if prevdoc_values[field] is not None and field not in self.exclude_fields:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
+	def get_prev_doc_reference_details(self, reference_names, reference_doctype, fields):
+		prev_doc_detail_map = {}
+		details = frappe.get_all(
+			reference_doctype,
+			filters={"name": ("in", reference_names)},
+			fields=["name"] + [d[0] for d in fields],
+		)
+
+		for d in details:
+			prev_doc_detail_map.setdefault(d.name, d)
+
+		return prev_doc_detail_map
+
 	def validate_rate_with_reference_doc(self, ref_details):
+		if self.get("is_internal_supplier"):
+			return
+
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 
 		if self.doctype in buying_doctypes:
-			action = frappe.db.get_single_value("Buying Settings", "maintain_same_rate_action")
-			settings_doc = "Buying Settings"
+			action, role_allowed_to_override = frappe.get_cached_value(
+				"Buying Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+			)
 		else:
-			action = frappe.db.get_single_value("Selling Settings", "maintain_same_rate_action")
-			settings_doc = "Selling Settings"
+			action, role_allowed_to_override = frappe.get_cached_value(
+				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+			)
 
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
+			reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
+			reference_details = self.get_reference_details(reference_names, ref_dt + " Item")
 			for d in self.get("items"):
 				if d.get(ref_link_field):
-					ref_rate = frappe.db.get_value(ref_dt + " Item", d.get(ref_link_field), "rate")
+					ref_rate = reference_details.get(d.get(ref_link_field))
 
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
 						if action == "Stop":
-							role_allowed_to_override = frappe.db.get_single_value(
-								settings_doc, "role_to_override_stop_action"
-							)
-
 							if role_allowed_to_override not in frappe.get_roles():
 								frappe.throw(
 									_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
@@ -163,6 +121,16 @@ class TransactionBase(StatusUpdater):
 								title=_("Warning"),
 								indicator="orange",
 							)
+
+	def get_reference_details(self, reference_names, reference_doctype):
+		return frappe._dict(
+			frappe.get_all(
+				reference_doctype,
+				filters={"name": ("in", reference_names)},
+				fields=["name", "rate"],
+				as_list=1,
+			)
+		)
 
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
@@ -241,12 +209,15 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					if abs(cint(qty) - flt(qty)) > 0.0000001:
+					if abs(cint(qty) - flt(qty, d.precision(f))) > 0.0000001:
 						frappe.throw(
 							_(
 								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 							).format(
-								qty, d.idx, frappe.bold(_("Must be Whole Number")), frappe.bold(d.get(uom_field))
+								flt(qty, d.precision(f)),
+								d.idx,
+								frappe.bold(_("Must be Whole Number")),
+								frappe.bold(d.get(uom_field)),
 							),
 							UOMMustBeIntegerError,
 						)

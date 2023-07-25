@@ -12,13 +12,17 @@ def get_data():
 			"Purchase Receipt": "return_against",
 		},
 		"internal_links": {
+			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
 			"Project": ["items", "project"],
 			"Quality Inspection": ["items", "quality_inspection"],
 		},
 		"transactions": [
 			{"label": _("Related"), "items": ["Purchase Invoice", "Landed Cost Voucher", "Asset"]},
-			{"label": _("Reference"), "items": ["Purchase Order", "Quality Inspection", "Project"]},
+			{
+				"label": _("Reference"),
+				"items": ["Material Request", "Purchase Order", "Quality Inspection", "Project"],
+			},
 			{"label": _("Returns"), "items": ["Purchase Receipt"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
 		],

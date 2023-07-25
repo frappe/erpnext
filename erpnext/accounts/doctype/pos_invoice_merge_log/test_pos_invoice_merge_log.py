@@ -13,6 +13,9 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_serial_nos_from_bundle,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
@@ -410,13 +413,13 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 
 		try:
 			se = make_serialized_item()
-			serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
+			serial_no = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)[0]
 
 			init_user_and_profile()
 
 			pos_inv = create_pos_invoice(
 				item_code="_Test Serialized Item With Series",
-				serial_no=serial_no,
+				serial_no=[serial_no],
 				qty=1,
 				rate=100,
 				do_not_submit=1,
@@ -430,7 +433,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 
 			pos_inv2 = create_pos_invoice(
 				item_code="_Test Serialized Item With Series",
-				serial_no=serial_no,
+				serial_no=[serial_no],
 				qty=1,
 				rate=100,
 				do_not_submit=1,

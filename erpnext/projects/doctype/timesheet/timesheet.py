@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours
 
 from erpnext.controllers.queries import get_match_cond
-from erpnext.hr.utils import validate_active_employee
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -24,20 +23,19 @@ class OverWorkLoggedError(frappe.ValidationError):
 
 class Timesheet(Document):
 	def validate(self):
-		if self.employee:
-			validate_active_employee(self.employee)
-		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
+		self.calculate_hours()
 		self.validate_time_logs()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
 
-	def set_employee_name(self):
-		if self.employee and not self.employee_name:
-			self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
+	def calculate_hours(self):
+		for row in self.time_logs:
+			if row.to_time and row.from_time:
+				row.hours = time_diff_in_hours(row.to_time, row.from_time)
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
@@ -66,6 +64,8 @@ class Timesheet(Document):
 		self.per_billed = 0
 		if self.total_billed_amount > 0 and self.total_billable_amount > 0:
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
+		elif self.total_billed_hours > 0 and self.total_billable_hours > 0:
+			self.per_billed = (self.total_billed_hours * 100) / self.total_billable_hours
 
 	def update_billing_hours(self, args):
 		if args.is_billable:
@@ -80,10 +80,7 @@ class Timesheet(Document):
 		if self.per_billed == 100:
 			self.status = "Billed"
 
-		if self.salary_slip:
-			self.status = "Payslip"
-
-		if self.sales_invoice and self.salary_slip:
+		if self.sales_invoice:
 			self.status = "Completed"
 
 	def set_dates(self):
@@ -328,7 +325,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and
 			tsd.docstatus = 1 and ts.total_billable_amount > 0
 			and tsd.parent LIKE %(txt)s {condition}
-			order by tsd.parent limit %(start)s, %(page_len)s""".format(
+			order by tsd.parent limit %(page_len)s offset %(start)s""".format(
 			condition=condition
 		),
 		{
@@ -377,6 +374,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 	billing_rate = billing_amount / hours
 
 	target.company = timesheet.company
+	target.project = timesheet.parent_project
 	if customer:
 		target.customer = customer
 
@@ -392,6 +390,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 				"timesheets",
 				{
 					"time_sheet": timesheet.name,
+					"project_name": time_log.project_name,
+					"from_time": time_log.from_time,
+					"to_time": time_log.to_time,
 					"billing_hours": time_log.billing_hours,
 					"billing_amount": time_log.billing_amount,
 					"timesheet_detail": time_log.name,
@@ -404,27 +405,6 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 	target.run_method("set_missing_values")
 
 	return target
-
-
-@frappe.whitelist()
-def make_salary_slip(source_name, target_doc=None):
-	target = frappe.new_doc("Salary Slip")
-	set_missing_values(source_name, target)
-	target.run_method("get_emp_and_working_day_details")
-
-	return target
-
-
-def set_missing_values(time_sheet, target):
-	doc = frappe.get_doc("Timesheet", time_sheet)
-	target.employee = doc.employee
-	target.employee_name = doc.employee_name
-	target.salary_slip_based_on_timesheet = 1
-	target.start_date = doc.start_date
-	target.end_date = doc.end_date
-	target.posting_date = doc.modified
-	target.total_working_hours = doc.total_hours
-	target.append("timesheets", {"time_sheet": doc.name, "working_hours": doc.total_hours})
 
 
 @frappe.whitelist()
@@ -515,7 +495,7 @@ def get_timesheets_list(
 					tsd.project IN %(projects)s
 				)
 			ORDER BY `end_date` ASC
-			LIMIT {0}, {1}
+			LIMIT {1} offset {0}
 		""".format(
 				limit_start, limit_page_length
 			),

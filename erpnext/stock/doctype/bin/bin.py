@@ -24,7 +24,29 @@ class Bin(Document):
 			- flt(self.reserved_qty)
 			- flt(self.reserved_qty_for_production)
 			- flt(self.reserved_qty_for_sub_contract)
+			- flt(self.reserved_qty_for_production_plan)
 		)
+
+	def update_reserved_qty_for_production_plan(self, skip_project_qty_update=False):
+		"""Update qty reserved for production from Production Plan tables
+		in open production plan"""
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_reserved_qty_for_production_plan,
+		)
+
+		self.reserved_qty_for_production_plan = get_reserved_qty_for_production_plan(
+			self.item_code, self.warehouse
+		)
+
+		self.db_set(
+			"reserved_qty_for_production_plan",
+			flt(self.reserved_qty_for_production_plan),
+			update_modified=True,
+		)
+
+		if not skip_project_qty_update:
+			self.set_projected_qty()
+			self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
 	def update_reserved_qty_for_production(self):
 		"""Update qty reserved for production from Production Item tables
@@ -35,30 +57,46 @@ class Bin(Document):
 			self.item_code, self.warehouse
 		)
 
+		self.db_set(
+			"reserved_qty_for_production", flt(self.reserved_qty_for_production), update_modified=True
+		)
+
+		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True)
+
 		self.set_projected_qty()
+		self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
-		self.db_set("reserved_qty_for_production", flt(self.reserved_qty_for_production))
-		self.db_set("projected_qty", self.projected_qty)
-
-	def update_reserved_qty_for_sub_contracting(self):
+	def update_reserved_qty_for_sub_contracting(self, subcontract_doctype="Subcontracting Order"):
 		# reserved qty
 
-		po = frappe.qb.DocType("Purchase Order")
-		supplied_item = frappe.qb.DocType("Purchase Order Item Supplied")
+		subcontract_order = frappe.qb.DocType(subcontract_doctype)
+		supplied_item = frappe.qb.DocType(
+			"Purchase Order Item Supplied"
+			if subcontract_doctype == "Purchase Order"
+			else "Subcontracting Order Supplied Item"
+		)
+
+		conditions = (
+			(supplied_item.rm_item_code == self.item_code)
+			& (subcontract_order.name == supplied_item.parent)
+			& (subcontract_order.per_received < 100)
+			& (supplied_item.reserve_warehouse == self.warehouse)
+			& (
+				(
+					(subcontract_order.is_old_subcontracting_flow == 1)
+					& (subcontract_order.status != "Closed")
+					& (subcontract_order.docstatus == 1)
+				)
+				if subcontract_doctype == "Purchase Order"
+				else (subcontract_order.docstatus == 1)
+			)
+		)
 
 		reserved_qty_for_sub_contract = (
-			frappe.qb.from_(po)
+			frappe.qb.from_(subcontract_order)
 			.from_(supplied_item)
 			.select(Sum(Coalesce(supplied_item.required_qty, 0)))
-			.where(
-				(supplied_item.rm_item_code == self.item_code)
-				& (po.name == supplied_item.parent)
-				& (po.docstatus == 1)
-				& (po.is_subcontracted)
-				& (po.status != "Closed")
-				& (po.per_received < 100)
-				& (supplied_item.reserve_warehouse == self.warehouse)
-			)
+			.where(conditions)
 		).run()[0][0] or 0.0
 
 		se = frappe.qb.DocType("Stock Entry")
@@ -71,23 +109,34 @@ class Bin(Document):
 		else:
 			qty_field = se_item.transfer_qty
 
+		conditions = (
+			(se.docstatus == 1)
+			& (se.purpose == "Send to Subcontractor")
+			& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
+			& (se.name == se_item.parent)
+			& (subcontract_order.docstatus == 1)
+			& (subcontract_order.per_received < 100)
+			& (
+				(
+					(Coalesce(se.purchase_order, "") != "")
+					& (subcontract_order.name == se.purchase_order)
+					& (subcontract_order.is_old_subcontracting_flow == 1)
+					& (subcontract_order.status != "Closed")
+				)
+				if subcontract_doctype == "Purchase Order"
+				else (
+					(Coalesce(se.subcontracting_order, "") != "")
+					& (subcontract_order.name == se.subcontracting_order)
+				)
+			)
+		)
+
 		materials_transferred = (
 			frappe.qb.from_(se)
 			.from_(se_item)
-			.from_(po)
+			.from_(subcontract_order)
 			.select(Sum(qty_field))
-			.where(
-				(se.docstatus == 1)
-				& (se.purpose == "Send to Subcontractor")
-				& (Coalesce(se.purchase_order, "") != "")
-				& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
-				& (se.name == se_item.parent)
-				& (po.name == se.purchase_order)
-				& (po.docstatus == 1)
-				& (po.is_subcontracted == 1)
-				& (po.status != "Closed")
-				& (po.per_received < 100)
-			)
+			.where(conditions)
 		).run()[0][0] or 0.0
 
 		if reserved_qty_for_sub_contract > materials_transferred:
@@ -95,9 +144,9 @@ class Bin(Document):
 		else:
 			reserved_qty_for_sub_contract = 0
 
-		self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract)
+		self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
 		self.set_projected_qty()
-		self.db_set("projected_qty", self.projected_qty)
+		self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
 
 def on_doctype_update():
@@ -116,6 +165,7 @@ def get_bin_details(bin_name):
 			"planned_qty",
 			"reserved_qty_for_production",
 			"reserved_qty_for_sub_contract",
+			"reserved_qty_for_production_plan",
 		],
 		as_dict=1,
 	)
@@ -134,12 +184,18 @@ def update_qty(bin_name, args):
 		last_sle_qty = (
 			frappe.qb.from_(sle)
 			.select(sle.qty_after_transaction)
-			.where((sle.item_code == args.get("item_code")) & (sle.warehouse == args.get("warehouse")))
+			.where(
+				(sle.item_code == args.get("item_code"))
+				& (sle.warehouse == args.get("warehouse"))
+				& (sle.is_cancelled == 0)
+			)
 			.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
+			.limit(1)
 			.run()
 		)
 
+		actual_qty = 0.0
 		if last_sle_qty:
 			actual_qty = last_sle_qty[0][0]
 
@@ -157,6 +213,7 @@ def update_qty(bin_name, args):
 		- flt(reserved_qty)
 		- flt(bin_details.reserved_qty_for_production)
 		- flt(bin_details.reserved_qty_for_sub_contract)
+		- flt(bin_details.reserved_qty_for_production_plan)
 	)
 
 	frappe.db.set_value(
@@ -170,4 +227,5 @@ def update_qty(bin_name, args):
 			"planned_qty": planned_qty,
 			"projected_qty": projected_qty,
 		},
+		update_modified=True,
 	)

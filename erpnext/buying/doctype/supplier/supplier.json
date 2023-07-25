@@ -10,34 +10,36 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "basic_info",
   "naming_series",
   "supplier_name",
   "country",
-  "default_bank_account",
-  "tax_id",
-  "tax_category",
-  "tax_withholding_category",
-  "image",
   "column_break0",
   "supplier_group",
   "supplier_type",
-  "allow_purchase_invoice_creation_without_purchase_order",
-  "allow_purchase_invoice_creation_without_purchase_receipt",
-  "is_internal_supplier",
-  "represents_company",
-  "disabled",
   "is_transporter",
-  "warn_rfqs",
-  "warn_pos",
-  "prevent_rfqs",
-  "prevent_pos",
-  "allowed_to_transact_section",
-  "companies",
-  "section_break_7",
+  "image",
+  "defaults_section",
   "default_currency",
+  "default_bank_account",
   "column_break_10",
   "default_price_list",
+  "internal_supplier_section",
+  "is_internal_supplier",
+  "represents_company",
+  "column_break_16",
+  "companies",
+  "column_break2",
+  "supplier_details",
+  "column_break_30",
+  "website",
+  "language",
+  "dashboard_tab",
+  "tax_tab",
+  "tax_id",
+  "column_break_27",
+  "tax_category",
+  "tax_withholding_category",
+  "contact_and_address_tab",
   "address_contacts",
   "address_html",
   "column_break1",
@@ -49,30 +51,30 @@
   "column_break_44",
   "supplier_primary_address",
   "primary_address",
-  "default_payable_accounts",
-  "accounts",
-  "section_credit_limit",
+  "accounting_tab",
   "payment_terms",
-  "cb_21",
+  "default_accounts_section",
+  "accounts",
+  "settings_tab",
+  "allow_purchase_invoice_creation_without_purchase_order",
+  "allow_purchase_invoice_creation_without_purchase_receipt",
+  "column_break_54",
+  "is_frozen",
+  "disabled",
+  "warn_rfqs",
+  "warn_pos",
+  "prevent_rfqs",
+  "prevent_pos",
+  "block_supplier_section",
   "on_hold",
   "hold_type",
+  "column_break_59",
   "release_date",
-  "default_tax_withholding_config",
-  "column_break2",
-  "website",
-  "supplier_details",
-  "column_break_30",
-  "language",
-  "is_frozen"
+  "portal_users_tab",
+  "portal_users",
+  "column_break_1mqv"
  ],
  "fields": [
-  {
-   "fieldname": "basic_info",
-   "fieldtype": "Section Break",
-   "label": "Name and Type",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-user"
-  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -192,6 +194,7 @@
    "default": "0",
    "fieldname": "warn_rfqs",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Warn RFQs",
    "read_only": 1
   },
@@ -199,6 +202,7 @@
    "default": "0",
    "fieldname": "warn_pos",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Warn POs",
    "read_only": 1
   },
@@ -206,6 +210,7 @@
    "default": "0",
    "fieldname": "prevent_rfqs",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Prevent RFQs",
    "read_only": 1
   },
@@ -213,14 +218,9 @@
    "default": "0",
    "fieldname": "prevent_pos",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Prevent POs",
    "read_only": 1
-  },
-  {
-   "depends_on": "represents_company",
-   "fieldname": "allowed_to_transact_section",
-   "fieldtype": "Section Break",
-   "label": "Allowed To Transact With"
   },
   {
    "depends_on": "represents_company",
@@ -228,12 +228,6 @@
    "fieldtype": "Table",
    "label": "Allowed To Transact With",
    "options": "Allowed To Transact With"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "label": "Currency and Price List"
   },
   {
    "fieldname": "default_currency",
@@ -255,20 +249,10 @@
    "options": "Price List"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_credit_limit",
-   "fieldtype": "Section Break",
-   "label": "Payment Terms"
-  },
-  {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
    "label": "Default Payment Terms Template",
    "options": "Payment Terms Template"
-  },
-  {
-   "fieldname": "cb_21",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -316,24 +300,11 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "accounts",
-   "fieldname": "default_payable_accounts",
-   "fieldtype": "Section Break",
-   "label": "Default Payable Accounts"
-  },
-  {
    "description": "Mention if non-standard payable account",
    "fieldname": "accounts",
    "fieldtype": "Table",
    "label": "Accounts",
    "options": "Party Account"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "default_tax_withholding_config",
-   "fieldtype": "Section Break",
-   "label": "Default Tax Withholding Config"
   },
   {
    "collapsible": 1,
@@ -383,7 +354,7 @@
   {
    "fieldname": "primary_address_and_contact_detail_section",
    "fieldtype": "Section Break",
-   "label": "Primary Address and Contact Detail"
+   "label": "Primary Address and Contact"
   },
   {
    "description": "Reselect, if the chosen contact is edited after save",
@@ -420,6 +391,84 @@
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "dashboard_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dashboard",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "contact_and_address_tab",
+   "fieldtype": "Tab Break",
+   "label": "Contact & Address"
+  },
+  {
+   "fieldname": "accounting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "tax_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tax"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "internal_supplier_section",
+   "fieldtype": "Section Break",
+   "label": "Internal Supplier"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "block_supplier_section",
+   "fieldtype": "Section Break",
+   "label": "Block Supplier"
+  },
+  {
+   "fieldname": "column_break_59",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Default Accounts"
+  },
+  {
+   "fieldname": "portal_users_tab",
+   "fieldtype": "Tab Break",
+   "label": "Portal Users"
+  },
+  {
+   "fieldname": "portal_users",
+   "fieldtype": "Table",
+   "label": "Supplier Portal Users",
+   "options": "Portal User"
+  },
+  {
+   "fieldname": "column_break_1mqv",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -432,11 +481,10 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 18:02:27.838623",
+ "modified": "2023-06-26 14:20:00.961554",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
@@ -465,7 +513,6 @@
    "read": 1,
    "report": 1,
    "role": "Purchase Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },

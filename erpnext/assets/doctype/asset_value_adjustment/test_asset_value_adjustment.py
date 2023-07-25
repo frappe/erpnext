@@ -6,9 +6,10 @@ import unittest
 import frappe
 from frappe.utils import add_days, get_last_day, nowdate
 
+from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
-from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import (
-	get_current_asset_value,
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
@@ -43,7 +44,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 		asset_doc.submit()
 
-		current_value = get_current_asset_value(asset_doc.name)
+		current_value = get_asset_value_after_depreciation(asset_doc.name)
 		self.assertEqual(current_value, 100000.0)
 
 	def test_asset_depreciation_value_adjustment(self):
@@ -73,11 +74,20 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 		asset_doc.submit()
 
-		current_value = get_current_asset_value(asset_doc.name)
+		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
+		current_value = get_asset_value_after_depreciation(asset_doc.name)
 		adj_doc = make_asset_value_adjustment(
 			asset=asset_doc.name, current_asset_value=current_value, new_asset_value=50000.0
 		)
 		adj_doc.submit()
+
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 
 		expected_gle = (
 			("_Test Accumulated Depreciations - _TC", 0.0, 50000.0),
@@ -91,7 +101,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 			adj_doc.journal_entry,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 
 
 def make_asset_value_adjustment(**args):

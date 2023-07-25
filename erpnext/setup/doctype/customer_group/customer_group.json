@@ -113,7 +113,7 @@
   {
    "fieldname": "default_receivable_account",
    "fieldtype": "Section Break",
-   "label": "Default Receivable Account"
+   "label": "Default Accounts"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -139,10 +139,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-02-08 17:01:52.162202",
+ "modified": "2023-06-02 13:40:34.435822",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_customer_group",
  "owner": "Administrator",
  "permissions": [
@@ -170,7 +171,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
@@ -198,10 +198,19 @@
    "role": "Customer",
    "select": 1,
    "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "search_fields": "parent_customer_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

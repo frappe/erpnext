@@ -61,13 +61,6 @@ def get_columns():
 			"options": "Territory",
 			"width": 150,
 		},
-		{
-			"label": _("Next Contact By"),
-			"fieldname": "contact_by",
-			"fieldtype": "Link",
-			"options": "User",
-			"width": 150,
-		},
 	]
 	return columns
 
@@ -81,7 +74,6 @@ def get_data(filters):
 			`tabOpportunity`.party_name,
 			`tabOpportunity`.customer_name,
 			`tabOpportunity`.opportunity_type,
-			`tabOpportunity`.contact_by,
 			GROUP_CONCAT(`tabOpportunity Lost Reason Detail`.lost_reason separator ', ') lost_reason,
 			`tabOpportunity`.sales_stage,
 			`tabOpportunity`.territory
@@ -90,7 +82,7 @@ def get_data(filters):
 			{join}
 		WHERE
 			`tabOpportunity`.status = 'Lost' and `tabOpportunity`.company = %(company)s
-			AND `tabOpportunity`.modified BETWEEN %(from_date)s AND %(to_date)s
+			AND DATE(`tabOpportunity`.modified) BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
 		GROUP BY
 			`tabOpportunity`.name
@@ -114,9 +106,6 @@ def get_conditions(filters):
 
 	if filters.get("party_name"):
 		conditions.append(" and `tabOpportunity`.party_name=%(party_name)s")
-
-	if filters.get("contact_by"):
-		conditions.append(" and `tabOpportunity`.contact_by=%(contact_by)s")
 
 	return " ".join(conditions) if conditions else ""
 

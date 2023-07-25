@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 	"filters": [
@@ -44,7 +44,7 @@ frappe.query_reports["Opportunity Summary by Sales Stage"] = {
 		},
 		{
 			fieldname: "opportunity_source",
-			label: __("Oppoturnity Source"),
+			label: __("Opportunity Source"),
 			fieldtype: "Link",
 			options: "Lead Source",
 		},

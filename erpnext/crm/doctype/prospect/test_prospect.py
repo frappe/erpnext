@@ -20,7 +20,7 @@ class TestProspect(unittest.TestCase):
 		add_lead_to_prospect(lead_doc.name, prospect_doc.name)
 		prospect_doc.reload()
 		lead_exists_in_prosoect = False
-		for rec in prospect_doc.get("prospect_lead"):
+		for rec in prospect_doc.get("leads"):
 			if rec.lead == lead_doc.name:
 				lead_exists_in_prosoect = True
 		self.assertEqual(lead_exists_in_prosoect, True)

@@ -21,56 +21,54 @@ class DelayedItemReport(object):
 		return self.get_columns(), self.get_data() or []
 
 	def get_data(self, consolidated=False):
-		conditions = ""
-
 		doctype = self.filters.get("based_on")
-		child_doc = "%s Item" % doctype
+		sales_order_field = "sales_order" if doctype == "Sales Invoice" else "against_sales_order"
+
+		parent = frappe.qb.DocType(doctype)
+		child = frappe.qb.DocType(f"{doctype} Item")
+
+		query = (
+			frappe.qb.from_(child)
+			.from_(parent)
+			.select(
+				child.item_code,
+				child.item_name,
+				child.item_group,
+				child.qty,
+				child.rate,
+				child.amount,
+				child.so_detail,
+				child[sales_order_field].as_("sales_order"),
+				parent.shipping_address_name,
+				parent.po_no,
+				parent.customer,
+				parent.posting_date,
+				parent.name,
+				parent.grand_total,
+			)
+			.where(
+				(child.parent == parent.name)
+				& (parent.docstatus == 1)
+				& (parent.posting_date.between(self.filters.get("from_date"), self.filters.get("to_date")))
+				& (child[sales_order_field].notnull())
+				& (child[sales_order_field] != "")
+			)
+		)
 
 		if doctype == "Sales Invoice":
-			conditions = " and `tabSales Invoice`.update_stock = 1 and `tabSales Invoice`.is_pos = 0"
+			query = query.where((parent.update_stock == 1) & (parent.is_pos == 0))
 
 		if self.filters.get("item_group"):
-			conditions += " and `tab%s`.item_group = %s" % (
-				child_doc,
-				frappe.db.escape(self.filters.get("item_group")),
-			)
-
-		for field in ["customer", "customer_group", "company"]:
-			if self.filters.get(field):
-				conditions += " and `tab%s`.%s = %s" % (
-					doctype,
-					field,
-					frappe.db.escape(self.filters.get(field)),
-				)
-
-		sales_order_field = "against_sales_order"
-		if doctype == "Sales Invoice":
-			sales_order_field = "sales_order"
+			query = query.where(child.item_group == self.filters.get("item_group"))
 
 		if self.filters.get("sales_order"):
-			conditions = " and `tab%s`.%s = '%s'" % (
-				child_doc,
-				sales_order_field,
-				self.filters.get("sales_order"),
-			)
+			query = query.where(child[sales_order_field] == self.filters.get("sales_order"))
 
-		self.transactions = frappe.db.sql(
-			""" SELECT `tab{child_doc}`.item_code, `tab{child_doc}`.item_name,
-				`tab{child_doc}`.item_group, `tab{child_doc}`.qty, `tab{child_doc}`.rate, `tab{child_doc}`.amount,
-				`tab{child_doc}`.so_detail, `tab{child_doc}`.{so_field} as sales_order,
-				`tab{doctype}`.shipping_address_name, `tab{doctype}`.po_no, `tab{doctype}`.customer,
-				`tab{doctype}`.posting_date, `tab{doctype}`.name, `tab{doctype}`.grand_total
-			FROM `tab{child_doc}`, `tab{doctype}`
-			WHERE
-				`tab{child_doc}`.parent = `tab{doctype}`.name and `tab{doctype}`.docstatus = 1 and
-				`tab{doctype}`.posting_date between %(from_date)s and %(to_date)s and
-				`tab{child_doc}`.{so_field} is not null and `tab{child_doc}`.{so_field} != '' {cond}
-		""".format(
-				cond=conditions, doctype=doctype, child_doc=child_doc, so_field=sales_order_field
-			),
-			{"from_date": self.filters.get("from_date"), "to_date": self.filters.get("to_date")},
-			as_dict=1,
-		)
+		for field in ("customer", "customer_group", "company"):
+			if self.filters.get(field):
+				query = query.where(parent[field] == self.filters.get(field))
+
+		self.transactions = query.run(as_dict=True)
 
 		if self.transactions:
 			self.filter_transactions_data(consolidated)

@@ -90,7 +90,7 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 	gl_filters["dimensions"] = set(dimension_list)
 
 	if filters.get("include_default_book_entries"):
-		gl_filters["company_fb"] = frappe.db.get_value(
+		gl_filters["company_fb"] = frappe.get_cached_value(
 			"Company", filters.company, "default_finance_book"
 		)
 

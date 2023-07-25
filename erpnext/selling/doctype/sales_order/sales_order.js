@@ -1,7 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %}
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Sales Order");
+erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
@@ -47,19 +49,77 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
+
 	refresh: function(frm) {
-		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
-			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
-			frm.add_custom_button(__('Update Items'), () => {
-				erpnext.utils.update_child_items({
-					frm: frm,
-					child_docname: "items",
-					child_doctype: "Sales Order Detail",
-					cannot_add_row: false,
+		if(frm.doc.docstatus === 1) {
+			if (frm.doc.status !== 'Closed' && flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
+				frm.add_custom_button(__('Update Items'), () => {
+					erpnext.utils.update_child_items({
+						frm: frm,
+						child_docname: "items",
+						child_doctype: "Sales Order Detail",
+						cannot_add_row: false,
+					})
+				});
+
+				// Stock Reservation > Reserve button will be only visible if the SO has unreserved stock.
+				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					frm.add_custom_button(__('Reserve'), () => frm.events.create_stock_reservation_entries(frm), __('Stock Reservation'));
+				}
+			}
+
+			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
+			if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
+				frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
+			}
+		}
+
+		if (frm.doc.docstatus === 0) {
+			if (frm.doc.is_internal_customer) {
+				frm.events.get_items_from_internal_purchase_order(frm);
+			}
+
+			if (frm.is_new()) {
+				frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
+					if (value) {
+						frappe.db.get_single_value("Stock Settings", "reserve_stock_on_sales_order_submission").then((value) => {
+							// If `Reserve Stock on Sales Order Submission` is enabled in Stock Settings, set Reserve Stock to 1 else 0.
+							frm.set_value("reserve_stock", value ? 1 : 0);
+						})
+					} else {
+						// If `Stock Reservation` is disabled in Stock Settings, set Reserve Stock to 0 and read only.
+						frm.set_value("reserve_stock", 0);
+						frm.set_df_property("reserve_stock", "read_only", 1);
+					}
 				})
-			});
+			}
 		}
 	},
+
+	get_items_from_internal_purchase_order(frm) {
+		frm.add_custom_button(__('Purchase Order'), () => {
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order',
+				source_doctype: 'Purchase Order',
+				target: frm,
+				setters: [
+					{
+						label: 'Supplier',
+						fieldname: 'supplier',
+						fieldtype: 'Link',
+						options: 'Supplier'
+					}
+				],
+				get_query_filters: {
+					company: frm.doc.company,
+					is_internal_supplier: 1,
+					docstatus: 1,
+					status: ['!=', 'Completed']
+				}
+			});
+		}, __('Get Items From'));
+	},
+
 	onload: function(frm) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
@@ -95,6 +155,11 @@ frappe.ui.form.on("Sales Order", {
 			return query;
 		});
 
+		// On cancel and amending a sales order with advance payment, reset advance paid amount
+		if (frm.is_new()) {
+			frm.set_value("advance_paid", 0)
+		}
+
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
 
@@ -103,6 +168,108 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
+	},
+
+	create_stock_reservation_entries(frm) {
+		let items_data = [];
+
+		const dialog = frappe.prompt({fieldname: 'items', fieldtype: 'Table', label: __('Items to Reserve'),
+			fields: [
+				{
+					fieldtype: 'Data',
+					fieldname: 'name',
+					label: __('Name'),
+					reqd: 1,
+					read_only: 1,
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'item_code',
+					label: __('Item Code'),
+					options: 'Item',
+					reqd: 1,
+					read_only: 1,
+					in_list_view: 1,
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'warehouse',
+					label: __('Warehouse'),
+					options: 'Warehouse',
+					reqd: 1,
+					in_list_view: 1,
+					get_query: function () {
+						return {
+							filters: [
+								["Warehouse", "is_group", "!=", 1]
+							]
+						};
+					},
+				},
+				{
+					fieldtype: 'Float',
+					fieldname: 'qty_to_reserve',
+					label: __('Qty'),
+					reqd: 1,
+					in_list_view: 1
+				}
+			],
+			data: items_data,
+			in_place_edit: true,
+			get_data: function() {
+				return items_data;
+			}
+		}, function(data) {
+			if (data.items.length > 0) {
+				frappe.call({
+					doc: frm.doc,
+					method: 'create_stock_reservation_entries',
+					args: {
+						items_details: data.items,
+						notify: true
+					},
+					freeze: true,
+					freeze_message: __('Reserving Stock...'),
+					callback: (r) => {
+						frm.doc.__onload.has_unreserved_stock = false;
+						frm.reload_doc();
+					}
+				});
+			}
+		}, __("Stock Reservation"), __("Reserve Stock"));
+
+		frm.doc.items.forEach(item => {
+			if (item.reserve_stock) {
+				let unreserved_qty = (flt(item.stock_qty) - (flt(item.delivered_qty) * flt(item.conversion_factor)) - flt(item.stock_reserved_qty))
+
+				if (unreserved_qty > 0) {
+					dialog.fields_dict.items.df.data.push({
+						'name': item.name,
+						'item_code': item.item_code,
+						'warehouse': item.warehouse,
+						'qty_to_reserve': (unreserved_qty / flt(item.conversion_factor))
+					});
+				}
+			}
+		});
+
+		dialog.fields_dict.items.grid.refresh();
+	},
+
+	cancel_stock_reservation_entries(frm) {
+		frappe.call({
+			method: 'erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.cancel_stock_reservation_entries',
+			args: {
+				voucher_type: frm.doctype,
+				voucher_no: frm.docname
+			},
+			freeze: true,
+			freeze_message: __('Unreserving Stock...'),
+			callback: (r) => {
+				frm.doc.__onload.has_reserved_stock = false;
+				frm.reload_doc();
+			}
+		})
 	}
 });
 
@@ -230,7 +397,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 				}
 				// payment request
-				if(flt(doc.per_billed)<100) {
+				if(flt(doc.per_billed, precision('per_billed', doc)) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
 					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
 					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
 				}
@@ -241,7 +408,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Quotation'),
 				function() {
-					erpnext.utils.map_current_doc({
+					let d = erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
@@ -259,7 +426,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							docstatus: 1,
 							status: ["!=", "Lost"]
 						}
-					})
+					});
+
+					setTimeout(() => {
+						d.$parent.append(`
+							<span class='small text-muted'>
+								${__("Note: Please create Sales Orders from individual Quotations to select from among Alternative Items.")}
+							</span>
+					`);
+					}, 200);
+
 				}, __("Get Items From"));
 		}
 
@@ -275,9 +451,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_work_order() {
 		var me = this;
-		this.frm.call({
-			doc: this.frm.doc,
-			method: 'get_work_order_items',
+		me.frm.call({
+			method: "erpnext.selling.doctype.sales_order.sales_order.get_work_order_items",
+			args: {
+				sales_order: this.frm.docname,
+			},
+			freeze: true,
 			callback: function(r) {
 				if(!r.message) {
 					frappe.msgprint({
@@ -287,14 +466,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					});
 					return;
 				}
-				else if(!r.message) {
-					frappe.msgprint({
-						title: __('Work Order not created'),
-						message: __('Work Order already created for all items with BOM'),
-						indicator: 'orange'
-					});
-					return;
-				} else {
+				else {
 					const fields = [{
 						label: 'Items',
 						fieldtype: 'Table',
@@ -395,9 +567,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	make_raw_material_request() {
 		var me = this;
 		this.frm.call({
-			doc: this.frm.doc,
-			method: 'get_work_order_items',
+			method: "erpnext.selling.doctype.sales_order.sales_order.get_work_order_items",
 			args: {
+				sales_order: this.frm.docname,
 				for_raw_material_request: 1
 			},
 			callback: function(r) {
@@ -416,6 +588,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	make_raw_material_request_dialog(r) {
+		var me = this;
 		var fields = [
 			{fieldtype:'Check', fieldname:'include_exploded_items',
 				label: __('Include Exploded Items')},
@@ -643,7 +816,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				var method = args.against_default_supplier ? "make_purchase_order_for_default_supplier" : "make_purchase_order"
 				return frappe.call({
 					method: "erpnext.selling.doctype.sales_order.sales_order." + method,
-					freeze: true,
 					freeze_message: __("Creating Purchase Order ..."),
 					args: {
 						"source_name": me.frm.doc.name,

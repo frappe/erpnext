@@ -100,7 +100,7 @@ frappe.ui.form.on("Bank Statement Import", {
 
 		if (frm.doc.status.includes("Success")) {
 			frm.add_custom_button(
-				__("Go to {0} List", [frm.doc.reference_doctype]),
+				__("Go to {0} List", [__(frm.doc.reference_doctype)]),
 				() => frappe.set_route("List", frm.doc.reference_doctype)
 			);
 		}
@@ -141,7 +141,7 @@ frappe.ui.form.on("Bank Statement Import", {
 	},
 
 	show_import_status(frm) {
-		let import_log = JSON.parse(frm.doc.import_log || "[]");
+		let import_log = JSON.parse(frm.doc.statement_import_log || "[]");
 		let successful_records = import_log.filter((log) => log.success);
 		let failed_records = import_log.filter((log) => !log.success);
 		if (successful_records.length === 0) return;
@@ -309,7 +309,7 @@ frappe.ui.form.on("Bank Statement Import", {
 	// method: 'frappe.core.doctype.data_import.data_import.get_preview_from_template',
 
 	show_import_preview(frm, preview_data) {
-		let import_log = JSON.parse(frm.doc.import_log || "[]");
+		let import_log = JSON.parse(frm.doc.statement_import_log || "[]");
 
 		if (
 			frm.import_preview &&
@@ -439,7 +439,7 @@ frappe.ui.form.on("Bank Statement Import", {
 	},
 
 	show_import_log(frm) {
-		let import_log = JSON.parse(frm.doc.import_log || "[]");
+		let import_log = JSON.parse(frm.doc.statement_import_log || "[]");
 		let logs = import_log;
 		frm.toggle_display("import_log", false);
 		frm.toggle_display("import_log_section", logs.length > 0);

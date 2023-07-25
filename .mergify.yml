@@ -9,6 +9,9 @@ pull_request_rules:
           - author!=nabinhait
           - author!=ankush
           - author!=deepeshgarg007
+          - author!=frappe-pr-bot
+          - author!=mergify[bot]
+
         - or:
           - base=version-13
           - base=version-12
@@ -18,6 +21,16 @@ pull_request_rules:
           message: |
             @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
             https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
+
+  - name: Auto-close PRs on pre-release branch
+    conditions:
+      - base=version-13-pre-release
+    actions:
+      close:
+      comment:
+          message: |
+            @{{author}}, pre-release branch is not maintained anymore. Releases are directly done by merging hotfix branch to stable branches.
+
 
   - name: backport to develop
     conditions:

@@ -1,1 +1,0 @@
-Attendance record of an Employee on a particular date.

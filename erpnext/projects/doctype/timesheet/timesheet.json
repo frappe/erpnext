@@ -16,7 +16,6 @@
   "exchange_rate",
   "sales_invoice",
   "column_break_3",
-  "salary_slip",
   "status",
   "parent_project",
   "employee_detail",
@@ -86,15 +85,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "salary_slip",
-   "fieldtype": "Link",
-   "label": "Salary Slip",
-   "no_copy": 1,
-   "options": "Salary Slip",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -106,7 +96,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.work_order || doc.docstatus == 1",
    "fieldname": "employee_detail",
    "fieldtype": "Section Break",
    "label": "Employee Detail"
@@ -120,6 +109,7 @@
   },
   {
    "depends_on": "employee",
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -291,21 +281,21 @@
   {
    "fieldname": "base_total_costing_amount",
    "fieldtype": "Currency",
-   "label": "Total Costing Amount",
+   "label": "Base Total Costing Amount",
    "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "base_total_billable_amount",
    "fieldtype": "Currency",
-   "label": "Total Billable Amount",
+   "label": "Base Total Billable Amount",
    "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "base_total_billed_amount",
    "fieldtype": "Currency",
-   "label": "Total Billed Amount",
+   "label": "Base Total Billed Amount",
    "print_hide": 1,
    "read_only": 1
   },
@@ -320,10 +310,11 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-09 12:08:53.930200",
+ "modified": "2023-04-20 15:59:11.107831",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -397,5 +388,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "title"
 }

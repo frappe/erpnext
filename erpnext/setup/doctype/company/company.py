@@ -10,8 +10,9 @@ from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cint, formatdate, get_timestamp, today
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
@@ -69,9 +70,6 @@ class Company(NestedSet):
 
 		self.abbr = self.abbr.strip()
 
-		# if self.get('__islocal') and len(self.abbr) > 5:
-		# 	frappe.throw(_("Abbreviation cannot have more than 5 characters"))
-
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
@@ -95,7 +93,6 @@ class Company(NestedSet):
 			["Stock Received But Not Billed Account", "stock_received_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
 			["Expense Included In Valuation Account", "expenses_included_in_valuation"],
-			["Default Payroll Payable Account", "default_payroll_payable_account"],
 		]
 
 		for account in accounts:
@@ -150,9 +147,7 @@ class Company(NestedSet):
 			self.create_default_tax_template()
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
-			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
-
-			install_post_company_fixtures(frappe._dict({"company_name": self.name}))
+			self.create_default_departments()
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
@@ -209,20 +204,117 @@ class Company(NestedSet):
 		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
-		frappe.db.set(
-			self,
+		self.db_set(
 			"default_receivable_account",
 			frappe.db.get_value(
 				"Account", {"company": self.name, "account_type": "Receivable", "is_group": 0}
 			),
 		)
-		frappe.db.set(
-			self,
+
+		self.db_set(
 			"default_payable_account",
 			frappe.db.get_value(
 				"Account", {"company": self.name, "account_type": "Payable", "is_group": 0}
 			),
 		)
+
+	def create_default_departments(self):
+		records = [
+			# Department
+			{
+				"doctype": "Department",
+				"department_name": _("All Departments"),
+				"is_group": 1,
+				"parent_department": "",
+				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Accounts"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Marketing"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Sales"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Purchase"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Operations"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Production"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Dispatch"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Customer Service"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Human Resources"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Management"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Quality Management"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Research & Development"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Legal"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+		]
+
+		# Make root department with NSM updation
+		make_records(records[:1])
+
+		frappe.local.flags.ignore_update_nsm = True
+		make_records(records)
+		frappe.local.flags.ignore_update_nsm = False
+		rebuild_tree("Department", "parent_department")
 
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":
@@ -293,6 +385,7 @@ class Company(NestedSet):
 			"capital_work_in_progress_account": "Capital Work in Progress",
 			"asset_received_but_not_billed": "Asset Received But Not Billed",
 			"expenses_included_in_asset_valuation": "Expenses Included In Asset Valuation",
+			"default_expense_account": "Cost of Goods Sold",
 		}
 
 		if self.enable_perpetual_inventory:
@@ -302,7 +395,6 @@ class Company(NestedSet):
 					"default_inventory_account": "Stock",
 					"stock_adjustment_account": "Stock Adjustment",
 					"expenses_included_in_valuation": "Expenses Included In Valuation",
-					"default_expense_account": "Cost of Goods Sold",
 				}
 			)
 
@@ -324,20 +416,6 @@ class Company(NestedSet):
 
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
-
-		if not self.default_payroll_payable_account:
-			payroll_payable_account = frappe.db.get_value(
-				"Account", {"account_name": _("Payroll Payable"), "company": self.name, "is_group": 0}
-			)
-
-			self.db_set("default_payroll_payable_account", payroll_payable_account)
-
-		if not self.default_employee_advance_account:
-			employe_advance_account = frappe.db.get_value(
-				"Account", {"account_name": _("Employee Advances"), "company": self.name, "is_group": 0}
-			)
-
-			self.db_set("default_employee_advance_account", employe_advance_account)
 
 		if not self.write_off_account:
 			write_off_acct = frappe.db.get_value(
@@ -409,12 +487,12 @@ class Company(NestedSet):
 				cc_doc.flags.ignore_mandatory = True
 			cc_doc.insert()
 
-		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
-		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
-		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
+		self.db_set("cost_center", _("Main") + " - " + self.abbr)
+		self.db_set("round_off_cost_center", _("Main") + " - " + self.abbr)
+		self.db_set("depreciation_cost_center", _("Main") + " - " + self.abbr)
 
 	def after_rename(self, olddn, newdn, merge=False):
-		frappe.db.set(self, "company_name", newdn)
+		self.db_set("company_name", newdn)
 
 		frappe.db.sql(
 			"""update `tabDefaultValue` set defvalue=%s
@@ -464,7 +542,7 @@ class Company(NestedSet):
 
 		# reset default company
 		frappe.db.sql(
-			"""update `tabSingles` set value=""
+			"""update `tabSingles` set value=''
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""",
 			self.name,
@@ -472,7 +550,7 @@ class Company(NestedSet):
 
 		# reset default company
 		frappe.db.sql(
-			"""update `tabSingles` set value=""
+			"""update `tabSingles` set value=''
 			where doctype='Chart of Accounts Importer' and field='company'
 			and value=%s""",
 			self.name,
@@ -608,11 +686,11 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 			name as value,
 			is_group as expandable
 		from
-			`tab{doctype}` comp
+			`tabCompany` comp
 		where
 			ifnull(parent_company, "")={parent}
 		""".format(
-			doctype=doctype, parent=frappe.db.escape(parent)
+			parent=frappe.db.escape(parent)
 		),
 		as_dict=1,
 	)
@@ -730,7 +808,7 @@ def get_default_company_address(name, sort_key="is_primary_address", existing_ad
 			return existing_address
 
 	if out:
-		return min(out, key=lambda x: x[1])[0]  # find min by sort_key
+		return max(out, key=lambda x: x[1])[0]  # find max by sort_key
 	else:
 		return None
 

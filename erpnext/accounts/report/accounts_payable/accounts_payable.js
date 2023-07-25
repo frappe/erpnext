@@ -51,6 +51,8 @@ frappe.query_reports["Accounts Payable"] = {
 				} else {
 					frappe.query_report.set_filter_value('tax_id', "");
 				}
+
+				frappe.query_report.refresh();
 			}
 		},
 		{
@@ -136,6 +138,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
+		},
+		{
+			"fieldname": "show_future_payments",
+			"label": __("Show Future Payments"),
+			"fieldtype": "Check",
 		}
 	],
 

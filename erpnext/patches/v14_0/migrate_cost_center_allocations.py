@@ -18,9 +18,11 @@ def create_new_cost_center_allocation_records(cc_allocations):
 		cca = frappe.new_doc("Cost Center Allocation")
 		cca.main_cost_center = main_cc
 		cca.valid_from = today()
+		cca._skip_from_date_validation = True
 
 		for child_cc, percentage in allocations.items():
 			cca.append("allocation_percentages", ({"cost_center": child_cc, "percentage": percentage}))
+
 		cca.save()
 		cca.submit()
 

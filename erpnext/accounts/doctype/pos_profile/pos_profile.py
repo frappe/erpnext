@@ -173,7 +173,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		where
 			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
 			and (pf.name like %(txt)s)
-			and pf.disabled = 0 limit %(start)s, %(page_len)s""",
+			and pf.disabled = 0 limit %(page_len)s offset %(start)s""",
 		args,
 	)
 

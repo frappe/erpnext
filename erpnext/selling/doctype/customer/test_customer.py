@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
@@ -341,6 +342,37 @@ class TestCustomer(FrappeTestCase):
 		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer")
 		self.assertEqual(due_date, "2017-01-22")
 
+	def test_serach_fields_for_customer(self):
+		from erpnext.controllers.queries import customer_query
+
+		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Naming Series")
+
+		make_property_setter(
+			"Customer", None, "search_fields", "customer_group", "Data", for_doctype="Doctype"
+		)
+
+		data = customer_query(
+			"Customer", "_Test Customer", "", 0, 20, filters={"name": "_Test Customer"}, as_dict=True
+		)
+
+		self.assertEqual(data[0].name, "_Test Customer")
+		self.assertEqual(data[0].customer_group, "_Test Customer Group")
+		self.assertTrue("territory" not in data[0])
+
+		make_property_setter(
+			"Customer", None, "search_fields", "customer_group, territory", "Data", for_doctype="Doctype"
+		)
+		data = customer_query(
+			"Customer", "_Test Customer", "", 0, 20, filters={"name": "_Test Customer"}, as_dict=True
+		)
+
+		self.assertEqual(data[0].name, "_Test Customer")
+		self.assertEqual(data[0].customer_group, "_Test Customer Group")
+		self.assertEqual(data[0].territory, "_Test Territory")
+		self.assertTrue("territory" in data[0])
+
+		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Customer Name")
+
 
 def get_customer_dict(customer_name):
 	return {
@@ -374,6 +406,12 @@ def create_internal_customer(
 		customer_name = represents_company
 	if not allowed_to_interact_with:
 		allowed_to_interact_with = represents_company
+
+	exisiting_representative = frappe.db.get_value(
+		"Customer", {"represents_company": represents_company}
+	)
+	if exisiting_representative:
+		return exisiting_representative
 
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc(

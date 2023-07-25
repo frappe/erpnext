@@ -168,7 +168,7 @@ class Analytics(object):
 	def get_sales_transactions_based_on_items(self):
 
 		if self.filters["value_quantity"] == "Value":
-			value_field = "base_amount"
+			value_field = "base_net_amount"
 		else:
 			value_field = "stock_qty"
 
@@ -216,7 +216,7 @@ class Analytics(object):
 
 	def get_sales_transactions_based_on_item_group(self):
 		if self.filters["value_quantity"] == "Value":
-			value_field = "base_amount"
+			value_field = "base_net_amount"
 		else:
 			value_field = "qty"
 
@@ -313,11 +313,13 @@ class Analytics(object):
 
 	def get_period(self, posting_date):
 		if self.filters.range == "Weekly":
-			period = "Week " + str(posting_date.isocalendar()[1]) + " " + str(posting_date.year)
+			period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
 		elif self.filters.range == "Monthly":
-			period = str(self.months[posting_date.month - 1]) + " " + str(posting_date.year)
+			period = _(str(self.months[posting_date.month - 1])) + " " + str(posting_date.year)
 		elif self.filters.range == "Quarterly":
-			period = "Quarter " + str(((posting_date.month - 1) // 3) + 1) + " " + str(posting_date.year)
+			period = _("Quarter {0} {1}").format(
+				str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
+			)
 		else:
 			year = get_fiscal_year(posting_date, company=self.filters.company)
 			period = str(year[0])

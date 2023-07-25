@@ -11,6 +11,7 @@
   "period_end_date",
   "column_break_3",
   "posting_date",
+  "posting_time",
   "pos_opening_entry",
   "status",
   "section_break_5",
@@ -51,7 +52,6 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Period End Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -219,6 +219,13 @@
    "fieldtype": "Small Text",
    "label": "Error",
    "read_only": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
@@ -228,10 +235,11 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2021-10-20 16:19:25.340565",
+ "modified": "2022-08-01 11:37:14.991228",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -278,5 +286,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

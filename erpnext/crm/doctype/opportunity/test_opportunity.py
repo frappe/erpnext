@@ -53,9 +53,7 @@ class TestOpportunity(unittest.TestCase):
 		self.assertEqual(opportunity_doc.total, 2200)
 
 	def test_carry_forward_of_email_and_comments(self):
-		frappe.db.set_value(
-			"CRM Settings", "CRM Settings", "carry_forward_communication_and_comments", 1
-		)
+		frappe.db.set_single_value("CRM Settings", "carry_forward_communication_and_comments", 1)
 		lead_doc = make_lead()
 		lead_doc.add_comment("Comment", text="Test Comment 1")
 		lead_doc.add_comment("Comment", text="Test Comment 2")
@@ -76,42 +74,6 @@ class TestOpportunity(unittest.TestCase):
 		opp_doc.add_comment("Comment", text="Test Comment 4")
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
-
-		quotation_doc = make_quotation(opp_doc.name)
-		quotation_doc.append("items", {"item_code": "_Test Item", "qty": 1})
-		quotation_doc.run_method("set_missing_values")
-		quotation_doc.run_method("calculate_taxes_and_totals")
-		quotation_doc.save()
-
-		quotation_comment_count = frappe.db.count(
-			"Comment",
-			{
-				"reference_doctype": quotation_doc.doctype,
-				"reference_name": quotation_doc.name,
-				"comment_type": "Comment",
-			},
-		)
-		quotation_communication_count = len(
-			get_linked_communication_list(quotation_doc.doctype, quotation_doc.name)
-		)
-		self.assertEqual(quotation_comment_count, 4)
-		self.assertEqual(quotation_communication_count, 4)
-
-	def test_render_template_for_to_discuss(self):
-		doc = make_opportunity(with_items=0, opportunity_from="Lead")
-		doc.contact_by = "test@example.com"
-		doc.contact_date = add_days(today(), days=2)
-		doc.to_discuss = "{{ doc.name }} test data"
-		doc.save()
-
-		event = frappe.get_all(
-			"Event Participants",
-			fields=["parent"],
-			filters={"reference_doctype": doc.doctype, "reference_docname": doc.name},
-		)
-
-		event_description = frappe.db.get_value("Event", event[0].parent, "description")
-		self.assertTrue(doc.name in event_description)
 
 
 def make_opportunity_from_lead():
@@ -139,7 +101,6 @@ def make_opportunity(**args):
 			"opportunity_from": args.opportunity_from or "Customer",
 			"opportunity_type": "Sales",
 			"conversion_rate": 1.0,
-			"with_items": args.with_items or 0,
 			"transaction_date": today(),
 		}
 	)

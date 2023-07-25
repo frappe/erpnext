@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
-  "barcode_type"
+  "barcode_type",
+  "uom"
  ],
  "fields": [
   {
@@ -16,6 +17,7 @@
    "in_list_view": 1,
    "label": "Barcode",
    "no_copy": 1,
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -23,12 +25,19 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Barcode Type",
-   "options": "\nEAN\nUPC-A"
+   "options": "\nEAN\nUPC-A\nCODE-39\nEAN-12\nEAN-8\nGS1\nGTIN\nISBN\nISBN-10\nISBN-13\nISSN\nJAN\nPZN\nUPC"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-04-01 05:54:27.314030",
+ "modified": "2022-08-24 19:59:47.871677",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Barcode",

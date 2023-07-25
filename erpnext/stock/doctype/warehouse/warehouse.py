@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from collections import defaultdict
-
 import frappe
 from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils import cint, flt
+from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock import get_warehouse_account
 
@@ -161,65 +160,11 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 
 	fields = ["name as value", "is_group as expandable"]
 	filters = [
-		["docstatus", "<", "2"],
-		['ifnull(`parent_warehouse`, "")', "=", parent],
+		["ifnull(`parent_warehouse`, '')", "=", parent],
 		["company", "in", (company, None, "")],
 	]
 
-	warehouses = frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
-
-	company_currency = ""
-	if company:
-		company_currency = frappe.get_cached_value("Company", company, "default_currency")
-
-	warehouse_wise_value = get_warehouse_wise_stock_value(company)
-
-	# return warehouses
-	for wh in warehouses:
-		wh["balance"] = warehouse_wise_value.get(wh.value)
-		if company_currency:
-			wh["company_currency"] = company_currency
-	return warehouses
-
-
-def get_warehouse_wise_stock_value(company):
-	warehouses = frappe.get_all(
-		"Warehouse", fields=["name", "parent_warehouse"], filters={"company": company}
-	)
-	parent_warehouse = {d.name: d.parent_warehouse for d in warehouses}
-
-	filters = {"warehouse": ("in", [data.name for data in warehouses])}
-	bin_data = frappe.get_all(
-		"Bin",
-		fields=["sum(stock_value) as stock_value", "warehouse"],
-		filters=filters,
-		group_by="warehouse",
-	)
-
-	warehouse_wise_stock_value = defaultdict(float)
-	for row in bin_data:
-		if not row.stock_value:
-			continue
-
-		warehouse_wise_stock_value[row.warehouse] = row.stock_value
-		update_value_in_parent_warehouse(
-			warehouse_wise_stock_value, parent_warehouse, row.warehouse, row.stock_value
-		)
-
-	return warehouse_wise_stock_value
-
-
-def update_value_in_parent_warehouse(
-	warehouse_wise_stock_value, parent_warehouse_dict, warehouse, stock_value
-):
-	parent_warehouse = parent_warehouse_dict.get(warehouse)
-	if not parent_warehouse:
-		return
-
-	warehouse_wise_stock_value[parent_warehouse] += flt(stock_value)
-	update_value_in_parent_warehouse(
-		warehouse_wise_stock_value, parent_warehouse_dict, parent_warehouse, stock_value
-	)
+	return frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
 
 
 @frappe.whitelist()
@@ -267,3 +212,23 @@ def get_warehouses_based_on_account(account, company=None):
 		frappe.throw(_("Warehouse not found against the account {0}").format(account))
 
 	return warehouses
+
+
+# Will be use for frappe.qb
+def apply_warehouse_filter(query, sle, filters):
+	if warehouse := filters.get("warehouse"):
+		warehouse_table = frappe.qb.DocType("Warehouse")
+
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		chilren_subquery = (
+			frappe.qb.from_(warehouse_table)
+			.select(warehouse_table.name)
+			.where(
+				(warehouse_table.lft >= lft)
+				& (warehouse_table.rgt <= rgt)
+				& (warehouse_table.name == sle.warehouse)
+			)
+		)
+		query = query.where(ExistsCriterion(chilren_subquery))
+
+	return query

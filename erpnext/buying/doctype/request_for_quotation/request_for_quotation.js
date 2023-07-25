@@ -1,10 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-{% include 'erpnext/public/js/controllers/buying.js' %};
-
 cur_frm.add_fetch('contact', 'email_id', 'email_id')
+
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
@@ -15,10 +14,20 @@ frappe.ui.form.on("Request for Quotation",{
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
 			return {
-				query: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_contacts",
-				filters: {'supplier': d.supplier}
-			}
+				query: "frappe.contacts.doctype.contact.contact.contact_query",
+				filters: {
+					link_doctype: "Supplier",
+					link_name: d.supplier || ""
+				}
+			};
 		}
+
+		frm.set_query('warehouse', 'items', () => ({
+			filters: {
+				company: frm.doc.company,
+				is_group: 0
+			}
+		}));
 	},
 
 	onload: function(frm) {
@@ -47,44 +56,95 @@ frappe.ui.form.on("Request for Quotation",{
 				});
 			}, __("Tools"));
 
-			frm.add_custom_button(__('Download PDF'), () => {
-				var suppliers = [];
-				const fields = [{
-					fieldtype: 'Link',
-					label: __('Select a Supplier'),
-					fieldname: 'supplier',
-					options: 'Supplier',
-					reqd: 1,
-					get_query: () => {
-						return {
-							filters: [
-								["Supplier", "name", "in", frm.doc.suppliers.map((row) => {return row.supplier;})]
-							]
-						}
-					}
-				}];
-
-				frappe.prompt(fields, data => {
-					var child = locals[cdt][cdn]
-
-					var w = window.open(
-						frappe.urllib.get_full_url("/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?"
-						+"doctype="+encodeURIComponent(frm.doc.doctype)
-						+"&name="+encodeURIComponent(frm.doc.name)
-						+"&supplier="+encodeURIComponent(data.supplier)
-						+"&no_letterhead=0"));
-					if(!w) {
-						frappe.msgprint(__("Please enable pop-ups")); return;
-					}
+			frm.add_custom_button(
+				__("Download PDF"),
+				() => {
+					frappe.prompt(
+						[
+							{
+								fieldtype: "Link",
+								label: "Select a Supplier",
+								fieldname: "supplier",
+								options: "Supplier",
+								reqd: 1,
+								default: frm.doc.suppliers?.length == 1 ? frm.doc.suppliers[0].supplier : "",
+								get_query: () => {
+									return {
+										filters: [
+											[
+												"Supplier",
+												"name",
+												"in",
+												frm.doc.suppliers.map((row) => {
+													return row.supplier;
+												}),
+											],
+										],
+									};
+								},
+							},
+							{
+								fieldtype: "Section Break",
+								label: "Print Settings",
+								fieldname: "print_settings",
+								collapsible: 1,
+							},
+							{
+								fieldtype: "Link",
+								label: "Print Format",
+								fieldname: "print_format",
+								options: "Print Format",
+								placeholder: "Standard",
+								get_query: () => {
+									return {
+										filters: {
+											doc_type: "Request for Quotation",
+										},
+									};
+								},
+							},
+							{
+								fieldtype: "Link",
+								label: "Language",
+								fieldname: "language",
+								options: "Language",
+								default: frappe.boot.lang,
+							},
+							{
+								fieldtype: "Link",
+								label: "Letter Head",
+								fieldname: "letter_head",
+								options: "Letter Head",
+								default: frm.doc.letter_head,
+							},
+						],
+						(data) => {
+							var w = window.open(
+								frappe.urllib.get_full_url(
+									"/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?" +
+									new URLSearchParams({
+										name: frm.doc.name,
+										supplier: data.supplier,
+										print_format: data.print_format || "Standard",
+										language: data.language || frappe.boot.lang,
+										letterhead: data.letter_head || frm.doc.letter_head || "",
+									}).toString()
+								)
+							);
+							if (!w) {
+								frappe.msgprint(__("Please enable pop-ups"));
+								return;
+							}
+						},
+						"Download PDF for Supplier",
+						"Download"
+					);
 				},
-				'Download PDF for Supplier',
-				'Download');
-			},
-			__("Tools"));
+				__("Tools")
+			);
 
-			frm.page.set_inner_btn_group_as_primary(__('Create'));
+			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
-
 	},
 
 	make_supplier_quotation: function(frm) {
@@ -375,7 +435,7 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 
 				//Remove blanks
 				for (var j = 0; j < frm.doc.suppliers.length; j++) {
-					if(!frm.doc.suppliers[j].hasOwnProperty("supplier")) {
+					if(!Object.prototype.hasOwnProperty.call(frm.doc.suppliers[j], "supplier")) {
 						frm.get_field("suppliers").grid.grid_rows[j].remove();
 					}
 				}
@@ -384,10 +444,11 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 					if(r.message) {
 						for (var i = 0; i < r.message.length; i++) {
 							var exists = false;
+							let supplier = "";
 							if (r.message[i].constructor === Array){
-								var supplier = r.message[i][0];
+								supplier = r.message[i][0];
 							} else {
-								var supplier = r.message[i].name;
+								supplier = r.message[i].name;
 							}
 
 							for (var j = 0; j < doc.suppliers.length;j++) {

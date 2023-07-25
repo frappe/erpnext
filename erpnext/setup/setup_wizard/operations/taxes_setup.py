@@ -158,6 +158,7 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
+	doc.flags.ignore_mandatory = True
 	doc.insert(ignore_permissions=True)
 	return doc
 

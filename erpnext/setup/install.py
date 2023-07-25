@@ -2,15 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import click
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-from frappe.installer import update_site_config
 from frappe.utils import cint
 
-from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
+import erpnext
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 
 from .default_success_action import get_default_success_action
 
@@ -23,13 +24,15 @@ def after_install():
 	set_single_defaults()
 	create_print_setting_custom_fields()
 	add_all_roles_to("Administrator")
-	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
 	create_default_energy_point_rules()
+	create_incoterms()
+	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
-	add_non_standard_user_types()
+	setup_log_settings()
+	hide_workspaces()
 	frappe.db.commit()
 
 
@@ -40,11 +43,29 @@ You can reinstall this site (after saving your data) using: bench --site [sitena
 		frappe.throw(message)  # nosemgrep
 
 
+def check_frappe_version():
+	def major_version(v: str) -> str:
+		return v.split(".")[0]
+
+	frappe_version = major_version(frappe.__version__)
+	erpnext_version = major_version(erpnext.__version__)
+
+	if frappe_version == erpnext_version:
+		return
+
+	click.secho(
+		f"You're attempting to install ERPNext version {erpnext_version} with Frappe version {frappe_version}. "
+		"This is not supported and will result in broken install. Switch to correct branch before installing.",
+		fg="red",
+	)
+
+	raise SystemExit(1)
+
+
 def set_single_defaults():
 	for dt in (
 		"Accounts Settings",
 		"Print Settings",
-		"HR Settings",
 		"Buying Settings",
 		"Selling Settings",
 		"Stock Settings",
@@ -86,43 +107,33 @@ def setup_currency_exchange():
 
 
 def create_print_setting_custom_fields():
-	create_custom_field(
-		"Print Settings",
+	create_custom_fields(
 		{
-			"label": _("Compact Item Print"),
-			"fieldname": "compact_item_print",
-			"fieldtype": "Check",
-			"default": 1,
-			"insert_after": "with_letterhead",
-		},
+			"Print Settings": [
+				{
+					"label": _("Compact Item Print"),
+					"fieldname": "compact_item_print",
+					"fieldtype": "Check",
+					"default": "1",
+					"insert_after": "with_letterhead",
+				},
+				{
+					"label": _("Print UOM after Quantity"),
+					"fieldname": "print_uom_after_quantity",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "compact_item_print",
+				},
+				{
+					"label": _("Print taxes with zero amount"),
+					"fieldname": "print_taxes_with_zero_amount",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "allow_print_for_cancelled",
+				},
+			]
+		}
 	)
-	create_custom_field(
-		"Print Settings",
-		{
-			"label": _("Print UOM after Quantity"),
-			"fieldname": "print_uom_after_quantity",
-			"fieldtype": "Check",
-			"default": 0,
-			"insert_after": "compact_item_print",
-		},
-	)
-	create_custom_field(
-		"Print Settings",
-		{
-			"label": _("Print taxes with zero amount"),
-			"fieldname": "print_taxes_with_zero_amount",
-			"fieldtype": "Check",
-			"default": 0,
-			"insert_after": "allow_print_for_cancelled",
-		},
-	)
-
-
-def create_default_cash_flow_mapper_templates():
-	for mapper in DEFAULT_MAPPERS:
-		if not frappe.db.exists("Cash Flow Mapper", mapper["section_name"]):
-			doc = frappe.get_doc(mapper)
-			doc.insert(ignore_permissions=True)
 
 
 def create_default_success_action():
@@ -158,13 +169,19 @@ def add_standard_navbar_items():
 		{
 			"item_label": "Documentation",
 			"item_type": "Route",
-			"route": "https://erpnext.com/docs/user/manual",
+			"route": "https://docs.erpnext.com/",
 			"is_standard": 1,
 		},
 		{
 			"item_label": "User Forum",
 			"item_type": "Route",
-			"route": "https://discuss.erpnext.com",
+			"route": "https://discuss.frappe.io",
+			"is_standard": 1,
+		},
+		{
+			"item_label": "Frappe School",
+			"item_type": "Route",
+			"route": "https://frappe.school?utm_source=in_app",
 			"is_standard": 1,
 		},
 		{
@@ -200,105 +217,55 @@ def add_standard_navbar_items():
 
 
 def add_app_name():
-	frappe.db.set_value("System Settings", None, "app_name", "ERPNext")
+	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
 
 
-def add_non_standard_user_types():
-	user_types = get_user_types_data()
+def setup_log_settings():
+	log_settings = frappe.get_single("Log Settings")
+	log_settings.append("logs_to_clear", {"ref_doctype": "Repost Item Valuation", "days": 60})
 
-	user_type_limit = {}
-	for user_type, data in user_types.items():
-		user_type_limit.setdefault(frappe.scrub(user_type), 20)
-
-	update_site_config("user_type_doctype_limit", user_type_limit)
-
-	for user_type, data in user_types.items():
-		create_custom_role(data)
-		create_user_type(user_type, data)
+	log_settings.save(ignore_permissions=True)
 
 
-def get_user_types_data():
-	return {
-		"Employee Self Service": {
-			"role": "Employee Self Service",
-			"apply_user_permission_on": "Employee",
-			"user_id_field": "user_id",
-			"doctypes": {
-				# masters
-				"Holiday List": ["read"],
-				"Employee": ["read", "write"],
-				# payroll
-				"Salary Slip": ["read"],
-				"Employee Benefit Application": ["read", "write", "create", "delete"],
-				# expenses
-				"Expense Claim": ["read", "write", "create", "delete"],
-				"Employee Advance": ["read", "write", "create", "delete"],
-				# leave and attendance
-				"Leave Application": ["read", "write", "create", "delete"],
-				"Attendance Request": ["read", "write", "create", "delete"],
-				"Compensatory Leave Request": ["read", "write", "create", "delete"],
-				# tax
-				"Employee Tax Exemption Declaration": ["read", "write", "create", "delete"],
-				"Employee Tax Exemption Proof Submission": ["read", "write", "create", "delete"],
-				# projects
-				"Timesheet": ["read", "write", "create", "delete", "submit", "cancel", "amend"],
-				# trainings
-				"Training Program": ["read"],
-				"Training Feedback": ["read", "write", "create", "delete", "submit", "cancel", "amend"],
-				# shifts
-				"Shift Request": ["read", "write", "create", "delete", "submit", "cancel", "amend"],
-				# misc
-				"Employee Grievance": ["read", "write", "create", "delete"],
-				"Employee Referral": ["read", "write", "create", "delete"],
-				"Travel Request": ["read", "write", "create", "delete"],
-			},
-		}
-	}
+def hide_workspaces():
+	for ws in ["Integration", "Settings"]:
+		frappe.db.set_value("Workspace", ws, "public", 0)
 
 
-def create_custom_role(data):
-	if data.get("role") and not frappe.db.exists("Role", data.get("role")):
-		frappe.get_doc(
-			{"doctype": "Role", "role_name": data.get("role"), "desk_access": 1, "is_custom": 1}
-		).insert(ignore_permissions=True)
+def create_default_role_profiles():
+	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		role_profile = frappe.new_doc("Role Profile")
+		role_profile.role_profile = role_profile_name
+		for role in roles:
+			role_profile.append("roles", {"role": role})
+
+		role_profile.insert(ignore_permissions=True)
 
 
-def create_user_type(user_type, data):
-	if frappe.db.exists("User Type", user_type):
-		doc = frappe.get_cached_doc("User Type", user_type)
-		doc.user_doctypes = []
-	else:
-		doc = frappe.new_doc("User Type")
-		doc.update(
-			{
-				"name": user_type,
-				"role": data.get("role"),
-				"user_id_field": data.get("user_id_field"),
-				"apply_user_permission_on": data.get("apply_user_permission_on"),
-			}
-		)
-
-	create_role_permissions_for_doctype(doc, data)
-	doc.save(ignore_permissions=True)
-
-
-def create_role_permissions_for_doctype(doc, data):
-	for doctype, perms in data.get("doctypes").items():
-		args = {"document_type": doctype}
-		for perm in perms:
-			args[perm] = 1
-
-		doc.append("user_doctypes", args)
-
-
-def update_select_perm_after_install():
-	if not frappe.flags.update_select_perm_after_migrate:
-		return
-
-	frappe.flags.ignore_select_perm = False
-	for row in frappe.get_all("User Type", filters={"is_standard": 0}):
-		print("Updating user type :- ", row.name)
-		doc = frappe.get_doc("User Type", row.name)
-		doc.save()
-
-	frappe.flags.update_select_perm_after_migrate = False
+DEFAULT_ROLE_PROFILES = {
+	"Inventory": [
+		"Stock User",
+		"Stock Manager",
+		"Item Manager",
+	],
+	"Manufacturing": [
+		"Stock User",
+		"Manufacturing User",
+		"Manufacturing Manager",
+	],
+	"Accounts": [
+		"Accounts User",
+		"Accounts Manager",
+	],
+	"Sales": [
+		"Sales User",
+		"Stock User",
+		"Sales Manager",
+	],
+	"Purchase": [
+		"Item Manager",
+		"Stock User",
+		"Purchase User",
+		"Purchase Manager",
+	],
+}

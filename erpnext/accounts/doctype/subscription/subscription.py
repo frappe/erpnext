@@ -142,12 +142,15 @@ class Subscription(Document):
 		"""
 		plan_names = [plan.plan for plan in self.plans]
 
-		return frappe.get_all(
-			"Subscription Plan",
-			filters={"name": ["in", plan_names]},
-			fields=["billing_interval", "billing_interval_count"],
-			distinct=True,
-		)
+		subscription_plan = frappe.qb.DocType("Subscription Plan")
+		billing_info = (
+			frappe.qb.from_(subscription_plan)
+			.select(subscription_plan.billing_interval, subscription_plan.billing_interval_count)
+			.distinct()
+			.where(subscription_plan.name.isin(plan_names))
+		).run(as_dict=1)
+
+		return billing_info
 
 	def get_billing_cycle_data(self) -> Dict[str, int]:
 		"""
@@ -262,7 +265,8 @@ class Subscription(Document):
 		self.validate_plans_billing_cycle(self.get_billing_cycle_and_interval())
 		self.validate_end_date()
 		self.validate_to_follow_calendar_months()
-		self.cost_center = get_default_cost_center(self.get("company"))
+		if not self.cost_center:
+			self.cost_center = get_default_cost_center(self.get("company"))
 
 	def validate_trial_period(self) -> None:
 		"""

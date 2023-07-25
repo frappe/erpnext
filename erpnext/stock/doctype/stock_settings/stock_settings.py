@@ -26,7 +26,7 @@ class StockSettings(Document):
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
+		from erpnext.utilities.naming import set_by_naming_series
 
 		set_by_naming_series(
 			"Item",
@@ -55,6 +55,7 @@ class StockSettings(Document):
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
+		self.validate_stock_reservation()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -93,11 +94,80 @@ class StockSettings(Document):
 			frappe.enqueue(
 				"erpnext.stock.doctype.stock_settings.stock_settings.clean_all_descriptions",
 				now=frappe.flags.in_test,
+				enqueue_after_commit=True,
 			)
 
 	def validate_pending_reposts(self):
 		if self.stock_frozen_upto:
 			check_pending_reposting(self.stock_frozen_upto)
+
+	def validate_stock_reservation(self):
+		"""Raises an exception if the user tries to enable/disable `Stock Reservation` with `Negative Stock` or `Open Stock Reservation Entries`."""
+
+		# Skip validation for tests
+		if frappe.flags.in_test:
+			return
+
+		db_allow_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+		db_enable_stock_reservation = frappe.db.get_single_value(
+			"Stock Settings", "enable_stock_reservation"
+		)
+
+		# Change in value of `Allow Negative Stock`
+		if db_allow_negative_stock != self.allow_negative_stock:
+
+			# Disable -> Enable: Don't allow if `Stock Reservation` is enabled
+			if self.allow_negative_stock and self.enable_stock_reservation:
+				frappe.throw(
+					_("As {0} is enabled, you can not enable {1}.").format(
+						frappe.bold("Stock Reservation"), frappe.bold("Allow Negative Stock")
+					)
+				)
+
+		# Change in value of `Enable Stock Reservation`
+		if db_enable_stock_reservation != self.enable_stock_reservation:
+
+			# Disable -> Enable
+			if self.enable_stock_reservation:
+
+				# Don't allow if `Allow Negative Stock` is enabled
+				if self.allow_negative_stock:
+					frappe.throw(
+						_("As {0} is enabled, you can not enable {1}.").format(
+							frappe.bold("Allow Negative Stock"), frappe.bold("Stock Reservation")
+						)
+					)
+
+				else:
+					# Don't allow if there are negative stock
+					from frappe.query_builder.functions import Round
+
+					precision = frappe.db.get_single_value("System Settings", "float_precision") or 3
+					bin = frappe.qb.DocType("Bin")
+					bin_with_negative_stock = (
+						frappe.qb.from_(bin).select(bin.name).where(Round(bin.actual_qty, precision) < 0).limit(1)
+					).run()
+
+					if bin_with_negative_stock:
+						frappe.throw(
+							_("As there are negative stock, you can not enable {0}.").format(
+								frappe.bold("Stock Reservation")
+							)
+						)
+
+			# Enable -> Disable
+			else:
+				# Don't allow if there are open Stock Reservation Entries
+				has_reserved_stock = frappe.db.exists(
+					"Stock Reservation Entry", {"docstatus": 1, "status": ["!=", "Delivered"]}
+				)
+
+				if has_reserved_stock:
+					frappe.throw(
+						_("As there are reserved stock, you cannot disable {0}.").format(
+							frappe.bold("Stock Reservation")
+						)
+					)
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()

@@ -10,9 +10,6 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class MaintenanceVisit(TransactionBase):
-	def get_feed(self):
-		return _("To {0}").format(self.customer_name)
-
 	def validate_serial_no(self):
 		for d in self.get("purposes"):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
@@ -125,12 +122,12 @@ class MaintenanceVisit(TransactionBase):
 
 	def on_submit(self):
 		self.update_customer_issue(1)
-		frappe.db.set(self, "status", "Submitted")
+		self.db_set("status", "Submitted")
 		self.update_status_and_actual_date()
 
 	def on_cancel(self):
 		self.check_if_last_visit()
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 		self.update_status_and_actual_date(cancel=True)
 
 	def on_update(self):

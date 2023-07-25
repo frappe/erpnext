@@ -29,7 +29,6 @@ def test_create_test_data():
 				"item_name": "_Test Tesla Car",
 				"apply_warehouse_wise_reorder_level": 0,
 				"warehouse": "Stores - _TC",
-				"gst_hsn_code": "999800",
 				"valuation_rate": 5000,
 				"standard_rate": 5000,
 				"item_defaults": [

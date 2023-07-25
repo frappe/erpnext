@@ -3,13 +3,17 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import cint, create_batch
 
 
 class TransactionDeletionRecord(Document):
+	def __init__(self, *args, **kwargs):
+		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
+		self.batch_size = 5000
+
 	def validate(self):
 		frappe.only_for("System Manager")
 		self.validate_doctypes_to_be_ignored()
@@ -42,7 +46,7 @@ class TransactionDeletionRecord(Document):
 
 	def delete_bins(self):
 		frappe.db.sql(
-			"""delete from tabBin where warehouse in
+			"""delete from `tabBin` where warehouse in
 				(select name from tabWarehouse where company=%s)""",
 			self.company,
 		)
@@ -64,7 +68,7 @@ class TransactionDeletionRecord(Document):
 				addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
 
 				frappe.db.sql(
-					"""delete from tabAddress where name in ({addresses}) and
+					"""delete from `tabAddress` where name in ({addresses}) and
 					name not in (select distinct dl1.parent from `tabDynamic Link` dl1
 					inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
 					and dl1.link_doctype<>dl2.link_doctype)""".format(
@@ -80,7 +84,7 @@ class TransactionDeletionRecord(Document):
 				)
 
 			frappe.db.sql(
-				"""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(
+				"""update `tabCustomer` set lead_name=NULL where lead_name in ({leads})""".format(
 					leads=",".join(leads)
 				)
 			)
@@ -155,8 +159,9 @@ class TransactionDeletionRecord(Document):
 			"DocField", filters={"fieldtype": "Table", "parent": doctype}, pluck="options"
 		)
 
-		for table in child_tables:
-			frappe.db.delete(table, {"parent": ["in", parent_docs_to_be_deleted]})
+		for batch in create_batch(parent_docs_to_be_deleted, self.batch_size):
+			for table in child_tables:
+				frappe.db.delete(table, {"parent": ["in", batch]})
 
 	def delete_docs_linked_with_specified_company(self, doctype, company_fieldname):
 		frappe.db.delete(doctype, {company_fieldname: self.company})
@@ -178,16 +183,19 @@ class TransactionDeletionRecord(Document):
 		else:
 			last = 0
 
-		frappe.db.sql("""update tabSeries set current = %s where name=%s""", (last, prefix))
+		frappe.db.sql("""update `tabSeries` set current = %s where name=%s""", (last, prefix))
 
 	def delete_version_log(self, doctype, company_fieldname):
-		frappe.db.sql(
-			"""delete from `tabVersion` where ref_doctype=%s and docname in
-			(select name from `tab{0}` where `{1}`=%s)""".format(
-				doctype, company_fieldname
-			),
-			(doctype, self.company),
-		)
+		dt = qb.DocType(doctype)
+		names = qb.from_(dt).select(dt.name).where(dt[company_fieldname] == self.company).run(as_list=1)
+		names = [x[0] for x in names]
+
+		if names:
+			versions = qb.DocType("Version")
+			for batch in create_batch(names, self.batch_size):
+				qb.from_(versions).delete().where(
+					(versions.ref_doctype == doctype) & (versions.docname.isin(batch))
+				).run()
 
 	def delete_communications(self, doctype, company_fieldname):
 		reference_docs = frappe.get_all(doctype, filters={company_fieldname: self.company})
@@ -199,12 +207,13 @@ class TransactionDeletionRecord(Document):
 		)
 		communication_names = [c.name for c in communications]
 
-		frappe.delete_doc("Communication", communication_names, ignore_permissions=True)
+		for batch in create_batch(communication_names, self.batch_size):
+			frappe.delete_doc("Communication", batch, ignore_permissions=True)
 
 
 @frappe.whitelist()
 def get_doctypes_to_be_ignored():
-	doctypes_to_be_ignored_list = [
+	doctypes_to_be_ignored = [
 		"Account",
 		"Cost Center",
 		"Warehouse",
@@ -222,6 +231,8 @@ def get_doctypes_to_be_ignored():
 		"Item Default",
 		"Customer",
 		"Supplier",
-		"GST Account",
 	]
-	return doctypes_to_be_ignored_list
+
+	doctypes_to_be_ignored.extend(frappe.get_hooks("company_data_to_be_ignored") or [])
+
+	return doctypes_to_be_ignored

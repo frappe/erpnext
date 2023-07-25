@@ -2,44 +2,44 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.model.document import Document
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
 from frappe.model.mapper import get_mapped_doc
 
-from erpnext.crm.utils import add_link_in_communication, copy_comments
+from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
 
 
-class Prospect(Document):
+class Prospect(CRMNote):
 	def onload(self):
 		load_address_and_contact(self)
-
-	def validate(self):
-		self.update_lead_details()
 
 	def on_update(self):
 		self.link_with_lead_contact_and_address()
 
 	def on_trash(self):
-		self.unlink_dynamic_links()
+		delete_contact_and_address(self.doctype, self.name)
 
 	def after_insert(self):
-		if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
-			for row in self.get("prospect_lead"):
-				copy_comments("Lead", row.lead, self)
-				add_link_in_communication("Lead", row.lead, self)
+		carry_forward_communication_and_comments = frappe.db.get_single_value(
+			"CRM Settings", "carry_forward_communication_and_comments"
+		)
 
-	def update_lead_details(self):
-		for row in self.get("prospect_lead"):
-			lead = frappe.get_value(
-				"Lead", row.lead, ["lead_name", "status", "email_id", "mobile_no"], as_dict=True
-			)
-			row.lead_name = lead.lead_name
-			row.status = lead.status
-			row.email = lead.email_id
-			row.mobile_no = lead.mobile_no
+		for row in self.get("leads"):
+			if carry_forward_communication_and_comments:
+				copy_comments("Lead", row.lead, self)
+				link_communications("Lead", row.lead, self)
+			link_open_events("Lead", row.lead, self)
+
+		for row in self.get("opportunities"):
+			if carry_forward_communication_and_comments:
+				copy_comments("Opportunity", row.opportunity, self)
+				link_communications("Opportunity", row.opportunity, self)
+			link_open_events("Opportunity", row.opportunity, self)
 
 	def link_with_lead_contact_and_address(self):
-		for row in self.prospect_lead:
+		for row in self.leads:
 			links = frappe.get_all(
 				"Dynamic Link",
 				filters={"link_doctype": "Lead", "link_name": row.lead},
@@ -55,27 +55,6 @@ class Prospect(Document):
 
 				if not exists:
 					linked_doc.append("links", {"link_doctype": self.doctype, "link_name": self.name})
-					linked_doc.save(ignore_permissions=True)
-
-	def unlink_dynamic_links(self):
-		links = frappe.get_all(
-			"Dynamic Link",
-			filters={"link_doctype": self.doctype, "link_name": self.name},
-			fields=["parent", "parenttype"],
-		)
-
-		for link in links:
-			linked_doc = frappe.get_doc(link["parenttype"], link["parent"])
-
-			if len(linked_doc.get("links")) == 1:
-				linked_doc.delete(ignore_permissions=True)
-			else:
-				to_remove = None
-				for d in linked_doc.get("links"):
-					if d.link_doctype == self.doctype and d.link_name == self.name:
-						to_remove = d
-				if to_remove:
-					linked_doc.remove(to_remove)
 					linked_doc.save(ignore_permissions=True)
 
 
@@ -116,9 +95,7 @@ def make_opportunity(source_name, target_doc=None):
 		{
 			"Prospect": {
 				"doctype": "Opportunity",
-				"field_map": {
-					"name": "party_name",
-				},
+				"field_map": {"name": "party_name", "prospect_owner": "opportunity_owner"},
 			}
 		},
 		target_doc,
@@ -127,3 +104,25 @@ def make_opportunity(source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+@frappe.whitelist()
+def get_opportunities(prospect):
+	return frappe.get_all(
+		"Opportunity",
+		filters={"opportunity_from": "Prospect", "party_name": prospect},
+		fields=[
+			"opportunity_owner",
+			"sales_stage",
+			"status",
+			"expected_closing",
+			"probability",
+			"opportunity_amount",
+			"currency",
+			"contact_person",
+			"contact_email",
+			"contact_mobile",
+			"creation",
+			"name",
+		],
+	)

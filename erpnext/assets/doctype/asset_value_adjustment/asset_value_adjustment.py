@@ -5,15 +5,16 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, date_diff, flt, formatdate, getdate
+from frappe.utils import date_diff, flt, formatdate, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.assets.doctype.asset.asset import get_depreciation_amount
+from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
-from erpnext.regional.india.utils import (
-	get_depreciation_amount as get_depreciation_amount_for_india,
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depr_schedule_doc,
+	get_depreciation_amount,
 )
 
 
@@ -45,7 +46,7 @@ class AssetValueAdjustment(Document):
 
 	def set_current_asset_value(self):
 		if not self.current_asset_value and self.asset:
-			self.current_asset_value = get_current_asset_value(self.asset, self.finance_book)
+			self.current_asset_value = get_asset_value_after_depreciation(self.asset, self.finance_book)
 
 	def make_depreciation_entry(self):
 		asset = frappe.get_doc("Asset", self.asset)
@@ -64,7 +65,9 @@ class AssetValueAdjustment(Document):
 		je.naming_series = depreciation_series
 		je.posting_date = self.date
 		je.company = self.company
-		je.remark = "Depreciation Entry against {0} worth {1}".format(self.asset, self.difference_amount)
+		je.remark = _("Depreciation Entry against {0} worth {1}").format(
+			self.asset, self.difference_amount
+		)
 		je.finance_book = self.finance_book
 
 		credit_entry = {
@@ -113,30 +116,56 @@ class AssetValueAdjustment(Document):
 		for d in asset.finance_books:
 			d.value_after_depreciation = asset_value
 
+			current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+				asset.name, "Active", d.finance_book
+			)
+
+			new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+			new_asset_depr_schedule_doc.status = "Draft"
+			new_asset_depr_schedule_doc.docstatus = 0
+
+			current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+			current_asset_depr_schedule_doc.cancel()
+
+			if self.docstatus == 1:
+				notes = _(
+					"This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
+				).format(
+					get_link_to_form(asset.doctype, asset.name),
+					get_link_to_form(self.get("doctype"), self.get("name")),
+				)
+			elif self.docstatus == 2:
+				notes = _(
+					"This schedule was created when Asset {0}'s Asset Value Adjustment {1} was cancelled."
+				).format(
+					get_link_to_form(asset.doctype, asset.name),
+					get_link_to_form(self.get("doctype"), self.get("name")),
+				)
+			new_asset_depr_schedule_doc.notes = notes
+
+			new_asset_depr_schedule_doc.insert()
+
+			depr_schedule = new_asset_depr_schedule_doc.get("depreciation_schedule")
+
 			if d.depreciation_method in ("Straight Line", "Manual"):
-				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
+				end_date = max(s.schedule_date for s in depr_schedule)
 				total_days = date_diff(end_date, self.date)
-				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
+				rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
+					total_days
+				)
 				from_date = self.date
 			else:
-				no_of_depreciations = len(
-					[
-						s.name for s in asset.schedules if (cint(s.finance_book_id) == d.idx and not s.journal_entry)
-					]
-				)
+				no_of_depreciations = len([s.name for s in depr_schedule if not s.journal_entry])
 
 			value_after_depreciation = d.value_after_depreciation
-			for data in asset.schedules:
-				if cint(data.finance_book_id) == d.idx and not data.journal_entry:
+			for data in depr_schedule:
+				if not data.journal_entry:
 					if d.depreciation_method in ("Straight Line", "Manual"):
 						days = date_diff(data.schedule_date, from_date)
 						depreciation_amount = days * rate_per_day
 						from_date = data.schedule_date
 					else:
-						if country == "India":
-							depreciation_amount = get_depreciation_amount_for_india(asset, value_after_depreciation, d)
-						else:
-							depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
+						depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
 
 					if depreciation_amount:
 						value_after_depreciation -= flt(depreciation_amount)
@@ -144,16 +173,9 @@ class AssetValueAdjustment(Document):
 
 			d.db_update()
 
-		asset.set_accumulated_depreciation(ignore_booked_entry=True)
-		for asset_data in asset.schedules:
-			if not asset_data.journal_entry:
-				asset_data.db_update()
+			new_asset_depr_schedule_doc.set_accumulated_depreciation(d, ignore_booked_entry=True)
+			for asset_data in depr_schedule:
+				if not asset_data.journal_entry:
+					asset_data.db_update()
 
-
-@frappe.whitelist()
-def get_current_asset_value(asset, finance_book=None):
-	cond = {"parent": asset, "parenttype": "Asset"}
-	if finance_book:
-		cond.update({"finance_book": finance_book})
-
-	return frappe.db.get_value("Asset Finance Book", cond, "value_after_depreciation")
+			new_asset_depr_schedule_doc.submit()

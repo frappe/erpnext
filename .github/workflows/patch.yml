@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: patch-develop-${{ github.event.number }}
+  group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
       mysql:
         image: mariadb:10.3
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: YES
+          MARIADB_ROOT_PASSWORD: 'root'
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
@@ -34,15 +34,25 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
+
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: "actions/setup-python@v4"
         with:
-          python-version: 3.8
+          python-version: |
+              3.7
+              3.10
 
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
           check-latest: true
 
       - name: Add to Hosts
@@ -52,7 +62,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
@@ -82,7 +92,9 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install
-        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        run: |
+          pip install frappe-bench
+          bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
           DB: mariadb
           TYPE: server
@@ -107,7 +119,11 @@ jobs:
               git -C "apps/frappe" checkout -q -f $branch_name
               git -C "apps/erpnext" checkout -q -f $branch_name
 
-              bench setup requirements --python
+              rm -rf ~/frappe-bench/env
+              bench setup env --python python3.7
+              bench pip install -e ./apps/payments
+              bench pip install -e ./apps/erpnext
+
               bench --site test_site migrate
           done
 
@@ -115,4 +131,11 @@ jobs:
           echo "Updating to latest version"
           git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
+
+          rm -rf ~/frappe-bench/env
+          bench -v setup env --python python3.10
+          bench pip install -e ./apps/payments
+          bench pip install -e ./apps/erpnext
+
           bench --site test_site migrate
+          bench --site test_site install-app payments

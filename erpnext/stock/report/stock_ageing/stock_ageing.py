@@ -34,6 +34,9 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
 	for item, item_dict in item_details.items():
+		if not flt(item_dict.get("total_qty"), precision):
+			continue
+
 		earliest_age, latest_age = 0, 0
 		details = item_dict["details"]
 
@@ -93,14 +96,14 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 	range1 = range2 = range3 = above_range3 = 0.0
 
 	for item in fifo_queue:
-		age = date_diff(to_date, item[1])
+		age = flt(date_diff(to_date, item[1]))
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
-		if age <= filters.range1:
+		if age <= flt(filters.range1):
 			range1 = flt(range1 + qty, precision)
-		elif age <= filters.range2:
+		elif age <= flt(filters.range2):
 			range2 = flt(range2 + qty, precision)
-		elif age <= filters.range3:
+		elif age <= flt(filters.range3):
 			range3 = flt(range3 + qty, precision)
 		else:
 			above_range3 = flt(above_range3 + qty, precision)
@@ -195,11 +198,11 @@ def setup_ageing_columns(filters: Filters, range_columns: List):
 		f"0 - {filters['range1']}",
 		f"{cint(filters['range1']) + 1} - {cint(filters['range2'])}",
 		f"{cint(filters['range2']) + 1} - {cint(filters['range3'])}",
-		f"{cint(filters['range3']) + 1} - {_('Above')}",
+		_("{0} - Above").format(cint(filters["range3"]) + 1),
 	]
 	for i, label in enumerate(ranges):
 		fieldname = "range" + str(i + 1)
-		add_column(range_columns, label=f"Age ({label})", fieldname=fieldname)
+		add_column(range_columns, label=_("Age ({0})").format(label), fieldname=fieldname)
 
 
 def add_column(
@@ -278,7 +281,7 @@ class FIFOSlots:
 			# consume transfer data and add stock to fifo queue
 			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
-			if not serial_nos:
+			if not serial_nos and not row.get("has_serial_no"):
 				if fifo_queue and flt(fifo_queue[0][0]) <= 0:
 					# neutralize 0/negative stock by adding positive stock
 					fifo_queue[0][0] += flt(row.actual_qty)

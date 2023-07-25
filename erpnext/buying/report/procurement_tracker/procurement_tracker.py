@@ -127,32 +127,27 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
-
+def apply_filters_on_query(filters, parent, child, query):
 	if filters.get("company"):
-		conditions += " AND parent.company=%s" % frappe.db.escape(filters.get("company"))
+		query = query.where(parent.company == filters.get("company"))
 
 	if filters.get("cost_center") or filters.get("project"):
-		conditions += """
-			AND (child.`cost_center`=%s OR child.`project`=%s)
-			""" % (
-			frappe.db.escape(filters.get("cost_center")),
-			frappe.db.escape(filters.get("project")),
+		query = query.where(
+			(child.cost_center == filters.get("cost_center")) | (child.project == filters.get("project"))
 		)
 
 	if filters.get("from_date"):
-		conditions += " AND parent.transaction_date>='%s'" % filters.get("from_date")
+		query = query.where(parent.transaction_date >= filters.get("from_date"))
 
 	if filters.get("to_date"):
-		conditions += " AND parent.transaction_date<='%s'" % filters.get("to_date")
-	return conditions
+		query = query.where(parent.transaction_date <= filters.get("to_date"))
+
+	return query
 
 
 def get_data(filters):
-	conditions = get_conditions(filters)
-	purchase_order_entry = get_po_entries(conditions)
-	mr_records, procurement_record_against_mr = get_mapped_mr_details(conditions)
+	purchase_order_entry = get_po_entries(filters)
+	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records()
 
@@ -187,11 +182,15 @@ def get_data(filters):
 	return procurement_record
 
 
-def get_mapped_mr_details(conditions):
+def get_mapped_mr_details(filters):
 	mr_records = {}
-	mr_details = frappe.db.sql(
-		"""
-		SELECT
+	parent = frappe.qb.DocType("Material Request")
+	child = frappe.qb.DocType("Material Request Item")
+
+	query = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(
 			parent.transaction_date,
 			parent.per_ordered,
 			parent.owner,
@@ -203,18 +202,13 @@ def get_mapped_mr_details(conditions):
 			child.uom,
 			parent.status,
 			child.project,
-			child.cost_center
-		FROM `tabMaterial Request` parent, `tabMaterial Request Item` child
-		WHERE
-			parent.per_ordered>=0
-			AND parent.name=child.parent
-			AND parent.docstatus=1
-			{conditions}
-		""".format(
-			conditions=conditions
-		),
-		as_dict=1,
-	)  # nosec
+			child.cost_center,
+		)
+		.where((parent.per_ordered >= 0) & (parent.name == child.parent) & (parent.docstatus == 1))
+	)
+	query = apply_filters_on_query(filters, parent, child, query)
+
+	mr_details = query.run(as_dict=True)
 
 	procurement_record_against_mr = []
 	for record in mr_details:
@@ -241,46 +235,49 @@ def get_mapped_mr_details(conditions):
 
 
 def get_mapped_pi_records():
-	return frappe._dict(
-		frappe.db.sql(
-			"""
-		SELECT
-			pi_item.po_detail,
-			pi_item.base_amount
-		FROM `tabPurchase Invoice Item` as pi_item
-		INNER JOIN `tabPurchase Order` as po
-		ON pi_item.`purchase_order` = po.`name`
-		WHERE
-			pi_item.docstatus = 1
-			AND po.status not in ("Closed","Completed","Cancelled")
-			AND pi_item.po_detail IS NOT NULL
-		"""
+	po = frappe.qb.DocType("Purchase Order")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	pi_records = (
+		frappe.qb.from_(pi_item)
+		.inner_join(po)
+		.on(pi_item.purchase_order == po.name)
+		.select(pi_item.po_detail, pi_item.base_amount)
+		.where(
+			(pi_item.docstatus == 1)
+			& (po.status.notin(("Closed", "Completed", "Cancelled")))
+			& (pi_item.po_detail.isnotnull())
 		)
-	)
+	).run()
+
+	return frappe._dict(pi_records)
 
 
 def get_mapped_pr_records():
-	return frappe._dict(
-		frappe.db.sql(
-			"""
-		SELECT
-			pr_item.purchase_order_item,
-			pr.posting_date
-		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
-		WHERE
-			pr.docstatus=1
-			AND pr.name=pr_item.parent
-			AND pr_item.purchase_order_item IS NOT NULL
-			AND pr.status not in  ("Closed","Completed","Cancelled")
-		"""
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+	pr_records = (
+		frappe.qb.from_(pr)
+		.from_(pr_item)
+		.select(pr_item.purchase_order_item, pr.posting_date)
+		.where(
+			(pr.docstatus == 1)
+			& (pr.name == pr_item.parent)
+			& (pr_item.purchase_order_item.isnotnull())
+			& (pr.status.notin(("Closed", "Completed", "Cancelled")))
 		)
-	)
+	).run()
+
+	return frappe._dict(pr_records)
 
 
-def get_po_entries(conditions):
-	return frappe.db.sql(
-		"""
-		SELECT
+def get_po_entries(filters):
+	parent = frappe.qb.DocType("Purchase Order")
+	child = frappe.qb.DocType("Purchase Order Item")
+
+	query = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(
 			child.name,
 			child.parent,
 			child.cost_center,
@@ -297,17 +294,15 @@ def get_po_entries(conditions):
 			parent.transaction_date,
 			parent.supplier,
 			parent.status,
-			parent.owner
-		FROM `tabPurchase Order` parent, `tabPurchase Order Item` child
-		WHERE
-			parent.docstatus = 1
-			AND parent.name = child.parent
-			AND parent.status not in  ("Closed","Completed","Cancelled")
-			{conditions}
-		GROUP BY
-			parent.name, child.item_code
-		""".format(
-			conditions=conditions
-		),
-		as_dict=1,
-	)  # nosec
+			parent.owner,
+		)
+		.where(
+			(parent.docstatus == 1)
+			& (parent.name == child.parent)
+			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
+		)
+		.groupby(parent.name, child.item_code)
+	)
+	query = apply_filters_on_query(filters, parent, child, query)
+
+	return query.run(as_dict=True)
