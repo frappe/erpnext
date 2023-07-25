@@ -16,19 +16,13 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Accounts User"
+   "role": "System Manager"
   }, 
   {
    "role": "Auditor"
   }, 
   {
-   "role": "Sales User"
-  }, 
-  {
-   "role": "Purchase User"
-  }, 
-  {
-   "role": "Accounts Manager"
+   "role": "Report Manager"
   }
  ]
 }
