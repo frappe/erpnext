@@ -20,7 +20,7 @@ dependencies = [
     "googlemaps",
     "plaid-python~=7.2.1",
     "python-youtube~=0.8.0",
-    "tweepy~=3.10.0",
+    "tweepy~=4.14.0",
 
     # Not used directly - required by PyQRCode for PNG generation
     "pypng~=0.20220715.0",
