@@ -19,6 +19,7 @@
   "column_break_17",
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
+  "dunning_fees_as_additonal_income",
   "journals_section",
   "merge_similar_account_heads",
   "report_setting_section",
@@ -62,7 +63,6 @@
   "acc_frozen_upto",
   "column_break_25",
   "frozen_accounts_modifier",
-  "report_settings_sb",
   "banking_tab",
   "enable_party_matching",
   "enable_fuzzy_matching"
@@ -408,6 +408,13 @@
    "fieldname": "enable_fuzzy_matching",
    "fieldtype": "Check",
    "label": "Enable Fuzzy Matching"
+  },
+  {
+   "default": "0",
+   "description": "Dunning GL Entries will be made directly while recording the Payment. Dunning fees will not be booked under receivables.",
+   "fieldname": "dunning_fees_as_additonal_income",
+   "fieldtype": "Check",
+   "label": "Record Dunning Fees as Additional Income"
   }
  ],
  "icon": "icon-cog",
@@ -415,7 +422,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-15 18:47:46.430291",
+ "modified": "2023-07-25 21:22:50.219596",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

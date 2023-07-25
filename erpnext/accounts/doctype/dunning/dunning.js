@@ -78,6 +78,19 @@ frappe.ui.form.on("Dunning", {
 			});
 		}
 
+		if (frm.doc.docstatus > 0 && frm.doc.__onload.gl_entries_exist) {
+			frm.add_custom_button(__('Ledger'), function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.posting_date,
+					"to_date": frm.doc.posting_date,
+					"company": frm.doc.company,
+					"show_cancelled_entries": frm.doc.docstatus === 2
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, __('View'));
+		}
+
 		frappe.dynamic_link = { doc: frm.doc, fieldname: 'customer', doctype: 'Customer' };
 
 		frm.toggle_display("customer_name", (frm.doc.customer_name && frm.doc.customer_name !== frm.doc.customer));

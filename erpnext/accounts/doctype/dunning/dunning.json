@@ -243,6 +243,7 @@
   {
    "description": "For dunning fee and interest",
    "fetch_from": "dunning_type.income_account",
+   "fetch_if_empty": 1,
    "fieldname": "income_account",
    "fieldtype": "Link",
    "label": "Income Account",
@@ -380,10 +381,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-15 15:46:53.865712",
+ "modified": "2023-07-25 23:18:31.280753",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -430,6 +432,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "customer_name",
  "track_changes": 1
 }

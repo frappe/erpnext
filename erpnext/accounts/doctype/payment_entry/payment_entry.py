@@ -1953,29 +1953,7 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
-				for overdue_payment in doc.overdue_payments:
-					pe.append(
-						"references",
-						{
-							"reference_doctype": "Sales Invoice",
-							"reference_name": overdue_payment.sales_invoice,
-							"payment_term": overdue_payment.payment_term,
-							"due_date": overdue_payment.due_date,
-							"total_amount": overdue_payment.outstanding,
-							"outstanding_amount": overdue_payment.outstanding,
-							"allocated_amount": overdue_payment.outstanding,
-						},
-					)
-
-				pe.append(
-					"deductions",
-					{
-						"account": doc.income_account,
-						"cost_center": doc.cost_center,
-						"amount": -1 * doc.dunning_amount,
-						"description": _("Interest and/or dunning fee"),
-					},
-				)
+				get_payment_references_for_dunning(pe, doc)
 			else:
 				pe.append(
 					"references",
@@ -2348,6 +2326,54 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	)
 
 	return paid_amount[0][0] if paid_amount else 0
+
+
+def get_payment_references_for_dunning(payment_entry, ref_doc):
+	for overdue_payment in ref_doc.overdue_payments:
+		# Record Sales Invoice outstanding
+		payment_entry.append(
+			"references",
+			{
+				"reference_doctype": "Sales Invoice",
+				"reference_name": overdue_payment.sales_invoice,
+				"payment_term": overdue_payment.payment_term,
+				"due_date": overdue_payment.due_date,
+				"total_amount": overdue_payment.outstanding,
+				"outstanding_amount": overdue_payment.outstanding,
+				"allocated_amount": overdue_payment.outstanding,
+			},
+		)
+
+	gl_entries_exist = frappe.db.exists(
+		"GL Entry", {"voucher_no": ref_doc.name, "voucher_type": "Dunning"}
+	)
+	due_date = max([row.due_date for row in ref_doc.overdue_payments])
+
+	if not gl_entries_exist:
+		# Record Dunning Fees as additional income if not booked under receivables
+		payment_entry.append(
+			"deductions",
+			{
+				"account": ref_doc.income_account,
+				"cost_center": ref_doc.cost_center,
+				"amount": -1 * ref_doc.dunning_amount,
+				"description": _("Interest and/or dunning fee"),
+			},
+		)
+	else:
+		# Record Dunning Fees as sales income to settle booked receivables
+		payment_entry.append(
+			"references",
+			{
+				"reference_doctype": ref_doc.get("doctype"),
+				"reference_name": ref_doc.get("name"),
+				"bill_no": ref_doc.get("bill_no"),
+				"due_date": due_date,
+				"total_amount": ref_doc.get("dunning_amount"),
+				"outstanding_amount": ref_doc.get("dunning_amount"),
+				"allocated_amount": ref_doc.get("dunning_amount"),
+			},
+		)
 
 
 @frappe.whitelist()
