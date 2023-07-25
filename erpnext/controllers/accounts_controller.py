@@ -55,6 +55,7 @@ from erpnext.stock.get_item_details import (
 	get_item_tax_map,
 	get_item_warehouse,
 )
+from erpnext.utilities.regional import temporary_flag
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -758,7 +759,9 @@ class AccountsController(TransactionBase):
 			}
 		)
 
-		update_gl_dict_with_regional_fields(self, gl_dict)
+		with temporary_flag("company", self.company):
+			update_gl_dict_with_regional_fields(self, gl_dict)
+
 		accounting_dimensions = get_accounting_dimensions()
 		dimension_dict = frappe._dict()
 
