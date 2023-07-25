@@ -381,7 +381,7 @@ def get_group_by_conditions(filters, doctype):
 
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	conditions = get_conditions(filters, additional_conditions)
-
+	additional_query_columns = ",".join(additional_query_columns)
 	return frappe.db.sql(
 		"""
 		select
@@ -401,7 +401,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
 			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 			`tabSales Invoice`.customer_name, `tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
-			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
+			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty, {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`, `tabItem`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent and
 			`tabItem`.name = `tabSales Invoice Item`.`item_code` and
