@@ -1,1 +1,205 @@
-{% include "accounts/report/accounts_receivable/accounts_receivable.html" %}
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+	</style>
+
+	<h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
+	<h4 class="text-center">
+		{% if (filters.customer_name) { %}
+			{%= filters.customer_name %}
+		{% } else { %}
+			{%= filters.customer || filters.supplier %}
+		{% } %}
+	</h4>
+	<h6 class="text-center">
+			{% if (filters.tax_id) { %}
+			{%= __("Tax Id: ")%}	{%= filters.tax_id %}
+			{% } %}
+	</h6>
+	<h5 class="text-center">
+		{%= __(filters.ageing_based_on) %}
+		{%= __("Until") %}
+		{%= frappe.datetime.str_to_user(filters.report_date) %}
+	</h5>
+
+	<div class="clearfix">
+		<div class="pull-left">
+		{% if(filters.payment_terms) { %}
+			<strong>{%= __("Payment Terms") %}:</strong> {%= filters.payment_terms %}
+		{% } %}
+		</div>
+		<div class="pull-right">
+		{% if(filters.credit_limit) { %}
+			<strong>{%= __("Credit Limit") %}:</strong> {%= format_currency(filters.credit_limit) %}
+		{% } %}
+		</div>
+	</div>
+
+
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
+					<th style="width: 10%">{%= __("Date") %}</th>
+					<th style="width: 4%">{%= __("Age (Days)") %}</th>
+
+					{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person) { %}
+						<th style="width: 14%">{%= __("Reference") %}</th>
+						<th style="width: 10%">{%= __("Sales Person") %}</th>
+					{% } else { %}
+						<th style="width: 24%">{%= __("Reference") %}</th>
+					{% } %}
+					{% if(!filters.show_future_payments) { %}
+						<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __(""): __("Party") %}</th>
+					{% } %}
+					<th style="width: 10%; text-align: right">{%= __("Invoiced Amount") %}</th>
+					{% if(!filters.show_future_payments) { %}
+						<th style="width: 10%; text-align: right">{%= __("Paid Amount") %}</th>
+						<th style="width: 10%; text-align: right">{%= report.report_name === "Accounts Receivable" ? __('Credit Note') : __('Debit Note') %}</th>
+					{% } %}
+					<th style="width: 10%; text-align: right">{%= __("Outstanding Amount") %}</th>
+					{% if(filters.show_future_payments) { %}
+						{% if(report.report_name === "Accounts Receivable") { %}
+							<th style="width: 12%">{%= __("Customer LPO No.") %}</th>
+						{% } %}
+						<th style="width: 10%">{%= __("Future Payment Ref") %}</th>
+						<th style="width: 10%">{%= __("Future Payment Amount") %}</th>
+						<th style="width: 10%">{%= __("Remaining Balance") %}</th>
+					{% } %}
+				{% } else { %}
+					<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __(""): __("Party") %}</th>
+					<th style="width: 7%">{%= __("0-30") %}</th>
+					<th style="width: 7%">{%= __("31-60") %}</th>
+					<th style="width: 7%">{%= __("61-90") %}</th>
+					<th style="width: 7%">{%= __("90+") %}</th>
+					<th style="width: 22%">{%= __("Total Outstanding Amount") %}</th>
+
+				{% } %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for(var i=0, l=data.length; i<l; i++) { %}
+				<tr>
+				{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
+					{% if(data[i]["party"]) { %}
+						<td>{%= frappe.datetime.str_to_user(data[i]["posting_date"]) %}</td>
+						<td style="text-align: right">{%= data[i]["age"] %}</td>
+						<td>
+							{% if(!filters.show_future_payments) { %}
+								{%= data[i]["voucher_type"] %}
+								<br>
+							{% } %}
+							{%= data[i]["voucher_no"] %}
+						</td>
+
+						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person) { %}
+						<td>{%= data[i]["sales_person"] %}</td>
+						{% } %}
+
+						{% if(!filters.show_future_payments) { %}
+						<td>
+							{% if(!(filters.customer || filters.supplier)) { %}
+								{%= data[i]["party"] %}
+								{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
+									<br> {%= data[i]["customer_name"] %}
+								{% } else if(data[i]["supplier_name"] != data[i]["party"]) { %}
+									<br> {%= data[i]["supplier_name"] %}
+								{% } %}
+							{% } %}
+						</td>
+						{% } %}
+
+						<td style="text-align: right">
+							{%= format_currency(data[i]["invoiced"], data[i]["currency"]) %}</td>
+
+						{% if(!filters.show_future_payments) { %}
+							<td style="text-align: right">
+								{%= format_currency(data[i]["paid"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">
+								{%= format_currency(data[i]["credit_note"], data[i]["currency"]) %}</td>
+						{% } %}
+						<td style="text-align: right">
+							<b> {%= format_currency(data[i]["outstanding"], data[i]["currency"]) %}</b>
+
+                        </td>
+
+						{% if(filters.show_future_payments) { %}
+							{% if(report.report_name === "Accounts Receivable") { %}
+								<td style="text-align: right">
+									{%= data[i]["po_no"] %}</td>
+							{% } %}
+							<td style="text-align: right">{%= data[i]["future_ref"] %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["future_amount"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["remaining_balance"], data[i]["currency"]) %}</td>
+						{% } %}
+					{% } else { %}
+						<td></td>
+						{% if(!filters.show_future_payments) { %}
+						<td></td>
+						{% } %}
+						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person) { %}
+						<td></td>
+						{% } %}
+						<td></td>
+						<td style="text-align: right"><b>{%= __("Total") %}</b></td>
+						<td style="text-align: right">
+							{%= format_currency(data[i]["invoiced"], data[i]["currency"] ) %}</td>
+
+						{% if(!filters.show_future_payments) { %}
+							<td style="text-align: right">
+								{%= format_currency(data[i]["paid"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["credit_note"], data[i]["currency"]) %} </td>
+						{% } %}
+						<td style="text-align: right">
+						    <b>	{%= format_currency(data[i]["outstanding"], data[i]["currency"]) %}</b></td>
+
+						{% if(filters.show_future_payments) { %}
+							{% if(report.report_name === "Accounts Receivable") { %}
+								<td style="text-align: right">
+									{%= data[i]["po_no"] %}</td>
+							{% } %}
+							<td style="text-align: right">{%= data[i]["future_ref"] %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["future_amount"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["remaining_balance"], data[i]["currency"]) %}</td>
+						{% } %}
+					{% } %}
+				{% } else { %}
+					{% if(data[i]["party"]|| "&nbsp;") { %}
+						{% if(!data[i]["is_total_row"]) { %}
+							<td>
+								{% if(!(filters.customer || filters.supplier)) { %}
+									{%= data[i]["party"] %}
+									{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
+										<br> {%= data[i]["customer_name"] %}
+									{% } else if(data[i]["supplier_name"] != data[i]["party"]) { %}
+										<br> {%= data[i]["supplier_name"] %}
+									{% } %}
+								{% } %}
+
+							</td>
+						{% } else { %}
+							<td><b>{%= __("Total") %}</b></td>
+						{% } %}
+						<td style="text-align: right">{%= data[i]["range1"]==0? '':data[i]["range1"] %}</td>
+						<td style="text-align: right">{%= data[i]["range2"]==0? '':data[i]["range2"] %}</td>
+						<td style="text-align: right">{%= data[i]["range3"]==0? '':data[i]["range"] %}</td>
+						<td style="text-align: right">{%= (data[i]["range4"]+data[i]["range5"])==0?'': format_currency(data[i]["range4"]+data[i]["range5"],data[i]["currency"]) %}</td>
+						{% if(!data[i]["is_total_row"]) { %}
+						<td style="text-align: right">{%= format_currency(data[i]["outstanding"], data[i]["currency"]) %}</td>
+
+						{% } else { %}
+						<td style="text-align: right;font-weight:bold;font-size: 120%">{%= format_currency(data[i]["outstanding"], data[i]["currency"]) %}</td>
+						{% } %}
+
+					{% } %}
+				{% } %}
+				</tr>
+			{% } %}
+		</tbody>
+	</table>
+	<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
