@@ -954,16 +954,15 @@ def get_itemised_tax_breakup_html(doc):
 
 	with temporary_flag("company", doc.company):
 		headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
-		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
-		get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
+		itemised_tax_data = get_itemised_tax_breakup_data(doc)
+		get_rounded_tax_amount(itemised_tax_data, doc.precision("tax_amount", "taxes"))
 		update_itemised_tax_data(doc)
 
 	return frappe.render_template(
 		"templates/includes/itemised_tax_breakup.html",
 		dict(
 			headers=headers,
-			itemised_tax=itemised_tax,
-			itemised_taxable_amount=itemised_taxable_amount,
+			itemised_tax_data=itemised_tax_data,
 			tax_accounts=tax_accounts,
 			doc=doc,
 		),
@@ -999,7 +998,15 @@ def get_itemised_tax_breakup_data(doc):
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
 
-	return itemised_tax, itemised_taxable_amount
+	itemised_tax_data = []
+	for item_code, taxes in itemised_tax.items():
+		itemised_tax_data.append(
+			frappe._dict(
+				{"item": item_code, "taxable_amount": itemised_taxable_amount.get(item_code), **taxes}
+			)
+		)
+
+	return itemised_tax_data
 
 
 def get_itemised_tax(taxes, with_tax_account=False):
@@ -1044,9 +1051,10 @@ def get_itemised_taxable_amount(items):
 
 def get_rounded_tax_amount(itemised_tax, precision):
 	# Rounding based on tax_amount precision
-	for taxes in itemised_tax.values():
-		for tax_account in taxes:
-			taxes[tax_account]["tax_amount"] = flt(taxes[tax_account]["tax_amount"], precision)
+	for taxes in itemised_tax:
+		for row in taxes.values():
+			if isinstance(row, dict) and isinstance(row["tax_amount"], float):
+				row["tax_amount"] = flt(row["tax_amount"], precision)
 
 
 class init_landed_taxes_and_totals(object):
