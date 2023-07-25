@@ -515,7 +515,8 @@
    "oldfieldname": "batch_no",
    "oldfieldtype": "Link",
    "options": "Batch",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "allow_on_submit": 1,
@@ -867,7 +868,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-01 21:05:14.175640",
+ "modified": "2023-07-25 11:58:28.101919",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
