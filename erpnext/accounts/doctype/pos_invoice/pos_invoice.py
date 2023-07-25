@@ -162,7 +162,7 @@ class POSInvoice(SalesInvoice):
 				if len(serial_nos) != len(set(serial_nos)):
 					frappe.throw(
 						_("Duplicate Serial Numbers Found in item {0} ").format(item.item_code),
-						title=_("Item Unavailable"),
+						title=_("Duplicate Serial Numbers Found"),
 					)
 
 	def validate_pos_reserved_batch_qty(self, item):
