@@ -17,6 +17,7 @@ frappe.query_reports["Tax Withholding Details"] = {
 			"fieldtype": "Select",
 			"options": ["Supplier", "Customer"],
 			"reqd": 1,
+			"default": "Supplier",
 			"on_change": function(){
 				frappe.query_report.set_filter_value("party", "");
 			}
