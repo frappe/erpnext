@@ -604,7 +604,12 @@
    "hidden": 1,
    "label": "Batch No",
    "options": "Batch",
+<<<<<<< HEAD
    "read_only": 1
+=======
+   "print_hide": 1,
+   "search_index": 1
+>>>>>>> 0575005c87 (fix: timeout error while cancelling the Purchase Receipt)
   },
   {
    "fieldname": "col_break5",
@@ -900,7 +905,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-03-12 13:42:24.303113",
+=======
+ "modified": "2023-07-25 11:58:10.723833",
+>>>>>>> 0575005c87 (fix: timeout error while cancelling the Purchase Receipt)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

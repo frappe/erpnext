@@ -173,7 +173,11 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch",
+<<<<<<< HEAD
    "read_only": 1
+=======
+   "search_index": 1
+>>>>>>> 0575005c87 (fix: timeout error while cancelling the Purchase Receipt)
   },
   {
    "default": "0",
@@ -214,7 +218,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-06-15 11:45:55.808942",
+=======
+ "modified": "2023-07-25 11:58:44.992419",
+>>>>>>> 0575005c87 (fix: timeout error while cancelling the Purchase Receipt)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
