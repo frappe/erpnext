@@ -44,6 +44,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
 		self.validate_change_amount()
+		self.validate_duplicate_serial_nos()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
 		self.validate_warehouse()
@@ -153,6 +154,16 @@ class POSInvoice(SalesInvoice):
 				).format(item.idx, bold_invalid_serial_nos),
 				title=_("Item Unavailable"),
 			)
+
+	def validate_duplicate_serial_nos(self):
+		for item in self.get("items"):
+			if item.serial_no:
+				serial_nos = get_serial_nos(item.serial_no)
+				if len(serial_nos) != len(set(serial_nos)):
+					frappe.throw(
+						_("Duplicate Serial Numbers Found in item {0} ").format(item.item_code),
+						title=_("Item Unavailable"),
+					)
 
 	def validate_pos_reserved_batch_qty(self, item):
 		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no": item.batch_no}
