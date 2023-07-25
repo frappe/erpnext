@@ -968,7 +968,7 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
-	def make_exchange_gain_loss_journal(self, args=None) -> None:
+	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
 		"""
