@@ -5,7 +5,6 @@ def get_data():
 	return {
 		"fieldname": "delivery_note",
 		"non_standard_fieldnames": {
-			"Sales Invoice": "delivery_note",
 			"Stock Entry": "delivery_note_no",
 			"Quality Inspection": "reference_name",
 			"Auto Repeat": "reference_document",
