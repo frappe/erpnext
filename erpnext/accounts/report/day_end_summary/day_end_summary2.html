@@ -1,0 +1,90 @@
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+</style>
+	<p class="text-right text-muted">{{ _("Printed On ") }}  {{ frappe.format_date(frappe.utils.today(),'dd-MM-YYYY')  }}</p>
+	<div class="container">
+		<div class="row">
+		  <div class="col-sm-6">
+			  <table class="table  table-bordered table-sm table-responsive">
+	<thead class="table-success">
+	  <tr>
+	  <th style="width: 14%">{{ _("Sales Person") }}</th>
+	  <th style="width: 10%">{{ _("Territory") }}</th>
+	  <th style="width: 24%">{{ _("Amount") }}</th>
+	   </tr>
+	 </thead>
+	 <tbody>
+	  {% for row in data  if row["paid_amount"]%}
+		  <tr>
+			  <td style="text-align: left">{{ row["sales_person"] }}</td>
+			  <td style="text-align: left">{{ row["territory"] }}</td>
+			  <td style="text-align: right">{{ row["paid_amount"] }}<td>						
+		  </tr>
+  
+	  {% endfor %}
+		 </tbody>
+		 <tfoot>
+	  <tr style="font-weight: 700; color: rgb(255, 255, 255); background-color: rgb(35, 50, 56);" class="text-sm-right">
+		<td colspan="2"></td>
+		 {% if totals %}
+		<td >{{totals["today_collection"]}}</td>
+		{%else %}
+		<td></td>
+		{% endif %}
+	  </tr>
+	</tfoot>
+	  </table></div>
+	<div class=" col-sm-6" style="padding-bottom: 6px;">
+	   <table class="table  table-bordered table-sm ">
+			<thead class="table-success">
+			  <tr>
+	  <th colspan="3" class="text-center">Expense / Payments</th>
+	</tr>
+	  <tr>
+	  <th style="width: 14%">{{ _("Head") }}</th>
+	  <th style="width: 44%">{{ _("Detail") }}</th>
+	  <th style="width: 24%">{{ _("Amount") }}</th>
+	   </tr>
+	 </thead>
+	 <tbody>
+	  {% for row in data %}
+	  {% if row["account"]  %}
+		<tr>
+		   <td style="word-wrap: break-word;max-width: 160px;text-align: left">
+	  {{ row["account"] }}
+	  </td>
+		   <td style="word-wrap: break-word;max-width: 160px;">
+	  {{ row["party"] if row["party"] }} :{{ row["user_remark"] if row["user_remark"]}}
+  </td>
+		   <td>{{ row["expense_amount"] }}</td>       
+		</tr>
+		   {% endif %}
+	  {% endfor %}
+	 </tbody>
+	<tfoot>
+	  <tr style="font-weight: 700; color: rgb(255, 255, 255); background-color: rgb(35, 50, 56);" class="text-sm-right">
+		<td colspan="2"></td>
+		  {% if totals %}
+	  <td style="text-align: right; font-weight:bold">{{totals["today_expenses"]}}</td>
+	  {%else %}
+	  <td style="text-align: right; font-weight:bold"></td>
+	  {% endif %}
+	  </tr>
+	</tfoot>
+  </table>
+		  </div> 
+	<div class="container" style="border: 1px dashed rgb(66, 133, 244);">
+	<div class="row" >
+	  <div class="col-sm-4">Total Cash in hand</div>
+	  <div class="col-sm-2 col-5"><h4>{{totals["cash_in_hand"]|string }}</h4></div>
+	  <div class="col-sm-4">Bank</div>
+	  <div class="col-sm-2"><h4>{{totals["bank_in_hand"]|string }}</h4></div>
+	</div>
+	<div class="m-1"></div>
+	  </div>
