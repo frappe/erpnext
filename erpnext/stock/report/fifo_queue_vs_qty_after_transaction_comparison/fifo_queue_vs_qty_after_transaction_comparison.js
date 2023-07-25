@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 const DIFFERNCE_FIELD_NAMES = [
 	"fifo_qty_diff",

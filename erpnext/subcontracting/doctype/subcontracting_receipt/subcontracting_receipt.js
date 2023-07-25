@@ -3,7 +3,7 @@
 
 frappe.provide('erpnext.buying');
 
-{% include 'erpnext/stock/landed_taxes_and_charges_common.js' %};
+erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Receipt");
 
 frappe.ui.form.on('Subcontracting Receipt', {
 	setup: (frm) => {

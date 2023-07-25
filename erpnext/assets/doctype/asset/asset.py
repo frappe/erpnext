@@ -933,6 +933,8 @@ def create_new_asset_after_split(asset, split_qty):
 	)
 
 	new_asset.gross_purchase_amount = new_gross_purchase_amount
+	if asset.purchase_receipt_amount:
+		new_asset.purchase_receipt_amount = new_gross_purchase_amount
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name
