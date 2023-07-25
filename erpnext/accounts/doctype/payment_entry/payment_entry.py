@@ -207,6 +207,20 @@ class PaymentEntry(AccountsController):
 				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
+	def term_based_allocation_enabled_for_reference(
+		self, reference_doctype: str, reference_name: str
+	) -> bool:
+		if (
+			reference_doctype
+			and reference_doctype in ["Sales Invoice", "Sales Order", "Purchase Order", "Purchase Invoice"]
+			and reference_name
+		):
+			if template := frappe.db.get_value(reference_doctype, reference_name, "payment_terms_template"):
+				return frappe.db.get_value(
+					"Payment Terms Template", template, "allocate_payment_based_on_payment_terms"
+				)
+		return False
+
 	def validate_allocated_amount_with_latest_data(self):
 		latest_references = get_outstanding_reference_documents(
 			{
@@ -228,10 +242,23 @@ class PaymentEntry(AccountsController):
 			d = frappe._dict(d)
 			latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
 
-		for d in self.get("references"):
-			latest = (latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()).get(
-				d.payment_term
-			)
+		for idx, d in enumerate(self.get("references"), start=1):
+			latest = latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()
+
+			# If term based allocation is enabled, throw
+			if (
+				d.payment_term is None or d.payment_term == ""
+			) and self.term_based_allocation_enabled_for_reference(
+				d.reference_doctype, d.reference_name
+			):
+				frappe.throw(
+					_(
+						"{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
+					).format(frappe.bold(d.reference_name), frappe.bold(idx))
+				)
+
+			# if no payment template is used by invoice and has a custom term(no `payment_term`), then invoice outstanding will be in 'None' key
+			latest = latest.get(d.payment_term) or latest.get(None)
 
 			# The reference has already been fully paid
 			if not latest:
@@ -1633,6 +1660,9 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 										"invoice_amount": flt(d.invoice_amount),
 										"outstanding_amount": flt(d.outstanding_amount),
 										"payment_term_outstanding": payment_term_outstanding,
+										"allocated_amount": payment_term_outstanding
+										if payment_term_outstanding
+										else d.outstanding_amount,
 										"payment_amount": payment_term.payment_amount,
 										"payment_term": payment_term.payment_term,
 										"account": d.account,
@@ -2054,28 +2084,27 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
+				for overdue_payment in doc.overdue_payments:
+					pe.append(
+						"references",
+						{
+							"reference_doctype": "Sales Invoice",
+							"reference_name": overdue_payment.sales_invoice,
+							"payment_term": overdue_payment.payment_term,
+							"due_date": overdue_payment.due_date,
+							"total_amount": overdue_payment.outstanding,
+							"outstanding_amount": overdue_payment.outstanding,
+							"allocated_amount": overdue_payment.outstanding,
+						},
+					)
+
 				pe.append(
-					"references",
+					"deductions",
 					{
-						"reference_doctype": "Sales Invoice",
-						"reference_name": doc.get("sales_invoice"),
-						"bill_no": doc.get("bill_no"),
-						"due_date": doc.get("due_date"),
-						"total_amount": doc.get("outstanding_amount"),
-						"outstanding_amount": doc.get("outstanding_amount"),
-						"allocated_amount": doc.get("outstanding_amount"),
-					},
-				)
-				pe.append(
-					"references",
-					{
-						"reference_doctype": dt,
-						"reference_name": dn,
-						"bill_no": doc.get("bill_no"),
-						"due_date": doc.get("due_date"),
-						"total_amount": doc.get("dunning_amount"),
-						"outstanding_amount": doc.get("dunning_amount"),
-						"allocated_amount": doc.get("dunning_amount"),
+						"account": doc.income_account,
+						"cost_center": doc.cost_center,
+						"amount": -1 * doc.dunning_amount,
+						"description": _("Interest and/or dunning fee"),
 					},
 				)
 			else:
@@ -2169,8 +2198,10 @@ def set_party_account_currency(dt, party_account, doc):
 
 def set_payment_type(dt, doc):
 	if (
-		dt == "Sales Order" or (dt in ("Sales Invoice", "Dunning") and doc.outstanding_amount > 0)
-	) or (dt == "Purchase Invoice" and doc.outstanding_amount < 0):
+		(dt == "Sales Order" or (dt == "Sales Invoice" and doc.outstanding_amount > 0))
+		or (dt == "Purchase Invoice" and doc.outstanding_amount < 0)
+		or dt == "Dunning"
+	):
 		payment_type = "Receive"
 	else:
 		payment_type = "Pay"

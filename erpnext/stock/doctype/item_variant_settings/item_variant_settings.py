@@ -24,7 +24,6 @@ class ItemVariantSettings(Document):
 			"description",
 			"variant_of",
 			"valuation_rate",
-			"description",
 			"barcodes",
 			"has_variants",
 			"attributes",

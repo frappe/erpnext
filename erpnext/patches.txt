@@ -262,6 +262,7 @@ erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 erpnext.patches.v15_0.saudi_depreciation_warning
 erpnext.patches.v15_0.delete_saudi_doctypes
 erpnext.patches.v14_0.show_loan_management_deprecation_warning
+execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -336,3 +337,4 @@ erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
 execute:frappe.defaults.clear_default("fiscal_year")
 erpnext.patches.v15_0.remove_exotel_integration
+erpnext.patches.v14_0.single_to_multi_dunning
