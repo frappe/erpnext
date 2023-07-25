@@ -1372,8 +1372,14 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 			& (sre.status.notin(["Delivered", "Cancelled"]))
 			& (sre.reservation_based_on == "Serial and Batch")
 		)
-		.groupby(sre.warehouse, sb_entry.batch_no)
+		.groupby(sb_entry.batch_no, sre.warehouse)
 	)
+
+	if kwargs.batch_no:
+		if isinstance(kwargs.batch_no, list):
+			query = query.where(sb_entry.batch_no.isin(kwargs.batch_no))
+		else:
+			query = query.where(sb_entry.batch_no == kwargs.batch_no)
 
 	if kwargs.warehouse:
 		query = query.where(sre.warehouse == kwargs.warehouse)
@@ -1386,7 +1392,9 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	reserved_batches_details = frappe._dict()
 	if data:
 		reserved_batches_details = frappe._dict(
-			{d.batch_no: frappe._dict({"warehouse": d.warehouse, "qty": d.qty}) for d in data}
+			{
+				(d.batch_no, d.warehouse): frappe._dict({"warehouse": d.warehouse, "qty": d.qty}) for d in data
+			}
 		)
 
 	return reserved_batches_details

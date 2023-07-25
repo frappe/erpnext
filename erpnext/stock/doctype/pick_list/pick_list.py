@@ -870,7 +870,7 @@ def create_dn_with_so(sales_dict, pick_list):
 	for customer in sales_dict:
 		for so in sales_dict[customer]:
 			delivery_note = None
-			kwargs = frappe._dict({"skip_item_mapping": True})
+			kwargs = {"skip_item_mapping": True}
 			delivery_note = create_delivery_note_from_sales_order(so, delivery_note, kwargs=kwargs)
 			break
 		if delivery_note:
