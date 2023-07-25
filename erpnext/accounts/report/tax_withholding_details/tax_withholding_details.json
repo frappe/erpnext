@@ -12,11 +12,11 @@
  "modified": "2021-09-20 12:05:50.387572",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "TDS Payable Monthly",
+ "name": "Tax Withholding Details",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Purchase Invoice",
- "report_name": "TDS Payable Monthly",
+ "report_name": "Tax Withholding Details",
  "report_type": "Script Report",
  "roles": [
   {
