@@ -1,0 +1,117 @@
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+</style>
+	<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+	<h2 class="text-center">{%= __("Statement of Account") %}</h2>
+	<h4 class="text-center">
+		{% if (filters.customer_name) { %}
+			{%= filters.customer_name %}
+		{% } %}
+	</h4>
+	<h5 class="text-center">
+		{%= frappe.datetime.str_to_user(filters.from_date? filters.from_date: moment(moment().year()+'-01-01')) %}
+		{%= __("to") %}
+		{%= frappe.datetime.str_to_user(filters.to_date? filters.to_date: moment()) %}
+	</h5>
+	<hr>
+	<table class="table  table-bordered align-center">
+		<thead style="font-size:1.4rem; font-weight:bold">
+			<tr>
+				<th width="8%">{%= __("Date") %}</th>
+				<th width="13%" >{%= __("Description") %} </th>
+				<th width="13%">{%= __("folio") %}</th>
+				<th width="6%">{%= __("Age") %}</th>
+				<th width="5%">{%= __("Wt (Kgs)") %}</th>
+				<th width="10%">{%= __("Debit") %}</th>
+				<th width="10%">{%= __("Credit") %}</th>
+				<th width="10%">{%= __("Misc") %}</th>
+				<th width="20%" style="text-align: right;">{%= __("Balance") %}</th>
+
+			</tr>
+		</thead>
+		<tbody style="font-size: 1rem; white-space:nowrap;">
+			{% for(var i=0, l=data.length; i<l; i++) { %}
+				<tr style="text-align: left; max-width: 90%">
+					<td style="text-align: left">{%= data[i]["posting_date"] %}	 </td>					
+					<td style="text-overflow:ellipsis; overflow: hidden;">
+						{% if(data[i]['remarks']) { %}
+							{%=data[i]['remarks'].includes('Amount PKR') || data[i]['remarks'].includes('No Remarks')?'': ": " + data[i]['remarks'] %}
+						{%  } %}
+					</td>
+					<td style="text-align: center;">	
+						{%= data[i]["voucher_no"] %}
+					</td>
+					<td style="text-align: center;">	
+						{%= data[i]["age"] %}
+					</td>
+					<td style="text-align: center;">	
+						{%= data[i]["weight"] %}
+					</td>
+					<td style="text-align: center; font-size:1.4rem">	
+						{%= data[i]["debit"]==0?'': data[i]["debit"]%}
+					</td>
+					<td style="text-align: center; font-size:1.4rem">	
+						{%= data[i]["credit"]==0?'': data[i]["credit"]%}
+					</td>
+					<td style="text-align: center; font-size:1.4rem">	
+						{%= data[i]["misc_credit"]==0?'': data[i]["misc_credit"]%}
+					</td>
+					<td style="text-align: right; font-size:1.4rem; font-weight:bold">
+							{%= format_currency( data[i]["balance"]? (data[i]["balance"].toFixed()):0, data[i]["currency"]).split(".")[0] %}
+					</td>									
+				</tr>
+			{% } %}
+
+		</tbody>
+		<tfoot style="background-color: gainsboro; font-size:1.4rem; font-weight:bold">
+			<td colspan="4"></td>
+			<td style="text-align: center;">{%= data.filter(f=> f.hasOwnProperty('weight')).map(i=> i["weight"]).reduce((v,t)=>v+t,0) %}</td>
+			<td style="text-align: center;">{%= format_currency(data.filter(f=> f.hasOwnProperty('debit')).map(i=> i["debit"]).reduce((v,t)=>v + Math.ceil(t*100)/100,0), data[0]["currency"]) %}</td>
+			<td style="text-align: center;">{%= format_currency(data.filter(f=> f.hasOwnProperty('credit')).map(i=> i["credit"]).reduce((v,t)=>v+ Math.ceil(t*100)/100,0),data[0]["currency"]) %}</td>
+			<td style="text-align: center;">{%= data.filter(f=> f.hasOwnProperty('misc_credit')).map(i=> i["misc_credit"]).reduce((v,t)=>v+ Math.ceil(t*100)/100,0) %}</td>
+			<td style="text-align: right;"></td>
+		</tfoot>
+	</table>
+
+
+	<table class="table  table-bordered align-center">
+		<thead style="font-size:1.4rem; font-weight:bold">
+			<tr> <th colspan="6" style="text-align: center;">{%= __("Outstanding Balance Summary in Days") %}</th></tr>
+			<tr>
+				<th width="16.6%">{%= __("0-30") %}</th>
+				<th width="16.6%" >{%= __("31 - 45") %} </th>
+				<th width="16.6%">{%= __("45 - 60") %}</th>
+				<th width="16.6%">{%= __("61 - 75") %}</th>
+				<th width="16.6%">{%= __("76 - 90") %}</th>
+				<th width="17%">{%= __("90+") %}</th>
+			</tr>
+		</thead>
+		<tbody style="font-size: 1rem; white-space:nowrap;text-align: center;">
+			<tr>
+				<td>{%= data[data.length-1].range1 %}	 </td>					
+				<td>{%= data[data.length-1].range2 %}	 </td>	
+				<td>{%= data[data.length-1].range3 %}	 </td>	
+				<td>{%= data[data.length-1].range4 %}	 </td>	
+				<td>{%= data[data.length-1].range5 %}	 </td>	
+				<td>{%= data[data.length-1].range6 %}	 </td>									
+			</tr>	
+	
+		</tbody>
+	
+	</table>
+
+{% for page in report %}
+<div class="page-break">
+	<div id="footer-html" class="visible-pdf">
+		<p class="text-center small page-number visible-pdf">
+			{{ _("Page {0} of {1}").format('<span class="page"></span>', '<span class="topage"></span>') }}
+		</p>
+	</div>
+</div>
+{% endfor %}
