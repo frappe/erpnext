@@ -181,6 +181,7 @@ def get_data(
 
 		set_gl_entries_by_account(
 			company,
+			root_type,
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
 			period_list[-1]["to_date"],
 			root.lft,
@@ -409,6 +410,7 @@ def sort_accounts(accounts, is_root=False, key="name"):
 
 def set_gl_entries_by_account(
 	company,
+	root_type,
 	from_date,
 	to_date,
 	root_lft,
@@ -423,7 +425,13 @@ def set_gl_entries_by_account(
 
 	accounts_list = frappe.db.get_all(
 		"Account",
-		filters={"company": company, "is_group": 0, "lft": (">=", root_lft), "rgt": ("<=", root_rgt)},
+		filters={
+			"company": company,
+			"is_group": 0,
+			"lft": (">=", root_lft),
+			"rgt": ("<=", root_rgt),
+			"root_type": root_type,
+		},
 		pluck="name",
 	)
 
