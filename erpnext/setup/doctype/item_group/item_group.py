@@ -24,9 +24,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		no_breadcrumbs=1,
 	)
 
-	def autoname(self):
-		self.name = self.item_group_name
-
 	def validate(self):
 		super(ItemGroup, self).validate()
 
