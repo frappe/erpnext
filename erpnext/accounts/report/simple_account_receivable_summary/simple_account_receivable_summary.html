@@ -1,0 +1,103 @@
+<style>
+	.print-format {
+		padding: 3px 10px 5px 5px;
+		margin-left: 0;
+		margin-right: 0;
+		font-size: 7.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+		border-bottom: 1px solid #ddd;
+	}
+	
+
+</style>
+	<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+	<div class="container">
+	<div class="row">
+		{% if (filters.customer) { %}
+		<div class="col text-center font-weight-bold"> 
+			{{ __("Customer Name: ") }} {%= filters.customer_name %} 
+		</div>
+		{% } %}
+
+		{% if (filters.sales_person) { %}
+		<div 	class="col text-center font-weight-bold"> 
+			{{ __("Sales Person: ") }} {%= filters.sales_person %} 
+		</div>
+		{% }  %}			
+
+		{% if (filters.territory) { %}
+		<div 	class="col text-center font-weight-bold"  style="width: 95%;"> 
+			{{ __("Sector: ") }}	{%= filters.territory %} 
+		</div>
+		{% }  %}
+	</div>
+	<table class="table table-borderless align-right">
+		<thead>
+			<tr>
+				<th width="14%">{%= __("Customer Name") %}</th>
+				<th width="18%" >{%= __("Address") %} </th>
+				<th width="7%" colspan="2">{%= __("Last Invoice") %}</th>
+				<th width="7%" colspan="2">{%= __("Last Payment") %}</th>
+				<th width="10%">{%= __("Overdue") %}</th>
+				<th width="13%">{%= __("Total Balance") %}</th>
+				<th width="4%">{%= __("Code") %}</th>
+				<th width="6%">{%= __("...") %}</th>
+
+			</tr>
+		</thead>
+		<tbody style="font-size: 1rem; white-space:nowrap;">
+			{% for(var i=0, l=data.length; i<l; i++) { %}
+				<tr style="text-align: left;">
+					<td style="max-width: 130px; font-size: 1rem; text-overflow: clip; overflow: hidden; text-align: left;" >
+						{%= data[i]["party"]?data[i]["party"].split("-",2)[1]:"" %}	 
+					</td>					
+					<td style="max-width: 85px; font-size: 0.8rem; text-overflow:ellipsis; overflow: hidden;">{%= data[i]["primary_address"]?
+						data[i]["primary_address"].replaceAll("<br>"," ").replace("Pakistan",""):
+						"" %}
+					</td>
+					<td style="max-width: 45px; font-size: 0.7rem; text-align: center">	
+						{%= data[i]["last_invoice_date"] && moment(data[i]["last_invoice_date"]).format("DD-MMM") %}
+					</td>
+					<td  style="max-width: 41px; font-size: 0.7rem; text-align: center">	
+						{%= data[i]["last_invoice_amount"]!=0?data[i]["last_invoice_amount"]:'' %}
+					</td>
+					<td style="max-width: 45px; font-size: 0.7rem;  text-align: center">	
+						{%= data[i]["last_payment_date"] && moment(data[i]["last_payment_date"]).format("DD-MMM") %}
+					</td>
+					<td  style="max-width: 41px; font-size: 0.7rem; text-align: center">	
+						{%= data[i]["last_payment_amount"]!=0?data[i]["last_payment_amount"]:'' %}
+					</td>
+
+					<td  style="max-width: 60px; text-align: center; font-size:1.05rem">
+						{%=format_currency(data[i]["overdue_amount"],data[i]["currency"],0)%}
+					</td>
+					
+					<td  style="max-width: 80px; text-align: center; font-size:1.1rem">
+							{%= format_currency(data[i]["balance"].toFixed(), data[i]["currency"]).split(".")[0] %}
+					</td>
+					<td  style="max-width: 38px; text-align: right;font-weight:bold;font-size:1rem">	
+						{%= data[i]["party"]?data[i]["party"].split("-",2)[0]:"" %}
+					</td>
+
+					<td   style="max-width: 25px;"></td>
+									
+				</tr>
+			{% } %}
+
+		</tbody>
+	</table>
+
+
+{% for page in report %}
+<div class="page-break">
+	<div id="footer-html" class="visible-pdf">
+		<p class="text-center small page-number visible-pdf">
+			{{ _("Page {0} of {1}").format('<span class="page"></span>', '<span class="topage"></span>') }}
+		</p>
+	</div>
+
+
+</div>
+{% endfor %}
