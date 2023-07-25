@@ -468,7 +468,7 @@ class PaymentEntry(AccountsController):
 				_(
 					"References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 				).format(
-					frappe.bold(comma_and((d.reference_name for d in references))),
+					frappe.bold(comma_and([d.reference_name for d in references])),
 					_(reference_doctype),
 				)
 				+ "<br><br>"
