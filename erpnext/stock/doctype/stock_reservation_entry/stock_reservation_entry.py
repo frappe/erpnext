@@ -988,7 +988,11 @@ def cancel_stock_reservation_entries(
 
 @frappe.whitelist()
 def get_stock_reservation_entries_for_voucher(
-	voucher_type: str, voucher_no: str, voucher_detail_no: str = None, fields: list[str] = None
+	voucher_type: str,
+	voucher_no: str,
+	voucher_detail_no: str = None,
+	fields: list[str] = None,
+	ignore_status: bool = False,
 ) -> list[dict]:
 	"""Returns list of Stock Reservation Entries against a Voucher."""
 
@@ -1007,10 +1011,7 @@ def get_stock_reservation_entries_for_voucher(
 	query = (
 		frappe.qb.from_(sre)
 		.where(
-			(sre.docstatus == 1)
-			& (sre.voucher_type == voucher_type)
-			& (sre.voucher_no == voucher_no)
-			& (sre.status.notin(["Delivered", "Cancelled"]))
+			(sre.docstatus == 1) & (sre.voucher_type == voucher_type) & (sre.voucher_no == voucher_no)
 		)
 		.orderby(sre.creation)
 	)
@@ -1020,5 +1021,8 @@ def get_stock_reservation_entries_for_voucher(
 
 	if voucher_detail_no:
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)
+
+	if ignore_status:
+		query = query.where(sre.status.notin(["Delivered", "Cancelled"]))
 
 	return query.run(as_dict=True)
