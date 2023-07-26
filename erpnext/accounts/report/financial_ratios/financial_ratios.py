@@ -25,8 +25,8 @@ def execute(filters=None):
 		company=filters.company,
 	)
 
-	columns = get_columns(period_list)
-	data = get_ratios_data(filters, period_list, columns)
+	columns, years = get_columns(period_list)
+	data = get_ratios_data(filters, period_list, years)
 
 	return columns, data
 
@@ -42,6 +42,7 @@ def setup_filters(filters):
 
 
 def get_columns(period_list):
+	years = []
 	columns = [
 		{
 			"label": _("Ratios"),
@@ -60,16 +61,67 @@ def get_columns(period_list):
 				"width": 150,
 			}
 		)
+		years.append(period.key)
 
-	return columns
+	return columns, years
 
 
-def get_ratios_data(filters, period_list, columns):
-	years = []
-	for c in columns:
-		if not c.get("fieldname") == "ratio":
-			years.append(c.get("fieldname"))
+def get_ratios_data(filters, period_list, years):
 
+	data = []
+	assets, liabilities, income, expense = get_gl_data(filters, period_list, years)
+
+	current_asset, total_asset = {}, {}
+	current_liability, total_liability = {}, {}
+	net_sales, total_income = {}, {}
+	cogs, total_expense = {}, {}
+	quick_asset = {}
+	direct_expense = {}
+
+	for year in years:
+		total_quick_asset = 0
+		total_net_sales = 0
+		total_cogs = 0
+
+		for d in [
+			[
+				current_asset,
+				total_asset,
+				"Current Asset",
+				year,
+				assets,
+				"Asset",
+				quick_asset,
+				total_quick_asset,
+			],
+			[
+				current_liability,
+				total_liability,
+				"Current Liability",
+				year,
+				liabilities,
+				"Liability",
+				{},
+				0,
+			],
+			[cogs, total_expense, "Cost of Goods Sold", year, expense, "Expense", {}, total_cogs],
+			[direct_expense, total_expense, "Direct Expense", year, expense, "Expense", {}, 0],
+			[net_sales, total_income, "Direct Income", year, income, "Income", {}, total_net_sales],
+		]:
+			update_balances(d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7])
+
+	add_liquidity_ratios(data, years, current_asset, current_liability, quick_asset)
+	add_solvency_ratios(
+		data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
+	)
+	add_turnover_ratios(
+		data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense
+	)
+
+	return data
+
+
+def get_gl_data(filters, period_list, years):
 	data = {}
 
 	for d in [
@@ -94,77 +146,7 @@ def get_ratios_data(filters, period_list, columns):
 		data.get("expense"),
 	)
 
-	data = []
-
-	current_asset = {}
-	current_liability = {}
-	quick_asset = {}
-	total_asset = {}
-	total_liability = {}
-	net_sales = {}
-	total_income = {}
-	total_expense = {}
-	cogs = {}
-	direct_expense = {}
-
-	for year in years:
-		total_quick_asset = 0
-		total_net_sales = 0
-		total_cogs = 0
-
-		update_balances(
-			current_asset,
-			total_asset,
-			"Current Asset",
-			year,
-			assets,
-			"Asset",
-			quick_asset,
-			total_quick_asset,
-		)
-
-		update_balances(
-			current_liability, total_liability, "Current Liability", year, liabilities, "Liability"
-		)
-
-		update_balances(
-			ratio_dict=cogs,
-			total_dict=total_expense,
-			account_type="Cost of Goods Sold",
-			year=year,
-			root_type_data=expense,
-			root_type="Expense",
-			total_net=total_cogs,
-		)
-
-		update_balances(
-			ratio_dict=direct_expense,
-			total_dict=total_expense,
-			account_type="Direct Expense",
-			year=year,
-			root_type_data=expense,
-			root_type="Expense",
-		)
-
-		update_balances(
-			ratio_dict=net_sales,
-			total_dict=total_income,
-			account_type="Direct Income",
-			year=year,
-			root_type_data=income,
-			root_type="Income",
-			total_net=total_net_sales,
-		)
-
-	add_liquidity_ratios(data, years, current_asset, current_liability, quick_asset)
-	add_solvency_ratios(
-		data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
-	)
-	add_turnover_ratios(
-		data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense
-	)
-
-	return data
+	return assets, liabilities, income, expense
 
 
 def add_liquidity_ratios(data, years, current_asset, current_liability, quick_asset):
@@ -189,7 +171,6 @@ def add_solvency_ratios(
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
 	data.append({"ratio": "Solvency Ratios"})
 
-	# ratio_data = [[]]
 	debt_equity_ratio = {"ratio": "Debt Equity Ratio"}
 	gross_profit_ratio = {"ratio": "Gross Profit Ratio"}
 	net_profit_ratio = {"ratio": "Net Profit Ratio"}
