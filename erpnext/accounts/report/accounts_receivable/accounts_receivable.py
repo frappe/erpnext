@@ -421,6 +421,10 @@ class ReceivablePayableReport(object):
 		# customer / supplier name
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
+		if row.voucher_type == "Expense Claim":
+			row.party_type = "Employee"
+		else:
+			row.party_type = self.party_type
 		if self.filters.get(scrub(self.filters.party_type)):
 			row.currency = row.account_currency
 		else:
@@ -747,7 +751,10 @@ class ReceivablePayableReport(object):
 	def prepare_conditions(self):
 		self.qb_selection_filter = []
 		party_type_field = scrub(self.party_type)
-		self.qb_selection_filter.append(self.ple.party_type == self.party_type)
+		if self.party_type == "Supplier":
+			self.qb_selection_filter.append(self.ple.party_type.isin([self.party_type, "Employee"]))
+		else:
+			self.qb_selection_filter.append(self.ple.party_type == self.party_type)
 
 		self.add_common_filters(party_type_field=party_type_field)
 
@@ -901,10 +908,16 @@ class ReceivablePayableReport(object):
 		self.columns = []
 		self.add_column("Posting Date", fieldtype="Date")
 		self.add_column(
-			label=_(self.party_type),
+			label="Party Type",
+			fieldname="party_type",
+			fieldtype="Data",
+			width=100,
+		)
+		self.add_column(
+			label="Party",
 			fieldname="party",
-			fieldtype="Link",
-			options=self.party_type,
+			fieldtype="Dynamic Link",
+			options="party_type",
 			width=180,
 		)
 		self.add_column(
