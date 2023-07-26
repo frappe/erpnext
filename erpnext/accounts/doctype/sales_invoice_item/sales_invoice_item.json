@@ -603,7 +603,8 @@
    "in_list_view": 1,
    "label": "Batch No",
    "options": "Batch",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "col_break5",
@@ -890,7 +891,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-17 12:51:44.825398",
+ "modified": "2023-07-25 11:58:10.723833",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

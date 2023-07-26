@@ -1900,16 +1900,22 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si = self.create_si_to_test_tax_breakup()
 
-		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
+		itemised_tax_data = get_itemised_tax_breakup_data(si)
 
-		expected_itemised_tax = {
-			"_Test Item": {"Service Tax": {"tax_rate": 10.0, "tax_amount": 1000.0}},
-			"_Test Item 2": {"Service Tax": {"tax_rate": 10.0, "tax_amount": 500.0}},
-		}
-		expected_itemised_taxable_amount = {"_Test Item": 10000.0, "_Test Item 2": 5000.0}
+		expected_itemised_tax = [
+			{
+				"item": "_Test Item",
+				"taxable_amount": 10000.0,
+				"Service Tax": {"tax_rate": 10.0, "tax_amount": 1000.0},
+			},
+			{
+				"item": "_Test Item 2",
+				"taxable_amount": 5000.0,
+				"Service Tax": {"tax_rate": 10.0, "tax_amount": 500.0},
+			},
+		]
 
-		self.assertEqual(itemised_tax, expected_itemised_tax)
-		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
+		self.assertEqual(itemised_tax_data, expected_itemised_tax)
 
 		frappe.flags.country = None
 

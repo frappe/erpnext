@@ -823,3 +823,18 @@ def get_fields(doctype, fields=None):
 		fields.insert(1, meta.title_field.strip())
 
 	return unique(fields)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len, filters) -> list:
+	terms = []
+	if filters:
+		terms = frappe.db.get_all(
+			"Payment Schedule",
+			filters={"parent": filters.get("reference")},
+			fields=["payment_term"],
+			limit=page_len,
+			as_list=1,
+		)
+	return terms
