@@ -38,7 +38,12 @@ from erpnext.accounts.party import (
 	get_party_gle_currency,
 	validate_party_frozen_disabled,
 )
-from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
+from erpnext.accounts.utils import (
+	create_gain_loss_journal,
+	get_account_currency,
+	get_fiscal_years,
+	validate_fiscal_year,
+)
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
@@ -968,78 +973,6 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
-	def create_gain_loss_journal(
-		self,
-		party_type,
-		party,
-		party_account,
-		gain_loss_account,
-		exc_gain_loss,
-		dr_or_cr,
-		reverse_dr_or_cr,
-		ref1_dt,
-		ref1_dn,
-		ref1_detail_no,
-		ref2_dt,
-		ref2_dn,
-		ref2_detail_no,
-	) -> str:
-		journal_entry = frappe.new_doc("Journal Entry")
-		journal_entry.voucher_type = "Exchange Gain Or Loss"
-		journal_entry.company = self.company
-		journal_entry.posting_date = nowdate()
-		journal_entry.multi_currency = 1
-
-		party_account_currency = frappe.get_cached_value("Account", party_account, "account_currency")
-
-		if not gain_loss_account:
-			frappe.throw(
-				_("Please set default Exchange Gain/Loss Account in Company {}").format(self.get("company"))
-			)
-		gain_loss_account_currency = get_account_currency(gain_loss_account)
-		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
-
-		if gain_loss_account_currency != self.company_currency:
-			frappe.throw(_("Currency for {0} must be {1}").format(gain_loss_account, company_currency))
-
-		journal_account = frappe._dict(
-			{
-				"account": party_account,
-				"party_type": party_type,
-				"party": party,
-				"account_currency": party_account_currency,
-				"exchange_rate": 0,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"reference_type": ref1_dt,
-				"reference_name": ref1_dn,
-				"reference_detail_no": ref1_detail_no,
-				dr_or_cr: abs(exc_gain_loss),
-				dr_or_cr + "_in_account_currency": 0,
-			}
-		)
-
-		journal_entry.append("accounts", journal_account)
-
-		journal_account = frappe._dict(
-			{
-				"account": gain_loss_account,
-				"account_currency": gain_loss_account_currency,
-				"exchange_rate": 1,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"reference_type": ref2_dt,
-				"reference_name": ref2_dn,
-				"reference_detail_no": ref2_detail_no,
-				reverse_dr_or_cr + "_in_account_currency": 0,
-				reverse_dr_or_cr: abs(exc_gain_loss),
-			}
-		)
-
-		journal_entry.append("accounts", journal_account)
-
-		journal_entry.save()
-		journal_entry.submit()
-		return journal_entry.name
-
 	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
@@ -1068,7 +1001,8 @@ class AccountsController(TransactionBase):
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-							self.create_gain_loss_journal(
+							create_gain_loss_journal(
+								self.company,
 								arg.get("party_type"),
 								arg.get("party"),
 								party_account,
@@ -1140,7 +1074,8 @@ class AccountsController(TransactionBase):
 							"Company", self.company, "exchange_gain_loss_account"
 						)
 
-						self.create_gain_loss_journal(
+						create_gain_loss_journal(
+							self.company,
 							self.party_type,
 							self.party,
 							party_account,
