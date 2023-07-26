@@ -3249,15 +3249,29 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		si.save()
 		si.submit()
-
 		expected_gle = [
-			["_Test Exchange Gain/Loss - _TC", 500.0, 0.0, nowdate()],
 			["_Test Receivable USD - _TC", 7500.0, 0.0, nowdate()],
-			["_Test Receivable USD - _TC", 0.0, 500.0, nowdate()],
 			["Sales - _TC", 0.0, 7500.0, nowdate()],
 		]
-
 		check_gl_entries(self, si.name, expected_gle, nowdate())
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": "Sales Invoice", "reference_name": si.name, "docstatus": 1},
+			pluck="parent",
+		)
+		journals = [x for x in journals if x != jv.name]
+		self.assertEqual(len(journals), 1)
+		je_type = frappe.get_cached_value("Journal Entry", journals[0], "voucher_type")
+		self.assertEqual(je_type, "Exchange Gain Or Loss")
+		ledger_outstanding = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"against_voucher_no": si.name, "delinked": 0},
+			fields=["sum(amount), sum(amount_in_account_currency)"],
+			as_list=1,
+		)
 
 	def test_batch_expiry_for_sales_invoice_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
