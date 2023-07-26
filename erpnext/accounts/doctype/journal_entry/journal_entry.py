@@ -586,7 +586,9 @@ class JournalEntry(AccountsController):
 						else:
 							party_account = against_voucher[1]
 
-					if against_voucher[0] != cstr(d.party) or party_account != d.account:
+					if (
+						against_voucher[0] != cstr(d.party) or party_account != d.account
+					) and self.voucher_type != "Exchange Gain Or Loss":
 						frappe.throw(
 							_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}").format(
 								d.idx,
