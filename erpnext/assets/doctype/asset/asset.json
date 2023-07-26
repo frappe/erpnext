@@ -52,6 +52,8 @@
   "column_break_24",
   "frequency_of_depreciation",
   "next_depreciation_date",
+  "depreciation_schedule_sb",
+  "depreciation_schedule_view",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -487,6 +489,17 @@
    "options": "\nSuccessful\nFailed",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "depreciation_schedule_sb",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Schedule"
+  },
+  {
+   "fieldname": "depreciation_schedule_view",
+   "fieldtype": "HTML",
+   "hidden": 1,
+   "label": "Depreciation Schedule View"
   }
  ],
  "idx": 72,
@@ -520,7 +533,7 @@
    "table_fieldname": "accounts"
   }
  ],
- "modified": "2023-03-30 15:07:41.542374",
+ "modified": "2023-07-26 13:33:36.821534",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
