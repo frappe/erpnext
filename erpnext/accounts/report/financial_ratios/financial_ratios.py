@@ -6,12 +6,14 @@ from frappe import _
 from frappe.utils import add_days, flt
 
 from erpnext.accounts.report.financial_statements import get_data, get_period_list
-from erpnext.accounts.utils import get_balance_on
+from erpnext.accounts.utils import get_balance_on, get_fiscal_year
 
 
 def execute(filters=None):
 	filters["filter_based_on"] = "Fiscal Year"
 	columns, data = [], []
+
+	setup_filters(filters)
 
 	period_list = get_period_list(
 		filters.from_fiscal_year,
@@ -23,14 +25,23 @@ def execute(filters=None):
 		company=filters.company,
 	)
 
-	columns = get_columns(filters, period_list)
+	columns = get_columns(period_list)
 	data = get_ratios_data(filters, period_list, columns)
 
 	return columns, data
 
 
-def get_columns(filters, period_list):
+def setup_filters(filters):
+	if not filters.get("period_start_date"):
+		period_start_date = get_fiscal_year(fiscal_year=filters.from_fiscal_year)[1]
+		filters["period_start_date"] = period_start_date
 
+	if not filters.get("period_end_date"):
+		period_end_date = get_fiscal_year(fiscal_year=filters.to_fiscal_year)[2]
+		filters["period_end_date"] = period_end_date
+
+
+def get_columns(period_list):
 	columns = [
 		{
 			"label": _("Ratios"),
@@ -59,50 +70,31 @@ def get_ratios_data(filters, period_list, columns):
 		if not c.get("fieldname") == "ratio":
 			years.append(c.get("fieldname"))
 
-	assets = get_data(
-		filters.company,
-		"Asset",
-		"Debit",
-		period_list,
-		only_current_fiscal_year=False,
-		filters=filters,
+	data = {}
+
+	for d in [
+		["Asset", "Debit"],
+		["Liability", "Credit"],
+		["Income", "Credit"],
+		["Expense", "Debit"],
+	]:
+		data[frappe.scrub(d[0])] = get_data(
+			filters.company,
+			d[0],
+			d[1],
+			period_list,
+			only_current_fiscal_year=False,
+			filters=filters,
+		)
+
+	assets, liabilities, income, expense = (
+		data.get("asset"),
+		data.get("liability"),
+		data.get("income"),
+		data.get("expense"),
 	)
 
-	liabilities = get_data(
-		filters.company,
-		"Liability",
-		"Credit",
-		period_list,
-		only_current_fiscal_year=False,
-		filters=filters,
-	)
-
-	income = get_data(
-		filters.company,
-		"Income",
-		"Credit",
-		period_list,
-		only_current_fiscal_year=False,
-		filters=filters,
-	)
-	expense = get_data(
-		filters.company,
-		"Expense",
-		"Debit",
-		period_list,
-		only_current_fiscal_year=False,
-		filters=filters,
-	)
-
-	precision = frappe.db.get_single_value("System Settings", "float_precision")
-
-	avg_debtors = {}
-	avg_creditors = {}
-	avg_stock = {}
-
-	avg_ratio_balance(avg_debtors, "Receivable", period_list, precision, filters)
-	avg_ratio_balance(avg_creditors, "Payable", period_list, precision, filters)
-	avg_ratio_balance(avg_stock, "Stock", period_list, precision, filters)
+	data = []
 
 	current_asset = {}
 	current_liability = {}
@@ -164,63 +156,98 @@ def get_ratios_data(filters, period_list, columns):
 			total_net=total_net_sales,
 		)
 
-	print("DEEE", direct_expense)
-	current_ratio = {"ratio": "Current Ratio"}
-	quick_ratio = {"ratio": "Quick Ratio"}
+	add_liquidity_ratios(data, years, current_asset, current_liability, quick_asset)
+	add_solvency_ratios(
+		data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
+	)
+	add_turnover_ratios(
+		data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense
+	)
+
+	return data
+
+
+def add_liquidity_ratios(data, years, current_asset, current_liability, quick_asset):
+	precision = frappe.db.get_single_value("System Settings", "float_precision")
+	data.append({"ratio": "Liquidity Ratios"})
+
+	ratio_data = [["Current Ratio", current_asset], ["Quick Ratio", quick_asset]]
+
+	for d in ratio_data:
+		row = {
+			"ratio": d[0],
+		}
+		for year in years:
+			row[year] = calculate_ratio(d[1].get(year, 0), current_liability.get(year, 0), precision)
+
+		data.append(row)
+
+
+def add_solvency_ratios(
+	data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
+):
+	precision = frappe.db.get_single_value("System Settings", "float_precision")
+	data.append({"ratio": "Solvency Ratios"})
+
+	# ratio_data = [[]]
 	debt_equity_ratio = {"ratio": "Debt Equity Ratio"}
 	gross_profit_ratio = {"ratio": "Gross Profit Ratio"}
 	net_profit_ratio = {"ratio": "Net Profit Ratio"}
 	return_on_asset_ratio = {"ratio": "Return on Asset Ratio"}
 	return_on_equity_ratio = {"ratio": "Return on Equity Ratio"}
-	fixed_asset_turnover_ratio = {"ratio": "Fixed Asset Turnover Ratio"}
-	debtor_turnover_ratio = {"ratio": "Debtor Turnover Ratio"}
-	creditor_turnover_ratio = {"ratio": "Creditor Turnover Ratio"}
-	inventory_turnover_ratio = {"ratio": "Inventory Turnover Ratio"}
 
 	for year in years:
-
-		current_ratio[year] = calculate_ratio(current_asset[year], current_liability[year], precision)
-		quick_ratio[year] = calculate_ratio(quick_asset[year], current_liability[year], precision)
-
 		profit_after_tax = total_income[year] + total_expense[year]
 		share_holder_fund = total_asset[year] - total_liability[year]
 
-		debt_equity_ratio[year] = calculate_ratio(total_liability[year], share_holder_fund, precision)
+		debt_equity_ratio[year] = calculate_ratio(
+			total_liability.get(year), share_holder_fund, precision
+		)
 		return_on_equity_ratio[year] = calculate_ratio(profit_after_tax, share_holder_fund, precision)
 
-		net_profit_ratio[year] = calculate_ratio(profit_after_tax, net_sales[year], precision)
+		net_profit_ratio[year] = calculate_ratio(profit_after_tax, net_sales.get(year), precision)
 		gross_profit_ratio[year] = calculate_ratio(
-			net_sales[year] - cogs[year], net_sales[year], precision
+			net_sales.get(year, 0) - cogs.get(year, 0), net_sales.get(year), precision
 		)
-		return_on_asset_ratio[year] = calculate_ratio(profit_after_tax, total_asset[year], precision)
+		return_on_asset_ratio[year] = calculate_ratio(profit_after_tax, total_asset.get(year), precision)
 
-		inventory_turnover_ratio[year] = calculate_ratio(cogs[year], avg_stock[year], precision)
-		debtor_turnover_ratio[year] = calculate_ratio(net_sales[year], avg_debtors[year], precision)
-		creditor_turnover_ratio[year] = calculate_ratio(
-			direct_expense[year] * -1, avg_creditors[year], precision
-		)
-		fixed_asset_turnover_ratio[year] = calculate_ratio(net_sales[year], total_asset[year], precision)
+	data.append(debt_equity_ratio)
+	data.append(gross_profit_ratio)
+	data.append(net_profit_ratio)
+	data.append(return_on_asset_ratio)
+	data.append(return_on_equity_ratio)
 
-	print(avg_creditors)
 
-	data = [
-		{"ratio": "Liquidity Ratios"},
-		current_ratio,
-		quick_ratio,
-		{"ratio": "Solvency Ratios"},
-		debt_equity_ratio,
-		gross_profit_ratio,
-		net_profit_ratio,
-		return_on_asset_ratio,
-		return_on_equity_ratio,
-		{"ratio": "Turnover Ratios"},
-		inventory_turnover_ratio,
-		debtor_turnover_ratio,
-		creditor_turnover_ratio,
-		fixed_asset_turnover_ratio,
+def add_turnover_ratios(
+	data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense
+):
+	precision = frappe.db.get_single_value("System Settings", "float_precision")
+	data.append({"ratio": "Turnover Ratios"})
+
+	avg_data = {}
+	for d in ["Receivable", "Payable", "Stock"]:
+		avg_data[frappe.scrub(d)] = avg_ratio_balance("Receivable", period_list, precision, filters)
+
+	avg_debtors, avg_creditors, avg_stock = (
+		avg_data.get("receivable"),
+		avg_data.get("payable"),
+		avg_data.get("stock"),
+	)
+	ratio_data = [
+		["Fixed Asset Turnover Ratio", net_sales, total_asset],
+		["Debtor Turnover Ratio", net_sales, avg_debtors],
+		["Creditor Turnover Ratio", direct_expense, avg_creditors],
+		["Inventory Turnover Ratio", cogs, avg_stock],
 	]
 
-	return data
+	for ratio in ratio_data:
+		row = {
+			"ratio": ratio[0],
+		}
+		for year in years:
+			row[year] = calculate_ratio(ratio[1].get(year, 0), ratio[2].get(year, 0), precision)
+
+		data.append(row)
 
 
 def update_balances(
@@ -231,48 +258,35 @@ def update_balances(
 	root_type_data,
 	root_type,
 	net_dict=None,
-	total_net=None,
+	total_net=0,
 ):
 
 	for entry in root_type_data:
-		if root_type == "Asset":
-			if not entry.get("parent_account") and entry.get("is_group"):
-				total_dict[year] = entry[year]
+		if not entry.get("parent_account") and entry.get("is_group"):
+			total_dict[year] = entry[year]
+
+		if root_type in ("Asset", "Liability"):
 			if entry.get("account_type") == account_type and entry.get("is_group"):
-				ratio_dict[year] = entry[year]
+				ratio_dict[year] = entry.get(year)
 			if entry.get("account_type") in ["Bank", "Cash", "Receivable"] and not entry.get("is_group"):
-				total_net += entry[year]
-				net_dict[year] = total_net
-
-		elif root_type == "Liability":
-			if not entry.get("parent_account") and entry.get("is_group"):
-				total_dict[year] = entry[year]
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				ratio_dict[year] = entry[year]
-
+				total_net += entry.get(year)
+				if net_dict:
+					net_dict[year] = total_net
 		elif root_type == "Income":
-			if not entry.get("parent_account") and entry.get("is_group"):
-				total_dict[year] = entry[year]
-
 			if entry.get("account_type") == account_type and entry.get("is_group"):
-				total_net += entry[year]
+				total_net += entry.get(year)
 				ratio_dict[year] = total_net
-
-		elif root_type == "Expense":
-			if not entry.get("parent_account") and entry.get("is_group"):
-				total_dict[year] = entry[year]
-
-			if account_type == "Cost of Goods Sold":
-				if entry.get("account_type") == account_type:
-					total_net += entry[year]
-					ratio_dict[year] = total_net
-			else:
-				if entry.get("account_type") == account_type and entry.get("is_group"):
-					ratio_dict[year] = entry[year]
+		elif root_type == "Expense" and account_type == "Cost of Goods Sold":
+			if entry.get("account_type") == account_type:
+				total_net += entry.get(year)
+				ratio_dict[year] = total_net
+		else:
+			if entry.get("account_type") == account_type and entry.get("is_group"):
+				ratio_dict[year] = entry.get(year)
 
 
-def avg_ratio_balance(avg_value_dict, account_type, period_list, precision, filters):
-
+def avg_ratio_balance(account_type, period_list, precision, filters):
+	avg_ratio = {}
 	for period in period_list:
 		opening_date = add_days(period["from_date"], -1)
 		closing_date = period["to_date"]
@@ -287,12 +301,14 @@ def avg_ratio_balance(avg_value_dict, account_type, period_list, precision, filt
 			company=filters.company,
 			account_type=account_type,
 		)
-		avg_value_dict[period["key"]] = flt(
+		avg_ratio[period["key"]] = flt(
 			(flt(closing_balance) + flt(opening_balance)) / 2, precision=precision
 		)
 
+	return avg_ratio
+
 
 def calculate_ratio(value, denominator, precision):
-	if denominator != 0:
-		return flt(value / denominator, precision)
+	if flt(denominator):
+		return flt(flt(value) / denominator, precision)
 	return 0
