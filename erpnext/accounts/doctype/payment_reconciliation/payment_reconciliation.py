@@ -695,10 +695,10 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 			inv.difference_amount,
 			dr_or_cr,
 			reverse_dr_or_cr,
-			inv.against_voucher_type,
-			inv.against_voucher,
-			None,
 			inv.voucher_type,
 			inv.voucher_no,
+			None,
+			inv.against_voucher_type,
+			inv.against_voucher,
 			None,
 		)
