@@ -51,7 +51,7 @@ def make_supplier(supplier_name, currency=None):
 class TestAccountsController(unittest.TestCase):
 	"""
 	Test Exchange Gain/Loss booking on various scenarios.
-	Test Cases are numbered for better readbility
+	Test Cases are numbered for better organization
 
 	10 series - Sales Invoice against Payment Entries
 	20 series - Sales Invoice against Journals
@@ -923,3 +923,44 @@ class TestAccountsController(unittest.TestCase):
 		exc_je_for_je = self.get_journals_for(je.doctype, je.name)
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_je, [])
+
+	def test_30_cr_note_against_sales_invoice(self):
+		"""
+		Reconciling Cr Note against Sales Invoice, both having different exchange rates
+		"""
+		# Invoice in Foreign currency
+		si = self.create_sales_invoice(qty=2, conversion_rate=80, rate=1)
+
+		# Cr Note in Foreign currency of different exchange rate
+		cr_note = self.create_sales_invoice(qty=-2, conversion_rate=75, rate=1, do_not_save=True)
+		cr_note.is_return = 1
+		cr_note.save().submit()
+
+		# Reconcile the first half
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		difference_amount = pr.calculate_difference_on_allocation_change(
+			[x.as_dict() for x in pr.payments], [x.as_dict() for x in pr.invoices], 1
+		)
+		pr.allocation[0].allocated_amount = 1
+		pr.allocation[0].difference_amount = difference_amount
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		# Exchange Gain/Loss Journal should've been created.
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_cr), 2)
+		self.assertEqual(exc_je_for_cr, exc_je_for_si)
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1)
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
