@@ -161,7 +161,7 @@ def get_leaf_boms() -> List[str]:
 		"""select name from `tabBOM` bom
 		where docstatus=1 and is_active=1
 			and not exists(select bom_no from `tabBOM Item`
-				where parent=bom.name and ifnull(bom_no, '')!='')"""
+				where parent=bom.name and bom_no !='')"""
 	)
 
 

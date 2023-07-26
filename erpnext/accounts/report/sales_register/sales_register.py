@@ -475,7 +475,7 @@ def get_invoice_so_dn_map(invoice_list):
 	si_items = frappe.db.sql(
 		"""select parent, sales_order, delivery_note, so_detail
 		from `tabSales Invoice Item` where parent in (%s)
-		and (ifnull(sales_order, '') != '' or ifnull(delivery_note, '') != '')"""
+		and (sales_order != '' or delivery_note != '')"""
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,
@@ -510,7 +510,7 @@ def get_invoice_cc_wh_map(invoice_list):
 	si_items = frappe.db.sql(
 		"""select parent, cost_center, warehouse
 		from `tabSales Invoice Item` where parent in (%s)
-		and (ifnull(cost_center, '') != '' or ifnull(warehouse, '') != '')"""
+		and (cost_center != '' or warehouse != '')"""
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,
