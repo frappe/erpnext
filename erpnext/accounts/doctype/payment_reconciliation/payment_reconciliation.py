@@ -277,6 +277,11 @@ class PaymentReconciliation(Document):
 	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
 		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
 		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
+		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
+			payment_entry[0]["exchange_rate"] = invoice_exchange_map.get(
+				payment_entry[0].get("reference_name")
+			)
+
 		new_difference_amount = self.get_difference_amount(
 			payment_entry[0], invoice[0], allocated_amount
 		)
