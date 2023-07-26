@@ -1,13 +1,6 @@
 import frappe
 
-jinja = {
-    "methods": [
-        "erpnext.jinja.trip_items",
-    ],
-}
-
 # METHODS
-@frappe.whitelist()
 def trip_items(doc=None):
     values = {'sales_invoices': doc}
     res=frappe.db.sql("""
