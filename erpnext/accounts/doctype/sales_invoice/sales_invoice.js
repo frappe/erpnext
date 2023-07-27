@@ -1,10 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
 
-
+erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
+erpnext.accounts.payment_triggers.setup("Sales Invoice");
+erpnext.accounts.pos.setup("Sales Invoice");
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.sales_common.setup_selling_controller();
 erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends erpnext.selling.SellingController {
 	setup(doc) {
 		this.setup_posting_date_time_check();
@@ -142,9 +145,15 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					cur_frm.events.create_invoice_discounting(cur_frm);
 				}, __('Create'));
 
-				if (doc.due_date < frappe.datetime.get_today()) {
-					cur_frm.add_custom_button(__('Dunning'), function() {
-						cur_frm.events.create_dunning(cur_frm);
+				const payment_is_overdue = doc.payment_schedule.map(
+					row => Date.parse(row.due_date) < Date.now()
+				).reduce(
+					(prev, current) => prev || current
+				);
+
+				if (payment_is_overdue) {
+					this.frm.add_custom_button(__('Dunning'), () => {
+						this.frm.events.create_dunning(this.frm);
 					}, __('Create'));
 				}
 			}
@@ -711,7 +720,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.set_query('pos_profile', function(doc) {
 			if(!doc.company) {
-				frappe.throw(_('Please set Company'));
+				frappe.throw(__('Please set Company'));
 			}
 
 			return {
@@ -767,7 +776,6 @@ frappe.ui.form.on('Sales Invoice', {
 
 	update_stock: function(frm, dt, dn) {
 		frm.events.hide_fields(frm);
-		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock);
 		frm.trigger('reset_posting_time');
 	},
 
@@ -858,7 +866,7 @@ frappe.ui.form.on('Sales Invoice', {
 			kwargs = Object();
 		}
 
-		if (!kwargs.hasOwnProperty("project") && frm.doc.project) {
+		if (!Object.prototype.hasOwnProperty.call(kwargs, "project") && frm.doc.project) {
 			kwargs.project = frm.doc.project;
 		}
 
@@ -891,6 +899,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
+		frm.refresh_field("timesheets");
+		frm.trigger("calculate_timesheet_totals");
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {
@@ -930,9 +940,6 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
 		row.project_name = time_log.project_name;
-
-		frm.refresh_field("timesheets");
-		frm.trigger("calculate_timesheet_totals");
 	},
 
 	calculate_timesheet_totals: function(frm) {

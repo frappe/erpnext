@@ -117,6 +117,7 @@ def get_data(filters):
 		filters,
 		gl_entries_by_account,
 		ignore_closing_entries=not flt(filters.with_period_closing_entry),
+		ignore_opening_entries=True,
 	)
 
 	calculate_values(accounts, gl_entries_by_account, opening_balances)
@@ -159,6 +160,8 @@ def get_rootwise_opening_balances(filters, report_type):
 			accounting_dimensions,
 			period_closing_voucher=last_period_closing_voucher[0].name,
 		)
+
+		# Report getting generate from the mid of a fiscal year
 		if getdate(last_period_closing_voucher[0].posting_date) < getdate(
 			add_days(filters.from_date, -1)
 		):
@@ -218,9 +221,18 @@ def get_opening_balance(
 		)
 	else:
 		if start_date:
-			opening_balance = opening_balance.where(closing_balance.posting_date >= start_date)
+			opening_balance = opening_balance.where(
+				(closing_balance.posting_date >= start_date)
+				& (closing_balance.posting_date < filters.from_date)
+			)
 			opening_balance = opening_balance.where(closing_balance.is_opening == "No")
-		opening_balance = opening_balance.where(closing_balance.posting_date < filters.from_date)
+		else:
+			opening_balance = opening_balance.where(
+				(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
+			)
+
+	if doctype == "GL Entry":
+		opening_balance = opening_balance.where(closing_balance.is_cancelled == 0)
 
 	if (
 		not filters.show_unclosed_fy_pl_balances

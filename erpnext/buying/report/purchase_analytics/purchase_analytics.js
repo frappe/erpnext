@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Purchase Analytics"] = {
 	"filters": [
@@ -35,14 +35,14 @@ frappe.query_reports["Purchase Analytics"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_start_date"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[1],
 			reqd: 1
 		},
 		{
 			fieldname:"to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_end_date"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[2],
 			reqd: 1
 		},
 		{
@@ -81,8 +81,9 @@ frappe.query_reports["Purchase Analytics"] = {
 					const tree_type = frappe.query_report.filters[0].value;
 					if (data_doctype != tree_type) return;
 
-					row_name = data[2].content;
-					length = data.length;
+					let row_name = data[2].content;
+					let length = data.length;
+					let row_values = '';
 
 					if (tree_type == "Supplier") {
 						row_values = data
@@ -104,7 +105,7 @@ frappe.query_reports["Purchase Analytics"] = {
 							});
 					}
 
-					entry = {
+					let entry = {
 						name: row_name,
 						values: row_values,
 					};

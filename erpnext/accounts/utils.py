@@ -1141,6 +1141,12 @@ def get_autoname_with_number(number_value, doc_title, company):
 	return " - ".join(parts)
 
 
+def parse_naming_series_variable(doc, variable):
+	if variable == "FY":
+		date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
+		return get_fiscal_year(date=date, company=doc.get("company"))[0]
+
+
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root, chart=None):
 	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
