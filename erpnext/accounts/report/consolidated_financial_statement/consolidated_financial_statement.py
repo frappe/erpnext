@@ -720,7 +720,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
 
 	if ignore_closing_entries:
-		additional_conditions.append("ifnull(gl.voucher_type, '')!='Period Closing Voucher'")
+		additional_conditions.append("gl.voucher_type != 'Period Closing Voucher'")
 
 	if from_date:
 		additional_conditions.append("gl.posting_date >= %(from_date)s")

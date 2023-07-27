@@ -1738,7 +1738,7 @@ def get_orders_to_be_billed(
 			{party_type} = %s
 			and docstatus = 1
 			and company = %s
-			and ifnull(status, "") != "Closed"
+			and status != "Closed"
 			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
 			and abs(100 - per_billed) > 0.01
 			{condition}

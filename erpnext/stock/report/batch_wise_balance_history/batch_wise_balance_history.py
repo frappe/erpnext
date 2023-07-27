@@ -102,7 +102,7 @@ def get_stock_ledger_entries_for_batch_no(filters):
 		.where(
 			(sle.docstatus < 2)
 			& (sle.is_cancelled == 0)
-			& (fn.IfNull(sle.batch_no, "") != "")
+			& (sle.batch_no != "")
 			& (sle.posting_date <= filters["to_date"])
 		)
 		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
