@@ -59,21 +59,39 @@ class RepostAccountingLedger(Document):
 
 	def print_gle(self):
 		vouchers = [(x.voucher_type, x.voucher_no) for x in self.vouchers]
-		repost_accounting_ledger(vouchers)
+		repost_accounting_ledger(self.name)
 		frappe.throw("stopping...")
 
-	def before_submit(self):
-		self.print_gle()
-
-
-def repost_accounting_ledger(vouchers: list = None) -> None:
-	if vouchers:
-		for x in vouchers:
-			doc = frappe.get_doc(x[0], x[1])
-
+	def show_preview(self):
+		for x in self.vouchers:
+			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
 				gle_map = doc.build_gl_map()
 			else:
 				gle_map = doc.get_gl_entries()
 
-			[print(x) for x in gle_map]
+	def on_submit(self):
+		# self.print_gle()
+		repost_accounting_ledger(self.name)
+
+
+@frappe.whitelist()
+def repost_accounting_ledger(account_repost_doc=str) -> None:
+	if account_repost_doc:
+		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
+
+		if repost_doc.docstatus == 1:
+			for x in repost_doc.vouchers:
+				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
+
+				if doc.doctype in ["Sales Invoice"]:
+					if repost_doc.delete_cancelled_entries:
+						frappe.db.delete("GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name})
+						frappe.db.delete(
+							"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
+						)
+					else:
+						doc.make_gl_entries_on_cancel()
+
+					doc.make_gl_entries()
+				frappe.db.commit()
