@@ -423,11 +423,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-06-15 18:47:46.430291",
-=======
  "modified": "2023-07-27 15:05:34.000264",
->>>>>>> ccf1920a78 (fix: Ignore account closing balance for financial statement)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
