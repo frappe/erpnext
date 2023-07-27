@@ -73,7 +73,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			return self.route
 
 	def on_trash(self):
-		NestedSet.on_trash(self)
+		NestedSet.on_trash(self, allow_root_deletion=True)
 		WebsiteGenerator.on_trash(self)
 		self.delete_child_item_groups_key()
 
