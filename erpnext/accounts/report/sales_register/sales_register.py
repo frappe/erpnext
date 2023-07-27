@@ -462,6 +462,7 @@ def get_invoices(filters, additional_query_columns):
 def get_payments(filters):
 	args = frappe._dict(
 		account="debit_to",
+		account_fieldname="paid_from",
 		party="customer",
 		party_name="customer_name",
 		party_account=get_party_account(
