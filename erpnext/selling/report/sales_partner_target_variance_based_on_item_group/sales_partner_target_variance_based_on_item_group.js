@@ -16,7 +16,7 @@ frappe.query_reports["Sales Partner Target Variance based on Item Group"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today())
+			default: frappe.sys_defaults.fiscal_year
 		},
 		{
 			fieldname: "doctype",

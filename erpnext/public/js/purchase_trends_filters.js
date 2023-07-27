@@ -28,7 +28,7 @@ erpnext.get_purchase_trends_filters = function() {
 			"label": __("Fiscal Year"),
 			"fieldtype": "Link",
 			"options":'Fiscal Year',
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today())
+			"default": frappe.sys_defaults.fiscal_year
 		},
 		{
 			"fieldname":"period_based_on",

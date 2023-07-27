@@ -7,7 +7,7 @@ frappe.query_reports["Itemwise Recommended Reorder Level"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[1],
+			"default": frappe.sys_defaults.year_start_date
 		},
 		{
 			"fieldname":"to_date",
