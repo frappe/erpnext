@@ -8,7 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "column_break_vpup",
   "delete_old_entries",
+  "section_break_metl",
   "vouchers",
   "amended_from"
  ],
@@ -39,12 +41,20 @@
    "fieldtype": "Table",
    "label": "Vouchers",
    "options": "Repost Accounting Ledger Items"
+  },
+  {
+   "fieldname": "column_break_vpup",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_metl",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-04 14:15:15.781246",
+ "modified": "2023-07-27 10:49:37.708857",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger",

@@ -6,7 +6,7 @@ frappe.ui.form.on("Repost Accounting Ledger", {
 		frm.fields_dict['vouchers'].grid.get_field('voucher_type').get_query = function(doc) {
 			return {
 				filters: {
-					name: ['in', ['Purchase Invoice', 'Sales Invoice', 'Payment Entry', 'Journal Entry']]
+					name: ['in', ['Purchase Invoice', 'Sales Invoice', 'Payment Entry', 'Journal Entry']],
 				}
 			}
 		}
