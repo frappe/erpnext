@@ -377,12 +377,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
 					}
 
-					if(!doc.auto_repeat) {
-						this.frm.add_custom_button(__('Subscription'), function() {
-							erpnext.utils.make_subscription(doc.doctype, doc.name)
-						}, __('Create'))
-					}
-
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
 						let internal = me.frm.doc.is_internal_customer;
