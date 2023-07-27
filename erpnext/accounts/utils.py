@@ -666,8 +666,9 @@ def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
 			fields=["parent"],
 			as_list=1,
 		)
+
 		if journals:
-			exchange_journals = frappe.db.get_all(
+			gain_loss_journals = frappe.db.get_all(
 				"Journal Entry",
 				filters={
 					"name": ["in", [x[0] for x in journals]],
@@ -676,7 +677,7 @@ def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
 				},
 				as_list=1,
 			)
-			for doc in exchange_journals:
+			for doc in gain_loss_journals:
 				frappe.get_doc("Journal Entry", doc[0]).cancel()
 
 
