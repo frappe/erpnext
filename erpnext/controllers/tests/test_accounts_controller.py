@@ -47,8 +47,7 @@ def make_supplier(supplier_name, currency=None):
 		return supplier_name
 
 
-# class TestAccountsController(FrappeTestCase):
-class TestAccountsController(unittest.TestCase):
+class TestAccountsController(FrappeTestCase):
 	"""
 	Test Exchange Gain/Loss booking on various scenarios.
 	Test Cases are numbered for better organization
@@ -66,8 +65,7 @@ class TestAccountsController(unittest.TestCase):
 		self.clear_old_entries()
 
 	def tearDown(self):
-		# frappe.db.rollback()
-		pass
+		frappe.db.rollback()
 
 	def create_company(self):
 		company_name = "_Test Company MC"
