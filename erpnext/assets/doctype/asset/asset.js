@@ -141,7 +141,7 @@ frappe.ui.form.on('Asset', {
 				frm.trigger("set_depr_posting_failure_alert");
 			}
 
-			frm.trigger("setup_chart");
+			frm.trigger("setup_chart_and_depr_schedule_view");
 		}
 
 		frm.trigger("toggle_reference_doc");
@@ -206,7 +206,38 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
-	setup_chart: async function(frm) {
+	render_depreciation_schedule_view: function(frm, depr_schedule) {
+		var wrapper = $(frm.fields_dict["depreciation_schedule_view"].wrapper).empty();
+
+		let table = $(`<table class="table table-bordered" style="margin-top:0px;">
+			<thead>
+				<tr>
+					<td align="center">${__("No.")}</td>
+					<td>${__("Schedule Date")}</td>
+					<td align="right">${__("Depreciation Amount")}</td>
+					<td align="right">${__("Accumulated Depreciation Amount")}</td>
+					<td>${__("Journal Entry")}</td>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>`);
+
+		depr_schedule.forEach((sch) => {
+			const row = $(`<tr>
+				<td align="center">${sch['idx']}</td>
+				<td><b>${frappe.format(sch['schedule_date'], { fieldtype: 'Date' })}</b></td>
+				<td><b>${frappe.format(sch['depreciation_amount'], { fieldtype: 'Currency' })}</b></td>
+				<td>${frappe.format(sch['accumulated_depreciation_amount'], { fieldtype: 'Currency' })}</td>
+				<td><a href="/app/journal-entry/${sch['journal_entry'] || ''}">${sch['journal_entry'] || ''}</a></td>
+			</tr>`);
+			table.find("tbody").append(row);
+		});
+
+		wrapper.append(table);
+
+	},
+
+	setup_chart_and_depr_schedule_view: async function(frm) {
 		if(frm.doc.finance_books.length > 1) {
 			return
 		}
@@ -228,7 +259,7 @@ frappe.ui.form.on('Asset', {
 				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule",
 				{
 					asset_name: frm.doc.name,
-					status: frm.doc.docstatus ? "Active" : "Draft",
+					status: "Active",
 					finance_book: frm.doc.finance_books[0].finance_book || null
 				}
 			)).message;
@@ -246,6 +277,9 @@ frappe.ui.form.on('Asset', {
 					}
 				}
 			});
+
+			frm.toggle_display(["depreciation_schedule_view"], 1);
+			frm.events.render_depreciation_schedule_view(frm, depr_schedule);
 		} else {
 			if(frm.doc.opening_accumulated_depreciation) {
 				x_intervals.push(frappe.format(frm.doc.creation.split(" ")[0], { fieldtype: 'Date' }));

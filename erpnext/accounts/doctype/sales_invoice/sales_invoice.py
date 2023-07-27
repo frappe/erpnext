@@ -113,7 +113,6 @@ class SalesInvoice(SellingController):
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
-			self.validate_item_code()
 			self.validate_warehouse()
 			self.update_current_stock()
 			self.validate_delivery_note()
@@ -853,11 +852,6 @@ class SalesInvoice(SellingController):
 				10.0 ** (self.precision("grand_total") + 1.0)
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
-
-	def validate_item_code(self):
-		for d in self.get("items"):
-			if not d.item_code and self.is_opening == "No":
-				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()

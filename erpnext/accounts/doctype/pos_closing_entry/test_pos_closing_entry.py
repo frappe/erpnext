@@ -49,6 +49,24 @@ class TestPOSClosingEntry(unittest.TestCase):
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
 
+	def test_pos_closing_without_item_code(self):
+		"""
+		Test if POS Closing Entry is created without item code
+		"""
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+
+		pos_inv = create_pos_invoice(
+			rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+		pos_inv.submit()
+
+		pcv_doc = make_closing_entry_from_opening(opening_entry)
+		pcv_doc.submit()
+
+		self.assertTrue(pcv_doc.name)
+
 	def test_cancelling_of_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
