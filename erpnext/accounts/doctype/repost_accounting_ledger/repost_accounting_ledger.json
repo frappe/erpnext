@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:ACC-REPOST-{#####}",
  "creation": "2023-07-04 13:07:32.923675",
  "default_view": "List",
  "doctype": "DocType",
@@ -9,7 +10,7 @@
  "field_order": [
   "company",
   "column_break_vpup",
-  "delete_old_entries",
+  "delete_cancelled_entries",
   "section_break_metl",
   "vouchers",
   "amended_from"
@@ -31,12 +32,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "delete_old_entries",
-   "fieldtype": "Check",
-   "label": "Delete Old Entries"
-  },
-  {
    "fieldname": "vouchers",
    "fieldtype": "Table",
    "label": "Vouchers",
@@ -49,15 +44,22 @@
   {
    "fieldname": "section_break_metl",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_cancelled_entries",
+   "fieldtype": "Check",
+   "label": "Delete Cancelled Ledger Entries"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-27 10:49:37.708857",
+ "modified": "2023-07-27 15:47:58.975034",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

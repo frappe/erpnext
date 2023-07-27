@@ -56,3 +56,24 @@ class RepostAccountingLedger(Document):
 						frappe.bold(comma_and(list(self._allowed_types))),
 					)
 				)
+
+	def print_gle(self):
+		vouchers = [(x.voucher_type, x.voucher_no) for x in self.vouchers]
+		repost_accounting_ledger(vouchers)
+		frappe.throw("stopping...")
+
+	def before_submit(self):
+		self.print_gle()
+
+
+def repost_accounting_ledger(vouchers: list = None) -> None:
+	if vouchers:
+		for x in vouchers:
+			doc = frappe.get_doc(x[0], x[1])
+
+			if doc.doctype in ["Payment Entry", "Journal Entry"]:
+				gle_map = doc.build_gl_map()
+			else:
+				gle_map = doc.get_gl_entries()
+
+			[print(x) for x in gle_map]
