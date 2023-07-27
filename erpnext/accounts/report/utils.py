@@ -280,7 +280,7 @@ def get_payment_entries(filters, args):
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
 			pe.posting_date,
-			pe.paid_to.as_(args.account),
+			pe[args.account_fieldname].as_(args.account),
 			pe.party.as_(args.party),
 			pe.party_name.as_(args.party_name),
 			pe.remarks,
@@ -290,7 +290,9 @@ def get_payment_entries(filters, args):
 			pe.project,
 			pe.cost_center,
 		)
-		.where((pe.party == filters.get(args.party)) & (pe.paid_to.isin(args.party_account)))
+		.where(
+			(pe.party == filters.get(args.party)) & (pe[args.account_fieldname].isin(args.party_account))
+		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
 <<<<<<< HEAD
