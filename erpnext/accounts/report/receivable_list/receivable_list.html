@@ -1,0 +1,77 @@
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+</style>
+	<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+	<div class="container">
+	<h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
+	<div class="row">
+		{% if (filters.customer) { %}
+		<div class="col text-center font-weight-light"> 
+			{{ __("Customer Name: ") }} {%= filters.customer %} 
+		</div>
+		{% } %}
+
+		{% if (filters.sales_person) { %}
+		<div 	class="col text-center font-weight-light"> 
+			{{ __("Sales Person: ") }} {%= filters.sales_person %} 
+		</div>
+		{% }  %}			
+
+		{% if (filters.territory) { %}
+		<div 	class="col text-center font-weight-light"> 
+			{{ __("Sector: ") }}	{%= filters.territory %} 
+		</div>
+		{% }  %}
+	</div>
+	<table class="table table-borderless align-right">
+		<thead>
+			<tr>
+				<th width="40%">{%= __("Customer Name") %}</th>
+				<th width="23%" >{%= __("Address") %} </th>
+				{% if (!filters.territory && !filters.sales_person) { %}
+					<th width="3%">{%= __("Territory") %}</th>
+				{% }%}
+				{% if (!filters.territory && !filters.sales_person) { %}
+				<th width="4%">{%= __("Agent") %}</th>
+			{% }%}
+				<th width="9%">{%= __("OverDue") %}</th>
+				<th width="13%">{%= __("Total Balance") %}</th>
+				<th width="4%">{%= __("Code") %}</th>
+				<th width="4%">{%= __("") %}</th>
+			</tr>
+		</thead>
+		<tbody style="font-size: 1rem; white-space:nowrap;">
+			{% for(var i=0, l=data.length; i<l; i++) { %}
+				<tr style="font-size: 10px;">
+					<td>{%= data[i]["party"] %}	 </td>					
+					<td>{%= data[i]["primary_address"]?
+						data[i]["primary_address"].replaceAll("<br>"," ").replace("Pakistan",""):
+						"" %}</td>
+						{% if (!filters.territory && !filters.sales_person) { %}
+							<td>{%= data[i]["territory"] %}	 </td>
+						{%} %}
+						{% if (!filters.territory && !filters.sales_person) { %}
+							<td>{%= data[i]["sales_person"] %}	 </td>
+						{%} %}
+					<td style="text-align: right">
+						{%= format_currency(data[i]["total_due"], data[i]["currency"]) %}
+					</td>
+					<td style="text-align: center">
+							{%= format_currency(data[i]["outstanding"].toFixed(), data[i]["currency"]).split(".")[0] %}
+					</td>
+					<td style="text-align: right">	
+						{%= data[i]["party"]?data[i]["party"].split("-",2)[0]:"" %}
+					</td>
+
+					<td></td>
+									
+				</tr>
+			{% } %}
+		</tbody>
+	</table>
