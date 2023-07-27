@@ -63,15 +63,16 @@ def make_acc_dimensions_offsetting_entry(gl_map):
 	offsetting_entries = []
 	for gle in gl_map:
 		for dimension in accounting_dimensions_to_offset:
-			offsetting_account = dimension.offsetting_account
 			offsetting_entry = gle.copy()
+			debit = flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0
+			credit = flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0
 			offsetting_entry.update(
 				{
-					"account": offsetting_account,
-					"debit": flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0,
-					"credit": flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0,
-					"debit_in_account_currency": flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0,
-					"credit_in_account_currency": flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0,
+					"account": dimension.offsetting_account,
+					"debit": debit,
+					"credit": credit,
+					"debit_in_account_currency": debit,
+					"credit_in_account_currency": credit,
 					"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension.name),
 					"against_voucher": None,
 				}
@@ -88,7 +89,7 @@ def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
 		frappe.qb.from_(acc_dimension)
 		.inner_join(dimension_detail)
 		.on(acc_dimension.name == dimension_detail.parent)
-		.select(acc_dimension.fieldname, dimension_detail.offsetting_account)
+		.select(acc_dimension.fieldname, acc_dimension.name, dimension_detail.offsetting_account)
 		.where(
 			(acc_dimension.disabled == 0)
 			& (dimension_detail.company == company)
