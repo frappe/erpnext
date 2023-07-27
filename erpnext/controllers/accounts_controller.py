@@ -995,7 +995,7 @@ class AccountsController(TransactionBase):
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-							create_gain_loss_journal(
+							je = create_gain_loss_journal(
 								self.company,
 								arg.get("party_type"),
 								arg.get("party"),
@@ -1010,6 +1010,11 @@ class AccountsController(TransactionBase):
 								self.doctype,
 								self.name,
 								arg.get("idx"),
+							)
+							frappe.msgprint(
+								_("Exchange Gain/Loss amount has been booked through {0}").format(
+									get_link_to_form("Journal Entry", je)
+								)
 							)
 
 			if self.get("doctype") == "Payment Entry":
@@ -1068,7 +1073,7 @@ class AccountsController(TransactionBase):
 							"Company", self.company, "exchange_gain_loss_account"
 						)
 
-						create_gain_loss_journal(
+						je = create_gain_loss_journal(
 							self.company,
 							self.party_type,
 							self.party,
@@ -1084,7 +1089,11 @@ class AccountsController(TransactionBase):
 							self.name,
 							d.idx,
 						)
-			# frappe.throw("stopping...")
+						frappe.msgprint(
+							_("Exchange Gain/Loss amount has been booked through {0}").format(
+								get_link_to_form("Journal Entry", je)
+							)
+						)
 
 	def make_precision_loss_gl_entry(self, gl_entries):
 		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
