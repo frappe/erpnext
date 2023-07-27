@@ -102,7 +102,7 @@ erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
 	}
 
 	onScriptLoaded(me) {
-		me.linkHandler = Plaid.create({
+		me.linkHandler = Plaid.create({ // eslint-disable-line no-undef
 			env: me.plaid_env,
 			token: me.token,
 			onSuccess: me.plaid_success

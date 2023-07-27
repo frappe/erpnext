@@ -49,7 +49,8 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "item_code.item_group",
@@ -78,7 +79,8 @@
    "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "item_code.item_name",
@@ -180,20 +182,22 @@
    "in_standard_filter": 1,
    "label": "Warehouse",
    "mandatory_depends_on": "eval:doc.type_of_transaction != \"Maintenance\"",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "search_index": 1
   },
   {
    "fieldname": "type_of_transaction",
    "fieldtype": "Select",
    "label": "Type of Transaction",
    "options": "\nInward\nOutward\nMaintenance\nAsset Repair",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
-   "options": "SBB-.####"
+   "options": "SABB-.########"
   },
   {
    "default": "0",
@@ -244,7 +248,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-10 20:02:42.964309",
+ "modified": "2023-07-26 12:56:03.072224",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",

@@ -1,5 +1,4 @@
 Total Costing Amount,Monto Total Calculado,
-Leave Policy Details,Detalles de Política de Licencia,
 Mode of Payments,Forma de pago,
 Student Group Student,Alumno de Grupo de Estudiantes,
 % Installed,% Instalado,
@@ -12,9 +11,7 @@ Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas 
 Support Hour Distribution,Distribución de Hora de Soporte
 Student Group Strength,Fortaleza de Grupo Estudiante,
 Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
-Leave Type {0} cannot be allocated since it is leave without pay,Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga,
 The payment gateway account in plan {0} is different from the payment gateway account in this payment request,La cuenta para pasarela de pago en el plan {0} es diferente de la cuenta de pasarela de pago en en esta petición de pago,
-Show Salary Slip,Mostrar Recibo de Nómina,
 Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas,
 "Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
@@ -57,10 +54,8 @@ La tasa impositiva que se defina aquí será la tasa de gravamen predeterminada 
  8. Línea de referencia: Si se basa en ""Línea anterior al total"" se puede seleccionar el número de la fila que será tomado como base para este cálculo (por defecto es la fila anterior).
  9. Considerar impuesto o cargo para: En esta sección se puede especificar si el impuesto / cargo es sólo para la valoración (no una parte del total) o sólo para el total (no agrega valor al elemento) o para ambos.
  10. Añadir o deducir: Si usted quiere añadir o deducir el impuesto."
-Leave Type {0} cannot be carry-forwarded,Tipo de Permiso {0} no se puede arrastar o trasladar,
 Gain/Loss on Asset Disposal,Ganancia/Pérdida por la venta de activos,
 Specify Exchange Rate to convert one currency into another,Especificar el Tipo de Cambio para convertir de una divisa a otra,
-Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,"Sólo Solicitudes de Permiso con estado ""Aprobado"" y ""Rechazado"" puede ser presentado"
 Loyalty Program,Programa de Lealtad,
 Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes,
 "Service Item,Type,frequency and expense amount are required","El Artículo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos"
@@ -73,12 +68,9 @@ Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que
 "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Ejemplo: ABCD. #####. Si se establece una serie y no se menciona el número de lote en las transacciones, se creará un número de lote automático basado en esta serie. Si siempre quiere mencionar explícitamente el número de lote para este artículo, déjelo en blanco. Nota: esta configuración tendrá prioridad sobre el Prefijo de denominación de serie en Configuración de Inventario."
 Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
 "For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
-Leave Policy Detail,Detalles de política de Licencia,
 "For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
 Payment Plan,Plan de pago,
 Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.,No se pueden cambiar las propiedades de Variantes después de la transacción de inventario. Deberá crear un nuevo artículo para hacer esto.
 Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,La cantidad de existencias para comenzar el procedimiento no está disponible en el almacén. ¿Desea registrar una transferencia de inventario?
 "Company, Payment Account, From Date and To Date is mandatory","Empresa, cuenta de pago, fecha de inicio y fecha final son obligatorios"
-Leave Encashment,Cobro de Permiso,
 Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega,
-Leave Encashment Amount Per Day,Cantidad por día para pago por Ausencia,

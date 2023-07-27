@@ -113,6 +113,23 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	view_serial_batch_nos: function(frm) {
+		let bundle_ids = frm.doc.items.filter(d => d.serial_and_batch_bundle);
+
+		if (bundle_ids?.length) {
+			frm.add_custom_button(__('Serial / Batch Nos'), () => {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"voucher_type": frm.doc.doctype,
+					"from_date": frm.doc.posting_date || frm.doc.transaction_date,
+					"to_date": frm.doc.posting_date || frm.doc.transaction_date,
+					"company": frm.doc.company,
+				};
+				frappe.set_route("query-report", "Serial and Batch Summary");
+			}, __('View'));
+		}
+	},
+
 	add_indicator_for_multicompany: function(frm, info) {
 		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
@@ -383,7 +400,11 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function(date) {
+	get_fiscal_year: function(date, with_dates=false) {
+		if(!date) {
+			date = frappe.datetime.get_today();
+		}
+
 		let fiscal_year = '';
 		frappe.call({
 			method: "erpnext.accounts.utils.get_fiscal_year",
@@ -393,7 +414,10 @@ $.extend(erpnext.utils, {
 			async: false,
 			callback: function(r) {
 				if (r.message) {
-					fiscal_year = r.message[0];
+					if (with_dates)
+						fiscal_year = r.message;
+					else
+						fiscal_year = r.message[0];
 				}
 			}
 		});
@@ -654,7 +678,7 @@ erpnext.utils.update_child_items = function(opts) {
 		})
 	}
 
-	new frappe.ui.Dialog({
+	let dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		size: "extra-large",
 		fields: [
@@ -691,7 +715,9 @@ erpnext.utils.update_child_items = function(opts) {
 			refresh_field("items");
 		},
 		primary_action_label: __('Update')
-	}).show();
+	})
+
+	dialog.show();
 }
 
 erpnext.utils.map_current_doc = function(opts) {

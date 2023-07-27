@@ -126,21 +126,22 @@ class PeriodClosingVoucher(AccountsController):
 	def make_gl_entries(self, get_opening_entries=False):
 		gl_entries = self.get_gl_entries()
 		closing_entries = self.get_grouped_gl_entries(get_opening_entries=get_opening_entries)
-		if gl_entries:
-			if len(gl_entries) > 5000:
-				frappe.enqueue(
-					process_gl_entries,
-					gl_entries=gl_entries,
-					closing_entries=closing_entries,
-					voucher_name=self.name,
-					queue="long",
-				)
-				frappe.msgprint(
-					_("The GL Entries will be processed in the background, it can take a few minutes."),
-					alert=True,
-				)
-			else:
-				process_gl_entries(gl_entries, closing_entries, voucher_name=self.name)
+		if len(gl_entries) > 5000:
+			frappe.enqueue(
+				process_gl_entries,
+				gl_entries=gl_entries,
+				closing_entries=closing_entries,
+				voucher_name=self.name,
+				company=self.company,
+				closing_date=self.posting_date,
+				queue="long",
+			)
+			frappe.msgprint(
+				_("The GL Entries will be processed in the background, it can take a few minutes."),
+				alert=True,
+			)
+		else:
+			process_gl_entries(gl_entries, closing_entries, self.name, self.company, self.posting_date)
 
 	def get_grouped_gl_entries(self, get_opening_entries=False):
 		closing_entries = []
@@ -321,24 +322,22 @@ class PeriodClosingVoucher(AccountsController):
 		return query.run(as_dict=1)
 
 
-def process_gl_entries(gl_entries, closing_entries, voucher_name=None):
+def process_gl_entries(gl_entries, closing_entries, voucher_name, company, closing_date):
 	from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
 		make_closing_entries,
 	)
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	try:
-		make_gl_entries(gl_entries, merge_entries=False)
-		make_closing_entries(gl_entries + closing_entries, voucher_name=voucher_name)
-		frappe.db.set_value(
-			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "gle_processing_status", "Completed"
-		)
+		if gl_entries:
+			make_gl_entries(gl_entries, merge_entries=False)
+
+		make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
+		frappe.db.set_value("Period Closing Voucher", voucher_name, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
-		frappe.db.set_value(
-			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "gle_processing_status", "Failed"
-		)
+		frappe.db.set_value("Period Closing Voucher", voucher_name, "gle_processing_status", "Failed")
 
 
 def make_reverse_gl_entries(voucher_type, voucher_no):
