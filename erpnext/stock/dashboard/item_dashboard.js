@@ -129,8 +129,6 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			context = this.get_item_dashboard_data(data, this.max_count, true);
 		}
 
-		this.max_count = this.max_count;
-
 		// show more button
 		if (data && data.length === (this.page_length + 1)) {
 			this.content.find('.more').removeClass('hidden');

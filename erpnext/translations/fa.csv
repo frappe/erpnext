@@ -13,7 +13,6 @@
 'Total',&#39;جمع&#39;,
 'Update Stock' can not be checked because items are not delivered via {0},'به روز رسانی موجودی'نمی تواند انتخاب شود ، زیرا موارد از طریق تحویل نمی {0},
 'Update Stock' cannot be checked for fixed asset sale,"""به روز رسانی انبار می تواند برای فروش دارایی ثابت شود چک",
-) for {0},) برای {0},
 1 exact match.,1 مسابقه دقیق,
 90-Above,90-بالاتر از,
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,یک گروه مشتری با نام مشابهی وجود دارد. لطا نام مشتری را تغییر دهید یا نام گروه مشتری را اصلاح نمایید.,
@@ -22,7 +21,6 @@ A Lead requires either a person's name or an organization's name,یک سرب ی�
 A customer with the same name already exists,یک مشتری با همین نام قبلا وجود دارد,
 A question must have more than one options,یک سوال باید بیش از یک گزینه داشته باشد,
 A qustion must have at least one correct options,یک کلاهبرداری حداقل باید یک گزینه صحیح داشته باشد,
-A {0} exists between {1} and {2} (,A {0} بین {1} و {2} (,
 A4,A4,
 API Endpoint,نقطه پایانی API,
 API Key,کلید API,
@@ -33,7 +31,6 @@ Abbreviation is mandatory,مخفف الزامی است,
 About the Company,درباره شرکت,
 About your company,درباره شرکت شما,
 Above,در بالا,
-Absent,غایب,
 Academic Term,ترم تحصیلی,
 Academic Term: ,شرایط تحصیلی:,
 Academic Year,سال تحصیلی,
@@ -85,7 +82,6 @@ Accounts Receivable,حسابهای دریافتنی,
 Accounts Receivable Summary,خلاصه حسابهای دریافتنی,
 Accounts User,کاربر حسابها,
 Accounts table cannot be blank.,جدول حسابها نمی تواند خالی باشد.,
-Accrual Journal Entry for salaries from {0} to {1},ورود مجله Accruable برای حقوق از {0} به {1},
 Accumulated Depreciation,استهلاک انباشته,
 Accumulated Depreciation Amount,انباشته مبلغ استهلاک,
 Accumulated Depreciation as on,انباشته استهلاک به عنوان در,
@@ -131,10 +127,8 @@ Add cards or custom sections on homepage,کارت یا بخش های سفارش�
 Add more items or open full form,اضافه کردن آیتم های بیشتر و یا به صورت کامل باز,
 Add notes,یادداشت ها را اضافه کنید,
 Add the rest of your organization as your users. You can also add invite Customers to your portal by adding them from Contacts,اضافه کردن بقیه سازمان خود را به عنوان کاربران خود را. شما همچنین می توانید دعوت مشتریان به پورتال خود را اضافه کنید با اضافه کردن آنها از اطلاعات تماس,
-Add to Details,اضافه کردن به جزئیات,
 Add/Remove Recipients,اضافه کردن / حذف دریافت کنندگان,
 Added,اضافه شده,
-Added to details,به جزئیات اضافه شده است,
 Added {0} users,اضافه شده {0} کاربران,
 Additional Salary Component Exists.,مؤلفه حقوق اضافی موجود است.,
 Address,نشانی,
@@ -182,7 +176,6 @@ All Day,تمام روز,
 All Departments,همه گروه ها,
 All Healthcare Service Units,همه ی سرویس های بهداشتی,
 All Item Groups,همه گروه مورد,
-All Jobs,همه مشاغل,
 All Products,همه محصولات,
 All Products or Services.,همه محصولات یا خدمات.,
 All Student Admissions,همه پذیرش دانشجو,
@@ -196,7 +189,6 @@ All other ITC,همه ITC دیگر,
 All the mandatory Task for employee creation hasn't been done yet.,تمام وظایف اجباری برای ایجاد کارمند هنوز انجام نشده است.,
 Allocate Payment Amount,اختصاص مبلغ پرداخت,
 Allocated Amount,مقدار اختصاص داده شده,
-Allocated Leaves,برگ های اختصاص یافته,
 Allocating leaves...,برگزیدن برگ ...,
 Already record exists for the item {0},قبلا ثبت برای آیتم {0} وجود دارد,
 "Already set default in pos profile {0} for user {1}, kindly disabled default",در حال حاضر پیش فرض در پروفایل پروفایل {0} برای کاربر {1} تنظیم شده است، به طور پیش فرض غیر فعال شده است,
@@ -221,7 +213,6 @@ An error occurred during the update process,یک خطا در طول فرایند
 Analyst,روانکاو,
 Analytics,تجزیه و تحلیل ترافیک,
 Annual Billing: {0},صدور صورت حساب سالانه: {0},
-Annual Salary,حقوق سالانه,
 Anonymous,ناشناس,
 Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' for fiscal year {4},یکی دیگر از حسابهای بودجه {0} در حال حاضر در برابر {1} &#39;{2}&#39; و حساب &#39;{3}&#39; برای سال مالی {4} وجود دارد,
 Another Period Closing Entry {0} has been made after {1},یکی دیگر از ورودی اختتامیه دوره {0} شده است پس از ساخته شده {1},
@@ -233,10 +224,7 @@ Applicable For,قابل استفاده برای,
 Applicable if the company is a limited liability company,اگر شرکت یک شرکت با مسئولیت محدود باشد قابل اجرا است,
 Applicable if the company is an Individual or a Proprietorship,اگر شرکت یک فرد یا مالکیت مالکیت باشد ، قابل اجرا است,
 Application of Funds (Assets),استفاده از وجوه (دارایی),
-Application period cannot be across two allocation records,دوره درخواست نمی تواند در دو رکورد تخصیص باشد,
-Application period cannot be outside leave allocation period,دوره نرم افزار می تواند دوره تخصیص مرخصی در خارج نیست,
 Applied,کاربردی,
-Apply Now,درخواست کن,
 Appointment Confirmation,تایید انتصاب,
 Appointment Duration (mins),مدت زمان انتصاب (دقیقه),
 Appointment Type,نوع انتصاب,
@@ -244,10 +232,6 @@ Appointment {0} and Sales Invoice {1} cancelled,انتصاب {0} و صورتحس
 Appointments and Encounters,ملاقات ها و مصاحبه ها,
 Appointments and Patient Encounters,ملاقات ها و برخورد های بیمار,
 Appraisal {0} created for Employee {1} in the given date range,ارزیابی {0} برای کارمند {1} در محدوده تاریخ ایجاد شود,
-Apprentice,شاگرد,
-Approval Status,وضعیت تایید,
-Approval Status must be 'Approved' or 'Rejected',وضعیت تایید باید &quot;تایید&quot; یا &quot;رد&quot;,
-Approve,تایید,
 Approving Role cannot be same as role the rule is Applicable To,تصویب نقش نمی تواند همان نقش حکومت قابل اجرا است به,
 Approving User cannot be same as user the rule is Applicable To,تصویب کاربر نمی تواند همان کاربر حکومت قابل اجرا است به,
 "Apps using current key won't be able to access, are you sure?",برنامه های کاربردی با استفاده از کلید فعلی قادر به دسترسی نخواهند بود، آیا مطمئن هستید؟,
@@ -258,7 +242,6 @@ As On Date,همانطور که در تاریخ,
 As Supervisor,به عنوان سرپرست,
 As per rules 42 & 43 of CGST Rules,طبق قوانین 42 و 43 از قوانین CGST,
 As per section 17(5),طبق بخش 17 (5),
-As per your assigned Salary Structure you cannot apply for benefits,همانطور که در ساختار حقوق شما تعیین شده است، نمی توانید برای مزایا درخواست دهید,
 Assessment,ارزیابی,
 Assessment Criteria,معیارهای ارزیابی,
 Assessment Group,گروه ارزیابی,
@@ -284,11 +267,7 @@ Asset scrapped via Journal Entry {0},دارایی اوراق از طریق ور�
 Asset {0} does not belong to company {1},دارایی {0} به شرکت تعلق ندارد {1},
 Asset {0} must be submitted,دارایی {0} باید ارائه شود,
 Assets,دارایی های,
-Assign,اختصاص دادن,
-Assign Salary Structure,تعیین ساختار حقوق و دستمزد,
 Assign To,اختصاص به,
-Assign to Employees,اختصاص به کارمندان,
-Assigning Structures...,اختصاص ساختارها ...,
 Associate,وابسته,
 At least one mode of payment is required for POS invoice.,باید حداقل یک حالت پرداخت برای فاکتور POS مورد نیاز است.,
 Atleast one item should be entered with negative quantity in return document,حداقل یک مورد باید با مقدار منفی در سند وارد بازگشت,
@@ -297,14 +276,10 @@ Atleast one warehouse is mandatory,حداقل یک انبار الزامی اس�
 Attach Logo,ضمیمه لوگو,
 Attachment,دلبستگی,
 Attachments,فایل های پیوست,
-Attendance,حضور,
-Attendance From Date and Attendance To Date is mandatory,حضور و غیاب حضور و غیاب از تاریخ و به روز الزامی است,
 Attendance can not be marked for future dates,حضور و غیاب می تواند برای تاریخ های آینده باشد مشخص شده,
 Attendance date can not be less than employee's joining date,تاریخ حضور و غیاب نمی تواند کمتر از تاریخ پیوستن کارکنان,
 Attendance for employee {0} is already marked,حضور و غیاب کارکنان برای {0} در حال حاضر مشخص شده,
-Attendance for employee {0} is already marked for this day,حضور و غیاب برای کارکنان {0} در حال حاضر برای این روز را گرامی می,
 Attendance has been marked successfully.,حضور و غیاب با موفقیت برگزار شده است.,
-Attendance not submitted for {0} as it is a Holiday.,حضور برای {0} ارائه نشده است به عنوان یک تعطیلات.,
 Attendance not submitted for {0} as {1} on leave.,حضور به دلیل {0} به عنوان {1} در بازنشستگی ارائه نشده است.,
 Attribute table is mandatory,جدول ویژگی الزامی است,
 Attribute {0} selected multiple times in Attributes Table,ویژگی {0} چند بار در صفات جدول انتخاب,
@@ -349,7 +324,6 @@ Bank,بانک,
 Bank Account,حساب بانکی,
 Bank Accounts,حساب های بانکی,
 Bank Draft,حواله بانکی,
-Bank Entries,مطالب بانک,
 Bank Name,نام بانک,
 Bank Overdraft Account,بانک حساب چک بی محل,
 Bank Reconciliation,مغایرت گیری بانک,
@@ -363,7 +337,6 @@ Banking,بانکداری,
 Banking and Payments,بانکداری و پرداخت,
 Barcode {0} already used in Item {1},بارکد {0} در حال حاضر در مورد استفاده {1},
 Barcode {0} is not a valid {1} code,بارکد {0} یک کد معتبر {1} نیست,
-Base,پایه,
 Base URL,URL پایه,
 Based On,بر اساس,
 Based On Payment Terms,براساس شرایط پرداخت,
@@ -380,7 +353,6 @@ Batch {0} of Item {1} is disabled.,دسته {0} مورد {1} غیرفعال اس
 Batch: ,دسته:,
 Batches,دسته,
 Become a Seller,تبدیل به یک فروشنده,
-Beginner,مبتدی,
 Bill,لایحه,
 Bill Date,تاریخ صورتحساب,
 Bill No,شماره صورتحساب,
@@ -398,12 +370,10 @@ Billing currency must be equal to either default company's currency or party acc
 Bills raised by Suppliers.,لوایح مطرح شده توسط تولید کنندگان.,
 Bills raised to Customers.,لوایح مطرح شده به مشتریان.,
 Biotechnology,بیوتکنولوژی,
-Birthday Reminder,یادآوری تولد,
 Black,سیاه,
 Blanket Orders from Costumers.,سفارشات پتو از مشتریان.,
 Block Invoice,مسدود کردن صورتحساب,
 Boms,BOM ها,
-Bonus Payment Date cannot be a past date,تاریخ پرداخت پاداش نمی تواند تاریخ گذشته باشد,
 Both Trial Period Start Date and Trial Period End Date must be set,هر دو تاریخچه تاریخچه دادگاه و تاریخ پایان تاریخ پرونده باید تعیین شود,
 Both Warehouse must belong to same Company,هر دو انبار باید به همان شرکت تعلق,
 Branch,شاخه,
@@ -434,7 +404,6 @@ CGST Amount,مقدار CGST,
 CRM,CRM,
 CWIP Account,حساب CWIP,
 Calculated Bank Statement balance,محاسبه تعادل بیانیه بانک,
-Calls,تماس,
 Campaign,کمپین,
 Can be approved by {0},می توان با تصویب {0},
 "Can not filter based on Account, if grouped by Account",می توانید بر روی حساب نمی فیلتر بر اساس، در صورتی که توسط حساب گروه بندی,
@@ -471,7 +440,6 @@ Cannot deduct when category is for 'Valuation' or 'Valuation and Total',نمی �
 Cannot deduct when category is for 'Valuation' or 'Vaulation and Total',نمی توانید کسر وقتی دسته است برای ارزش گذاری &quot;یا&quot; Vaulation و مجموع:,
 "Cannot delete Serial No {0}, as it is used in stock transactions",نمی توانید حذف سریال نه {0}، آن را به عنوان در معاملات سهام مورد استفاده,
 Cannot enroll more than {0} students for this student group.,نمی توانید بیش از {0} دانش آموزان برای این گروه از دانشجویان ثبت نام.,
-Cannot find active Leave Period,می توانید دوره فعال خروج را پیدا نکنید,
 Cannot produce more Item {0} than Sales Order quantity {1},می تواند مورد دیگر {0} از مقدار سفارش فروش تولید نمی {1},
 Cannot promote Employee with status Left,کارمند با وضعیت چپ را نمیتوان ارتقا داد,
 Cannot refer row number greater than or equal to current row number for this Charge type,می توانید تعداد ردیف بزرگتر یا مساوی به تعداد سطر فعلی برای این نوع شارژ مراجعه نمی,
@@ -498,7 +466,6 @@ Cash Flow from Operations,جریان وجوه نقد از عملیات,
 Cash In Hand,پول نقد در دست,
 Cash or Bank Account is mandatory for making payment entry,نقدی یا حساب بانکی برای ساخت پرداخت ورود الزامی است,
 Cashier Closing,بسته شدن قدیس,
-Casual Leave,مرخصی گاه به گاه,
 Category,دسته,
 Category Name,نام بخش,
 Caution,احتیاط,
@@ -530,7 +497,6 @@ Child warehouse exists for this warehouse. You can not delete this warehouse.,ا
 Circular Reference Error,خطا مرجع مدور,
 City,شهرستان,
 City/Town,شهرستان / شهر,
-Claimed Amount,مقدار ادعا شده,
 Clay,خاک رس,
 Clear filters,فیلترها را پاک کنید,
 Clear values,مقادیر پاک کنید,
@@ -572,7 +538,6 @@ Company currencies of both the companies should match for Inter Company Transact
 Company is manadatory for company account,شرکت برای شرکت حسابداری است,
 Company name not same,نام شرکت همان نیست,
 Company {0} does not exist,شرکت {0} وجود ندارد,
-Compensatory Off,جبرانی فعال,
 Compensatory leave request days not in valid holidays,درخواست روز بازپرداخت جبران خسارت در تعطیلات معتبر,
 Complaint,شکایت,
 Completion Date,تاریخ تکمیل,
@@ -596,7 +561,6 @@ Consumed Qty,مصرف تعداد,
 Consumer Products,محصولات مصرفی,
 Contact,تماس,
 Contact Details,اطلاعات تماس,
-Contact Number,شماره تماس,
 Contact Us,تماس با ما,
 Content,مقدار,
 Content Masters,کارشناسی ارشد محتوا,
@@ -636,7 +600,6 @@ Could not solve weighted score function. Make sure the formula is valid.,تاب�
 Could not submit some Salary Slips,نمیتوان برخی از لغزشهای حقوق را ارائه داد,
 "Could not update stock, invoice contains drop shipping item.",می تواند سهام به روز رسانی نیست، فاکتور شامل آیتم افت حمل و نقل.,
 Country wise default Address Templates,کشور به طور پیش فرض عاقلانه آدرس قالب,
-Course,دوره,
 Course Code: ,کد درس:,
 Course Enrollment {0} does not exists,ثبت نام دوره {0} وجود ندارد,
 Course Schedule,برنامه های آموزشی,
@@ -645,7 +608,6 @@ Cr,کروم,
 Create,ساختن,
 Create BOM,BOM ایجاد کنید,
 Create Delivery Trip,سفر تحویل را ایجاد کنید,
-Create Disbursement Entry,ورود ورودی را ایجاد کنید,
 Create Employee,ایجاد کارمند,
 Create Employee Records,درست کارمند سوابق,
 "Create Employee records to manage leaves, expense claims and payroll",درست سوابق کارمند به مدیریت برگ، ادعاهای هزینه و حقوق و دستمزد,
@@ -668,8 +630,6 @@ Create Print Format,درست چاپ فرمت,
 Create Purchase Order,ایجاد سفارش خرید,
 Create Purchase Orders,ایجاد سفارشات خرید,
 Create Quotation,ایجاد استعلام,
-Create Salary Slip,ایجاد لغزش حقوق,
-Create Salary Slips,ایجاد لغزش حقوق,
 Create Sales Invoice,ایجاد فاکتور فروش,
 Create Sales Order,ایجاد سفارش فروش,
 Create Sales Orders to help you plan your work and deliver on-time,برای کمک به شما در برنامه ریزی کار و تحویل به موقع ، سفارشات فروش ایجاد کنید,
@@ -690,8 +650,6 @@ Create rules to restrict transactions based on values.,ایجاد قوانین �
 Created {0} scorecards for {1} between: ,{0} کارت امتیازی برای {1} ایجاد شده بین:,
 Creating Company and Importing Chart of Accounts,ایجاد شرکت و وارد کردن نمودار حساب,
 Creating Fees,ایجاد هزینه ها,
-Creating Payment Entries......,ایجاد مطالب پرداخت ......,
-Creating Salary Slips...,ایجاد حقوق و دستمزد ...,
 Creating student groups,ایجاد گروه های دانشجویی,
 Creating {0} Invoice,ایجاد {0} صورتحساب,
 Credit,اعتبار,
@@ -718,10 +676,8 @@ Currency is required for Price List {0},برای اطلاع از قیمت ارز
 Currency of the Closing Account must be {0},نرخ ارز از بستن حساب باید {0},
 Currency of the price list {0} must be {1} or {2},ارزش لیست قیمت {0} باید {1} یا {2} باشد,
 Currency should be same as Price List Currency: {0},ارز باید مشابه با لیست قیمت ارز باشد: {0},
-Current,جاری,
 Current Assets,دارایی های نقد,
 Current BOM and New BOM can not be same,BOM BOM کنونی و جدید را نمی توان همان,
-Current Job Openings,فرصت های شغلی فعلی,
 Current Liabilities,بدهی های جاری,
 Current Qty,تعداد کنونی,
 Current invoice {0} is missing,فاکتور فعلی {0} گم شده است,
@@ -748,14 +704,11 @@ Customize Homepage Sections,بخشهای صفحه را شخصی سازی کنی�
 Customizing Forms,فرم سفارشی,
 Daily Project Summary for {0},خلاصه پروژه روزانه برای {0},
 Daily Reminders,یادآوری روزانه,
-Daily Work Summary,خلاصه کار روزانه,
-Daily Work Summary Group,خلاصه گروه روزانه,
 Data Import and Export,اطلاعات واردات و صادرات,
 Data Import and Settings,وارد کردن داده ها و تنظیمات,
 Database of potential customers.,پایگاه داده از مشتریان بالقوه است.,
 Date Format,قالب تاریخ,
 Date Of Retirement must be greater than Date of Joining,تاریخ بازنشستگی باید از تاریخ پیوستن بیشتر,
-Date is repeated,تاریخ تکرار شده است,
 Date of Birth,تاریخ تولد,
 Date of Birth cannot be greater than today.,تاریخ تولد نمی تواند بیشتر از امروز.,
 Date of Commencement should be greater than Date of Incorporation,تاریخ شروع باید بیشتر از تاریخ ثبت نام باشد,
@@ -766,7 +719,6 @@ Datetime,زمان قرار,
 Day,روز,
 Debit,بدهی,
 Debit ({0}),بده ({0}),
-Debit A/C Number,Debit A / C شماره,
 Debit Account,حساب بانکی,
 Debit Note,بدهی توجه داشته باشید,
 Debit Note Amount,دبیت توجه مقدار,
@@ -776,7 +728,6 @@ Debit and Credit not equal for {0} #{1}. Difference is {2}.,بدهی و اعتب
 Debtors,بدهکاران,
 Debtors ({0}),بدهکاران ({0}),
 Declare Lost,اعلام گمشده,
-Deduction,کسر,
 Default Activity Cost exists for Activity Type - {0},هزینه به طور پیش فرض برای فعالیت نوع فعالیت وجود دارد - {0},
 Default BOM ({0}) must be active for this item or its template,به طور پیش فرض BOM ({0}) باید برای این آیتم به و یا قالب آن فعال باشد,
 Default BOM for {0} not found,BOM به طور پیش فرض برای {0} یافت نشد,
@@ -864,7 +815,6 @@ Doc Name,نام فیلم کارگردان تهیه کننده,
 Doc Type,نوع فیلم کارگردان تهیه کننده,
 Docs Search,جستجوی سند,
 Document Name,نام سند,
-Document Status,وضعیت سند,
 Document Type,نوع سند,
 Domain,دامنه,
 Domains,دامنه,
@@ -894,7 +844,6 @@ ERPNext Demo,ERPNext نسخه ی نمایشی,
 ERPNext Settings,تنظیمات ERPNext,
 Earliest,قدیمیترین,
 Earnest Money,بیعانه,
-Earning,سود,
 Edit,ویرایش کنید,
 Edit Publishing Details,ویرایش جزئیات انتشار,
 "Edit in full page for more options like assets, serial nos, batches etc.",ویرایش در صفحه کامل برای گزینه های بیشتر مانند دارایی، شماره سریال، دسته و غیره,
@@ -916,25 +865,15 @@ Email Template,قالب ایمیل,
 Email not found in default contact,ایمیل در ارتباط پیش فرض یافت نشد,
 Email sent to {0},ایمیل فرستاده {0},
 Employee,کارمند,
-Employee A/C Number,شماره A / C کارمند,
 Employee Advances,پیشرفت کارمند,
-Employee Benefits,مزایای کارکنان,
-Employee Grade,درجه کارمند,
 Employee ID,شناسه کارمند,
 Employee Lifecycle,طول عمر کارمند,
 Employee Name,نام کارمند,
 Employee Promotion cannot be submitted before Promotion Date ,ارتقاء کارکنان نمی تواند قبل از تاریخ ارتقاء ارائه شود,
-Employee Referral,ارجاع کارمند,
 Employee Transfer cannot be submitted before Transfer Date ,انتقال کارفرما نمی تواند قبل از تاریخ انتقال ارسال شود,
 Employee cannot report to himself.,کارمند نمی تواند به خود گزارش دهید.,
-Employee relieved on {0} must be set as 'Left',کارمند رها در {0} باید تنظیم شود به عنوان چپ,
-Employee {0} already submited an apllication {1} for the payroll period {2},کارمند {0} قبلا یک آپلود {1} را برای مدت زمان پرداخت {2},
 Employee {0} has already applied for {1} between {2} and {3} : ,کارکنان {0} قبلا برای {1} بین {2} و {3} درخواست شده است:,
-Employee {0} has no maximum benefit amount,کارمند {0} مقدار حداکثر سود ندارد,
-Employee {0} is not active or does not exist,کارمند {0} غیر فعال است و یا وجود ندارد,
-Employee {0} is on Leave on {1},کارمند {0} در حال ترک در {1},
 Employee {0} of grade {1} have no default leave policy,کارمند {0} درجه {1} هیچ خط مشی پیش فرض ترک ندارد,
-Employee {0} on Half day on {1},کارمند {0} در روز نیمه در {1},
 Enable,قادر ساختن,
 Enable / disable currencies.,فعال / غیر فعال کردن ارز.,
 Enabled,فعال,
@@ -945,7 +884,6 @@ End Date cannot be before Start Date.,تاریخ پایان نمی تواند ق
 End Year,پایان سال,
 End Year cannot be before Start Year,پایان سال نمی تواند قبل از شروع سال می شود,
 End on,پایان دادن به,
-End time cannot be before start time,زمان پایان نمی تواند قبل از زمان شروع باشد,
 Ends On date cannot be before Next Contact Date.,پایان می دهد تاریخ نمی تواند قبل از تاریخ تماس بعدی.,
 Energy,انرژی,
 Engineer,مهندس,
@@ -966,11 +904,8 @@ Error evaluating the criteria formula,خطا در ارزیابی فرمول مع
 Error in formula or condition: {0},اشکال در فرمول یا شرایط: {0},
 Error: Not a valid id?,خطا: نه یک شناسه معتبر است؟,
 Estimated Cost,هزینه تخمین زده شده,
-Evaluation,ارزیابی,
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:",حتی اگر قوانین قیمت گذاری های متعدد را با بالاترین اولویت وجود دارد، سپس زیر اولویت های داخلی می شود:,
 Event,واقعه,
-Event Location,محل رویداد,
-Event Name,نام رخداد,
 Exchange Gain/Loss,تبادل کاهش / افزایش,
 Exchange Rate Revaluation master.,استاد ارزشیابی نرخ ارز.,
 Exchange Rate must be same as {0} {1} ({2}),نرخ ارز باید به همان صورت {0} {1} ({2}),
@@ -987,8 +922,6 @@ Expense,هزینه,
 Expense / Difference account ({0}) must be a 'Profit or Loss' account,حساب هزینه / تفاوت ({0}) باید یک حساب کاربری &#39;، سود و ضرر باشد,
 Expense Account,حساب هزینه,
 Expense Claim,ادعای هزینه,
-Expense Claim for Vehicle Log {0},ادعای هزینه برای ورود خودرو {0},
-Expense Claim {0} already exists for the Vehicle Log,هزینه ادعای {0} در حال حاضر برای ورود خودرو وجود دارد,
 Expense Claims,ادعاهای هزینه,
 Expense account is mandatory for item {0},حساب هزینه برای آیتم الزامی است {0},
 Expenses,مخارج,
@@ -1026,8 +959,6 @@ Fetching records......,ثبت پرونده ها ......,
 Field Name,نام درست,
 Fieldname,Fieldname,
 Fields,زمینه,
-Fill the form and save it,فرم را پر کنید و آن را ذخیره کنید,
-Filter Employees By (Optional),فیلتر کارمندان توسط (اختیاری),
 "Filter Fields Row #{0}: Fieldname <b>{1}</b> must be of type ""Link"" or ""Table MultiSelect""",Filter Fields Row Row # {0}: نام زمینه <b>{1}</b> باید از نوع &quot;پیوند&quot; یا &quot;Table MultiSelect&quot; باشد,
 Filter Total Zero Qty,تعداد کل صفر را فیلتر کنید,
 Finance Book,کتاب مالی,
@@ -1049,7 +980,6 @@ Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {
 Fiscal Year Start Date should be one year earlier than Fiscal Year End Date,تاریخ شروع سال مالی باید یک سال زودتر از تاریخ پایان سال مالی باشد,
 Fiscal Year {0} does not exist,سال مالی {0} وجود ندارد,
 Fiscal Year {0} is required,سال مالی {0} مورد نیاز است,
-Fiscal Year {0} not found,سال مالی {0} یافت نشد,
 Fixed Asset,دارائی های ثابت,
 Fixed Asset Item must be a non-stock item.,مورد دارائی های ثابت باید یک آیتم غیر سهام باشد.,
 Fixed Assets,دارایی های ثابت,
@@ -1058,11 +988,9 @@ Following accounts might be selected in GST Settings:,حسابهای زیر مم
 Following course schedules were created,برنامه های دوره ای ایجاد شد,
 Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master,مورد زیر {0} به عنوان {1} علامت گذاری نشده است. شما می توانید آنها را به عنوان {1} مورد از استاد مورد خود را فعال کنید,
 Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,موارد زیر {0} به عنوان {1} علامتگذاری نشده اند. شما می توانید آنها را به عنوان {1} مورد از استاد مورد خود را فعال کنید,
-Food,غذا,
 "Food, Beverage & Tobacco",مواد غذایی، آشامیدنی و دخانیات,
 For,برای,
 "For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.",برای آیتم های &#39;محصولات بسته نرم افزاری، انبار، سریال و بدون دسته بدون خواهد شد از&#39; بسته بندی فهرست جدول در نظر گرفته. اگر انبار و دسته ای بدون برای همه آیتم ها بسته بندی مورد هر &#39;محصولات بسته نرم افزاری &quot;هستند، این ارزش ها را می توان در جدول آیتم های اصلی وارد شده، ارزش خواهد شد کپی شده به&#39; بسته بندی فهرست جدول.,
-For Employee,برای کارمند,
 For Quantity (Manufactured Qty) is mandatory,برای کمیت (تعداد تولیدی) الزامی است,
 For Supplier,منبع,
 For Warehouse,ذخیره سازی,
@@ -1087,8 +1015,6 @@ From Date and To Date lie in different Fiscal Year,از تاریخ و تاریخ
 From Date cannot be greater than To Date,از تاریخ نمی تواند بیشتر از به روز,
 From Date must be before To Date,از تاریخ باید قبل از به روز می شود,
 From Date should be within the Fiscal Year. Assuming From Date = {0},از تاریخ باید در سال مالی باشد. با فرض از تاریخ = {0},
-From Date {0} cannot be after employee's relieving Date {1},از تاریخ {0} نمیتواند پس از تخفیف کارمند تاریخ {1},
-From Date {0} cannot be before employee's joining Date {1},از تاریخ {0} نمیتواند قبل از پیوستن کارمند تاریخ {1},
 From Datetime,از تاریخ ساعت,
 From Delivery Note,از تحویل توجه داشته باشید,
 From Fiscal Year,از سال مالی,
@@ -1103,21 +1029,16 @@ From Time Should Be Less Than To Time,از زمان باید کمتر از زم�
 From Time cannot be greater than To Time.,از زمان نمی تواند بیشتر از به زمان.,
 "From a supplier under composition scheme, Exempt and Nil rated",از یک تأمین کننده تحت عنوان ترکیب ، معافیت و نیل امتیاز داده اند,
 From and To dates required,از و به تاریخ های الزامی,
-From date can not be less than employee's joining date,از تاریخ نمیتواند کمتر از تاریخ پیوستن کارکنان باشد,
 From value must be less than to value in row {0},از مقدار باید کمتر از ارزش در ردیف شود {0},
 From {0} | {1} {2},از {0} | {1} {2},
-Fuel Price,قیمت سوخت,
-Fuel Qty,تعداد سوخت,
 Fulfillment,انجام,
 Full,پر شده,
 Full Name,نام و نام خانوادگی,
-Full-time,تمام وقت,
 Fully Depreciated,به طور کامل مستهلک,
 Furnitures and Fixtures,مبلمان و لامپ,
 "Further accounts can be made under Groups, but entries can be made against non-Groups",حساب های بیشتر می تواند در زیر گروه ساخته شده، اما مطالب را می توان در برابر غیر گروه ساخته شده,
 Further cost centers can be made under Groups but entries can be made against non-Groups,مراکز هزینه به علاوه می تواند در زیر گروه ساخته شده اما مطالب را می توان در برابر غیر گروه ساخته شده,
 Further nodes can be only created under 'Group' type nodes,گره علاوه بر این می تواند تنها تحت نوع گره &#39;گروه&#39; ایجاد,
-Future dates not allowed,تاریخ های آینده مجاز نیست,
 GSTIN,GSTIN,
 GSTR3B-Form,GSTR3B-فرم,
 Gain/Loss on Asset Disposal,کاهش / افزایش در دفع دارایی,
@@ -1128,8 +1049,6 @@ General,عمومی,
 General Ledger,لجر عمومی,
 Generate Material Requests (MRP) and Work Orders.,درخواستهای مواد (MRP) و دستور کار را تولید کنید.,
 Generate Secret,ایجاد راز,
-Get Details From Declaration,جزئیات را از اعلامیه دریافت کنید,
-Get Employees,کارمندان را دریافت کنید,
 Get Invocies,دریافت invocies,
 Get Invoices,دریافت فاکتورها,
 Get Invoices based on Filters,فاکتورها را بر اساس فیلترها دریافت کنید,
@@ -1161,7 +1080,6 @@ Grant Application,درخواست گرانت,
 Grant Leaves,گرانت برگ,
 Grant information.,دادن اطلاعات,
 Grocery,خواربار,
-Gross Pay,پرداخت ناخالص,
 Gross Profit,سود ناخالص,
 Gross Profit %,سود ناخالص٪,
 Gross Profit / Loss,سود ناخالص / از دست دادن,
@@ -1181,16 +1099,10 @@ Guardian1 Name,نام Guardian1,
 Guardian2 Email ID,Guardian2 ID ایمیل,
 Guardian2 Mobile No,Guardian2 موبایل بدون,
 Guardian2 Name,نام Guardian2,
-Guest,مهمان,
 HR Manager,مدیریت منابع انسانی,
 HSN,HSN,
 HSN/SAC,HSN / SAC,
-Half Day,نیم روز,
-Half Day Date is mandatory,تاریخ نیمه روز اجباری است,
-Half Day Date should be between From Date and To Date,نیم تاریخ روز باید بین از تاریخ و به روز می شود,
-Half Day Date should be in between Work From Date and Work End Date,تاریخ نود روز باید بین کار از تاریخ و تاریخ پایان کار باشد,
 Half Yearly,نیمی سالانه,
-Half day date should be in between from date and to date,تاریخ نود روز باید بین تاریخ و تاریخ باشد,
 Half-Yearly,نیمه سال,
 Hardware,سخت افزار,
 Head of Marketing and Sales,رئیس بازاریابی و فروش,
@@ -1205,7 +1117,6 @@ Healthcare Service Unit Tree,بخش مراقبت های بهداشتی,
 Healthcare Service Unit Type,نوع واحد مراقبت بهداشتی,
 Healthcare Services,خدمات بهداشتی,
 Healthcare Settings,تنظیمات سلامت,
-Hello,سلام,
 Help Results for,نتایج جستجو برای,
 High,زیاد,
 High Sensitivity,حساسیت بالا,
@@ -1217,9 +1128,6 @@ Hotel Rooms of type {0} are unavailable on {1},اتاق هتل نوع {0} در {
 Hotels,هتل ها,
 Hourly,ساعتی,
 Hours,ساعت ها,
-House rent paid days overlapping with {0},اجاره خانه با هم تلفنی با {0},
-House rented dates required for exemption calculation,خانه تاریخ اجاره برای محاسبه معافیت مورد نیاز است,
-House rented dates should be atleast 15 days apart,تاریخ اجاره خانه باید تا 15 روز فاصله باشد,
 How Pricing Rule is applied?,چگونه قیمت گذاری قانون اعمال می شود؟,
 Hub Category,رده هاب,
 Hub Sync ID,شناسه همگام سازی هاب,
@@ -1289,9 +1197,7 @@ Insufficient Stock,سهام کافی,
 Insurance Start date should be less than Insurance End date,تاریخ بیمه شروع باید کمتر از تاریخ پایان باشد بیمه,
 Integrated Tax,مالیات یکپارچه,
 Inter-State Supplies,لوازم بین دولتی,
-Interest Amount,مقدار بهره,
 Interests,منافع,
-Intern,انترن,
 Internet Publishing,انتشارات اینترنت,
 Intra-State Supplies,لوازم داخل کشور,
 Introduction,معرفی,
@@ -1392,10 +1298,7 @@ Items Filter,آیتم فیلتر,
 Items and Pricing,اقلام و قیمت گذاری,
 Items for Raw Material Request,مواردی برای درخواست مواد اولیه,
 Job Card,کارت کار,
-Job Description,شرح شغل,
-Job Offer,پیشنهاد کار,
 Job card {0} created,کارت کار {0} ایجاد شد,
-Jobs,شغل ها,
 Join,پیوستن,
 Journal Entries {0} are un-linked,ورودی های دفتر {0} مشابه نیستند,
 Journal Entry,ورودی دفتر,
@@ -1432,27 +1335,11 @@ Lead Time Days,سرب زمان روز,
 Lead to Quotation,منجر به عبارت,
 "Leads help you get business, add all your contacts and more as your leads",آگهی های کمک به شما کسب و کار، اضافه کردن اطلاعات تماس خود را و بیشتر به عنوان منجر خود را,
 Learn,فرا گرفتن,
-Leave Approval Notification,اخطار تصویب را ترک کنید,
-Leave Blocked,ترک مسدود,
-Leave Encashment,ترک مجموعه,
 Leave Management,ترک مدیریت,
-Leave Status Notification,اخطار وضعیت را ترک کنید,
-Leave Type,نوع مرخصی,
-Leave Type is madatory,نوع ترک تحصیل کرده است,
-Leave Type {0} cannot be allocated since it is leave without pay,ترک نوع {0} نمی تواند اختصاص داده شود از آن است که بدون حقوق ترک,
-Leave Type {0} cannot be carry-forwarded,نوع ترک {0} نمی تواند حمل فرستاده,
-Leave Type {0} is not encashable,ترک نوع {0} قابل اتصال نیست,
-Leave Without Pay,ترک کنی بدون اینکه پرداخت,
 Leave and Attendance,حضور و غیاب,
 Leave application {0} already exists against the student {1},ترک برنامه {0} در برابر دانش آموز وجود دارد {1},
-"Leave cannot be allocated before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}",می توانید قبل از ترک نمی اختصاص داده شود {0}، به عنوان تعادل مرخصی در حال حاضر شده حمل فرستاده در آینده رکورد تخصیص مرخصی {1},
-"Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}",ترک نمی تواند اعمال شود / قبل از {0} لغو، به عنوان تعادل مرخصی در حال حاضر شده حمل فرستاده در آینده رکورد تخصیص مرخصی {1},
-Leave of type {0} cannot be longer than {1},مرخصی از نوع {0} نمی تواند بیش از {1},
-Leaves,برگها,
-Leaves Allocated Successfully for {0},برگ با موفقیت برای اختصاص {0},
 Leaves has been granted sucessfully,برگ ها به موفقیت آموخته شده اند,
 Leaves must be allocated in multiples of 0.5,برگ باید در تقسیم عددی بر مضرب 0.5 اختصاص داده,
-Leaves per Year,برگ در سال,
 Ledger,دفتر کل,
 Legal,حقوقی,
 Legal Expenses,هزینه های قانونی,
@@ -1461,7 +1348,6 @@ Letter Heads for print templates.,سران نامه برای قالب چاپ.,
 Level,سطح,
 Liability,مسئوليت,
 License,مجوز,
-Lifecycle,چرخه زندگی,
 Limit,حد,
 Limit Crossed,محدودیت عبور,
 Link to Material Request,پیوند به درخواست مواد,
@@ -1525,7 +1411,6 @@ Manufacturing Quantity is mandatory,ساخت تعداد الزامی است,
 Mapping,نقشه برداری,
 Mapping Type,نوع نقشه برداری,
 Mark Absent,علامت گذاری به عنوان غایب,
-Mark Attendance,علامتگذاری حضور,
 Mark Half Day,روز علامت نیم,
 Mark Present,علامت گذاری به عنوان در حال حاضر,
 Marketing,بازار یابی,
@@ -1550,18 +1435,11 @@ Material Request {0} submitted.,درخواست مواد {0} ارسال شد.,
 Material Transfer,انتقال مواد,
 Material Transferred,مواد منتقل شده است,
 Material to Supplier,مواد به کننده,
-Max Exemption Amount cannot be greater than maximum exemption amount {0} of Tax Exemption Category {1},حداکثر مبلغ معافیت نمی تواند بیشتر از مقدار حداکثر معافیت {0} از معافیت مالیاتی دسته {1},
-Max benefits should be greater than zero to dispense benefits,حداکثر مزایا باید بیشتر از صفر باشد تا مزایا را از بین ببرند,
 Max discount allowed for item: {0} is {1}%,حداکثر تخفیف را برای آیتم: {0} {1}٪ است,
 Max: {0},حداکثر: {0},
 Maximum Samples - {0} can be retained for Batch {1} and Item {2}.,حداکثر نمونه - {0} را می توان برای Batch {1} و Item {2} حفظ کرد.,
 Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,حداکثر نمونه - {0} برای Batch {1} و Item {2} در Batch {3} حفظ شده است.,
-Maximum amount eligible for the component {0} exceeds {1},حداکثر واجد شرایط برای کامپوننت {0} بیش از {1},
-Maximum benefit amount of component {0} exceeds {1},مقدار حداکثر مزایای کامپوننت {0} بیش از {1},
-Maximum benefit amount of employee {0} exceeds {1},حداکثر مبلغ مزیت کارمند {0} بیش از {1},
 Maximum discount for Item {0} is {1}%,حداکثر تخفیف برای Item {0} {1}٪ است,
-Maximum leave allowed in the leave type {0} is {1},حداکثر مرخصی مجاز در نوع ترک {0} {1},
-Medical,پزشکی,
 Medical Code,کد پزشکی,
 Medical Code Standard,کد استاندارد پزشکی,
 Medical Department,گروه پزشکی,
@@ -1599,7 +1477,6 @@ Mode of Payment,نحوه پرداخت,
 Mode of Payments,حالت پرداخت,
 Mode of Transport,حالت حمل و نقل,
 Mode of Transportation,روش حمل ونقل,
-Mode of payment is required to make a payment,نحوه پرداخت مورد نیاز است را به پرداخت,
 Model,مدل,
 Moderate Sensitivity,حساسیت متوسط,
 Monday,دوشنبه,
@@ -1607,7 +1484,6 @@ Monthly,ماهیانه,
 Monthly Distribution,توزیع ماهانه,
 More,بیش,
 More Information,اطلاعات بیشتر,
-More than one selection for {0} not allowed,بیش از یک انتخاب برای {0} مجاز نیست,
 More...,بیش...,
 Motion Picture & Video,فیلم و ویدیو,
 Move,حرکت,
@@ -1640,12 +1516,8 @@ Net Change in Equity,تغییر خالص در حقوق صاحبان سهام,
 Net Change in Fixed Asset,تغییر خالص دارائی های ثابت در,
 Net Change in Inventory,تغییر خالص در پرسشنامه,
 Net ITC Available(A) - (B),ITC خالص موجود (A) - (B),
-Net Pay,پرداخت خالص,
-Net Pay cannot be less than 0,پرداخت خالص نمی تواند کمتر از 0,
 Net Profit,سود خالص,
-Net Salary Amount,مبلغ دستمزد خالص,
 Net Total,مجموع خالص,
-Net pay cannot be negative,پرداخت خالص نمی تونه منفی,
 New Account Name,نام حساب,
 New Address,آدرس جدید,
 New BOM,BOM جدید,
@@ -1676,7 +1548,6 @@ No Action,هیچ عملی نیست,
 No Customers yet!,بدون مشتریان هنوز!,
 No Data,بدون اطلاعات,
 No Delivery Note selected for Customer {},هیچ ضمانت تحویل برای مشتری {},
-No Employee Found,هیچ کارمند یافت نشد,
 No Item with Barcode {0},آیتم با بارکد بدون {0},
 No Item with Serial No {0},آیتم با سریال بدون هیچ {0},
 No Items available for transfer,هیچ موردی برای انتقال وجود ندارد,
@@ -1687,14 +1558,11 @@ No Items with Bill of Materials.,هیچ موردی با قبض مواد وجود
 No Permission,بدون اجازه,
 No Remarks,بدون شرح,
 No Result to submit,هیچ نتیجهای برای ارسال وجود ندارد,
-No Salary Structure assigned for Employee {0} on given date {1},بدون ساختار حقوق و دستمزد برای کارمندان {0} در تاریخ داده شده {1},
-No Staffing Plans found for this Designation,هیچ برنامه انکشافی برای این تعیین نشد,
 No Student Groups created.,بدون تشکل های دانشجویی ایجاد شده است.,
 No Students in,هیچ دانشآموزی در,
 No Tax Withholding data found for the current Fiscal Year.,هیچ اطلاعات مالیاتی محروم برای سال مالی جاری یافت نشد.,
 No Work Orders created,بدون سفارش کار ایجاد شده است,
 No accounting entries for the following warehouses,هیچ نوشته حسابداری برای انبار زیر,
-No active or default Salary Structure found for employee {0} for the given dates,فعال یا حقوق و دستمزد به طور پیش فرض ساختار پیدا شده برای کارکنان {0} برای تاریخ داده شده,
 No contacts with email IDs found.,هیچ ارتباطی با شناسه های ایمیل یافت نشد,
 No data for this period,برای این دوره داده ای وجود ندارد,
 No description given,بدون شرح داده می شود,
@@ -1703,7 +1571,6 @@ No gain or loss in the exchange rate,هیچ سود یا زیان در نرخ ا�
 No items listed,بدون موارد ذکر شده,
 No items to be received are overdue,هیچ اقدامی دریافت نمی شود,
 No material request created,درخواست مادری ایجاد نشد,
-No more updates,هیچ به روز رسانی بیشتر,
 No of Interactions,هیچ تعاملات,
 No of Shares,بدون سهام,
 No pending Material Requests found to link for the given items.,هیچ درخواستی در انتظار درخواست برای پیدا کردن لینک برای موارد داده شده یافت نشد.,
@@ -1712,8 +1579,6 @@ No products found.,هیچ محصولی وجود ندارد پیدا شده اس�
 No record found,موردی یافت,
 No records found in the Invoice table,هیچ ثبتی یافت نشد در جدول فاکتور,
 No records found in the Payment table,هیچ ثبتی یافت نشد در جدول پرداخت,
-No replies from,بدون پاسخ از,
-No salary slip found to submit for the above selected criteria OR salary slip already submitted,هیچ لغزش حقوق و دستمزد برای ارائه معیارهای انتخاب شده یا معافیت حقوق و دستمزد در حال حاضر ارائه نشده است,
 No tasks,وظایف,
 No time sheets,بدون ورق زمان,
 No values,هیچ مقداری وجود ندارد,
@@ -1749,8 +1614,6 @@ Note: {0},توجه: {0},
 Notes,یادداشت,
 Nothing is included in gross,هیچ چیز ناخالصی شامل نمی شود,
 Nothing more to show.,هیچ چیز بیشتر نشان می دهد.,
-Nothing to change,چیزی برای تغییر ندارد,
-Notice Period,مقررات دوره,
 Notify Customers via Email,اطلاع از مشتریان از طریق ایمیل,
 Number,عدد,
 Number of Depreciations Booked cannot be greater than Total Number of Depreciations,تعداد Depreciations رزرو نمی تواند بیشتر از تعداد کل Depreciations,
@@ -1767,7 +1630,6 @@ On Hold,در حال برگزاری,
 On Net Total,در مجموع خالص,
 One customer can be part of only single Loyalty Program.,یک مشتری می تواند بخشی از تنها یک برنامه وفاداری باشد.,
 Online Auctions,مزایده آنلاین,
-Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,تنها برنامه های کاربردی با وضعیت ترک &#39;تایید&#39; و &#39;رد&#39; را می توان ارسال,
 "Only the Student Applicant with the status ""Approved"" will be selected in the table below.",فقط متقاضی دانشجویی با وضعیت &quot;تأیید&quot; در جدول زیر انتخاب می شود.,
 Only users with {0} role can register on Marketplace,فقط کاربران با {0} نقش می توانند در Marketplace ثبت نام کنند,
 Open BOM {0},گسترش BOM {0},
@@ -1806,7 +1668,6 @@ Opportunities,فرصت ها,
 Opportunities by lead source,فرصت های منبع سرب,
 Opportunity,فرصت,
 Opportunity Amount,مقدار فرصت,
-Optional Holiday List not set for leave period {0},فهرست تعطیلات اختیاری برای مدت زمان تعطیل تنظیم نمی شود {0},
 "Optional. Sets company's default currency, if not specified.",اختیاری است. مجموعه پیش فرض ارز شرکت، اگر مشخص نشده است.,
 Optional. This setting will be used to filter in various transactions.,اختیاری است. این تنظیم استفاده می شود برای فیلتر کردن در معاملات مختلف است.,
 Options,گزینه,
@@ -1857,7 +1718,6 @@ Paid and Not Delivered,پرداخت و تحویل داده نشده است,
 Parameter,پارامتر,
 Parent Item {0} must not be a Stock Item,مورد پدر و مادر {0} نباید آیتم سهام,
 Parents Teacher Meeting Attendance,دیدار با تئاتر والدین,
-Part-time,پاره وقت,
 Partially Depreciated,نیمه مستهلک,
 Partially Received,تا حدی دریافت شد,
 Party,حزب,
@@ -1867,7 +1727,6 @@ Party Type and Party is mandatory for {0} account,نوع حزب و حزب برا
 Party Type is mandatory,نوع حزب الزامی است,
 Party is mandatory,حزب الزامی است,
 Password,رمز عبور,
-Password policy for Salary Slips is not set,خط مشی رمز عبور برای حقوق و دستمزدها تنظیم نشده است,
 Past Due Date,تاریخ تحویل گذشته,
 Patient,صبور,
 Patient Appointment,قرار ملاقات بیمار,
@@ -1880,7 +1739,6 @@ Payable Account,قابل پرداخت حساب,
 Payment,پرداخت,
 Payment Cancelled. Please check your GoCardless Account for more details,پرداخت لغو شد برای اطلاعات بیشتر، لطفا حساب GoCardless خود را بررسی کنید,
 Payment Confirmation,تاییدیه پرداخت,
-Payment Days,روز پرداخت,
 Payment Document,سند پرداخت,
 Payment Due Date,پرداخت با توجه تاریخ,
 Payment Entries {0} are un-linked,مطالب پرداخت {0} سازمان ملل متحد در ارتباط هستند,
@@ -1904,11 +1762,8 @@ Payment Terms based on conditions,شرایط پرداخت بر اساس شرای
 Payment Type,نوع پرداخت,
 "Payment Type must be one of Receive, Pay and Internal Transfer",نوع پرداخت باید یکی از دریافت شود، پرداخت و انتقال داخلی,
 Payment against {0} {1} cannot be greater than Outstanding Amount {2},پرداخت در مقابل {0} {1} نمی تواند بیشتر از برجسته مقدار {2},
-Payment of {0} from {1} to {2},پرداخت {0} از {1} تا {2},
 Payment request {0} created,درخواست پرداخت {0} ایجاد شد,
 Payments,پرداخت,
-Payroll,لیست حقوق,
-Payroll Number,شماره حقوق و دستمزد,
 Payroll Payable,حقوق و دستمزد پرداختنی,
 Payslip,Payslip,
 Pending Activities,فعالیت در انتظار,
@@ -1929,7 +1784,6 @@ Personal Details,اطلاعات شخصی,
 Pharmaceutical,دارویی,
 Pharmaceuticals,داروسازی,
 Physician,پزشک,
-Piecework,کار از روی مقاطعه,
 Pincode,Pincode,
 Place Of Supply (State/UT),محل عرضه (ایالت / UT),
 Place Order,محل سفارش,
@@ -1942,17 +1796,14 @@ Plants and Machineries,گیاهان و ماشین آلات,
 Please Set Supplier Group in Buying Settings.,لطفا تنظیم کننده گروه در تنظیمات خرید.,
 Please add a Temporary Opening account in Chart of Accounts,لطفا یک حساب باز کردن موقت در نمودار حساب اضافه کنید,
 Please add the account to root level Company - ,لطفاً حساب را به سطح سطح شرکت اضافه کنید -,
-Please add the remaining benefits {0} to any of the existing component,لطفا مزایای باقیمانده {0} را به هر یک از اجزای موجود اضافه کنید,
 Please check Multi Currency option to allow accounts with other currency,لطفا گزینه ارز چند اجازه می دهد تا حساب با ارز دیگر را بررسی کنید,
 Please click on 'Generate Schedule',لطفا بر روی &#39;ایجاد برنامه کلیک کنید,
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},لطفا بر روی &#39;ایجاد برنامه &quot;کلیک کنید و به واکشی سریال بدون برای مورد اضافه شده است {0},
 Please click on 'Generate Schedule' to get schedule,لطفا بر روی &#39;ایجاد برنامه&#39; کلیک کنید برای دریافت برنامه,
-Please confirm once you have completed your training,لطفا پس از اتمام آموزش خود را تأیید کنید,
 Please create purchase receipt or purchase invoice for the item {0},لطفا رسید خرید یا خرید صورتحساب را برای آیتم {0},
 Please define grade for Threshold 0%,لطفا درجه برای آستانه 0٪ تعریف,
 Please enable Applicable on Booking Actual Expenses,لطفا هزینه های واقعی رزرو را فعال کنید,
 Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses,لطفا مناسب برای خرید سفارش مناسب و مناسب در رزرو هزینه واقعی فعال کنید,
-Please enable default incoming account before creating Daily Work Summary Group,قبل از ایجاد خلاصه گروه روزانه، لطفا قبل از ورود به حساب ورودی فعال کنید,
 Please enable pop-ups,لطفا پنجرههای بازشو را فعال,
 Please enter 'Is Subcontracted' as Yes or No,لطفا وارد است واگذار شده به عنوان بله یا نه,
 Please enter API Consumer Key,لطفا کلید مصرف کننده API را وارد کنید,
@@ -2010,14 +1861,12 @@ Please select BOM in BOM field for Item {0},لطفا BOM BOM در زمینه ب�
 Please select Category first,لطفا ابتدا دسته را انتخاب کنید,
 Please select Charge Type first,لطفا ابتدا شارژ نوع را انتخاب کنید,
 Please select Company,لطفا انتخاب کنید شرکت,
-Please select Company and Designation,لطفا شرکت و تعیین را انتخاب کنید,
 Please select Company and Posting Date to getting entries,لطفا شرکت و تاریخ ارسال را برای گرفتن نوشته انتخاب کنید,
 Please select Company first,لطفا ابتدا شرکت را انتخاب کنید,
 Please select Completion Date for Completed Asset Maintenance Log,لطفا تاریخ تکمیل را برای ورود به سیستم نگهداری دارایی تکمیل کنید,
 Please select Completion Date for Completed Repair,لطفا تاریخ تکمیل برای تعمیرات کامل را انتخاب کنید,
 Please select Course,لطفا دوره را انتخاب کنید,
 Please select Drug,لطفا مواد مخدر را انتخاب کنید,
-Please select Employee,لطفا کارمند را انتخاب کنید,
 Please select Existing Company for creating Chart of Accounts,لطفا موجود شرکت برای ایجاد نمودار از حساب را انتخاب کنید,
 Please select Healthcare Service,لطفا خدمات بهداشتی را انتخاب کنید,
 "Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Product Bundle",لطفا آیتم را انتخاب کنید که در آن &quot;آیا مورد سهام&quot; است &quot;نه&quot; و &quot;آیا مورد فروش&quot; است &quot;بله&quot; است و هیچ بسته نرم افزاری محصولات دیگر وجود دارد,
@@ -2037,7 +1886,6 @@ Please select a BOM,لطفا یک BOM را انتخاب کنید,
 Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement,لطفا یک دسته ای برای آیتم را انتخاب کنید {0}. قادر به پیدا کردن یک دسته واحد است که این شرط را برآورده,
 Please select a Company,لطفا یک شرکت را انتخاب کنید,
 Please select a batch,لطفا یک دسته را انتخاب کنید,
-Please select a csv file,لطفا یک فایل CSV را انتخاب کنید,
 Please select a field to edit from numpad,لطفا یک فیلد برای ویرایش از numpad انتخاب کنید,
 Please select a table,لطفا یک جدول را انتخاب کنید,
 Please select a valid Date,لطفا یک تاریخ معتبر را انتخاب کنید,
@@ -2079,15 +1927,11 @@ Please set at least one row in the Taxes and Charges Table,لطفا حداقل �
 Please set default Cash or Bank account in Mode of Payment {0},لطفا نقدی پیش فرض و یا حساب بانکی در نحوه پرداخت را تعیین {0},
 Please set default account in Salary Component {0},لطفا به حساب پیش فرض تنظیم شده در حقوق و دستمزد و اجزای {0},
 Please set default customer in Restaurant Settings,لطفا تنظیمات پیشفرض را در تنظیمات رستوران تنظیم کنید,
-Please set default template for Leave Approval Notification in HR Settings.,لطفا قالب پیش فرض برای اعلان تأیید خروج در تنظیمات HR تنظیم کنید.,
-Please set default template for Leave Status Notification in HR Settings.,لطفا قالب پیش فرض برای اعلام وضعیت وضعیت ترک در تنظیمات HR تعیین کنید.,
 Please set default {0} in Company {1},لطفا پیش فرض {0} در {1} شرکت,
 Please set filter based on Item or Warehouse,لطفا فیلتر بر اساس مورد یا انبار مجموعه,
 Please set leave policy for employee {0} in Employee / Grade record,لطفا سؤال را برای کارمند {0} در رکورد کارمند / درجه تعیین کنید,
 Please set recurring after saving,لطفا پس از ذخیره در محدوده زمانی معین,
-Please set the Company,لطفا مجموعه ای از شرکت,
 Please set the Customer Address,لطفا آدرس مشتری را تنظیم کنید,
-Please set the Date Of Joining for employee {0},لطفا مجموعه ای از تاریخ پیوستن برای کارمند {0},
 Please set the Default Cost Center in {0} company.,لطفا مرکز هزینه پیش فرض را در شرکت {0} تنظیم کنید.,
 Please set the Email ID for the Student to send the Payment Request,لطفا برای شناسایی ایمیل برای دانشجو برای ارسال درخواست پرداخت تنظیم کنید,
 Please set the Item Code first,لطفا ابتدا کد مورد را تنظیم کنید,
@@ -2095,7 +1939,6 @@ Please set the Payment Schedule,لطفا برنامه پرداخت را تنظی
 Please set the series to be used.,لطفا مجموعه ای را که استفاده می کنید تنظیم کنید,
 Please set {0} for address {1},لطفا {0} را برای آدرس {1} تنظیم کنید,
 Please setup Students under Student Groups,لطفا دانشجویان را در گروه های دانشجویی قرار دهید,
-Please share your feedback to the training by clicking on 'Training Feedback' and then 'New',لطفا نظرات خود را به آموزش با کلیک بر روی &#39;آموزش بازخورد&#39; و سپس &#39;جدید&#39;,
 Please specify Company,لطفا شرکت مشخص,
 Please specify Company to proceed,لطفا شرکت مشخص برای ادامه,
 Please specify a valid 'From Case No.',لطفا یک معتبر را مشخص &#39;از مورد شماره&#39;,
@@ -2105,7 +1948,6 @@ Please specify currency in Company,لطفا ارز در شرکت مشخص,
 Please specify either Quantity or Valuation Rate or both,لطفا یا مقدار و یا نرخ گذاری و یا هر دو مشخص,
 Please specify from/to range,لطفا از مشخص / به محدوده,
 Please supply the specified items at the best possible rates,لطفا تأمین اقلام مشخص شده در بهترین نرخ ممکن,
-Please update your status for this training event,لطفا وضعیت خود را برای این رویداد آموزشی به روز کنید,
 Please wait 3 days before resending the reminder.,لطفا 3 روز قبل از ارسال دوباره یادآوری منتظر بمانید.,
 Point of Sale,نقطه ای از فروش,
 Point-of-Sale,نقطه از فروش,
@@ -2128,10 +1970,8 @@ Prescription,نسخه,
 Prescription Dosage,نسخه تجویزی,
 Prescription Duration,مدت زمان تجویز,
 Prescriptions,نسخه ها,
-Present,حاضر,
 Prev,قبلی,
 Preview,پیش نمایش,
-Preview Salary Slip,پیش نمایش لغزش حقوق,
 Previous Financial Year is not closed,قبلی سال مالی بسته نشده است,
 Price,قیمت,
 Price List,لیست قیمت,
@@ -2158,9 +1998,6 @@ Print settings updated in respective print format,تنظیمات چاپ به ر�
 Print taxes with zero amount,مالیات را با مقدار صفر چاپ کنید,
 Printing and Branding,چاپ و علامت گذاری,
 Private Equity,سهام خصوصی,
-Privilege Leave,امتیاز مرخصی,
-Probation,عفو مشروط,
-Probationary Period,دوره وابسته به التزام,
 Procedure,روش,
 Process Day Book Data,پردازش داده های کتاب روز,
 Process Master Data,پردازش داده های استاد,
@@ -2199,8 +2036,6 @@ Projected,بینی,
 Projected Qty,تعداد پیش بینی شده,
 Projected Quantity Formula,فرمول مقدار پیش بینی شده,
 Projects,پروژه,
-Property,خاصیت,
-Property already added,املاک در حال حاضر اضافه شده است,
 Proposal Writing,نوشتن طرح های پیشنهادی,
 Proposal/Price Quote,پیشنهاد / قیمت نقل قول,
 Prospecting,چشم انداز,
@@ -2324,7 +2159,6 @@ References,مراجع,
 Refresh Token,تازه کردن رمز,
 Region,منطقه,
 Register,ثبت نام,
-Reject,رد کردن,
 Rejected,رد,
 Related,مربوط,
 Relation with Guardian1,ارتباط با Guardian1,
@@ -2344,7 +2178,6 @@ Repeat Customer Revenue,تکرار درآمد و ضوابط,
 Repeat Customers,مشتریان تکرار,
 Replace BOM and update latest price in all BOMs,جایگزین BOM و به روز رسانی آخرین قیمت در تمام BOMs,
 Replied,پاسخ,
-Replies,پاسخ ها,
 Report,گزارش,
 Report Builder,گزارش ساز,
 Report Type,نوع گزارش,
@@ -2381,7 +2214,6 @@ Reserved for sale,محفوظ برای فروش,
 Reserved for sub contracting,برای قراردادن قرارداد ممنوع است,
 Resistant,مقاوم,
 Resolve error and upload again.,رفع خطا و بارگذاری مجدد.,
-Responsibilities,مسئولیت,
 Rest Of The World,بقیه دنیا,
 Restart Subscription,راه اندازی مجدد اشتراک,
 Restaurant,رستوران,
@@ -2401,7 +2233,6 @@ Returns,بازگشت,
 Reverse Journal Entry,ورودی مجله معکوس,
 Review Invitation Sent,مرور دعوت نامه ارسال شده است,
 Review and Action,بررسی و اقدام,
-Role,نقش,
 Rooms Booked,اتاق رزرو,
 Root Company,شرکت ریشه,
 Root Type,نوع ریشه,
@@ -2445,9 +2276,7 @@ Row #{0}: Timings conflicts with row {1},ردیف # {0}: درگیری های ت�
 Row #{0}: {1} can not be negative for item {2},ردیف # {0}: {1} نمی تواند برای قلم منفی {2},
 Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},ردیف بدون {0}: مبلغ نمی تواند بیشتر از انتظار مقدار برابر هزینه ادعای {1}. در انتظار مقدار است {2},
 Row {0} : Operation is required against the raw material item {1},ردیف {0}: عملیات مورد نیاز علیه مواد خام مورد نیاز است {1},
-Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2},ردیف {0} # مقدار اختصاص داده شده {1} نمیتواند بیشتر از مقدار درخواست نشده باشد {2},
 Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},ردیف {0} # Item {1} را نمی توان بیش از {2} در برابر سفارش خرید {3},
-Row {0}# Paid Amount cannot be greater than requested advance amount,ردیف {0} # مبلغ پرداخت شده نمیتواند بیشتر از مبلغ درخواست پیشنهادی باشد,
 Row {0}: Activity Type is mandatory.,ردیف {0}: نوع فعالیت الزامی است.,
 Row {0}: Advance against Customer must be credit,ردیف {0}: پیشرفت در برابر مشتری باید اعتبار,
 Row {0}: Advance against Supplier must be debit,ردیف {0}: پیشرفت در برابر کننده باید بدهی شود,
@@ -2492,16 +2321,8 @@ SGST Amount,مقدار SGST,
 SO Qty,SO تعداد,
 Safety Stock,سهام ایمنی,
 Salary,حقوق,
-Salary Slip ID,حقوق و دستمزد ID لغزش,
-Salary Slip of employee {0} already created for this period,لغزش حقوق و دستمزد کارکنان {0} در حال حاضر برای این دوره بوجود,
-Salary Slip of employee {0} already created for time sheet {1},لغزش حقوق و دستمزد کارکنان {0} در حال حاضر برای ورق زمان ایجاد {1},
 Salary Slip submitted for period from {0} to {1},لغزش حقوق برای دوره ای از {0} تا {1},
-Salary Structure Assignment for Employee already exists,تخصیص ساختار حقوق برای کارمندان در حال حاضر وجود دارد,
-Salary Structure Missing,گمشده ساختار حقوق و دستمزد,
 Salary Structure must be submitted before submission of Tax Ememption Declaration,ساختار حقوق باید قبل از ارائه اظهارنامه فرار مالیاتی ارائه شود,
-Salary Structure not found for employee {0} and date {1},ساختار حقوق و دستمزد برای کارمند یافت نشد {0} و تاریخ {1},
-Salary Structure should have flexible benefit component(s) to dispense benefit amount,ساختار حقوق و دستمزد باید اجزای مزایای قابل انعطاف را در اختیار داشته باشد تا مبلغ سود مورد استفاده قرار گیرد,
-"Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.",حقوق و دستمزد در حال حاضر برای دوره بین {0} و {1}، ترک دوره نرم افزار نمی تواند بین این محدوده تاریخ پردازش شده است.,
 Sales,فروش,
 Sales Account,حساب فروش,
 Sales Expenses,هزینه فروش,
@@ -2538,7 +2359,6 @@ Sample,نمونه,
 Sample Collection,مجموعه نمونه,
 Sample quantity {0} cannot be more than received quantity {1},مقدار نمونه {0} نمیتواند بیش از مقدار دریافتی باشد {1},
 Sanctioned,تحریم,
-Sanctioned Amount cannot be greater than Claim Amount in Row {0}.,مقدار تحریم نیست می تواند بیشتر از مقدار ادعای در ردیف {0}.,
 Sand,شن,
 Saturday,روز شنبه,
 Saved,ذخیره,
@@ -2553,7 +2373,6 @@ Scheduled,برنامه ریزی,
 Scheduled Upto,برنامه ریزی شده تا,
 "Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?",آیا برنامه هایی برای {0} همپوشانی را دنبال می کنید، پس از لغو شکاف های پوشیدنی، می خواهید؟,
 Score cannot be greater than Maximum Score,امتیاز نمی تواند بیشتر از حداکثر نمره,
-Score must be less than or equal to 5,امتیاز باید کمتر از یا برابر با 5 است,
 Scorecards,کارت امتیازی,
 Scrapped,اوراق,
 Search,جستجو,
@@ -2593,13 +2412,11 @@ Select Items to Manufacture,انتخاب موارد برای ساخت,
 Select Loyalty Program,برنامه وفاداری را انتخاب کنید,
 Select Patient,بیمار را انتخاب کنید,
 Select Possible Supplier,انتخاب کننده ممکن,
-Select Property,املاک را انتخاب کنید,
 Select Quantity,انتخاب تعداد,
 Select Serial Numbers,انتخاب کنید شماره سریال,
 Select Target Warehouse,انتخاب هدف انبار,
 Select Warehouse...,انتخاب کنید ... انبار,
 Select an account to print in account currency,یک حساب کاربری برای چاپ در حساب حساب را انتخاب کنید,
-Select an employee to get the employee advance.,یک کارمند را برای پیشبرد کارمند انتخاب کنید,
 Select at least one value from each of the attributes.,حداقل یک مقدار از هر یک از ویژگی ها را انتخاب کنید.,
 Select change amount account,انتخاب تغییر حساب مقدار,
 Select company first,اولین شرکت را انتخاب کنید,
@@ -2648,7 +2465,6 @@ Series Updated Successfully,سری به روز رسانی با موفقیت,
 Series is mandatory,سری الزامی است,
 Series {0} already used in {1},سری {0} در حال حاضر در مورد استفاده {1},
 Service,سرویس,
-Service Expense,هزینه خدمات,
 Service Level Agreement,توافق نامه سطح خدمات,
 Service Level Agreement.,توافق نامه سطح خدمات.,
 Service Level.,سطح سرویس.,
@@ -2707,12 +2523,10 @@ Short Name,نام کوتاه,
 Shortage Qty,کمبود تعداد,
 Show Completed,نمایش به پایان رسید,
 Show Cumulative Amount,نمایش مقدار تجمعی,
-Show Employee,نمایش کارمند,
 Show Open,نشان می دهد باز,
 Show Opening Entries,نمایش ورودی های افتتاحیه,
 Show Payment Details,نمایش جزئیات پرداخت,
 Show Return Entries,نمایش مقالات بازگشت,
-Show Salary Slip,لغزش نمایش حقوق,
 Show Variant Attributes,نمایش خصیصه های متغیر,
 Show Variants,نمایش انواع,
 Show closed,نمایش بسته,
@@ -2720,12 +2534,10 @@ Show exploded view,نمایش نمایش منفرد,
 Show only POS,فقط POS نمایش داده شود,
 Show unclosed fiscal year's P&L balances,نمایش P &amp; L مانده سال مالی بستهنشده است,
 Show zero values,نمایش صفر ارزش,
-Sick Leave,مرخصی استعلاجی,
 Silt,سیل,
 Single Variant,تنها گزینه,
 Single unit of an Item.,تنها واحد آیتم استفاده کنید.,
 "Skipping Leave Allocation for the following employees, as Leave Allocation records already exists against them. {0}",رد کردن اختصاص دادن به کارکنان زیر، به عنوان رکورد های خروج از محل در برابر آنها وجود دارد. {0},
-"Skipping Salary Structure Assignment for the following employees, as Salary Structure Assignment records already exists against them. {0}",تخصیص مجدد ساختار حقوق و دستمزد برای کارکنان زیر، به عنوان پرونده های وظیفه ساختار حقوق و دستمزد در حال حاضر در برابر آنها وجود دارد. {0},
 Slideshow,نمایش به صورت اسلاید,
 Slots for {0} are not added to the schedule,اسلات برای {0} به برنامه اضافه نمی شود,
 Small,کوچک,
@@ -2752,7 +2564,6 @@ Split,شکاف,
 Split Batch,دسته تقسیم,
 Split Issue,موضوع تقسیم شده,
 Sports,ورزشی,
-Staffing Plan {0} already exist for designation {1},برنامه کارکنان {0} برای تعیین نام وجود دارد {1},
 Standard,استاندارد,
 Standard Buying,خرید استاندارد,
 Standard Selling,فروش استاندارد,
@@ -2760,8 +2571,6 @@ Standard contract terms for Sales or Purchase.,شرایط قرارداد است�
 Start Date,تاریخ شروع,
 Start Date of Agreement can't be greater than or equal to End Date.,تاریخ شروع توافق نمی تواند بزرگتر یا مساوی با تاریخ پایان باشد.,
 Start Year,سال شروع,
-"Start and end dates not in a valid Payroll Period, cannot calculate {0}",تاریخ شروع و پایان را در یک دوره ثبت نام معیوب معتبر، نمیتوان {0} محاسبه کرد,
-"Start and end dates not in a valid Payroll Period, cannot calculate {0}.",تاریخ شروع و پایان را در یک دوره ثبت نام معیوب معتبر، نمیتوان {0} محاسبه کرد.,
 Start date should be less than end date for Item {0},تاریخ شروع باید کمتر از تاریخ پایان برای مورد است {0},
 Start date should be less than end date for task {0},تاریخ شروع باید کمتر از تاریخ پایان کار باشد {0},
 Start day is greater than end day in task '{0}',روز شروع است بیشتر از پایان روز در کار {0},
@@ -2787,7 +2596,6 @@ Stock Ledger,سهام لجر,
 Stock Ledger Entries and GL Entries are reposted for the selected Purchase Receipts,سهام لجر مطالب و GL مطالب برای دریافت خرید انتخاب reposted,
 Stock Levels,سطح سهام,
 Stock Liabilities,بدهی سهام,
-Stock Options,گزینه های سهام,
 Stock Qty,موجودی تعداد,
 Stock Received But Not Billed,سهام دریافتی اما صورتحساب نه,
 Stock Reports,گزارش سهام,
@@ -2804,7 +2612,6 @@ Stop,توقف,
 Stopped,متوقف,
 "Stopped Work Order cannot be cancelled, Unstop it first to cancel",کار متوقف کار را نمی توان لغو کرد، برای لغو آن ابتدا آن را متوقف کنید,
 Stores,فروشگاه,
-Structures have been assigned successfully,ساختارها با موفقیت انجام شده است,
 Student,دانشجو,
 Student Activity,فعالیت دانشجویی,
 Student Address,نشانی دانشجویی,
@@ -2835,11 +2642,7 @@ Sub-contracting,پیمانکاری,
 Subcontract,مقاطعه کاری فرعی,
 Subject,موضوع,
 Submit,ثبت کردن,
-Submit Proof,اثبات ارسال کنید,
-Submit Salary Slip,ثبت کردن لغزش حقوق,
 Submit this Work Order for further processing.,این کار را برای پردازش بیشتر ارسال کنید.,
-Submit this to create the Employee record,این را برای ایجاد رکورد کارمند ارسال کنید,
-Submitting Salary Slips...,ارسال حقوق و دستمزد ...,
 Subscription,اشتراک,
 Subscription Management,مدیریت اشتراک,
 Subscriptions,اشتراک ها,
@@ -2912,7 +2715,6 @@ Tax template for item tax rates.,الگوی مالیات نرخ مالیات ا�
 Tax template for selling transactions.,قالب های مالیاتی برای فروش معاملات.,
 Taxable Amount,مبلغ مشمول مالیات,
 Taxes,عوارض,
-Team Updates,به روز رسانی تیم,
 Technology,تکنولوژی,
 Telecommunications,ارتباطات,
 Telephone Expenses,هزینه تلفن,
@@ -2930,7 +2732,6 @@ Terms and Conditions,شرایط و ضوابط,
 Terms and Conditions Template,شرایط و ضوابط الگو,
 Territory,منطقه,
 Test,تست,
-Thank you,متشکرم,
 Thank you for your business!,از کار شما متشکرم!,
 The 'From Package No.' field must neither be empty nor it's value less than 1.,شماره &quot;از بسته بندی&quot; فیلد نباید خالی باشد و ارزش آن کمتر از 1 باشد.,
 The Brand,نام تجاری,
@@ -2942,7 +2743,6 @@ The Term End Date cannot be later than the Year End Date of the Academic Year to
 The Term Start Date cannot be earlier than the Year Start Date of the Academic Year to which the term is linked (Academic Year {}). Please correct the dates and try again.,تاریخ شروع ترم نمی تواند زودتر از تاریخ سال شروع سال تحصیلی که مدت مرتبط است باشد (سال تحصیلی {}). لطفا تاریخ های صحیح و دوباره امتحان کنید.,
 The Year End Date cannot be earlier than the Year Start Date. Please correct the dates and try again.,سال پایان تاریخ را نمی توان قبل از تاریخ سال شروع باشد. لطفا تاریخ های صحیح و دوباره امتحان کنید.,
 The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.,مقدار {0} در این درخواست پرداخت متفاوت از مقدار محاسبه شده از همه برنامه های پرداخت است {1}. قبل از ارسال سند مطمئن شوید این درست است.,
-The day(s) on which you are applying for leave are holidays. You need not apply for leave.,روز (بازدید کنندگان) که در آن شما برای مرخصی استفاده از تعطیلات. شما نیاز به درخواست برای ترک نمی کند.,
 The field From Shareholder cannot be blank,زمینه از سهامدار نمی تواند خالی باشد,
 The field To Shareholder cannot be blank,میدان به سهامدار نمی تواند خالی باشد,
 The fields From Shareholder and To Shareholder cannot be blank,زمینه های سهامدار و سهامدار نمی تواند خالی باشد,
@@ -2961,11 +2761,9 @@ The shares don't exist with the {0},سهام با {0} وجود ندارد,
 "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage",این کار به عنوان یک کار پس زمینه درج شده است. در صورت بروز مشکل در پردازش در پس زمینه ، سیستم در مورد خطا در این آشتی سهام نظر می دهد و به مرحله پیش نویس بازگشت.,
 "Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.",مشاهده قوانین سپس قیمت گذاری بر اساس مشتری، مشتری گروه، منطقه، تامین کننده، تامین کننده نوع، کمپین، فروش شریک و غیره فیلتر,
 "There are inconsistencies between the rate, no of shares and the amount calculated",ناسازگاری بین نرخ، بدون سهام و مقدار محاسبه شده وجود دارد,
-There are more holidays than working days this month.,می تعطیلات بیشتر از روز کاری در این ماه وجود دارد.,
 There can be multiple tiered collection factor based on the total spent. But the conversion factor for redemption will always be same for all the tier.,فاکتور جمع آوری چندگانه براساس کل هزینه صرف می شود. اما فاکتور تبدیل برای رستگاری همیشه برای تمام سطوح یکسان است.,
 There can only be 1 Account per Company in {0} {1},فقط می تواند وجود 1 حساب در هر شرکت می شود {0} {1},
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""",فقط یک قانون حمل و نقل شرط با 0 یا مقدار خالی برای &quot;به ارزش&quot;,
-There is no leave period in between {0} and {1},فاصله زمانی بین {0} و {1} وجود ندارد,
 There is not enough leave balance for Leave Type {0},است تعادل مرخصی به اندازه کافی برای مرخصی نوع وجود ندارد {0},
 There is nothing to edit.,چیزی برای ویرایش وجود دارد.,
 There isn't any item variant for the selected item,هیچ موردی برای آیتم انتخابی وجود ندارد,
@@ -2991,14 +2789,12 @@ This is an example website auto-generated from ERPNext,این یک مثال وب
 This is based on logs against this Vehicle. See timeline below for details,این است که در سیاهههای مربوط در برابر این خودرو است. مشاهده جدول زمانی زیر برای جزئیات,
 This is based on stock movement. See {0} for details,این است که در جنبش سهام است. مشاهده {0} برای جزئیات,
 This is based on the Time Sheets created against this project,این است که در ورق زمان ایجاد در برابر این پروژه بر اساس,
-This is based on the attendance of this Employee,این است که در حضور این کارمند بر اساس,
 This is based on the attendance of this Student,این است که در حضور این دانش آموز بر اساس,
 This is based on transactions against this Customer. See timeline below for details,این است که در معاملات در برابر این مشتری است. مشاهده جدول زمانی زیر برای جزئیات,
 This is based on transactions against this Healthcare Practitioner.,این بر مبنای معاملات علیه این متخصص بهداشت و درمان است.,
 This is based on transactions against this Patient. See timeline below for details,این بر مبنای معاملات در برابر این بیمار است. برای جزئیات بیشتر به جدول زمانی زیر مراجعه کنید,
 This is based on transactions against this Sales Person. See timeline below for details,این بر مبنای معاملات علیه این فروشنده فروش است. برای جزئیات بیشتر به جدول زمانی زیر مراجعه کنید,
 This is based on transactions against this Supplier. See timeline below for details,این است که در معاملات در برابر این کننده است. مشاهده جدول زمانی زیر برای جزئیات,
-This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,این باعث می شود که حقوق و دستمزد را ایجاد کنید و مجله ورودی تعهدی ایجاد کنید. آیا شما می خواهید ادامه دهید؟,
 This {0} conflicts with {1} for {2} {3},این {0} درگیری با {1} برای {2} {3},
 Time Sheet for manufacturing.,ورق زمان برای تولید.,
 Time Tracking,پیگیری زمان,
@@ -3035,9 +2831,6 @@ To Receive and Bill,برای دریافت و بیل,
 To State,به دولت,
 To Warehouse,به انبار,
 To create a Payment Request reference document is required,برای ایجاد یک درخواست پاسخ به پرداخت سند مرجع مورد نیاز است,
-To date can not be equal or less than from date,تا تاریخ نمی تواند برابر یا کمتر از تاریخ باشد,
-To date can not be less than from date,تا تاریخ نمی تواند کمتر از تاریخ باشد,
-To date can not greater than employee's relieving date,تا تاریخ نمیتواند بیشتر از تاریخ تسکین کارکنان باشد,
 "To filter based on Party, select Party Type first",برای فیلتر کردن بر اساس حزب، حزب انتخاب نوع اول,
 "To get the best out of ERPNext, we recommend that you take some time and watch these help videos.",برای دریافت بهترین نتیجه را از ERPNext، توصیه می کنیم که شما را برخی از زمان و تماشای این فیلم ها به کمک.,
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included",شامل مالیات در ردیف {0} در مورد نرخ، مالیات در ردیف {1} باید گنجانده شود,
@@ -3053,7 +2846,6 @@ Too many columns. Export the report and print it using a spreadsheet application
 Tools,ابزار,
 Total (Credit),مجموع (اعتباری),
 Total (Without Tax),مجموع (بدون مالیات),
-Total Absent,مجموع غایب,
 Total Achieved,مجموع بهدستآمده,
 Total Actual,مجموع واقعی,
 Total Allocated Leaves,مجموع برگه های برگزیده,
@@ -3066,9 +2858,7 @@ Total Commission,کمیسیون ها,
 Total Contribution Amount: {0},مجموع کمک مالی: {0},
 Total Credit/ Debit Amount should be same as linked Journal Entry,مبلغ کل اعتبار / بدهی باید همانند ورود مجله مجله باشد,
 Total Debit must be equal to Total Credit. The difference is {0},دبیت مجموع باید به مجموع اعتبار مساوی باشد. تفاوت در این است {0},
-Total Deduction,کسر مجموع,
 Total Invoiced Amount,کل مقدار صورتحساب,
-Total Leaves,مجموع برگ,
 Total Order Considered,ترتیب مجموع در نظر گرفته شده,
 Total Order Value,مجموع ارزش ترتیب,
 Total Outgoing,خروجی ها,
@@ -3078,7 +2868,6 @@ Total Outstanding: {0},مجموع برجسته: {0},
 Total Paid Amount,کل مقدار پرداخت,
 Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,مجموع مبلغ پرداختی در برنامه پرداخت باید برابر با مقدار Grand / Rounded باشد,
 Total Payments,کل پرداخت ها,
-Total Present,در حال حاضر مجموع,
 Total Qty,مجموع تعداد,
 Total Quantity,تعداد کل,
 Total Revenue,درآمد کل,
@@ -3092,16 +2881,12 @@ Total Variance,واریانس ها,
 Total Weightage of all Assessment Criteria must be 100%,وزنها در کل از همه معیارهای ارزیابی باید 100٪,
 Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2}),مجموع پیش ({0}) را در برابر سفارش {1} نمی تواند بیشتر از جمع کل ({2}),
 Total advance amount cannot be greater than total claimed amount,مقدار کل پیش پرداخت نمی تواند بیشتر از مقدار ادعا شده باشد,
-Total advance amount cannot be greater than total sanctioned amount,مبلغ پیشنهادی کل نمیتواند بیشتر از مجموع مبلغ مجاز باشد,
 Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period,برگ مجموع اختصاص داده شده روز بیشتر از حداکثر تخصیص {0} نوع ترک برای کارمند {1} در دوره است,
 Total allocated leaves are more than days in the period,مجموع برگ اختصاص داده بیش از روز در دوره,
 Total allocated percentage for sales team should be 100,درصد اختصاص داده ها را برای تیم فروش باید 100 باشد,
 Total cannot be zero,مجموع نمیتواند صفر باشد,
 Total contribution percentage should be equal to 100,کل درصد سهم باید برابر با 100 باشد,
-Total flexible benefit component amount {0} should not be less than max benefits {1},مقدار کامپوننت منعطف انعطاف پذیر {0} نباید کمتر از مزایای حداکثر باشد {1},
 Total hours: {0},کل ساعت: {0},
-Total leaves allocated is mandatory for Leave Type {0},مجموع برگ ها اختصاص داده شده برای نوع ترک {0} اجباری است,
-Total working hours should not be greater than max working hours {0},کل ساعات کار نباید از ساعات کار حداکثر است بیشتر {0},
 Total {0} ({1}),مجموع {0} ({1}),
 "Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'",مجموع {0} برای همه موارد صفر است، ممکن است شما باید &#39;اتهامات بر اساس توزیع را تغییر,
 Total(Amt),مجموع (AMT),
@@ -3109,11 +2894,6 @@ Total(Qty),مجموع (تعداد),
 Traceability,قابلیت ردیابی,
 Traceback,ردیابی,
 Track Leads by Lead Source.,پیگیری بر اساس منبع سرب,
-Training,آموزش,
-Training Event,برنامه آموزشی,
-Training Events,رویدادهای آموزشی,
-Training Feedback,آموزش فیدبک,
-Training Result,نتیجه آموزش,
 Transaction,معامله,
 Transaction Date,تاریخ تراکنش,
 Transaction Type,نوع تراکنش,
@@ -3133,7 +2913,6 @@ Transport Receipt No,شماره گیرنده حمل و نقل,
 Transportation,حمل و نقل,
 Transporter ID,شناسه حمل و نقل,
 Transporter Name,نام حمل و نقل,
-Travel,سفر,
 Travel Expenses,هزینه های سفر,
 Tree Type,نوع درخت,
 Tree of Bill of Materials,درخت بیل از مواد,
@@ -3173,7 +2952,6 @@ Update Account Number / Name,به روزرسانی شماره حساب / نام,
 Update Cost,به روز رسانی هزینه,
 Update Items,به روز رسانی موارد,
 Update Print Format,به روز رسانی فرمت چاپ,
-Update Response,به روز رسانی پاسخ,
 Update bank payment dates with journals.,به روز رسانی تاریخ های پرداخت بانک با مجلات.,
 Update in progress. It might take a while.,در حال بروزرسانی. ممکن است کمی طول بکشد.,
 Update rate as per last purchase,نرخ به روز رسانی به عنوان آخرین خرید,
@@ -3209,10 +2987,8 @@ Valuation type charges can not marked as Inclusive,نوع گذاری اتهام�
 Value Or Qty,ارزش و یا تعداد,
 Value Proposition,گزاره ارزش,
 Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4},ارزش صفت {0} باید در طیف وسیعی از {1} به {2} در بازه {3} برای مورد {4},
-Value missing,ارزش گمشده,
 Value must be between {0} and {1},مقدار باید بین {0} و {1} باشد,
 "Values of exempt, nil rated and non-GST inward supplies",مقادیر معافیت ، صفر درجه بندی شده و غیر GST منابع داخلی,
-Variable,متغیر,
 Variance,واریانس,
 Variance ({}),واریانس ({}),
 Variant,نوع دیگر,
@@ -3244,7 +3020,6 @@ Voucher #,کوپن #,
 Voucher No,کوپن بدون,
 Voucher Type,کوپن نوع,
 WIP Warehouse,انبار WIP,
-Walk In,راه رفتن در,
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,انبار نمی تواند حذف شود به عنوان ورودی سهام دفتر برای این انبار وجود دارد.,
 Warehouse cannot be changed for Serial No.,انبار می توانید برای شماره سریال نمی تواند تغییر,
 Warehouse is mandatory,انبار الزامی است,
@@ -3263,7 +3038,6 @@ Warning,هشدار,
 Warning: Another {0} # {1} exists against stock entry {2},هشدار: یکی دیگر از {0} # {1} در برابر ورود سهام وجود دارد {2},
 Warning: Invalid SSL certificate on attachment {0},هشدار: گواهینامه SSL نامعتبر در پیوست {0},
 Warning: Invalid attachment {0},هشدار: پیوست معتبر {0},
-Warning: Leave application contains following block dates,هشدار: بگذارید برنامه شامل تاریخ های بلوک زیر,
 Warning: Material Requested Qty is less than Minimum Order Qty,هشدار: مواد درخواست شده تعداد کمتر از حداقل تعداد سفارش تعداد است,
 Warning: Sales Order {0} already exists against Customer's Purchase Order {1},هشدار: سفارش فروش {0} حال حاضر در برابر خرید سفارش مشتری وجود دارد {1},
 Warning: System will not check overbilling since amount for Item {0} in {1} is zero,هشدار: سیستم خواهد overbilling از مقدار برای مورد بررسی نمی {0} در {1} صفر است,
@@ -3273,7 +3047,6 @@ Warranty Claim against Serial No.,ادعای ضمانت نامه در مقابل
 Website,سایت اینترنتی,
 Website Image should be a public file or website URL,وب سایت تصویر باید یک فایل عمومی و یا آدرس وب سایت می باشد,
 Website Image {0} attached to Item {1} cannot be found,وب سایت تصویر {0} متصل به مورد {1} را نمی توان یافت,
-Website Listing,لیست وبسایت,
 Website Manager,مدیر وب سایت,
 Website Settings,تنظیمات وب سایت,
 Wednesday,چهار شنبه,
@@ -3298,7 +3071,6 @@ Work Order not created,سفارش کار ایجاد نشده است,
 Work Order {0} must be cancelled before cancelling this Sales Order,سفارش کار {0} باید قبل از لغو این سفارش فروش لغو شود,
 Work Order {0} must be submitted,سفارش کار {0} باید ارائه شود,
 Work Orders Created: {0},دستور کار ایجاد شده: {0},
-Work Summary for {0},خلاصه کار برای {0},
 Work-in-Progress Warehouse is required before Submit,کار در حال پیشرفت انبار قبل از ارسال مورد نیاز است,
 Workflow,گردش کار,
 Working,کار,
@@ -3309,16 +3081,13 @@ Wrapping up,بسته شدن,
 Wrong Password,رمز اشتباه,
 Year start date or end date is overlapping with {0}. To avoid please set company,تاریخ شروع سال یا تاریخ پایان است با هم تداخل دارند با {0}. برای جلوگیری از به مدیر مجموعه شرکت,
 You are not authorized to add or update entries before {0},شما مجاز به اضافه و یا به روز رسانی مطالب قبل از {0} نیستید,
-You are not authorized to approve leaves on Block Dates,شما مجاز به تایید برگ در تاریخ های مسدود شده نیستید,
 You are not authorized to set Frozen value,شما مجاز به تنظیم مقدار ثابت شده نیستید,
-You are not present all day(s) between compensatory leave request days,شما در تمام روز بین روزهای درخواست تعرفه تعلیق حضور ندارید,
 You can not change rate if BOM mentioned agianst any item,اگر ذکر بی ا م در مقابل هر ایتمی باشد شما نمیتوانید نرخ را تغییر دهید,
 You can not enter current voucher in 'Against Journal Entry' column,"شما نمی توانید سند هزینه جاری را  در ستون""علیه مجله "" وارد کنید",
 You can only have Plans with the same billing cycle in a Subscription,فقط می توانید برنامه هایی با یک چرخه صدور صورت حساب در یک اشتراک داشته باشید,
 You can only redeem max {0} points in this order.,شما فقط می توانید حداکثر {0} امتیاز را در این ترتیب استفاده کنید.,
 You can only renew if your membership expires within 30 days,شما فقط می توانید تمدید کنید اگر عضویت شما در 30 روز منقضی شود,
 You can only select a maximum of one option from the list of check boxes.,شما فقط می توانید حداکثر یک گزینه را از لیست کادرهای انتخاب انتخاب کنید.,
-You can only submit Leave Encashment for a valid encashment amount,شما فقط می توانید محتوا را ترک کنید برای یک مبلغ اعتبار معتبر,
 You can't redeem Loyalty Points having more value than the Grand Total.,شما نمیتوانید امتیازات وفاداری را که ارزش بیشتری از مجموع کل را دارند، بازخرید کنید.,
 You cannot credit and debit same account at the same time,شما نمی توانید اعتباری و بدهی همان حساب در همان زمان,
 You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,شما نمی توانید حذف سال مالی {0}. سال مالی {0} به عنوان پیش فرض در تنظیمات جهانی تنظیم,
@@ -3372,8 +3141,6 @@ on,بر,
 {0} against Purchase Order {1},{0} در برابر سفارش خرید {1},
 {0} against Sales Invoice {1},{0} در برابر فاکتور فروش {1},
 {0} against Sales Order {1},{0} در برابر سفارش فروش {1},
-{0} already allocated for Employee {1} for period {2} to {3},{0} در حال حاضر برای کارکنان اختصاص داده {1} برای مدت {2} به {3},
-{0} applicable after {1} working days,{0} پس از {1} روز کاری قابل اجرا است,
 {0} asset cannot be transferred,{0} دارایی نمی تواند منتقل شود,
 {0} can not be negative,{0} نمی تواند منفی باشد,
 {0} created,{0} ایجاد شد,
@@ -3394,8 +3161,6 @@ on,بر,
 {0} is not a stock Item,{0}  از اقلام انبار نیست,
 {0} is not a valid Batch Number for Item {1},{0} است تعداد دسته معتبر برای مورد نمی {1},
 {0} is not added in the table,{0} در جدول اضافه نشده است,
-{0} is not in Optional Holiday List,{0} در فهرست تعطیلات اختیاری نیست,
-{0} is not in a valid Payroll Period,{0} در یک دوره ثبت نام معتبر نیست,
 {0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} در حال حاضر به طور پیش فرض سال مالی. لطفا مرورگر خود را برای تغییر تاثیر گذار تازه کردن.,
 {0} is on hold till {1},{0} تا پایان {1},
 {0} item found.,{0} مورد یافت شد.,
@@ -3404,7 +3169,6 @@ on,بر,
 {0} items produced,{0} کالاهای تولید شده,
 {0} must appear only once,{0} باید تنها یک بار ظاهر شود,
 {0} must be negative in return document,{0} باید در سند بازگشت منفی باشد,
-{0} must be submitted,{0} باید ارسال شود,
 {0} not allowed to transact with {1}. Please change the Company.,{0} مجاز به انجام معاملات با {1} نیست. لطفا شرکت را تغییر دهید,
 {0} not found for item {1},{0} برای مورد {1} یافت نشد,
 {0} parameter is invalid,{0} پارامتر نامعتبر است,
@@ -3447,8 +3211,6 @@ on,بر,
 {0} {1}: Supplier is required against Payable account {2},{0} {1}: عرضه کننده به حساب پرداختنی مورد نیاز است {2},
 {0}% Billed,{0}٪ صورتحساب شد,
 {0}% Delivered,{0}٪ تحویل داده شد,
-"{0}: Employee email not found, hence email not sent",{0}: ایمیل کارمند یافت نشد، از این رو ایمیل ارسال نمی,
-{0}: From {0} of type {1},{0}: از {0} از نوع {1},
 {0}: From {1},{0}: از {1},
 {0}: {1} does not exists,{0}: {1} وجود ندارد,
 {0}: {1} not found in Invoice Details table,{0}: {1} در فاکتور جزییات جدول یافت نشد,
@@ -3456,7 +3218,6 @@ on,بر,
 Assigned To,اختصاص یافته به,
 Chat,گپ زدن,
 Completed By,تکمیل شده توسط,
-Conditions,شرایط,
 County,شهرستان,
 Day of Week,روز هفته,
 "Dear System Manager,",مدیر محترم سیستم،,
@@ -3478,7 +3239,6 @@ Orientation,گرایش,
 Parent,والدین,
 Passive,غیر فعال,
 Payment Failed,پرداخت ناموفق,
-Percent,در صد,
 Permanent,دائمي,
 Personal,شخصی,
 Plant,گیاه,
@@ -3501,13 +3261,11 @@ Ageing Range 4,محدوده پیر 4,
 Allocated amount cannot be greater than unadjusted amount,مبلغ اختصاص یافته نمی تواند بیشتر از مقدار غیر قابل تنظیم باشد,
 Allocated amount cannot be negative,مقدار اختصاص یافته نمی تواند منفی باشد,
 "Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry",حساب کاربری تفاوت باید یک حساب از نوع دارایی / بدهی باشد ، زیرا این ورود سهام یک ورودی افتتاحی است,
-Error in some rows,خطا در برخی ردیف ها,
 Import Successful,واردات موفقیت آمیز است,
 Please save first,لطفا اول ذخیره کنید,
 Price not found for item {0} in price list {1},قیمت برای آیتم {0} در لیست قیمت یافت نشد {1},
 Warehouse Type,نوع انبار,
 'Date' is required,&#39;تاریخ&#39; الزامی است,
-Benefit,سود,
 Budgets,بودجه,
 Bundle Qty,بسته نرم افزاری,
 Company GSTIN,شرکت GSTIN,
@@ -3521,7 +3279,6 @@ Make Stock Entry,ورود سهام,
 Quality Feedback,بازخورد کیفیت,
 Quality Feedback Template,الگوی بازخورد کیفیت,
 Rules for applying different promotional schemes.,قوانین استفاده از طرح های تبلیغاتی مختلف.,
-Shift,تغییر مکان,
 Show {0},نمایش {0},
 "Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}",{0} کاراکترهای خاص به جز &quot;-&quot; ، &quot;#&quot; ، &quot;.&quot; ، &quot;/&quot; ، &quot;{{&quot; و &quot;}}&quot; در سریال نامگذاری مجاز نیستند,
 Target Details,جزئیات هدف,
@@ -3533,7 +3290,6 @@ Contact Email,تماس با ایمیل,
 Export Type,نوع صادرات,
 From Date,از تاریخ,
 Group By,دسته بندی بر اساس,
-Importing {0} of {1},واردات {0} از 1 {,
 Invalid URL,URL نامعتبر است,
 Landscape,چشم انداز,
 Last Sync On,آخرین همگام سازی در,
@@ -3548,7 +3304,6 @@ Show Traceback,نمایش ردگیری,
 Video,فیلم,
 Webhook Secret,راز وب,
 % Of Grand Total,٪ از تعداد کل,
-'employee_field_value' and 'timestamp' are required.,&#39;staff_field_value&#39; و &#39;timestamp&#39; الزامی هستند.,
 <b>Company</b> is a mandatory filter.,<b>شرکت</b> فیلتر اجباری است.,
 <b>From Date</b> is a mandatory filter.,<b>از تاریخ</b> فیلتر اجباری است.,
 <b>From Time</b> cannot be later than <b>To Time</b> for {0},<b>از زمان</b> نمی توان دیرتر از <b>زمان</b> برای {0,
@@ -3580,7 +3335,6 @@ Admission End Date should be greater than Admission Start Date.,تاریخ پا�
 All,همه,
 All bank transactions have been created,تمام معاملات بانکی ایجاد شده است,
 All the depreciations has been booked,همه استهلاک ها رزرو شده اند,
-Allocation Expired!,تخصیص منقضی شده است!,
 Allow Resetting Service Level Agreement from Support Settings.,تنظیم مجدد توافق نامه سطح خدمات از تنظیمات پشتیبانی مجاز است.,
 Amount of {0} is required for Loan closure,مبلغ {0 برای بسته شدن وام مورد نیاز است,
 Applied Coupon Code,کد کوپن کاربردی,
@@ -3594,8 +3348,6 @@ Asset {0} does not belongs to the custodian {1},دارایی {0} متعلق به
 Asset {0} does not belongs to the location {1},دارایی {0} متعلق به موقعیت مکانی {1 نیست,
 At least one of the Applicable Modules should be selected,حداقل یکی از ماژول های قابل اجرا باید انتخاب شود,
 Atleast one asset has to be selected.,حداقل یک دارایی باید انتخاب شود.,
-Attendance Marked,حضور و علامت گذاری شده,
-Attendance has been marked as per employee check-ins,حضور و غیاب مطابق با اعلامیه های کارمندان مشخص شده است,
 Authentication Failed,تأیید هویت انجام نشد,
 Automatic Reconciliation,آشتی خودکار,
 Available For Use Date,در دسترس برای تاریخ استفاده,
@@ -3671,7 +3423,6 @@ Customer PO,سفارش خرید مشتری,
 Customize,سفارشی,
 Daily,روزانه,
 Date,تاریخ,
-Date Range,محدوده زمانی,
 Date of Birth cannot be greater than Joining Date.,تاریخ تولد نمی تواند بیشتر از تاریخ عضویت باشد.,
 Dear,عزیز,
 Default,پیش فرض,
@@ -3722,10 +3473,8 @@ Entity Type,نوع سازمان,
 Error,خطا,
 Error in Exotel incoming call,خطا در تماس دریافتی Exotel,
 Error: {0} is mandatory field,خطا: {0} فیلد اجباری است,
-Event Link,پیوند رویداد,
 Exception occurred while reconciling {0},استثنا در هنگام آشتی 0 {رخ داده است,
 Expected and Discharge dates cannot be less than Admission Schedule date,تاریخ های مورد انتظار و تخلیه نمی تواند کمتر از تاریخ برنامه پذیرش باشد,
-Expire Allocation,تخصیص Expire,
 Expired,تمام شده,
 Export,صادرات,
 Export not allowed. You need {0} role to export.,صادرات پذیر نیست. شما {0} نقش به صادرات نیاز دارید.,
@@ -3745,7 +3494,6 @@ For quantity {0} should not be greater than work order quantity {1},برای م�
 Free item not set in the pricing rule {0},مورد رایگان در قانون قیمت گذاری 0} تعیین نشده است,
 From Date and To Date are Mandatory,از تاریخ و به بعد اجباری هستند,
 From employee is required while receiving Asset {0} to a target location,در هنگام دریافت دارایی 0} به یک مکان هدف از کارمندان لازم است,
-Fuel Expense,هزینه سوخت,
 Future Payment Amount,مبلغ پرداخت آینده,
 Future Payment Ref,آینده پرداخت Ref,
 Future Payments,پرداختهای آینده,
@@ -3771,7 +3519,6 @@ Import Data from CSV / Excel files.,واردات داده ها از فایل ه�
 In Progress,در حال پیش رفت,
 Incoming call from {0},تماس ورودی از {0,
 Incorrect Warehouse,انبار نادرست,
-Intermediate,حد واسط,
 Invalid Barcode. There is no Item attached to this barcode.,بارکد نامعتبر است. هیچ موردی به این بارکد وصل نشده است.,
 Invalid credentials,گواهی نامه نامعتبر,
 Invite as User,دعوت به عنوان کاربر,
@@ -3787,7 +3534,6 @@ Joining Date can not be greater than Leaving Date,تاریخ عضویت نمی �
 Lab Test Item {0} already exist,آزمایش آزمایش مورد {0} در حال حاضر وجود دارد,
 Last Issue,آخرین شماره,
 Latest Age,آخرین سن,
-Leave application is linked with leave allocations {0}. Leave application cannot be set as leave without pay,برنامه مرخصی با تخصیص مرخصی 0 {مرتبط است. برنامه مرخصی را نمی توان به عنوان مرخصی بدون پرداخت هزینه تعیین کرد,
 Leaves Taken,برگ برداشت,
 Less Than Amount,مقدار کمتری از مقدار,
 Liabilities,بدهی,
@@ -3798,7 +3544,6 @@ Loan Type for interest and penalty rates,نوع وام برای نرخ بهره 
 Loans,وام,
 Loans provided to customers and employees.,وامهایی که به مشتریان و کارمندان داده می شود.,
 Location,محل,
-Log Type is required for check-ins falling in the shift: {0}.,ورود به سیستم برای ورود به سیستم در شیفت لازم است: {0.,
 Looks like someone sent you to an incomplete URL. Please ask them to look into it.,به نظر می رسد کسی که شما را به URL های ناقص ارسال می شود. لطفا از آنها بخواهید به آن نگاه کنید.,
 Make Journal Entry,مجله را ورود,
 Make Purchase Invoice,را خریداری فاکتور,
@@ -3821,8 +3566,6 @@ New Payment,پرداخت جدید,
 New release date should be in the future,تاریخ انتشار جدید باید در آینده باشد,
 Newsletter,عضویت در خبرنامه,
 No Account matched these filters: {},هیچ حساب با این فیلترها مطابقت ندارد: {},
-No Employee found for the given employee field value. '{}': {},هیچ کارمندی برای ارزش زمینه کارمند داده شده یافت نشد. &#39;{}&#39;: {},
-No Leaves Allocated to Employee: {0} for Leave Type: {1},بدون برگ اختصاص داده شده به کارمند: {0} برای نوع مرخصی: 1 {,
 No communication found.,هیچ ارتباطی یافت نشد,
 No correct answer is set for {0},هیچ پاسخ صحیحی برای {0 set تعیین نشده است,
 No description,بدون توضیح,
@@ -3845,8 +3588,6 @@ On Sales Order Submission,در ارسال سفارش فروش,
 On Task Completion,در تکمیل کار,
 On {0} Creation,در {0} ایجاد,
 Only .csv and .xlsx files are supported currently,فقط فایلهای .csv و .xlsx در حال حاضر پشتیبانی می شوند,
-Only expired allocation can be cancelled,فقط تخصیص منقضی شده قابل لغو است,
-Only users with the {0} role can create backdated leave applications,فقط کاربران با نقش {0 can می توانند برنامه های مرخصی عقب افتاده ایجاد کنند,
 Open,باز,
 Open Contact,تماس با ما باز کنید,
 Open Lead,سرب باز کنید,
@@ -3857,7 +3598,6 @@ Page {0} of {1},صفحه {0} از {1},
 Paid amount cannot be less than {0},مبلغ پرداخت شده نمی تواند کمتر از {0 باشد,
 Parent Company must be a group company,شرکت مادر باید یک شرکت گروه باشد,
 Passing Score value should be between 0 and 100,گذراندن مقدار امتیاز باید بین 0 تا 100 باشد,
-Password policy cannot contain spaces or simultaneous hyphens. The format will be restructured automatically,خط مشی گذرواژه نمی تواند حاوی فضاها یا منافذ همزمان باشد. این فرمت به طور خودکار بازسازی می شود,
 Patient History,تاریخچه بیمار,
 Pause,وقفه,
 Pay,پرداخت,
@@ -3880,7 +3620,6 @@ Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Accoun
 Please enter GSTIN and state for the Company Address {0},لطفاً GSTIN را وارد کنید و آدرس شرکت را اعلام کنید} 0,
 Please enter Item Code to get item taxes,لطفا کد کالا را وارد کنید تا مالیات مورد را دریافت کنید,
 Please enter Warehouse and Date,لطفا انبار و تاریخ را وارد کنید,
-Please enter the designation,لطفاً عنوان را وارد کنید,
 Please login as a Marketplace User to edit this item.,لطفاً برای ویرایش این مورد به عنوان یک کاربر Marketplace وارد شوید.,
 Please login as a Marketplace User to report this item.,لطفا برای گزارش این مورد به عنوان یک کاربر Marketplace وارد شوید.,
 Please select <b>Template Type</b> to download template,لطفا <b>الگو را</b> برای بارگیری قالب انتخاب کنید,
@@ -4049,38 +3788,29 @@ The question cannot be duplicate,سوال نمی تواند تکراری باش�
 The selected payment entry should be linked with a creditor bank transaction,ورودی پرداخت انتخابی باید با معامله بانکی بستانکار مرتبط باشد,
 The selected payment entry should be linked with a debtor bank transaction,ورودی پرداخت انتخابی باید با معامله بانکی بدهکار مرتبط باشد,
 The total allocated amount ({0}) is greated than the paid amount ({1}).,کل مبلغ اختصاص یافته (0 {}) از مبلغ پرداخت شده (1 {{) پس انداز می شود.,
-There are no vacancies under staffing plan {0},طبق برنامه کارمندان هیچ خالی وجود ندارد {0},
 This Service Level Agreement is specific to Customer {0},این توافق نامه سطح سرویس مختص {0 Custom مشتری است,
 This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?,این عملکرد این حساب را از هر سرویس خارجی که ERPNext را با حساب های بانکی شما ادغام می کند ، قطع می کند. قابل برگشت نیست. یقین دارید؟,
 This bank account is already synchronized,این حساب بانکی در حال حاضر هماهنگ شده است,
 This bank transaction is already fully reconciled,این تراکنش بانکی قبلاً کاملاً آشتی داده شده است,
-This employee already has a log with the same timestamp.{0},این کارمند قبلاً با همان دفترچه زمانی وارد سیستم شده است. {0},
 This page keeps track of items you want to buy from sellers.,این صفحه مواردی را که می خواهید از فروشندگان خریداری کنید ، ردیابی می کند.,
 This page keeps track of your items in which buyers have showed some interest.,این صفحه موارد شما را که خریداران از آن ابراز علاقه کرده اند ، ردیابی می کند.,
 Thursday,پنج شنبه,
-Timing,زمان سنجی,
 Title,عنوان,
 "To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.",برای اجازه بیش از صدور صورت حساب ، &quot;بیش از کمک هزینه صورتحساب&quot; را در تنظیمات حساب یا مورد به روز کنید.,
 "To allow over receipt / delivery, update ""Over Receipt/Delivery Allowance"" in Stock Settings or the Item.",برای اجازه بیش از دریافت / تحویل ، &quot;تنظیم بیش از دریافت / تحویل&quot; را در تنظیمات سهام یا مورد به روز کنید.,
-To date needs to be before from date,تا به امروز باید قبل از تاریخ باشد,
 Total,کل,
-Total Early Exits,تعداد خروج های اولیه,
-Total Late Entries,کل ورودی های دیررس,
 Total Payment Request amount cannot be greater than {0} amount,مبلغ درخواست پرداخت کل نمی تواند بیشتر از {0 مقدار باشد,
 Total payments amount can't be greater than {},کل مبلغ پرداخت نمی تواند بیشتر از {,
 Totals,مجموع,
-Training Event:,رویداد آموزشی:,
 Transactions already retreived from the statement,معاملات قبلاً از بیانیه عقب نشینی کردند,
 Transfer Material to Supplier,انتقال مواد به تامین کننده,
 Transport Receipt No and Date are mandatory for your chosen Mode of Transport,رسید و شماره حمل و نقل برای نحوه حمل و نقل انتخابی شما الزامی است,
 Tuesday,سهشنبه,
 Type,نوع,
-Unable to find Salary Component {0},یافتن جزء حقوق و دستمزد {0} یافت نشد,
 Unable to find the time slot in the next {0} days for the operation {1}.,یافتن شکاف زمان در {0} روزهای بعد از عمل 1 {ممکن نیست.,
 Unable to update remote activity,امکان به روزرسانی فعالیت از راه دور وجود ندارد,
 Unknown Caller,تماس گیرنده ناشناس,
 Unlink external integrations,ادغام های خارجی را قطع کنید,
-Unmarked Attendance for days,حضور در روز بدون علامت,
 Unpublish Item,عدم انتشار مورد,
 Unreconciled,نامشخص,
 Unsupported GST Category for E-Way Bill JSON generation,دسته پشتیبانی نشده پشتیبانی نشده برای نسل بیل بی سیم JSON,
@@ -4092,7 +3822,6 @@ Upload a statement,بیانیه را بارگذاری کنید,
 Use a name that is different from previous project name,از نامی استفاده کنید که متفاوت از نام پروژه قبلی باشد,
 User {0} is disabled,کاربر {0} غیر فعال است,
 Users and Permissions,کاربران و ویرایش,
-Vacancies cannot be lower than the current openings,جای خالی نمی تواند کمتر از دهانه های فعلی باشد,
 Valuation Rate required for Item {0} at row {1},نرخ ارزیابی مورد نیاز برای {0} در ردیف {1,
 Values Out Of Sync,ارزشهای خارج از همگام سازی,
 Vehicle Type is required if Mode of Transport is Road,در صورتی که نحوه حمل و نقل جاده ای باشد ، نوع خودرو مورد نیاز است,
@@ -4138,7 +3867,6 @@ woocommerce - {0},woocommerce - {0},
 {0} is not the default supplier for any items.,{0} تأمین کننده پیش فرض برای هر مورد نیست.,
 {0} is required,{0} مورد نیاز است,
 {0}: {1} must be less than {2},{0: {1} باید کمتر از {2,
-{} is an invalid Attendance Status.,{} وضعیت حضور نامعتبر است.,
 {} is required to generate E-Way Bill JSON,{to برای تولید بیل JSON از طریق e-Way لازم است,
 "Invalid lost reason {0}, please create a new lost reason",دلیل از دست رفته معتبر {0} ، لطفا یک دلیل از دست رفته جدید ایجاد کنید,
 Profit This Year,سود امسال,
@@ -4172,7 +3900,6 @@ Mode Of Payment,نحوه پرداخت,
 No students Found,هیچ دانشجویی یافت نشد,
 Not in Stock,در انبار,
 Please select a Customer,لطفا یک مشتری را انتخاب کنید,
-Printed On,چاپ شده در,
 Received From,دریافت شده از,
 Sales Person,شخص فروش,
 To date cannot be before From date,تا به امروز نمی تواند قبل از از تاریخ,
@@ -4200,7 +3927,6 @@ Minimum Qty,حداقل تعداد,
 More details,جزئیات بیشتر,
 Nature of Supplies,طبیعت لوازم,
 No Items found.,موردی یافت نشد.,
-No employee found,بدون کارمند یافت,
 No students found,هیچ دانش آموزان یافت,
 Not in stock,موجود نیست,
 Not permitted,غیر مجاز,
@@ -4242,15 +3968,11 @@ UOM Conversion factor ({0} -> {1}) not found for item: {2},ضریب تبدیل U
 Item Code > Item Group > Brand,کد کالا&gt; گروه مورد&gt; نام تجاری,
 Customer > Customer Group > Territory,مشتری&gt; گروه مشتری&gt; سرزمین,
 Supplier > Supplier Type,عرضه کننده&gt; نوع عرضه کننده,
-Please setup Employee Naming System in Human Resource > HR Settings,لطفاً سیستم نامگذاری کارمندان را در منابع انسانی&gt; تنظیمات HR تنظیم کنید,
-Please setup numbering series for Attendance via Setup > Numbering Series,لطفاً سریال های شماره گذاری را برای حضور از طریق تنظیم&gt; سری شماره گذاری تنظیم کنید,
 The value of {0} differs between Items {1} and {2},مقدار {0} بین موارد {1} و {2} متفاوت است,
 Auto Fetch,واکشی خودکار,
 Fetch Serial Numbers based on FIFO,واکشی شماره های سریال بر اساس FIFO,
 "Outward taxable supplies(other than zero rated, nil rated and exempted)",لوازم مشمول مالیات به خارج (غیر از صفر ، صفر و معاف),
 "To allow different rates, disable the {0} checkbox in {1}.",برای اجازه دادن به نرخ های مختلف ، {0} کادر تأیید در {1} را غیرفعال کنید.,
-Current Odometer Value should be greater than Last Odometer Value {0},مقدار کیلومتر شمار کنونی باید از مقدار آخر کیلومترشمار بیشتر باشد {0},
-No additional expenses has been added,هیچ هزینه اضافی اضافه نشده است,
 Asset{} {assets_link} created for {},دارایی {} {دارایی_لینک} ایجاد شده برای {},
 Row {}: Asset Naming Series is mandatory for the auto creation for item {},ردیف {}: سری نامگذاری دارایی برای ایجاد خودکار برای مورد اجباری است {},
 Assets not created for {0}. You will have to create asset manually.,دارایی برای {0} ایجاد نشده است. شما باید دارایی را به صورت دستی ایجاد کنید.,
@@ -4306,19 +4028,7 @@ Maintain Same Rate Throughout Sales Cycle,حفظ همان نرخ در طول چ�
 Must be Whole Number,باید عدد,
 Please setup Razorpay Plan ID,لطفاً شناسه برنامه Razorpay را تنظیم کنید,
 Contact Creation Failed,ایجاد تماس ناموفق بود,
-{0} already exists for employee {1} and period {2},{0} از قبل برای کارمند وجود دارد {1} و دوره {2},
-Leaves Allocated,برگ های اختصاص یافته,
 Leaves Expired,برگهای منقضی شده,
-Leave Without Pay does not match with approved {} records,ترک بدون پرداخت با سوابق تأیید شده {} مطابقت ندارد,
-Income Tax Slab not set in Salary Structure Assignment: {0},اسلب مالیات بر درآمد در انتساب ساختار حقوق تنظیم نشده است: {0},
-Income Tax Slab: {0} is disabled,اسلب مالیات بر درآمد: {0} غیرفعال است,
-Income Tax Slab must be effective on or before Payroll Period Start Date: {0},اسلب مالیات بر درآمد باید از تاریخ شروع دوره حقوق و دستمزد یا قبل از آن موثر باشد: {0},
-No leave record found for employee {0} on {1},سابقه مرخصی برای کارمند {0} در {1} یافت نشد,
-Row {0}: {1} is required in the expenses table to book an expense claim.,ردیف {0}: برای ثبت ادعای هزینه ، {1} در جدول هزینه ها لازم است.,
-Set the default account for the {0} {1},حساب پیش فرض را برای {0} {1} تنظیم کنید,
-(Half Day),(نیم روز),
-Income Tax Slab,اسلب مالیات بر درآمد,
-Row #{0}: Cannot set amount or formula for Salary Component {1} with Variable Based On Taxable Salary,ردیف شماره {0}: نمی توان مقدار یا فرمولی برای ملفه حقوق {1} با متغیر براساس حقوق مشمول مالیات تعیین کرد,
 Row #{}: {} of {} should be {}. Please modify the account or select a different account.,ردیف شماره {}: {} از {} باید {} باشد. لطفاً حساب را اصلاح کنید یا حساب دیگری را انتخاب کنید.,
 Row #{}: Please asign task to a member.,ردیف # {}: لطفاً کار را به عضوی اختصاص دهید.,
 Process Failed,روند ناموفق بود,
@@ -4363,7 +4073,6 @@ BOM Qty,تعداد BOM,
 Time logs are required for {0} {1},گزارش های زمانی برای {0} {1} لازم است,
 Total Completed Qty,تعداد کل تکمیل شده است,
 Qty to Manufacture,تعداد برای تولید,
-Repay From Salary can be selected only for term loans,بازپرداخت از حقوق فقط برای وام های مدت دار قابل انتخاب است,
 Social Media Campaigns,کمپین های رسانه های اجتماعی,
 From Date can not be greater than To Date,از تاریخ نمی تواند بیشتر از تاریخ باشد,
 Please set a Customer linked to the Patient,لطفاً مشتری متصل به بیمار را تنظیم کنید,
@@ -5054,8 +4763,6 @@ Account Head,سر حساب,
 Tax Amount After Discount Amount,مبلغ مالیات پس از تخفیف مبلغ,
 Item Wise Tax Detail ,جزئیات مالیات خردمندانه مورد,
 "Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.\n10. Add or Deduct: Whether you want to add or deduct the tax.",قالب مالیاتی استاندارد است که می تواند به تمام معاملات خرید استفاده شود. این الگو می تواند شامل لیستی از سر مالیات و همچنین دیگر سر هزینه مانند &quot;حمل و نقل&quot;، &quot;بیمه&quot;، &quot;سیستم های انتقال مواد&quot; و غیره #### توجه داشته باشید نرخ مالیات در اینجا تعریف می کنید خواهد بود که نرخ مالیات استاندارد برای همه آیتم ها ** * * * * * * * *. اگر تعداد آیتم ها ** ** که نرخ های مختلف وجود دارد، آنها باید در مورد مالیات ** ** جدول اضافه می شود در مورد ** ** استاد. #### شرح ستون 1. نوع محاسبه: - این می تواند بر روی ** ** خالص مجموع باشد (که مجموع مبلغ پایه است). - ** در انتظار قبلی مجموع / مقدار ** (برای مالیات تجمعی و یا اتهامات عنوان شده علیه). اگر شما این گزینه را انتخاب کنید، مالیات به عنوان یک درصد از سطر قبلی (در جدول مالیاتی) و یا مقدار کل اعمال می شود. - ** ** واقعی (به عنوان ذکر شده). 2. حساب سر: دفتر حساب که تحت آن این مالیات خواهد شد رزرو 3. مرکز هزینه: اگر مالیات / هزینه درآمد (مانند حمل و نقل) است و یا هزینه آن نیاز دارد تا در برابر یک مرکز هزینه رزرو شود. 4. توضیحات: توضیحات از مالیات (که در فاکتورها / به نقل از چاپ). 5. نرخ: نرخ مالیات. 6. مقدار: مبلغ مالیات. 7. مجموع: مجموع تجمعی به این نقطه است. 8. ردیف را وارد کنید: اگر بر اساس &quot;سطر قبلی مجموع&quot; شما می توانید تعداد ردیف خواهد شد که به عنوان پایه ای برای این محاسبه (به طور پیش فرض سطر قبلی است) گرفته شده را انتخاب کنید. 9. در نظر بگیرید مالیات و یا هزینه برای: در این بخش شما می توانید مشخص کنید اگر مالیات / بار فقط برای ارزیابی (و نه بخشی از کل ارسال ها) و یا تنها برای کل (ارزش به آیتم اضافه کنید) و یا برای هر دو. 10. اضافه کردن و یا کسر: آیا شما می خواهید برای اضافه کردن یا کسر مالیات.,
-Salary Component Account,حساب حقوق و دستمزد و اجزای,
-Default Bank / Cash account will be automatically updated in Salary Journal Entry when this mode is selected.,به طور پیش فرض حساب بانک / نقدی به طور خودکار در حقوق ورودی مجله به روز هنگامی که این حالت انتخاب شده است.,
 ACC-SINV-.YYYY.-,ACC-SINV- .YYYY.-,
 Include Payment (POS),شامل پرداخت (POS),
 Offline POS Name,آفلاین نام POS,
@@ -5705,8 +5412,6 @@ Evaluate,ارزیابی کنید,
 Maximum Assessment Score,حداکثر نمره ارزیابی,
 Assessment Plan Criteria,معیارهای ارزیابی طرح,
 Maximum Score,حداکثر نمره,
-Result,نتیجه,
-Total Score,نمره کل,
 Grade,مقطع تحصیلی,
 Assessment Result Detail,ارزیابی جزئیات نتیجه,
 Assessment Result Tool,ابزار ارزیابی نتیجه,
@@ -5855,7 +5560,6 @@ Seating Capacity,گنجایش,
 House Name,نام خانه,
 EDU-STU-.YYYY.-,EDU-STU- .YYYY.-,
 Student Mobile Number,دانشجو شماره موبایل,
-Joining Date,پیوستن به تاریخ,
 Blood Group,گروه خونی,
 A+,A +,
 A-,A-,
@@ -5878,7 +5582,6 @@ Reason For Leaving,دلیل ترک,
 Student Admission,پذیرش دانشجو,
 Admission Start Date,پذیرش تاریخ شروع,
 Admission End Date,پذیرش پایان تاریخ,
-Publish on website,انتشار در وب سایت,
 Eligibility and Details,واجد شرایط بودن و جزئیات,
 Student Admission Program,برنامه پذیرش دانشجویی,
 Minimum Age,کمترین سن,
@@ -5887,7 +5590,6 @@ Application Fee,هزینه درخواست,
 Naming Series (for Student Applicant),نامگذاری سری (دانشجویی برای متقاضی),
 LMS Only,فقط LMS,
 EDU-APP-.YYYY.-,EDU-APP- .YYYY.-,
-Application Status,وضعیت برنامه,
 Application Date,تاریخ برنامه,
 Student Attendance Tool,ابزار حضور دانش آموز,
 Group Based On,گروه بر اساس,
@@ -5947,7 +5649,6 @@ CN,CN,
 DE,DE,
 ES,ES,
 FR,FR,
-IN,که در,
 JP,JP,
 IT,آی تی,
 MX,MX,
@@ -6179,7 +5880,6 @@ Avoid Confirmation,اجتناب از تأیید,
 Do not confirm if appointment is created for the same day,تأیید نکرده اید که قرار ملاقات برای همان روز ایجاد شده باشد,
 Appointment Reminder,یادآوری انتصاب,
 Reminder Message,پیام یادآوری,
-Remind Before,قبل از یادآوری,
 Laboratory Settings,تنظیمات آزمایشگاهی,
 Create Lab Test(s) on Sales Invoice Submission,در ارسال فاکتور فروش تست (های) آزمایشگاهی ایجاد کنید,
 Checking this will create Lab Test(s) specified in the Sales Invoice on submission.,با بررسی این امر آزمایش (های آزمایشگاهی) مشخص شده در فاکتور فروش هنگام ارسال ارائه می شود.,
@@ -6269,7 +5969,6 @@ Duration (In Minutes),مدت زمان (در چند دقیقه),
 Reference Sales Invoice,فاکتور فروش مرجع,
 More Info,اطلاعات بیشتر,
 Referring Practitioner,متخصص ارجاع,
-Reminded,یادآوری شد,
 HLC-PA-.YYYY.-,HLC-PA-.YYYY.-,
 Assessment Template,الگوی ارزیابی,
 Assessment Datetime,ارزیابی Datetime,
@@ -6376,73 +6075,20 @@ Hotel Room Reservation Item,مورد رزرو اتاق هتل,
 Hotel Settings,تنظیمات هتل,
 Default Taxes and Charges,مالیات به طور پیش فرض ها و اتهامات,
 Default Invoice Naming Series,Default Invoice نامگذاری سری,
-Additional Salary,حقوق اضافی,
 HR,HR,
-HR-ADS-.YY.-.MM.-,HR-ADS- .YY-. MM.-,
-Salary Component,حقوق و دستمزد و اجزای,
-Overwrite Salary Structure Amount,بازپرداخت مقدار حقوق و دستمزد,
-Deduct Full Tax on Selected Payroll Date,كاهش ماليات كامل در تاريخ انتخاب حقوق و دستمزد,
-Payroll Date,تاریخ عضویت,
 Date on which this component is applied,تاریخ استفاده از این مؤلفه,
 Salary Slip,لغزش حقوق و دستمزد,
-Salary Component Type,نوع مشمول حقوق و دستمزد,
 HR User,HR کاربر,
-Appointment Letter,نامه انتصاب,
 Job Applicant,درخواستگر کار,
-Appointment Date,تاریخ انتصاب,
-Appointment Letter Template,الگوی نامه انتصاب,
 Body,بدن,
-Closing Notes,یادداشتهای بسته شدن,
-Appointment Letter content,محتوای نامه انتصاب,
-Appraisal,ارزیابی,
-HR-APR-.YY.-.MM.,HR-APR--YY.-MM.,
 Appraisal Template,ارزیابی الگو,
-For Employee Name,نام کارمند,
-Goals,اهداف,
-Total Score (Out of 5),نمره کل (از 5),
-"Any other remarks, noteworthy effort that should go in the records.",هر گونه اظهارات دیگر، تلاش قابل توجه است که باید در پرونده بروید.,
-Appraisal Goal,ارزیابی هدف,
-Key Responsibility Area,منطقه مسئولیت های کلیدی,
-Weightage (%),بین وزنها (٪),
-Score (0-5),امتیاز (0-5),
-Score Earned,امتیاز کسب,
-Appraisal Template Title,ارزیابی الگو عنوان,
-Appraisal Template Goal,هدف ارزیابی الگو,
-KRA,ناحیه جنوبی,
-Key Performance Area,منطقه کلیدی کارایی,
-HR-ATT-.YYYY.-,HR-ATT- .YYYY.-,
-On Leave,در مرخصی,
-Work From Home,کار از خانه,
-Leave Application,مرخصی استفاده,
-Attendance Date,حضور و غیاب عضویت,
-Attendance Request,درخواست حضور,
-Late Entry,ورود اواخر,
-Early Exit,زود هنگام خروج,
-Half Day Date,تاریخ نیم روز,
-On Duty,در وظیفه,
-Explanation,توضیح,
-Compensatory Leave Request,درخواست بازپرداخت جبران خسارت,
-Leave Allocation,ترک تخصیص,
-Worked On Holiday,کار تعطیلات,
-Work From Date,کار از تاریخ,
-Work End Date,تاریخ پایان کار,
-Email Sent To,ایمیل ارسال شده به,
-Select Users,کاربران را انتخاب کنید,
-Send Emails At,ارسال ایمیل در,
-Reminder,یادآور,
-Daily Work Summary Group User,کاربر خلاصه گروه کار روزانه,
-email,پست الکترونیک,
 Parent Department,والدین,
 Leave Block List,ترک فهرست بلوک,
 Days for which Holidays are blocked for this department.,روز که تعطیلات برای این بخش مسدود شده است.,
 Leave Approver,ترک تصویب,
 Expense Approver,تصویب هزینه,
-Department Approver,تأیید کننده گروه,
-Approver,تصویب,
 Required Skills,مهارت های مورد نیاز,
 Skills,مهارت ها,
-Designation Skill,مهارت طراحی,
-Skill,مهارت,
 Driver,راننده,
 HR-DRI-.YYYY.-,HR-DRI- .YYYY.-,
 Suspended,تعطیل,
@@ -6474,11 +6120,9 @@ Date Of Retirement,تاریخ بازنشستگی,
 Department and Grade,گروه و درجه,
 Reports to,گزارش به,
 Attendance and Leave Details,حضور و خروج جزئیات,
-Leave Policy,ترک سیاست,
 Attendance Device ID (Biometric/RF tag ID),شناسه دستگاه حضور و غیاب (شناسه برچسب بیومتریک / RF),
 Applicable Holiday List,فهرست تعطیلات قابل اجرا,
 Default Shift,تغییر پیش فرض,
-Salary Details,جزئیات حقوق و دستمزد,
 Salary Mode,حالت حقوق و دستمزد,
 Bank A/C No.,شماره حساب بانک,
 Health Insurance,بیمه سلامت,
@@ -6517,45 +6161,11 @@ Reason for Leaving,دلیلی برای ترک,
 Leave Encashed?,ترک نقد شدنی؟,
 Encashment Date,Encashment عضویت,
 New Workplace,جدید محل کار,
-HR-EAD-.YYYY.-,HR-EAD- .YYYY.-,
 Returned Amount,مقدار برگشت داده شد,
-Claimed,ادعا شده,
 Advance Account,حساب پیشرو,
-Employee Attendance Tool,کارمند ابزار حضور و غیاب,
-Unmarked Attendance,حضور و غیاب بینام,
-Employees HTML,کارمندان HTML,
-Marked Attendance,حضور و غیاب مشخص شده,
-Marked Attendance HTML,حضور و غیاب مشخص HTML,
-Employee Benefit Application,درخواست کارفرما,
-Max Benefits (Yearly),حداکثر مزایا (سالیانه),
-Remaining Benefits (Yearly),مزایای باقی مانده (سالانه),
-Payroll Period,دوره حقوق و دستمزد,
 Benefits Applied,مزایای کاربردی,
-Dispensed Amount (Pro-rated),مقدار اعطا شده (امتیاز داده شده),
-Employee Benefit Application Detail,جزئیات برنامه کاربرد مزایای کارکنان,
-Earning Component,کامپوننت درآمد,
-Pay Against Benefit Claim,پرداخت حق بیمه,
-Max Benefit Amount,حداکثر مبلغ مزایا,
-Employee Benefit Claim,ادعای مزایای کارکنان,
-Claim Date,تاریخ ادعا,
 Benefit Type and Amount,نوع مزایا و مبلغ,
-Claim Benefit For,درخواست مزایا برای,
-Max Amount Eligible,حداکثر مبلغ مجاز,
-Expense Proof,اثبات هزینه,
-Employee Boarding Activity,فعاليت شبانه روزی کارکنان,
-Activity Name,نام فعالیت,
 Task Weight,وظیفه وزن,
-Required for Employee Creation,مورد نیاز برای ایجاد کارمند,
-Applicable in the case of Employee Onboarding,قابل اجرا در مورد کارمند انبار,
-Employee Checkin,بررسی کارمندان,
-Log Type,نوع ورود,
-OUT,بیرون,
-Location / Device ID,شناسه مکان / دستگاه,
-Skip Auto Attendance,شرکت در حضور خودکار,
-Shift Start,Shift Start,
-Shift End,پایان شیفت,
-Shift Actual Start,شروع واقعی Shift,
-Shift Actual End,پایان واقعی Shift,
 Employee Education,آموزش و پرورش کارمند,
 School/University,مدرسه / دانشگاه,
 Graduate,فارغ التحصیل,
@@ -6567,80 +6177,14 @@ Major/Optional Subjects,عمده / موضوع اختیاری,
 Employee External Work History,کارمند خارجی سابقه کار,
 Total Experience,تجربه ها,
 Default Leave Policy,پیش فرض خط مشی را ترک کنید,
-Default Salary Structure,ساختار پیش فرض حقوق,
 Employee Group Table,جدول گروه کارمندان,
 ERPNext User ID,شناسه کاربر ERPNext,
-Employee Health Insurance,بیمه بهداشتی کارکنان,
-Health Insurance Name,نام بیمه بهداشتی,
-Employee Incentive,مشوق کارمند,
-Incentive Amount,مبلغ تسریع کننده,
 Employee Internal Work History,کارمند داخلی سابقه کار,
-Employee Onboarding,کارمند انبار,
-Notify users by email,از طریق ایمیل به کاربران اطلاع دهید,
-Employee Onboarding Template,کارمند برپایه الگو,
 Activities,فعالیت ها,
 Employee Onboarding Activity,فعالیت کارکنان کارکنان,
-Employee Other Income,درآمد دیگر کارمند,
-Employee Promotion,ارتقاء کارکنان,
-Promotion Date,تاریخ ارتقاء,
-Employee Promotion Details,جزئیات ارتقاء کارکنان,
 Employee Promotion Detail,جزئیات ارتقاء کارکنان,
-Employee Property History,تاریخ اموال کارکنان,
-Employee Separation,جدایی کارکنان,
-Employee Separation Template,قالب جداگانه کارمند,
-Exit Interview Summary,خروج خلاصه مصاحبه,
-Employee Skill,مهارت کارمندان,
-Proficiency,مهارت,
-Evaluation Date,تاریخ ارزیابی,
-Employee Skill Map,نقشه مهارت کارمندان,
-Employee Skills,مهارت های کارمندان,
-Trainings,آموزشها,
-Employee Tax Exemption Category,رده اخراج مالیات کارکنان,
-Max Exemption Amount,حداکثر میزان معافیت,
-Employee Tax Exemption Declaration,بیانیه مالیات بر ارزش افزوده کارمند,
-Declarations,اعلامیه,
-Total Declared Amount,مقدار اعلام شده کل,
-Total Exemption Amount,مجموع مبلغ معافیت,
-Employee Tax Exemption Declaration Category,بخش اعلامیه حقوق بازنشستگی کارکنان,
-Exemption Sub Category,معافیت زیر رده,
-Exemption Category,رده انحصاری,
-Maximum Exempted Amount,حداکثر مقدار مجاز,
-Declared Amount,مقدار اعلام شد,
-Employee Tax Exemption Proof Submission,ارائه بازپرداخت معاف از مالیات کارمند,
-Submission Date,تاریخ ارسال,
-Tax Exemption Proofs,اثبات های تخفیف مالیاتی,
-Total Actual Amount,مقدار کل واقعی,
-Employee Tax Exemption Proof Submission Detail,جزئیات بازپرداخت معاف از مالیات کارمند,
-Maximum Exemption Amount,حداکثر میزان معافیت,
-Type of Proof,نوع اثبات,
-Actual Amount,مقدار واقعی,
-Employee Tax Exemption Sub Category,معافیت مالیاتی کارکنان زیر رده,
-Tax Exemption Category,معافیت مالیاتی رده,
-Employee Training,آموزش کارمندان,
-Training Date,تاریخ آموزش,
-Employee Transfer,انتقال کارفرمایان,
-Transfer Date,تاریخ انتقال,
-Employee Transfer Details,جزئیات انتقال کارکنان,
-Employee Transfer Detail,جزئیات انتقال کارکنان,
-Re-allocate Leaves,تخصیص برگهای مجدد,
-Create New Employee Id,ایجاد شناسه کارمند جدید,
-New Employee ID,شناسه کارمند جدید,
 Employee Transfer Property,کارفرما انتقال اموال,
-HR-EXP-.YYYY.-,HR-EXP- .YYYY.-,
-Expense Taxes and Charges,هزینه مالیات و عوارض,
-Total Sanctioned Amount,کل مقدار تحریم,
-Total Advance Amount,مجموع پیشامد,
-Total Claimed Amount,مجموع مقدار ادعا,
-Total Amount Reimbursed,مقدار کل بازپرداخت,
-Vehicle Log,ورود خودرو,
-Employees Email Id,کارکنان پست الکترونیکی شناسه,
-More Details,جزئیات بیشتر,
-Expense Claim Account,حساب ادعای هزینه,
-Expense Claim Advance,پیش پرداخت هزینه,
 Unclaimed amount,مقدار نامعلوم,
-Expense Claim Detail,هزینه جزئیات درخواست,
-Expense Date,هزینه عضویت,
-Expense Claim Type,هزینه نوع ادعا,
 Holiday List Name,نام فهرست تعطیلات,
 Total Holidays,کل تعطیلات,
 Add Weekly Holidays,تعطیلات هفتگی اضافه کنید,
@@ -6648,191 +6192,25 @@ Weekly Off,فعال هفتگی,
 Add to Holidays,اضافه کردن به تعطیلات,
 Holidays,تعطیلات,
 Clear Table,جدول پاک کردن,
-HR Settings,تنظیمات HR,
-Employee Settings,تنظیمات کارمند,
 Retirement Age,سن بازنشستگی,
 Enter retirement age in years,سن بازنشستگی را وارد کنید در سال های,
 Stop Birthday Reminders,توقف تولد یادآوری,
-Expense Approver Mandatory In Expense Claim,تأیید کننده هزینه مورد نیاز در هزینه ادعا,
-Payroll Settings,تنظیمات حقوق و دستمزد,
-Leave,ترک کردن,
-Max working hours against Timesheet,حداکثر ساعات کار در برابر برنامه زمانی,
-Include holidays in Total no. of Working Days,شامل تعطیلات در مجموع هیچ. از روز کاری,
-"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",اگر علامت زده شود، هیچ مجموع. از روز کاری شامل تعطیلات، و این خواهد شد که ارزش حقوق پستها در طول روز کاهش,
-"If checked, hides and disables Rounded Total field in Salary Slips",اگر علامت زده شود ، قسمت Rounded Total را در Slip Slips مخفی کرده و غیرفعال می کند,
-The fraction of daily wages to be paid for half-day attendance,کسری از حقوق روزانه که باید برای حضور در نیم روز پرداخت شود,
-Email Salary Slip to Employee,ایمیل لغزش حقوق و دستمزد به کارکنان,
-Emails salary slip to employee based on preferred email selected in Employee,لغزش ایمیل حقوق و دستمزد به کارکنان را بر اساس ایمیل مورد نظر در انتخاب کارمند,
-Encrypt Salary Slips in Emails,رمزگذاری لیست حقوق در ایمیل,
-"The salary slip emailed to the employee will be password protected, the password will be generated based on the password policy.",مبلغ دستمزدی که به کارمند ارسال می شود از رمز عبور محافظت می شود ، رمز عبور بر اساس خط مشی رمز عبور تولید می شود.,
-Password Policy,خط مشی رمز عبور,
-<b>Example:</b> SAL-{first_name}-{date_of_birth.year} <br>This will generate a password like SAL-Jane-1972,<b>مثال:</b> SAL- {first_name - {date_of_birth.year <br> با این کار رمز عبوری مانند SAL-Jane-1972 ایجاد می شود,
 Leave Settings,تنظیمات را ترک کنید,
-Leave Approval Notification Template,قالب اخطار تایید را ترک کنید,
-Leave Status Notification Template,حالت اخطار وضعیت را ترک کنید,
-Role Allowed to Create Backdated Leave Application,نقش مجاز به ایجاد برنامه مرخصی با سابقه بازگشت,
-Leave Approver Mandatory In Leave Application,خروج از تأیید کننده در مورد درخواست اجباری,
-Show Leaves Of All Department Members In Calendar,نمایش برگ همه اعضای گروه در تقویم,
-Auto Leave Encashment,خودکار ترک کردن رمزگذاری,
-Hiring Settings,تنظیمات استخدام,
-Check Vacancies On Job Offer Creation,فرصتهای شغلی در ایجاد پیشنهاد شغلی را بررسی کنید,
-Identification Document Type,نوع سند شناسایی,
-Effective from,موثر از,
-Allow Tax Exemption,معافیت مالیاتی مجاز است,
-"If enabled, Tax Exemption Declaration will be considered for income tax calculation.",در صورت فعال بودن ، اعلامیه معافیت مالیاتی برای محاسبه مالیات بر درآمد در نظر گرفته می شود.,
-Standard Tax Exemption Amount,مبلغ معافیت مالیاتی استاندارد,
-Taxable Salary Slabs,اسلب حقوق و دستمزد مشمول مالیات,
-Taxes and Charges on Income Tax,مالیات و هزینه های مالیات بر درآمد,
-Other Taxes and Charges,سایر مالیات ها و هزینه ها,
-Income Tax Slab Other Charges,سایر اسناد مالیات بر درآمد,
-Min Taxable Income,حداقل درآمد مشمول مالیات,
-Max Taxable Income,حداکثر درآمد مشمول مالیات,
-Applicant for a Job,متقاضی برای شغل,
 Accepted,پذیرفته,
-Job Opening,افتتاح شغلی,
-Cover Letter,جلد نامه,
-Resume Attachment,پیوست رزومه,
-Job Applicant Source,منبع درخواست شغلی,
-Applicant Email Address,آدرس ایمیل متقاضی,
-Awaiting Response,در انتظار پاسخ,
-Job Offer Terms,شرایط پیشنهاد شغلی,
-Select Terms and Conditions,انتخاب شرایط و ضوابط,
 Printing Details,اطلاعات چاپ,
-Job Offer Term,پیشنهاد شغلی,
-Offer Term,مدت پیشنهاد,
-Value / Description,ارزش / توضیحات,
-Description of a Job Opening,شرح یک شغل,
 Job Title,عنوان شغلی,
-Staffing Plan,طرح کارکنان,
-Planned number of Positions,تعداد پالیسی های برنامه ریزی شده,
-"Job profile, qualifications required etc.",مشخصات شغلی، شرایط مورد نیاز و غیره,
-HR-LAL-.YYYY.-,HR-LAL- .YYYY.-,
 Allocation,تخصیص,
-New Leaves Allocated,برگ جدید اختصاص داده شده,
-Add unused leaves from previous allocations,اضافه کردن برگ های استفاده نشده از تخصیص قبلی,
-Unused leaves,برگ استفاده نشده,
-Total Leaves Allocated,مجموع برگ اختصاص داده شده,
-Total Leaves Encashed,مجموع برگ ها جای داده شده است,
-Leave Period,ترک دوره,
-Carry Forwarded Leaves,برگ فرستاده حمل,
-Apply / Approve Leaves,درخواست / برگ تصویب,
-HR-LAP-.YYYY.-,HR-LAP- .YYYY.-,
-Leave Balance Before Application,ترک تعادل قبل از اعمال,
-Total Leave Days,مجموع مرخصی روز,
-Leave Approver Name,ترک نام تصویب,
-Follow via Email,از طریق ایمیل دنبال کنید,
-Block Holidays on important days.,تعطیلات بلوک در روز مهم است.,
-Leave Block List Name,ترک نام فهرست بلوک,
-Applies to Company,امر به شرکت,
-"If not checked, the list will have to be added to each Department where it has to be applied.",اگر بررسی نیست، لیست خواهد باید به هر بخش که در آن به کار گرفته شوند اضافه شده است.,
-Block Days,بلوک روز,
-Stop users from making Leave Applications on following days.,توقف کاربران از ساخت نرم افزار مرخصی در روز بعد.,
-Leave Block List Dates,ترک فهرست بلوک خرما,
-Allow Users,کاربران اجازه می دهد,
-Allow the following users to approve Leave Applications for block days.,اجازه می دهد کاربران زیر به تصویب برنامه های کاربردی را برای روز مسدود کند.,
-Leave Block List Allowed,ترک فهرست بلوک های مجاز,
-Leave Block List Allow,ترک فهرست بلوک اجازه,
-Allow User,اجازه می دهد کاربر,
-Leave Block List Date,ترک فهرست بلوک عضویت,
-Block Date,بلوک عضویت,
-Leave Control Panel,ترک کنترل پنل,
 Select Employees,انتخاب کارمندان,
-Employment Type (optional),نوع اشتغال (اختیاری),
-Branch (optional),شعبه (اختیاری),
-Department (optional),بخش (اختیاری),
-Designation (optional),تعیین (اختیاری),
-Employee Grade (optional),درجه کارمند (اختیاری),
-Employee (optional),کارمند (اختیاری),
-Allocate Leaves,تخصیص برگ,
-Carry Forward,حمل به جلو,
-Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,لطفا انتخاب کنید حمل به جلو اگر شما نیز می خواهید که شامل تعادل سال گذشته مالی برگ به سال مالی جاری,
-New Leaves Allocated (In Days),برگ جدید اختصاص داده شده (در روز),
 Allocate,اختصاص دادن,
-Leave Balance,برهم زدن تعادل,
-Encashable days,روزهای Encashable,
-Encashment Amount,مبلغ مبلغ,
-Leave Ledger Entry,ورود ورود به سیستم را ترک کنید,
-Transaction Name,نام معاملات,
-Is Carry Forward,آیا حمل به جلو,
-Is Expired,باطل شده,
-Is Leave Without Pay,آیا ترک کنی بدون اینکه پرداخت,
-Holiday List for Optional Leave,لیست تعطیلات برای اقامت اختیاری,
-Leave Allocations,رها کردن,
-Leave Policy Details,ترک جزئیات سیاست,
-Leave Policy Detail,ترک جزئیات سیاست,
-Annual Allocation,توزیع سالانه,
-Leave Type Name,ترک نام نوع,
 Max Leaves Allowed,حداکثر برگ مجاز است,
-Applicable After (Working Days),قابل اجرا بعد از (روزهای کاری),
 Maximum Continuous Days Applicable,حداکثر روز پیوسته قابل اجرا,
-Is Optional Leave,ترک اختیاری است,
-Allow Negative Balance,اجازه می دهد تراز منفی,
-Include holidays within leaves as leaves,شامل تعطیلات در برگ برگ,
-Is Compensatory,عیبی دارد,
-Maximum Carry Forwarded Leaves,حداکثر برگهای حمل شده,
-Expire Carry Forwarded Leaves (Days),برگهای حمل شده Expire (روزها),
-Calculated in days,در روز محاسبه می شود,
-Encashment,محاسبه,
-Allow Encashment,مجاز به انسداد,
-Encashment Threshold Days,روز آستانه محاسبه,
-Earned Leave,درآمد کسب شده,
-Is Earned Leave,درآمد کسب کرده است,
-Earned Leave Frequency,فرکانس خروج درآمد,
-Rounding,گرد کردن,
-Payroll Employee Detail,جزئیات کارمند حقوق و دستمزد,
-Payroll Frequency,فرکانس حقوق و دستمزد,
-Fortnightly,دوهفتگی,
-Bimonthly,مجلهای که دوماه یکبار منتشر میشود,
-Employees,کارمندان,
-Number Of Employees,تعداد کارکنان,
-Employee Details,جزئیات کارمند,
-Validate Attendance,تأیید حضور,
-Salary Slip Based on Timesheet,لغزش حقوق و دستمزد بر اساس برنامه زمانی,
 Select Payroll Period,انتخاب کنید حقوق و دستمزد دوره,
-Deduct Tax For Unclaimed Employee Benefits,تخفیف مالیات برای مزایای کارمند بدون اعلان,
-Deduct Tax For Unsubmitted Tax Exemption Proof,تخفیف مالیات برای اثبات تخفیف مالیات غیرقانونی,
-Select Payment Account to make Bank Entry,انتخاب حساب پرداخت به ورود بانک,
-Salary Slips Created,حقوق و دستمزد ایجاد شده است,
-Salary Slips Submitted,حقوق و دستمزد ارسال شده است,
-Payroll Periods,دوره های حقوق و دستمزد,
-Payroll Period Date,تاریخ پرداخت حقوق,
-Purpose of Travel,هدف سفر,
-Retention Bonus,جایزه نگهداری,
-Bonus Payment Date,تاریخ پرداخت پاداش,
-Bonus Amount,مقدار پاداش,
 Abbr,مخفف,
-Depends on Payment Days,بستگی به روزهای پرداخت دارد,
-Is Tax Applicable,مالیات قابل اجرا است,
-Variable Based On Taxable Salary,متغیر بر اساس حقوق و دستمزد قابل پرداخت,
-Exempted from Income Tax,معاف از مالیات بر درآمد,
-Round to the Nearest Integer,دور تا نزدیکترین علاقه,
-Statistical Component,کامپوننت آماری,
-"If selected, the value specified or calculated in this component will not contribute to the earnings or deductions. However, it's value can be referenced by other components that can be added or deducted. ",در صورت انتخاب، از مقدار مشخص شده و یا محاسبه در این بخش نمی خواهد به درآمد یا کسورات کمک می کند. با این حال، ارزش را می توان با دیگر اجزای که می تواند اضافه یا کسر اشاره شده است.,
-Do Not Include in Total,در کل وارد نکنید,
-Flexible Benefits,مزایای انعطاف پذیر,
-Is Flexible Benefit,مزایای قابل انعطاف است,
-Max Benefit Amount (Yearly),مقدار حداکثر مزایا (سالانه),
-Only Tax Impact (Cannot Claim But Part of Taxable Income),فقط تأثیر مالیاتی (نمیتوان ادعا کرد که بخشی از درآمد مشمول مالیات است),
-Create Separate Payment Entry Against Benefit Claim,ایجاد تکالیف جداگانه علیه ادعای مزایا,
 Condition and Formula,شرایط و فرمول,
-Amount based on formula,مقدار در فرمول بر اساس,
-Formula,فرمول,
-Salary Detail,جزئیات حقوق و دستمزد,
-Component,مولفه,
-Do not include in total,در مجموع شامل نمی شود,
-Default Amount,مقدار پیش فرض,
-Additional Amount,مقدار اضافی,
-Tax on flexible benefit,مالیات بر سود انعطاف پذیر,
-Tax on additional salary,مالیات بر حقوق و دستمزد اضافی,
-Salary Structure,ساختار حقوق و دستمزد,
-Working Days,روزهای کاری,
-Salary Slip Timesheet,برنامه زمانی حقوق و دستمزد لغزش,
 Total Working Hours,کل ساعات کار,
 Hour Rate,یک ساعت یک نرخ,
 Bank Account No.,شماره حساب بانکی,
 Earning & Deduction,سود و کسر,
-Earnings,درامد,
-Deductions,کسر,
 Loan repayment,بازپرداخت وام,
 Employee Loan,کارمند وام,
 Total Principal Amount,مجموع کل اصل,
@@ -6840,126 +6218,10 @@ Total Interest Amount,مقدار کل سود,
 Total Loan Repayment,مجموع بازپرداخت وام,
 net pay info,اطلاعات خالص دستمزد,
 Gross Pay - Total Deduction - Loan Repayment,دستمزد ناخالص - کسر مجموع - بازپرداخت وام,
-Total in words,مجموع در کلمات,
 Net Pay (in words) will be visible once you save the Salary Slip.,پرداخت خالص (به عبارت) قابل مشاهده خواهد بود یک بار شما را لغزش حقوق و دستمزد را نجات دهد.,
-Salary Component for timesheet based payroll.,کامپوننت حقوق و دستمزد حقوق و دستمزد بر اساس برنامه زمانی برای.,
-Leave Encashment Amount Per Day,مبلغ مبلغ در روز را ترک کنید,
-Max Benefits (Amount),حداکثر مزایا (مقدار),
-Salary breakup based on Earning and Deduction.,فروپاشی حقوق و دستمزد بر اساس سود و کسر.,
-Total Earning,سود مجموع,
-Salary Structure Assignment,تخصیص ساختار حقوق و دستمزد,
-Shift Assignment,تخصیص تغییر,
-Shift Type,نوع تغییر,
-Shift Request,درخواست تغییر,
-Enable Auto Attendance,حضور و غیاب خودکار را فعال کنید,
-Mark attendance based on 'Employee Checkin' for Employees assigned to this shift.,حضور و علامت گذاری بر اساس &quot;Checkin Employee&quot; را برای کارمندان اختصاص داده شده در این شیفت انجام دهید.,
-Auto Attendance Settings,تنظیمات حضور و غیاب خودکار,
-Determine Check-in and Check-out,Check-in و Check-Out را تعیین کنید,
-Alternating entries as IN and OUT during the same shift,ورودی های متناوب مانند IN و OUT در همان شیفت,
-Strictly based on Log Type in Employee Checkin,کاملاً مبتنی بر ورود به سیستم در ورود به سیستم کارمندان,
-Working Hours Calculation Based On,محاسبه ساعت کار بر اساس,
-First Check-in and Last Check-out,اولین ورود به سیستم و آخرین check-out,
-Every Valid Check-in and Check-out,هر ورود به سیستم و ورود به سیستم معتبر است,
-Begin check-in before shift start time (in minutes),قبل از شروع زمان تغییر شیفت (در عرض چند دقیقه) ورود به سیستم را شروع کنید,
-The time before the shift start time during which Employee Check-in is considered for attendance.,زمان قبل از شروع کار شیفت که در آن Check-in کارمندان برای حضور در نظر گرفته می شود.,
-Allow check-out after shift end time (in minutes),بعد از اتمام زمان تغییر شیفت (در عرض چند دقیقه) اجازه ورود به سیستم,
-Time after the end of shift during which check-out is considered for attendance.,زمان بعد از پایان شیفت که در آن چک لیست برای حضور در نظر گرفته شده است.,
-Working Hours Threshold for Half Day,آستانه ساعت کار برای نیم روز,
-Working hours below which Half Day is marked. (Zero to disable),ساعات کاری که زیر آن نیمه روز مشخص شده است. (غیرفعال کردن صفر),
-Working Hours Threshold for Absent,آستانه ساعت کاری برای غیبت,
-Working hours below which Absent is marked. (Zero to disable),ساعات کاری که در زیر آن غایب مشخص شده است. (غیرفعال کردن صفر),
-Process Attendance After,حضور در فرآیند پس از,
-Attendance will be marked automatically only after this date.,حضور فقط بعد از این تاریخ به طور خودکار مشخص می شود.,
-Last Sync of Checkin,آخرین همگام سازی Checkin,
-Last Known Successful Sync of Employee Checkin. Reset this only if you are sure that all Logs are synced from all the locations. Please don't modify this if you are unsure.,آخرین همگام سازی موفقیت آمیز بررسی کارمندان. این تنظیم مجدد فقط درصورتی که مطمئن هستید که همه گزارش ها از همه مکان ها همگام سازی شده اند. اگر مطمئن نیستید ، لطفاً این را اصلاح نکنید.,
-Grace Period Settings For Auto Attendance,تنظیمات دوره Grace برای حضور خودکار,
-Enable Entry Grace Period,دوره ورود Grace را فعال کنید,
-Late Entry Grace Period,دوره تأخیر ورود,
-The time after the shift start time when check-in is considered as late (in minutes).,زمان بعد از شروع زمان تغییر هنگام ورود به سیستم دیر هنگام (در عرض چند دقیقه) در نظر گرفته می شود.,
-Enable Exit Grace Period,Exit Grace Period را فعال کنید,
-Early Exit Grace Period,زودرس دوره گریس,
-The time before the shift end time when check-out is considered as early (in minutes).,زمان قبل از زمان پایان شیفت هنگام استعلام زود هنگام (در عرض چند دقیقه) در نظر گرفته می شود.,
-Skill Name,نام مهارت,
 Staffing Plan Details,جزئیات برنامه کارکنان,
-Staffing Plan Detail,جزئیات برنامه کارکنان,
-Total Estimated Budget,مجموع بودجه تخمینی,
-Vacancies,واجد شرایط,
-Estimated Cost Per Position,هزینه پیش بینی شده در هر موقعیت,
-Total Estimated Cost,کل هزینه تخمینی,
-Current Count,تعداد فعلی,
-Current Openings,بازوهای فعلی,
-Number Of Positions,تعداد موقعیت ها,
-Taxable Salary Slab,حقوق و دستمزد قابل پرداخت,
-From Amount,از مقدار,
-To Amount,به مقدار,
-Percent Deduction,کاهش درصد,
-Training Program,برنامه آموزشی,
-Event Status,وضعیت رویداد,
-Has Certificate,گواهی دارد,
-Seminar,سمینار,
-Theory,تئوری,
-Workshop,کارگاه,
-Conference,کنفرانس,
-Exam,امتحان,
-Internet,اینترنت,
-Self-Study,خودخوان,
-Advance,پیشرفت,
-Trainer Name,نام مربی,
-Trainer Email,ترینر ایمیل,
-Attendees,شرکت کنندگان,
-Employee Emails,ایمیل کارمند,
-Training Event Employee,رویداد آموزش کارکنان,
-Invited,دعوت کرد,
-Feedback Submitted,بازخورد ارائه,
 Optional,اختیاری,
-Training Result Employee,کارمند آموزش نتیجه,
-Travel Itinerary,سفرنامه سفر,
-Travel From,سفر از,
-Travel To,سفر به,
-Mode of Travel,حالت سفر,
-Flight,پرواز,
-Train,قطار - تعلیم دادن,
-Taxi,تاکسی,
-Rented Car,ماشین اجاره ای,
-Meal Preference,اولویت غذا,
-Vegetarian,گیاه خواری,
-Non-Vegetarian,غیر گیاهی,
-Gluten Free,گلوتن رایگان,
-Non Diary,غیر رسمی,
-Travel Advance Required,پیش نیاز سفر,
-Departure Datetime,زمان تاریخ خروج,
-Arrival Datetime,زمان ورود,
-Lodging Required,اسکان ضروری است,
-Preferred Area for Lodging,منطقه مورد نظر برای اسکان,
-Check-in Date,تاریخ ورود,
-Check-out Date,چک کردن تاریخ,
-Travel Request,درخواست سفر,
-Travel Type,نوع سفر,
-Domestic,داخلی,
-International,بین المللی,
-Travel Funding,تامین مالی سفر,
-Require Full Funding,نیاز به بودجه کامل,
-Fully Sponsored,کاملا حمایت شده,
-"Partially Sponsored, Require Partial Funding",بخشی از حمایت مالی، نیاز به سرمایه گذاری بخشی,
-Copy of Invitation/Announcement,کپی دعوت / اعلامیه,
-"Details of Sponsor (Name, Location)",جزئیات حامی (نام، محل),
-Identification Document Number,تشخیص شماره سند,
-Any other details,هر جزئیات دیگر,
-Costing Details,جزئیات هزینه,
 Costing,هزینه یابی,
-Event Details,جزئیات رویداد,
-Name of Organizer,نام سازنده,
-Address of Organizer,آدرس برگزار کننده,
-Travel Request Costing,هزینه هزینه سفر,
-Expense Type,نوع هزینه,
-Sponsored Amount,مقدار حمایت شده,
-Funded Amount,مبلغ جمع شده,
-Upload Attendance,بارگذاری حضور و غیاب,
-Attendance From Date,حضور و غیاب از تاریخ,
-Attendance To Date,حضور و غیاب به روز,
-Get Template,دریافت قالب,
-Import Attendance,واردات حضور و غیاب,
-Upload HTML,بارگذاری HTML,
 Vehicle,وسیله نقلیه,
 License Plate,پلاک وسیله نقلیه,
 Odometer Value (Last),ارزش کیلومترشمار (آخرین),
@@ -6979,23 +6241,8 @@ Fuel UOM,UOM سوخت,
 Last Carbon Check,آخرین چک کربن,
 Wheels,چرخ ها,
 Doors,درب,
-HR-VLOG-.YYYY.-,HR-VLOG- .YYYY.-,
-Odometer Reading,خواندن کیلومترشمار,
-Current Odometer value ,مقدار کیلومتر شمار فعلی,
 last Odometer Value ,آخرین مقدار کیلومتر شمار,
-Refuelling Details,اطلاعات سوختگیری,
-Invoice Ref,فاکتور کد عکس,
-Service Details,جزئیات خدمات,
 Service Detail,جزئیات خدمات,
-Vehicle Service,خدمات خودرو,
-Service Item,مورد خدمات,
-Brake Oil,روغن ترمز,
-Brake Pad,لنت ترمز,
-Clutch Plate,صفحه کلاچ,
-Engine Oil,روغن موتور,
-Oil Change,تعویض روغن,
-Inspection,بازرسی,
-Mileage,مسافت پیموده شده,
 Hub Tracked Item,مورد پیگیری توپی,
 Hub Node,مرکز گره,
 Image List,لیست تصویر,
@@ -7014,8 +6261,6 @@ Repay From Salary,بازپرداخت از حقوق و دستمزد,
 Regular Payment,پرداخت منظم,
 Loan Closure,بسته شدن وام,
 Rate of Interest (%) Yearly,نرخ بهره (٪) سالانه,
-Salary Slip Loan,وام وام لغزش,
-Loan Repayment Entry,ورودی بازپرداخت وام,
 MAT-MSH-.YYYY.-,MAT-MSH- .YYYY.-,
 Generate Schedule,تولید برنامه,
 Schedules,برنامه,
@@ -7446,9 +6691,6 @@ January,ژانویه,
 February,فوریه,
 March,مارس,
 April,آوریل,
-May,مه,
-June,ژوئن,
-July,جولای,
 August,اوت,
 September,سپتامبر,
 October,اکتبر,
@@ -8311,7 +7553,6 @@ Asset Depreciation Ledger,دارایی لجر استهلاک,
 Asset Depreciations and Balances,Depreciations دارایی و تعادل,
 Available Stock for Packing Items,انبار موجود آیتم ها بسته بندی,
 Bank Clearance Summary,بانک ترخیص کالا از خلاصه,
-Bank Remittance,حواله بانکی,
 Batch Item Expiry Status,دسته ای مورد وضعیت انقضاء,
 Batch-Wise Balance History,دسته حکیم تاریخچه تعادل,
 BOM Explorer,BOM Explorer,
@@ -8331,20 +7572,17 @@ Customer Ledger Summary,خلاصه لجر مشتری,
 Customer-wise Item Price,قیمت کالای خردمندانه مشتری,
 Customers Without Any Sales Transactions,مشتریان بدون هیچگونه معامله فروش,
 Daily Timesheet Summary,خلاصه برنامه زمانی روزانه,
-Daily Work Summary Replies,روزانه کار خلاصه پاسخ ها,
 DATEV,DATEV,
 Delayed Item Report,گزارش مورد تأخیر,
 Delayed Order Report,گزارش سفارش تأخیر,
 Delivered Items To Be Billed,آیتم ها تحویل داده شده به صورتحساب می شود,
 Delivery Note Trends,روند تحویل توجه داشته باشید,
 Electronic Invoice Register,ثبت فاکتور الکترونیکی,
-Employee Advance Summary,خلاصه پیشرفت کارمند,
 Employee Billing Summary,خلاصه صورتحساب کارمندان,
 Employee Birthday,کارمند تولد,
 Employee Information,اطلاعات کارمند,
 Employee Leave Balance,کارمند مرخصی تعادل,
 Employee Leave Balance Summary,خلاصه مانده تراز کارمندان,
-Employees working on a holiday,کارمندان کار در یک روز تعطیل,
 Eway Bill,Eway Bill,
 Expiring Memberships,عضويت در پايان نامه,
 Fichier des Ecritures Comptables [FEC],Ficier Des Ecritures Comptables [FEC],
@@ -8382,7 +7620,6 @@ Lead Owner Efficiency,بهره وری مالک سرب,
 Lost Opportunity,فرصت از دست رفته,
 Maintenance Schedules,برنامه های  نگهداری و تعمیرات,
 Material Requests for which Supplier Quotations are not created,درخواست مواد که نقل قول تامین کننده ایجاد نمی,
-Monthly Attendance Sheet,جدول ماهانه حضور و غیاب,
 Open Work Orders,دستور کار باز است,
 Qty to Deliver,تعداد برای ارائه,
 Patient Appointment Analytics,تجزیه و تحلیل انتصاب بیمار,
@@ -8410,7 +7647,6 @@ Received Items To Be Billed,دریافت گزینه هایی که صورتحسا
 Qty to Order,تعداد سفارش,
 Requested Items To Be Transferred,آیتم ها درخواست می شود منتقل,
 Qty to Transfer,تعداد می توان به انتقال,
-Salary Register,حقوق و دستمزد ثبت نام,
 Sales Analytics,تجزیه و تحلیل ترافیک فروش,
 Sales Invoice Trends,فروش روند فاکتور,
 Sales Order Trends,سفارش فروش روند,
@@ -8448,7 +7684,6 @@ Total Stock Summary,خلاصه سهام مجموع,
 Trial Balance,آزمایش تعادل,
 Trial Balance (Simple),موجودی آزمایشی (ساده),
 Trial Balance for Party,تعادل دادگاه برای حزب,
-Unpaid Expense Claim,ادعای هزینه های پرداخت نشده,
 Warehouse wise Item Balance Age and Value,انبار عاقل عنصر تعادل سن و ارزش,
 Work Order Stock Report,سفارش کار سفارش سفارش,
 Work Orders in Progress,دستور کار در حال پیشرفت است,
@@ -8467,8 +7702,6 @@ End date cannot be before start date,تاریخ پایان نمی تواند ق�
 Total Counts Targeted,تعداد کل هدف گذاری شده,
 Total Counts Completed,تعداد کل انجام شده,
 Counts Targeted: {0},تعداد مورد نظر: {0},
-Payment Account is mandatory,حساب پرداخت اجباری است,
-"If checked, the full amount will be deducted from taxable income before calculating income tax without any declaration or proof submission.",در صورت بررسی ، قبل از محاسبه مالیات بر درآمد ، بدون هیچ گونه اظهارنامه یا اثبات اثبات ، کل مبلغ از درآمد مشمول مالیات کسر می شود.,
 Material Request Warehouse,انبار درخواست مواد,
 Select warehouse for material requests,انبار را برای درخواست های مواد انتخاب کنید,
 Transfer Materials For Warehouse {0},انتقال مواد برای انبار {0},
@@ -8844,8 +8077,6 @@ Collected On,جمع شده در,
 No. of prints,تعداد چاپها,
 Number of prints required for labelling the samples,تعداد چاپ های لازم برای برچسب گذاری نمونه ها,
 HLC-VTS-.YYYY.-,HLC-VTS-.YYYY.-,
-In Time,به موقع,
-Out Time,زمان خاموش,
 Payroll Cost Center,مرکز هزینه حقوق و دستمزد,
 Approvers,متقن,
 The first Approver in the list will be set as the default Approver.,اولین تأیید کننده در لیست به عنوان تأیید کننده پیش فرض تنظیم می شود.,
@@ -8906,34 +8137,6 @@ Regenerate Webhook Secret,Webhook Secret را دوباره احیا کنید,
 Generate Webhook Secret,راز Webhook را ایجاد کنید,
 Copy Webhook URL,URL Webhook را کپی کنید,
 Linked Item,مورد پیوند داده شده,
-Is Recurring,در حال تکرار است,
-HRA Exemption,معافیت HRA,
-Monthly House Rent,اجاره ماهانه خانه,
-Rented in Metro City,اجاره شده در شهر مترو,
-HRA as per Salary Structure,HRA طبق ساختار حقوق و دستمزد,
-Annual HRA Exemption,معافیت سالانه HRA,
-Monthly HRA Exemption,معافیت ماهیانه HRA,
-House Rent Payment Amount,مبلغ پرداخت اجاره خانه,
-Rented From Date,اجاره شده از تاریخ,
-Rented To Date,اجاره شده تا امروز,
-Monthly Eligible Amount,مبلغ قابل قبول ماهانه,
-Total Eligible HRA Exemption,کل معافیت HRA واجد شرایط,
-Validating Employee Attendance...,تأیید اعتبار حضور کارمندان ...,
-Submitting Salary Slips and creating Journal Entry...,ارسال برگه های حقوق و ایجاد ورودی مجله ...,
-Calculate Payroll Working Days Based On,روزهای حقوق و دستمزد را بر اساس محاسبه کنید,
-Consider Unmarked Attendance As,حضور بدون علامت را در نظر بگیرید,
-Fraction of Daily Salary for Half Day,کسری حقوق روزانه برای نیم روز,
-Component Type,نوع ملفه,
-Provident Fund,صندوق,
-Additional Provident Fund,صندوق تأمین اضافی,
-Provident Fund Loan,وام صندوق تأمین مالی,
-Professional Tax,مالیات حرفه ای,
-Is Income Tax Component,آیا م Taxلفه مالیات بر درآمد است,
-Component properties and references ,خصوصیات و منابع ملفه,
-Additional Salary ,حقوق اضافی,
-Unmarked days,روزهای بدون علامت,
-Absent Days,روزهای غایب,
-Conditions and Formula variable and example,شرایط و متغیر فرمول و مثال,
 Feedback By,بازخورد توسط,
 Manufacturing Section,بخش ساخت,
 "By default, the Customer Name is set as per the Full Name entered. If you want Customers to be named by a ",به طور پیش فرض ، نام مشتری بر اساس نام کامل وارد شده تنظیم می شود. اگر می خواهید مشتریان توسط الف نامگذاری شوند,
@@ -9053,9 +8256,6 @@ Period Based On,دوره بر اساس,
 Date Based On,تاریخ بر اساس,
 {0} and {1} are mandatory,{0} و {1} اجباری است,
 Consider Accounting Dimensions,ابعاد حسابداری را در نظر بگیرید,
-Income Tax Deductions,کسر مالیات بر درآمد,
-Income Tax Component,م Taxلفه مالیات بر درآمد,
-Income Tax Amount,مبلغ مالیات بر درآمد,
 Reserved Quantity for Production,مقدار ذخیره شده برای تولید,
 Projected Quantity,مقدار پیش بینی شده,
  Total Sales Amount,مبلغ کل فروش,
@@ -9066,17 +8266,6 @@ From Posting Date,از تاریخ ارسال,
 To Posting Date,به تاریخ ارسال,
 No records found,هیچ سوابقی یافت نشد,
 Customer/Lead Name,نام مشتری / سرب,
-Unmarked Days,روزهای بدون علامت,
-Jan,جان,
-Feb,فوریه,
-Mar,مارس,
-Apr,آوریل,
-Aug,اوت,
-Sep,سپتامبر,
-Oct,مهر,
-Nov,نوامبر,
-Dec,دسامبر,
-Summarized View,نمای خلاصه شده,
 Production Planning Report,گزارش برنامه ریزی تولید,
 Order Qty,تعداد سفارش,
 Raw Material Code,کد مواد اولیه,
@@ -9087,7 +8276,6 @@ Arrival Quantity,مقدار ورود,
 Raw Material Warehouse,انبار مواد اولیه,
 Order By,سفارش توسط,
 Include Sub-assembly Raw Materials,شامل مواد اولیه مونتاژ فرعی است,
-Professional Tax Deductions,کسر مالیات حرفه ای,
 Program wise Fee Collection,برنامه مجموعه هزینه عاقلانه,
 Fees Collected,هزینه های جمع شده,
 Project Summary,خلاصه ی پروژه,
@@ -9095,7 +8283,6 @@ Total Tasks,کل وظایف,
 Tasks Completed,کارها انجام شد,
 Tasks Overdue,کارهای منقضی شده,
 Completion,تکمیل,
-Provident Fund Deductions,کسر صندوق تأمین مالی,
 Purchase Order Analysis,آنالیز سفارش خرید,
 From and To Dates are required.,از و به تاریخ لازم است.,
 To Date cannot be before From Date.,به تاریخ نمی تواند قبل از تاریخ باشد.,
@@ -9107,16 +8294,7 @@ Quality Inspection Summary,خلاصه بازرسی کیفیت,
  Quoted Amount,مقدار نقل شده,
 Lead Time (Days),زمان سرب (روزها),
 Include Expired,منقضی شده را وارد کنید,
-Recruitment Analytics,تجزیه و تحلیل استخدام,
-Applicant name,نام متقاضی,
-Job Offer status,وضعیت پیشنهاد کار,
-On Date,در تاریخ,
 Requested Items to Order and Receive,موارد را برای سفارش و دریافت درخواست کرد,
-Salary Payments Based On Payment Mode,پرداخت های حقوق براساس حالت پرداخت,
-Salary Payments via ECS,پرداخت حقوق از طریق ECS,
-Account No,شماره حساب,
-IFSC,IFSC,
-MICR,MICR,
 Sales Order Analysis,تجزیه و تحلیل سفارش فروش,
 Amount Delivered,مبلغ تحویل داده شده,
 Delay (in Days),تأخیر (در روزها),
@@ -9135,10 +8313,6 @@ Select a Company,یک شرکت انتخاب کنید,
 Opportunity {0} created,فرصت {0} ایجاد شد,
 Kindly select the company first,لطفا ابتدا شرکت را انتخاب کنید,
 Please enter From Date and To Date to generate JSON,لطفاً برای تولید JSON از تاریخ و به تاریخ وارد کنید,
-PF Account,حساب PF,
-PF Amount,مقدار PF,
-Additional PF,PF اضافی,
-PF Loan,وام PF,
 Download DATEV File,پرونده DATEV را بارگیری کنید,
 Numero has not set in the XML file,Numero در پرونده XML تنظیم نشده است,
 Inward Supplies(liable to reverse charge),لوازم داخلی (مشمول هزینه معکوس),
@@ -9151,7 +8325,6 @@ Program and Course,برنامه و دوره,
 Mandatory Fields,فیلد های اجباری,
 Student {0}: {1} does not belong to Student Group {2},دانشجو {0}: {1} به گروه دانشجویی تعلق ندارد {2},
 Student Attendance record {0} already exists against the Student {1},سابقه حضور دانشجو {0} از قبل در برابر دانشجو وجود دارد {1},
-Duplicate Entry,ورود تکراری,
 Course and Fee,دوره و هزینه,
 Not eligible for the admission in this program as per Date Of Birth,طبق تاریخ تولد واجد شرایط پذیرش در این برنامه نیست,
 Topic {0} has been added to all the selected courses successfully.,مبحث {0} با موفقیت به همه دوره های انتخاب شده اضافه شد.,
@@ -9176,15 +8349,8 @@ End Date must not be lesser than Start Date,تاریخ پایان نباید ک�
 Employee {0} already has Active Shift {1}: {2},کارمند {0} از قبل دارای Shift فعال است {1}: {2},
  from {0},از {0},
  to {0},به {0},
-Please select Employee first.,لطفاً ابتدا کارمند را انتخاب کنید.,
 Please set {0} for the Employee or for Department: {1},لطفاً {0} را برای کارمند یا بخش تنظیم کنید: {1},
-To Date should be greater than From Date,To Date باید بزرگتر از From باشد,
 Employee Onboarding: {0} is already for Job Applicant: {1},کارکنان در حال انجام: {0} در حال حاضر برای متقاضی شغل است: {1},
-Job Offer: {0} is already for Job Applicant: {1},پیشنهاد شغلی: {0} در حال حاضر برای متقاضی شغل است: {1},
-Only Shift Request with status 'Approved' and 'Rejected' can be submitted,فقط درخواست شیفت با وضعیت &quot;تأیید شده&quot; و &quot;رد شده&quot; قابل ارسال است,
-Shift Assignment: {0} created for Employee: {1},تکلیف شیفت: {0} برای کارمند ایجاد شده است: {1},
-You can not request for your Default Shift: {0},نمی توانید برای شیفت پیش فرض خود درخواست کنید: {0},
-Only Approvers can Approve this Request.,فقط تصدیق کنندگان می توانند این درخواست را تأیید کنند.,
 Asset Value Analytics,تجزیه و تحلیل ارزش دارایی,
 Category-wise Asset Value,ارزش دارایی طبقه بندی شده,
 Total Assets,کل دارایی,
@@ -9324,13 +8490,7 @@ Credit limit reached for customer {0},سقف اعتبار برای مشتری {0
 Could not auto create Customer due to the following missing mandatory field(s):,به دلیل وجود فیلد (های) اجباری زیر ، مشتری به طور خودکار ایجاد نمی شود:,
 Please create Customer from Lead {0}.,لطفاً مشتری را از Lead {0} ایجاد کنید.,
 Mandatory Missing,گمشده اجباری,
-Please set Payroll based on in Payroll settings,لطفاً حقوق و دستمزد را براساس تنظیمات حقوق و دستمزد تنظیم کنید,
-Additional Salary: {0} already exist for Salary Component: {1} for period {2} and {3},حقوق اضافی: {0} از قبل برای مonلفه حقوق وجود دارد: {1} برای دوره {2} و {3},
 From Date can not be greater than To Date.,از تاریخ نمی تواند بیشتر از تاریخ باشد.,
-Payroll date can not be less than employee's joining date.,تاریخ حقوق و دستمزد نمی تواند کمتر از تاریخ عضویت کارمند باشد.,
-From date can not be less than employee's joining date.,از تاریخ نمی تواند کمتر از تاریخ عضویت کارمند باشد.,
-To date can not be greater than employee's relieving date.,تا به امروز نمی تواند بیشتر از تاریخ تسویه حساب کارمند باشد.,
-Payroll date can not be greater than employee's relieving date.,تاریخ حقوق و دستمزد نمی تواند بیشتر از تاریخ تسویه حساب کارمند باشد.,
 Row #{0}: Please enter the result value for {1},ردیف شماره {0}: لطفاً مقدار نتیجه را برای {1} وارد کنید,
 Mandatory Results,نتایج اجباری,
 Sales Invoice or Patient Encounter is required to create Lab Tests,برای ایجاد تست های آزمایشگاهی فاکتور فروش یا ملاقات بیمار لازم است,
@@ -9381,7 +8541,6 @@ Please select a Supplier,لطفاً یک تامین کننده انتخاب کن
 Supplier Lead Time (days),زمان سرب تامین کننده (روزها),
 "Home, Work, etc.",خانه ، محل کار و غیره,
 Exit Interview Held On,مصاحبه خارج شد,
-Condition and formula,شرایط و فرمول,
 Sets 'Target Warehouse' in each row of the Items table.,&quot;Target Warehouse&quot; را در هر ردیف از جدول آیتم ها تنظیم می کند.,
 Sets 'Source Warehouse' in each row of the Items table.,&quot;منبع انبار&quot; را در هر ردیف از جدول آیتم ها تنظیم می کند.,
 POS Register,ثبت نام POS,

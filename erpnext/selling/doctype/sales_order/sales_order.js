@@ -1,7 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %}
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Sales Order");
+erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
@@ -500,12 +502,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
 					}
 
-					if(!doc.auto_repeat) {
-						this.frm.add_custom_button(__('Subscription'), function() {
-							erpnext.utils.make_subscription(doc.doctype, doc.name)
-						}, __('Create'))
-					}
-
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
 						let internal = me.frm.doc.is_internal_customer;
@@ -942,7 +938,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				var method = args.against_default_supplier ? "make_purchase_order_for_default_supplier" : "make_purchase_order"
 				return frappe.call({
 					method: "erpnext.selling.doctype.sales_order.sales_order." + method,
-					freeze: true,
 					freeze_message: __("Creating Purchase Order ..."),
 					args: {
 						"source_name": me.frm.doc.name,
