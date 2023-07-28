@@ -23,7 +23,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
 	get_disposal_account_and_cost_center,
@@ -1049,6 +1049,7 @@ class SalesInvoice(SellingController):
 
 				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
+				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
