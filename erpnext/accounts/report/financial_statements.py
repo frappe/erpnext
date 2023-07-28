@@ -181,7 +181,6 @@ def get_data(
 
 		set_gl_entries_by_account(
 			company,
-			root_type,
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
 			period_list[-1]["to_date"],
 			root.lft,
@@ -189,6 +188,7 @@ def get_data(
 			filters,
 			gl_entries_by_account,
 			ignore_closing_entries=ignore_closing_entries,
+			root_type=root_type,
 		)
 
 	calculate_values(
@@ -410,7 +410,6 @@ def sort_accounts(accounts, is_root=False, key="name"):
 
 def set_gl_entries_by_account(
 	company,
-	root_type,
 	from_date,
 	to_date,
 	root_lft,
@@ -419,6 +418,7 @@ def set_gl_entries_by_account(
 	gl_entries_by_account,
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []

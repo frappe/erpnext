@@ -359,6 +359,7 @@ def get_data(
 			accounts_by_name,
 			accounts,
 			ignore_closing_entries=False,
+			root_type=root_type,
 		)
 
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year)
@@ -603,6 +604,7 @@ def set_gl_entries_by_account(
 	accounts_by_name,
 	accounts,
 	ignore_closing_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
@@ -631,7 +633,7 @@ def set_gl_entries_by_account(
 			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
 			acc.account_name, acc.account_number
 			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
-			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
+			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s and acc.root_type = %(root_type)s
 			order by gl.account, gl.posting_date""".format(
 				additional_conditions=additional_conditions
 			),
@@ -643,6 +645,7 @@ def set_gl_entries_by_account(
 				"company": d.name,
 				"finance_book": filters.get("finance_book"),
 				"company_fb": frappe.get_cached_value("Company", d.name, "default_finance_book"),
+				"root_type": root_type,
 			},
 			as_dict=True,
 		)
