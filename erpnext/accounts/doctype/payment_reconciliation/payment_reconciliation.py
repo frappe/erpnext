@@ -680,27 +680,28 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 		jv.flags.ignore_exchange_rate = True
 		jv.submit()
 
-		# make gain/loss journal
-		if inv.party_type == "Customer":
-			dr_or_cr = "credit" if inv.difference_amount < 0 else "debit"
-		else:
-			dr_or_cr = "debit" if inv.difference_amount < 0 else "credit"
+		if inv.difference_amount != 0:
+			# make gain/loss journal
+			if inv.party_type == "Customer":
+				dr_or_cr = "credit" if inv.difference_amount < 0 else "debit"
+			else:
+				dr_or_cr = "debit" if inv.difference_amount < 0 else "credit"
 
-		reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+			reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-		create_gain_loss_journal(
-			company,
-			inv.party_type,
-			inv.party,
-			inv.account,
-			inv.difference_account,
-			inv.difference_amount,
-			dr_or_cr,
-			reverse_dr_or_cr,
-			inv.voucher_type,
-			inv.voucher_no,
-			None,
-			inv.against_voucher_type,
-			inv.against_voucher,
-			None,
-		)
+			create_gain_loss_journal(
+				company,
+				inv.party_type,
+				inv.party,
+				inv.account,
+				inv.difference_account,
+				inv.difference_amount,
+				dr_or_cr,
+				reverse_dr_or_cr,
+				inv.voucher_type,
+				inv.voucher_no,
+				None,
+				inv.against_voucher_type,
+				inv.against_voucher,
+				None,
+			)
