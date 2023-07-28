@@ -398,10 +398,18 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
+
+					for account in reverse_journal_entry.accounts:
+						account.update(
+							{
+								"reference_type": "Asset",
+								"reference_name": asset.name,
+							}
+						)
+
 					frappe.flags.is_reverse_depr_entry = True
 					reverse_journal_entry.submit()
 
-<<<<<<< HEAD
 					frappe.flags.is_reverse_depr_entry = False
 					asset_depr_schedule_doc.flags.ignore_validate_update_after_submit = True
 					asset.flags.ignore_validate_update_after_submit = True
@@ -410,31 +418,6 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 					row.value_after_depreciation += depreciation_amount
 					asset_depr_schedule_doc.save()
 					asset.save()
-=======
-				reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
-				reverse_journal_entry.posting_date = nowdate()
-
-				for account in reverse_journal_entry.accounts:
-					account.update(
-						{
-							"reference_type": "Asset",
-							"reference_name": asset.name,
-						}
-					)
-
-				frappe.flags.is_reverse_depr_entry = True
-				reverse_journal_entry.submit()
-
-				frappe.flags.is_reverse_depr_entry = False
-				asset.flags.ignore_validate_update_after_submit = True
-				schedule.journal_entry = None
-				depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
-
-				idx = cint(schedule.finance_book_id)
-				asset.finance_books[idx - 1].value_after_depreciation += depreciation_amount
-
-				asset.save()
->>>>>>> 9489cba275 (fix: allow fully depreciated existing assets)
 
 
 def get_depreciation_amount_in_je(journal_entry):
