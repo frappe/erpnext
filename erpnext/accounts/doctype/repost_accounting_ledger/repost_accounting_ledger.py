@@ -66,7 +66,6 @@ class RepostAccountingLedger(Document):
 				gle_map = doc.get_gl_entries()
 
 	def on_submit(self):
-		# repost_accounting_ledger(self.name)
 		job_name = "repost_accounting_ledger_" + self.name
 		frappe.enqueue(
 			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
@@ -86,14 +85,23 @@ def start_repost(account_repost_doc=str) -> None:
 			for x in repost_doc.vouchers:
 				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 
-				if doc.doctype in ["Sales Invoice"]:
-					if repost_doc.delete_cancelled_entries:
-						frappe.db.delete("GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name})
-						frappe.db.delete(
-							"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
-						)
-					else:
+				if repost_doc.delete_cancelled_entries:
+					frappe.db.delete("GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name})
+					frappe.db.delete(
+						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
+					)
+
+				if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+					if not repost_doc.delete_cancelled_entries:
+						doc.docstatus = 2
 						doc.make_gl_entries_on_cancel()
 
+					doc.docstatus = 1
 					doc.make_gl_entries()
+
+				elif doc.doctype in ["Payment Entry", "Journal Entry"]:
+					if not repost_doc.delete_cancelled_entries:
+						doc.make_gl_entries(1)
+					doc.make_gl_entries()
+
 				frappe.db.commit()
