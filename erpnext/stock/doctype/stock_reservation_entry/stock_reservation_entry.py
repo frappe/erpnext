@@ -544,56 +544,42 @@ def get_available_serial_nos_to_reserve(
 	return available_serial_nos_list
 
 
-def get_sre_reserved_qty_details_for_item_and_warehouse(
-	item_code_list: list, warehouse_list: list
-) -> dict:
-	"""Returns a dict like {("item_code", "warehouse"): "reserved_qty", ... }."""
+def get_sre_reserved_qty_for_item_and_warehouse(
+	item_code: str | list, warehouse: str | list = None
+) -> float | dict:
+	"""Returns `Reserved Qty` for Item and Warehouse combination OR a dict like {("item_code", "warehouse"): "reserved_qty", ... }."""
 
-	sre_details = {}
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(
+			sre.item_code,
+			sre.warehouse,
+			Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
+		)
+		.where((sre.docstatus == 1) & (sre.status.notin(["Delivered", "Cancelled"])))
+		.groupby(sre.item_code, sre.warehouse)
+	)
 
-	if item_code_list and warehouse_list:
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sre_data = (
-			frappe.qb.from_(sre)
-			.select(
-				sre.item_code,
-				sre.warehouse,
-				Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
-			)
-			.where(
-				(sre.docstatus == 1)
-				& (sre.item_code.isin(item_code_list))
-				& (sre.warehouse.isin(warehouse_list))
-				& (sre.status.notin(["Delivered", "Cancelled"]))
-			)
-			.groupby(sre.item_code, sre.warehouse)
-		).run(as_dict=True)
+	query = (
+		query.where(sre.item_code.isin(item_code))
+		if isinstance(item_code, list)
+		else query.where(sre.item_code == item_code)
+	)
 
-		if sre_data:
-			sre_details = {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in sre_data}
+	if warehouse:
+		query = (
+			query.where(sre.warehouse.isin(warehouse))
+			if isinstance(warehouse, list)
+			else query.where(sre.warehouse == warehouse)
+		)
 
-	return sre_details
+	data = query.run(as_dict=True)
 
-
-def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str) -> float:
-	"""Returns `Reserved Qty` for Item and Warehouse combination."""
-
-	reserved_qty = 0.0
-
-	if item_code and warehouse:
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		return (
-			frappe.qb.from_(sre)
-			.select(Sum(sre.reserved_qty - sre.delivered_qty))
-			.where(
-				(sre.docstatus == 1)
-				& (sre.item_code == item_code)
-				& (sre.warehouse == warehouse)
-				& (sre.status.notin(["Delivered", "Cancelled"]))
-			)
-		).run(as_list=True)[0][0] or 0.0
-
-	return reserved_qty
+	if isinstance(item_code, str) and isinstance(warehouse, str):
+		return data[0]["reserved_qty"] if data else 0.0
+	else:
+		return {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in data} if data else {}
 
 
 def get_sre_reserved_qty_details_for_voucher(voucher_type: str, voucher_no: str) -> dict:
