@@ -195,7 +195,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
 		self.filters = frappe._dict(
 			{
-				"company": frappe.defaults.get_user_default("Company"),
+				"company": self.company,
 				"filter_based_on": "Date Range",
 				"period_start_date": "2021-05-01",
 				"period_end_date": "2021-08-01",
@@ -262,7 +262,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
 		self.filters = frappe._dict(
 			{
-				"company": frappe.defaults.get_user_default("Company"),
+				"company": self.company,
 				"filter_based_on": "Date Range",
 				"period_start_date": "2021-05-01",
 				"period_end_date": "2021-08-01",
