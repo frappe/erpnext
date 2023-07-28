@@ -157,14 +157,6 @@ def get_next_higher_level_boms(
 def get_leaf_boms() -> List[str]:
 	"Get BOMs that have no dependencies."
 
-<<<<<<< HEAD
-	return frappe.db.sql_list(
-		"""select name from `tabBOM` bom
-		where docstatus=1 and is_active=1
-			and not exists(select bom_no from `tabBOM Item`
-				where parent=bom.name and ifnull(bom_no, '')!='')"""
-	)
-=======
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
 
@@ -178,7 +170,6 @@ def get_leaf_boms() -> List[str]:
 	).run(pluck=True)
 
 	return boms
->>>>>>> 58d867503b (perf: use `LEFT JOIN` instead of `NOT EXISTS`)
 
 
 def _generate_dependence_map() -> defaultdict:
