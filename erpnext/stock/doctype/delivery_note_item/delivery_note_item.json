@@ -854,7 +854,8 @@
    "label": "Serial and Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "pick_serial_and_batch",
@@ -884,14 +885,15 @@
    "hidden": 1,
    "label": "Batch No",
    "options": "Batch",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-02 21:05:14.175640",
+ "modified": "2023-07-26 12:53:49.357171",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

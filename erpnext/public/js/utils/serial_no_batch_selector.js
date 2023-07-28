@@ -382,7 +382,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	edit_full_form() {
 		let bundle_id = this.item.serial_and_batch_bundle
 		if (!bundle_id) {
-			_new = frappe.model.get_new_doc(
+			let _new = frappe.model.get_new_doc(
 				"Serial and Batch Bundle", null, null, true
 			);
 

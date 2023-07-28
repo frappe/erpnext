@@ -16,16 +16,37 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldname": "based_on",
 				"label": __("Based On"),
 				"fieldtype": "Select",
-				"options": ["Cost Center", "Project"],
+				"options": ["Cost Center", "Project", "Accounting Dimension"],
 				"default": "Cost Center",
-				"reqd": 1
+				"reqd": 1,
+				"on_change": function(query_report){
+					let based_on = query_report.get_values().based_on;
+					if(based_on!='Accounting Dimension'){
+						frappe.query_report.set_filter_value({
+							accounting_dimension: ''
+						});
+					}
+				}
+			},
+			{
+				"fieldname": "accounting_dimension",
+				"label": __("Accounting Dimension"),
+				"fieldtype": "Link",
+				"options": "Accounting Dimension",
+				"get_query": () =>{
+					return {
+						filters: {
+							"disabled": 0
+						}
+					}
+				}
 			},
 			{
 				"fieldname": "fiscal_year",
 				"label": __("Fiscal Year"),
 				"fieldtype": "Link",
 				"options": "Fiscal Year",
-				"default": frappe.defaults.get_user_default("fiscal_year"),
+				"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 				"reqd": 1,
 				"on_change": function(query_report) {
 					var fiscal_year = query_report.get_values().fiscal_year;
@@ -45,13 +66,13 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldname": "from_date",
 				"label": __("From Date"),
 				"fieldtype": "Date",
-				"default": frappe.defaults.get_user_default("year_start_date"),
+				"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			},
 			{
 				"fieldname": "to_date",
 				"label": __("To Date"),
 				"fieldtype": "Date",
-				"default": frappe.defaults.get_user_default("year_end_date"),
+				"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 			},
 			{
 				"fieldname": "show_zero_values",

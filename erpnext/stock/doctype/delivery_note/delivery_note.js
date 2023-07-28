@@ -1,13 +1,16 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %};
-
 cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 frappe.provide("erpnext.accounts.dimensions");
+
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Delivery Note");
+erpnext.sales_common.setup_selling_controller();
+
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
@@ -232,12 +235,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 				__("Status"))
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
-
-		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
-			cur_frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(doc.doctype, doc.name)
-			}, __('Create'))
-		}
 	}
 
 	make_shipment() {

@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line
 frappe.provide("erpnext.accounts.dimensions");
-{% include 'erpnext/public/js/controllers/buying.js' %};
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on('Material Request', {
 	setup: function(frm) {
@@ -472,13 +472,13 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 		set_schedule_date(this.frm);
 	}
 
-	onload(doc, cdt, cdn) {
-		this.frm.set_query("item_code", "items", function() {
+	onload() {
+		this.frm.set_query("item_code", "items", function(doc, cdt, cdn) {
 			if (doc.material_request_type == "Customer Provided") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{
-						'customer': me.frm.doc.customer,
+						'customer': doc.customer,
 						'is_stock_item':1
 					}
 				}
