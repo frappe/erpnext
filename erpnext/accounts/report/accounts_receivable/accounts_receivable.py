@@ -7,7 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date
+from frappe.query_builder.functions import Date, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -539,64 +539,66 @@ class ReceivablePayableReport(object):
 						self.future_payments.setdefault((d.invoice_no, d.party), []).append(d)
 
 	def get_future_payments_from_payment_entry(self):
-		return frappe.db.sql(
-			"""
-			select
-				ref.reference_name as invoice_no,
-				payment_entry.party,
-				payment_entry.party_type,
-				payment_entry.posting_date as future_date,
-				ref.allocated_amount as future_amount,
-				payment_entry.reference_no as future_ref
-			from
-				`tabPayment Entry` as payment_entry inner join `tabPayment Entry Reference` as ref
-			on
-				(ref.parent = payment_entry.name)
-			where
-				payment_entry.docstatus < 2
-				and payment_entry.posting_date > %s
-				and payment_entry.party_type in %s
-			""",
-			(self.filters.report_date, self.party_type),
-			as_dict=1,
-		)
+		pe = frappe.qb.DocType("Payment Entry")
+		pe_ref = frappe.qb.DocType("Payment Entry Reference")
+		return (
+			frappe.qb.from_(pe)
+			.inner_join(pe_ref)
+			.on(pe_ref.parent == pe.name)
+			.select(
+				(pe_ref.reference_name).as_("invoice_no"),
+				pe.party,
+				pe.party_type,
+				(pe.posting_date).as_("future_date"),
+				(pe_ref.allocated_amount).as_("future_amount"),
+				(pe.reference_no).as_("future_ref"),
+			)
+			.where(
+				(pe.docstatus < 2)
+				& (pe.posting_date > self.filters.report_date)
+				& (pe.party_type.isin(self.party_type))
+			)
+		).run(as_dict=True)
 
 	def get_future_payments_from_journal_entry(self):
-		if self.filters.get("party"):
-			amount_field = (
-				"jea.debit_in_account_currency - jea.credit_in_account_currency"
-				if self.account_type == "Payable"
-				else "jea.credit_in_account_currency - jea.debit_in_account_currency"
-			)
-		else:
-			amount_field = "jea.debit - " if self.account_type == "Payable" else "jea.credit"
-
-		return frappe.db.sql(
-			"""
-			select
-				jea.reference_name as invoice_no,
+		je = frappe.qb.DocType("Journal Entry")
+		jea = frappe.qb.DocType("Journal Entry Account")
+		query = (
+			frappe.qb.from_(je)
+			.inner_join(jea)
+			.on(jea.parent == je.name)
+			.select(
+				jea.reference_name.as_("invoice_no"),
 				jea.party,
 				jea.party_type,
-				je.posting_date as future_date,
-				sum('{0}') as future_amount,
-				je.cheque_no as future_ref
-			from
-				`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
-			on
-				(jea.parent = je.name)
-			where
-				je.docstatus < 2
-				and je.posting_date > %s
-				and jea.party_type in %s
-				and jea.reference_name is not null and jea.reference_name != ''
-			group by je.name, jea.reference_name
-			having future_amount > 0
-			""".format(
-				amount_field
-			),
-			(self.filters.report_date, self.party_type),
-			as_dict=1,
+				je.posting_date.as_("future_date"),
+				je.cheque_no.as_("future_ref"),
+			)
+			.where(
+				(je.docstatus < 2)
+				& (je.posting_date > self.filters.report_date)
+				& (jea.party_type.isin(self.party_type))
+				& (jea.reference_name.isnotnull())
+				& (jea.reference_name != "")
+			)
 		)
+
+		if self.filters.get("party"):
+			if self.account_type == "Payable":
+				query = query.select(
+					Sum(jea.debit_in_account_currency - jea.credit_in_account_currency).as_("future_amount")
+				)
+			else:
+				query = query.select(
+					Sum(jea.credit_in_account_currency - jea.debit_in_account_currency).as_("future_amount")
+				)
+		else:
+			query = query.select(
+				Sum(jea.debit if self.account_type == "Payable" else jea.credit).as_("future_amount")
+			)
+
+		query = query.having(qb.Field("future_amount") > 0)
+		return query.run(as_dict=True)
 
 	def allocate_future_payments(self, row):
 		# future payments are captured in additional columns

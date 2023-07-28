@@ -928,7 +928,7 @@ def get_partywise_advanced_payment_amount(
 		frappe.qb.from_(gle)
 		.select(gle.party)
 		.where(
-			(gle.party_type.isin(party_type)) & (gle.against_voucher == None) & (gle.is_cancelled == 0)
+			(gle.party_type.isin(party_type)) & (gle.against_voucher.isnull()) & (gle.is_cancelled == 0)
 		)
 		.groupby(gle.party)
 	)
