@@ -161,7 +161,7 @@ class POSInvoice(SalesInvoice):
 				serial_nos = get_serial_nos(item.serial_no)
 				if len(serial_nos) != len(set(serial_nos)):
 					frappe.throw(
-						_("Duplicate Serial Numbers Found in item {0} ").format(item.item_code),
+						_("Duplicate Serial Numbers Found in item {0}").format(item.item_code),
 						title=_("Duplicate Serial Numbers Found"),
 					)
 
