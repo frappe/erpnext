@@ -403,9 +403,9 @@ class Item(Document):
 				warehouse_material_request_type += [(d.get("warehouse"), d.get("material_request_type"))]
 			else:
 				frappe.throw(
-					_(
-						"Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
-					).format(d.idx, d.warehouse, d.material_request_type),
+					_("Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}.").format(
+						d.idx, d.warehouse, d.material_request_type
+					),
 					DuplicateReorderRows,
 				)
 
