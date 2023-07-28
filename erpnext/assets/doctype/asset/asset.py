@@ -25,6 +25,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	cancel_asset_depr_schedules,
@@ -59,7 +60,7 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
-		if not self.split_from:
+		if self.calculate_depreciation and not self.split_from:
 			asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
 			convert_draft_asset_depr_schedules_into_active(self)
 			if asset_depr_schedules_names:
@@ -71,6 +72,9 @@ class Asset(AccountsController):
 						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 					).format(asset_depr_schedules_links)
 				)
+		add_asset_activity(
+			self.name, _("Asset {0} submitted").format(get_link_to_form(self.doctype, self.name))
+		)
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -81,9 +85,12 @@ class Asset(AccountsController):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 		self.db_set("booked_fixed_asset", 0)
+		add_asset_activity(
+			self.name, _("Asset {0} cancelled").format(get_link_to_form(self.doctype, self.name))
+		)
 
 	def after_insert(self):
-		if not self.split_from:
+		if self.calculate_depreciation and not self.split_from:
 			asset_depr_schedules_names = make_draft_asset_depr_schedules(self)
 			asset_depr_schedules_links = get_comma_separated_links(
 				asset_depr_schedules_names, "Asset Depreciation Schedule"
