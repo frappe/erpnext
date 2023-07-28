@@ -57,11 +57,6 @@ class RepostAccountingLedger(Document):
 					)
 				)
 
-	def print_gle(self):
-		vouchers = [(x.voucher_type, x.voucher_no) for x in self.vouchers]
-		repost_accounting_ledger(self.name)
-		frappe.throw("stopping...")
-
 	def show_preview(self):
 		for x in self.vouchers:
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
@@ -71,12 +66,19 @@ class RepostAccountingLedger(Document):
 				gle_map = doc.get_gl_entries()
 
 	def on_submit(self):
-		# self.print_gle()
-		repost_accounting_ledger(self.name)
+		# repost_accounting_ledger(self.name)
+		job_name = "repost_accounting_ledger_" + self.name
+		frappe.enqueue(
+			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
+			account_repost_doc=self.name,
+			is_async=True,
+			job_name=job_name,
+		)
+		frappe.msgprint(_("Repost has started in the background"))
 
 
 @frappe.whitelist()
-def repost_accounting_ledger(account_repost_doc=str) -> None:
+def start_repost(account_repost_doc=str) -> None:
 	if account_repost_doc:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
 
