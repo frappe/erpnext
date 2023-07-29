@@ -92,7 +92,7 @@ frappe.ui.form.on('Delivery Trip', {
 					frm.set_value("driver_email", data.message.email);
 				}
 			});
-		};
+		}
 	},
 
 	optimize_route: function (frm) {

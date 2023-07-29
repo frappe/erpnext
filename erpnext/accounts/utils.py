@@ -576,7 +576,11 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	# new row with references
 	new_row = journal_entry.append("accounts")
 
-	new_row.update((frappe.copy_doc(jv_detail)).as_dict())
+	# Copy field values into new row
+	[
+		new_row.set(field, jv_detail.get(field))
+		for field in frappe.get_meta("Journal Entry Account").get_fieldnames_with_value()
+	]
 
 	new_row.set(d["dr_or_cr"], d["allocated_amount"])
 	new_row.set(
@@ -1108,6 +1112,12 @@ def get_autoname_with_number(number_value, doc_title, company):
 		parts.insert(0, cstr(number_value).strip())
 
 	return " - ".join(parts)
+
+
+def parse_naming_series_variable(doc, variable):
+	if variable == "FY":
+		date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
+		return get_fiscal_year(date=date, company=doc.get("company"))[0]
 
 
 @frappe.whitelist()

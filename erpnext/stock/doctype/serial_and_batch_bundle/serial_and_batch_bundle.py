@@ -889,13 +889,16 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code, docstatus=None, voucher_no=None, name=None):
-	filters = get_filters_for_bundle(item_code, docstatus=docstatus, voucher_no=voucher_no, name=name)
+def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None):
+	filters = get_filters_for_bundle(
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name
+	)
 
 	return frappe.get_all(
 		"Serial and Batch Bundle",
 		fields=[
 			"`tabSerial and Batch Bundle`.`name`",
+			"`tabSerial and Batch Bundle`.`item_code`",
 			"`tabSerial and Batch Entry`.`qty`",
 			"`tabSerial and Batch Entry`.`warehouse`",
 			"`tabSerial and Batch Entry`.`batch_no`",
@@ -906,11 +909,13 @@ def get_serial_batch_ledgers(item_code, docstatus=None, voucher_no=None, name=No
 	)
 
 
-def get_filters_for_bundle(item_code, docstatus=None, voucher_no=None, name=None):
+def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name=None):
 	filters = [
-		["Serial and Batch Bundle", "item_code", "=", item_code],
 		["Serial and Batch Bundle", "is_cancelled", "=", 0],
 	]
+
+	if item_code:
+		filters.append(["Serial and Batch Bundle", "item_code", "=", item_code])
 
 	if not docstatus:
 		docstatus = [0, 1]

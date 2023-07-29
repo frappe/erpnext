@@ -13,12 +13,9 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.utils import create_payment_ledger_entry
-
-
-class ClosedAccountingPeriod(frappe.ValidationError):
-	pass
 
 
 def make_gl_entries(
@@ -166,7 +163,8 @@ def process_gl_map(gl_map, merge_entries=True, precision=None):
 	if not gl_map:
 		return []
 
-	gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
+	if gl_map[0].voucher_type != "Period Closing Voucher":
+		gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
 
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map, precision)

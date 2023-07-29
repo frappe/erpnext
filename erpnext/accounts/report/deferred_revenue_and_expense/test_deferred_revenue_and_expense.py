@@ -2,6 +2,7 @@ import unittest
 
 import frappe
 from frappe import qb
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -10,15 +11,15 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.report.deferred_revenue_and_expense.deferred_revenue_and_expense import (
 	Deferred_Revenue_and_Expense_Report,
 )
+from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.stock.doctype.item.test_item import create_item
 
 
-class TestDeferredRevenueAndExpense(unittest.TestCase):
+class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 	@classmethod
 	def setUpClass(self):
-		clear_accounts_and_items()
-		create_company()
 		self.maxDiff = None
 
 	def clear_old_entries(self):
@@ -50,55 +51,58 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		if deferred_invoices:
 			qb.from_(pinv).delete().where(pinv.name.isin(deferred_invoices)).run()
 
-	def test_deferred_revenue(self):
-		self.clear_old_entries()
+	def setup_deferred_accounts_and_items(self):
+		# created deferred expense accounts, if not found
+		self.deferred_revenue_account = create_account(
+			account_name="Deferred Revenue",
+			parent_account="Current Liabilities - " + self.company_abbr,
+			company=self.company,
+		)
 
 		# created deferred expense accounts, if not found
-		deferred_revenue_account = create_account(
-			account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _CD",
-			company="_Test Company DR",
+		self.deferred_expense_account = create_account(
+			account_name="Deferred Expense",
+			parent_account="Current Assets - " + self.company_abbr,
+			company=self.company,
 		)
 
-		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-		acc_settings.book_deferred_entries_based_on = "Months"
-		acc_settings.save()
+	def setUp(self):
+		self.create_company()
+		self.create_customer("_Test Customer")
+		self.create_supplier("_Test Furniture Supplier")
+		self.setup_deferred_accounts_and_items()
+		self.clear_old_entries()
 
-		customer = frappe.new_doc("Customer")
-		customer.customer_name = "_Test Customer DR"
-		customer.type = "Individual"
-		customer.insert()
+	def tearDown(self):
+		frappe.db.rollback()
 
-		item = create_item(
-			"_Test Internet Subscription",
-			is_stock_item=0,
-			warehouse="All Warehouses - _CD",
-			company="_Test Company DR",
-		)
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	def test_deferred_revenue(self):
+		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
+		item = frappe.get_doc("Item", self.item)
 		item.enable_deferred_revenue = 1
-		item.deferred_revenue_account = deferred_revenue_account
+		item.deferred_revenue_account = self.deferred_revenue_account
 		item.no_of_months = 3
 		item.save()
 
 		si = create_sales_invoice(
-			item=item.name,
-			company="_Test Company DR",
-			customer="_Test Customer DR",
-			debit_to="Debtors - _CD",
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
 			posting_date="2021-05-01",
-			parent_cost_center="Main - _CD",
-			cost_center="Main - _CD",
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
 			do_not_save=True,
 			rate=300,
 			price_list_rate=300,
 		)
 
-		si.items[0].income_account = "Sales - _CD"
+		si.items[0].income_account = self.income_account
 		si.items[0].enable_deferred_revenue = 1
 		si.items[0].service_start_date = "2021-05-01"
 		si.items[0].service_end_date = "2021-08-01"
-		si.items[0].deferred_revenue_account = deferred_revenue_account
-		si.items[0].income_account = "Sales - _CD"
+		si.items[0].deferred_revenue_account = self.deferred_revenue_account
 		si.save()
 		si.submit()
 
@@ -109,17 +113,17 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 				start_date="2021-05-01",
 				end_date="2021-08-01",
 				type="Income",
-				company="_Test Company DR",
+				company=self.company,
 			)
 		)
 		pda.insert()
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", frappe.defaults.get_user_default("fiscal_year"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
 		self.filters = frappe._dict(
 			{
-				"company": frappe.defaults.get_user_default("Company"),
+				"company": self.company,
 				"filter_based_on": "Date Range",
 				"period_start_date": "2021-05-01",
 				"period_end_date": "2021-08-01",
@@ -141,57 +145,36 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		]
 		self.assertEqual(report.period_total, expected)
 
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_deferred_expense(self):
-		self.clear_old_entries()
-
-		# created deferred expense accounts, if not found
-		deferred_expense_account = create_account(
-			account_name="Deferred Expense",
-			parent_account="Current Assets - _CD",
-			company="_Test Company DR",
-		)
-
-		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-		acc_settings.book_deferred_entries_based_on = "Months"
-		acc_settings.save()
-
-		supplier = create_supplier(
-			supplier_name="_Test Furniture Supplier", supplier_group="Local", supplier_type="Company"
-		)
-		supplier.save()
-
-		item = create_item(
-			"_Test Office Desk",
-			is_stock_item=0,
-			warehouse="All Warehouses - _CD",
-			company="_Test Company DR",
-		)
+		self.create_item("_Test Office Desk", 0, self.warehouse, self.company)
+		item = frappe.get_doc("Item", self.item)
 		item.enable_deferred_expense = 1
-		item.deferred_expense_account = deferred_expense_account
+		item.deferred_expense_account = self.deferred_expense_account
 		item.no_of_months_exp = 3
 		item.save()
 
 		pi = make_purchase_invoice(
-			item=item.name,
-			company="_Test Company DR",
-			supplier="_Test Furniture Supplier",
+			item=self.item,
+			company=self.company,
+			supplier=self.supplier,
 			is_return=False,
 			update_stock=False,
 			posting_date=frappe.utils.datetime.date(2021, 5, 1),
-			parent_cost_center="Main - _CD",
-			cost_center="Main - _CD",
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
 			do_not_save=True,
 			rate=300,
 			price_list_rate=300,
-			warehouse="All Warehouses - _CD",
+			warehouse=self.warehouse,
 			qty=1,
 		)
 		pi.set_posting_time = True
 		pi.items[0].enable_deferred_expense = 1
 		pi.items[0].service_start_date = "2021-05-01"
 		pi.items[0].service_end_date = "2021-08-01"
-		pi.items[0].deferred_expense_account = deferred_expense_account
-		pi.items[0].expense_account = "Office Maintenance Expenses - _CD"
+		pi.items[0].deferred_expense_account = self.deferred_expense_account
+		pi.items[0].expense_account = self.expense_account
 		pi.save()
 		pi.submit()
 
@@ -202,17 +185,17 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 				start_date="2021-05-01",
 				end_date="2021-08-01",
 				type="Expense",
-				company="_Test Company DR",
+				company=self.company,
 			)
 		)
 		pda.insert()
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", frappe.defaults.get_user_default("fiscal_year"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
 		self.filters = frappe._dict(
 			{
-				"company": frappe.defaults.get_user_default("Company"),
+				"company": self.company,
 				"filter_based_on": "Date Range",
 				"period_start_date": "2021-05-01",
 				"period_end_date": "2021-08-01",
@@ -234,52 +217,31 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		]
 		self.assertEqual(report.period_total, expected)
 
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_zero_months(self):
-		self.clear_old_entries()
-		# created deferred expense accounts, if not found
-		deferred_revenue_account = create_account(
-			account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _CD",
-			company="_Test Company DR",
-		)
-
-		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
-		acc_settings.book_deferred_entries_based_on = "Months"
-		acc_settings.save()
-
-		customer = frappe.new_doc("Customer")
-		customer.customer_name = "_Test Customer DR"
-		customer.type = "Individual"
-		customer.insert()
-
-		item = create_item(
-			"_Test Internet Subscription",
-			is_stock_item=0,
-			warehouse="All Warehouses - _CD",
-			company="_Test Company DR",
-		)
+		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
+		item = frappe.get_doc("Item", self.item)
 		item.enable_deferred_revenue = 1
-		item.deferred_revenue_account = deferred_revenue_account
+		item.deferred_revenue_account = self.deferred_revenue_account
 		item.no_of_months = 0
 		item.save()
 
 		si = create_sales_invoice(
 			item=item.name,
-			company="_Test Company DR",
-			customer="_Test Customer DR",
-			debit_to="Debtors - _CD",
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
 			posting_date="2021-05-01",
-			parent_cost_center="Main - _CD",
-			cost_center="Main - _CD",
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
 			do_not_save=True,
 			rate=300,
 			price_list_rate=300,
 		)
 
 		si.items[0].enable_deferred_revenue = 1
-		si.items[0].income_account = "Sales - _CD"
-		si.items[0].deferred_revenue_account = deferred_revenue_account
-		si.items[0].income_account = "Sales - _CD"
+		si.items[0].income_account = self.income_account
+		si.items[0].deferred_revenue_account = self.deferred_revenue_account
 		si.save()
 		si.submit()
 
@@ -290,17 +252,17 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 				start_date="2021-05-01",
 				end_date="2021-08-01",
 				type="Income",
-				company="_Test Company DR",
+				company=self.company,
 			)
 		)
 		pda.insert()
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", frappe.defaults.get_user_default("fiscal_year"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2021-05-01"))
 		self.filters = frappe._dict(
 			{
-				"company": frappe.defaults.get_user_default("Company"),
+				"company": self.company,
 				"filter_based_on": "Date Range",
 				"period_start_date": "2021-05-01",
 				"period_end_date": "2021-08-01",
@@ -321,30 +283,3 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 			{"key": "aug_2021", "total": 0, "actual": 0},
 		]
 		self.assertEqual(report.period_total, expected)
-
-
-def create_company():
-	company = frappe.db.exists("Company", "_Test Company DR")
-	if not company:
-		company = frappe.new_doc("Company")
-		company.company_name = "_Test Company DR"
-		company.default_currency = "INR"
-		company.chart_of_accounts = "Standard"
-		company.insert()
-
-
-def clear_accounts_and_items():
-	item = qb.DocType("Item")
-	account = qb.DocType("Account")
-	customer = qb.DocType("Customer")
-	supplier = qb.DocType("Supplier")
-
-	qb.from_(account).delete().where(
-		(account.account_name == "Deferred Revenue")
-		| (account.account_name == "Deferred Expense") & (account.company == "_Test Company DR")
-	).run()
-	qb.from_(item).delete().where(
-		(item.item_code == "_Test Internet Subscription") | (item.item_code == "_Test Office Rent")
-	).run()
-	qb.from_(customer).delete().where(customer.customer_name == "_Test Customer DR").run()
-	qb.from_(supplier).delete().where(supplier.supplier_name == "_Test Furniture Supplier").run()

@@ -21,6 +21,7 @@ from frappe.utils import (
 import erpnext
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.assets.doctype.asset.depreciation import (
+	get_comma_separated_links,
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
 )
@@ -59,8 +60,17 @@ class Asset(AccountsController):
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 		if not self.split_from:
-			make_draft_asset_depr_schedules_if_not_present(self)
+			asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
 			convert_draft_asset_depr_schedules_into_active(self)
+			if asset_depr_schedules_names:
+				asset_depr_schedules_links = get_comma_separated_links(
+					asset_depr_schedules_names, "Asset Depreciation Schedule"
+				)
+				frappe.msgprint(
+					_(
+						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
+					).format(asset_depr_schedules_links)
+				)
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -74,7 +84,15 @@ class Asset(AccountsController):
 
 	def after_insert(self):
 		if not self.split_from:
-			make_draft_asset_depr_schedules(self)
+			asset_depr_schedules_names = make_draft_asset_depr_schedules(self)
+			asset_depr_schedules_links = get_comma_separated_links(
+				asset_depr_schedules_names, "Asset Depreciation Schedule"
+			)
+			frappe.msgprint(
+				_(
+					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
+				).format(asset_depr_schedules_links)
+			)
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -933,6 +951,8 @@ def create_new_asset_after_split(asset, split_qty):
 	)
 
 	new_asset.gross_purchase_amount = new_gross_purchase_amount
+	if asset.purchase_receipt_amount:
+		new_asset.purchase_receipt_amount = new_gross_purchase_amount
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name

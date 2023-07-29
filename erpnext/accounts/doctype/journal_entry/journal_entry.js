@@ -264,11 +264,11 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 			}
 
 			if(jvd.party_type && jvd.party) {
-				var party_field = "";
+				let party_field = "";
 				if(jvd.reference_type.indexOf("Sales")===0) {
-					var party_field = "customer";
+					party_field = "customer";
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
-					var party_field = "supplier";
+					party_field = "supplier";
 				}
 
 				if (party_field) {
@@ -368,7 +368,7 @@ cur_frm.cscript.update_totals = function(doc) {
 		td += flt(accounts[i].debit, precision("debit", accounts[i]));
 		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
 	}
-	var doc = locals[doc.doctype][doc.name];
+	doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
 	doc.total_credit = tc;
 	doc.difference = flt((td - tc), precision("difference"));

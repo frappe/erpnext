@@ -1,8 +1,10 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-{% include 'erpnext/selling/sales_common.js' %}
+erpnext.accounts.taxes.setup_tax_validations("Sales Taxes and Charges Template");
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.pre_sales.set_as_lost("Quotation");
+erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
@@ -123,12 +125,6 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 						this.frm.trigger('set_as_lost_dialog');
 					});
 				}
-
-			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
-			}
 
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
