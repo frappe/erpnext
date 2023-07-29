@@ -288,6 +288,8 @@ def update_args_in_repost_item_valuation(
 	frappe.publish_realtime(
 		"item_reposting_progress",
 		{"name": doc.name, "items_to_be_repost": json.dumps(args, default=str), "current_index": index},
+		doctype=doc.doctype,
+		docname=doc.name,
 	)
 
 
