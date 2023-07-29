@@ -1774,10 +1774,10 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.submit()
 
 		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate(), {"branch": branch2.branch}],
-			["Creditors - _TC", 0.0, 1000, nowdate(), {"branch": branch1.branch}],
-			["Offsetting - _TC", 1000, 0.0, nowdate(), {"branch": branch1.branch}],
-			["Offsetting - _TC", 0.0, 1000, nowdate(), {"branch": branch2.branch}],
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate(), branch2.branch],
+			["Creditors - _TC", 0.0, 1000, nowdate(), branch1.branch],
+			["Offsetting - _TC", 1000, 0.0, nowdate(), branch1.branch],
+			["Offsetting - _TC", 0.0, 1000, nowdate(), branch2.branch],
 		]
 
 		check_gl_entries(
@@ -1786,7 +1786,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			expected_gle,
 			nowdate(),
 			voucher_type="Purchase Invoice",
-			check_acc_dimensions=True,
+			additional_columns=["branch"],
 		)
 		clear_dimension_defaults("Branch")
 		disable_dimension()
@@ -1809,7 +1809,7 @@ def check_gl_entries(
 	expected_gle,
 	posting_date,
 	voucher_type="Purchase Invoice",
-	check_acc_dimensions=False,
+	additional_columns=None,
 ):
 	gl = frappe.qb.DocType("GL Entry")
 	query = (
@@ -1823,9 +1823,11 @@ def check_gl_entries(
 		)
 		.orderby(gl.posting_date, gl.account, gl.creation)
 	)
-	if check_acc_dimensions:
-		for col in list(expected_gle[0][4].keys()):
-			query = query.select(col)
+
+	if additional_columns:
+		for col in additional_columns:
+			query = query.select(gl[col])
+
 	gl_entries = query.run(as_dict=True)
 
 	for i, gle in enumerate(gl_entries):
@@ -1833,9 +1835,12 @@ def check_gl_entries(
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
-		if check_acc_dimensions:
-			for acc_dimension in expected_gle[i][4]:
-				doc.assertEqual(expected_gle[i][4][acc_dimension], gle[acc_dimension])
+
+		if additional_columns:
+			j = 4
+			for col in additional_columns:
+				doc.assertEqual(expected_gle[i][j], gle[col])
+				j += 1
 
 
 def create_tax_witholding_category(category_name, company, account):
