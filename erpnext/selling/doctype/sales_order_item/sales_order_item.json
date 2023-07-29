@@ -861,29 +861,6 @@
    "fieldname": "material_request_item",
    "fieldtype": "Data",
    "label": "Material Request Item"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "1",
-   "fieldname": "reserve_stock",
-   "fieldtype": "Check",
-   "label": "Reserve Stock",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: doc.stock_reserved_qty",
-   "fieldname": "stock_reserved_qty",
-   "fieldtype": "Float",
-   "label": "Stock Reserved Qty (in Stock UOM)",
-   "no_copy": 1,
-   "non_negative": 1,
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
   },
   {
    "fieldname": "production_plan_qty",
@@ -891,17 +868,12 @@
    "label": "Production Plan Qty",
    "no_copy": 1,
    "read_only": 1
->>>>>>> 1c2148b637 (fix: multiple issues related to Production Plan)
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-12-25 02:51:10.247569",
-=======
  "modified": "2023-07-28 14:56:42.031636",
->>>>>>> 1c2148b637 (fix: multiple issues related to Production Plan)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
