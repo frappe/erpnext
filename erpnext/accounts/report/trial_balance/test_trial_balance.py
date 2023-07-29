@@ -91,7 +91,8 @@ def create_accounting_dimension(**args):
 		accounting_dimension = frappe.new_doc("Accounting Dimension")
 		accounting_dimension.document_type = document_type
 		accounting_dimension.insert()
-	accounting_dimension.save()
+
+	accounting_dimension.set("dimension_defaults", [])
 	accounting_dimension.append(
 		"dimension_defaults",
 		{
