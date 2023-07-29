@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_depreciation_amount,
@@ -27,9 +28,21 @@ class AssetValueAdjustment(Document):
 	def on_submit(self):
 		self.make_depreciation_entry()
 		self.reschedule_depreciations(self.new_asset_value)
+		add_asset_activity(
+			self.asset,
+			_("Asset {0}'s value adjusted after submission of Asset Value Adjustment {1}").format(
+				get_link_to_form("Asset", self.asset), get_link_to_form("Asset Value Adjustment", self.name)
+			),
+		)
 
 	def on_cancel(self):
 		self.reschedule_depreciations(self.current_asset_value)
+		add_asset_activity(
+			self.asset,
+			_("Asset {0}'s value adjusted after cancellation of Asset Value Adjustment {1}").format(
+				get_link_to_form("Asset", self.asset), get_link_to_form("Asset Value Adjustment", self.name)
+			),
+		)
 
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
@@ -74,12 +87,16 @@ class AssetValueAdjustment(Document):
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": self.asset,
 		}
 
 		debit_entry = {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": self.asset,
 		}
 
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()

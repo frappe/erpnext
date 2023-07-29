@@ -73,7 +73,7 @@ class Asset(AccountsController):
 					).format(asset_depr_schedules_links)
 				)
 		add_asset_activity(
-			self.name, _("Asset {0} submitted").format(get_link_to_form(self.doctype, self.name))
+			self.name, _("Asset {0} submitted").format(get_link_to_form("Asset", self.name))
 		)
 
 	def on_cancel(self):
@@ -86,7 +86,7 @@ class Asset(AccountsController):
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 		self.db_set("booked_fixed_asset", 0)
 		add_asset_activity(
-			self.name, _("Asset {0} cancelled").format(get_link_to_form(self.doctype, self.name))
+			self.name, _("Asset {0} cancelled").format(get_link_to_form("Asset", self.name))
 		)
 
 	def after_insert(self):
@@ -905,6 +905,13 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 		},
 	)
 
+	add_asset_activity(
+		asset.name,
+		_("Asset {0} updated after being split into Asset {1}").format(
+			get_link_to_form("Asset", asset.name), get_link_to_form("Asset", new_asset_name)
+		),
+	)
+
 	for row in asset.get("finance_books"):
 		value_after_depreciation = flt(
 			(row.value_after_depreciation * remaining_qty) / asset.asset_quantity
@@ -971,6 +978,15 @@ def create_new_asset_after_split(asset, split_qty):
 		row.expected_value_after_useful_life = flt(
 			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
+
+	new_asset.insert()
+
+	add_asset_activity(
+		new_asset.name,
+		_("Asset {0} created after being split from Asset {1}").format(
+			get_link_to_form("Asset", new_asset.name), get_link_to_form("Asset", asset.name)
+		),
+	)
 
 	new_asset.submit()
 	new_asset.set_status()
