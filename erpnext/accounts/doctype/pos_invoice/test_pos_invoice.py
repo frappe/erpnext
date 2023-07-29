@@ -767,6 +767,39 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 		self.assertEqual(rounded_total, 400)
 
+	def test_pos_batch_reservation(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_auto_batch_nos,
+		)
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+
+		create_batch_item_with_batch("_BATCH ITEM Test For Reserve", "TestBatch-RS 02")
+		make_stock_entry(
+			target="_Test Warehouse - _TC",
+			item_code="_BATCH ITEM Test For Reserve",
+			qty=20,
+			basic_rate=100,
+			batch_no="TestBatch-RS 02",
+		)
+
+		pos_inv1 = create_pos_invoice(
+			item="_BATCH ITEM Test For Reserve", rate=300, qty=15, batch_no="TestBatch-RS 02"
+		)
+		pos_inv1.save()
+		pos_inv1.submit()
+
+		batches = get_auto_batch_nos(
+			frappe._dict(
+				{"item_code": "_BATCH ITEM Test For Reserve", "warehouse": "_Test Warehouse - _TC"}
+			)
+		)
+
+		for batch in batches:
+			if batch.batch_no == "TestBatch-RS 02" and batch.warehouse == "_Test Warehouse - _TC":
+				self.assertEqual(batch.qty, 5)
+
 	def test_pos_batch_item_qty_validation(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			BatchNegativeStockError,
@@ -953,19 +986,34 @@ def create_pos_invoice(**args):
 			msg = f"Serial No {args.serial_no} not available for Item {args.item}"
 			frappe.throw(_(msg))
 
-	pos_inv.append(
-		"items",
-		{
-			"item_code": args.item or args.item_code or "_Test Item",
-			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 1,
-			"rate": args.rate if args.get("rate") is not None else 100,
-			"income_account": args.income_account or "Sales - _TC",
-			"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
-			"cost_center": args.cost_center or "_Test Cost Center - _TC",
-			"serial_and_batch_bundle": bundle_id,
-		},
-	)
+	pos_invoice_item = {
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"qty": args.qty or 1,
+		"rate": args.rate if args.get("rate") is not None else 100,
+		"income_account": args.income_account or "Sales - _TC",
+		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
+		"serial_and_batch_bundle": bundle_id,
+	}
+	# append in pos invoice items without item_code by checking flag without_item_code
+	if args.without_item_code:
+		pos_inv.append(
+			"items",
+			{
+				**pos_invoice_item,
+				"item_name": args.item_name or "_Test Item",
+				"description": args.item_name or "_Test Item",
+			},
+		)
+
+	else:
+		pos_inv.append(
+			"items",
+			{
+				**pos_invoice_item,
+				"item_code": args.item or args.item_code or "_Test Item",
+			},
+		)
 
 	if not args.do_not_save:
 		pos_inv.insert()

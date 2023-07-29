@@ -213,6 +213,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
+   "no_copy": 1,
    "oldfieldname": "received_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -1001,7 +1002,8 @@
    "label": "Serial and Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "depends_on": "eval:parent.is_old_subcontracting_flow",
@@ -1026,7 +1028,8 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "rejected_serial_and_batch_bundle",
@@ -1057,7 +1060,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-12 13:37:47.778021",
+ "modified": "2023-07-26 12:55:15.234477",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

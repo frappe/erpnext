@@ -29,6 +29,17 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			};
 		});
 
+		this.frm.set_query('default_advance_account', () => {
+			return {
+				filters: {
+					"company": this.frm.doc.company,
+					"is_group": 0,
+					"account_type": this.frm.doc.party_type == 'Customer' ? "Receivable": "Payable",
+					"root_type": this.frm.doc.party_type == 'Customer' ? "Liability": "Asset"
+				}
+			};
+		});
+
 		this.frm.set_query('bank_cash_account', () => {
 			return {
 				filters:[
@@ -85,25 +96,29 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
-			frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments").then((enabled) => {
- 				if(enabled) {
-					this.frm.call({
-						'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
-						"args": {
-							for_filter: {
-								company: this.frm.doc.company,
-								party_type: this.frm.doc.party_type,
-								party: this.frm.doc.party,
-								receivable_payable_account: this.frm.doc.receivable_payable_account
+			this.frm.call({
+				doc: this.frm.doc,
+				method: 'is_auto_process_enabled',
+				callback: (r) => {
+					if (r.message) {
+						this.frm.call({
+							'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
+							"args": {
+								for_filter: {
+									company: this.frm.doc.company,
+									party_type: this.frm.doc.party_type,
+									party: this.frm.doc.party,
+									receivable_payable_account: this.frm.doc.receivable_payable_account
+								}
 							}
-						}
-					}).then(r => {
-						if (r.message) {
-							let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message, true);
-							let msg = __("Payment Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
-							this.frm.dashboard.add_comment(msg, "yellow");
-						}
-					});
+						}).then(r => {
+							if (r.message) {
+								let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message, true);
+								let msg = __("Payment Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
+								this.frm.dashboard.add_comment(msg, "yellow");
+							}
+						});
+					}
 				}
 			});
 		}
@@ -124,19 +139,20 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.trigger("clear_child_tables");
 
 		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
-			return frappe.call({
+			frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
 					company: this.frm.doc.company,
 					party_type: this.frm.doc.party_type,
-					party: this.frm.doc.party
+					party: this.frm.doc.party,
+					include_advance: 1
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						this.frm.set_value("receivable_payable_account", r.message);
+						this.frm.set_value("receivable_payable_account", r.message[0]);
+						this.frm.set_value("default_advance_account", r.message[1]);
 					}
 					this.frm.refresh();
-
 				}
 			});
 		}

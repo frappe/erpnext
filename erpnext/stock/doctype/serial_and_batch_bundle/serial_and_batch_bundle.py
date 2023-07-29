@@ -122,7 +122,12 @@ class SerialandBatchBundle(Document):
 		frappe.throw(_(message), exception, title=_("Error"))
 
 	def set_incoming_rate(self, row=None, save=False):
-		if self.type_of_transaction not in ["Inward", "Outward"]:
+		if self.type_of_transaction not in ["Inward", "Outward"] or self.voucher_type in [
+			"Installation Note",
+			"Job Card",
+			"Maintenance Schedule",
+			"Pick List",
+		]:
 			return
 
 		if self.type_of_transaction == "Outward":
@@ -220,7 +225,7 @@ class SerialandBatchBundle(Document):
 
 	def set_incoming_rate_for_inward_transaction(self, row=None, save=False):
 		valuation_field = "valuation_rate"
-		if self.voucher_type in ["Sales Invoice", "Delivery Note"]:
+		if self.voucher_type in ["Sales Invoice", "Delivery Note", "Quotation"]:
 			valuation_field = "incoming_rate"
 
 		if self.voucher_type == "POS Invoice":
@@ -229,8 +234,10 @@ class SerialandBatchBundle(Document):
 		rate = row.get(valuation_field) if row else 0.0
 		child_table = self.child_table
 
-		if self.voucher_type == "Subcontracting Receipt" and self.voucher_detail_no:
-			if frappe.db.exists("Subcontracting Receipt Supplied Item", self.voucher_detail_no):
+		if self.voucher_type == "Subcontracting Receipt":
+			if not self.voucher_detail_no:
+				return
+			elif frappe.db.exists("Subcontracting Receipt Supplied Item", self.voucher_detail_no):
 				valuation_field = "rate"
 				child_table = "Subcontracting Receipt Supplied Item"
 			else:
@@ -563,11 +570,21 @@ class SerialandBatchBundle(Document):
 
 	@property
 	def child_table(self):
-		table = f"{self.voucher_type} Item"
-		if self.voucher_type == "Stock Entry":
-			table = f"{self.voucher_type} Detail"
+		if self.voucher_type == "Job Card":
+			return
 
-		return table
+		parent_child_map = {
+			"Asset Capitalization": "Asset Capitalization Stock Item",
+			"Asset Repair": "Asset Repair Consumed Item",
+			"Quotation": "Packed Item",
+			"Stock Entry": "Stock Entry Detail",
+		}
+
+		return (
+			parent_child_map[self.voucher_type]
+			if self.voucher_type in parent_child_map
+			else f"{self.voucher_type} Item"
+		)
 
 	def delink_refernce_from_voucher(self):
 		or_filters = {"serial_and_batch_bundle": self.name}
@@ -872,13 +889,16 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code, docstatus=None, voucher_no=None, name=None):
-	filters = get_filters_for_bundle(item_code, docstatus=docstatus, voucher_no=voucher_no, name=name)
+def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None):
+	filters = get_filters_for_bundle(
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name
+	)
 
 	return frappe.get_all(
 		"Serial and Batch Bundle",
 		fields=[
 			"`tabSerial and Batch Bundle`.`name`",
+			"`tabSerial and Batch Bundle`.`item_code`",
 			"`tabSerial and Batch Entry`.`qty`",
 			"`tabSerial and Batch Entry`.`warehouse`",
 			"`tabSerial and Batch Entry`.`batch_no`",
@@ -889,11 +909,13 @@ def get_serial_batch_ledgers(item_code, docstatus=None, voucher_no=None, name=No
 	)
 
 
-def get_filters_for_bundle(item_code, docstatus=None, voucher_no=None, name=None):
+def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name=None):
 	filters = [
-		["Serial and Batch Bundle", "item_code", "=", item_code],
 		["Serial and Batch Bundle", "is_cancelled", "=", 0],
 	]
+
+	if item_code:
+		filters.append(["Serial and Batch Bundle", "item_code", "=", item_code])
 
 	if not docstatus:
 		docstatus = [0, 1]
@@ -1224,59 +1246,132 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	return list(set(ignore_serial_nos) - set(returned_serial_nos))
 
 
+def get_reserved_batches_for_pos(kwargs):
+	pos_batches = frappe._dict()
+	pos_invoices = frappe.get_all(
+		"POS Invoice",
+		fields=[
+			"`tabPOS Invoice Item`.batch_no",
+			"`tabPOS Invoice`.is_return",
+			"`tabPOS Invoice Item`.warehouse",
+			"`tabPOS Invoice Item`.name as child_docname",
+			"`tabPOS Invoice`.name as parent_docname",
+			"`tabPOS Invoice Item`.serial_and_batch_bundle",
+		],
+		filters=[
+			["POS Invoice", "consolidated_invoice", "is", "not set"],
+			["POS Invoice", "docstatus", "=", 1],
+			["POS Invoice Item", "item_code", "=", kwargs.item_code],
+			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
+		],
+	)
+
+	ids = [
+		pos_invoice.serial_and_batch_bundle
+		for pos_invoice in pos_invoices
+		if pos_invoice.serial_and_batch_bundle
+	]
+
+	if not ids:
+		return []
+
+	if ids:
+		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+			key = (d.batch_no, d.warehouse)
+			if key not in pos_batches:
+				pos_batches[key] = frappe._dict(
+					{
+						"qty": d.qty,
+						"warehouse": d.warehouse,
+					}
+				)
+			else:
+				pos_batches[key].qty += d.qty
+
+	for row in pos_invoices:
+		if not row.batch_no:
+			continue
+
+		if kwargs.get("batch_no") and row.batch_no != kwargs.get("batch_no"):
+			continue
+
+		key = (row.batch_no, row.warehouse)
+		if key in pos_batches:
+			pos_batches[key] -= row.qty * -1 if row.is_return else row.qty
+		else:
+			pos_batches[key] = frappe._dict(
+				{
+					"qty": (row.qty * -1 if row.is_return else row.qty),
+					"warehouse": row.warehouse,
+				}
+			)
+
+	return pos_batches
+
+
 def get_auto_batch_nos(kwargs):
 	available_batches = get_available_batches(kwargs)
 	qty = flt(kwargs.qty)
 
+	pos_invoice_batches = get_reserved_batches_for_pos(kwargs)
 	stock_ledgers_batches = get_stock_ledgers_batches(kwargs)
-	if stock_ledgers_batches:
-		update_available_batches(available_batches, stock_ledgers_batches)
+	if stock_ledgers_batches or pos_invoice_batches:
+		update_available_batches(available_batches, stock_ledgers_batches, pos_invoice_batches)
 
 	available_batches = list(filter(lambda x: x.qty > 0, available_batches))
 
 	if not qty:
 		return available_batches
 
+	return get_qty_based_available_batches(available_batches, qty)
+
+
+def get_qty_based_available_batches(available_batches, qty):
 	batches = []
 	for batch in available_batches:
-		if qty > 0:
-			batch_qty = flt(batch.qty)
-			if qty > batch_qty:
-				batches.append(
-					frappe._dict(
-						{
-							"batch_no": batch.batch_no,
-							"qty": batch_qty,
-							"warehouse": batch.warehouse,
-						}
-					)
+		if qty <= 0:
+			break
+
+		batch_qty = flt(batch.qty)
+		if qty > batch_qty:
+			batches.append(
+				frappe._dict(
+					{
+						"batch_no": batch.batch_no,
+						"qty": batch_qty,
+						"warehouse": batch.warehouse,
+					}
 				)
-				qty -= batch_qty
-			else:
-				batches.append(
-					frappe._dict(
-						{
-							"batch_no": batch.batch_no,
-							"qty": qty,
-							"warehouse": batch.warehouse,
-						}
-					)
+			)
+			qty -= batch_qty
+		else:
+			batches.append(
+				frappe._dict(
+					{
+						"batch_no": batch.batch_no,
+						"qty": qty,
+						"warehouse": batch.warehouse,
+					}
 				)
-				qty = 0
+			)
+			qty = 0
 
 	return batches
 
 
-def update_available_batches(available_batches, reserved_batches):
-	for batch_no, data in reserved_batches.items():
-		batch_not_exists = True
-		for batch in available_batches:
-			if batch.batch_no == batch_no:
-				batch.qty += data.qty
-				batch_not_exists = False
+def update_available_batches(available_batches, reserved_batches=None, pos_invoice_batches=None):
+	for batches in [reserved_batches, pos_invoice_batches]:
+		if batches:
+			for key, data in batches.items():
+				batch_no, warehouse = key
+				batch_not_exists = True
+				for batch in available_batches:
+					if batch.batch_no == batch_no and batch.warehouse == warehouse:
+						batch.qty += data.qty
+						batch_not_exists = False
 
-		if batch_not_exists:
-			available_batches.append(data)
+				if batch_not_exists:
+					available_batches.append(data)
 
 
 def get_available_batches(kwargs):
@@ -1295,7 +1390,10 @@ def get_available_batches(kwargs):
 			batch_ledger.warehouse,
 			Sum(batch_ledger.qty).as_("qty"),
 		)
-		.where(((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull())))
+		.where(
+			(batch_table.disabled == 0)
+			& ((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
+		)
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.groupby(batch_ledger.batch_no, batch_ledger.warehouse)
 	)
@@ -1477,7 +1575,7 @@ def get_stock_ledgers_batches(kwargs):
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
 	)
 
-	for field in ["warehouse", "item_code"]:
+	for field in ["warehouse", "item_code", "batch_no"]:
 		if not kwargs.get(field):
 			continue
 
@@ -1496,6 +1594,10 @@ def get_stock_ledgers_batches(kwargs):
 	data = query.run(as_dict=True)
 	batches = {}
 	for d in data:
-		batches[d.batch_no] = d
+		key = (d.batch_no, d.warehouse)
+		if key not in batches:
+			batches[key] = d
+		else:
+			batches[key].qty += d.qty
 
 	return batches

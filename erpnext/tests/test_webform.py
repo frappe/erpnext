@@ -3,18 +3,21 @@ import unittest
 import frappe
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 
 class TestWebsite(unittest.TestCase):
 	def test_permission_for_custom_doctype(self):
 		create_user("Supplier 1", "supplier1@gmail.com")
 		create_user("Supplier 2", "supplier2@gmail.com")
-		create_supplier_with_contact(
-			"Supplier1", "All Supplier Groups", "Supplier 1", "supplier1@gmail.com"
-		)
-		create_supplier_with_contact(
-			"Supplier2", "All Supplier Groups", "Supplier 2", "supplier2@gmail.com"
-		)
+
+		supplier1 = create_supplier(supplier_name="Supplier1")
+		supplier2 = create_supplier(supplier_name="Supplier2")
+		supplier1.append("portal_users", {"user": "supplier1@gmail.com"})
+		supplier1.save()
+		supplier2.append("portal_users", {"user": "supplier2@gmail.com"})
+		supplier2.save()
+
 		po1 = create_purchase_order(supplier="Supplier1")
 		po2 = create_purchase_order(supplier="Supplier2")
 
@@ -59,21 +62,6 @@ def create_user(name, email):
 			"roles": [{"doctype": "Has Role", "role": "Supplier"}],
 		}
 	).insert(ignore_if_duplicate=True)
-
-
-def create_supplier_with_contact(name, group, contact_name, contact_email):
-	supplier = frappe.get_doc(
-		{"doctype": "Supplier", "supplier_name": name, "supplier_group": group}
-	).insert(ignore_if_duplicate=True)
-
-	if not frappe.db.exists("Contact", contact_name + "-1-" + name):
-		new_contact = frappe.new_doc("Contact")
-		new_contact.first_name = contact_name
-		new_contact.is_primary_contact = (True,)
-		new_contact.append("links", {"link_doctype": "Supplier", "link_name": supplier.name})
-		new_contact.append("email_ids", {"email_id": contact_email, "is_primary": 1})
-
-		new_contact.insert(ignore_mandatory=True)
 
 
 def create_custom_doctype():

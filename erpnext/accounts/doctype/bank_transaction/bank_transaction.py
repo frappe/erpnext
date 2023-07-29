@@ -15,6 +15,9 @@ class BankTransaction(StatusUpdater):
 		self.clear_linked_payment_entries()
 		self.set_status()
 
+		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
+			self.auto_set_party()
+
 	_saving_flag = False
 
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting
@@ -145,6 +148,26 @@ class BankTransaction(StatusUpdater):
 		set_voucher_clearance(
 			payment_entry.payment_document, payment_entry.payment_entry, clearance_date, self
 		)
+
+	def auto_set_party(self):
+		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
+
+		if self.party_type and self.party:
+			return
+
+		result = AutoMatchParty(
+			bank_party_account_number=self.bank_party_account_number,
+			bank_party_iban=self.bank_party_iban,
+			bank_party_name=self.bank_party_name,
+			description=self.description,
+			deposit=self.deposit,
+		).match()
+
+		if result:
+			party_type, party = result
+			frappe.db.set_value(
+				"Bank Transaction", self.name, field={"party_type": party_type, "party": party}
+			)
 
 
 @frappe.whitelist()
@@ -320,14 +343,7 @@ def get_paid_amount(payment_entry, currency, gl_bank_account):
 
 
 def set_voucher_clearance(doctype, docname, clearance_date, self):
-	if doctype in [
-		"Payment Entry",
-		"Journal Entry",
-		"Purchase Invoice",
-		"Expense Claim",
-		"Loan Repayment",
-		"Loan Disbursement",
-	]:
+	if doctype in get_doctypes_for_bank_reconciliation():
 		if (
 			doctype == "Payment Entry"
 			and frappe.db.get_value("Payment Entry", docname, "payment_type") == "Internal Transfer"

@@ -3,7 +3,10 @@
 
 frappe.provide("erpnext.buying");
 frappe.provide("erpnext.accounts.dimensions");
-{% include 'erpnext/public/js/controllers/buying.js' %};
+
+erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Purchase Order");
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {
@@ -248,12 +251,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 							function() { me.make_payment_request() }, __('Create'));
 					}
 
-					if(!doc.auto_repeat) {
-						cur_frm.add_custom_button(__('Subscription'), function() {
-							erpnext.utils.make_subscription(doc.doctype, doc.name)
-						}, __('Create'))
-					}
-
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
 						let internal = me.frm.doc.is_internal_supplier;
@@ -286,7 +283,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			source_name: this.frm.doc.supplier,
 			target: this.frm,
 			setters: {
-				company: me.frm.doc.company
+				company: this.frm.doc.company
 			},
 			get_query_filters: {
 				docstatus: ["!=", 2],

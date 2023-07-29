@@ -2,7 +2,11 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
-{% include 'erpnext/public/js/controllers/buying.js' %};
+
+erpnext.accounts.payment_triggers.setup("Purchase Invoice");
+erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Purchase Invoice");
+erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
@@ -54,9 +58,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		hide_fields(this.frm.doc);
 		// Show / Hide button
 		this.show_general_ledger();
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
 
-		if(doc.update_stock==1 && doc.docstatus==1) {
+		if(doc.update_stock==1) {
 			this.show_stock_ledger();
+			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
 		if(!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0){
@@ -94,12 +100,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __('Create'));
-			}
-
-			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
 			}
 		}
 
@@ -504,7 +504,8 @@ frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Purchase Invoice': 'Return / Debit Note',
-			'Payment Entry': 'Payment'
+			'Payment Entry': 'Payment',
+			'Landed Cost Voucher': function () { frm.trigger('create_landed_cost_voucher') },
 		}
 
 		frm.set_query("additional_discount_account", function() {
@@ -540,6 +541,26 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	refresh: function(frm) {
 		frm.events.add_custom_buttons(frm);
+	},
+
+	mode_of_payment: function(frm) {
+		erpnext.accounts.pos.get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account) {
+			frm.set_value("cash_bank_account", account);
+		})
+	},
+
+	create_landed_cost_voucher: function (frm) {
+		let lcv = frappe.model.get_new_doc('Landed Cost Voucher');
+		lcv.company = frm.doc.company;
+
+		let lcv_receipt = frappe.model.get_new_doc('Landed Cost Purchase Invoice');
+		lcv_receipt.receipt_document_type = 'Purchase Invoice';
+		lcv_receipt.receipt_document = frm.doc.name;
+		lcv_receipt.supplier = frm.doc.supplier;
+		lcv_receipt.grand_total = frm.doc.grand_total;
+		lcv.purchase_receipts = [lcv_receipt];
+
+		frappe.set_route("Form", lcv.doctype, lcv.name);
 	},
 
 	add_custom_buttons: function(frm) {

@@ -113,7 +113,6 @@ class SalesInvoice(SellingController):
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
-			self.validate_item_code()
 			self.validate_warehouse()
 			self.update_current_stock()
 			self.validate_delivery_note()
@@ -854,11 +853,6 @@ class SalesInvoice(SellingController):
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
-	def validate_item_code(self):
-		for d in self.get("items"):
-			if not d.item_code and self.is_opening == "No":
-				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
-
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
@@ -1001,10 +995,16 @@ class SalesInvoice(SellingController):
 
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
-			if d.sales_order and frappe.db.get_value("Sales Order", d.sales_order, "docstatus") != 1:
+			if (
+				d.sales_order
+				and frappe.db.get_value("Sales Order", d.sales_order, "docstatus", cache=True) != 1
+			):
 				frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
 
-			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
+			if (
+				d.delivery_note
+				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus", cache=True) != 1
+			):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
@@ -2510,55 +2510,49 @@ def get_mode_of_payment_info(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_dunning(source_name, target_doc=None):
+def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	from frappe.model.mapper import get_mapped_doc
 
-	from erpnext.accounts.doctype.dunning.dunning import (
-		calculate_interest_and_amount,
-		get_dunning_letter_text,
-	)
+	def postprocess_dunning(source, target):
+		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
 
-	def set_missing_values(source, target):
-		target.sales_invoice = source_name
-		target.outstanding_amount = source.outstanding_amount
-		overdue_days = (getdate(target.posting_date) - getdate(source.due_date)).days
-		target.overdue_days = overdue_days
-		if frappe.db.exists(
-			"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-		):
-			dunning_type = frappe.get_doc(
-				"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-			)
+		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
+		if dunning_type:
+			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
 			target.dunning_fee = dunning_type.dunning_fee
-			letter_text = get_dunning_letter_text(dunning_type=dunning_type.name, doc=target.as_dict())
+			target.income_account = dunning_type.income_account
+			target.cost_center = dunning_type.cost_center
+			letter_text = get_dunning_letter_text(
+				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
+			)
+
 			if letter_text:
 				target.body_text = letter_text.get("body_text")
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
-			amounts = calculate_interest_and_amount(
-				target.outstanding_amount,
-				target.rate_of_interest,
-				target.dunning_fee,
-				target.overdue_days,
-			)
-			target.interest_amount = amounts.get("interest_amount")
-			target.dunning_amount = amounts.get("dunning_amount")
-			target.grand_total = amounts.get("grand_total")
 
-	doclist = get_mapped_doc(
-		"Sales Invoice",
-		source_name,
-		{
+		target.validate()
+
+	return get_mapped_doc(
+		from_doctype="Sales Invoice",
+		from_docname=source_name,
+		target_doc=target_doc,
+		table_maps={
 			"Sales Invoice": {
 				"doctype": "Dunning",
-			}
+				"field_map": {"customer_address": "customer_address", "parent": "sales_invoice"},
+			},
+			"Payment Schedule": {
+				"doctype": "Overdue Payment",
+				"field_map": {"name": "payment_schedule", "parent": "sales_invoice"},
+				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
+			},
 		},
-		target_doc,
-		set_missing_values,
+		postprocess=postprocess_dunning,
+		ignore_permissions=ignore_permissions,
 	)
-	return doclist
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

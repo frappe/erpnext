@@ -53,7 +53,7 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:(doc.docstatus==1 && !doc.journal_entry && doc.schedule_date <= get_today())",
+   "depends_on": "eval:(doc.docstatus==1 && !doc.journal_entry && doc.schedule_date <= frappe.datetime.now_date())",
    "fieldname": "make_depreciation_entry",
    "fieldtype": "Button",
    "label": "Make Depreciation Entry"
@@ -61,7 +61,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-03-13 23:17:15.849950",
+ "modified": "2023-07-26 12:56:48.718736",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Depreciation Schedule",

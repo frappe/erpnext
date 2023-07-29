@@ -10,7 +10,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url_to_form
 from frappe.utils.file_manager import get_file_path
-from tweepy.error import TweepError
 
 
 class TwitterSettings(Document):
@@ -21,20 +20,22 @@ class TwitterSettings(Document):
 				frappe.utils.get_url()
 			)
 		)
-		auth = tweepy.OAuthHandler(
+		auth = tweepy.OAuth1UserHandler(
 			self.consumer_key, self.get_password(fieldname="consumer_secret"), callback_url
 		)
 		try:
 			redirect_url = auth.get_authorization_url()
 			return redirect_url
-		except tweepy.TweepError as e:
+		except (tweepy.TweepyException, tweepy.HTTPException) as e:
 			frappe.msgprint(_("Error! Failed to get request token."))
 			frappe.throw(
 				_("Invalid {0} or {1}").format(frappe.bold("Consumer Key"), frappe.bold("Consumer Secret Key"))
 			)
 
 	def get_access_token(self, oauth_token, oauth_verifier):
-		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
+		auth = tweepy.OAuth1UserHandler(
+			self.consumer_key, self.get_password(fieldname="consumer_secret")
+		)
 		auth.request_token = {"oauth_token": oauth_token, "oauth_token_secret": oauth_verifier}
 
 		try:
@@ -59,13 +60,15 @@ class TwitterSettings(Document):
 
 			frappe.local.response["type"] = "redirect"
 			frappe.local.response["location"] = get_url_to_form("Twitter Settings", "Twitter Settings")
-		except TweepError as e:
+		except (tweepy.TweepyException, tweepy.HTTPException) as e:
 			frappe.msgprint(_("Error! Failed to get access token."))
 			frappe.throw(_("Invalid Consumer Key or Consumer Secret Key"))
 
 	def get_api(self):
 		# authentication of consumer key and secret
-		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
+		auth = tweepy.OAuth1UserHandler(
+			self.consumer_key, self.get_password(fieldname="consumer_secret")
+		)
 		# authentication of access token and secret
 		auth.set_access_token(self.access_token, self.access_token_secret)
 
@@ -96,21 +99,21 @@ class TwitterSettings(Document):
 
 			return response
 
-		except TweepError as e:
+		except (tweepy.TweepyException, tweepy.HTTPException) as e:
 			self.api_error(e)
 
 	def delete_tweet(self, tweet_id):
 		api = self.get_api()
 		try:
 			api.destroy_status(tweet_id)
-		except TweepError as e:
+		except (tweepy.TweepyException, tweepy.HTTPException) as e:
 			self.api_error(e)
 
 	def get_tweet(self, tweet_id):
 		api = self.get_api()
 		try:
 			response = api.get_status(tweet_id, trim_user=True, include_entities=True)
-		except TweepError as e:
+		except (tweepy.TweepyException, tweepy.HTTPException) as e:
 			self.api_error(e)
 
 		return response._json

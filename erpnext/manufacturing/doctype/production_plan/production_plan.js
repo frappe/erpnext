@@ -9,19 +9,25 @@ frappe.ui.form.on('Production Plan', {
 			item.temporary_name = item.name;
 		});
 	},
+
 	setup(frm) {
+		frm.trigger("setup_queries");
+
 		frm.custom_make_buttons = {
 			'Work Order': 'Work Order / Subcontract PO',
 			'Material Request': 'Material Request',
 		};
+	},
 
-		frm.fields_dict['po_items'].grid.get_field('warehouse').get_query = function(doc) {
+	setup_queries(frm) {
+		frm.set_query("sales_order", "sales_orders", () => {
 			return {
+				query: "erpnext.manufacturing.doctype.production_plan.production_plan.sales_order_query",
 				filters: {
-					company: doc.company
+					company: frm.doc.company,
 				}
 			}
-		}
+		});
 
 		frm.set_query('for_warehouse', function(doc) {
 			return {
@@ -42,32 +48,40 @@ frappe.ui.form.on('Production Plan', {
 			};
 		});
 
-		frm.fields_dict['po_items'].grid.get_field('item_code').get_query = function(doc) {
+		frm.set_query("item_code", "po_items", (doc, cdt, cdn) => {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters:{
 					'is_stock_item': 1,
 				}
 			}
-		}
+		});
 
-		frm.fields_dict['po_items'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
+		frm.set_query("bom_no", "po_items", (doc, cdt, cdn) => {
 			var d = locals[cdt][cdn];
 			if (d.item_code) {
 				return {
 					query: "erpnext.controllers.queries.bom",
-					filters:{'item': cstr(d.item_code), 'docstatus': 1}
+					filters:{'item': d.item_code, 'docstatus': 1}
 				}
 			} else frappe.msgprint(__("Please enter Item first"));
-		}
+		});
 
-		frm.fields_dict['mr_items'].grid.get_field('warehouse').get_query = function(doc) {
+		frm.set_query("warehouse", "mr_items", (doc) => {
 			return {
 				filters: {
 					company: doc.company
 				}
 			}
-		}
+		});
+
+		frm.set_query("warehouse", "po_items", (doc) => {
+			return {
+				filters: {
+					company: doc.company
+				}
+			}
+		});
 	},
 
 	refresh(frm) {
@@ -99,7 +113,7 @@ frappe.ui.form.on('Production Plan', {
 					}, __('Create'));
 				}
 
-				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
+				if (frm.doc.mr_items && frm.doc.mr_items.length && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
 					frm.add_custom_button(__("Material Request"), ()=> {
 						frm.trigger("make_material_request");
 					}, __('Create'));
@@ -436,7 +450,7 @@ frappe.ui.form.on("Production Plan Item", {
 				}
 			});
 		}
-	}
+	},
 });
 
 frappe.ui.form.on("Material Request Plan Item", {
@@ -467,30 +481,35 @@ frappe.ui.form.on("Material Request Plan Item", {
 
 frappe.ui.form.on("Production Plan Sales Order", {
 	sales_order(frm, cdt, cdn) {
-		const { sales_order } = locals[cdt][cdn];
+		let row = locals[cdt][cdn];
+		const sales_order = row.sales_order;
 		if (!sales_order) {
 			return;
 		}
-		frappe.call({
-			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_so_details",
-			args: { sales_order },
-			callback(r) {
-				const {transaction_date, customer, grand_total} = r.message;
-				frappe.model.set_value(cdt, cdn, 'sales_order_date', transaction_date);
-				frappe.model.set_value(cdt, cdn, 'customer', customer);
-				frappe.model.set_value(cdt, cdn, 'grand_total', grand_total);
-			}
-		});
+
+		if (row.sales_order) {
+			frm.call({
+				method: "validate_sales_orders",
+				doc: frm.doc,
+				args: {
+					sales_order: row.sales_order,
+				},
+				callback(r) {
+					frappe.call({
+						method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_so_details",
+						args: { sales_order },
+						callback(r) {
+							const {transaction_date, customer, grand_total} = r.message;
+							frappe.model.set_value(cdt, cdn, 'sales_order_date', transaction_date);
+							frappe.model.set_value(cdt, cdn, 'customer', customer);
+							frappe.model.set_value(cdt, cdn, 'grand_total', grand_total);
+						}
+					});
+				}
+			});
+		}
 	}
 });
-
-cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = function() {
-	return{
-		filters: [
-			['Sales Order','docstatus', '=' ,1]
-		]
-	}
-};
 
 frappe.tour['Production Plan'] = [
 	{

@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "default_company",
-  "current_fiscal_year",
   "country",
   "default_distance_unit",
   "column_break_8",
@@ -23,13 +22,6 @@
    "ignore_user_permissions": 1,
    "label": "Default Company",
    "options": "Company"
-  },
-  {
-   "fieldname": "current_fiscal_year",
-   "fieldtype": "Link",
-   "label": "Current Fiscal Year",
-   "options": "Fiscal Year",
-   "reqd": 1
   },
   {
    "fieldname": "country",
@@ -95,7 +87,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-17 19:49:14.094209",
+ "modified": "2023-07-01 19:45:00.323953",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

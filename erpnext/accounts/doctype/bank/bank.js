@@ -8,9 +8,6 @@ frappe.ui.form.on('Bank', {
 	},
 	refresh: function(frm) {
 		add_fields_to_mapping_table(frm);
-
-		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Bank' };
-
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if (frm.doc.__islocal) {
@@ -105,7 +102,7 @@ erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
 	}
 
 	onScriptLoaded(me) {
-		me.linkHandler = Plaid.create({
+		me.linkHandler = Plaid.create({ // eslint-disable-line no-undef
 			env: me.plaid_env,
 			token: me.token,
 			onSuccess: me.plaid_success

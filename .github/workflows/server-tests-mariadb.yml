@@ -7,11 +7,9 @@ on:
       - '**.css'
       - '**.md'
       - '**.html'
-  push:
-    branches: [ develop ]
-    paths-ignore:
-      - '**.js'
-      - '**.md'
+  schedule:
+    # Run everday at midnight UTC / 5:30 IST
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       user:
@@ -71,7 +69,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
           check-latest: true
 
       - name: Add to Hosts

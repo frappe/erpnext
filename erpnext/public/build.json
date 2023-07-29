@@ -2,8 +2,7 @@
 	"css/erpnext.css": [
 		"public/less/erpnext.less",
 		"public/scss/call_popup.scss",
-		"public/scss/point-of-sale.scss",
-		"public/scss/hierarchy_chart.scss"
+		"public/scss/point-of-sale.scss"
 	],
 	"js/erpnext-web.min.js": [
 		"public/js/website_utils.js",
@@ -28,7 +27,6 @@
 		"public/js/templates/item_selector.html",
 		"public/js/utils/item_selector.js",
 		"public/js/help_links.js",
-		"public/js/agriculture/ternary_plot.js",
 		"public/js/templates/item_quick_entry.html",
 		"public/js/utils/customer_quick_entry.js",
 		"public/js/utils/supplier_quick_entry.js",
@@ -38,7 +36,6 @@
 		"public/js/utils/dimension_tree_filter.js",
 		"public/js/telephony.js",
 		"public/js/templates/call_link.html",
-		"public/js/templates/node_card.html",
 		"public/js/bulk_transaction_processing.js"
 	],
 	"js/item-dashboard.min.js": [
@@ -62,10 +59,6 @@
 		"public/js/bank_reconciliation_tool/data_table_manager.js",
 		"public/js/bank_reconciliation_tool/number_card.js",
 		"public/js/bank_reconciliation_tool/dialog_manager.js"
-	],
-	"js/hierarchy-chart.min.js": [
-		"public/js/hierarchy_chart/hierarchy_chart_desktop.js",
-		"public/js/hierarchy_chart/hierarchy_chart_mobile.js"
 	],
 	"js/e-commerce.min.js": [
 		"e_commerce/product_ui/views.js",

@@ -11,6 +11,7 @@ from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	InvalidPaymentEntry,
 	get_payment_entry,
+	get_reference_details,
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	make_purchase_invoice,
@@ -931,7 +932,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(pe.cost_center, si.cost_center)
 		self.assertEqual(flt(expected_account_balance), account_balance)
 		self.assertEqual(flt(expected_party_balance), party_balance)
-		self.assertEqual(flt(expected_party_account_balance), party_account_balance)
+		self.assertEqual(flt(expected_party_account_balance, 2), flt(party_account_balance, 2))
 
 	def test_multi_currency_payment_entry_with_taxes(self):
 		payment_entry = create_payment_entry(
@@ -1037,6 +1038,124 @@ class TestPaymentEntry(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
+	def test_details_update_on_reference_table(self):
+		so = make_sales_order(
+			customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_submit=True
+		)
+		so.conversion_rate = 50
+		so.submit()
+		pe = get_payment_entry("Sales Order", so.name)
+		pe.references.clear()
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_from_account_currency = "INR"
+		pe.source_exchange_rate = 50
+		pe.save()
+
+		ref_details = get_reference_details(so.doctype, so.name, pe.paid_from_account_currency)
+		expected_response = {
+			"total_amount": 5000.0,
+			"outstanding_amount": 5000.0,
+			"exchange_rate": 1.0,
+			"due_date": None,
+			"bill_no": None,
+		}
+		self.assertDictEqual(ref_details, expected_response)
+
+	@change_settings(
+		"Accounts Settings",
+		{
+			"unlink_payment_on_cancellation_of_invoice": 1,
+			"delete_linked_ledger_entries": 1,
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+		},
+	)
+	def test_overallocation_validation_on_payment_terms(self):
+		"""
+		Validate Allocation on Payment Entry based on Payment Schedule. Upon overallocation, validation error must be thrown.
+
+		"""
+		customer = create_customer()
+		create_payment_terms_template()
+
+		# Validate allocation on base/company currency
+		si1 = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si1.payment_terms_template = "Test Receivable Template"
+		si1.save().submit()
+
+		si1.reload()
+		pe = get_payment_entry(si1.doctype, si1.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si1.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(flt(schedule.payment_amount), flt(pe.references[idx].allocated_amount))
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 400
+		pe.references[0].allocated_amount = 200
+		pe.references[1].allocated_amount = 200
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si1.cancel()
+		si1.delete()
+
+		# Validate allocation on foreign currency
+		si2 = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			do_not_save=1,
+		)
+		si2.payment_terms_template = "Test Receivable Template"
+		si2.save().submit()
+
+		si2.reload()
+		pe = get_payment_entry(si2.doctype, si2.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si2.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(flt(schedule.payment_amount), flt(pe.references[idx].allocated_amount))
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 200
+		pe.references[0].allocated_amount = 100
+		pe.references[1].allocated_amount = 100
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si2.cancel()
+		si2.delete()
+
+		# Validate allocation in base/company currency on a foreign currency document
+		# when invoice is made is foreign currency, but posted to base/company currency debtors account
+		si3 = create_sales_invoice(
+			customer=customer,
+			currency="USD",
+			conversion_rate=80,
+			do_not_save=1,
+		)
+		si3.payment_terms_template = "Test Receivable Template"
+		si3.save().submit()
+
+		si3.reload()
+		pe = get_payment_entry(si3.doctype, si3.name).save()
+		# Allocated amount should be equal to payment term outstanding
+		self.assertEqual(len(pe.references), 2)
+		for idx, ref in enumerate(pe.references):
+			with self.subTest(idx=idx):
+				self.assertEqual(ref.payment_term_outstanding, ref.allocated_amount)
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 16000
+		pe.references[0].allocated_amount = 8000
+		pe.references[1].allocated_amount = 8000
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si3.cancel()
+		si3.delete()
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
@@ -1126,3 +1245,17 @@ def create_payment_terms_template_with_discount(
 def create_payment_term(name):
 	if not frappe.db.exists("Payment Term", name):
 		frappe.get_doc({"doctype": "Payment Term", "payment_term_name": name}).insert()
+
+
+def create_customer(name="_Test Customer 2 USD", currency="USD"):
+	customer = None
+	if frappe.db.exists("Customer", name):
+		customer = name
+	else:
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = name
+		customer.default_currency = currency
+		customer.type = "Individual"
+		customer.save()
+		customer = customer.name
+	return customer

@@ -43,7 +43,7 @@ class TestJournalEntry(unittest.TestCase):
 				frappe.db.sql(
 					"""select name from `tabJournal Entry Account`
 				where account = %s and docstatus = 1 and parent = %s""",
-					("_Test Receivable - _TC", test_voucher.name),
+					("Debtors - _TC", test_voucher.name),
 				)
 			)
 
@@ -273,7 +273,7 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 		# create jv in USD, but account currency in INR
-		jv = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 100, save=False)
+		jv = make_journal_entry("_Test Bank - _TC", "Debtors - _TC", 100, save=False)
 
 		jv.accounts[1].update({"party_type": "Customer", "party": "_Test Customer USD"})
 

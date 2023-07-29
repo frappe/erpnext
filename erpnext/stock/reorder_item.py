@@ -67,7 +67,7 @@ def _reorder_item():
 		else:
 			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
 
-		if (reorder_level or reorder_qty) and projected_qty < reorder_level:
+		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
 				reorder_qty = deficiency

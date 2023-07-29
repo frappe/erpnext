@@ -6,7 +6,7 @@
   "doctype": "Journal Entry",
   "accounts": [
    {
-    "account": "_Test Receivable - _TC",
+    "account": "Debtors - _TC",
 	  "party_type": "Customer",
 	  "party": "_Test Customer",
     "credit_in_account_currency": 400.0,
@@ -70,7 +70,7 @@
   "doctype": "Journal Entry",
   "accounts": [
    {
-    "account": "_Test Receivable - _TC",
+    "account": "Debtors - _TC",
 	  "party_type": "Customer",
   	"party": "_Test Customer",
     "credit_in_account_currency": 0.0,

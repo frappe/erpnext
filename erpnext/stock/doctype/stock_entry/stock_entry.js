@@ -3,7 +3,7 @@
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.accounts.dimensions");
 
-{% include 'erpnext/stock/landed_taxes_and_charges_common.js' %};
+erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
@@ -56,7 +56,7 @@ frappe.ui.form.on('Stock Entry', {
 
 		frappe.db.get_value('Stock Settings', {name: 'Stock Settings'}, 'sample_retention_warehouse', (r) => {
 			if (r.sample_retention_warehouse) {
-				var filters = [
+				let filters = [
 							["Warehouse", 'company', '=', frm.doc.company],
 							["Warehouse", "is_group", "=",0],
 							['Warehouse', 'name', '!=', r.sample_retention_warehouse]
@@ -75,17 +75,19 @@ frappe.ui.form.on('Stock Entry', {
 		});
 
 		frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
-			var item = locals[cdt][cdn];
+			let item = locals[cdt][cdn];
+			let filters = {};
+
 			if(!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
 				if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor"], doc.purpose)) {
-					var filters = {
+					filters = {
 						'item_code': item.item_code,
 						'posting_date': frm.doc.posting_date || frappe.datetime.nowdate()
 					}
 				} else {
-					var filters = {
+					filters = {
 						'item_code': item.item_code
 					}
 				}
@@ -103,6 +105,27 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
@@ -665,7 +688,6 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	process_loss_percentage(frm) {
-		debugger
 		if (frm.doc.process_loss_percentage) {
 			frm.doc.process_loss_qty = flt((frm.doc.fg_completed_qty * frm.doc.process_loss_percentage) / 100 , precision("process_loss_qty", frm.doc));
 			refresh_field("process_loss_qty");
@@ -904,6 +926,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
+		erpnext.utils.view_serial_batch_nos(this.frm);
 		if (this.frm.doc.docstatus===1 && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			this.show_general_ledger();
 		}
@@ -1102,7 +1125,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
 				item.has_serial_no = r.message.has_serial_no;
 				item.has_batch_no = r.message.has_batch_no;
-				item.outward = item.s_warehouse ? 1 : 0;
+				item.type_of_transaction = item.s_warehouse ? "Outward" : "Inward";
 
 				frappe.require(path, function() {
 					new erpnext.SerialBatchPackageSelector(

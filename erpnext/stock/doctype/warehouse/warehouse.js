@@ -13,7 +13,7 @@ frappe.ui.form.on("Warehouse", {
 			};
 		});
 
-		frm.set_query("parent_warehouse", function () {
+		frm.set_query("parent_warehouse", function (doc) {
 			return {
 				filters: {
 					is_group: 1,
@@ -83,12 +83,6 @@ frappe.ui.form.on("Warehouse", {
 		}
 
 		frm.toggle_enable(["is_group", "company"], false);
-
-		frappe.dynamic_link = {
-			doc: frm.doc,
-			fieldname: "name",
-			doctype: "Warehouse",
-		};
 	},
 });
 

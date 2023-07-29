@@ -266,10 +266,10 @@ class StockEntry(StockController):
 			return
 
 		for row in self.items:
-			if row.job_card_item:
+			if row.job_card_item or not row.s_warehouse:
 				continue
 
-			msg = f"""Row #{0}: The job card item reference
+			msg = f"""Row #{row.idx}: The job card item reference
 				is missing. Kindly create the stock entry
 				from the job card. If you have added the row manually
 				then you won't be able to add job card item reference."""
@@ -420,7 +420,7 @@ class StockEntry(StockController):
 						transferred_materials = frappe.db.sql(
 							"""
 									select
-										sum(qty) as qty
+										sum(sed.qty) as qty
 									from `tabStock Entry` se,`tabStock Entry Detail` sed
 									where
 										se.name = sed.parent and se.docstatus=1 and

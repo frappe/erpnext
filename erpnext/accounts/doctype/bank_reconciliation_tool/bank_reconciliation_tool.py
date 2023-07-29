@@ -7,9 +7,9 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import cint, flt
 
+from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	get_amounts_not_reflected_in_system,
@@ -140,6 +140,9 @@ def create_journal_entry_bts(
 					second_account
 				)
 			)
+
+	company = frappe.get_value("Account", company_account, "company")
+
 	accounts = []
 	# Multi Currency?
 	accounts.append(
@@ -149,6 +152,7 @@ def create_journal_entry_bts(
 			"debit_in_account_currency": bank_transaction.withdrawal,
 			"party_type": party_type,
 			"party": party,
+			"cost_center": get_default_cost_center(company),
 		}
 	)
 
@@ -158,10 +162,9 @@ def create_journal_entry_bts(
 			"bank_account": bank_transaction.bank_account,
 			"credit_in_account_currency": bank_transaction.withdrawal,
 			"debit_in_account_currency": bank_transaction.deposit,
+			"cost_center": get_default_cost_center(company),
 		}
 	)
-
-	company = frappe.get_value("Account", company_account, "company")
 
 	journal_entry_dict = {
 		"voucher_type": entry_type,
@@ -415,19 +418,7 @@ def check_matching(
 	to_reference_date,
 ):
 	exact_match = True if "exact_match" in document_types else False
-	# combine all types of vouchers
-	subquery = get_queries(
-		bank_account,
-		company,
-		transaction,
-		document_types,
-		from_date,
-		to_date,
-		filter_by_reference_date,
-		from_reference_date,
-		to_reference_date,
-		exact_match,
-	)
+
 	filters = {
 		"amount": transaction.unallocated_amount,
 		"payment_type": "Receive" if transaction.deposit > 0.0 else "Pay",
@@ -439,21 +430,29 @@ def check_matching(
 
 	matching_vouchers = []
 
-	matching_vouchers.extend(
-		get_loan_vouchers(bank_account, transaction, document_types, filters, exact_match)
-	)
-
-	for query in subquery:
+	# get matching vouchers from all the apps
+	for method_name in frappe.get_hooks("get_matching_vouchers_for_bank_reconciliation"):
 		matching_vouchers.extend(
-			frappe.db.sql(
-				query,
+			frappe.get_attr(method_name)(
+				bank_account,
+				company,
+				transaction,
+				document_types,
+				from_date,
+				to_date,
+				filter_by_reference_date,
+				from_reference_date,
+				to_reference_date,
+				exact_match,
 				filters,
 			)
+			or []
 		)
+
 	return sorted(matching_vouchers, key=lambda x: x[0], reverse=True) if matching_vouchers else []
 
 
-def get_queries(
+def get_matching_vouchers_for_bank_reconciliation(
 	bank_account,
 	company,
 	transaction,
@@ -464,6 +463,7 @@ def get_queries(
 	from_reference_date,
 	to_reference_date,
 	exact_match,
+	filters,
 ):
 	# get queries to get matching vouchers
 	account_from_to = "paid_to" if transaction.deposit > 0.0 else "paid_from"
@@ -488,7 +488,17 @@ def get_queries(
 			or []
 		)
 
-	return queries
+	vouchers = []
+
+	for query in queries:
+		vouchers.extend(
+			frappe.db.sql(
+				query,
+				filters,
+			)
+		)
+
+	return vouchers
 
 
 def get_matching_queries(
@@ -546,18 +556,6 @@ def get_matching_queries(
 	return queries
 
 
-def get_loan_vouchers(bank_account, transaction, document_types, filters, exact_match):
-	vouchers = []
-
-	if transaction.withdrawal > 0.0 and "loan_disbursement" in document_types:
-		vouchers.extend(get_ld_matching_query(bank_account, exact_match, filters))
-
-	if transaction.deposit > 0.0 and "loan_repayment" in document_types:
-		vouchers.extend(get_lr_matching_query(bank_account, exact_match, filters))
-
-	return vouchers
-
-
 def get_bt_matching_query(exact_match, transaction):
 	# get matching bank transaction query
 	# find bank transactions in the same bank account with opposite sign
@@ -589,85 +587,6 @@ def get_bt_matching_query(exact_match, transaction):
 			AND bank_account = '{transaction.bank_account}'
 			AND {field} {'= %(amount)s' if exact_match else '> 0.0'}
 	"""
-
-
-def get_ld_matching_query(bank_account, exact_match, filters):
-	loan_disbursement = frappe.qb.DocType("Loan Disbursement")
-	matching_reference = loan_disbursement.reference_number == filters.get("reference_number")
-	matching_party = loan_disbursement.applicant_type == filters.get(
-		"party_type"
-	) and loan_disbursement.applicant == filters.get("party")
-
-	rank = frappe.qb.terms.Case().when(matching_reference, 1).else_(0)
-
-	rank1 = frappe.qb.terms.Case().when(matching_party, 1).else_(0)
-
-	query = (
-		frappe.qb.from_(loan_disbursement)
-		.select(
-			rank + rank1 + 1,
-			ConstantColumn("Loan Disbursement").as_("doctype"),
-			loan_disbursement.name,
-			loan_disbursement.disbursed_amount,
-			loan_disbursement.reference_number,
-			loan_disbursement.reference_date,
-			loan_disbursement.applicant_type,
-			loan_disbursement.disbursement_date,
-		)
-		.where(loan_disbursement.docstatus == 1)
-		.where(loan_disbursement.clearance_date.isnull())
-		.where(loan_disbursement.disbursement_account == bank_account)
-	)
-
-	if exact_match:
-		query.where(loan_disbursement.disbursed_amount == filters.get("amount"))
-	else:
-		query.where(loan_disbursement.disbursed_amount > 0.0)
-
-	vouchers = query.run(as_list=True)
-
-	return vouchers
-
-
-def get_lr_matching_query(bank_account, exact_match, filters):
-	loan_repayment = frappe.qb.DocType("Loan Repayment")
-	matching_reference = loan_repayment.reference_number == filters.get("reference_number")
-	matching_party = loan_repayment.applicant_type == filters.get(
-		"party_type"
-	) and loan_repayment.applicant == filters.get("party")
-
-	rank = frappe.qb.terms.Case().when(matching_reference, 1).else_(0)
-
-	rank1 = frappe.qb.terms.Case().when(matching_party, 1).else_(0)
-
-	query = (
-		frappe.qb.from_(loan_repayment)
-		.select(
-			rank + rank1 + 1,
-			ConstantColumn("Loan Repayment").as_("doctype"),
-			loan_repayment.name,
-			loan_repayment.amount_paid,
-			loan_repayment.reference_number,
-			loan_repayment.reference_date,
-			loan_repayment.applicant_type,
-			loan_repayment.posting_date,
-		)
-		.where(loan_repayment.docstatus == 1)
-		.where(loan_repayment.clearance_date.isnull())
-		.where(loan_repayment.payment_account == bank_account)
-	)
-
-	if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-		query = query.where((loan_repayment.repay_from_salary == 0))
-
-	if exact_match:
-		query.where(loan_repayment.amount_paid == filters.get("amount"))
-	else:
-		query.where(loan_repayment.amount_paid > 0.0)
-
-	vouchers = query.run()
-
-	return vouchers
 
 
 def get_pe_matching_query(

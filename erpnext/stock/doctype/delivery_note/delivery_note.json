@@ -1223,7 +1223,8 @@
    "hidden": 1,
    "label": "Pick List",
    "options": "Pick List",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -1399,7 +1400,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:13:25.011487",
+ "modified": "2023-06-16 14:58:55.066602",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

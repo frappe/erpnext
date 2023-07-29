@@ -1,6 +1,5 @@
 This is a root sales person and cannot be edited.,Se trata de una persona de las ventas raíz y no se puede editar .
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.","Establecer Valores Predeterminados , como Empresa , Moneda, Año Fiscal Actual, etc"
-Employee Settings,Configuración del Empleado,
 Serial No {0} does not belong to Item {1},Número de orden {0} no pertenece al elemento {1}
 User must always select,Usuario elegirá siempre,
 Cost of Goods Sold,Costo de las Ventas,
@@ -29,7 +28,6 @@ Retail & Wholesale,Venta al por menor y al por mayor,
 Default Holiday List,Listado de vacaciones / feriados predeterminados,
 Journal Entry,Asientos Contables,
 Completed Qty can not be greater than 'Qty to Manufacture',La cantidad completada no puede ser mayor que la cantidad a producir,
-Stop users from making Leave Applications on following days.,Deje que los usuarios realicen Solicitudes de Vacaciones en los siguientes días .
 Qty as per Stock UOM,Cantidad de acuerdo a la Unidad de Medida del Inventario,
 Manufacture,Manufactura,
 Write Off Outstanding Amount,Cantidad de desajuste,
@@ -37,12 +35,10 @@ Manage Customer Group Tree.,Administrar el listado de las categorías de cliente
 Retail,venta al por menor,
 Time at which materials were received,Momento en que se recibieron los materiales,
 Expected End Date,Fecha de finalización prevista,
-HR Settings,Configuración de Recursos Humanos,
 Delete all the Transactions for this Company,Eliminar todas las transacciones para esta empresa,
 Abbreviation is mandatory,La Abreviación es mandatoria,
 End of Life,Final de la Vida,
 Reqd By Date,Solicitado Por Fecha,
-Salary breakup based on Earning and Deduction.,Calculo de Salario basado en los Ingresos y la Deducción.
 You are not authorized to set Frozen value,Usted no está autorizado para fijar el valor congelado,
 Leave Approver,Supervisor de Vacaciones,
 Package Weight Details,Peso Detallado del Paquete,
@@ -92,7 +88,6 @@ Target Warehouse,Inventario Objetivo,
 Net Weight UOM,Unidad de Medida Peso Neto,
 Row #{0}: Timings conflicts with row {1},Fila # {0}: conflictos con fila {1}
 Operation Time,Tiempo de funcionamiento,
-Leave Balance Before Application,Vacaciones disponibles antes de la solicitud,
 Set prefix for numbering series on your transactions,Establezca los prefijos de sus transacciones,
 Under AMC,Bajo AMC,
 Warranty Period (in days),Período de garantía ( en días)
@@ -102,7 +97,6 @@ Target On,Objetivo On,
 "To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","Para no aplicar la Regla de Precios en una transacción en particular, todas las Reglas de Precios aplicables deben ser desactivadas."
 "Sorry, Serial Nos cannot be merged","Lo sentimos , Nos de serie no se puede fusionar"
 Manufacturing Settings,Ajustes de Manufactura,
-Appraisal Template Title,Titulo de la Plantilla deEvaluación,
 Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,"Fila {0}: Por favor, consulte ""¿Es Avance 'contra la Cuenta {1} si se trata de una entrada con antelación."
 Capital Equipments,Maquinaria y Equipos,
 {0} {1} is not submitted,{0} {1} no esta presentado,
@@ -110,7 +104,6 @@ Earning & Deduction,Ganancia y Descuento,
 Leave Encashed?,Vacaciones Descansadas?
 Send regular summary reports via Email.,Enviar informes periódicos resumidos por correo electrónico.
 'Based On' and 'Group By' can not be same,"""Basado en"" y ""Agrupar por"" no pueden ser el mismo"
-Net pay cannot be negative,Salario neto no puede ser negativo,
 Phone No,Teléfono No,
 Default Cost Center,Centro de coste por defecto,
 Employee Number,Número del Empleado,
@@ -136,7 +129,6 @@ Row {0}: Conversion Factor is mandatory,Fila {0}: Factor de conversión es oblig
 Purchase Receipt,Recibos de Compra,
 Disable,Inhabilitar,
 Table for Item that will be shown in Web Site,Tabla de Artículo que se muestra en el Sitio Web,
-Leave Type,Tipo de Vacaciones,
 Applicable For,Aplicable para,
 Start date should be less than end date for Item {0},La fecha de inicio debe ser menor que la fecha de finalización para el punto {0}
 Rate (Company Currency),Precio (Moneda Local)
@@ -179,7 +171,6 @@ Parent Customer Group,Categoría de cliente principal,
 Total Outstanding Amount,Total Monto Pendiente,
 Select Monthly Distribution to unevenly distribute targets across months.,Seleccione Distribución Mensual de distribuir de manera desigual a través de objetivos meses.
 You need to enable Shopping Cart,Necesita habilitar Carito de Compras,
-New Leaves Allocated (In Days),Nuevas Vacaciones Asignados (en días)
 Rented,Alquilado,
 Shipping Address Name,Dirección de envío Nombre,
 Moving Average,Promedio Movil,
@@ -198,7 +189,6 @@ Doc Type,Tipo Doc.,
 List a few of your customers. They could be organizations or individuals.,Enumere algunos de sus clientes. Pueden ser organizaciones o individuos.,
 Ref Code,Código Referencia,
 Default Selling Cost Center,Centros de coste por defecto,
-Leave Block List Allowed,Lista de Bloqueo de Vacaciones Permitida,
 Report Date,Fecha del Informe,
 Purchase Invoice {0} is already submitted,Factura de Compra {0} ya existe,
 Currency and Price List,Divisa y Lista de precios,
@@ -209,7 +199,6 @@ Customer Details,Datos del Cliente,
 **Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,**Año Fiscal** representa un 'Ejercicio Financiero'. Los asientos contables y otras transacciones importantes se registran contra **Año Fiscal**
 Actual Qty is mandatory,Cantidad actual es obligatoria,
 Stock Reconciliation,Reconciliación de Inventario,
-Score must be less than or equal to 5,Puntuación debe ser menor o igual a 5,
 On Previous Row Total,En la Anterior Fila Total,
 Serial No / Batch,N º de serie / lote,
 Supplier Quotation Item,Articulo de la Cotización del Proveedor,
@@ -222,7 +211,6 @@ Software Developer,Desarrollador de Software,
 Website Item Groups,Grupos de Artículos del Sitio Web,
 Marketing Expenses,Gastos de Comercialización,
 "Cannot declare as lost, because Quotation has been made.","No se puede declarar como perdido , porque la cotización ha sido hecha."
-New Leaves Allocated,Nuevas Vacaciones Asignadas,
 user@example.com,user@example.com,
 Source Warehouse,fuente de depósito,
 No contacts added yet.,No se han añadido contactos todavía,
@@ -257,10 +245,8 @@ Settings for Buying Module,Ajustes para la compra de módulo,
 Sales Person Targets,Metas de Vendedor,
 Standard contract terms for Sales or Purchase.,Condiciones contractuales estándar para ventas y compras.
 Actual Qty (at source/target),Cantidad Actual (en origen/destino)
-Privilege Leave,Permiso con Privilegio,
 Stock User,Foto del usuario,
 On Previous Row Amount,En la Fila Anterior de Cantidad,
-Weightage (%),Coeficiente de ponderación (% )
 Creation Time,Momento de la creación,
 Default Source Warehouse,Origen predeterminado Almacén,
 Sales Taxes and Charges Template,Plantilla de Cargos e Impuestos sobre Ventas,
@@ -309,7 +295,6 @@ Shipping Rule Label,Regla Etiqueta de envío,
 This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set,Este artículo es una plantilla y no se puede utilizar en las transacciones. Atributos artículo se copiarán en las variantes menos que se establece 'No Copy'
 Target  Amount,Monto Objtetivo,
 S.O. No.,S.O. No.
-Sanctioned Amount,importe sancionado,
 "If the account is frozen, entries are allowed to restricted users.","Si la cuenta está congelada , las entradas se les permite a los usuarios restringidos."
 Sales Taxes and Charges,Los impuestos y cargos de venta,
 Warehouse {0} can not be deleted as quantity exists for Item {1},Almacén {0} no se puede eliminar mientras exista cantidad de artículo {1}
@@ -345,7 +330,6 @@ Stock Balance,Balance de Inventarios,
 Cost Center For Item with Item Code ',Centro de Costos para artículo con Código del artículo '
 Write Off Cost Center,Centro de costos de desajuste,
 Please contact to the user who have Sales Master Manager {0} role,"Por favor, póngase en contacto con el usuario con función de Gerente de Ventas {0}"
-Allow the following users to approve Leave Applications for block days.,Permitir a los usuarios siguientes aprobar Solicitudes de ausencia en bloques de días.
 Net Rate,Tasa neta,
 Reference Row #,Referencia Fila #
 Employee Internal Work History,Historial de Trabajo Interno del Empleado,
@@ -481,14 +465,11 @@ Shipping Address,Dirección de envío,
 "Settings for online shopping cart such as shipping rules, price list etc.","Ajustes para la compra online, como las normas de envío, lista de precios, etc."
 Series Updated,Series Actualizado,
 Contract End Date,Fecha Fin de Contrato,
-Attendance From Date,Asistencia De Fecha,
 Excise Entry,Entrada Impuestos Especiales,
-Appraisal Template Goal,Objetivo Plantilla de Evaluación,
 Opportunity,Oportunidades,
 Salary Slip,Planilla,
 Rate at which this tax is applied,Velocidad a la que se aplica este impuesto,
 Supplier Id,Proveedor Id,
-Block Holidays on important days.,Bloqueo de vacaciones en días importantes.
 Support Analtyics,Analitico de Soporte,
 Subcontract,Subcontrato,
 From Lead,De la iniciativa,
@@ -510,7 +491,6 @@ Cost of Purchased Items,El costo de artículos comprados,
 Delete Company Transactions,Eliminar Transacciones de la empresa,
 Stock UOM,Unidad de Media del Inventario,
 Itemwise Recommended Reorder Level,Nivel recomendado de re-ordenamiento de producto,
-Leave Type Name,Nombre de Tipo de Vacaciones,
 Actual End Time,Hora actual de finalización,
 Please mention Round Off Cost Center in Company,"Por favor, indique las centro de costos para el redondeo--"
 Under Graduate,Bajo Graduación,
@@ -521,11 +501,8 @@ Maintenance start date can not be before delivery date for Serial No {0},Manteni
 Suggestions,Sugerencias,
 Warehouse where you are maintaining stock of rejected items,Almacén en el que está manteniendo un balance de los artículos rechazados,
 Default Cost of Goods Sold Account,Cuenta de costos de venta por defecto,
-Is Carry Forward,Es llevar adelante,
 "Create and manage daily, weekly and monthly email digests.","Creación y gestión de resúmenes de correo electrónico diarias , semanales y mensuales."
 Sales Order to Payment,Órdenes de venta al Pago,
-Warning: Leave application contains following block dates,Advertencia: Solicitud de Renuncia contiene las siguientes fechas bloquedas,
-Total Leaves Allocated,Total Vacaciones Asignadas,
 Default settings for selling transactions.,Los ajustes por defecto para las transacciones de venta.
 Customize the Notification,Personalice la Notificación,
 Make Difference Entry,Hacer Entrada de Diferencia,
@@ -533,14 +510,12 @@ Ordered Qty,Cantidad Pedida,
 Total(Amt),Total (Amt)
 Credit Card Entry,Introducción de tarjetas de crédito,
 Applicable To (Designation),Aplicables a (Denominación )
-Stock Options,Opciones sobre Acciones,
 Receivable,Cuenta por Cobrar,
 Opportunity From field is mandatory,El campo 'Oportunidad de' es obligatorio,
 -Above,-Mayor,
 Office Maintenance Expenses,Gastos de Mantenimiento de Oficinas,
 Manufacturing,Producción,
 'Entries' cannot be empty,'Entradas' no puede estar vacío,
-Leave Control Panel,Salir del Panel de Control,
 Percentage Allocation,Porcentaje de asignación de,
 Shipping Amount,Importe del envío,
 Item Code is mandatory because Item is not automatically numbered,El código del artículo es obligatorio porque el producto no se enumera automáticamente,
@@ -564,7 +539,6 @@ Stop Birthday Reminders,Detener recordatorios de cumpleaños,
 Sales Expenses,Gastos de Ventas,
 Warranty / AMC Details,Garantía / AMC Detalles,
 No of Visits,No. de visitas,
-Leave Approver Name,Nombre de Supervisor de Vacaciones,
 Item Description,Descripción del Artículo,
 Cost of Issued Items,Costo de Artículos Emitidas,
 Stock Expenses,Inventario de Gastos,
@@ -575,8 +549,6 @@ Tax Amount After Discount Amount,Total de Impuestos Después Cantidad de Descuen
 Has Serial No,Tiene No de Serie,
 Sales Order required for Item {0},Orden de Venta requerida para el punto {0}
 Out of AMC,Fuera de AMC,
-Apply / Approve Leaves,Aplicar / Aprobar Vacaciones,
-Select Terms and Conditions,Selecciona Términos y Condiciones,
 Delivery Note {0} is not submitted,Nota de Entrega {0} no está presentada,
 "Row {0}: To set {1} periodicity, difference between from and to date \
 						must be greater than or equal to {2}","Fila {0}: Para establecer {1} periodicidad, diferencia entre desde y hasta la fecha \
@@ -593,7 +565,6 @@ Show In Website,Mostrar En Sitio Web,
 Bank Overdraft Account,Cuenta de sobregiros,
 Warning: Another {0} # {1} exists against stock entry {2},Existe otro {0} # {1} contra la entrada de población {2}: Advertencia,
 'Update Stock' can not be checked because items are not delivered via {0},'Actualizar Stock' no se puede marcar porque los productos no se entregan a través de {0}
-Approval Status must be 'Approved' or 'Rejected',"Estado de aprobación debe ser "" Aprobado "" o "" Rechazado """
 Holiday List,Lista de Feriados,
 Settings for Selling Module,Ajustes para vender Módulo,
 "e.g. ""Build tools for builders""","por ejemplo "" Herramientas para los Constructores """
@@ -627,9 +598,7 @@ Serial No Warranty Expiry,Número de orden de caducidad Garantía,
 Manufacturing Manager,Gerente de Manufactura,
 Item UOM,Unidad de Medida del Artículo,
 Total Invoiced Amt,Total Monto Facturado,
-Total Leave Days,Total Vacaciones,
 Tax template for selling transactions.,Plantilla de Impuestos para las transacciones de venta.
-Score Earned,Puntuación Obtenida,
 Re-open,Re Abrir,
 Material Request Type,Tipo de Solicitud de Material,
 Serial No {0} not found,Serial No {0} no encontrado,
@@ -644,10 +613,8 @@ Supplied Qty,Suministrado Cantidad,
 Employee cannot report to himself.,Empleado no puede informar a sí mismo.
 Delivery Note No,No. de Nota de Entrega,
 Purchase Order,Órdenes de Compra,
-Employee {0} is not active or does not exist,Empleado {0} no está activo o no existe,
 POS Profile required to make POS Entry,Se requiere un perfil POS para crear entradas en el Punto-de-Venta,
 Requested Items To Be Ordered,Solicitud de Productos Aprobados,
-Leave Without Pay,Licencia sin Sueldo,
 Root cannot be edited.,Root no se puede editar .
 Source warehouse is mandatory for row {0},Almacén de origen es obligatoria para la fila {0}
 Target Distribution,Distribución Objetivo,
@@ -658,11 +625,9 @@ Quotation To,Cotización Para,
 Select Fiscal Year,Seleccione el año fiscal,
 'Has Serial No' can not be 'Yes' for non-stock item,"'Tiene Número de Serie' no puede ser ""Sí"" para elementos que son de inventario"
 Cash In Hand,Efectivo Disponible,
-Earning,Ganancia,
 Please specify currency in Company,"Por favor, especifique la moneda en la compañía"
 Purchase Order Message,Mensaje de la Orden de Compra,
 Only leaf nodes are allowed in transaction,Sólo las Cuentas de Detalle se permiten en una transacción,
-Date is repeated,Fecha se repite,
 Government,Gobierno,
 Securities & Commodity Exchanges,Valores y Bolsas de Productos,
 Items with higher weightage will be shown higher,Los productos con mayor peso se mostraran arriba,
@@ -673,7 +638,6 @@ Secretary,Secretario,
 Lead must be set if Opportunity is made from Lead,La Iniciativa se debe establecer si la oportunidad está hecha desde Iniciativas,
 Operation completed for how many finished goods?,La operación se realizó para la cantidad de productos terminados?
 Type of document to rename.,Tipo de documento para cambiar el nombre.
-Include holidays within leaves as leaves,"Incluir las vacaciones con ausencias, únicamente como ausencias"
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",Asiento contable congelado actualmente ; nadie puede modificar el asiento  excepto el rol que se especifica a continuación .
 Duties and Taxes,Derechos e Impuestos,
 Tree of Bill of Materials,Árbol de la lista de materiales,
@@ -681,11 +645,8 @@ Manufacturing User,Usuario de Manufactura,
 Profit and Loss Statement,Estado de Pérdidas y Ganancias,
 Item Supplier,Proveedor del Artículo,
 Account {0}: Parent account {1} can not be a ledger,Cuenta {0}: Cuenta Padre {1} no puede ser una cuenta Mayor,
-Attendance From Date and Attendance To Date is mandatory,Asistencia Desde Fecha y Hasta Fecha de Asistencia es obligatoria,
 Cart is Empty,El carro esta vacío,
 Please Delivery Note first,Primero la nota de entrega,
-Monthly Attendance Sheet,Hoja de Asistencia Mensual,
-Get Template,Verificar Plantilla,
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included",Para incluir el impuesto de la linea {0} los impuestos de las lineas {1} también deben ser incluidos,
 Sales Invoice Advance,Factura Anticipadas,
 Quantity for Item {0} must be less than {1},Cantidad de elemento {0} debe ser menor de {1}
@@ -693,14 +654,12 @@ Stock Value Difference,Diferencia de Valor de Inventario,
 Min Order Qty,Cantidad mínima de Pedido (MOQ)
 Website Warehouse,Almacén del Sitio Web,
 Source and target warehouse cannot be same for row {0},Fuente y el almacén de destino no pueden ser la misma para la fila {0}
-Submit Salary Slip,Presentar nómina,
 Specify conditions to calculate shipping amount,Especificar condiciones de calcular el importe de envío,
 This is a root customer group and cannot be edited.,Este es una categoría de cliente raíz y no se puede editar.
 Customer Items,Artículos de clientes,
 Customer Naming By,Naming Cliente Por,
 Fixed Asset,Activos Fijos,
 Start date of current invoice's period,Fecha del período de facturación actual Inicie,
-Score (0-5),Puntuación ( 0-5)
 "To set this Fiscal Year as Default, click on 'Set as Default'","Para establecer este Año Fiscal como Predeterminado , haga clic en "" Establecer como Predeterminado """
 Where manufacturing operations are carried.,¿Dónde se realizan las operaciones de fabricación.
 Appraisal {0} created for Employee {1} in the given date range,Evaluación {0} creado por Empleado {1} en el rango de fechas determinado,
@@ -716,7 +675,6 @@ User {0} is already assigned to Employee {1},El usuario {0} ya está asignado a 
 Expenses Included In Valuation,Gastos dentro de la valoración,
 New Customers,Clientes Nuevos,
 Total Taxes and Charges (Company Currency),Total Impuestos y Cargos (Moneda Local)
-Piecework,Pieza de trabajo,
 Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,El elemento {0}: Con la cantidad ordenada {1} no puede ser menor que el pedido mínimo {2} (definido en el producto).
 A logical Warehouse against which stock entries are made.,Un almacén lógico por el cual se hacen las entradas de existencia.
 Has Batch No,Tiene lote No,
@@ -737,7 +695,6 @@ Series List for this Transaction,Lista de series para esta transacción,
 "This will be appended to the Item Code of the variant. For example, if your abbreviation is ""SM"", and the item code is ""T-SHIRT"", the item code of the variant will be ""T-SHIRT-SM""","Esto se añade al Código del Artículo de la variante. Por ejemplo, si su abreviatura es ""SM"", y el código del artículo es ""CAMISETA"", el código de artículo de la variante será ""CAMISETA-SM"""
 Wages,Salario,
 Outstanding for {0} cannot be less than zero ({1}),Sobresaliente para {0} no puede ser menor que cero ({1} )
-Appraisal Goal,Evaluación Meta,
 Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Balance de Inventario en Lote {0} se convertirá en negativa {1} para la partida {2} en Almacén {3}
 Allow Production on Holidays,Permitir Producción en Vacaciones,
 Terms,Términos,
@@ -770,7 +727,6 @@ Actual type tax cannot be included in Item rate in row {0},"El tipo de impuesto 
 Role Allowed to edit frozen stock,Función Permitida para editar Inventario Congelado,
 "Higher the number, higher the priority","Mayor es el número, mayor es la prioridad"
 Stock cannot exist for Item {0} since has variants,Inventario no puede existir para el punto {0} ya tiene variantes,
-Carry Forward,Cargar,
 Account {0} is frozen,Cuenta {0} está congelada,
 Periodicity,Periodicidad,
 Raw Materials cannot be blank.,Materias primas no pueden estar en blanco.
@@ -802,7 +758,6 @@ Supplier Invoice Date,Fecha de la Factura de Proveedor,
 This is a root item group and cannot be edited.,Se trata de un grupo de elementos raíz y no se puede editar .
 Specified BOM {0} does not exist for Item {1},Solicitud de Materiales especificado {0} no existe la partida {1}
 Sum of points for all goals should be 100. It is {0},Suma de puntos para todas las metas debe ser 100. Es {0}
-There are more holidays than working days this month.,Hay más vacaciones que días de trabajo este mes.
 Gross Weight UOM,Peso Bruto de la Unidad de Medida,
 Territory Target Variance Item Group-Wise,Variación de Grupo por Territorio Objetivo,
 Item to be manufactured or repacked,Artículo a fabricar o embalados de nuevo,
@@ -863,13 +818,11 @@ Rate at which supplier's currency is converted to company's base currency,Grado 
 Person Name,Nombre de la persona,
 Batch number is mandatory for Item {0},Número de lote es obligatorio para el producto {0}
 Account: {0} can only be updated via Stock Transactions,La cuenta: {0} sólo puede ser actualizada a través de transacciones de inventario,
-Employees Email Id,Empleados Email Id,
 Shortage Qty,Escasez Cantidad,
 Cash Flow,Flujo de Caja,
 Role that is allowed to submit transactions that exceed credit limits set.,Función que esta autorizada a presentar las transacciones que excedan los límites de crédito establecidos .
 {0} valid serial nos for Item {1},{0} No. de serie válidos para el producto {1}
 Default Stock UOM,Unidad de Medida Predeterminada para Inventario,
-Description of a Job Opening,Descripción de una oferta de trabajo,
 Project-wise data is not available for Quotation,El seguimiento preciso del proyecto no está disponible para la cotización--
 Stock Settings,Ajustes de Inventarios,
 Quotation Item,Cotización del artículo,
@@ -935,7 +888,6 @@ Item Code required at Row No {0},Código del producto requerido en la fila No. {
 No of Requested SMS,No. de SMS solicitados,
 Nos,Números,
 Short biography for website and other publications.,Breve biografía de la página web y otras publicaciones.
-Leave of type {0} cannot be longer than {1},Permiso de tipo {0} no puede tener más de {1}
 Sales Browser,Navegador de Ventas,
 Contact Details,Datos del Contacto,
 Warehouse {0} does not belong to company {1},Almacén {0} no pertenece a la empresa {1}
@@ -956,7 +908,6 @@ There was an error. One probable reason could be that you haven't saved the form
 Max discount allowed for item: {0} is {1}%,Descuento máximo permitido para cada elemento: {0} es {1}%
 POS,POS,
 End Date can not be less than Start Date,Fecha Final no puede ser inferior a Fecha de Inicio,
-Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,"Por favor seleccione trasladar, si usted desea incluir los saldos del año fiscal anterior a este año"
 Contact HTML,HTML del Contacto,
 Calculate Based On,Calcular basado en,
 Qty To Manufacture,Cantidad Para Fabricación,
@@ -967,7 +918,6 @@ Row {0}: Credit entry can not be linked with a {1},Fila {0}: Crédito no puede v
 Credit Card,Tarjeta de Crédito,
 Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.,Partidas contables ya han sido realizadas en {0} para la empresa {1}. Por favor seleccione una cuenta por cobrar o pagar con moneda {0}
 Duplicate row {0} with same {1},Duplicar fila {0} con el mismo {1}
-Leave Application,Solicitud de Vacaciones,
 For Supplier,Por proveedor,
 Visit report for maintenance call.,Informe de visita por llamada de mantenimiento .
 Manage Sales Person Tree.,Vista en árbol para la administración de las categoría de vendedores,

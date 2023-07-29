@@ -650,7 +650,7 @@ def set_gl_entries_by_account(
 		if filters and filters.get("presentation_currency") != d.default_currency:
 			currency_info["company"] = d.name
 			currency_info["company_currency"] = d.default_currency
-			convert_to_presentation_currency(gl_entries, currency_info, filters.get("company"))
+			convert_to_presentation_currency(gl_entries, currency_info)
 
 		for entry in gl_entries:
 			if entry.account_number:
@@ -720,7 +720,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
 
 	if ignore_closing_entries:
-		additional_conditions.append("ifnull(gl.voucher_type, '')!='Period Closing Voucher'")
+		additional_conditions.append("gl.voucher_type != 'Period Closing Voucher'")
 
 	if from_date:
 		additional_conditions.append("gl.posting_date >= %(from_date)s")

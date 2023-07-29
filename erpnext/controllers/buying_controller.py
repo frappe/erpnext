@@ -26,6 +26,8 @@ class BuyingController(SubcontractingController):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
 	def validate(self):
+		self.set_rate_for_standalone_debit_note()
+
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
@@ -99,6 +101,30 @@ class BuyingController(SubcontractingController):
 						type_of_transaction="Outward",
 						do_not_submit=True,
 					)
+
+	def set_rate_for_standalone_debit_note(self):
+		if self.get("is_return") and self.get("update_stock") and not self.return_against:
+			for row in self.items:
+
+				# override the rate with valuation rate
+				row.rate = get_incoming_rate(
+					{
+						"item_code": row.item_code,
+						"warehouse": row.warehouse,
+						"posting_date": self.get("posting_date"),
+						"posting_time": self.get("posting_time"),
+						"qty": row.qty,
+						"serial_and_batch_bundle": row.get("serial_and_batch_bundle"),
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+					},
+					raise_error_if_no_rate=False,
+				)
+
+				row.discount_percentage = 0.0
+				row.discount_amount = 0.0
+				row.margin_rate_or_amount = 0.0
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
@@ -411,17 +437,22 @@ class BuyingController(SubcontractingController):
 			# validate rate with ref PR
 
 	def validate_rejected_warehouse(self):
-		for d in self.get("items"):
-			if flt(d.rejected_qty) and not d.rejected_warehouse:
+		for item in self.get("items"):
+			if flt(item.rejected_qty) and not item.rejected_warehouse:
 				if self.rejected_warehouse:
-					d.rejected_warehouse = self.rejected_warehouse
+					item.rejected_warehouse = self.rejected_warehouse
 
-				if not d.rejected_warehouse:
+				if not item.rejected_warehouse:
 					frappe.throw(
-						_("Row #{0}: Rejected Warehouse is mandatory against rejected Item {1}").format(
-							d.idx, d.item_code
+						_("Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}").format(
+							item.idx, item.item_code
 						)
 					)
+
+			if item.get("rejected_warehouse") and (item.get("rejected_warehouse") == item.get("warehouse")):
+				frappe.throw(
+					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
+				)
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
@@ -472,7 +503,7 @@ class BuyingController(SubcontractingController):
 				continue
 
 			if d.warehouse:
-				pr_qty = flt(d.qty) * flt(d.conversion_factor)
+				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 
 				if pr_qty:
 
@@ -548,7 +579,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+							"actual_qty": flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")),
 							"incoming_rate": 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
 						},
