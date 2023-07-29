@@ -167,7 +167,9 @@ def get_leaf_boms() -> List[str]:
 		.select(bom.name)
 		.where((bom.docstatus == 1) & (bom.is_active == 1) & (bom_item.bom_no.isnull()))
 		.distinct()
-	).run(pluck=True)
+	).run(as_list=True)
+
+	boms = [bom[0] for bom in boms]
 
 	return boms
 
