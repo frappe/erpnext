@@ -6,9 +6,10 @@ import os
 from random import randint
 
 import frappe
-from frappe.utils import add_days
+from frappe.utils import add_days, getdate
 
 import erpnext
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
@@ -65,8 +66,7 @@ def create_demo_record(doctype):
 
 
 def make_transactions(company):
-	fiscal_year = frappe.db.get_single_value("Global Defaults", "current_fiscal_year")
-	start_date = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
+	start_date = get_fiscal_year(date=getdate())[1]
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	for doctype in frappe.get_hooks("demo_transaction_doctypes"):
