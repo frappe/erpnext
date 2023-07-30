@@ -65,7 +65,7 @@ frappe.ui.form.on("Purchase Order", {
 	get_materials_from_supplier: function(frm) {
 		let po_details = [];
 
-		if (frm.doc.supplied_items && (frm.doc.per_received == 100 || frm.doc.status === 'Closed')) {
+		if (frm.doc.supplied_items && (flt(frm.doc.per_received, 2) == 100 || frm.doc.status === 'Closed')) {
 			frm.doc.supplied_items.forEach(d => {
 				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
 					po_details.push(d.name)
@@ -184,7 +184,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			}
 
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
-				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
+				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received, 2) < 100 && flt(this.frm.doc.per_billed, 2) < 100) {
 					// Don't add Update Items button if the PO is following the new subcontracting flow.
 					if (!(this.frm.doc.is_subcontracted && !this.frm.doc.is_old_subcontracting_flow)) {
 						this.frm.add_custom_button(__('Update Items'), () => {
@@ -198,7 +198,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 					}
 				}
 				if (this.frm.has_perm("submit")) {
-					if(flt(doc.per_billed, 6) < 100 || flt(doc.per_received, 6) < 100) {
+					if(flt(doc.per_billed, 2) < 100 || flt(doc.per_received, 2) < 100) {
 						if (doc.status != "On Hold") {
 							this.frm.add_custom_button(__('Hold'), () => this.hold_purchase_order(), __("Status"));
 						} else{
@@ -221,7 +221,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			}
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-					if(flt(doc.per_received) < 100 && allow_receipt) {
+					if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
 						if (doc.is_subcontracted) {
 							if (doc.is_old_subcontracting_flow) {
@@ -234,11 +234,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 							}
 						}
 					}
-					if(flt(doc.per_billed) < 100)
+					if(flt(doc.per_billed, 2) < 100)
 						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
 
-					if(flt(doc.per_billed) < 100 && doc.status != "Delivered") {
+					if(flt(doc.per_billed, 2) < 100 && doc.status != "Delivered") {
 						this.frm.add_custom_button(
 							__('Payment'),
 							() => this.make_payment_entry(),
@@ -246,7 +246,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 						);
 					}
 
-					if(flt(doc.per_billed) < 100) {
+					if(flt(doc.per_billed, 2) < 100) {
 						this.frm.add_custom_button(__('Payment Request'),
 							function() { me.make_payment_request() }, __('Create'));
 					}
