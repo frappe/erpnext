@@ -26,6 +26,8 @@ def clear_demo_data():
 	create_transaction_deletion_record(company)
 	clear_masters()
 	delete_company(company)
+	default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+	frappe.db.set_default("company", default_company)
 
 
 def create_demo_company():
