@@ -137,8 +137,7 @@ class AssetMovement(Document):
 			if current_location and current_employee:
 				add_asset_activity(
 					d.asset,
-					_("Asset {0} received at Location {1} and issued to Employee {2}").format(
-						get_link_to_form("Asset", d.asset),
+					_("Asset received at Location {0} and issued to Employee {1}").format(
 						get_link_to_form("Location", current_location),
 						get_link_to_form("Employee", current_employee),
 					),
@@ -146,14 +145,10 @@ class AssetMovement(Document):
 			elif current_location:
 				add_asset_activity(
 					d.asset,
-					_("Asset {0} transferred to Location {1}").format(
-						get_link_to_form("Asset", d.asset), get_link_to_form("Location", current_location)
-					),
+					_("Asset transferred to Location {0}").format(get_link_to_form("Location", current_location)),
 				)
 			elif current_employee:
 				add_asset_activity(
 					d.asset,
-					_("Asset {0} issued to Employee {1}").format(
-						get_link_to_form("Asset", d.asset), get_link_to_form("Employee", current_employee)
-					),
+					_("Asset issued to Employee {0}").format(get_link_to_form("Employee", current_employee)),
 				)

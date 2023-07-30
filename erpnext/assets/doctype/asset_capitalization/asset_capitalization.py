@@ -522,8 +522,8 @@ class AssetCapitalization(StockController):
 
 		add_asset_activity(
 			asset_doc.name,
-			_("Asset {0} created after Asset Capitalization {1} was submitted").format(
-				get_link_to_form("Asset", asset_doc.name), get_link_to_form("Asset Capitalization", self.name)
+			_("Asset created after Asset Capitalization {0} was submitted").format(
+				get_link_to_form("Asset Capitalization", self.name)
 			),
 		)
 
@@ -554,24 +554,24 @@ class AssetCapitalization(StockController):
 				asset.set_status("Capitalized")
 				add_asset_activity(
 					asset.name,
-					_("Asset {0} capitalized after Asset Capitalization {1} was submitted").format(
-						get_link_to_form("Asset", asset.name), get_link_to_form("Asset Capitalization", self.name)
+					_("Asset capitalized after Asset Capitalization {0} was submitted").format(
+						get_link_to_form("Asset Capitalization", self.name)
 					),
 				)
 			else:
 				asset.set_status("Decapitalized")
 				add_asset_activity(
 					asset.name,
-					_("Asset {0} decapitalized after Asset Capitalization {1} was submitted").format(
-						get_link_to_form("Asset", asset.name), get_link_to_form("Asset Capitalization", self.name)
+					_("Asset decapitalized after Asset Capitalization {0} was submitted").format(
+						get_link_to_form("Asset Capitalization", self.name)
 					),
 				)
 		else:
 			asset.set_status()
 			add_asset_activity(
 				asset.name,
-				_("Asset {0} restored after Asset Capitalization {1} was cancelled").format(
-					get_link_to_form("Asset", asset.name), get_link_to_form("Asset Capitalization", self.name)
+				_("Asset restored after Asset Capitalization {0} was cancelled").format(
+					get_link_to_form("Asset Capitalization", self.name)
 				),
 			)
 

@@ -30,8 +30,8 @@ class AssetValueAdjustment(Document):
 		self.reschedule_depreciations(self.new_asset_value)
 		add_asset_activity(
 			self.asset,
-			_("Asset {0}'s value adjusted after submission of Asset Value Adjustment {1}").format(
-				get_link_to_form("Asset", self.asset), get_link_to_form("Asset Value Adjustment", self.name)
+			_("Asset's value adjusted after submission of Asset Value Adjustment {0}").format(
+				get_link_to_form("Asset Value Adjustment", self.name)
 			),
 		)
 
@@ -39,8 +39,8 @@ class AssetValueAdjustment(Document):
 		self.reschedule_depreciations(self.current_asset_value)
 		add_asset_activity(
 			self.asset,
-			_("Asset {0}'s value adjusted after cancellation of Asset Value Adjustment {1}").format(
-				get_link_to_form("Asset", self.asset), get_link_to_form("Asset Value Adjustment", self.name)
+			_("Asset's value adjusted after cancellation of Asset Value Adjustment {0}").format(
+				get_link_to_form("Asset Value Adjustment", self.name)
 			),
 		)
 

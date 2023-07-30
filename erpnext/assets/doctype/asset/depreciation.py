@@ -326,9 +326,7 @@ def scrap_asset(asset_name):
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
 	asset.set_status("Scrapped")
 
-	add_asset_activity(
-		asset_name, _("Asset {0} scrapped").format(get_link_to_form("Asset", asset_name))
-	)
+	add_asset_activity(asset_name, _("Asset scrapped"))
 
 	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
 
@@ -354,9 +352,7 @@ def restore_asset(asset_name):
 
 	asset.set_status()
 
-	add_asset_activity(
-		asset_name, _("Asset {0} restored").format(get_link_to_form("Asset", asset_name))
-	)
+	add_asset_activity(asset_name, _("Asset restored"))
 
 
 def depreciate_asset(asset_doc, date, notes):

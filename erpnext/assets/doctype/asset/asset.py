@@ -72,9 +72,7 @@ class Asset(AccountsController):
 						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 					).format(asset_depr_schedules_links)
 				)
-		add_asset_activity(
-			self.name, _("Asset {0} submitted").format(get_link_to_form("Asset", self.name))
-		)
+		add_asset_activity(self.name, _("Asset submitted"))
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -85,9 +83,7 @@ class Asset(AccountsController):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 		self.db_set("booked_fixed_asset", 0)
-		add_asset_activity(
-			self.name, _("Asset {0} cancelled").format(get_link_to_form("Asset", self.name))
-		)
+		add_asset_activity(self.name, _("Asset cancelled"))
 
 	def after_insert(self):
 		if self.calculate_depreciation and not self.split_from:
@@ -106,14 +102,10 @@ class Asset(AccountsController):
 				"asset": self.name,
 			}
 		):
-			add_asset_activity(
-				self.name, _("Asset {0} created").format(get_link_to_form("Asset", self.name))
-			)
+			add_asset_activity(self.name, _("Asset created"))
 
 	def after_delete(self):
-		add_asset_activity(
-			self.name, _("Asset {0} deleted").format(get_link_to_form("Asset", self.name))
-		)
+		add_asset_activity(self.name, _("Asset deleted"))
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -921,8 +913,8 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 
 	add_asset_activity(
 		asset.name,
-		_("Asset {0} updated after being split into Asset {1}").format(
-			get_link_to_form("Asset", asset.name), get_link_to_form("Asset", new_asset_name)
+		_("Asset updated after being split into Asset {0}").format(
+			get_link_to_form("Asset", new_asset_name)
 		),
 	)
 
@@ -997,8 +989,8 @@ def create_new_asset_after_split(asset, split_qty):
 
 	add_asset_activity(
 		new_asset.name,
-		_("Asset {0} created after being split from Asset {1}").format(
-			get_link_to_form("Asset", new_asset.name), get_link_to_form("Asset", asset.name)
+		_("Asset created after being split from Asset {0}").format(
+			get_link_to_form("Asset", asset.name)
 		),
 	)
 

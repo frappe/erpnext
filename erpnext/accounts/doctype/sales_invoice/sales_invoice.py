@@ -1177,9 +1177,7 @@ class SalesInvoice(SellingController):
 							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", None)
-						add_asset_activity(
-							asset.name, _("Asset {0} returned").format(get_link_to_form("Asset", asset.name))
-						)
+						add_asset_activity(asset.name, _("Asset returned"))
 
 						if asset.calculate_depreciation:
 							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
@@ -1213,9 +1211,7 @@ class SalesInvoice(SellingController):
 							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", self.posting_date)
-						add_asset_activity(
-							asset.name, _("Asset {0} sold").format(get_link_to_form("Asset", asset.name))
-						)
+						add_asset_activity(asset.name, _("Asset sold"))
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer

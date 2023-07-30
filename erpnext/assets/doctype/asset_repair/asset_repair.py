@@ -30,8 +30,8 @@ class AssetRepair(AccountsController):
 			frappe.db.set_value("Asset", self.asset, "status", "Out of Order")
 			add_asset_activity(
 				self.asset,
-				_("Asset {0} out of order due to Asset Repair {1}").format(
-					get_link_to_form("Asset", self.asset), get_link_to_form("Asset Repair", self.name)
+				_("Asset out of order due to Asset Repair {0}").format(
+					get_link_to_form("Asset Repair", self.name)
 				),
 			)
 		else:
@@ -77,8 +77,8 @@ class AssetRepair(AccountsController):
 
 			add_asset_activity(
 				self.asset,
-				_("Asset {0} updated after completion of Asset Repair {1}").format(
-					get_link_to_form("Asset", self.asset), get_link_to_form("Asset Repair", self.name)
+				_("Asset updated after completion of Asset Repair {0}").format(
+					get_link_to_form("Asset Repair", self.name)
 				),
 			)
 
@@ -111,8 +111,8 @@ class AssetRepair(AccountsController):
 
 			add_asset_activity(
 				self.asset,
-				_("Asset {0} updated after cancellation of Asset Repair {1}").format(
-					get_link_to_form("Asset", self.asset), get_link_to_form("Asset Repair", self.name)
+				_("Asset updated after cancellation of Asset Repair {0}").format(
+					get_link_to_form("Asset Repair", self.name)
 				),
 			)
 
