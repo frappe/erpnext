@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "account_name",
-  "account",
   "bank",
   "account_type",
   "account_subtype",
@@ -16,6 +15,7 @@
   "is_default",
   "is_company_account",
   "company",
+  "account",
   "section_break_11",
   "party_type",
   "column_break_14",
@@ -47,11 +47,14 @@
   },
   {
    "depends_on": "is_company_account",
+   "description": "Connect to a GL account to allow for Bank Reconciliation.",
    "fieldname": "account",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Company Account",
-   "options": "Account"
+   "label": "Connected GL Account",
+   "mandatory_depends_on": "is_company_account",
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "bank",
@@ -85,7 +88,7 @@
   },
   {
    "default": "0",
-   "description": "Setting the account as a Company Account is necessary for Bank Reconciliation",
+   "description": "Enable if this is your company\u2018s bank account.",
    "fieldname": "is_company_account",
    "fieldtype": "Check",
    "label": "Is Company Account"
@@ -97,7 +100,9 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company"
+   "mandatory_depends_on": "is_company_account",
+   "options": "Company",
+   "reqd": 1
   },
   {
    "depends_on": "eval:!doc.is_company_account",
@@ -202,7 +207,7 @@
   }
  ],
  "links": [],
- "modified": "2022-05-04 15:49:42.620630",
+ "modified": "2023-07-30 12:46:52.787769",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

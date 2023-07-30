@@ -1,0 +1,280 @@
+diff --git a/erpnext/accounts/doctype/account/account.json b/erpnext/accounts/doctype/account/account.json
+index e79fb66062..c2a9dc4d69 100644
+--- a/erpnext/accounts/doctype/account/account.json
++++ b/erpnext/accounts/doctype/account/account.json
+@@ -134,7 +134,7 @@
+    "oldfieldtype": "Currency"
+   },
+   {
+-   "description": "If the account is frozen, entries are allowed to restricted users.",
++   "description": "If the account is frozen, entries aren\u2018t allowed to restricted users.",
+    "fieldname": "freeze_account",
+    "fieldtype": "Select",
+    "label": "Frozen",
+@@ -192,7 +192,7 @@
+  "idx": 1,
+  "is_tree": 1,
+  "links": [],
+- "modified": "2023-04-11 16:08:46.983677",
++ "modified": "2023-07-29 18:29:36.193067",
+  "modified_by": "Administrator",
+  "module": "Accounts",
+  "name": "Account",
+@@ -243,7 +243,6 @@
+    "read": 1,
+    "report": 1,
+    "role": "Accounts Manager",
+-   "set_user_permissions": 1,
+    "share": 1,
+    "write": 1
+   }
+diff --git a/erpnext/accounts/doctype/accounting_period/accounting_period.py b/erpnext/accounts/doctype/accounting_period/accounting_period.py
+index d5f37a6806..0a84fcb64f 100644
+--- a/erpnext/accounts/doctype/accounting_period/accounting_period.py
++++ b/erpnext/accounts/doctype/accounting_period/accounting_period.py
+@@ -23,8 +23,9 @@ class AccountingPeriod(Document):
+ 		self.bootstrap_doctypes_for_closing()
+ 
+ 	def autoname(self):
+-		company_abbr = frappe.get_cached_value("Company", self.company, "abbr")
+-		self.name = " - ".join([self.period_name, company_abbr])
++		self.name = self.period_name
++		if (company_abbr := frappe.get_cached_value("Company", self.company, "abbr")):
++			self.name += " - " + company_abbr
+ 
+ 	def validate_overlap(self):
+ 		existing_accounting_period = frappe.db.sql(
+diff --git a/erpnext/accounts/doctype/bank_account/bank_account.py b/erpnext/accounts/doctype/bank_account/bank_account.py
+index 363a2776aa..85d7e83561 100644
+--- a/erpnext/accounts/doctype/bank_account/bank_account.py
++++ b/erpnext/accounts/doctype/bank_account/bank_account.py
+@@ -10,6 +10,7 @@ from frappe.contacts.address_and_contact import (
+ )
+ from frappe.model.document import Document
+ 
++from schwifty import IBAN
+ 
+ class BankAccount(Document):
+ 	def onload(self):
+@@ -38,6 +39,12 @@ class BankAccount(Document):
+ 		if not self.iban:
+ 			return
+ 
++		try:
++			iban = IBAN(self.iban, validate_bban=True)
++			self.bank_account_no = iban.bic.formatted
++		except:
++			frappe.throw(_("Check failed."))
++
+ 		def encode_char(c):
+ 			# Position in the alphabet (A=1, B=2, ...) plus nine
+ 			return str(9 + ord(c) - 64)
+diff --git a/erpnext/accounts/doctype/item_tax_template/item_tax_template.py b/erpnext/accounts/doctype/item_tax_template/item_tax_template.py
+index 7e2fca8d24..998274b630 100644
+--- a/erpnext/accounts/doctype/item_tax_template/item_tax_template.py
++++ b/erpnext/accounts/doctype/item_tax_template/item_tax_template.py
+@@ -13,8 +13,9 @@ class ItemTaxTemplate(Document):
+ 
+ 	def autoname(self):
+ 		if self.company and self.title:
+-			abbr = frappe.get_cached_value("Company", self.company, "abbr")
+-			self.name = "{0} - {1}".format(self.title, abbr)
++			self.name = self.title
++			if (company_abbr := frappe.get_cached_value("Company", self.company, "abbr")):
++				self.name += " - " + company_abbr
+ 
+ 	def validate_tax_accounts(self):
+ 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
+diff --git a/erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.py b/erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.py
+index 70d29bfda2..13467fd2aa 100644
+--- a/erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.py
++++ b/erpnext/accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.py
+@@ -16,5 +16,6 @@ class PurchaseTaxesandChargesTemplate(Document):
+ 
+ 	def autoname(self):
+ 		if self.company and self.title:
+-			abbr = frappe.get_cached_value("Company", self.company, "abbr")
+-			self.name = "{0} - {1}".format(self.title, abbr)
++			self.name = self.title
++			if (company_abbr := frappe.get_cached_value("Company", self.company, "abbr")):
++				self.name += " - " + company_abbr
+diff --git a/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py b/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py
+index a3a5d627b7..380168a115 100644
+--- a/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py
++++ b/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py
+@@ -21,8 +21,9 @@ class SalesTaxesandChargesTemplate(Document):
+ 
+ 	def autoname(self):
+ 		if self.company and self.title:
+-			abbr = frappe.get_cached_value("Company", self.company, "abbr")
+-			self.name = "{0} - {1}".format(self.title, abbr)
++			self.name = self.title
++			if (company_abbr := frappe.get_cached_value("Company", self.company, "abbr")):
++				self.name += " - " + company_abbr
+ 
+ 	def set_missing_values(self):
+ 		for data in self.taxes:
+diff --git a/erpnext/accounts/utils.py b/erpnext/accounts/utils.py
+index ae0a279b6d..8578f9cfe0 100644
+--- a/erpnext/accounts/utils.py
++++ b/erpnext/accounts/utils.py
+@@ -1105,12 +1105,15 @@ def validate_field_number(doctype_name, docname, number_value, company, field_na
+ 
+ def get_autoname_with_number(number_value, doc_title, company):
+ 	"""append title with prefix as number and suffix as company's abbreviation separated by '-'"""
+-	company_abbr = frappe.get_cached_value("Company", company, "abbr")
+-	parts = [doc_title.strip(), company_abbr]
++	parts = [doc_title.strip()]
+ 
+ 	if cstr(number_value).strip():
+ 		parts.insert(0, cstr(number_value).strip())
+ 
++	company_abbr = frappe.get_cached_value("Company", company, "abbr")
++	if company_abbr:
++		parts.append(company_abbr)
++
+ 	return " - ".join(parts)
+ 
+ 
+diff --git a/erpnext/modules.txt b/erpnext/modules.txt
+index dcb421298d..87648521ef 100644
+--- a/erpnext/modules.txt
++++ b/erpnext/modules.txt
+@@ -5,7 +5,6 @@ Projects
+ Selling
+ Setup
+ Manufacturing
+-Stock
+ Support
+ Utilities
+ Assets
+diff --git a/erpnext/setup/doctype/company/company.js b/erpnext/setup/doctype/company/company.js
+index f4682c1b80..3869d0d4f6 100644
+--- a/erpnext/setup/doctype/company/company.js
++++ b/erpnext/setup/doctype/company/company.js
+@@ -38,7 +38,7 @@ frappe.ui.form.on("Company", {
+ 			return {
+ 				filters:{
+ 					'warehouse_type' : 'Transit',
+-					'is_group': 0,
++						'is_group': 0,
+ 					'company': frm.doc.company
+ 				}
+ 			};
+@@ -77,7 +77,7 @@ frappe.ui.form.on("Company", {
+ 		frm.toggle_display('address_html', !frm.is_new());
+ 
+ 		if (!frm.is_new()) {
+-			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
++		//	frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
+ 			disbale_coa_fields(frm);
+ 			frappe.contacts.render_address_and_contact(frm);
+ 
+diff --git a/erpnext/setup/doctype/company/company.json b/erpnext/setup/doctype/company/company.json
+index ed2852e87a..1bca25ca28 100644
+--- a/erpnext/setup/doctype/company/company.json
++++ b/erpnext/setup/doctype/company/company.json
+@@ -38,7 +38,6 @@
+   "existing_company",
+   "column_break_26",
+   "chart_of_accounts",
+-  "charts_section",
+   "sales_settings",
+   "default_buying_terms",
+   "sales_monthly_history",
+@@ -128,8 +127,7 @@
+    "label": "Abbr",
+    "oldfieldname": "abbr",
+    "oldfieldtype": "Data",
+-   "reqd": 1,
+-   "set_only_once": 1
++   "unique": 1
+   },
+   {
+    "bold": 1,
+@@ -211,11 +209,6 @@
+    "options": "default_currency",
+    "read_only": 1
+   },
+-  {
+-   "fieldname": "charts_section",
+-   "fieldtype": "Section Break",
+-   "label": "Default Values"
+-  },
+   {
+    "fieldname": "default_currency",
+    "fieldtype": "Link",
+@@ -765,7 +758,7 @@
+  "image_field": "company_logo",
+  "is_tree": 1,
+  "links": [],
+- "modified": "2023-07-07 05:41:41.537256",
++ "modified": "2023-07-29 18:03:52.155439",
+  "modified_by": "Administrator",
+  "module": "Setup",
+  "name": "Company",
+diff --git a/erpnext/setup/doctype/company/company.py b/erpnext/setup/doctype/company/company.py
+index fcdf245659..338c2f1352 100644
+--- a/erpnext/setup/doctype/company/company.py
++++ b/erpnext/setup/doctype/company/company.py
+@@ -65,18 +65,19 @@ class Company(NestedSet):
+ 		self.validate_parent_company()
+ 
+ 	def validate_abbr(self):
+-		if not self.abbr:
+-			self.abbr = "".join(c[0] for c in self.company_name.split()).upper()
++		# if not self.abbr :
++		# 	self.abbr = "".join(c[0] for c in self.company_name.split()).upper()
+ 
+-		self.abbr = self.abbr.strip()
++		# self.abbr = self.abbr.strip()
+ 
+-		if not self.abbr.strip():
+-			frappe.throw(_("Abbreviation is mandatory"))
++		# if not self.abbr.strip():
++		#	frappe.throw(_("Abbreviation is mandatory"))
+ 
+-		if frappe.db.sql(
+-			"select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)
+-		):
+-			frappe.throw(_("Abbreviation already used for another company"))
++		# if frappe.db.sql(
++		#	"select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)
++		# ):
++		# 	frappe.throw(_("Abbreviation already used for another company"))
++		self.abbr = self.abbr or ""
+ 
+ 	@frappe.whitelist()
+ 	def create_default_tax_template(self):
+@@ -503,7 +504,8 @@ class Company(NestedSet):
+ 		clear_defaults_cache()
+ 
+ 	def abbreviate(self):
+-		self.abbr = "".join(c[0].upper() for c in self.company_name.split())
++		# self.abbr = "".join(c[0].upper() for c in self.company_name.split())
++		self.abbr = self.abbr or ""
+ 
+ 	def on_trash(self):
+ 		"""
+diff --git a/erpnext/stock/doctype/warehouse/warehouse.py b/erpnext/stock/doctype/warehouse/warehouse.py
+index 430a8d17e0..1d55254683 100644
+--- a/erpnext/stock/doctype/warehouse/warehouse.py
++++ b/erpnext/stock/doctype/warehouse/warehouse.py
+@@ -16,13 +16,11 @@ class Warehouse(NestedSet):
+ 	nsm_parent_field = "parent_warehouse"
+ 
+ 	def autoname(self):
+-		if self.company:
+-			suffix = " - " + frappe.get_cached_value("Company", self.company, "abbr")
+-			if not self.warehouse_name.endswith(suffix):
+-				self.name = self.warehouse_name + suffix
+-				return
+-
+ 		self.name = self.warehouse_name
++		if self.company and (abbr := frappe.get_cached_value("Company", self.company, "abbr")):
++			suffix = " - " + abbr
++			if not self.warehouse_name.endswith(suffix):
++				self.name += suffix
+ 
+ 	def onload(self):
+ 		"""load account name for General Ledger Report"""

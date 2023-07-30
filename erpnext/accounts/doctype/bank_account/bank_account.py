@@ -26,10 +26,6 @@ class BankAccount(Document):
 		self.validate_company()
 		self.validate_iban()
 
-	def validate_company(self):
-		if self.is_company_account and not self.company:
-			frappe.throw(_("Company is manadatory for company account"))
-
 	def validate_iban(self):
 		"""
 		Algorithm: https://en.wikipedia.org/wiki/International_Bank_Account_Number#Validating_the_IBAN
