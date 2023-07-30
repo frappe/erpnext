@@ -100,6 +100,20 @@ class Asset(AccountsController):
 					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 				).format(asset_depr_schedules_links)
 			)
+		if not frappe.db.exists(
+			{
+				"doctype": "Asset Activity",
+				"asset": self.name,
+			}
+		):
+			add_asset_activity(
+				self.name, _("Asset {0} created").format(get_link_to_form("Asset", self.name))
+			)
+
+	def after_delete(self):
+		add_asset_activity(
+			self.name, _("Asset {0} deleted").format(get_link_to_form("Asset", self.name))
+		)
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:

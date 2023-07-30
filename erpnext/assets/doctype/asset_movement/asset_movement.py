@@ -131,8 +131,8 @@ class AssetMovement(Document):
 				current_location = latest_movement_entry[0][0]
 				current_employee = latest_movement_entry[0][1]
 
-			frappe.db.set_value("Asset", d.asset, "location", current_location)
-			frappe.db.set_value("Asset", d.asset, "custodian", current_employee)
+			frappe.db.set_value("Asset", d.asset, "location", current_location, update_modified=False)
+			frappe.db.set_value("Asset", d.asset, "custodian", current_employee, update_modified=False)
 
 			if current_location and current_employee:
 				add_asset_activity(
