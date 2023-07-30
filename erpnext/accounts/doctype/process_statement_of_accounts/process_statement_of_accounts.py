@@ -138,7 +138,7 @@ def get_gl_filters(doc, entry, tax_id, presentation_currency):
 def get_ar_filters(doc, entry):
 	return {
 		"report_date": doc.posting_date if doc.posting_date else None,
-		"customer_name": entry.customer,
+		"customer": entry.customer,
 		"payment_terms_template": doc.payment_terms_template if doc.payment_terms_template else None,
 		"sales_partner": doc.sales_partner if doc.sales_partner else None,
 		"sales_person": doc.sales_person if doc.sales_person else None,
