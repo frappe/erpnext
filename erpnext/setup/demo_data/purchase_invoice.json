@@ -25,8 +25,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU002",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 50.0,
+                "rate": 300.0,
                 "conversion_factor": 1
             }
         ]
@@ -41,8 +41,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU003",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 75.0,
+                "rate": 523.0,
                 "conversion_factor": 1
             }
         ]
@@ -57,8 +57,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU004",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 60.0,
+                "rate": 725.0,
                 "conversion_factor": 1
             }
         ]
@@ -73,8 +73,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU005",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 82.0,
+                "rate": 222.0,
                 "conversion_factor": 1
             }
         ]
@@ -89,8 +89,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU006",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 50.0,
+                "rate": 420.0,
                 "conversion_factor": 1
             }
         ]
@@ -105,8 +105,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU007",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 90.0,
+                "rate": 375.0,
                 "conversion_factor": 1
             }
         ]
@@ -121,8 +121,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU008",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 121.0,
+                "rate": 333.0,
                 "conversion_factor": 1
             }
         ]
@@ -137,8 +137,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU009",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 76.0,
+                "rate": 700.0,
                 "conversion_factor": 1
             }
         ]
@@ -153,8 +153,8 @@
                 "doctype": "Purchase Invoice Item",
                 "item_code": "SKU010",
                 "parentfield": "items",
-                "qty": 100.0,
-                "rate": 400.0,
+                "qty": 78.0,
+                "rate": 500.0,
                 "conversion_factor": 1
             }
         ]
