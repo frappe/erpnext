@@ -194,7 +194,7 @@ class Customer(TransactionBase):
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display
 
-		if self.flags.is_new_doc and self.get("address_line1"):
+		if self.flags.is_new_doc and self.get("city"):
 			address = make_address(self)
 			address_display = get_address_display(address.name)
 
