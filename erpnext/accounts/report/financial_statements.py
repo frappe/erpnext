@@ -423,15 +423,23 @@ def set_gl_entries_by_account(
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
+	account_filters = {
+		"company": company,
+		"is_group": 0,
+		"lft": (">=", root_lft),
+		"rgt": ("<=", root_rgt),
+	}
+
+	if root_type:
+		account_filters.update(
+			{
+				"root_type": root_type,
+			}
+		)
+
 	accounts_list = frappe.db.get_all(
 		"Account",
-		filters={
-			"company": company,
-			"is_group": 0,
-			"lft": (">=", root_lft),
-			"rgt": ("<=", root_rgt),
-			"root_type": root_type,
-		},
+		filters=account_filters,
 		pluck="name",
 	)
 
