@@ -172,9 +172,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0; });
 
-			if (!this.discount_amount_applied && cur_frm) {
-				cur_frm.cscript.validate_taxes_and_charges(tax.doctype, tax.name);
-				me.validate_inclusive_tax(tax);
+			if (!this.discount_amount_applied) {
+				erpnext.accounts.taxes.validate_taxes_and_charges(tax.doctype, tax.name);
+				erpnext.accounts.taxes.validate_inclusive_tax(tax);
 			}
 			frappe.model.round_floats_in(tax);
 		});

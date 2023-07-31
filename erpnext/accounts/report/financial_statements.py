@@ -445,11 +445,17 @@ def set_gl_entries_by_account(
 
 	if accounts_list:
 		# For balance sheet
-		if not from_date:
-			from_date = filters["period_start_date"]
+		ignore_closing_balances = frappe.db.get_single_value(
+			"Accounts Settings", "ignore_account_closing_balance"
+		)
+		if not from_date and not ignore_closing_balances:
 			last_period_closing_voucher = frappe.db.get_all(
 				"Period Closing Voucher",
-				filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", from_date)},
+				filters={
+					"docstatus": 1,
+					"company": filters.company,
+					"posting_date": ("<", filters["period_start_date"]),
+				},
 				fields=["posting_date", "name"],
 				order_by="posting_date desc",
 				limit=1,

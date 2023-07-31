@@ -358,6 +358,8 @@ def update_args_in_repost_item_valuation(
 			"current_index": index,
 			"total_reposting_count": len(args),
 		},
+		doctype=doc.doctype,
+		docname=doc.name,
 	)
 
 
