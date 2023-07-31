@@ -35,7 +35,7 @@
  ],
  "fields": [
   {
-   "default": "Customer Name",
+   "default": "Auto Name",
    "fieldname": "cust_master_name",
    "fieldtype": "Select",
    "in_list_view": 1,

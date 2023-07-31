@@ -40,7 +40,7 @@ def set_default_settings(args):
 	stock_settings.save()
 
 	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.cust_master_name = "Customer Name"
+	selling_settings.cust_master_name = "Auto Name"
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
 	selling_settings.allow_multiple_items = 1
@@ -48,7 +48,7 @@ def set_default_settings(args):
 	selling_settings.save()
 
 	buying_settings = frappe.get_doc("Buying Settings")
-	buying_settings.supp_master_name = "Supplier Name"
+	buying_settings.supp_master_name = "Auto Name"
 	buying_settings.po_required = "No"
 	buying_settings.pr_required = "No"
 	buying_settings.maintain_same_rate = 1
