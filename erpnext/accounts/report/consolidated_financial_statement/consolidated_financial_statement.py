@@ -6,7 +6,12 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.utils import cint, flt, getdate
+=======
+from frappe.query_builder import Criterion
+from frappe.utils import flt, getdate
+>>>>>>> 11bd15e580 (fix: root type in account map for balance sheet (#36303))
 
 import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
@@ -364,6 +369,7 @@ def get_data(
 			accounts_by_name,
 			accounts,
 			ignore_closing_entries=False,
+			root_type=root_type,
 		)
 
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year)
@@ -608,6 +614,7 @@ def set_gl_entries_by_account(
 	accounts_by_name,
 	accounts,
 	ignore_closing_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
@@ -615,7 +622,6 @@ def set_gl_entries_by_account(
 		"Company", filters.get("company"), ["lft", "rgt"]
 	)
 
-	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 	companies = frappe.db.sql(
 		""" select name, default_currency from `tabCompany`
 		where lft >= %(company_lft)s and rgt <= %(company_rgt)s""",
@@ -631,6 +637,7 @@ def set_gl_entries_by_account(
 	)
 
 	for d in companies:
+<<<<<<< HEAD
 		gl_entries = frappe.db.sql(
 			"""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
 			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
@@ -650,7 +657,43 @@ def set_gl_entries_by_account(
 				"company_fb": frappe.db.get_value("Company", d.name, "default_finance_book"),
 			},
 			as_dict=True,
+=======
+		gle = frappe.qb.DocType("GL Entry")
+		account = frappe.qb.DocType("Account")
+		query = (
+			frappe.qb.from_(gle)
+			.inner_join(account)
+			.on(account.name == gle.account)
+			.select(
+				gle.posting_date,
+				gle.account,
+				gle.debit,
+				gle.credit,
+				gle.is_opening,
+				gle.company,
+				gle.fiscal_year,
+				gle.debit_in_account_currency,
+				gle.credit_in_account_currency,
+				gle.account_currency,
+				account.account_name,
+				account.account_number,
+			)
+			.where(
+				(gle.company == d.name)
+				& (gle.is_cancelled == 0)
+				& (gle.posting_date <= to_date)
+				& (account.lft >= root_lft)
+				& (account.rgt <= root_rgt)
+				& (account.root_type <= root_type)
+			)
+			.orderby(gle.account, gle.posting_date)
+>>>>>>> 11bd15e580 (fix: root type in account map for balance sheet (#36303))
 		)
+
+		additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters, d)
+		if additional_conditions:
+			query = query.where(Criterion.all(additional_conditions))
+		gl_entries = query.run(as_dict=True)
 
 		if filters and filters.get("presentation_currency") != d.default_currency:
 			currency_info["company"] = d.name
@@ -721,23 +764,29 @@ def validate_entries(key, entry, accounts_by_name, accounts):
 		accounts.insert(idx + 1, args)
 
 
-def get_additional_conditions(from_date, ignore_closing_entries, filters):
+def get_additional_conditions(from_date, ignore_closing_entries, filters, d):
+	gle = frappe.qb.DocType("GL Entry")
 	additional_conditions = []
 
 	if ignore_closing_entries:
+<<<<<<< HEAD
 		additional_conditions.append("ifnull(gl.voucher_type, '')!='Period Closing Voucher'")
+=======
+		additional_conditions.append((gle.voucher_type != "Period Closing Voucher"))
+>>>>>>> 11bd15e580 (fix: root type in account map for balance sheet (#36303))
 
 	if from_date:
-		additional_conditions.append("gl.posting_date >= %(from_date)s")
+		additional_conditions.append(gle.posting_date >= from_date)
+
+	finance_book = filters.get("finance_book")
+	company_fb = frappe.get_cached_value("Company", d.name, "default_finance_book")
 
 	if filters.get("include_default_book_entries"):
-		additional_conditions.append(
-			"(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
-		)
+		additional_conditions.append((gle.finance_book.isin([finance_book, company_fb, "", None])))
 	else:
-		additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
+		additional_conditions.append((gle.finance_book.isin([finance_book, "", None])))
 
-	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
+	return additional_conditions
 
 
 def add_total_row(out, root_type, balance_must_be, companies, company_currency):
