@@ -52,7 +52,7 @@ frappe.ui.form.on("Sales Order", {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1) {
-			if (frm.doc.status !== 'Closed' && flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
+			if (frm.doc.status !== 'Closed' && flt(frm.doc.per_delivered, 2) < 100 && flt(frm.doc.per_billed, 2) < 100) {
 				frm.add_custom_button(__('Update Items'), () => {
 					erpnext.utils.update_child_items({
 						frm: frm,
@@ -309,7 +309,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					   me.frm.cscript.update_status('Resume', 'Draft')
 				   }, __("Status"));
 
-				   if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+				   if(flt(doc.per_delivered, 2) < 100 || flt(doc.per_billed, 2) < 100) {
 					   // close
 					   this.frm.add_custom_button(__('Close'), () => this.close_sales_order(), __("Status"))
 				   }
@@ -327,7 +327,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						&& !this.frm.doc.skip_delivery_note
 
 					if (this.frm.has_perm("submit")) {
-						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+						if(flt(doc.per_delivered, 2) < 100 || flt(doc.per_billed, 2) < 100) {
 							// hold
 							this.frm.add_custom_button(__('Hold'), () => this.hold_sales_order(), __("Status"))
 							// close
@@ -335,7 +335,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						}
 					}
 
-					if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
+					if (flt(doc.per_picked, 2) < 100 && flt(doc.per_delivered, 2) < 100) {
 						this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
 					}
 
@@ -345,18 +345,18 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					const order_is_a_custom_sale = ["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					// delivery note
-					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
+					if(flt(doc.per_delivered, 2) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
 					// sales invoice
-					if(flt(doc.per_billed, 6) < 100) {
+					if(flt(doc.per_billed, 2) < 100) {
 						this.frm.add_custom_button(__('Sales Invoice'), () => me.make_sales_invoice(), __('Create'));
 					}
 
 					// material request
-					if(!doc.order_type || (order_is_a_sale || order_is_a_custom_sale) && flt(doc.per_delivered, 6) < 100) {
+					if(!doc.order_type || (order_is_a_sale || order_is_a_custom_sale) && flt(doc.per_delivered, 2) < 100) {
 						this.frm.add_custom_button(__('Material Request'), () => this.make_material_request(), __('Create'));
 						this.frm.add_custom_button(__('Request for Raw Materials'), () => this.make_raw_material_request(), __('Create'));
 					}
