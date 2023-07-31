@@ -57,13 +57,42 @@ class RepostAccountingLedger(Document):
 					)
 				)
 
-	def show_preview(self):
+	def generate_preview(self):
+		self.gl_entries = []
 		for x in self.vouchers:
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
 				gle_map = doc.build_gl_map()
 			else:
 				gle_map = doc.get_gl_entries()
+
+			# add empty row
+			self.gl_entries.append(gle_map + [])
+
+	def format_preview(self):
+		from erpnext.accounts.report.general_ledger.general_ledger import get_columns
+		from erpnext.controllers.stock_controller import get_columns, get_data
+
+		if self.gl_entries:
+			fields = [
+				"posting_date",
+				"account",
+				"debit",
+				"credit",
+				"against",
+				"party",
+				"party_type",
+				"cost_center",
+				"against_voucher_type",
+				"against_voucher",
+			]
+
+			filters = {"company": self.company}
+			columns = get_columns(filters)
+			data = self.gl_entries
+
+			gl_columns = get_columns(columns, fields)
+			gl_data = get_data(fields, self.gl_entries)
 
 	def on_submit(self):
 		job_name = "repost_accounting_ledger_" + self.name
