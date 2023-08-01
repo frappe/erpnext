@@ -6,12 +6,8 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.utils import cint, flt, getdate
-=======
 from frappe.query_builder import Criterion
-from frappe.utils import flt, getdate
->>>>>>> 11bd15e580 (fix: root type in account map for balance sheet (#36303))
+from frappe.utils import cint, flt, getdate
 
 import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
@@ -637,27 +633,6 @@ def set_gl_entries_by_account(
 	)
 
 	for d in companies:
-<<<<<<< HEAD
-		gl_entries = frappe.db.sql(
-			"""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
-			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
-			acc.account_name, acc.account_number
-			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
-			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
-			order by gl.account, gl.posting_date""".format(
-				additional_conditions=additional_conditions
-			),
-			{
-				"from_date": from_date,
-				"to_date": to_date,
-				"lft": root_lft,
-				"rgt": root_rgt,
-				"company": d.name,
-				"finance_book": filters.get("finance_book"),
-				"company_fb": frappe.db.get_value("Company", d.name, "default_finance_book"),
-			},
-			as_dict=True,
-=======
 		gle = frappe.qb.DocType("GL Entry")
 		account = frappe.qb.DocType("Account")
 		query = (
@@ -687,7 +662,6 @@ def set_gl_entries_by_account(
 				& (account.root_type <= root_type)
 			)
 			.orderby(gle.account, gle.posting_date)
->>>>>>> 11bd15e580 (fix: root type in account map for balance sheet (#36303))
 		)
 
 		additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters, d)
@@ -769,11 +743,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters, d):
 	additional_conditions = []
 
 	if ignore_closing_entries:
-<<<<<<< HEAD
-		additional_conditions.append("ifnull(gl.voucher_type, '')!='Period Closing Voucher'")
-=======
 		additional_conditions.append((gle.voucher_type != "Period Closing Voucher"))
->>>>>>> 11bd15e580 (fix: root type in account map for balance sheet (#36303))
 
 	if from_date:
 		additional_conditions.append(gle.posting_date >= from_date)
