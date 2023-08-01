@@ -209,30 +209,6 @@ frappe.ui.form.on('Asset', {
 	render_depreciation_schedule_view: function(frm, depr_schedule) {
 		let wrapper = $(frm.fields_dict["depreciation_schedule_view"].wrapper).empty();
 
-		let table = $(`<table class="table table-bordered" style="margin-top:0px;">
-			<thead>
-				<tr>
-					<td align="center">${__("No.")}</td>
-					<td>${__("Schedule Date")}</td>
-					<td align="right">${__("Depreciation Amount")}</td>
-					<td align="right">${__("Accumulated Depreciation Amount")}</td>
-					<td>${__("Journal Entry")}</td>
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>`);
-
-		depr_schedule.forEach((sch) => {
-			const row = $(`<tr>
-				<td align="center">${sch['idx']}</td>
-				<td><b>${frappe.format(sch['schedule_date'], { fieldtype: 'Date' })}</b></td>
-				<td><b>${frappe.format(sch['depreciation_amount'], { fieldtype: 'Currency' })}</b></td>
-				<td>${frappe.format(sch['accumulated_depreciation_amount'], { fieldtype: 'Currency' })}</td>
-				<td><a href="/app/journal-entry/${sch['journal_entry'] || ''}">${sch['journal_entry'] || ''}</a></td>
-			</tr>`);
-			table.find("tbody").append(row);
-		});
-
 		let data = [];
 
 		depr_schedule.forEach((sch) => {
