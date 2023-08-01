@@ -654,7 +654,7 @@ def set_gl_entries_by_account(
 				& (gle.posting_date <= to_date)
 				& (account.lft >= root_lft)
 				& (account.rgt <= root_rgt)
-				& (account.root_type <= root_type)
+				& (account.root_type == root_type)
 			)
 			.orderby(gle.account, gle.posting_date)
 		)
