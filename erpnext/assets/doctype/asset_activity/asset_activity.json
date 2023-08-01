@@ -59,10 +59,13 @@
   {
    "fieldname": "user",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "User",
    "options": "User",
+   "print_width": "150",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "width": "150"
   },
   {
    "fieldname": "column_break_kkxv",
@@ -72,7 +75,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-07-30 12:49:31.058008",
+ "modified": "2023-08-01 11:09:52.584482",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Activity",
