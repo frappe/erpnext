@@ -229,7 +229,7 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		if (
-			cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate"))
+			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
 			and not self.is_return
 			and not self.is_internal_supplier
 		):
