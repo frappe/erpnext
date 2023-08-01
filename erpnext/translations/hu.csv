@@ -3094,7 +3094,7 @@ You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global S
 You cannot delete Project Type 'External',"A ""Külső"" projekttípust nem törölheti",
 You cannot edit root node.,Nem szerkesztheti a fő csomópontot.,
 You cannot restart a Subscription that is not cancelled.,"Nem indíthatja el az Előfizetést, amelyet nem zárt le.",
-You don't have enought Loyalty Points to redeem,Nincs elegendő hűségpontjaid megváltáshoz,
+You don't have enough Loyalty Points to redeem,Nincs elegendő hűségpontjaid megváltáshoz,
 You have already assessed for the assessment criteria {}.,Már értékelte ezekkel az értékelési kritériumokkal: {}.,
 You have already selected items from {0} {1},Már választott ki elemeket innen {0} {1},
 You have been invited to collaborate on the project: {0},Ön meghívást kapott ennek a projeknek a közreműködéséhez: {0},

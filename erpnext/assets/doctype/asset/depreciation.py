@@ -403,6 +403,15 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
+
+					for account in reverse_journal_entry.accounts:
+						account.update(
+							{
+								"reference_type": "Asset",
+								"reference_name": asset.name,
+							}
+						)
+
 					frappe.flags.is_reverse_depr_entry = True
 					reverse_journal_entry.submit()
 
