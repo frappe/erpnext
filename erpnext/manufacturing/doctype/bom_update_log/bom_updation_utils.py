@@ -157,12 +157,21 @@ def get_next_higher_level_boms(
 def get_leaf_boms() -> List[str]:
 	"Get BOMs that have no dependencies."
 
-	return frappe.db.sql_list(
-		"""select name from `tabBOM` bom
-		where docstatus=1 and is_active=1
-			and not exists(select bom_no from `tabBOM Item`
-				where parent=bom.name and ifnull(bom_no, '')!='')"""
-	)
+	bom = frappe.qb.DocType("BOM")
+	bom_item = frappe.qb.DocType("BOM Item")
+
+	boms = (
+		frappe.qb.from_(bom)
+		.left_join(bom_item)
+		.on((bom.name == bom_item.parent) & (bom_item.bom_no != ""))
+		.select(bom.name)
+		.where((bom.docstatus == 1) & (bom.is_active == 1) & (bom_item.bom_no.isnull()))
+		.distinct()
+	).run(as_list=True)
+
+	boms = [bom[0] for bom in boms]
+
+	return boms
 
 
 def _generate_dependence_map() -> defaultdict:
