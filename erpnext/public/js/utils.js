@@ -400,7 +400,7 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function(date, with_dates) {
+	get_fiscal_year: function(date, with_dates=false) {
 		if(!date) {
 			date = frappe.datetime.get_today();
 		}

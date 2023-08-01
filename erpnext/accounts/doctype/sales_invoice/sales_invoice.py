@@ -32,6 +32,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
@@ -1176,12 +1177,13 @@ class SalesInvoice(SellingController):
 							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", None)
+						add_asset_activity(asset.name, _("Asset returned"))
 
 						if asset.calculate_depreciation:
 							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
 							notes = _(
-								"This schedule was created when Asset {0} was returned after being sold through Sales Invoice {1}."
+								"This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 							).format(
 								get_link_to_form(asset.doctype, asset.name),
 								get_link_to_form(self.doctype, self.get("name")),
@@ -1209,6 +1211,7 @@ class SalesInvoice(SellingController):
 							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", self.posting_date)
+						add_asset_activity(asset.name, _("Asset sold"))
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1833,7 +1836,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		doc = frappe.get_doc(ref_doc, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
-			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(partytype))
+			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(partytype)))
 		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
@@ -1847,7 +1850,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		if not company in companies:
 			frappe.throw(
 				_("{0} not allowed to transact with {1}. Please change the Company.").format(
-					partytype, company
+					_(partytype), company
 				)
 			)
 

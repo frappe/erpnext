@@ -36,13 +36,13 @@ frappe.query_reports["Trial Balance for Party"] = {
 			"fieldname": "from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[1],
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 		},
 		{
 			"fieldname": "to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[2],
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 		},
 		{
 			"fieldname":"party_type",
