@@ -1156,6 +1156,52 @@ class TestPaymentEntry(FrappeTestCase):
 		si3.cancel()
 		si3.delete()
 
+	@change_settings(
+		"Accounts Settings",
+		{
+			"unlink_payment_on_cancellation_of_invoice": 1,
+			"delete_linked_ledger_entries": 1,
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+		},
+	)
+	def test_overallocation_validation_shouldnt_misfire(self):
+		"""
+		Overallocation validation shouldn't fire for Template without "Allocate Payment based on Payment Terms" enabled
+
+		"""
+		customer = create_customer()
+		create_payment_terms_template()
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+
+		# Validate allocation on base/company currency
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+
+		si.reload()
+		pe = get_payment_entry(si.doctype, si.name).save()
+		# There will no term based allocation
+		self.assertEqual(len(pe.references), 1)
+		self.assertEqual(pe.references[0].payment_term, None)
+		self.assertEqual(flt(pe.references[0].allocated_amount), flt(si.grand_total))
+		pe.save()
+
+		# specify a term
+		pe.references[0].payment_term = template.terms[0].payment_term
+		# no validation error should be thrown
+		pe.save()
+
+		pe.paid_amount = si.grand_total + 1
+		pe.references[0].allocated_amount = si.grand_total + 1
+		self.assertRaises(frappe.ValidationError, pe.save)
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 1
+		template.save()
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
