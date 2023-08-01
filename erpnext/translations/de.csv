@@ -3107,7 +3107,7 @@ You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global S
 You cannot delete Project Type 'External',Sie können den Projekttyp &#39;Extern&#39; nicht löschen,
 You cannot edit root node.,Sie können den Stammknoten nicht bearbeiten.,
 You cannot restart a Subscription that is not cancelled.,Sie können ein nicht abgebrochenes Abonnement nicht neu starten.,
-You don't have enought Loyalty Points to redeem,Sie haben nicht genügend Treuepunkte zum Einlösen,
+You don't have enough Loyalty Points to redeem,Sie haben nicht genügend Treuepunkte zum Einlösen,
 You have already assessed for the assessment criteria {}.,Sie haben bereits für die Bewertungskriterien beurteilt.,
 You have already selected items from {0} {1},Sie haben bereits Elemente aus {0} {1} gewählt,
 You have been invited to collaborate on the project: {0},Sie wurden zur Zusammenarbeit für das Projekt {0} eingeladen.,
