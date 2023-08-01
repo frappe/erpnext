@@ -430,10 +430,9 @@ class StockBalanceReport(object):
 				{
 					"label": _("Valuation Rate"),
 					"fieldname": "val_rate",
-					"fieldtype": "Currency",
+					"fieldtype": "Float",
 					"width": 90,
 					"convertible": "rate",
-					"options": "currency",
 				},
 				{
 					"label": _("Company"),

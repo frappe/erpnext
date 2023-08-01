@@ -142,13 +142,19 @@ def get_opening_balances(filters):
 def get_rootwise_opening_balances(filters, report_type):
 	gle = []
 
-	last_period_closing_voucher = frappe.db.get_all(
-		"Period Closing Voucher",
-		filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", filters.from_date)},
-		fields=["posting_date", "name"],
-		order_by="posting_date desc",
-		limit=1,
+	last_period_closing_voucher = ""
+	ignore_closing_balances = frappe.db.get_single_value(
+		"Accounts Settings", "ignore_account_closing_balance"
 	)
+
+	if not ignore_closing_balances:
+		last_period_closing_voucher = frappe.db.get_all(
+			"Period Closing Voucher",
+			filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", filters.from_date)},
+			fields=["posting_date", "name"],
+			order_by="posting_date desc",
+			limit=1,
+		)
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
