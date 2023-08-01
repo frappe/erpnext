@@ -234,12 +234,13 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
-				frappe.throw(fail_message.format(d.idx))
-
-			if d.payment_term and (
-				(flt(d.allocated_amount)) > 0
-				and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+			if (
+				d.payment_term
+				and (
+					(flt(d.allocated_amount)) > 0
+					and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+				)
+				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
 				frappe.throw(
 					_(
@@ -248,6 +249,9 @@ class PaymentEntry(AccountsController):
 						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
 					)
 				)
+
+			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
 			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
