@@ -1483,6 +1483,7 @@ DocType: Leave Block List,Leave Block List Dates,休假區塊清單日期表
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +297,"Sales Order {0} has reservation for item {1}, you can
 		only deliver reserved {1} against {0}. Serial No {2} cannot
 		be delivered",銷售訂單{0}對項目{1}有預留，您只能對{0}提供保留的{1}。序列號{2}無法發送
+<<<<<<< HEAD
 DocType: Sales Invoice,Billing Address GSTIN,帳單地址GSTIN
 DocType: Employee Tax Exemption Proof Submission,Total Eligible HRA Exemption,合格的HRA豁免總數
 DocType: Assessment Plan,Evaluate,評估
@@ -1788,6 +1789,289 @@ DocType: Supplier Scorecard,Warn for new Request for Quotations,警告新的報�
 apps/erpnext/erpnext/utilities/activation.py +91,Purchase orders help you plan and follow up on your purchases,採購訂單幫助您規劃和跟進您的購買
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +146,Lab Test Prescriptions,實驗室測試處方
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +164,"The total Issue / Transfer quantity {0} in Material Request {1}  \
+=======
+Billing Address GSTIN,帳單地址GSTIN,
+Evaluate,評估
+Net Hour Rate,淨小時率
+Landed Cost Purchase Receipt,到岸成本採購入庫單
+Default Terms,默認條款
+Criteria,標準
+Packing Slip Item,包裝單項目
+Cash/Bank Account,現金／銀行會計科目
+Please specify a {0},請指定{0}
+Removed items with no change in quantity or value.,刪除的項目在數量或價值沒有變化。
+Delivery To,交貨給
+Variant creation has been queued.,變體創建已經排隊。
+The first Leave Approver in the list will be set as the default Leave Approver.,列表中的第一個請假批准者將被設置為默認的批准批准者。
+Attribute table is mandatory,屬性表是強制性的
+Get Sales Orders,獲取銷售訂單
+{0} can not be negative,{0}不能為負數
+Connect to Quickbooks,連接到Quickbooks,
+Period End Date,期末結束日期
+Row {0}: {1} is required to create the Opening {2} Invoices,行{0}：{1}是創建開始{2}發票所必需的
+Membership,籍
+Total Number of Depreciations,折舊總數
+Rate With Margin,利率保證金
+Rate With Margin,利率保證金
+Is Return (Debit Note),是退貨（借記卡）
+Wages,工資
+Maintenance Manager Name,維護經理姓名
+Urgent,緊急
+Please specify a valid Row ID for row {0} in table {1},請指定行{0}在表中的有效行ID {1}
+Unable to find variable: ,無法找到變量：
+Please select a field to edit from numpad,請選擇要從數字鍵盤編輯的字段
+Cannot be a fixed asset item as Stock Ledger is created.,不能成為庫存分類賬創建的固定資產項目。
+Admit,承認
+Go to the Desktop and start using ERPNext,轉到桌面和開始使用ERPNext,
+Pay Remaining,支付剩餘
+Manufacturer,生產廠家
+Purchase Receipt Item,採購入庫項目
+Sales Invoice Payment,銷售發票付款
+Quality Inspection Template Name,質量檢驗模板名稱
+First Email,第一郵件
+Exception Budget Approver Role,例外預算審批人角色
+"Once set, this invoice will be on hold till the set date",一旦設置，該發票將被保留至設定的日期
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,在銷售訂單/成品倉庫保留倉庫
+Selling Amount,銷售金額
+Loyalty Amount,忠誠金額
+Creation Document No,文檔創建編號
+Location Details,位置詳情
+Issue,問題
+Records,記錄
+Scrapped,報廢
+Item Defaults,項目默認值
+Returns,返回
+WIP Warehouse,WIP倉庫
+Serial No {0} is under maintenance contract upto {1},序列號{0}在維護合約期間內直到{1}
+Organization Name,組織名稱
+Show Latest Forum Posts,顯示最新的論壇帖子
+Shipping State,運輸狀態
+Projected Quantity as Source,預計庫存量的來源
+Item must be added using 'Get Items from Purchase Receipts' button,項目必須使用'從採購入庫“按鈕進行新增
+Delivery Trip,送貨之旅
+A-,一個-
+Transfer Type,轉移類型
+Sales Expenses,銷售費用
+Diagnosis,診斷
+Standard Buying,標準採購
+Against,針對
+Sales Defaults,銷售默認值
+Work Order Qty,工作訂單數量
+Default Selling Cost Center,預設銷售成本中心
+Disc,圓盤
+Material Transferred for Subcontract,轉包材料轉讓
+Purchase Orders Items Overdue,採購訂單項目逾期
+ZIP Code,郵政編碼
+Sales Order {0} is {1},銷售訂單{0} {1}
+Select interest income account in loan {0},選擇貸款{0}中的利息收入科目
+Contact Info,聯絡方式
+Making Stock Entries,製作Stock條目
+Cannot promote Employee with status Left,無法提升狀態為Left的員工
+Net Weight UOM,淨重計量單位
+Default Supplier,預設的供應商
+Shipping Rule Condition,送貨規則條件
+End Date can not be less than Start Date,結束日期不能小於開始日期
+Invoice can't be made for zero billing hour,在零計費時間內無法開具發票
+Date of Commencement,開始日期
+Select company name first.,先選擇公司名稱。
+Email sent to {0},電子郵件發送到{0}
+Quotations received from Suppliers.,從供應商收到的報價。
+Replace BOM and update latest price in all BOMs,更換BOM並更新所有BOM中的最新價格
+This is a root supplier group and cannot be edited.,這是一個根源供應商組，無法編輯。
+Driver Name,司機姓名
+Average Age,平均年齡
+Attendance Freeze Date,出勤凍結日期
+Attendance Freeze Date,出勤凍結日期
+Inward,向內的
+List a few of your suppliers. They could be organizations or individuals.,列出一些你的供應商。他們可以是組織或個人。
+View All Products,查看所有產品
+Minimum Lead Age (Days),最低鉛年齡（天）
+Minimum Lead Age (Days),最低鉛年齡（天）
+All BOMs,所有的材料明細表
+Hotel Rooms of type {0} are unavailable on {1},{0}類型的酒店客房不適用於{1}
+Default Currency,預設貨幣
+Maximum discount for Item {0} is {1}%,第{0}項的最大折扣為{1}％
+From Employee,從員工
+Cellphone Number,手機號碼
+Monitor Progress,監視進度
+Warning: System will not check overbilling since amount for Item {0} in {1} is zero,警告： {0} {1}為零，系統將不檢查超收因為金額項目
+Make Difference Entry,使不同入口
+Auto Repeat Section,自動重複部分
+Transportation,運輸
+Invalid Attribute,無效屬性
+{0} {1} must be submitted,{0} {1}必須提交
+Default Supplier Group,默認供應商組
+Quantity must be less than or equal to {0},量必須小於或等於{0}
+Application Settings,應用程序設置
+Total Characters,總字元數
+Row Spacing,行間距
+Please select BOM in BOM field for Item {0},請BOM字段中選擇BOM的項目{0}
+There isn't any item variant for the selected item,所選項目沒有任何項目變體
+C-Form Invoice Detail,C-表 發票詳細資訊
+Payment Reconciliation Invoice,付款發票對帳
+Contribution %,貢獻％
+"As per the Buying Settings if Purchase Order Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Order first for item {0}",根據購買設置，如果需要採購訂單==&#39;是&#39;，那麼為了創建採購發票，用戶需要首先為項目{0}創建採購訂單
+HSN-wise-summary of outward supplies,HSN明智的向外供應摘要
+Company registration numbers for your reference. Tax numbers etc.,公司註冊號碼，供大家參考。稅務號碼等
+To State,國家
+Distributor,經銷商
+Asset Finance Book,資產融資書
+Shopping Cart Shipping Rule,購物車運輸規則
+Please set 'Apply Additional Discount On',請設置“收取額外折扣”
+Applicable Percent,適用百分比
+Ordered Items To Be Billed,預付款的訂購物品
+From Range has to be less than To Range,從範圍必須小於要範圍
+Global Defaults,全域預設值
+Project Collaboration Invitation,項目合作邀請
+Action Name,動作名稱
+Start Year,開始年份
+First 2 digits of GSTIN should match with State number {0},GSTIN的前2位數字應與狀態號{0}匹配
+PDC/LC,PDC / LC,
+Start date of current invoice's period,當前發票期間內的開始日期
+Capacity Planning Error,產能規劃錯誤
+Trial Balance for Party,試算表的派對
+Consultant,顧問
+Parents Teacher Meeting Attendance,家長老師見面會
+Finished Item {0} must be entered for Manufacture type entry,完成項目{0}必須為製造類條目進入
+Opening Accounting Balance,打開會計平衡
+GST Sales Register,消費稅銷售登記冊
+Sales Invoice Advance,銷售發票提前
+Nothing to request,無需求
+Default Return Warehouse,默認退貨倉庫
+Select your Domains,選擇您的域名
+Shopify Supplier,Shopify供應商
+Payment Invoice Items,付款發票項目
+Fields will be copied over only at time of creation.,字段將僅在創建時復制。
+'Actual Start Date' can not be greater than 'Actual End Date',“實際開始日期”不能大於“實際結束日期'
+Management,管理
+Payer Settings,付款人設置
+No pending Material Requests found to link for the given items.,找不到針對給定項目鏈接的待處理物料請求。
+Select company first,首先選擇公司
+"This will be appended to the Item Code of the variant. For example, if your abbreviation is ""SM"", and the item code is ""T-SHIRT"", the item code of the variant will be ""T-SHIRT-SM""",這將追加到變異的項目代碼。例如，如果你的英文縮寫為“SM”，而該項目的代碼是“T-SHIRT”，該變種的項目代碼將是“T-SHIRT-SM”
+Net Pay (in words) will be visible once you save the Salary Slip.,薪資單一被儲存，淨付款就會被顯示出來。
+Is Return,退貨
+Start day is greater than end day in task '{0}',開始日期大於任務“{0}”的結束日期
+Return / Debit Note,返回/借記注
+Price List Country,價目表國家
+UOMs,計量單位
+{0} valid serial nos for Item {1},{0}項目{1}的有效的序號
+Item Code cannot be changed for Serial No.,產品編號不能為序列號改變
+UOM Conversion Factor,計量單位換算係數
+Please enter Item Code to get Batch Number,請輸入產品代碼來獲得批號
+Loyalty Point Entry,忠誠度積分
+Default Item Group,預設項目群組
+Time In Mins,分鐘時間
+Supplier database.,供應商數據庫。
+Contract Terms and Conditions,合同條款和條件
+You cannot restart a Subscription that is not cancelled.,您無法重新啟動未取消的訂閱。
+Balance Sheet,資產負債表
+Cost Center For Item with Item Code ',成本中心與項目代碼“項目
+Total Parents Teacher Meeting,總計家長教師會議
+"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.",付款方式未配置。請檢查是否帳戶已就付款方式或POS機配置文件中設置。
+Same item cannot be entered multiple times.,同一項目不能輸入多次。
+"Further accounts can be made under Groups, but entries can be made against non-Groups",進一步帳戶可以根據組進行，但條目可針對非組進行
+Lead,潛在客戶
+Payables,應付帳款
+Course Intro,課程介紹
+MWS Auth Token,MWS Auth Token,
+Stock Entry {0} created,庫存輸入{0}創建
+You don't have enough Loyalty Points to redeem,您沒有獲得忠誠度積分兌換
+Please set associated account in Tax Withholding Category {0} against Company {1},請在針對公司{1}的預扣稅分類{0}中設置關聯帳戶
+Row #{0}: Rejected Qty can not be entered in Purchase Return,行＃{0}：駁回採購退貨數量不能進入
+Changing Customer Group for the selected Customer is not allowed.,不允許更改所選客戶的客戶組。
+Purchase Order Items To Be Billed,欲付款的採購訂單品項
+Updating estimated arrival times.,更新預計到達時間。
+Enrollment Details,註冊詳情
+Cannot set multiple Item Defaults for a company.,無法為公司設置多個項目默認值。
+Net Rate,淨費率
+Please select a customer,請選擇一個客戶
+Purchase Invoice Item,採購發票項目
+Stock Ledger Entries and GL Entries are reposted for the selected Purchase Receipts,針對所選的採購入庫單，存貨帳分錄和總帳分錄已經重新登錄。
+Assessment Terms,評估條款
+Item 1,項目1,
+Holiday,節日
+Close Issue After Days,關閉問題天后
+You need to be a user with System Manager and Item Manager roles to add users to Marketplace.,您需要是具有System Manager和Item Manager角色的用戶才能將用戶添加到Marketplace。
+Leave blank if considered for all branches,保持空白如果考慮到全部分支機構
+Validity in Days,天數有效
+Validity in Days,天數有效
+C-form is not applicable for Invoice: {0},C-形式不適用發票：{0}
+Name of Consultant,顧問的名字
+Unreconciled Payment Details,未核銷付款明細
+Member Activity,會員活動
+Order Count,訂單數量
+Order Count,訂單數量
+Current Fiscal Year,當前會計年度
+Group same items,組相同的項目
+Disable Rounded Total,禁用圓角總
+Sync in Progress,同步進行中
+Parent Department,家長部門
+'Entries' cannot be empty,“分錄”不能是空的
+Maintenance Role,維護角色
+Duplicate row {0} with same {1},重複的行{0}同{1}
+Disable Marketplace,禁用市場
+Trial Balance,試算表
+Setting up Employees,建立職工
+Hotel Reservation User,酒店預訂用戶
+Please select prefix first,請先選擇前綴稱號
+Subscription Settings,訂閱設置
+Update Auto Repeat Reference,更新自動重複參考
+Work Done,工作完成
+Please specify at least one attribute in the Attributes table,請指定屬性表中的至少一個屬性
+All Students,所有學生
+Item {0} must be a non-stock item,項{0}必須是一個非庫存項目
+View Ledger,查看總帳
+Intervals,間隔
+Reconciled Transactions,協調的事務
+Linked Location,鏈接位置
+"An Item Group exists with same name, please change the item name or rename the item group",具有具有相同名稱的項目群組存在，請更改項目名稱或重新命名該項目群組
+Student Mobile No.,學生手機號碼
+Rest Of The World,世界其他地區
+The Item {0} cannot have Batch,該項目{0}不能有批
+Yield UOM,產量UOM,
+Budget Variance Report,預算差異報告
+Is Item from Hub,是來自Hub的Item,
+Get Items from Healthcare Services,從醫療保健服務獲取項目
+Row {0}: Activity Type is mandatory.,行{0}：活動類型是強制性的。
+Accounting Ledger,會計總帳
+Difference Amount,差額
+Reverse Charge,反向充電
+Timing Detail,時間細節
+05-Change in POS,05-更改POS,
+Service Detail,服務細節
+Item Description,項目說明
+Student Sibling,學生兄弟
+Supplied Items,提供的物品
+Please set an active menu for Restaurant {0},請設置餐館{0}的有效菜單
+Qty To Manufacture,製造數量
+Maintain same rate throughout purchase cycle,在整個採購週期價格保持一致
+Opportunity Item,項目的機會
+Student and Guardian Contact Details,學生和監護人聯繫方式
+Merge Account,合併科目
+Row {0}: For supplier {0} Email Address is required to send email,行{0}：對於供應商{0}的電郵地址發送電子郵件
+Temporary Opening,臨時開通
+Employee Leave Balance,員工休假餘額
+Balance for Account {0} must always be {1},科目{0}的餘額必須始終為{1}
+More Info,更多訊息
+Valuation Rate required for Item in row {0},行對項目所需的估值速率{0}
+Scorecard Actions,記分卡操作
+Example: Masters in Computer Science,舉例：碩士計算機科學
+Supplier {0} not found in {1},在{1}中找不到供應商{0}
+Rejected Warehouse,拒絕倉庫
+Against Voucher,對傳票
+Default Buying Cost Center,預設採購成本中心
+"To get the best out of ERPNext, we recommend that you take some time and watch these help videos.",為得到最好的 ERPNext 教學，我們建議您花一些時間和觀看這些說明影片。
+For Default Supplier (optional),對於默認供應商（可選）
+Lead Time in days,交貨天期
+Accounts Payable Summary,應付帳款摘要
+Not authorized to edit frozen Account {0},無權修改凍結帳戶{0}
+Get Outstanding Invoices,獲取未付發票
+Sales Order {0} is not valid,銷售訂單{0}無效
+Warn for new Request for Quotations,警告新的報價請求
+Purchase orders help you plan and follow up on your purchases,採購訂單幫助您規劃和跟進您的購買
+Lab Test Prescriptions,實驗室測試處方
+"The total Issue / Transfer quantity {0} in Material Request {1}  \
+>>>>>>> 4f473eb090 (fix: typo in loyalty program throw message (#36432))
 							cannot be greater than requested quantity {2} for Item {3}",在材質要求總發行/傳輸量{0} {1} \不能超過請求的數量{2}的項目更大的{3}
 DocType: Shopify Settings,"If Shopify not contains a customer in Order, then while syncing Orders, the system will consider default customer for order",如果Shopify不包含訂單中的客戶，則在同步訂單時，系統會考慮默認客戶訂單
 DocType: Opening Invoice Creation Tool Item,Opening Invoice Creation Tool Item,打開發票創建工具項目
