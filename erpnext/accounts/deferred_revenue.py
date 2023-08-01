@@ -341,7 +341,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		"enable_deferred_revenue" if doc.doctype == "Sales Invoice" else "enable_deferred_expense"
 	)
 
-	accounts_frozen_upto = frappe.get_cached_value("Accounts Settings", "None", "acc_frozen_upto")
+	accounts_frozen_upto = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
 
 	def _book_deferred_revenue_or_expense(
 		item,

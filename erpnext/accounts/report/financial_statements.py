@@ -188,6 +188,7 @@ def get_data(
 			filters,
 			gl_entries_by_account,
 			ignore_closing_entries=ignore_closing_entries,
+			root_type=root_type,
 		)
 
 	calculate_values(
@@ -417,13 +418,28 @@ def set_gl_entries_by_account(
 	gl_entries_by_account,
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
+	account_filters = {
+		"company": company,
+		"is_group": 0,
+		"lft": (">=", root_lft),
+		"rgt": ("<=", root_rgt),
+	}
+
+	if root_type:
+		account_filters.update(
+			{
+				"root_type": root_type,
+			}
+		)
+
 	accounts_list = frappe.db.get_all(
 		"Account",
-		filters={"company": company, "is_group": 0, "lft": (">=", root_lft), "rgt": ("<=", root_rgt)},
+		filters=account_filters,
 		pluck="name",
 	)
 
