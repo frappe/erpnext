@@ -188,6 +188,7 @@ def get_data(
 			filters,
 			gl_entries_by_account,
 			ignore_closing_entries=ignore_closing_entries,
+			root_type=root_type,
 		)
 
 	calculate_values(
@@ -417,23 +418,44 @@ def set_gl_entries_by_account(
 	gl_entries_by_account,
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
+	account_filters = {
+		"company": company,
+		"is_group": 0,
+		"lft": (">=", root_lft),
+		"rgt": ("<=", root_rgt),
+	}
+
+	if root_type:
+		account_filters.update(
+			{
+				"root_type": root_type,
+			}
+		)
+
 	accounts_list = frappe.db.get_all(
 		"Account",
-		filters={"company": company, "is_group": 0, "lft": (">=", root_lft), "rgt": ("<=", root_rgt)},
+		filters=account_filters,
 		pluck="name",
 	)
 
 	if accounts_list:
 		# For balance sheet
-		if not from_date:
-			from_date = filters["period_start_date"]
+		ignore_closing_balances = frappe.db.get_single_value(
+			"Accounts Settings", "ignore_account_closing_balance"
+		)
+		if not from_date and not ignore_closing_balances:
 			last_period_closing_voucher = frappe.db.get_all(
 				"Period Closing Voucher",
-				filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", from_date)},
+				filters={
+					"docstatus": 1,
+					"company": filters.company,
+					"posting_date": ("<", filters["period_start_date"]),
+				},
 				fields=["posting_date", "name"],
 				order_by="posting_date desc",
 				limit=1,

@@ -277,12 +277,13 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
-				frappe.throw(fail_message.format(d.idx))
-
-			if d.payment_term and (
-				(flt(d.allocated_amount)) > 0
-				and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+			if (
+				d.payment_term
+				and (
+					(flt(d.allocated_amount)) > 0
+					and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+				)
+				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
 				frappe.throw(
 					_(
@@ -291,6 +292,9 @@ class PaymentEntry(AccountsController):
 						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
 					)
 				)
+
+			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
 			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
@@ -514,7 +518,7 @@ class PaymentEntry(AccountsController):
 				_(
 					"References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 				).format(
-					frappe.bold(comma_and((d.reference_name for d in references))),
+					frappe.bold(comma_and([d.reference_name for d in references])),
 					_(reference_doctype),
 				)
 				+ "<br><br>"
@@ -1738,7 +1742,7 @@ def get_orders_to_be_billed(
 			{party_type} = %s
 			and docstatus = 1
 			and company = %s
-			and ifnull(status, "") != "Closed"
+			and status != "Closed"
 			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
 			and abs(100 - per_billed) > 0.01
 			{condition}

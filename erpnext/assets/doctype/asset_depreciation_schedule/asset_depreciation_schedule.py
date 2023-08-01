@@ -571,6 +571,8 @@ def get_wdv_or_dd_depr_amount(
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
+	asset_depr_schedules_names = []
+
 	for row in asset_doc.get("finance_books"):
 		draft_asset_depr_schedule_name = get_asset_depr_schedule_name(
 			asset_doc.name, "Draft", row.finance_book
@@ -581,12 +583,20 @@ def make_draft_asset_depr_schedules_if_not_present(asset_doc):
 		)
 
 		if not draft_asset_depr_schedule_name and not active_asset_depr_schedule_name:
-			make_draft_asset_depr_schedule(asset_doc, row)
+			name = make_draft_asset_depr_schedule(asset_doc, row)
+			asset_depr_schedules_names.append(name)
+
+	return asset_depr_schedules_names
 
 
 def make_draft_asset_depr_schedules(asset_doc):
+	asset_depr_schedules_names = []
+
 	for row in asset_doc.get("finance_books"):
-		make_draft_asset_depr_schedule(asset_doc, row)
+		name = make_draft_asset_depr_schedule(asset_doc, row)
+		asset_depr_schedules_names.append(name)
+
+	return asset_depr_schedules_names
 
 
 def make_draft_asset_depr_schedule(asset_doc, row):
@@ -595,6 +605,8 @@ def make_draft_asset_depr_schedule(asset_doc, row):
 	asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(asset_doc, row)
 
 	asset_depr_schedule_doc.insert()
+
+	return asset_depr_schedule_doc.name
 
 
 def update_draft_asset_depr_schedules(asset_doc):

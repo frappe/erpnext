@@ -163,12 +163,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					cur_frm.cscript.make_maintenance_schedule();
 				}, __('Create'));
 			}
-
-			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
-			}
 		}
 
 		// Show buttons only when pos view is active
@@ -776,7 +770,6 @@ frappe.ui.form.on('Sales Invoice', {
 
 	update_stock: function(frm, dt, dn) {
 		frm.events.hide_fields(frm);
-		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock);
 		frm.trigger('reset_posting_time');
 	},
 

@@ -208,7 +208,7 @@ def set_gl_entries_by_account(
 	additional_conditions = []
 
 	if ignore_closing_entries:
-		additional_conditions.append("and ifnull(voucher_type, '')!='Period Closing Voucher'")
+		additional_conditions.append("and voucher_type !='Period Closing Voucher'")
 
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")

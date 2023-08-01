@@ -141,7 +141,7 @@ frappe.ui.form.on('Asset', {
 				frm.trigger("set_depr_posting_failure_alert");
 			}
 
-			frm.trigger("setup_chart");
+			frm.trigger("setup_chart_and_depr_schedule_view");
 		}
 
 		frm.trigger("toggle_reference_doc");
@@ -206,7 +206,43 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
-	setup_chart: async function(frm) {
+	render_depreciation_schedule_view: function(frm, depr_schedule) {
+		let wrapper = $(frm.fields_dict["depreciation_schedule_view"].wrapper).empty();
+
+		let data = [];
+
+		depr_schedule.forEach((sch) => {
+			const row = [
+				sch['idx'],
+				frappe.format(sch['schedule_date'], { fieldtype: 'Date' }),
+				frappe.format(sch['depreciation_amount'], { fieldtype: 'Currency' }),
+				frappe.format(sch['accumulated_depreciation_amount'], { fieldtype: 'Currency' }),
+				sch['journal_entry'] || ''
+			];
+			data.push(row);
+		});
+
+		let datatable = new frappe.DataTable(wrapper.get(0), {
+			columns: [
+				{name: __("No."), editable: false, resizable: false, format: value => value, width: 60},
+				{name: __("Schedule Date"), editable: false, resizable: false, width: 270},
+				{name: __("Depreciation Amount"), editable: false, resizable: false, width: 164},
+				{name: __("Accumulated Depreciation Amount"), editable: false, resizable: false, width: 164},
+				{name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 312}
+			],
+			data: data,
+			serialNoColumn: false,
+			checkboxColumn: true,
+			cellHeight: 35
+		});
+
+		datatable.style.setStyle(`.dt-scrollable`, {'font-size': '0.75rem', 'margin-bottom': '1rem'});
+		datatable.style.setStyle(`.dt-cell--col-1`, {'text-align': 'center'});
+		datatable.style.setStyle(`.dt-cell--col-2`, {'font-weight': 600});
+		datatable.style.setStyle(`.dt-cell--col-3`, {'font-weight': 600});
+	},
+
+	setup_chart_and_depr_schedule_view: async function(frm) {
 		if(frm.doc.finance_books.length > 1) {
 			return
 		}
@@ -228,7 +264,7 @@ frappe.ui.form.on('Asset', {
 				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule",
 				{
 					asset_name: frm.doc.name,
-					status: frm.doc.docstatus ? "Active" : "Draft",
+					status: "Active",
 					finance_book: frm.doc.finance_books[0].finance_book || null
 				}
 			)).message;
@@ -246,6 +282,9 @@ frappe.ui.form.on('Asset', {
 					}
 				}
 			});
+
+			frm.toggle_display(["depreciation_schedule_view"], 1);
+			frm.events.render_depreciation_schedule_view(frm, depr_schedule);
 		} else {
 			if(frm.doc.opening_accumulated_depreciation) {
 				x_intervals.push(frappe.format(frm.doc.creation.split(" ")[0], { fieldtype: 'Date' }));
