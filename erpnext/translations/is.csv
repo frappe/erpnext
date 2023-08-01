@@ -3338,7 +3338,7 @@ You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global S
 You cannot delete Project Type 'External',Þú getur ekki eytt verkefnisgerðinni &#39;ytri&#39;,
 You cannot edit root node.,Þú getur ekki breytt rótarkóði.,
 You cannot restart a Subscription that is not cancelled.,Þú getur ekki endurræst áskrift sem ekki er lokað.,
-You don't have enought Loyalty Points to redeem,Þú hefur ekki nóg hollusta stig til að innleysa,
+You don't have enough Loyalty Points to redeem,Þú hefur ekki nóg hollusta stig til að innleysa,
 You have already assessed for the assessment criteria {}.,Þú hefur nú þegar metið mat á viðmiðunum {}.,
 You have already selected items from {0} {1},Þú hefur nú þegar valið hluti úr {0} {1},
 You have been invited to collaborate on the project: {0},Þér hefur verið boðið að vinna að verkefninu: {0},
