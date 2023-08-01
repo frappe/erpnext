@@ -83,7 +83,9 @@ def create_transaction(doctype, company, start_date):
 	posting_date = (
 		start_date if doctype.get("doctype") == "Purchase Invoice" else get_random_date(start_date)
 	)
-	bank_account = frappe.db.get_value("Company", company, "default_bank_account")
+	bank_account, default_receivable_account = frappe.db.get_value(
+		"Company", company, ["default_bank_account", "default_receivable_account"]
+	)
 	bank_field = "paid_to" if doctype.get("party_type") == "Customer" else "paid_from"
 
 	doctype.update(
@@ -101,18 +103,25 @@ def create_transaction(doctype, company, start_date):
 		"Company", company, ["default_income_account", "default_expense_account"]
 	)
 
-	for item in doctype.get("items") or []:
-		item.update(
-			{
-				"cost_center": erpnext.get_default_cost_center(company),
-				"income_account": income_account,
-				"expense_account": expense_account,
-			}
-		)
+	if doctype in ("Purchase Invoice", "Sales Invoice"):
+		for item in doctype.get("items") or []:
+			item.update(
+				{
+					"cost_center": erpnext.get_default_cost_center(company),
+					"income_account": income_account,
+					"expense_account": expense_account,
+				}
+			)
+	elif doctype == "Journal Entry":
+		pass
+		# update_accounts(doctype, bank_account, default_receivable_account)
 
 	doc = frappe.get_doc(doctype)
 	doc.save(ignore_permissions=True)
 	doc.submit()
+
+
+# def update_accounts(doctype, company, bank_account):
 
 
 def get_random_date(start_date):
