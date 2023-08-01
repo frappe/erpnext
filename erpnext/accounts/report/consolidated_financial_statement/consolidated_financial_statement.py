@@ -659,11 +659,12 @@ def set_gl_entries_by_account(
 				& (gle.posting_date <= to_date)
 				& (account.lft >= root_lft)
 				& (account.rgt <= root_rgt)
-				& (account.root_type == root_type)
 			)
 			.orderby(gle.account, gle.posting_date)
 		)
 
+		if root_type:
+			query = query.where(account.root_type == root_type)
 		additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters, d)
 		if additional_conditions:
 			query = query.where(Criterion.all(additional_conditions))
