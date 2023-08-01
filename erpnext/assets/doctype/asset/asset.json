@@ -534,13 +534,18 @@
    "link_fieldname": "asset"
   },
   {
+   "group": "Activity",
+   "link_doctype": "Asset Activity",
+   "link_fieldname": "asset"
+  },
+  {
    "group": "Journal Entry",
    "link_doctype": "Journal Entry",
    "link_fieldname": "reference_name",
    "table_fieldname": "accounts"
   }
  ],
- "modified": "2023-07-28 15:47:01.137996",
+ "modified": "2023-07-28 20:12:44.819616",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

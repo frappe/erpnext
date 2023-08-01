@@ -18,6 +18,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.stock_controller import StockController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -519,6 +520,13 @@ class AssetCapitalization(StockController):
 			"fixed_asset_account", item=self.target_item_code, company=asset_doc.company
 		)
 
+		add_asset_activity(
+			asset_doc.name,
+			_("Asset created after Asset Capitalization {0} was submitted").format(
+				get_link_to_form("Asset Capitalization", self.name)
+			),
+		)
+
 		frappe.msgprint(
 			_(
 				"Asset {0} has been created. Please set the depreciation details if any and submit it."
@@ -542,9 +550,30 @@ class AssetCapitalization(StockController):
 
 	def set_consumed_asset_status(self, asset):
 		if self.docstatus == 1:
-			asset.set_status("Capitalized" if self.target_is_fixed_asset else "Decapitalized")
+			if self.target_is_fixed_asset:
+				asset.set_status("Capitalized")
+				add_asset_activity(
+					asset.name,
+					_("Asset capitalized after Asset Capitalization {0} was submitted").format(
+						get_link_to_form("Asset Capitalization", self.name)
+					),
+				)
+			else:
+				asset.set_status("Decapitalized")
+				add_asset_activity(
+					asset.name,
+					_("Asset decapitalized after Asset Capitalization {0} was submitted").format(
+						get_link_to_form("Asset Capitalization", self.name)
+					),
+				)
 		else:
 			asset.set_status()
+			add_asset_activity(
+				asset.name,
+				_("Asset restored after Asset Capitalization {0} was cancelled").format(
+					get_link_to_form("Asset Capitalization", self.name)
+				),
+			)
 
 
 @frappe.whitelist()
