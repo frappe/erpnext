@@ -74,6 +74,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle_doc.as_dict()
+			args["allow_zero_valuation_rate"] = sle.get("allow_zero_valuation_rate") or False
 
 			if sle.get("voucher_type") == "Stock Reconciliation":
 				# preserve previous_qty_after_transaction for qty reposting
@@ -109,6 +110,7 @@ def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_vou
 					"sle_id": args.get("name"),
 					"creation": args.get("creation"),
 				},
+				allow_zero_rate=args.get("allow_zero_valuation_rate") or False,
 				allow_negative_stock=allow_negative_stock,
 				via_landed_cost_voucher=via_landed_cost_voucher,
 			)
