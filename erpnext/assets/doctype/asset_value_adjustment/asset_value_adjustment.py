@@ -50,10 +50,10 @@ class AssetValueAdjustment(Document):
 	def make_depreciation_entry(self):
 		asset = frappe.get_doc("Asset", self.asset)
 		(
-			fixed_asset_account,
+			_,
 			accumulated_depreciation_account,
 			depreciation_expense_account,
-		) = get_depreciation_accounts(asset)
+		) = get_depreciation_accounts(asset.asset_category, asset.company)
 
 		depreciation_cost_center, depreciation_series = frappe.get_cached_value(
 			"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]

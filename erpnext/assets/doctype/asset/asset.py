@@ -946,7 +946,9 @@ class Asset(AccountsController):
 
 	@frappe.whitelist()
 	def get_manual_depreciation_entries(self):
-		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
+		(_, _, depreciation_expense_account) = get_depreciation_accounts(
+			self.asset_category, self.company
+		)
 
 		gle = frappe.qb.DocType("GL Entry")
 
@@ -1185,10 +1187,10 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 def make_journal_entry(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 	(
-		fixed_asset_account,
+		_,
 		accumulated_depreciation_account,
 		depreciation_expense_account,
-	) = get_depreciation_accounts(asset)
+	) = get_depreciation_accounts(asset.asset_category, asset.company)
 
 	depreciation_cost_center, depreciation_series = frappe.get_cached_value(
 		"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
