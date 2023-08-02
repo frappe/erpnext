@@ -3316,6 +3316,83 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		self.assertRaises(frappe.ValidationError, si.submit)
 
+<<<<<<< HEAD
+=======
+	def test_advance_entries_as_liability(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Advances Received",
+			company="_Test Company",
+			account_type="Receivable",
+		)
+
+		set_advance_flag(company="_Test Company", flag=1, default_account=account)
+
+		pe = create_payment_entry(
+			company="_Test Company",
+			payment_type="Receive",
+			party_type="Customer",
+			party="_Test Customer",
+			paid_from="Debtors - _TC",
+			paid_to="Cash - _TC",
+			paid_amount=1000,
+		)
+		pe.submit()
+
+		si = create_sales_invoice(
+			company="_Test Company",
+			customer="_Test Customer",
+			do_not_save=True,
+			do_not_submit=True,
+			rate=500,
+			price_list_rate=500,
+		)
+		si.base_grand_total = 500
+		si.grand_total = 500
+		si.set_advances()
+		for advance in si.advances:
+			advance.allocated_amount = 500 if advance.reference_name == pe.name else 0
+		si.save()
+		si.submit()
+
+		self.assertEqual(si.advances[0].allocated_amount, 500)
+
+		# Check GL Entry against payment doctype
+		expected_gle = [
+			["Advances Received - _TC", 500, 0.0, nowdate()],
+			["Cash - _TC", 1000, 0.0, nowdate()],
+			["Debtors - _TC", 0.0, 1000, nowdate()],
+			["Debtors - _TC", 0.0, 500, nowdate()],
+		]
+
+		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
+
+		si.load_from_db()
+		self.assertEqual(si.outstanding_amount, 0)
+
+		set_advance_flag(company="_Test Company", flag=0, default_account="")
+
+	def test_sales_return_negative_rate(self):
+		si = create_sales_invoice(is_return=1, qty=-2, rate=-10, do_not_save=True)
+		self.assertRaises(frappe.ValidationError, si.save)
+
+		si.items[0].rate = 10
+		si.save()
+
+
+def set_advance_flag(company, flag, default_account):
+	frappe.db.set_value(
+		"Company",
+		company,
+		{
+			"book_advance_payments_in_separate_party_account": flag,
+			"default_advance_received_account": default_account,
+		},
+	)
+
+>>>>>>> dedf24b86d (fix: don't allow negative rates (#36027))
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
