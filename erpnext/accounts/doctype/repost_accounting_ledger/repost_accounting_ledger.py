@@ -57,7 +57,7 @@ class RepostAccountingLedger(Document):
 					)
 				)
 
-	def generate_preview(self):
+	def generate_preview_data(self):
 		self.gl_entries = []
 		for x in self.vouchers:
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
@@ -67,32 +67,42 @@ class RepostAccountingLedger(Document):
 				gle_map = doc.get_gl_entries()
 
 			# add empty row
-			self.gl_entries.append(gle_map + [])
+			self.gl_entries.extend(gle_map + [])
 
-	def format_preview(self):
-		from erpnext.accounts.report.general_ledger.general_ledger import get_columns
-		from erpnext.controllers.stock_controller import get_columns, get_data
+	@frappe.whitelist()
+	def generate_preview(self):
+		from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+		from erpnext.controllers.stock_controller import get_data
 
+		gl_columns = []
+		gl_data = []
+
+		self.generate_preview_data()
 		if self.gl_entries:
-			fields = [
-				"posting_date",
-				"account",
-				"debit",
-				"credit",
-				"against",
-				"party",
-				"party_type",
-				"cost_center",
-				"against_voucher_type",
-				"against_voucher",
-			]
+			# fields = [
+			# 	"posting_date",
+			# 	"account",
+			# 	"debit",
+			# 	"credit",
+			# 	"against",
+			# 	"party",
+			# 	"party_type",
+			# 	"cost_center",
+			# 	"voucher_type",
+			# 	"voucher_no",
+			# 	"against_voucher_type",
+			# 	"against_voucher",
+			# ]
 
-			filters = {"company": self.company}
-			columns = get_columns(filters)
-			data = self.gl_entries
+			filters = {"company": self.company, "include_dimensions": 1}
 
-			gl_columns = get_columns(columns, fields)
-			gl_data = get_data(fields, self.gl_entries)
+			gl_columns = get_gl_columns(filters)
+			gl_data = get_data([x["fieldname"] for x in gl_columns], self.gl_entries)
+		rendered_page = frappe.render_template(
+			"erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.html",
+			{"gl_columns": gl_columns, "gl_data": gl_data},
+		)
+		return rendered_page
 
 	def on_submit(self):
 		job_name = "repost_accounting_ledger_" + self.name

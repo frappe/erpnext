@@ -1,0 +1,34 @@
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+</style>
+
+
+<table class="table table-bordered table-condensed">
+  <colgroup>
+  {% for col in gl_columns%}
+  <col style="width: 18mm;">
+  {% endfor %}
+  </colgroup>
+  <thead>
+    <tr>
+    {% for col in gl_columns%}
+    <td>{{ col.label }}</td>
+    {% endfor %}
+    </tr>
+  </thead>
+{% for gl in gl_data%}
+<tr>
+  {% for col in gl %}
+  <td class="text-right">
+    {{ col }}
+  </td>
+  {% endfor %}
+</tr>
+{% endfor %}
+</table>
