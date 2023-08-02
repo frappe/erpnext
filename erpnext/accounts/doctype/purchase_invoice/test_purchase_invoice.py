@@ -1838,7 +1838,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		disable_dimension()
 
 
-
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
 		"Company",
