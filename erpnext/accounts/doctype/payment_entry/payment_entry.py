@@ -281,7 +281,8 @@ class PaymentEntry(AccountsController):
 				d.payment_term
 				and (
 					(flt(d.allocated_amount)) > 0
-					and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+					and latest.payment_term_outstanding
+					and (flt(d.allocated_amount) > flt(latest.payment_term_outstanding))
 				)
 				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
