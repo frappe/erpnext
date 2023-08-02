@@ -3316,6 +3316,13 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		self.assertRaises(frappe.ValidationError, si.submit)
 
+	def test_sales_return_negative_rate(self):
+		si = create_sales_invoice(is_return=1, qty=-2, rate=-10, do_not_save=True)
+		self.assertRaises(frappe.ValidationError, si.save)
+
+		si.items[0].rate = 10
+		si.save()
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
