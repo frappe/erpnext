@@ -57,6 +57,22 @@ class RepostAccountingLedger(Document):
 					)
 				)
 
+	def get_existing_ledger_entries(self):
+		vouchers = [x.voucher_no for x in self.vouchers]
+		gl = qb.DocType("GL Entry")
+		existing_gles = (
+			qb.from_(gl)
+			.select(gl.star)
+			.where((gl.voucher_no.isin(vouchers)) & (gl.is_cancelled == 0))
+			.run(as_dict=True)
+		)
+		self.gles = frappe._dict({})
+
+		for gle in existing_gles:
+			self.gles.setdefault((gle.voucher_type, gle.voucher_no), frappe._dict({})).setdefault(
+				"existing", []
+			).append(gle.update({"old": True}))
+
 	def generate_preview_data(self):
 		self.gl_entries = []
 		self.get_existing_ledger_entries()
@@ -67,29 +83,14 @@ class RepostAccountingLedger(Document):
 			else:
 				gle_map = doc.get_gl_entries()
 
-			self.gl_entries.extend(self.gles.get((x.voucher_type, x.voucher_no)).existing)
+			old_entries = self.gles.get((x.voucher_type, x.voucher_no))
+			if old_entries:
+				self.gl_entries.extend(old_entries.existing)
 			self.gl_entries.extend(gle_map)
-
-	def get_existing_ledger_entries(self):
-		vouchers = [x.voucher_no for x in self.vouchers]
-		gl = qb.DocType("GL Entry")
-		existing_gles = (
-			qb.from_(gl)
-			.select(gl.star)
-			.where((gl.voucher_no.isin(vouchers)) & (gl.is_cancelled == 1))
-			.run(as_dict=True)
-		)
-		self.gles = frappe._dict({})
-
-		for gle in existing_gles:
-			self.gles.setdefault((gle.voucher_type, gle.voucher_no), frappe._dict({})).setdefault(
-				"existing", []
-			).append(gle)
 
 	@frappe.whitelist()
 	def generate_preview(self):
 		from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
-		from erpnext.controllers.stock_controller import get_data
 
 		gl_columns = []
 		gl_data = []
@@ -97,9 +98,12 @@ class RepostAccountingLedger(Document):
 		self.generate_preview_data()
 		if self.gl_entries:
 			filters = {"company": self.company, "include_dimensions": 1}
+			for x in get_gl_columns(filters):
+				if x["fieldname"] == "gl_entry":
+					x["fieldname"] = "name"
+				gl_columns.append(x)
 
-			gl_columns = get_gl_columns(filters)
-			gl_data = get_data([x["fieldname"] for x in gl_columns], self.gl_entries)
+			gl_data = self.gl_entries
 		rendered_page = frappe.render_template(
 			"erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.html",
 			{"gl_columns": gl_columns, "gl_data": gl_data},

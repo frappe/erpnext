@@ -6,6 +6,12 @@
 	.print-format td {
 		vertical-align:middle !important;
 	}
+	.old {
+	    background-color: #FFB3C0;
+	}
+	.new {
+	    background-color: #B3FFCC;
+	}
 </style>
 
 
@@ -23,10 +29,14 @@
     </tr>
   </thead>
 {% for gl in gl_data%}
-<tr>
-  {% for col in gl %}
+{% if gl["old"]%}
+<tr class="old">
+{% else %}
+<tr class="new">
+{% endif %}
+  {% for col in gl_columns %}
   <td class="text-right">
-    {{ col }}
+    {{ gl[col.fieldname] }}
   </td>
   {% endfor %}
 </tr>
