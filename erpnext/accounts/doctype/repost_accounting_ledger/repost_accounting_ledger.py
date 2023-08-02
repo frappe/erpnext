@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.utils.data import comma_and
 
@@ -59,6 +59,7 @@ class RepostAccountingLedger(Document):
 
 	def generate_preview_data(self):
 		self.gl_entries = []
+		self.get_existing_ledger_entries()
 		for x in self.vouchers:
 			doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 			if doc.doctype in ["Payment Entry", "Journal Entry"]:
@@ -66,8 +67,24 @@ class RepostAccountingLedger(Document):
 			else:
 				gle_map = doc.get_gl_entries()
 
-			# add empty row
-			self.gl_entries.extend(gle_map + [])
+			self.gl_entries.extend(self.gles.get((x.voucher_type, x.voucher_no)).existing)
+			self.gl_entries.extend(gle_map)
+
+	def get_existing_ledger_entries(self):
+		vouchers = [x.voucher_no for x in self.vouchers]
+		gl = qb.DocType("GL Entry")
+		existing_gles = (
+			qb.from_(gl)
+			.select(gl.star)
+			.where((gl.voucher_no.isin(vouchers)) & (gl.is_cancelled == 1))
+			.run(as_dict=True)
+		)
+		self.gles = frappe._dict({})
+
+		for gle in existing_gles:
+			self.gles.setdefault((gle.voucher_type, gle.voucher_no), frappe._dict({})).setdefault(
+				"existing", []
+			).append(gle)
 
 	@frappe.whitelist()
 	def generate_preview(self):
@@ -79,21 +96,6 @@ class RepostAccountingLedger(Document):
 
 		self.generate_preview_data()
 		if self.gl_entries:
-			# fields = [
-			# 	"posting_date",
-			# 	"account",
-			# 	"debit",
-			# 	"credit",
-			# 	"against",
-			# 	"party",
-			# 	"party_type",
-			# 	"cost_center",
-			# 	"voucher_type",
-			# 	"voucher_no",
-			# 	"against_voucher_type",
-			# 	"against_voucher",
-			# ]
-
 			filters = {"company": self.company, "include_dimensions": 1}
 
 			gl_columns = get_gl_columns(filters)
@@ -102,6 +104,7 @@ class RepostAccountingLedger(Document):
 			"erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.html",
 			{"gl_columns": gl_columns, "gl_data": gl_data},
 		)
+
 		return rendered_page
 
 	def on_submit(self):
