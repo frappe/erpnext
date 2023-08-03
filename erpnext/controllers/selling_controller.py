@@ -281,6 +281,9 @@ class SellingController(StockController):
 
 			last_valuation_rate_in_sales_uom = last_valuation_rate * (item.conversion_factor or 1)
 
+			if item.free_item == True:
+				continue
+
 			if flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_valuation_rate_in_sales_uom, "valuation rate")
 
