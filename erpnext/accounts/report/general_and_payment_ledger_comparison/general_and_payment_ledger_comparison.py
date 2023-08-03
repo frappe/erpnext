@@ -17,12 +17,20 @@ class General_Payment_Ledger_Comparison(object):
 		self.ple = []
 
 	def get_accounts(self):
-		receivable_accounts = frappe.db.get_all(
-			"Account", filters={"company": self.filters.company, "account_type": "Receivable"}, as_list=True
-		)
-		payable_accounts = frappe.db.get_all(
-			"Account", filters={"company": self.filters.company, "account_type": "Payable"}, as_list=True
-		)
+		receivable_accounts = [
+			x[0]
+			for x in frappe.db.get_all(
+				"Account",
+				filters={"company": self.filters.company, "account_type": "Receivable"},
+				as_list=True,
+			)
+		]
+		payable_accounts = [
+			x[0]
+			for x in frappe.db.get_all(
+				"Account", filters={"company": self.filters.company, "account_type": "Payable"}, as_list=True
+			)
+		]
 
 		self.account_types = frappe._dict(
 			{
@@ -31,47 +39,64 @@ class General_Payment_Ledger_Comparison(object):
 			}
 		)
 
+	def generate_filters(self):
+		if self.filters.account:
+			self.account_types.receivable.accounts = []
+			self.account_types.payable.accounts = []
+
+			for acc in frappe.db.get_all(
+				"Account", filters={"name": ["in", self.filters.account]}, fields=["name", "account_type"]
+			):
+				if acc.account_type == "Receivable":
+					self.account_types.receivable.accounts.append(acc.name)
+				else:
+					self.account_types.payable.accounts.append(acc.name)
+
 	def get_gle(self):
 		gle = qb.DocType("GL Entry")
 
 		for acc_type, val in self.account_types.items():
-			if acc_type == "receivable":
-				outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
-			else:
-				outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
+			if val.accounts:
+				if acc_type == "receivable":
+					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
+				else:
+					outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
 
-			self.account_types[acc_type].gle = (
-				qb.from_(gle)
-				.select(
-					gle.company,
-					gle.account,
-					gle.voucher_no,
-					outstanding,
+				self.account_types[acc_type].gle = (
+					qb.from_(gle)
+					.select(
+						gle.company,
+						gle.account,
+						gle.voucher_no,
+						outstanding,
+					)
+					.where(
+						(gle.company == self.filters.company)
+						& (gle.is_cancelled == 0)
+						& (gle.account.isin(val.accounts))
+					)
+					.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
+					# .run(as_dict=True)
+					.run(debug=1)
 				)
-				.where(
-					(gle.company == self.filters.company)
-					& (gle.is_cancelled == 0)
-					& (gle.account.isin(val.accounts))
-				)
-				.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
-				# .run(as_dict=True)
-				.run()
-			)
 
 	def get_ple(self):
 		ple = qb.DocType("Payment Ledger Entry")
 
 		for acc_type, val in self.account_types.items():
-			self.account_types[acc_type].ple = (
-				qb.from_(ple)
-				.select(ple.company, ple.account, ple.voucher_no, Sum(ple.amount).as_("outstanding"))
-				.where(
-					(ple.company == self.filters.company) & (ple.delinked == 0) & (ple.account.isin(val.accounts))
+			if val.accounts:
+				self.account_types[acc_type].ple = (
+					qb.from_(ple)
+					.select(ple.company, ple.account, ple.voucher_no, Sum(ple.amount).as_("outstanding"))
+					.where(
+						(ple.company == self.filters.company)
+						& (ple.delinked == 0)
+						& (ple.account.isin(val.accounts))
+					)
+					.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
+					# .run(as_dict=True)
+					.run(debug=1)
 				)
-				.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
-				# .run(as_dict=True)
-				.run()
-			)
 
 	def compare(self):
 		self.gle_balances = set()
@@ -132,6 +157,7 @@ class General_Payment_Ledger_Comparison(object):
 
 	def run(self):
 		self.get_accounts()
+		self.generate_filters()
 		self.get_gle()
 		self.get_ple()
 		self.compare()
