@@ -544,12 +544,12 @@ class JobCard(Document):
 		if self.for_quantity and flt(total_completed_qty, precision) != flt(
 			self.for_quantity, precision
 		):
-			total_completed_qty = bold(_("Total Completed Qty"))
+			total_completed_qty_label = bold(_("Total Completed Qty"))
 			qty_to_manufacture = bold(_("Qty to Manufacture"))
 
 			frappe.throw(
 				_("The {0} ({1}) must be equal to {2} ({3})").format(
-					total_completed_qty,
+					total_completed_qty_label,
 					bold(flt(total_completed_qty, precision)),
 					qty_to_manufacture,
 					bold(self.for_quantity),

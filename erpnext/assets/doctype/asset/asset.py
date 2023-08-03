@@ -25,6 +25,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	cancel_asset_depr_schedules,
@@ -59,7 +60,7 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
-		if not self.split_from:
+		if self.calculate_depreciation and not self.split_from:
 			asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
 			convert_draft_asset_depr_schedules_into_active(self)
 			if asset_depr_schedules_names:
@@ -71,6 +72,7 @@ class Asset(AccountsController):
 						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 					).format(asset_depr_schedules_links)
 				)
+		add_asset_activity(self.name, _("Asset submitted"))
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -81,9 +83,10 @@ class Asset(AccountsController):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 		self.db_set("booked_fixed_asset", 0)
+		add_asset_activity(self.name, _("Asset cancelled"))
 
 	def after_insert(self):
-		if not self.split_from:
+		if self.calculate_depreciation and not self.split_from:
 			asset_depr_schedules_names = make_draft_asset_depr_schedules(self)
 			asset_depr_schedules_links = get_comma_separated_links(
 				asset_depr_schedules_names, "Asset Depreciation Schedule"
@@ -93,6 +96,16 @@ class Asset(AccountsController):
 					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 				).format(asset_depr_schedules_links)
 			)
+		if not frappe.db.exists(
+			{
+				"doctype": "Asset Activity",
+				"asset": self.name,
+			}
+		):
+			add_asset_activity(self.name, _("Asset created"))
+
+	def after_delete(self):
+		add_asset_activity(self.name, _("Asset deleted"))
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -135,17 +148,33 @@ class Asset(AccountsController):
 			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
 
 	def validate_cost_center(self):
-		if not self.cost_center:
-			return
-
-		cost_center_company = frappe.db.get_value("Cost Center", self.cost_center, "company")
-		if cost_center_company != self.company:
-			frappe.throw(
-				_("Selected Cost Center {} doesn't belongs to {}").format(
-					frappe.bold(self.cost_center), frappe.bold(self.company)
-				),
-				title=_("Invalid Cost Center"),
+		if self.cost_center:
+			cost_center_company, cost_center_is_group = frappe.db.get_value(
+				"Cost Center", self.cost_center, ["company", "is_group"]
 			)
+			if cost_center_company != self.company:
+				frappe.throw(
+					_("Cost Center {} doesn't belong to Company {}").format(
+						frappe.bold(self.cost_center), frappe.bold(self.company)
+					),
+					title=_("Invalid Cost Center"),
+				)
+			if cost_center_is_group:
+				frappe.throw(
+					_(
+						"Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
+					).format(frappe.bold(self.cost_center)),
+					title=_("Invalid Cost Center"),
+				)
+
+		else:
+			if not frappe.get_cached_value("Company", self.company, "depreciation_cost_center"):
+				frappe.throw(
+					_(
+						"Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
+					).format(frappe.bold(self.company)),
+					title=_("Missing Cost Center"),
+				)
 
 	def validate_in_use_date(self):
 		if not self.available_for_use_date:
@@ -194,8 +223,11 @@ class Asset(AccountsController):
 
 		if not self.calculate_depreciation:
 			return
-		elif not self.finance_books:
-			frappe.throw(_("Enter depreciation details"))
+		else:
+			if not self.finance_books:
+				frappe.throw(_("Enter depreciation details"))
+			if self.is_fully_depreciated:
+				frappe.throw(_("Depreciation cannot be calculated for fully depreciated assets"))
 
 		if self.is_existing_asset:
 			return
@@ -276,7 +308,7 @@ class Asset(AccountsController):
 			depreciable_amount = flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
 			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
 				frappe.throw(
-					_("Opening Accumulated Depreciation must be less than equal to {0}").format(
+					_("Opening Accumulated Depreciation must be less than or equal to {0}").format(
 						depreciable_amount
 					)
 				)
@@ -412,7 +444,9 @@ class Asset(AccountsController):
 					expected_value_after_useful_life = self.finance_books[idx].expected_value_after_useful_life
 					value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
-				if flt(value_after_depreciation) <= expected_value_after_useful_life:
+				if (
+					flt(value_after_depreciation) <= expected_value_after_useful_life or self.is_fully_depreciated
+				):
 					status = "Fully Depreciated"
 				elif flt(value_after_depreciation) < flt(self.gross_purchase_amount):
 					status = "Partially Depreciated"
@@ -898,6 +932,13 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 		},
 	)
 
+	add_asset_activity(
+		asset.name,
+		_("Asset updated after being split into Asset {0}").format(
+			get_link_to_form("Asset", new_asset_name)
+		),
+	)
+
 	for row in asset.get("finance_books"):
 		value_after_depreciation = flt(
 			(row.value_after_depreciation * remaining_qty) / asset.asset_quantity
@@ -964,6 +1005,15 @@ def create_new_asset_after_split(asset, split_qty):
 		row.expected_value_after_useful_life = flt(
 			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
+
+	new_asset.insert()
+
+	add_asset_activity(
+		new_asset.name,
+		_("Asset created after being split from Asset {0}").format(
+			get_link_to_form("Asset", asset.name)
+		),
+	)
 
 	new_asset.submit()
 	new_asset.set_status()
