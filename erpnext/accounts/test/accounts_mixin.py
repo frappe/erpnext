@@ -4,7 +4,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 
 class AccountsTestMixin:
-	def create_customer(self, customer_name, currency=None):
+	def create_customer(self, customer_name="_Test Customer", currency=None):
 		if not frappe.db.exists("Customer", customer_name):
 			customer = frappe.new_doc("Customer")
 			customer.customer_name = customer_name
@@ -17,7 +17,7 @@ class AccountsTestMixin:
 		else:
 			self.customer = customer_name
 
-	def create_supplier(self, supplier_name, currency=None):
+	def create_supplier(self, supplier_name="_Test Supplier", currency=None):
 		if not frappe.db.exists("Supplier", supplier_name):
 			supplier = frappe.new_doc("Supplier")
 			supplier.supplier_name = supplier_name
@@ -31,7 +31,7 @@ class AccountsTestMixin:
 		else:
 			self.supplier = supplier_name
 
-	def create_item(self, item_name, is_stock=0, warehouse=None, company=None):
+	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None):
 		item = create_item(item_name, is_stock_item=is_stock, warehouse=warehouse, company=company)
 		self.item = item.name
 
