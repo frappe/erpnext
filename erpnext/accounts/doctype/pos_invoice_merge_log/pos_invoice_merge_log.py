@@ -172,21 +172,23 @@ class POSInvoiceMergeLog(Document):
 
 			for item in doc.get("items"):
 				found = False
-				for i in items:
-					if (
-						i.item_code == item.item_code
-						and not i.serial_no
-						and not i.batch_no
-						and i.uom == item.uom
-						and i.net_rate == item.net_rate
-						and i.warehouse == item.warehouse
-					):
-						found = True
-						i.qty = i.qty + item.qty
-						i.amount = i.amount + item.net_amount
-						i.net_amount = i.amount
-						i.base_amount = i.base_amount + item.base_net_amount
-						i.base_net_amount = i.base_amount
+				if not item.serial_and_batch_bundle:
+					for i in items:
+
+						if (
+							i.item_code == item.item_code
+							and not i.serial_no
+							and not i.batch_no
+							and i.uom == item.uom
+							and i.net_rate == item.net_rate
+							and i.warehouse == item.warehouse
+						):
+							found = True
+							i.qty = i.qty + item.qty
+							i.amount = i.amount + item.net_amount
+							i.net_amount = i.amount
+							i.base_amount = i.base_amount + item.base_net_amount
+							i.base_net_amount = i.base_amount
 
 				if not found:
 					item.rate = item.net_rate
