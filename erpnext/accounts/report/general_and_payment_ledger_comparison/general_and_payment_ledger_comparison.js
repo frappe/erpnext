@@ -38,37 +38,8 @@ function get_filters() {
 			}
 		},
 		{
-			"fieldname":"party_type",
-			"label": __("Party Type"),
-			"fieldtype": "Link",
-			"options": "Party Type",
-			"default": "",
-			on_change: function() {
-				frappe.query_report.set_filter_value('party', "");
-			}
-		},
-		{
-			"fieldname":"party",
-			"label": __("Party"),
-			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
-				if (!frappe.query_report.filters) return;
-
-				let party_type = frappe.query_report.get_filter_value('party_type');
-				if (!party_type) return;
-
-				return frappe.db.get_link_options(party_type, txt);
-			},
-		},
-		{
 			"fieldname":"voucher_no",
 			"label": __("Voucher No"),
-			"fieldtype": "Data",
-			"width": 100,
-		},
-		{
-			"fieldname":"against_voucher_no",
-			"label": __("Against Voucher No"),
 			"fieldtype": "Data",
 			"width": 100,
 		},
@@ -78,14 +49,6 @@ function get_filters() {
 			"fieldtype": "Check",
 			"width": 100,
 		},
-		{
-			"fieldname":"group_party",
-			"label": __("Group by Party"),
-			"fieldtype": "Check",
-			"width": 100,
-		},
-
-
 
 	]
 	return filters;

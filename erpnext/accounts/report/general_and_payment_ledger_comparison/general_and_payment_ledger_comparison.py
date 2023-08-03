@@ -3,12 +3,13 @@
 
 import frappe
 from frappe import _, qb
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Sum
 
 
 class General_Payment_Ledger_Comparison(object):
 	"""
-	Compare Voucher-wise entries between General and Payment Ledger
+	A Utility report to compare Voucher-wise balance between General and Payment Ledger
 	"""
 
 	def __init__(self, filters=None):
@@ -57,6 +58,11 @@ class General_Payment_Ledger_Comparison(object):
 
 		for acc_type, val in self.account_types.items():
 			if val.accounts:
+
+				filter_criterion = []
+				if self.filters.voucher_no:
+					filter_criterion.append((gle.voucher_no == self.filters.voucher_no))
+
 				if acc_type == "receivable":
 					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
 				else:
@@ -68,6 +74,7 @@ class General_Payment_Ledger_Comparison(object):
 						gle.company,
 						gle.account,
 						gle.voucher_no,
+						gle.party,
 						outstanding,
 					)
 					.where(
@@ -75,6 +82,7 @@ class General_Payment_Ledger_Comparison(object):
 						& (gle.is_cancelled == 0)
 						& (gle.account.isin(val.accounts))
 					)
+					.where(Criterion.all(filter_criterion))
 					.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
 					# .run(as_dict=True)
 					.run(debug=1)
@@ -85,14 +93,22 @@ class General_Payment_Ledger_Comparison(object):
 
 		for acc_type, val in self.account_types.items():
 			if val.accounts:
+
+				filter_criterion = []
+				if self.filters.voucher_no:
+					filter_criterion.append((ple.voucher_no == self.filters.voucher_no))
+
 				self.account_types[acc_type].ple = (
 					qb.from_(ple)
-					.select(ple.company, ple.account, ple.voucher_no, Sum(ple.amount).as_("outstanding"))
+					.select(
+						ple.company, ple.account, ple.voucher_no, ple.party, Sum(ple.amount).as_("outstanding")
+					)
 					.where(
 						(ple.company == self.filters.company)
 						& (ple.delinked == 0)
 						& (ple.account.isin(val.accounts))
 					)
+					.where(Criterion.all(filter_criterion))
 					.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
 					# .run(as_dict=True)
 					.run(debug=1)
@@ -112,17 +128,22 @@ class General_Payment_Ledger_Comparison(object):
 		self.diff = frappe._dict({})
 
 		for x in self.diff1:
-			self.diff[(x[0], x[1], x[2])] = frappe._dict({"gl_balance": x[3]})
+			self.diff[(x[0], x[1], x[2], x[3])] = frappe._dict({"gl_balance": x[4]})
 
 		for x in self.diff2:
-			self.diff[(x[0], x[1], x[2])].update(frappe._dict({"pl_balance": x[3]}))
+			self.diff[(x[0], x[1], x[2], x[3])].update(frappe._dict({"pl_balance": x[4]}))
 
 	def generate_data(self):
 		self.data = []
 		for key, val in self.diff.items():
 			self.data.append(
 				frappe._dict(
-					{"voucher_no": key[2], "gl_balance": val.gl_balance, "pl_balance": val.pl_balance}
+					{
+						"voucher_no": key[2],
+						"party": key[3],
+						"gl_balance": val.gl_balance,
+						"pl_balance": val.pl_balance,
+					}
 				)
 			)
 
@@ -133,6 +154,16 @@ class General_Payment_Ledger_Comparison(object):
 			dict(
 				label=_("Voucher No"),
 				fieldname="voucher_no",
+				fieldtype="Data",
+				options=options,
+				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Party"),
+				fieldname="party",
 				fieldtype="Data",
 				options=options,
 				width="100",
