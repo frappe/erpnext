@@ -170,7 +170,11 @@ class General_Payment_Ledger_Comparison(object):
 
 		self.columns.append(
 			dict(
-				label=_("GL Balance"), fieldname="gl_balance", fieldtype="data", options=options, width="100"
+				label=_("GL Balance"),
+				fieldname="gl_balance",
+				fieldtype="Currency",
+				options="Company:company:default_currency",
+				width="100",
 			)
 		)
 
@@ -178,8 +182,8 @@ class General_Payment_Ledger_Comparison(object):
 			dict(
 				label=_("Payment Ledger Balance"),
 				fieldname="pl_balance",
-				fieldtype="data",
-				options=options,
+				fieldtype="Currency",
+				options="Company:company:default_currency",
 				width="100",
 			)
 		)
