@@ -25,10 +25,8 @@ frappe.ui.form.on("Repost Accounting Ledger", {
 
 	refresh: function(frm) {
 		frm.add_custom_button(__('Show Preview'), () => {
-			// frappe.open_in_new_tab = true;
 			frm.call({
 				method: 'generate_preview',
-				// method: 'format_preview',
 				doc: frm.doc,
 				freeze: true,
 				freeze_message: __('Generating Preview'),
