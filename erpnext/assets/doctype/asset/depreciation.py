@@ -97,9 +97,31 @@ def get_depreciable_assets(date):
 		.where(ds.schedule_date <= date)
 		.groupby(a.name)
 		.orderby(a.creation, order=Order.desc)
-	).run()
+	)
+
+	acc_frozen_upto = get_acc_frozen_upto()
+	if acc_frozen_upto:
+		res = res.where(ds.schedule_date > acc_frozen_upto)
+
+	res = res.run()
 
 	return res
+
+
+def get_acc_frozen_upto():
+	acc_frozen_upto = frappe.db.get_value("Accounts Settings", None, "acc_frozen_upto")
+
+	if not acc_frozen_upto:
+		return
+
+	frozen_accounts_modifier = frappe.db.get_value(
+		"Accounts Settings", None, "frozen_accounts_modifier"
+	)
+
+	if frozen_accounts_modifier not in frappe.get_roles() or frappe.session.user == "Administrator":
+		return getdate(acc_frozen_upto)
+
+	return
 
 
 def get_credit_and_debit_accounts_for_asset_category_and_company(asset_category, company):
@@ -168,9 +190,7 @@ def make_depreciation_entry(
 
 	depreciation_posting_error = None
 
-	for d in asset.get("schedules")[sch_start_idx or 0 : sch_end_idx or len(asset.get("schedules"))][
-		::-1
-	]:
+	for d in asset.get("schedules")[sch_start_idx or 0 : sch_end_idx or len(asset.get("schedules"))]:
 		try:
 			_make_journal_entry_for_depreciation(
 				asset,
