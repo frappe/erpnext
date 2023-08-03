@@ -17,109 +17,83 @@ class General_Payment_Ledger_Comparison(object):
 		self.ple = []
 
 	def get_accounts(self):
-		self.receivable_accounts = frappe.db.get_all(
+		receivable_accounts = frappe.db.get_all(
 			"Account", filters={"company": self.filters.company, "account_type": "Receivable"}, as_list=True
 		)
-		self.payable_accounts = frappe.db.get_all(
+		payable_accounts = frappe.db.get_all(
 			"Account", filters={"company": self.filters.company, "account_type": "Payable"}, as_list=True
+		)
+
+		self.account_types = frappe._dict(
+			{
+				"receivable": frappe._dict({"accounts": receivable_accounts, "gle": [], "ple": []}),
+				"payable": frappe._dict({"accounts": payable_accounts, "gle": [], "ple": []}),
+			}
 		)
 
 	def get_gle(self):
 		gle = qb.DocType("GL Entry")
-		self.receivable_gle = (
-			qb.from_(gle)
-			.select(
-				gle.company,
-				gle.account,
-				gle.voucher_no,
-				gle.voucher_no,
-				(Sum(gle.debit) - Sum(gle.credit)).as_("outstanding"),
-			)
-			.where(
-				(gle.company == self.filters.company)
-				& (gle.is_cancelled == 0)
-				& (gle.account.isin(self.receivable_accounts))
-			)
-			.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
-			# .run(as_dict=True)
-			.run()
-		)
 
-		self.payable_gle = (
-			qb.from_(gle)
-			.select(
-				gle.company,
-				gle.account,
-				gle.voucher_no,
-				gle.voucher_no,
-				(Sum(gle.credit) - Sum(gle.debit)).as_("outstanding"),
+		for acc_type, val in self.account_types.items():
+			if acc_type == "receivable":
+				outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
+			else:
+				outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
+
+			self.account_types[acc_type].gle = (
+				qb.from_(gle)
+				.select(
+					gle.company,
+					gle.account,
+					gle.voucher_no,
+					outstanding,
+				)
+				.where(
+					(gle.company == self.filters.company)
+					& (gle.is_cancelled == 0)
+					& (gle.account.isin(val.accounts))
+				)
+				.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
+				# .run(as_dict=True)
+				.run()
 			)
-			.where(
-				(gle.company == self.filters.company)
-				& (gle.is_cancelled == 0)
-				& (gle.account.isin(self.payable_accounts))
-			)
-			.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
-			# .run(as_dict=True)
-			.run()
-		)
 
 	def get_ple(self):
 		ple = qb.DocType("Payment Ledger Entry")
-		self.receivable_ple = (
-			qb.from_(ple)
-			.select(
-				ple.company, ple.account, ple.voucher_no, ple.voucher_no, Sum(ple.amount).as_("outstanding")
-			)
-			.where(
-				(ple.company == self.filters.company)
-				& (ple.delinked == 0)
-				& (ple.account.isin(self.receivable_accounts))
-			)
-			.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
-			# .run(as_dict=True)
-			.run()
-		)
 
-		self.payable_ple = (
-			qb.from_(ple)
-			.select(
-				ple.company, ple.account, ple.voucher_no, ple.voucher_no, Sum(ple.amount).as_("outstanding")
+		for acc_type, val in self.account_types.items():
+			self.account_types[acc_type].ple = (
+				qb.from_(ple)
+				.select(ple.company, ple.account, ple.voucher_no, Sum(ple.amount).as_("outstanding"))
+				.where(
+					(ple.company == self.filters.company) & (ple.delinked == 0) & (ple.account.isin(val.accounts))
+				)
+				.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
+				# .run(as_dict=True)
+				.run()
 			)
-			.where(
-				(ple.company == self.filters.company)
-				& (ple.delinked == 0)
-				& (ple.account.isin(self.payable_accounts))
-			)
-			.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
-			# .run(as_dict=True)
-			.run()
-		)
 
 	def compare(self):
 		self.gle_balances = set()
 		self.ple_balances = set()
-		for x in self.receivable_gle:
-			self.gle_balances.add(x)
-		for x in self.payable_gle:
-			self.gle_balances.add(x)
 
-		for x in self.receivable_ple:
-			self.ple_balances.add(x)
-		for x in self.payable_ple:
-			self.ple_balances.add(x)
+		# consolidate both receivable and payable balances in one set
+		for acc_type, val in self.account_types.items():
+			self.gle_balances = set(val.gle) | self.gle_balances
+			self.ple_balances = set(val.ple) | self.ple_balances
 
 		self.diff1 = self.gle_balances.difference(self.ple_balances)
 		self.diff2 = self.ple_balances.difference(self.gle_balances)
 		self.diff = frappe._dict({})
 
-		self.data = []
 		for x in self.diff1:
-			self.diff[(x[0], x[1], x[2], x[3])] = frappe._dict({"gl_balance": x[4]})
+			self.diff[(x[0], x[1], x[2])] = frappe._dict({"gl_balance": x[3]})
 
 		for x in self.diff2:
-			self.diff[(x[0], x[1], x[2], x[3])].update(frappe._dict({"pl_balance": x[4]}))
+			self.diff[(x[0], x[1], x[2])].update(frappe._dict({"pl_balance": x[3]}))
 
+	def generate_data(self):
+		self.data = []
 		for key, val in self.diff.items():
 			self.data.append(
 				frappe._dict(
@@ -161,6 +135,7 @@ class General_Payment_Ledger_Comparison(object):
 		self.get_gle()
 		self.get_ple()
 		self.compare()
+		self.generate_data()
 		self.get_columns()
 
 		return self.columns, self.data
