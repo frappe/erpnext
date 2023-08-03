@@ -475,6 +475,10 @@ class BuyingController(SubcontractingController):
 			if d.item_code not in stock_items:
 				continue
 
+			rejected_qty = 0.0
+			if flt(d.rejected_qty) != 0:
+				rejected_qty = flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty"))
+
 			if d.warehouse:
 				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 
@@ -494,6 +498,11 @@ class BuyingController(SubcontractingController):
 								"dependant_sle_voucher_detail_no": d.name,
 							},
 						)
+
+						if flt(rejected_qty) != 0:
+							from_warehouse_sle["actual_qty"] += -1 * rejected_qty
+							if d.rejected_serial_no:
+								from_warehouse_sle["serial_no"] += "\n" + cstr(d.rejected_serial_no).strip()
 
 						sl_entries.append(from_warehouse_sle)
 
@@ -520,6 +529,7 @@ class BuyingController(SubcontractingController):
 								else 0,
 							}
 						)
+
 					sl_entries.append(sle)
 
 					if d.from_warehouse and (
@@ -530,23 +540,30 @@ class BuyingController(SubcontractingController):
 							d, {"actual_qty": -1 * pr_qty, "warehouse": d.from_warehouse, "recalculate_rate": 1}
 						)
 
+						if flt(rejected_qty) != 0:
+							from_warehouse_sle["actual_qty"] += -1 * rejected_qty
+							if d.rejected_serial_no:
+								from_warehouse_sle["serial_no"] += "\n" + cstr(d.rejected_serial_no).strip()
+
 						sl_entries.append(from_warehouse_sle)
 
-			if flt(d.rejected_qty) != 0:
+			if flt(rejected_qty) != 0:
 				sl_entries.append(
 					self.get_sl_entries(
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")),
+							"actual_qty": rejected_qty,
 							"serial_no": cstr(d.rejected_serial_no).strip(),
 							"incoming_rate": 0.0,
+							"allow_zero_valuation_rate": True,
 						},
 					)
 				)
 
 		if self.get("is_old_subcontracting_flow"):
 			self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,
