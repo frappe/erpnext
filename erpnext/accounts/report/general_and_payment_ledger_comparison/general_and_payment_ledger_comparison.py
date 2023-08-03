@@ -84,8 +84,7 @@ class General_Payment_Ledger_Comparison(object):
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(gle.company, gle.account, gle.voucher_no, gle.party)
-					# .run(as_dict=True)
-					.run(debug=1)
+					.run()
 				)
 
 	def get_ple(self):
@@ -110,8 +109,7 @@ class General_Payment_Ledger_Comparison(object):
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(ple.company, ple.account, ple.voucher_no, ple.party)
-					# .run(as_dict=True)
-					.run(debug=1)
+					.run()
 				)
 
 	def compare(self):
