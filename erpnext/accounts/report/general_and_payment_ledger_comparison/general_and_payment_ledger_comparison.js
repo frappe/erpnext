@@ -43,13 +43,6 @@ function get_filters() {
 			"fieldtype": "Data",
 			"width": 100,
 		},
-		{
-			"fieldname":"include_account_currency",
-			"label": __("Include Account Currency"),
-			"fieldtype": "Check",
-			"width": 100,
-		},
-
 	]
 	return filters;
 }

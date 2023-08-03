@@ -63,6 +63,12 @@ class General_Payment_Ledger_Comparison(object):
 				if self.filters.voucher_no:
 					filter_criterion.append((gle.voucher_no == self.filters.voucher_no))
 
+				if self.filters.period_start_date:
+					filter_criterion.append(gle.posting_date.gte(self.filters.period_start_date))
+
+				if self.filters.period_end_date:
+					filter_criterion.append(gle.posting_date.lte(self.filters.period_end_date))
+
 				if acc_type == "receivable":
 					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
 				else:
@@ -96,6 +102,12 @@ class General_Payment_Ledger_Comparison(object):
 				filter_criterion = []
 				if self.filters.voucher_no:
 					filter_criterion.append((ple.voucher_no == self.filters.voucher_no))
+
+				if self.filters.period_start_date:
+					filter_criterion.append(ple.posting_date.gte(self.filters.period_start_date))
+
+				if self.filters.period_end_date:
+					filter_criterion.append(ple.posting_date.lte(self.filters.period_end_date))
 
 				self.account_types[acc_type].ple = (
 					qb.from_(ple)
