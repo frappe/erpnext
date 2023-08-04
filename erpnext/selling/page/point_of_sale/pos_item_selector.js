@@ -78,7 +78,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, uom, price_list_rate } = item;
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 		let indicator_color;
 		let qty_to_display = actual_qty;
@@ -103,9 +103,9 @@ erpnext.PointOfSale.ItemSelector = class {
 						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 							<img
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
-								class="h-full" src="${item_image}"
+								class="h-full item-img" src="${item_image}"
 								alt="${frappe.get_abbr(item.item_name)}"
-								style="object-fit: cover;">
+							>
 						</div>`;
 			} else {
 				return `<div class="item-qty-pill">
@@ -118,7 +118,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return (
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
 				data-rate="${escape(price_list_rate || 0)}"
 				title="${item.item_name}">
 
@@ -128,7 +128,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}</div>
 				</div>
 			</div>`
 		);

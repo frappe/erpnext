@@ -12,7 +12,7 @@ class PlaidConnector:
 	def __init__(self, access_token=None):
 		self.access_token = access_token
 		self.settings = frappe.get_single("Plaid Settings")
-		self.products = ["auth", "transactions"]
+		self.products = ["transactions"]
 		self.client_name = frappe.local.site
 		self.client = plaid.Client(
 			client_id=self.settings.plaid_client_id,

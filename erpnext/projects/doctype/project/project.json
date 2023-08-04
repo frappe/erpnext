@@ -234,13 +234,13 @@
   {
    "fieldname": "actual_start_date",
    "fieldtype": "Date",
-   "label": "Actual Start Date (via Time Sheet)",
+   "label": "Actual Start Date (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time (in Hours via Time Sheet)",
+   "label": "Actual Time in Hours (via Timesheet)",
    "read_only": 1
   },
   {
@@ -250,7 +250,7 @@
   {
    "fieldname": "actual_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date (via Time Sheet)",
+   "label": "Actual End Date (via Timesheet)",
    "oldfieldname": "act_completion_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -275,7 +275,7 @@
   {
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
-   "label": "Total Costing Amount (via Timesheets)",
+   "label": "Total Costing Amount (via Timesheet)",
    "read_only": 1
   },
   {
@@ -289,7 +289,8 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "remember_last_selected_value": 1
+   "remember_last_selected_value": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_28",
@@ -304,19 +305,19 @@
   {
    "fieldname": "total_billable_amount",
    "fieldtype": "Currency",
-   "label": "Total Billable Amount (via Timesheets)",
+   "label": "Total Billable Amount (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "total_billed_amount",
    "fieldtype": "Currency",
-   "label": "Total Billed Amount (via Sales Invoices)",
+   "label": "Total Billed Amount (via Sales Invoice)",
    "read_only": 1
   },
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
-   "label": "Total Consumed Material Cost  (via Stock Entry)",
+   "label": "Total Consumed Material Cost (via Stock Entry)",
    "read_only": 1
   },
   {
@@ -364,7 +365,8 @@
    "default": "0",
    "fieldname": "collect_progress",
    "fieldtype": "Check",
-   "label": "Collect Progress"
+   "label": "Collect Progress",
+   "search_index": 1
   },
   {
    "depends_on": "collect_progress",
@@ -408,7 +410,7 @@
    "depends_on": "eval:(doc.frequency == \"Daily\" && doc.collect_progress == true)",
    "fieldname": "daily_time_to_send",
    "fieldtype": "Time",
-   "label": "Time to send"
+   "label": "Daily Time to send"
   },
   {
    "depends_on": "eval:(doc.frequency == \"Weekly\" && doc.collect_progress == true)",
@@ -421,7 +423,7 @@
    "depends_on": "eval:(doc.frequency == \"Weekly\" && doc.collect_progress == true)",
    "fieldname": "weekly_time_to_send",
    "fieldtype": "Time",
-   "label": "Time to send"
+   "label": "Weekly Time to send"
   },
   {
    "fieldname": "column_break_45",
@@ -451,7 +453,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2022-06-23 16:45:06.108499",
+ "modified": "2023-06-28 18:57:11.603497",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

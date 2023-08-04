@@ -11,6 +11,7 @@ from frappe.utils import flt, today
 
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import (
+	make_in_transit_stock_entry,
 	make_purchase_order,
 	make_stock_entry,
 	make_supplier_quotation,
@@ -53,8 +54,28 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
+		self.assertEqual(se.stock_entry_type, "Material Transfer")
+		self.assertEqual(se.purpose, "Material Transfer")
 		self.assertEqual(se.doctype, "Stock Entry")
 		self.assertEqual(len(se.get("items")), len(mr.get("items")))
+
+	def test_in_transit_make_stock_entry(self):
+		mr = frappe.copy_doc(test_records[0]).insert()
+
+		self.assertRaises(frappe.ValidationError, make_stock_entry, mr.name)
+
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.material_request_type = "Material Transfer"
+		mr.submit()
+
+		in_transit_warehouse = get_in_transit_warehouse(mr.company)
+		se = make_in_transit_stock_entry(mr.name, in_transit_warehouse)
+
+		self.assertEqual(se.stock_entry_type, "Material Transfer")
+		self.assertEqual(se.purpose, "Material Transfer")
+		self.assertEqual(se.doctype, "Stock Entry")
+		for row in se.get("items"):
+			self.assertEqual(row.t_warehouse, in_transit_warehouse)
 
 	def _insert_stock_entry(self, qty1, qty2, warehouse=None):
 		se = frappe.get_doc(
@@ -216,7 +237,7 @@ class TestMaterialRequest(FrappeTestCase):
 		po.load_from_db()
 		mr.update_status("Stopped")
 		self.assertRaises(frappe.InvalidStatusError, po.submit)
-		frappe.db.set(po, "docstatus", 1)
+		po.db_set("docstatus", 1)
 		self.assertRaises(frappe.InvalidStatusError, po.cancel)
 
 		# resubmit and check for per complete
@@ -379,7 +400,7 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.insert()
 		mr.submit()
 
-		frappe.db.set_value("Stock Settings", None, "mr_qty_allowance", 20)
+		frappe.db.set_single_value("Stock Settings", "mr_qty_allowance", 20)
 
 		# map a stock entry
 
@@ -740,6 +761,36 @@ class TestMaterialRequest(FrappeTestCase):
 
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(existing_requested_qty, current_requested_qty)
+
+
+def get_in_transit_warehouse(company):
+	if not frappe.db.exists("Warehouse Type", "Transit"):
+		frappe.get_doc(
+			{
+				"doctype": "Warehouse Type",
+				"name": "Transit",
+			}
+		).insert()
+
+	in_transit_warehouse = frappe.db.exists(
+		"Warehouse", {"warehouse_type": "Transit", "company": company}
+	)
+
+	if not in_transit_warehouse:
+		in_transit_warehouse = (
+			frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "Transit",
+					"warehouse_type": "Transit",
+					"company": company,
+				}
+			)
+			.insert()
+			.name
+		)
+
+	return in_transit_warehouse
 
 
 def make_material_request(**args):

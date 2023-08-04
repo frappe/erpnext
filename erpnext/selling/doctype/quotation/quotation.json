@@ -43,11 +43,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_36",
-  "tax_category",
-  "column_break_34",
   "shipping_rule",
+  "column_break_34",
+  "incoterm",
+  "named_place",
   "section_break_36",
   "taxes",
   "section_break_39",
@@ -289,6 +291,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -414,7 +417,6 @@
    "fieldname": "items_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
-   "label": "Items",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -422,6 +424,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "quotation_details",
    "oldfieldtype": "Table",
    "options": "Quotation Item",
@@ -1052,13 +1055,25 @@
   {
    "fieldname": "column_break_108",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:06:33.479650",
+ "modified": "2023-06-03 16:21:04.980033",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

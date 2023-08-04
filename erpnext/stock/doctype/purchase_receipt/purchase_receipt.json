@@ -58,11 +58,13 @@
   "total",
   "net_total",
   "taxes_charges_section",
+  "tax_category",
   "taxes_and_charges",
   "shipping_col",
-  "tax_category",
-  "column_break_53",
   "shipping_rule",
+  "column_break_53",
+  "incoterm",
+  "named_place",
   "taxes_section",
   "taxes",
   "totals",
@@ -324,6 +326,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -435,6 +438,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "no_copy": 1,
    "oldfieldname": "rejected_warehouse",
@@ -1111,6 +1115,7 @@
    "depends_on": "eval: doc.is_internal_supplier",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set From Warehouse",
    "options": "Warehouse"
   },
@@ -1218,13 +1223,25 @@
   {
    "fieldname": "column_break_104",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:02:31.776256",
+ "modified": "2023-07-04 17:23:17.025390",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

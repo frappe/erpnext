@@ -174,7 +174,10 @@ class TestWebsiteItem(unittest.TestCase):
 	# Website Item Portal Tests Begin
 
 	def test_website_item_breadcrumbs(self):
-		"Check if breadcrumbs include homepage, product listing navigation page, parent item group(s) and item group."
+		"""
+		Check if breadcrumbs include homepage, product listing navigation page,
+		parent item group(s) and item group
+		"""
 		from erpnext.setup.doctype.item_group.item_group import get_parent_item_groups
 
 		item_code = "Test Breadcrumb Item"
@@ -196,8 +199,14 @@ class TestWebsiteItem(unittest.TestCase):
 
 		breadcrumbs = get_parent_item_groups(item.item_group)
 
+		settings = frappe.get_cached_doc("E Commerce Settings")
+		if settings.enable_field_filters:
+			base_breadcrumb = "Shop by Category"
+		else:
+			base_breadcrumb = "All Products"
+
 		self.assertEqual(breadcrumbs[0]["name"], "Home")
-		self.assertEqual(breadcrumbs[1]["name"], "Shop by Category")
+		self.assertEqual(breadcrumbs[1]["name"], base_breadcrumb)
 		self.assertEqual(breadcrumbs[2]["name"], "_Test Item Group B")  # parent item group
 		self.assertEqual(breadcrumbs[3]["name"], "_Test Item Group B - 1")
 
@@ -223,11 +232,11 @@ class TestWebsiteItem(unittest.TestCase):
 		self.assertTrue(bool(data.product_info["price"]))
 
 		price_object = data.product_info["price"]
-		self.assertEqual(price_object.get("discount_percent"), 25)
+		self.assertEqual(price_object.get("discount_percent"), 25.0)
 		self.assertEqual(price_object.get("price_list_rate"), 750)
 		self.assertEqual(price_object.get("formatted_mrp"), "₹ 1,000.00")
 		self.assertEqual(price_object.get("formatted_price"), "₹ 750.00")
-		self.assertEqual(price_object.get("formatted_discount_percent"), "25%")
+		self.assertEqual(price_object.get("formatted_discount_percent"), "25.0%")
 
 		# switch to admin and disable show price
 		frappe.set_user("Administrator")

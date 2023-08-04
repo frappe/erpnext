@@ -205,7 +205,7 @@ class TestShoppingCart(unittest.TestCase):
 
 		self.assertEqual(quote_doctstatus, 0)
 
-		frappe.db.set_value("E Commerce Settings", None, "save_quotations_as_draft", 0)
+		frappe.db.set_single_value("E Commerce Settings", "save_quotations_as_draft", 0)
 		frappe.local.shopping_cart_settings = None
 		update_cart("_Test Item", 1)
 		quote_name = request_for_quotation()  # Request for Quote

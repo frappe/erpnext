@@ -54,17 +54,21 @@
   "column_break_26",
   "total",
   "net_total",
+  "tax_withholding_net_total",
+  "base_tax_withholding_net_total",
   "section_break_48",
   "pricing_rules",
   "raw_material_details",
   "set_reserve_warehouse",
   "supplied_items",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_53",
-  "tax_category",
-  "column_break_50",
   "shipping_rule",
+  "column_break_50",
+  "incoterm",
+  "named_place",
   "section_break_52",
   "taxes",
   "totals",
@@ -104,7 +108,7 @@
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "company_shipping_address_section",
+  "shipping_address_section",
   "shipping_address",
   "column_break_99",
   "shipping_address_display",
@@ -153,7 +157,7 @@
   "party_account_currency",
   "inter_company_order_reference",
   "is_old_subcontracting_flow",
-  "dashboard"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -318,6 +322,7 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Customer Mobile No",
+   "options": "Phone",
    "print_hide": 1
   },
   {
@@ -364,6 +369,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Contact Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -381,7 +387,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "label": "Company Shipping Address",
+   "label": "Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -491,6 +497,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Items",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Purchase Order Item",
@@ -1096,8 +1103,7 @@
   {
    "fieldname": "before_items_section",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "Items"
+   "hide_border": 1
   },
   {
    "fieldname": "items_col_break",
@@ -1108,7 +1114,8 @@
    "fetch_from": "supplier.is_internal_supplier",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
-   "label": "Is Internal Supplier"
+   "label": "Is Internal Supplier",
+   "read_only": 1
   },
   {
    "fetch_from": "supplier.represents_company",
@@ -1180,12 +1187,6 @@
    "label": "More Info"
   },
   {
-   "fieldname": "dashboard",
-   "fieldtype": "Tab Break",
-   "label": "Dashboard",
-   "show_dashboard": 1
-  },
-  {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
@@ -1203,11 +1204,6 @@
    "label": "Address & Contact"
   },
   {
-   "fieldname": "company_shipping_address_section",
-   "fieldtype": "Section Break",
-   "label": "Company Shipping Address"
-  },
-  {
    "fieldname": "company_billing_address_section",
    "fieldtype": "Section Break",
    "label": "Company Billing Address"
@@ -1220,19 +1216,64 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "default": "0",
+   "depends_on": "apply_tds",
+   "fieldname": "tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "apply_tds",
+   "fieldname": "base_tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_99",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_103",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
+  },
+  {
+   "fieldname": "shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Address"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:01:41.674352",
+ "modified": "2023-06-03 16:19:45.710444",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

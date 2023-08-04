@@ -21,6 +21,9 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+	validate_against_blanket_order,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
@@ -69,6 +72,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
+		validate_against_blanket_order(self)
 
 		if self.is_old_subcontracting_flow:
 			self.validate_bom_for_subcontracting_items()
@@ -207,31 +211,32 @@ class PurchaseOrder(BuyingController):
 				)
 
 	def validate_fg_item_for_subcontracting(self):
-		if self.is_subcontracted and not self.is_old_subcontracting_flow:
+		if self.is_subcontracted:
+			if not self.is_old_subcontracting_flow:
+				for item in self.items:
+					if not item.fg_item:
+						frappe.throw(
+							_("Row #{0}: Finished Good Item is not specified for service item {1}").format(
+								item.idx, item.item_code
+							)
+						)
+					else:
+						if not frappe.get_value("Item", item.fg_item, "is_sub_contracted_item"):
+							frappe.throw(
+								_("Row #{0}: Finished Good Item {1} must be a sub-contracted item").format(
+									item.idx, item.fg_item
+								)
+							)
+						elif not frappe.get_value("Item", item.fg_item, "default_bom"):
+							frappe.throw(
+								_("Row #{0}: Default BOM not found for FG Item {1}").format(item.idx, item.fg_item)
+							)
+					if not item.fg_item_qty:
+						frappe.throw(_("Row #{0}: Finished Good Item Qty can not be zero").format(item.idx))
+		else:
 			for item in self.items:
-				if not item.fg_item:
-					frappe.throw(
-						_("Row #{0}: Finished Good Item is not specified for service item {1}").format(
-							item.idx, item.item_code
-						)
-					)
-				else:
-					if not frappe.get_value("Item", item.fg_item, "is_sub_contracted_item"):
-						frappe.throw(
-							_(
-								"Row #{0}: Finished Good Item {1} must be a sub-contracted item for service item {2}"
-							).format(item.idx, item.fg_item, item.item_code)
-						)
-					elif not frappe.get_value("Item", item.fg_item, "default_bom"):
-						frappe.throw(
-							_("Row #{0}: Default BOM not found for FG Item {1}").format(item.idx, item.fg_item)
-						)
-				if not item.fg_item_qty:
-					frappe.throw(
-						_("Row #{0}: Finished Good Item Qty is not specified for service item {0}").format(
-							item.idx, item.item_code
-						)
-					)
+				item.set("fg_item", None)
+				item.set("fg_item_qty", 0)
 
 	def get_schedule_dates(self):
 		for d in self.get("items"):
@@ -361,7 +366,7 @@ class PurchaseOrder(BuyingController):
 		self.update_reserved_qty_for_subcontract()
 		self.check_on_hold_or_closed_status()
 
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		self.update_prevdoc_status()
 

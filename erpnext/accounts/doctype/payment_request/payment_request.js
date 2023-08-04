@@ -42,7 +42,7 @@ frappe.ui.form.on("Payment Request", "refresh", function(frm) {
 		});
 	}
 
-	if(!frm.doc.payment_gateway_account && frm.doc.status == "Initiated") {
+	if((!frm.doc.payment_gateway_account || frm.doc.payment_request_type == "Outward") && frm.doc.status == "Initiated") {
 		frm.add_custom_button(__('Create Payment Entry'), function(){
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry",

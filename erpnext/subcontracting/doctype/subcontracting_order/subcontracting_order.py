@@ -77,22 +77,22 @@ class SubcontractingOrder(SubcontractingController):
 					frappe.throw(_(msg))
 
 	def set_missing_values(self):
-		self.set_missing_values_in_additional_costs()
-		self.set_missing_values_in_service_items()
-		self.set_missing_values_in_supplied_items()
-		self.set_missing_values_in_items()
+		self.calculate_additional_costs()
+		self.calculate_service_costs()
+		self.calculate_supplied_items_qty_and_amount()
+		self.calculate_items_qty_and_amount()
 
-	def set_missing_values_in_service_items(self):
+	def calculate_service_costs(self):
 		for idx, item in enumerate(self.get("service_items")):
 			self.items[idx].service_cost_per_qty = item.amount / self.items[idx].qty
 
-	def set_missing_values_in_supplied_items(self):
+	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):
 			bom = frappe.get_doc("BOM", item.bom)
 			rm_cost = sum(flt(rm_item.amount) for rm_item in bom.items)
 			item.rm_cost_per_qty = rm_cost / flt(bom.quantity)
 
-	def set_missing_values_in_items(self):
+	def calculate_items_qty_and_amount(self):
 		total_qty = total = 0
 		for item in self.items:
 			item.rate = item.rm_cost_per_qty + item.service_cost_per_qty + flt(item.additional_cost_per_qty)
@@ -163,9 +163,10 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
 					for item in self.supplied_items:
-						if item.returned_qty:
-							status = "Closed"
+						if not item.returned_qty or (item.supplied_qty - item.consumed_qty - item.returned_qty) > 0:
 							break
+					else:
+						status = "Closed"
 				else:
 					total_required_qty = total_supplied_qty = 0
 					for item in self.supplied_items:

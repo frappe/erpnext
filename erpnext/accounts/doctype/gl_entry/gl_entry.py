@@ -58,7 +58,14 @@ class GLEntry(Document):
 			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
 
-			if frappe.db.get_value("Account", self.account, "account_type") not in [
+			if (
+				self.voucher_type == "Journal Entry"
+				and frappe.get_cached_value("Journal Entry", self.voucher_no, "voucher_type")
+				== "Exchange Gain Or Loss"
+			):
+				return
+
+			if frappe.get_cached_value("Account", self.account, "account_type") not in [
 				"Receivable",
 				"Payable",
 			]:
@@ -95,7 +102,15 @@ class GLEntry(Document):
 				)
 
 		# Zero value transaction is not allowed
-		if not (flt(self.debit, self.precision("debit")) or flt(self.credit, self.precision("credit"))):
+		if not (
+			flt(self.debit, self.precision("debit"))
+			or flt(self.credit, self.precision("credit"))
+			or (
+				self.voucher_type == "Journal Entry"
+				and frappe.get_cached_value("Journal Entry", self.voucher_no, "voucher_type")
+				== "Exchange Gain Or Loss"
+			)
+		):
 			frappe.throw(
 				_("{0} {1}: Either debit or credit amount is required for {2}").format(
 					self.voucher_type, self.voucher_no, self.account
@@ -120,7 +135,7 @@ class GLEntry(Document):
 			frappe.throw(msg, title=_("Missing Cost Center"))
 
 	def validate_dimensions_for_pl_and_bs(self):
-		account_type = frappe.db.get_value("Account", self.account, "report_type")
+		account_type = frappe.get_cached_value("Account", self.account, "report_type")
 
 		for dimension in get_checks_for_pl_and_bs_accounts():
 			if (
@@ -188,7 +203,7 @@ class GLEntry(Document):
 	def check_pl_account(self):
 		if (
 			self.is_opening == "Yes"
-			and frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss"
+			and frappe.get_cached_value("Account", self.account, "report_type") == "Profit and Loss"
 			and not self.is_cancelled
 		):
 			frappe.throw(
@@ -281,7 +296,7 @@ class GLEntry(Document):
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
-		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
+		balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
 		if balance_must_be:
 			balance = frappe.db.sql(
 				"""select sum(debit) - sum(credit)

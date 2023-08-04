@@ -8,7 +8,6 @@ from frappe.permissions import (
 	get_doc_permissions,
 	has_permission,
 	remove_user_permission,
-	set_user_permission_if_allowed,
 )
 from frappe.utils import cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
@@ -96,7 +95,7 @@ class Employee(NestedSet):
 			return
 
 		add_user_permission("Employee", self.name, self.user_id)
-		set_user_permission_if_allowed("Company", self.company, self.user_id)
+		add_user_permission("Company", self.company, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing
@@ -145,33 +144,10 @@ class Employee(NestedSet):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
 			throw(_("Date of Birth cannot be greater than today."))
 
-		if (
-			self.date_of_birth
-			and self.date_of_joining
-			and getdate(self.date_of_birth) >= getdate(self.date_of_joining)
-		):
-			throw(_("Date of Joining must be greater than Date of Birth"))
-
-		elif (
-			self.date_of_retirement
-			and self.date_of_joining
-			and (getdate(self.date_of_retirement) <= getdate(self.date_of_joining))
-		):
-			throw(_("Date Of Retirement must be greater than Date of Joining"))
-
-		elif (
-			self.relieving_date
-			and self.date_of_joining
-			and (getdate(self.relieving_date) < getdate(self.date_of_joining))
-		):
-			throw(_("Relieving Date must be greater than or equal to Date of Joining"))
-
-		elif (
-			self.contract_end_date
-			and self.date_of_joining
-			and (getdate(self.contract_end_date) <= getdate(self.date_of_joining))
-		):
-			throw(_("Contract End Date must be greater than Date of Joining"))
+		self.validate_from_to_dates("date_of_birth", "date_of_joining")
+		self.validate_from_to_dates("date_of_joining", "date_of_retirement")
+		self.validate_from_to_dates("date_of_joining", "relieving_date")
+		self.validate_from_to_dates("date_of_joining", "contract_end_date")
 
 	def validate_email(self):
 		if self.company_email:
@@ -281,7 +257,9 @@ def get_employee_email(employee_doc):
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
 	if employee:
-		holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
+		holiday_list, company = frappe.get_cached_value(
+			"Employee", employee, ["holiday_list", "company"]
+		)
 	else:
 		holiday_list = ""
 		company = frappe.db.get_single_value("Global Defaults", "default_company")

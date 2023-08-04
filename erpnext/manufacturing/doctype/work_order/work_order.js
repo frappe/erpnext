@@ -139,7 +139,7 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		if (frm.doc.status != "Closed") {
-			if (frm.doc.docstatus === 1
+			if (frm.doc.docstatus === 1 && frm.doc.status !== "Completed"
 				&& frm.doc.operations && frm.doc.operations.length) {
 
 				const not_completed = frm.doc.operations.filter(d => {
@@ -256,6 +256,12 @@ frappe.ui.form.on("Work Order", {
 					label: __('Batch Size'),
 					read_only: 1
 				},
+				{
+					fieldtype: 'Int',
+					fieldname: 'sequence_id',
+					label: __('Sequence Id'),
+					read_only: 1
+				},
 			],
 			data: operations_data,
 			in_place_edit: true,
@@ -280,8 +286,8 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach(data => {
-			if(data.completed_qty != frm.doc.qty) {
-				pending_qty = frm.doc.qty - flt(data.completed_qty);
+			if(data.completed_qty + data.process_loss_qty != frm.doc.qty) {
+				pending_qty = frm.doc.qty - flt(data.completed_qty) - flt(data.process_loss_qty);
 
 				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({
@@ -290,7 +296,8 @@ frappe.ui.form.on("Work Order", {
 						'workstation': data.workstation,
 						'batch_size': data.batch_size,
 						'qty': pending_qty,
-						'pending_qty': pending_qty
+						'pending_qty': pending_qty,
+						'sequence_id': data.sequence_id
 					});
 				}
 			}
@@ -446,7 +453,6 @@ frappe.ui.form.on("Work Order", {
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
-		frm.fields_dict.operations.grid.toggle_reqd("workstation", frm.doc.operations);
 	},
 
 	set_sales_order: function(frm) {
@@ -507,7 +513,7 @@ frappe.ui.form.on("Work Order Item", {
 				callback: function(r) {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, {
-							"required_qty": 1,
+							"required_qty": row.required_qty || 1,
 							"item_name": r.message.item_name,
 							"description": r.message.description,
 							"source_warehouse": r.message.default_warehouse,
@@ -589,43 +595,45 @@ erpnext.work_order = {
 				}
 			}
 
-			if(!frm.doc.skip_transfer){
+			if (frm.doc.status != 'Stopped') {
 				// If "Material Consumption is check in Manufacturing Settings, allow Material Consumption
-				if (flt(doc.material_transferred_for_manufacturing) > 0 && frm.doc.status != 'Stopped') {
-					if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))) {
-						frm.has_finish_btn = true;
-
-						if (frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
-							// Only show "Material Consumption" when required_qty > consumed_qty
-							var counter = 0;
-							var tbl = frm.doc.required_items || [];
-							var tbl_lenght = tbl.length;
-							for (var i = 0, len = tbl_lenght; i < len; i++) {
-								let wo_item_qty = frm.doc.required_items[i].transferred_qty || frm.doc.required_items[i].required_qty;
-								if (flt(wo_item_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
-									counter += 1;
-								}
-							}
-							if (counter > 0) {
-								var consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
-									const backflush_raw_materials_based_on = frm.doc.__onload.backflush_raw_materials_based_on;
-									erpnext.work_order.make_consumption_se(frm, backflush_raw_materials_based_on);
-								});
-								consumption_btn.addClass('btn-primary');
+				if (frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
+					if (flt(doc.material_transferred_for_manufacturing) > 0 || frm.doc.skip_transfer) {
+						// Only show "Material Consumption" when required_qty > consumed_qty
+						var counter = 0;
+						var tbl = frm.doc.required_items || [];
+						var tbl_lenght = tbl.length;
+						for (var i = 0, len = tbl_lenght; i < len; i++) {
+							let wo_item_qty = frm.doc.required_items[i].transferred_qty || frm.doc.required_items[i].required_qty;
+							if (flt(wo_item_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
+								counter += 1;
 							}
 						}
-
-						var finish_btn = frm.add_custom_button(__('Finish'), function() {
-							erpnext.work_order.make_se(frm, 'Manufacture');
-						});
-
-						if(doc.material_transferred_for_manufacturing>=doc.qty) {
-							// all materials transferred for manufacturing, make this primary
-							finish_btn.addClass('btn-primary');
+						if (counter > 0) {
+							var consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+								const backflush_raw_materials_based_on = frm.doc.__onload.backflush_raw_materials_based_on;
+								erpnext.work_order.make_consumption_se(frm, backflush_raw_materials_based_on);
+							});
+							consumption_btn.addClass('btn-primary');
 						}
-					} else {
-						frappe.db.get_doc("Manufacturing Settings").then((doc) => {
-							let allowance_percentage = doc.overproduction_percentage_for_work_order;
+					}
+				}
+
+				if(!frm.doc.skip_transfer){
+					if (flt(doc.material_transferred_for_manufacturing) > 0) {
+						if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))) {
+							frm.has_finish_btn = true;
+
+							let finish_btn = frm.add_custom_button(__('Finish'), function() {
+								erpnext.work_order.make_se(frm, 'Manufacture');
+							});
+
+							if(doc.material_transferred_for_manufacturing>=doc.qty) {
+								// all materials transferred for manufacturing, make this primary
+								finish_btn.addClass('btn-primary');
+							}
+						} else if (frm.doc.__onload && frm.doc.__onload.overproduction_percentage) {
+							let allowance_percentage = frm.doc.__onload.overproduction_percentage;
 
 							if (allowance_percentage > 0) {
 								let allowed_qty = frm.doc.qty + ((allowance_percentage / 100) * frm.doc.qty);
@@ -636,19 +644,18 @@ erpnext.work_order = {
 									});
 								}
 							}
-						});
+						}
 					}
-				}
-			} else {
-				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
-					var finish_btn = frm.add_custom_button(__('Finish'), function() {
-						erpnext.work_order.make_se(frm, 'Manufacture');
-					});
-					finish_btn.addClass('btn-primary');
+				} else {
+					if ((flt(doc.produced_qty) < flt(doc.qty))) {
+						let finish_btn = frm.add_custom_button(__('Finish'), function() {
+							erpnext.work_order.make_se(frm, 'Manufacture');
+						});
+						finish_btn.addClass('btn-primary');
+					}
 				}
 			}
 		}
-
 	},
 	calculate_cost: function(doc) {
 		if (doc.operations){
@@ -749,13 +756,14 @@ erpnext.work_order = {
 	},
 
 	make_consumption_se: function(frm, backflush_raw_materials_based_on) {
+		let max = 0;
 		if(!frm.doc.skip_transfer){
-			var max = (backflush_raw_materials_based_on === "Material Transferred for Manufacture") ?
+			max = (backflush_raw_materials_based_on === "Material Transferred for Manufacture") ?
 				flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty) :
 				flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 				// flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
 		} else {
-			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+			max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		}
 
 		frappe.call({

@@ -8,7 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule'];
 	},
 
 	refresh: function(frm) {
@@ -253,9 +253,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 
-				if (in_list(['Debit Note', 'Credit Note'], doc.voucher_type)) {
-					out.filters.push([jvd.reference_type, "is_return", "=", 1]);
-				}
 			}
 
 			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
@@ -267,11 +264,11 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 			}
 
 			if(jvd.party_type && jvd.party) {
-				var party_field = "";
+				let party_field = "";
 				if(jvd.reference_type.indexOf("Sales")===0) {
-					var party_field = "customer";
+					party_field = "customer";
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
-					var party_field = "supplier";
+					party_field = "supplier";
 				}
 
 				if (party_field) {
@@ -371,7 +368,7 @@ cur_frm.cscript.update_totals = function(doc) {
 		td += flt(accounts[i].debit, precision("debit", accounts[i]));
 		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
 	}
-	var doc = locals[doc.doctype][doc.name];
+	doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
 	doc.total_credit = tc;
 	doc.difference = flt((td - tc), precision("difference"));
@@ -578,7 +575,7 @@ $.extend(erpnext.journal_entry, {
 		};
 		if(!frm.doc.multi_currency) {
 			$.extend(filters, {
-				account_currency: frappe.get_doc(":Company", frm.doc.company).default_currency
+				account_currency: ['in', [frappe.get_doc(":Company", frm.doc.company).default_currency, null]]
 			});
 		}
 		return { filters: filters };

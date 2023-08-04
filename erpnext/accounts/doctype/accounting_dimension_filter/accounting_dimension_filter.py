@@ -8,6 +8,12 @@ from frappe.model.document import Document
 
 
 class AccountingDimensionFilter(Document):
+	def before_save(self):
+		# If restriction is not applied on values, then remove all the dimensions and set allow_or_restrict to Restrict
+		if not self.apply_restriction_on_values:
+			self.allow_or_restrict = "Restrict"
+			self.set("dimensions", [])
+
 	def validate(self):
 		self.validate_applicable_accounts()
 
@@ -44,12 +50,12 @@ def get_dimension_filter_map():
 			a.applicable_on_account, d.dimension_value, p.accounting_dimension,
 			p.allow_or_restrict, a.is_mandatory
 		FROM
-			`tabApplicable On Account` a, `tabAllowed Dimension` d,
+			`tabApplicable On Account` a,
 			`tabAccounting Dimension Filter` p
+		LEFT JOIN `tabAllowed Dimension` d ON d.parent = p.name
 		WHERE
 			p.name = a.parent
 			AND p.disabled = 0
-			AND p.name = d.parent
 	""",
 		as_dict=1,
 	)
@@ -76,4 +82,5 @@ def build_map(map_object, dimension, account, filter_value, allow_or_restrict, i
 		(dimension, account),
 		{"allowed_dimensions": [], "is_mandatory": is_mandatory, "allow_or_restrict": allow_or_restrict},
 	)
-	map_object[(dimension, account)]["allowed_dimensions"].append(filter_value)
+	if filter_value:
+		map_object[(dimension, account)]["allowed_dimensions"].append(filter_value)

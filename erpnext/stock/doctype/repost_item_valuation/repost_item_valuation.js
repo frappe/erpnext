@@ -34,6 +34,22 @@ frappe.ui.form.on('Repost Item Valuation', {
 		frm.trigger('setup_realtime_progress');
 	},
 
+	based_on: function(frm) {
+		var fields_to_reset = [];
+
+		if (frm.doc.based_on == 'Transaction') {
+			fields_to_reset = ['item_code', 'warehouse'];
+		} else if (frm.doc.based_on == 'Item and Warehouse') {
+			fields_to_reset = ['voucher_type', 'voucher_no'];
+		}
+
+		if (fields_to_reset) {
+			fields_to_reset.forEach(field => {
+				frm.set_value(field, undefined);
+			});
+		}
+	},
+
 	setup_realtime_progress: function(frm) {
 		frappe.realtime.on('item_reposting_progress', data => {
 			if (frm.doc.name !== data.name) {
@@ -43,6 +59,7 @@ frappe.ui.form.on('Repost Item Valuation', {
 			if (frm.doc.status == 'In Progress') {
 				frm.doc.current_index = data.current_index;
 				frm.doc.items_to_be_repost = data.items_to_be_repost;
+				frm.doc.total_reposting_count = data.total_reposting_count;
 
 				frm.dashboard.reset();
 				frm.trigger('show_reposting_progress');
@@ -79,6 +96,11 @@ frappe.ui.form.on('Repost Item Valuation', {
 		var bars = [];
 
 		let total_count = frm.doc.items_to_be_repost ? JSON.parse(frm.doc.items_to_be_repost).length : 0;
+
+		if (frm.doc?.total_reposting_count) {
+			total_count = frm.doc.total_reposting_count;
+		}
+
 		let progress = flt(cint(frm.doc.current_index) / total_count * 100, 2) || 0.5;
 		var title = __('Reposting Completed {0}%', [progress]);
 

@@ -13,10 +13,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Setup Node.js v14
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save

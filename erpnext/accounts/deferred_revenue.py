@@ -136,7 +136,7 @@ def convert_deferred_revenue_to_income(
 		send_mail(deferred_process)
 
 
-def get_booking_dates(doc, item, posting_date=None):
+def get_booking_dates(doc, item, posting_date=None, prev_posting_date=None):
 	if not posting_date:
 		posting_date = add_days(today(), -1)
 
@@ -146,39 +146,42 @@ def get_booking_dates(doc, item, posting_date=None):
 		"deferred_revenue_account" if doc.doctype == "Sales Invoice" else "deferred_expense_account"
 	)
 
-	prev_gl_entry = frappe.db.sql(
-		"""
-		select name, posting_date from `tabGL Entry` where company=%s and account=%s and
-		voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-		and is_cancelled = 0
-		order by posting_date desc limit 1
-	""",
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
-	)
+	if not prev_posting_date:
+		prev_gl_entry = frappe.db.sql(
+			"""
+			select name, posting_date from `tabGL Entry` where company=%s and account=%s and
+			voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
+			and is_cancelled = 0
+			order by posting_date desc limit 1
+		""",
+			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
+			as_dict=True,
+		)
 
-	prev_gl_via_je = frappe.db.sql(
-		"""
-		SELECT p.name, p.posting_date FROM `tabJournal Entry` p, `tabJournal Entry Account` c
-		WHERE p.name = c.parent and p.company=%s and c.account=%s
-		and c.reference_type=%s and c.reference_name=%s
-		and c.reference_detail_no=%s and c.docstatus < 2 order by posting_date desc limit 1
-	""",
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
-	)
+		prev_gl_via_je = frappe.db.sql(
+			"""
+			SELECT p.name, p.posting_date FROM `tabJournal Entry` p, `tabJournal Entry Account` c
+			WHERE p.name = c.parent and p.company=%s and c.account=%s
+			and c.reference_type=%s and c.reference_name=%s
+			and c.reference_detail_no=%s and c.docstatus < 2 order by posting_date desc limit 1
+		""",
+			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
+			as_dict=True,
+		)
 
-	if prev_gl_via_je:
-		if (not prev_gl_entry) or (
-			prev_gl_entry and prev_gl_entry[0].posting_date < prev_gl_via_je[0].posting_date
-		):
-			prev_gl_entry = prev_gl_via_je
+		if prev_gl_via_je:
+			if (not prev_gl_entry) or (
+				prev_gl_entry and prev_gl_entry[0].posting_date < prev_gl_via_je[0].posting_date
+			):
+				prev_gl_entry = prev_gl_via_je
 
-	if prev_gl_entry:
-		start_date = getdate(add_days(prev_gl_entry[0].posting_date, 1))
+		if prev_gl_entry:
+			start_date = getdate(add_days(prev_gl_entry[0].posting_date, 1))
+		else:
+			start_date = item.service_start_date
+
 	else:
-		start_date = item.service_start_date
-
+		start_date = getdate(add_days(prev_posting_date, 1))
 	end_date = get_last_day(start_date)
 	if end_date >= item.service_end_date:
 		end_date = item.service_end_date
@@ -338,12 +341,18 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		"enable_deferred_revenue" if doc.doctype == "Sales Invoice" else "enable_deferred_expense"
 	)
 
-	accounts_frozen_upto = frappe.get_cached_value("Accounts Settings", "None", "acc_frozen_upto")
+	accounts_frozen_upto = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
 
 	def _book_deferred_revenue_or_expense(
-		item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on
+		item,
+		via_journal_entry,
+		submit_journal_entry,
+		book_deferred_entries_based_on,
+		prev_posting_date=None,
 	):
-		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
+		start_date, end_date, last_gl_entry = get_booking_dates(
+			doc, item, posting_date=posting_date, prev_posting_date=prev_posting_date
+		)
 		if not (start_date and end_date):
 			return
 
@@ -377,9 +386,12 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		if not amount:
 			return
 
+		gl_posting_date = end_date
+		prev_posting_date = None
 		# check if books nor frozen till endate:
-		if accounts_frozen_upto and (end_date) <= getdate(accounts_frozen_upto):
-			end_date = get_last_day(add_days(accounts_frozen_upto, 1))
+		if accounts_frozen_upto and getdate(end_date) <= getdate(accounts_frozen_upto):
+			gl_posting_date = get_last_day(add_days(accounts_frozen_upto, 1))
+			prev_posting_date = end_date
 
 		if via_journal_entry:
 			book_revenue_via_journal_entry(
@@ -388,7 +400,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 				debit_account,
 				amount,
 				base_amount,
-				end_date,
+				gl_posting_date,
 				project,
 				account_currency,
 				item.cost_center,
@@ -404,7 +416,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 				against,
 				amount,
 				base_amount,
-				end_date,
+				gl_posting_date,
 				project,
 				account_currency,
 				item.cost_center,
@@ -418,7 +430,11 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(
-				item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on
+				item,
+				via_journal_entry,
+				submit_journal_entry,
+				book_deferred_entries_based_on,
+				prev_posting_date,
 			)
 
 	via_journal_entry = cint(

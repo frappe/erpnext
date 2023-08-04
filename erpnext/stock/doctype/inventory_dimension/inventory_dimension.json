@@ -11,20 +11,23 @@
   "reference_document",
   "column_break_4",
   "disabled",
-  "section_break_7",
   "field_mapping_section",
   "source_fieldname",
   "column_break_9",
   "target_fieldname",
   "applicable_for_documents_tab",
   "apply_to_all_doctypes",
+  "column_break_13",
   "document_type",
-  "istable",
   "type_of_transaction",
   "fetch_from_parent",
-  "column_break_16",
-  "condition",
+  "istable",
   "applicable_condition_example_section",
+  "condition",
+  "conditional_mandatory_section",
+  "reqd",
+  "mandatory_depends_on",
+  "conditional_rule_examples_section",
   "html_19"
  ],
  "fields": [
@@ -52,13 +55,13 @@
   {
    "fieldname": "applicable_for_documents_tab",
    "fieldtype": "Tab Break",
-   "label": "Applicable For Documents"
+   "label": "Applicable For"
   },
   {
    "depends_on": "eval:!doc.apply_to_all_doctypes",
    "fieldname": "document_type",
    "fieldtype": "Link",
-   "label": "Applicable to Document",
+   "label": "Apply to Document",
    "mandatory_depends_on": "eval:!doc.apply_to_all_doctypes",
    "options": "DocType"
   },
@@ -72,6 +75,7 @@
    "fetch_from": "document_type.istable",
    "fieldname": "istable",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": " Is Child Table",
    "read_only": 1
   },
@@ -79,23 +83,19 @@
    "depends_on": "eval:!doc.apply_to_all_doctypes",
    "fieldname": "condition",
    "fieldtype": "Code",
-   "label": "Applicable Condition"
+   "label": "Conditional Rule"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "apply_to_all_doctypes",
    "fieldtype": "Check",
-   "label": "Apply to All Inventory Document Types"
+   "label": "Apply to All Inventory Documents"
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
-  },
-  {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "target_fieldname",
@@ -115,13 +115,11 @@
    "collapsible": 1,
    "fieldname": "field_mapping_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Field Mapping"
   },
   {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
    "fieldname": "type_of_transaction",
    "fieldtype": "Select",
    "label": "Type of Transaction",
@@ -136,23 +134,50 @@
    "collapsible": 1,
    "depends_on": "eval:!doc.apply_to_all_doctypes",
    "fieldname": "applicable_condition_example_section",
-   "fieldtype": "Section Break",
-   "label": "Applicable Condition Examples"
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Set fieldname or DocType name like Supplier, Customer etc.",
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "description": "Set fieldname from which you want to fetch the data from the parent form.",
    "fieldname": "fetch_from_parent",
    "fieldtype": "Select",
-   "label": "Fetch Value From Parent Form"
+   "label": "Fetch Value From"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "fieldname": "conditional_rule_examples_section",
+   "fieldtype": "Section Break",
+   "label": "Conditional Rule Examples"
+  },
+  {
+   "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
+   "fieldname": "mandatory_depends_on",
+   "fieldtype": "Small Text",
+   "label": "Mandatory Depends On"
+  },
+  {
+   "fieldname": "conditional_mandatory_section",
+   "fieldtype": "Section Break",
+   "label": "Mandatory Section"
+  },
+  {
+   "default": "0",
+   "fieldname": "reqd",
+   "fieldtype": "Check",
+   "label": "Mandatory"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-02 13:29:04.098469",
+ "modified": "2023-01-31 13:44:38.507698",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

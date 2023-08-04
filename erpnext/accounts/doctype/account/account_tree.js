@@ -56,36 +56,41 @@ frappe.treeview_settings["Account"] = {
 			accounts = nodes;
 		}
 
-		const get_balances = frappe.call({
-			method: 'erpnext.accounts.utils.get_account_balances',
-			args: {
-				accounts: accounts,
-				company: cur_tree.args.company
-			},
-		});
+		frappe.db.get_single_value("Accounts Settings", "show_balance_in_coa").then((value) => {
+			if(value) {
 
-		get_balances.then(r => {
-			if (!r.message || r.message.length == 0) return;
+				const get_balances = frappe.call({
+					method: 'erpnext.accounts.utils.get_account_balances',
+					args: {
+						accounts: accounts,
+						company: cur_tree.args.company
+					},
+				});
 
-			for (let account of r.message) {
+				get_balances.then(r => {
+					if (!r.message || r.message.length == 0) return;
 
-				const node = cur_tree.nodes && cur_tree.nodes[account.value];
-				if (!node || node.is_root) continue;
+					for (let account of r.message) {
 
-				// show Dr if positive since balance is calculated as debit - credit else show Cr
-				const balance = account.balance_in_account_currency || account.balance;
-				const dr_or_cr = balance > 0 ? "Dr": "Cr";
-				const format = (value, currency) => format_currency(Math.abs(value), currency);
+						const node = cur_tree.nodes && cur_tree.nodes[account.value];
+						if (!node || node.is_root) continue;
 
-				if (account.balance!==undefined) {
-					node.parent && node.parent.find('.balance-area').remove();
-					$('<span class="balance-area pull-right">'
-						+ (account.balance_in_account_currency ?
-							(format(account.balance_in_account_currency, account.account_currency) + " / ") : "")
-						+ format(account.balance, account.company_currency)
-						+ " " + dr_or_cr
-						+ '</span>').insertBefore(node.$ul);
-				}
+						// show Dr if positive since balance is calculated as debit - credit else show Cr
+						const balance = account.balance_in_account_currency || account.balance;
+						const dr_or_cr = balance > 0 ? "Dr": "Cr";
+						const format = (value, currency) => format_currency(Math.abs(value), currency);
+
+						if (account.balance!==undefined) {
+							node.parent && node.parent.find('.balance-area').remove();
+							$('<span class="balance-area pull-right">'
+							  + (account.balance_in_account_currency ?
+							     (format(account.balance_in_account_currency, account.account_currency) + " / ") : "")
+							  + format(account.balance, account.company_currency)
+							  + " " + dr_or_cr
+							  + '</span>').insertBefore(node.$ul);
+						}
+					}
+				});
 			}
 		});
 	},
@@ -189,8 +194,8 @@ frappe.treeview_settings["Account"] = {
 			click: function(node, btn) {
 				frappe.route_options = {
 					"account": node.label,
-					"from_date": frappe.sys_defaults.year_start_date,
-					"to_date": frappe.sys_defaults.year_end_date,
+					"from_date": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+					"to_date": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 					"company": frappe.treeview_settings['Account'].treeview.page.fields_dict.company.get_value()
 				};
 				frappe.set_route("query-report", "General Ledger");

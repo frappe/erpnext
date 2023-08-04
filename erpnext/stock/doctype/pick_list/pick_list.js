@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty === 0) ? "red" : "green"; });
 
@@ -10,6 +12,7 @@ frappe.ui.form.on('Pick List', {
 			'Delivery Note': 'Delivery Note',
 			'Stock Entry': 'Stock Entry',
 		};
+
 		frm.set_query('parent_warehouse', () => {
 			return {
 				filters: {
@@ -18,6 +21,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('work_order', () => {
 			return {
 				query: 'erpnext.stock.doctype.pick_list.pick_list.get_pending_work_orders',
@@ -26,6 +30,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('material_request', () => {
 			return {
 				filters: {
@@ -33,9 +38,11 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('item_code', 'locations', () => {
 			return erpnext.queries.item({ "is_stock_item": 1 });
 		});
+
 		frm.set_query('batch_no', 'locations', (frm, cdt, cdn) => {
 			const row = locals[cdt][cdn];
 			return {
@@ -46,12 +53,43 @@ frappe.ui.form.on('Pick List', {
 				},
 			};
 		});
+
+		frm.set_query("serial_and_batch_bundle", "locations", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('locations', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
 	},
 	set_item_locations:(frm, save) => {
 		if (!(frm.doc.locations && frm.doc.locations.length)) {
 			frappe.msgprint(__('Add items in the Item Locations table'));
 		} else {
-			frm.call('set_item_locations', {save: save});
+			frappe.call({
+				method: "set_item_locations",
+				doc: frm.doc,
+				args: {
+					"save": save,
+				},
+				freeze: 1,
+				freeze_message: __("Setting Item Locations..."),
+			});
 		}
 	},
 	get_item_locations: (frm) => {

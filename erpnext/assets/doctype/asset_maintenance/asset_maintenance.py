@@ -42,7 +42,6 @@ class AssetMaintenance(Document):
 				maintenance_log.db_set("maintenance_status", "Cancelled")
 
 
-@frappe.whitelist()
 def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
 	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
@@ -84,6 +83,8 @@ def calculate_next_due_date(
 		next_due_date = add_years(start_date, 1)
 	if periodicity == "2 Yearly":
 		next_due_date = add_years(start_date, 2)
+	if periodicity == "3 Yearly":
+		next_due_date = add_years(start_date, 3)
 	if periodicity == "Quarterly":
 		next_due_date = add_months(start_date, 3)
 	if end_date and (

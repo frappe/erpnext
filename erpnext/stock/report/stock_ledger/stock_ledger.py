@@ -34,6 +34,9 @@ def execute(filters=None):
 		conversion_factors.append(0)
 
 	actual_qty = stock_value = 0
+	if opening_row:
+		actual_qty = opening_row.get("qty_after_transaction")
+		stock_value = opening_row.get("stock_value")
 
 	available_serial_nos = {}
 	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(filters)
@@ -57,6 +60,12 @@ def execute(filters=None):
 
 		if sle.serial_no:
 			update_available_serial_nos(available_serial_nos, sle)
+
+		if sle.actual_qty:
+			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, precision)
+
+		elif sle.voucher_type == "Stock Reconciliation":
+			sle["in_out_rate"] = sle.valuation_rate
 
 		data.append(sle)
 
@@ -185,10 +194,18 @@ def get_columns(filters):
 				"convertible": "rate",
 			},
 			{
-				"label": _("Valuation Rate"),
+				"label": _("Avg Rate (Balance Stock)"),
 				"fieldname": "valuation_rate",
-				"fieldtype": "Currency",
-				"width": 110,
+				"fieldtype": "Float",
+				"width": 180,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Valuation Rate"),
+				"fieldname": "in_out_rate",
+				"fieldtype": "Float",
+				"width": 140,
 				"options": "Company:company:default_currency",
 				"convertible": "rate",
 			},
@@ -292,7 +309,7 @@ def get_stock_ledger_entries(filters, items):
 		query = query.where(sle.item_code.isin(items))
 
 	for field in ["voucher_no", "batch_no", "project", "company"]:
-		if filters.get(field):
+		if filters.get(field) and field not in inventory_dimension_fields:
 			query = query.where(sle[field] == filters.get(field))
 
 	query = apply_warehouse_filter(query, sle, filters)
@@ -394,7 +411,7 @@ def get_opening_balance(filters, columns, sl_entries):
 	)
 
 	# check if any SLEs are actually Opening Stock Reconciliation
-	for sle in sl_entries:
+	for sle in list(sl_entries):
 		if (
 			sle.get("voucher_type") == "Stock Reconciliation"
 			and sle.posting_date == filters.from_date

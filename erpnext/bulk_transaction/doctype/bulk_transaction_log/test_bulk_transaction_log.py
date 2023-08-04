@@ -15,17 +15,6 @@ class TestBulkTransactionLog(unittest.TestCase):
 		create_customer()
 		create_item()
 
-	def test_for_single_record(self):
-		so_name = create_so()
-		transaction_processing([{"name": so_name}], "Sales Order", "Sales Invoice")
-		data = frappe.db.get_list(
-			"Sales Invoice",
-			filters={"posting_date": date.today(), "customer": "Bulk Customer"},
-			fields=["*"],
-		)
-		if not data:
-			self.fail("No Sales Invoice Created !")
-
 	def test_entry_in_log(self):
 		so_name = create_so()
 		transaction_processing([{"name": so_name}], "Sales Order", "Sales Invoice")

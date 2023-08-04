@@ -25,7 +25,7 @@ frappe.ui.form.on('POS Closing Entry', {
 
 		frappe.realtime.on('closing_process_complete', async function(data) {
 			await frm.reload_doc();
-			if (frm.doc.status == 'Failed' && frm.doc.error_message && data.user == frappe.session.user) {
+			if (frm.doc.status == 'Failed' && frm.doc.error_message) {
 				frappe.msgprint({
 					title: __('POS Closing Failed'),
 					message: frm.doc.error_message,
@@ -123,22 +123,29 @@ frappe.ui.form.on('POS Closing Entry', {
 			row.expected_amount = row.opening_amount;
 		}
 
-		const pos_inv_promises = frm.doc.pos_transactions.map(
-			row => frappe.db.get_doc("POS Invoice", row.pos_invoice)
-		);
-
-		const pos_invoices = await Promise.all(pos_inv_promises);
-
-		for (let doc of pos_invoices) {
-			frm.doc.grand_total += flt(doc.grand_total);
-			frm.doc.net_total += flt(doc.net_total);
-			frm.doc.total_quantity += flt(doc.total_qty);
-			refresh_payments(doc, frm);
-			refresh_taxes(doc, frm);
-			refresh_fields(frm);
-			set_html_data(frm);
-		}
-
+		await Promise.all([
+			frappe.call({
+				method: 'erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices',
+				args: {
+					start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
+					end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
+					pos_profile: frm.doc.pos_profile,
+					user: frm.doc.user
+				},
+				callback: (r) => {
+					let pos_invoices = r.message;
+					for (let doc of pos_invoices) {
+						frm.doc.grand_total += flt(doc.grand_total);
+						frm.doc.net_total += flt(doc.net_total);
+						frm.doc.total_quantity += flt(doc.total_qty);
+						refresh_payments(doc, frm);
+						refresh_taxes(doc, frm);
+						refresh_fields(frm);
+						set_html_data(frm);
+					}
+				}
+			})
+		])
 		frappe.dom.unfreeze();
 	}
 });

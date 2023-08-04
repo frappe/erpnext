@@ -15,7 +15,8 @@
   "difference_amount",
   "sec_break1",
   "remark",
-  "currency"
+  "currency",
+  "exchange_rate"
  ],
  "fields": [
   {
@@ -91,11 +92,17 @@
    "label": "Difference Amount",
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Exchange Rate"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-08-30 10:51:48.140062",
+ "modified": "2022-11-08 18:18:36.268760",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Payment",
@@ -103,5 +110,6 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
+  "has_item_scanned",
   "item_code",
   "col_break1",
   "item_name",
@@ -78,6 +79,7 @@
   "warehouse",
   "target_warehouse",
   "quality_inspection",
+  "serial_and_batch_bundle",
   "batch_no",
   "col_break5",
   "allow_zero_valuation_rate",
@@ -627,10 +629,11 @@
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Batch No",
    "options": "Batch",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_break5",
@@ -647,10 +650,12 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Serial No",
    "oldfieldname": "serial_no",
-   "oldfieldtype": "Small Text"
+   "oldfieldtype": "Small Text",
+   "read_only": 1
   },
   {
    "fieldname": "item_tax_rate",
@@ -808,11 +813,27 @@
    "fieldtype": "Check",
    "label": "Grant Commission",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Check",
+   "label": "Has Item Scanned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:23:47.506290",
+ "modified": "2023-03-12 13:36:40.160468",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Item",
@@ -820,5 +841,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

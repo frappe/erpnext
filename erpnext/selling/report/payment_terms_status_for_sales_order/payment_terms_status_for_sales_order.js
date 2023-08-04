@@ -1,6 +1,6 @@
 // Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 function get_filters() {
 	let filters = [
@@ -103,6 +103,11 @@ function get_filters() {
 				return options
 			}
 		},
+		{
+			"fieldname":"only_immediate_upcoming_term",
+			"label": __("Show only the Immediate Upcoming Term"),
+			"fieldtype": "Check",
+		},
 	]
 	return filters;
 }
@@ -111,7 +116,7 @@ frappe.query_reports["Payment Terms Status for Sales Order"] = {
 	"filters": get_filters(),
 	"formatter": function(value, row, column, data, default_formatter){
 		if(column.fieldname == 'invoices' && value) {
-			invoices = value.split(',');
+			let invoices = value.split(',');
 			const invoice_formatter = (prev_value, curr_value) => {
 				if(prev_value != "") {
 					return prev_value + ", " + default_formatter(curr_value, row, column, data);
@@ -123,7 +128,7 @@ frappe.query_reports["Payment Terms Status for Sales Order"] = {
 			return invoices.reduce(invoice_formatter, "")
 		}
 		else if (column.fieldname == 'paid_amount' && value){
-			formatted_value = default_formatter(value, row, column, data);
+			let formatted_value = default_formatter(value, row, column, data);
 			if(value > 0) {
 				formatted_value = "<span style='color:green;'>" + formatted_value + "</span>"
 			}

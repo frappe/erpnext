@@ -53,6 +53,9 @@ def get_conditions(filters):
 	if filters.get("status"):
 		conditions += " and so.status in %(status)s"
 
+	if filters.get("warehouse"):
+		conditions += " and soi.warehouse = %(warehouse)s"
+
 	return conditions
 
 
@@ -172,7 +175,9 @@ def prepare_data(data, so_elapsed_time, filters):
 				# update existing entry
 				so_row = sales_order_map[so_name]
 				so_row["required_date"] = max(getdate(so_row["delivery_date"]), getdate(row["delivery_date"]))
-				so_row["delay"] = min(so_row["delay"], row["delay"])
+				so_row["delay"] = (
+					min(so_row["delay"], row["delay"]) if row["delay"] and so_row["delay"] else so_row["delay"]
+				)
 
 				# sum numeric columns
 				fields = [

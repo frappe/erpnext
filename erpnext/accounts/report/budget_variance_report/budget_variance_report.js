@@ -8,7 +8,7 @@ frappe.query_reports["Budget Variance Report"] = {
 			label: __("From Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: frappe.sys_defaults.fiscal_year,
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1
 		},
 		{
@@ -16,7 +16,7 @@ frappe.query_reports["Budget Variance Report"] = {
 			label: __("To Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: frappe.sys_defaults.fiscal_year,
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1
 		},
 		{
@@ -75,7 +75,7 @@ frappe.query_reports["Budget Variance Report"] = {
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 
-		if (column.fieldname.includes('variance')) {
+		if (column.fieldname.includes(__("variance"))) {
 
 			if (data[column.fieldname] < 0) {
 				value = "<span style='color:red'>" + value + "</span>";

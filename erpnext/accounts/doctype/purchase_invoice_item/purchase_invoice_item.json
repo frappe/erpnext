@@ -49,6 +49,7 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
+  "apply_tds",
   "section_break_22",
   "net_rate",
   "net_amount",
@@ -63,9 +64,11 @@
   "warehouse",
   "from_warehouse",
   "quality_inspection",
+  "serial_and_batch_bundle",
   "serial_no",
   "col_br_wh",
   "rejected_warehouse",
+  "rejected_serial_and_batch_bundle",
   "batch_no",
   "rejected_serial_no",
   "manufacture_details",
@@ -175,6 +178,7 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -419,6 +423,7 @@
   {
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Rejected Warehouse",
    "options": "Warehouse"
   },
@@ -435,9 +440,11 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "batch_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Batch No",
-   "no_copy": 1,
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "col_br_wh",
@@ -447,8 +454,9 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Text",
+   "hidden": 1,
    "label": "Serial No",
-   "no_copy": 1
+   "read_only": 1
   },
   {
    "depends_on": "eval:!doc.is_fixed_asset",
@@ -456,7 +464,8 @@
    "fieldtype": "Text",
    "label": "Rejected Serial No",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "accounting",
@@ -868,12 +877,37 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply TDS"
+  },
+  {
+   "depends_on": "eval:parent.update_stock == 1",
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:parent.update_stock == 1",
+   "fieldname": "rejected_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Rejected Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-26 16:05:37.304788",
+ "modified": "2023-07-26 12:54:53.178156",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Floor, Sum
+from frappe.utils import cint
 from pypika.terms import ExistsCriterion
 
 
@@ -34,57 +35,55 @@ def get_columns():
 
 
 def get_bom_stock(filters):
-	qty_to_produce = filters.get("qty_to_produce") or 1
-	if int(qty_to_produce) < 0:
-		frappe.throw(_("Quantity to Produce can not be less than Zero"))
+	qty_to_produce = filters.get("qty_to_produce")
+	if cint(qty_to_produce) <= 0:
+		frappe.throw(_("Quantity to Produce should be greater than zero."))
 
 	if filters.get("show_exploded_view"):
 		bom_item_table = "BOM Explosion Item"
 	else:
 		bom_item_table = "BOM Item"
 
-	bin = frappe.qb.DocType("Bin")
-	bom = frappe.qb.DocType("BOM")
-	bom_item = frappe.qb.DocType(bom_item_table)
-
-	query = (
-		frappe.qb.from_(bom)
-		.inner_join(bom_item)
-		.on(bom.name == bom_item.parent)
-		.left_join(bin)
-		.on(bom_item.item_code == bin.item_code)
-		.select(
-			bom_item.item_code,
-			bom_item.description,
-			bom_item.stock_qty,
-			bom_item.stock_uom,
-			bom_item.stock_qty * qty_to_produce / bom.quantity,
-			Sum(bin.actual_qty).as_("actual_qty"),
-			Sum(Floor(bin.actual_qty / (bom_item.stock_qty * qty_to_produce / bom.quantity))),
-		)
-		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
-		.groupby(bom_item.item_code)
+	warehouse_details = frappe.db.get_value(
+		"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
 	)
 
-	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value(
-			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
-		)
+	BOM = frappe.qb.DocType("BOM")
+	BOM_ITEM = frappe.qb.DocType(bom_item_table)
+	BIN = frappe.qb.DocType("Bin")
+	WH = frappe.qb.DocType("Warehouse")
+	CONDITIONS = ()
 
-		if warehouse_details:
-			wh = frappe.qb.DocType("Warehouse")
-			query = query.where(
-				ExistsCriterion(
-					frappe.qb.from_(wh)
-					.select(wh.name)
-					.where(
-						(wh.lft >= warehouse_details.lft)
-						& (wh.rgt <= warehouse_details.rgt)
-						& (bin.warehouse == wh.name)
-					)
-				)
+	if warehouse_details:
+		CONDITIONS = ExistsCriterion(
+			frappe.qb.from_(WH)
+			.select(WH.name)
+			.where(
+				(WH.lft >= warehouse_details.lft)
+				& (WH.rgt <= warehouse_details.rgt)
+				& (BIN.warehouse == WH.name)
 			)
-		else:
-			query = query.where(bin.warehouse == filters.get("warehouse"))
+		)
+	else:
+		CONDITIONS = BIN.warehouse == filters.get("warehouse")
 
-	return query.run()
+	QUERY = (
+		frappe.qb.from_(BOM)
+		.inner_join(BOM_ITEM)
+		.on(BOM.name == BOM_ITEM.parent)
+		.left_join(BIN)
+		.on((BOM_ITEM.item_code == BIN.item_code) & (CONDITIONS))
+		.select(
+			BOM_ITEM.item_code,
+			BOM_ITEM.description,
+			BOM_ITEM.stock_qty,
+			BOM_ITEM.stock_uom,
+			BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity,
+			Sum(BIN.actual_qty).as_("actual_qty"),
+			Sum(Floor(BIN.actual_qty / (BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity))),
+		)
+		.where((BOM_ITEM.parent == filters.get("bom")) & (BOM_ITEM.parenttype == "BOM"))
+		.groupby(BOM_ITEM.item_code)
+	)
+
+	return QUERY.run()

@@ -1,10 +1,10 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-
-{% include 'erpnext/selling/sales_common.js' %}
 frappe.provide("erpnext.crm");
+erpnext.pre_sales.set_as_lost("Quotation");
+erpnext.sales_common.setup_selling_controller();
 
-cur_frm.email_field = "contact_email";
+
 frappe.ui.form.on("Opportunity", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
@@ -20,9 +20,7 @@ frappe.ui.form.on("Opportunity", {
 			}
 		});
 
-		if (frm.doc.opportunity_from && frm.doc.party_name){
-			frm.trigger('set_contact_link');
-		}
+		frm.email_field = "contact_email";
 	},
 
 	validate: function(frm) {
@@ -48,10 +46,6 @@ frappe.ui.form.on("Opportunity", {
 				frm: frm
 			});
 		}
-	},
-
-	onload_post_render: function(frm) {
-		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
 	status:function(frm){
@@ -130,6 +124,10 @@ frappe.ui.form.on("Opportunity", {
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
+
+		if (frm.doc.opportunity_from && frm.doc.party_name) {
+			frm.trigger('set_contact_link');
+		}
 	},
 
 	set_contact_link: function(frm) {
@@ -137,6 +135,8 @@ frappe.ui.form.on("Opportunity", {
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Customer'}
 		} else if(frm.doc.opportunity_from == "Lead" && frm.doc.party_name) {
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Lead'}
+		} else if (frm.doc.opportunity_from == "Prospect" && frm.doc.party_name) {
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Prospect'}
 		}
 	},
 
@@ -250,13 +250,13 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 	onload() {
 
 		if(!this.frm.doc.status) {
-			frm.set_value('status', 'Open');
+			this.frm.set_value('status', 'Open');
 		}
 		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company")) {
-			frm.set_value('company', frappe.defaults.get_user_default("Company"));
+			this.frm.set_value('company', frappe.defaults.get_user_default("Company"));
 		}
 		if(!this.frm.doc.currency) {
-			frm.set_value('currency', frappe.defaults.get_user_default("Currency"));
+			this.frm.set_value('currency', frappe.defaults.get_user_default("Currency"));
 		}
 
 		this.setup_queries();

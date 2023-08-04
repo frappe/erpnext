@@ -77,7 +77,7 @@ def get_issued_items_cost():
 		"""select se.project, sum(se_item.amount) as amount
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
 		where se.name = se_item.parent and se.docstatus = 1 and ifnull(se_item.t_warehouse, '') = ''
-		and ifnull(se.project, '') != '' group by se.project""",
+		and se.project != '' group by se.project""",
 		as_dict=1,
 	)
 

@@ -33,6 +33,9 @@ frappe.ui.form.on("Item", {
 			'Material Request': () => {
 				open_form(frm, "Material Request", "Material Request Item", "items");
 			},
+			'Stock Entry': () => {
+				open_form(frm, "Stock Entry", "Stock Entry Detail", "items");
+			},
 		};
 
 	},
@@ -587,7 +590,7 @@ $.extend(erpnext.item, {
 			let selected_attributes = {};
 			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
 				if(i===0) return;
-				let attribute_name = $(col).find('.control-label').html().trim();
+				let attribute_name = $(col).find('.column-label').html().trim();
 				selected_attributes[attribute_name] = [];
 				let checked_opts = $(col).find('.checkbox input');
 				checked_opts.each((i, opt) => {
@@ -769,12 +772,6 @@ $.extend(erpnext.item, {
 					if (modal) {
 						$(modal).removeClass("modal-dialog-scrollable");
 					}
-				})
-				.on("awesomplete-close", () => {
-					let modal = field.$input.parents('.modal-dialog')[0];
-					if (modal) {
-						$(modal).addClass("modal-dialog-scrollable");
-					}
 				});
 		});
 	},
@@ -893,7 +890,16 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.item_name = frm.doc.item_name;
 		new_child_doc.uom = frm.doc.stock_uom;
 		new_child_doc.description = frm.doc.description;
+		if (!new_child_doc.qty) {
+			new_child_doc.qty = 1.0;
+		}
 
-		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+		frappe.run_serially([
+			() => frappe.ui.form.make_quick_entry(doctype, null, null, new_doc),
+			() => {
+				frappe.flags.ignore_company_party_validation = true;
+				frappe.model.trigger("item_code", frm.doc.name, new_child_doc);
+			}
+		])
 	});
 }

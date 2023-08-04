@@ -4,6 +4,7 @@ import json
 import frappe
 import pytz
 from frappe import _
+from frappe.utils.data import get_system_timezone
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -26,8 +27,12 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
-	settings = frappe.get_doc("Appointment Booking Settings")
-	settings.holiday_list = frappe.get_doc("Holiday List", settings.holiday_list)
+	settings = frappe.get_cached_value(
+		"Appointment Booking Settings",
+		None,
+		["advance_booking_days", "appointment_duration", "success_redirect_url"],
+		as_dict=True,
+	)
 	return settings
 
 
@@ -106,7 +111,7 @@ def create_appointment(date, time, tz, contact):
 	appointment.customer_details = contact.get("notes", None)
 	appointment.customer_email = contact.get("email", None)
 	appointment.status = "Open"
-	appointment.insert()
+	appointment.insert(ignore_permissions=True)
 	return appointment
 
 
@@ -121,7 +126,7 @@ def filter_timeslots(date, timeslots):
 
 def convert_to_guest_timezone(guest_tz, datetimeobject):
 	guest_tz = pytz.timezone(guest_tz)
-	local_timezone = pytz.timezone(frappe.utils.get_time_zone())
+	local_timezone = pytz.timezone(get_system_timezone())
 	datetimeobject = local_timezone.localize(datetimeobject)
 	datetimeobject = datetimeobject.astimezone(guest_tz)
 	return datetimeobject
@@ -130,7 +135,7 @@ def convert_to_guest_timezone(guest_tz, datetimeobject):
 def convert_to_system_timezone(guest_tz, datetimeobject):
 	guest_tz = pytz.timezone(guest_tz)
 	datetimeobject = guest_tz.localize(datetimeobject)
-	system_tz = pytz.timezone(frappe.utils.get_time_zone())
+	system_tz = pytz.timezone(get_system_timezone())
 	datetimeobject = datetimeobject.astimezone(system_tz)
 	return datetimeobject
 

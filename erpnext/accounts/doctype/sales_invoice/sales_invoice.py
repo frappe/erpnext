@@ -11,6 +11,9 @@ from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -20,7 +23,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
 	get_disposal_account_and_cost_center,
@@ -29,17 +32,13 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
-from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.stock.doctype.serial_no.serial_no import (
-	get_delivery_note_serial_no,
-	get_serial_nos,
-	update_serial_nos_after_submit,
-)
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -100,13 +99,11 @@ class SalesInvoice(SellingController):
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
-		self.validate_write_off_account()
-		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
-		self.validate_income_account()
 		self.check_conversion_rate()
+		self.validate_accounts()
 
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
@@ -117,7 +114,6 @@ class SalesInvoice(SellingController):
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
-			self.validate_item_code()
 			self.validate_warehouse()
 			self.update_current_stock()
 			self.validate_delivery_note()
@@ -127,9 +123,6 @@ class SalesInvoice(SellingController):
 
 		if not self.is_opening:
 			self.is_opening = "No"
-
-		if self._action != "submit" and self.update_stock and not self.is_return:
-			set_batch_nos(self, "warehouse", True)
 
 		if self.redeem_loyalty_points:
 			lp = frappe.get_doc("Loyalty Program", self.loyalty_program)
@@ -144,7 +137,7 @@ class SalesInvoice(SellingController):
 
 		self.set_against_income_account()
 		self.validate_time_sheets_are_submitted()
-		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
+		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 		if not self.is_return:
 			self.validate_serial_numbers()
 		else:
@@ -169,6 +162,11 @@ class SalesInvoice(SellingController):
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+	def validate_accounts(self):
+		self.validate_write_off_account()
+		self.validate_account_for_change_amount()
+		self.validate_income_account()
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
@@ -256,8 +254,6 @@ class SalesInvoice(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
-		if self.is_return and self.update_stock:
-			update_serial_nos_after_submit(self, "items")
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -269,8 +265,6 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
-
-		self.update_serial_no()
 
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -355,7 +349,6 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.update_serial_no(in_cancel=True)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -367,7 +360,8 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
+		self.db_set("repost_required", 0)
 
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
@@ -390,7 +384,10 @@ class SalesInvoice(SellingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
 			"Payment Ledger Entry",
+			"Serial and Batch Bundle",
 		)
 
 	def update_status_updater_args(self):
@@ -513,6 +510,93 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
+
+	def on_update_after_submit(self):
+		if hasattr(self, "repost_required"):
+			needs_repost = 0
+
+			# Check if any field affecting accounting entry is altered
+			doc_before_update = self.get_doc_before_save()
+			accounting_dimensions = get_accounting_dimensions() + ["cost_center", "project"]
+
+			# Check if opening entry check updated
+			if doc_before_update.get("is_opening") != self.is_opening:
+				needs_repost = 1
+
+			if not needs_repost:
+				# Parent Level Accounts excluding party account
+				for field in (
+					"additional_discount_account",
+					"cash_bank_account",
+					"account_for_change_amount",
+					"write_off_account",
+					"loyalty_redemption_account",
+					"unrealized_profit_loss_account",
+				):
+					if doc_before_update.get(field) != self.get(field):
+						needs_repost = 1
+						break
+
+				# Check for parent accounting dimensions
+				for dimension in accounting_dimensions:
+					if doc_before_update.get(dimension) != self.get(dimension):
+						needs_repost = 1
+						break
+
+				# Check for child tables
+				if self.check_if_child_table_updated(
+					"items",
+					doc_before_update,
+					("income_account", "expense_account", "discount_account"),
+					accounting_dimensions,
+				):
+					needs_repost = 1
+
+				if self.check_if_child_table_updated(
+					"taxes", doc_before_update, ("account_head",), accounting_dimensions
+				):
+					needs_repost = 1
+
+			self.validate_accounts()
+
+			# validate if deferred revenue is enabled for any item
+			# Don't allow to update the invoice if deferred revenue is enabled
+			if needs_repost:
+				for item in self.get("items"):
+					if item.enable_deferred_revenue:
+						frappe.throw(
+							_(
+								"Deferred Revenue is enabled for item {0}. You cannot update the invoice after submission."
+							).format(item.item_code)
+						)
+
+			self.db_set("repost_required", needs_repost)
+
+	def check_if_child_table_updated(
+		self, child_table, doc_before_update, fields_to_check, accounting_dimensions
+	):
+		# Check if any field affecting accounting entry is altered
+		for index, item in enumerate(self.get(child_table)):
+			for field in fields_to_check:
+				if doc_before_update.get(child_table)[index].get(field) != item.get(field):
+					return True
+
+			for dimension in accounting_dimensions:
+				if doc_before_update.get(child_table)[index].get(dimension) != item.get(dimension):
+					return True
+
+		return False
+
+	@frappe.whitelist()
+	def repost_accounting_entries(self):
+		if self.repost_required:
+			self.docstatus = 2
+			self.make_gl_entries_on_cancel()
+			self.docstatus = 1
+			self.make_gl_entries()
+			self.db_set("repost_required", 0)
+		else:
+			frappe.throw(_("No updates pending for reposting"))
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -770,11 +854,6 @@ class SalesInvoice(SellingController):
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
-	def validate_item_code(self):
-		for d in self.get("items"):
-			if not d.item_code and self.is_opening == "No":
-				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
-
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
@@ -917,10 +996,16 @@ class SalesInvoice(SellingController):
 
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
-			if d.sales_order and frappe.db.get_value("Sales Order", d.sales_order, "docstatus") != 1:
+			if (
+				d.sales_order
+				and frappe.db.get_value("Sales Order", d.sales_order, "docstatus", cache=True) != 1
+			):
 				frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
 
-			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
+			if (
+				d.delivery_note
+				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus", cache=True) != 1
+			):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
@@ -945,7 +1030,10 @@ class SalesInvoice(SellingController):
 					merge_entries=False,
 					from_repost=from_repost,
 				)
+
+				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
+				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
@@ -970,7 +1058,6 @@ class SalesInvoice(SellingController):
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
-		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
@@ -1084,24 +1171,49 @@ class SalesInvoice(SellingController):
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
-							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
+							asset,
+							item.base_net_amount,
+							item.finance_book,
+							self.get("doctype"),
+							self.get("name"),
+							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", None)
+						add_asset_activity(asset.name, _("Asset returned"))
 
 						if asset.calculate_depreciation:
 							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
-							reset_depreciation_schedule(asset, self.posting_date)
+							notes = _(
+								"This schedule was created when Asset {0} was returned through Sales Invoice {1}."
+							).format(
+								get_link_to_form(asset.doctype, asset.name),
+								get_link_to_form(self.doctype, self.get("name")),
+							)
+							reset_depreciation_schedule(asset, self.posting_date, notes)
+							asset.reload()
 
 					else:
 						if asset.calculate_depreciation:
-							depreciate_asset(asset, self.posting_date)
+							notes = _(
+								"This schedule was created when Asset {0} was sold through Sales Invoice {1}."
+							).format(
+								get_link_to_form(asset.doctype, asset.name),
+								get_link_to_form(self.doctype, self.get("name")),
+							)
+							depreciate_asset(asset, self.posting_date, notes)
 							asset.reload()
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
+							asset,
+							item.base_net_amount,
+							item.finance_book,
+							self.get("doctype"),
+							self.get("name"),
+							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", self.posting_date)
+						add_asset_activity(asset.name, _("Asset sold"))
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1300,7 +1412,11 @@ class SalesInvoice(SellingController):
 
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
-		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
+		if (
+			self.is_pos
+			and self.write_off_account
+			and flt(self.write_off_amount, self.precision("write_off_amount"))
+		):
 			write_off_account_currency = get_account_currency(self.write_off_account)
 			default_cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 
@@ -1351,7 +1467,7 @@ class SalesInvoice(SellingController):
 			and not self.is_internal_transfer()
 		):
 			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-				self.company, "Sales Invoice", self.name
+				self.company, "Sales Invoice", self.name, self.use_company_roundoff_cost_center
 			)
 
 			gl_entries.append(
@@ -1363,7 +1479,9 @@ class SalesInvoice(SellingController):
 							self.rounding_adjustment, self.precision("rounding_adjustment")
 						),
 						"credit": flt(self.base_rounding_adjustment, self.precision("base_rounding_adjustment")),
-						"cost_center": self.cost_center or round_off_cost_center,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else (self.cost_center or round_off_cost_center),
 					},
 					item=self,
 				)
@@ -1392,20 +1510,6 @@ class SalesInvoice(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.due_date = None
-
-	def update_serial_no(self, in_cancel=False):
-		"""update Sales Invoice refrence in Serial No"""
-		invoice = None if (in_cancel or self.is_return) else self.name
-		if in_cancel and self.is_return:
-			invoice = self.return_against
-
-		for item in self.items:
-			if not item.serial_no:
-				continue
-
-			for serial_no in get_serial_nos(item.serial_no):
-				if serial_no and frappe.db.get_value("Serial No", serial_no, "item_code") == item.item_code:
-					frappe.db.set_value("Serial No", serial_no, "sales_invoice", invoice)
 
 	def validate_serial_numbers(self):
 		"""
@@ -1734,7 +1838,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		doc = frappe.get_doc(ref_doc, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
-			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(partytype))
+			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(partytype)))
 		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
@@ -1748,7 +1852,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		if not company in companies:
 			frappe.throw(
 				_("{0} not allowed to transact with {1}. Please change the Company.").format(
-					partytype, company
+					_(partytype), company
 				)
 			)
 
@@ -2067,6 +2171,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
 			target.purchase_order = source.parent
 			target.purchase_order_item = source.name
+			target.material_request = source.material_request
+			target.material_request_item = source.material_request_item
 
 		if (
 			source.get("purchase_order")
@@ -2306,7 +2412,7 @@ def get_loyalty_programs(customer):
 	lp_details = get_loyalty_programs(customer)
 
 	if len(lp_details) == 1:
-		frappe.db.set(customer, "loyalty_program", lp_details[0])
+		customer.db_set("loyalty_program", lp_details[0])
 		return lp_details
 	else:
 		return lp_details
@@ -2409,55 +2515,49 @@ def get_mode_of_payment_info(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_dunning(source_name, target_doc=None):
+def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	from frappe.model.mapper import get_mapped_doc
 
-	from erpnext.accounts.doctype.dunning.dunning import (
-		calculate_interest_and_amount,
-		get_dunning_letter_text,
-	)
+	def postprocess_dunning(source, target):
+		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
 
-	def set_missing_values(source, target):
-		target.sales_invoice = source_name
-		target.outstanding_amount = source.outstanding_amount
-		overdue_days = (getdate(target.posting_date) - getdate(source.due_date)).days
-		target.overdue_days = overdue_days
-		if frappe.db.exists(
-			"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-		):
-			dunning_type = frappe.get_doc(
-				"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-			)
+		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
+		if dunning_type:
+			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
 			target.dunning_fee = dunning_type.dunning_fee
-			letter_text = get_dunning_letter_text(dunning_type=dunning_type.name, doc=target.as_dict())
+			target.income_account = dunning_type.income_account
+			target.cost_center = dunning_type.cost_center
+			letter_text = get_dunning_letter_text(
+				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
+			)
+
 			if letter_text:
 				target.body_text = letter_text.get("body_text")
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
-			amounts = calculate_interest_and_amount(
-				target.outstanding_amount,
-				target.rate_of_interest,
-				target.dunning_fee,
-				target.overdue_days,
-			)
-			target.interest_amount = amounts.get("interest_amount")
-			target.dunning_amount = amounts.get("dunning_amount")
-			target.grand_total = amounts.get("grand_total")
 
-	doclist = get_mapped_doc(
-		"Sales Invoice",
-		source_name,
-		{
+		target.validate()
+
+	return get_mapped_doc(
+		from_doctype="Sales Invoice",
+		from_docname=source_name,
+		target_doc=target_doc,
+		table_maps={
 			"Sales Invoice": {
 				"doctype": "Dunning",
-			}
+				"field_map": {"customer_address": "customer_address", "parent": "sales_invoice"},
+			},
+			"Payment Schedule": {
+				"doctype": "Overdue Payment",
+				"field_map": {"name": "payment_schedule", "parent": "sales_invoice"},
+				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
+			},
 		},
-		target_doc,
-		set_missing_values,
+		postprocess=postprocess_dunning,
+		ignore_permissions=ignore_permissions,
 	)
-	return doclist
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

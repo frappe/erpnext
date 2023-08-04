@@ -2,6 +2,7 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2022-02-08 13:14:41.083327",
  "doctype": "DocType",
@@ -312,7 +313,8 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Title",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "language",
@@ -514,11 +516,10 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-10-13 12:42:04.277879",
+ "modified": "2023-04-14 18:20:05.044791",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

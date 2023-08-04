@@ -46,6 +46,9 @@ def get_data(filters):
 			# task has no end date, hence no delay
 			task.delay = 0
 
+		task.status = _(task.status)
+		task.priority = _(task.priority)
+
 	# Sort by descending order of delay
 	tasks.sort(key=lambda x: x["delay"], reverse=True)
 	return tasks
@@ -73,7 +76,7 @@ def get_chart_data(data):
 			on_track = on_track + 1
 	charts = {
 		"data": {
-			"labels": ["On Track", "Delayed"],
+			"labels": [_("On Track"), _("Delayed")],
 			"datasets": [{"name": "Delayed", "values": [on_track, delay]}],
 		},
 		"type": "percentage",

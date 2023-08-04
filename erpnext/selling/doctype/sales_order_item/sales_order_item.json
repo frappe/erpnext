@@ -10,6 +10,7 @@
   "item_code",
   "customer_item_code",
   "ensure_delivery_based_on_produced_serial_no",
+  "reserve_stock",
   "col_break1",
   "delivery_date",
   "item_name",
@@ -27,6 +28,7 @@
   "uom",
   "conversion_factor",
   "stock_qty",
+  "stock_reserved_qty",
   "section_break_16",
   "price_list_rate",
   "base_price_list_rate",
@@ -70,6 +72,7 @@
   "warehouse",
   "target_warehouse",
   "prevdoc_docname",
+  "quotation_item",
   "col_break4",
   "against_blanket_order",
   "blanket_order",
@@ -81,6 +84,7 @@
   "actual_qty",
   "ordered_qty",
   "planned_qty",
+  "production_plan_qty",
   "column_break_69",
   "work_order_qty",
   "delivered_qty",
@@ -94,8 +98,10 @@
   "item_tax_rate",
   "transaction_date",
   "inter_transfer_reference_section",
+  "material_request",
   "purchase_order",
   "column_break_89",
+  "material_request_item",
   "purchase_order_item"
  ],
  "fields": [
@@ -111,7 +117,6 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "print_width": "150px",
-   "reqd": 1,
    "width": "150px"
   },
   {
@@ -838,12 +843,59 @@
    "label": "Purchase Order Item",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "quotation_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "quotation_item",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.stock_reserved_qty",
+   "fieldname": "stock_reserved_qty",
+   "fieldtype": "Float",
+   "label": "Stock Reserved Qty (in Stock UOM)",
+   "no_copy": 1,
+   "non_negative": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "production_plan_qty",
+   "fieldtype": "Float",
+   "label": "Production Plan Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-26 16:05:02.712705",
+ "modified": "2023-07-28 14:56:42.031636",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

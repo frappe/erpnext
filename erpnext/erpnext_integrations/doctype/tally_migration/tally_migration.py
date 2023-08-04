@@ -304,6 +304,7 @@ class TallyMigration(Document):
 		frappe.publish_realtime(
 			"tally_migration_progress_update",
 			{"title": title, "message": message, "count": count, "total": total},
+			user=self.modified_by,
 		)
 
 	def _import_master_data(self):

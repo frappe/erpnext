@@ -18,7 +18,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		existing_allow_negative_stock = frappe.db.get_value(
 			"Stock Settings", None, "allow_negative_stock"
 		)
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	item_warehouses = frappe.db.sql(
 		"""
@@ -37,8 +37,8 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 			frappe.db.rollback()
 
 	if allow_negative_stock:
-		frappe.db.set_value(
-			"Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock
+		frappe.db.set_single_value(
+			"Stock Settings", "allow_negative_stock", existing_allow_negative_stock
 		)
 	frappe.db.auto_commit_on_many_writes = 0
 
@@ -94,10 +94,13 @@ def get_balance_qty_from_sle(item_code, warehouse):
 
 
 def get_reserved_qty(item_code, warehouse):
+	dont_reserve_on_return = frappe.get_cached_value(
+		"Selling Settings", "Selling Settings", "dont_reserve_sales_order_qty_on_sales_return"
+	)
 	reserved_qty = frappe.db.sql(
-		"""
+		f"""
 		select
-			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty) / so_item_qty))
+			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - if(dont_reserve_qty_on_return, so_item_returned_qty, 0)) / so_item_qty))
 		from
 			(
 				(select
@@ -112,6 +115,12 @@ def get_reserved_qty(item_code, warehouse):
 						where name = dnpi.parent_detail_docname
 						and delivered_by_supplier = 0
 					) as so_item_delivered_qty,
+					(
+						select returned_qty from `tabSales Order Item`
+						where name = dnpi.parent_detail_docname
+						and delivered_by_supplier = 0
+					) as so_item_returned_qty,
+					{dont_reserve_on_return} as dont_reserve_qty_on_return,
 					parent, name
 				from
 				(
@@ -121,17 +130,19 @@ def get_reserved_qty(item_code, warehouse):
 					and parenttype='Sales Order'
 					and item_code != parent_item
 					and exists (select * from `tabSales Order` so
-					where name = dnpi_in.parent and docstatus = 1 and status != 'Closed')
+					where name = dnpi_in.parent and docstatus = 1 and status not in ('On Hold', 'Closed'))
 				) dnpi)
 			union
 				(select stock_qty as dnpi_qty, qty as so_item_qty,
-					delivered_qty as so_item_delivered_qty, parent, name
+					delivered_qty as so_item_delivered_qty,
+					returned_qty as so_item_returned_qty,
+					{dont_reserve_on_return}, parent, name
 				from `tabSales Order Item` so_item
 				where item_code = %s and warehouse = %s
 				and (so_item.delivered_by_supplier is null or so_item.delivered_by_supplier = 0)
 				and exists(select * from `tabSales Order` so
 					where so.name = so_item.parent and so.docstatus = 1
-					and so.status != 'Closed'))
+					and so.status not in ('On Hold', 'Closed')))
 			) tab
 		where
 			so_item_qty >= so_item_delivered_qty
@@ -284,19 +295,3 @@ def set_stock_balance_as_per_serial_no(
 				"posting_time": posting_time,
 			}
 		)
-
-
-def reset_serial_no_status_and_warehouse(serial_nos=None):
-	if not serial_nos:
-		serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where docstatus = 0""")
-		for serial_no in serial_nos:
-			try:
-				sr = frappe.get_doc("Serial No", serial_no)
-				last_sle = sr.get_last_sle()
-				if flt(last_sle.actual_qty) > 0:
-					sr.warehouse = last_sle.warehouse
-
-				sr.via_stock_ledger = True
-				sr.save()
-			except Exception:
-				pass

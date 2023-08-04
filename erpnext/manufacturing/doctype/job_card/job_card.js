@@ -12,6 +12,28 @@ frappe.ui.form.on('Job Card', {
 			};
 		});
 
+		frm.set_query("serial_and_batch_bundle", () => {
+			return {
+				filters: {
+					'item_code': frm.doc.production_item,
+					'voucher_type': frm.doc.doctype,
+					'voucher_no': ["in", [frm.doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
+
+		let sbb_field = frm.get_docfield('serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = () => {
+				return {
+					'item_code': frm.doc.production_item,
+					'warehouse': frm.doc.wip_warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
+		}
+
 		frm.set_indicator_formatter('sub_operation',
 			function(doc) {
 				if (doc.status == "Pending") {
@@ -32,6 +54,11 @@ frappe.ui.form.on('Job Card', {
 			frm.disable_save();
 			return;
 		}
+
+		let has_stock_entry = frm.doc.__onload &&
+			frm.doc.__onload.has_stock_entry ? true : false;
+
+		frm.toggle_enable("for_quantity", !has_stock_entry);
 
 		if (!frm.is_new() && has_items && frm.doc.docstatus < 2) {
 			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
@@ -78,7 +105,7 @@ frappe.ui.form.on('Job Card', {
 			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
 				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status'], (result) => {
-					if (result.skip_transfer === 1 || result.status == 'In Process') {
+					if (result.skip_transfer === 1 || result.status == 'In Process' || frm.doc.transferred_qty > 0 || !frm.doc.items.length) {
 						frm.trigger("prepare_timer_buttons");
 					}
 				});
@@ -317,6 +344,28 @@ frappe.ui.form.on('Job Card', {
 		if(frm.doc.__islocal)
 			return;
 
+		function setCurrentIncrement() {
+			currentIncrement += 1;
+			return currentIncrement;
+		}
+
+		function updateStopwatch(increment) {
+			var hours = Math.floor(increment / 3600);
+			var minutes = Math.floor((increment - (hours * 3600)) / 60);
+			var seconds = increment - (hours * 3600) - (minutes * 60);
+
+			$(section).find(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
+			$(section).find(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
+			$(section).find(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
+		}
+
+		function initialiseTimer() {
+			const interval = setInterval(function() {
+				var current = setCurrentIncrement();
+				updateStopwatch(current);
+			}, 1000);
+		}
+
 		frm.dashboard.refresh();
 		const timer = `
 			<div class="stopwatch" style="font-weight:bold;margin:0px 13px 0px 2px;
@@ -337,28 +386,6 @@ frappe.ui.form.on('Job Card', {
 			} else {
 				currentIncrement += moment(frappe.datetime.now_datetime()).diff(moment(frm.doc.started_time),"seconds");
 				initialiseTimer();
-			}
-
-			function initialiseTimer() {
-				const interval = setInterval(function() {
-					var current = setCurrentIncrement();
-					updateStopwatch(current);
-				}, 1000);
-			}
-
-			function updateStopwatch(increment) {
-				var hours = Math.floor(increment / 3600);
-				var minutes = Math.floor((increment - (hours * 3600)) / 60);
-				var seconds = increment - (hours * 3600) - (minutes * 60);
-
-				$(section).find(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
-				$(section).find(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
-				$(section).find(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
-			}
-
-			function setCurrentIncrement() {
-				currentIncrement += 1;
-				return currentIncrement;
 			}
 		}
 	},
@@ -405,6 +432,16 @@ frappe.ui.form.on('Job Card', {
 				frm.doc.total_completed_qty += d.completed_qty;
 			}
 		});
+
+		if (frm.doc.total_completed_qty && frm.doc.for_quantity > frm.doc.total_completed_qty) {
+			let flt_precision = precision('for_quantity', frm.doc);
+			let process_loss_qty = (
+				flt(frm.doc.for_quantity, flt_precision)
+				- flt(frm.doc.total_completed_qty, flt_precision)
+			);
+
+			frm.set_value('process_loss_qty', process_loss_qty);
+		}
 
 		refresh_field("total_completed_qty");
 	}

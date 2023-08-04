@@ -7,6 +7,8 @@ from email_reply_parser import EmailReplyParser
 from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Count, CurDate, Date, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 
 from erpnext import get_default_company
@@ -15,9 +17,6 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), frappe.safe_decode(self.project_name))
-
 	def onload(self):
 		self.set_onload(
 			"activity_summary",
@@ -42,6 +41,8 @@ class Project(Document):
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
+		self.validate_from_to_dates("expected_start_date", "expected_end_date")
+		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
 	def copy_from_template(self):
 		"""
@@ -298,17 +299,19 @@ class Project(Document):
 				user.welcome_email_sent = 1
 
 
-def get_timeline_data(doctype, name):
+def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	"""Return timeline for attendance"""
+
+	timesheet_detail = frappe.qb.DocType("Timesheet Detail")
+
 	return dict(
-		frappe.db.sql(
-			"""select unix_timestamp(from_time), count(*)
-		from `tabTimesheet Detail` where project=%s
-			and from_time > date_sub(curdate(), interval 1 year)
-			and docstatus < 2
-			group by date(from_time)""",
-			name,
-		)
+		frappe.qb.from_(timesheet_detail)
+		.select(UnixTimestamp(timesheet_detail.from_time), Count("*"))
+		.where(timesheet_detail.project == name)
+		.where(timesheet_detail.from_time > CurDate() - Interval(years=1))
+		.where(timesheet_detail.docstatus < 2)
+		.groupby(Date(timesheet_detail.from_time))
+		.run()
 	)
 
 

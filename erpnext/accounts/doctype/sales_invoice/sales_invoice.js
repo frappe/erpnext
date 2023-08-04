@@ -1,10 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
 
-
+erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
+erpnext.accounts.payment_triggers.setup("Sales Invoice");
+erpnext.accounts.pos.setup("Sales Invoice");
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.sales_common.setup_selling_controller();
 erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends erpnext.selling.SellingController {
 	setup(doc) {
 		this.setup_posting_date_time_check();
@@ -34,7 +37,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		super.onload();
 
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log',
-			'POS Closing Entry', 'Journal Entry', 'Payment Entry'];
+							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger"];
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -64,19 +67,45 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
+		if (this.frm.doc.repost_required && this.frm.doc.docstatus===1) {
+			this.frm.set_intro(__("Accounting entries for this invoice needs to be reposted. Please click on 'Repost' button to update."));
+			this.frm.add_custom_button(__('Repost Accounting Entries'),
+				() => {
+					this.frm.call({
+						doc: this.frm.doc,
+						method: 'repost_accounting_entries',
+						freeze: true,
+						freeze_message: __('Reposting...'),
+						callback: (r) => {
+							if (!r.exc) {
+								frappe.msgprint(__('Accounting Entries are reposted'));
+								me.frm.refresh();
+							}
+						}
+					});
+				}).removeClass('btn-default').addClass('btn-warning');
+		}
+
 		if (this.frm.doc.is_return) {
 			this.frm.return_print_format = "Sales Invoice Return";
 		}
 
 		this.show_general_ledger();
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
 
-		if(doc.update_stock) this.show_stock_ledger();
+		if(doc.update_stock){
+			this.show_stock_ledger();
+			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
+		}
 
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {
-			cur_frm.add_custom_button(__('Payment'),
-				this.make_payment_entry, __('Create'));
-			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+			this.frm.add_custom_button(
+				__('Payment'),
+				() => this.make_payment_entry(),
+				__('Create')
+			);
+			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if(doc.docstatus==1 && !doc.is_return) {
@@ -116,9 +145,15 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					cur_frm.events.create_invoice_discounting(cur_frm);
 				}, __('Create'));
 
-				if (doc.due_date < frappe.datetime.get_today()) {
-					cur_frm.add_custom_button(__('Dunning'), function() {
-						cur_frm.events.create_dunning(cur_frm);
+				const payment_is_overdue = doc.payment_schedule.map(
+					row => Date.parse(row.due_date) < Date.now()
+				).reduce(
+					(prev, current) => prev || current
+				);
+
+				if (payment_is_overdue) {
+					this.frm.add_custom_button(__('Dunning'), () => {
+						this.frm.events.create_dunning(this.frm);
 					}, __('Create'));
 				}
 			}
@@ -127,12 +162,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
 					cur_frm.cscript.make_maintenance_schedule();
 				}, __('Create'));
-			}
-
-			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
 			}
 		}
 
@@ -312,6 +341,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	make_inter_company_invoice() {
+		let me = this;
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
 			frm: me.frm
@@ -647,19 +677,6 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		}
 
-		// expense account
-		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
-			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
-				return {
-					filters: {
-						'report_type': 'Profit and Loss',
-						'company': doc.company,
-						"is_group": 0
-					}
-				}
-			}
-		}
-
 		// discount account
 		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
 			return {
@@ -697,7 +714,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.set_query('pos_profile', function(doc) {
 			if(!doc.company) {
-				frappe.throw(_('Please set Company'));
+				frappe.throw(__('Please set Company'));
 			}
 
 			return {
@@ -753,7 +770,6 @@ frappe.ui.form.on('Sales Invoice', {
 
 	update_stock: function(frm, dt, dn) {
 		frm.events.hide_fields(frm);
-		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock);
 		frm.trigger('reset_posting_time');
 	},
 
@@ -844,7 +860,7 @@ frappe.ui.form.on('Sales Invoice', {
 			kwargs = Object();
 		}
 
-		if (!kwargs.hasOwnProperty("project") && frm.doc.project) {
+		if (!Object.prototype.hasOwnProperty.call(kwargs, "project") && frm.doc.project) {
 			kwargs.project = frm.doc.project;
 		}
 
@@ -877,6 +893,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
+		frm.refresh_field("timesheets");
+		frm.trigger("calculate_timesheet_totals");
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {
@@ -916,9 +934,6 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
 		row.project_name = time_log.project_name;
-
-		frm.refresh_field("timesheets");
-		frm.trigger("calculate_timesheet_totals");
 	},
 
 	calculate_timesheet_totals: function(frm) {

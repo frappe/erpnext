@@ -25,7 +25,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Barcode Type",
-   "options": "\nEAN\nUPC-A"
+   "options": "\nEAN\nUPC-A\nCODE-39\nEAN-12\nEAN-8\nGS1\nGTIN\nISBN\nISBN-10\nISBN-13\nISSN\nJAN\nPZN\nUPC"
   },
   {
    "fieldname": "uom",

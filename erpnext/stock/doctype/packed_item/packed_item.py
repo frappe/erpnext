@@ -48,7 +48,7 @@ def make_packing_list(doc):
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
 				if set_price_from_children:  # create/update bundle item wise price dict
-					update_product_bundle_rate(parent_items_price, pi_row)
+					update_product_bundle_rate(parent_items_price, pi_row, item_row)
 
 	if parent_items_price:
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
@@ -83,8 +83,8 @@ def reset_packing_list(doc):
 		# 1. items were deleted
 		# 2. if bundle item replaced by another item (same no. of items but different items)
 		# we maintain list to track recurring item rows as well
-		items_before_save = [item.item_code for item in doc_before_save.get("items")]
-		items_after_save = [item.item_code for item in doc.get("items")]
+		items_before_save = [(item.name, item.item_code) for item in doc_before_save.get("items")]
+		items_after_save = [(item.name, item.item_code) for item in doc.get("items")]
 		reset_table = items_before_save != items_after_save
 	else:
 		# reset: if via Update Items OR
@@ -247,7 +247,7 @@ def get_cancelled_doc_packed_item_details(old_packed_items):
 	return prev_doc_packed_items_map
 
 
-def update_product_bundle_rate(parent_items_price, pi_row):
+def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 	"""
 	Update the price dict of Product Bundles based on the rates of the Items in the bundle.
 
@@ -259,7 +259,7 @@ def update_product_bundle_rate(parent_items_price, pi_row):
 	if not rate:
 		parent_items_price[key] = 0.0
 
-	parent_items_price[key] += flt(pi_row.rate)
+	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.stock_qty)
 
 
 def set_product_bundle_rate_amount(doc, parent_items_price):

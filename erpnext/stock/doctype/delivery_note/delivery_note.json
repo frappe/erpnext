@@ -28,8 +28,6 @@
   "column_break_18",
   "project",
   "dimension_col_break",
-  "campaign",
-  "source",
   "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
@@ -57,11 +55,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_43",
-  "tax_category",
-  "column_break_39",
   "shipping_rule",
+  "column_break_39",
+  "incoterm",
+  "named_place",
   "section_break_41",
   "taxes",
   "section_break_44",
@@ -159,11 +159,12 @@
   "inter_company_reference",
   "customer_group",
   "territory",
+  "source",
+  "campaign",
   "column_break5",
   "excise_page",
   "instructions",
-  "connections_tab",
-  "column_break_25"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -373,6 +374,7 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -519,6 +521,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
+   "label": "Delivery Note Item",
    "oldfieldname": "delivery_note_details",
    "oldfieldtype": "Table",
    "options": "Delivery Note Item",
@@ -664,6 +667,7 @@
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
+   "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
    "options": "Sales Taxes and Charges"
@@ -1219,7 +1223,8 @@
    "hidden": 1,
    "label": "Pick List",
    "options": "Pick List",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -1336,10 +1341,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_30",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -1381,13 +1382,25 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:06:58.655635",
+ "modified": "2023-06-16 14:58:55.066602",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

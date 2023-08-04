@@ -3,7 +3,6 @@ frappe.listview_settings['Stock Entry'] = {
 		"`tabStock Entry`.`purpose`", "`tabStock Entry`.`work_order`", "`tabStock Entry`.`bom_no`",
 		"`tabStock Entry`.`is_return`"],
 	get_indicator: function (doc) {
-		debugger
 		if(doc.is_return===1 && doc.purpose === "Material Transfer for Manufacture") {
 			return [__("Material Returned from WIP"), "orange",
 				"is_return,=,1|purpose,=,Material Transfer for Manufacture|docstatus,<,2"];

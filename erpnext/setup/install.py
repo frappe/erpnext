@@ -2,14 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import click
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.utils import cint
 
-from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
+import erpnext
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 
 from .default_success_action import get_default_success_action
 
@@ -22,12 +24,15 @@ def after_install():
 	set_single_defaults()
 	create_print_setting_custom_fields()
 	add_all_roles_to("Administrator")
-	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
 	create_default_energy_point_rules()
+	create_incoterms()
+	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
+	setup_log_settings()
+	hide_workspaces()
 	frappe.db.commit()
 
 
@@ -36,6 +41,25 @@ def check_setup_wizard_not_completed():
 		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
 You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
 		frappe.throw(message)  # nosemgrep
+
+
+def check_frappe_version():
+	def major_version(v: str) -> str:
+		return v.split(".")[0]
+
+	frappe_version = major_version(frappe.__version__)
+	erpnext_version = major_version(erpnext.__version__)
+
+	if frappe_version == erpnext_version:
+		return
+
+	click.secho(
+		f"You're attempting to install ERPNext version {erpnext_version} with Frappe version {frappe_version}. "
+		"This is not supported and will result in broken install. Switch to correct branch before installing.",
+		fg="red",
+	)
+
+	raise SystemExit(1)
 
 
 def set_single_defaults():
@@ -112,13 +136,6 @@ def create_print_setting_custom_fields():
 	)
 
 
-def create_default_cash_flow_mapper_templates():
-	for mapper in DEFAULT_MAPPERS:
-		if not frappe.db.exists("Cash Flow Mapper", mapper["section_name"]):
-			doc = frappe.get_doc(mapper)
-			doc.insert(ignore_permissions=True)
-
-
 def create_default_success_action():
 	for success_action in get_default_success_action():
 		if not frappe.db.exists("Success Action", success_action.get("ref_doctype")):
@@ -152,13 +169,19 @@ def add_standard_navbar_items():
 		{
 			"item_label": "Documentation",
 			"item_type": "Route",
-			"route": "https://erpnext.com/docs/user/manual",
+			"route": "https://docs.erpnext.com/",
 			"is_standard": 1,
 		},
 		{
 			"item_label": "User Forum",
 			"item_type": "Route",
-			"route": "https://discuss.erpnext.com",
+			"route": "https://discuss.frappe.io",
+			"is_standard": 1,
+		},
+		{
+			"item_label": "Frappe School",
+			"item_type": "Route",
+			"route": "https://frappe.school?utm_source=in_app",
 			"is_standard": 1,
 		},
 		{
@@ -194,4 +217,55 @@ def add_standard_navbar_items():
 
 
 def add_app_name():
-	frappe.db.set_value("System Settings", None, "app_name", "ERPNext")
+	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
+
+
+def setup_log_settings():
+	log_settings = frappe.get_single("Log Settings")
+	log_settings.append("logs_to_clear", {"ref_doctype": "Repost Item Valuation", "days": 60})
+
+	log_settings.save(ignore_permissions=True)
+
+
+def hide_workspaces():
+	for ws in ["Integration", "Settings"]:
+		frappe.db.set_value("Workspace", ws, "public", 0)
+
+
+def create_default_role_profiles():
+	for role_profile_name, roles in DEFAULT_ROLE_PROFILES.items():
+		role_profile = frappe.new_doc("Role Profile")
+		role_profile.role_profile = role_profile_name
+		for role in roles:
+			role_profile.append("roles", {"role": role})
+
+		role_profile.insert(ignore_permissions=True)
+
+
+DEFAULT_ROLE_PROFILES = {
+	"Inventory": [
+		"Stock User",
+		"Stock Manager",
+		"Item Manager",
+	],
+	"Manufacturing": [
+		"Stock User",
+		"Manufacturing User",
+		"Manufacturing Manager",
+	],
+	"Accounts": [
+		"Accounts User",
+		"Accounts Manager",
+	],
+	"Sales": [
+		"Sales User",
+		"Stock User",
+		"Sales Manager",
+	],
+	"Purchase": [
+		"Item Manager",
+		"Stock User",
+		"Purchase User",
+		"Purchase Manager",
+	],
+}

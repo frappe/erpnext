@@ -181,7 +181,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nOrdered\nIssued\nTransferred\nReceived",
+   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nPartially Received\nOrdered\nIssued\nTransferred\nReceived",
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
@@ -280,6 +280,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
@@ -355,7 +356,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 17:58:26.366469",
+ "modified": "2023-07-25 17:19:31.662662",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

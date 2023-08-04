@@ -6,7 +6,8 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate
+from frappe.query_builder import Criterion
+from frappe.utils import flt, getdate
 
 import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
@@ -58,11 +59,6 @@ def execute(filters=None):
 			fiscal_year, companies, columns, filters
 		)
 	else:
-		if cint(frappe.db.get_single_value("Accounts Settings", "use_custom_cash_flow")):
-			from erpnext.accounts.report.cash_flow.custom_cash_flow import execute as execute_custom
-
-			return execute_custom(filters=filters)
-
 		data, report_summary = get_cash_flow_data(fiscal_year, companies, filters)
 
 	return columns, data, message, chart, report_summary
@@ -118,7 +114,6 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 		liability,
 		equity,
 		provisional_profit_loss,
-		total_credit,
 		company_currency,
 		filters,
 		True,
@@ -138,7 +133,8 @@ def prepare_companywise_opening_balance(asset_data, liability_data, equity_data,
 		for data in [asset_data, liability_data, equity_data]:
 			if data:
 				account_name = get_root_account_name(data[0].root_type, company)
-				opening_value += get_opening_balance(account_name, data, company) or 0.0
+				if account_name:
+					opening_value += get_opening_balance(account_name, data, company) or 0.0
 
 		opening_balance[company] = opening_value
 
@@ -155,7 +151,7 @@ def get_opening_balance(account_name, data, company):
 
 
 def get_root_account_name(root_type, company):
-	return frappe.get_all(
+	root_account = frappe.get_all(
 		"Account",
 		fields=["account_name"],
 		filters={
@@ -165,7 +161,10 @@ def get_root_account_name(root_type, company):
 			"parent_account": ("is", "not set"),
 		},
 		as_list=1,
-	)[0][0]
+	)
+
+	if root_account:
+		return root_account[0][0]
 
 
 def get_profit_loss_data(fiscal_year, companies, columns, filters):
@@ -268,10 +267,12 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	data = {}
 	total = 0
+	filters.account_type = account_type
+	filters.start_date = fiscal_year.year_start_date
+	filters.end_date = fiscal_year.year_end_date
+
 	for company in companies:
-		amount = get_account_type_based_gl_data(
-			company, fiscal_year.year_start_date, fiscal_year.year_end_date, account_type, filters
-		)
+		amount = get_account_type_based_gl_data(company, filters)
 
 		if amount and account_type == "Depreciation":
 			amount *= -1
@@ -359,6 +360,7 @@ def get_data(
 			accounts_by_name,
 			accounts,
 			ignore_closing_entries=False,
+			root_type=root_type,
 		)
 
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year)
@@ -533,12 +535,13 @@ def get_accounts(root_type, companies):
 			],
 			filters={"company": company, "root_type": root_type},
 		):
-			if account.account_name not in added_accounts:
+			if account.account_number:
+				account_key = account.account_number + "-" + account.account_name
+			else:
+				account_key = account.account_name
+
+			if account_key not in added_accounts:
 				accounts.append(account)
-				if account.account_number:
-					account_key = account.account_number + "-" + account.account_name
-				else:
-					account_key = account.account_name
 				added_accounts.append(account_key)
 
 	return accounts
@@ -602,6 +605,7 @@ def set_gl_entries_by_account(
 	accounts_by_name,
 	accounts,
 	ignore_closing_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
@@ -609,7 +613,6 @@ def set_gl_entries_by_account(
 		"Company", filters.get("company"), ["lft", "rgt"]
 	)
 
-	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 	companies = frappe.db.sql(
 		""" select name, default_currency from `tabCompany`
 		where lft >= %(company_lft)s and rgt <= %(company_rgt)s""",
@@ -625,31 +628,47 @@ def set_gl_entries_by_account(
 	)
 
 	for d in companies:
-		gl_entries = frappe.db.sql(
-			"""select gl.posting_date, gl.account, gl.debit, gl.credit, gl.is_opening, gl.company,
-			gl.fiscal_year, gl.debit_in_account_currency, gl.credit_in_account_currency, gl.account_currency,
-			acc.account_name, acc.account_number
-			from `tabGL Entry` gl, `tabAccount` acc where acc.name = gl.account and gl.company = %(company)s and gl.is_cancelled = 0
-			{additional_conditions} and gl.posting_date <= %(to_date)s and acc.lft >= %(lft)s and acc.rgt <= %(rgt)s
-			order by gl.account, gl.posting_date""".format(
-				additional_conditions=additional_conditions
-			),
-			{
-				"from_date": from_date,
-				"to_date": to_date,
-				"lft": root_lft,
-				"rgt": root_rgt,
-				"company": d.name,
-				"finance_book": filters.get("finance_book"),
-				"company_fb": frappe.db.get_value("Company", d.name, "default_finance_book"),
-			},
-			as_dict=True,
+		gle = frappe.qb.DocType("GL Entry")
+		account = frappe.qb.DocType("Account")
+		query = (
+			frappe.qb.from_(gle)
+			.inner_join(account)
+			.on(account.name == gle.account)
+			.select(
+				gle.posting_date,
+				gle.account,
+				gle.debit,
+				gle.credit,
+				gle.is_opening,
+				gle.company,
+				gle.fiscal_year,
+				gle.debit_in_account_currency,
+				gle.credit_in_account_currency,
+				gle.account_currency,
+				account.account_name,
+				account.account_number,
+			)
+			.where(
+				(gle.company == d.name)
+				& (gle.is_cancelled == 0)
+				& (gle.posting_date <= to_date)
+				& (account.lft >= root_lft)
+				& (account.rgt <= root_rgt)
+			)
+			.orderby(gle.account, gle.posting_date)
 		)
+
+		if root_type:
+			query = query.where(account.root_type == root_type)
+		additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters, d)
+		if additional_conditions:
+			query = query.where(Criterion.all(additional_conditions))
+		gl_entries = query.run(as_dict=True)
 
 		if filters and filters.get("presentation_currency") != d.default_currency:
 			currency_info["company"] = d.name
 			currency_info["company_currency"] = d.default_currency
-			convert_to_presentation_currency(gl_entries, currency_info, filters.get("company"))
+			convert_to_presentation_currency(gl_entries, currency_info)
 
 		for entry in gl_entries:
 			if entry.account_number:
@@ -715,23 +734,25 @@ def validate_entries(key, entry, accounts_by_name, accounts):
 		accounts.insert(idx + 1, args)
 
 
-def get_additional_conditions(from_date, ignore_closing_entries, filters):
+def get_additional_conditions(from_date, ignore_closing_entries, filters, d):
+	gle = frappe.qb.DocType("GL Entry")
 	additional_conditions = []
 
 	if ignore_closing_entries:
-		additional_conditions.append("ifnull(gl.voucher_type, '')!='Period Closing Voucher'")
+		additional_conditions.append((gle.voucher_type != "Period Closing Voucher"))
 
 	if from_date:
-		additional_conditions.append("gl.posting_date >= %(from_date)s")
+		additional_conditions.append(gle.posting_date >= from_date)
+
+	finance_book = filters.get("finance_book")
+	company_fb = frappe.get_cached_value("Company", d.name, "default_finance_book")
 
 	if filters.get("include_default_book_entries"):
-		additional_conditions.append(
-			"(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
-		)
+		additional_conditions.append((gle.finance_book.isin([finance_book, company_fb, "", None])))
 	else:
-		additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
+		additional_conditions.append((gle.finance_book.isin([finance_book, "", None])))
 
-	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
+	return additional_conditions
 
 
 def add_total_row(out, root_type, balance_must_be, companies, company_currency):

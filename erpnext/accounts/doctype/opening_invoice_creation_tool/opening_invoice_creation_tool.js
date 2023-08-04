@@ -20,7 +20,6 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				frm.dashboard.reset();
 				frm.doc.import_in_progress = true;
 			}
-			if (data.user != frappe.session.user) return;
 			if (data.count == data.total) {
 				setTimeout(() => {
 					frm.doc.import_in_progress = false;

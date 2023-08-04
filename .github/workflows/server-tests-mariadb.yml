@@ -7,21 +7,18 @@ on:
       - '**.css'
       - '**.md'
       - '**.html'
-      - '**.csv'
-  push:
-    branches: [ develop ]
-    paths-ignore:
-      - '**.js'
-      - '**.md'
+  schedule:
+    # Run everday at midnight UTC / 5:30 IST
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       user:
-        description: 'user'
+        description: 'Frappe Framework repository user (add your username for forks)'
         required: true
         default: 'frappe'
         type: string
       branch:
-        description: 'Branch name'
+        description: 'Frappe Framework branch'
         default: 'develop'
         required: false
         type: string
@@ -45,9 +42,9 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:10.3
+        image: mariadb:10.6
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: YES
+          MARIADB_ROOT_PASSWORD: 'root'
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
@@ -59,7 +56,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Check for valid Python & Merge Conflicts
         run: |
@@ -72,7 +69,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
           check-latest: true
 
       - name: Add to Hosts

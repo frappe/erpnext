@@ -38,5 +38,19 @@
   "price_list_rate": 1000,
   "valid_from": "2017-04-10",
   "valid_upto": "2017-04-17"
+ },
+ {
+  "doctype": "Item Price",
+  "item_code": "_Test Item",
+  "price_list": "_Test Buying Price List",
+  "price_list_rate": 100,
+  "supplier": "_Test Supplier"
+ },
+ {
+  "doctype": "Item Price",
+  "item_code": "_Test Item",
+  "price_list": "_Test Selling Price List",
+  "price_list_rate": 200,
+  "customer": "_Test Customer"
  }
 ]

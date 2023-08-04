@@ -12,7 +12,15 @@ from erpnext.assets.doctype.asset.test_asset import (
 	create_asset_data,
 	set_depreciation_settings_in_company,
 )
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depr_schedule_doc,
+)
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 
 
 class TestAssetCapitalization(unittest.TestCase):
@@ -39,13 +47,6 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		total_amount = 103000
 
-		# Create assets
-		target_asset = create_asset(
-			asset_name="Asset Capitalization Target Asset",
-			submit=1,
-			warehouse="Stores - TCP1",
-			company=company,
-		)
 		consumed_asset = create_asset(
 			asset_name="Asset Capitalization Consumable Asset",
 			asset_value=consumed_asset_value,
@@ -57,7 +58,8 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Capitalization",
-			target_asset=target_asset.name,
+			target_item_code="Macbook Pro",
+			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
 			consumed_asset=consumed_asset.name,
@@ -86,7 +88,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(asset_capitalization.target_incoming_rate, total_amount)
 
 		# Test Target Asset values
-		target_asset.reload()
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
 
@@ -134,13 +136,6 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		total_amount = 103000
 
-		# Create assets
-		target_asset = create_asset(
-			asset_name="Asset Capitalization Target Asset",
-			submit=1,
-			warehouse="Stores - _TC",
-			company=company,
-		)
 		consumed_asset = create_asset(
 			asset_name="Asset Capitalization Consumable Asset",
 			asset_value=consumed_asset_value,
@@ -152,7 +147,8 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Capitalization",
-			target_asset=target_asset.name,
+			target_item_code="Macbook Pro",
+			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
 			consumed_asset=consumed_asset.name,
@@ -181,7 +177,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(asset_capitalization.target_incoming_rate, total_amount)
 
 		# Test Target Asset values
-		target_asset.reload()
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
 
@@ -253,6 +249,9 @@ class TestAssetCapitalization(unittest.TestCase):
 			submit=1,
 		)
 
+		first_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Decapitalization",
@@ -282,8 +281,18 @@ class TestAssetCapitalization(unittest.TestCase):
 		consumed_asset.reload()
 		self.assertEqual(consumed_asset.status, "Decapitalized")
 
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+
+		depr_schedule_of_consumed_asset = second_asset_depr_schedule.get("depreciation_schedule")
+
 		consumed_depreciation_schedule = [
-			d for d in consumed_asset.schedules if getdate(d.schedule_date) == getdate(capitalization_date)
+			d
+			for d in depr_schedule_of_consumed_asset
+			if getdate(d.schedule_date) == getdate(capitalization_date)
 		]
 		self.assertTrue(
 			consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry
@@ -343,6 +352,7 @@ def create_asset_capitalization(**args):
 			"posting_time": args.posting_time or now.strftime("%H:%M:%S.%f"),
 			"target_item_code": target_item_code,
 			"target_asset": target_asset.name,
+			"target_asset_location": "Test Location",
 			"target_warehouse": target_warehouse,
 			"target_qty": flt(args.target_qty) or 1,
 			"target_batch_no": args.target_batch_no,
@@ -355,14 +365,32 @@ def create_asset_capitalization(**args):
 		asset_capitalization.set_posting_time = 1
 
 	if flt(args.stock_rate):
+		bundle = None
+		if args.stock_batch_no or args.stock_serial_no:
+			bundle = make_serial_batch_bundle(
+				frappe._dict(
+					{
+						"item_code": args.stock_item,
+						"warehouse": source_warehouse,
+						"company": frappe.get_cached_value("Warehouse", source_warehouse, "company"),
+						"qty": (flt(args.stock_qty) or 1) * -1,
+						"voucher_type": "Asset Capitalization",
+						"type_of_transaction": "Outward",
+						"serial_nos": args.stock_serial_no,
+						"posting_date": asset_capitalization.posting_date,
+						"posting_time": asset_capitalization.posting_time,
+						"do_not_submit": True,
+					}
+				)
+			).name
+
 		asset_capitalization.append(
 			"stock_items",
 			{
 				"item_code": args.stock_item or "Capitalization Source Stock Item",
 				"warehouse": source_warehouse,
 				"stock_qty": flt(args.stock_qty) or 1,
-				"batch_no": args.stock_batch_no,
-				"serial_no": args.stock_serial_no,
+				"serial_and_batch_bundle": bundle,
 			},
 		)
 

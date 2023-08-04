@@ -3,7 +3,10 @@
 
 frappe.provide("erpnext.buying");
 frappe.provide("erpnext.accounts.dimensions");
-{% include 'erpnext/public/js/controllers/buying.js' %};
+
+erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Purchase Order");
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {
@@ -62,7 +65,7 @@ frappe.ui.form.on("Purchase Order", {
 	get_materials_from_supplier: function(frm) {
 		let po_details = [];
 
-		if (frm.doc.supplied_items && (frm.doc.per_received == 100 || frm.doc.status === 'Closed')) {
+		if (frm.doc.supplied_items && (flt(frm.doc.per_received, 2) == 100 || frm.doc.status === 'Closed')) {
 			frm.doc.supplied_items.forEach(d => {
 				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
 					po_details.push(d.name)
@@ -181,7 +184,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			}
 
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
-				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
+				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received, 2) < 100 && flt(this.frm.doc.per_billed, 2) < 100) {
 					// Don't add Update Items button if the PO is following the new subcontracting flow.
 					if (!(this.frm.doc.is_subcontracted && !this.frm.doc.is_old_subcontracting_flow)) {
 						this.frm.add_custom_button(__('Update Items'), () => {
@@ -195,7 +198,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 					}
 				}
 				if (this.frm.has_perm("submit")) {
-					if(flt(doc.per_billed, 6) < 100 || flt(doc.per_received, 6) < 100) {
+					if(flt(doc.per_billed, 2) < 100 || flt(doc.per_received, 2) < 100) {
 						if (doc.status != "On Hold") {
 							this.frm.add_custom_button(__('Hold'), () => this.hold_purchase_order(), __("Status"));
 						} else{
@@ -218,7 +221,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			}
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-					if(flt(doc.per_received) < 100 && allow_receipt) {
+					if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
 						if (doc.is_subcontracted) {
 							if (doc.is_old_subcontracting_flow) {
@@ -231,23 +234,21 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 							}
 						}
 					}
-					if(flt(doc.per_billed) < 100)
+					if(flt(doc.per_billed, 2) < 100)
 						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
 
-					if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-						cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __('Create'));
+					if(flt(doc.per_billed, 2) < 100 && doc.status != "Delivered") {
+						this.frm.add_custom_button(
+							__('Payment'),
+							() => this.make_payment_entry(),
+							__('Create')
+						);
 					}
 
-					if(flt(doc.per_billed)==0) {
+					if(flt(doc.per_billed, 2) < 100) {
 						this.frm.add_custom_button(__('Payment Request'),
 							function() { me.make_payment_request() }, __('Create'));
-					}
-
-					if(!doc.auto_repeat) {
-						cur_frm.add_custom_button(__('Subscription'), function() {
-							erpnext.utils.make_subscription(doc.doctype, doc.name)
-						}, __('Create'))
 					}
 
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
@@ -282,7 +283,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			source_name: this.frm.doc.supplier,
 			target: this.frm,
 			setters: {
-				company: me.frm.doc.company
+				company: this.frm.doc.company
 			},
 			get_query_filters: {
 				docstatus: ["!=", 2],

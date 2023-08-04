@@ -15,7 +15,8 @@
   "outstanding_amount",
   "allocated_amount",
   "exchange_rate",
-  "exchange_gain_loss"
+  "exchange_gain_loss",
+  "account"
  ],
  "fields": [
   {
@@ -25,7 +26,8 @@
    "in_list_view": 1,
    "label": "Type",
    "options": "DocType",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "columns": 2,
@@ -35,7 +37,8 @@
    "in_list_view": 1,
    "label": "Name",
    "options": "reference_doctype",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "due_date",
@@ -99,12 +102,18 @@
    "label": "Exchange Gain/Loss",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-26 17:06:55.597389",
+ "modified": "2023-06-08 07:40:38.487874",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",
@@ -113,5 +122,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

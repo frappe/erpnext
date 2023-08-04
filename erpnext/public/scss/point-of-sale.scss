@@ -34,7 +34,7 @@
 	}
 
 	.abbr {
-		background-color: var(--gray-50);
+		background-color: var(--control-bg);
 		font-size: var(--text-3xl);
 	}
 
@@ -72,7 +72,7 @@
 	.highlighted-numpad-btn {
 		box-shadow: inset 0 0px 4px 0px rgba(0, 0, 0, 0.15) !important;
 		font-weight: 700;
-		background-color: var(--gray-50);
+		background-color: var(--control-bg);
 	}
 
 	> .items-selector {
@@ -152,11 +152,16 @@
 					margin-bottom: 0px;
 					min-height: 8rem;
 					height: 8rem;
-					color: var(--gray-500);
 
 					> img {
 						@extend .image;
 					}
+				}
+
+				.item-img {
+					@extend .image;
+					border-radius: 8px 8px 0 0;
+					object-fit: cover;
 				}
 
 				> .item-detail {
@@ -236,7 +241,7 @@
 						width: 3rem;
 						height: 3rem;
 						border-radius: 50%;
-						color: var(--gray-500);
+						color: var(--text-light);
 						margin-right: var(--margin-md);
 
 						> img {
@@ -262,7 +267,6 @@
 						}
 
 						>.customer-desc {
-							color: var(--gray-600);
 							font-weight: 500;
 							font-size: var(--text-sm);
 						}
@@ -357,7 +361,7 @@
 					display: flex;
 					align-items: center;
 					justify-content: center;
-					background-color: var(--gray-50);
+					background-color: var(--control-bg);
 					border-radius: var(--border-radius-md);
 					font-size: var(--text-md);
 					font-weight: 500;
@@ -379,7 +383,7 @@
 						border-radius: var(--border-radius-md);
 
 						&:hover {
-							background-color: var(--gray-50);
+							background-color: var(--control-bg);
 						}
 
 						> .item-image {
@@ -389,7 +393,7 @@
 							width: 2rem;
 							height: 2rem;
 							border-radius: var(--border-radius-md);
-							color: var(--gray-500);
+							color: var(--text-light);
 							margin-right: var(--margin-md);
 
 							> img {
@@ -531,13 +535,13 @@
 					> .edit-cart-btn {
 						@extend .primary-action;
 						display: none;
-						background-color: var(--gray-300);
+						background-color: var(--control-bg);
 						font-weight: 500;
 						transition: all 0.15s ease-in-out;
 
 						&:hover {
-							background-color: var(--gray-600);
-							color: white;
+							background-color: var(--control-bg);
+							color: var(--text-light);
 							font-weight: 700;
 						}
 					}
@@ -826,13 +830,13 @@
 						> .shortcut {
 							@extend .pointer-no-select;
 							border-radius: var(--border-radius-sm);
-							background-color: var(--gray-100);
+							background-color: var(--control-bg);
 							font-weight: 500;
 							padding: var(--padding-xs) var(--padding-sm);
 							transition: all 0.15s ease-in-out;
 
 							&:hover {
-								background-color: var(--gray-300);
+								background-color: var(--control-bg);
 							}
 						}
 					}
@@ -906,7 +910,7 @@
 
 			> .totals {
 				display: flex;
-				background-color: var(--gray-100);
+				background-color: var(--control-bg);
 				justify-content: center;
 				padding: var(--padding-md);
 				border-radius: var(--border-radius-md);
@@ -918,7 +922,6 @@
 					> .total-label {
 						font-size: var(--text-md);
 						font-weight: 500;
-						color: var(--gray-600);
 					}
 
 					> .value {
@@ -1030,7 +1033,6 @@
 						> .customer-email {
 							font-size: var(--text-md);
 							font-weight: 500;
-							color: var(--gray-600);
 						}
 
 						> .cashier {
@@ -1065,7 +1067,7 @@
 					display: flex;
 					flex-direction: column;
 					border-radius: var(--border-radius-md);
-					background-color: var(--gray-50);
+					background-color: var(--control-bg);
 					margin: var(--margin-md) 0px;
 
 					> .summary-row-wrapper {

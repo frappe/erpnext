@@ -58,7 +58,7 @@ status_map = {
 			"eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed == 100 and self.docstatus == 1",
 		],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 		["On Hold", "eval:self.status=='On Hold'"],
 	],
 	"Purchase Order": [
@@ -79,7 +79,7 @@ status_map = {
 		["Delivered", "eval:self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["On Hold", "eval:self.status=='On Hold'"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
 	"Delivery Note": [
 		["Draft", None],
@@ -87,7 +87,7 @@ status_map = {
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
 	"Purchase Receipt": [
 		["Draft", None],
@@ -95,7 +95,7 @@ status_map = {
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Closed", "eval:self.status=='Closed' and self.docstatus != 2"],
 	],
 	"Material Request": [
 		["Draft", None],
@@ -233,6 +233,9 @@ class StatusUpdater(Document):
 				if hasattr(d, "qty") and d.qty > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 
+				if hasattr(d, "item_code") and hasattr(d, "rate") and d.rate < 0:
+					frappe.throw(_("For an item {0}, rate must be a positive number").format(d.item_code))
+
 				if d.doctype == args["source_dt"] and d.get(args["join_field"]):
 					args["name"] = d.get(args["join_field"])
 
@@ -347,16 +350,21 @@ class StatusUpdater(Document):
 		)
 
 	def warn_about_bypassing_with_role(self, item, qty_or_amount, role):
-		action = _("Over Receipt/Delivery") if qty_or_amount == "qty" else _("Overbilling")
+		if qty_or_amount == "qty":
+			msg = _("Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role.")
+		else:
+			msg = _("Overbilling of {0} {1} ignored for item {2} because you have {3} role.")
 
-		msg = _("{} of {} {} ignored for item {} because you have {} role.").format(
-			action,
-			_(item["target_ref_field"].title()),
-			frappe.bold(item["reduce_by"]),
-			frappe.bold(item.get("item_code")),
-			role,
+		frappe.msgprint(
+			msg.format(
+				_(item["target_ref_field"].title()),
+				frappe.bold(item["reduce_by"]),
+				frappe.bold(item.get("item_code")),
+				role,
+			),
+			indicator="orange",
+			alert=True,
 		)
-		frappe.msgprint(msg, indicator="orange", alert=True)
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
@@ -459,7 +467,7 @@ class StatusUpdater(Document):
 					ifnull((select
 						ifnull(sum(case when abs(%(target_ref_field)s) > abs(%(target_field)s) then abs(%(target_field)s) else abs(%(target_ref_field)s) end), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent='%(name)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
+					from `tab%(target_dt)s` where parent='%(name)s' and parenttype='%(target_parent_dt)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
 				where name='%(name)s'"""
 				% args

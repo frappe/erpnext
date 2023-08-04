@@ -63,7 +63,7 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	else:
 		filters["parent_department"] = parent
 
-	return frappe.get_all(doctype, fields=fields, filters=filters, order_by="name")
+	return frappe.get_all("Department", fields=fields, filters=filters, order_by="name")
 
 
 @frappe.whitelist()

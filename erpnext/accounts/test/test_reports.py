@@ -30,10 +30,6 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("Sales Register", {}),
 	("Sales Register", {"item_group": "All Item Groups"}),
 	("Purchase Register", {}),
-	(
-		"Tax Detail",
-		{"mode": "run", "report_name": "Tax Detail"},
-	),
 ]
 
 OPTIONAL_FILTERS = {}

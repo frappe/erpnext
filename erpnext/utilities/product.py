@@ -110,6 +110,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 					"conversion_rate": 1,
 					"for_shopping_cart": True,
 					"currency": frappe.db.get_value("Price List", price_list, "currency"),
+					"doctype": "Quotation",
 				}
 			)
 

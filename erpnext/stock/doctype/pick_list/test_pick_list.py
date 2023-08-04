@@ -11,6 +11,11 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
@@ -139,6 +144,18 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pick_list.locations[1].qty, 10)
 
 	def test_pick_list_shows_serial_no_for_serialized_item(self):
+		serial_nos = ["SADD-0001", "SADD-0002", "SADD-0003", "SADD-0004", "SADD-0005"]
+
+		for serial_no in serial_nos:
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"company": "_Test Company",
+						"item_code": "_Test Serialized Item",
+						"serial_no": serial_no,
+					}
+				).insert()
 
 		stock_reconciliation = frappe.get_doc(
 			{
@@ -151,7 +168,20 @@ class TestPickList(FrappeTestCase):
 						"warehouse": "_Test Warehouse - _TC",
 						"valuation_rate": 100,
 						"qty": 5,
-						"serial_no": "123450\n123451\n123452\n123453\n123454",
+						"serial_and_batch_bundle": make_serial_batch_bundle(
+							frappe._dict(
+								{
+									"item_code": "_Test Serialized Item",
+									"warehouse": "_Test Warehouse - _TC",
+									"qty": 5,
+									"rate": 100,
+									"type_of_transaction": "Inward",
+									"do_not_submit": True,
+									"voucher_type": "Stock Reconciliation",
+									"serial_nos": serial_nos,
+								}
+							)
+						).name,
 					}
 				],
 			}
@@ -161,6 +191,10 @@ class TestPickList(FrappeTestCase):
 			stock_reconciliation.submit()
 		except EmptyStockReconciliationItemsError:
 			pass
+
+		so = make_sales_order(
+			item_code="_Test Serialized Item", warehouse="_Test Warehouse - _TC", qty=5, rate=1000
+		)
 
 		pick_list = frappe.get_doc(
 			{
@@ -175,18 +209,20 @@ class TestPickList(FrappeTestCase):
 						"qty": 1000,
 						"stock_qty": 1000,
 						"conversion_factor": 1,
-						"sales_order": "_T-Sales Order-1",
-						"sales_order_item": "_T-Sales Order-1_item",
+						"sales_order": so.name,
+						"sales_order_item": so.items[0].name,
 					}
 				],
 			}
 		)
 
-		pick_list.set_item_locations()
+		pick_list.save()
 		self.assertEqual(pick_list.locations[0].item_code, "_Test Serialized Item")
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
-		self.assertEqual(pick_list.locations[0].serial_no, "123450\n123451\n123452\n123453\n123454")
+		self.assertEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_nos
+		)
 
 	def test_pick_list_shows_batch_no_for_batched_item(self):
 		# check if oldest batch no is picked
@@ -245,8 +281,8 @@ class TestPickList(FrappeTestCase):
 		pr1 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
 		pr1.load_from_db()
-		oldest_batch_no = pr1.items[0].batch_no
-		oldest_serial_nos = pr1.items[0].serial_no
+		oldest_batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		oldest_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
 
 		pr2 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
@@ -267,8 +303,12 @@ class TestPickList(FrappeTestCase):
 		)
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].batch_no, oldest_batch_no)
-		self.assertEqual(pick_list.locations[0].serial_no, oldest_serial_nos)
+		self.assertEqual(
+			get_batch_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_batch_no
+		)
+		self.assertEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_serial_nos
+		)
 
 		pr1.cancel()
 		pr2.cancel()
@@ -414,6 +454,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 
 		delivery_note = create_delivery_note(pick_list.name)
+		pick_list.load_from_db()
 
 		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
@@ -445,10 +486,10 @@ class TestPickList(FrappeTestCase):
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 4)
 
-		# grouping should halve the number of items
+		# grouping should not happen if group_same_items is False
 		pl = frappe.get_doc(
 			doctype="Pick List",
-			group_same_items=True,
+			group_same_items=False,
 			locations=[
 				_dict(item_code="A", warehouse="X", qty=5, picked_qty=1),
 				_dict(item_code="B", warehouse="Y", qty=4, picked_qty=2),
@@ -456,6 +497,11 @@ class TestPickList(FrappeTestCase):
 				_dict(item_code="B", warehouse="Y", qty=2, picked_qty=2),
 			],
 		)
+		pl.before_print()
+		self.assertEqual(len(pl.locations), 4)
+
+		# grouping should halve the number of items
+		pl.group_same_items = True
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 2)
 
@@ -658,3 +704,36 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(dn.items[0].rate, 42)
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
+
+	def test_pick_list_status(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"maintain_stock": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.reload()
+		self.assertEqual(pl.status, "Draft")
+
+		pl.submit()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		dn = create_delivery_note(pl.name)
+		dn.save()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		dn.submit()
+		pl.reload()
+		self.assertEqual(pl.status, "Completed")
+
+		dn.cancel()
+		pl.reload()
+		self.assertEqual(pl.status, "Completed")
+
+		pl.cancel()
+		pl.reload()
+		self.assertEqual(pl.status, "Cancelled")

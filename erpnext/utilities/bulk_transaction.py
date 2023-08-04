@@ -69,11 +69,11 @@ def task(doc_name, from_doctype, to_doctype):
 		"Sales Order": {
 			"Sales Invoice": sales_order.make_sales_invoice,
 			"Delivery Note": sales_order.make_delivery_note,
-			"Advance Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Sales Invoice": {
 			"Delivery Note": sales_invoice.make_delivery_note,
-			"Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Delivery Note": {
 			"Sales Invoice": delivery_note.make_sales_invoice,
@@ -86,24 +86,25 @@ def task(doc_name, from_doctype, to_doctype):
 		"Supplier Quotation": {
 			"Purchase Order": supplier_quotation.make_purchase_order,
 			"Purchase Invoice": supplier_quotation.make_purchase_invoice,
-			"Advance Payment": payment_entry.get_payment_entry,
 		},
 		"Purchase Order": {
 			"Purchase Invoice": purchase_order.make_purchase_invoice,
 			"Purchase Receipt": purchase_order.make_purchase_receipt,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Purchase Invoice": {
 			"Purchase Receipt": purchase_invoice.make_purchase_receipt,
-			"Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice},
 	}
-	if to_doctype in ["Advance Payment", "Payment"]:
+	if to_doctype in ["Payment Entry"]:
 		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)
 	else:
 		obj = mapper[from_doctype][to_doctype](doc_name)
 
 	obj.flags.ignore_validate = True
+	obj.set_title_field()
 	obj.insert(ignore_mandatory=True)
 
 
@@ -151,7 +152,9 @@ def update_logger(doc_name, e, from_doctype, to_doctype, status, log_date=None, 
 def show_job_status(fail_count, deserialized_data_count, to_doctype):
 	if not fail_count:
 		frappe.msgprint(
-			_("Creation of {0} successful").format(to_doctype),
+			_("Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful").format(
+				to_doctype.lower().replace(" ", "-"), to_doctype
+			),
 			title="Successful",
 			indicator="green",
 		)

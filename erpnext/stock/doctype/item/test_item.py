@@ -83,6 +83,7 @@ class TestItem(FrappeTestCase):
 	def test_get_item_details(self):
 		# delete modified item price record and make as per test_records
 		frappe.db.sql("""delete from `tabItem Price`""")
+		frappe.db.sql("""delete from `tabBin`""")
 
 		to_check = {
 			"item_code": "_Test Item",
@@ -103,9 +104,25 @@ class TestItem(FrappeTestCase):
 			"batch_no": None,
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
+			"reserved_qty": 1,
+			"actual_qty": 5,
+			"projected_qty": 14,
 		}
 
 		make_test_objects("Item Price")
+		make_test_objects(
+			"Bin",
+			[
+				{
+					"item_code": "_Test Item",
+					"warehouse": "_Test Warehouse - _TC",
+					"reserved_qty": 1,
+					"actual_qty": 5,
+					"ordered_qty": 10,
+					"projected_qty": 14,
+				}
+			],
+		)
 
 		company = "_Test Company"
 		currency = frappe.get_cached_value("Company", company, "default_currency")
@@ -129,7 +146,7 @@ class TestItem(FrappeTestCase):
 		)
 
 		for key, value in to_check.items():
-			self.assertEqual(value, details.get(key))
+			self.assertEqual(value, details.get(key), key)
 
 	def test_item_tax_template(self):
 		expected_item_tax_template = [
@@ -562,6 +579,20 @@ class TestItem(FrappeTestCase):
 			{
 				"barcode": "ARBITRARY_TEXT",
 			},
+			{"barcode": "72527273070", "barcode_type": "UPC-A"},
+			{"barcode": "123456", "barcode_type": "CODE-39"},
+			{"barcode": "401268452363", "barcode_type": "EAN"},
+			{"barcode": "90311017", "barcode_type": "EAN"},
+			{"barcode": "73513537", "barcode_type": "EAN"},
+			{"barcode": "0123456789012", "barcode_type": "GS1"},
+			{"barcode": "2211564566668", "barcode_type": "GTIN"},
+			{"barcode": "0256480249", "barcode_type": "ISBN"},
+			{"barcode": "0192552570", "barcode_type": "ISBN-10"},
+			{"barcode": "9781234567897", "barcode_type": "ISBN-13"},
+			{"barcode": "9771234567898", "barcode_type": "ISSN"},
+			{"barcode": "4581171967072", "barcode_type": "JAN"},
+			{"barcode": "12345678", "barcode_type": "PZN"},
+			{"barcode": "725272730706", "barcode_type": "UPC"},
 		]
 		create_item(item_code)
 		for barcode_properties in barcode_properties_list:

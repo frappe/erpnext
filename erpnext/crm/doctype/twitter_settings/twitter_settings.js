@@ -14,7 +14,7 @@ frappe.ui.form.on('Twitter Settings', {
 				}
 			);
 		}
-		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/twitter-settings'>${__('Click here')}</a>`]));
+		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/twitter-settings'>${__('click here')}</a>`]));
 	},
 	refresh: function(frm) {
 		let msg, color, flag=false;

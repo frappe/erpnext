@@ -26,10 +26,11 @@
   }
  ],
  "links": [],
- "modified": "2021-02-08 12:51:48.971517",
+ "modified": "2023-02-10 00:51:44.973957",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Source",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -58,5 +59,7 @@
  ],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": [],
+ "translated_doctype": 1
 }
