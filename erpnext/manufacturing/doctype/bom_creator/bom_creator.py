@@ -250,6 +250,8 @@ def add_item(**kwargs):
 	doc.append("items", kwargs)
 	doc.save()
 
+	return doc
+
 
 @frappe.whitelist()
 def add_sub_assembly(**kwargs):
@@ -305,6 +307,7 @@ def add_sub_assembly(**kwargs):
 		)
 
 	doc.save()
+
 	return doc
 
 
@@ -330,6 +333,12 @@ def delete_node(**kwargs):
 		frappe.delete_doc("BOM Creator Item", item.name)
 		if item.expandable:
 			delete_node(fg_item=item.value, parent=item.parent_id)
+
+	doc = frappe.get_doc("BOM Creator", kwargs.parent)
+	doc.set_rate_for_sub_assemblies()
+	doc.save()
+
+	return doc
 
 
 @frappe.whitelist()

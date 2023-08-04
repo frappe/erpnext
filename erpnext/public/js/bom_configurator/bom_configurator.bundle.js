@@ -36,6 +36,7 @@ class BOMConfigurator {
 			delete_node: this.delete_node,
 			edit_qty: this.edit_qty,
 			frm: this.frm,
+			load_tree: this.load_tree,
 		}
 	}
 
@@ -85,12 +86,12 @@ class BOMConfigurator {
 							font-weight:450;
 							margin-right: 40px;
 							display: inline-flex;
-							width: 128px;
+							min-width: 128px;
 							border: 1px solid var(--bg-gray);
 						"
 						data-bom-qty-docname="${docname}">
 							<div style="padding-right:5px">${qty} ${uom}</div>
-							<div style="padding-left:8px; border-left:1px solid var(--bg-gray)">
+							<div class="fg-item-amt" style="padding-left:12px; border-left:1px solid var(--bg-gray)">
 								${amount}
 							</div>
 					</div>
@@ -110,7 +111,7 @@ class BOMConfigurator {
 					label:__(frappe.utils.icon('add', 'sm') + " Raw Material"),
 					click: function(node) {
 						let view = frappe.views.trees["BOM Configurator"];
-						view.events.add_item(node);
+						view.events.add_item(node, view);
 					},
 					condition: function(node) {
 						return node.expandable;
@@ -191,7 +192,7 @@ class BOMConfigurator {
 		}
 	}
 
-	add_item(node) {
+	add_item(node, view) {
 		frappe.prompt([
 			{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1 },
 			{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1 },
@@ -211,7 +212,7 @@ class BOMConfigurator {
 					qty: data.qty,
 				},
 				callback: (r) => {
-					frappe.views.trees["BOM Configurator"].tree.load_children(node);
+					view.events.load_tree(r, node);
 				}
 			});
 		},
@@ -243,7 +244,7 @@ class BOMConfigurator {
 					bom_item: bom_item,
 				},
 				callback: (r) => {
-					frappe.views.trees["BOM Configurator"].tree.load_children(node);
+					view.events.load_tree(r, node);
 				}
 			});
 
@@ -293,7 +294,7 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					node.expandable = true;
-					frappe.views.trees["BOM Configurator"].tree.load_children(node);
+					view.events.load_tree(r, node);
 				}
 			});
 
@@ -312,7 +313,7 @@ class BOMConfigurator {
 					docname: node.data.name,
 				},
 				callback: (r) => {
-					frappe.views.trees["BOM Configurator"].tree.load_children(node.parent_node);
+					view.events.load_tree(r, node.parent_node);
 				}
 			});
 		});
@@ -352,6 +353,23 @@ class BOMConfigurator {
 		$(main_div).find(".tree-children")[0].style.minHeight = "370px";
 		$(main_div).find(".tree-children")[0].style.maxHeight = "370px";
 		$(main_div).find(".tree-children")[0].style.overflowY = "auto";
+	}
+
+	load_tree(response, node) {
+		frappe.views.trees["BOM Configurator"].tree.load_children(node);
+		let parent_dom = $(node.parent.get(0));
+		if (node?.parent_node) {
+			parent_dom = $(node.parent_node.$tree_link.get(0));
+		}
+
+		let total_amount = frappe.format(
+			response.message.raw_material_cost, {
+				fieldtype: "Currency",
+				currency: this.frm.doc.currency
+			}
+		);
+
+		$(parent_dom).find(".fg-item-amt").html(total_amount);
 	}
 }
 
