@@ -203,17 +203,6 @@ def get_balance_on(
 		acc = frappe.get_doc("Account", account)
 
 	account_name = []
-	if account_type:
-		accounts = frappe.db.get_all(
-			"Account",
-			filters={"company": company, "account_type": account_type, "is_group": 0},
-			fields=["name", "lft", "rgt"],
-			order_by="lft",
-		)
-		for a in accounts:
-			account_name.append(a["name"])
-		account_name = tuple(account_name)
-
 	try:
 		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
 	except FiscalYearError:
@@ -268,22 +257,19 @@ def get_balance_on(
 			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
 
 	if account_type:
+		accounts = frappe.db.get_all(
+			"Account",
+			filters={"company": company, "account_type": account_type, "is_group": 0},
+			pluck="name",
+			order_by="lft",
+		)
 
-		if len(account_name) == 1:
-			account_name = "'" + list(account_name)[0] + "'"
-			cond.append(
-				"""exists (
-					select name from `tabAccount` ac where gle.account = %s
-				)"""
-				% (account_name)
-			)
-		elif len(account_name) > 1:
-			cond.append(
-				"""exists (
-					select name from `tabAccount` ac where gle.account in %s
-				)"""
-				% (account_name,)
-			)
+		cond.append(
+			"""
+			gle.account in (%s)
+		"""
+			% (", ".join([frappe.db.escape(account) for account in accounts]))
+		)
 
 	if party_type and party:
 		cond.append(

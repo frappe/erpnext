@@ -2,7 +2,6 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-let fiscal_year = frappe.defaults.get_user_default("fiscal_year");
 frappe.query_reports["Financial Ratios"] = {
 	filters: [
 		{
@@ -18,7 +17,7 @@ frappe.query_reports["Financial Ratios"] = {
 			label: __("Start Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: fiscal_year,
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 		},
 		{
@@ -26,7 +25,7 @@ frappe.query_reports["Financial Ratios"] = {
 			label: __("End Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: fiscal_year,
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 		},
 		{
@@ -41,14 +40,14 @@ frappe.query_reports["Financial Ratios"] = {
 			fieldname: "period_start_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_start_date"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			hidden: 1,
 		},
 		{
 			fieldname: "period_end_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_end_date"),
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 			hidden: 1,
 		},
 	],
