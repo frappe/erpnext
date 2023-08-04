@@ -714,6 +714,17 @@ def make_time_log(args):
 	doc.validate_sequence_id()
 	doc.add_time_log(args)
 
+@frappe.whitelist()
+def pause_job_cards():
+	doc = frappe.db.get_list('Job Card', filters = {"status": "Work In Progress"})
+	for item in doc:
+		doc = frappe.db.set_value("Job Card", item.name, {"status": "On Hold"}) 
+
+@frappe.whitelist()
+def resume_job_cards():
+	doc = frappe.db.get_list('Job Card', filters = {"status": "On Hold"})
+	for item in doc:
+		doc = frappe.db.set_value("Job Card", item.name, {"status": "Work In Progress"}) 
 
 @frappe.whitelist()
 def get_operation_details(work_order, operation):
