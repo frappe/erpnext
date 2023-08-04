@@ -79,7 +79,7 @@
   "show_operations",
   "web_long_description",
   "reference_section",
-  "bom_configurator",
+  "bom_creator",
   "amended_from",
   "connections_tab"
  ],
@@ -235,7 +235,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual"
   },
   {
    "allow_on_submit": 1,
@@ -608,7 +608,7 @@
    "label": "Reference"
   },
   {
-   "fieldname": "bom_configurator",
+   "fieldname": "bom_creator",
    "fieldtype": "Link",
    "label": "BOM Configurator",
    "no_copy": 1,
@@ -622,7 +622,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-03 17:21:42.240881",
+ "modified": "2023-08-04 14:27:32.961309",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

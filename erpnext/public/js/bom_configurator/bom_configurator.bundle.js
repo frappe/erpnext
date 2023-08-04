@@ -36,7 +36,6 @@ class BOMConfigurator {
 			delete_node: this.delete_node,
 			edit_qty: this.edit_qty,
 			frm: this.frm,
-			// datatable: this.datatable,
 		}
 	}
 
@@ -76,14 +75,26 @@ class BOMConfigurator {
 				const qty = node.data.qty || frm_obj.frm.doc.qty;
 				const uom = node.data.uom || frm_obj.frm.doc.uom;
 				const docname = node.data.name || frm_obj.frm.doc.name;
+				let amount = node.data.amount || frm_obj.frm.doc.raw_material_cost;
+				amount = frappe.format(amount, { fieldtype: "Currency", currency: frm_obj.frm.doc.currency });
 
-				$(`<span class="pill small pull-right bom-qty-pill"
-					style="background-color: var(--bg-gray);
-						color: var(--text-on-gray);
-						font-weight:500;
-						margin-right: 10px;"
-					data-bom-qty-docname="${docname}"
-					>${qty} ${uom}</span>
+				$(`
+					<div class="pill small pull-right bom-qty-pill"
+						style="background-color: var(--bg-white);
+							color: var(--text-on-gray);
+							font-weight:450;
+							margin-right: 40px;
+							display: inline-flex;
+							width: 128px;
+							border: 1px solid var(--bg-gray);
+						"
+						data-bom-qty-docname="${docname}">
+							<div style="padding-right:5px">${qty} ${uom}</div>
+							<div style="padding-left:8px; border-left:1px solid var(--bg-gray)">
+								${amount}
+							</div>
+					</div>
+
 				`).insertBefore(node.$ul);
 			},
 			toolbar: this.frm?.doc.docstatus === 0 ? [
@@ -158,7 +169,25 @@ class BOMConfigurator {
 					},
 					btnClass: "hidden-xs"
 				},
-			] : [],
+			] : [{
+				label:__("Expand All"),
+				click: function(node) {
+					let view = frappe.views.trees["BOM Configurator"];
+
+					if (!node.expanded) {
+						view.tree.load_children(node, true);
+						$(node.parent[0]).find(".tree-children").show();
+						node.$toolbar.find(".expand-all-btn").html("Collapse All");
+					} else {
+						node.$tree_link.trigger("click");
+						node.$toolbar.find(".expand-all-btn").html("Expand All");
+					}
+				},
+				condition: function(node) {
+					return node.expandable && node.is_root;
+				},
+				btnClass: "hidden-xs expand-all-btn"
+			}],
 		}
 	}
 
@@ -178,6 +207,7 @@ class BOMConfigurator {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					item_code: data.item_code,
+					fg_reference_id: node.data.name || this.frm.doc.name,
 					qty: data.qty,
 				},
 				callback: (r) => {
@@ -209,6 +239,7 @@ class BOMConfigurator {
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
+					fg_reference_id: node.data.name || this.frm.doc.name,
 					bom_item: bom_item,
 				},
 				callback: (r) => {
@@ -257,6 +288,7 @@ class BOMConfigurator {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					bom_item: bom_item,
+					fg_reference_id: node.data.name || this.frm.doc.name,
 					convert_to_sub_assembly: true,
 				},
 				callback: (r) => {

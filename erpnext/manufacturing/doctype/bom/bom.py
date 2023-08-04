@@ -662,18 +662,19 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			old_rate = d.rate
-			d.rate = self.get_rm_rate(
-				{
-					"company": self.company,
-					"item_code": d.item_code,
-					"bom_no": d.bom_no,
-					"qty": d.qty,
-					"uom": d.uom,
-					"stock_uom": d.stock_uom,
-					"conversion_factor": d.conversion_factor,
-					"sourced_by_supplier": d.sourced_by_supplier,
-				}
-			)
+			if self.rm_cost_as_per != "Manual":
+				d.rate = self.get_rm_rate(
+					{
+						"company": self.company,
+						"item_code": d.item_code,
+						"bom_no": d.bom_no,
+						"qty": d.qty,
+						"uom": d.uom,
+						"stock_uom": d.stock_uom,
+						"conversion_factor": d.conversion_factor,
+						"sourced_by_supplier": d.sourced_by_supplier,
+					}
+				)
 
 			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
 			d.amount = flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty"))
@@ -964,7 +965,12 @@ def get_valuation_rate(data):
 			.as_("valuation_rate")
 		)
 		.where((bin_table.item_code == item_code) & (wh_table.company == company))
-	).run(as_dict=True)[0]
+	)
+
+	if data.get("set_rate_based_on_warehouse") and data.get("warehouse"):
+		item_valuation = item_valuation.where(bin_table.warehouse == data.get("warehouse"))
+
+	item_valuation = item_valuation.run(as_dict=True)[0]
 
 	valuation_rate = item_valuation.get("valuation_rate")
 

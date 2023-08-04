@@ -13,6 +13,7 @@
   "fg_item",
   "source_warehouse",
   "is_expandable",
+  "sourced_by_supplier",
   "description_section",
   "description",
   "quantity_and_rate_section",
@@ -28,10 +29,11 @@
   "column_break_yuca",
   "base_rate",
   "base_amount",
-  "explode_item_section",
+  "section_break_wtld",
   "do_not_explode",
-  "bom_no",
-  "instruction_section",
+  "parent_row_no",
+  "fg_reference_id",
+  "column_break_sulm",
   "instruction"
  ],
  "fields": [
@@ -41,7 +43,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item Code",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fetch_from": "item_code.item_name",
@@ -163,34 +166,16 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "explode_item_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Explode Item"
-  },
-  {
    "default": "1",
    "fieldname": "do_not_explode",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Do Not Explode"
   },
   {
-   "depends_on": "eval:!doc.do_not_explode",
-   "fieldname": "bom_no",
-   "fieldtype": "Link",
-   "label": "Exploded BOM",
-   "no_copy": 1,
-   "options": "BOM"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "instruction_section",
-   "fieldtype": "Section Break",
-   "label": "Instruction"
-  },
-  {
    "fieldname": "instruction",
-   "fieldtype": "Small Text"
+   "fieldtype": "Small Text",
+   "label": "Instruction"
   },
   {
    "fieldname": "base_amount",
@@ -203,12 +188,37 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Base Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "sourced_by_supplier",
+   "fieldtype": "Check",
+   "label": "Sourced by Supplier"
+  },
+  {
+   "fieldname": "section_break_wtld",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fg_reference_id",
+   "fieldtype": "Data",
+   "label": "FG Reference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_sulm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "parent_row_no",
+   "fieldtype": "Data",
+   "label": "Parent Row No"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-03 17:50:16.574197",
+ "modified": "2023-08-04 12:32:28.555867",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",
