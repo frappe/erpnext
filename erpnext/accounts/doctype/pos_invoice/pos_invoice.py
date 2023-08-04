@@ -631,6 +631,7 @@ def get_stock_availability(item_code, warehouse):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+
 		return bin_qty - pos_sales_qty, is_stock_item
 	else:
 		is_stock_item = True

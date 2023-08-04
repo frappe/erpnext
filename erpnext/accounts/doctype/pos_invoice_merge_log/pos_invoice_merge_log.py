@@ -84,30 +84,19 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_docs = [
 			frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices
 		]
-		batched_invoices = self.get_batched_invoices(pos_invoice_docs)
 
-		for invoice in batched_invoices:
-			sales_invoice, credit_note = "", ""
-			if not invoice[0].get("is_return"):
-				sales_invoice = self.process_merging_into_sales_invoice(invoice)
-			else:
-				credit_note = self.process_merging_into_credit_note(invoice)
+		returns = [d for d in pos_invoice_docs if d.get("is_return") == 1]
+		sales = [d for d in pos_invoice_docs if d.get("is_return") == 0]
 
-			self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
-			self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
+		sales_invoice, credit_note = "", ""
+		if returns:
+			credit_note = self.process_merging_into_credit_note(returns)
 
-		# returns = [d for d in pos_invoice_docs if d.get("is_return") == 1]
-		# sales = [d for d in pos_invoice_docs if d.get("is_return") == 0]
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
-		# sales_invoice, credit_note = "", ""
-		# if returns:
-		# 	credit_note = self.process_merging_into_credit_note(returns)
-
-		# if sales:
-		# 	sales_invoice = self.process_merging_into_sales_invoice(sales)
-
-		# self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
-		# self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
+		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
+		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
 
 	def on_cancel(self):
 		pos_invoice_docs = [
@@ -172,23 +161,20 @@ class POSInvoiceMergeLog(Document):
 
 			for item in doc.get("items"):
 				found = False
-				if not item.serial_and_batch_bundle:
-					for i in items:
-
-						if (
-							i.item_code == item.item_code
-							and not i.serial_no
-							and not i.batch_no
-							and i.uom == item.uom
-							and i.net_rate == item.net_rate
-							and i.warehouse == item.warehouse
-						):
-							found = True
-							i.qty = i.qty + item.qty
-							i.amount = i.amount + item.net_amount
-							i.net_amount = i.amount
-							i.base_amount = i.base_amount + item.base_net_amount
-							i.base_net_amount = i.base_amount
+				for i in items:
+					if (
+						i.item_code == item.item_code
+						and not i.serial_and_batch_bundle
+						and i.uom == item.uom
+						and i.net_rate == item.net_rate
+						and i.warehouse == item.warehouse
+					):
+						found = True
+						i.qty = i.qty + item.qty
+						i.amount = i.amount + item.net_amount
+						i.net_amount = i.amount
+						i.base_amount = i.base_amount + item.base_net_amount
+						i.base_net_amount = i.base_amount
 
 				if not found:
 					item.rate = item.net_rate
@@ -285,21 +271,6 @@ class POSInvoiceMergeLog(Document):
 			si = frappe.get_doc("Sales Invoice", si_name)
 			si.flags.ignore_validate = True
 			si.cancel()
-
-	def get_batched_invoices(self, pos_invoice_docs):
-		grouped_batch = []
-		current_batch = []
-		for item in pos_invoice_docs:
-			if not current_batch:
-				current_batch.append(item)
-			elif current_batch[-1].get("is_return") != item.get("is_return"):
-				grouped_batch.append(current_batch)
-				current_batch = [item]
-			else:
-				current_batch.append(item)
-
-		grouped_batch.append(current_batch)
-		return grouped_batch
 
 
 def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
