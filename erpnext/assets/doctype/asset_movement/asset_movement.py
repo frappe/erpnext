@@ -5,6 +5,9 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form
+
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 
 
 class AssetMovement(Document):
@@ -128,5 +131,24 @@ class AssetMovement(Document):
 				current_location = latest_movement_entry[0][0]
 				current_employee = latest_movement_entry[0][1]
 
-			frappe.db.set_value("Asset", d.asset, "location", current_location)
-			frappe.db.set_value("Asset", d.asset, "custodian", current_employee)
+			frappe.db.set_value("Asset", d.asset, "location", current_location, update_modified=False)
+			frappe.db.set_value("Asset", d.asset, "custodian", current_employee, update_modified=False)
+
+			if current_location and current_employee:
+				add_asset_activity(
+					d.asset,
+					_("Asset received at Location {0} and issued to Employee {1}").format(
+						get_link_to_form("Location", current_location),
+						get_link_to_form("Employee", current_employee),
+					),
+				)
+			elif current_location:
+				add_asset_activity(
+					d.asset,
+					_("Asset transferred to Location {0}").format(get_link_to_form("Location", current_location)),
+				)
+			elif current_employee:
+				add_asset_activity(
+					d.asset,
+					_("Asset issued to Employee {0}").format(get_link_to_form("Employee", current_employee)),
+				)
