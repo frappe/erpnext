@@ -49,7 +49,7 @@ class BOMConfigurator {
 			expandable: true,
 			title: __("Configure Product Assembly"),
 			breadcrumb: "Manufacturing",
-			get_tree_nodes: "erpnext.manufacturing.doctype.bom_configurator.bom_configurator.get_children",
+			get_tree_nodes: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_children",
 			root_label: this.frm.doc.item_code,
 			disable_add_node: true,
 			get_tree_root: false,
@@ -118,6 +118,25 @@ class BOMConfigurator {
 					btnClass: "hidden-xs"
 				},
 				{
+					label:__("Expand All"),
+					click: function(node) {
+						let view = frappe.views.trees["BOM Configurator"];
+
+						if (!node.expanded) {
+							view.tree.load_children(node, true);
+							$(node.parent[0]).find(".tree-children").show();
+							node.$toolbar.find(".expand-all-btn").html("Collapse All");
+						} else {
+							node.$tree_link.trigger("click");
+							node.$toolbar.find(".expand-all-btn").html("Expand All");
+						}
+					},
+					condition: function(node) {
+						return node.expandable && node.is_root;
+					},
+					btnClass: "hidden-xs expand-all-btn"
+				},
+				{
 					label:__(frappe.utils.icon('move', 'sm') + " Sub Assembly"),
 					click: function(node) {
 						let view = frappe.views.trees["BOM Configurator"];
@@ -154,7 +173,7 @@ class BOMConfigurator {
 			}
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_configurator.bom_configurator.add_item",
+				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_item",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -186,7 +205,7 @@ class BOMConfigurator {
 			}
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_configurator.bom_configurator.add_sub_assembly",
+				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -194,7 +213,6 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					frappe.views.trees["BOM Configurator"].tree.load_children(node);
-					view.events.frm.doc = r.message;
 				}
 			});
 
@@ -234,7 +252,7 @@ class BOMConfigurator {
 			let bom_item = dialog.get_values();
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_configurator.bom_configurator.add_sub_assembly",
+				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -244,7 +262,6 @@ class BOMConfigurator {
 				callback: (r) => {
 					node.expandable = true;
 					frappe.views.trees["BOM Configurator"].tree.load_children(node);
-					view.events.frm.doc = r.message;
 				}
 			});
 
@@ -255,7 +272,7 @@ class BOMConfigurator {
 	delete_node(node, view) {
 		frappe.confirm(__("Are you sure you want to delete this Item?"), () => {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_configurator.bom_configurator.delete_node",
+				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.delete_node",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -279,7 +296,7 @@ class BOMConfigurator {
 			let docname = node.data.name || this.frm.doc.name;
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_configurator.bom_configurator.edit_qty",
+				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_qty",
 				args: {
 					doctype: doctype,
 					docname: docname,

@@ -63,7 +63,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual"
   },
   {
    "allow_on_submit": 1,
@@ -116,12 +116,13 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
    "oldfieldname": "bom_materials",
    "oldfieldtype": "Table",
-   "options": "BOM Configurator Item"
+   "options": "BOM Creator Item"
   },
   {
    "fieldname": "costing_detail",
@@ -215,7 +216,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "BOM Configurator",
+   "options": "BOM Creator",
    "print_hide": 1,
    "read_only": 1
   },
@@ -247,7 +248,7 @@
    "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\"",
    "fieldname": "set_rate_based_on_warehouse",
    "fieldtype": "Check",
-   "label": "Set Rate Based on Default Warehouse"
+   "label": "Set Valuation Rate Based on Source Warehouse"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -258,10 +259,10 @@
    "link_fieldname": "bom_configurator"
   }
  ],
- "modified": "2023-08-03 17:09:02.811034",
+ "modified": "2023-08-04 11:42:42.146052",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "BOM Configurator",
+ "name": "BOM Creator",
  "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [

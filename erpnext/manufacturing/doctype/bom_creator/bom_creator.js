@@ -2,30 +2,29 @@
 // For license information, please see license.txt
 frappe.provide("erpnext.bom");
 
-frappe.ui.form.on("BOM Configurator", {
+frappe.ui.form.on("BOM Creator", {
 	setup(frm) {
 		frm.trigger("set_queries");
-	},
-
-	onload(frm) {
-		frm.trigger("setup_bom_creator");
 	},
 
 	setup_bom_creator(frm) {
 		frm.dashboard.clear_comment();
 
 		if (!frm.is_new()) {
-			let $parent = $(frm.fields_dict["bom_creator"].wrapper);
-			$parent.empty();
+			if ((!frappe.bom_configurator
+				|| frappe.bom_configurator.bom_configurator !== frm.doc.name)) {
+				let $parent = $(frm.fields_dict["bom_creator"].wrapper);
+				$parent.empty();
 
-			frappe.require('bom_configurator.bundle.js').then(() => {
-				frappe.bom_configurator = new frappe.ui.BOMConfigurator({
-					wrapper: $parent,
-					page: $parent,
-					frm: frm,
-					bom_configurator: frm.doc.name,
+				frappe.require('bom_configurator.bundle.js').then(() => {
+					frappe.bom_configurator = new frappe.ui.BOMConfigurator({
+						wrapper: $parent,
+						page: $parent,
+						frm: frm,
+						bom_configurator: frm.doc.name,
+					});
 				});
-			});
+			}
 		} else {
 			frm.trigger("make_new_entry");
 		}
@@ -110,6 +109,7 @@ frappe.ui.form.on("BOM Configurator", {
 	},
 
 	refresh(frm) {
+		frm.trigger("setup_bom_creator");
 		frm.trigger("set_root_item");
 		frm.trigger("add_custom_buttons");
 	},
@@ -126,7 +126,7 @@ frappe.ui.form.on("BOM Configurator", {
 	}
 });
 
-frappe.ui.form.on("BOM Configurator Item", {
+frappe.ui.form.on("BOM Creator Item", {
 	item_code(frm, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
 		if (item.item_code && item.is_root) {

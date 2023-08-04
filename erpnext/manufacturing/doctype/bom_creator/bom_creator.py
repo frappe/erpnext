@@ -15,7 +15,7 @@ BOM_FIELDS = [
 ]
 
 
-class BOMConfigurator(Document):
+class BOMCreator(Document):
 	def before_save(self):
 		self.set_is_expandable()
 
@@ -40,7 +40,7 @@ class BOMConfigurator(Document):
 
 		for field, label in fields.items():
 			if not self.get(field):
-				frappe.throw(_("Please set {0} in BOM Configurator {1}").format(label, self.name))
+				frappe.throw(_("Please set {0} in BOM Creator {1}").format(label, self.name))
 
 	def on_submit(self):
 		self.create_boms()
@@ -74,7 +74,7 @@ class BOMConfigurator(Document):
 				"bom_type": "Production",
 				"quantity": row.qty,
 				"allow_alternative_item": 1,
-				"bom_configurator": self.name,
+				"bom_creator": self.name,
 			}
 		)
 
@@ -119,14 +119,12 @@ class BOMConfigurator(Document):
 
 
 @frappe.whitelist()
-def get_children(**kwargs):
+def get_children(doctype=None, parent=None, **kwargs):
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
-
-	print(kwargs)
 
 	fields = [
 		"item_code as value",
@@ -134,25 +132,22 @@ def get_children(**kwargs):
 		"parent as parent_id",
 		"qty",
 		"idx",
-		"'BOM Configurator Item' as doctype",
+		"'BOM Creator Item' as doctype",
 		"name",
 		"uom",
 	]
 
 	query_filters = {
-		"fg_item": kwargs.parent,
+		"fg_item": parent,
 		"parent": kwargs.parent_id,
 	}
 
 	if kwargs.name:
 		query_filters["name"] = kwargs.name
 
-	data = frappe.get_all(
-		"BOM Configurator Item", fields=fields, filters=query_filters, order_by="idx", debug=1
+	return frappe.get_all(
+		"BOM Creator Item", fields=fields, filters=query_filters, order_by="idx", debug=1
 	)
-
-	frappe.errprint(data)
-	return data
 
 
 @frappe.whitelist()
@@ -163,7 +158,7 @@ def add_item(**kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
-	doc = frappe.get_doc("BOM Configurator", kwargs.parent)
+	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	doc.append("items", kwargs)
 	doc.save()
 
@@ -176,7 +171,7 @@ def add_sub_assembly(**kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
-	doc = frappe.get_doc("BOM Configurator", kwargs.parent)
+	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	bom_item = frappe.parse_json(kwargs.bom_item)
 
 	if not kwargs.convert_to_sub_assembly:
@@ -232,10 +227,10 @@ def delete_node(**kwargs):
 
 	items = get_children(parent=kwargs.fg_item, parent_id=kwargs.parent)
 	if kwargs.docname:
-		frappe.delete_doc("BOM Configurator Item", kwargs.docname)
+		frappe.delete_doc("BOM Creator Item", kwargs.docname)
 
 	for item in items:
-		frappe.delete_doc("BOM Configurator Item", item.name)
+		frappe.delete_doc("BOM Creator Item", item.name)
 		if item.expandable:
 			delete_node(fg_item=item.value, parent=item.parent_id)
 
