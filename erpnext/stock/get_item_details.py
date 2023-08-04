@@ -81,7 +81,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		if out.get("item_tax_template") is None
 		else out.get("item_tax_template"),
 		as_json=True,
-		args=args,
+		doctype_type=args.get("doctype"),
 	)
 
 	get_party_item_code(args, item, out)
@@ -632,12 +632,12 @@ def is_within_valid_range(args, tax):
 
 
 @frappe.whitelist()
-def get_item_tax_map(company, item_tax_template, as_json=True, args=None):
+def get_item_tax_map(company, item_tax_template, as_json=True, doctype_type=None):
 	item_tax_map = {}
 	transaction_type = None
 
-	if args and args.get("doctype"):
-		transaction_type = "Sales" if args.get("doctype") in sales_doctypes else "Purchase"
+	if doctype_type:
+		transaction_type = "Sales" if doctype_type in sales_doctypes else "Purchase"
 
 	if item_tax_template:
 		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)

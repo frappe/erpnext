@@ -1855,9 +1855,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					company: me.frm.doc.company,
 					item_tax_template: item.item_tax_template,
 					as_json: true,
-					args: {
-						doctype: doc.doctype
-					}
+					doctype_type: doc.doctype
 				},
 				callback: function(r) {
 					if(!r.exc) {
