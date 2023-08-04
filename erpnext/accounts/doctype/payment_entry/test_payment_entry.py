@@ -31,6 +31,16 @@ class TestPaymentEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
+	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
+		journals = []
+		if voucher_type and voucher_no:
+			journals = frappe.db.get_all(
+				"Journal Entry Account",
+				filters={"reference_type": voucher_type, "reference_name": voucher_no, "docstatus": 1},
+				fields=["parent"],
+			)
+		return journals
+
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
@@ -591,20 +601,14 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.target_exchange_rate = 45.263
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-
-		pe.append(
-			"deductions",
-			{
-				"account": "_Test Exchange Gain/Loss - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"amount": 94.80,
-			},
-		)
-
 		pe.save()
 
 		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
 		self.assertEqual(flt(pe.unallocated_amount, 2), 0.0)
+
+		# the exchange gain/loss amount is captured in reference table and a separate Journal will be submitted for them
+		# payment entry will not be generating difference amount
+		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
@@ -792,33 +796,28 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = 55
-
-		pe.append(
-			"deductions",
-			{
-				"account": "_Test Exchange Gain/Loss - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"amount": -500,
-			},
-		)
 		pe.save()
 
 		self.assertEqual(pe.unallocated_amount, 0)
 		self.assertEqual(pe.difference_amount, 0)
-
+		self.assertEqual(pe.references[0].exchange_gain_loss, 500)
 		pe.submit()
 
 		expected_gle = dict(
 			(d[0], d)
 			for d in [
-				["_Test Receivable USD - _TC", 0, 5000, si.name],
+				["_Test Receivable USD - _TC", 0, 5500, si.name],
 				["_Test Bank USD - _TC", 5500, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 0, 500, None],
 			]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+		# Exchange gain/loss should have been posted through a journal
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertEqual(exc_je_for_si, exc_je_for_pe)
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
@@ -1155,6 +1154,52 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.delete()
 		si3.cancel()
 		si3.delete()
+
+	@change_settings(
+		"Accounts Settings",
+		{
+			"unlink_payment_on_cancellation_of_invoice": 1,
+			"delete_linked_ledger_entries": 1,
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+		},
+	)
+	def test_overallocation_validation_shouldnt_misfire(self):
+		"""
+		Overallocation validation shouldn't fire for Template without "Allocate Payment based on Payment Terms" enabled
+
+		"""
+		customer = create_customer()
+		create_payment_terms_template()
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+
+		# Validate allocation on base/company currency
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+
+		si.reload()
+		pe = get_payment_entry(si.doctype, si.name).save()
+		# There will no term based allocation
+		self.assertEqual(len(pe.references), 1)
+		self.assertEqual(pe.references[0].payment_term, None)
+		self.assertEqual(flt(pe.references[0].allocated_amount), flt(si.grand_total))
+		pe.save()
+
+		# specify a term
+		pe.references[0].payment_term = template.terms[0].payment_term
+		# no validation error should be thrown
+		pe.save()
+
+		pe.paid_amount = si.grand_total + 1
+		pe.references[0].allocated_amount = si.grand_total + 1
+		self.assertRaises(frappe.ValidationError, pe.save)
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 1
+		template.save()
 
 
 def create_payment_entry(**args):

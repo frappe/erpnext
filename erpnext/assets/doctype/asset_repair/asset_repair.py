@@ -8,6 +8,7 @@ from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
@@ -25,8 +26,14 @@ class AssetRepair(AccountsController):
 		self.calculate_total_repair_cost()
 
 	def update_status(self):
-		if self.repair_status == "Pending":
+		if self.repair_status == "Pending" and self.asset_doc.status != "Out of Order":
 			frappe.db.set_value("Asset", self.asset, "status", "Out of Order")
+			add_asset_activity(
+				self.asset,
+				_("Asset out of order due to Asset Repair {0}").format(
+					get_link_to_form("Asset Repair", self.name)
+				),
+			)
 		else:
 			self.asset_doc.set_status()
 
@@ -68,6 +75,13 @@ class AssetRepair(AccountsController):
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 			self.asset_doc.save()
 
+			add_asset_activity(
+				self.asset,
+				_("Asset updated after completion of Asset Repair {0}").format(
+					get_link_to_form("Asset Repair", self.name)
+				),
+			)
+
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 
@@ -94,6 +108,13 @@ class AssetRepair(AccountsController):
 			self.asset_doc.flags.ignore_validate_update_after_submit = True
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 			self.asset_doc.save()
+
+			add_asset_activity(
+				self.asset,
+				_("Asset updated after cancellation of Asset Repair {0}").format(
+					get_link_to_form("Asset Repair", self.name)
+				),
+			)
 
 	def after_delete(self):
 		frappe.get_doc("Asset", self.asset).set_status()

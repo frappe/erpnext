@@ -225,6 +225,102 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(sales_orders, [])
 
+	def test_donot_allow_to_make_multiple_pp_against_same_so(self):
+		item = "Test SO Production Item 1"
+		create_item(item)
+
+		raw_material = "Test SO RM Production Item 1"
+		create_item(raw_material)
+
+		if not frappe.db.get_value("BOM", {"item": item}):
+			make_bom(item=item, raw_materials=[raw_material])
+
+		so = make_sales_order(item_code=item, qty=4)
+		pln = frappe.new_doc("Production Plan")
+		pln.company = so.company
+		pln.get_items_from = "Sales Order"
+
+		pln.append(
+			"sales_orders",
+			{
+				"sales_order": so.name,
+				"sales_order_date": so.transaction_date,
+				"customer": so.customer,
+				"grand_total": so.grand_total,
+			},
+		)
+
+		pln.get_so_items()
+		pln.submit()
+
+		pln = frappe.new_doc("Production Plan")
+		pln.company = so.company
+		pln.get_items_from = "Sales Order"
+
+		pln.append(
+			"sales_orders",
+			{
+				"sales_order": so.name,
+				"sales_order_date": so.transaction_date,
+				"customer": so.customer,
+				"grand_total": so.grand_total,
+			},
+		)
+
+		pln.get_so_items()
+		self.assertRaises(frappe.ValidationError, pln.save)
+
+	def test_so_based_bill_of_material(self):
+		item = "Test SO Production Item 1"
+		create_item(item)
+
+		raw_material = "Test SO RM Production Item 1"
+		create_item(raw_material)
+
+		bom1 = make_bom(item=item, raw_materials=[raw_material])
+
+		so = make_sales_order(item_code=item, qty=4)
+
+		# Create new BOM and assign to new sales order
+		bom2 = make_bom(item=item, raw_materials=[raw_material])
+		so2 = make_sales_order(item_code=item, qty=4)
+
+		pln1 = frappe.new_doc("Production Plan")
+		pln1.company = so.company
+		pln1.get_items_from = "Sales Order"
+
+		pln1.append(
+			"sales_orders",
+			{
+				"sales_order": so.name,
+				"sales_order_date": so.transaction_date,
+				"customer": so.customer,
+				"grand_total": so.grand_total,
+			},
+		)
+
+		pln1.get_so_items()
+
+		self.assertEqual(pln1.po_items[0].bom_no, bom1.name)
+
+		pln2 = frappe.new_doc("Production Plan")
+		pln2.company = so2.company
+		pln2.get_items_from = "Sales Order"
+
+		pln2.append(
+			"sales_orders",
+			{
+				"sales_order": so2.name,
+				"sales_order_date": so2.transaction_date,
+				"customer": so2.customer,
+				"grand_total": so2.grand_total,
+			},
+		)
+
+		pln2.get_so_items()
+
+		self.assertEqual(pln2.po_items[0].bom_no, bom2.name)
+
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
 		item = "Test Production Item 1"

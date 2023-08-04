@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_asset_depr_schedule_name,
@@ -325,6 +326,8 @@ def scrap_asset(asset_name):
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
 	asset.set_status("Scrapped")
 
+	add_asset_activity(asset_name, _("Asset scrapped"))
+
 	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
 
 
@@ -348,6 +351,8 @@ def restore_asset(asset_name):
 	frappe.get_doc("Journal Entry", je).cancel()
 
 	asset.set_status()
+
+	add_asset_activity(asset_name, _("Asset restored"))
 
 
 def depreciate_asset(asset_doc, date, notes):
@@ -398,6 +403,15 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
+
+					for account in reverse_journal_entry.accounts:
+						account.update(
+							{
+								"reference_type": "Asset",
+								"reference_name": asset.name,
+							}
+						)
+
 					frappe.flags.is_reverse_depr_entry = True
 					reverse_journal_entry.submit()
 

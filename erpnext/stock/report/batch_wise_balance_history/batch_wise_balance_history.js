@@ -16,7 +16,7 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), with_dates=true)[1],
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			"reqd": 1
 		},
 		{
