@@ -202,7 +202,6 @@ def get_balance_on(
 	if account:
 		acc = frappe.get_doc("Account", account)
 
-	account_name = []
 	try:
 		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
 	except FiscalYearError:
