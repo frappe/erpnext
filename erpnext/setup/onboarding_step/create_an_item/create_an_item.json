@@ -2,7 +2,7 @@
  "action": "Create Entry",
  "action_label": "Create a new Item",
  "creation": "2021-05-17 13:47:18.515052",
- "description": "# Create an Item\n\nItem is a product, of a or service offered by your company, or something you buy as a part of your supplies or raw materials.\n\nItems are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets etc.\n",
+ "description": "# Create an Item\n\nItem is a product, or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n\nItems are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets etc.\n",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "form_tour": "Item General",
