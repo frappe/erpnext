@@ -365,10 +365,10 @@ class POSInvoice(SalesInvoice):
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
-		# if self.is_return:
-		# 	invoice_total = self.rounded_total or self.grand_total
-		# 	if total_amount_in_payments and total_amount_in_payments < invoice_total:
-		# 		frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
+		if self.is_return:
+			invoice_total = self.rounded_total or self.grand_total
+			if total_amount_in_payments and total_amount_in_payments < invoice_total:
+				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
