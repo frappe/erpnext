@@ -1215,7 +1215,6 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 		ignore_serial_nos.append(d.serial_no)
 
-	# Will be deprecated in v16
 	returned_serial_nos = []
 	for pos_invoice in pos_invoices:
 		if pos_invoice.serial_no:
@@ -1244,8 +1243,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 			)
 		)
 	# Counter is used to create a hashmap of serial nos, which contains count of each serial no
-	# ignore serial nos inlcudes serial nos which are sold and returned
-	# so we need to subtract returned serial nos from ignore serial nos after creating a counter of each
+	# so we subtract returned serial nos from ignore serial nos after creating a counter of each to get the items which we need 	to ignore(which are sold)
 
 	ignore_serial_nos_counter = Counter(ignore_serial_nos)
 	returned_serial_nos_counter = Counter(returned_serial_nos)

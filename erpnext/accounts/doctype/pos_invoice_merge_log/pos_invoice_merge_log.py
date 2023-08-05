@@ -83,17 +83,19 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_docs = [
 			frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices
 		]
-		batched_invoices = self.get_batched_invoices(pos_invoice_docs)
 
-		for invoice in batched_invoices:
-			sales_invoice, credit_note = "", ""
-			if not invoice[0].get("is_return"):
-				sales_invoice = self.process_merging_into_sales_invoice(invoice)
-			else:
-				credit_note = self.process_merging_into_credit_note(invoice)
+		returns = [d for d in pos_invoice_docs if d.get("is_return") == 1]
+		sales = [d for d in pos_invoice_docs if d.get("is_return") == 0]
 
-			self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
-			self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
+		sales_invoice, credit_note = "", ""
+		if returns:
+			credit_note = self.process_merging_into_credit_note(returns)
+
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
+
+		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
+		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
 
 	def on_cancel(self):
 		pos_invoice_docs = [
@@ -395,8 +397,7 @@ def split_invoices(invoices):
 		for d in invoices
 		if d.is_return and d.return_against
 	]
-	print(pos_return_docs, invoices, _invoices, sep="-")
-	# breakpoint()
+
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
 			if not item.serial_no and not item.serial_and_batch_bundle:
