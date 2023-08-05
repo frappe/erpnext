@@ -93,6 +93,7 @@ class BOMUpdateLog(Document):
 		else:
 			frappe.enqueue(
 				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.process_boms_cost_level_wise",
+				queue="long",
 				update_doc=self,
 				now=frappe.flags.in_test,
 				enqueue_after_commit=True,
