@@ -258,7 +258,9 @@ class Subscription(Document):
 		"""
 		Returns `True` if `Subscription` has never generated an invoice
 		"""
-		return not frappe.db.exists({"doctype": self.invoice_document_type, "subscription": self.name})
+		return self.is_new() or not frappe.db.exists(
+			{"doctype": self.invoice_document_type, "subscription": self.name}
+		)
 
 	def validate(self) -> None:
 		self.validate_trial_period()
