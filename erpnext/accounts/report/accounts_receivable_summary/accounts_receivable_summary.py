@@ -145,13 +145,13 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 	def get_columns(self):
 		self.columns = []
 		self.add_column(
-			label="Party Type",
+			label=_("Party Type"),
 			fieldname="party_type",
 			fieldtype="Data",
 			width=100,
 		)
 		self.add_column(
-			label="Party",
+			label=_("Party"),
 			fieldname="party",
 			fieldtype="Dynamic Link",
 			options="party_type",
@@ -160,7 +160,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		if self.party_naming_by == "Naming Series":
 			self.add_column(
-				label="Supplier Name" if self.account_type == "Payable" else "Customer Name",
+				label=_("Supplier Name") if self.account_type == "Payable" else _("Customer Name"),
 				fieldname="party_name",
 				fieldtype="Data",
 			)
