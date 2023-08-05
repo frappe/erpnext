@@ -90,11 +90,13 @@ def create_parties():
 		)
 		customer.insert()
 
+
 def reset_settings():
 	settings = frappe.get_single("Subscription Settings")
 	settings.grace_period = 0
 	settings.cancel_after_grace = 0
 	settings.save()
+
 
 class TestSubscription(unittest.TestCase):
 	def setUp(self):
@@ -123,7 +125,6 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.invoices, [])
 		self.assertEqual(subscription.status, "Trialling")
 
-
 	def test_create_subscription_without_trial_with_correct_period(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
@@ -139,7 +140,6 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(len(subscription.invoices), 0)
 		self.assertEqual(subscription.status, "Active")
 
-
 	def test_create_subscription_trial_with_wrong_dates(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
@@ -149,7 +149,6 @@ class TestSubscription(unittest.TestCase):
 		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
 
 		self.assertRaises(frappe.ValidationError, subscription.save)
-
 
 	def test_create_subscription_multi_with_different_billing_fails(self):
 		subscription = frappe.new_doc("Subscription")
@@ -161,7 +160,6 @@ class TestSubscription(unittest.TestCase):
 		subscription.append("plans", {"plan": "_Test Plan Name 3", "qty": 1})
 
 		self.assertRaises(frappe.ValidationError, subscription.save)
-
 
 	def test_invoice_is_generated_at_end_of_billing_period(self):
 		subscription = frappe.new_doc("Subscription")
@@ -182,7 +180,6 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.current_invoice_end, "2018-02-28")
 		self.assertEqual(subscription.status, "Unpaid")
 
-
 	def test_status_goes_back_to_active_after_invoice_is_paid(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
@@ -192,7 +189,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.generate_invoice_at_period_start = True
 		subscription.insert()
 		frappe.flags.current_date = "2018-01-01"
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 
 		# Status is unpaid as Days until Due is zero and grace period is Zero
@@ -211,7 +208,6 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.current_invoice_start, add_months(subscription.start_date, 1))
 		self.assertEqual(len(subscription.invoices), 1)
 
-
 	def test_subscription_cancel_after_grace_period(self):
 		settings = frappe.get_single("Subscription Settings")
 		settings.cancel_after_grace = 1
@@ -228,11 +224,10 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, "Active")
 
 		frappe.flags.current_date = "2018-01-31"
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 		# This should change status to Cancelled since grace period is 0
 		# And is backdated subscription so subscription will be cancelled after processing
 		self.assertEqual(subscription.status, "Cancelled")
-
 
 	def test_subscription_unpaid_after_grace_period(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -246,14 +241,13 @@ class TestSubscription(unittest.TestCase):
 		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
 		subscription.start_date = "2018-01-01"
 		subscription.insert()
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 
 		# Status is unpaid as Days until Due is zero and grace period is Zero
 		self.assertEqual(subscription.status, "Unpaid")
 
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
-
 
 	def test_subscription_invoice_days_until_due(self):
 		_date = add_months(nowdate(), -1)
@@ -267,14 +261,13 @@ class TestSubscription(unittest.TestCase):
 
 		frappe.flags.current_date = subscription.current_invoice_end
 
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Active")
 
 		frappe.flags.current_date = add_days(subscription.current_invoice_end, 3)
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Active")
-
 
 	def test_subscription_is_past_due_doesnt_change_within_grace_period(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -290,7 +283,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.insert()
 
 		frappe.flags.current_date = subscription.current_invoice_end
-		subscription.process()		# generate first invoice
+		subscription.process()  # generate first invoice
 
 		self.assertEqual(subscription.status, "Past Due Date")
 
@@ -307,32 +300,30 @@ class TestSubscription(unittest.TestCase):
 		settings.grace_period = grace_period
 		settings.save()
 
-
 	def test_subscription_remains_active_during_invoice_period(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
 		subscription.party = "_Test Customer"
 		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
 		subscription.save()
-		subscription.process() # no changes expected
+		subscription.process()  # no changes expected
 
 		self.assertEqual(subscription.status, "Active")
 		self.assertEqual(subscription.current_invoice_start, nowdate())
 		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
 		self.assertEqual(len(subscription.invoices), 0)
 
-		subscription.process() # no changes expected still
+		subscription.process()  # no changes expected still
 		self.assertEqual(subscription.status, "Active")
 		self.assertEqual(subscription.current_invoice_start, nowdate())
 		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
 		self.assertEqual(len(subscription.invoices), 0)
 
-		subscription.process() # no changes expected yet still
+		subscription.process()  # no changes expected yet still
 		self.assertEqual(subscription.status, "Active")
 		self.assertEqual(subscription.current_invoice_start, nowdate())
 		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
 		self.assertEqual(len(subscription.invoices), 0)
-
 
 	def test_subscription_cancelation(self):
 		subscription = frappe.new_doc("Subscription")
@@ -343,7 +334,6 @@ class TestSubscription(unittest.TestCase):
 		subscription.cancel_subscription()
 
 		self.assertEqual(subscription.status, "Cancelled")
-
 
 	def test_subscription_cancellation_invoices(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -406,7 +396,6 @@ class TestSubscription(unittest.TestCase):
 		settings.prorate = to_prorate
 		settings.save()
 
-
 	def test_subscription_cancellation_invoices_with_prorata_true(self):
 		settings = frappe.get_single("Subscription Settings")
 		to_prorate = settings.prorate
@@ -432,7 +421,6 @@ class TestSubscription(unittest.TestCase):
 		settings.prorate = to_prorate
 		settings.save()
 
-
 	def test_subcription_cancellation_and_process(self):
 		settings = frappe.get_single("Subscription Settings")
 		default_grace_period_action = settings.cancel_after_grace
@@ -445,7 +433,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
 		subscription.start_date = "2018-01-01"
 		subscription.insert()
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 
 		# Generate an invoice for the cancelled period
 		subscription.cancel_subscription()
@@ -463,7 +451,6 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 
-
 	def test_subscription_restart_and_process(self):
 		settings = frappe.get_single("Subscription Settings")
 		default_grace_period_action = settings.cancel_after_grace
@@ -478,7 +465,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.start_date = "2018-01-01"
 		subscription.insert()
 		frappe.flags.current_date = "2018-01-31"
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 
 		# Status is unpaid as Days until Due is zero and grace period is Zero
 		self.assertEqual(subscription.status, "Unpaid")
@@ -501,7 +488,6 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 
-
 	def test_subscription_unpaid_back_to_active(self):
 		settings = frappe.get_single("Subscription Settings")
 		default_grace_period_action = settings.cancel_after_grace
@@ -518,7 +504,7 @@ class TestSubscription(unittest.TestCase):
 
 		frappe.flags.current_date = subscription.current_invoice_start
 
-		subscription.process() # generate first invoice
+		subscription.process()  # generate first invoice
 		# This should change status to Unpaid since grace period is 0
 		self.assertEqual(subscription.status, "Unpaid")
 
@@ -537,7 +523,6 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 
-
 	def test_restart_active_subscription(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
@@ -546,7 +531,6 @@ class TestSubscription(unittest.TestCase):
 		subscription.save()
 
 		self.assertRaises(frappe.ValidationError, subscription.restart_subscription)
-
 
 	def test_subscription_invoice_discount_percentage(self):
 		subscription = frappe.new_doc("Subscription")
@@ -562,7 +546,6 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(invoice.additional_discount_percentage, 10)
 		self.assertEqual(invoice.apply_discount_on, "Grand Total")
 
-
 	def test_subscription_invoice_discount_amount(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
@@ -576,7 +559,6 @@ class TestSubscription(unittest.TestCase):
 
 		self.assertEqual(invoice.discount_amount, 11)
 		self.assertEqual(invoice.apply_discount_on, "Grand Total")
-
 
 	def test_prepaid_subscriptions(self):
 		# Create a non pre-billed subscription, processing should not create
@@ -597,7 +579,6 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 
 		self.assertEqual(len(subscription.invoices), 1)
-
 
 	def test_prepaid_subscriptions_with_prorate_true(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -626,7 +607,6 @@ class TestSubscription(unittest.TestCase):
 		settings.prorate = to_prorate
 		settings.save()
 
-
 	def test_subscription_with_follow_calendar_months(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Supplier"
@@ -643,7 +623,6 @@ class TestSubscription(unittest.TestCase):
 		# even though subscription starts at "2018-01-15" and Billing interval is Month and count 3
 		# First invoice will end at "2018-03-31" instead of "2018-04-14"
 		self.assertEqual(get_date_str(subscription.current_invoice_end), "2018-03-31")
-
 
 	def test_subscription_generate_invoice_past_due(self):
 		subscription = frappe.new_doc("Subscription")
@@ -670,7 +649,6 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 		self.assertEqual(len(subscription.invoices), 2)
 
-
 	def test_subscription_without_generate_invoice_past_due(self):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Supplier"
@@ -689,7 +667,6 @@ class TestSubscription(unittest.TestCase):
 
 		subscription.process()
 		self.assertEqual(len(subscription.invoices), 1)
-
 
 	def test_multicurrency_subscription(self):
 		subscription = frappe.new_doc("Subscription")
@@ -710,7 +687,6 @@ class TestSubscription(unittest.TestCase):
 		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "currency")
 		self.assertEqual(currency, "USD")
 
-
 	def test_subscription_recovery(self):
 		"""Test if Subscription recovers when start/end date run out of sync with created invoices."""
 		subscription = frappe.new_doc("Subscription")
@@ -730,9 +706,6 @@ class TestSubscription(unittest.TestCase):
 		frappe.flags.current_date = "2022-01-31"
 		subscription.process()
 
-		# commit needed to query invoice dates
-		frappe.db.commit() # nosemgrep
-
 		self.assertEqual(len(subscription.invoices), 2)
 		self.assertEqual(
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "from_date")),
@@ -746,8 +719,6 @@ class TestSubscription(unittest.TestCase):
 		# recreate most recent invoice
 		subscription.process()
 
-		# commit needed to query invoice dates
-		frappe.db.commit() # nosemgrep
 		self.assertEqual(len(subscription.invoices), 2)
 		self.assertEqual(
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "from_date")),
@@ -757,4 +728,3 @@ class TestSubscription(unittest.TestCase):
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[1].name, "from_date")),
 			getdate("2022-01-01"),
 		)
-
