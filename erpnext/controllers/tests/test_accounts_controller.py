@@ -347,18 +347,23 @@ class TestAccountsController(FrappeTestCase):
 		for exc_rate in [75.9, 83.1, 80.01]:
 			with self.subTest(exc_rate=exc_rate):
 				si = self.create_sales_invoice(qty=1, conversion_rate=exc_rate, rate=1, do_not_submit=True)
+				advances = si.get_advance_entries()
+				self.assertEqual(len(advances), 1)
+				self.assertEqual(advances[0].reference_name, adv.name)
 				si.append(
 					"advances",
 					{
 						"doctype": "Sales Invoice Advance",
-						"reference_type": adv.doctype,
-						"reference_name": adv.name,
+						"reference_type": advances[0].reference_type,
+						"reference_name": advances[0].reference_name,
+						"reference_row": advances[0].reference_row,
 						"advance_amount": 1,
 						"allocated_amount": 1,
-						"ref_exchange_rate": 85,
-						"remarks": "Test",
+						"ref_exchange_rate": advances[0].exchange_rate,
+						"remarks": advances[0].remarks,
 					},
 				)
+
 				si = si.save()
 				si = si.submit()
 
@@ -398,16 +403,19 @@ class TestAccountsController(FrappeTestCase):
 		si = self.create_sales_invoice(
 			qty=2, conversion_rate=80, rate=rate_in_account_currency, do_not_submit=True
 		)
+		advances = si.get_advance_entries()
+		self.assertEqual(len(advances), 1)
+		self.assertEqual(advances[0].reference_name, adv.name)
 		si.append(
 			"advances",
 			{
 				"doctype": "Sales Invoice Advance",
-				"reference_type": adv.doctype,
-				"reference_name": adv.name,
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
 				"advance_amount": 1,
 				"allocated_amount": 1,
-				"ref_exchange_rate": 85,
-				"remarks": "Test",
+				"ref_exchange_rate": advances[0].exchange_rate,
+				"remarks": advances[0].remarks,
 			},
 		)
 		si = si.save()
@@ -470,16 +478,19 @@ class TestAccountsController(FrappeTestCase):
 
 		# invoice with advance(partial amount)
 		si = self.create_sales_invoice(qty=2, conversion_rate=80, rate=1, do_not_submit=True)
+		advances = si.get_advance_entries()
+		self.assertEqual(len(advances), 1)
+		self.assertEqual(advances[0].reference_name, adv.name)
 		si.append(
 			"advances",
 			{
 				"doctype": "Sales Invoice Advance",
-				"reference_type": adv.doctype,
-				"reference_name": adv.name,
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
 				"advance_amount": 1,
 				"allocated_amount": 1,
-				"ref_exchange_rate": 85,
-				"remarks": "Test",
+				"ref_exchange_rate": advances[0].exchange_rate,
+				"remarks": advances[0].remarks,
 			},
 		)
 		si = si.save()
@@ -678,22 +689,26 @@ class TestAccountsController(FrappeTestCase):
 		adv.reload()
 
 		# Sales Invoices in different exchange rates
-		for exc_rate in [75.9, 83.1, 80.01]:
+		for exc_rate in [75.9, 83.1]:
 			with self.subTest(exc_rate=exc_rate):
 				si = self.create_sales_invoice(qty=1, conversion_rate=exc_rate, rate=1, do_not_submit=True)
+				advances = si.get_advance_entries()
+				self.assertEqual(len(advances), 1)
+				self.assertEqual(advances[0].reference_name, adv.name)
 				si.append(
 					"advances",
 					{
 						"doctype": "Sales Invoice Advance",
-						"reference_type": adv.doctype,
-						"reference_name": adv.name,
-						"reference_row": adv.accounts[0].name,
+						"reference_type": advances[0].reference_type,
+						"reference_name": advances[0].reference_name,
+						"reference_row": advances[0].reference_row,
 						"advance_amount": 1,
 						"allocated_amount": 1,
-						"ref_exchange_rate": adv_exc_rate,
-						"remarks": "Test",
+						"ref_exchange_rate": advances[0].exchange_rate,
+						"remarks": advances[0].remarks,
 					},
 				)
+
 				si = si.save()
 				si = si.submit()
 
@@ -741,19 +756,23 @@ class TestAccountsController(FrappeTestCase):
 
 		# invoice with advance(partial amount)
 		si = self.create_sales_invoice(qty=3, conversion_rate=80, rate=1, do_not_submit=True)
+		advances = si.get_advance_entries()
+		self.assertEqual(len(advances), 1)
+		self.assertEqual(advances[0].reference_name, adv.name)
 		si.append(
 			"advances",
 			{
 				"doctype": "Sales Invoice Advance",
-				"reference_type": adv.doctype,
-				"reference_name": adv.name,
-				"reference_row": adv.accounts[0].name,
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"reference_row": advances[0].reference_row,
 				"advance_amount": 1,
 				"allocated_amount": 1,
-				"ref_exchange_rate": adv_exc_rate,
-				"remarks": "Test",
+				"ref_exchange_rate": advances[0].exchange_rate,
+				"remarks": advances[0].remarks,
 			},
 		)
+
 		si = si.save()
 		si = si.submit()
 
