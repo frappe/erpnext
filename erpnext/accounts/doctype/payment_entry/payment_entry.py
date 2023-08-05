@@ -690,7 +690,7 @@ class PaymentEntry(AccountsController):
 
 		order_amount = self.get_order_net_total()
 
-		net_total = order_amount + self.unallocated_amount
+		net_total = flt(order_amount) + flt(self.unallocated_amount)
 
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict(
