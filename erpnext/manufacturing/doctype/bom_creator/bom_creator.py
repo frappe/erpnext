@@ -52,46 +52,42 @@ class BOMCreator(Document):
 		if self.rm_cost_as_per == "Manual":
 			return
 
-		self.set_rate_for_raw_materials()
-		self.set_rate_for_sub_assemblies()
+		amount = self.get_raw_material_cost()
+		self.raw_material_cost = amount
 
-	def set_rate_for_raw_materials(self):
+	def get_raw_material_cost(self, fg_reference_id=None, amount=0):
+		if not fg_reference_id:
+			fg_reference_id = self.name
+
 		for row in self.items:
-			if row.is_expandable:
+			if row.fg_reference_id != fg_reference_id:
 				continue
 
-			row.rate = get_bom_item_rate(
-				{
-					"company": self.company,
-					"item_code": row.item_code,
-					"bom_no": "",
-					"qty": row.qty,
-					"uom": row.uom,
-					"stock_uom": row.stock_uom,
-					"conversion_factor": row.conversion_factor,
-					"sourced_by_supplier": row.sourced_by_supplier,
-				},
-				self,
-			)
+			if not row.is_expandable:
+				row.rate = get_bom_item_rate(
+					{
+						"company": self.company,
+						"item_code": row.item_code,
+						"bom_no": "",
+						"qty": row.qty,
+						"uom": row.uom,
+						"stock_uom": row.stock_uom,
+						"conversion_factor": row.conversion_factor,
+						"sourced_by_supplier": row.sourced_by_supplier,
+					},
+					self,
+				)
 
-			row.amount = flt(row.rate) * flt(row.qty)
+				row.amount = flt(row.rate) * flt(row.qty)
 
-	def set_rate_for_sub_assemblies(self):
-		sub_assemblies = frappe._dict({})
-		for row in self.items:
-			if row.fg_reference_id == self.name:
-				continue
-
-			sub_assemblies.setdefault((row.fg_reference_id), []).append(flt(row.amount))
-
-		self.raw_material_cost = 0
-		for row in self.items:
-			if row.name in sub_assemblies:
-				row.amount = sum(sub_assemblies.get(row.name))
+			else:
+				row.amount = 0.0
+				row.amount = self.get_raw_material_cost(row.name, row.amount)
 				row.rate = flt(row.amount) / (flt(row.qty) * flt(row.conversion_factor))
 
-			if row.fg_reference_id == self.name:
-				self.raw_material_cost += flt(row.amount)
+			amount += flt(row.amount)
+
+		return amount
 
 	def set_is_expandable(self):
 		fg_items = [row.fg_item for row in self.items]
@@ -335,7 +331,7 @@ def delete_node(**kwargs):
 			delete_node(fg_item=item.value, parent=item.parent_id)
 
 	doc = frappe.get_doc("BOM Creator", kwargs.parent)
-	doc.set_rate_for_sub_assemblies()
+	doc.set_rate_for_items()
 	doc.save()
 
 	return doc

@@ -25,6 +25,7 @@ class BOMConfigurator {
 		};
 
 		frappe.views.trees["BOM Configurator"] = new frappe.views.TreeView(options);
+		this.tree_view = frappe.views.trees["BOM Configurator"];
 	}
 
 	bind_events() {
@@ -76,7 +77,11 @@ class BOMConfigurator {
 				const qty = node.data.qty || frm_obj.frm.doc.qty;
 				const uom = node.data.uom || frm_obj.frm.doc.uom;
 				const docname = node.data.name || frm_obj.frm.doc.name;
-				let amount = node.data.amount || frm_obj.frm.doc.raw_material_cost;
+				let amount = node.data.amount;
+				if (node.data.value === frm_obj.frm.doc.item_code) {
+					amount = frm_obj.frm.doc.raw_material_cost;
+				}
+
 				amount = frappe.format(amount, { fieldtype: "Currency", currency: frm_obj.frm.doc.currency });
 
 				$(`
@@ -356,20 +361,39 @@ class BOMConfigurator {
 	}
 
 	load_tree(response, node) {
+		let item_row = "";
+		let parent_dom = ""
+		let total_amount = response.message.raw_material_cost;
+
 		frappe.views.trees["BOM Configurator"].tree.load_children(node);
-		let parent_dom = $(node.parent.get(0));
-		if (node?.parent_node) {
-			parent_dom = $(node.parent_node.$tree_link.get(0));
+
+		while (true) {
+			item_row = response.message.items.filter(item => item.name === node.data.name);
+
+			if (item_row?.length) {
+				node.data.amount = item_row[0].amount;
+				total_amount = node.data.amount
+			} else {
+				total_amount = response.message.raw_material_cost;
+			}
+
+			parent_dom = $(node.parent.get(0));
+			total_amount = frappe.format(
+				total_amount, {
+					fieldtype: "Currency",
+					currency: this.frm.doc.currency
+				}
+			);
+
+			$($(parent_dom).find(".fg-item-amt")[0]).html(total_amount);
+
+			if (node.is_root) {
+				break;
+			}
+
+			node = node.parent_node;
 		}
 
-		let total_amount = frappe.format(
-			response.message.raw_material_cost, {
-				fieldtype: "Currency",
-				currency: this.frm.doc.currency
-			}
-		);
-
-		$(parent_dom).find(".fg-item-amt").html(total_amount);
 	}
 }
 
