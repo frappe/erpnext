@@ -460,19 +460,7 @@ class SubcontractingController(StockController):
 					"allow_zero_valuation": 1,
 				}
 			)
-<<<<<<< HEAD
-			rm_obj.rate = bom_item.rate if self.backflush_based_on == "BOM" else get_incoming_rate(args)
-=======
-
-			rm_obj.serial_and_batch_bundle = self.__set_serial_and_batch_bundle(
-				item_row, rm_obj, rm_obj.consumed_qty
-			)
-
-			if rm_obj.serial_and_batch_bundle:
-				args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
-
 			rm_obj.rate = get_incoming_rate(args)
->>>>>>> 758b31d895 (fix: get incoming rate instead of BOM rate (#36496))
 
 		if self.doctype == self.subcontract_data.order_doctype:
 			rm_obj.required_qty = qty
