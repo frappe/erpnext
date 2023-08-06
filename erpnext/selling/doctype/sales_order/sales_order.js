@@ -179,6 +179,7 @@ frappe.ui.form.on("Sales Order", {
 	create_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Reservation"),
+			size: "large",
 			fields: [
 				{
 					fieldname: "set_warehouse",
@@ -298,6 +299,7 @@ frappe.ui.form.on("Sales Order", {
 	cancel_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Unreservation"),
+			size: "large",
 			fields: [
 				{
 					fieldname: "stock_reservation_entries",
