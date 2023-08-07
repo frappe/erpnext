@@ -69,7 +69,7 @@ class RepostAccountingLedger(Document):
 						order_by="posting_date desc",
 						limit=1,
 					)[0]
-					if latest_voucher and latest_pcv > latest_voucher:
+					if latest_voucher and latest_pcv[0] >= latest_voucher:
 						frappe.throw(_("Cannot Resubmit Ledger entries for vouchers in Closed fiscal year."))
 
 	def validate_vouchers(self):

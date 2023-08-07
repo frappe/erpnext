@@ -62,19 +62,44 @@ class AccountsTestMixin:
 		self.debit_usd = "Debtors USD - " + abbr
 		self.cash = "Cash - " + abbr
 		self.creditors = "Creditors - " + abbr
+		self.retained_earnings = "Retained Earnings - " + abbr
 
-		# create bank account
-		bank_account = "HDFC - " + abbr
-		if frappe.db.exists("Account", bank_account):
-			self.bank = bank_account
-		else:
-			bank_acc = frappe.get_doc(
+		# Deferred revenue, expense and bank accounts
+		other_accounts = [
+			frappe._dict(
 				{
-					"doctype": "Account",
+					"attribute_name": "deferred_revenue",
+					"account_name": "Deferred Revenue",
+					"parent_account": "Current Liabilities - " + abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "deferred_expense",
+					"account_name": "Deferred Expense",
+					"parent_account": "Current Assets - " + abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "bank",
 					"account_name": "HDFC",
 					"parent_account": "Bank Accounts - " + abbr,
-					"company": self.company,
 				}
-			)
-			bank_acc.save()
-			self.bank = bank_acc.name
+			),
+		]
+		for acc in other_accounts:
+			acc_name = acc.account_name + " - " + abbr
+			if frappe.db.exists("Account", acc_name):
+				setattr(self, acc.attribute_name, acc_name)
+			else:
+				new_acc = frappe.get_doc(
+					{
+						"doctype": "Account",
+						"account_name": acc.account_name + " - " + abbr,
+						"parent_account": acc.parent_account,
+						"company": self.company,
+					}
+				)
+				new_acc.save()
+				setattr(self, acc.attribute_name, new_acc.name)
