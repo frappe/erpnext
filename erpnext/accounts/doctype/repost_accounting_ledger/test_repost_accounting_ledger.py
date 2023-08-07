@@ -6,6 +6,8 @@ from frappe import qb
 from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import start_repost
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -20,7 +22,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 	def teadDown(self):
 		frappe.db.rollback()
 
-	def test_repost_on_both_ledgers(self):
+	def test_basic_functions(self):
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,
@@ -30,6 +32,35 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 			cost_center=self.cost_center,
 			rate=100,
 		)
+
+		preq = frappe.get_doc(
+			make_payment_request(
+				dt=si.doctype,
+				dn=si.name,
+				payment_request_type="Inward",
+				party_type="Customer",
+				party=si.customer,
+			)
+		)
+		preq.save().submit()
+
+		# Test Validation Error
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.company = self.company
+		ral.delete_cancelled_entries = True
+		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		ral.append(
+			"vouchers", {"voucher_type": preq.doctype, "voucher_no": preq.name}
+		)  # this should throw validation error
+		self.assertRaises(frappe.ValidationError, ral.save)
+		ral.vouchers.pop()
+		preq.cancel()
+		preq.delete()
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
+		ral.save()
 
 		# manually set an incorrect debit amount in DB
 		gle = frappe.db.get_all("GL Entry", filters={"voucher_no": si.name, "account": self.debit_to})
@@ -42,13 +73,16 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
 			.run()
 		)
-		# Ledger has incorrect amount
+
+		# Assert incorrect ledger balance
 		self.assertNotEqual(res[0], (si.name, 100, 100))
 
-		ral = frappe.new_doc("Repost Accounting Ledger")
-		ral.company = self.company
-		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		# Submit report document
 		ral.save().submit()
+
+		# assert preview data is generated
+		preview = ral.generate_preview()
+		self.assertIsNotNone(preview)
 
 		# background jobs don't run on test cases. Manually triggering repost function.
 		start_repost(ral.name)
@@ -59,5 +93,6 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
 			.run()
 		)
+
 		# Ledger should reflect correct amount post repost
 		self.assertEqual(res[0], (si.name, 100, 100))
