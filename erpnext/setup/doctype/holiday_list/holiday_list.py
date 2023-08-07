@@ -6,7 +6,6 @@ import json
 from datetime import date
 
 import frappe
-from babel import Locale
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import formatdate, getdate, today
@@ -169,4 +168,6 @@ def is_holiday(holiday_list, date=None):
 
 def local_country_name(country_code: str) -> str:
 	"""Return the localized country name for the given country code."""
+	from babel import Locale
+
 	return Locale.parse(frappe.local.lang, sep="-").territories.get(country_code, country_code)
