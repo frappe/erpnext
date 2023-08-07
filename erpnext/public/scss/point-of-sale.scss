@@ -858,13 +858,10 @@
 
 			> .fields-section {
 				flex: 1;
-				position: absolute;
 				display: flex;
 				flex-direction: column;
 				width: 50%;
 				height: 100%;
-				top: 0;
-				left: 0;
 				padding-bottom: var(--margin-md);
 
 				.invoice-fields {
@@ -1149,6 +1146,65 @@
 					}
 				}
 			}
+		}
+	}
+}
+
+@media screen and (max-width: 620px) {
+	.point-of-sale-app {
+		grid-template-columns: repeat(1, minmax(0, 1fr));
+
+		> .items-selector {
+			grid-column: span 6 / span 1  !important;
+			> .items-container {
+			grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+			}
+		}
+
+		> .item-details-container, .customer-cart-container {
+			grid-column: span 6 / span 1;
+		}
+
+		> .payment-container {
+			overflow: scroll;
+			> .fields-numpad-container {
+				flex-direction: column-reverse;
+				> .number-pad {
+					display: none;
+				}
+				> .fields-section {
+					width: 100%;
+				}
+			}
+		}
+
+		> .past-order-summary{
+			> .invoice-summary-wrapper {
+				width: 100%;
+			}
+		}
+
+		.numpad-totals {
+			> span {
+				padding: 0 5px;
+				font-size: 12px;
+			}
+		}
+
+		.col > * {
+			font-size: 12px !important;
+		}
+
+		.control-input-wrapper {
+			padding-left: 0.15rem;
+		}
+
+		.pay-amount {
+			margin-left: 0.2rem;
+		}
+
+		.past-order-list {
+			grid-column: span 6 / span 1;
 		}
 	}
 }
