@@ -9,8 +9,6 @@ import frappe
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import formatdate, getdate, today
-from holidays import country_holidays
-from holidays.utils import list_supported_countries
 
 
 class OverlapError(frappe.ValidationError):
@@ -39,6 +37,8 @@ class HolidayList(Document):
 
 	@frappe.whitelist()
 	def get_supported_countries(self):
+		from holidays.utils import list_supported_countries
+
 		subdivisions_by_country = list_supported_countries()
 		countries = [
 			{"value": country, "label": local_country_name(country)}
@@ -51,6 +51,8 @@ class HolidayList(Document):
 
 	@frappe.whitelist()
 	def get_local_holidays(self):
+		from holidays import country_holidays
+
 		if not self.country:
 			throw(_("Please select a country"))
 
