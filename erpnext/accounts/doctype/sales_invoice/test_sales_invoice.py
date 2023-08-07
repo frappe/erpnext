@@ -2049,28 +2049,27 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.total_taxes_and_charges, 228.82)
 		self.assertEqual(si.rounding_adjustment, -0.01)
 
-		expected_values = dict(
-			(d[0], d)
-			for d in [
-				[si.debit_to, 1500, 0.0],
-				["_Test Account Service Tax - _TC", 0.0, 114.41],
-				["_Test Account VAT - _TC", 0.0, 114.41],
-				["Sales - _TC", 0.0, 1271.18],
-			]
-		)
+		expected_values = [
+			["_Test Account Service Tax - _TC", 0.0, 114.41],
+			["_Test Account VAT - _TC", 0.0, 114.41],
+			[si.debit_to, 1500, 0.0],
+			["Round Off - _TC", 0.01, 0.01],
+			["Sales - _TC", 0.0, 1271.18],
+		]
 
 		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
+			"""select account, sum(debit) as debit, sum(credit) as credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			group by account
 			order by account asc""",
 			si.name,
 			as_dict=1,
 		)
 
-		for gle in gl_entries:
-			self.assertEqual(expected_values[gle.account][0], gle.account)
-			self.assertEqual(expected_values[gle.account][1], gle.debit)
-			self.assertEqual(expected_values[gle.account][2], gle.credit)
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[i][0], gle.account)
+			self.assertEqual(expected_values[i][1], gle.debit)
+			self.assertEqual(expected_values[i][2], gle.credit)
 
 	def test_rounding_adjustment_3(self):
 		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
