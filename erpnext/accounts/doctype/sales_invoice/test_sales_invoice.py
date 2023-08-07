@@ -2124,13 +2124,14 @@ class TestSalesInvoice(unittest.TestCase):
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
-				["Round Off - _TC", 0.01, 0],
+				["Round Off - _TC", 0.02, 0.01],
 			]
 		)
 
 		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
+			"""select account, sum(debit) as debit, sum(credit) as credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			group by account
 			order by account asc""",
 			si.name,
 			as_dict=1,
