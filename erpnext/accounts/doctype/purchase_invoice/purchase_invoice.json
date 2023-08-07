@@ -169,6 +169,7 @@
   "unrealized_profit_loss_account",
   "repost_required",
   "subscription_section",
+  "subscription",
   "auto_repeat",
   "update_auto_repeat_reference",
   "column_break_114",
@@ -1427,6 +1428,12 @@
    "read_only": 1
   },
   {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
+  },
+  {
    "default": "0",
    "fieldname": "is_old_subcontracting_flow",
    "fieldtype": "Check",
@@ -1592,7 +1599,11 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-10-16 16:24:51.886231",
+=======
+ "modified": "2023-07-25 17:22:59.145031",
+>>>>>>> 38805603db (feat: subscription refactor (#30963))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
