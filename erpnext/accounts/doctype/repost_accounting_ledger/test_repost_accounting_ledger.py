@@ -24,7 +24,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 	def teadDown(self):
 		frappe.db.rollback()
 
-	def test_basic_functions(self):
+	def test_01_basic_functions(self):
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,
@@ -99,7 +99,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		# Ledger should reflect correct amount post repost
 		self.assertEqual(res[0], (si.name, 100, 100))
 
-	def test_deferred_accounting_valiations(self):
+	def test_02_deferred_accounting_valiations(self):
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,
@@ -121,7 +121,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
-	def test_pcv_validation(self):
+	def test_03_pcv_validation(self):
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,

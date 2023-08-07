@@ -91,7 +91,7 @@ class AccountsTestMixin:
 		for acc in other_accounts:
 			acc_name = acc.account_name + " - " + abbr
 			if frappe.db.exists("Account", acc_name):
-				setattr(self, acc.attribute_name, acc.acc_name)
+				setattr(self, acc.attribute_name, acc_name)
 			else:
 				new_acc = frappe.get_doc(
 					{
