@@ -107,11 +107,11 @@
    "reqd": 1
   },
   {
+   "default": "1",
    "fieldname": "conversion_rate",
    "fieldtype": "Float",
    "label": "Conversion Rate",
-   "precision": "9",
-   "reqd": 1
+   "precision": "9"
   },
   {
    "fieldname": "materials_section",
@@ -288,7 +288,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2023-08-07 13:42:20.270471",
+ "modified": "2023-08-07 15:45:06.176313",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
