@@ -17,6 +17,33 @@ class RepostAccountingLedger(Document):
 	def validate(self):
 		self.validate_vouchers()
 		self.validate_for_closed_fiscal_year()
+		self.validate_for_deferred_accounting()
+
+	def validate_for_deferred_accounting(self):
+		sales_docs = [x.voucher_no for x in self.vouchers if x.voucher_type == "Sales Invoice"]
+		docs_with_deferred_revenue = frappe.db.get_all(
+			"Sales Invoice Item",
+			filters={"parent": ["in", sales_docs], "docstatus": 1, "enable_deferred_revenue": True},
+			fields=["parent"],
+			as_list=1,
+		)
+
+		purchase_docs = [x.voucher_no for x in self.vouchers if x.voucher_type == "Purchase Invoice"]
+		docs_with_deferred_expense = frappe.db.get_all(
+			"Purchase Invoice Item",
+			filters={"parent": ["in", purchase_docs], "docstatus": 1, "enable_deferred_expense": 1},
+			fields=["parent"],
+			as_list=1,
+		)
+
+		if docs_with_deferred_revenue or docs_with_deferred_expense:
+			frappe.throw(
+				_("Documents: {0} have deferred revenue/expense enabled for them. Cannot repost.").format(
+					frappe.bold(
+						comma_and([x[0] for x in docs_with_deferred_expense + docs_with_deferred_revenue])
+					)
+				)
+			)
 
 	def validate_for_closed_fiscal_year(self):
 		if self.vouchers:
@@ -128,6 +155,9 @@ def start_repost(account_repost_doc=str) -> None:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
 
 		if repost_doc.docstatus == 1:
+			# Prevent repost on invoices with deferred accounting
+			repost_doc.validate_for_deferred_accounting()
+
 			for x in repost_doc.vouchers:
 				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 
