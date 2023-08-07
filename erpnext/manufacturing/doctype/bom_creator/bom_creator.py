@@ -19,13 +19,57 @@ BOM_FIELDS = [
 	"buying_price_list",
 ]
 
+BOM_ITEM_FIELDS = [
+	"item_code",
+	"qty",
+	"uom",
+	"rate",
+	"stock_qty",
+	"stock_uom",
+	"conversion_factor",
+	"do_not_explode",
+]
+
 
 class BOMCreator(Document):
 	def before_save(self):
+		self.set_status()
 		self.set_conversion_factor()
 		self.set_reference_id()
 		self.set_is_expandable()
 		self.set_rate_for_items()
+
+	def set_status(self, save=False):
+		self.status = {
+			0: "Draft",
+			1: "Submitted",
+			2: "Cancelled",
+		}[self.docstatus]
+
+		self.set_status_completed()
+		if save:
+			self.db_set("status", self.status)
+
+	def set_status_completed(self):
+		if self.docstatus != 1:
+			return
+
+		has_completed = True
+		for row in self.items:
+			if row.is_expandable and not row.bom_created:
+				has_completed = False
+				break
+
+		if not frappe.get_cached_value(
+			"BOM", {"bom_creator": self.name, "item": self.item_code}, "name"
+		):
+			has_completed = False
+
+		if has_completed:
+			self.status = "Completed"
+
+	def on_cancel(self):
+		self.set_status(True)
 
 	def set_conversion_factor(self):
 		for row in self.items:
@@ -33,6 +77,7 @@ class BOMCreator(Document):
 
 	def before_submit(self):
 		self.validate_fields()
+		self.set_status()
 
 	def set_reference_id(self):
 		parent_reference = {row.idx: row.name for row in self.items}
@@ -106,7 +151,19 @@ class BOMCreator(Document):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(label, self.name))
 
 	def on_submit(self):
-		self.create_boms()
+		self.enqueue_create_boms()
+
+	def enqueue_create_boms(self):
+		frappe.enqueue(
+			self.create_boms,
+			queue="short",
+			timeout=600,
+			is_async=True,
+		)
+
+		frappe.msgprint(
+			_("BOMs creation has been enqueued, kindly check the status after some time"), alert=True
+		)
 
 	def create_boms(self):
 		"""
@@ -120,6 +177,7 @@ class BOMCreator(Document):
 		}
 		"""
 
+		self.db_set("status", "In Progress")
 		production_item_wise_rm = OrderedDict({})
 		production_item_wise_rm.setdefault(
 			(self.item_code, self.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
@@ -136,11 +194,22 @@ class BOMCreator(Document):
 
 		reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
 
-		for d in reverse_tree:
-			fg_item_data = production_item_wise_rm.get(d).fg_item_data
-			self.create_bom(fg_item_data, production_item_wise_rm)
+		try:
+			for d in reverse_tree:
+				fg_item_data = production_item_wise_rm.get(d).fg_item_data
+				self.create_bom(fg_item_data, production_item_wise_rm)
 
-		frappe.msgprint(_("BOMs created successfully"))
+			frappe.msgprint(_("BOMs created successfully"))
+		except Exception:
+			traceback = frappe.get_traceback()
+			self.db_set(
+				{
+					"status": "Failed",
+					"error_log": traceback,
+				}
+			)
+
+			frappe.msgprint(_("BOMs creation failed"))
 
 	def create_bom(self, row, production_item_wise_rm):
 		bom = frappe.new_doc("BOM")
@@ -151,6 +220,7 @@ class BOMCreator(Document):
 				"quantity": row.qty,
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
+				"bom_creator_item": row.name if row.name != self.name else "",
 				"rm_cost_as_per": "Manual",
 			}
 		)
@@ -165,23 +235,20 @@ class BOMCreator(Document):
 				bom_no = production_item_wise_rm.get((item.item_code, item.name)).bom_no
 				item.do_not_explode = 0
 
-			bom.append(
-				"items",
+			item_args = {}
+			for field in BOM_ITEM_FIELDS:
+				item_args[field] = item.get(field)
+
+			item_args.update(
 				{
-					"item_code": item.item_code,
-					"qty": item.qty,
-					"uom": item.uom,
-					"rate": item.rate,
-					"conversion_factor": item.conversion_factor,
-					"stock_qty": item.stock_qty,
-					"stock_uom": item.stock_uom,
-					"do_not_explode": item.do_not_explode,
 					"bom_no": bom_no,
 					"allow_alternative_item": 1,
 					"allow_scrap_items": 1,
 					"include_item_in_manufacturing": 1,
-				},
+				}
 			)
+
+			bom.append("items", item_args)
 
 		bom.save(ignore_permissions=True)
 		bom.submit()

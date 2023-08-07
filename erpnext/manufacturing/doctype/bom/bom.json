@@ -80,6 +80,8 @@
   "web_long_description",
   "reference_section",
   "bom_creator",
+  "bom_creator_item",
+  "column_break_oxbz",
   "amended_from",
   "connections_tab"
  ],
@@ -610,11 +612,23 @@
   {
    "fieldname": "bom_creator",
    "fieldtype": "Link",
-   "label": "BOM Configurator",
+   "label": "BOM Creator",
    "no_copy": 1,
    "options": "BOM Creator",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "bom_creator_item",
+   "fieldtype": "Data",
+   "label": "BOM Creator Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_oxbz",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -622,7 +636,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-04 14:27:32.961309",
+ "modified": "2023-08-07 11:38:08.152294",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

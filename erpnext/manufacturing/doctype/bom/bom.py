@@ -206,6 +206,7 @@ class BOM(WebsiteGenerator):
 
 	def on_submit(self):
 		self.manage_default_bom()
+		self.update_bom_creator_status()
 
 	def on_cancel(self):
 		self.db_set("is_active", 0)
@@ -214,6 +215,23 @@ class BOM(WebsiteGenerator):
 		# check if used in any other bom
 		self.validate_bom_links()
 		self.manage_default_bom()
+		self.update_bom_creator_status()
+
+	def update_bom_creator_status(self):
+		if not self.bom_creator:
+			return
+
+		if self.bom_creator_item:
+			frappe.db.set_value(
+				"BOM Creator Item",
+				self.bom_creator_item,
+				"bom_created",
+				1 if self.docstatus == 1 else 0,
+				update_modified=False,
+			)
+
+		doc = frappe.get_doc("BOM Creator", self.bom_creator)
+		doc.set_status(save=True)
 
 	def on_update_after_submit(self):
 		self.validate_bom_links()

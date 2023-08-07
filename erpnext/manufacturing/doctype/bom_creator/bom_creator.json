@@ -39,6 +39,10 @@
   "raw_material_cost",
   "remarks_tab",
   "remarks",
+  "section_break_yixm",
+  "status",
+  "column_break_irab",
+  "error_log",
   "connections_tab",
   "amended_from"
  ],
@@ -46,7 +50,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
@@ -106,7 +109,6 @@
   {
    "fieldname": "conversion_rate",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Conversion Rate",
    "precision": "9",
    "reqd": 1
@@ -133,6 +135,7 @@
   {
    "fieldname": "raw_material_cost",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Cost",
    "no_copy": 1,
    "options": "currency",
@@ -156,6 +159,8 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Finished Good",
    "options": "Item",
    "reqd": 1
@@ -250,6 +255,29 @@
    "fieldname": "set_rate_based_on_warehouse",
    "fieldtype": "Check",
    "label": "Set Valuation Rate Based on Source Warehouse"
+  },
+  {
+   "fieldname": "section_break_yixm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nIn Progress\nCompleted\nFailed\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_irab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Text",
+   "label": "Error Log",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -260,7 +288,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2023-08-04 14:29:51.375361",
+ "modified": "2023-08-07 13:42:20.270471",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
