@@ -476,7 +476,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 	threshold = tax_details.get("threshold", 0)
 	cumulative_threshold = tax_details.get("cumulative_threshold", 0)
 
-	if (threshold and inv.tax_withholding_net_total >= threshold) or (
+	if (threshold and inv.base_tax_withholding_net_total >= threshold) or (
 		cumulative_threshold and supp_credit_amt >= cumulative_threshold
 	):
 		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(
