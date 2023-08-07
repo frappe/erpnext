@@ -179,35 +179,28 @@ class RequestforQuotation(BuyingController):
 		if full_name == "Guest":
 			full_name = "Administrator"
 
-		# send document dict and some important data from suppliers row
-		# to render message_for_supplier from any template
 		doc_args = self.as_dict()
-		doc_args.update({"supplier": data.get("supplier"), "supplier_name": data.get("supplier_name")})
 
-		# Get Contact Full Name
-		supplier_name = None
 		if data.get("contact"):
-			contact_name = frappe.db.get_value(
-				"Contact", data.get("contact"), ["first_name", "middle_name", "last_name"]
-			)
-			supplier_name = (" ").join(x for x in contact_name if x)  # remove any blank values
+			contact = frappe.get_doc("Contact", data.get("contact"))
+			doc_args["contact"] = contact.as_dict()
 
-		args = {
-			"update_password_link": update_password_link,
-			"message": frappe.render_template(self.message_for_supplier, doc_args),
-			"rfq_link": rfq_link,
-			"user_fullname": full_name,
-			"supplier_name": supplier_name or data.get("supplier_name"),
-			"supplier_salutation": self.salutation or "Dear Mx.",
-		}
-
-		subject = self.subject or _("Request for Quotation")
-		template = "templates/emails/request_for_quotation.html"
+		doc_args.update(
+			{
+				"supplier": data.get("supplier"),
+				"supplier_name": data.get("supplier_name"),
+				"update_password_link": f'<a href="{update_password_link}" class="btn btn-default btn-xs" target="_blank">{_("Set Password")}</a>',
+				"portal_link": f'<a href="{rfq_link}" class="btn btn-default btn-sm" target="_blank"> {_("Submit your Quotation")} </a>',
+				"user_fullname": full_name,
+			}
+		)
+		email_template = frappe.get_doc("Email Template", self.email_template)
+		message = frappe.render_template(email_template.response_, doc_args)
+		subject = frappe.render_template(email_template.subject, doc_args)
 		sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
-		message = frappe.get_template(template).render(args)
 
 		if preview:
-			return message
+			return {"message": message, "subject": subject}
 
 		attachments = self.get_attachments()
 
