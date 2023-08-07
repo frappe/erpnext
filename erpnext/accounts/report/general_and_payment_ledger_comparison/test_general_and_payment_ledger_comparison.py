@@ -3,6 +3,7 @@ import unittest
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_and_payment_ledger_comparison.general_and_payment_ledger_comparison import (
@@ -55,3 +56,45 @@ class TestGeneralAndPaymentLedger(FrappeTestCase, AccountsTestMixin):
 			"pl_balance": sinv.grand_total - 1,
 		}
 		self.assertEqual(expected, data[0])
+
+		# account filter
+		filters = frappe._dict({"company": self.company, "account": self.debit_to})
+		columns, data = execute(filters=filters)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(expected, data[0])
+
+		filters = frappe._dict({"company": self.company, "account": self.creditors})
+		columns, data = execute(filters=filters)
+		self.assertEqual([], data)
+
+		# voucher_no filter
+		filters = frappe._dict({"company": self.company, "voucher_no": sinv.name})
+		columns, data = execute(filters=filters)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(expected, data[0])
+
+		filters = frappe._dict({"company": self.company, "voucher_no": sinv.name + "-1"})
+		columns, data = execute(filters=filters)
+		self.assertEqual([], data)
+
+		# date range filter
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"period_start_date": sinv.posting_date,
+				"period_end_date": sinv.posting_date,
+			}
+		)
+		columns, data = execute(filters=filters)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(expected, data[0])
+
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"period_start_date": add_days(sinv.posting_date, -1),
+				"period_end_date": add_days(sinv.posting_date, -1),
+			}
+		)
+		columns, data = execute(filters=filters)
+		self.assertEqual([], data)
