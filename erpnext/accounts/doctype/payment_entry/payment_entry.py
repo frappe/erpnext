@@ -672,7 +672,7 @@ class PaymentEntry(AccountsController):
 		docnames = [d.reference_name for d in self.references if d.reference_doctype == doctype]
 
 		tax_withholding_net_total = frappe.db.get_value(
-			doctype, {"name": ["in", docnames]}, ["sum(base_tax_withholding_net_total)"]
+			doctype, {"name": ["in", docnames]}, ["sum(base_net_total)"]
 		)
 
 		return tax_withholding_net_total
