@@ -1670,8 +1670,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
 
-<<<<<<< HEAD
-=======
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
@@ -1718,14 +1716,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			0,
 		)
 
-	def test_offsetting_entries_for_accounting_dimensions(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
-		from erpnext.accounts.report.trial_balance.test_trial_balance import (
-			clear_dimension_defaults,
-			create_accounting_dimension,
-			disable_dimension,
-		)
->>>>>>> edbefee10c (fix: payment allocation in invoice payment schedule (#36440))
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
