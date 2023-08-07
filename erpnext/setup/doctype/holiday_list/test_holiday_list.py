@@ -8,6 +8,8 @@ from datetime import date, timedelta
 import frappe
 from frappe.utils import getdate
 
+from erpnext.setup.doctype.holiday_list.holiday_list import local_country_name
+
 
 class TestHolidayList(unittest.TestCase):
 	def test_holiday_list(self):
@@ -57,6 +59,16 @@ class TestHolidayList(unittest.TestCase):
 		self.assertIn(date(2023, 4, 7), holidays)
 		self.assertIn(date(2023, 4, 10), holidays)
 		self.assertNotIn(date(2023, 5, 1), holidays)
+
+	def test_localized_country_names(self):
+		lang = frappe.local.lang
+		frappe.local.lang = "en-gb"
+		self.assertEqual(local_country_name("IN"), "India")
+		self.assertEqual(local_country_name("DE"), "Germany")
+
+		frappe.local.lang = "de"
+		self.assertEqual(local_country_name("DE"), "Deutschland")
+		frappe.local.lang = lang
 
 
 def make_holiday_list(

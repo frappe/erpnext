@@ -169,4 +169,4 @@ def is_holiday(holiday_list, date=None):
 
 def local_country_name(country_code: str) -> str:
 	"""Return the localized country name for the given country code."""
-	return Locale.parse(frappe.local.lang).territories.get(country_code, country_code)
+	return Locale.parse(frappe.local.lang, sep="-").territories.get(country_code, country_code)
