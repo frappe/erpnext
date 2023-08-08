@@ -147,6 +147,8 @@ class PaymentEntry(AccountsController):
 			"Payment Ledger Entry",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 		)
 		super(PaymentEntry, self).on_cancel()
 		self.make_gl_entries(cancel=1)

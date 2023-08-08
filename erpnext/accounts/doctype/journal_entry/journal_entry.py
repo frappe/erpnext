@@ -96,6 +96,8 @@ class JournalEntry(AccountsController):
 			"Payment Ledger Entry",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
