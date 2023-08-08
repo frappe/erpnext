@@ -696,7 +696,7 @@ class StockReconciliation(StockController):
 			)
 
 		if sl_entries:
-			self.make_sl_entries(sl_entries)
+			self.make_sl_entries(sl_entries, allow_negative_stock=True)
 
 	def recalculate_qty_for_serial_and_batch_bundle(self, row):
 		doc = frappe.get_doc("Serial and Batch Bundle", row.current_serial_and_batch_bundle)

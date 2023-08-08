@@ -244,19 +244,21 @@ frappe.ui.form.on("Request for Quotation",{
 			]
 		});
 
-		dialog.fields_dict['supplier'].df.onchange = () => {
-			var supplier = dialog.get_value('supplier');
-			frm.call('get_supplier_email_preview', {supplier: supplier}).then(result => {
+		dialog.fields_dict["supplier"].df.onchange = () => {
+			frm.call("get_supplier_email_preview", {
+				supplier: dialog.get_value("supplier"),
+			}).then(({ message }) => {
 				dialog.fields_dict.email_preview.$wrapper.empty();
-				dialog.fields_dict.email_preview.$wrapper.append(result.message);
+				dialog.fields_dict.email_preview.$wrapper.append(
+					message.message
+				);
+				dialog.set_value("subject", message.subject);
 			});
-
-		}
+		};
 
 		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of the document will
 			automatically be attached with the email.</p>`);
 
-		dialog.set_value("subject", frm.doc.subject);
 		dialog.show();
 	}
 })
