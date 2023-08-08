@@ -2,11 +2,14 @@
 # See license.txt
 
 
+from urllib.parse import urlparse
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+	RequestforQuotation,
 	create_supplier_quotation,
 	get_pdf,
 	make_supplier_quotation_from_rfq,
@@ -125,13 +128,18 @@ class TestRequestforQuotation(FrappeTestCase):
 		rfq.status = "Draft"
 		rfq.submit()
 
+	def test_get_link(self):
+		rfq = make_request_for_quotation()
+		parsed_link = urlparse(rfq.get_link())
+		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
+
 	def test_get_pdf(self):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
 		self.assertEqual(frappe.local.response.type, "pdf")
 
 
-def make_request_for_quotation(**args):
+def make_request_for_quotation(**args) -> "RequestforQuotation":
 	"""
 	:param supplier_data: List containing supplier data
 	"""
