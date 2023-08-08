@@ -118,6 +118,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 
 		ral = frappe.new_doc("Repost Accounting Ledger")
 		ral.company = self.company
+		ral.delete_cancelled_entries = False
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
@@ -151,5 +152,6 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 
 		ral = frappe.new_doc("Repost Accounting Ledger")
 		ral.company = self.company
+		ral.delete_cancelled_entries = True
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
