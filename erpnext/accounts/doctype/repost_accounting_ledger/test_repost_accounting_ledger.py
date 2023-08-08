@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -79,12 +79,8 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		# Assert incorrect ledger balance
 		self.assertNotEqual(res[0], (si.name, 100, 100))
 
-		# Submit report document
+		# Submit repost document
 		ral.save().submit()
-
-		# assert preview data is generated
-		preview = ral.generate_preview()
-		self.assertIsNotNone(preview)
 
 		# background jobs don't run on test cases. Manually triggering repost function.
 		start_repost(ral.name)
@@ -118,11 +114,11 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 
 		ral = frappe.new_doc("Repost Accounting Ledger")
 		ral.company = self.company
-		ral.delete_cancelled_entries = False
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
 
-	def test_03_pcv_validation(self):
+	@change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
+	def test_04_pcv_validation(self):
 		# Clear old GL entries so PCV can be submitted.
 		gl = frappe.qb.DocType("GL Entry")
 		qb.from_(gl).delete().where(gl.company == self.company).run()
@@ -152,6 +148,55 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 
 		ral = frappe.new_doc("Repost Accounting Ledger")
 		ral.company = self.company
-		ral.delete_cancelled_entries = True
 		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
 		self.assertRaises(frappe.ValidationError, ral.save)
+
+		pcv.reload()
+		pcv.cancel()
+		pcv.delete()
+
+	def test_03_deletion_flag_and_preview_function(self):
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+		)
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+
+		# without deletion flag set
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.company = self.company
+		ral.delete_cancelled_entries = False
+		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
+		ral.save()
+
+		# assert preview data is generated
+		preview = ral.generate_preview()
+		self.assertIsNotNone(preview)
+
+		ral.save().submit()
+
+		# background jobs don't run on test cases. Manually triggering repost function.
+		start_repost(ral.name)
+
+		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
+		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
+
+		# with deletion flag set
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.company = self.company
+		ral.delete_cancelled_entries = True
+		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
+		ral.save().submit()
+
+		start_repost(ral.name)
+		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
+		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
