@@ -13,21 +13,28 @@ frappe.ui.form.on("BOM Creator", {
 		if (!frm.is_new()) {
 			if ((!frappe.bom_configurator
 				|| frappe.bom_configurator.bom_configurator !== frm.doc.name)) {
-				let $parent = $(frm.fields_dict["bom_creator"].wrapper);
-				$parent.empty();
-
-				frappe.require('bom_configurator.bundle.js').then(() => {
-					frappe.bom_configurator = new frappe.ui.BOMConfigurator({
-						wrapper: $parent,
-						page: $parent,
-						frm: frm,
-						bom_configurator: frm.doc.name,
-					});
-				});
+				frm.trigger("build_tree");
 			}
 		} else {
+			let $parent = $(frm.fields_dict["bom_creator"].wrapper);
+			$parent.empty();
 			frm.trigger("make_new_entry");
 		}
+	},
+
+	build_tree(frm) {
+		let $parent = $(frm.fields_dict["bom_creator"].wrapper);
+		$parent.empty();
+		frm.toggle_enable("item_code", false);
+
+		frappe.require('bom_configurator.bundle.js').then(() => {
+			frappe.bom_configurator = new frappe.ui.BOMConfigurator({
+				wrapper: $parent,
+				page: $parent,
+				frm: frm,
+				bom_configurator: frm.doc.name,
+			});
+		});
 	},
 
 	make_new_entry(frm) {
@@ -122,7 +129,11 @@ frappe.ui.form.on("BOM Creator", {
 	},
 
 	add_custom_buttons(frm) {
-		//
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Rebuild Tree"), () => {
+				frm.trigger("build_tree");
+			});
+		}
 	}
 });
 

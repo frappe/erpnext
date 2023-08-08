@@ -30,14 +30,15 @@ class BOMConfigurator {
 
 	bind_events() {
 		frappe.views.trees["BOM Configurator"].events = {
+			frm: this.frm,
 			add_item: this.add_item,
 			add_sub_assembly: this.add_sub_assembly,
 			get_sub_assembly_modal_fields: this.get_sub_assembly_modal_fields,
 			convert_to_sub_assembly: this.convert_to_sub_assembly,
 			delete_node: this.delete_node,
 			edit_qty: this.edit_qty,
-			frm: this.frm,
 			load_tree: this.load_tree,
+			set_default_qty: this.set_default_qty,
 		}
 	}
 
@@ -93,9 +94,8 @@ class BOMConfigurator {
 							display: inline-flex;
 							min-width: 128px;
 							border: 1px solid var(--bg-gray);
-						"
-						data-bom-qty-docname="${docname}">
-							<div style="padding-right:5px">${qty} ${uom}</div>
+						">
+							<div style="padding-right:5px" data-bom-qty-docname="${docname}">${qty} ${uom}</div>
 							<div class="fg-item-amt" style="padding-left:12px; border-left:1px solid var(--bg-gray)">
 								${amount}
 							</div>
@@ -108,7 +108,7 @@ class BOMConfigurator {
 					label:__(frappe.utils.icon('edit', 'sm') + " Qty"),
 					click: function(node) {
 						let view = frappe.views.trees["BOM Configurator"];
-						view.events.edit_qty(node);
+						view.events.edit_qty(node, view);
 					},
 					btnClass: "hidden-xs"
 				},
@@ -232,6 +232,7 @@ class BOMConfigurator {
 		});
 
 		dialog.show();
+		view.events.set_default_qty(dialog);
 
 		dialog.set_primary_action(__("Add"), () => {
 			let bom_item = dialog.get_values();
@@ -285,6 +286,8 @@ class BOMConfigurator {
 		});
 
 		dialog.show();
+		view.events.set_default_qty(dialog);
+
 		dialog.set_primary_action(__("Add"), () => {
 			let bom_item = dialog.get_values();
 
@@ -307,6 +310,17 @@ class BOMConfigurator {
 		});
 	}
 
+	set_default_qty(dialog) {
+		dialog.fields_dict.items.grid.fields_map.item_code.onchange = function (event) {
+			if (event) {
+				let name = $(event.currentTarget).closest('.grid-row').attr("data-name")
+				let item_row = dialog.fields_dict.items.grid.grid_rows_by_docname[name].doc;
+				item_row.qty = 1;
+				dialog.fields_dict.items.grid.refresh()
+			}
+		}
+	}
+
 	delete_node(node, view) {
 		frappe.confirm(__("Are you sure you want to delete this Item?"), () => {
 			frappe.call({
@@ -324,7 +338,7 @@ class BOMConfigurator {
 		});
 	}
 
-	edit_qty(node) {
+	edit_qty(node, view) {
 		let qty = node.data.qty || this.frm.doc.qty;
 		frappe.prompt([
 			{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 },
@@ -339,11 +353,13 @@ class BOMConfigurator {
 					doctype: doctype,
 					docname: docname,
 					qty: data.qty,
+					parent: node.data.parent_id,
 				},
 				callback: (r) => {
 					node.data.qty = data.qty;
 					let uom = node.data.uom || this.frm.doc.uom;
 					$(node.parent.get(0)).find(`[data-bom-qty-docname='${docname}']`).html(data.qty + " " + uom);
+					view.events.load_tree(r, node);
 				}
 			});
 		},

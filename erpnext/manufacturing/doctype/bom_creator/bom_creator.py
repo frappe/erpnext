@@ -34,10 +34,18 @@ BOM_ITEM_FIELDS = [
 class BOMCreator(Document):
 	def before_save(self):
 		self.set_status()
+		self.set_is_expandable()
 		self.set_conversion_factor()
 		self.set_reference_id()
-		self.set_is_expandable()
 		self.set_rate_for_items()
+
+	def validate(self):
+		self.validate_items()
+
+	def validate_items(self):
+		for row in self.items:
+			if row.is_expandable and row.item_code == self.item_code:
+				frappe.throw(_("Item {0} cannot be added as a sub-assembly of itself").format(row.item_code))
 
 	def set_status(self, save=False):
 		self.status = {
@@ -135,7 +143,7 @@ class BOMCreator(Document):
 		return amount
 
 	def set_is_expandable(self):
-		fg_items = [row.fg_item for row in self.items]
+		fg_items = [row.fg_item for row in self.items if row.fg_item != self.item_code]
 		for row in self.items:
 			row.is_expandable = 0
 			if row.item_code in fg_items:
@@ -231,6 +239,7 @@ class BOMCreator(Document):
 
 		for item in production_item_wise_rm[(row.item_code, row.name)]["items"]:
 			bom_no = ""
+			item.do_not_explode = 1
 			if (item.item_code, item.name) in production_item_wise_rm:
 				bom_no = production_item_wise_rm.get((item.item_code, item.name)).bom_no
 				item.do_not_explode = 0
@@ -343,6 +352,7 @@ def add_sub_assembly(**kwargs):
 				"stock_qty": bom_item.qty,
 				"fg_reference_id": name,
 				"do_not_explode": 1,
+				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
 			},
 		)
@@ -405,5 +415,10 @@ def delete_node(**kwargs):
 
 
 @frappe.whitelist()
-def edit_qty(doctype, docname, qty):
+def edit_qty(doctype, docname, qty, parent):
 	frappe.db.set_value(doctype, docname, "qty", qty)
+	doc = frappe.get_doc("BOM Creator", parent)
+	doc.set_rate_for_items()
+	doc.save()
+
+	return doc

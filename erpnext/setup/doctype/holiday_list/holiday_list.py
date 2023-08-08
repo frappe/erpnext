@@ -9,8 +9,6 @@ import frappe
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import formatdate, getdate, today
-from holidays import country_holidays
-from holidays.utils import list_supported_countries
 
 
 class OverlapError(frappe.ValidationError):
