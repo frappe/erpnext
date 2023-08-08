@@ -268,7 +268,7 @@
    "label": "Reservation Based On",
    "no_copy": 1,
    "options": "Qty\nSerial and Batch",
-   "read_only_depends_on": "eval: (doc.delivered_qty > 0)"
+   "read_only_depends_on": "eval: (doc.delivered_qty > 0 || doc.against_pick_list)"
   },
   {
    "fieldname": "against_pick_list",
@@ -304,7 +304,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-20 12:39:47.703163",
+ "modified": "2023-08-08 17:15:13.317706",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
