@@ -186,6 +186,42 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in reversed(invoices):
 			d.cancel()
 
+	def test_tds_deduction_for_po_via_payment_entry(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier8", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+		order = create_purchase_order(supplier="Test TDS Supplier8", rate=40000, do_not_save=True)
+
+		# Add some tax on the order
+		order.append(
+			"taxes",
+			{
+				"category": "Total",
+				"charge_type": "Actual",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "Main - _TC",
+				"tax_amount": 8000,
+				"description": "Test",
+				"add_deduct_tax": "Add",
+			},
+		)
+
+		order.save()
+
+		order.apply_tds = 1
+		order.tax_withholding_category = "Cumulative Threshold TDS"
+		order.submit()
+
+		self.assertEqual(order.taxes[0].tax_amount, 4000)
+
+		payment = get_payment_entry(order.doctype, order.name)
+		payment.apply_tax_withholding_amount = 1
+		payment.tax_withholding_category = "Cumulative Threshold TDS"
+		payment.submit()
+		self.assertEqual(payment.taxes[0].tax_amount, 4000)
+
 	def test_multi_category_single_supplier(self):
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier5", "tax_withholding_category", "Test Service Category"
@@ -275,6 +311,37 @@ def cancel_invoices():
 		frappe.get_doc("Sales Invoice", d).cancel()
 
 
+def create_purchase_order(**args):
+	# return purchase order doc object
+	item = frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name")
+	args = frappe._dict(args)
+	po = frappe.get_doc(
+		{
+			"doctype": "Purchase Order",
+			"transaction_date": today(),
+			"schedule_date": today(),
+			"apply_tds": 0 if args.do_not_apply_tds else 1,
+			"supplier": args.supplier,
+			"company": "_Test Company",
+			"taxes_and_charges": "",
+			"currency": "INR",
+			"taxes": [],
+			"items": [
+				{
+					"doctype": "Purchase Order Item",
+					"item_code": item,
+					"qty": args.qty or 1,
+					"rate": args.rate or 10000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+				}
+			],
+		}
+	)
+	po.save()
+	return po
+
+
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
 	item = frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name")
@@ -351,6 +418,8 @@ def create_records():
 		"Test TDS Supplier4",
 		"Test TDS Supplier5",
 		"Test TDS Supplier6",
+		"Test TDS Supplier7",
+		"Test TDS Supplier8",
 	]:
 		if frappe.db.exists("Supplier", name):
 			continue
