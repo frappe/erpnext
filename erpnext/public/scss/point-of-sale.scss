@@ -53,7 +53,7 @@
 
 	.seperator {
 		margin-left: var(--margin-sm);
-		margin-right: var(--margin-sm);
+		margin-right: var(--margin-md);
 		border-bottom: 1px solid var(--gray-300);
 	}
 
@@ -381,6 +381,7 @@
 						align-items: center;
 						padding: var(--padding-sm);
 						border-radius: var(--border-radius-md);
+						margin-right: var(--margin-sm);
 
 						&:hover {
 							background-color: var(--control-bg);
@@ -1187,12 +1188,12 @@
 		.numpad-totals {
 			> span {
 				padding: 0 5px;
-				font-size: 12px;
+				font-size: var(--text-sm);
 			}
 		}
 
 		.col > * {
-			font-size: 12px !important;
+			font-size: var(--text-sm) !important;
 		}
 
 		.control-input-wrapper {
