@@ -20,6 +20,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
+		self.clear_old_entries()
 
 	def teadDown(self):
 		frappe.db.rollback()
