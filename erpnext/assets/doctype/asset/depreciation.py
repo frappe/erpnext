@@ -48,29 +48,34 @@ def post_depreciation_entries(date=None):
 	accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
 	for asset in depreciable_assets:
-		if (asset[1], asset[2]) not in credit_and_debit_accounts_for_asset_category_and_company:
+		asset_name, asset_category, asset_company, sch_start_idx, sch_end_idx = asset
+
+		if (
+			asset_category,
+			asset_company,
+		) not in credit_and_debit_accounts_for_asset_category_and_company:
 			credit_and_debit_accounts_for_asset_category_and_company.update(
 				{
-					(asset[1], asset[2]): get_credit_and_debit_accounts_for_asset_category_and_company(
-						asset[1], asset[2]
+					(asset_category, asset_company): get_credit_and_debit_accounts_for_asset_category_and_company(
+						asset_category, asset_company
 					),
 				}
 			)
 
 		try:
 			make_depreciation_entry(
-				asset[0],
+				asset_name,
 				date,
-				asset[3],
-				asset[4],
-				credit_and_debit_accounts_for_asset_category_and_company[(asset[1], asset[2])],
-				depreciation_cost_center_and_depreciation_series_for_company[asset[2]],
+				sch_start_idx,
+				sch_end_idx,
+				credit_and_debit_accounts_for_asset_category_and_company[(asset_category, asset_company)],
+				depreciation_cost_center_and_depreciation_series_for_company[asset_company],
 				accounting_dimensions,
 			)
 			frappe.db.commit()
 		except Exception as e:
 			frappe.db.rollback()
-			failed_asset_names.append(asset[0])
+			failed_asset_names.append(asset_name)
 			error_log = frappe.log_error(e)
 			error_log_names.append(error_log.name)
 
