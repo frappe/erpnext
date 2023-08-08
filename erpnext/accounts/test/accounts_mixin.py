@@ -103,9 +103,3 @@ class AccountsTestMixin:
 				)
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
-
-	def clear_old_entries(self):
-		if self.company:
-			tdr = frappe.new_doc("Transaction Deletion Record")
-			tdr.company = self.company
-			tdr.save().submit()

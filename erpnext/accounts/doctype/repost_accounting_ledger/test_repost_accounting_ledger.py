@@ -20,7 +20,6 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
-		self.clear_old_entries()
 
 	def teadDown(self):
 		frappe.db.rollback()
@@ -123,6 +122,10 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, ral.save)
 
 	def test_03_pcv_validation(self):
+		# Clear old GL entries so PCV can be submitted.
+		gl = frappe.qb.DocType("GL Entry")
+		qb.from_(gl).delete().where(gl.company == self.company).run()
+
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,
