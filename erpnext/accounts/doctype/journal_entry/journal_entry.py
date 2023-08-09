@@ -797,6 +797,9 @@ class JournalEntry(AccountsController):
 	def create_remarks(self):
 		r = []
 
+		if self.flags.skip_remarks_creation:
+			return
+
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))
 
