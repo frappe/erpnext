@@ -28,7 +28,12 @@ from erpnext.accounts.general_ledger import (
 	process_gl_map,
 )
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
+from erpnext.accounts.utils import (
+	cancel_exchange_gain_loss_journal,
+	get_account_currency,
+	get_balance_on,
+	get_outstanding_invoices,
+)
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
 	get_supplier_block_status,
@@ -142,7 +147,10 @@ class PaymentEntry(AccountsController):
 			"Payment Ledger Entry",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 		)
+		super(PaymentEntry, self).on_cancel()
 		self.make_gl_entries(cancel=1)
 		self.make_advance_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
@@ -277,12 +285,14 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
-				frappe.throw(fail_message.format(d.idx))
-
-			if d.payment_term and (
-				(flt(d.allocated_amount)) > 0
-				and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
+			if (
+				d.payment_term
+				and (
+					(flt(d.allocated_amount)) > 0
+					and latest.payment_term_outstanding
+					and (flt(d.allocated_amount) > flt(latest.payment_term_outstanding))
+				)
+				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
 				frappe.throw(
 					_(
@@ -291,6 +301,9 @@ class PaymentEntry(AccountsController):
 						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
 					)
 				)
+
+			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
 			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
@@ -399,7 +412,7 @@ class PaymentEntry(AccountsController):
 			else:
 				if ref_doc:
 					if self.paid_from_account_currency == ref_doc.currency:
-						self.source_exchange_rate = ref_doc.get("exchange_rate")
+						self.source_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.source_exchange_rate:
 				self.source_exchange_rate = get_exchange_rate(
@@ -412,7 +425,7 @@ class PaymentEntry(AccountsController):
 		elif self.paid_to and not self.target_exchange_rate:
 			if ref_doc:
 				if self.paid_to_account_currency == ref_doc.currency:
-					self.target_exchange_rate = ref_doc.get("exchange_rate")
+					self.target_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.target_exchange_rate:
 				self.target_exchange_rate = get_exchange_rate(
@@ -677,7 +690,9 @@ class PaymentEntry(AccountsController):
 		if not self.apply_tax_withholding_amount:
 			return
 
-		net_total = self.paid_amount
+		order_amount = self.get_order_net_total()
+
+		net_total = flt(order_amount) + flt(self.unallocated_amount)
 
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict(
@@ -721,6 +736,20 @@ class PaymentEntry(AccountsController):
 
 		for d in to_remove:
 			self.remove(d)
+
+	def get_order_net_total(self):
+		if self.party_type == "Supplier":
+			doctype = "Purchase Order"
+		else:
+			doctype = "Sales Order"
+
+		docnames = [d.reference_name for d in self.references if d.reference_doctype == doctype]
+
+		tax_withholding_net_total = frappe.db.get_value(
+			doctype, {"name": ["in", docnames]}, ["sum(base_tax_withholding_net_total)"]
+		)
+
+		return tax_withholding_net_total
 
 	def apply_taxes(self):
 		self.initialize_taxes()
@@ -808,10 +837,25 @@ class PaymentEntry(AccountsController):
 				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 		else:
+
+			# Use source/target exchange rate, so no difference amount is calculated.
+			# then update exchange gain/loss amount in reference table
+			# if there is an exchange gain/loss amount in reference table, submit a JE for that
+
+			exchange_rate = 1
+			if self.payment_type == "Receive":
+				exchange_rate = self.source_exchange_rate
+			elif self.payment_type == "Pay":
+				exchange_rate = self.target_exchange_rate
+
 			base_allocated_amount += flt(
-				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 
+			allocated_amount_in_pe_exchange_rate = flt(
+				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+			)
+			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_pe_exchange_rate
 		return base_allocated_amount
 
 	def set_total_allocated_amount(self):
@@ -1002,6 +1046,10 @@ class PaymentEntry(AccountsController):
 		gl_entries = self.build_gl_map()
 		gl_entries = process_gl_map(gl_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+		if cancel:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+		else:
+			self.make_exchange_gain_loss_journal()
 
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
@@ -1988,7 +2036,6 @@ def get_payment_entry(
 	payment_type=None,
 	reference_date=None,
 ):
-	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
@@ -2128,7 +2175,7 @@ def get_payment_entry(
 	update_accounting_dimensions(pe, doc)
 
 	if party_account and bank:
-		pe.set_exchange_rate(ref_doc=reference_doc)
+		pe.set_exchange_rate(ref_doc=doc)
 		pe.set_amounts()
 
 		if discount_amount:

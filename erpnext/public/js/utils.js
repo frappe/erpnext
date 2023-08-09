@@ -400,7 +400,7 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function(date) {
+	get_fiscal_year: function(date, with_dates=false) {
 		if(!date) {
 			date = frappe.datetime.get_today();
 		}
@@ -414,7 +414,10 @@ $.extend(erpnext.utils, {
 			async: false,
 			callback: function(r) {
 				if (r.message) {
-					fiscal_year = r.message[0];
+					if (with_dates)
+						fiscal_year = r.message;
+					else
+						fiscal_year = r.message[0];
 				}
 			}
 		});

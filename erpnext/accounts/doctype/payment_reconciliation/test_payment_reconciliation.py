@@ -686,14 +686,24 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		# Check if difference journal entry gets generated for difference amount after reconciliation
 		pr.reconcile()
-		total_debit_amount = frappe.db.get_all(
+		total_credit_amount = frappe.db.get_all(
 			"Journal Entry Account",
 			{"account": self.debtors_eur, "docstatus": 1, "reference_name": si.name},
-			"sum(debit) as amount",
+			"sum(credit) as amount",
 			group_by="reference_name",
 		)[0].amount
 
-		self.assertEqual(flt(total_debit_amount, 2), -500)
+		# total credit includes the exchange gain/loss amount
+		self.assertEqual(flt(total_credit_amount, 2), 8500)
+
+		jea_parent = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"account": self.debtors_eur, "docstatus": 1, "reference_name": si.name, "credit": 500},
+			fields=["parent"],
+		)[0]
+		self.assertEqual(
+			frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"), "Exchange Gain Or Loss"
+		)
 
 	def test_difference_amount_via_payment_entry(self):
 		# Make Sale Invoice

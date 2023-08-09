@@ -3094,7 +3094,7 @@ You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global S
 You cannot delete Project Type 'External',คุณไม่สามารถลบประเภทโครงการ &#39;ภายนอก&#39;,
 You cannot edit root node.,คุณไม่สามารถแก้ไขโหนดรากได้,
 You cannot restart a Subscription that is not cancelled.,คุณไม่สามารถรีสตาร์ทการสมัครสมาชิกที่ไม่ได้ยกเลิกได้,
-You don't have enought Loyalty Points to redeem,คุณไม่มีจุดภักดีเพียงพอที่จะไถ่ถอน,
+You don't have enough Loyalty Points to redeem,คุณไม่มีจุดภักดีเพียงพอที่จะไถ่ถอน,
 You have already assessed for the assessment criteria {}.,คุณได้รับการประเมินเกณฑ์การประเมินแล้ว {},
 You have already selected items from {0} {1},คุณได้เลือกแล้วรายการจาก {0} {1},
 You have been invited to collaborate on the project: {0},คุณได้รับเชิญที่จะทำงานร่วมกันในโครงการ: {0},

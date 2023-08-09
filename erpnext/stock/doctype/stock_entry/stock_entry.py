@@ -187,7 +187,7 @@ class StockEntry(StockController):
 			return False
 
 		# If line items are more than 100 or record is older than 6 months
-		if len(self.items) > 100 or month_diff(nowdate(), self.posting_date) > 6:
+		if len(self.items) > 50 or month_diff(nowdate(), self.posting_date) > 6:
 			return True
 
 		return False
