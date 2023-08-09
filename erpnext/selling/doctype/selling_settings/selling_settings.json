@@ -84,7 +84,7 @@
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "Sales Update Frequency in Company and Project",
-   "options": "Each Transaction\nDaily\nMonthly",
+   "options": "Monthly\nEach Transaction\nDaily",
    "reqd": 1
   },
   {
@@ -193,7 +193,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-03-03 11:16:54.333615",
+=======
+ "modified": "2023-08-09 15:35:42.914354",
+>>>>>>> 32863b4922 (fix: Make default sales update frequency as monthly instead of each transaction)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
