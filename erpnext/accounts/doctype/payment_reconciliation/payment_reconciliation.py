@@ -682,6 +682,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 		jv.flags.ignore_exchange_rate = True
 		jv.remark = None
 		jv.flags.skip_remarks_creation = True
+		jv.is_system_generated = True
 		jv.submit()
 
 		if inv.difference_amount != 0:
