@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
+from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
 
 import erpnext
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
@@ -640,6 +640,11 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.against_voucher_type,
 						"reference_name": inv.against_voucher,
 						"cost_center": erpnext.get_default_cost_center(company),
+<<<<<<< HEAD
+=======
+						"exchange_rate": inv.exchange_rate,
+						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
+>>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
 					},
 					{
 						"account": inv.account,
@@ -653,6 +658,11 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.voucher_type,
 						"reference_name": inv.voucher_no,
 						"cost_center": erpnext.get_default_cost_center(company),
+<<<<<<< HEAD
+=======
+						"exchange_rate": inv.exchange_rate,
+						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
+>>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
 					},
 				],
 			}
@@ -662,4 +672,10 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 			jv.append("accounts", difference_entry)
 
 		jv.flags.ignore_mandatory = True
+<<<<<<< HEAD
+=======
+		jv.flags.ignore_exchange_rate = True
+		jv.remark = None
+		jv.flags.skip_remarks_creation = True
+>>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
 		jv.submit()
