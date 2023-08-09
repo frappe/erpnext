@@ -607,7 +607,7 @@ class StockReconciliation(StockController):
 			)
 
 		if sl_entries:
-			self.make_sl_entries(sl_entries)
+			self.make_sl_entries(sl_entries, allow_negative_stock=True)
 
 
 def get_batch_qty_for_stock_reco(

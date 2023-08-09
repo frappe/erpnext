@@ -209,7 +209,9 @@ class RequestforQuotation(BuyingController):
 		if preview:
 			return message
 
-		attachments = self.get_attachments()
+		attachments = None
+		if self.send_attached_files:
+			attachments = self.get_attachments()
 
 		self.send_email(data, sender, subject, message, attachments)
 

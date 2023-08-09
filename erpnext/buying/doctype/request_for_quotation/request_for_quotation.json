@@ -25,6 +25,7 @@
   "col_break_email_1",
   "email_template",
   "preview",
+  "send_attached_files",
   "sec_break_email_2",
   "message_for_supplier",
   "terms_section_break",
@@ -285,13 +286,20 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "default": "1",
+   "description": "If enabled, all files attached to this document will be attached to each email",
+   "fieldname": "send_attached_files",
+   "fieldtype": "Check",
+   "label": "Send Attached Files"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-31 23:22:06.684694",
+ "modified": "2023-07-27 16:41:48.468873",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

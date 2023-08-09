@@ -14,6 +14,7 @@ from frappe.contacts.doctype.address.address import (
 from frappe.contacts.doctype.contact.contact import get_contact_details
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder.functions import Date, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -883,32 +884,35 @@ def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 
 
 def get_partywise_advanced_payment_amount(
-	party_type, posting_date=None, future_payment=0, company=None, party=None
+	party_type, posting_date=None, future_payment=0, company=None, party=None, account_type=None
 ):
-	cond = "1=1"
+	gle = frappe.qb.DocType("GL Entry")
+	query = (
+		frappe.qb.from_(gle)
+		.select(gle.party)
+		.where(
+			(gle.party_type.isin(party_type)) & (gle.against_voucher.isnull()) & (gle.is_cancelled == 0)
+		)
+		.groupby(gle.party)
+	)
+	if account_type == "Receivable":
+		query = query.select(Sum(gle.credit).as_("amount"))
+	else:
+		query = query.select(Sum(gle.debit).as_("amount"))
+
 	if posting_date:
 		if future_payment:
-			cond = "(posting_date <= '{0}' OR DATE(creation) <= '{0}')" "".format(posting_date)
+			query = query.where((gle.posting_date <= posting_date) | (Date(gle.creation) <= posting_date))
 		else:
-			cond = "posting_date <= '{0}'".format(posting_date)
+			query = query.where(gle.posting_date <= posting_date)
 
 	if company:
-		cond += "and company = {0}".format(frappe.db.escape(company))
+		query = query.where(gle.company == company)
 
 	if party:
-		cond += "and party = {0}".format(frappe.db.escape(party))
+		query = query.where(gle.party == party)
 
-	data = frappe.db.sql(
-		""" SELECT party, sum({0}) as amount
-		FROM `tabGL Entry`
-		WHERE
-			party_type = %s and against_voucher is null
-			and is_cancelled = 0
-			and {1} GROUP BY party""".format(
-			("credit") if party_type == "Customer" else "debit", cond
-		),
-		party_type,
-	)
+	data = query.run(as_dict=True)
 	if data:
 		return frappe._dict(data)
 
