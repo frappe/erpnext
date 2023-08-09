@@ -677,5 +677,9 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 		jv.flags.ignore_exchange_rate = True
 		jv.remark = None
 		jv.flags.skip_remarks_creation = True
+<<<<<<< HEAD
 >>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
+=======
+		jv.is_system_generated = True
+>>>>>>> 3997aa77d4 (refactor: add `is_system_generated` field to Journal Entry)
 		jv.submit()
