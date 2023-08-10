@@ -282,11 +282,7 @@ class StockReconciliation(StockController):
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
-			allow_negative_stock = False
-			if has_batch_no:
-				allow_negative_stock = True
-
-			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
 
 		if has_serial_no and sl_entries:
 			self.update_valuation_rate_for_serial_no()
@@ -457,10 +453,7 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = cint(
-				frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-			)
-			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
 
 	def merge_similar_item_serial_nos(self, sl_entries):
 		# If user has put the same item in multiple row with different serial no
@@ -574,6 +567,7 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
 		sl_entries = []
+
 		for row in self.items:
 			if voucher_detail_no != row.name:
 				continue
@@ -619,9 +613,17 @@ class StockReconciliation(StockController):
 				sl_entries.append(new_sle)
 
 		if sl_entries:
-			self.make_sl_entries(sl_entries, allow_negative_stock=True)
-			if frappe.db.exists("Repost Item Valuation", {"voucher_no": self.name, "status": "Queued"}):
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
+			if not frappe.db.exists("Repost Item Valuation", {"voucher_no": self.name, "status": "Queued"}):
 				self.repost_future_sle_and_gle(force=True)
+
+	def has_negative_stock_allowed(self):
+		allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
+		if all(d.batch_no and flt(d.qty) == flt(d.current_qty) for d in self.items):
+			allow_negative_stock = True
+
+		return allow_negative_stock
 
 
 def get_batch_qty_for_stock_reco(
