@@ -330,7 +330,7 @@ class AssetCapitalization(StockController):
 				gl_entries = self.get_gl_entries()
 
 			if gl_entries:
-				make_gl_entries(gl_entries, from_repost=from_repost)
+				make_gl_entries(gl_entries, merge_entries=False, from_repost=from_repost)
 		elif self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -359,9 +359,6 @@ class AssetCapitalization(StockController):
 		self.get_gl_entries_for_consumed_service_items(
 			gl_entries, target_account, target_against, precision
 		)
-
-		if not self.stock_items and not self.service_items and self.are_all_asset_items_non_depreciable:
-			return []
 
 		self.get_gl_entries_for_target_item(gl_entries, target_against, precision)
 
