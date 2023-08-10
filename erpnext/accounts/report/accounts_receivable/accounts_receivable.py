@@ -452,8 +452,7 @@ class ReceivablePayableReport(object):
 			"""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				si.total_advance, si.conversion_rate,
-				ps.due_date, ps.payment_term, ps.payment_amount, ps.base_payment_amount,
+				si.total_advance, ps.due_date, ps.payment_term, ps.payment_amount, ps.base_payment_amount,
 				ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
