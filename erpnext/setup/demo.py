@@ -9,8 +9,10 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, getdate
 
-import erpnext
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
@@ -88,8 +90,8 @@ def create_demo_record(doctype):
 
 
 def make_transactions(company):
-	start_date = get_fiscal_year(date=getdate())[1]
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
+	start_date = get_fiscal_year(date=getdate())[1]
 
 	for doctype in frappe.get_hooks("demo_transaction_doctypes"):
 		data = read_data_file_using_hooks(doctype)
@@ -97,55 +99,63 @@ def make_transactions(company):
 			for item in json.loads(data):
 				create_transaction(item, company, start_date)
 
+	convert_order_to_invoices()
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+
 
 def create_transaction(doctype, company, start_date):
+	document_type = doctype.get("doctype")
 	warehouse = get_warehouse(company)
-	posting_date = (
-		start_date if doctype.get("doctype") == "Purchase Invoice" else get_random_date(start_date)
-	)
-	bank_account, default_receivable_account = frappe.db.get_value(
-		"Company", company, ["default_bank_account", "default_receivable_account"]
-	)
-	bank_field = "paid_to" if doctype.get("party_type") == "Customer" else "paid_from"
+
+	if document_type == "Purchase Order":
+		posting_date = get_random_date(start_date, 1, 30)
+	else:
+		posting_date = get_random_date(start_date, 31, 365)
 
 	doctype.update(
 		{
 			"company": company,
 			"set_posting_time": 1,
-			"posting_date": posting_date,
+			"transaction_date": posting_date,
+			"schedule_date": posting_date,
+			"delivery_date": posting_date,
 			"set_warehouse": warehouse,
-			bank_field: bank_account,
-			"reference_date": posting_date,
 		}
 	)
-
-	income_account, expense_account = frappe.db.get_value(
-		"Company", company, ["default_income_account", "default_expense_account"]
-	)
-
-	if doctype in ("Purchase Invoice", "Sales Invoice"):
-		for item in doctype.get("items") or []:
-			item.update(
-				{
-					"cost_center": erpnext.get_default_cost_center(company),
-					"income_account": income_account,
-					"expense_account": expense_account,
-				}
-			)
-	elif doctype == "Journal Entry":
-		pass
-		# update_accounts(doctype, bank_account, default_receivable_account)
 
 	doc = frappe.get_doc(doctype)
 	doc.save(ignore_permissions=True)
 	doc.submit()
 
 
-# def update_accounts(doctype, company, bank_account):
+def convert_order_to_invoices():
+	for document in ["Purchase Order", "Sales Order"]:
+		# Keep some orders intentionally unbilled/unpaid
+		for i, order in enumerate(
+			frappe.db.get_all(
+				document, filters={"docstatus": 1}, fields=["name", "transaction_date"], limit=6
+			)
+		):
+
+			if document == "Purchase Order":
+				invoice = make_purchase_invoice(order.name)
+			elif document == "Sales Order":
+				invoice = make_sales_invoice(order.name)
+
+			invoice.set_posting_time = 1
+			invoice.posting_date = order.transaction_date
+			invoice.due_date = order.transaction_date
+			invoice.update_stock = 1
+			invoice.submit()
+
+			if i % 2 != 0:
+				payment = get_payment_entry(invoice.doctype, invoice.name)
+				payment.reference_no = invoice.name
+				payment.submit()
 
 
-def get_random_date(start_date):
-	return add_days(start_date, randint(1, 365))
+def get_random_date(start_date, start_range, end_range):
+	return add_days(start_date, randint(start_range, end_range))
 
 
 def create_transaction_deletion_record(company):
@@ -164,9 +174,9 @@ def clear_masters():
 
 
 def clear_demo_record(document):
-	doc_type = document.get("doctype")
+	document_type = document.get("doctype")
 	del document["doctype"]
-	doc = frappe.get_doc(doc_type, document)
+	doc = frappe.get_doc(document_type, document)
 	frappe.delete_doc(doc.doctype, doc.name, ignore_permissions=True)
 
 
@@ -184,7 +194,5 @@ def read_data_file_using_hooks(doctype):
 
 
 def get_warehouse(company):
-	abbr = frappe.db.get_value("Company", company, "abbr")
-	warehouse = "Stores - {0}".format(abbr)
-
-	return warehouse
+	warehouses = frappe.db.get_all("Warehouse", {"company": company, "is_group": 0})
+	return warehouses[randint(0, 3)].name

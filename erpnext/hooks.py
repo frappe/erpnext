@@ -79,9 +79,8 @@ demo_master_doctypes = [
 	"supplier",
 ]
 demo_transaction_doctypes = [
-	"purchase_invoice",
-	"sales_invoice",
-	"payment_entry",
+	"purchase_order",
+	"sales_order",
 ]
 
 jinja = {

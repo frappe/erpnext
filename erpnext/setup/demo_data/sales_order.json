@@ -1,87 +1,87 @@
 [
     {
         "conversion_rate": 1.0,
-        "customer": "ABC Enterprises",
-        "doctype": "Sales Invoice",
+        "customer": "Grant Plastics Ltd.",
+        "doctype": "Sales Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU004",
                 "parentfield": "items",
                 "qty": 20.0,
-                "rate": 500.0,
+                "rate": 1000.0,
                 "conversion_factor": 1
             }
         ]
     },
     {
         "conversion_rate": 1.0,
-        "customer": "XYZ Corporation",
-        "doctype": "Sales Invoice",
+        "customer": "West View Software Ltd.",
+        "doctype": "Sales Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU001",
                 "parentfield": "items",
                 "qty": 25.0,
-                "rate": 600.0,
+                "rate": 800.0,
                 "conversion_factor": 1
             },
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU002",
                 "parentfield": "items",
                 "qty": 15.0,
-                "rate": 300.0,
+                "rate": 800.0,
                 "conversion_factor": 1
             }
         ]
     },
     {
         "conversion_rate": 1.0,
-        "customer": "XYZ Corporation",
-        "doctype": "Sales Invoice",
+        "customer": "West View Software Ltd.",
+        "doctype": "Sales Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU003",
                 "parentfield": "items",
                 "qty": 100,
-                "rate": 300.0,
+                "rate": 500.0,
                 "conversion_factor": 1
             },
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU006",
                 "parentfield": "items",
                 "qty": 100,
-                "rate": 300.0,
+                "rate": 890.0,
                 "conversion_factor": 1
             },
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU007",
                 "parentfield": "items",
                 "qty": 100,
-                "rate": 300.0,
+                "rate": 900.0,
                 "conversion_factor": 1
             }
         ]
     },
     {
         "conversion_rate": 1.0,
-        "customer": "KJPR Pvt. Ltd.",
-        "doctype": "Sales Invoice",
+        "customer": "Palmer Productions Ltd.",
+        "doctype": "Sales Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU005",
                 "parentfield": "items",
-                "qty": 200.0,
+                "qty": 150.0,
                 "rate": 100.0,
                 "conversion_factor": 1
             }
@@ -89,12 +89,12 @@
     },
     {
         "conversion_rate": 1.0,
-        "customer": "ABC Enterprises",
-        "doctype": "Sales Invoice",
+        "customer": "Grant Plastics Ltd.",
+        "doctype": "Sales Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU008",
                 "parentfield": "items",
                 "qty": 20.0,
@@ -102,7 +102,7 @@
                 "conversion_factor": 1
             },
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU009",
                 "parentfield": "items",
                 "qty": 40.0,
@@ -110,7 +110,7 @@
                 "conversion_factor": 1
             },
             {
-                "doctype": "Sales Invoice Item",
+                "doctype": "Sales Order Item",
                 "item_code": "SKU010",
                 "parentfield": "items",
                 "qty": 50.0,

@@ -1,12 +1,12 @@
 [
     {
         "conversion_rate": 1.0,
-        "supplier": "DQ Industries",
-        "doctype": "Purchase Invoice",
+        "supplier": "Zuckerman Security Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU001",
                 "parentfield": "items",
                 "qty": 100.0,
@@ -18,11 +18,11 @@
     {
         "conversion_rate": 1.0,
         "supplier": "MA Inc.",
-        "doctype": "Purchase Invoice",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU002",
                 "parentfield": "items",
                 "qty": 50.0,
@@ -33,15 +33,15 @@
     },
     {
         "conversion_rate": 1.0,
-        "supplier": "KC Corp.",
-        "doctype": "Purchase Invoice",
+        "supplier": "Summit Traders Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU003",
                 "parentfield": "items",
-                "qty": 75.0,
+                "qty": 200.0,
                 "rate": 523.0,
                 "conversion_factor": 1
             }
@@ -49,12 +49,12 @@
     },
     {
         "conversion_rate": 1.0,
-        "supplier": "DQ Industries",
-        "doctype": "Purchase Invoice",
+        "supplier": "Zuckerman Security Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU004",
                 "parentfield": "items",
                 "qty": 60.0,
@@ -66,14 +66,14 @@
     {
         "conversion_rate": 1.0,
         "supplier": "MA Inc.",
-        "doctype": "Purchase Invoice",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU005",
                 "parentfield": "items",
-                "qty": 82.0,
+                "qty": 182.0,
                 "rate": 222.0,
                 "conversion_factor": 1
             }
@@ -81,15 +81,15 @@
     },
     {
         "conversion_rate": 1.0,
-        "supplier": "KC Corp.",
-        "doctype": "Purchase Invoice",
+        "supplier": "Summit Traders Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU006",
                 "parentfield": "items",
-                "qty": 50.0,
+                "qty": 250.0,
                 "rate": 420.0,
                 "conversion_factor": 1
             }
@@ -97,15 +97,15 @@
     },
     {
         "conversion_rate": 1.0,
-        "supplier": "DQ Industries",
-        "doctype": "Purchase Invoice",
+        "supplier": "Zuckerman Security Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU007",
                 "parentfield": "items",
-                "qty": 90.0,
+                "qty": 190.0,
                 "rate": 375.0,
                 "conversion_factor": 1
             }
@@ -114,11 +114,11 @@
     {
         "conversion_rate": 1.0,
         "supplier": "MA Inc.",
-        "doctype": "Purchase Invoice",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU008",
                 "parentfield": "items",
                 "qty": 121.0,
@@ -129,12 +129,12 @@
     },
     {
         "conversion_rate": 1.0,
-        "supplier": "KC Corp.",
-        "doctype": "Purchase Invoice",
+        "supplier": "Summit Traders Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU009",
                 "parentfield": "items",
                 "qty": 76.0,
@@ -145,12 +145,12 @@
     },
     {
         "conversion_rate": 1.0,
-        "supplier": "DQ Industries",
-        "doctype": "Purchase Invoice",
+        "supplier": "Zuckerman Security Ltd.",
+        "doctype": "Purchase Order",
         "update_stock": 1,
         "items": [
             {
-                "doctype": "Purchase Invoice Item",
+                "doctype": "Purchase Order Item",
                 "item_code": "SKU010",
                 "parentfield": "items",
                 "qty": 78.0,
