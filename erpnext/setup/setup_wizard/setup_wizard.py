@@ -71,7 +71,7 @@ def fin(args):
 
 def setup_demo(args):
 	if args.get("setup_demo"):
-		frappe.enqueue(setup_demo_data, enqueue_after_commit=True)
+		frappe.enqueue(setup_demo_data, enqueue_after_commit=True, at_front=True)
 
 
 def login_as_first_user(args):
