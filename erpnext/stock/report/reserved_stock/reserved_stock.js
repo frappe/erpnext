@@ -86,6 +86,9 @@ frappe.query_reports["Reserved Stock"] = {
 					company: frappe.query_report.get_filter_value("company"),
 				},
 			}),
+			get_options: function () {
+				return frappe.query_report.get_filter_value("voucher_type");
+			},
 		},
 		{
 			fieldname: "against_pick_list",

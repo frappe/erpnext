@@ -69,9 +69,10 @@ frappe.ui.form.on("Sales Order", {
 				}
 			}
 
-			// Stock Reservation > Unreserve button will be only visible if the SO has reserved stock.
+			// Stock Reservation > Unreserve/Reserved Stock button will be only visible if the SO has reserved stock.
 			if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
 				frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
+				frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
 			}
 		}
 
@@ -394,6 +395,20 @@ frappe.ui.form.on("Sales Order", {
 			dialog.fields_dict.stock_reservation_entries.grid.refresh();
 			dialog.show();
 		});
+	},
+
+	show_reserved_stock(frm) {
+		// Get the latest modified date from the items table.
+		var to_date = moment(new Date(Math.max(...frm.doc.items.map(e => new Date(e.modified))))).format('YYYY-MM-DD');
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: frm.doc.transaction_date,
+			to_date: to_date,
+			voucher_type: frm.doc.doctype,
+			voucher_no: frm.doc.name,
+		}
+		frappe.set_route("query-report", "Reserved Stock");
 	}
 });
 

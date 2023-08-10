@@ -128,6 +128,7 @@ frappe.ui.form.on('Pick List', {
 							() => frm.events.cancel_stock_reservation_entries(frm)
 						)
 					}, __('Stock Reservation'));
+					frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
 				}
 			}
 		}
@@ -254,6 +255,19 @@ frappe.ui.form.on('Pick List', {
 				frm.reload_doc();
 			}
 		});
+	},
+	show_reserved_stock(frm) {
+		// Get the latest modified date from the locations table.
+		var to_date = moment(new Date(Math.max(...frm.doc.locations.map(e => new Date(e.modified))))).format('YYYY-MM-DD');
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: moment(frm.doc.creation).format('YYYY-MM-DD'),
+			to_date: to_date,
+			voucher_type: "Sales Order",
+			against_pick_list: frm.doc.name,
+		}
+		frappe.set_route("query-report", "Reserved Stock");
 	}
 });
 
