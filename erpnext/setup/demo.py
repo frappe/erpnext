@@ -6,6 +6,7 @@ import os
 from random import randint
 
 import frappe
+from frappe import _
 from frappe.utils import add_days, getdate
 
 import erpnext
@@ -33,12 +34,20 @@ def setup_demo_data():
 @frappe.whitelist()
 def clear_demo_data():
 	frappe.only_for("System Manager")
-	company = frappe.db.get_single_value("Global Defaults", "demo_company")
-	create_transaction_deletion_record(company)
-	clear_masters()
-	delete_company(company)
-	default_company = frappe.db.get_single_value("Global Defaults", "default_company")
-	frappe.db.set_default("company", default_company)
+	try:
+		company = frappe.db.get_single_value("Global Defaults", "demo_company")
+		create_transaction_deletion_record(company)
+		clear_masters()
+		delete_company(company)
+		default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+		frappe.db.set_default("company", default_company)
+	except Exception:
+		frappe.db.rollback()
+		frappe.log_error("Failed to erase demo data")
+		frappe.throw(
+			_("Failed to erase demo data, please delete the demo company manually."),
+			title=_("Could Not Delete Demo Data"),
+		)
 
 
 def create_demo_company():
@@ -154,10 +163,10 @@ def clear_masters():
 				clear_demo_record(item)
 
 
-def clear_demo_record(doctype):
-	doc_type = doctype.get("doctype")
-	del doctype["doctype"]
-	doc = frappe.get_doc(doc_type, doctype)
+def clear_demo_record(document):
+	doc_type = document.get("doctype")
+	del document["doctype"]
+	doc = frappe.get_doc(doc_type, document)
 	frappe.delete_doc(doc.doctype, doc.name, ignore_permissions=True)
 
 
