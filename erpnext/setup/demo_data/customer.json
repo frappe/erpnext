@@ -3,18 +3,18 @@
         "doctype": "Customer",
         "customer_group": "Demo Customer Group",
         "territory": "All Territories",
-        "customer_name": "ABC Enterprises"
+        "customer_name": "Grant Plastics Ltd."
     },
     {
         "doctype": "Customer",
         "customer_group": "Demo Customer Group",
         "territory": "All Territories",
-        "customer_name": "XYZ Corporation"
+        "customer_name": "West View Software Ltd."
     },
     {
         "doctype": "Customer",
         "customer_group": "Demo Customer Group",
         "territory": "All Territories",
-        "customer_name": "KJPR Pvt. Ltd."
+        "customer_name": "Palmer Productions Ltd."
     }
 ]

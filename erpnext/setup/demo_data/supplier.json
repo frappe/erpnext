@@ -2,7 +2,7 @@
     {
         "doctype": "Supplier",
         "supplier_group": "Demo Supplier Group",
-        "supplier_name": "DQ Industries"
+        "supplier_name": "Zuckerman Security Ltd."
     },
     {
         "doctype": "Supplier",
@@ -12,6 +12,6 @@
     {
         "doctype": "Supplier",
         "supplier_group": "Demo Supplier Group",
-        "supplier_name": "KC Corp."
+        "supplier_name": "Summit Traders Ltd."
     }
 ]
