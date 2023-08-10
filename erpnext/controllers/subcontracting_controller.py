@@ -550,7 +550,7 @@ class SubcontractingController(StockController):
 			if rm_obj.serial_and_batch_bundle:
 				args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
 
-			rm_obj.rate = bom_item.rate if self.backflush_based_on == "BOM" else get_incoming_rate(args)
+			rm_obj.rate = get_incoming_rate(args)
 
 	def __get_qty_based_on_material_transfer(self, item_row, transfer_item):
 		key = (item_row.item_code, item_row.get(self.subcontract_data.order_field))

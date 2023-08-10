@@ -320,6 +320,8 @@ erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances #14-07-2023
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
+erpnext.patches.v14_0.update_subscription_details
 # below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 execute:frappe.delete_doc_if_exists("Report", "Tax Detail")

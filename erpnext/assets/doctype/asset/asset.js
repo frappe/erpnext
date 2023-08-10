@@ -207,34 +207,39 @@ frappe.ui.form.on('Asset', {
 	},
 
 	render_depreciation_schedule_view: function(frm, depr_schedule) {
-		var wrapper = $(frm.fields_dict["depreciation_schedule_view"].wrapper).empty();
+		let wrapper = $(frm.fields_dict["depreciation_schedule_view"].wrapper).empty();
 
-		let table = $(`<table class="table table-bordered" style="margin-top:0px;">
-			<thead>
-				<tr>
-					<td align="center">${__("No.")}</td>
-					<td>${__("Schedule Date")}</td>
-					<td align="right">${__("Depreciation Amount")}</td>
-					<td align="right">${__("Accumulated Depreciation Amount")}</td>
-					<td>${__("Journal Entry")}</td>
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>`);
+		let data = [];
 
 		depr_schedule.forEach((sch) => {
-			const row = $(`<tr>
-				<td align="center">${sch['idx']}</td>
-				<td><b>${frappe.format(sch['schedule_date'], { fieldtype: 'Date' })}</b></td>
-				<td><b>${frappe.format(sch['depreciation_amount'], { fieldtype: 'Currency' })}</b></td>
-				<td>${frappe.format(sch['accumulated_depreciation_amount'], { fieldtype: 'Currency' })}</td>
-				<td><a href="/app/journal-entry/${sch['journal_entry'] || ''}">${sch['journal_entry'] || ''}</a></td>
-			</tr>`);
-			table.find("tbody").append(row);
+			const row = [
+				sch['idx'],
+				frappe.format(sch['schedule_date'], { fieldtype: 'Date' }),
+				frappe.format(sch['depreciation_amount'], { fieldtype: 'Currency' }),
+				frappe.format(sch['accumulated_depreciation_amount'], { fieldtype: 'Currency' }),
+				sch['journal_entry'] || ''
+			];
+			data.push(row);
 		});
 
-		wrapper.append(table);
+		let datatable = new frappe.DataTable(wrapper.get(0), {
+			columns: [
+				{name: __("No."), editable: false, resizable: false, format: value => value, width: 60},
+				{name: __("Schedule Date"), editable: false, resizable: false, width: 270},
+				{name: __("Depreciation Amount"), editable: false, resizable: false, width: 164},
+				{name: __("Accumulated Depreciation Amount"), editable: false, resizable: false, width: 164},
+				{name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 312}
+			],
+			data: data,
+			serialNoColumn: false,
+			checkboxColumn: true,
+			cellHeight: 35
+		});
 
+		datatable.style.setStyle(`.dt-scrollable`, {'font-size': '0.75rem', 'margin-bottom': '1rem'});
+		datatable.style.setStyle(`.dt-cell--col-1`, {'text-align': 'center'});
+		datatable.style.setStyle(`.dt-cell--col-2`, {'font-weight': 600});
+		datatable.style.setStyle(`.dt-cell--col-3`, {'font-weight': 600});
 	},
 
 	setup_chart_and_depr_schedule_view: async function(frm) {

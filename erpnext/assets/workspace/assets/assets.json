@@ -183,6 +183,17 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "dependencies": "Asset Activity",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Activity",
+   "link_count": 0,
+   "link_to": "Asset Activity",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
  "modified": "2023-05-24 14:47:20.243146",
