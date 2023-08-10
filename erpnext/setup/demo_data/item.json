@@ -4,69 +4,69 @@
         "item_group": "Demo Item Group",
         "item_code": "SKU001",
         "item_name": "T-shirt",
-        "image": "https://media.istockphoto.com/id/1281631373/vector/mockup-template-men-black-t-shirt-short-sleeve.jpg?s=612x612&w=0&k=20&c=SfYrtFXQS2wJ1-R9ozvxhUabJz3cnmH5HXv2sXW_mZk="
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg?auto=compress"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU002",
         "item_name": "Laptop",
-        "image": "https://media.istockphoto.com/id/1297051332/vector/levitation-laptop-mockup.jpg?s=612x612&w=0&k=20&c=E9rp9HY7CaPjjsnZlg8NYBTFOGy7gfBSL7oK6wv5VnY="
+        "image": "https://images.pexels.com/photos/3999538/pexels-photo-3999538.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU003",
         "item_name": "Book",
-        "image": "https://media.istockphoto.com/id/950152244/vector/vector-mock-up-of-standing-book.jpg?s=612x612&w=0&k=20&c=oDF2LeFoAcPAwJZFEVjWRvT53sMmCQwkVj-3qYy1duw="
+        "image": "https://images.pexels.com/photos/2422178/pexels-photo-2422178.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU004",
         "item_name": "Smartphone",
-        "image": "https://media.istockphoto.com/id/1308145590/vector/realistic-mobile-phone-mockup-template-isolated-stock-vector.jpg?s=612x612&w=0&k=20&c=63UyujU3S9kAkUh3MXdJcr10xelDjgVyQzRx5Sh5018="
+        "image": "https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU005",
         "item_name": "Sneakers",
-        "image": "https://media.istockphoto.com/id/1303978937/photo/white-sneaker-on-a-blue-gradient-background-mens-fashion-sport-shoe-sneakers-lifestyle.jpg?s=612x612&w=0&k=20&c=L725fuzFTnm6qEaqE7Urc5q6IR80EgYQEjBn_qtBIQg="
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU006",
         "item_name": "Coffee Mug",
-        "image": "https://media.istockphoto.com/id/821282266/photo/white-mug-isolated.jpg?s=612x612&w=0&k=20&c=LJCMPk0D83OKmJHahkiLzAB3OsKr83nMbL7KxSgfpfM="
+        "image": "https://images.pexels.com/photos/585753/pexels-photo-585753.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU007",
         "item_name": "Television",
-        "image": "https://media.istockphoto.com/id/1002728980/vector/wide-tv-monitor-mockup.jpg?s=612x612&w=0&k=20&c=1gDEH7ppC9ap8UBuIQmO1gM_Z8VeEaEUDDo-Aw_k8qs="
+        "image": "https://images.pexels.com/photos/8059376/pexels-photo-8059376.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU008",
         "item_name": "Backpack",
-        "image": "https://media.istockphoto.com/id/1141208525/photo/yellow-open-backpack.jpg?s=612x612&w=0&k=20&c=k0NOqN9FnIGdkaUNx6-fMIBG2IfWwLT_AbDVefqJT_0="
+        "image": "https://images.pexels.com/photos/3731256/pexels-photo-3731256.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU009",
         "item_name": "Headphones",
-        "image": "https://media.istockphoto.com/id/860853774/photo/blue-headphones-isolated-on-a-white-background.jpg?s=612x612&w=0&k=20&c=KqMSLWuM_Prrq5XHTe79bnFRU_leFDaXTuKqup5uvrE="
+        "image": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg"
     },
     {
         "doctype": "Item",
         "item_group": "Demo Item Group",
         "item_code": "SKU010",
         "item_name": "Camera",
-        "image": "https://media.istockphoto.com/id/185278433/photo/black-digital-slr-camera-in-a-white-background.jpg?s=612x612&w=0&k=20&c=OOCbhvOF0W-eVhhrm-TxbgLfbKhFfs4Lprjd7hiQBNU="
+        "image": "https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg"
     }
 ]
