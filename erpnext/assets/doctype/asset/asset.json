@@ -318,6 +318,7 @@
    "label": "Depreciation Schedule"
   },
   {
+   "depends_on": "schedules",
    "fieldname": "schedules",
    "fieldtype": "Table",
    "label": "Depreciation Schedule",
@@ -537,7 +538,7 @@
    "table_fieldname": "accounts"
   }
  ],
- "modified": "2023-07-28 15:47:01.137996",
+ "modified": "2023-08-10 20:25:09.913073",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

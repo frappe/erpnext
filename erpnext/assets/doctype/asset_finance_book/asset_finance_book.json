@@ -8,6 +8,7 @@
   "finance_book",
   "depreciation_method",
   "total_number_of_depreciations",
+  "daily_depreciation",
   "column_break_5",
   "frequency_of_depreciation",
   "depreciation_start_date",
@@ -79,12 +80,19 @@
    "fieldname": "rate_of_depreciation",
    "fieldtype": "Percent",
    "label": "Rate of Depreciation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
+   "fieldname": "daily_depreciation",
+   "fieldtype": "Check",
+   "label": "Daily Depreciation"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-17 12:59:05.743683",
+ "modified": "2023-08-10 18:56:09.022246",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
@@ -93,5 +101,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
