@@ -537,9 +537,9 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_system_generated == 1;",
    "fieldname": "is_system_generated",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Is System Generated",
    "read_only": 1
   }
@@ -548,7 +548,7 @@
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-09 20:47:27.719809",
+ "modified": "2023-08-10 09:54:52.060639",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
