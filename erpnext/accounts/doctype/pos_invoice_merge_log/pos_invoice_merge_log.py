@@ -273,21 +273,6 @@ class POSInvoiceMergeLog(Document):
 			si.flags.ignore_validate = True
 			si.cancel()
 
-	def get_batched_invoices(self, pos_invoice_docs):
-		grouped_batch = []
-		current_batch = []
-		for item in pos_invoice_docs:
-			if not current_batch:
-				current_batch.append(item)
-			elif current_batch[-1].get("is_return") != item.get("is_return"):
-				grouped_batch.append(current_batch)
-				current_batch = [item]
-			else:
-				current_batch.append(item)
-
-		grouped_batch.append(current_batch)
-		return grouped_batch
-
 
 def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
 	consolidated_tax_detail = json.loads(consolidate_tax_row.item_wise_tax_detail)
