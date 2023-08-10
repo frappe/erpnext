@@ -4,7 +4,7 @@
         "item_group": "Demo Item Group",
         "item_code": "SKU001",
         "item_name": "T-shirt",
-        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg?auto=compress"
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
     },
     {
         "doctype": "Item",
