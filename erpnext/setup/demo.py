@@ -35,7 +35,11 @@ def setup_demo_data():
 
 @frappe.whitelist()
 def clear_demo_data():
+	from frappe.utils.telemetry import capture
+
 	frappe.only_for("System Manager")
+
+	capture("demo_data_erased", "erpnext")
 	try:
 		company = frappe.db.get_single_value("Global Defaults", "demo_company")
 		create_transaction_deletion_record(company)
