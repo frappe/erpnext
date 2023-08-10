@@ -13,15 +13,26 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
-@frappe.whitelist()
 def setup_demo_data():
-	company = create_demo_company()
-	process_masters()
-	make_transactions(company)
+	from frappe.utils.telemetry import capture
+
+	capture("demo_data_creation_started", "erpnext")
+	try:
+		company = create_demo_company()
+		process_masters()
+		make_transactions(company)
+		frappe.cache.delete_keys("bootinfo")
+		frappe.publish_realtime("demo_data_complete")
+	except Exception:
+		frappe.log_error("Failed to create demo data")
+		capture("demo_data_creation_failed", "erpnext", properties={"exception": frappe.get_traceback()})
+		raise
+	capture("demo_data_creation_completed", "erpnext")
 
 
 @frappe.whitelist()
 def clear_demo_data():
+	frappe.only_for("System Manager")
 	company = frappe.db.get_single_value("Global Defaults", "demo_company")
 	create_transaction_deletion_record(company)
 	clear_masters()

@@ -2,15 +2,19 @@ $(document).on("toolbar_setup", function() {
 	if (frappe.boot.sysdefaults.demo_company) {
 		erpnext.setup_clear_button();
 	}
+
+	// for first load
+	frappe.realtime.on("demo_data_complete", () => {
+		erpnext.setup_clear_button();
+	})
 });
 
 erpnext.setup_clear_button = function() {
-	let message_string = __('Demo data is setup, use this button to clear before starting actual transactions');
+	let message_string = __("Demo data is present on the system, erase data before starting real usage.");
 	let $floatingBar = $(`
 		<div class="flex justify-content-center" style="width: 100%;">
 			<div class="flex justify-content-center flex-col shadow rounded p-2"
 					style="
-						width: 50%;
 						background-color: #e0f2fe;
 						position: fixed;
 						bottom: 20px;
@@ -34,7 +38,7 @@ erpnext.setup_clear_button = function() {
 						margin-right: 10px
 					"
 				>
-					Clear
+					Clear Demo Data
 				</button>
 			</div>
 		</div>
