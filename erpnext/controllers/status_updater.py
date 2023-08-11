@@ -233,7 +233,7 @@ class StatusUpdater(Document):
 				if hasattr(d, "qty") and d.qty > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 
-				if hasattr(d, "item_code") and hasattr(d, "rate") and d.rate < 0:
+				if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
 					frappe.throw(_("For an item {0}, rate must be a positive number").format(d.item_code))
 
 				if d.doctype == args["source_dt"] and d.get(args["join_field"]):
