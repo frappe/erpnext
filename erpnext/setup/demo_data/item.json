@@ -1,0 +1,72 @@
+[
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU001",
+        "item_name": "T-shirt",
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU002",
+        "item_name": "Laptop",
+        "image": "https://images.pexels.com/photos/3999538/pexels-photo-3999538.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU003",
+        "item_name": "Book",
+        "image": "https://images.pexels.com/photos/2422178/pexels-photo-2422178.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU004",
+        "item_name": "Smartphone",
+        "image": "https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU005",
+        "item_name": "Sneakers",
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU006",
+        "item_name": "Coffee Mug",
+        "image": "https://images.pexels.com/photos/585753/pexels-photo-585753.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU007",
+        "item_name": "Television",
+        "image": "https://images.pexels.com/photos/8059376/pexels-photo-8059376.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU008",
+        "item_name": "Backpack",
+        "image": "https://images.pexels.com/photos/3731256/pexels-photo-3731256.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU009",
+        "item_name": "Headphones",
+        "image": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU010",
+        "item_name": "Camera",
+        "image": "https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg"
+    }
+]

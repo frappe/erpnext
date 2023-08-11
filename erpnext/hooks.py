@@ -70,6 +70,19 @@ treeviews = [
 	"Department",
 ]
 
+demo_master_doctypes = [
+	"item_group",
+	"item",
+	"customer_group",
+	"supplier_group",
+	"customer",
+	"supplier",
+]
+demo_transaction_doctypes = [
+	"purchase_order",
+	"sales_order",
+]
+
 jinja = {
 	"methods": [
 		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
