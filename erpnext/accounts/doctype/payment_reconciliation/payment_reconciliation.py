@@ -640,11 +640,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.against_voucher_type,
 						"reference_name": inv.against_voucher,
 						"cost_center": erpnext.get_default_cost_center(company),
-<<<<<<< HEAD
-=======
-						"exchange_rate": inv.exchange_rate,
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
->>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
 					},
 					{
 						"account": inv.account,
@@ -658,11 +654,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_type": inv.voucher_type,
 						"reference_name": inv.voucher_no,
 						"cost_center": erpnext.get_default_cost_center(company),
-<<<<<<< HEAD
-=======
-						"exchange_rate": inv.exchange_rate,
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
->>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
 					},
 				],
 			}
@@ -672,14 +664,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 			jv.append("accounts", difference_entry)
 
 		jv.flags.ignore_mandatory = True
-<<<<<<< HEAD
-=======
-		jv.flags.ignore_exchange_rate = True
 		jv.remark = None
 		jv.flags.skip_remarks_creation = True
-<<<<<<< HEAD
->>>>>>> 47cb349362 (fix: better remarks on Cr note created by Reconciliation)
-=======
 		jv.is_system_generated = True
->>>>>>> 3997aa77d4 (refactor: add `is_system_generated` field to Journal Entry)
 		jv.submit()
