@@ -48,7 +48,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		const email_dialog = new frappe.ui.Dialog({
 			title: 'Email Receipt',
 			fields: [
-				{fieldname: 'email_id', fieldtype: 'Data', options: 'Email', label: 'Email ID'},
+				{fieldname: 'email_id', fieldtype: 'Data', options: 'Email', label: 'Email ID', reqd: 1},
 				{fieldname:'content', fieldtype:'Small Text', label:'Message (if any)'}
 			],
 			primary_action: () => {
