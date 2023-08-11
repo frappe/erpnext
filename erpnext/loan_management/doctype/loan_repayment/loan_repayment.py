@@ -570,6 +570,7 @@ def regenerate_repayment_schedule(loan, cancel=0):
 		get_monthly_repayment_amount,
 	)
 
+	precision = cint(frappe.db.get_default("currency_precision")) or 2
 	loan_doc = frappe.get_doc("Loan", loan)
 	next_accrual_date = None
 	accrued_entries = 0
@@ -607,7 +608,7 @@ def regenerate_repayment_schedule(loan, cancel=0):
 
 	payment_date = next_accrual_date
 
-	while balance_amount > 0:
+	while flt(balance_amount, precision) > 0:
 		interest_amount = flt(balance_amount * flt(loan_doc.rate_of_interest) / (12 * 100))
 		principal_amount = monthly_repayment_amount - interest_amount
 		balance_amount = flt(balance_amount + interest_amount - monthly_repayment_amount)
