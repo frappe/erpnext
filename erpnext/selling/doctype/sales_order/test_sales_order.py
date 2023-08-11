@@ -2055,7 +2055,7 @@ def make_sales_order(**args):
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"
-	so.po_no = args.po_no or "12345"
+	so.po_no = args.po_no or ""
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
 
