@@ -1580,8 +1580,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
-<<<<<<< HEAD
-=======
 	def test_gl_entries_for_standalone_debit_note(self):
 		make_purchase_invoice(qty=5, rate=500, update_stock=True)
 
@@ -1643,7 +1641,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			0,
 		)
 
->>>>>>> 0e87c86aab (fix: payment allocation in invoice payment schedule (#36440))
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
