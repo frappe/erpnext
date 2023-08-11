@@ -639,7 +639,13 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	if periodicity != "Yearly":
 		if not accumulated_values:
 			columns.append(
-				{"fieldname": "total", "label": _("Total"), "fieldtype": "Currency", "width": 150, "options": "currency"}
+				{
+					"fieldname": "total",
+					"label": _("Total"),
+					"fieldtype": "Currency",
+					"width": 150,
+					"options": "currency",
+				}
 			)
 
 	return columns
