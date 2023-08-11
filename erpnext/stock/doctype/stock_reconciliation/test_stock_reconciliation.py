@@ -939,7 +939,7 @@ def insert_existing_sle(warehouse, item_code="_Test Item"):
 		posting_time="02:00",
 		item_code=item_code,
 		target=warehouse,
-		qty=10,
+		qty=15,
 		basic_rate=700,
 	)
 
