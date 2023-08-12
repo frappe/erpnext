@@ -250,6 +250,9 @@ class LoanRepayment(AccountsController):
 		)
 
 	def check_future_accruals(self):
+		if self.is_term_loan:
+			return
+
 		future_accrual_date = frappe.db.get_value(
 			"Loan Interest Accrual",
 			{"posting_date": (">", self.posting_date), "docstatus": 1, "loan": self.against_loan},
