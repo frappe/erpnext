@@ -52,6 +52,12 @@ function setup_clear_demo_button() {
 				>
 					Clear Demo Data
 				</button>
+
+	 			<a type="button" id="dismiss-demo-banner" class="text-muted" style="align-self: center">
+					<svg class="icon" style="">
+						<use class="" href="#icon-close"></use>
+					</svg>
+				</a>
 			</div>
 		</div>
 	`);
@@ -77,5 +83,9 @@ function setup_clear_demo_button() {
 				});
 			}
 		);
+	});
+
+	$("#dismiss-demo-banner").on("click", function () {
+		$floatingBar.remove();
 	});
 }
