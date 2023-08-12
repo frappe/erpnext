@@ -146,7 +146,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-21 17:19:30.912953",
+ "modified": "2023-08-11 10:56:51.699137",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",
@@ -154,15 +154,25 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "System Manager",
+   "role": "Accounts Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

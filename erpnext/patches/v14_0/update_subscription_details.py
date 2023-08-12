@@ -10,7 +10,7 @@ def execute():
 		frappe.db.set_value(
 			subscription_invoice.document_type,
 			subscription_invoice.invoice,
-			"Subscription",
+			"subscription",
 			subscription_invoice.parent,
 		)
 

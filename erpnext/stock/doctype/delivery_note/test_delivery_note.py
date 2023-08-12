@@ -703,7 +703,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
-		so = make_sales_order()
+		so = make_sales_order(po_no="12345")
 		dn = create_dn_against_so(so.name, delivered_qty=2)
 
 		self.assertEqual(dn.status, "To Bill")
@@ -730,7 +730,7 @@ class TestDeliveryNote(FrappeTestCase):
 			make_sales_invoice,
 		)
 
-		so = make_sales_order()
+		so = make_sales_order(po_no="12345")
 
 		si = make_sales_invoice(so.name)
 		si.get("items")[0].qty = 5
@@ -774,7 +774,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
-		so = make_sales_order()
+		so = make_sales_order(po_no="12345")
 
 		dn1 = make_delivery_note(so.name)
 		dn1.get("items")[0].qty = 2
@@ -820,7 +820,7 @@ class TestDeliveryNote(FrappeTestCase):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		so = make_sales_order()
+		so = make_sales_order(po_no="12345")
 
 		si = make_sales_invoice(so.name)
 		si.submit()
@@ -1227,6 +1227,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(get_reserved_qty(item, warehouse), 0 if dont_reserve_qty else qty_to_reserve)
 
 	def tearDown(self):
+		frappe.db.rollback()
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
 
 

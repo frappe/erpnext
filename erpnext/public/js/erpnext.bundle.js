@@ -28,5 +28,6 @@ import "./controllers/accounts.js"
 import "./utils/landed_taxes_and_charges_common.js";
 import "./utils/sales_common.js";
 import "./controllers/buying.js";
+import "./utils/demo.js";
 
 // import { sum } from 'frappe/public/utils/util.js'
