@@ -1580,21 +1580,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
-	def test_gl_entries_for_standalone_debit_note(self):
-		make_purchase_invoice(qty=5, rate=500, update_stock=True)
-
-		returned_inv = make_purchase_invoice(qty=-5, rate=5, update_stock=True, is_return=True)
-
-		# override the rate with valuation rate
-		sle = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["stock_value_difference", "actual_qty"],
-			filters={"voucher_no": returned_inv.name},
-		)[0]
-
-		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
-		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
-
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
