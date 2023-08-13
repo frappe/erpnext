@@ -261,11 +261,14 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		ldc = get_lower_deduction_certificate(inv.company, tax_details, pan_no)
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
-			limit_consumed = get_limit_consumed(ldc, parties)
-			if ldc and is_valid_certificate(ldc, posting_date, limit_consumed):
-				tax_amount = get_lower_deduction_amount(
-					net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details
-				)
+			if ldc:
+				limit_consumed = get_limit_consumed(ldc, parties)
+				if is_valid_certificate(ldc, posting_date, limit_consumed):
+					tax_amount = get_lower_deduction_amount(
+						net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details
+					)
+				else:
+					tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
 			else:
 				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
 
