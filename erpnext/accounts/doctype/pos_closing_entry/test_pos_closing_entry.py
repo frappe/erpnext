@@ -167,7 +167,7 @@ def get_test_item_qty(pos_profile):
 		item_group="All Item Groups",
 	)
 
-	test_item_qty = [item for item in test_item_pos["items"] if item["item_code"] == "_Test Item"][0][
-		"actual_qty"
-	]
+	test_item_qty = [item for item in test_item_pos["items"] if item["item_code"] == "_Test Item"][
+		0
+	].get("actual_qty")
 	return test_item_qty
