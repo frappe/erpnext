@@ -7,6 +7,13 @@ from frappe import _
 
 
 def execute(filters=None):
+	if filters.get("party_type") == "Customer":
+		party_naming_by = frappe.db.get_single_value("Selling Settings", "cust_master_name")
+	else:
+		party_naming_by = frappe.db.get_single_value("Buying Settings", "supp_master_name")
+
+	filters.update({"naming_series": party_naming_by})
+
 	validate_filters(filters)
 	(
 		tds_docs,
@@ -69,15 +76,13 @@ def get_result(
 			if party_map.get(party, {}).get("party_type") == "Supplier":
 				party_name = "supplier_name"
 				party_type = "supplier_type"
-				table_name = "Supplier"
 			else:
 				party_name = "customer_name"
 				party_type = "customer_type"
-				table_name = "Customer"
 
 			row = {
 				"pan"
-				if frappe.db.has_column(table_name, "pan")
+				if frappe.db.has_column(filters.party_type, "pan")
 				else "tax_id": party_map.get(party, {}).get("pan"),
 				"party": party_map.get(party, {}).get("name"),
 			}
@@ -146,7 +151,7 @@ def get_gle_map(documents):
 
 
 def get_columns(filters):
-	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
+	pan = "pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id"
 	columns = [
 		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
 		{
@@ -160,7 +165,12 @@ def get_columns(filters):
 
 	if filters.naming_series == "Naming Series":
 		columns.append(
-			{"label": _("Party Name"), "fieldname": "party_name", "fieldtype": "Data", "width": 180}
+			{
+				"label": _(filters.party_type + " Name"),
+				"fieldname": "party_name",
+				"fieldtype": "Data",
+				"width": 180,
+			}
 		)
 
 	columns.extend(
