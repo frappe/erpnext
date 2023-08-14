@@ -829,8 +829,22 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
+<<<<<<< HEAD
 def remove_return_pos_invoices(party_type, party, invoice_list):
 	if invoice_list:
+=======
+def get_outstanding_invoices(
+	party_type,
+	party,
+	account,
+	common_filter=None,
+	posting_date=None,
+	min_outstanding=None,
+	max_outstanding=None,
+	accounting_dimensions=None,
+	vouchers=None,
+):
+>>>>>>> 47345e81a1 (perf: pull latest details only for referenced vouchers)
 
 		if party_type == "Customer":
 			sinv = frappe.qb.DocType("Sales Invoice")
@@ -873,6 +887,7 @@ def get_outstanding_invoices(party_type, party, account, company, condition=None
 
 	held_invoices = get_held_invoices(party_type, party)
 
+<<<<<<< HEAD
 	invoice_list = frappe.db.sql(
 		"""
 		select
@@ -899,6 +914,23 @@ def get_outstanding_invoices(party_type, party, account, company, condition=None
 			"account": account,
 		},
 		as_dict=True,
+=======
+	common_filter = common_filter or []
+	common_filter.append(ple.account_type == party_account_type)
+	common_filter.append(ple.account == account)
+	common_filter.append(ple.party_type == party_type)
+	common_filter.append(ple.party == party)
+
+	ple_query = QueryPaymentLedger()
+	invoice_list = ple_query.get_voucher_outstandings(
+		vouchers=vouchers,
+		common_filter=common_filter,
+		posting_date=posting_date,
+		min_outstanding=min_outstanding,
+		max_outstanding=max_outstanding,
+		get_invoices=True,
+		accounting_dimensions=accounting_dimensions or [],
+>>>>>>> 47345e81a1 (perf: pull latest details only for referenced vouchers)
 	)
 
 	invoice_list = remove_return_pos_invoices(party_type, party, invoice_list)
