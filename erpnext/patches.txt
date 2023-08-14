@@ -328,13 +328,32 @@ erpnext.patches.v14_0.set_pick_list_status
 erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v14_0.enable_all_leads
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+<<<<<<< HEAD
 # below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+=======
+erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
+erpnext.patches.v14_0.update_subscription_details
+execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
+erpnext.patches.v15_0.enable_all_leads
+>>>>>>> a0fc68538f (refactor: toggle for negative rates in Selling Settings)
 erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
 erpnext.patches.v14_0.cleanup_workspaces
+<<<<<<< HEAD
 erpnext.patches.v14_0.enable_allow_existing_serial_no
 erpnext.patches.v14_0.set_report_in_process_SOA 
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances #15-07-2023
 execute:frappe.defaults.clear_default("fiscal_year")
+=======
+erpnext.patches.v15_0.remove_loan_management_module #2023-07-03
+erpnext.patches.v14_0.set_report_in_process_SOA
+erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
+execute:frappe.defaults.clear_default("fiscal_year")
+erpnext.patches.v15_0.remove_exotel_integration
+erpnext.patches.v14_0.single_to_multi_dunning
+execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for_items', 0)
+# below migration patch should always run last
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+>>>>>>> a0fc68538f (refactor: toggle for negative rates in Selling Settings)
