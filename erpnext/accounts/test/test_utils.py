@@ -3,6 +3,8 @@ import unittest
 import frappe
 from frappe.test_runner import make_test_objects
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
 	get_future_stock_vouchers,
