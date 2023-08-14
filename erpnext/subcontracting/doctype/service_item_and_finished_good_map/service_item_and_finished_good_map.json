@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "autoname": "format:{service_item}",
+ "creation": "2023-08-14 18:55:39.646165",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "is_active",
+  "section_break_rzeo",
+  "service_item",
+  "service_item_qty",
+  "service_uom",
+  "column_break_11fx",
+  "finished_good_item",
+  "finished_good_qty",
+  "finished_good_uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Item",
+   "no_copy": 1,
+   "options": "Item",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "service_item_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Service Item Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_item.stock_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "service_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service UOM",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_11fx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finished_good_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Finished Good Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "finished_good_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "finished_good_item.stock_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "finished_good_uom",
+   "fieldtype": "Link",
+   "label": "Finished Good UOM",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_rzeo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-08-14 22:22:25.043224",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Service Item and Finished Good Map",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
