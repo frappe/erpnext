@@ -163,7 +163,7 @@ def init_user_and_profile(**args):
 def get_test_item_qty(pos_profile):
 	test_item_pos = get_items(
 		start=0,
-		page_length=40,
+		page_length=5,
 		price_list="Standard Selling",
 		pos_profile=pos_profile.name,
 		search_term="_Test Item",
