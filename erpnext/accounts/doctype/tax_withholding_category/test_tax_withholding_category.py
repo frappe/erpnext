@@ -4,11 +4,8 @@
 import unittest
 
 import frappe
-<<<<<<< HEAD
 from frappe.tests.utils import change_settings
-=======
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
->>>>>>> 985ff9781b (fix: Tax withholding post LDC limit consumed (#36611))
 from frappe.utils import today
 
 from erpnext.accounts.utils import get_fiscal_year
