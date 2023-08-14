@@ -4,8 +4,8 @@
 import unittest
 
 import frappe
-from frappe.tests.utils import change_settings
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.tests.utils import change_settings
 from frappe.utils import today
 
 from erpnext.accounts.utils import get_fiscal_year
