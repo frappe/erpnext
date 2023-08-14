@@ -33,7 +33,14 @@ frappe.query_reports["TDS Payable Monthly"] = {
 					frappe.throw(__("Please select Party Type first"));
 				}
 				return party_type;
-			}
+			},
+			"get_query": function() {
+				return {
+					"filters": {
+						"tax_withholding_category": ["!=",""],
+					}
+				}
+			},
 		},
 		{
 			"fieldname":"from_date",
