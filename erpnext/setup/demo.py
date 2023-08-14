@@ -180,8 +180,16 @@ def clear_masters():
 def clear_demo_record(document):
 	document_type = document.get("doctype")
 	del document["doctype"]
-	doc = frappe.get_doc(document_type, document)
-	frappe.delete_doc(doc.doctype, doc.name, ignore_permissions=True)
+
+	valid_columns = frappe.get_meta(document_type).get_valid_columns()
+
+	filters = document
+	for key in list(filters):
+		if key not in valid_columns:
+			filters.pop(key, None)
+
+	doc = frappe.get_doc(document_type, filters)
+	doc.delete(ignore_permissions=True)
 
 
 def delete_company(company):
