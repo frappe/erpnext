@@ -636,25 +636,6 @@ def update_reference_in_payment_entry(
 		new_row.docstatus = 1
 		new_row.update(reference_details)
 
-<<<<<<< HEAD
-	payment_entry.flags.ignore_validate_update_after_submit = True
-	payment_entry.setup_party_account_field()
-	payment_entry.set_missing_values()
-	payment_entry.set_amounts()
-
-	if d.difference_amount and d.difference_account:
-		account_details = {
-			"account": d.difference_account,
-			"cost_center": payment_entry.cost_center
-			or frappe.get_cached_value("Company", payment_entry.company, "cost_center"),
-		}
-		if d.difference_amount:
-			account_details["amount"] = d.difference_amount
-
-		payment_entry.set_gain_or_loss(account_details=account_details)
-
-=======
->>>>>>> 1bcb728c85 (refactor: remove call for setting deductions in payment entry)
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()

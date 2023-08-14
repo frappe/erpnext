@@ -73,8 +73,6 @@ class TestUtils(unittest.TestCase):
 		sorted_vouchers = sort_stock_vouchers_by_posting_date(list(reversed(vouchers)))
 		self.assertEqual(sorted_vouchers, vouchers)
 
-<<<<<<< HEAD
-=======
 	def test_update_reference_in_payment_entry(self):
 		item = make_item().name
 
@@ -125,7 +123,6 @@ class TestUtils(unittest.TestCase):
 		self.assertEqual(len(payment_entry.references), 1)
 		self.assertEqual(payment_entry.difference_amount, 0)
 
->>>>>>> 72bc5b3a11 (refactor(test): difference amount no updated for exchange gain/loss)
 
 ADDRESS_RECORDS = [
 	{
