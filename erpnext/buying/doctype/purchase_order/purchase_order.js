@@ -132,6 +132,25 @@ frappe.ui.form.on("Purchase Order Item", {
 		}
 	},
 
+	item_code: function(frm, cdt, cdn) {
+		if (frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
+			var row = locals[cdt][cdn];
+			var fields = ["service_item_qty", "service_uom", "finished_good_item", "finished_good_qty", "finished_good_uom"];
+
+			if (row.item_code) {
+				frappe.db.get_value("Service Item and Finished Good Map", {
+					is_active: 1,
+					service_item: row.item_code
+				}, fields, (r) => {
+					row.qty = r.service_item_qty;
+					row.uom = r.service_uom;
+					row.fg_item = r.finished_good_item;
+					row.fg_item_qty = r.finished_good_qty;
+				});
+			}
+		}
+	},
+
 	qty: function(frm, cdt, cdn) {
 		if (frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
 			var row = locals[cdt][cdn];
