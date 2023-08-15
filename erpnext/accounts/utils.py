@@ -1118,7 +1118,7 @@ def parse_naming_series_variable(doc, variable):
 		else:
 			date = getdate()
 			company = None
-		return get_fiscal_year(date=date, company=doc.get("company"))[0]
+		return get_fiscal_year(date=date, company=company)[0]
 
 
 @frappe.whitelist()
