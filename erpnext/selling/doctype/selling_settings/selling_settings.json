@@ -187,21 +187,12 @@
    "fieldname": "over_order_allowance",
    "fieldtype": "Float",
    "label": "Over Order Allowance (%)"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "default": "0",
-   "fieldname": "dont_reserve_sales_order_qty_on_sales_return",
-   "fieldtype": "Check",
-   "label": "Don't Reserve Sales Order Qty on Sales Return"
   },
   {
    "default": "0",
    "fieldname": "allow_negative_rates_for_items",
    "fieldtype": "Check",
    "label": "Allow Negative rates for Items"
->>>>>>> a0fc68538f (refactor: toggle for negative rates in Selling Settings)
   }
  ],
  "icon": "fa fa-cog",
