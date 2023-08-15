@@ -10,12 +10,12 @@
   "is_active",
   "section_break_rzeo",
   "service_item",
+  "column_break_5n6w",
   "service_item_qty",
-  "service_uom",
   "column_break_11fx",
-  "finished_good_item",
-  "finished_good_qty",
-  "finished_good_uom"
+  "service_item_uom",
+  "section_break_kq1a",
+  "finished_goods_detail"
  ],
  "fields": [
   {
@@ -39,43 +39,8 @@
    "reqd": 1
   },
   {
-   "fetch_from": "service_item.stock_uom",
-   "fetch_if_empty": 1,
-   "fieldname": "service_uom",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Service UOM",
-   "options": "UOM",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_11fx",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "finished_good_item",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Finished Good Item",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "finished_good_qty",
-   "fieldtype": "Float",
-   "label": "Finished Good Qty",
-   "non_negative": 1,
-   "reqd": 1
-  },
-  {
-   "fetch_from": "finished_good_item.stock_uom",
-   "fetch_if_empty": 1,
-   "fieldname": "finished_good_uom",
-   "fieldtype": "Link",
-   "label": "Finished Good UOM",
-   "options": "UOM",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_rzeo",
@@ -86,14 +51,39 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Is Active"
+  },
+  {
+   "fieldname": "column_break_5n6w",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_kq1a",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "finished_goods_detail",
+   "fieldtype": "Table",
+   "label": "Finished Goods Detail",
+   "options": "Finished Good Detail",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_item.stock_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "service_item_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Item UOM",
+   "options": "UOM",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-14 22:22:25.043224",
+ "modified": "2023-08-16 14:35:42.331157",
  "modified_by": "Administrator",
  "module": "Subcontracting",
- "name": "Service Item and Finished Good Map",
+ "name": "Service Item and Finished Goods Map",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
