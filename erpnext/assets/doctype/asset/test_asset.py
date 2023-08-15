@@ -730,6 +730,40 @@ class TestDepreciationMethods(AssetSetup):
 
 		self.assertEqual(schedules, expected_schedules)
 
+	def test_schedule_for_straight_line_method_with_daily_depreciation(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2023-01-01",
+			purchase_date="2023-01-01",
+			gross_purchase_amount=12000,
+			depreciation_start_date="2023-01-31",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			daily_depreciation=1,
+		)
+
+		expected_schedules = [
+			["2023-01-31", 1019.18, 1019.18],
+			["2023-02-28", 920.55, 1939.73],
+			["2023-03-31", 1019.18, 2958.91],
+			["2023-04-30", 986.3, 3945.21],
+			["2023-05-31", 1019.18, 4964.39],
+			["2023-06-30", 986.3, 5950.69],
+			["2023-07-31", 1019.18, 6969.87],
+			["2023-08-31", 1019.18, 7989.05],
+			["2023-09-30", 986.3, 8975.35],
+			["2023-10-31", 1019.18, 9994.53],
+			["2023-11-30", 986.3, 10980.83],
+			["2023-12-31", 1019.17, 12000.0],
+		]
+
+		schedules = [
+			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")
+		]
+
+		self.assertEqual(schedules, expected_schedules)
+
 	def test_schedule_for_double_declining_method(self):
 		asset = create_asset(
 			calculate_depreciation=1,
@@ -1653,6 +1687,7 @@ def create_asset(**args):
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
 				"depreciation_start_date": args.depreciation_start_date,
+				"daily_depreciation": args.daily_depreciation or 0,
 			},
 		)
 

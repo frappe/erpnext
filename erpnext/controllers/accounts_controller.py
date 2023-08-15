@@ -31,6 +31,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_on_transaction,
 	get_applied_pricing_rules,
 )
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import (
 	get_party_account,
 	get_party_account_currency,
@@ -1023,6 +1024,33 @@ class AccountsController(TransactionBase):
 						)
 					)
 
+	def make_precision_loss_gl_entry(self, gl_entries):
+		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
+		)
+
+		precision_loss = self.get("base_net_total") - flt(
+			self.get("net_total") * self.conversion_rate, self.precision("net_total")
+		)
+
+		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
+		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
+
+		if precision_loss:
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": round_off_account,
+						"against": against,
+						credit_or_debit: precision_loss,
+						"cost_center": round_off_cost_center
+						if self.use_company_roundoff_cost_center
+						else self.cost_center or round_off_cost_center,
+						"remarks": _("Net total calculation precision loss"),
+					}
+				)
+			)
+
 	def update_against_document_in_jv(self):
 		"""
 		Links invoice and advance voucher:
@@ -1672,8 +1700,13 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
+		allocate_payment_based_on_payment_terms = frappe.db.get_value(
+			"Payment Terms Template", self.payment_terms_template, "allocate_payment_based_on_payment_terms"
+		)
+
 		if not (
 			automatically_fetch_payment_terms
+			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
 			for d in self.get("payment_schedule"):

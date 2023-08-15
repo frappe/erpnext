@@ -6,7 +6,7 @@ from typing import Optional
 import frappe
 from frappe import _, bold, msgprint
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, cstr, flt
+from frappe.utils import add_to_date, cint, cstr, flt
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -282,11 +282,7 @@ class StockReconciliation(StockController):
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
-			allow_negative_stock = False
-			if has_batch_no:
-				allow_negative_stock = True
-
-			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
 
 		if has_serial_no and sl_entries:
 			self.update_valuation_rate_for_serial_no()
@@ -457,10 +453,7 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = cint(
-				frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-			)
-			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
 
 	def merge_similar_item_serial_nos(self, sl_entries):
 		# If user has put the same item in multiple row with different serial no
@@ -570,44 +563,67 @@ class StockReconciliation(StockController):
 		else:
 			self._cancel()
 
-	def recalculate_current_qty(self, item_code, batch_no):
+	def recalculate_current_qty(self, voucher_detail_no, sle_creation, add_new_sle=False):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
 		sl_entries = []
+
 		for row in self.items:
-			if not (row.item_code == item_code and row.batch_no == batch_no):
+			if voucher_detail_no != row.name:
 				continue
 
 			current_qty = get_batch_qty_for_stock_reco(
-				item_code, row.warehouse, batch_no, self.posting_date, self.posting_time, self.name
+				row.item_code, row.warehouse, row.batch_no, self.posting_date, self.posting_time, self.name
 			)
 
 			precesion = row.precision("current_qty")
-			if flt(current_qty, precesion) == flt(row.current_qty, precesion):
-				continue
+			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
+				val_rate = get_valuation_rate(
+					row.item_code,
+					row.warehouse,
+					self.doctype,
+					self.name,
+					company=self.company,
+					batch_no=row.batch_no,
+				)
 
-			val_rate = get_valuation_rate(
-				item_code, row.warehouse, self.doctype, self.name, company=self.company, batch_no=batch_no
-			)
+				row.current_valuation_rate = val_rate
+				row.current_qty = current_qty
+				row.db_set(
+					{
+						"current_qty": row.current_qty,
+						"current_valuation_rate": row.current_valuation_rate,
+						"current_amount": flt(row.current_qty * row.current_valuation_rate),
+					}
+				)
 
-			row.current_valuation_rate = val_rate
-			if not row.current_qty and current_qty:
-				sle = self.get_sle_for_items(row)
-				sle.actual_qty = current_qty * -1
-				sle.valuation_rate = val_rate
-				sl_entries.append(sle)
-
-			row.current_qty = current_qty
-			row.db_set(
-				{
-					"current_qty": row.current_qty,
-					"current_valuation_rate": row.current_valuation_rate,
-					"current_amount": flt(row.current_qty * row.current_valuation_rate),
-				}
-			)
+			if (
+				add_new_sle
+				and not frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
+					"name",
+				)
+				and current_qty
+			):
+				new_sle = self.get_sle_for_items(row)
+				new_sle.actual_qty = current_qty * -1
+				new_sle.valuation_rate = row.current_valuation_rate
+				new_sle.creation_time = add_to_date(sle_creation, seconds=-1)
+				sl_entries.append(new_sle)
 
 		if sl_entries:
-			self.make_sl_entries(sl_entries)
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
+			if not frappe.db.exists("Repost Item Valuation", {"voucher_no": self.name, "status": "Queued"}):
+				self.repost_future_sle_and_gle(force=True)
+
+	def has_negative_stock_allowed(self):
+		allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
+		if all(d.batch_no and flt(d.qty) == flt(d.current_qty) for d in self.items):
+			allow_negative_stock = True
+
+		return allow_negative_stock
 
 
 def get_batch_qty_for_stock_reco(
