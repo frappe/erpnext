@@ -114,7 +114,7 @@ def create_transaction(doctype, company, start_date):
 	if document_type == "Purchase Order":
 		posting_date = get_random_date(start_date, 1, 30)
 	else:
-		posting_date = get_random_date(start_date, 31, 365)
+		posting_date = get_random_date(start_date, 31, 364)
 
 	doctype.update(
 		{

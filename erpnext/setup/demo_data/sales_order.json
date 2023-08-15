@@ -4,6 +4,7 @@
         "customer": "Grant Plastics Ltd.",
         "doctype": "Sales Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Sales Order Item",
@@ -20,6 +21,7 @@
         "customer": "West View Software Ltd.",
         "doctype": "Sales Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Sales Order Item",
@@ -44,6 +46,7 @@
         "customer": "West View Software Ltd.",
         "doctype": "Sales Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Sales Order Item",
@@ -76,6 +79,7 @@
         "customer": "Palmer Productions Ltd.",
         "doctype": "Sales Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Sales Order Item",
@@ -92,6 +96,7 @@
         "customer": "Grant Plastics Ltd.",
         "doctype": "Sales Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Sales Order Item",
