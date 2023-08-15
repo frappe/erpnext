@@ -98,9 +98,11 @@ def get_timesheets(filters):
 	record_filters = [
 		["start_date", "<=", filters.to_date],
 		["end_date", ">=", filters.from_date],
-		["docstatus", "=", 1],
 	]
-
+	if not filters.get("include_draft_timesheets"):
+		record_filters.append(["docstatus", "=", 1])
+	else:
+		record_filters.append(["docstatus", "!=", 2])
 	if "employee" in filters:
 		record_filters.append(["employee", "=", filters.employee])
 
