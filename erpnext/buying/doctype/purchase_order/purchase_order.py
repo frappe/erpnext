@@ -450,6 +450,43 @@ class PurchaseOrder(BuyingController):
 		else:
 			self.db_set("per_received", 0, update_modified=False)
 
+	def set_service_items_for_finished_goods(self):
+		if not self.is_subcontracted or self.is_old_subcontracting_flow:
+			return
+
+		finished_goods_without_service_item = {
+			d.fg_item for d in self.items if (not d.item_code and d.fg_item)
+		}
+		if finished_goods_without_service_item:
+			parent = frappe.qb.DocType("Service Item and Finished Goods Map")
+			child = frappe.qb.DocType("Finished Good Detail")
+
+			result = (
+				frappe.qb.from_(parent)
+				.inner_join(child)
+				.on(parent.name == child.parent)
+				.select(
+					parent.service_item,
+					parent.service_item_uom,
+					child.finished_good_item,
+					child.conversion_factor,
+				)
+				.where(
+					(parent.is_active == 1) & (child.finished_good_item.isin(finished_goods_without_service_item))
+				)
+			).run(as_dict=True)
+
+			if result:
+				service_item_details = {d.finished_good_item: d for d in result}
+
+				for item in self.items:
+					if not item.item_code and item.fg_item in service_item_details:
+						service_item_detail = service_item_details[item.fg_item]
+
+						item.item_code = service_item_detail.service_item
+						item.qty = flt(item.fg_item_qty) * flt(service_item_detail.conversion_factor)
+						item.uom = service_item_detail.service_item_uom
+
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
 	"""get last purchase rate for an item"""
