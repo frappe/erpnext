@@ -388,7 +388,7 @@ def split_invoices(invoices):
 				continue
 
 			return_against_is_added = any(
-				d for d in invoices if d.pos_invoice == pos_invoice.return_against
+				d for d in _invoices if d.pos_invoice == pos_invoice.return_against
 			)
 			if return_against_is_added:
 				break
