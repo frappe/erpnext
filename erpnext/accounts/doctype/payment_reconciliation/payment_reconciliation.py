@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_rec
 )
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
+	create_gain_loss_journal,
 	get_outstanding_invoices,
 	reconcile_against_document,
 )
@@ -260,6 +261,11 @@ class PaymentReconciliation(Document):
 	def calculate_difference_on_allocation_change(self, payment_entry, invoice, allocated_amount):
 		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
 		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
+		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
+			payment_entry[0]["exchange_rate"] = invoice_exchange_map.get(
+				payment_entry[0].get("reference_name")
+			)
+
 		new_difference_amount = self.get_difference_amount(
 			payment_entry[0], invoice[0], allocated_amount
 		)
@@ -346,12 +352,6 @@ class PaymentReconciliation(Document):
 
 				payment_details = self.get_payment_details(row, dr_or_cr)
 				reconciled_entry.append(payment_details)
-
-				if payment_details.difference_amount and row.reference_type not in [
-					"Sales Invoice",
-					"Purchase Invoice",
-				]:
-					self.make_difference_entry(payment_details)
 
 		if entry_list:
 			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
@@ -641,6 +641,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_name": inv.against_voucher,
 						"cost_center": erpnext.get_default_cost_center(company),
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
+						"exchange_rate": inv.exchange_rate,
 					},
 					{
 						"account": inv.account,
@@ -655,16 +656,41 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						"reference_name": inv.voucher_no,
 						"cost_center": erpnext.get_default_cost_center(company),
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
+						"exchange_rate": inv.exchange_rate,
 					},
 				],
 			}
 		)
 
-		if difference_entry := get_difference_row(inv):
-			jv.append("accounts", difference_entry)
-
 		jv.flags.ignore_mandatory = True
-		jv.remark = None
 		jv.flags.skip_remarks_creation = True
+		jv.flags.ignore_exchange_rate = True
 		jv.is_system_generated = True
+		jv.remark = None
 		jv.submit()
+
+		if inv.difference_amount != 0:
+			# make gain/loss journal
+			if inv.party_type == "Customer":
+				dr_or_cr = "credit" if inv.difference_amount < 0 else "debit"
+			else:
+				dr_or_cr = "debit" if inv.difference_amount < 0 else "credit"
+
+			reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
+			create_gain_loss_journal(
+				company,
+				inv.party_type,
+				inv.party,
+				inv.account,
+				inv.difference_account,
+				inv.difference_amount,
+				dr_or_cr,
+				reverse_dr_or_cr,
+				inv.voucher_type,
+				inv.voucher_no,
+				None,
+				inv.against_voucher_type,
+				inv.against_voucher,
+				None,
+			)

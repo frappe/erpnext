@@ -328,6 +328,7 @@ erpnext.patches.v14_0.set_pick_list_status
 erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v14_0.enable_all_leads
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
 # below migration patches should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.update_company_in_ldc
