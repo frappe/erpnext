@@ -44,6 +44,9 @@ def execute():
 
 	doctypes = frappe.get_all("DocType", {"module": "education", "custom": 0}, pluck="name")
 	for doctype in doctypes:
+		frappe.delete_doc(
+			"Portal Menu Item", {"reference_doctype": doctype}, ignore_missing=True, force=True
+		)
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
 	frappe.delete_doc("Module Def", "Education", ignore_missing=True, force=True)
