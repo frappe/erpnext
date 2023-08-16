@@ -555,7 +555,45 @@
  "name": "Journal Entry",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
- "permissions": [],
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
+  }
+ ],
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "modified",
  "sort_order": "DESC",
