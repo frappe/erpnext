@@ -12,6 +12,10 @@ from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):
@@ -83,6 +87,11 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_docs = [
 			frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices
 		]
+		accounting_dimensions = get_accounting_dimensions()
+		for d in pos_invoice_docs:
+			for dimension in accounting_dimensions:
+				dimension_value = frappe.db.get_value("POS Profile", d.pos_profile, dimension)
+				d.set(dimension, dimension_value)
 
 		returns = [d for d in pos_invoice_docs if d.get("is_return") == 1]
 		sales = [d for d in pos_invoice_docs if d.get("is_return") == 0]
@@ -414,6 +423,7 @@ def split_invoices(invoices):
 
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
+	# breakpoint()
 	try:
 		for customer, invoices in invoice_by_customer.items():
 			for _invoices in split_invoices(invoices):
@@ -426,11 +436,9 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 				)
 				merge_log.customer = customer
 				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
-
 				merge_log.set("pos_invoices", _invoices)
 				merge_log.save(ignore_permissions=True)
 				merge_log.submit()
-
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
 			closing_entry.db_set("error_message", "")
