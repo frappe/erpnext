@@ -93,7 +93,7 @@ def _execute(filters=None, additional_table_columns=None):
 				row.append(tax_amount)
 
 		# total tax, grand total, rounded total & outstanding amount
-		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount, inv.total_net_weight]
+		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
 	return columns, data
@@ -179,7 +179,6 @@ def get_columns(invoice_list, additional_table_columns):
 			_("Grand Total") + ":Currency/currency:120",
 			_("Rounded Total") + ":Currency/currency:120",
 			_("Outstanding Amount") + ":Currency/currency:120",
-			_("Net Weight") + ":Float:120",
 		]
 	)
 
@@ -193,10 +192,6 @@ def get_conditions(filters):
 		conditions += " and company=%(company)s"
 	if filters.get("supplier"):
 		conditions += " and supplier = %(supplier)s"
-	if filters.get("item_brand"):
-		conditions += """ and exists(select name from `tabPurchase Invoice Item`
-			where parent=`tabPurchase Invoice`.name
-			and ifnull(`tabPurchase Invoice Item`.brand, '') = %(item_brand)s)"""
 
 	if filters.get("from_date"):
 		conditions += " and posting_date>=%(from_date)s"
@@ -254,7 +249,7 @@ def get_invoices(filters, additional_query_columns):
 		"""
 		select
 			name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
-			remarks, total_net_weight, base_net_total, base_grand_total, outstanding_amount,
+			remarks, base_net_total, base_grand_total, outstanding_amount,
 			mode_of_payment {0}
 		from `tabPurchase Invoice`
 		where docstatus = 1 {1}

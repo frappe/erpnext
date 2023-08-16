@@ -52,12 +52,6 @@ frappe.query_reports["Purchase Register"] = {
 			"label": __("Item Group"),
 			"fieldtype": "Link",
 			"options": "Item Group"
-		},
-		{
-			"fieldname":"item_brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
 		}
 	]
 }

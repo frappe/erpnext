@@ -205,7 +205,7 @@ class SellingController(StockController):
 			throw(
 				_(
 					"""Row #{0}: Selling rate for item {1} is lower than its {2}.
-					<br><br>Alternatively,
+					Selling {3} should be atleast {4}.<br><br>Alternatively,
 					you can disable selling price validation in {5} to bypass
 					this validation."""
 				).format(

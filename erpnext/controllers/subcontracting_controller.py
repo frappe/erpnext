@@ -460,7 +460,7 @@ class SubcontractingController(StockController):
 					"allow_zero_valuation": 1,
 				}
 			)
-			rm_obj.rate = bom_item.rate if self.backflush_based_on == "BOM" else get_incoming_rate(args)
+			rm_obj.rate = get_incoming_rate(args)
 
 		if self.doctype == self.subcontract_data.order_doctype:
 			rm_obj.required_qty = qty

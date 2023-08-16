@@ -33,77 +33,94 @@ def validate_filters(filters):
 def get_result(
 	filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, invoice_net_total_map
 ):
-	supplier_map = get_supplier_pan_map()
+	party_map = get_party_pan_map(filters.get("party_type"))
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
 
 	out = []
 	for name, details in gle_map.items():
-		tds_deducted, total_amount_credited = 0, 0
+		tax_amount, total_amount = 0, 0
 		tax_withholding_category = tax_category_map.get(name)
 		rate = tax_rate_map.get(tax_withholding_category)
 
 		for entry in details:
-			supplier = entry.party or entry.against
+			party = entry.party or entry.against
 			posting_date = entry.posting_date
 			voucher_type = entry.voucher_type
 
 			if voucher_type == "Journal Entry":
-				suppliers = journal_entry_party_map.get(name)
-				if suppliers:
-					supplier = suppliers[0]
+				party_list = journal_entry_party_map.get(name)
+				if party_list:
+					party = party_list[0]
 
 			if not tax_withholding_category:
-				tax_withholding_category = supplier_map.get(supplier, {}).get("tax_withholding_category")
+				tax_withholding_category = party_map.get(party, {}).get("tax_withholding_category")
 				rate = tax_rate_map.get(tax_withholding_category)
 
 			if entry.account in tds_accounts:
-				tds_deducted += entry.credit - entry.debit
+				tax_amount += entry.credit - entry.debit
 
 			if invoice_net_total_map.get(name):
-				total_amount_credited = invoice_net_total_map.get(name)
+				total_amount = invoice_net_total_map.get(name)
 			else:
-				total_amount_credited += entry.credit
+				total_amount += entry.credit
 
-		if tds_deducted:
+		if tax_amount:
+			if party_map.get(party, {}).get("party_type") == "Supplier":
+				party_name = "supplier_name"
+				party_type = "supplier_type"
+				table_name = "Supplier"
+			else:
+				party_name = "customer_name"
+				party_type = "customer_type"
+				table_name = "Customer"
+
 			row = {
 				"pan"
-				if frappe.db.has_column("Supplier", "pan")
-				else "tax_id": supplier_map.get(supplier, {}).get("pan"),
-				"supplier": supplier_map.get(supplier, {}).get("name"),
+				if frappe.db.has_column(table_name, "pan")
+				else "tax_id": party_map.get(party, {}).get("pan"),
+				"party": party_map.get(party, {}).get("name"),
 			}
 
 			if filters.naming_series == "Naming Series":
-				row.update({"supplier_name": supplier_map.get(supplier, {}).get("supplier_name")})
+				row.update({"party_name": party_map.get(party, {}).get(party_name)})
 
 			row.update(
 				{
 					"section_code": tax_withholding_category,
-					"entity_type": supplier_map.get(supplier, {}).get("supplier_type"),
-					"tds_rate": rate,
-					"total_amount_credited": total_amount_credited,
-					"tds_deducted": tds_deducted,
+					"entity_type": party_map.get(party, {}).get(party_type),
+					"rate": rate,
+					"total_amount": total_amount,
+					"tax_amount": tax_amount,
 					"transaction_date": posting_date,
 					"transaction_type": voucher_type,
 					"ref_no": name,
 				}
 			)
-
 			out.append(row)
 
 	return out
 
 
-def get_supplier_pan_map():
-	supplier_map = frappe._dict()
-	suppliers = frappe.db.get_all(
-		"Supplier", fields=["name", "pan", "supplier_type", "supplier_name", "tax_withholding_category"]
-	)
+def get_party_pan_map(party_type):
+	party_map = frappe._dict()
 
-	for d in suppliers:
-		supplier_map[d.name] = d
+	fields = ["name", "tax_withholding_category"]
+	if party_type == "Supplier":
+		fields += ["supplier_type", "supplier_name"]
+	else:
+		fields += ["customer_type", "customer_name"]
 
-	return supplier_map
+	if frappe.db.has_column(party_type, "pan"):
+		fields.append("pan")
+
+	party_details = frappe.db.get_all(party_type, fields=fields)
+
+	for party in party_details:
+		party.party_type = party_type
+		party_map[party.name] = party
+
+	return party_map
 
 
 def get_gle_map(documents):
@@ -131,17 +148,17 @@ def get_columns(filters):
 	columns = [
 		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 90},
 		{
-			"label": _("Supplier"),
-			"options": "Supplier",
-			"fieldname": "supplier",
-			"fieldtype": "Link",
+			"label": _(filters.get("party_type")),
+			"fieldname": "party",
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
 			"width": 180,
 		},
 	]
 
 	if filters.naming_series == "Naming Series":
 		columns.append(
-			{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 180}
+			{"label": _("Party Name"), "fieldname": "party_name", "fieldtype": "Data", "width": 180}
 		)
 
 	columns.extend(
@@ -153,17 +170,22 @@ def get_columns(filters):
 				"fieldtype": "Link",
 				"width": 180,
 			},
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
-			{"label": _("TDS Rate %"), "fieldname": "tds_rate", "fieldtype": "Percent", "width": 90},
+			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 120},
 			{
-				"label": _("Total Amount Credited"),
-				"fieldname": "total_amount_credited",
+				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
+				"fieldname": "rate",
+				"fieldtype": "Percent",
+				"width": 90,
+			},
+			{
+				"label": _("Total Amount"),
+				"fieldname": "total_amount",
 				"fieldtype": "Float",
 				"width": 90,
 			},
 			{
-				"label": _("Amount of TDS Deducted"),
-				"fieldname": "tds_deducted",
+				"label": _("TDS Amount") if filters.get("party_type") == "Supplier" else _("TCS Amount"),
+				"fieldname": "tax_amount",
 				"fieldtype": "Float",
 				"width": 90,
 			},
@@ -173,13 +195,13 @@ def get_columns(filters):
 				"fieldtype": "Date",
 				"width": 90,
 			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 90},
+			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 100},
 			{
 				"label": _("Reference No."),
 				"fieldname": "ref_no",
 				"fieldtype": "Dynamic Link",
 				"options": "transaction_type",
-				"width": 90,
+				"width": 180,
 			},
 		]
 	)
@@ -190,6 +212,7 @@ def get_columns(filters):
 def get_tds_docs(filters):
 	tds_documents = []
 	purchase_invoices = []
+	sales_invoices = []
 	payment_entries = []
 	journal_entries = []
 	tax_category_map = frappe._dict()
@@ -209,10 +232,13 @@ def get_tds_docs(filters):
 		"against": ("not in", bank_accounts),
 	}
 
-	if filters.get("supplier"):
+	party = frappe.get_all(filters.get("party_type"), pluck="name")
+	query_filters.update({"against": ("in", party)})
+
+	if filters.get("party"):
 		del query_filters["account"]
 		del query_filters["against"]
-		or_filters = {"against": filters.get("supplier"), "party": filters.get("supplier")}
+		or_filters = {"against": filters.get("party"), "party": filters.get("party")}
 
 	tds_docs = frappe.get_all(
 		"GL Entry",
@@ -224,6 +250,8 @@ def get_tds_docs(filters):
 	for d in tds_docs:
 		if d.voucher_type == "Purchase Invoice":
 			purchase_invoices.append(d.voucher_no)
+		if d.voucher_type == "Sales Invoice":
+			sales_invoices.append(d.voucher_no)
 		elif d.voucher_type == "Payment Entry":
 			payment_entries.append(d.voucher_no)
 		elif d.voucher_type == "Journal Entry":
@@ -233,6 +261,9 @@ def get_tds_docs(filters):
 
 	if purchase_invoices:
 		get_doc_info(purchase_invoices, "Purchase Invoice", tax_category_map, invoice_net_total_map)
+
+	if sales_invoices:
+		get_doc_info(sales_invoices, "Sales Invoice", tax_category_map, invoice_net_total_map)
 
 	if payment_entries:
 		get_doc_info(payment_entries, "Payment Entry", tax_category_map)
@@ -267,6 +298,8 @@ def get_journal_entry_party_map(journal_entries):
 def get_doc_info(vouchers, doctype, tax_category_map, invoice_net_total_map=None):
 	if doctype == "Purchase Invoice":
 		fields = ["name", "tax_withholding_category", "base_tax_withholding_net_total"]
+	if doctype == "Sales Invoice":
+		fields = ["name", "base_net_total"]
 	else:
 		fields = ["name", "tax_withholding_category"]
 
@@ -276,6 +309,8 @@ def get_doc_info(vouchers, doctype, tax_category_map, invoice_net_total_map=None
 		tax_category_map.update({entry.name: entry.tax_withholding_category})
 		if doctype == "Purchase Invoice":
 			invoice_net_total_map.update({entry.name: entry.base_tax_withholding_net_total})
+		if doctype == "Sales Invoice":
+			invoice_net_total_map.update({entry.name: entry.base_net_total})
 
 
 def get_tax_rate_map(filters):

@@ -371,7 +371,6 @@
   },
   {
    "collapsible": 1,
-   "allow_on_submit": 1,
    "collapsible_depends_on": "bill_no",
    "fieldname": "supplier_invoice_details",
    "fieldtype": "Section Break",
@@ -383,7 +382,6 @@
    "label": "Supplier Invoice No",
    "oldfieldname": "bill_no",
    "oldfieldtype": "Data",
-   "allow_on_submit": 1,
    "print_hide": 1
   },
   {
