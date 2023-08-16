@@ -198,6 +198,25 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+def required_accounting_dimensions():
+
+	p = frappe.qb.DocType("Accounting Dimension")
+	c = frappe.qb.DocType("Accounting Dimension Detail")
+
+	acc_dim_doc = (
+		frappe.qb.from_(p)
+		.inner_join(c)
+		.on(p.name == c.parent)
+		.select(c.parent)
+		.where(c.mandatory_for_bs == 1 or c.mandatory_for_pl == 1)
+		.where(p.disabled == 0)
+	).run(as_dict=1)
+
+	acc_dim_names = [d.parent.lower() for d in acc_dim_doc]
+	return acc_dim_names
+
+
+@frappe.whitelist()
 def set_default_profile(pos_profile, company):
 	modified = now()
 	user = frappe.session.user

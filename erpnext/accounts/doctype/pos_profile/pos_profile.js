@@ -1,5 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
+frappe.provide("erpnext.accounts");
+
 
 frappe.ui.form.on('POS Profile', {
 	setup: function(frm) {
@@ -135,11 +137,20 @@ frappe.ui.form.on('POS Profile', {
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
+		frappe.call({
+			method: 'erpnext.accounts.doctype.pos_profile.pos_profile.required_accounting_dimensions',
+			callback: function(r) {
+				r.message.forEach((acc_dim) => {
+					frm.toggle_reqd(acc_dim, true);
+				})
+			}
+		});
 	},
 
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+
 	},
 
 	toggle_display_account_head: function(frm) {
