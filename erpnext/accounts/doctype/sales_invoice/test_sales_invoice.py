@@ -3320,6 +3320,7 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		self.assertRaises(frappe.ValidationError, si.submit)
 
+	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
 	def test_sales_return_negative_rate(self):
 		si = create_sales_invoice(is_return=1, qty=-2, rate=-10, do_not_save=True)
 		self.assertRaises(frappe.ValidationError, si.save)
