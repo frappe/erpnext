@@ -8,11 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-<<<<<<< HEAD
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement'];
-=======
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule', "Repost Accounting Ledger"];
->>>>>>> e64b004eca (feat: utility to repost accounting ledgers without cancellation (#36469))
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger', 'Asset', 'Asset Movement', 'Repost Accounting Ledger'];
 	},
 
 	refresh: function(frm) {
