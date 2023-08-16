@@ -20,6 +20,7 @@
   "editable_price_list_rate",
   "validate_selling_price",
   "editable_bundle_item_rates",
+  "allow_negative_rates_for_items",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
@@ -84,7 +85,7 @@
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "Sales Update Frequency in Company and Project",
-   "options": "Each Transaction\nDaily\nMonthly",
+   "options": "Monthly\nEach Transaction\nDaily",
    "reqd": 1
   },
   {
@@ -186,6 +187,12 @@
    "fieldname": "over_order_allowance",
    "fieldtype": "Float",
    "label": "Over Order Allowance (%)"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_negative_rates_for_items",
+   "fieldtype": "Check",
+   "label": "Allow Negative rates for Items"
   }
  ],
  "icon": "fa fa-cog",
@@ -193,7 +200,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-03 11:16:54.333615",
+ "modified": "2023-08-14 20:33:05.693667",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

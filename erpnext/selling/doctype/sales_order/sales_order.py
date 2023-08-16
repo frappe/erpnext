@@ -95,18 +95,26 @@ class SalesOrder(SellingController):
 				and customer = %s",
 				(self.po_no, self.name, self.customer),
 			)
-			if (
-				so
-				and so[0][0]
-				and not cint(
+			if so and so[0][0]:
+				if cint(
 					frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
-				)
-			):
-				frappe.msgprint(
-					_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
-						so[0][0], self.po_no
+				):
+					frappe.msgprint(
+						_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
+							frappe.bold(so[0][0]), frappe.bold(self.po_no)
+						)
 					)
-				)
+				else:
+					frappe.throw(
+						_(
+							"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
+						).format(
+							frappe.bold(so[0][0]),
+							frappe.bold(self.po_no),
+							frappe.bold(_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")),
+							get_link_to_form("Selling Settings", "Selling Settings"),
+						)
+					)
 
 	def validate_for_items(self):
 		for d in self.get("items"):

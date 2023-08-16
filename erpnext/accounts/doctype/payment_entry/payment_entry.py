@@ -24,7 +24,12 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
+from erpnext.accounts.utils import (
+	cancel_exchange_gain_loss_journal,
+	get_account_currency,
+	get_balance_on,
+	get_outstanding_invoices,
+)
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
 	get_supplier_block_status,
@@ -61,7 +66,7 @@ class PaymentEntry(AccountsController):
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
-		self.set_missing_ref_details()
+		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_party_details()
 		self.set_exchange_rate()
@@ -101,6 +106,7 @@ class PaymentEntry(AccountsController):
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
 		)
+		super(PaymentEntry, self).on_cancel()
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
@@ -361,7 +367,7 @@ class PaymentEntry(AccountsController):
 			else:
 				if ref_doc:
 					if self.paid_from_account_currency == ref_doc.currency:
-						self.source_exchange_rate = ref_doc.get("exchange_rate")
+						self.source_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.source_exchange_rate:
 				self.source_exchange_rate = get_exchange_rate(
@@ -374,7 +380,7 @@ class PaymentEntry(AccountsController):
 		elif self.paid_to and not self.target_exchange_rate:
 			if ref_doc:
 				if self.paid_to_account_currency == ref_doc.currency:
-					self.target_exchange_rate = ref_doc.get("exchange_rate")
+					self.target_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.target_exchange_rate:
 				self.target_exchange_rate = get_exchange_rate(
@@ -783,10 +789,25 @@ class PaymentEntry(AccountsController):
 				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 		else:
+
+			# Use source/target exchange rate, so no difference amount is calculated.
+			# then update exchange gain/loss amount in reference table
+			# if there is an exchange gain/loss amount in reference table, submit a JE for that
+
+			exchange_rate = 1
+			if self.payment_type == "Receive":
+				exchange_rate = self.source_exchange_rate
+			elif self.payment_type == "Pay":
+				exchange_rate = self.target_exchange_rate
+
 			base_allocated_amount += flt(
-				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 
+			allocated_amount_in_pe_exchange_rate = flt(
+				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+			)
+			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_pe_exchange_rate
 		return base_allocated_amount
 
 	def set_total_allocated_amount(self):
@@ -977,6 +998,10 @@ class PaymentEntry(AccountsController):
 		gl_entries = self.build_gl_map()
 		gl_entries = process_gl_map(gl_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+		if cancel:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+		else:
+			self.make_exchange_gain_loss_journal()
 
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
@@ -1878,7 +1903,6 @@ def get_payment_entry(
 	payment_type=None,
 	reference_date=None,
 ):
-	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
@@ -2019,7 +2043,7 @@ def get_payment_entry(
 	update_accounting_dimensions(pe, doc)
 
 	if party_account and bank:
-		pe.set_exchange_rate(ref_doc=reference_doc)
+		pe.set_exchange_rate(ref_doc=doc)
 		pe.set_amounts()
 
 		if discount_amount:
