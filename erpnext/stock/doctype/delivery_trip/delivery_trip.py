@@ -56,7 +56,7 @@ class DeliveryTrip(Document):
 				status = "In Transit"
 
 		self.db_set("status", status)
-	
+
 	def update_sales_invoices(self, delete=False):
 			"""
 			Update all connected Sales Invoices with Delivery Trip details
