@@ -61,3 +61,36 @@ class ServiceItemandFinishedGoodsMap(Document):
 	def set_conversion_factor(self):
 		for fg_detail in self.finished_goods_detail:
 			fg_detail.conversion_factor = flt(self.service_item_qty) / flt(fg_detail.finished_good_qty)
+
+
+@frappe.whitelist()
+def get_service_items_for_finished_goods(fg_items: str | list) -> dict:
+	if fg_items:
+		parent = frappe.qb.DocType("Service Item and Finished Goods Map")
+		child = frappe.qb.DocType("Finished Good Detail")
+
+		query = (
+			frappe.qb.from_(parent)
+			.inner_join(child)
+			.on(parent.name == child.parent)
+			.select(
+				parent.service_item,
+				parent.service_item_uom,
+				child.finished_good_item,
+				child.conversion_factor,
+			)
+			.where(parent.is_active == 1)
+		)
+
+		if isinstance(fg_items, list):
+			query = query.where(child.finished_good_item.isin(fg_items))
+		else:
+			query = query.where(child.finished_good_item == fg_items)
+
+		if service_item_details := query.run(as_dict=True):
+			if isinstance(fg_items, list):
+				return {d.finished_good_item: d for d in service_item_details}
+			else:
+				return service_item_details[0]
+
+	return {}
