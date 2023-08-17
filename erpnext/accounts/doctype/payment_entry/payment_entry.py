@@ -175,20 +175,6 @@ class PaymentEntry(AccountsController):
 					frappe.throw(fail_message.format(d.idx))
 
 	def validate_allocated_amount_with_latest_data(self):
-<<<<<<< HEAD
-		latest_references = get_outstanding_reference_documents(
-			{
-				"posting_date": self.posting_date,
-				"company": self.company,
-				"party_type": self.party_type,
-				"payment_type": self.payment_type,
-				"party": self.party,
-				"party_account": self.paid_from if self.payment_type == "Receive" else self.paid_to,
-				"get_outstanding_invoices": True,
-				"get_orders_to_be_billed": True,
-			}
-		)
-=======
 		if self.references:
 			uniq_vouchers = set([(x.reference_doctype, x.reference_name) for x in self.references])
 			vouchers = [frappe._dict({"voucher_type": x[0], "voucher_no": x[1]}) for x in uniq_vouchers]
@@ -203,10 +189,8 @@ class PaymentEntry(AccountsController):
 					"get_outstanding_invoices": True,
 					"get_orders_to_be_billed": True,
 					"vouchers": vouchers,
-				},
-				validate=True,
+				}
 			)
->>>>>>> deb0d71294 (perf: pull latest details only for referenced vouchers)
 
 <<<<<<< HEAD
 		# Group latest_references by (voucher_type, voucher_no)
@@ -227,6 +211,7 @@ class PaymentEntry(AccountsController):
 			for idx, d in enumerate(self.get("references"), start=1):
 				latest = latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 			# If term based allocation is enabled, throw
 			if (
@@ -281,6 +266,8 @@ class PaymentEntry(AccountsController):
 					).format(
 						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
 =======
+=======
+>>>>>>> 3f33d4cf76 (chore: resolve conflicts)
 				# If term based allocation is enabled, throw
 				if (
 					d.payment_term is None or d.payment_term == ""
@@ -291,7 +278,6 @@ class PaymentEntry(AccountsController):
 						_(
 							"{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
 						).format(frappe.bold(d.reference_name), frappe.bold(idx))
->>>>>>> deb0d71294 (perf: pull latest details only for referenced vouchers)
 					)
 
 				# if no payment template is used by invoice and has a custom term(no `payment_term`), then invoice outstanding will be in 'None' key
