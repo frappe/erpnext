@@ -388,7 +388,7 @@ class SellingController(StockController):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
-				if (status in ["Closed", "On Hold"] and not self.is_return) or (status in ["On Hold"] and self.is_return):
+				if status in ("Closed", "On Hold") and not self.is_return:
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
 
 	def update_reserved_qty(self):
