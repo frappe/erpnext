@@ -51,8 +51,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
 
-<<<<<<< HEAD
-=======
+
 	def test_pos_closing_without_item_code(self):
 		"""
 		Test if POS Closing Entry is created without item code
@@ -101,7 +100,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		test_item_qty_after_sales = get_test_item_qty(pos_profile)
 		self.assertEqual(test_item_qty_after_sales, test_item_qty - 1)
 
->>>>>>> 526f1d18fb (fix: added test for runtime effect)
+
 	def test_cancelling_of_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
