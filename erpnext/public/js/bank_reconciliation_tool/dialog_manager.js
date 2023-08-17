@@ -144,20 +144,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		];
 	}
 
-<<<<<<< HEAD
-=======
-	format_row(row) {
-		return [
-			row[1], // Document Type
-			row[2], // Document Name
-			row[5] || row[8], // Reference Date
-			format_currency(row[3], row[9]), // Remaining
-			row[4], // Reference Number
-			row[6], // Party
-		];
-	}
-
->>>>>>> 7ab55b1bb2 (fix: Document Name link validation in Bank Reconciliation Tool (#36495))
 	get_datatable(proposals_wrapper) {
 		if (!this.datatable) {
 			const datatable_options = {
