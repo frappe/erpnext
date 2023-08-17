@@ -10,7 +10,7 @@ pip install frappe-bench
 
 githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
-frappebranch="develop"
+frappebranch=${FRAPPE_BRANCH:-$githubbranch}
 
 git clone "https://github.com/${frappeuser}/frappe" --branch "${frappebranch}" --depth 1
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
