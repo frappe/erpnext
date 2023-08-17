@@ -715,7 +715,7 @@ class AccountsController(TransactionBase):
 
 	def validate_enabled_taxes_and_charges(self):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
-		if frappe.get_cached_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
+		if self.taxes_and_charges and frappe.get_cached_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(
 				_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges)
 			)
