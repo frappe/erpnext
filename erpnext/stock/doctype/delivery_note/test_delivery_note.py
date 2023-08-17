@@ -1180,57 +1180,10 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertTrue(return_dn.docstatus == 1)
 
-<<<<<<< HEAD
-=======
-	def test_reserve_qty_on_sales_return(self):
-		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
-		self.reserved_qty_check()
-
-	def test_dont_reserve_qty_on_sales_return(self):
-		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 1)
-		self.reserved_qty_check()
-
-	def reserved_qty_check(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-		from erpnext.stock.stock_balance import get_reserved_qty
-
-		dont_reserve_qty = frappe.db.get_single_value(
-			"Selling Settings", "dont_reserve_sales_order_qty_on_sales_return"
-		)
-
-		item = make_item().name
-		warehouse = "_Test Warehouse - _TC"
-		qty_to_reserve = 5
-
-		so = make_sales_order(item_code=item, qty=qty_to_reserve)
-
-		# Make qty avl for test.
-		make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, basic_rate=100)
-
-		# Test that item qty has been reserved on submit of sales order.
-		self.assertEqual(get_reserved_qty(item, warehouse), qty_to_reserve)
-
-		dn = make_delivery_note(so.name)
-		dn.save().submit()
-
-		# Test that item qty is no longer reserved since qty has been delivered.
-		self.assertEqual(get_reserved_qty(item, warehouse), 0)
-
-		dn_return = make_return_doc("Delivery Note", dn.name)
-		dn_return.save().submit()
-
-		returned = frappe.get_doc("Delivery Note", dn_return.name)
-		returned.update_prevdoc_status()
-
-		# Test that item qty is not reserved on sales return, if selling setting don't reserve qty is checked.
-		self.assertEqual(get_reserved_qty(item, warehouse), 0 if dont_reserve_qty else qty_to_reserve)
-
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
 
->>>>>>> 64614cd915 (refactor(test): don't set po_no by default)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
