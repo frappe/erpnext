@@ -404,7 +404,7 @@ class SellingController(StockController):
 			if so and so_item_rows:
 				sales_order = frappe.get_doc("Sales Order", so)
 
-				if (sales_order.status in ["Closed", "Cancelled"] and not self.is_return) or (sales_order.status in ["Cancelled"] and self.is_return):
+				if (sales_order.status == "Closed" and not self.is_return) or sales_order.status in ["Cancelled"]:
 					frappe.throw(
 						_("{0} {1} is cancelled or closed").format(_("Sales Order"), so), frappe.InvalidStatusError
 					)
