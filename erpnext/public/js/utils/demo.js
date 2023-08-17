@@ -11,7 +11,7 @@ $(document).on("toolbar_setup", function () {
 
 function render_clear_demo_button() {
 	let wait_for_onboaring_tours = setInterval(() => {
-		if ($("#driver-page-overlay").length) {
+		if ($("#driver-page-overlay").length || $("#show-dialog").length) {
 			return;
 		}
 		setup_clear_demo_button();
