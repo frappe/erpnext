@@ -115,7 +115,8 @@
    "fieldtype": "Dynamic Link",
    "label": "Voucher No",
    "no_copy": 1,
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "search_index": 1
   },
   {
    "default": "0",
@@ -229,7 +230,8 @@
    "fieldtype": "Data",
    "label": "Voucher Detail No",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "allow_bulk_edit": 1,
@@ -248,7 +250,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-26 12:56:03.072224",
+ "modified": "2023-07-28 12:56:03.072224",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
