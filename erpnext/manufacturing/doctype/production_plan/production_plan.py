@@ -347,7 +347,7 @@ class ProductionPlan(Document):
 			if not data.pending_qty:
 				continue
 
-			item_details = get_item_details(data.item_code)
+			item_details = get_item_details(data.item_code, throw=False)
 			if self.combine_items:
 				if item_details.bom_no in refs:
 					refs[item_details.bom_no]["so_details"].append(
