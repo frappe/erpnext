@@ -1,10 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-{% include 'erpnext/public/js/controllers/buying.js' %};
-
 cur_frm.add_fetch('contact', 'email_id', 'email_id')
+
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
@@ -245,19 +244,21 @@ frappe.ui.form.on("Request for Quotation",{
 			]
 		});
 
-		dialog.fields_dict['supplier'].df.onchange = () => {
-			var supplier = dialog.get_value('supplier');
-			frm.call('get_supplier_email_preview', {supplier: supplier}).then(result => {
+		dialog.fields_dict["supplier"].df.onchange = () => {
+			frm.call("get_supplier_email_preview", {
+				supplier: dialog.get_value("supplier"),
+			}).then(({ message }) => {
 				dialog.fields_dict.email_preview.$wrapper.empty();
-				dialog.fields_dict.email_preview.$wrapper.append(result.message);
+				dialog.fields_dict.email_preview.$wrapper.append(
+					message.message
+				);
+				dialog.set_value("subject", message.subject);
 			});
-
-		}
+		};
 
 		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of the document will
 			automatically be attached with the email.</p>`);
 
-		dialog.set_value("subject", frm.doc.subject);
 		dialog.show();
 	}
 })
@@ -436,7 +437,7 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 
 				//Remove blanks
 				for (var j = 0; j < frm.doc.suppliers.length; j++) {
-					if(!frm.doc.suppliers[j].hasOwnProperty("supplier")) {
+					if(!Object.prototype.hasOwnProperty.call(frm.doc.suppliers[j], "supplier")) {
 						frm.get_field("suppliers").grid.grid_rows[j].remove();
 					}
 				}
@@ -445,10 +446,11 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 					if(r.message) {
 						for (var i = 0; i < r.message.length; i++) {
 							var exists = false;
+							let supplier = "";
 							if (r.message[i].constructor === Array){
-								var supplier = r.message[i][0];
+								supplier = r.message[i][0];
 							} else {
-								var supplier = r.message[i].name;
+								supplier = r.message[i].name;
 							}
 
 							for (var j = 0; j < doc.suppliers.length;j++) {

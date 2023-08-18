@@ -1900,16 +1900,22 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si = self.create_si_to_test_tax_breakup()
 
-		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
+		itemised_tax_data = get_itemised_tax_breakup_data(si)
 
-		expected_itemised_tax = {
-			"_Test Item": {"Service Tax": {"tax_rate": 10.0, "tax_amount": 1000.0}},
-			"_Test Item 2": {"Service Tax": {"tax_rate": 10.0, "tax_amount": 500.0}},
-		}
-		expected_itemised_taxable_amount = {"_Test Item": 10000.0, "_Test Item 2": 5000.0}
+		expected_itemised_tax = [
+			{
+				"item": "_Test Item",
+				"taxable_amount": 10000.0,
+				"Service Tax": {"tax_rate": 10.0, "tax_amount": 1000.0},
+			},
+			{
+				"item": "_Test Item 2",
+				"taxable_amount": 5000.0,
+				"Service Tax": {"tax_rate": 10.0, "tax_amount": 500.0},
+			},
+		]
 
-		self.assertEqual(itemised_tax, expected_itemised_tax)
-		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
+		self.assertEqual(itemised_tax_data, expected_itemised_tax)
 
 		frappe.flags.country = None
 
@@ -2043,28 +2049,27 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.total_taxes_and_charges, 228.82)
 		self.assertEqual(si.rounding_adjustment, -0.01)
 
-		expected_values = dict(
-			(d[0], d)
-			for d in [
-				[si.debit_to, 1500, 0.0],
-				["_Test Account Service Tax - _TC", 0.0, 114.41],
-				["_Test Account VAT - _TC", 0.0, 114.41],
-				["Sales - _TC", 0.0, 1271.18],
-			]
-		)
+		expected_values = [
+			["_Test Account Service Tax - _TC", 0.0, 114.41],
+			["_Test Account VAT - _TC", 0.0, 114.41],
+			[si.debit_to, 1500, 0.0],
+			["Round Off - _TC", 0.01, 0.01],
+			["Sales - _TC", 0.0, 1271.18],
+		]
 
 		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
+			"""select account, sum(debit) as debit, sum(credit) as credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			group by account
 			order by account asc""",
 			si.name,
 			as_dict=1,
 		)
 
-		for gle in gl_entries:
-			self.assertEqual(expected_values[gle.account][0], gle.account)
-			self.assertEqual(expected_values[gle.account][1], gle.debit)
-			self.assertEqual(expected_values[gle.account][2], gle.credit)
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[i][0], gle.account)
+			self.assertEqual(expected_values[i][1], gle.debit)
+			self.assertEqual(expected_values[i][2], gle.credit)
 
 	def test_rounding_adjustment_3(self):
 		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
@@ -2119,13 +2124,14 @@ class TestSalesInvoice(unittest.TestCase):
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
-				["Round Off - _TC", 0.01, 0],
+				["Round Off - _TC", 0.02, 0.01],
 			]
 		)
 
 		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
+			"""select account, sum(debit) as debit, sum(credit) as credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			group by account
 			order by account asc""",
 			si.name,
 			as_dict=1,
@@ -3207,14 +3213,9 @@ class TestSalesInvoice(unittest.TestCase):
 			account.disabled = 0
 			account.save()
 
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_gain_loss_with_advance_entry(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-
-		unlink_enabled = frappe.db.get_value(
-			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice"
-		)
-
-		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1)
 
 		jv = make_journal_entry("_Test Receivable USD - _TC", "_Test Bank - _TC", -7000, save=False)
 
@@ -3248,18 +3249,28 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		si.save()
 		si.submit()
-
 		expected_gle = [
-			["_Test Exchange Gain/Loss - _TC", 500.0, 0.0, nowdate()],
 			["_Test Receivable USD - _TC", 7500.0, 0.0, nowdate()],
-			["_Test Receivable USD - _TC", 0.0, 500.0, nowdate()],
 			["Sales - _TC", 0.0, 7500.0, nowdate()],
 		]
-
 		check_gl_entries(self, si.name, expected_gle, nowdate())
 
-		frappe.db.set_single_value(
-			"Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": "Sales Invoice", "reference_name": si.name, "docstatus": 1},
+			pluck="parent",
+		)
+		journals = [x for x in journals if x != jv.name]
+		self.assertEqual(len(journals), 1)
+		je_type = frappe.get_cached_value("Journal Entry", journals[0], "voucher_type")
+		self.assertEqual(je_type, "Exchange Gain Or Loss")
+		ledger_outstanding = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"against_voucher_no": si.name, "delinked": 0},
+			fields=["sum(amount), sum(amount_in_account_currency)"],
+			as_list=1,
 		)
 
 	def test_batch_expiry_for_sales_invoice_return(self):
@@ -3364,6 +3375,14 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.outstanding_amount, 0)
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
+
+	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
+	def test_sales_return_negative_rate(self):
+		si = create_sales_invoice(is_return=1, qty=-2, rate=-10, do_not_save=True)
+		self.assertRaises(frappe.ValidationError, si.save)
+
+		si.items[0].rate = 10
+		si.save()
 
 
 def set_advance_flag(company, flag, default_account):

@@ -195,6 +195,22 @@ class TestCompany(unittest.TestCase):
 		child_company.save()
 		self.test_basic_tree()
 
+	def test_demo_data(self):
+		from erpnext.setup.demo import clear_demo_data, setup_demo_data
+
+		setup_demo_data()
+		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
+		self.assertTrue(company_name)
+
+		for transaction in frappe.get_hooks("demo_transaction_doctypes"):
+			self.assertTrue(frappe.db.exists(frappe.unscrub(transaction), {"company": company_name}))
+
+		clear_demo_data()
+		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
+		self.assertFalse(company_name)
+		for transaction in frappe.get_hooks("demo_transaction_doctypes"):
+			self.assertFalse(frappe.db.exists(frappe.unscrub(transaction), {"company": company_name}))
+
 
 def create_company_communication(doctype, docname):
 	comm = frappe.get_doc(

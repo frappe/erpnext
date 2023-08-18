@@ -11,6 +11,7 @@ def get_data():
 		},
 		"internal_links": {
 			"Sales Order": ["items", "against_sales_order"],
+			"Sales Invoice": ["items", "against_sales_invoice"],
 			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
 		},

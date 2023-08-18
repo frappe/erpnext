@@ -182,12 +182,18 @@ def get_gl_entries(filters, accounting_dimensions):
 	if accounting_dimensions:
 		dimension_fields = ", ".join(accounting_dimensions) + ","
 
+	transaction_currency_fields = ""
+	if filters.get("add_values_in_transaction_currency"):
+		transaction_currency_fields = (
+			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
+		)
+
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, {dimension_fields}
-			cost_center, project,
+			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening, creation {select_fields}
 		from `tabGL Entry`
@@ -195,6 +201,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		{order_by_statement}
 	""".format(
 			dimension_fields=dimension_fields,
+			transaction_currency_fields=transaction_currency_fields,
 			select_fields=select_fields,
 			conditions=get_conditions(filters),
 			order_by_statement=order_by_statement,
@@ -562,6 +569,34 @@ def get_columns(filters):
 			"fieldtype": "Float",
 			"width": 130,
 		},
+	]
+
+	if filters.get("add_values_in_transaction_currency"):
+		columns += [
+			{
+				"label": _("Debit (Transaction)"),
+				"fieldname": "debit_in_transaction_currency",
+				"fieldtype": "Currency",
+				"width": 130,
+				"options": "transaction_currency",
+			},
+			{
+				"label": _("Credit (Transaction)"),
+				"fieldname": "credit_in_transaction_currency",
+				"fieldtype": "Currency",
+				"width": 130,
+				"options": "transaction_currency",
+			},
+			{
+				"label": "Transaction Currency",
+				"fieldname": "transaction_currency",
+				"fieldtype": "Link",
+				"options": "Currency",
+				"width": 70,
+			},
+		]
+
+	columns += [
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
 		{
 			"label": _("Voucher No"),

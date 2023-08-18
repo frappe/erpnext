@@ -1,9 +1,11 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/public/js/controllers/buying.js' %};
-
 frappe.provide("erpnext.stock");
+
+erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Purchase Receipt");
+erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
@@ -186,12 +188,6 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __('Create'));
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
-
-				if(!this.frm.doc.auto_repeat) {
-					cur_frm.add_custom_button(__('Subscription'), function() {
-						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
-					}, __('Create'))
-				}
 
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}

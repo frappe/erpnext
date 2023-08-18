@@ -23,7 +23,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
 	get_disposal_account_and_cost_center,
@@ -32,6 +32,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
@@ -113,7 +114,6 @@ class SalesInvoice(SellingController):
 
 		if cint(self.update_stock):
 			self.validate_dropship_item()
-			self.validate_item_code()
 			self.validate_warehouse()
 			self.update_current_stock()
 			self.validate_delivery_note()
@@ -386,6 +386,8 @@ class SalesInvoice(SellingController):
 			"Repost Item Valuation",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
 		)
@@ -854,11 +856,6 @@ class SalesInvoice(SellingController):
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
-	def validate_item_code(self):
-		for d in self.get("items"):
-			if not d.item_code and self.is_opening == "No":
-				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
-
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
@@ -1035,7 +1032,10 @@ class SalesInvoice(SellingController):
 					merge_entries=False,
 					from_repost=from_repost,
 				)
+
+				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
+				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
@@ -1060,10 +1060,10 @@ class SalesInvoice(SellingController):
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
-		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
+		self.make_precision_loss_gl_entry(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
@@ -1182,12 +1182,13 @@ class SalesInvoice(SellingController):
 							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", None)
+						add_asset_activity(asset.name, _("Asset returned"))
 
 						if asset.calculate_depreciation:
 							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
 							notes = _(
-								"This schedule was created when Asset {0} was returned after being sold through Sales Invoice {1}."
+								"This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 							).format(
 								get_link_to_form(asset.doctype, asset.name),
 								get_link_to_form(self.doctype, self.get("name")),
@@ -1215,6 +1216,7 @@ class SalesInvoice(SellingController):
 							self.get("posting_date"),
 						)
 						asset.db_set("disposal_date", self.posting_date)
+						add_asset_activity(asset.name, _("Asset sold"))
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1652,15 +1654,13 @@ class SalesInvoice(SellingController):
 		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
-		from frappe.query_builder.functions import Coalesce, Sum
+		from frappe.query_builder.functions import Sum
 
 		doc = frappe.qb.DocType(self.doctype)
 		returned_amount = (
 			frappe.qb.from_(doc)
 			.select(Sum(doc.grand_total))
-			.where(
-				(doc.docstatus == 1) & (doc.is_return == 1) & (Coalesce(doc.return_against, "") == self.name)
-			)
+			.where((doc.docstatus == 1) & (doc.is_return == 1) & (doc.return_against == self.name))
 		).run()
 
 		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
@@ -1839,7 +1839,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		doc = frappe.get_doc(ref_doc, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
-			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(partytype))
+			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(partytype)))
 		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
@@ -1853,7 +1853,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		if not company in companies:
 			frappe.throw(
 				_("{0} not allowed to transact with {1}. Please change the Company.").format(
-					partytype, company
+					_(partytype), company
 				)
 			)
 
@@ -2516,55 +2516,49 @@ def get_mode_of_payment_info(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_dunning(source_name, target_doc=None):
+def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	from frappe.model.mapper import get_mapped_doc
 
-	from erpnext.accounts.doctype.dunning.dunning import (
-		calculate_interest_and_amount,
-		get_dunning_letter_text,
-	)
+	def postprocess_dunning(source, target):
+		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
 
-	def set_missing_values(source, target):
-		target.sales_invoice = source_name
-		target.outstanding_amount = source.outstanding_amount
-		overdue_days = (getdate(target.posting_date) - getdate(source.due_date)).days
-		target.overdue_days = overdue_days
-		if frappe.db.exists(
-			"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-		):
-			dunning_type = frappe.get_doc(
-				"Dunning Type", {"start_day": ["<", overdue_days], "end_day": [">=", overdue_days]}
-			)
+		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
+		if dunning_type:
+			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
 			target.dunning_fee = dunning_type.dunning_fee
-			letter_text = get_dunning_letter_text(dunning_type=dunning_type.name, doc=target.as_dict())
+			target.income_account = dunning_type.income_account
+			target.cost_center = dunning_type.cost_center
+			letter_text = get_dunning_letter_text(
+				dunning_type=dunning_type.name, doc=target.as_dict(), language=source.language
+			)
+
 			if letter_text:
 				target.body_text = letter_text.get("body_text")
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
-			amounts = calculate_interest_and_amount(
-				target.outstanding_amount,
-				target.rate_of_interest,
-				target.dunning_fee,
-				target.overdue_days,
-			)
-			target.interest_amount = amounts.get("interest_amount")
-			target.dunning_amount = amounts.get("dunning_amount")
-			target.grand_total = amounts.get("grand_total")
 
-	doclist = get_mapped_doc(
-		"Sales Invoice",
-		source_name,
-		{
+		target.validate()
+
+	return get_mapped_doc(
+		from_doctype="Sales Invoice",
+		from_docname=source_name,
+		target_doc=target_doc,
+		table_maps={
 			"Sales Invoice": {
 				"doctype": "Dunning",
-			}
+				"field_map": {"customer_address": "customer_address", "parent": "sales_invoice"},
+			},
+			"Payment Schedule": {
+				"doctype": "Overdue Payment",
+				"field_map": {"name": "payment_schedule", "parent": "sales_invoice"},
+				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
+			},
 		},
-		target_doc,
-		set_missing_values,
+		postprocess=postprocess_dunning,
+		ignore_permissions=ignore_permissions,
 	)
-	return doclist
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

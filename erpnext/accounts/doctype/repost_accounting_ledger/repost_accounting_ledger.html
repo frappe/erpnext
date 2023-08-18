@@ -1,0 +1,44 @@
+<style>
+	.print-format {
+		padding: 4mm;
+		font-size: 8.0pt !important;
+	}
+	.print-format td {
+		vertical-align:middle !important;
+	}
+	.old {
+	    background-color: #FFB3C0;
+	}
+	.new {
+	    background-color: #B3FFCC;
+	}
+</style>
+
+
+<table class="table table-bordered table-condensed">
+  <colgroup>
+  {% for col in gl_columns%}
+  <col style="width: 18mm;">
+  {% endfor %}
+  </colgroup>
+  <thead>
+    <tr>
+    {% for col in gl_columns%}
+    <td>{{ col.label }}</td>
+    {% endfor %}
+    </tr>
+  </thead>
+{% for gl in gl_data%}
+{% if gl["old"]%}
+<tr class="old">
+{% else %}
+<tr class="new">
+{% endif %}
+  {% for col in gl_columns %}
+  <td class="text-right">
+    {{ gl[col.fieldname] }}
+  </td>
+  {% endfor %}
+</tr>
+{% endfor %}
+</table>

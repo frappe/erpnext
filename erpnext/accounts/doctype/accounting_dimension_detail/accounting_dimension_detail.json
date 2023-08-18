@@ -8,7 +8,10 @@
   "reference_document",
   "default_dimension",
   "mandatory_for_bs",
-  "mandatory_for_pl"
+  "mandatory_for_pl",
+  "column_break_lqns",
+  "automatically_post_balancing_accounting_entry",
+  "offsetting_account"
  ],
  "fields": [
   {
@@ -50,6 +53,23 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Mandatory For Profit and Loss Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "automatically_post_balancing_accounting_entry",
+   "fieldtype": "Check",
+   "label": "Automatically post balancing accounting entry"
+  },
+  {
+   "fieldname": "offsetting_account",
+   "fieldtype": "Link",
+   "label": "Offsetting Account",
+   "mandatory_depends_on": "eval: doc.automatically_post_balancing_accounting_entry",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_lqns",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,

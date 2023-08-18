@@ -2,65 +2,32 @@
 	"env": {
 		"browser": true,
 		"node": true,
-		"es6": true
+		"es2022": true
 	},
 	"parserOptions": {
-		"ecmaVersion": 11,
 		"sourceType": "module"
 	},
 	"extends": "eslint:recommended",
 	"rules": {
-		"indent": [
-			"error",
-			"tab",
-			{ "SwitchCase": 1 }
-		],
-		"brace-style": [
-			"error",
-			"1tbs"
-		],
-		"space-unary-ops": [
-			"error",
-			{ "words": true }
-		],
-		"linebreak-style": [
-			"error",
-			"unix"
-		],
-		"quotes": [
-			"off"
-		],
-		"semi": [
-			"warn",
-			"always"
-		],
-		"camelcase": [
-			"off"
-		],
-		"no-unused-vars": [
-			"warn"
-		],
-		"no-redeclare": [
-			"warn"
-		],
-		"no-console": [
-			"warn"
-		],
-		"no-extra-boolean-cast": [
-			"off"
-		],
-		"no-control-regex": [
-			"off"
-		],
-		"space-before-blocks": "warn",
-		"keyword-spacing": "warn",
-		"comma-spacing": "warn",
-		"key-spacing": "warn"
+		"indent": "off",
+		"brace-style": "off",
+		"no-mixed-spaces-and-tabs": "off",
+		"no-useless-escape": "off",
+		"space-unary-ops": ["error", { "words": true }],
+		"linebreak-style": "off",
+		"quotes": ["off"],
+		"semi": "off",
+		"camelcase": "off",
+		"no-unused-vars": "off",
+		"no-console": ["warn"],
+		"no-extra-boolean-cast": ["off"],
+		"no-control-regex": ["off"]
 	},
 	"root": true,
 	"globals": {
 		"frappe": true,
 		"Vue": true,
+		"SetVueGlobals": true,
 		"erpnext": true,
 		"hub": true,
 		"$": true,
@@ -97,8 +64,10 @@
 		"is_null": true,
 		"in_list": true,
 		"has_common": true,
+		"posthog": true,
 		"has_words": true,
 		"validate_email": true,
+		"open_web_template_values_editor": true,
 		"get_number_format": true,
 		"format_number": true,
 		"format_currency": true,

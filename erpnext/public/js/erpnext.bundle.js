@@ -10,7 +10,6 @@ import "./controllers/transaction";
 import "./templates/item_selector.html";
 import "./utils/item_selector";
 import "./help_links";
-import "./agriculture/ternary_plot";
 import "./templates/item_quick_entry.html";
 import "./utils/contact_address_quick_entry";
 import "./utils/customer_quick_entry";
@@ -25,5 +24,10 @@ import "./bulk_transaction_processing";
 import "./utils/crm_activities";
 import "./templates/crm_activities.html";
 import "./templates/crm_notes.html";
+import "./controllers/accounts.js"
+import "./utils/landed_taxes_and_charges_common.js";
+import "./utils/sales_common.js";
+import "./controllers/buying.js";
+import "./utils/demo.js";
 
 // import { sum } from 'frappe/public/utils/util.js'

@@ -31,6 +31,16 @@ class TestPaymentEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
+	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
+		journals = []
+		if voucher_type and voucher_no:
+			journals = frappe.db.get_all(
+				"Journal Entry Account",
+				filters={"reference_type": voucher_type, "reference_name": voucher_no, "docstatus": 1},
+				fields=["parent"],
+			)
+		return journals
+
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
@@ -591,20 +601,14 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.target_exchange_rate = 45.263
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
-
-		pe.append(
-			"deductions",
-			{
-				"account": "_Test Exchange Gain/Loss - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"amount": 94.80,
-			},
-		)
-
 		pe.save()
 
 		self.assertEqual(flt(pe.difference_amount, 2), 0.0)
 		self.assertEqual(flt(pe.unallocated_amount, 2), 0.0)
+
+		# the exchange gain/loss amount is captured in reference table and a separate Journal will be submitted for them
+		# payment entry will not be generating difference amount
+		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
@@ -792,33 +796,28 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = 55
-
-		pe.append(
-			"deductions",
-			{
-				"account": "_Test Exchange Gain/Loss - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"amount": -500,
-			},
-		)
 		pe.save()
 
 		self.assertEqual(pe.unallocated_amount, 0)
 		self.assertEqual(pe.difference_amount, 0)
-
+		self.assertEqual(pe.references[0].exchange_gain_loss, 500)
 		pe.submit()
 
 		expected_gle = dict(
 			(d[0], d)
 			for d in [
-				["_Test Receivable USD - _TC", 0, 5000, si.name],
+				["_Test Receivable USD - _TC", 0, 5500, si.name],
 				["_Test Bank USD - _TC", 5500, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 0, 500, None],
 			]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+		# Exchange gain/loss should have been posted through a journal
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
+
+		self.assertEqual(exc_je_for_si, exc_je_for_pe)
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
@@ -1061,6 +1060,147 @@ class TestPaymentEntry(FrappeTestCase):
 		}
 		self.assertDictEqual(ref_details, expected_response)
 
+	@change_settings(
+		"Accounts Settings",
+		{
+			"unlink_payment_on_cancellation_of_invoice": 1,
+			"delete_linked_ledger_entries": 1,
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+		},
+	)
+	def test_overallocation_validation_on_payment_terms(self):
+		"""
+		Validate Allocation on Payment Entry based on Payment Schedule. Upon overallocation, validation error must be thrown.
+
+		"""
+		customer = create_customer()
+		create_payment_terms_template()
+
+		# Validate allocation on base/company currency
+		si1 = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si1.payment_terms_template = "Test Receivable Template"
+		si1.save().submit()
+
+		si1.reload()
+		pe = get_payment_entry(si1.doctype, si1.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si1.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(flt(schedule.payment_amount), flt(pe.references[idx].allocated_amount))
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 400
+		pe.references[0].allocated_amount = 200
+		pe.references[1].allocated_amount = 200
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si1.cancel()
+		si1.delete()
+
+		# Validate allocation on foreign currency
+		si2 = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			do_not_save=1,
+		)
+		si2.payment_terms_template = "Test Receivable Template"
+		si2.save().submit()
+
+		si2.reload()
+		pe = get_payment_entry(si2.doctype, si2.name).save()
+		# Allocated amount should be according to the payment schedule
+		for idx, schedule in enumerate(si2.payment_schedule):
+			with self.subTest(idx=idx):
+				self.assertEqual(flt(schedule.payment_amount), flt(pe.references[idx].allocated_amount))
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 200
+		pe.references[0].allocated_amount = 100
+		pe.references[1].allocated_amount = 100
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si2.cancel()
+		si2.delete()
+
+		# Validate allocation in base/company currency on a foreign currency document
+		# when invoice is made is foreign currency, but posted to base/company currency debtors account
+		si3 = create_sales_invoice(
+			customer=customer,
+			currency="USD",
+			conversion_rate=80,
+			do_not_save=1,
+		)
+		si3.payment_terms_template = "Test Receivable Template"
+		si3.save().submit()
+
+		si3.reload()
+		pe = get_payment_entry(si3.doctype, si3.name).save()
+		# Allocated amount should be equal to payment term outstanding
+		self.assertEqual(len(pe.references), 2)
+		for idx, ref in enumerate(pe.references):
+			with self.subTest(idx=idx):
+				self.assertEqual(ref.payment_term_outstanding, ref.allocated_amount)
+		pe.save()
+
+		# Overallocation validation should trigger
+		pe.paid_amount = 16000
+		pe.references[0].allocated_amount = 8000
+		pe.references[1].allocated_amount = 8000
+		self.assertRaises(frappe.ValidationError, pe.save)
+		pe.delete()
+		si3.cancel()
+		si3.delete()
+
+	@change_settings(
+		"Accounts Settings",
+		{
+			"unlink_payment_on_cancellation_of_invoice": 1,
+			"delete_linked_ledger_entries": 1,
+			"allow_multi_currency_invoices_against_single_party_account": 1,
+		},
+	)
+	def test_overallocation_validation_shouldnt_misfire(self):
+		"""
+		Overallocation validation shouldn't fire for Template without "Allocate Payment based on Payment Terms" enabled
+
+		"""
+		customer = create_customer()
+		create_payment_terms_template()
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+
+		# Validate allocation on base/company currency
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+
+		si.reload()
+		pe = get_payment_entry(si.doctype, si.name).save()
+		# There will no term based allocation
+		self.assertEqual(len(pe.references), 1)
+		self.assertEqual(pe.references[0].payment_term, None)
+		self.assertEqual(flt(pe.references[0].allocated_amount), flt(si.grand_total))
+		pe.save()
+
+		# specify a term
+		pe.references[0].payment_term = template.terms[0].payment_term
+		# no validation error should be thrown
+		pe.save()
+
+		pe.paid_amount = si.grand_total + 1
+		pe.references[0].allocated_amount = si.grand_total + 1
+		self.assertRaises(frappe.ValidationError, pe.save)
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 1
+		template.save()
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
@@ -1150,3 +1290,17 @@ def create_payment_terms_template_with_discount(
 def create_payment_term(name):
 	if not frappe.db.exists("Payment Term", name):
 		frappe.get_doc({"doctype": "Payment Term", "payment_term_name": name}).insert()
+
+
+def create_customer(name="_Test Customer 2 USD", currency="USD"):
+	customer = None
+	if frappe.db.exists("Customer", name):
+		customer = name
+	else:
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = name
+		customer.default_currency = currency
+		customer.type = "Individual"
+		customer.save()
+		customer = customer.name
+	return customer

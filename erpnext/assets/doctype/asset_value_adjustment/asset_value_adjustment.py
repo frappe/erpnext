@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_depreciation_amount,
@@ -27,9 +28,21 @@ class AssetValueAdjustment(Document):
 	def on_submit(self):
 		self.make_depreciation_entry()
 		self.reschedule_depreciations(self.new_asset_value)
+		add_asset_activity(
+			self.asset,
+			_("Asset's value adjusted after submission of Asset Value Adjustment {0}").format(
+				get_link_to_form("Asset Value Adjustment", self.name)
+			),
+		)
 
 	def on_cancel(self):
 		self.reschedule_depreciations(self.current_asset_value)
+		add_asset_activity(
+			self.asset,
+			_("Asset's value adjusted after cancellation of Asset Value Adjustment {0}").format(
+				get_link_to_form("Asset Value Adjustment", self.name)
+			),
+		)
 
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
@@ -51,10 +64,10 @@ class AssetValueAdjustment(Document):
 	def make_depreciation_entry(self):
 		asset = frappe.get_doc("Asset", self.asset)
 		(
-			fixed_asset_account,
+			_,
 			accumulated_depreciation_account,
 			depreciation_expense_account,
-		) = get_depreciation_accounts(asset)
+		) = get_depreciation_accounts(asset.asset_category, asset.company)
 
 		depreciation_cost_center, depreciation_series = frappe.get_cached_value(
 			"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
@@ -65,21 +78,23 @@ class AssetValueAdjustment(Document):
 		je.naming_series = depreciation_series
 		je.posting_date = self.date
 		je.company = self.company
-		je.remark = _("Depreciation Entry against {0} worth {1}").format(
-			self.asset, self.difference_amount
-		)
+		je.remark = "Depreciation Entry against {0} worth {1}".format(self.asset, self.difference_amount)
 		je.finance_book = self.finance_book
 
 		credit_entry = {
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": self.asset,
 		}
 
 		debit_entry = {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": self.asset,
 		}
 
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()

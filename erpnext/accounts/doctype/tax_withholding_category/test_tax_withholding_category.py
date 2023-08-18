@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.utils import today
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -17,6 +18,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		# create relevant supplier, etc
 		create_records()
 		create_tax_withholding_category_records()
+		make_pan_no_field()
 
 	def tearDown(self):
 		cancel_invoices()
@@ -316,6 +318,42 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in reversed(orders):
 			d.cancel()
 
+	def test_tds_deduction_for_po_via_payment_entry(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier8", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+		order = create_purchase_order(supplier="Test TDS Supplier8", rate=40000, do_not_save=True)
+
+		# Add some tax on the order
+		order.append(
+			"taxes",
+			{
+				"category": "Total",
+				"charge_type": "Actual",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "Main - _TC",
+				"tax_amount": 8000,
+				"description": "Test",
+				"add_deduct_tax": "Add",
+			},
+		)
+
+		order.save()
+
+		order.apply_tds = 1
+		order.tax_withholding_category = "Cumulative Threshold TDS"
+		order.submit()
+
+		self.assertEqual(order.taxes[0].tax_amount, 4000)
+
+		payment = get_payment_entry(order.doctype, order.name)
+		payment.apply_tax_withholding_amount = 1
+		payment.tax_withholding_category = "Cumulative Threshold TDS"
+		payment.submit()
+		self.assertEqual(payment.taxes[0].tax_amount, 4000)
+
 	def test_multi_category_single_supplier(self):
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier5", "tax_withholding_category", "Test Service Category"
@@ -414,6 +452,40 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pe1.cancel()
 		pe2.cancel()
 		pe3.cancel()
+
+	def test_lower_deduction_certificate_application(self):
+		frappe.db.set_value(
+			"Supplier",
+			"Test LDC Supplier",
+			{
+				"tax_withholding_category": "Test Service Category",
+				"pan": "ABCTY1234D",
+			},
+		)
+
+		create_lower_deduction_certificate(
+			supplier="Test LDC Supplier",
+			certificate_no="1AE0423AAJ",
+			tax_withholding_category="Test Service Category",
+			tax_rate=2,
+			limit=50000,
+		)
+
+		pi1 = create_purchase_invoice(supplier="Test LDC Supplier", rate=35000)
+		pi1.submit()
+		self.assertEqual(pi1.taxes[0].tax_amount, 700)
+
+		pi2 = create_purchase_invoice(supplier="Test LDC Supplier", rate=35000)
+		pi2.submit()
+		self.assertEqual(pi2.taxes[0].tax_amount, 2300)
+
+		pi3 = create_purchase_invoice(supplier="Test LDC Supplier", rate=35000)
+		pi3.submit()
+		self.assertEqual(pi3.taxes[0].tax_amount, 3500)
+
+		pi1.cancel()
+		pi2.cancel()
+		pi3.cancel()
 
 
 def cancel_invoices():
@@ -573,6 +645,8 @@ def create_records():
 		"Test TDS Supplier5",
 		"Test TDS Supplier6",
 		"Test TDS Supplier7",
+		"Test TDS Supplier8",
+		"Test LDC Supplier",
 	]:
 		if frappe.db.exists("Supplier", name):
 			continue
@@ -769,3 +843,39 @@ def create_tax_withholding_category(
 				"accounts": [{"company": "_Test Company", "account": account}],
 			}
 		).insert()
+
+
+def create_lower_deduction_certificate(
+	supplier, tax_withholding_category, tax_rate, certificate_no, limit
+):
+	fiscal_year = get_fiscal_year(today(), company="_Test Company")
+	if not frappe.db.exists("Lower Deduction Certificate", certificate_no):
+		frappe.get_doc(
+			{
+				"doctype": "Lower Deduction Certificate",
+				"company": "_Test Company",
+				"supplier": supplier,
+				"certificate_no": certificate_no,
+				"tax_withholding_category": tax_withholding_category,
+				"fiscal_year": fiscal_year[0],
+				"valid_from": fiscal_year[1],
+				"valid_upto": fiscal_year[2],
+				"rate": tax_rate,
+				"certificate_limit": limit,
+			}
+		).insert()
+
+
+def make_pan_no_field():
+	pan_field = {
+		"Supplier": [
+			{
+				"fieldname": "pan",
+				"label": "PAN",
+				"fieldtype": "Data",
+				"translatable": 0,
+			}
+		]
+	}
+
+	create_custom_fields(pan_field, update=1)

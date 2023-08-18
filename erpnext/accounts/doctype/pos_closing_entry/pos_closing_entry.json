@@ -221,6 +221,7 @@
    "read_only": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -235,7 +236,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2022-08-01 11:37:14.991228",
+ "modified": "2023-08-10 16:25:49.322697",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

@@ -542,6 +542,7 @@ def get_stock_availability(item_code, warehouse):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+
 		return bin_qty - pos_sales_qty, is_stock_item
 	else:
 		is_stock_item = True
@@ -595,7 +596,6 @@ def get_pos_reserved_qty(item_code, warehouse):
 		.where(
 			(p_inv.name == p_item.parent)
 			& (IfNull(p_inv.consolidated_invoice, "") == "")
-			& (p_inv.is_return == 0)
 			& (p_item.docstatus == 1)
 			& (p_item.item_code == item_code)
 			& (p_item.warehouse == warehouse)

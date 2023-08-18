@@ -194,6 +194,7 @@
   "select_print_heading",
   "language",
   "subscription_section",
+  "subscription",
   "from_date",
   "auto_repeat",
   "column_break_140",
@@ -2018,6 +2019,12 @@
    "read_only": 1
   },
   {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
+  },
+  {
    "default": "0",
    "depends_on": "eval: doc.apply_discount_on == \"Grand Total\"",
    "fieldname": "is_cash_or_non_trade_discount",
@@ -2157,7 +2164,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-06-21 16:02:18.988799",
+ "modified": "2023-07-25 16:02:18.988799",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

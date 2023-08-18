@@ -49,7 +49,8 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "item_code.item_group",
@@ -78,7 +79,8 @@
    "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "item_code.item_name",
@@ -113,7 +115,8 @@
    "fieldtype": "Dynamic Link",
    "label": "Voucher No",
    "no_copy": 1,
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "search_index": 1
   },
   {
    "default": "0",
@@ -180,14 +183,16 @@
    "in_standard_filter": 1,
    "label": "Warehouse",
    "mandatory_depends_on": "eval:doc.type_of_transaction != \"Maintenance\"",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "search_index": 1
   },
   {
    "fieldname": "type_of_transaction",
    "fieldtype": "Select",
    "label": "Type of Transaction",
    "options": "\nInward\nOutward\nMaintenance\nAsset Repair",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "naming_series",
@@ -225,7 +230,8 @@
    "fieldtype": "Data",
    "label": "Voucher Detail No",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "allow_bulk_edit": 1,
@@ -244,7 +250,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-16 10:53:04.045605",
+ "modified": "2023-07-28 12:56:03.072224",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
