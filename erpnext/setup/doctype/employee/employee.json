@@ -142,6 +142,7 @@
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
    "options": "HR-EMP-",
+   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -162,17 +163,20 @@
    "allow_in_quick_entry": 1,
    "fieldname": "middle_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Middle Name"
   },
   {
    "allow_in_quick_entry": 1,
    "fieldname": "last_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Last Name"
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
@@ -219,6 +223,7 @@
   {
    "fieldname": "employee_number",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "Employee Number",
    "oldfieldname": "employee_number",
@@ -822,48 +827,13 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-03-30 15:57:05.174592",
+ "modified": "2023-08-18 11:43:42.465168",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
- "permissions": [
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Employee"
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "import": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "import": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Manager",
-   "set_user_permissions": 1,
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "search_fields": "employee_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
