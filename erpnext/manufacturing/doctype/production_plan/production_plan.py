@@ -795,6 +795,9 @@ class ProductionPlan(Document):
 			if not row.item_code:
 				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
 
+			if not row.bom_no:
+				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
+
 			bom_data = []
 
 			warehouse = row.warehouse if self.skip_available_sub_assembly_item else None
