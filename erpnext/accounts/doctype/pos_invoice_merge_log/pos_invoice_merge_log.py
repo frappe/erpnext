@@ -423,7 +423,6 @@ def split_invoices(invoices):
 
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
-	# breakpoint()
 	try:
 		for customer, invoices in invoice_by_customer.items():
 			for _invoices in split_invoices(invoices):
