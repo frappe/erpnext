@@ -908,6 +908,7 @@ def get_outstanding_invoices(
 	min_outstanding=None,
 	max_outstanding=None,
 	accounting_dimensions=None,
+	vouchers=None,
 ):
 
 	ple = qb.DocType("Payment Ledger Entry")
@@ -933,6 +934,7 @@ def get_outstanding_invoices(
 
 	ple_query = QueryPaymentLedger()
 	invoice_list = ple_query.get_voucher_outstandings(
+		vouchers=vouchers,
 		common_filter=common_filter,
 		posting_date=posting_date,
 		min_outstanding=min_outstanding,

@@ -95,7 +95,6 @@ class POSInvoiceMergeLog(Document):
 			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
 		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
-
 		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
 
 	def on_cancel(self):
@@ -108,7 +107,6 @@ class POSInvoiceMergeLog(Document):
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
-
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
@@ -165,8 +163,7 @@ class POSInvoiceMergeLog(Document):
 				for i in items:
 					if (
 						i.item_code == item.item_code
-						and not i.serial_no
-						and not i.batch_no
+						and not i.serial_and_batch_bundle
 						and i.uom == item.uom
 						and i.net_rate == item.net_rate
 						and i.warehouse == item.warehouse
@@ -385,6 +382,7 @@ def split_invoices(invoices):
 		for d in invoices
 		if d.is_return and d.return_against
 	]
+
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
 			if not item.serial_no and not item.serial_and_batch_bundle:

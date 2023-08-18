@@ -193,7 +193,7 @@ class RequestforQuotation(BuyingController):
 				"supplier": data.get("supplier"),
 				"supplier_name": data.get("supplier_name"),
 				"update_password_link": f'<a href="{update_password_link}" class="btn btn-default btn-xs" target="_blank">{_("Set Password")}</a>',
-				"portal_link": f'<a href="{rfq_link}" class="btn btn-default btn-sm" target="_blank"> {_("Submit your Quotation")} </a>',
+				"portal_link": f'<a href="{rfq_link}" class="btn btn-default btn-xs" target="_blank"> {_("Submit your Quotation")} </a>',
 				"user_fullname": full_name,
 			}
 		)
