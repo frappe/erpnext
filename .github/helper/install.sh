@@ -12,6 +12,13 @@ githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
 frappebranch=${FRAPPE_BRANCH:-$githubbranch}
 
+echo 'base_ref' $GITHUB_BASE_REF
+echo 'github_ref' $GITHUB_REF
+
+echo 'githubbranch' $githubbranch
+echo 'frappeuser' $frappeuser
+echo 'frappebranch' $frappebranch
+
 git clone "https://github.com/${frappeuser}/frappe" --branch "${frappebranch}" --depth 1
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
 
