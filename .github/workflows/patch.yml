@@ -109,18 +109,15 @@ jobs:
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
 
-          for version in $(13 14)
-          do
+          version="14"
           branch_name="version-$version-hotfix"
-
+          echo "Updating to v$version"
           git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
           git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
-
-          echo "Updating to v$version"
           git -C "apps/frappe" checkout -q -f $branch_name
           git -C "apps/erpnext" checkout -q -f $branch_name
-
           bench pip install -e ./apps/payments
           bench pip install -e ./apps/erpnext
-
           bench --site test_site migrate
+
+          echo "Patch ran successfully"
