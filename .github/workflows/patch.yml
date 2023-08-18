@@ -103,8 +103,8 @@ jobs:
         run: |
           cd ~/frappe-bench/
 
-          wget https://erpnext.com/files/v13-erpnext.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/v13-erpnext.sql.gz
+          wget https://erpnext.com/files/v13-erpnext_2.sql.gz
+          bench --site test_site --force restore ~/frappe-bench/v13-erpnext_2.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
