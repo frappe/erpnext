@@ -5,15 +5,12 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, date_diff, flt, formatdate, getdate
+from frappe.utils import flt, formatdate, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.assets.doctype.asset.asset import (
-	get_asset_value_after_depreciation,
-	get_depreciation_amount,
-)
+from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 
 
@@ -108,42 +105,47 @@ class AssetValueAdjustment(Document):
 
 	def reschedule_depreciations(self, asset_value):
 		asset = frappe.get_doc("Asset", self.asset)
-		country = frappe.get_value("Company", self.company, "country")
 
-		for d in asset.finance_books:
-			d.value_after_depreciation = asset_value
+		asset.flags.decrease_in_asset_value_due_to_value_adjustment = True
 
-			if d.depreciation_method in ("Straight Line", "Manual"):
-				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
-				total_days = date_diff(end_date, self.date)
-				rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
-					total_days
-				)
-				from_date = self.date
-			else:
-				no_of_depreciations = len(
-					[
-						s.name for s in asset.schedules if (cint(s.finance_book_id) == d.idx and not s.journal_entry)
-					]
-				)
+		asset.prepare_depreciation_data(value_after_depreciation=asset_value, ignore_booked_entry=True)
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.save()
 
-			value_after_depreciation = d.value_after_depreciation
-			for data in asset.schedules:
-				if cint(data.finance_book_id) == d.idx and not data.journal_entry:
-					if d.depreciation_method in ("Straight Line", "Manual"):
-						days = date_diff(data.schedule_date, from_date)
-						depreciation_amount = days * rate_per_day
-						from_date = data.schedule_date
-					else:
-						depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
+		# for d in asset.finance_books:
+		# 	d.value_after_depreciation = asset_value
 
-					if depreciation_amount:
-						value_after_depreciation -= flt(depreciation_amount)
-						data.depreciation_amount = depreciation_amount
+		# 	if d.depreciation_method in ("Straight Line", "Manual"):
+		# 		end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
+		# 		total_days = date_diff(end_date, self.date)
+		# 		rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
+		# 			total_days
+		# 		)
+		# 		from_date = self.date
+		# 	else:
+		# 		no_of_depreciations = len(
+		# 			[
+		# 				s.name for s in asset.schedules if (cint(s.finance_book_id) == d.idx and not s.journal_entry)
+		# 			]
+		# 		)
 
-			d.db_update()
+		# 	value_after_depreciation = d.value_after_depreciation
+		# 	for data in asset.schedules:
+		# 		if cint(data.finance_book_id) == d.idx and not data.journal_entry:
+		# 			if d.depreciation_method in ("Straight Line", "Manual"):
+		# 				days = date_diff(data.schedule_date, from_date)
+		# 				depreciation_amount = days * rate_per_day
+		# 				from_date = data.schedule_date
+		# 			else:
+		# 				depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
 
-		asset.set_accumulated_depreciation(ignore_booked_entry=True)
-		for asset_data in asset.schedules:
-			if not asset_data.journal_entry:
-				asset_data.db_update()
+		# 			if depreciation_amount:
+		# 				value_after_depreciation -= flt(depreciation_amount)
+		# 				data.depreciation_amount = depreciation_amount
+
+		# 	d.db_update()
+
+		# asset.set_accumulated_depreciation(ignore_booked_entry=True)
+		# for asset_data in asset.schedules:
+		# 	if not asset_data.journal_entry:
+		# 		asset_data.db_update()
