@@ -1422,6 +1422,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Item Valuation",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 		)
