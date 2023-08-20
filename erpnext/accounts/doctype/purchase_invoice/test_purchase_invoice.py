@@ -1725,12 +1725,52 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
 
-<<<<<<< HEAD
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
 			create_purchase_order,
-=======
+		)
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+		)
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		automatically_fetch_payment_terms()
+		frappe.db.set_value(
+			"Payment Terms Template",
+			"_Test Payment Term Template",
+			"allocate_payment_based_on_payment_terms",
+			0,
+		)
+
+		po = create_purchase_order(do_not_save=1)
+		po.payment_terms_template = "_Test Payment Term Template"
+		po.save()
+		po.submit()
+
+		pr = create_pr_against_po(po.name, received_qty=4)
+		pi = make_pi_from_pr(pr.name)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 1000)
+
+		frappe.db.set_value(
+			"Payment Terms Template",
+			"_Test Payment Term Template",
+			"allocate_payment_based_on_payment_terms",
+			1,
+		)
+		pi = make_pi_from_pr(pr.name)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500)
+
+		automatically_fetch_payment_terms(enable=0)
+		frappe.db.set_value(
+			"Payment Terms Template",
+			"_Test Payment Term Template",
+			"allocate_payment_based_on_payment_terms",
+			0,
+		)
+
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.report.trial_balance.test_trial_balance import (
@@ -1787,78 +1827,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		disable_dimension()
 
 
-def set_advance_flag(company, flag, default_account):
-	frappe.db.set_value(
-		"Company",
-		company,
-		{
-			"book_advance_payments_in_separate_party_account": flag,
-			"default_advance_paid_account": default_account,
-		},
-	)
-
-
-def check_gl_entries(
-	doc,
-	voucher_no,
-	expected_gle,
-	posting_date,
-	voucher_type="Purchase Invoice",
-	additional_columns=None,
-):
-	gl = frappe.qb.DocType("GL Entry")
-	query = (
-		frappe.qb.from_(gl)
-		.select(gl.account, gl.debit, gl.credit, gl.posting_date)
-		.where(
-			(gl.voucher_type == voucher_type)
-			& (gl.voucher_no == voucher_no)
-			& (gl.posting_date >= posting_date)
-			& (gl.is_cancelled == 0)
->>>>>>> 77deac4fb9 (test: PI offsetting entry for accounting dimension)
-		)
-		from erpnext.selling.doctype.sales_order.test_sales_order import (
-			automatically_fetch_payment_terms,
-		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
-			make_purchase_invoice as make_pi_from_pr,
-		)
-
-		automatically_fetch_payment_terms()
-		frappe.db.set_value(
-			"Payment Terms Template",
-			"_Test Payment Term Template",
-			"allocate_payment_based_on_payment_terms",
-			0,
-		)
-
-		po = create_purchase_order(do_not_save=1)
-		po.payment_terms_template = "_Test Payment Term Template"
-		po.save()
-		po.submit()
-
-		pr = create_pr_against_po(po.name, received_qty=4)
-		pi = make_pi_from_pr(pr.name)
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 1000)
-
-		frappe.db.set_value(
-			"Payment Terms Template",
-			"_Test Payment Term Template",
-			"allocate_payment_based_on_payment_terms",
-			1,
-		)
-		pi = make_pi_from_pr(pr.name)
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500)
-
-		automatically_fetch_payment_terms(enable=0)
-		frappe.db.set_value(
-			"Payment Terms Template",
-			"_Test Payment Term Template",
-			"allocate_payment_based_on_payment_terms",
-			0,
-		)
-
-
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
 		"""select account, debit, credit, posting_date
@@ -1868,33 +1836,12 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		(voucher_no, posting_date),
 		as_dict=1,
 	)
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	if check_acc_dimensions:
-		for col in list(expected_gle[0][4].keys()):
-			query = query.select(col)
-=======
-
-	if additional_columns:
-		for col in additional_columns:
-			query = query.select(gl[col])
-
->>>>>>> ecca9cb023 (fix: Add company filters for account)
-	gl_entries = query.run(as_dict=True)
->>>>>>> 77deac4fb9 (test: PI offsetting entry for accounting dimension)
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
-
-		if additional_columns:
-			j = 4
-			for col in additional_columns:
-				doc.assertEqual(expected_gle[i][j], gle[col])
-				j += 1
 
 
 def create_tax_witholding_category(category_name, company, account):
