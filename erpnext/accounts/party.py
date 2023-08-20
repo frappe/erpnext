@@ -950,7 +950,7 @@ def get_partywise_advanced_payment_amount(
 	if party:
 		query = query.where(gle.party == party)
 
-	data = query.run(as_dict=True)
+	data = query.run()
 	if data:
 		return frappe._dict(data)
 
