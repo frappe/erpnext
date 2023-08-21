@@ -4,9 +4,10 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, cstr, get_last_day, nowdate
+from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
@@ -46,40 +47,44 @@ class TestAssetValueAdjustment(unittest.TestCase):
 
 	def test_asset_depreciation_value_adjustment(self):
 		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
+			item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location"
 		)
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
 		asset_doc.calculate_depreciation = 1
 
-		month_end_date = get_last_day(nowdate())
-		purchase_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
-
-		asset_doc.available_for_use_date = purchase_date
-		asset_doc.purchase_date = purchase_date
+		asset_doc.available_for_use_date = "2023-01-15"
+		asset_doc.purchase_date = "2023-01-15"
 		asset_doc.calculate_depreciation = 1
 		asset_doc.append(
 			"finance_books",
 			{
 				"expected_value_after_useful_life": 200,
 				"depreciation_method": "Straight Line",
-				"total_number_of_depreciations": 3,
-				"frequency_of_depreciation": 10,
-				"depreciation_start_date": month_end_date,
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"depreciation_start_date": "2023-01-31",
 			},
 		)
 		asset_doc.submit()
 
+		post_depreciation_entries(getdate("2023-08-21"))
+
 		current_value = get_asset_value_after_depreciation(asset_doc.name)
 		adj_doc = make_asset_value_adjustment(
-			asset=asset_doc.name, current_asset_value=current_value, new_asset_value=50000.0
+			asset=asset_doc.name,
+			current_asset_value=current_value,
+			new_asset_value=50000.0,
+			date="2023-08-21",
 		)
 		adj_doc.submit()
 
+		asset_doc.reload()
+
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 0.0, 50000.0),
-			("_Test Depreciations - _TC", 50000.0, 0.0),
+			("_Test Accumulated Depreciations - _TC", 0.0, 4625.29),
+			("_Test Depreciations - _TC", 4625.29, 0.0),
 		)
 
 		gle = frappe.db.sql(
@@ -92,10 +97,19 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertSequenceEqual(gle, expected_gle)
 
 		expected_schedules = [
-			["2023-08-31", 1203.73, 1203.73],
-			["2024-06-30", 33266.67, 34470.4],
-			["2025-04-30", 33266.67, 67737.07],
-			["2026-02-21", 32062.93, 99800.0],
+			["2023-01-31", 5474.73, 5474.73],
+			["2023-02-28", 9983.33, 15458.06],
+			["2023-03-31", 9983.33, 25441.39],
+			["2023-04-30", 9983.33, 35424.72],
+			["2023-05-31", 9983.33, 45408.05],
+			["2023-06-30", 9983.33, 55391.38],
+			["2023-07-31", 9983.33, 65374.71],
+			["2023-08-31", 8300.0, 73674.71],
+			["2023-09-30", 8300.0, 81974.71],
+			["2023-10-31", 8300.0, 90274.71],
+			["2023-11-30", 8300.0, 98574.71],
+			["2023-12-31", 8300.0, 106874.71],
+			["2024-01-15", 8300.0, 115174.71],
 		]
 
 		schedules = [
