@@ -85,7 +85,7 @@ class Asset(AccountsController):
 		self,
 		date_of_disposal=None,
 		date_of_return=None,
-		value_after_depreciation=0,
+		value_after_depreciation=None,
 		ignore_booked_entry=False,
 	):
 		if self.calculate_depreciation:
@@ -291,10 +291,10 @@ class Asset(AccountsController):
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
 			d.rate_of_depreciation = flt(
-				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
+				self.get_depreciation_rate(d, on_validate=True), d.precisionc("rate_of_depreciation")
 			)
 
-	def make_depreciation_schedule(self, date_of_disposal, value_after_depreciation=0):
+	def make_depreciation_schedule(self, date_of_disposal, value_after_depreciation=None):
 		if not self.get("schedules"):
 			self.schedules = []
 
@@ -312,7 +312,7 @@ class Asset(AccountsController):
 			self.sort_depreciation_schedule()
 
 	def _make_depreciation_schedule(
-		self, finance_book, start, date_of_disposal, value_after_depreciation=0
+		self, finance_book, start, date_of_disposal, value_after_depreciation=None
 	):
 		self.validate_asset_finance_books(finance_book)
 
