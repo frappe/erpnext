@@ -160,10 +160,6 @@ def get_invoiced_item_gross_margin(
 	return result
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
 def get_query_columns(report_columns):
 	if not report_columns:
 		return ""
@@ -191,12 +187,8 @@ def get_values_for_columns(report_columns, report_row):
 		values[fieldname] = report_row.get(fieldname)
 
 	return values
-<<<<<<< HEAD
-=======
-=======
 
 
->>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
 def get_party_details(party_type, party_list):
 	party_details = {}
 	party = frappe.qb.DocType(party_type)
@@ -233,9 +225,6 @@ def get_taxes_query(invoice_list, doctype, parenttype):
 	elif doctype == "Sales Taxes and Charges":
 		return query
 	return query.where(taxes.charge_type.isin(["On Paid Amount", "Actual"]))
-<<<<<<< HEAD
->>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
-=======
 
 
 def get_journal_entries(filters, args):
@@ -295,18 +284,7 @@ def get_payment_entries(filters, args):
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> d5aa0e325e (feat: fetch JV with PE)
-=======
-	query = get_conditions(filters, query, [pe], accounting_dimensions, payments=True)
-=======
-	query = get_conditions(filters, query, [pe], payments=True)
->>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
-=======
 	query = get_conditions(filters, query, doctype="Payment Entry", payments=True)
->>>>>>> 33f8f7d7b3 (fix: exclude cancelled gl entries for opening balance)
 	payment_entries = query.run(as_dict=True)
 	return payment_entries
 
@@ -350,9 +328,6 @@ def get_conditions(filters, query, doctype, child_doctype=None, payments=False):
 	if parent_doc.get_table_name() != "tabJournal Entry":
 		query = filter_invoices_based_on_dimensions(filters, query, parent_doc)
 	return query
-<<<<<<< HEAD
->>>>>>> 6c11ca1b75 (refactor: use qb to fetch PE JV and Inv)
-=======
 
 
 def get_advance_taxes_and_charges(invoice_list):
@@ -374,10 +349,6 @@ def get_advance_taxes_and_charges(invoice_list):
 			& (adv_taxes.base_tax_amount != 0)
 		)
 		.groupby(adv_taxes.parent, adv_taxes.account_head, adv_taxes.add_deduct_tax)
-<<<<<<< HEAD
-	).run(as_dict=True, debug=True)
->>>>>>> f5027fdcaf (refactor: move fn to fetch advance taxes to utils & use qb)
-=======
 	).run(as_dict=True)
 
 
@@ -391,19 +362,8 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
 				fieldname = dimension.fieldname
-<<<<<<< HEAD
-				if inv.fieldname != filters[fieldname]:
-					break
-		else:
-			invoices_with_acc_dimensions.append(inv)
-	return invoices_with_acc_dimensions
-<<<<<<< HEAD
->>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
-=======
-=======
 				query = query.where(parent_doc[fieldname] == filters.fieldname)
 	return query
->>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 
 
 def get_opening_row(party_type, party, from_date, company):
@@ -424,4 +384,3 @@ def get_opening_row(party_type, party, from_date, company):
 			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)

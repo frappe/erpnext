@@ -8,26 +8,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika import Order
 
-<<<<<<< HEAD
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
-	get_accounting_dimensions,
-)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
-=======
-from erpnext.accounts.report.utils import get_party_details, get_taxes_query
->>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
-=======
-=======
->>>>>>> 1e8b8b5b29 (fix: linting issues)
-=======
-=======
->>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 from erpnext.accounts.party import get_party_account
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 from erpnext.accounts.report.utils import (
 	get_advance_taxes_and_charges,
 	get_conditions,
@@ -39,10 +20,6 @@ from erpnext.accounts.report.utils import (
 	get_taxes_query,
 	get_values_for_columns,
 )
-<<<<<<< HEAD
->>>>>>> d5aa0e325e (feat: fetch JV with PE)
-=======
->>>>>>> 1e8b8b5b29 (fix: linting issues)
 
 
 def execute(filters=None):
@@ -53,47 +30,13 @@ def _execute(filters=None, additional_table_columns=None):
 	if not filters:
 		filters = {}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 	include_payments = filters.get("include_payments")
 	if filters.get("include_payments") and not filters.get("supplier"):
 		frappe.throw(_("Please select a supplier for fetching payments."))
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
-=======
-=======
-	include_payments = filters.get("include_payments")
->>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
-	invoice_list = get_invoices(filters, additional_query_columns)
 	if filters.get("include_payments"):
-<<<<<<< HEAD
-<<<<<<< HEAD
-		if not filters.get("supplier"):
-			frappe.throw(_("Please select a supplier for fetching payments."))
-<<<<<<< HEAD
-		invoice_list += get_payments(filters, additional_query_columns)
->>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
-=======
-=======
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
-		invoice_list += get_payments(filters, additional_table_columns)
-=======
 		invoice_list += get_payments(filters)
->>>>>>> 0d89bfacdb (fix: show additional table cols from india compliance api call)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 1e8b8b5b29 (fix: linting issues)
-=======
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	if len(invoice_list) > 0 and accounting_dimensions:
-		invoice_list = filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoice_list)
-
->>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
-=======
->>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
@@ -134,51 +77,6 @@ def _execute(filters=None, additional_table_columns=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-		row = [
-<<<<<<< HEAD
-=======
-			inv.doctype,
->>>>>>> 1e8b8b5b29 (fix: linting issues)
-			inv.name,
-			inv.posting_date,
-			inv.supplier,
-			inv.supplier_name,
-			*get_values_for_columns(additional_table_columns, inv).values(),
-			supplier_details.get(inv.supplier),  # supplier_group
-			inv.tax_id,
-=======
-		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
-=======
-		row = [inv.doctype, inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
->>>>>>> d5aa0e325e (feat: fetch JV with PE)
-
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.append(inv.get(col))
-
-		row += [
-<<<<<<< HEAD
-			supplier_details.get(inv.supplier)[0],  # supplier_group
-			supplier_details.get(inv.supplier)[1],
->>>>>>> 4f0aa54c09 (feat: add check for fetching PE along with Invoice details in Purchase Register)
-=======
-			supplier_details.get(inv.supplier).get("supplier_group"),  # supplier_group
-			supplier_details.get(inv.supplier).get("tax_id"),
->>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
-			inv.credit_to,
-			inv.mode_of_payment,
-			", ".join(project) if inv.doctype == "Purchase Invoice" else inv.project,
-			inv.bill_no,
-			inv.bill_date,
-			inv.remarks,
-			", ".join(purchase_order),
-			", ".join(purchase_receipt),
-			company_currency,
-		]
-=======
 		row = {
 			"voucher_type": inv.doctype,
 			"voucher_no": inv.name,
@@ -196,7 +94,6 @@ def _execute(filters=None, additional_table_columns=None):
 			"purchase_receipt": ", ".join(purchase_receipt),
 			"currency": company_currency,
 		}
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 
 		# map expense values
 		base_net_total = 0

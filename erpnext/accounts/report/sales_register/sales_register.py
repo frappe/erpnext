@@ -9,26 +9,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika import Order
 
-<<<<<<< HEAD
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
-	get_accounting_dimensions,
-)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
-=======
-from erpnext.accounts.report.utils import get_party_details, get_taxes_query
->>>>>>> cbef6c30c3 (refactor: move repeating code to common controller)
-=======
-=======
->>>>>>> 1e8b8b5b29 (fix: linting issues)
-=======
-=======
->>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 from erpnext.accounts.party import get_party_account
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 from erpnext.accounts.report.utils import (
 	get_advance_taxes_and_charges,
 	get_conditions,
@@ -40,10 +21,6 @@ from erpnext.accounts.report.utils import (
 	get_taxes_query,
 	get_values_for_columns,
 )
-<<<<<<< HEAD
->>>>>>> d5aa0e325e (feat: fetch JV with PE)
-=======
->>>>>>> 1e8b8b5b29 (fix: linting issues)
 
 
 def execute(filters=None):
@@ -54,44 +31,13 @@ def _execute(filters, additional_table_columns=None):
 	if not filters:
 		filters = frappe._dict({})
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 	include_payments = filters.get("include_payments")
 	if filters.get("include_payments") and not filters.get("customer"):
 		frappe.throw(_("Please select a customer for fetching payments."))
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
-=======
-	include_payments = filters.get("include_payments")
-	invoice_list = get_invoices(filters, additional_query_columns)
 	if filters.get("include_payments"):
-<<<<<<< HEAD
-<<<<<<< HEAD
-		if not filters.get("customer"):
-			frappe.throw(_("Please select a customer for fetching payments."))
-<<<<<<< HEAD
-		invoice_list += get_payments(filters, additional_query_columns)
->>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
-=======
-=======
->>>>>>> 944244ceff (fix: modify rows and columns for ledger view)
-		invoice_list += get_payments(filters, additional_table_columns)
-=======
 		invoice_list += get_payments(filters)
->>>>>>> 0d89bfacdb (fix: show additional table cols from india compliance api call)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 1e8b8b5b29 (fix: linting issues)
-=======
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	if len(invoice_list) > 0 and accounting_dimensions:
-		invoice_list = filter_invoices_based_on_dimensions(filters, accounting_dimensions, invoice_list)
-
->>>>>>> bf08aa7529 (fix: filtering through accounting dimensions)
-=======
->>>>>>> c084fe6b3f (refactor: filter accounting dimensions using qb)
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
@@ -142,9 +88,9 @@ def _execute(filters, additional_table_columns=None):
 			"customer": inv.customer,
 			"customer_name": inv.customer_name,
 			**get_values_for_columns(additional_table_columns, inv),
-			"customer_group": inv.get("customer_group"),
-			"territory": inv.get("territory"),
-			"tax_id": inv.get("tax_id"),
+			"customer_group": customer_details.get(inv.customer).get("customer_group"),
+			"territory": customer_details.get(inv.customer).get("territory"),
+			"tax_id": customer_details.get(inv.customer).get("tax_id"),
 			"receivable_account": inv.debit_to,
 			"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
 			"project": inv.project,
@@ -157,31 +103,6 @@ def _execute(filters, additional_table_columns=None):
 			"currency": company_currency,
 		}
 
-<<<<<<< HEAD
-=======
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.update({col: inv.get(col)})
-
-		row.update(
-			{
-				"customer_group": customer_details.get(inv.customer).get("customer_group"),
-				"territory": customer_details.get(inv.customer).get("territory"),
-				"tax_id": customer_details.get(inv.customer).get("tax_id"),
-				"receivable_account": inv.debit_to,
-				"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
-				"project": inv.project,
-				"owner": inv.owner,
-				"remarks": inv.remarks,
-				"sales_order": ", ".join(sales_order),
-				"delivery_note": ", ".join(delivery_note),
-				"cost_center": ", ".join(cost_center) if inv.doctype == "Sales Invoice" else inv.cost_center,
-				"warehouse": ", ".join(warehouse),
-				"currency": company_currency,
-			}
-		)
-
->>>>>>> d7ffad1dd3 (feat: fetch PE along with SI)
 		# map income values
 		base_net_total = 0
 		for income_acc in income_accounts:
@@ -619,7 +540,7 @@ def get_invoice_so_dn_map(invoice_list):
 	si_items = frappe.db.sql(
 		"""select parent, sales_order, delivery_note, so_detail
 		from `tabSales Invoice Item` where parent in (%s)
-		and (ifnull(sales_order, '') != '' or ifnull(delivery_note, '') != '')"""
+		and (sales_order != '' or delivery_note != '')"""
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,
@@ -654,7 +575,7 @@ def get_invoice_cc_wh_map(invoice_list):
 	si_items = frappe.db.sql(
 		"""select parent, cost_center, warehouse
 		from `tabSales Invoice Item` where parent in (%s)
-		and (ifnull(cost_center, '') != '' or ifnull(warehouse, '') != '')"""
+		and (cost_center != '' or warehouse != '')"""
 		% ", ".join(["%s"] * len(invoice_list)),
 		tuple(inv.name for inv in invoice_list),
 		as_dict=1,
