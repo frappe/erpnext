@@ -291,7 +291,7 @@ class Asset(AccountsController):
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
 			d.rate_of_depreciation = flt(
-				self.get_depreciation_rate(d, on_validate=True), d.precisionc("rate_of_depreciation")
+				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
 			)
 
 	def make_depreciation_schedule(self, date_of_disposal, value_after_depreciation=None):
