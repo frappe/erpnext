@@ -49,9 +49,22 @@ class PurchaseOrder(BuyingController):
 			}
 		]
 
+	def can_update_items(self) -> bool:
+		result = True
+
+		if self.is_subcontracted and not self.is_old_subcontracting_flow:
+			# Check - 1: NOT ALLOWED if non-cancelled Subcontracting Order exists for this Purchase Order
+			if frappe.db.exists(
+				"Subcontracting Order", {"purchase_order": self.name, "docstatus": ["!=", 2]}
+			):
+				return False
+
+		return result
+
 	def onload(self):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
+		self.set_onload("can_update_items", self.can_update_items())
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()

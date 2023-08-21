@@ -678,6 +678,37 @@ erpnext.utils.update_child_items = function(opts) {
 		})
 	}
 
+	if (frm.doc.doctype == 'Purchase Order' && frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
+		fields.push({
+			fieldtype:'Link',
+			fieldname:'fg_item',
+			options: 'Item',
+			reqd: 1,
+			in_list_view: 0,
+			read_only: 0,
+			disabled: 0,
+			label: __('Finished Good Item'),
+			get_query: () => {
+				return {
+					filters: {
+						'is_stock_item': 1,
+						'is_sub_contracted_item': 1,
+						'default_bom': ['!=', '']
+					}
+				}
+			},
+		}, {
+			fieldtype:'Float',
+			fieldname:'fg_item_qty',
+			reqd: 1,
+			default: 0,
+			read_only: 0,
+			in_list_view: 0,
+			label: __('Finished Good Item Qty'),
+			precision: get_precision('fg_item_qty')
+		})
+	}
+
 	let dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		size: "extra-large",
