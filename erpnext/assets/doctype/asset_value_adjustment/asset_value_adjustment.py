@@ -22,10 +22,10 @@ class AssetValueAdjustment(Document):
 
 	def on_submit(self):
 		self.make_depreciation_entry()
-		self.reschedule_depreciations(self.new_asset_value)
+		self.update_asset(self.new_asset_value)
 
 	def on_cancel(self):
-		self.reschedule_depreciations(self.current_asset_value)
+		self.update_asset(self.current_asset_value)
 
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
@@ -107,7 +107,7 @@ class AssetValueAdjustment(Document):
 
 		self.db_set("journal_entry", je.name)
 
-	def reschedule_depreciations(self, asset_value):
+	def update_asset(self, asset_value):
 		asset = frappe.get_doc("Asset", self.asset)
 
 		asset.flags.decrease_in_asset_value_due_to_value_adjustment = True
