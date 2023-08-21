@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, get_last_day, nowdate
+from frappe.utils import add_days, cstr, get_last_day, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
@@ -90,6 +90,20 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 
 		self.assertSequenceEqual(gle, expected_gle)
+
+		expected_schedules = [
+			["2023-08-31", 1203.73, 1203.73],
+			["2024-06-30", 33266.67, 34470.4],
+			["2025-04-30", 33266.67, 67737.07],
+			["2026-02-21", 32062.93, 99800.0],
+		]
+
+		schedules = [
+			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset_doc.get("schedules")
+		]
+
+		self.assertEqual(schedules, expected_schedules)
 
 
 def make_asset_value_adjustment(**args):

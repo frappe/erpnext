@@ -68,12 +68,16 @@ class AssetValueAdjustment(Document):
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": asset.name,
 		}
 
 		debit_entry = {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": asset.name,
 		}
 
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
