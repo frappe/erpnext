@@ -579,7 +579,9 @@ erpnext.utils.update_child_items = function(opts) {
 			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
-			"uom": d.uom
+			"uom": d.uom,
+			"fg_item": d.fg_item,
+			"fg_item_qty": d.fg_item_qty,
 		}
 	});
 
