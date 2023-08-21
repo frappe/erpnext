@@ -716,6 +716,7 @@
    "fieldtype": "Table",
    "hide_days": 1,
    "hide_seconds": 1,
+   "label": "Items",
    "oldfieldname": "entries",
    "oldfieldtype": "Table",
    "options": "Sales Invoice Item",
