@@ -489,14 +489,13 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		gl_map = doc.build_gl_map()
 		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
-		if voucher_type == "Payment Entry":
-			doc.make_advance_gl_entries()
-
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
 			update_voucher_outstanding(
 				entry.against_voucher_type, entry.against_voucher, entry.account, entry.party_type, entry.party
 			)
+			if voucher_type == "Payment Entry":
+				doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
 
 		frappe.flags.ignore_party_validation = False
 
