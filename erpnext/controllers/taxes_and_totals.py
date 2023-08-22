@@ -25,6 +25,9 @@ class calculate_taxes_and_totals(object):
 	def __init__(self, doc: Document):
 		self.doc = doc
 		frappe.flags.round_off_applicable_accounts = []
+		frappe.flags.round_row_wise_tax = (
+			frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
+		)
 
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
 
@@ -368,6 +371,8 @@ class calculate_taxes_and_totals(object):
 			for i, tax in enumerate(self.doc.get("taxes")):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+				if frappe.flags.round_row_wise_tax:
+					current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount"))
 
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
