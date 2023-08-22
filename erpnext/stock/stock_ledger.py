@@ -503,7 +503,7 @@ class update_entries_after(object):
 
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)
-		val = frappe._dict({"sle": dependant_sle, "dependent_voucher_detail_nos": []})
+		val = frappe._dict({"sle": dependant_sle})
 
 		if key not in self.distinct_item_warehouses:
 			self.distinct_item_warehouses[key] = val
@@ -517,6 +517,8 @@ class update_entries_after(object):
 
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
 				val.sle_changed = True
+				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
+				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
 			elif dependant_sle.voucher_detail_no not in set(dependent_voucher_detail_nos):
