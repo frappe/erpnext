@@ -1090,7 +1090,10 @@ class ReceivablePayableReport(object):
 			.where(
 				(je.company == self.filters.company)
 				& (je.posting_date.lte(self.filters.report_date))
-				& (je.voucher_type == "Exchange Rate Revaluation")
+				& (
+					(je.voucher_type == "Exchange Rate Revaluation")
+					| (je.voucher_type == "Exchange Gain Or Loss")
+				)
 			)
 			.run()
 		)
