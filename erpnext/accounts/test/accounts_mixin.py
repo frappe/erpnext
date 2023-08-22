@@ -1,4 +1,5 @@
 import frappe
+from frappe import qb
 
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -103,3 +104,15 @@ class AccountsTestMixin:
 				)
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
+
+	def clear_old_entries(self):
+		doctype_list = [
+			"GL Entry",
+			"Payment Ledger Entry",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Payment Entry",
+			"Journal Entry",
+		]
+		for doctype in doctype_list:
+			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
