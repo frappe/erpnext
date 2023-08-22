@@ -214,8 +214,8 @@ class ReceivablePayableReport(object):
 		for party_type in self.party_type:
 			if self.filters.get(scrub(party_type)):
 				amount = ple.amount_in_account_currency
-		else:
-			amount = ple.amount
+			else:
+				amount = ple.amount
 		amount_in_account_currency = ple.amount_in_account_currency
 
 		# update voucher
