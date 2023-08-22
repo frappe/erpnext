@@ -276,6 +276,9 @@ def get_amount(args, budget):
 	elif args.get("doctype") == "Purchase Order" and budget.for_purchase_order:
 		amount = get_ordered_amount(args, budget) + get_actual_expense(args)
 
+	elif args.get("doctype") == "Purchase Invoice":
+		amount = args.get("amount")
+
 	return amount
 
 

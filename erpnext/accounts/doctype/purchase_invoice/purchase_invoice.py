@@ -78,6 +78,7 @@ class PurchaseInvoice(BuyingController):
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ""
+		self.validate_budget()
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
