@@ -509,6 +509,7 @@ class AssetCapitalization(StockController):
 		asset_doc.gross_purchase_amount = total_target_asset_value
 		asset_doc.purchase_receipt_amount = total_target_asset_value
 		asset_doc.flags.ignore_validate = True
+		asset_doc.flags.asset_created_via_asset_capitalization = True
 		asset_doc.insert()
 
 		self.target_asset = asset_doc.name

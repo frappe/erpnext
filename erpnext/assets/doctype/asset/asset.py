@@ -96,11 +96,14 @@ class Asset(AccountsController):
 					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 				).format(asset_depr_schedules_links)
 			)
-		if not frappe.db.exists(
-			{
-				"doctype": "Asset Activity",
-				"asset": self.name,
-			}
+		if (
+			not frappe.db.exists(
+				{
+					"doctype": "Asset Activity",
+					"asset": self.name,
+				}
+			)
+			and not self.flags.asset_created_via_asset_capitalization
 		):
 			add_asset_activity(self.name, _("Asset created"))
 
