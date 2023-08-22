@@ -32,13 +32,16 @@ class DeliveryTrip(Document):
 	def on_submit(self):
 		self.update_status()
 		self.update_sales_invoices()
+		self.update_sales_order_status()
 
 	def on_update_after_submit(self):
 		self.update_status()
+		self.update_sales_order_status()
 
 	def on_cancel(self):
 		self.update_status()
-		self.update_sales_invoices(delete=True)
+		self.update_sales_order_status(cancel=True)
+		self.update_sales_invoices(cancel=True)
 
 	def validate_stop_addresses(self):
 		for stop in self.delivery_stops:
@@ -57,7 +60,34 @@ class DeliveryTrip(Document):
 
 		self.db_set("status", status)
 
-	def update_sales_invoices(self, delete=False):
+	def update_sales_order_status(self, cancel=False):
+		if self.docstatus == 1:
+			invoices = {stop.sales_invoice: stop.visited for stop in self.delivery_stops}
+			invoice_names = invoices.keys()
+
+			sales_orders = frappe.get_all(
+				"Sales Invoice Item",
+				filters=[
+					['parent', 'in', invoice_names],
+					['docstatus', '=', '1']
+				],
+				fields=['sales_order', 'parent']
+			)
+
+			processed_so_details=set()
+			for sales_order in sales_orders:
+				# sales_order_doc = frappe.get_doc("Sales Order", sales_order['sales_order'])
+				status = invoices.get(sales_order['parent'], 0)
+
+				if sales_order['sales_order'] in processed_so_details:
+					continue
+
+				processed_so_details.add(sales_order['sales_order'])
+
+				delivery_status = 'Not Delivered' if cancel else ('Fully Delivered' if status == 1 else 'In Transit')
+				frappe.db.set_value("Sales Order", sales_order['sales_order'], "delivery_status", delivery_status)
+
+	def update_sales_invoices(self, cancel=False):
 			"""
 			Update all connected Sales Invoices with Delivery Trip details
 			(Driver, Vehicle, etc.). If `delete` is `True`, then details
@@ -80,7 +110,7 @@ class DeliveryTrip(Document):
 				note_doc = frappe.get_doc("Sales Invoice", sales_invoice)
 
 				for field, value in update_fields.items():
-					value = None if delete else value
+					value = None if cancel else value
 					setattr(note_doc, field, value)
 
 				note_doc.flags.ignore_validate_update_after_submit = True
