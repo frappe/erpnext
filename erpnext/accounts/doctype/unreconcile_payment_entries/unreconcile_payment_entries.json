@@ -6,41 +6,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "voucher_type",
-  "voucher_no",
-  "reference_type",
+  "reference_doctype",
   "reference_name",
   "allocated_amount",
   "unlinked"
  ],
  "fields": [
   {
-   "fieldname": "voucher_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Voucher Type",
-   "options": "DocType"
-  },
-  {
-   "fieldname": "voucher_no",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "label": "Voucher No",
-   "options": "voucher_type"
-  },
-  {
-   "fieldname": "reference_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Reference Type",
-   "options": "DocType"
-  },
-  {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "Reference Name",
-   "options": "reference_type"
+   "options": "reference_doctype"
   },
   {
    "fieldname": "allocated_amount",
@@ -54,12 +31,19 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Unlinked"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference Type",
+   "options": "DocType"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-22 11:22:20.381079",
+ "modified": "2023-08-22 15:00:33.203161",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Unreconcile Payment Entries",
