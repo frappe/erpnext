@@ -185,7 +185,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		frappe.flags.round_off_applicable_accounts = [];
 
 		if (me.frm.doc.company) {
-			return frappe.call({
+			frappe.call({
 				"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
 				"args": {
 					"company": me.frm.doc.company,
@@ -198,6 +198,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 			});
 		}
+
+		frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
+			.then((round_row_wise_tax) => {
+				frappe.flags.round_row_wise_tax = round_row_wise_tax;
+			})
 	}
 
 	determine_exclusive_rate() {
@@ -338,6 +343,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			$.each(me.frm.doc["taxes"] || [], function(i, tax) {
 				// tax_amount represents the amount of tax for the current step
 				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
+				if (frappe.flags.round_row_wise_tax) {
+					current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
+				}
 
 				// Adjust divisional loss to the last item
 				if (tax.charge_type == "Actual") {

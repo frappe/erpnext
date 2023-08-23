@@ -1387,9 +1387,6 @@ class PaymentEntry(AccountsController):
 	def calculate_taxes(self):
 		self.total_taxes_and_charges = 0.0
 		self.base_total_taxes_and_charges = 0.0
-		frappe.flags.round_row_wise_tax = (
-			frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
-		)
 
 		actual_tax_dict = dict(
 			[
@@ -1401,8 +1398,6 @@ class PaymentEntry(AccountsController):
 
 		for i, tax in enumerate(self.get("taxes")):
 			current_tax_amount = self.get_current_tax_amount(tax)
-			if frappe.flags.round_row_wise_tax:
-				current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount"))
 
 			if tax.charge_type == "Actual":
 				actual_tax_dict[tax.idx] -= current_tax_amount
