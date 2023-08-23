@@ -483,8 +483,13 @@ class calculate_taxes_and_totals(object):
 		# store tax breakup for each item
 		key = item.item_code or item.item_name
 		item_wise_tax_amount = current_tax_amount * self.doc.conversion_rate
-		if tax.item_wise_tax_detail.get(key):
-			item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
+		if frappe.flags.round_row_wise_tax:
+			item_wise_tax_amount = flt(item_wise_tax_amount, tax.precision("tax_amount"))
+			if tax.item_wise_tax_detail.get(key):
+				item_wise_tax_amount += flt(tax.item_wise_tax_detail[key][1], tax.precision("tax_amount"))
+		else:
+			if tax.item_wise_tax_detail.get(key):
+				item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
 
 		tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount)]
 
