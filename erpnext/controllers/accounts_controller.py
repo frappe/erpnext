@@ -2418,6 +2418,9 @@ def get_common_query(
 		q = q.select((payment_entry.target_exchange_rate).as_("exchange_rate"))
 
 	if condition:
+		if condition.get("name", None):
+			q = q.where(payment_entry.name.like(f"%{condition.get('name')}%"))
+
 		q = q.where(payment_entry.company == condition["company"])
 		q = (
 			q.where(payment_entry.posting_date >= condition["from_payment_date"])
