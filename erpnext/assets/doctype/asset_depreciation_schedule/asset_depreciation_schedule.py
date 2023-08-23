@@ -779,9 +779,20 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 def get_temp_asset_depr_schedule_doc(
 	asset_doc, row, date_of_disposal=None, date_of_return=None, update_asset_finance_book_row=False
 ):
-	asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
+	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+		asset_doc.name, "Active", row.finance_book
+	)
 
-	asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
+	if not current_asset_depr_schedule_doc:
+		frappe.throw(
+			_("Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}").format(
+				asset_doc.name, row.finance_book
+			)
+		)
+
+	temp_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+
+	temp_asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
 		asset_doc,
 		row,
 		date_of_disposal,
@@ -789,7 +800,7 @@ def get_temp_asset_depr_schedule_doc(
 		update_asset_finance_book_row,
 	)
 
-	return asset_depr_schedule_doc
+	return temp_asset_depr_schedule_doc
 
 
 @frappe.whitelist()
