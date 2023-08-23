@@ -599,6 +599,7 @@ class StockController(AccountsController):
 		inspection_fieldname_map = {
 			"Purchase Receipt": "inspection_required_before_purchase",
 			"Purchase Invoice": "inspection_required_before_purchase",
+			"Subcontracting Receipt": "inspection_required_before_purchase",
 			"Sales Invoice": "inspection_required_before_delivery",
 			"Delivery Note": "inspection_required_before_delivery",
 		}
