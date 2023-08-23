@@ -901,6 +901,71 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, po.save)
 
+	def test_update_items_for_subcontracting_purchase_order(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_subcontracting_order,
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		def update_items(po, qty):
+			trans_items = [po.items[0].as_dict()]
+			trans_items[0]["qty"] = qty
+			trans_items[0]["fg_item_qty"] = qty
+			trans_items = json.dumps(trans_items, default=str)
+
+			return update_child_qty_rate(
+				po.doctype,
+				trans_items,
+				po.name,
+			)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+		)
+
+		update_items(po, qty=20)
+		po.reload()
+
+		# Test - 1: Items should be updated as there is no Subcontracting Order against PO
+		self.assertEqual(po.items[0].qty, 20)
+		self.assertEqual(po.items[0].fg_item_qty, 20)
+
+		sco = get_subcontracting_order(po_name=po.name, warehouse="_Test Warehouse - _TC")
+
+		# Test - 2: ValidationError should be raised as there is Subcontracting Order against PO
+		self.assertRaises(frappe.ValidationError, update_items, po=po, qty=30)
+
+		sco.reload()
+		sco.cancel()
+		po.reload()
+
+		update_items(po, qty=30)
+		po.reload()
+
+		# Test - 3: Items should be updated as the Subcontracting Order is cancelled
+		self.assertEqual(po.items[0].qty, 30)
+		self.assertEqual(po.items[0].fg_item_qty, 30)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
