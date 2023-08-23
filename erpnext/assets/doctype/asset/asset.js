@@ -228,18 +228,21 @@ frappe.ui.form.on('Asset', {
 				{name: __("Schedule Date"), editable: false, resizable: false, width: 270},
 				{name: __("Depreciation Amount"), editable: false, resizable: false, width: 164},
 				{name: __("Accumulated Depreciation Amount"), editable: false, resizable: false, width: 164},
-				{name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 312}
+				{name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 304}
 			],
 			data: data,
+			layout: "fluid",
 			serialNoColumn: false,
 			checkboxColumn: true,
 			cellHeight: 35
 		});
 
-		datatable.style.setStyle(`.dt-scrollable`, {'font-size': '0.75rem', 'margin-bottom': '1rem'});
+		datatable.style.setStyle(`.dt-scrollable`, {'font-size': '0.75rem', 'margin-bottom': '1rem', 'margin-left': '0.35rem', 'margin-right': '0.35rem'});
+		datatable.style.setStyle(`.dt-header`, {'margin-left': '0.35rem', 'margin-right': '0.35rem'});
 		datatable.style.setStyle(`.dt-cell--col-1`, {'text-align': 'center'});
 		datatable.style.setStyle(`.dt-cell--col-2`, {'font-weight': 600});
 		datatable.style.setStyle(`.dt-cell--col-3`, {'font-weight': 600});
+		datatable.style.setStyle(`.dt-cell--header`, {'color': 'var(--text-muted)'});
 	},
 
 	setup_chart_and_depr_schedule_view: async function(frm) {
