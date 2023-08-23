@@ -2320,48 +2320,10 @@ def get_advance_payment_entries(
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
 
-<<<<<<< HEAD
 	if order_list or against_all_orders:
 		if order_list:
 			reference_condition = " and t2.reference_name in ({0})".format(
 				", ".join(["%s"] * len(order_list))
-=======
-	if payment_type == "Receive":
-		q = q.select((payment_entry.source_exchange_rate).as_("exchange_rate"))
-	else:
-		q = q.select((payment_entry.target_exchange_rate).as_("exchange_rate"))
-
-	if condition:
-		if condition.get("name", None):
-			q = q.where(payment_entry.name.like(f"%{condition.get('name')}%"))
-
-		q = q.where(payment_entry.company == condition["company"])
-		q = (
-			q.where(payment_entry.posting_date >= condition["from_payment_date"])
-			if condition.get("from_payment_date")
-			else q
-		)
-		q = (
-			q.where(payment_entry.posting_date <= condition["to_payment_date"])
-			if condition.get("to_payment_date")
-			else q
-		)
-		if condition.get("get_payments") == True:
-			q = (
-				q.where(payment_entry.cost_center == condition["cost_center"])
-				if condition.get("cost_center")
-				else q
-			)
-			q = (
-				q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"])
-				if condition.get("minimum_payment_amount")
-				else q
-			)
-			q = (
-				q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"])
-				if condition.get("maximum_payment_amount")
-				else q
->>>>>>> 86bac2cf52 (refactor: filter on advance payments)
 			)
 		else:
 			reference_condition = ""
