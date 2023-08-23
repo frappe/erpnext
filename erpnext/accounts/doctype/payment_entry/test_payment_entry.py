@@ -702,7 +702,50 @@ class TestPaymentEntry(FrappeTestCase):
 		pe2.submit()
 
 		# create return entry against si1
-		create_sales_invoice(is_return=1, return_against=si1.name, qty=-1)
+		cr_note = create_sales_invoice(is_return=1, return_against=si1.name, qty=-1)
+		si1_outstanding = frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount")
+
+		# create JE(credit note) manually against si1 and cr_note
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": si1.company,
+				"voucher_type": "Credit Note",
+				"posting_date": nowdate(),
+			}
+		)
+		je.append(
+			"accounts",
+			{
+				"account": si1.debit_to,
+				"party_type": "Customer",
+				"party": si1.customer,
+				"debit": 0,
+				"credit": 100,
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": 100,
+				"reference_type": si1.doctype,
+				"reference_name": si1.name,
+				"cost_center": si1.items[0].cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": cr_note.debit_to,
+				"party_type": "Customer",
+				"party": cr_note.customer,
+				"debit": 100,
+				"credit": 0,
+				"debit_in_account_currency": 100,
+				"credit_in_account_currency": 0,
+				"reference_type": cr_note.doctype,
+				"reference_name": cr_note.name,
+				"cost_center": cr_note.items[0].cost_center,
+			},
+		)
+		je.save().submit()
+
 		si1_outstanding = frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount")
 		self.assertEqual(si1_outstanding, -100)
 
