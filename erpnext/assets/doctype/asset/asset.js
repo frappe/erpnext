@@ -239,10 +239,11 @@ frappe.ui.form.on('Asset', {
 
 		datatable.style.setStyle(`.dt-scrollable`, {'font-size': '0.75rem', 'margin-bottom': '1rem', 'margin-left': '0.35rem', 'margin-right': '0.35rem'});
 		datatable.style.setStyle(`.dt-header`, {'margin-left': '0.35rem', 'margin-right': '0.35rem'});
+		datatable.style.setStyle(`.dt-cell--header`, {'color': 'var(--text-muted)'});
+		datatable.style.setStyle(`.dt-cell`, {'color': 'var(--text-color)'});
 		datatable.style.setStyle(`.dt-cell--col-1`, {'text-align': 'center'});
 		datatable.style.setStyle(`.dt-cell--col-2`, {'font-weight': 600});
 		datatable.style.setStyle(`.dt-cell--col-3`, {'font-weight': 600});
-		datatable.style.setStyle(`.dt-cell--header`, {'color': 'var(--text-muted)'});
 	},
 
 	setup_chart_and_depr_schedule_view: async function(frm) {
