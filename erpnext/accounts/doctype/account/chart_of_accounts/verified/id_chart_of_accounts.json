@@ -669,7 +669,8 @@
             }, 
             "Penjualan Barang Dagangan": {
                 "Penjualan": {
-                    "account_number": "4110.000"
+                    "account_number": "4110.000",
+                    "account_type": "Income Account"
                 }, 
                 "Potongan Penjualan": {
                     "account_number": "4130.000"
