@@ -22,4 +22,20 @@ frappe.ui.form.on("Unreconcile Payments", {
 		});
 
 	},
+	get_allocations: function(frm) {
+		frm.clear_table("allocations");
+		frappe.call({
+			method: "get_allocations_from_payment",
+			doc: frm.doc,
+			callback: function(r) {
+				if (r.message) {
+					r.message.forEach(x => {
+						frm.add_child("allocations", x)
+					})
+					frm.refresh_fields();
+				}
+			}
+		})
+
+	}
 });
