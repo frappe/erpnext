@@ -908,9 +908,9 @@ def get_outstanding_invoices(
 	min_outstanding=None,
 	max_outstanding=None,
 	accounting_dimensions=None,
-	vouchers=None, # list of dicts [{'voucher_type': '', 'voucher_no': ''}] for filtering
-	limit=None, # passed by reconciliation tool
-	voucher_no=None, # filter passed by reconciliation tool
+	vouchers=None,  # list of dicts [{'voucher_type': '', 'voucher_no': ''}] for filtering
+	limit=None,  # passed by reconciliation tool
+	voucher_no=None,  # filter passed by reconciliation tool
 ):
 
 	ple = qb.DocType("Payment Ledger Entry")
