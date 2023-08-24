@@ -15,6 +15,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
+from frappe.utils.nestedset import get_root_of
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (  # noqa
@@ -80,6 +81,7 @@ class Customer(TransactionBase):
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
+		self.set_territory_and_group()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
@@ -137,6 +139,12 @@ class Customer(TransactionBase):
 				frappe.throw(
 					_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account))
 				)
+
+	def set_territory_and_group(self):
+		if not self.territory:
+			self.territory = get_root_of("Territory")
+		if not self.customer_group:
+			self.customer_group = get_root_of("Customer Group")
 
 	def validate_internal_customer(self):
 		if not self.is_internal_customer:
