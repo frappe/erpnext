@@ -829,8 +829,24 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
+<<<<<<< HEAD
 def remove_return_pos_invoices(party_type, party, invoice_list):
 	if invoice_list:
+=======
+def get_outstanding_invoices(
+	party_type,
+	party,
+	account,
+	common_filter=None,
+	posting_date=None,
+	min_outstanding=None,
+	max_outstanding=None,
+	accounting_dimensions=None,
+	vouchers=None,  # list of dicts [{'voucher_type': '', 'voucher_no': ''}] for filtering
+	limit=None,  # passed by reconciliation tool
+	voucher_no=None,  # filter passed by reconciliation tool
+):
+>>>>>>> 89ddf3272e (fix(regional): item wise tax calc issue)
 
 		if party_type == "Customer":
 			sinv = frappe.qb.DocType("Sales Invoice")
