@@ -12,6 +12,7 @@ from six import iteritems
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
+		"account_type": "Receivable",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 
