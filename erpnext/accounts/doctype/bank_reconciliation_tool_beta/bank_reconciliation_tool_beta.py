@@ -311,9 +311,17 @@ def check_matching(
 				as_dict=1,
 			)
 		)
-	return (
-		sorted(matching_vouchers, key=lambda x: x["rank"], reverse=True) if matching_vouchers else []
-	)
+
+	if not matching_vouchers:
+		return []
+
+	for voucher in matching_vouchers:
+		# higher rank if voucher name is in bank transaction
+		if voucher["name"] in transaction.description:
+			voucher["rank"] += 1
+			voucher["name_in_desc_match"] = 1
+
+	return sorted(matching_vouchers, key=lambda x: x["rank"], reverse=True)
 
 
 def get_queries(
@@ -439,7 +447,9 @@ def get_bt_matching_query(exact_match, transaction, exact_party_match):
 	# same bank account must have same company and currency
 	field = "deposit" if transaction.withdrawal > 0.0 else "withdrawal"
 	filter_by_party = (
-		"AND party_type = %(party_type)s AND party = %(party)s" if exact_party_match else ""
+		"AND party_type = %(party_type)s AND party = %(party)s AND party IS NOT NULL"
+		if exact_party_match
+		else ""
 	)
 
 	return f"""
@@ -447,7 +457,7 @@ def get_bt_matching_query(exact_match, transaction, exact_party_match):
 			(
 				CASE WHEN reference_number = %(reference_no)s THEN 1 ELSE 0 END
 				+ CASE WHEN {field} = %(amount)s THEN 1 ELSE 0 END
-				+ CASE WHEN ( party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0 END
+				+ CASE WHEN ( party_type = %(party_type)s AND party = %(party)s AND party IS NOT NULL) THEN 1 ELSE 0 END
 				+ CASE WHEN unallocated_amount = %(amount)s THEN 1 ELSE 0 END
 				+ 1
 			) AS rank,
@@ -467,7 +477,7 @@ def get_bt_matching_query(exact_match, transaction, exact_party_match):
 				CASE WHEN {field} = %(amount)s THEN 1 ELSE 0 END
 			) as amount_match,
 			(
-				CASE WHEN ( party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0 END
+				CASE WHEN ( party_type = %(party_type)s AND party = %(party)s AND party IS NOT NULL) THEN 1 ELSE 0 END
 			) as party_match,
 			(
 				CASE WHEN unallocated_amount = %(amount)s THEN 1 ELSE 0 END
@@ -596,13 +606,15 @@ def get_pe_matching_query(
 		filter_by_reference_no = f"AND reference_no = '{transaction.reference_number}'"
 
 	filter_by_party = (
-		"AND (party_type = %(party_type)s AND party = %(party)s )" if exact_party_match else ""
+		"AND (party_type = %(party_type)s AND party = %(party)s AND party IS NOT NULL)"
+		if exact_party_match
+		else ""
 	)
 
 	return f"""
 		SELECT
 			(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
-			+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0 END
+			+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s AND party IS NOT NULL) THEN 1 ELSE 0 END
 			+ CASE WHEN paid_amount = %(amount)s THEN 1 ELSE 0 END
 			+ 1 ) AS rank,
 			'Payment Entry' as doctype,
@@ -615,7 +627,7 @@ def get_pe_matching_query(
 			posting_date,
 			{currency_field},
 			(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END) AS reference_number_match,
-			(CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0 END) AS party_match,
+			(CASE WHEN (party_type = %(party_type)s AND party = %(party)s AND party IS NOT NULL) THEN 1 ELSE 0 END) AS party_match,
 			(CASE WHEN paid_amount = %(amount)s THEN 1 ELSE 0 END) AS amount_match
 		FROM
 			`tabPayment Entry`
