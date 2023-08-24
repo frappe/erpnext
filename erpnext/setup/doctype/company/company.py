@@ -415,6 +415,8 @@ class Company(NestedSet):
 
 			if income_account:
 				income_account = income_account[0]
+			else:
+				income_account = None
 
 			self.db_set("default_income_account", income_account)
 
