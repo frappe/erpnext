@@ -52,6 +52,7 @@ class PurchaseOrder(BuyingController):
 	def onload(self):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
+		self.set_onload("can_update_items", self.can_update_items())
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()
@@ -449,6 +450,17 @@ class PurchaseOrder(BuyingController):
 			self.db_set("per_received", flt(received_qty / total_qty) * 100, update_modified=False)
 		else:
 			self.db_set("per_received", 0, update_modified=False)
+
+	def can_update_items(self) -> bool:
+		result = True
+
+		if self.is_subcontracted and not self.is_old_subcontracting_flow:
+			if frappe.db.exists(
+				"Subcontracting Order", {"purchase_order": self.name, "docstatus": ["!=", 2]}
+			):
+				result = False
+
+		return result
 
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):

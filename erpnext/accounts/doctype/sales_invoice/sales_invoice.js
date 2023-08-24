@@ -98,8 +98,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount!=0
-			&& !(cint(doc.is_return) && doc.return_against)) {
+		if (doc.docstatus == 1 && doc.outstanding_amount!=0) {
 			this.frm.add_custom_button(
 				__('Payment'),
 				() => this.make_payment_entry(),
