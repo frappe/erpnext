@@ -1,0 +1,63 @@
+{% set width_class = "expand" if not slides else "" %}
+{% set cart_settings = shopping_cart.cart_settings %}
+{% set product_info = shopping_cart.product_info %}
+{% set price_info = product_info.get('price') or {} %}
+
+<div class="col-md-7 product-details {{ width_class }}">
+	<div class="d-flex">
+		<!-- title -->
+		<div class="product-title col-11" itemprop="name">
+			{{ doc.web_item_name }}
+		</div>
+
+		<!-- Wishlist -->
+		{% if cart_settings.enable_wishlist %}
+			<div class="like-action-item-fp like-action {{ 'like-action-wished' if wished else ''}} ml-2"
+				data-item-code="{{ doc.item_code }}">
+				<svg class="icon sm">
+					<use class="{{ 'wished' if wished else 'not-wished' }} wish-icon" href="#icon-heart"></use>
+				</svg>
+			</div>
+		{% endif %}
+	</div>
+
+	<p class="product-code">
+		<span class="product-item-group">
+			{{ _(doc.item_group) }}
+		</span>
+		<span class="product-item-code">
+			{{ _("Item Code") }}:
+		</span>
+		<span itemprop="productID">{{ doc.item_code }}</span>
+	</p>
+	{% if has_variants %}
+		<!-- configure template -->
+		{% include "templates/generators/item/item_configure.html" %}
+	{% else %}
+		<!-- add variant to cart -->
+		{% include "templates/generators/item/item_add_to_cart.html" %}
+	{% endif %}
+	<!-- description -->
+	<div class="product-description" itemprop="description">
+	{% if frappe.utils.strip_html(doc.web_long_description or '') %}
+		{{ doc.web_long_description | safe }}
+	{% elif frappe.utils.strip_html(doc.description or '')  %}
+		{{ doc.description | safe }}
+	{% else %}
+		{{ "" }}
+	{% endif  %}
+	</div>
+</div>
+
+{% block base_scripts %}
+<!-- js should be loaded in body! -->
+<script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+{% endblock %}
+
+<script>
+	$('.page_content').on('click', '.like-action-item-fp', (e) => {
+			// Bind action on wishlist button
+			const $btn = $(e.currentTarget);
+			erpnext.e_commerce.wishlist.wishlist_action($btn);
+		});
+</script>

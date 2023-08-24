@@ -1,0 +1,25 @@
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
+<a class="product-link" href="{{ route|abs_url }}">
+	<div class="col-sm-4 col-xs-4 product-image-wrapper">
+		<div class="product-image-img">
+			{{ product_image_square(thumbnail or website_image or image) }}
+			<div class="product-text" itemprop="name">{{ item_name or name }}</div>
+			{% if price_sales_uom %}
+				<div>{{ price_sales_uom }}</div>
+				<div style='font-size: small; margin-bottom: 10px;'>({{ price_stock_uom }} / {{ stock_uom }})</div>
+			{% else %}
+				<div>&nbsp</div>
+				<div style='font-size: small; margin-bottom: 10px;'>&nbsp</div>
+			{% endif %}
+
+			{% if show_availability_status %}
+				{% if in_stock or not is_stock_item %}
+					<div style='color: green'> <i class='fa fa-check'></i> {{ _("In stock") }}</div>
+				{% else %}
+					<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>
+				{% endif %}
+			{% endif %}
+		</div>
+	</div>
+</a>

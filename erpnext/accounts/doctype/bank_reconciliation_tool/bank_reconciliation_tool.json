@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "creation": "2020-12-02 10:13:02.148040",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "bank_account",
+  "column_break_1",
+  "bank_statement_from_date",
+  "bank_statement_to_date",
+  "from_reference_date",
+  "to_reference_date",
+  "filter_by_reference_date",
+  "column_break_2",
+  "account_currency",
+  "account_opening_balance",
+  "bank_statement_closing_balance",
+  "section_break_1",
+  "reconciliation_tool_cards",
+  "reconciliation_tool_dt",
+  "no_bank_transactions"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.bank_account && !doc.filter_by_reference_date",
+   "fieldname": "bank_statement_from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "depends_on": "eval: doc.bank_account && !doc.filter_by_reference_date",
+   "fieldname": "bank_statement_to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.bank_statement_from_date",
+   "fieldname": "account_opening_balance",
+   "fieldtype": "Currency",
+   "label": "Account Opening Balance",
+   "options": "account_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.bank_statement_to_date",
+   "fieldname": "bank_statement_closing_balance",
+   "fieldtype": "Currency",
+   "label": "Closing Balance",
+   "options": "account_currency"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Reconcile"
+  },
+  {
+   "fieldname": "reconciliation_tool_cards",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "reconciliation_tool_dt",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "no_bank_transactions",
+   "fieldtype": "HTML",
+   "options": "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
+  },
+  {
+   "depends_on": "eval:doc.filter_by_reference_date",
+   "fieldname": "from_reference_date",
+   "fieldtype": "Date",
+   "label": "From Reference Date"
+  },
+  {
+   "depends_on": "eval:doc.filter_by_reference_date",
+   "fieldname": "to_reference_date",
+   "fieldtype": "Date",
+   "label": "To Reference Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "filter_by_reference_date",
+   "fieldtype": "Check",
+   "label": "Filter by Reference Date"
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Account Currency",
+   "options": "Currency"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-03-07 11:02:24.535714",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Reconciliation Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

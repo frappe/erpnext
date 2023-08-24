@@ -1,0 +1,204 @@
+{
+ "actions": [],
+ "creation": "2013-06-25 11:04:03",
+ "description": "Settings for Buying Module",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier_and_price_defaults_section",
+  "supp_master_name",
+  "supplier_group",
+  "buying_price_list",
+  "column_break_4",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
+  "transaction_settings_section",
+  "po_required",
+  "pr_required",
+  "over_order_allowance",
+  "column_break_12",
+  "maintain_same_rate",
+  "set_landed_cost_based_on_purchase_invoice_rate",
+  "allow_multiple_items",
+  "bill_for_rejected_quantity_in_purchase_invoice",
+  "disable_last_purchase_rate",
+  "show_pay_button",
+  "subcontract",
+  "backflush_raw_materials_of_subcontract_based_on",
+  "column_break_11",
+  "over_transfer_allowance"
+ ],
+ "fields": [
+  {
+   "default": "Supplier Name",
+   "fieldname": "supp_master_name",
+   "fieldtype": "Select",
+   "label": "Supplier Naming By",
+   "options": "Supplier Name\nNaming Series\nAuto Name"
+  },
+  {
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "label": "Default Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Default Buying Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_multiple_items",
+   "fieldtype": "Check",
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting Settings"
+  },
+  {
+   "default": "BOM",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Transferred for Subcontract"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
+   "fieldname": "over_transfer_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance (%)"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_rate",
+   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action If Same Rate is Not Maintained",
+   "mandatory_depends_on": "maintain_same_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval:doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "default": "1",
+   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "supplier_and_price_defaults_section",
+   "fieldtype": "Tab Break",
+   "label": "Naming Series and Price Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_settings_section",
+   "fieldtype": "Tab Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_last_purchase_rate",
+   "fieldtype": "Check",
+   "label": "Disable Last Purchase Rate"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_pay_button",
+   "fieldtype": "Check",
+   "label": "Show Pay Button in Purchase Order Portal"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.maintain_same_rate",
+   "description": "Users can enable the checkbox If they want to adjust the incoming rate (set using purchase receipt) based on the purchase invoice rate.",
+   "fieldname": "set_landed_cost_based_on_purchase_invoice_rate",
+   "fieldtype": "Check",
+   "label": "Set Landed Cost Based on Purchase Invoice Rate"
+  },
+  {
+   "default": "0",
+   "description": "Percentage you are allowed to order more against the Blanket Order Quantity. For example: If you have a Blanket Order of Quantity 100 units. and your Allowance is 10% then you are allowed to order 110 units.",
+   "fieldname": "over_order_allowance",
+   "fieldtype": "Float",
+   "label": "Over Order Allowance (%)"
+  }
+ ],
+ "icon": "fa fa-cog",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-03-02 17:02:14.404622",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

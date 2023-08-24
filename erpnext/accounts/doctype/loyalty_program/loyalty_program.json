@@ -1,0 +1,171 @@
+{
+ "autoname": "field:loyalty_program_name",
+ "creation": "2018-01-23 06:23:05.731431",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loyalty_program_name",
+  "loyalty_program_type",
+  "from_date",
+  "to_date",
+  "column_break_7",
+  "customer_group",
+  "customer_territory",
+  "auto_opt_in",
+  "rules",
+  "collection_rules",
+  "redemption",
+  "conversion_factor",
+  "expiry_duration",
+  "column_break_10",
+  "expense_account",
+  "company",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "help_section",
+  "loyalty_program_help"
+ ],
+ "fields": [
+  {
+   "fieldname": "loyalty_program_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Loyalty Program Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "loyalty_program_type",
+   "fieldtype": "Select",
+   "label": "Loyalty Program Type",
+   "options": "Single Tier Program\nMultiple Tier Program"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "customer_territory",
+   "fieldtype": "Link",
+   "label": "Customer Territory",
+   "options": "Territory"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_opt_in",
+   "fieldtype": "Check",
+   "label": "Auto Opt In (For all customers)"
+  },
+  {
+   "fieldname": "rules",
+   "fieldtype": "Section Break",
+   "label": "Collection Tier"
+  },
+  {
+   "fieldname": "collection_rules",
+   "fieldtype": "Table",
+   "label": "Collection Rules",
+   "options": "Loyalty Program Collection",
+   "reqd": 1
+  },
+  {
+   "fieldname": "redemption",
+   "fieldtype": "Section Break",
+   "label": "Redemption"
+  },
+  {
+   "description": "1 Loyalty Points = How much base currency?",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor"
+  },
+  {
+   "fieldname": "expiry_duration",
+   "fieldtype": "Int",
+   "label": "Expiry Duration (in days)"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "help_section",
+   "fieldtype": "Section Break",
+   "label": "Help Section"
+  },
+  {
+   "fieldname": "loyalty_program_help",
+   "fieldtype": "HTML",
+   "label": "Loyalty Program Help"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "modified": "2019-05-26 09:11:46.120251",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Loyalty Program",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,111 @@
+{% if doc.taxes %}
+	<div class="w-100 order-taxes mt-5">
+		<div class="col-4 d-flex  border-btm pb-5">
+			<div class="item-grand-total col-8">
+				{{ _("Net Total") }}
+			</div>
+			<div class="item-grand-total col-4 text-right pr-0">
+				{{ doc.get_formatted("net_total") }}
+			</div>
+		</div>
+	</div>
+{% endif %}
+
+{% for d in doc.taxes %}
+	{% if d.base_tax_amount %}
+		<div class="order-taxes w-100 mt-5">
+			<div class="col-4 d-flex  border-btm pb-5">
+				<div class="item-grand-total col-8">
+					{{ d.description }}
+				</div>
+				<div class="item-grand-total col-4 text-right pr-0">
+					{{ d.get_formatted("base_tax_amount") }}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+{% endfor %}
+
+{% if doc.doctype == 'Quotation' %}
+	{% if doc.coupon_code %}
+		<div class="w-100 mt-5 order-taxes font-weight-bold">
+			<div class="col-4 d-flex  border-btm pb-5">
+				<div class="item-grand-total col-8">
+					{{ _("Savings") }}
+				</div>
+				<div class="item-grand-total col-4 text-right pr-0">
+					{% set tot_quotation_discount = [] %}
+					{%- for item in doc.items -%}
+						{% if tot_quotation_discount.append((((item.price_list_rate * item.qty)
+							* item.discount_percentage) / 100)) %}
+						{% endif %}
+					{% endfor %}
+					{{ frappe.utils.fmt_money((tot_quotation_discount | sum),currency=doc.currency) }} </div>
+			</div>
+		</div>
+	{% endif %}
+{% endif %}
+
+{% if doc.doctype == 'Sales Order' %}
+	{% if doc.coupon_code %}
+		<div class="w-100 order-taxes mt-5">
+			<div class="col-4 d-flex  border-btm pb-5">
+				<div class="item-grand-total col-8">
+					{{ _("Total Amount") }}
+				</div>
+				<div class="item-grand-total col-4 text-right pr-0">
+					<span>
+						{% set total_amount = [] %}
+						{%- for item in doc.items -%}
+						{% if total_amount.append((item.price_list_rate * item.qty)) %}{% endif %}
+						{% endfor %}
+						{{ frappe.utils.fmt_money((total_amount | sum),currency=doc.currency) }}
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="order-taxes w-100 mt-5">
+			<div class="col-4 d-flex">
+				<div class="item-grand-total col-8">
+					{{ _("Applied Coupon Code") }}
+				</div>
+				<div class="item-grand-total col-4 text-right pr-0">
+					<span>
+						{%- for row in frappe.get_all(doctype="Coupon Code",
+						fields=["coupon_code"], filters={ "name":doc.coupon_code}) -%}
+							<span>{{ row.coupon_code }}</span>
+						{% endfor %}
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="order-taxes mt-5">
+			<div class="col-4 d-flex border-btm pb-5">
+				<div class="item-grand-total col-8">
+					{{ _("Savings") }}
+				</div>
+				<div class="item-grand-total col-4 text-right pr-0">
+					<span>
+						{% set tot_SO_discount = [] %}
+						{%- for item in doc.items -%}
+						{% if tot_SO_discount.append((((item.price_list_rate * item.qty)
+						* item.discount_percentage) / 100)) %}{% endif %}
+						{% endfor %}
+						{{ frappe.utils.fmt_money((tot_SO_discount | sum),currency=doc.currency) }}
+					</span>
+				</div>
+			</div>
+		</div>
+	{% endif %}
+{% endif %}
+
+<div class="w-100 mt-5 order-taxes font-weight-bold">
+	<div class="col-4 d-flex">
+		<div class="item-grand-total col-8">
+			{{ _("Grand Total") }}
+		</div>
+		<div class="item-grand-total col-4 text-right pr-0">
+			{{ doc.get_formatted("grand_total") }}
+		</div>
+	</div>
+</div>

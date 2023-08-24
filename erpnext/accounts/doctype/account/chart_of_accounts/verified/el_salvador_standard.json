@@ -1,0 +1,809 @@
+{
+    "country_code": "sv",
+    "name": "El Salvador Standard",
+    "tree": {
+        "100000 - ACTIVOS - xmC": {
+            "11000000 - ACTIVOS CORRIENTES - xmC": {
+                "11010000 - EFECTIVO Y EQUIVALENTES AL EFECTIVO - xmC": {
+                    "11010100 - Caja general - xmC": {
+                        "account_number": "11010100",
+                        "account_type": "Cash"
+                    },
+                    "Caja chica": {
+                        "account_number": "11010200",
+                        "account_type": "Cash",
+                        "is_group": 1
+                    },
+                    "Efectivo en bancos": {
+                        "account_number": "11010300",
+                        "account_type": "Bank",
+                        "is_group": 1
+                    },
+                    "account_number": "11010000",
+                    "account_type": "Cash"
+                },
+                "CUENTAS POR COBRAR ARRENDAMIENTOS FINANCIEROS": {
+                    "Arrendamientos financieros por cobrar": {
+                        "account_number": "11040100",
+                        "is_group": 1
+                    },
+                    "Estimaci\u00f3n para cuentas de cobro dudoso (CR)": {
+                        "account_number": "11040200",
+                        "is_group": 1
+                    },
+                    "account_number": "11040000"
+                },
+                "DEUDORES COMERCIALES Y OTRAS CUENTAS POR COBRAR": {
+                    "11030100 - Deudores comerciales - xmC": {
+                        "account_number": "11030100",
+                        "account_type": "Receivable"
+                    },
+                    "Estimaci\u00f3n para cuentas de cobro dudoso (CR)": {
+                        "account_number": "11030200",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "Otras cuentas por cobrar no comerciales": {
+                        "account_number": "11030300",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "account_number": "11030000",
+                    "account_type": "Receivable"
+                },
+                "GASTOS PAGADOS POR ANTICIPADO": {
+                    "Adelantos a empleados": {
+                        "account_number": "110904",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "Papeler\u00eda y \u00fatiles en existencia": {
+                        "account_number": "11090300",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "Primas de seguros aun no vendidas": {
+                        "account_number": "11090100",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "Rentas aun no corridas por los inmuebles": {
+                        "account_number": "11090200",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "account_number": "11090000",
+                    "account_type": "Temporary"
+                },
+                "INVENTARIOS": {
+                    "11050100 - Inventarios en bodega al costo - xmC": {
+                        "account_number": "11050100",
+                        "account_type": "Stock"
+                    },
+                    "11050300 - Pedidos en transito - xmC": {
+                        "account_number": "11050300",
+                        "account_type": "Stock Received But Not Billed"
+                    },
+                    "Estimaci\u00f3n para obsolescencia de inventarios o de lento movimiento (CR)": {
+                        "account_number": "11050200",
+                        "account_type": "Stock",
+                        "is_group": 1
+                    },
+                    "Mercader\u00edas en consignaci\u00f3n": {
+                        "account_number": "11050400",
+                        "account_type": "Stock",
+                        "is_group": 1
+                    },
+                    "account_number": "11050000",
+                    "account_type": "Stock"
+                },
+                "INVERSIONES TEMPORALES": {
+                    "Acciones": {
+                        "account_number": "11020100",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "Bonos": {
+                        "account_number": "11020200",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "C\u00e9dulas hipotecarias": {
+                        "account_number": "11020300",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "account_number": "11020000",
+                    "account_type": "Temporary"
+                },
+                "IVA CREDITO FISCAL": {
+                    "IVA compras locales": {
+                        "account_number": "11060100",
+                        "account_type": "Tax",
+                        "is_group": 1,
+                        "tax_rate": 13.0
+                    },
+                    "IVA importaciones": {
+                        "account_number": "11060200",
+                        "account_type": "Tax",
+                        "is_group": 1,
+                        "tax_rate": 13.0
+                    },
+                    "account_number": "11060000",
+                    "account_type": "Tax",
+                    "tax_rate": 13.0
+                },
+                "IVA PERCIBIDO": {
+                    "account_number": "IVA PERCIBIDO",
+                    "account_type": "Tax",
+                    "is_group": 1,
+                    "tax_rate": 1.0
+                },
+                "IVA RETENIDO": {
+                    "account_number": "11070000",
+                    "account_type": "Tax",
+                    "is_group": 1,
+                    "tax_rate": 1.0
+                },
+                "account_number": "11000000"
+            },
+            "12000000 - ACTIVOS NO CORRIENTES - xmC": {
+                "ACTIVOS INTANGIBLES": {
+                    "Concesiones y franquicias": {
+                        "account_number": "12080300",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Derechos de llave": {
+                        "account_number": "12080100",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Patentes y marcas de fabrica": {
+                        "account_number": "12080200",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Software": {
+                        "account_number": "12080400",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "account_number": "12080000",
+                    "account_type": "Fixed Asset"
+                },
+                "CUENTAS POR COBRAR ARRENDAMIENTOS FINANCIEROS A LARGO PLAZO": {
+                    "Arrendamientos financieros por cobrar a largo plazo": {
+                        "account_number": "12060100",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "Estimaci\u00f3n para cuentas de cobro dudoso a largo plazo (CR)": {
+                        "account_number": "12060200",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "account_number": "12060000",
+                    "account_type": "Receivable"
+                },
+                "DEPRECIACION ACUMULUDA (CR)": {
+                    "12030100 - Deprec. acumulada de propiedades, planta y equipo propio al costo - xmC": {
+                        "account_number": "12030100",
+                        "account_type": "Accumulated Depreciation"
+                    },
+                    "Deprec. acumulada de prop., planta y equipo bajo arrend. Financiero": {
+                        "account_number": "12030200",
+                        "account_type": "Accumulated Depreciation",
+                        "is_group": 1
+                    },
+                    "Deprec. acumulada de revaluaos de propiedades, planta y equipo": {
+                        "account_number": "12030300",
+                        "account_type": "Accumulated Depreciation",
+                        "is_group": 1
+                    },
+                    "account_number": "12030000",
+                    "account_type": "Accumulated Depreciation"
+                },
+                "DEUDORES COMERCIALES Y OTRAS CUENTAS POR COBRAR A LARGO PLAZO": {
+                    "12050100 - Deudores comerciales a largo plazo - xmC": {
+                        "account_number": "12050100",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "Cuentas por cobrar no comerciales a largo plazo": {
+                        "account_number": "12050300",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "Estimaci\u00f3n para cuentas de cobro dudoso a largo plazo (CR)": {
+                        "account_number": "12050200",
+                        "account_type": "Receivable",
+                        "is_group": 1
+                    },
+                    "account_number": "12050000",
+                    "account_type": "Receivable"
+                },
+                "IMPUESTO SOBRE LA RENTA DIFERIDO-ACTIVO": {
+                    "12070200 - Pago anticipados de impuestos sobre la renta - xmC": {
+                        "account_number": "12070200",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "Cr\u00e9dito impuestos sobre la renta de a\u00f1os anteriores": {
+                        "account_number": "12070100",
+                        "account_type": "Tax",
+                        "is_group": 1
+                    },
+                    "account_number": "12070000",
+                    "account_type": "Tax"
+                },
+                "INVERSIONES PERMANENTES": {
+                    "Inversiones en asociadas": {
+                        "account_number": "12040200",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Inversiones en negocios conjuntos": {
+                        "account_number": "12040300",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Inversiones en subsidiarias": {
+                        "account_number": "12040100",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "account_number": "12040000",
+                    "account_type": "Fixed Asset"
+                },
+                "PROPIEDADES, PLANTA Y EQUIPO": {
+                    "12010300 - Maquinarias y equipos - xmC": {
+                        "account_number": "12010300",
+                        "account_type": "Fixed Asset"
+                    },
+                    "Edificios": {
+                        "account_number": "12010200",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Mobiliario y equipo": {
+                        "account_number": "12010400",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Terrenos": {
+                        "account_number": "12010100",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Veh\u00edculos": {
+                        "account_number": "12010500",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "account_number": "12010000",
+                    "account_type": "Fixed Asset"
+                },
+                "REVALUACIONES DE PROPIEDADES, PLANTA Y EQUIPO": {
+                    "Revaluaci\u00f3n de edificios": {
+                        "account_number": "12020200",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Revaluaci\u00f3n de maquinarias y equipo": {
+                        "account_number": "12020300",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Revaluaci\u00f3n de mobiliario y equipo": {
+                        "account_number": "12020400",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Revaluaci\u00f3n de terrenos": {
+                        "account_number": "12020100",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "Revaluaci\u00f3n de veh\u00edculos": {
+                        "account_number": "12020500",
+                        "account_type": "Fixed Asset",
+                        "is_group": 1
+                    },
+                    "account_number": "12020000",
+                    "account_type": "Fixed Asset"
+                },
+                "account_number": "12000000",
+                "account_type": "Fixed Asset"
+            },
+            "account_number": "100000",
+            "root_type": "Asset"
+        },
+        "20000000 - PASIVOS - xmC": {
+            "PASIVOS CORRIENTES": {
+                "ACREEDORES COMERCIALES Y OTRAS CUENTAS POR PAGAR": {
+                    "21020100 - Cuentas por pagar comerciales - xmC": {
+                        "account_number": "21020100",
+                        "account_type": "Payable"
+                    },
+                    "Documentos por pagar comerciales": {
+                        "account_number": "21020200",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "account_number": "21020000",
+                    "account_type": "Payable"
+                },
+                "BENEFICIOS A EMPLEADOS POR PAGAR": {
+                    "Beneficios a corto plazo por pagar": {
+                        "account_number": "21050100",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "Beneficios post empleo por pagar": {
+                        "account_number": "21050200",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "account_number": "21050000",
+                    "account_type": "Payable"
+                },
+                "DIVIDENDOS POR PAGAR": {
+                    "account_number": "21080000",
+                    "account_type": "Payable",
+                    "is_group": 1
+                },
+                "IMPUESTO SOBRE LA RENTA CORRIENTE POR PAGAR": {
+                    "account_number": "21070000",
+                    "account_type": "Tax",
+                    "is_group": 1
+                },
+                "IVA DEBITOS FISCALES": {
+                    "Por ventas a consumidores": {
+                        "account_number": "21060200",
+                        "account_type": "Tax",
+                        "is_group": 1
+                    },
+                    "Por ventas a contribuyentes": {
+                        "account_number": "21060100",
+                        "account_type": "Tax",
+                        "is_group": 1
+                    },
+                    "account_number": "21060000",
+                    "account_type": "Tax"
+                },
+                "OBLIGACIONES BAJO ARRENDAMIENTOS FINANCIEROS PORCION CORRIENTE": {
+                    "Contratos bajo arrendamientos financieros": {
+                        "account_number": "21030100",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "account_number": "21030000",
+                    "account_type": "Payable"
+                },
+                "OTROS ACREEDORES, RETENCIONES Y DESCUENTOS": {
+                    "Cuentas por pagar a accionistas": {
+                        "account_number": "21040400",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "Descuentos": {
+                        "account_number": "21040300",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "Otros acreedores": {
+                        "account_number": "21040100",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "Retenciones": {
+                        "account_number": "21040200",
+                        "account_type": "Payable",
+                        "is_group": 1
+                    },
+                    "account_number": "21040000",
+                    "account_type": "Payable"
+                },
+                "PRESTAMOS Y SOBREGIROS BANCARIOS": {
+                    "Porci\u00f3n corriente de prestamos bancarios a largo plazo": {
+                        "account_number": "21010300",
+                        "is_group": 1
+                    },
+                    "Prestamos bancarios a corto plazo": {
+                        "account_number": "21010100",
+                        "is_group": 1
+                    },
+                    "Sobregiros bancarios": {
+                        "account_number": "21010200",
+                        "is_group": 1
+                    },
+                    "account_number": "21010000"
+                },
+                "account_number": "21000000"
+            },
+            "PASIVOS NO CORRIENTES": {
+                "ANTICIPOS Y GARANTIAS DE CLIENTES": {
+                    "Anticipos de clientes": {
+                        "account_number": "22040100",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "Garant\u00edas de clientes": {
+                        "account_number": "22040200",
+                        "account_type": "Temporary",
+                        "is_group": 1
+                    },
+                    "account_number": "22040000",
+                    "account_type": "Temporary"
+                },
+                "INTERES MINOTARIO": {
+                    "Inter\u00e9s de accionista minotarios": {
+                        "account_number": "22050100",
+                        "is_group": 1
+                    },
+                    "account_number": "22050000"
+                },
+                "OBLIGACIONES BAJO ARRENDAMIENTOS FINANCIEROS A LARGO PLAZO": {
+                    "Contratos bajo arrendamientos financieros": {
+                        "account_number": "22030100",
+                        "is_group": 1
+                    },
+                    "account_number": "22030000"
+                },
+                "OTROS PRESTAMOS A LARGO PLAZO": {
+                    "account_number": "22020000",
+                    "is_group": 1
+                },
+                "PRESTAMOS BANCARIOS A LARGO PLAZO": {
+                    "account_number": "22010000",
+                    "is_group": 1
+                },
+                "account_number": "22000000"
+            },
+            "PROVISIONES": {
+                "IMPUESTOS SOBRE LA RENTA COMPLEMENTARIO": {
+                    "Ejercicios anteriores": {
+                        "account_number": "23010100",
+                        "account_type": "Tax",
+                        "is_group": 1
+                    },
+                    "account_number": "23010000",
+                    "account_type": "Tax"
+                },
+                "PROVISION PARA OBLIGACIONES LABORALES": {
+                    "Indemnizaci\u00f3n": {
+                        "account_number": "23020100",
+                        "is_group": 1
+                    },
+                    "account_number": "23020000"
+                },
+                "account_number": "23000000"
+            },
+            "account_number": "20000000",
+            "root_type": "Liability"
+        },
+        "30000000 - PATRIMONIO - xmC": {
+            "CAPITAL, RESERVAS Y RESULTADOS": {
+                "CAPITAL SOCIAL": {
+                    "Capital Social M\u00ednimo": {
+                        "Capital Social M\u00ednimo NO Pagado": {
+                            "account_number": "31010102",
+                            "account_type": "Equity",
+                            "is_group": 1
+                        },
+                        "Capital Social M\u00ednimo Suscrito": {
+                            "account_number": "31010101",
+                            "account_type": "Equity",
+                            "is_group": 1
+                        },
+                        "account_number": "31010100",
+                        "account_type": "Equity"
+                    },
+                    "Capital Social Variable": {
+                        "Capital Social Variable NO Pagado": {
+                            "account_number": "31010202",
+                            "account_type": "Equity",
+                            "is_group": 1
+                        },
+                        "Capital Social Variable Suscrito": {
+                            "account_number": "31010201",
+                            "account_type": "Equity",
+                            "is_group": 1
+                        },
+                        "account_number": "31010200",
+                        "account_type": "Equity"
+                    },
+                    "account_number": "31010000",
+                    "account_type": "Equity"
+                },
+                "DIVIDENDOS PAGADOS": {
+                    "account_number": "31060000",
+                    "account_type": "Equity",
+                    "is_group": 1
+                },
+                "GANANCIAS NO DISTRIBUIDAS": {
+                    "De ejercicios anteriores": {
+                        "account_number": "31020100",
+                        "account_type": "Equity",
+                        "is_group": 1
+                    },
+                    "Del presente ejercicio": {
+                        "account_number": "31020200",
+                        "account_type": "Equity",
+                        "is_group": 1
+                    },
+                    "account_number": "31020000",
+                    "account_type": "Equity"
+                },
+                "GANANCIAS RESTRINGIDAS": {
+                    "Reserva legal": {
+                        "account_number": "31030100",
+                        "account_type": "Equity",
+                        "is_group": 1
+                    },
+                    "account_number": "31030000",
+                    "account_type": "Equity"
+                },
+                "PERDIDAS ACUMULADAS (CR)": {
+                    "De ejercicios anteriores": {
+                        "account_number": "31050100",
+                        "account_type": "Equity",
+                        "is_group": 1
+                    },
+                    "Del presente ejercicio": {
+                        "account_number": "31050200",
+                        "account_type": "Equity",
+                        "is_group": 1
+                    },
+                    "account_number": "31050000",
+                    "account_type": "Equity"
+                },
+                "SUPERAVIT POR REVALUACIONES": {
+                    "Super\u00e1vit por revaluaci\u00f3n de activos": {
+                        "account_number": "31040100",
+                        "account_type": "Equity",
+                        "is_group": 1
+                    },
+                    "account_number": "31040000",
+                    "account_type": "Equity"
+                },
+                "account_number": "31000000",
+                "account_type": "Equity"
+            },
+            "account_number": "30000000",
+            "root_type": "Equity"
+        },
+        "40000000 - CUENTAS DE RESULTADO DEUDORAS - xmC": {
+            "COSTOS Y GASTOS DE OPERACI\u00d3N": {
+                "41010000 - COSTO DE LAS VENTAS - xmC": {
+                    "account_number": "41010000",
+                    "account_type": "Cost of Goods Sold"
+                },
+                "GASTOS DE DEPARTAMENTO DE OPERACIONES": {
+                    "41020600 - Depreciaciones y amortizaciones - xmC": {
+                        "account_number": "41020600",
+                        "account_type": "Depreciation"
+                    },
+                    "41020900 - Redondeos - xmC": {
+                        "account_number": "41020900",
+                        "account_type": "Round Off"
+                    },
+                    "Gastos operativos": {
+                        "account_number": "41020700",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Mantenimientos": {
+                        "account_number": "41020400",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Materiales y suministros": {
+                        "Ajustes de Inventario": {
+                            "account_number": "41020201",
+                            "account_type": "Stock Adjustment"
+                        },
+                        "account_number": "41020200",
+                        "account_type": "Chargeable"
+                    },
+                    "Seguros": {
+                        "account_number": "41020500",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Servicios b\u00e1sicos": {
+                        "account_number": "41020300",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Servicios y honorarios profesionales": {
+                        "account_number": "41020800",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Sueldos y prestaciones laborales": {
+                        "account_number": "41020100",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "account_number": "41020000",
+                    "account_type": "Expense Account"
+                },
+                "GASTOS DE VENTAS Y DISTRIBUCION": {
+                    "Depreciaciones y amortizaciones": {
+                        "account_number": "41030600",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Gastos operativos": {
+                        "account_number": "41030700",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Mantenimientos": {
+                        "account_number": "41030400",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Materiales y suministros": {
+                        "account_number": "41030200",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Seguros": {
+                        "account_number": "41030500",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Servicios b\u00e1sicos": {
+                        "account_number": "41030300",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Servicios y honorarios profesionales": {
+                        "account_number": "41030800",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "Sueldos y prestaciones laborales": {
+                        "account_number": "41030100",
+                        "account_type": "Chargeable",
+                        "is_group": 1
+                    },
+                    "account_number": "41030000",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "41000000",
+                "account_type": "Expense Account"
+            },
+            "GASTOS DE IMPUESTO SOBRE LA RENTA": {
+                "GASTOS DE IMPUESTO SOBRE LA RENTA CORRIENTE": {
+                    "account_number": "43010000",
+                    "account_type": "Expense Account",
+                    "is_group": 1
+                },
+                "account_number": "43000000",
+                "account_type": "Expense Account"
+            },
+            "GASTOS DE NO OPERACI\u00d3N": {
+                "42020000 - GASTOS NO DEDUCIBLES - xmC": {
+                    "Garant\u00eda por venta de productos": {
+                        "account_number": "42020200",
+                        "account_type": "Expense Account",
+                        "is_group": 1
+                    },
+                    "Impuesto sobre la renta complementario": {
+                        "account_number": "42020100",
+                        "account_type": "Tax",
+                        "is_group": 1
+                    },
+                    "account_number": "42020000",
+                    "account_type": "Expense Account"
+                },
+                "GASTOS FINANCIEROS": {
+                    "42010100 - Intereses - xmC": {
+                        "account_number": "42010100",
+                        "account_type": "Expense Account",
+                        "is_group": 1
+                    },
+                    "42010300 - Diferenciales cambiarios - xmC": {
+                        "account_number": "42010300",
+                        "account_type": "Expense Account",
+                        "is_group": 1
+                    },
+                    "Comisiones bancarias": {
+                        "account_number": "42010200",
+                        "account_type": "Expense Account",
+                        "is_group": 1
+                    },
+                    "account_number": "42010000",
+                    "account_type": "Expense Account"
+                },
+                "account_number": "42000000",
+                "account_type": "Expense Account"
+            },
+            "account_number": "40000000",
+            "root_type": "Expense"
+        },
+        "50000000 - CUENTAS DE RESULTADO ACREEDORAS - xmC": {
+            "INGRESOS DE NO OPERACI\u00d3N": {
+                "DIVIDENDOS GANADOS": {
+                    "Dividendos devengados por inversiones": {
+                        "account_number": "52020100",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "account_number": "52020000",
+                    "account_type": "Income Account"
+                },
+                "INGRESOS FINANCIEROS": {
+                    "Comisiones": {
+                        "account_number": "52010200",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "Diferenciales cambiarios": {
+                        "account_number": "52010300",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "Intereses": {
+                        "account_number": "52010100",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "account_number": "52010000",
+                    "account_type": "Income Account"
+                },
+                "OTROS INGRESOS": {
+                    "Ingresos por activos dados en arrendamientos financieros": {
+                        "account_number": "52030200",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "Ingresos por conversi\u00f3n": {
+                        "account_number": "52030100",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "Reintegros de seguros": {
+                        "account_number": "52030300",
+                        "account_type": "Income Account",
+                        "is_group": 1
+                    },
+                    "account_number": "52030000",
+                    "account_type": "Income Account"
+                },
+                "account_number": "52000000",
+                "account_type": "Income Account"
+            },
+            "INGRESOS POR OPERACIONES CONTINUAS": {
+                "51010000 - VENTAS DE BIENES - xmC": {
+                    "account_number": "51010000",
+                    "account_type": "Income Account"
+                },
+                "VENTAS DE SERVICIOS": {
+                    "account_number": "51020000",
+                    "account_type": "Income Account",
+                    "is_group": 1
+                },
+                "account_number": "51000000",
+                "account_type": "Income Account"
+            },
+            "account_number": "50000000",
+            "root_type": "Income"
+        },
+        "60000000 - CUENTA LIQUIDADORA DE RESULTADOS - xmC": {
+            "CUENTA DE CIERRE": {
+                "PERDIDAS Y GANANCIAS": {
+                    "account_number": "61010000",
+                    "is_group": 1
+                },
+                "account_number": "61000000"
+            },
+            "account_number": "60000000",
+            "root_type": "Income"
+        }
+    }
+}

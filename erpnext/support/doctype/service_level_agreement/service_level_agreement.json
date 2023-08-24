@@ -1,0 +1,223 @@
+{
+ "actions": [],
+ "autoname": "format:SLA-{document_type}-{service_level}",
+ "creation": "2018-12-26 21:08:15.448812",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "default_priority",
+  "column_break_2",
+  "service_level",
+  "enabled",
+  "filters_section",
+  "default_service_level_agreement",
+  "entity_type",
+  "entity",
+  "column_break_15",
+  "condition",
+  "agreement_details_section",
+  "start_date",
+  "column_break_7",
+  "end_date",
+  "response_and_resolution_time_section",
+  "apply_sla_for_resolution",
+  "priorities",
+  "status_details",
+  "sla_fulfilled_on",
+  "column_break_22",
+  "pause_sla_on",
+  "support_and_resolution_section_break",
+  "holiday_list",
+  "support_and_resolution"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Service Level Name",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.document_type",
+   "fieldname": "agreement_details_section",
+   "fieldtype": "Section Break",
+   "label": "Valid From"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "depends_on": "eval: !doc.default_contract",
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "response_and_resolution_time_section",
+   "fieldtype": "Section Break",
+   "label": "Response and Resolution"
+  },
+  {
+   "fieldname": "support_and_resolution_section_break",
+   "fieldtype": "Section Break",
+   "label": "Working Hours"
+  },
+  {
+   "fieldname": "support_and_resolution",
+   "fieldtype": "Table",
+   "label": "Working Hours",
+   "options": "Service Day",
+   "reqd": 1
+  },
+  {
+   "fieldname": "priorities",
+   "fieldtype": "Table",
+   "label": "Priorities",
+   "options": "Service Level Priority",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "fieldname": "entity",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entity",
+   "options": "entity_type"
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "fieldname": "entity_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Entity Type",
+   "options": "\nCustomer\nCustomer Group\nTerritory"
+  },
+  {
+   "default": "0",
+   "fieldname": "default_service_level_agreement",
+   "fieldtype": "Check",
+   "label": "Default Service Level Agreement"
+  },
+  {
+   "fieldname": "default_priority",
+   "fieldtype": "Link",
+   "label": "Default Priority",
+   "options": "Issue Priority",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pause_sla_on",
+   "fieldtype": "Table",
+   "label": "SLA Paused On",
+   "options": "Pause SLA On Status"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Apply On",
+   "options": "DocType",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "depends_on": "document_type",
+   "fieldname": "status_details",
+   "fieldtype": "Section Break",
+   "label": "Status Details"
+  },
+  {
+   "fieldname": "sla_fulfilled_on",
+   "fieldtype": "Table",
+   "label": "SLA Fulfilled On",
+   "options": "SLA Fulfilled On Status",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_sla_for_resolution",
+   "fieldtype": "Check",
+   "label": "Apply SLA for Resolution Time"
+  },
+  {
+   "depends_on": "document_type",
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment Conditions"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "description": "Simple Python Expression, Example: doc.status == 'Open' and doc.issue_type == 'Bug'",
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition",
+   "max_height": "7rem",
+   "options": "PythonExpression"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "links": [],
+ "modified": "2023-04-21 17:16:56.192560",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Service Level Agreement",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "All"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

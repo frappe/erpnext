@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "autoname": "field:payment_gateway_name",
+ "creation": "2020-09-10 13:21:27.398088",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_gateway_name",
+  "consumer_key",
+  "consumer_secret",
+  "initiator_name",
+  "till_number",
+  "transaction_limit",
+  "sandbox",
+  "column_break_4",
+  "business_shortcode",
+  "online_passkey",
+  "security_credential",
+  "get_account_balance",
+  "account_balance"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_gateway_name",
+   "fieldtype": "Data",
+   "label": "Payment Gateway Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "consumer_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Consumer Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "consumer_secret",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Consumer Secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "till_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Till Number",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "online_passkey",
+   "fieldtype": "Password",
+   "label": " Online PassKey",
+   "reqd": 1
+  },
+  {
+   "fieldname": "initiator_name",
+   "fieldtype": "Data",
+   "label": "Initiator Name"
+  },
+  {
+   "fieldname": "security_credential",
+   "fieldtype": "Small Text",
+   "label": "Security Credential"
+  },
+  {
+   "fieldname": "account_balance",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Account Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "get_account_balance",
+   "fieldtype": "Button",
+   "label": "Get Account Balance"
+  },
+  {
+   "depends_on": "eval:(doc.sandbox==0)",
+   "fieldname": "business_shortcode",
+   "fieldtype": "Data",
+   "label": "Business Shortcode",
+   "mandatory_depends_on": "eval:(doc.sandbox==0)"
+  },
+  {
+   "default": "150000",
+   "fieldname": "transaction_limit",
+   "fieldtype": "Float",
+   "label": "Transaction Limit",
+   "non_negative": 1
+  }
+ ],
+ "links": [],
+ "modified": "2021-03-02 17:35:14.084342",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Mpesa Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,197 @@
+{
+ "allow_import": 1,
+ "autoname": "ACC-INV-DISC-.YYYY.-.#####",
+ "creation": "2019-03-07 12:01:56.296952",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "loan_start_date",
+  "loan_period",
+  "loan_end_date",
+  "column_break_3",
+  "status",
+  "company",
+  "section_break_5",
+  "invoices",
+  "section_break_7",
+  "total_amount",
+  "column_break_9",
+  "bank_charges",
+  "section_break_6",
+  "short_term_loan",
+  "bank_account",
+  "bank_charges_account",
+  "column_break_15",
+  "accounts_receivable_credit",
+  "accounts_receivable_discounted",
+  "accounts_receivable_unpaid",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_start_date",
+   "fieldtype": "Date",
+   "label": "Loan Start Date"
+  },
+  {
+   "fieldname": "loan_period",
+   "fieldtype": "Int",
+   "label": "Loan Period (Days)"
+  },
+  {
+   "fieldname": "loan_end_date",
+   "fieldtype": "Date",
+   "label": "Loan End Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSanctioned\nDisbursed\nSettled\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Invoices",
+   "options": "Discounted Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_charges",
+   "fieldtype": "Currency",
+   "label": "Bank Charges",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "short_term_loan",
+   "fieldtype": "Link",
+   "label": "Short Term Loan Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_charges_account",
+   "fieldtype": "Link",
+   "label": "Bank Charges Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounts_receivable_credit",
+   "fieldtype": "Link",
+   "label": "Accounts Receivable Credit Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounts_receivable_discounted",
+   "fieldtype": "Link",
+   "label": "Accounts Receivable Discounted Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounts_receivable_unpaid",
+   "fieldtype": "Link",
+   "label": "Accounts Receivable Unpaid Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Invoice Discounting",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2019-05-30 19:08:21.199759",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Invoice Discounting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

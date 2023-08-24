@@ -1,0 +1,79 @@
+{% extends "templates/web.html" %}
+
+{% from "erpnext/templates/includes/macros.html" import render_homepage_section %}
+
+{% block content %}
+<main>
+	{% if homepage.hero_section_based_on == 'Default' %}
+	<section class="hero-section border-bottom {%if homepage.hero_image%}hero-image{%endif%}"
+		{% if homepage.hero_image %}
+		style="background-image: url('{{ homepage.hero_image }}');"
+		{%- endif %}
+	>
+		<div class="container py-5">
+			<h1 class="d-none d-sm-block display-4">{{ homepage.tag_line }}</h1>
+			<h1 class="d-block d-sm-none">{{ homepage.tag_line }}</h1>
+			<h2 class="d-none d-sm-block">{{ homepage.description }}</h2>
+			<h3 class="d-block d-sm-none">{{ homepage.description }}</h3>
+		</div>
+
+		<div class="container">
+			<a href="{{ explore_link }}" class="mb-5 btn btn-primary">{{ _('Explore') }}</a>
+		</div>
+	</section>
+	{% elif homepage.hero_section_based_on == 'Slideshow' and slideshow %}
+	<section class="hero-section">
+		{% include "templates/includes/slideshow.html" %}
+	</section>
+	{% elif homepage.hero_section_based_on == 'Homepage Section' %}
+		{{ render_homepage_section(homepage.hero_section_doc) }}
+	{% endif %}
+
+	{% if homepage.products %}
+	<section class="container section-products my-5">
+		<h3>{{ _('Products') }}</h3>
+
+		<div class="row">
+			{% for item in homepage.products %}
+			<div class="col-md-4 mb-4">
+				<div class="card h-100 justify-content-between">
+					<img class="card-img-top website-image-extra-large" src="{{ item.image }}" loading="lazy" alt="{{ item.item_name }}"></img>
+					<div class="card-body flex-grow-0">
+						<h5 class="card-title">{{ item.item_name }}</h5>
+						<a href="{{ item.route }}" class="card-link">{{ _('More details') }}</a>
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</section>
+	{% endif %}
+
+	{% if blogs %}
+	<section class="container my-5">
+		<h3>{{ _('Publications') }}</h3>
+
+		<div class="row">
+			{% for blog in blogs %}
+			<div class="col-md-4 mb-4">
+				<div class="card h-100">
+					<div class="card-body">
+						<h5 class="card-title">{{ blog.title }}</h5>
+						<p class="card-subtitle mb-2 text-muted">{{ _('By {0}').format(blog.blogger) }}</p>
+						<p class="card-text">{{ blog.blog_intro }}</p>
+					</div>
+					<div class="card-body flex-grow-0">
+						<a href="{{ blog.route }}" class="card-link">{{ _('Read blog') }}</a>
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</section>
+	{% endif %}
+
+	{% for section in homepage_sections %}
+		{{ render_homepage_section(section) }}
+	{% endfor %}
+</main>
+{% endblock %}

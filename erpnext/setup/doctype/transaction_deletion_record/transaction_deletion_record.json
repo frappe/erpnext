@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "autoname": "TDL.####",
+ "creation": "2021-04-06 20:17:18.404716",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "doctypes",
+  "doctypes_to_be_ignored",
+  "amended_from",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "doctypes",
+   "fieldtype": "Table",
+   "label": "Summary",
+   "options": "Transaction Deletion Record Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctypes_to_be_ignored",
+   "fieldtype": "Table",
+   "label": "Excluded DocTypes",
+   "options": "Transaction Deletion Record Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transaction Deletion Record",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nCompleted"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-08-04 20:15:59.071493",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Transaction Deletion Record",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

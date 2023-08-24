@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create your first Work Order",
+ "creation": "2020-05-12 16:15:56.084682",
+ "description": "# Create a Work Order\n\nA Work Order or a Job order is given to the manufacturing shop floor by the Production Manager to initiate the manufacturing of a certain quantity of an item. Work Order carriers details of production Item, its BOM, quantities to be manufactured, and operations.\n\nThrough Work Order, you can track various production status like:\n\n- Issue of raw-material to shop material\n- Progress on each Workstation via Job Card\n- Manufactured Quantity against Work Order\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-13 16:02:04.223536",
+ "modified_by": "Administrator",
+ "name": "Work Order",
+ "owner": "Administrator",
+ "reference_document": "Work Order",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Work Order",
+ "validate_action": 1
+}

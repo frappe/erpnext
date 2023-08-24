@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "creation": "2022-02-11 11:26:20.611960",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "field_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "field_name",
+   "fieldtype": "Autocomplete",
+   "in_list_view": 1,
+   "label": "Field Name",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-03-25 05:48:30.946201",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Variant Field",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

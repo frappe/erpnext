@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:territory_name",
+ "creation": "2013-01-10 16:34:24",
+ "description": "Classification of Customers by region",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "territory_name",
+  "parent_territory",
+  "is_group",
+  "cb0",
+  "territory_manager",
+  "lft",
+  "rgt",
+  "old_parent",
+  "target_details_section_break",
+  "targets"
+ ],
+ "fields": [
+  {
+   "fieldname": "territory_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Territory Name",
+   "no_copy": 1,
+   "oldfieldname": "territory_name",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "parent_territory",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Parent Territory",
+   "oldfieldname": "parent_territory",
+   "oldfieldtype": "Link",
+   "options": "Territory"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Group",
+   "oldfieldname": "is_group",
+   "oldfieldtype": "Select"
+  },
+  {
+   "fieldname": "cb0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "For reference",
+   "fieldname": "territory_manager",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Territory Manager",
+   "oldfieldname": "territory_manager",
+   "oldfieldtype": "Link",
+   "options": "Sales Person",
+   "search_index": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "lft",
+   "no_copy": 1,
+   "oldfieldname": "lft",
+   "oldfieldtype": "Int",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "rgt",
+   "no_copy": 1,
+   "oldfieldname": "rgt",
+   "oldfieldtype": "Int",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "old_parent",
+   "no_copy": 1,
+   "oldfieldname": "old_parent",
+   "oldfieldtype": "Data",
+   "options": "Territory",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "description": "Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.",
+   "fieldname": "target_details_section_break",
+   "fieldtype": "Section Break",
+   "label": "Territory Targets",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "targets",
+   "fieldtype": "Table",
+   "label": "Targets",
+   "oldfieldname": "target_details",
+   "oldfieldtype": "Table",
+   "options": "Target Detail"
+  }
+ ],
+ "icon": "fa fa-map-marker",
+ "idx": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2022-12-24 11:16:39.964956",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Territory",
+ "name_case": "Title Case",
+ "naming_rule": "By fieldname",
+ "nsm_parent_field": "parent_territory",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Customer",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "search_fields": "parent_territory,territory_manager",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

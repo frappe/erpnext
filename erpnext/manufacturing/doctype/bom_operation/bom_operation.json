@@ -1,0 +1,206 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:49",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sequence_id",
+  "operation",
+  "col_break1",
+  "workstation_type",
+  "workstation",
+  "time_in_mins",
+  "fixed_time",
+  "costing_section",
+  "hour_rate",
+  "base_hour_rate",
+  "column_break_9",
+  "operating_cost",
+  "base_operating_cost",
+  "column_break_11",
+  "batch_size",
+  "set_cost_based_on_bom_qty",
+  "cost_per_unit",
+  "base_cost_per_unit",
+  "more_information_section",
+  "description",
+  "column_break_18",
+  "image"
+ ],
+ "fields": [
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operation",
+   "oldfieldname": "operation_no",
+   "oldfieldtype": "Data",
+   "options": "Operation",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:!doc.workstation_type",
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "label": "Workstation",
+   "oldfieldname": "workstation",
+   "oldfieldtype": "Link",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "opn_description",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hour_rate",
+   "fieldtype": "Currency",
+   "label": "Hour Rate",
+   "oldfieldname": "hour_rate",
+   "oldfieldtype": "Currency",
+   "options": "currency",
+   "precision": "2"
+  },
+  {
+   "description": "In minutes",
+   "fetch_from": "operation.total_operation_time",
+   "fetch_if_empty": 1,
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Operation Time ",
+   "oldfieldname": "time_in_mins",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Operation time does not depend on quantity to produce",
+   "fieldname": "fixed_time",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Fixed Time"
+  },
+  {
+   "fieldname": "operating_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Operating Cost",
+   "oldfieldname": "operating_cost",
+   "oldfieldtype": "Currency",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.doctype == 'BOM'",
+   "fieldname": "base_hour_rate",
+   "fieldtype": "Currency",
+   "label": "Base Hour Rate(Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.doctype == 'BOM'",
+   "fieldname": "base_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Operating Cost(Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach",
+   "label": "Image"
+  },
+  {
+   "fetch_from": "operation.batch_size",
+   "fetch_if_empty": 1,
+   "fieldname": "batch_size",
+   "fieldtype": "Int",
+   "label": "Batch Size"
+  },
+  {
+   "depends_on": "eval:doc.parenttype == \"Routing\"",
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence ID"
+  },
+  {
+   "depends_on": "eval:doc.batch_size > 0 && doc.set_cost_based_on_bom_qty",
+   "fieldname": "cost_per_unit",
+   "fieldtype": "Float",
+   "label": "Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_cost_per_unit",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Base Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "costing_section",
+   "fieldtype": "Section Break",
+   "label": "Costing"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "set_cost_based_on_bom_qty",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost Based On BOM Quantity"
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  }
+ ],
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-04 17:17:16.986941",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,76 @@
+Total Costing Amount,Monto Total Calculado,
+Mode of Payments,Forma de pago,
+Student Group Student,Alumno de Grupo de Estudiantes,
+% Installed,% Instalado,
+The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.,La cantidad de {0} establecida en esta solicitud de pago es diferente de la cantidad calculada para todos los planes de pago: {1}. Verifique que esto sea correcto antes de enviar el documento.
+Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos,
+Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+Loyalty Point Entry,Entrada de Punto de Lealtad,
+Please set the Item Code first,"Por favor, primero define el Código del Artículo"
+Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar,
+Support Hour Distribution,Distribución de Hora de Soporte
+Student Group Strength,Fortaleza de Grupo Estudiante,
+Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
+The payment gateway account in plan {0} is different from the payment gateway account in this payment request,La cuenta para pasarela de pago en el plan {0} es diferente de la cuenta de pasarela de pago en en esta petición de pago,
+Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas,
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked,
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
+10. Add or Deduct: Whether you want to add or deduct the tax.","Plantilla de impuestos que puede aplicarse a todas las operaciones de compra. Esta plantilla puede contener un listado de cuentas de impuestos así como también de otras cuentas de gastos como ""Envío"", ""Seguros"", ""Manejo"", etc. 
+
+ #### Nota 
+
+La tasa impositiva que se defina aquí será la tasa de gravamen predeterminada para todos los **Productos**. Si existen **Productos** con diferentes tasas, estas deben ser añadidas a la tabla de **Impuestos del Producto ** dentro del maestro del **Producto**.
+
+ #### Descripción de las Columnas 
+
+ 1. Tipo de Cálculo: 
+ - Este puede ser **Sobre el total neto** (que es la suma de la cantidad básica).
+ - **Sobre la línea anterior total / importe** (para impuestos o cargos acumulados). Si selecciona esta opción, el impuesto se aplica como un porcentaje de la cantidad o total de la fila anterior (de la tabla de impuestos).
+ - **Actual** (como se haya capturado).
+ 2. Encabezado de cuenta: La cuenta mayor sobre la que se registrara este gravamen. 
+ 3. Centro de Costo: Si el impuesto / cargo es un ingreso (como en un envío) o un gasto, debe ser registrado contra un centro de costos.
+ 4. Descripción: Descripción del impuesto (que se imprimirán en facturas / cotizaciones).
+ 5. Rate: Tasa de impuesto.
+ 6. Monto: Monto de impuesto.
+ 7. Total: Total acumulado hasta este punto.
+ 8. Línea de referencia: Si se basa en ""Línea anterior al total"" se puede seleccionar el número de la fila que será tomado como base para este cálculo (por defecto es la fila anterior).
+ 9. Considerar impuesto o cargo para: En esta sección se puede especificar si el impuesto / cargo es sólo para la valoración (no una parte del total) o sólo para el total (no agrega valor al elemento) o para ambos.
+ 10. Añadir o deducir: Si usted quiere añadir o deducir el impuesto."
+Gain/Loss on Asset Disposal,Ganancia/Pérdida por la venta de activos,
+Specify Exchange Rate to convert one currency into another,Especificar el Tipo de Cambio para convertir de una divisa a otra,
+Loyalty Program,Programa de Lealtad,
+Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes,
+"Service Item,Type,frequency and expense amount are required","El Artículo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos"
+Gross Purchase Amount is mandatory,El Importe Bruto de Compra es obligatorio,
+Customer or Supplier Details,Detalle de cliente o proveedor,
+Standard Selling Rate,Tarifa de Venta Estándar,
+School House,Casa Escuela,
+Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
+Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima,
+"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Ejemplo: ABCD. #####. Si se establece una serie y no se menciona el número de lote en las transacciones, se creará un número de lote automático basado en esta serie. Si siempre quiere mencionar explícitamente el número de lote para este artículo, déjelo en blanco. Nota: esta configuración tendrá prioridad sobre el Prefijo de denominación de serie en Configuración de Inventario."
+Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
+"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
+"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
+Payment Plan,Plan de pago,
+Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.,No se pueden cambiar las propiedades de Variantes después de la transacción de inventario. Deberá crear un nuevo artículo para hacer esto.
+Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer,La cantidad de existencias para comenzar el procedimiento no está disponible en el almacén. ¿Desea registrar una transferencia de inventario?
+"Company, Payment Account, From Date and To Date is mandatory","Empresa, cuenta de pago, fecha de inicio y fecha final son obligatorios"
+Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega,

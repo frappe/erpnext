@@ -1,0 +1,85 @@
+{
+ "creation": "2019-07-16 17:53:18.718831",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "reference_document",
+  "default_dimension",
+  "mandatory_for_bs",
+  "mandatory_for_pl",
+  "column_break_lqns",
+  "automatically_post_balancing_accounting_entry",
+  "offsetting_account"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Reference Document",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "default_dimension",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Default Dimension",
+   "options": "reference_document"
+  },
+  {
+   "columns": 3,
+   "default": "0",
+   "fieldname": "mandatory_for_bs",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Mandatory For Balance Sheet"
+  },
+  {
+   "columns": 3,
+   "default": "0",
+   "fieldname": "mandatory_for_pl",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Mandatory For Profit and Loss Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "automatically_post_balancing_accounting_entry",
+   "fieldtype": "Check",
+   "label": "Automatically post balancing accounting entry"
+  },
+  {
+   "fieldname": "offsetting_account",
+   "fieldtype": "Link",
+   "label": "Offsetting Account",
+   "mandatory_depends_on": "eval: doc.automatically_post_balancing_accounting_entry",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_lqns",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-08-15 11:59:09.389891",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounting Dimension Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

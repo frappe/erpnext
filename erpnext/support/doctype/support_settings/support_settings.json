@@ -1,0 +1,187 @@
+{
+ "actions": "",
+ "creation": "2017-02-17 13:07:35.686409",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sb_00",
+  "track_service_level_agreement",
+  "allow_resetting_service_level_agreement",
+  "issues_sb",
+  "close_issue_after_days",
+  "portal_sb",
+  "get_started_sections",
+  "show_latest_forum_posts",
+  "forum_sb",
+  "forum_url",
+  "get_latest_query",
+  "response_key_list",
+  "column_break_10",
+  "post_title_key",
+  "post_description_key",
+  "post_route_key",
+  "post_route_string",
+  "greetings_section_section",
+  "greeting_title",
+  "column_break_19",
+  "greeting_subtitle",
+  "search_apis_sb",
+  "search_apis"
+ ],
+ "fields": [
+  {
+   "fieldname": "issues_sb",
+   "fieldtype": "Section Break",
+   "label": "Issues"
+  },
+  {
+   "default": "7",
+   "fieldname": "close_issue_after_days",
+   "fieldtype": "Int",
+   "label": "Close Issue After Days"
+  },
+  {
+   "fieldname": "portal_sb",
+   "fieldtype": "Section Break",
+   "label": "Support Portal"
+  },
+  {
+   "fieldname": "get_started_sections",
+   "fieldtype": "Code",
+   "label": "Get Started Sections"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_latest_forum_posts",
+   "fieldtype": "Check",
+   "label": "Show Latest Forum Posts"
+  },
+  {
+   "depends_on": "show_latest_forum_posts",
+   "fieldname": "forum_sb",
+   "fieldtype": "Section Break",
+   "label": "Forum Posts"
+  },
+  {
+   "fieldname": "forum_url",
+   "fieldtype": "Data",
+   "label": "Forum URL"
+  },
+  {
+   "fieldname": "get_latest_query",
+   "fieldtype": "Data",
+   "label": "Get Latest Query"
+  },
+  {
+   "fieldname": "response_key_list",
+   "fieldtype": "Data",
+   "label": "Response Key List"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "post_title_key",
+   "fieldtype": "Data",
+   "label": "Post Title Key"
+  },
+  {
+   "fieldname": "post_description_key",
+   "fieldtype": "Data",
+   "label": "Post Description Key"
+  },
+  {
+   "fieldname": "post_route_key",
+   "fieldtype": "Data",
+   "label": "Post Route Key"
+  },
+  {
+   "fieldname": "post_route_string",
+   "fieldtype": "Data",
+   "label": "Post Route String"
+  },
+  {
+   "fieldname": "search_apis_sb",
+   "fieldtype": "Section Break",
+   "label": "Search APIs"
+  },
+  {
+   "fieldname": "search_apis",
+   "fieldtype": "Table",
+   "label": "Search APIs",
+   "options": "Support Search Source"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Service Level Agreements"
+  },
+  {
+   "default": "0",
+   "fieldname": "track_service_level_agreement",
+   "fieldtype": "Check",
+   "label": "Track Service Level Agreement"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.track_service_level_agreement;",
+   "fieldname": "allow_resetting_service_level_agreement",
+   "fieldtype": "Check",
+   "label": "Allow Resetting Service Level Agreement"
+  },
+  {
+   "default": "We're here to help",
+   "fieldname": "greeting_title",
+   "fieldtype": "Data",
+   "label": "Greeting Title",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "Browse help topics",
+   "fieldname": "greeting_subtitle",
+   "fieldtype": "Data",
+   "label": "Greeting Subtitle",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "greetings_section_section",
+   "fieldtype": "Section Break",
+   "label": "Greetings Section",
+   "show_days": 1,
+   "show_seconds": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-10-14 13:08:38.473616",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Support Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

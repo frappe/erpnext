@@ -1,0 +1,32 @@
+{
+ "add_total_row": 0,
+ "apply_user_permissions": 1,
+ "creation": "2016-07-21 08:31:05.890362",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 2,
+ "is_standard": "Yes",
+ "modified": "2017-02-24 20:04:58.784351",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier Quotation Comparison",
+ "owner": "Administrator",
+ "ref_doctype": "Supplier Quotation",
+ "report_name": "Supplier Quotation Comparison",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Stock User"
+  }
+ ]
+}

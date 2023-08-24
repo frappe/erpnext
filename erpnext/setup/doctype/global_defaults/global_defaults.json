@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2013-05-02 17:53:24",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_company",
+  "country",
+  "default_distance_unit",
+  "column_break_8",
+  "default_currency",
+  "hide_currency_symbol",
+  "disable_rounded_total",
+  "disable_in_words",
+  "demo_company"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "default_distance_unit",
+   "fieldtype": "Link",
+   "label": "Default Distance Unit",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "INR",
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Default Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "description": "Do not show any symbol like $ etc next to currencies.",
+   "fieldname": "hide_currency_symbol",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Hide Currency Symbol",
+   "options": "\nNo\nYes"
+  },
+  {
+   "default": "0",
+   "description": "If disable, 'Rounded Total' field will not be visible in any transaction",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "description": "If disable, 'In Words' field will not be visible in any transaction",
+   "fieldname": "disable_in_words",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Disable In Words"
+  },
+  {
+   "fieldname": "demo_company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Demo Company",
+   "options": "Company",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-cog",
+ "idx": 1,
+ "in_create": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-07-01 19:45:00.323953",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Global Defaults",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "read_only": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

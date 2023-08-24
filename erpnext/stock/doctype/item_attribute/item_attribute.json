@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:attribute_name",
+ "creation": "2014-09-26 03:49:54.899170",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "attribute_name",
+  "numeric_values",
+  "section_break_4",
+  "from_range",
+  "increment",
+  "column_break_8",
+  "to_range",
+  "section_break_5",
+  "item_attribute_values"
+ ],
+ "fields": [
+  {
+   "fieldname": "attribute_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Attribute Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "numeric_values",
+   "fieldtype": "Check",
+   "label": "Numeric Values"
+  },
+  {
+   "depends_on": "numeric_values",
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "from_range",
+   "fieldtype": "Float",
+   "label": "From Range"
+  },
+  {
+   "default": "0",
+   "fieldname": "increment",
+   "fieldtype": "Float",
+   "label": "Increment"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "to_range",
+   "fieldtype": "Float",
+   "label": "To Range"
+  },
+  {
+   "depends_on": "eval: !doc.numeric_values",
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "item_attribute_values",
+   "fieldtype": "Table",
+   "label": "Item Attribute Values",
+   "options": "Item Attribute Value"
+  }
+ ],
+ "icon": "fa fa-edit",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-10-02 12:03:02.359202",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Attribute",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

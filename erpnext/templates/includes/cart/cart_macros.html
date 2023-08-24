@@ -1,0 +1,22 @@
+{% macro show_address(address, doc, fieldname, select_address=False) %}
+{% set selected=address.name==doc.get(fieldname) %}
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row">
+			<div class="col-sm-10 address-title"
+				data-address-name="{{ address.name }}">
+                <strong>{{ address.name }}</strong></div>
+			<div class="col-sm-2 text-right">
+                <input type="checkbox"
+                data-fieldname="{{ fieldname }}"
+				data-address-name="{{ address.name}}"
+                    {{ "checked" if selected else "" }}></div>
+		</div>
+	</div>
+	<div class="panel-collapse"
+        data-address-name="{{ address.name }}">
+		<div class="panel-body text-muted small">{{ address.display }}</div>
+	</div>
+</div>
+{% endmacro %}

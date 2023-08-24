@@ -1,0 +1,235 @@
+{
+ "actions": [],
+ "creation": "2014-10-16 14:35:41.950175",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "details",
+  "operation",
+  "status",
+  "completed_qty",
+  "process_loss_qty",
+  "column_break_4",
+  "bom",
+  "workstation_type",
+  "workstation",
+  "sequence_id",
+  "section_break_10",
+  "description",
+  "estimated_time_and_cost",
+  "planned_start_time",
+  "hour_rate",
+  "time_in_mins",
+  "column_break_10",
+  "planned_end_time",
+  "batch_size",
+  "planned_operating_cost",
+  "section_break_9",
+  "actual_start_time",
+  "actual_operation_time",
+  "column_break_11",
+  "actual_end_time",
+  "actual_operating_cost"
+ ],
+ "fields": [
+  {
+   "fieldname": "details",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operation",
+   "oldfieldname": "operation_no",
+   "oldfieldtype": "Data",
+   "options": "Operation",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "bom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BOM",
+   "no_copy": 1,
+   "options": "BOM",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Operation Description",
+   "oldfieldname": "opn_description",
+   "oldfieldtype": "Text"
+  },
+  {
+   "columns": 2,
+   "description": "Operation completed for how many finished goods?",
+   "fieldname": "completed_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Completed Qty",
+   "no_copy": 1
+  },
+  {
+   "columns": 1,
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Pending\nWork in Progress\nCompleted"
+  },
+  {
+   "columns": 1,
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Workstation",
+   "oldfieldname": "workstation",
+   "oldfieldtype": "Link",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "estimated_time_and_cost",
+   "fieldtype": "Section Break",
+   "label": "Estimated Time and Cost"
+  },
+  {
+   "fieldname": "planned_start_time",
+   "fieldtype": "Datetime",
+   "label": "Planned Start Time",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "planned_end_time",
+   "fieldtype": "Datetime",
+   "label": "Planned End Time",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "description": "In Minutes",
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Time",
+   "oldfieldname": "time_in_mins",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hour_rate",
+   "fieldtype": "Float",
+   "label": "Hour Rate",
+   "oldfieldname": "hour_rate",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Planned Operating Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Actual Time and Cost"
+  },
+  {
+   "description": "Updated via 'Time Log' (In Minutes)",
+   "fieldname": "actual_start_time",
+   "fieldtype": "Datetime",
+   "label": "Actual Start Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Updated via 'Time Log' (In Minutes)",
+   "fieldname": "actual_end_time",
+   "fieldtype": "Datetime",
+   "label": "Actual End Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Updated via 'Time Log' (In Minutes)",
+   "fieldname": "actual_operation_time",
+   "fieldtype": "Float",
+   "label": "Actual Operation Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "(Hour Rate / 60) * Actual Operation Time",
+   "fieldname": "actual_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Actual Operating Cost",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Sequence ID",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-06-09 14:03:01.612909",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Work Order Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

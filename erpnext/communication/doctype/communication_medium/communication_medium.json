@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2019-06-05 11:48:30.572795",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "communication_channel",
+  "communication_medium_type",
+  "column_break_3",
+  "catch_all",
+  "provider",
+  "disabled",
+  "timeslots_section",
+  "timeslots"
+ ],
+ "fields": [
+  {
+   "fieldname": "communication_medium_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Communication Medium Type",
+   "options": "Voice\nEmail\nChat",
+   "reqd": 1
+  },
+  {
+   "description": "If there is no assigned timeslot, then communication will be handled by this group",
+   "fieldname": "catch_all",
+   "fieldtype": "Link",
+   "label": "Catch All",
+   "options": "Employee Group"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Link",
+   "label": "Provider",
+   "options": "Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "timeslots_section",
+   "fieldtype": "Section Break",
+   "label": "Timeslots"
+  },
+  {
+   "fieldname": "timeslots",
+   "fieldtype": "Table",
+   "label": "Timeslots",
+   "options": "Communication Medium Timeslot"
+  },
+  {
+   "fieldname": "communication_channel",
+   "fieldtype": "Select",
+   "label": "Communication Channel",
+   "options": ""
+  }
+ ],
+ "links": [],
+ "modified": "2020-10-27 16:22:08.068542",
+ "modified_by": "Administrator",
+ "module": "Communication",
+ "name": "Communication Medium",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

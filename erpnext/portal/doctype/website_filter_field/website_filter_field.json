@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "creation": "2018-12-31 17:06:08.716134",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "fieldname"
+ ],
+ "fields": [
+  {
+   "fieldname": "fieldname",
+   "fieldtype": "Autocomplete",
+   "in_list_view": 1,
+   "label": "Fieldname"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-04-18 18:55:17.835666",
+ "modified_by": "Administrator",
+ "module": "Portal",
+ "name": "Website Filter Field",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

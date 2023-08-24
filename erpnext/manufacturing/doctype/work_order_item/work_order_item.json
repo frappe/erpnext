@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "creation": "2016-04-18 07:38:26.314642",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "operation",
+  "item_code",
+  "source_warehouse",
+  "column_break_3",
+  "item_name",
+  "description",
+  "allow_alternative_item",
+  "include_item_in_manufacturing",
+  "qty_section",
+  "required_qty",
+  "rate",
+  "amount",
+  "column_break_11",
+  "transferred_qty",
+  "consumed_qty",
+  "returned_qty",
+  "available_qty_at_source_warehouse",
+  "available_qty_at_wip_warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Operation",
+   "options": "Operation"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty_section",
+   "fieldtype": "Section Break",
+   "label": "Qty"
+  },
+  {
+   "fieldname": "required_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Required Qty"
+  },
+  {
+   "depends_on": "eval:!parent.skip_transfer",
+   "fieldname": "transferred_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Transferred Qty",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_alternative_item",
+   "fieldtype": "Check",
+   "label": "Allow Alternative Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_item_in_manufacturing",
+   "fieldtype": "Check",
+   "label": "Include Item In Manufacturing"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:!parent.skip_transfer",
+   "fieldname": "consumed_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Consumed Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "available_qty_at_source_warehouse",
+   "fieldtype": "Float",
+   "label": "Available Qty at Source Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "available_qty_at_wip_warehouse",
+   "fieldtype": "Float",
+   "label": "Available Qty at WIP Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Returned Qty ",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-28 10:50:43.512562",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Work Order Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

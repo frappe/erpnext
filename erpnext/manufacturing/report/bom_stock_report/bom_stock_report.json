@@ -1,0 +1,28 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2017-01-10 14:00:50.387244", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "", 
+ "modified": "2017-06-23 04:46:43.209008", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "BOM Stock Report", 
+ "owner": "Administrator", 
+ "query": "SELECT \n\tbom_item.item_code as \"Item:Link/Item:200\",\n\tbom_item.description as \"Description:Data:300\",\n\tbom_item.qty as \"Required Qty:Float:100\",\n\tledger.actual_qty  as \"In Stock Qty:Float:100\",\n\tFLOOR(ledger.actual_qty /bom_item.qty) as \"Enough Parts to Build:Int:100\"\nFROM\n\t`tabBOM Item` AS bom_item \n\tLEFT JOIN `tabBin` AS ledger\t\n\t\tON bom_item.item_code = ledger.item_code  \n\t\tAND ledger.warehouse = %(warehouse)s\nWHERE\n\tbom_item.parent=%(bom)s\n\nGROUP BY bom_item.item_code", 
+ "ref_doctype": "BOM", 
+ "report_name": "BOM Stock Report", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Manufacturing Manager"
+  }, 
+  {
+   "role": "Manufacturing User"
+  }
+ ]
+}

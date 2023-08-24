@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2019-02-15 15:02:51.454754", 
+ "custom_format": 0, 
+ "default_print_language": "en", 
+ "disabled": 0, 
+ "doc_type": "Sales Invoice", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2019-02-15 15:02:51.454754", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Sales Auditing Voucher", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Jinja", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

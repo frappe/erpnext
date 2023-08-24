@@ -1,0 +1,14 @@
+name: Trigger Docker build on release
+on:
+  release:
+    types: [released]
+jobs:
+  curl:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:latest
+    steps:
+    - name: curl
+      run: |
+        apk add curl bash
+        curl -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer ${{ secrets.CI_PAT }}" https://api.github.com/repos/frappe/frappe_docker/actions/workflows/build_stable.yml/dispatches -d '{"ref":"main"}'

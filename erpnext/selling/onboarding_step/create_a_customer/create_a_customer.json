@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-14 17:46:41.831517",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-06-01 13:16:19.731719",
+ "modified_by": "Administrator",
+ "name": "Create a Customer",
+ "owner": "Administrator",
+ "reference_document": "Customer",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create a Customer",
+ "validate_action": 1
+}

@@ -1,0 +1,128 @@
+{
+ "actions": [],
+ "autoname": "format:QA-ACT-{#####}",
+ "creation": "2018-10-02 11:40:43.666100",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "corrective_preventive",
+  "review",
+  "feedback",
+  "status",
+  "cb_00",
+  "date",
+  "goal",
+  "procedure",
+  "sb_00",
+  "resolutions"
+ ],
+ "fields": [
+  {
+   "fetch_from": "review.goal",
+   "fieldname": "goal",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Goal",
+   "options": "Quality Goal"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Procedure",
+   "options": "Quality Procedure"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nCompleted",
+   "read_only": 1
+  },
+  {
+   "default": "Corrective",
+   "fieldname": "corrective_preventive",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Corrective/Preventive",
+   "options": "Corrective\nPreventive",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolutions",
+   "fieldtype": "Table",
+   "label": "Resolutions",
+   "options": "Quality Action Resolution"
+  },
+  {
+   "fieldname": "review",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Review",
+   "options": "Quality Review"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Link",
+   "label": "Feedback",
+   "options": "Quality Feedback"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-10-27 16:21:59.533937",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Action",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

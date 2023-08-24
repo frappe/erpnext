@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Let\u2019s create your first  warehouse ",
+ "creation": "2021-05-17 16:13:19.297789",
+ "description": "# Setup a Warehouse\nThe warehouse can be your location/godown/store where you maintain the item's inventory, and receive/deliver them to various parties.\n\nIn ERPNext, you can maintain a Warehouse in the tree structure, so that location and sub-location of an item can be tracked. Also, you can link a Warehouse to a specific Accounting ledger, where the real-time stock value of that warehouse\u2019s item will be reflected.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2023-05-29 14:39:04.074907",
+ "modified_by": "Administrator",
+ "name": "Create a Warehouse",
+ "owner": "Administrator",
+ "reference_document": "Warehouse",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Setup a Warehouse",
+ "validate_action": 1
+}

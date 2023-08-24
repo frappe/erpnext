@@ -1,0 +1,24 @@
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+
+erpnext/accounts/               @deepeshgarg007 @ruthra-kumar
+erpnext/assets/                 @anandbaburajan @deepeshgarg007
+erpnext/regional                @deepeshgarg007 @ruthra-kumar
+erpnext/selling                 @deepeshgarg007 @ruthra-kumar
+erpnext/support/                @deepeshgarg007
+pos*                            
+
+erpnext/buying/                 @rohitwaghchaure @s-aga-r
+erpnext/maintenance/            @rohitwaghchaure @s-aga-r
+erpnext/manufacturing/          @rohitwaghchaure @s-aga-r
+erpnext/quality_management/     @rohitwaghchaure @s-aga-r
+erpnext/stock/                  @rohitwaghchaure @s-aga-r
+erpnext/subcontracting          @rohitwaghchaure @s-aga-r
+
+erpnext/controllers/            @deepeshgarg007 @rohitwaghchaure
+erpnext/patches/                @deepeshgarg007 
+
+.github/                        @deepeshgarg007
+pyproject.toml                  @phot0n

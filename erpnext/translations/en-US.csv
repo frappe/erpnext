@@ -1,0 +1,46 @@
+Cheques Required,Checks Required,
+Row #{0}: Clearance date {1} cannot be before Cheque Date {2},Row #{0}: Clearance date {1} cannot be before Check Date {2}
+People who teach at your organisation,People who teach at your organization,
+"Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry","Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submitting/canceling this entry"
+Cancel Material Visit {0} before cancelling this Warranty Claim,Cancel Material Visit {0} before canceling this Warranty Claim,
+"Appointment cancelled, Please review and cancel the invoice {0}","Appointment canceled, Please review and cancel the invoice {0}"
+Outstanding Cheques and Deposits to clear,Outstanding Checks and Deposits to clear,
+Appointment cancelled,Appointment canceled,
+Cheque/Reference Date,Check/Reference Date,
+Scanned Cheque,Scanned Check,
+Cheque Size,Check Size,
+Maintenance Status has to be Cancelled or Completed to Submit,Maintenance Status has to be Canceled or Completed to Submit,
+'Entries' cannot be empty,'Entries' can not be empty,
+"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Cannot change company's default currency, because there are existing transactions. Transactions must be canceled to change the default currency."
+Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maintenance Visit {0} must be canceled before cancelling this Sales Order,
+Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be canceled before cancelling this Sales Order,
+Cheque Date,Check Date,
+"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Stopped Work Order cannot be canceled, Unstop it first to cancel"
+Material Request {0} is cancelled or stopped,Material Request {0} is canceled or stopped,
+Closed order cannot be cancelled. Unclose to cancel.,Closed order cannot be canceled. Unclose to cancel.
+Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Maintenance Schedule {0} must be canceled before cancelling this Sales Order,
+Unlink Payment on Cancellation of Invoice,Unlink Payment on Cancelation of Invoice,
+Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order,
+Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order,
+Setup cheque dimensions for printing,Setup check dimensions for printing,
+Cheques and Deposits incorrectly cleared,Checks and Deposits incorrectly cleared,
+{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed,
+Packing Slip(s) cancelled,Packing Slip(s) canceled,
+Cheque/Reference No,Check/Reference No,
+"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
+Select account head of the bank where cheque was deposited.,Select account head of the bank where check was deposited.
+Cheque Print Template,Check Print Template,
+{0} {1} is cancelled or closed,{0} {1} is canceled or closed,
+Quotation {0} is cancelled,Quotation {0} is canceled,
+Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled,
+Payment Cancelled. Please check your GoCardless Account for more details,Payment Canceled. Please check your GoCardless Account for more details,
+Item {0} is cancelled,Item {0} is canceled,
+Is Cancelled,Is Canceled,
+{0} {1} is cancelled or stopped,{0} {1} is canceled or stopped,
+Colour,Color,
+Cheque Number,Check Number,
+Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancel Material Visits {0} before canceling this Maintenance Visit,
+Cheque,Check,
+Cheque Height,Check Height,
+Cheque Width,Check Width,
+Wire Transfer,Wire Transfer,

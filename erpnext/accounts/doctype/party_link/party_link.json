@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "autoname": "ACC-PT-LNK-.###.",
+ "creation": "2021-08-18 21:06:53.027695",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "primary_role",
+  "secondary_role",
+  "column_break_2",
+  "primary_party",
+  "secondary_party"
+ ],
+ "fields": [
+  {
+   "fieldname": "primary_role",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Primary Role",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "primary_role",
+   "fieldname": "secondary_role",
+   "fieldtype": "Link",
+   "label": "Secondary Role",
+   "mandatory_depends_on": "primary_role",
+   "options": "DocType"
+  },
+  {
+   "depends_on": "primary_role",
+   "fieldname": "primary_party",
+   "fieldtype": "Dynamic Link",
+   "label": "Primary Party",
+   "mandatory_depends_on": "primary_role",
+   "options": "primary_role"
+  },
+  {
+   "depends_on": "secondary_role",
+   "fieldname": "secondary_party",
+   "fieldtype": "Dynamic Link",
+   "label": "Secondary Party",
+   "mandatory_depends_on": "secondary_role",
+   "options": "secondary_role"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-08-25 20:08:56.761150",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Party Link",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "primary_party",
+ "track_changes": 1
+}

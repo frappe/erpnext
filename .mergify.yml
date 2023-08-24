@@ -1,0 +1,139 @@
+pull_request_rules:
+  - name: Auto-close PRs on stable branch
+    conditions:
+      - and:
+        - and:
+          - author!=surajshetty3416
+          - author!=gavindsouza
+          - author!=rohitwaghchaure
+          - author!=nabinhait
+          - author!=ankush
+          - author!=deepeshgarg007
+          - author!=frappe-pr-bot
+          - author!=mergify[bot]
+
+        - or:
+          - base=version-13
+          - base=version-12
+          - base=version-14
+          - base=version-15
+    actions:
+      close:
+      comment:
+          message: |
+            @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
+            https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
+
+  - name: Auto-close PRs on pre-release branch
+    conditions:
+      - base=version-13-pre-release
+    actions:
+      close:
+      comment:
+          message: |
+            @{{author}}, pre-release branch is not maintained anymore. Releases are directly done by merging hotfix branch to stable branches.
+
+
+  - name: backport to develop
+    conditions:
+      - label="backport develop"
+    actions:
+      backport:
+        branches:
+          - develop
+        assignees:
+          - "{{ author }}"
+
+  - name: backport to version-14-hotfix
+    conditions:
+      - label="backport version-14-hotfix"
+    actions:
+      backport:
+        branches:
+          - version-14-hotfix
+        assignees:
+          - "{{ author }}"
+
+  - name: backport to version-14-pre-release
+    conditions:
+      - label="backport version-14-pre-release"
+    actions:
+      backport:
+        branches:
+          - version-14-pre-release
+        assignees:
+          - "{{ author }}"
+
+  - name: backport to version-13-hotfix
+    conditions:
+      - label="backport version-13-hotfix"
+    actions:
+      backport:
+        branches:
+          - version-13-hotfix
+        assignees:
+          - "{{ author }}"
+
+  - name: backport to version-13-pre-release
+    conditions:
+      - label="backport version-13-pre-release"
+    actions:
+      backport:
+        branches:
+          - version-13-pre-release
+        assignees:
+          - "{{ author }}"
+
+  - name: backport to version-12-hotfix
+    conditions:
+      - label="backport version-12-hotfix"
+    actions:
+      backport:
+        branches:
+          - version-12-hotfix
+        assignees:
+          - "{{ author }}"
+
+  - name: backport to version-12-pre-release
+    conditions:
+      - label="backport version-12-pre-release"
+    actions:
+      backport:
+        branches:
+          - version-12-pre-release
+        assignees:
+          - "{{ author }}"
+
+  - name: Automatic merge on CI success and review
+    conditions:
+      - status-success=linters
+      - status-success=Sider
+      - status-success=Semantic Pull Request
+      - status-success=Patch Test
+      - status-success=Python Unit Tests (1)
+      - status-success=Python Unit Tests (2)
+      - status-success=Python Unit Tests (3)
+      - label!=dont-merge
+      - label!=squash
+      - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: merge
+  - name: Automatic squash on CI success and review
+    conditions:
+      - status-success=linters
+      - status-success=Sider
+      - status-success=Patch Test
+      - status-success=Python Unit Tests (1)
+      - status-success=Python Unit Tests (2)
+      - status-success=Python Unit Tests (3)
+      - label!=dont-merge
+      - label=squash
+      - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: squash
+        commit_message_template: |
+            {{ title }} (#{{ number }})
+
+            {{ body }}

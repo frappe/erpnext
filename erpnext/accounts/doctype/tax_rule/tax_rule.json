@@ -1,0 +1,250 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "ACC-TAX-RULE-.YYYY.-.#####",
+ "creation": "2015-08-07 02:33:52.670866",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "tax_type",
+  "use_for_shopping_cart",
+  "column_break_1",
+  "sales_tax_template",
+  "purchase_tax_template",
+  "filters",
+  "customer",
+  "supplier",
+  "item",
+  "billing_city",
+  "billing_county",
+  "billing_state",
+  "billing_zipcode",
+  "billing_country",
+  "tax_category",
+  "column_break_2",
+  "customer_group",
+  "supplier_group",
+  "item_group",
+  "shipping_city",
+  "shipping_county",
+  "shipping_state",
+  "shipping_zipcode",
+  "shipping_country",
+  "section_break_4",
+  "from_date",
+  "column_break_7",
+  "to_date",
+  "section_break_6",
+  "priority",
+  "column_break_20",
+  "company"
+ ],
+ "fields": [
+  {
+   "default": "Sales",
+   "fieldname": "tax_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Tax Type",
+   "options": "Sales\nPurchase"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_for_shopping_cart",
+   "fieldtype": "Check",
+   "label": "Use for Shopping Cart"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tax_type==\"Sales\"",
+   "fieldname": "sales_tax_template",
+   "fieldtype": "Link",
+   "label": "Sales Tax Template",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "depends_on": "eval:doc.tax_type==\"Purchase\"",
+   "fieldname": "purchase_tax_template",
+   "fieldtype": "Link",
+   "label": "Purchase Tax Template",
+   "options": "Purchase Taxes and Charges Template"
+  },
+  {
+   "fieldname": "filters",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "depends_on": "eval:doc.tax_type==\"Sales\"",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.tax_type==\"Purchase\"",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "billing_city",
+   "fieldtype": "Data",
+   "label": "Billing City"
+  },
+  {
+   "fieldname": "billing_county",
+   "fieldtype": "Data",
+   "label": "Billing County"
+  },
+  {
+   "fieldname": "billing_state",
+   "fieldtype": "Data",
+   "label": "Billing State"
+  },
+  {
+   "fieldname": "billing_zipcode",
+   "fieldtype": "Data",
+   "label": "Billing Zipcode"
+  },
+  {
+   "fieldname": "billing_country",
+   "fieldtype": "Link",
+   "label": "Billing Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "tax_category",
+   "fieldtype": "Link",
+   "label": "Tax Category",
+   "options": "Tax Category"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tax_type==\"Sales\"",
+   "fetch_from": "customer.customer_group",
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "depends_on": "eval:doc.tax_type==\"Purchase\"",
+   "fetch_from": "supplier.supplier_group",
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "label": "Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "shipping_city",
+   "fieldtype": "Data",
+   "label": "Shipping City"
+  },
+  {
+   "fieldname": "shipping_county",
+   "fieldtype": "Data",
+   "label": "Shipping County"
+  },
+  {
+   "fieldname": "shipping_state",
+   "fieldtype": "Data",
+   "label": "Shipping State"
+  },
+  {
+   "fieldname": "shipping_zipcode",
+   "fieldtype": "Data",
+   "label": "Shipping Zipcode"
+  },
+  {
+   "fieldname": "shipping_country",
+   "fieldtype": "Link",
+   "label": "Shipping Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Validity"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "label": "Priority"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1
+  }
+ ],
+ "links": [],
+ "modified": "2021-06-04 23:14:27.186879",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Tax Rule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

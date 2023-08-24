@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:41",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_type",
+  "reference_name",
+  "remarks",
+  "reference_row",
+  "col_break1",
+  "advance_amount",
+  "allocated_amount",
+  "exchange_gain_loss",
+  "ref_exchange_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "no_copy": 1,
+   "oldfieldname": "journal_voucher",
+   "oldfieldtype": "Link",
+   "options": "DocType",
+   "print_width": "250px",
+   "read_only": 1,
+   "width": "250px"
+  },
+  {
+   "columns": 3,
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "no_copy": 1,
+   "options": "reference_type",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Remarks",
+   "no_copy": 1,
+   "oldfieldname": "remarks",
+   "oldfieldtype": "Small Text",
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "reference_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Row",
+   "no_copy": 1,
+   "oldfieldname": "jv_detail_no",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "print_width": "120px",
+   "read_only": 1,
+   "width": "120px"
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "advance_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Advance amount",
+   "no_copy": 1,
+   "oldfieldname": "advance_amount",
+   "oldfieldtype": "Currency",
+   "options": "party_account_currency",
+   "print_width": "120px",
+   "read_only": 1,
+   "width": "120px"
+  },
+  {
+   "columns": 2,
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated amount",
+   "no_copy": 1,
+   "oldfieldname": "allocated_amount",
+   "oldfieldtype": "Currency",
+   "options": "party_account_currency",
+   "print_width": "120px",
+   "width": "120px"
+  },
+  {
+   "depends_on": "exchange_gain_loss",
+   "fieldname": "exchange_gain_loss",
+   "fieldtype": "Currency",
+   "label": "Exchange Gain/Loss",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "exchange_gain_loss",
+   "fieldname": "ref_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Reference Exchange Rate",
+   "non_negative": 1,
+   "read_only": 1
+  }
+ ],
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-06-23 21:12:57.557731",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Invoice Advance",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

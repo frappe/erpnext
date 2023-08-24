@@ -1,0 +1,72 @@
+{% from "erpnext/templates/includes/macros.html" import field_filter_section, attribute_filter_section, discount_range_filters %}
+{% extends "templates/web.html" %}
+
+{% block header %}
+<div class="mb-6">{{ _(item_group_name) }}</div>
+{% endblock header %}
+
+{% block script %}
+<script type="text/javascript" src="/all-products/index.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="item-breadcrumbs small text-muted">
+	{% include "templates/includes/breadcrumbs.html" %}
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product"
+	data-item-group="{{ name }}">
+	<div class="item-group-slideshow">
+		{% if slideshow %} <!-- slideshow -->
+			{{ web_block(
+				"Hero Slider",
+				values=slideshow,
+				add_container=0,
+				add_top_padding=0,
+				add_bottom_padding=0,
+			) }}
+		{% endif %}
+
+		{% if description %} <!-- description -->
+		<div class="item-group-description text-muted mb-5" itemprop="description">{{ description or ""}}</div>
+		{% endif %}
+	</div>
+	<div class="row">
+		<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
+			<!-- Products Rendered in all-products/index.js-->
+		</div>
+
+		<div class="col-12 order-1 col-md-3 order-md-1">
+			<div class="collapse d-md-block mr-4 filters-section" id="product-filters">
+				<div class="d-flex justify-content-between align-items-center mb-5 title-section">
+					<div class="mb-4 filters-title" > {{ _('Filters') }} </div>
+					<a class="mb-4 clear-filters" href="/{{ doc.route }}">{{ _('Clear All') }}</a>
+				</div>
+				<!-- field filters -->
+				{{ field_filter_section(field_filters) }}
+
+				<!-- attribute filters -->
+				{{ attribute_filter_section(attribute_filters) }}
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<script>
+	frappe.ready(() => {
+		$('.btn-prev, .btn-next').click((e) => {
+			const $btn = $(e.target);
+			$btn.prop('disabled', true);
+			const start = $btn.data('start');
+			let query_params = frappe.utils.get_query_params();
+			query_params.start = start;
+			let path = window.location.pathname + '?' + frappe.utils.get_url_from_dict(query_params);
+			window.location.href = path;
+		});
+	});
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.auto_created",
+ "creation": "2018-04-25 14:19:05.440361",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Fiscal Year",
+ "enabled": 1,
+ "event": "New",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "<h3>{{_(\"Fiscal Year\")}}</h3>\n\n<p>{{ _(\"New fiscal year created :- \") }} {{ doc.name }}</p>",
+ "modified": "2018-04-25 14:30:38.588534",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Notification for new fiscal year",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "email_by_role": "Accounts User"
+  },
+  {
+   "email_by_role": "Accounts Manager"
+  }
+ ],
+ "subject": "Notification for new fiscal year {{ doc.name }}"
+}

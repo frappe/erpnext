@@ -1,0 +1,31 @@
+[
+ {
+  "buying_price_list": "_Test Price List", 
+  "company": "_Test Company", 
+  "conversion_rate": 1.0, 
+  "currency": "INR", 
+  "doctype": "Supplier Quotation", 
+  "base_grand_total": 5000.0, 
+  "grand_total": 5000.0, 
+  "is_subcontracted": 0, 
+  "naming_series": "_T-Supplier Quotation-", 
+  "base_net_total": 5000.0, 
+  "items": [
+   {
+    "base_amount": 5000.0, 
+    "description": "_Test FG Item", 
+    "doctype": "Supplier Quotation Item", 
+    "item_code": "_Test FG Item", 
+    "item_name": "_Test FG Item", 
+    "parentfield": "items", 
+    "qty": 10.0, 
+    "rate": 500.0, 
+    "uom": "_Test UOM", 
+    "warehouse": "_Test Warehouse - _TC"
+   }
+  ], 
+  "supplier": "_Test Supplier", 
+  "supplier_name": "_Test Supplier", 
+  "transaction_date": "2013-02-12"
+ }
+]

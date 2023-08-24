@@ -1,0 +1,1 @@
+Sales User for whom sales targets can be set.

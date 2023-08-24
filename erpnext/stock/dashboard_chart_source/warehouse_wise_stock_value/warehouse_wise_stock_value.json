@@ -1,0 +1,13 @@
+{
+ "creation": "2020-05-14 14:27:44.108017",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2020-05-14 14:27:44.108017",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Warehouse wise Stock Value",
+ "owner": "Administrator",
+ "source_name": "Warehouse wise Stock Value ",
+ "timeseries": 0
+}

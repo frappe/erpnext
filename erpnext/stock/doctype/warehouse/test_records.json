@@ -1,0 +1,64 @@
+[
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Scrap Warehouse",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse 1",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse 2",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Rejected Warehouse",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company 1",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse 2",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse No Account",
+  "is_group": 0
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse Group",
+  "is_group": 1
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse Group-C1",
+  "is_group": 0,
+  "parent_warehouse": "_Test Warehouse Group - _TC"
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Warehouse",
+  "warehouse_name": "_Test Warehouse Group-C2",
+  "is_group": 0,
+  "parent_warehouse": "_Test Warehouse Group - _TC"
+ }
+]

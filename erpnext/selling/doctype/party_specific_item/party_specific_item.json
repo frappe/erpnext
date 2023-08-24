@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "creation": "2021-08-27 19:28:07.559978",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "party",
+  "column_break_3",
+  "restrict_based_on",
+  "based_on_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Party Type",
+   "options": "Customer\nSupplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Party Name",
+   "options": "party_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "restrict_based_on",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Restrict Items Based On",
+   "options": "Item\nItem Group\nBrand",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "based_on_value",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Based On Value",
+   "options": "restrict_based_on",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-02-15 13:00:50.379713",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Party Specific Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "party",
+ "track_changes": 1
+}

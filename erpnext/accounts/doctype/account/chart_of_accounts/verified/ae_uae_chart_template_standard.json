@@ -1,0 +1,467 @@
+{
+    "country_code": "ae",
+    "name": "U.A.E - Chart of Accounts",
+    "tree": {
+        "Assets": {
+            "Current Assets": {
+                "Accounts Receivable": {
+                    "Corporate Credit Cards": {
+                        "account_type": "Receivable"
+                    },
+                    "Other Receivable": {
+                        "Accrued Rebates Due from Suppliers": {
+                            "account_type": "Receivable"
+                        },
+                        "Accrued Income from Suppliers": {
+                            "account_type": "Receivable"
+                        },
+                        "Other Debtors": {
+                            "account_type": "Receivable"
+                        },
+                        "account_type": "Receivable"
+                    },
+                    "Post Dated Cheques Received": {
+                        "account_type": "Receivable"
+                    },
+                    "Staff Receivable": {
+                        "account_type": "Receivable"
+                    },
+                    "Trade Receivable": {
+                        "account_type": "Receivable"
+                    },
+                    "Trade in Opening Fees": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "Cash in Hand & Banks": {
+                    "Banks": {
+                        "Bank Margin On LC & LG": {},
+                        "Banks Blocked Deposits": {},
+                        "Banks Call Deposit Accounts": {},
+                        "Banks Current Accounts": {
+                            "account_type": "Bank"
+                        },
+                        "account_type": "Bank"
+                    },
+                    "Cash in Hand": {
+                        "Cash in Safe": {
+                            "Main Safe": {
+                                "account_type": "Cash"
+                            },
+                            "Main Safe - Foreign Currency": {
+                                "account_type": "Cash"
+                            }
+                        },
+                        "Petty Cash": {
+                            "Petty Cash - Administration": {
+                                "account_type": "Cash"
+                            },
+                            "Petty Cash - Others": {
+                                "account_type": "Cash"
+                            }
+                        },
+                        "account_type": "Cash"
+                    },
+                    "Cash in Transit": {
+                        "Credit Cards": {
+                            "Gateway Credit Cards": {
+                                "account_type": "Bank"
+                            },
+                            "Manual Visa & Master Cards": {
+                                "account_type": "Bank"
+                            },
+                            "PayPal Account": {
+                                "account_type": "Bank"
+                            },
+                            "Visa & Master Credit Cards": {
+                                "account_type": "Bank"
+                            }
+                        }
+                    }
+                },
+                "Inventory": {
+                    "Consigned Stock": {
+                        "Handling Difference in Inventory": {},
+                        "Items Delivered to Customs on temporary Base": {}
+                    },
+                    "Stock in Hand": {
+                        "account_type": "Stock"
+                    }
+                },
+                "Preliminary and Preoperating Expenses": {
+                    "Preoperating Expenses": {}
+                },
+                "Prepayments & Deposits": {
+                    "Deposits": {
+                        "Deposit - Office Rent": {},
+                        "Deposit Others": {},
+                        "Deposit to Immigration (Visa)": {},
+                        "Deposits - Customs": {}
+                    },
+                    "Prepaid Taxes": {
+                        "Sales Taxes Receivables": {},
+                        "Withholding Tax Receivables": {}
+                    },
+                    "Prepayments": {
+                        "Other Prepayments": {},
+                        "PrePaid Advertisement Expenses": {},
+                        "Prepaid Bank Guarantee": {},
+                        "Prepaid Consultancy Fees": {},
+                        "Prepaid Employees Housing": {},
+                        "Prepaid Finance charge for Loans": {},
+                        "Prepaid Legal Fees": {},
+                        "Prepaid License Fees": {},
+                        "Prepaid Life Insurance": {},
+                        "Prepaid Maintenance": {},
+                        "Prepaid Medical Insurance": {},
+                        "Prepaid Office Rent": {},
+                        "Prepaid Other Insurance": {},
+                        "Prepaid Schooling Fees": {},
+                        "Prepaid Site Hosting Fees": {},
+                        "Prepaid Sponsorship Fees": {}
+                    }
+                }
+            },
+            "Long Term Assets": {
+                "Fixed Assets": {
+                    "Accumulated Depreciation": {
+                        "Acc. Depreciation of Motor Vehicles": {
+                            "account_type": "Accumulated Depreciation"
+                        },
+                        "Acc. Deprn.Computer Hardware & Software": {
+                            "account_type": "Accumulated Depreciation"
+                        },
+                        "Acc.Deprn.of Furniture & Office Equipment": {
+                            "account_type": "Accumulated Depreciation"
+                        },
+                        "Amortisation on Leasehold Improvement": {
+                            "account_type": "Accumulated Depreciation"
+                        },
+                        "account_type": "Accumulated Depreciation"
+                    },
+                    "Fixed Assets (Cost Price)": {
+                        "Computer Hardware & Software": {
+                            "account_type": "Fixed Asset"
+                        },
+                        "Furniture and Equipment": {
+                            "account_type": "Fixed Asset"
+                        },
+                        "Leasehold Improvement": {},
+                        "Motor Vehicles": {
+                            "account_type": "Fixed Asset"
+                        },
+                        "Work In Progress": {},
+                        "account_type": "Fixed Asset"
+                    }
+                },
+                "Intangible Assets": {
+                    "Computer Card Renewal": {},
+                    "Disposal of Outlets": {},
+                    "Registration of Trademarks": {}
+                },
+                "Intercompany Accounts": {},
+                "Investments": {
+                    "Investments in Subsidiaries": {}
+                }
+            },
+            "root_type": "Asset"
+        },
+        "Closing And Temporary Accounts": {
+            "Closing Accounts": {
+                "Closing Account": {}
+            },
+            "root_type": "Liability"
+        },
+        "Expenses": {
+            "Commercial Expenses": {
+                "Consultancy Fees": {},
+                "Provision for Doubtful Debts": {}
+            },
+            "Cost of Sale": {
+                "Cost Of Goods Sold": {
+                    "Cost Of Goods Sold I/C Sales": {},
+                    "Cost of Goods Sold in Trading": {
+                        "account_type": "Cost of Goods Sold"
+                    },
+                    "account_type": "Cost of Goods Sold"
+                },
+                "Expenses Included In Valuation": {
+                    "account_type": "Expenses Included In Valuation"
+                },
+                "Stock Adjustment": {
+                    "account_type": "Stock Adjustment"
+                }
+            },
+            "Depreciation": {
+                "Depreciation & Amortization": {
+                    "Amortization on Leasehold Improvement": {},
+                    "Depreciation Of Computer Hard & Soft": {
+                        "account_type": "Depreciation"
+                    },
+                    "Depreciation Of Furniture & Office Equipment\n\t\t\t": {
+                        "account_type": "Depreciation"
+                    },
+                    "Depreciation Of Motor Vehicles": {
+                        "account_type": "Depreciation"
+                    }
+                }
+            },
+            "Direct Expenses": {
+                "Financial Charges": {
+                    "Air Miles Card Charges": {},
+                    "Amex Credit Cards Charges": {},
+                    "Bank Finance & Loan Charges": {},
+                    "Credit Card Charges": {},
+                    "Credit Card Swipe Charges": {},
+                    "PayPal Charges": {}
+                }
+            },
+            "MISC Charges": {
+                "Other Charges": {
+                    "Capital Loss": {
+                        "Disposal of Business Branch": {},
+                        "Loss On Fixed Assets Disposal": {},
+                        "Loss on Difference on Exchange": {}
+                    },
+                    "Other Non Operating Exp": {
+                        "Other Non Operating Expenses": {}
+                    },
+                    "Previous Year Adjustments": {
+                        "Previous Year Adjustments Account": {}
+                    },
+                    "Royalty Fees": {
+                        "Royalty to Parent Co.": {}
+                    },
+                    "Tax / Zakat Expenses": {
+                        "Income Tax": {
+                            "account_type": "Tax"
+                        },
+                        "Zakat": {},
+                        "account_type": "Tax"
+                    }
+                }
+            },
+            "Share Resources": {
+                "Share Resource Expenses Account": {}
+            },
+            "Store Operating Expenses": {
+                "Selling, General & Admin Expenses": {
+                    "Advertising Expenses": {
+                        "Other - Advertising Expenses": {}
+                    },
+                    "Bank & Finance Charges": {
+                        "Other Bank Charges": {}
+                    },
+                    "Communications": {
+                        "Courier": {},
+                        "Others - Communication": {},
+                        "Telephone": {},
+                        "Web Site Hosting Fees": {}
+                    },
+                    "Office & Various Expenses": {
+                        "Cleaning": {},
+                        "Conveyance Expenses": {},
+                        "Gifts & Donations": {},
+                        "Insurance": {},
+                        "Kitchen and Buffet Expenses": {},
+                        "Maintenance": {},
+                        "Others - Office Various Expenses": {},
+                        "Security & Guard": {},
+                        "Stationary From Suppliers": {},
+                        "Stationary Out Of Stock": {},
+                        "Subscriptions": {},
+                        "Training": {},
+                        "Vehicle Expenses": {}
+                    },
+                    "Personnel Cost": {
+                        "Basic Salary": {},
+                        "End Of Service Indemnity": {},
+                        "Housing Allowance": {},
+                        "Leave Salary": {},
+                        "Leave Ticket": {},
+                        "Life Insurance": {},
+                        "Medical Insurance": {},
+                        "Personnel Cost Others": {},
+                        "Sales Commission": {},
+                        "Staff School Allowances": {},
+                        "Transportation Allowance": {},
+                        "Uniform": {},
+                        "Visa Expenses": {}
+                    },
+                    "Professional & Legal Fees": {
+                        "Audit Fees": {},
+                        "Legal fees": {},
+                        "Others - Professional Fees": {},
+                        "Sponsorship Fees": {},
+                        "Trade License Fees": {}
+                    },
+                    "Provision & Write Off": {
+                        "Amortisation of Preoperating Expenses": {},
+                        "Cash Shortage": {},
+                        "Others - Provision & Write off": {},
+                        "Write Off Inventory": {},
+                        "Write Off Receivables & Payables": {}
+                    },
+                    "Rent Expenses": {
+                        "Office Rent": {},
+                        "Warehouse Rent": {}
+                    },
+                    "Travel Expenses": {
+                        "Air tickets": {},
+                        "Hotel": {},
+                        "Meals": {},
+                        "Others": {},
+                        "Per Diem": {}
+                    },
+                    "Utilities": {
+                        "Other Utility Cahrges": {},
+                        "Water & Electricity": {}
+                    }
+                }
+            },
+            "root_type": "Expense"
+        },
+        "Liabilities": {
+            "Current Liabilities": {
+                "Accounts Payable": {
+                    "Payables": {
+                        "Advance Payable to Suppliers": {
+                            "account_type": "Payable"
+                        },
+                        "Consigned Payable": {
+                            "account_type": "Payable"
+                        },
+                        "Other Payable": {
+                            "account_type": "Payable"
+                        },
+                        "Post Dated Cheques Paid": {
+                            "account_type": "Payable"
+                        },
+                        "Staff Payable": {},
+                        "Suppliers Price Protection": {
+                            "account_type": "Payable"
+                        },
+                        "Trade Payable": {
+                            "account_type": "Payable"
+                        },
+                        "account_type": "Payable"
+                    }
+                },
+                "Accruals & Provisions": {
+                    "Accruals": {
+                        "Accrued Personnel Cost": {
+                            "Accrued - Commissions": {},
+                            "Accrued - Leave Salary": {},
+                            "Accrued - Leave Tickets": {},
+                            "Accrued - Salaries": {},
+                            "Accrued Other Personnel Cost": {},
+                            "Accrued Salaries Increment": {},
+                            "Accrued-Staff Bonus": {}
+                        }
+                    },
+                    "Accrued Expenses": {
+                        "Accrued Other Expenses": {
+                            "Accrued - Audit Fees": {},
+                            "Accrued - Office Rent": {},
+                            "Accrued - Sponsorship": {},
+                            "Accrued - Telephone": {},
+                            "Accrued - Utilities": {},
+                            "Accrued Others": {}
+                        }
+                    },
+                    "Other Current Liabilities": {
+                        "Accrued Dubai Customs": {},
+                        "Deferred income": {},
+                        "Shipping & Handling": {}
+                    },
+                    "Provisions": {
+                        "Tax Payables": {
+                            "Income Tax Payable": {},
+                            "Sales Tax Payable": {},
+                            "Withholding Tax Payable": {}
+                        }
+                    },
+                    "Short Term Loan": {}
+                },
+                "Duties and Taxes": {
+                    "account_type": "Tax",
+                    "is_group": 1
+                },
+                "Reservations & Credit Notes": {
+                    "Credit Notes": {
+                        "Credit Notes to Customers": {},
+                        "Reservations": {}
+                    }
+                },
+                "Stock Liabilities": {
+                    "Stock Received But Not Billed": {
+                        "account_type": "Stock Received But Not Billed"
+                    }
+                },
+                "Unearned Income": {}
+            },
+            "Long Term Liabilities": {
+                "Long Term Loans & Provisions": {}
+            },
+            "root_type": "Liability"
+        },
+        "Revenue": {
+            "Direct Revenue": {
+                "Other Direct Revenue": {
+                    "Other Revenue - Operating": {
+                        "Advertising Income": {},
+                        "Branding Income": {},
+                        "Early Setmt Margin from Suppliers": {},
+                        "Marketing Rebate from Suppliers": {},
+                        "Rebate from Suppliers": {},
+                        "Service Income": {},
+                        "Space Rental Income": {}
+                    }
+                }
+            },
+            "Indirect Revenue": {
+                "Other Indirect Revenue": {
+                    "Capital Gain": {},
+                    "Excess In Till": {},
+                    "Gain On Difference Of Exchange": {},
+                    "Management Consultancy Fees": {},
+                    "Other Income": {}
+                },
+                "Other Revenue - Non Operating": {
+                    "Interest Revenue": {},
+                    "Interest from FD": {},
+                    "Products Listing Fees from Suppliers": {},
+                    "Trade Opening Fees from suppliers": {}
+                }
+            },
+            "Sales": {
+                "Sales from Other Regions": {
+                    "Sales from Other Region": {}
+                },
+                "Sales of same region": {
+                    "Management Consultancy Fees 1": {},
+                    "Sales Account": {},
+                    "Sales of I/C": {}
+                }
+            },
+            "root_type": "Income"
+        },
+        "Share Holder Equity": {
+            "Capital": {
+                "Contributed Capital": {},
+                "Share Capital": {},
+                "Shareholders Current A/c": {},
+                "Sub Ordinated Loan": {},
+                "Treasury Stocks": {}
+            },
+            "Retained Earnings": {
+                "Current Year Results": {},
+                "Dividends Paid": {},
+                "Previous Years Results": {}
+            },
+            "account_type": "Equity",
+            "root_type": "Equity"
+        }
+    }
+}

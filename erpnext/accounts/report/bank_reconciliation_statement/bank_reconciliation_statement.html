@@ -1,0 +1,49 @@
+<div style="margin-bottom: 7px;">
+	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __("Bank Reconciliation Statement") %}</h2>
+<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 15%">{%= __("Posting Date") %}</th>
+			<th style="width: 15%">{%= __("Payment Entry") %}</th>
+			<th style="width: 40%">{%= __("Reference") %}</th>
+			<th style="width: 15%; text-align: right;">{%= __("Debit") %}</th>
+			<th style="width: 15%; text-align: right;">{%= __("Credit") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			{% if (data[i]["posting_date"]) { %}
+			<tr>
+				<td>{%= frappe.datetime.str_to_user(data[i]["posting_date"]) %}</td>
+				<td>{%= data[i]["payment_entry"] %}</td>
+				<td>{%= __("Against") %}: {%= data[i]["against_account"] %}
+					{% if (data[i]["reference_no"]) { %}
+						<br>{%= __("Reference") %}: {%= data[i]["reference_no"] %}
+						{% if (data[i]["ref_date"]) { %}
+							<br>{%= __("Reference Date") %}: {%= frappe.datetime.str_to_user(data[i]["ref_date"]) %}
+						{% } %}
+					{% } %}
+					{% if (data[i]["clearance_date"]) { %}
+						<br>{%= __("Clearance Date") %}: {%= frappe.datetime.str_to_user(data[i]["clearance_date"]) %}
+					{% } %}
+				</td>
+				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
+			</tr>
+			{% } else { %}
+			<tr>
+				<td></td>
+				<td></td>
+				<td>{%= data[i]["payment_entry"] %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
+			</tr>
+			{% } %}
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

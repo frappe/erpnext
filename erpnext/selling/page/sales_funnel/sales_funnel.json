@@ -1,0 +1,20 @@
+{
+ "creation": "2013-10-04 13:17:18.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-filter", 
+ "idx": 1, 
+ "modified": "2013-10-04 13:17:18.000000", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "sales-funnel", 
+ "owner": "Administrator", 
+ "page_name": "sales-funnel", 
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Sales Funnel"
+}

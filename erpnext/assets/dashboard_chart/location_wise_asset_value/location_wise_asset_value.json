@@ -1,0 +1,29 @@
+{
+ "chart_name": "Location-wise Asset Value",
+ "chart_type": "Report",
+ "creation": "2020-07-14 18:23:53.195389",
+ "custom_options": "{\"type\": \"donut\", \"height\": 300, \"axisOptions\": {\"shortenYAxisNumbers\": 1}}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"from_date\":\"frappe.datetime.add_months(frappe.datetime.nowdate(), -12)\",\"to_date\":\"frappe.datetime.nowdate()\"}",
+ "filters_json": "{\"status\":\"In Location\",\"group_by\":\"Location\",\"is_existing_asset\":0}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2020-10-28 23:16:07.883312",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Location-wise Asset Value",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "report_name": "Fixed Asset Register",
+ "timeseries": 0,
+ "type": "Donut",
+ "use_report_chart": 0,
+ "x_field": "location",
+ "y_axis": [
+  {
+   "y_field": "asset_value"
+  }
+ ]
+}

@@ -1,0 +1,86 @@
+{% extends "templates/web.html" %}
+
+{% block title %} ERPNext Certification {% endblock %}
+
+{% block page_content %}
+
+{% macro show_currency_options() %}
+
+<p> Certification price is 20,000 INR / 300 USD.</p>
+
+<section>
+	<input type="radio" name="gender" value="USD" checked> USD <br>
+	<input type="radio" name="gender" value="INR" style="margin-top: 15px;"> INR <br>
+</section>
+
+<div class="section" style="margin-top:10px;"><a class="btn btn-primary next"> Next </a></div>
+
+<script>
+	frappe.ready(function() {
+		$('.next').on('click', function() {
+			if($("input[type=radio]:checked").val() == 'INR'){
+				window.location = '/certification-application?new=1'
+			}
+			else{
+				window.location = '/certification-application-usd?new=1'
+			}
+		})
+	})
+</script>
+
+{% endmacro %}
+
+{% if frappe.session.user=='Guest' %}
+<div class='with-border'>
+	<p>You must first sign up and login to apply for certification.</p>
+	<p><a href="/login#signup" class=''>Sign Up</a></p>
+</div>
+
+{% else %}
+
+{% if all_certifications %}
+
+<h2>Certification History</h2>
+
+	<div class="table">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr class="active">
+          <th style="width: 150px">Certification Id</th>
+          <th style="width: 120px">From</th>
+          <th style="width: 120px">To</th>
+          <th style="width: 100px">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+				{% for certification in all_certifications %}
+
+          <tr>
+            <td>{{ certification['name'] }}</td>
+            <td>{{ frappe.format_date(certification['from_date']) }}</td>
+            <td>{{ frappe.format_date(certification['to_date']) }}</td>
+            <td>{{ frappe.utils.fmt_money(certification['amount'],currency=frappe.db.get_value("Currency",certification['currency'],"symbol")) }}</td>
+          </tr>
+					{% endfor %}
+      </tbody>
+    </table>
+</div>
+
+{% endif %}
+
+{% if not all_certifications %}
+  {{ show_currency_options() }}
+
+{% elif all_certifications and (frappe.utils.getdate(all_certifications[0]['to_date']) < frappe.utils.getdate(frappe.utils.nowdate())) %}
+	<p>Your certification has expired. Click on the button below to start a new certification.</p>
+	{{ show_currency_options() }}
+
+{% elif all_certifications and (frappe.utils.getdate(frappe.utils.add_days(all_certifications[0]['to_date'], -30)) < frappe.utils.getdate(frappe.utils.nowdate()))%}
+	<p>Your certification is due to expire soon. Click on the button below to start a new certification.</p>
+	{{ show_currency_options() }}
+
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

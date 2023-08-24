@@ -1,0 +1,1 @@
+Batch of Items Units. If Item has batched inventory, then adding tagging each inventory transaction to a Batch becomes important.

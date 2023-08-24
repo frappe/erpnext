@@ -1,0 +1,1 @@
+Plan and manage manufacturing operations, bill of materials for manufacturing.

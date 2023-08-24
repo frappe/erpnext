@@ -1,0 +1,21 @@
+{
+ "action": "Watch Video",
+ "action_label": "Learn about  Navigation options",
+ "creation": "2021-11-22 12:09:52.233872",
+ "description": "# Navigation in ERPNext\n\nEase of navigating and browsing around the ERPNext is one of our core strengths. In the following video, you will learn how to reach a specific feature in ERPNext via module page or AwesomeBar.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 1,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2023-05-16 12:53:25.939908",
+ "modified_by": "Administrator",
+ "name": "Navigation Help",
+ "owner": "Administrator",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "How to Navigate in ERPNext",
+ "validate_action": 1,
+ "video_url": "https://youtu.be/j60xyNFqX_A"
+}

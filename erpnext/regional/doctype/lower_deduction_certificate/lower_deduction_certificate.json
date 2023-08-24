@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "autoname": "field:certificate_no",
+ "creation": "2020-03-10 23:12:10.072631",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "certificate_details_section",
+  "tax_withholding_category",
+  "fiscal_year",
+  "column_break_3",
+  "company",
+  "certificate_no",
+  "section_break_3",
+  "supplier",
+  "column_break_7",
+  "pan_no",
+  "validity_details_section",
+  "valid_from",
+  "column_break_10",
+  "valid_upto",
+  "section_break_9",
+  "rate",
+  "column_break_14",
+  "certificate_limit"
+ ],
+ "fields": [
+  {
+   "fieldname": "certificate_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Certificate No",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Deductee Details"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.pan",
+   "fetch_if_empty": 1,
+   "fieldname": "pan_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PAN No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "validity_details_section",
+   "fieldtype": "Section Break",
+   "label": "Validity Details"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Date",
+   "label": "Valid Upto",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Percent",
+   "label": "Rate Of TDS As Per Certificate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "certificate_limit",
+   "fieldtype": "Currency",
+   "label": "Certificate Limit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "certificate_details_section",
+   "fieldtype": "Section Break",
+   "label": "Certificate Details"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-04-18 08:25:35.302081",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "Lower Deduction Certificate",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

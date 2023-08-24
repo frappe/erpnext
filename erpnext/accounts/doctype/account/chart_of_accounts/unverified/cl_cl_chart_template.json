@@ -1,0 +1,205 @@
+{
+    "country_code": "cl",
+    "name": "Chile - Plan de Cuentas",
+    "tree": {
+        "Cuentas de Movimiento": {
+            "Compras": {
+                "Compras - Categoria de productos 01": {}
+            },
+            "Costos de Producci\u00f3n": {},
+            "Gastos de Administraci\u00f3n": {},
+            "Gastos de Comercializaci\u00f3n": {},
+            "root_type": ""
+        },
+        "Cuentas de Orden": {
+            "CUENTAS DE ORDEN ACREEDORAS": {
+                "Acreedor por Documentos Descontados": {},
+                "Acreedor por Garant\u00edas Otorgadas": {},
+                "Comitente por Mercaderias Recibidas en Consignaci\u00f3n": {}
+            },
+            "CUENTAS DE ORDEN DEUDORAS": {
+                "Dep\u00f3sito de Valores Recibos en Garant\u00eda": {},
+                "Documentos Descontados": {},
+                "Documentos Endosados": {},
+                "Garantias Otorgadas": {},
+                "Mercaderias Recibidas en Consignaci\u00f3n": {}
+            },
+            "root_type": ""
+        },
+        "Cuentas de Resultado": {
+            "RESULTADO GANANCIA": {
+                "Ingresos Fuera de Explotaci\u00f3n": {
+                    "Donaciones obtenidas, ganandas, percibidas": {},
+                    "Ganancia Venta Inversiones Permanentes": {},
+                    "Ganancia Venta de Activo Fijo": {},
+                    "Recupero de Deudores Incobrables": {},
+                    "Recupero de Rezagos": {}
+                },
+                "Ingresos de Explotaci\u00f3n": {
+                    "Alquileres gananados, obtenidos, percibidos": {},
+                    "Comisiones gananados, obtenidos, percibidos": {},
+                    "Descuentos gananados, obtenidos, percibidos": {},
+                    "Ganancia Venta de Acciones": {},
+                    "Honorarios gananados, obtenidos, percibidos": {},
+                    "Interese sobre Inversiones": {},
+                    "Intereses gananados, obtenidos, percibidos": {},
+                    "Ventas": {
+                        "Ventas - Categoria de productos 01": {}
+                    }
+                }
+            },
+            "RESULTADO P\u00c9RDIDA": {
+                "Egresos Fuera de Explotaci\u00f3n": {
+                    "Donaciones Cedidas, Otorgadas": {},
+                    "Gastos en Siniestros": {},
+                    "P\u00e9rdida Venta Activo Fijo": {}
+                },
+                "Egresos de Explotaci\u00f3n": {
+                    "Costo de Mercader\u00edas Vendidas": {
+                        "Costo de Mercader\u00edas Vendidas - Categoria de productos 01": {}
+                    },
+                    "Gastos Bancarios": {},
+                    "Gastos de Publicidad y Propaganda": {},
+                    "Gastos en Amortizaci\u00f3n": {},
+                    "Gastos en Cargas Sociales": {},
+                    "Gastos en Depreciaci\u00f3n de Activo Fijo": {},
+                    "Gastos en Impuestos": {},
+                    "Gastos en Servicios P\u00fablicos": {},
+                    "Gastos en Sueldos y Jornales": {}
+                }
+            },
+            "root_type": ""
+        },
+        "inventario del Balance General": {
+            "ACTIVOS": {
+                "Activo Circulante": {
+                    "Activo Circulante - Bancos": {
+                        "Activo Circulante.../ BCO. CTA CTE CLP": {}
+                    },
+                    "Activo Circulante - Caja": {
+                        "Activo Circulante - Caja / efectivo CLP": {}
+                    },
+                    "Activo Circulante - Fondos fijos": {
+                        "Activo Circulante - Fondos fijos / caja chica 01 CLP": {}
+                    },
+                    "Activo Circulante - Moneda Extranjera": {
+                        "Activo Circulante - Caja / efectivo USD": {}
+                    },
+                    "Activo Circulante - Recaudaciones a Depositar ": {},
+                    "Activo Circulante - Valores a Depositar ": {}
+                },
+                "Activo Fijo": {
+                    "Activo Fijo / (-) Depreciaci\u00f3n Acumulada": {},
+                    "Activo Fijo / Equipos": {},
+                    "Activo Fijo / Inmuebles": {},
+                    "Activo Fijo / Maquinaria": {},
+                    "Activo Fijo / Material Rodante Motorizado": {}
+                },
+                "Activo Intangible": {
+                    "Activo Intangible / (-) Amortizaci\u00f3n Acumulada": {},
+                    "Activo Intangible / Concesiones y Franquicias": {},
+                    "Activo Intangible / Derecho de Llaves": {},
+                    "Activo Intangible / Marcas y Patentes de Invenci\u00f3n": {}
+                },
+                "Existencias": {
+                    "(-) Previsi\u00f3n para Desvalorizaci\u00f3n de Existencias": {},
+                    "Existencias - Mercader\u00edas": {
+                        "Existencias - Mercader\u00edas / Categoria de productos 01": {}
+                    },
+                    "Existencias - Mercader\u00edas en Tr\u00e1nsito": {},
+                    "Materiales Varios ": {},
+                    "Materias primas": {},
+                    "Productos Elaborados": {},
+                    "Productos en Curso de Elaboraci\u00f3n": {}
+                },
+                "Inversiones Financieras": {
+                    "Inversiones / (-) Previsi\u00f3n para Devalorizaci\u00f3n de Acciones": {},
+                    "Inversiones / Acciones Permanentes": {},
+                    "Inversiones / Acciones Transitorias": {},
+                    "Inversiones / T\u00edtulos P\u00fablicos": {}
+                }
+            },
+            "Cuentas por Cobrar": {
+                "Cuentas por Cobrar / (-) Intereses (+) a Devengar": {},
+                "Cuentas por Cobrar / (-) Previsi\u00f3n para Descuentos": {},
+                "Cuentas por Cobrar / Accionistas": {},
+                "Cuentas por Cobrar / Alquileres Pagados por Adelantado": {},
+                "Cuentas por Cobrar / Anticipo al Personal": {},
+                "Cuentas por Cobrar / Anticipo de Impuestos": {},
+                "Cuentas por Cobrar / Anticipos a Proveedores": {},
+                "Cuentas por Cobrar / Intereses Pagados por Adelantado": {},
+                "Cuentas por Cobrar / Pr\u00e9stamos otorgados": {}
+            },
+            "Documentos por Cobrar": {
+                "Documentos por Cobrar / (-) Previsi\u00f3n para Incobrables": {},
+                "Documentos por Cobrar / Deudores Morosos": {},
+                "Documentos por Cobrar / Deudores Varios": {},
+                "Documentos por Cobrar / Deudores en Gesti\u00f3n Judicial": {},
+                "Documentos por Cobrar / Deudores por Ventas": {}
+            },
+            "PASIVOS": {
+                "Cuentas por Pagar": {
+                    "Cuentas por Pagar / (-) Intereses a Devengar por Compras al Cr\u00e9dito": {},
+                    "Cuentas por Pagar / Anticipos de Clientes": {},
+                    "Cuentas por Pagar / Proveedores": {}
+                },
+                "Impuestos por Pagar": {
+                    "Impuestos por Pagar / IVA a Pagar": {},
+                    "Impuestos por Pagar / Impuesto a la Renta a Pagar": {}
+                },
+                "Otras Cuentas por Pagar": {
+                    "Otras Cuentas por Pagar / Acreedores Varios": {},
+                    "Otras Cuentas por Pagar / Cobros por Adelantado": {},
+                    "Otras Cuentas por Pagar / Dividendos a Pagar": {},
+                    "Otras Cuentas por Pagar / Honorarios Directores y S\u00edndicos a Pagar": {}
+                },
+                "Pasivo Circulante": {
+                    "Pasivo Circulante / Adelantos en Cuenta Corriente": {},
+                    "Pasivo Circulante / Debentures Emitidos": {},
+                    "Pasivo Circulante / Intereses a Pagar": {},
+                    "Pasivo Circulante / Obligaciones a Pagar": {},
+                    "Pasivo Circulante / Prestamos": {}
+                },
+                "Provisiones": {
+                    "Provisiones / Previsi\u00f3n Indemnizaci\u00f3n por Despidos": {},
+                    "Provisiones / Previsi\u00f3n para Garant\u00edas por Service": {},
+                    "Provisiones / Previsi\u00f3n para juicios Pendientes": {}
+                },
+                "Remuneraciones por Pagar": {
+                    "Remuneraciones por Pagar / Cargas Sociales a Pagar": {},
+                    "Remuneraciones por Pagar / Provisi\u00f3n para Sueldo Anual Complementario": {},
+                    "Remuneraciones por Pagar / Retenciones a Depositar": {},
+                    "Remuneraciones por Pagar / Sueldos a Pagar": {}
+                }
+            },
+            "PATRIMONIO": {
+                "Ajustes al Patrimonio": {
+                    "Ajustes al Patrimonio / Revaluo T\u00e9cnico de Activo Fijo": {}
+                },
+                "Aportes No Capitalizados": {
+                    "Aportes No Capitalizados / Aportes Irrevocables Futura Suscripci\u00f3n de Acciones": {},
+                    "Aportes No Capitalizados / Primas de Emsi\u00f3n": {}
+                },
+                "Capital": {
+                    "Capital / (-) Descuento de Emisi\u00f3n de Acciones": {},
+                    "Capital / Acciones en Circulaci\u00f3n": {},
+                    "Capital / Capital Propio": {},
+                    "Capital / Dividendos a Distribuir en Acciones": {}
+                },
+                "Futuras Eventualidades": {
+                    "Reserva Estatutaria": {},
+                    "Reserva Facultativa": {},
+                    "Reserva Legal": {},
+                    "Reserva para Renovaci\u00f3n de Activo Fijo": {}
+                },
+                "Resultados No Asignados": {
+                    "Resultado del Ejercicio": {},
+                    "Resultados Acumulados": {},
+                    "Resultados Acumulados del Ejercicio Anterior": {},
+                    "Utilidades y P\u00e9rdidas del Ejercicio": {}
+                }
+            },
+            "root_type": ""
+        }
+    }
+}

@@ -1,0 +1,8 @@
+/* csslint ignore:start */
+{% if homepage.hero_image %}
+.hero-image {
+	background-size: cover;
+	padding: 10rem 0;
+}
+{% endif %}
+/* csslint ignore:end */

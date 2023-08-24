@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "creation": "2018-07-17 16:53:13.716665",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_date",
+  "to_date",
+  "tax_withholding_rate",
+  "column_break_3",
+  "single_threshold",
+  "cumulative_threshold"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "tax_withholding_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tax Withholding Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "single_threshold",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Single Transaction Threshold"
+  },
+  {
+   "columns": 3,
+   "fieldname": "cumulative_threshold",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Cumulative Transaction Threshold"
+  },
+  {
+   "columns": 2,
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-01-13 12:04:42.904263",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Tax Withholding Rate",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

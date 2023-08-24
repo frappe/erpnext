@@ -1,0 +1,835 @@
+{
+	"country_code": "hu", 
+	"name": "Hungary - Chart of Accounts", 
+	"tree": {
+		"1. SZ\u00c1MLAOSZT\u00c1LY BEFEKTETETT ESZK\u00d6Z\u00d6K": {
+			"11. IMMATERI\u00c1LIS JAVAK": {
+				"111. Alap\u00edt\u00e1s-\u00e1tszervez\u00e9s aktiv\u00e1lt \u00e9rt\u00e9ke": {}, 
+				"112. K\u00eds\u00e9rleti fejleszt\u00e9s aktiv\u00e1lt \u00e9rt\u00e9ke": {}, 
+				"113. Vagyoni \u00e9rt\u00e9k\u0171 jogok": {}, 
+				"114. Szellemi term\u00e9kek": {}, 
+				"115. \u00dczleti vagy c\u00e9g\u00e9rt\u00e9k": {}, 
+				"117. Immateri\u00e1lis javak \u00e9rt\u00e9khelyesb\u00edt\u00e9se": {}
+			}, 
+			"12-16. T\u00c1RGYI ESZK\u00d6Z\u00d6K": {
+				"12. INGATLANOK \u00c9S KAPCSOL\u00d3D\u00d3 VAGYONI \u00c9RT\u00c9K\u00db JOGOK": {
+					"121. Telkek, f\u00f6ldter\u00fclet ": {
+						"1211. Telkek, f\u00f6ldter\u00fcletek brutt\u00f3 \u00e9rt\u00e9ke": {
+							"account_type": "Fixed Asset"
+						}, 
+						"1218. Telkek, f\u00f6ldter\u00fcletek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+						"1219. Telkek, f\u00f6ldter\u00fcletek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+					}, 
+					"122. Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok": {
+						"1221. Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok brutt\u00f3 \u00e9rt\u00e9ke": {
+							"account_type": "Fixed Asset"
+						}, 
+						"1228. Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+						"1229. Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+					}, 
+					"123. \u00c9p\u00fcletek, \u00e9p\u00fcletr\u00e9szek, tulajdoni h\u00e1nyadok ": {
+						"account_type": "Fixed Asset", 
+						"is_group": 1
+					}, 
+					"124. Egy\u00e9b ingatlanok": {
+						"is_group": 1
+					}, 
+					"125. \u00dczemk\u00f6r\u00f6n k\u00edv\u00fcli ingatlanok, \u00e9p\u00fcletek ": {
+						"is_group": 1
+					}, 
+					"126. Ingatlanokhoz kapcsol\u00f3d\u00f3 vagyoni \u00e9rt\u00e9k\u0171 jogok": {
+						"is_group": 1
+					}, 
+					"127. Ingatlanok \u00e9rt\u00e9khelyesb\u00edt\u00e9se": {}, 
+					"129. Kis \u00e9rt\u00e9k\u0171 ingatlanok": {}
+				}, 
+				"13. M\u00dbSZAKI BERENDEZ\u00c9SEK, G\u00c9PEK, J\u00c1RM\u00dbVEK": {
+					"131. Termel\u0151 g\u00e9pek, berendez\u00e9sek, szersz\u00e1mok, gy\u00e1rt\u00f3eszk\u00f6z\u00f6k": {
+						"1311. Termel\u0151 g\u00e9pek, berendez\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+							"account_type": "Fixed Asset"
+						}, 
+						"1318. Termel\u0151 g\u00e9pek, berendez\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+						"1319. Termel\u0151 g\u00e9pek, berendez\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+					}, 
+					"132. M\u0171szaki j\u00e1rm\u0171vek": {}, 
+					"133. Ki nem emelt m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek": {}, 
+					"139. Kis \u00e9rt\u00e9k\u0171 m\u0171szaki berendez\u00e9sek, g\u00e9pek, j\u00e1rm\u0171vek": {}
+				}, 
+				"14. EGY\u00c9B BERENDEZ\u00c9SEK, FELSZEREL\u00c9SEK, J\u00c1RM\u00dbVEK": {
+					"141. Egy\u00e9b (\u00fczemi \u2013 \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek": {
+						"1411. Egy\u00e9b (\u00fczemi \u2013 \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+							"account_type": "Fixed Asset"
+						}, 
+						"1418. Egy\u00e9b (\u00fczemi \u2013 \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+						"1419. Egy\u00e9b (\u00fczemi \u2013 \u00fczleti), berendez\u00e9sek, felszerel\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+					}, 
+					"142. Egy\u00e9b j\u00e1rm\u0171vek": {
+						"1421. Egy\u00e9b j\u00e1rm\u0171vek brutt\u00f3 \u00e9rt\u00e9ke": {
+							"account_type": "Fixed Asset"
+						}, 
+						"1428. Egy\u00e9b j\u00e1rm\u0171vek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+						"1429. Egy\u00e9b j\u00e1rm\u0171vek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+					}, 
+					"143. Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek": {
+						"1431. Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek brutt\u00f3 \u00e9rt\u00e9ke": {
+							"account_type": "Fixed Asset"
+						}, 
+						"1438. Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+						"1439. Irodai, igazgat\u00e1si berendez\u00e9sek \u00e9s felszerel\u00e9sek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+					}, 
+					"144. Ki nem emelt egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek": {
+						"account_type": "Fixed Asset"
+					}, 
+					"145. J\u00f3l\u00e9ti berendez\u00e9sek, felszerel\u00e9si t\u00e1rgyak \u00e9s k\u00e9pz\u0151m\u0171v\u00e9szeti alkot\u00e1sok": {
+						"account_type": "Fixed Asset"
+					}, 
+					"147. Egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek, j\u00e1rm\u0171vek \u00e9rt\u00e9khelyesb\u00edt\u00e9se": {
+						"account_type": "Fixed Asset"
+					}, 
+					"149. Kis \u00e9rt\u00e9k\u0171 egy\u00e9b berendez\u00e9sek, felszerel\u00e9sek, j\u00e1rm\u0171vek": {
+						"account_type": "Fixed Asset"
+					}
+				}, 
+				"15. TENY\u00c9SZ\u00c1LLATOK": {
+					"151. Teny\u00e9sz\u00e1llatok": {}
+				}, 
+				"16. BERUH\u00c1Z\u00c1SOK, FEL\u00daJ\u00cdT\u00c1SOK": {
+					"161. Befejezetlen beruh\u00e1z\u00e1sok ": {}, 
+					"162. Fel\u00faj\u00edt\u00e1sok": {}, 
+					"168. Beruh\u00e1z\u00e1sok terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}
+				}, 
+				"17-19. BEFEKTETETT P\u00c9NZ\u00dcGYI ESZK\u00d6Z\u00d6K": {
+					"17. TULAJDONI R\u00c9SZESED\u00c9ST JELENT\u00d5 BEFEKTET\u00c9SEK (R\u00c9SZESED\u00c9SEK)": {
+						"171. Tart\u00f3s r\u00e9szesed\u00e9s kapcsolt v\u00e1llalkoz\u00e1sban": {}, 
+						"172. Egy\u00e9b tart\u00f3s r\u00e9szesed\u00e9s": {}, 
+						"177. R\u00e9szesed\u00e9sek \u00e9rt\u00e9khelyesb\u00edt\u00e9se": {}, 
+						"179. R\u00e9szesed\u00e9sek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+					}, 
+					"18. HITELVISZONYT MEGTESTES\u00cdT\u00d5 \u00c9RT\u00c9KPAP\u00cdROK": {
+						"181. \u00c1llamk\u00f6tv\u00e9nyek": {}, 
+						"182. Kapcsolt v\u00e1llalkoz\u00e1sok \u00e9rt\u00e9kpap\u00edrjai": {}, 
+						"183. Egy\u00e9b v\u00e1llalkoz\u00e1sok \u00e9rt\u00e9kpap\u00edrjai": {}, 
+						"184. Tart\u00f3s diszkont \u00e9rt\u00e9kpap\u00edrok": {}, 
+						"189. \u00c9rt\u00e9kpap\u00edrok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+					}, 
+					"19. TART\u00d3SAN ADOTT K\u00d6LCS\u00d6N\u00d6K (tart\u00f3s bankbet\u00e9tek)": {
+						"191. Tart\u00f3san adott k\u00f6lcs\u00f6n\u00f6k kapcsolt v\u00e1llalkoz\u00e1sban": {}, 
+						"192. Tart\u00f3s bankbet\u00e9tek": {}, 
+						"193. Egy\u00e9b tart\u00f3san adott k\u00f6lcs\u00f6n\u00f6k": {}, 
+						"194. Tart\u00f3s bankbet\u00e9tek kapcsolt v\u00e1llalkoz\u00e1sban": {}, 
+						"195. Tart\u00f3s bankbet\u00e9tek egy\u00e9b r\u00e9szesed\u00e9si viszonyban \u00e1ll\u00f3 v\u00e1llalkoz\u00e1sban": {}, 
+						"196. Egy\u00e9b tart\u00f3s bankbet\u00e9tek": {}, 
+						"197. P\u00e9nz\u00fcgyi l\u00edzing miatti tart\u00f3s k\u00f6vetel\u00e9s": {}, 
+						"199. Tart\u00f3san adott k\u00f6lcs\u00f6n\u00f6k (\u00e9s bankbet\u00e9tek) \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+					}
+				}
+			}, 
+			"root_type": "Asset"
+		}, 
+		"2. SZ\u00c1MLAOSZT\u00c1LY K\u00c9SZLETEK": {
+			"21-22. ANYAGOK": {
+				"211 - 219. Nyers- \u00e9s alapanyagok ": {}, 
+				"221. Seg\u00e9danyagok": {}, 
+				"222. \u00dczem- \u00e9s f\u0171t\u0151anyagok ": {}, 
+				"223. Fenntart\u00e1si anyagok ": {}, 
+				"224. \u00c9p\u00edt\u00e9si anyagok": {}, 
+				"225. Egy \u00e9ven bel\u00fcl elhaszn\u00e1l\u00f3d\u00f3 anyagi eszk\u00f6z\u00f6k ": {}, 
+				"226. T\u00e1rgyi eszk\u00f6z\u00f6k k\u00f6z\u00fcl \u00e1tsorolt anyagok": {}, 
+				"227. Egy\u00e9b anyagok": {}, 
+				"228. Anyagok \u00e1rk\u00fcl\u00f6nb\u00f6zete": {}, 
+				"229. Anyagok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"23. BEFEJEZETLEN TERMEL\u00c9S \u00c9S F\u00c9LK\u00c9SZ TERM\u00c9KEK": {
+				"231 - 234. Befejezetlen termel\u00e9s ": {
+					"231. Befejezetlen termel\u00e9s": {}, 
+					"232. F\u00e9lk\u00e9sz term\u00e9kek": {}
+				}, 
+				"238. F\u00e9lk\u00e9sz term\u00e9kek k\u00e9szlet\u00e9rt\u00e9k-k\u00fcl\u00f6nb\u00f6zete": {}, 
+				"239. Befejezetlen termel\u00e9s \u00e9s f\u00e9lk\u00e9sz term\u00e9kek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"24. N\u00d6VEND\u00c9K-, H\u00cdZ\u00d3- \u00c9S EGY\u00c9B \u00c1LLATOK": {
+				"is_group": 1
+			}, 
+			"25. K\u00c9SZTERM\u00c9KEK": {
+				"251-257. K\u00e9szterm\u00e9kek": {}, 
+				"258. K\u00e9szterm\u00e9kek k\u00e9szlet\u00e9rt\u00e9k-k\u00fcl\u00f6nb\u00f6zete": {}, 
+				"259. K\u00e9szterm\u00e9kek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"26-28. \u00c1RUK ": {
+				"261. Kereskedelmi \u00e1ruk": {
+					"account_type": "Stock",
+					"is_group": 0
+				}, 
+				"262. Idegen helyen t\u00e1rolt, bizom\u00e1nyba \u00e1tadott \u00e1ruk": {
+					"account_type": "Stock",
+					"is_group": 0
+				}, 
+				"263. T\u00e1rgyi eszk\u00f6z\u00f6k k\u00f6z\u00fcl \u00e1tsorolt \u00e1ruk": {
+					"account_type": "Stock",
+					"is_group": 0
+				}, 
+				"264. Bels\u0151 (egys\u00e9gek, tev\u00e9kenys\u00e9gek k\u00f6z\u00f6tti) \u00e1tad\u00e1s-\u00e1tv\u00e9tel \u00fctk\u00f6z\u0151sz\u00e1mla": {
+					"account_type": "Stock",
+					"is_group": 0
+				}, 
+				"269. Kereskedelmi \u00e1ruk \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {
+					"account_type": "Stock",
+					"is_group": 0
+				}, 
+				"account_type": "Stock"
+			}, 
+			"27. K\u00d6ZVET\u00cdTETT SZOLG\u00c1LTAT\u00c1SOK ": {
+				"271. K\u00f6zvet\u00edtett szolg\u00e1ltat\u00e1sok": {}, 
+				"279. K\u00f6zvet\u00edtett szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"28. BET\u00c9TD\u00cdJAS G\u00d6NGY\u00d6LEGEK": {
+				"is_group": 1
+			}, 
+			"root_type": "Asset"
+		}, 
+		"3. SZ\u00c1MLAOSZT\u00c1LY K\u00d6VETEL\u00c9SEK, P\u00c9NZ\u00dcGYI ESZK\u00d6Z\u00d6K \u00c9S AKT\u00cdV ID\u00d5BELI ELHAT\u00c1ROL\u00c1SOK": {
+			"31. K\u00d6VETEL\u00c9SEK \u00c1RUSZ\u00c1LL\u00cdT\u00c1SB\u00d3L \u00c9S SZOLG\u00c1LTAT\u00c1SB\u00d3L (VEV\u00d5K) ": {
+				"311. Belf\u00f6ldi k\u00f6vetel\u00e9sek (forintban)": {
+					"account_type": "Receivable"
+				}, 
+				"312. Belf\u00f6ldi k\u00f6vetel\u00e9sek (deviz\u00e1ban)": {
+					"account_type": "Receivable"
+				}, 
+				"315. Belf\u00f6ldi k\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa ": {}, 
+				"316. K\u00fclf\u00f6ldi k\u00f6vetel\u00e9sek (forintban)": {
+					"account_type": "Receivable"
+				}, 
+				"317. K\u00fclf\u00f6ldi k\u00f6vetel\u00e9sek (deviz\u00e1ban)": {
+					"account_type": "Receivable"
+				}, 
+				"319. K\u00fclf\u00f6ldi k\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"32. K\u00d6VETEL\u00c9SEK KAPCSOLT V\u00c1LLALKOZ\u00c1SSAL SZEMBEN": {
+				"is_group": 1
+			}, 
+			"33. K\u00d6VETEL\u00c9SEK EGY\u00c9B R\u00c9SZESED\u00c9SI VISZONYBAN L\u00c9V\u00d5 V\u00c1LLALKOZ\u00c1SSAL SZEMBEN ": {
+				"is_group": 1
+			}, 
+			"34. V\u00c1LT\u00d3K\u00d6VETEL\u00c9SEK": {
+				"is_group": 1
+			}, 
+			"35. ADOTT EL\u00d5LEGEK": {
+				"351. Immateri\u00e1lis javakra adott el\u0151legek": {}, 
+				"352. Beruh\u00e1z\u00e1sokra adott el\u0151legek": {}, 
+				"353. K\u00e9szletekre adott el\u0151legek": {}, 
+				"358. Jegyzett, de m\u00e9g be nem fizetett t\u0151ke r\u00e9szesed\u00e9si viszonyban nem l\u00e9v\u0151 v\u00e1llalkoz\u00e1st\u00f3l": {}, 
+				"359. Adott el\u0151legek \u00e9rt\u00e9kveszt\u00e9se \u00e9s vissza\u00edr\u00e1sa": {}
+			}, 
+			"36. EGY\u00c9B K\u00d6VETEL\u00c9SEK": {
+				"361. Munkav\u00e1llal\u00f3kkal szembeni k\u00f6vetel\u00e9sek": {
+					"3611. Munkav\u00e1llal\u00f3knak foly\u00f3s\u00edtott el\u0151legek": {}, 
+					"3612. El\u0151\u00edrt tartoz\u00e1sok": {}, 
+					"3613. Egy\u00e9b elsz\u00e1mol\u00e1sok a munkav\u00e1llal\u00f3kkal": {}
+				}, 
+				"362. K\u00f6lts\u00e9gvet\u00e9ssel szembeni k\u00f6vetel\u00e9sek": {
+					"is_group": 1
+				}, 
+				"363. R\u00f6vid lej\u00e1ratra k\u00f6lcs\u00f6nadott p\u00e9nzeszk\u00f6z\u00f6k": {
+					"is_group": 1
+				}, 
+				"364. R\u00e9szesed\u00e9sekkel, \u00e9rt\u00e9kpap\u00edrokkal kapcsolatos k\u00f6vetel\u00e9sek": {
+					"3641. R\u00f6vid lej\u00e1rat\u00fa k\u00f6lcs\u00f6n\u00f6k": {}, 
+					"3642. Tart\u00f3san adott k\u00f6lcs\u00f6n\u00f6kb\u0151l \u00e1tsorolt k\u00f6vetel\u00e9sek": {}
+				}, 
+				"365. V\u00e1s\u00e1rolt \u00e9s kapott k\u00f6vetel\u00e9sek ": {
+					"is_group": 1
+				}, 
+				"366. R\u00e9szesed\u00e9sekkel, \u00e9rt\u00e9kpap\u00edrokkal kapcsolatos k\u00f6vetel\u00e9sek": {}, 
+				"367. Hat\u00e1rid\u0151s, opci\u00f3s \u00e9s swap \u00fcgyletekkel kapcsolatos k\u00f6vetel\u00e9sek": {}, 
+				"368. K\u00fcl\u00f6nf\u00e9le egy\u00e9b k\u00f6vetel\u00e9sek ": {
+					"3681. Bizom\u00e1nyosi \u00fcgylettel kapcsolatos elsz\u00e1mol\u00e1sok": {}, 
+					"3682. \u00c9rt\u00e9kpap\u00edr-elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+					"3683. Import beszerz\u00e9sek \u00e1f\u00e1ja": {}, 
+					"3684. Ad\u00f3sok": {}, 
+					"3685. Biztos\u00edt\u00f3int\u00e9zettel szembeni k\u00f6vetel\u00e9sek": {}, 
+					"3686. Barter \u00fcgylet elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+					"3687. \u00c1rfolyam k\u00fcl\u00f6nb\u00f6zetek elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+					"3688. Ki nem emelt egy\u00e9b k\u00f6vetel\u00e9sek": {}
+				}, 
+				"369. Egy\u00e9b k\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"37. \u00c9RT\u00c9KPAP\u00cdROK": {
+				"371. R\u00e9szesed\u00e9sek": {
+					"3711. R\u00e9szesed\u00e9s anyav\u00e1llalatban": {}, 
+					"3712. R\u00e9szesed\u00e9s le\u00e1nyv\u00e1llalatban": {}, 
+					"3713. R\u00e9szesed\u00e9s k\u00f6z\u00f6s vezet\u00e9s\u0171 v\u00e1llalkoz\u00e1sban": {}, 
+					"3714. R\u00e9szesed\u00e9s t\u00e1rsult v\u00e1llalkoz\u00e1sban": {}, 
+					"3719. Kapcsolt v\u00e1llalkoz\u00e1sban l\u00e9v\u0151 r\u00e9szesed\u00e9sek \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+				}, 
+				"372. Saj\u00e1t r\u00e9szv\u00e9nyek, saj\u00e1t \u00fczletr\u00e9szek": {
+					"3721. Elad\u00e1sra v\u00e1s\u00e1rolt egy\u00e9b r\u00e9szesed\u00e9sek": {}
+				}, 
+				"373. Forgat\u00e1si c\u00e9l\u00fa hitelviszonyt megtestes\u00edt\u0151 \u00e9rt\u00e9kpap\u00edrok ": {
+					"3741. Elad\u00e1sra v\u00e1s\u00e1rolt hitelviszonyt megtestes\u00edt\u0151 \u00e9rt\u00e9kpap\u00edrok": {}, 
+					"3742. Elad\u00e1sra v\u00e1s\u00e1rolt diszkont \u00e9rt\u00e9kpap\u00edrok": {}, 
+					"3749. Forgat\u00e1si c\u00e9l\u00fa hitelviszonyt megtestes\u00edt\u0151 \u00e9rt\u00e9kpap\u00edrok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+				}, 
+				"378. \u00c9rt\u00e9kpap\u00edrok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}, 
+				"379. \u00c9rt\u00e9kpap\u00edr elsz\u00e1mol\u00e1si sz\u00e1mla": {}
+			}, 
+			"38. P\u00c9NZESZK\u00d6Z\u00d6K": {
+				"381. P\u00e9nzt\u00e1r ": {
+					"3811. P\u00e9nzt\u00e1r-sz\u00e1mla": {}, 
+					"3812. Elektronikus p\u00e9nzeszk\u00f6z\u00f6k ": {}, 
+					"account_type": "Cash"
+				}, 
+				"382. Valutap\u00e9nzt\u00e1r ": {
+					"3821. Valutap\u00e9nzt\u00e1r-sz\u00e1mla": {}, 
+					"3829. Valuta \u00e1rfolyamk\u00fcl\u00f6nb\u00f6zeti sz\u00e1mla ": {}
+				}, 
+				"383. Csekkek": {}, 
+				"384. Elsz\u00e1mol\u00e1si bet\u00e9tsz\u00e1mla ": {
+					"account_type": "Bank", 
+					"is_group": 1
+				}, 
+				"385. Elk\u00fcl\u00f6n\u00edtett bet\u00e9tsz\u00e1ml\u00e1k ": {
+					"3851. Kamatoz\u00f3 bet\u00e9tsz\u00e1ml\u00e1k": {}, 
+					"3852. Elk\u00fcl\u00f6n\u00edtett p\u00e9nzeszk\u00f6z\u00f6k k\u00f6tv\u00e9nykibocs\u00e1t\u00e1sb\u00f3l ": {}, 
+					"3853. Beruh\u00e1z\u00e1sra elk\u00fcl\u00f6n\u00edtett p\u00e9nzeszk\u00f6z\u00f6k": {}, 
+					"3854. Fejleszt\u00e9si c\u00e9lra elk\u00fcl\u00f6n\u00edtett p\u00e9nzeszk\u00f6z\u00f6k ": {}, 
+					"3855. Egy\u00e9b c\u00e9lra elk\u00fcl\u00f6n\u00edtett p\u00e9nzeszk\u00f6z\u00f6k": {}, 
+					"3856. Lak\u00e1s\u00e9p\u00edt\u00e9si bet\u00e9tsz\u00e1mla": {}, 
+					"3857. Elk\u00fcl\u00f6n\u00edtett lak\u00e1s\u00e9p\u00edt\u00e9si c\u00e9l\u00fa p\u00e9nzeszk\u00f6z\u00f6k ": {}, 
+					"3858. Lak\u00e1s\u00e9p\u00edt\u00e9s \u00faton l\u00e9v\u0151 p\u00e9nzeszk\u00f6zei": {}
+				}, 
+				"386. Devizabet\u00e9t-sz\u00e1mla ": {
+					"3861. Devizabet\u00e9t-sz\u00e1mla": {}, 
+					"3862. K\u00fclf\u00f6ld\u00f6n vezetett devizabet\u00e9t-sz\u00e1mla ": {}, 
+					"3863. Devizat\u00f6rzsbet\u00e9t-sz\u00e1mla": {}, 
+					"3868. Egy\u00e9b devizabet\u00e9t-sz\u00e1mla": {}, 
+					"3869. Devizabet\u00e9t \u00e1rfolyamk\u00fcl\u00f6nb\u00f6zeti sz\u00e1mla ": {}
+				}, 
+				"387. Elektronikus p\u00e9nz": {}, 
+				"389. \u00c1tvezet\u00e9si sz\u00e1mla": {}
+			}, 
+			"39. AKT\u00cdV ID\u00d5BELI ELHAT\u00c1ROL\u00c1SOK": {
+				"391. Bev\u00e9telek akt\u00edv id\u0151beli elhat\u00e1rol\u00e1sa ": {
+					"3911. Diszkont \u00e9rt\u00e9kpap\u00edrok id\u0151ar\u00e1nyos kamat\u00e1nak elhat\u00e1rol\u00e1sa": {}, 
+					"3912. \u00c9rt\u00e9kpap\u00edrok beszerz\u00e9s\u00e9hez kapcsol\u00f3d\u00f3 k\u00fcl\u00f6nb\u00f6zetb\u0151l az id\u0151ar\u00e1nyos \u00e1rfolyamnyeres\u00e9g elhat\u00e1rol\u00e1sa": {}, 
+					"3913. \u00c1rbev\u00e9tel, egy\u00e9b kamatbev\u00e9tel, egy\u00e9b bev\u00e9tel elhat\u00e1rol\u00e1sa": {}
+				}, 
+				"392. K\u00f6lts\u00e9gek, r\u00e1ford\u00edt\u00e1sok akt\u00edv id\u0151beli elhat\u00e1rol\u00e1sa ": {
+					"3921. \u00c9rt\u00e9kpap\u00edrok, r\u00e9szesed\u00e9sek beszerz\u00e9s\u00e9hez kapcsol\u00f3d\u00f3 bizom\u00e1nyi d\u00edj, v\u00e1s\u00e1rolt v\u00e9teli opci\u00f3 d\u00edj\u00e1nak elhat\u00e1rol\u00e1sa": {}, 
+					"3922. T\u00f6bbletk\u00f6telezetts\u00e9gek elhat\u00e1rol\u00e1sa": {}, 
+					"3923. K\u00f6lts\u00e9gek, egy\u00e9b fizetett kamatok, egy\u00e9b r\u00e1ford\u00edt\u00e1sok elhat\u00e1rol\u00e1sa": {}
+				}, 
+				"393. Halasztott r\u00e1ford\u00edt\u00e1sok ": {
+					"3931. Tartoz\u00e1s\u00e1tv\u00e1llal\u00e1sok miatti r\u00e1ford\u00edt\u00e1sok elhat\u00e1rol\u00e1sa": {}, 
+					"3932. Devizak\u00f6telezetts\u00e9gek \u00e1rfolyamvesztes\u00e9g\u00e9nek elhat\u00e1rol\u00e1sa ": {}
+				}, 
+				"399. A k\u00f6vetel\u00e9s-jelleg\u0171 akt\u00edv id\u0151beli elhat\u00e1rol\u00e1sok \u00e9rt\u00e9kveszt\u00e9se \u00e9s annak vissza\u00edr\u00e1sa": {}
+			}, 
+			"root_type": "Asset"
+		}, 
+		"4. SZ\u00c1MLAOSZT\u00c1LY FORR\u00c1SOK": {
+			"41. SAJ\u00c1T T\u00d5KE": {
+				"411. Jegyzett\u0151ke ": {}, 
+				"412. T\u0151ketartal\u00e9k": {}, 
+				"413. Eredm\u00e9nytartal\u00e9k": {}, 
+				"414. Lek\u00f6t\u00f6tt tartal\u00e9k ": {
+					"4141. Lek\u00f6t\u00f6tt tartal\u00e9k t\u0151ketartal\u00e9kb\u00f3l": {}, 
+					"4142. Lek\u00f6t\u00f6tt tartal\u00e9k eredm\u00e9nytartal\u00e9kb\u00f3l": {}, 
+					"4143. Lek\u00f6t\u00f6tt tartal\u00e9k p\u00f3tbefizet\u00e9sb\u0151l ": {}
+				}, 
+				"417. \u00c9rt\u00e9kel\u00e9si tartal\u00e9k": {}, 
+				"418. El\u0151z\u0151 \u00e9vek helyesb\u00edt\u00e9s\u00e9b\u0151l sz\u00e1rmaz\u00f3 m\u00e9rleg szerinti eredm\u00e9ny": {}, 
+				"419. Ad\u00f3zott eredm\u00e9ny": {}
+			}, 
+			"42. C\u00c9LTARTAL\u00c9KOK": {
+				"421. C\u00e9ltartal\u00e9k a v\u00e1rhat\u00f3 k\u00f6telezetts\u00e9gekre ": {}, 
+				"422. C\u00e9ltartal\u00e9k a j\u00f6v\u0151beni k\u00f6lts\u00e9gekre": {}, 
+				"424. \u00c1rfolyamvesztes\u00e9g id\u0151beli elhat\u00e1rol\u00e1sa alapj\u00e1n k\u00e9pzett c\u00e9ltartal\u00e9k ": {}, 
+				"429. Egy\u00e9b c\u00e9ltartal\u00e9k": {}
+			}, 
+			"43-47. K\u00d6TELEZETTS\u00c9GEK": {
+				"43. H\u00c1TRASOROLT K\u00d6TELEZETTS\u00c9GEK": {
+					"431. H\u00e1trasorolt k\u00f6telezetts\u00e9gek kapcsolt v\u00e1llalkoz\u00e1ssal szemben ": {
+						"4311. H\u00e1trasorolt k\u00f6telezetts\u00e9gek anyav\u00e1llalattal szemben ": {}, 
+						"4312. H\u00e1trasorolt k\u00f6telezetts\u00e9gek le\u00e1nyv\u00e1llalattal szemben": {}, 
+						"4313. H\u00e1trasorolt k\u00f6telezetts\u00e9gek k\u00f6z\u00f6s vezet\u00e9s\u0171 v\u00e1llalkoz\u00e1ssal szemben ": {}, 
+						"4314. H\u00e1trasorolt k\u00f6telezetts\u00e9gek t\u00e1rsult v\u00e1llalkoz\u00e1ssal szemben ": {}
+					}, 
+					"432. H\u00e1trasorolt k\u00f6telezetts\u00e9gek egy\u00e9b r\u00e9szesed\u00e9si viszonyban l\u00e9v\u0151 v\u00e1llalkoz\u00e1ssal szemben": {}, 
+					"433. H\u00e1trasorolt k\u00f6telezetts\u00e9gek egy\u00e9b gazd\u00e1lkod\u00f3val szemben": {}
+				}, 
+				"44. HOSSZ\u00da LEJ\u00c1RAT\u00da K\u00d6TELEZETTS\u00c9GEK": {
+					"441. Hossz\u00fa lej\u00e1ratra kapott k\u00f6lcs\u00f6n\u00f6k": {}, 
+					"442. \u00c1tv\u00e1ltoztathat\u00f3 k\u00f6tv\u00e9nyek ": {}, 
+					"443. Tartoz\u00e1sok k\u00f6tv\u00e9nykibocs\u00e1t\u00e1sb\u00f3l ": {
+						"4431. Tartoz\u00e1sok k\u00f6tv\u00e9nykibocs\u00e1t\u00e1sb\u00f3l forintban ": {}, 
+						"4432. Tartoz\u00e1sok k\u00f6tv\u00e9nykibocs\u00e1t\u00e1sb\u00f3l deviz\u00e1ban": {}
+					}, 
+					"444. Beruh\u00e1z\u00e1si \u00e9s fejleszt\u00e9si hitelek ": {
+						"4441. Beruh\u00e1z\u00e1si \u00e9s fejleszt\u00e9si hitelek forintban ": {}, 
+						"4442. Beruh\u00e1z\u00e1si \u00e9s fejleszt\u00e9si hitelek deviz\u00e1ban ": {}
+					}, 
+					"445. Egy\u00e9b hossz\u00fa lej\u00e1rat\u00fa hitelek ": {
+						"4451. Egy\u00e9b hossz\u00fa lej\u00e1rat\u00fa hitelek forintban ": {}, 
+						"4452. Egy\u00e9b hossz\u00fa lej\u00e1rat\u00fa hitelek deviz\u00e1ban": {}
+					}, 
+					"446. Tart\u00f3s k\u00f6telezetts\u00e9gek kapcsolt v\u00e1llalkoz\u00e1ssal szemben ": {
+						"is_group": 1
+					}, 
+					"447. Tart\u00f3s k\u00f6telezetts\u00e9gek egy\u00e9b r\u00e9szesed\u00e9si viszonyban l\u00e9v\u0151 v\u00e1llalkoz\u00e1ssal szemben": {}, 
+					"448. P\u00e9nz\u00fcgyi l\u00edzing miatti k\u00f6telezetts\u00e9gek ": {}, 
+					"449. Egy\u00e9b hossz\u00fa lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek ": {
+						"4491. Kincst\u00e1ri vagyon r\u00e9sz\u00e9t k\u00e9pez\u0151 eszk\u00f6z\u00f6k kezel\u00e9sbe v\u00e9tel\u00e9hez kapcsol\u00f3d\u00f3 k\u00f6telezetts\u00e9g": {}, 
+						"4492. Alap\u00edt\u00f3kkal szembeni hossz\u00fa lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek ": {}
+					}, 
+					"4499. Hossz\u00fa lej\u00e1rat\u00fa egy\u00e9b k\u00f6telezetts\u00e9gek": {}
+				}, 
+				"45-47. R\u00d6VID LEJ\u00c1RAT\u00da K\u00d6TELEZETTS\u00c9GEK": {
+					"451. R\u00f6vid lej\u00e1rat\u00fa k\u00f6lcs\u00f6n\u00f6k ": {
+						"4511. R\u00f6vid lej\u00e1rat\u00fa \u00e1tv\u00e1ltoztathat\u00f3 k\u00f6tv\u00e9nyek ": {}, 
+						"4512. Egy\u00e9b r\u00f6vid lej\u00e1rat\u00fa k\u00f6lcs\u00f6n\u00f6k": {}
+					}, 
+					"452. R\u00f6vid lej\u00e1rat\u00fa hitelek ": {
+						"4521. R\u00f6vid lej\u00e1rat\u00fa hitelek forintban ": {}, 
+						"4522. R\u00f6vid lej\u00e1rat\u00fa hitelek deviz\u00e1ban ": {}
+					}, 
+					"453. Vev\u0151kt\u0151l kapott el\u0151legek": {}, 
+					"454-456. K\u00f6telezetts\u00e9gek \u00e1rusz\u00e1ll\u00edt\u00e1sb\u00f3l \u00e9s szolg\u00e1ltat\u00e1sb\u00f3l (sz\u00e1ll\u00edt\u00f3k)": {
+						"454. Sz\u00e1ll\u00edt\u00f3k ": {
+							"4541. Belf\u00f6ldi anyag- \u00e9s \u00e1rusz\u00e1ll\u00edt\u00f3k ": {
+								"account_type": "Payable"
+							}, 
+							"4542. K\u00fclf\u00f6ldi anyag- \u00e9s \u00e1rusz\u00e1ll\u00edt\u00f3k ": {
+								"account_type": "Payable"
+							}, 
+							"4543. Belf\u00f6ldi szolg\u00e1ltat\u00f3k": {}, 
+							"4544. K\u00fclf\u00f6ldi szolg\u00e1ltat\u00f3k": {}, 
+							"4549. Nem sz\u00e1ml\u00e1zott sz\u00e1ll\u00edt\u00e1sok, szolg\u00e1ltat\u00e1sok ": {
+								"account_type": "Stock Received But Not Billed"
+							}
+						}, 
+						"455. Beruh\u00e1z\u00e1si sz\u00e1ll\u00edt\u00f3k ": {
+							"4551. Belf\u00f6ldi beruh\u00e1z\u00e1si sz\u00e1ll\u00edt\u00f3k ": {}, 
+							"4552. K\u00fclf\u00f6ldi beruh\u00e1z\u00e1si sz\u00e1ll\u00edt\u00f3k": {}, 
+							"4559. Nem sz\u00e1ml\u00e1zott beruh\u00e1z\u00e1si sz\u00e1ll\u00edt\u00f3k ": {}
+						}, 
+						"456. Nem sz\u00e1ml\u00e1zott sz\u00e1ll\u00edt\u00f3k": {}
+					}, 
+					"457. V\u00e1lt\u00f3tartoz\u00e1sok": {}, 
+					"458. R\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek kapcsolt v\u00e1llalkoz\u00e1ssal szemben ": {
+						"4581. R\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek anyav\u00e1llalattal szemben ": {}, 
+						"4582. R\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek le\u00e1nyv\u00e1llalattal szemben": {}, 
+						"4583. R\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek k\u00f6z\u00f6s vezet\u00e9s\u0171 v\u00e1llalkoz\u00e1ssal szemben": {}, 
+						"4584. R\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek t\u00e1rsult v\u00e1llalkoz\u00e1ssal szemben": {}
+					}, 
+					"459. R\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek egy\u00e9b r\u00e9szesed\u00e9si viszonyban l\u00e9v\u0151 v\u00e1llalkoz\u00e1ssal szemben": {}, 
+					"461-479. Egy\u00e9b r\u00f6vid lej\u00e1rat\u00fa k\u00f6telezetts\u00e9gek": {
+						"461. Eredm\u00e9nyt terhel\u0151 ad\u00f3k elsz\u00e1mol\u00e1sa": {
+							"4611. T\u00e1rsas\u00e1gi ad\u00f3 elsz\u00e1mol\u00e1sa ": {}, 
+							"4612. K\u00fcl\u00f6nad\u00f3 elsz\u00e1mol\u00e1sa ": {}, 
+							"4613. Egyszer\u0171s\u00edtett v\u00e1llalkoz\u00f3i ad\u00f3 elsz\u00e1mol\u00e1sa ": {}
+						}, 
+						"462. Szem\u00e9lyi j\u00f6vedelemad\u00f3 elsz\u00e1mol\u00e1sa ": {
+							"4612. Mag\u00e1nszem\u00e9lyekt\u0151l levont szem\u00e9lyi j\u00f6vedelem ad\u00f3 elsz\u00e1mol\u00e1sa ": {}, 
+							"4621. Kifizet\u0151t terhel\u0151  szem\u00e9lyi j\u00f6vedelem ad\u00f3 elsz\u00e1mol\u00e1sa ": {}
+						}, 
+						"463. K\u00f6lts\u00e9gvet\u00e9si befizet\u00e9si k\u00f6telezetts\u00e9gek ": {
+							"463-1. Nyugd\u00edjj\u00e1rul\u00e9k ": {}, 
+							"463-10. Innov\u00e1ci\u00f3s j\u00e1rul\u00e9k  ": {}, 
+							"463-11. \u00d6nellen\u0151rz\u00e9si p\u00f3tl\u00e9k  ": {}, 
+							"463-12. Mulaszt\u00e1si b\u00edrs\u00e1g, ad\u00f3b\u00edrs\u00e1g  ": {}, 
+							"463-13. K\u00e9sedelmi p\u00f3tl\u00e9k ": {}, 
+							"463-14. Egy\u00e9b k\u00f6lts\u00e9gvet\u00e9si befizet\u00e9si k\u00f6telezetts\u00e9gek ": {}, 
+							"463-2. Eg\u00e9szs\u00e9gbiztos\u00edt\u00e1si- \u00e9s munkaer\u0151  piaci j\u00e1rul\u00e9k ": {}, 
+							"463-3. Rehabilit\u00e1ci\u00f3s hozz\u00e1j\u00e1rul\u00e1s  ": {}, 
+							"463-4. Szoci\u00e1lis hozz\u00e1j\u00e1rul\u00e1si ad\u00f3  ": {}, 
+							"463-5. Eg\u00e9szs\u00e9g\u00fcgyi szolg\u00e1ltat\u00e1si j\u00e1rul\u00e9k ": {}, 
+							"463-6. Szakk\u00e9pz\u00e9si hozz\u00e1j\u00e1rul\u00e1s ": {}, 
+							"463-7. Eg\u00e9szs\u00e9g\u00fcgyi hozz\u00e1j\u00e1rul\u00e1s  ": {}, 
+							"463-8. Egyszer\u0171s\u00edtett foglalkoztat\u00e1s k\u00f6zterhe ": {}, 
+							"463-9. C\u00e9gaut\u00f3ad\u00f3 ": {}
+						}, 
+						"464. G\u00e9pj\u00e1rm\u0171 ad\u00f3 (c\u00e9gaut\u00f3ad\u00f3) elsz\u00e1mol\u00e1sa": {
+							"is_group": 1
+						}, 
+						"465. V\u00e1m- \u00e9s p\u00e9nz\u00fcgy\u0151rs\u00e9g elsz\u00e1mol\u00e1si sz\u00e1mla ": {
+							"4651. V\u00e1mk\u00f6lts\u00e9gek \u00e9s egy\u00e9b v\u00e1mterhek elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+							"4652. Importbeszerz\u00e9s ut\u00e1n fizetend\u0151 \u00e1ltal\u00e1nos forgalmi ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+							"4653. V\u00e1m- \u00e9s p\u00e9nz\u00fcgy\u0151rs\u00e9ggel kapcsolatos egy\u00e9b elsz\u00e1mol\u00e1sok ": {}
+						}, 
+						"466. El\u0151zetesen felsz\u00e1m\u00edtott \u00e1ltal\u00e1nos forgalmi ad\u00f3 ": {
+							"4661. Beszerz\u00e9sek el\u0151zetesen felsz\u00e1m\u00edtott \u00e1ltal\u00e1nos forgalmi ad\u00f3ja ": {}, 
+							"4662. Ar\u00e1nyos\u00edt\u00e1ssal megosztand\u00f3 el\u0151zetesen felsz\u00e1m\u00edtott \u00e1ltal\u00e1nos forgalmi ad\u00f3": {}
+						}, 
+						"467. Fizetend\u0151 \u00e1ltal\u00e1nos forgalmi ad\u00f3": {}, 
+						"468. \u00c1ltal\u00e1nos forgalmi ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+						"469. Helyi ad\u00f3k elsz\u00e1mol\u00e1si sz\u00e1mla ": {
+							"4691. \u00c9p\u00edtm\u00e9nyad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+							"4692. Telekad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+							"4693. Kommun\u00e1lis ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+							"4694. Idegenforgalmi ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+							"4695. Helyi ipar\u0171z\u00e9si ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+							"4696. G\u00e9pj\u00e1rm\u0171ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+							"4697. K\u00fclf\u00f6ldi g\u00e9pj\u00e1rm\u0171ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+							"4699. Egy\u00e9b helyi ad\u00f3 elsz\u00e1mol\u00e1si sz\u00e1mla": {}
+						}, 
+						"471. J\u00f6vedelemelsz\u00e1mol\u00e1si sz\u00e1mla ": {
+							"4711. Keresetelsz\u00e1mol\u00e1si sz\u00e1mla ": {}, 
+							"4712. T\u00e1rsadalombiztos\u00edt\u00e1si ell\u00e1t\u00e1s ": {}, 
+							"4713. Egy\u00e9b kifizet\u00e9sek elsz\u00e1mol\u00e1sa": {}
+						}, 
+						"472. Fel nem vett j\u00e1rand\u00f3s\u00e1gok": {}, 
+						"473. Elsz\u00e1mol\u00e1s a t\u00e1rsadalombiztos\u00edt\u00e1ssal ": {}, 
+						"474. Szakk\u00e9pz\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {
+							"4741. K\u00f6zponti m\u0171szaki fejleszt\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {}, 
+							"4742. Elsz\u00e1mol\u00e1sra kapott p\u00e9nzeszk\u00f6z\u00f6k": {}, 
+							"4743. K\u00f6rnyezetv\u00e9delmi term\u00e9k d\u00edjfizet\u00e9si k\u00f6telezetts\u00e9g ": {}, 
+							"4749. Egy\u00e9b befizet\u00e9sek az elk\u00fcl\u00f6n\u00edtett alapokba": {}
+						}, 
+						"475. Eg\u00e9szs\u00e9g\u00fcgyi hozz\u00e1j\u00e1rul\u00e1s (EHO) elsz\u00e1mol\u00e1sa": {}, 
+						"476. Egy\u00e9b \u00e1llami ad\u00f3hat\u00f3s\u00e1ggal szembeni k\u00f6telezetts\u00e9g elsz\u00e1mol\u00e1sa": {
+							"4761. K\u00e1rt\u00e9r\u00edt\u00e9s": {}, 
+							"4762. B\u00edr\u00f3i letilt\u00e1s": {}, 
+							"4763. Banki-elsz\u00e1mol\u00e1s": {}, 
+							"4764. Levont szakszervezeti d\u00edj": {}, 
+							"4765. Mag\u00e1n nyugd\u00edjp\u00e9nzt\u00e1ri befizet\u00e9si k\u00f6telezetts\u00e9gek": {}
+						}, 
+						"477. R\u00f6vid lej\u00e1rat\u00fa egy\u00e9b k\u00f6telezetts\u00e9gek munkav\u00e1llal\u00f3kkal \u00e9s tulajdonosokkal szemben": {}, 
+						"478. R\u00e9szesed\u00e9sekkel, \u00e9rt\u00e9kpap\u00edrokkal kapcsolatos k\u00f6telezetts\u00e9gek ": {}, 
+						"479. K\u00fcl\u00f6nf\u00e9le r\u00f6vid lej\u00e1rat\u00fa egy\u00e9b befizet\u00e9si k\u00f6telezetts\u00e9gek ": {
+							"4791. Biztos\u00edt\u00f3 int\u00e9zetekkel szembeni k\u00f6telezetts\u00e9gek": {}, 
+							"4792. Hitelez\u0151k": {}, 
+							"4793. \u00c1tv\u00e1llalt k\u00f6telezetts\u00e9gek": {}, 
+							"4794. Beszerz\u00e9si \u00e1rba beletartoz\u00f3 el\u0151\u00edrt egy\u00e9b k\u00f6telezetts\u00e9gek ": {}, 
+							"4795. Egy\u00e9b r\u00f6vid lej\u00e1rat\u00fa el\u0151\u00edrt k\u00f6telezetts\u00e9gek": {}
+						}
+					}
+				}
+			}, 
+			"48. PASSZ\u00cdV ID\u00d5BELI ELHAT\u00c1ROL\u00c1SOK": {
+				"481. Bev\u00e9telek passz\u00edv id\u0151beli elhat\u00e1rol\u00e1sa ": {
+					"4811. Befolyt, elsz\u00e1molt bev\u00e9telek elhat\u00e1rol\u00e1sa": {}, 
+					"4812. K\u00f6lts\u00e9gek ellent\u00e9telez\u00e9s\u00e9re kapott t\u00e1mogat\u00e1sok elhat\u00e1rol\u00e1sa": {}, 
+					"4813. Devizaeszk\u00f6z\u00f6k \u00e9s devizak\u00f6telezetts\u00e9gek m\u00e9rlegfordul\u00f3napi \u00e9rt\u00e9kel\u00e9se \u00e1rfolyamnyeres\u00e9g\u00e9nek elhat\u00e1rol\u00e1sa": {}
+				}, 
+				"482. K\u00f6lts\u00e9gek, r\u00e1ford\u00edt\u00e1sok passz\u00edv id\u0151beli elhat\u00e1rol\u00e1sa ": {
+					"4821. M\u00e9rlegfordul\u00f3nap el\u0151tti id\u0151szakot terhel\u0151 k\u00f6lts\u00e9gek, r\u00e1ford\u00edt\u00e1sok elhat\u00e1rol\u00e1sa": {}, 
+					"4822. \u00c9rt\u00e9kpap\u00edrok beszerz\u00e9s\u00e9hez kapcsol\u00f3d\u00f3 k\u00fcl\u00f6nb\u00f6zetb\u0151l az id\u0151ar\u00e1nyos \u00e1rfolyam\u008fvesztes\u00e9g elhat\u00e1rol\u00e1sa": {}, 
+					"4823. Fizetend\u0151 kamatok elhat\u00e1rol\u00e1sa ": {}
+				}, 
+				"483. Halasztott bev\u00e9telek ": {}
+			}, 
+			"49. \u00c9VI M\u00c9RLEGSZ\u00c1ML\u00c1K": {
+				"491. Nyit\u00f3m\u00e9rleg sz\u00e1mla ": {}, 
+				"492. Z\u00e1r\u00f3m\u00e9rleg sz\u00e1mla": {}, 
+				"493. Ad\u00f3zott eredm\u00e9ny elsz\u00e1mol\u00e1si sz\u00e1mla": {}, 
+				"494. El\u0151z\u0151 \u00e9vi ad\u00f3zott eredm\u00e9ny elsz\u00e1mol\u00e1sa": {}
+			}, 
+			"root_type": "Liability"
+		}, 
+		"5. SZ\u00c1MLAOSZT\u00c1LY K\u00d6LTS\u00c9GNEMEK": {
+			"51 - 53. ANYAGJELLEG\u00db R\u00c1FORD\u00cdT\u00c1SOK ": {
+				"51. ANYAGK\u00d6LTS\u00c9G": {
+					"511. V\u00e1s\u00e1rolt anyagok k\u00f6lts\u00e9gei ": {
+						"5111. Alapanyag k\u00f6lts\u00e9gek": {}, 
+						"5112. Seg\u00e9danyag k\u00f6lts\u00e9gek": {}, 
+						"5113. \u00dczemanyag k\u00f6lts\u00e9gek": {}, 
+						"5114. Egy \u00e9ven bel\u00fcl elhaszn\u00e1l\u00f3d\u00f3 gy\u00e1rt\u00f3eszk\u00f6z\u00f6k, berendez\u00e9sek, felszerel\u00e9sek \u00e9s egy\u00e9b eszk\u00f6z\u00f6k k\u00f6lts\u00e9gei": {}, 
+						"5115. Egy \u00e9ven bel\u00fcl elhaszn\u00e1l\u00f3d\u00f3 munkaruha, v\u00e9d\u0151ruha felhaszn\u00e1l\u00e1s k\u00f6lts\u00e9gei": {}, 
+						"5116. Nyomtatv\u00e1nyok, irodaszerek k\u00f6lts\u00e9gei": {}, 
+						"5117. F\u0171t\u0151anyag k\u00f6lts\u00e9gek": {}, 
+						"5118. Villamosenergia felhaszn\u00e1l\u00e1s \u00e9s v\u00edzfelhaszn\u00e1l\u00e1s k\u00f6lts\u00e9gei": {}, 
+						"5119. Egy\u00e9b anyagfelhaszn\u00e1l\u00e1s k\u00f6lts\u00e9gei": {}, 
+						"512. Egy \u00e9ven bel\u00fcl elhaszn\u00e1l\u00f3d\u00f3 anyagi eszk\u00f6z\u00f6k k\u00f6lts\u00e9gei ": {}, 
+						"5121. V\u00e1s\u00e1rolt n\u00f6vend\u00e9k\u00e1llatok k\u00f6lts\u00e9gei": {}, 
+						"5122. V\u00e1s\u00e1rolt h\u00edz\u00f3\u00e1llatok k\u00f6lts\u00e9gei": {}, 
+						"5123. V\u00e1s\u00e1rolt egy\u00e9b \u00e1llatok k\u00f6lts\u00e9gei": {}, 
+						"513. Egy\u00e9b anyagk\u00f6lts\u00e9g": {}, 
+						"519. Anyagk\u00f6lts\u00e9g megt\u00e9r\u00fcl\u00e9s": {}
+					}
+				}, 
+				"52. IG\u00c9NYBE VETT SZOLG\u00c1LTAT\u00c1SOK K\u00d6LTS\u00c9GEI": {
+					"521. Sz\u00e1ll\u00edt\u00e1s-rakod\u00e1s, rakt\u00e1roz\u00e1s k\u00f6lts\u00e9gei": {}, 
+					"522. B\u00e9rleti d\u00edjak": {}, 
+					"523. Karbantart\u00e1si k\u00f6lts\u00e9gek": {}, 
+					"524. Hirdet\u00e9s, rekl\u00e1m, propaganda k\u00f6lts\u00e9gek": {}, 
+					"525. Oktat\u00e1s \u00e9s tov\u00e1bbk\u00e9pz\u00e9s k\u00f6lts\u00e9gei": {}, 
+					"526. Utaz\u00e1si \u00e9s kik\u00fcldet\u00e9si k\u00f6lts\u00e9gek (napid\u00edj n\u00e9lk\u00fcl)": {}, 
+					"529. Ig\u00e9nybe vett egy\u00e9b szolg\u00e1ltat\u00e1sok k\u00f6lts\u00e9gei": {}
+				}, 
+				"53. EGY\u00c9B SZOLG\u00c1LTAT\u00c1SOK K\u00d6LTS\u00c9GEI": {
+					"531. Hat\u00f3s\u00e1gi igazgat\u00e1si, szolg\u00e1ltat\u00e1si d\u00edjak, illet\u00e9kek": {}, 
+					"532. P\u00e9nz\u00fcgyi, befektet\u00e9si szolg\u00e1ltat\u00e1si d\u00edjak": {}, 
+					"533. Biztos\u00edt\u00e1si d\u00edj ": {}, 
+					"534. K\u00f6lts\u00e9gk\u00e9nt elsz\u00e1moland\u00f3 ad\u00f3k, j\u00e1rul\u00e9kok, term\u00e9kd\u00edjak": {}, 
+					"539. K\u00fcl\u00f6nf\u00e9le egy\u00e9b szolg\u00e1ltat\u00e1sok k\u00f6lts\u00e9gei": {}
+				}
+			}, 
+			"54 - 56. SZEM\u00c9LYI JELLEG\u00db R\u00c1FORD\u00cdT\u00c1SOK": {
+				"54. B\u00c9RK\u00d6LTS\u00c9G ": {
+					"541. B\u00e9rk\u00f6lts\u00e9g": {}, 
+					"542. Tulajdonos szem\u00e9lyes k\u00f6zrem\u0171k\u00f6d\u00e9s\u00e9nek ellen\u00e9rt\u00e9ke": {}, 
+					"543. Sz\u00f6vetkezeti tagok munkad\u00edja": {}
+				}, 
+				"55. SZEM\u00c9LYI JELLEG\u00db EGY\u00c9B KIFIZET\u00c9SEK": {
+					"551. Munkav\u00e1llal\u00f3knak, tagoknak fizetett szem\u00e9lyi jelleg\u0171 kifizet\u00e9sek ": {
+						"5511. Betegszabads\u00e1g d\u00edja, munk\u00e1ltat\u00f3t terhel\u0151 t\u00e1pp\u00e9nz, t\u00e1pp\u00e9nz kieg\u00e9sz\u00edt\u00e9s": {}, 
+						"5512. V\u00e9gkiel\u00e9g\u00edt\u00e9s": {}, 
+						"5513. Munk\u00e1baj\u00e1r\u00e1ssal kapcsolatos egy\u00e9b k\u00f6lts\u00e9gek t\u00e9r\u00edt\u00e9se": {}, 
+						"5514. Kik\u00fcldet\u00e9s napid\u00edja": {}, 
+						"5515. Megv\u00e1ltozott munkak\u00e9pess\u00e9g\u0171 munkav\u00e1llal\u00f3k keresetkieg\u00e9sz\u00edt\u00e9se, fizetett seg\u00e9lyek": {}, 
+						"5516. \u00dcd\u00fcl\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {}, 
+						"5517. Lak\u00e1s\u00e9p\u00edt\u00e9sre ny\u00fajtott t\u00e1mogat\u00e1s, alb\u00e9rleti hozz\u00e1j\u00e1rul\u00e1s": {}, 
+						"5518. Jubileumi jutalom, t\u00e1rgyjutalom": {}, 
+						"5519. Sorkatonai vagy polg\u00e1ri szolg\u00e1lat teljes\u00edt\u00e9s\u00e9t k\u00f6vet\u0151en fizetett szem\u00e9lyi alapb\u00e9r": {}
+					}, 
+					"552. J\u00f3l\u00e9ti \u00e9s kultur\u00e1lis k\u00f6lts\u00e9gek": {}, 
+					"559. Egy\u00e9b szem\u00e9lyi jelleg\u0171 kifizet\u00e9sek ": {
+						"5591. Munk\u00e1ltat\u00f3 \u00e1ltal fizetett baleset-, \u00e9let- \u00e9s nyugd\u00edjbiztos\u00edt\u00e1s d\u00edja": {}, 
+						"5592. Munk\u00e1ltat\u00f3 \u00e1ltal \u00f6nk\u00e9ntes p\u00e9nzt\u00e1rba befizetett munk\u00e1ltat\u00f3i tagd\u00edj hozz\u00e1j\u00e1rul\u00e1s": {}, 
+						"5593. Munk\u00e1ltat\u00f3t terhel\u0151 szem\u00e9lyi j\u00f6vedelemad\u00f3": {}, 
+						"5594. Munk\u00e1ltat\u00f3i hozz\u00e1j\u00e1rul\u00e1s a korengedm\u00e9nyes nyugd\u00edj ig\u00e9nybev\u00e9tel\u00e9hez": {}, 
+						"5596. Fizetett szerz\u0151i, \u00edr\u00f3i \u00e9s m\u00e1s jogv\u00e9delmet \u00e9lvez\u0151 munk\u00e1k d\u00edjai \u00e9s ezekkel kapcsolatos k\u00f6zrem\u0171k\u00f6d\u0151i d\u00edjak": {}, 
+						"5597. Fizetett \u00f6szt\u00f6nd\u00edjak": {}, 
+						"5598. Reprezent\u00e1ci\u00f3s k\u00f6lts\u00e9gek, \u00e9tkez\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {}, 
+						"5599. Munk\u00e1ltat\u00f3 \u00e1ltal fizetett mag\u00e1nnyugd\u00edj-p\u00e9nzt\u00e1ri tagd\u00edj kieg\u00e9sz\u00edt\u00e9s, munkav\u00e1llal\u00f3kkal kapcsolatos biztos\u00edt\u00e1si d\u00edjak": {}
+					}
+				}, 
+				"56. B\u00c9RJ\u00c1RUL\u00c9KOK": {
+					"561. Nyugd\u00edjbiztos\u00edt\u00e1si \u00e9s eg\u00e9szs\u00e9gbiztos\u00edt\u00e1si j\u00e1rul\u00e9k ": {}, 
+					"562. Eg\u00e9szs\u00e9g\u00fcgyi hozz\u00e1j\u00e1rul\u00e1s": {}, 
+					"563. Munkaad\u00f3i j\u00e1rul\u00e9k": {}, 
+					"564. Szakk\u00e9pz\u00e9si hozz\u00e1j\u00e1rul\u00e1s ": {}, 
+					"569. Egy\u00e9b hozz\u00e1j\u00e1rul\u00e1s ": {}
+				}
+			}, 
+			"57. \u00c9RT\u00c9KCS\u00d6KKEN\u00c9SI LE\u00cdR\u00c1S": {
+				"571. Terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1s ": {
+					"5711. Terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1s ": {
+						"account_type": "Depreciation"
+					}, 
+					"5712. Kiemelt, kis \u00e9rt\u00e9k\u0171 (50 eFt egyedi beszerz\u00e9si \u00e9rt\u00e9k alatti) eszk\u00f6z\u00f6k terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1sa": {}, 
+					"57121. Kis \u00e9rt\u00e9k\u0171 (50 eFt egyedi beszerz\u00e9si \u00e9rt\u00e9k alatti) vagyoni \u00e9rt\u00e9k\u0171 jogok terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1sa": {}, 
+					"57122. Kis \u00e9rt\u00e9k\u0171 (50 eFt egyedi beszerz\u00e9si \u00e9rt\u00e9k alatti) szellemi term\u00e9kek terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1sa": {}, 
+					"57123. Kis \u00e9rt\u00e9k\u0171 (50 eFt egyedi beszerz\u00e9si \u00e9rt\u00e9k alatti) t\u00e1rgyi eszk\u00f6z\u00f6k terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1sa": {}
+				}
+			}, 
+			"58. AKTIV\u00c1LT SAJ\u00c1T TELJES\u00cdTM\u00c9NYEK \u00c9RT\u00c9KE": {
+				"581. Saj\u00e1t termel\u00e9s\u0171 k\u00e9szletek \u00e1llom\u00e1nyv\u00e1ltoz\u00e1sa ": {}, 
+				"582. Saj\u00e1t el\u0151\u00e1ll\u00edt\u00e1s\u00fa eszk\u00f6z\u00f6k aktiv\u00e1lt \u00e9rt\u00e9ke": {}, 
+				"589. Aktiv\u00e1lt saj\u00e1t teljes\u00edtm\u00e9nyek \u00e1tvezet\u00e9si sz\u00e1mla": {}
+			},
+			"59. K\u00d6LTS\u00c9GNEM \u00c1TVEZET\u00c9SI SZ\u00c1MLA": {
+				"is_group": 1
+			}, 
+			"root_type": "Expense"
+		}, 
+		"6. SZ\u00c1MLAOSZT\u00c1LY K\u00d6LTS\u00c9GHELYEK, \u00c1LTAL\u00c1NOS K\u00d6LTS\u00c9GEK": {
+			"61. JAV\u00cdT\u00d3-KARBANTART\u00d3 \u00dcZEMEK K\u00d6LTS\u00c9GEI": {}, 
+			"62. SZOLG\u00c1LTAT\u00c1ST V\u00c9GZ\u00d5 \u00dcZEMEK (EGYS\u00c9GEK) K\u00d6LTS\u00c9GEI": {}, 
+			"63. G\u00c9PK\u00d6LTS\u00c9G": {}, 
+			"64-65. \u00dcZEMI IR\u00c1NY\u00cdT\u00c1S \u00c1LTAL\u00c1NOS K\u00d6LTS\u00c9GEI": {}, 
+			"66. K\u00d6ZPONTI IR\u00c1NY\u00cdT\u00c1S \u00c1LTL\u00c1NOS K\u00d6LTS\u00c9GEI": {}, 
+			"67. \u00c9RT\u00c9KES\u00cdT\u00c9SI, FORGALMAZ\u00c1SI K\u00d6LTS\u00c9GEK": {}, 
+			"68. ELK\u00dcL\u00d6N\u00cdTETT EGY\u00c9B \u00c1LTL\u00c1NOS K\u00d6LTS\u00c9GEK": {
+				"681. Alap\u00edt\u00e1s-\u00e1tszervez\u00e9s k\u00f6lts\u00e9gei": {}, 
+				"682. Alap- \u00e9s alkalmazott kutat\u00e1s saj\u00e1t k\u00f6lts\u00e9gei": {}, 
+				"683. V\u00e1llalkoz\u00e1sban adott alap- \u00e9s alkalmazott kutat\u00e1s k\u00f6lts\u00e9gei": {}, 
+				"684. K\u00eds\u00e9rleti fejleszt\u00e9s saj\u00e1t k\u00f6lts\u00e9gei": {}, 
+				"685. V\u00e1llalkoz\u00e1sba adott k\u00eds\u00e9rleti fejleszt\u00e9s k\u00f6lts\u00e9gei": {}, 
+				"686. Kutat\u00e1s-k\u00eds\u00e9rleti fejleszt\u00e9s \u00e1ltal\u00e1nos \u00e9s k\u00f6zvetett k\u00f6lts\u00e9gei": {}, 
+				"687. Kutat\u00e1s-k\u00eds\u00e9rleti fejleszt\u00e9s elsz\u00e1molt \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}, 
+				"688. Garanci\u00e1lis jav\u00edt\u00e1s k\u00f6lts\u00e9gei": {}, 
+				"689. Egy\u00e9b elk\u00fcl\u00f6n\u00edtett k\u00f6lts\u00e9gek": {}
+			}, 
+			"69. K\u00d6LTS\u00c9GHELYEK K\u00d6LTS\u00c9GNEMEK \u00c1TVEZET\u00c9SE": {
+				"691. K\u00f6lts\u00e9ghelyek k\u00f6lts\u00e9geinek \u00e1tvezet\u00e9se": {}
+			}, 
+			"root_type": "Expense"
+		}, 
+		"7. SZ\u00c1MLAOSZT\u00c1LY TEV\u00c9KENYS\u00c9GEKK\u00d6LTS\u00c9GEI": {
+			"is_group": 1, 
+			"root_type": "Expense"
+		}, 
+		"8. SZ\u00c1MLAOSZT\u00c1LY \u00c9RT\u00c9KES\u00cdT\u00c9S ELSZ\u00c1MOLT \u00d6NK\u00d6LTS\u00c9GE \u00c9S R\u00c1FORD\u00cdT\u00c1SOK": {
+			"81-83. SZ\u00c1MLACSOPORTOK (az \u00f6sszk\u00f6lts\u00e9g elj\u00e1r\u00e1ssal k\u00e9sz\u00fcl\u0151 eredm\u00e9ny-kimutat\u00e1shoz)": {
+				"81. ANYAGJELLEG\u00db R\u00c1FORD\u00cdT\u00c1SOK": {
+					"811. Anyagk\u00f6lts\u00e9g ": {}, 
+					"812. Ig\u00e9nybe vett szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {}, 
+					"813. Egy\u00e9b szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {}, 
+					"814. Eladott \u00e1ruk beszerz\u00e9si \u00e9rt\u00e9ke": {}, 
+					"815. Eladott (k\u00f6zvet\u00edtett) szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {}
+				}, 
+				"82. SZEM\u00c9LYI JELLEG\u00db R\u00c1FORD\u00cdT\u00c1SOK": {
+					"821. B\u00e9rk\u00f6lts\u00e9g": {}, 
+					"822. Szem\u00e9lyi jelleg\u0171 egy\u00e9b kifizet\u00e9sek": {}, 
+					"823. B\u00e9rj\u00e1rul\u00e9kok": {}
+				}, 
+				"83. \u00c9RT\u00c9KCS\u00d6KKEN\u00c9SI LE\u00cdR\u00c1S": {
+					"831. \u00c9rt\u00e9kcs\u00f6kken\u00e9si le\u00edr\u00e1s ": {}
+				}
+			}, 
+			"81-85. SZ\u00c1MLACSOPORTOK (a forgalmi k\u00f6lts\u00e9g elj\u00e1r\u00e1ssal k\u00e9sz\u00fcl\u0151 eredm\u00e9nykimutat\u00e1shoz)": {
+				"81-82. BELF\u00d6LDI \u00c9RT\u00c9KES\u00cdT\u00c9S K\u00d6ZVETLEN K\u00d6LTS\u00c9GEI": {
+					"811. Belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s elsz\u00e1molt k\u00f6zvetlen \u00f6nk\u00f6lts\u00e9ge": {
+						"account_type": "Cost of Goods Sold"
+					}, 
+					"812. Belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s eladott \u00e1ruk beszerz\u00e9si \u00e9rt\u00e9ke": {
+						"account_type": "Stock Adjustment"
+					}, 
+					"813. Belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s eladott (k\u00f6zvet\u00edtett) szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {
+						"account_type": "Expenses Included In Valuation"
+					}
+				}, 
+				"83-84. EXPORT\u00c9RT\u00c9KES\u00cdT\u00c9S K\u00d6ZVETLEN K\u00d6LTS\u00c9GEI": {
+					"831. Export\u00e9rt\u00e9kes\u00edt\u00e9s elsz\u00e1molt k\u00f6zvetlen \u00f6nk\u00f6lts\u00e9ge": {}, 
+					"832. Export\u00e9rt\u00e9kes\u00edt\u00e9s eladott \u00e1ruk beszerz\u00e9si \u00e9rt\u00e9ke": {}, 
+					"833. Export\u00e9rt\u00e9kes\u00edt\u00e9s eladott (k\u00f6zvet\u00edtett) szolg\u00e1ltat\u00e1sok \u00e9rt\u00e9ke": {}
+				}, 
+				"85. \u00c9RT\u00c9KES\u00cdT\u00c9S K\u00d6ZVETETT K\u00d6LTS\u00c9GEI": {
+					"851. \u00c9rt\u00e9kes\u00edt\u00e9si, forgalmaz\u00e1si k\u00f6lts\u00e9gek": {}, 
+					"852. Igazgat\u00e1si k\u00f6lts\u00e9gek": {}, 
+					"853. Egy\u00e9b \u00e1ltal\u00e1nos k\u00f6lts\u00e9gek": {}
+				}
+			}, 
+			"86. EGY\u00c9B R\u00c1FORD\u00cdT\u00c1SOK": {
+				"861. Egy\u00e9b r\u00e1ford\u00edt\u00e1snak min\u0151s\u00fcl\u0151 \u00e9rt\u00e9kes\u00edt\u00e9sek": {
+					"8611. \u00c9rt\u00e9kes\u00edtett immateri\u00e1lis javak, t\u00e1rgyi eszk\u00f6z\u00f6k k\u00f6nyv szerinti \u00e9rt\u00e9ke": {}, 
+					"8612. \u00c9rt\u00e9kes\u00edtett, \u00e1truh\u00e1zott (engedm\u00e9nyezett) k\u00f6vetel\u00e9sek k\u00f6nyv szerinti \u00e9rt\u00e9ke": {}
+				}, 
+				"862. Egy\u00e9b r\u00e1ford\u00edt\u00e1snak min\u0151s\u00fcl\u0151 eszk\u00f6z kivezet\u00e9sek": {
+					"8621. Hi\u00e1nyz\u00f3, megsemmis\u00fclt, kiselejtezett immateri\u00e1lis javak, t\u00e1rgyi eszk\u00f6z\u00f6k nett\u00f3 \u00e9rt\u00e9ke": {}, 
+					"8622. Hi\u00e1nyz\u00f3, megsemmis\u00fclt, \u00e1llom\u00e1nyb\u00f3l kivezetett k\u00e9szletek k\u00f6nyv szerinti \u00e9rt\u00e9ke": {}
+				}, 
+				"863. Behajthatatlan k\u00f6vetel\u00e9sek le\u00edrt \u00f6sszege": {}, 
+				"864. C\u00e9ltartal\u00e9k k\u00e9pz\u00e9s": {
+					"8641. C\u00e9ltartal\u00e9k-k\u00e9pz\u00e9s a v\u00e1rhat\u00f3 k\u00f6telezetts\u00e9gekre": {}, 
+					"8642. C\u00e9ltartal\u00e9k-k\u00e9pz\u00e9s a j\u00f6v\u0151beni k\u00f6lts\u00e9gekre": {}, 
+					"8643. C\u00e9ltartal\u00e9k-k\u00e9pz\u00e9s egy\u00e9b c\u00edmen": {}
+				}, 
+				"865. Ut\u00f3lag adott, nem sz\u00e1ml\u00e1zott engedm\u00e9ny": {}, 
+				"866. Egy\u00e9b r\u00e1ford\u00edt\u00e1sk\u00e9nt elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {
+					"8661. K\u00f6zponti k\u00f6lts\u00e9gvet\u00e9ssel elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {}, 
+					"8662. Helyi \u00f6nkorm\u00e1nyzatokkal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {}, 
+					"8663. Elk\u00fcl\u00f6n\u00edtett \u00e1llami p\u00e9nzalapokkal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {}, 
+					"8664. T\u00e1rsadalombiztos\u00edt\u00e1ssal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {}, 
+					"8665. EU p\u00e9nz\u00fcgyi alapokkal elsz\u00e1molt ad\u00f3k, illet\u00e9kek, hozz\u00e1j\u00e1rul\u00e1sok": {}, 
+					"8666. R\u00e1ford\u00edt\u00e1sk\u00e9nt elsz\u00e1molt egy\u00e9b ad\u00f3k \u00e9s ad\u00f3jelleg\u0171 t\u00e9telek": {}
+				}, 
+				"867. Egy\u00e9b r\u00e1ford\u00edt\u00e1sk\u00e9nt elsz\u00e1molt, ad\u00f3nak nem min\u0151s\u00fcl\u0151 kifizet\u00e9sek": {
+					"8671. K\u00e1resem\u00e9nnyel kapcsolatos fizetett, fizetend\u0151 \u00f6sszegek": {}, 
+					"8672. K\u00f6lts\u00e9gek (r\u00e1ford\u00edt\u00e1sok) ellent\u00e9telez\u00e9s\u00e9re visszafizet\u00e9si k\u00f6telezetts\u00e9g n\u00e9lk\u00fcl adott t\u00e1mogat\u00e1s, juttat\u00e1": {}, 
+					"8673. Fejleszt\u00e9si c\u00e9lra, visszafizet\u00e9si k\u00f6telezetts\u00e9g n\u00e9lk\u00fcl adott t\u00e1mogat\u00e1s, juttat\u00e1s": {}, 
+					"8674. Fejleszt\u00e9si c\u00e9lra kapott t\u00e1mogat\u00e1s visszafizetend\u0151 \u00f6sszege": {}, 
+					"8675. Tao \u00e1ltal elismert b\u00edrs\u00e1gok, k\u00f6tb\u00e9rek, k\u00e9sedelmi kamatok, p\u00f3tl\u00e9kok, k\u00e1rt\u00e9r\u00edt\u00e9sek, s\u00e9relemd\u00edjak": {}, 
+					"8676. Tao \u00e1ltal el nem ismert b\u00edrs\u00e1gok, k\u00f6tb\u00e9rek, k\u00e9sedelmi kamatok, p\u00f3tl\u00e9kok, k\u00e1rt\u00e9r\u00edt\u00e9sek, s\u00e9relemd\u00edjak": {}
+				}, 
+				"868. Terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9sek, \u00e9rt\u00e9kveszt\u00e9sek": {
+					"8681. Immateri\u00e1lis javak terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}, 
+					"8682. T\u00e1rgyi eszk\u00f6z\u00f6k terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9se": {}, 
+					"8683. K\u00e9szletek \u00e9rt\u00e9kveszt\u00e9se": {}, 
+					"8684. K\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se": {}
+				}, 
+				"869. K\u00fcl\u00f6nf\u00e9le egy\u00e9b r\u00e1ford\u00edt\u00e1sok": {
+					"8691. T\u00e1rsas\u00e1gba bevitt, \u00e9rt\u00e9kpap\u00edrnak vagy r\u00e9szesed\u00e9snek nem min\u0151s\u00fcl\u0151 vagyont.": {}, 
+					"8692. Ellent\u00e9telez\u00e9s n\u00e9lk\u00fcl \u00e1tv\u00e1llalt k\u00f6telezetts\u00e9g szerz\u0151d\u00e9s szerinti \u00f6sszege": {}, 
+					"8693. T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl \u00e1tadott, r\u00e9szesed\u00e9snek vagy \u00e9rt\u00e9kpap\u00edrnak nem min\u0151s\u00fcl\u0151 eszk\u00f6z\u00f6k nyilv\u00e1ntart\u00e1s szerinti \u00e9rt\u00e9ke": {}, 
+					"8694. T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl ny\u00fajtott szolg\u00e1ltat\u00e1sok beker\u00fcl\u00e9si \u00e9rt\u00e9ke": {}, 
+					"8695. Elengedett k\u00f6vetel\u00e9sek k\u00f6nyv szerinti \u00e9rt\u00e9ke": {}, 
+					"8696. Egy\u00e9b, vagyoncs\u00f6kken\u00e9ssel j\u00e1r\u00f3 r\u00e1ford\u00edt\u00e1sok": {}
+				}
+			}, 
+			"87. P\u00c9NZ\u00dcGYI M\u0170VELETEK R\u00c1FORD\u00cdT\u00c1SAI": {
+				"871. R\u00e9szesed\u00e9sekb\u0151l sz\u00e1rmaz\u00f3 r\u00e1ford\u00edt\u00e1sok, \u00e1rfolyamvesztes\u00e9gek": {}, 
+				"872. Befektetett p\u00e9nz\u00fcgyi eszk\u00f6z\u00f6kb\u0151l (\u00e9rt\u00e9kpap\u00edrokb\u00f3l, k\u00f6lcs\u00f6n\u00f6kb\u0151l) sz\u00e1rmaz\u00f3 r\u00e1ford\u00edt\u00e1sok \u00e1rfolyamvesztes\u00e9gek": {}, 
+				"873. Hitelint\u00e9zetnek fizetend\u0151 kamatok \u00e9s kamatjelleg\u0171 r\u00e1ford\u00edt\u00e1sok": {}, 
+				"874. Nem hitelint\u00e9zetnek fizetend\u0151 kamatok \u00e9s kamatjelleg\u0171 r\u00e1ford\u00edt\u00e1sok": {}, 
+				"875. R\u00e9szesed\u00e9sek, \u00e9rt\u00e9kpap\u00edrok, bankbet\u00e9tek \u00e9rt\u00e9kveszt\u00e9se \u00e9s vissza\u00edr\u00e1sa": {
+					"8751. R\u00e9szesed\u00e9sek, \u00e9rt\u00e9kpap\u00edrok, bankbet\u00e9tek \u00e9rt\u00e9kveszt\u00e9se": {}, 
+					"8752. R\u00e9szesed\u00e9sek, \u00e9rt\u00e9kpap\u00edrok, bankbet\u00e9tek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {}
+				}, 
+				"876. K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek \u00e1rfolyamvesztes\u00e9gei": {
+					"8761. Deviza- \u00e9s valutak\u00e9szletek forintra \u00e1tv\u00e1lt\u00e1s\u00e1nak \u00e1rfolyamvesztes\u00e9ge": {}, 
+					"8762. K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek p\u00e9nz\u00fcgyileg rendezett \u00e1rfolyamvesztes\u00e9ge": {}
+				}, 
+				"877. P\u00e9nz\u00fcgyi m\u0171veletek egy\u00e9b r\u00e1ford\u00edt\u00e1sai": {}, 
+				"878. P\u00e9nz\u00fcgyi rendez\u00e9shez kapcsol\u00f3d\u00f3an adott engedm\u00e9ny": {}, 
+				"879. Egy\u00e9b vagyoncs\u00f6kken\u00e9ssel j\u00e1r\u00f3 p\u00e9nz\u00fcgyi r\u00e1ford\u00edt\u00e1sok": {}
+			}, 
+			"88. RENDK\u00cdV\u00dcLI R\u00c1FORD\u00cdT\u00c1SOK": {
+				"881. T\u00e1rsas\u00e1gba bevitt eszk\u00f6z\u00f6k nyilv\u00e1ntart\u00e1s szerinti \u00e9rt\u00e9ke": {}
+			}, 
+			"89. EREDM\u00c9NYT TERHEL\u0150 AD\u00d3K": {
+				"891. T\u00e1rsas\u00e1gi ad\u00f3": {}, 
+				"892. Egyszer\u0171s\u00edtett v\u00e1llalkoz\u00f3i ad\u00f3": {}, 
+				"893. Kisv\u00e1llalati ad\u00f3": {}, 
+				"899. Eredm\u00e9nyt terhel\u0151 egy\u00e9b ad\u00f3k": {}
+			}, 
+			"root_type": "Expense"
+		}, 
+		"9. SZ\u00c1MLAOSZT\u00c1LY BEV\u00c9TELEK": {
+			"91. BELF\u00d6LDI \u00c9RT\u00c9KES\u00cdT\u00c9S \u00c1RBEV\u00c9TELE": {
+				"911. Belf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett saj\u00e1t termel\u00e9s\u0171 k\u00e9szletek \u00e1rbev\u00e9tele": {}, 
+				"912. Belf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett v\u00e1s\u00e1rolt k\u00e9szletek \u00e1rbev\u00e9tele": {}, 
+				"913. Belf\u00f6ldinek ny\u00fajtott szolg\u00e1ltat\u00e1sok \u00e1rbev\u00e9tele": {}, 
+				"918. Belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9ssel kapcsolatos \u00e1rt\u00e1mogat\u00e1s": {}, 
+				"919. Egy\u00e9b belf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s \u00e1rbev\u00e9tele": {}
+			}, 
+			"92. EXPORT\u00c9RT\u00c9KES\u00cdT\u00c9S \u00c1RBEV\u00c9TELE": {
+				"921. K\u00fclf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett saj\u00e1t termel\u00e9s\u0171 k\u00e9szletek \u00e1rbev\u00e9tele": {}, 
+				"922. K\u00fclf\u00f6ldinek \u00e9rt\u00e9kes\u00edtett v\u00e1s\u00e1rolt k\u00e9szletek \u00e1rbev\u00e9tele": {}, 
+				"923. K\u00fclf\u00f6ldinek ny\u00fajtott szolg\u00e1ltat\u00e1sok \u00e1rbev\u00e9tele": {}, 
+				"928. K\u00fclf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9ssel kapcsolatos \u00e1rt\u00e1mogat\u00e1s": {}, 
+				"929. Egy\u00e9b k\u00fclf\u00f6ldi \u00e9rt\u00e9kes\u00edt\u00e9s \u00e1rbev\u00e9tele": {}
+			}, 
+			"96. EGY\u00c9B BEV\u00c9TELEK": {
+				"961. Egy\u00e9b bev\u00e9telnek min\u0151s\u00fcl\u0151 \u00e9rt\u00e9kes\u00edt\u00e9sek": {
+					"9611. \u00c9rt\u00e9kes\u00edtett immateri\u00e1lis javak, t\u00e1rgyi eszk\u00f6z\u00f6k ellen\u00e9rt\u00e9ke": {}, 
+					"9612. \u00c9rt\u00e9kes\u00edtett, \u00e1truh\u00e1zott (engedm\u00e9nyezett) k\u00f6vetel\u00e9sek ellen\u00e9rt\u00e9ke": {}
+				}, 
+				"963. K\u00f6vetel\u00e9s k\u00f6nyv szerinti \u00e9rt\u00e9k\u00e9t meghalad\u00f3an realiz\u00e1lt \u00f6sszeg": {}, 
+				"964. C\u00e9ltartal\u00e9k felold\u00e1s": {
+					"9651. V\u00e1rhat\u00f3 k\u00f6telezetts\u00e9gek fedezet\u00e9re k\u00e9pzett  c\u00e9ltartal\u00e9k felhaszn\u00e1l\u00e1sa   ": {}, 
+					"9652. J\u00f6v\u0151beni k\u00f6lts\u00e9gekre k\u00e9pzett c\u00e9ltartal\u00e9k felhaszn\u00e1l\u00e1sa ": {}, 
+					"9653. Egy\u00e9b c\u00edmen k\u00e9pzett c\u00e9ltartal\u00e9k felhaszn\u00e1l\u00e1sa ": {}
+				}, 
+				"965. Ut\u00f3lag kapott, nem sz\u00e1ml\u00e1zott engedm\u00e9ny": {}, 
+				"966. Ut\u00f3lag kapott, nem sz\u00e1ml\u00e1zott engedm\u00e9ny": {
+					"9661. K\u00f6zponti k\u00f6lts\u00e9gvet\u00e9sb\u0151l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {}, 
+					"9662. Helyi \u00f6nkorm\u00e1nyzatokt\u00f3l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {}, 
+					"9663. Eur\u00f3pai Uni\u00f3t\u00f3l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {}, 
+					"9664. Egy\u00e9b forr\u00e1sb\u00f3l kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {}
+				}, 
+				"967. Egy\u00e9b bev\u00e9telk\u00e9nt elsz\u00e1molt p\u00e9nzbev\u00e9telek": {
+					"9671. K\u00e1resem\u00e9nnyel kapcsolatos t\u00e9r\u00edt\u00e9sek": {}, 
+					"9672. K\u00f6lts\u00e9gek (r\u00e1ford\u00edt\u00e1sok) ellent\u00e9telez\u00e9s\u00e9re kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {}, 
+					"9673. Fejleszt\u00e9si c\u00e9lra kapott t\u00e1mogat\u00e1s, juttat\u00e1s": {}, 
+					"9674. Kapott b\u00edrs\u00e1gok, k\u00f6tb\u00e9rek, fekb\u00e9rek, k\u00e9sedelmi kamatok, k\u00e1rt\u00e9r\u00edt\u00e9sek": {}
+				}, 
+				"968. Terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9sek, \u00e9rt\u00e9kveszt\u00e9sek vissza\u00edr\u00e1sa": {
+					"9681. Immateri\u00e1lis javak terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {}, 
+					"9682. T\u00e1rgyi eszk\u00f6z\u00f6k terven fel\u00fcli \u00e9rt\u00e9kcs\u00f6kken\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {}, 
+					"9683. K\u00e9szletek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {}, 
+					"9684. R\u00e9szesed\u00e9sek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {}
+				}, 
+				"969. K\u00fcl\u00f6nf\u00e9le egy\u00e9b bev\u00e9telek": {
+					"is_group": 1
+				}
+			}, 
+			"97. P\u00c9NZ\u00dcGYI M\u0170VELETEK BEV\u00c9TELEI": {
+				"971. R\u00e9szesed\u00e9sekb\u0151l sz\u00e1rmaz\u00f3 bev\u00e9telek, \u00e1rfolyamnyeres\u00e9gek": {}, 
+				"972. Befektetett p\u00e9nz\u00fcgyi eszk\u00f6z\u00f6kb\u0151l (\u00e9rt\u00e9kpap\u00edrokb\u00f3l, k\u00f6lcs\u00f6n\u00f6kb\u0151l) sz\u00e1rmaz\u00f3 bev\u00e9telek, \u00e1rfolyamnyeres\u00e9gek": {}, 
+				"973. Hitelint\u00e9zett\u0151l kapott kamatok \u00e9s kamatjelleg\u0171 bev\u00e9telek": {}, 
+				"974. Nem hitelint\u00e9zett\u0151l kapott kamatok \u00e9s kamatjelleg\u0171 bev\u00e9telek": {}, 
+				"975. Kapott (j\u00e1r\u00f3) osztal\u00e9k \u00e9s r\u00e9szesed\u00e9s": {}, 
+				"976. K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek \u00e1rfolyamnyeres\u00e9gei": {
+					"9761. Deviza- \u00e9s valutak\u00e9szletek forintra \u00e1tv\u00e1lt\u00e1s\u00e1nak \u00e1rfolyamnyeres\u00e9ge": {}, 
+					"9762. K\u00fclf\u00f6ldi p\u00e9nz\u00e9rt\u00e9kre sz\u00f3l\u00f3 eszk\u00f6z\u00f6k \u00e9s k\u00f6telezetts\u00e9gek p\u00e9nz\u00fcgyileg rendezett \u00e1rfolyamnyeres\u00e9ge": {}
+				}, 
+				"977. P\u00e9nz\u00fcgyi m\u0171veletek egy\u00e9b bev\u00e9telei": {}, 
+				"978. P\u00e9nz\u00fcgyi rendez\u00e9shez kapcsol\u00f3d\u00f3an kapott engedm\u00e9ny": {}, 
+				"979. Egy\u00e9b vagyonn\u00f6veked\u00e9ssel j\u00e1r\u00f3 p\u00e9nz\u00fcgyi bev\u00e9telek": {}
+			}, 
+			"root_type": "Income"
+		}
+	}
+}

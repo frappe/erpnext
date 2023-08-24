@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-04-30 18:30:21", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:19:19.231541", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Bank Reconciliation Statement", 
+ "owner": "Administrator", 
+ "ref_doctype": "Journal Entry", 
+ "report_name": "Bank Reconciliation Statement", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Auditor"
+  }
+ ]
+}

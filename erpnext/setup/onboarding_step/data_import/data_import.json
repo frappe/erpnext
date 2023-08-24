@@ -1,0 +1,21 @@
+{
+ "action": "Watch Video",
+ "action_label": "Learn more about data migration",
+ "creation": "2021-05-19 05:29:16.809610",
+ "description": "# Import Data from Spreadsheet\n\nIn ERPNext, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 1,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2023-05-15 09:18:42.962231",
+ "modified_by": "Administrator",
+ "name": "Data import",
+ "owner": "Administrator",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Import Data from Spreadsheet",
+ "validate_action": 1,
+ "video_url": "https://youtu.be/DQyqeurPI64"
+}

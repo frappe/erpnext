@@ -1,0 +1,56 @@
+{
+ "creation": "2021-08-24 14:44:22.292652",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-08-25 16:31:31.441194",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry",
+ "owner": "Administrator",
+ "reference_doctype": "Stock Entry",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select the type of Stock Entry to be made. For now, to receive stock into a warehouses select <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/stock-entry-purpose#2purpose-material-receipt\" target=\"_blank\">Material Receipt.</a>",
+   "field": "",
+   "fieldname": "stock_entry_type",
+   "fieldtype": "Link",
+   "has_next_condition": 1,
+   "is_table_field": 0,
+   "label": "Stock Entry Type",
+   "next_step_condition": "eval: doc.stock_entry_type === \"Material Receipt\"",
+   "parent_field": "",
+   "position": "Top",
+   "title": "Stock Entry Type"
+  },
+  {
+   "description": "Select a target warehouse where the stock will be received.",
+   "field": "",
+   "fieldname": "to_warehouse",
+   "fieldtype": "Link",
+   "has_next_condition": 1,
+   "is_table_field": 0,
+   "label": "Default Target Warehouse",
+   "next_step_condition": "eval: doc.to_warehouse",
+   "parent_field": "",
+   "position": "Top",
+   "title": "Default Target Warehouse"
+  },
+  {
+   "description": "Select an item and entry quantity to be delivered.",
+   "field": "",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "has_next_condition": 1,
+   "is_table_field": 0,
+   "label": "Items",
+   "next_step_condition": "eval: doc.items[0]?.item_code",
+   "parent_field": "",
+   "position": "Top",
+   "title": "Items"
+  }
+ ],
+ "title": "Stock Entry"
+}

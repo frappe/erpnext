@@ -1,0 +1,21 @@
+{
+ "action": "Show Form Tour",
+ "action_label": "Let\u2019s create your first Material Request",
+ "creation": "2020-05-15 14:39:09.818764",
+ "description": "# Track Material Request\n\n\nAlso known as Purchase Request or an Indent, is a document identifying a requirement of a set of items (products or services) for various purposes like procurement, transfer, issue, or manufacturing. Once the Material Request is validated, a purchase manager can take the next actions for purchasing items like requesting RFQ from a supplier or directly placing an order with an identified Supplier.\n\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-24 18:08:08.347501",
+ "modified_by": "Administrator",
+ "name": "Create a Material Request",
+ "owner": "Administrator",
+ "reference_document": "Material Request",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Track Material Request",
+ "validate_action": 1
+}

@@ -1,0 +1,66 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Book Appointment") }}{% endblock %}
+
+{% block script %}
+<script src="assets/js/moment-bundle.min.js"></script>
+<script src="book_appointment/index.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <!-- title: Book an appointment -->
+    <div id="select-date-time">
+        <div class="text-center mt-5">
+            <h3>{{ _("Book an appointment") }}</h3>
+            <p class="lead text-muted" id="lead-text">{{ _("Select the date and your timezone") }}</p>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-6 align-self-center ">
+                <div class="row">
+                    <input type="date" oninput="on_date_or_timezone_select()" name="appointment-date"
+                        id="appointment-date" class="form-control mt-3 col-md m-3">
+                    <select name="appointment-timezone" oninput="on_date_or_timezone_select()" id="appointment-timezone"
+                        class="form-control m-3 col-md">
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3" id="timeslot-container">
+
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-4 mb-3">
+                <button class="btn btn-primary form-control" id="next-button">{{ _("Next") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Enter Details-->
+<div id="enter-details" class="mb-5">
+    <div class="text-center mt-5">
+        <h3>{{ _("Add details") }}</h3>
+        <p class="lead text-muted">{{ _("Selected date is") }} <span class="date-span"></span> {{ _("at") }} <span class="time-span">
+            </span></p>
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-4 align-items-center">
+            <form id="customer-form" action='#'>
+            <input class="form-control mt-3" type="text" name="customer_name" id="customer_name" placeholder="{{ _('Your Name (required)') }}" required>
+            <input class="form-control mt-3" type="tel" name="customer_number" id="customer_number" placeholder="+910000000000">
+            <input class="form-control mt-3" type="text" name="customer_skype" id="customer_skype" placeholder="Skype">
+            <input class="form-control mt-3"type="email" name="customer_email" id="customer_email" placeholder="{{ _('Email Address (required)') }}" required>
+
+            <textarea class="form-control mt-3" name="customer_notes" id="customer_notes" cols="30" rows="10"
+                placeholder="{{ _('Notes') }}"></textarea>
+            </form>
+            <div class="row mt-3 " id="submit-button-area">
+                <div class="col-md mt-3" style="grid-area: back;"><button class="btn btn-dark form-control" onclick="initialise_select_date()">{{ _("Go back") }}</button></div>
+                <div class="col-md mt-3" style="grid-area: submit;"><button class="btn btn-primary form-control " onclick="submit()" id="submit-button">{{ _("Submit") }}</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}

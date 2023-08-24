@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:asset_category_name",
+ "creation": "2016-03-01 17:41:39.778765",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "asset_category_name",
+  "column_break_3",
+  "depreciation_options",
+  "enable_cwip_accounting",
+  "finance_book_detail",
+  "finance_books",
+  "section_break_2",
+  "accounts"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset_category_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Asset Category Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finance_book_detail",
+   "fieldtype": "Section Break",
+   "label": "Finance Book Detail"
+  },
+  {
+   "fieldname": "finance_books",
+   "fieldtype": "Table",
+   "label": "Finance Books",
+   "options": "Asset Finance Book"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Asset Category Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "depreciation_options",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_cwip_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Capital Work in Progress Accounting"
+  }
+ ],
+ "links": [],
+ "modified": "2021-02-24 15:05:38.621803",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Category",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

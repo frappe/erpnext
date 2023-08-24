@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2013-01-10 16:34:18",
+ "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "campaign",
+  "campaign_name",
+  "naming_series",
+  "campaign_schedules_section",
+  "campaign_schedules",
+  "description_section",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "campaign",
+   "fieldtype": "Section Break",
+   "label": "Campaign",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "campaign_name",
+   "fieldtype": "Data",
+   "label": "Campaign Name",
+   "oldfieldname": "campaign_name",
+   "oldfieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "SAL-CAM-.YYYY.-",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "campaign_schedules_section",
+   "fieldtype": "Section Break",
+   "label": "Campaign Schedules"
+  },
+  {
+   "fieldname": "campaign_schedules",
+   "fieldtype": "Table",
+   "label": "Campaign Schedules",
+   "options": "Campaign Email Schedule"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "width": "300px"
+  }
+ ],
+ "icon": "fa fa-bullhorn",
+ "idx": 1,
+ "links": [],
+ "modified": "2021-06-30 18:05:06.412712",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Campaign",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "set_user_permissions": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

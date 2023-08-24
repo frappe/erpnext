@@ -1,0 +1,395 @@
+{
+ "actions": [],
+ "creation": "2021-02-10 17:13:39.139103",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "products_per_page",
+  "filter_categories_section",
+  "enable_field_filters",
+  "filter_fields",
+  "enable_attribute_filters",
+  "filter_attributes",
+  "display_settings_section",
+  "hide_variants",
+  "enable_variants",
+  "show_price",
+  "column_break_9",
+  "show_stock_availability",
+  "show_quantity_in_website",
+  "allow_items_not_in_stock",
+  "column_break_13",
+  "show_apply_coupon_code_in_website",
+  "show_contact_us_button",
+  "show_attachments",
+  "section_break_18",
+  "company",
+  "price_list",
+  "enabled",
+  "store_page_docs",
+  "column_break_21",
+  "default_customer_group",
+  "quotation_series",
+  "checkout_settings_section",
+  "enable_checkout",
+  "show_price_in_quotation",
+  "column_break_27",
+  "save_quotations_as_draft",
+  "payment_gateway_account",
+  "payment_success_url",
+  "add_ons_section",
+  "enable_wishlist",
+  "column_break_22",
+  "enable_reviews",
+  "column_break_23",
+  "enable_recommendations",
+  "item_search_settings_section",
+  "redisearch_warning",
+  "search_index_fields",
+  "is_redisearch_enabled",
+  "is_redisearch_loaded",
+  "shop_by_category_section",
+  "slideshow",
+  "guest_display_settings_section",
+  "hide_price_for_guest",
+  "redirect_on_action"
+ ],
+ "fields": [
+  {
+   "default": "6",
+   "fieldname": "products_per_page",
+   "fieldtype": "Int",
+   "label": "Products per Page"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "filter_categories_section",
+   "fieldtype": "Section Break",
+   "label": "Filters and Categories"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_variants",
+   "fieldtype": "Check",
+   "label": "Hide Variants"
+  },
+  {
+   "default": "0",
+   "description": "The field filters will also work as categories in the <b>Shop by Category</b> page.",
+   "fieldname": "enable_field_filters",
+   "fieldtype": "Check",
+   "label": "Enable Field Filters (Categories)"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_attribute_filters",
+   "fieldtype": "Check",
+   "label": "Enable Attribute Filters"
+  },
+  {
+   "depends_on": "enable_field_filters",
+   "fieldname": "filter_fields",
+   "fieldtype": "Table",
+   "label": "Website Item Fields",
+   "options": "Website Filter Field"
+  },
+  {
+   "depends_on": "enable_attribute_filters",
+   "fieldname": "filter_attributes",
+   "fieldtype": "Table",
+   "label": "Attributes",
+   "options": "Website Attribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enable Shopping Cart"
+  },
+  {
+   "depends_on": "doc.enabled",
+   "fieldname": "store_page_docs",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "display_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Display Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_attachments",
+   "fieldtype": "Check",
+   "label": "Show Public Attachments"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_price",
+   "fieldtype": "Check",
+   "label": "Show Price"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_stock_availability",
+   "fieldtype": "Check",
+   "label": "Show Stock Availability"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_variants",
+   "fieldtype": "Check",
+   "label": "Enable Variant Selection"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_contact_us_button",
+   "fieldtype": "Check",
+   "label": "Show Contact Us Button"
+  },
+  {
+   "default": "0",
+   "depends_on": "show_stock_availability",
+   "fieldname": "show_quantity_in_website",
+   "fieldtype": "Check",
+   "label": "Show Stock Quantity"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_apply_coupon_code_in_website",
+   "fieldtype": "Check",
+   "label": "Show Apply Coupon Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_items_not_in_stock",
+   "fieldtype": "Check",
+   "label": "Allow items not in stock to be added to cart"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "label": "Shopping Cart"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Company",
+   "remember_last_selected_value": 1
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Prices will not be shown if Price List is not set",
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "default_customer_group",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Customer Group",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Customer Group"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "quotation_series",
+   "fieldtype": "Select",
+   "label": "Quotation Series",
+   "mandatory_depends_on": "eval: doc.enabled === 1"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.enable_checkout",
+   "depends_on": "enabled",
+   "fieldname": "checkout_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Checkout Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_checkout",
+   "fieldtype": "Check",
+   "label": "Enable Checkout"
+  },
+  {
+   "default": "Orders",
+   "depends_on": "enable_checkout",
+   "description": "After payment completion redirect user to selected page.",
+   "fieldname": "payment_success_url",
+   "fieldtype": "Select",
+   "label": "Payment Success Url",
+   "mandatory_depends_on": "enable_checkout",
+   "options": "\nOrders\nInvoices\nMy Account"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_checkout == 0",
+   "fieldname": "save_quotations_as_draft",
+   "fieldtype": "Check",
+   "label": "Save Quotations as Draft"
+  },
+  {
+   "depends_on": "enable_checkout",
+   "fieldname": "payment_gateway_account",
+   "fieldtype": "Link",
+   "label": "Payment Gateway Account",
+   "mandatory_depends_on": "enable_checkout",
+   "options": "Payment Gateway Account"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "enable_field_filters",
+   "fieldname": "shop_by_category_section",
+   "fieldtype": "Section Break",
+   "label": "Shop by Category"
+  },
+  {
+   "fieldname": "slideshow",
+   "fieldtype": "Link",
+   "label": "Slideshow",
+   "options": "Website Slideshow"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "add_ons_section",
+   "fieldtype": "Section Break",
+   "label": "Add-ons"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_wishlist",
+   "fieldtype": "Check",
+   "label": "Enable Wishlist"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_reviews",
+   "fieldtype": "Check",
+   "label": "Enable Reviews and Ratings"
+  },
+  {
+   "fieldname": "search_index_fields",
+   "fieldtype": "Small Text",
+   "label": "Search Index Fields",
+   "mandatory_depends_on": "is_redisearch_enabled",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "item_search_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Search Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_redisearch_loaded",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Redisearch Loaded"
+  },
+  {
+   "depends_on": "eval:!doc.is_redisearch_loaded",
+   "fieldname": "redisearch_warning",
+   "fieldtype": "HTML",
+   "label": "Redisearch Warning",
+   "options": "<p class=\"alert alert-warning\">Redisearch is not loaded. If you want to use the advanced product search feature, refer <a class=\"alert-link\" href=\"https://docs.erpnext.com/docs/v13/user/manual/en/setting-up/articles/installing-redisearch\" target=\"_blank\">here</a>.</p>"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.show_price",
+   "fieldname": "hide_price_for_guest",
+   "fieldtype": "Check",
+   "label": "Hide Price for Guest"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "guest_display_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Guest Display Settings"
+  },
+  {
+   "description": "Link to redirect Guest on actions that need login such as add to cart, wishlist, etc. <b>E.g.: /login</b>",
+   "fieldname": "redirect_on_action",
+   "fieldtype": "Data",
+   "label": "Redirect on Action"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_recommendations",
+   "fieldtype": "Check",
+   "label": "Enable Recommendations"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_checkout == 0",
+   "fieldname": "show_price_in_quotation",
+   "fieldtype": "Check",
+   "label": "Show Price in Quotation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_redisearch_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Redisearch",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-04-01 18:35:56.106756",
+ "modified_by": "Administrator",
+ "module": "E-commerce",
+ "name": "E Commerce Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,317 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "creation": "2023-05-29 13:02:17.121296",
+ "description": "A logical Warehouse against which stock entries are made.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse_detail",
+  "disabled",
+  "warehouse_name",
+  "column_break_3",
+  "is_group",
+  "parent_warehouse",
+  "column_break_4",
+  "account",
+  "company",
+  "address_and_contact",
+  "address_html",
+  "column_break_10",
+  "contact_html",
+  "warehouse_contact_info",
+  "email_id",
+  "phone_no",
+  "mobile_no",
+  "column_break0",
+  "address_line_1",
+  "address_line_2",
+  "city",
+  "state",
+  "pin",
+  "transit_section",
+  "warehouse_type",
+  "column_break_qajx",
+  "default_in_transit_warehouse",
+  "tree_details",
+  "lft",
+  "rgt",
+  "old_parent"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse_detail",
+   "fieldtype": "Section Break",
+   "label": "Warehouse Detail",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "warehouse_name",
+   "fieldtype": "Data",
+   "label": "Warehouse Name",
+   "oldfieldname": "warehouse_name",
+   "oldfieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Group Warehouse"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "read_only_depends_on": "eval: !doc.__islocal",
+   "remember_last_selected_value": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "If blank, parent Warehouse Account or company default will be considered in transactions",
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "address_and_contact",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "warehouse_contact_info",
+   "fieldtype": "Section Break",
+   "label": "Warehouse Contact Info"
+  },
+  {
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Email Address",
+   "oldfieldname": "email_id",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "phone_no",
+   "fieldtype": "Data",
+   "label": "Phone No",
+   "oldfieldname": "phone_no",
+   "oldfieldtype": "Int",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "oldfieldname": "mobile_no",
+   "oldfieldtype": "Int",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "column_break0",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_line_1",
+   "fieldtype": "Data",
+   "label": "Address Line 1",
+   "oldfieldname": "address_line_1",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "address_line_2",
+   "fieldtype": "Data",
+   "label": "Address Line 2",
+   "oldfieldname": "address_line_2",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "oldfieldname": "city",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State",
+   "oldfieldname": "state",
+   "oldfieldtype": "Select"
+  },
+  {
+   "fieldname": "pin",
+   "fieldtype": "Data",
+   "label": "PIN",
+   "oldfieldname": "pin",
+   "oldfieldtype": "Int"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tree_details",
+   "fieldtype": "Section Break",
+   "label": "Tree Details"
+  },
+  {
+   "bold": 1,
+   "fieldname": "parent_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Warehouse",
+   "options": "Warehouse",
+   "search_index": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "lft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "rgt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Old Parent",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:(!doc.is_group);",
+   "fieldname": "warehouse_type",
+   "fieldtype": "Link",
+   "label": "Warehouse Type",
+   "options": "Warehouse Type"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: doc.warehouse_type !== 'Transit';",
+   "fieldname": "default_in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "Default In-Transit Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "transit_section",
+   "fieldtype": "Section Break",
+   "label": "Transit"
+  },
+  {
+   "fieldname": "column_break_qajx",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "icon": "fa fa-building",
+ "idx": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2023-05-29 13:10:43.333160",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Warehouse",
+ "nsm_parent_field": "parent_warehouse",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "warehouse_name",
+ "track_changes": 1
+}
