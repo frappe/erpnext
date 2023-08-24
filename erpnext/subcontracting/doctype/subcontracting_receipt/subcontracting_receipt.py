@@ -183,9 +183,9 @@ class SubcontractingReceipt(SubcontractingController):
 					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
 				)
 
-			item.received_qty = item.qty + flt(item.rejected_qty)
-			item.amount = item.qty * item.rate
-			total_qty += item.qty
+			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
+			item.amount = flt(item.qty) * flt(item.rate)
+			total_qty += flt(item.qty)
 			total_amount += item.amount
 		else:
 			self.total_qty = total_qty
