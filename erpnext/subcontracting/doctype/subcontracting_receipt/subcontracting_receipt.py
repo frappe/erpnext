@@ -150,11 +150,13 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "BOM"
 		):
+			self.remove_scrap_items()
+
 			for item in list(self.items):
-				if item.bom and not item.is_scrap_item:
+				if item.bom:
 					bom = frappe.get_doc("BOM", item.bom)
 					for scrap_item in bom.scrap_items:
-						qty = flt(item.received_qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
+						qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
 						self.append(
 							"items",
 							{
@@ -168,8 +170,14 @@ class SubcontractingReceipt(SubcontractingController):
 								"warehouse": self.set_warehouse,
 								"rejected_warehouse": self.rejected_warehouse,
 								"service_cost_per_qty": 0,
+								"reference_name": item.name,
 							},
 						)
+
+	def remove_scrap_items(self):
+		for item in list(self.items):
+			if item.is_scrap_item:
+				self.remove(item)
 
 	@frappe.whitelist()
 	def set_missing_values(self):
@@ -214,27 +222,44 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def calculate_items_qty_and_amount(self):
-		rm_supp_cost = {}
+		rm_cost_map = {}
 		for item in self.get("supplied_items") or []:
-			if item.reference_name in rm_supp_cost:
-				rm_supp_cost[item.reference_name] += item.amount
+			if item.reference_name in rm_cost_map:
+				rm_cost_map[item.reference_name] += item.amount
 			else:
-				rm_supp_cost[item.reference_name] = item.amount
+				rm_cost_map[item.reference_name] = item.amount
+
+		scrap_cost_map = {}
+		for item in self.get("items") or []:
+			if item.is_scrap_item:
+				if item.reference_name in scrap_cost_map:
+					scrap_cost_map[item.reference_name] += item.amount
+				else:
+					scrap_cost_map[item.reference_name] = item.amount
 
 		total_qty = total_amount = 0
 		for item in self.items:
-			if item.qty and item.name in rm_supp_cost:
-				item.rm_supp_cost = rm_supp_cost[item.name]
-				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
-				rm_supp_cost.pop(item.name)
+			if item.qty and not item.is_scrap_item:
+				if item.name in rm_cost_map:
+					item.rm_supp_cost = rm_cost_map[item.name]
+					item.rm_cost_per_qty = item.rm_supp_cost / item.qty
+					rm_cost_map.pop(item.name)
+
+				if item.name in scrap_cost_map:
+					item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
+					scrap_cost_map.pop(item.name)
 
 			if item.recalculate_rate:
 				item.rate = (
-					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
+					flt(item.rm_cost_per_qty)
+					+ flt(item.service_cost_per_qty)
+					+ flt(item.additional_cost_per_qty)
+					- flt(item.scrap_cost_per_qty)
 				)
 
 			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
 			item.amount = flt(item.qty) * flt(item.rate)
+
 			total_qty += flt(item.qty)
 			total_amount += item.amount
 		else:
