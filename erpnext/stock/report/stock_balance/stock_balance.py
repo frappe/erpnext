@@ -44,6 +44,9 @@ class StockBalanceReport(object):
 		self.filters = filters
 		self.from_date = getdate(filters.get("from_date"))
 		self.to_date = getdate(filters.get("to_date"))
+		self.disable_closing_stock = frappe.db.get_single_value(
+			"Stock Settings", "disable_closing_stock_balance"
+		)
 
 		self.start_from = None
 		self.data = []
@@ -81,6 +84,9 @@ class StockBalanceReport(object):
 
 		self.start_from = add_days(closing_balance[0].to_date, 1)
 		res = frappe.get_doc("Closing Stock Balance", closing_balance[0].name).get_prepared_data()
+
+		if not res:
+			return
 
 		for entry in res.data:
 			entry = frappe._dict(entry)
@@ -227,7 +233,7 @@ class StockBalanceReport(object):
 				"out_val": 0.0,
 				"bal_qty": opening_data.get("bal_qty") or 0.0,
 				"bal_val": opening_data.get("bal_val") or 0.0,
-				"val_rate": 0.0,
+				"val_rate": opening_data.get("val_rate"),
 			}
 		)
 
@@ -241,7 +247,7 @@ class StockBalanceReport(object):
 		return tuple(group_by_key)
 
 	def get_closing_balance(self) -> List[Dict[str, Any]]:
-		if self.filters.get("ignore_closing_balance"):
+		if self.disable_closing_stock:
 			return []
 
 		table = frappe.qb.DocType("Closing Stock Balance")
@@ -345,7 +351,7 @@ class StockBalanceReport(object):
 		return query
 
 	def apply_date_filters(self, query, sle) -> str:
-		if not self.filters.ignore_closing_balance and self.start_from:
+		if not self.disable_closing_stock and self.start_from:
 			query = query.where(sle.posting_date >= self.start_from)
 
 		if self.to_date:

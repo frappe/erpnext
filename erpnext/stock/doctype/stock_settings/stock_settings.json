@@ -59,7 +59,9 @@
   "stock_frozen_upto_days",
   "column_break_26",
   "role_allowed_to_create_edit_back_dated_transactions",
-  "stock_auth_role"
+  "stock_auth_role",
+  "section_break_plhx",
+  "disable_closing_stock_balance"
  ],
  "fields": [
   {
@@ -363,7 +365,8 @@
   },
   {
    "fieldname": "section_break_plhx",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Stock Balance Closing"
   },
   {
    "fieldname": "column_break_mhzc",
@@ -383,6 +386,13 @@
    "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
    "fieldtype": "Check",
    "label": "Auto Create Serial and Batch Bundle For Outward"
+  },
+  {
+   "default": "0",
+   "description": "To know more about Closing Stock Balance, please check <a href=\"https://docs.erpnext.com/docs/user/manual/en/closing-stock-balance\">documentation.</a>",
+   "fieldname": "disable_closing_stock_balance",
+   "fieldtype": "Check",
+   "label": "Disable Closing Stock Balance"
   }
  ],
  "icon": "icon-cog",
@@ -390,7 +400,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-29 15:10:54.959411",
+ "modified": "2023-08-24 12:16:51.243508",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
