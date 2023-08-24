@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.controllers.status_updater import StatusUpdater
 
 
@@ -63,17 +64,39 @@ class BankTransaction(StatusUpdater):
 					found = True
 
 			if not found:
+				payment_doctype, payment_name = voucher["payment_doctype"], voucher["payment_name"]
+
+				if self.is_unpaid_invoice(payment_doctype, payment_name):
+					# Make Payment Entry against the unpaid invoice, link PE to Bank Transaction
+					payment_name = self.make_pe_against_invoice(payment_doctype, payment_name)
+					payment_doctype = "Payment Entry"  # Change doctype to PE
+
 				pe = {
-					"payment_document": voucher["payment_doctype"],
-					"payment_entry": voucher["payment_name"],
+					"payment_document": payment_doctype,
+					"payment_entry": payment_name,
 					"allocated_amount": 0.0,  # Temporary
 				}
-				child = self.append("payment_entries", pe)
+				self.append("payment_entries", pe)
 				added = True
 
 		# runs on_update_after_submit
 		if added:
 			self.save()
+
+	def is_unpaid_invoice(self, payment_doctype, payment_name):
+		is_invoice = payment_doctype in ("Sales Invoice", "Purchase Invoice")
+		if not is_invoice:
+			return False
+
+		# Check if the invoice is unpaid
+		return flt(frappe.db.get_value(payment_doctype, payment_name, "outstanding_amount")) > 0
+
+	def make_pe_against_invoice(self, payment_doctype, payment_name):
+		bank_account = frappe.db.get_value("Bank Account", self.bank_account, "account")
+		payment_entry = get_payment_entry(payment_doctype, payment_name, bank_account=bank_account)
+		payment_entry.reference_no = self.reference_number or payment_name
+		payment_entry.submit()
+		return payment_entry.name
 
 	def allocate_payment_entries(self):
 		"""Refactored from bank reconciliation tool.

@@ -1,0 +1,166 @@
+.p-10 {
+	padding: 10px;
+}
+
+.list-panel {
+	display: flex;
+	flex-direction: column;
+	width: 40%;
+	height: 100vh;
+	border: 1px solid var(--gray-200);
+
+	> .sort-by {
+		display:flex;
+		justify-content: flex-start;
+		align-items: center;
+		border-bottom: 1px solid var(--gray-200);
+		cursor: pointer;
+
+		> .sort-by-title {
+			padding: 10px 0 10px 10px;
+			color: var(--text-muted);
+		}
+	}
+
+	> .list-container {
+		height: -webkit-fill-available;
+		overflow-y: scroll;
+
+		> .transaction-row {
+			cursor: pointer;
+			border-bottom: 1px solid var(--gray-200);
+
+			&.active {
+				border-left: 6px solid var(--blue-500);
+			}
+
+			> div {
+				padding: 4px 10px;
+
+				> .bt-label {
+					color: var(--gray-500);
+				}
+			}
+
+			* .reference-value, * .account-holder-value {
+				font-weight: 600;
+			}
+
+		}
+	}
+}
+
+.bt-amount-contianer {
+	text-align: end;
+
+	> .bt-amount {
+		font-size: var(--text-base);
+	}
+}
+
+.actions-panel {
+	display: flex;
+	flex-direction: column;
+	width: 60%;
+	height: 100vh;
+	border: 1px solid var(--gray-200);
+	overflow-y: scroll;
+
+	> .tab-content {
+		height: -webkit-fill-available;
+
+		* .frappe-control[data-fieldname="submit_transaction"],
+		* .btn-primary[data-fieldname="bt_reconcile"],
+		* .btn-primary[data-fieldname="create"] {
+			float: right;
+		}
+
+		* .dt-scrollable {
+			height: calc(100vh - 550px) !important;
+		}
+
+		* .dt-toast {
+			display: none !important;
+		}
+	}
+}
+
+.nav-actions-link {
+	display: block;
+	padding: var(--padding-md) 0;
+	margin: 0 var(--margin-md);
+	color: var(--text-muted);
+
+	&.active {
+		font-weight: 600;
+		border-bottom: 1px solid var(--primary);
+		color: var(--text-color);
+	}
+
+	&:hover {
+		text-decoration: none;
+	}
+}
+
+.report-summary {
+	margin: .5rem 0 calc(var(--margin-sm) + 1rem) 0 !important;
+}
+
+.reconciliation-summary {
+	gap: 0 !important;
+
+	> .summary-item  {
+		> .summary-label {
+			font-size: var(--text-base);
+		}
+
+		> .summary-value {
+			font-weight: 600;
+			font-size: 16px;
+		}
+
+	}
+}
+
+.text-blue {
+	color: var(--blue-500) !important;
+}
+
+.bank-reco-beta-empty-state {
+	display: flex;
+    flex-direction: column;
+    min-height: 30vh;
+	align-items: center;
+    justify-content: center;
+    padding: 2rem;
+	font-size: 14px;
+	color: var(--gray-600);
+
+	> .btn-primary {
+		padding: 0.5rem 1rem !important;
+	}
+}
+
+.no-transactions {
+	display: flex;
+    flex-direction: column;
+    min-height: 30vh;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-size: 14px;
+    width: 100%;
+    color: var(--gray-600);
+
+	> img {
+		margin-bottom: var(--margin-md);
+		max-height: 70px;
+	}
+}
+
+.match-popover-header {
+	font-size: var(--text-base);
+	color: var(--primary);
+	font-weight: 500;
+	margin-bottom: .5rem;
+}

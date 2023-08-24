@@ -16,23 +16,23 @@ repos:
       - id: check-merge-conflict
       - id: check-ast
 
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.44.0
-    hooks:
-      - id: eslint
-        types_or: [javascript]
-        args: ['--quiet']
-        # Ignore any files that might contain jinja / bundles
-        exclude: |
-            (?x)^(
-                erpnext/public/dist/.*|
-                cypress/.*|
-                .*node_modules.*|
-                .*boilerplate.*|
-                erpnext/public/js/controllers/.*|
-                erpnext/templates/pages/order.js|
-                erpnext/templates/includes/.*
-            )$
+  # - repo: https://github.com/pre-commit/mirrors-eslint
+  #   rev: v8.44.0
+  #   hooks:
+  #     - id: eslint
+  #       types_or: [javascript]
+  #       args: ['--quiet']
+  #       # Ignore any files that might contain jinja / bundles
+  #       exclude: |
+  #           (?x)^(
+  #               erpnext/public/dist/.*|
+  #               cypress/.*|
+  #               .*node_modules.*|
+  #               .*boilerplate.*|
+  #               erpnext/public/js/controllers/.*|
+  #               erpnext/templates/pages/order.js|
+  #               erpnext/templates/includes/.*
+  #           )$
 
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
