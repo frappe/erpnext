@@ -10,6 +10,7 @@
   "item_code",
   "column_break_2",
   "item_name",
+  "is_scrap_item",
   "section_break_4",
   "description",
   "brand",
@@ -345,7 +346,8 @@
    "label": "BOM",
    "no_copy": 1,
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.is_scrap_item"
   },
   {
    "fetch_from": "item_code.brand",
@@ -490,12 +492,22 @@
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.bom",
+   "fieldname": "is_scrap_item",
+   "fieldtype": "Check",
+   "label": "Is Scrap Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.bom"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-06 18:43:45.599761",
+ "modified": "2023-08-24 11:52:22.666506",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
