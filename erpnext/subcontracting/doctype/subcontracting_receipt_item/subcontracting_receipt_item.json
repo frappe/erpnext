@@ -33,6 +33,7 @@
   "rm_cost_per_qty",
   "service_cost_per_qty",
   "additional_cost_per_qty",
+  "scrap_cost_per_qty",
   "rm_supp_cost",
   "warehouse_and_reference",
   "warehouse",
@@ -44,6 +45,7 @@
   "bom",
   "quality_inspection",
   "schedule_date",
+  "reference_name",
   "section_break_45",
   "serial_and_batch_bundle",
   "serial_no",
@@ -158,6 +160,7 @@
    "no_copy": 1,
    "print_hide": 1,
    "print_width": "100px",
+   "read_only_depends_on": "eval: doc.is_scrap_item",
    "width": "100px"
   },
   {
@@ -215,6 +218,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
+   "depends_on": "eval: !doc.is_scrap_item",
    "fieldname": "rm_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Raw Material Cost Per Qty",
@@ -222,6 +227,8 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "depends_on": "eval: !doc.is_scrap_item",
    "fieldname": "service_cost_per_qty",
    "fieldtype": "Currency",
    "label": "Service Cost Per Qty",
@@ -261,6 +268,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "100px",
+   "read_only_depends_on": "eval: doc.is_scrap_item",
    "width": "100px"
   },
   {
@@ -452,6 +460,7 @@
    "print_hide": 1
   },
   {
+   "default": "0",
    "depends_on": "returned_qty",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
@@ -496,12 +505,29 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only_depends_on": "eval: doc.bom"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.is_scrap_item",
+   "fieldname": "scrap_cost_per_qty",
+   "fieldtype": "Float",
+   "label": "Scrap Cost Per Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "label": "Reference Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-24 12:14:25.123857",
+ "modified": "2023-08-24 21:57:15.897010",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
