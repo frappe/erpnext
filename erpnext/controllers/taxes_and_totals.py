@@ -487,11 +487,15 @@ class calculate_taxes_and_totals(object):
 			item_wise_tax_amount = flt(item_wise_tax_amount, tax.precision("tax_amount"))
 			if tax.item_wise_tax_detail.get(key):
 				item_wise_tax_amount += flt(tax.item_wise_tax_detail[key][1], tax.precision("tax_amount"))
+			tax.item_wise_tax_detail[key] = [
+				tax_rate,
+				flt(item_wise_tax_amount, tax.precision("tax_amount")),
+			]
 		else:
 			if tax.item_wise_tax_detail.get(key):
 				item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
 
-		tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount)]
+			tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount)]
 
 	def round_off_totals(self, tax):
 		if tax.account_head in frappe.flags.round_off_applicable_accounts:
