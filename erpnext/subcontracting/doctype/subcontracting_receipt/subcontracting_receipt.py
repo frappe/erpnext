@@ -79,6 +79,7 @@ class SubcontractingReceipt(SubcontractingController):
 		super(SubcontractingReceipt, self).validate()
 		self.set_missing_values()
 		self.validate_posting_time()
+		self.validate_accepted_warehouse()
 		self.validate_rejected_warehouse()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
@@ -126,6 +127,23 @@ class SubcontractingReceipt(SubcontractingController):
 		self.calculate_additional_costs()
 		self.calculate_supplied_items_qty_and_amount()
 		self.calculate_items_qty_and_amount()
+
+	def validate_accepted_warehouse(self):
+		for item in self.get("items"):
+			if flt(item.qty) and not item.warehouse:
+				if self.set_warehouse:
+					item.warehouse = self.set_warehouse
+				else:
+					frappe.throw(
+						_("Row #{0}: Accepted Warehouse is mandatory for the accepted Item {1}").format(
+							item.idx, item.item_code
+						)
+					)
+
+			if item.get("warehouse") and (item.get("warehouse") == item.get("rejected_warehouse")):
+				frappe.throw(
+					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
+				)
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
@@ -190,24 +208,6 @@ class SubcontractingReceipt(SubcontractingController):
 		else:
 			self.total_qty = total_qty
 			self.total = total_amount
-
-	def validate_rejected_warehouse(self):
-		for item in self.items:
-			if flt(item.rejected_qty) and not item.rejected_warehouse:
-				if self.rejected_warehouse:
-					item.rejected_warehouse = self.rejected_warehouse
-
-				if not item.rejected_warehouse:
-					frappe.throw(
-						_("Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}").format(
-							item.idx, item.item_code
-						)
-					)
-
-			if item.get("rejected_warehouse") and (item.get("rejected_warehouse") == item.get("warehouse")):
-				frappe.throw(
-					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
-				)
 
 	def validate_available_qty_for_consumption(self):
 		for item in self.get("supplied_items"):
