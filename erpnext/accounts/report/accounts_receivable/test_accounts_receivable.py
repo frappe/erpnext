@@ -107,6 +107,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"range2": 60,
 			"range3": 90,
 			"range4": 120,
+			"show_remarks": True,
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms
@@ -115,11 +116,11 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 		report = execute(filters)
 
-		expected_data = [[100, 30], [100, 50], [100, 20]]
+		expected_data = [[100, 30, "No Remarks"], [100, 50, "No Remarks"], [100, 20, "No Remarks"]]
 
 		for i in range(3):
 			row = report[1][i - 1]
-			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced])
+			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced, row.remarks])
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after payment
 		self.create_payment_entry(si.name)
@@ -315,3 +316,255 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		}
 		report = execute(filters)
 		self.assertEqual(report[1], [])
+
+	def test_group_by_party(self):
+		si1 = self.create_sales_invoice(do_not_submit=True)
+		si1.posting_date = add_days(today(), -1)
+		si1.save().submit()
+		si2 = self.create_sales_invoice(do_not_submit=True)
+		si2.items[0].rate = 85
+		si2.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"group_by_party": True,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 5)
+
+		# assert voucher rows
+		expected_voucher_rows = [
+			[100.0, 100.0, 100.0, 100.0],
+			[85.0, 85.0, 85.0, 85.0],
+		]
+		voucher_rows = []
+		for x in report[0:2]:
+			voucher_rows.append(
+				[x.invoiced, x.outstanding, x.invoiced_in_account_currency, x.outstanding_in_account_currency]
+			)
+		self.assertEqual(expected_voucher_rows, voucher_rows)
+
+		# assert total rows
+		expected_total_rows = [
+			[self.customer, 185.0, 185.0],  # party total
+			{},  # empty row for padding
+			["Total", 185.0, 185.0],  # grand total
+		]
+		party_total_row = report[2]
+		self.assertEqual(
+			expected_total_rows[0],
+			[
+				party_total_row.get("party"),
+				party_total_row.get("invoiced"),
+				party_total_row.get("outstanding"),
+			],
+		)
+		empty_row = report[3]
+		self.assertEqual(expected_total_rows[1], empty_row)
+		grand_total_row = report[4]
+		self.assertEqual(
+			expected_total_rows[2],
+			[
+				grand_total_row.get("party"),
+				grand_total_row.get("invoiced"),
+				grand_total_row.get("outstanding"),
+			],
+		)
+
+	def test_future_payments(self):
+		si = self.create_sales_invoice()
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.paid_amount = 90.0
+		pe.references[0].allocated_amount = 90.0
+		pe.save().submit()
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"show_future_payments": True,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+
+		expected_data = [100.0, 100.0, 10.0, 90.0]
+
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)
+
+		pe.cancel()
+		# full payment in future date
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.save().submit()
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, 0.0, 100.0]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)
+
+		pe.cancel()
+		# over payment in future date
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.paid_amount = 110
+		pe.save().submit()
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 2)
+		expected_data = [[100.0, 0.0, 100.0, 0.0, 100.0], [0.0, 10.0, -10.0, -10.0, 0.0]]
+		for idx, row in enumerate(report):
+			self.assertEqual(
+				expected_data[idx],
+				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+			)
+
+	def test_sales_person(self):
+		sales_person = (
+			frappe.get_doc({"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True})
+			.insert()
+			.submit()
+		)
+		si = self.create_sales_invoice(do_not_submit=True)
+		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
+		si.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"sales_person": sales_person.name,
+			"show_sales_person": True,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+
+		expected_data = [100.0, 100.0, sales_person.name]
+
+		row = report[0]
+		self.assertEqual(expected_data, [row.invoiced, row.outstanding, row.sales_person])
+
+	def test_cost_center_filter(self):
+		si = self.create_sales_invoice()
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"cost_center": self.cost_center,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, self.cost_center]
+		row = report[0]
+		self.assertEqual(expected_data, [row.invoiced, row.outstanding, row.cost_center])
+
+	def test_customer_group_filter(self):
+		si = self.create_sales_invoice()
+		cus_group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"customer_group": cus_group,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, cus_group]
+		row = report[0]
+		self.assertEqual(expected_data, [row.invoiced, row.outstanding, row.customer_group])
+
+		filters.update({"customer_group": "Individual"})
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 0)
+
+	def test_party_account_filter(self):
+		si1 = self.create_sales_invoice()
+		self.customer2 = (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "Jane Doe",
+					"type": "Individual",
+					"default_currency": "USD",
+				}
+			)
+			.insert()
+			.submit()
+		)
+
+		si2 = self.create_sales_invoice(do_not_submit=True)
+		si2.posting_date = add_days(today(), -1)
+		si2.customer = self.customer2
+		si2.currency = "USD"
+		si2.conversion_rate = 80
+		si2.debit_to = self.debtors_usd
+		si2.save().submit()
+
+		# Filter on company currency receivable account
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"party_account": self.debit_to,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, self.debit_to, si1.currency]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.party_account, row.account_currency]
+		)
+
+		# Filter on USD receivable account
+		filters.update({"party_account": self.debtors_usd})
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [8000.0, 8000.0, self.debtors_usd, si2.currency]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.party_account, row.account_currency]
+		)
+
+		# without filter on party account
+		filters.pop("party_account")
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 2)
+		expected_data = [
+			[8000.0, 8000.0, 100.0, 100.0, self.debtors_usd, si2.currency],
+			[100.0, 100.0, 100.0, 100.0, self.debit_to, si1.currency],
+		]
+		for idx, row in enumerate(report):
+			self.assertEqual(
+				expected_data[idx],
+				[
+					row.invoiced,
+					row.outstanding,
+					row.invoiced_in_account_currency,
+					row.outstanding_in_account_currency,
+					row.party_account,
+					row.account_currency,
+				],
+			)
