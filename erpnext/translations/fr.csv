@@ -3536,7 +3536,7 @@ Quality Feedback Template,Modèle de commentaires sur la qualité,
 Rules for applying different promotional schemes.,Règles d'application de différents programmes promotionnels.,
 Shift,Décalage,
 Show {0},Montrer {0},
-"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Caractères spéciaux sauf &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; Et &quot;}}&quot; non autorisés dans les séries de nommage {0}",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Caractères spéciaux sauf &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; Et &quot;}}&quot; non autorisés dans les masques de numérotation {0}",
 Target Details,Détails de la cible,
 {0} already has a Parent Procedure {1}.,{0} a déjà une procédure parent {1}.,
 API,API,
@@ -3551,7 +3551,7 @@ Importing {0} of {1},Importer {0} de {1},
 Invalid URL,URL invalide,
 Landscape,Paysage,
 Last Sync On,Dernière synchronisation le,
-Naming Series,Nom de série,
+Naming Series,Masque de numérotation,
 No data to export,Aucune donnée à exporter,
 Portrait,Portrait,
 Print Heading,Imprimer Titre,
@@ -4282,7 +4282,7 @@ Please set {0},Veuillez définir {0},supplier
 Draft,Brouillon,"docstatus,=,0"
 Cancelled,Annulé,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Veuillez configurer le système de dénomination de l'instructeur dans Éducation&gt; Paramètres de l'éducation,
-Please set Naming Series for {0} via Setup > Settings > Naming Series,Veuillez définir la série de noms pour {0} via Configuration&gt; Paramètres&gt; Série de noms,
+Please set Naming Series for {0} via Setup > Settings > Naming Series,Veuillez définir le masque de numérotation pour {0} via Configuration&gt; Paramètres&gt; Série de noms,
 UOM Conversion factor ({0} -> {1}) not found for item: {2},Facteur de conversion UdM ({0} -&gt; {1}) introuvable pour l'article: {2},
 Item Code > Item Group > Brand,Code article&gt; Groupe d'articles&gt; Marque,
 Customer > Customer Group > Territory,Client&gt; Groupe de clients&gt; Territoire,
@@ -4297,7 +4297,7 @@ Fetch Serial Numbers based on FIFO,Récupérer les numéros de série basés sur
 Current Odometer Value should be greater than Last Odometer Value {0},La valeur actuelle de l'odomètre doit être supérieure à la dernière valeur de l'odomètre {0},
 No additional expenses has been added,Aucune dépense supplémentaire n'a été ajoutée,
 Asset{} {assets_link} created for {},Élément {} {assets_link} créé pour {},
-Row {}: Asset Naming Series is mandatory for the auto creation for item {},Ligne {}: la série de noms d'éléments est obligatoire pour la création automatique de l'élément {},
+Row {}: Asset Naming Series is mandatory for the auto creation for item {},Ligne {}: Le masque de numérotation d'éléments est obligatoire pour la création automatique de l'élément {},
 Assets not created for {0}. You will have to create asset manually.,Éléments non créés pour {0}. Vous devrez créer un actif manuellement.,
 {0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.,{0} {1} a des écritures comptables dans la devise {2} pour l'entreprise {3}. Veuillez sélectionner un compte à recevoir ou à payer avec la devise {2}.,
 Invalid Account,Compte invalide,
@@ -4321,7 +4321,7 @@ Advanced Settings,Réglages avancés,
 Path,Chemin,
 Components,Composants,
 Verified By,Vérifié Par,
-Invalid naming series (. missing) for {0},Série de noms non valide (. Manquante) pour {0},
+Invalid naming series (. missing) for {0},Masque de numérotation non valide (. Manquante) pour {0},
 Filter Based On,Filtre basé sur,
 Reqd by date,Reqd par date,
 Manufacturer Part Number <b>{0}</b> is invalid,Le numéro de <b>pièce du</b> fabricant <b>{0}</b> n'est pas valide,
@@ -5933,7 +5933,7 @@ Student Admission Program,Programme d'admission des étudiants,
 Minimum Age,Âge Minimum,
 Maximum Age,Âge Maximum,
 Application Fee,Frais de Dossier,
-Naming Series (for Student Applicant),Nom de série (pour un candidat étudiant),
+Naming Series (for Student Applicant),Masque de numérotation (pour un candidat étudiant),
 LMS Only,LMS seulement,
 EDU-APP-.YYYY.-,EDU-APP-YYYY.-,
 Application Status,État de la Demande,
@@ -6424,8 +6424,12 @@ Hotel Reservation User,Utilisateur chargé des réservations d'hôtel,
 Hotel Room Reservation Item,Article de réservation de la chambre d'hôtel,
 Hotel Settings,Paramètres d'Hotel,
 Default Taxes and Charges,Taxes et frais par défaut,
+<<<<<<< HEAD
 Default Invoice Naming Series,Numéro de série par défaut pour les factures,
 Additional Salary,Salaire supplémentaire,
+=======
+Default Invoice Naming Series,Masque de numérotation par défaut pour les factures,
+>>>>>>> e462edc628 (chore: update fr translation for Naming Series (#36785))
 HR,RH,
 HR-ADS-.YY.-.MM.-,HR-ADS-.YY .-. MM.-,
 Salary Component,Composante Salariale,
@@ -8034,7 +8038,7 @@ Default Unit of Measure,Unité de Mesure par Défaut,
 Maintain Stock,Maintenir Stock,
 Standard Selling Rate,Prix de Vente Standard,
 Auto Create Assets on Purchase,Création automatique d'actifs à l'achat,
-Asset Naming Series,Nom de série de l'actif,
+Asset Naming Series,Masque de numérotation de l'actif,
 Over Delivery/Receipt Allowance (%),Surlivrance / indemnité de réception (%),
 Barcodes,Codes-barres,
 Shelf Life In Days,Durée de conservation en jours,
@@ -8053,7 +8057,7 @@ Serial Nos and Batches,N° de Série et Lots,
 Has Batch No,A un Numéro de Lot,
 Automatically Create New Batch,Créer un Nouveau Lot Automatiquement,
 Batch Number Series,Série de numéros de lots,
-"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Exemple: ABCD. #####. Si la série est définie et que le numéro de lot n'est pas mentionné dans les transactions, un numéro de lot sera automatiquement créé en avec cette série. Si vous préferez mentionner explicitement et systématiquement le numéro de lot pour cet article, laissez ce champ vide. Remarque: ce paramètre aura la priorité sur le préfixe de la série dans les paramètres de stock.",
+"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Exemple: ABCD. #####. Si le masque est définie et que le numéro de lot n'est pas mentionné dans les transactions, un numéro de lot sera automatiquement créé en avec ce masque. Si vous préferez mentionner explicitement et systématiquement le numéro de lot pour cet article, laissez ce champ vide. Remarque: ce paramètre aura la priorité sur le préfixe du masque dans les paramètres de stock.",
 Has Expiry Date,A une date d'expiration,
 Retain Sample,Conserver l'échantillon,
 Max Sample Quantity,Quantité maximum d'échantillon,
@@ -8353,8 +8357,8 @@ Inter Warehouse Transfer Settings,Paramètres de transfert entre entrepôts,
 Freeze Stock Entries,Geler les Entrées de Stocks,
 Stock Frozen Upto,Stock Gelé Jusqu'au,
 Batch Identification,Identification par lots,
-Use Naming Series,Utiliser la série de noms,
-Naming Series Prefix,Préfix du nom de série,
+Use Naming Series,Utiliser le masque de numérotation,
+Naming Series Prefix,Préfix du masque de numérotation,
 UOM Category,Catégorie d'unité de mesure (UdM),
 UOM Conversion Detail,Détails de Conversion de l'UdM,
 Variant Field,Champ de Variante,
@@ -8824,7 +8828,7 @@ Is Inter State,Est Inter State,
 Purchase Details,Détails d'achat,
 Depreciation Posting Date,Date comptable de l'amortissement,
 "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a  ","Par défaut, le nom du fournisseur est défini selon le nom du fournisseur saisi. Si vous souhaitez que les fournisseurs soient nommés par un",
- choose the 'Naming Series' option.,choisissez l'option 'Naming Series'.,
+ choose the 'Naming Series' option.,choisissez l'option 'Masque de numérotation'.,
 Configure the default Price List when creating a new Purchase transaction. Item prices will be fetched from this Price List.,Configurez la liste de prix par défaut lors de la création d'une nouvelle transaction d'achat. Les prix des articles seront extraits de cette liste de prix.,
 "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master.","Si cette option est configurée «Oui», ERPNext vous empêchera de créer une facture d'achat ou un reçu sans créer d'abord une Commande d'Achat. Cette configuration peut être remplacée pour un fournisseur particulier en cochant la case «Autoriser la création de facture d'achat sans commmande d'achat» dans la fiche fournisseur.",
 "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master.","Si cette option est configurée «Oui», ERPNext vous empêchera de créer une facture d'achat sans créer d'abord un reçu d'achat. Cette configuration peut être remplacée pour un fournisseur particulier en cochant la case &quot;Autoriser la création de facture d'achat sans reçu d'achat&quot; dans la fiche fournisseur.",
@@ -9858,6 +9862,7 @@ Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de dé
 Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
 Control Historical Stock Transactions,Controle de l'historique des stransaction de stock
 No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
+<<<<<<< HEAD
 Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
 Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
 "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.","Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire"
@@ -9866,6 +9871,16 @@ Update Existing Price List Rate,Mise a jour automatique du prix dans les listes 
 Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
 Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
 Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
+=======
+Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées,
+Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée,
+"If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
+Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent,
+Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix,
+Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock,
+Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions,
+Have Default Naming Series for Batch ID?,Masque de numérotation par défaut pour les Lots ou Séries,
+>>>>>>> e462edc628 (chore: update fr translation for Naming Series (#36785))
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
 Allowed Items,Articles autorisés
 Party Specific Item,Restriction d'article disponible
@@ -9892,6 +9907,7 @@ Interview Feedback,Retour d'entretien
 Journal Energy Point,Historique des points d'énergies
 Billing Address Details,Adresse de facturation (détails)
 Supplier Address Details,Adresse Fournisseur (détails)
+<<<<<<< HEAD
 Retail,Commerce
 Users,Utilisateurs
 Permission Manager,Gestion des permissions
@@ -9923,3 +9939,48 @@ Enable Reviews and Ratings,Activer les avis et notes
 Enable Recommendations,Activer les recommendations
 Item Search Settings,Paramétrage de la recherche d'article
 Purchase demande,Demande de materiel
+=======
+Retail,Commerce,
+Users,Utilisateurs,
+Permission Manager,Gestion des permissions,
+Fetch Timesheet,Récuprer les temps saisis,
+Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur,
+Quality Inspection(s),Inspection(s) Qualite,
+Set Advances and Allocate (FIFO),Affecter les encours au réglement,
+Apply Putaway Rule,Appliquer la régle de routage d'entrepot,
+Delete Transactions,Supprimer les transactions,
+Default Payment Discount Account,Compte par défaut des paiements de remise,
+Unrealized Profit / Loss Account,Compte de perte,
+Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés,
+Publish in Website,Publier sur le Site Web,
+List View,Vue en liste,
+Allow Excess Material Transfer,Autoriser les transfert de stock supérieurs à l'attendue,
+Allow transferring raw materials even after the Required Quantity is fulfilled,Autoriser les transfert  de matiéres premiére mais si la quantité requise est atteinte,
+Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations de correction de coût pour la valorisation des produits finis,
+Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications,
+System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications,
+Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication,
+Quality Inspection Parameter,Paramétre des Inspection Qualite,
+Parameter Group,Groupe de paramétre,
+E Commerce Settings,Paramétrage E-Commerce,
+Follow these steps to create a landing page for your store:,Suivez les intructions suivantes pour créer votre page d'accueil de boutique en ligne,
+Show Price in Quotation,Afficher les prix sur les devis,
+Add-ons,Extensions,
+Enable Wishlist,Activer la liste de souhaits,
+Enable Reviews and Ratings,Activer les avis et notes,
+Enable Recommendations,Activer les recommendations,
+Item Search Settings,Paramétrage de la recherche d'article,
+Purchase demande,Demande de materiel,
+Internal Customer,Client interne
+Internal Supplier,Fournisseur interne
+Contact & Address,Contact et Adresse
+Primary Address and Contact,Adresse et contact principal
+Supplier Primary Contact,Contact fournisseur principal
+Supplier Primary Address,Adresse fournisseur principal
+From Opportunity,Depuis l'opportunité
+Default Receivable Accounts,Compte de débit par défaut
+Receivable Accounts,Compte de débit
+Mention if a non-standard receivable account,Veuillez mentionner s'il s'agit d'un compte débiteur non standard
+Allow Purchase,Autoriser à l'achat
+Inventory Settings,Paramétrage de l'inventaire
+>>>>>>> e462edc628 (chore: update fr translation for Naming Series (#36785))
