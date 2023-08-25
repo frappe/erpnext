@@ -45,7 +45,8 @@ erpnext.setup.slides_settings = [
 				fieldname: 'setup_demo',
 				label: __('Generate Demo Data for Exploration'),
 				fieldtype: 'Check',
-				description: 'If checked, we will create demo data for you to explore the system. This demo data can be erased later.'},
+				description: __('If checked, we will create demo data for you to explore the system. This demo data can be erased later.')
+			},
 		],
 
 		onload: function (slide) {

@@ -50,13 +50,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				self.filters.show_future_payments,
 				self.filters.company,
 				party=party,
-				account_type=self.account_type,
 			)
 			or {}
 		)
 
 		if self.filters.show_gl_balance:
-			gl_balance_map = get_gl_balance(self.filters.report_date)
+			gl_balance_map = get_gl_balance(self.filters.report_date, self.filters.company)
 
 		for party, party_dict in self.party_total.items():
 			if party_dict.outstanding == 0:
@@ -233,12 +232,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		self.add_column(label="Total Amount Due", fieldname="total_due")
 
 
-def get_gl_balance(report_date):
+def get_gl_balance(report_date, company):
 	return frappe._dict(
 		frappe.db.get_all(
 			"GL Entry",
 			fields=["party", "sum(debit -  credit)"],
-			filters={"posting_date": ("<=", report_date), "is_cancelled": 0},
+			filters={"posting_date": ("<=", report_date), "is_cancelled": 0, "company": company},
 			group_by="party",
 			as_list=1,
 		)

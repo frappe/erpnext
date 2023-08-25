@@ -131,6 +131,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			args: { "pos_profile": frm.pos_profile },
 			callback: ({ message: profile }) => {
 				this.update_customer_groups_settings(profile?.customer_groups);
+				this.frm.set_value("company", profile?.company);
 			},
 		});
 	}

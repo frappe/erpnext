@@ -759,7 +759,7 @@ class BuyingController(SubcontractingController):
 				"company": self.company,
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
-				"calculate_depreciation": 1,
+				"calculate_depreciation": 0,
 				"purchase_receipt_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
 				"asset_quantity": row.qty if is_grouped_asset else 0,

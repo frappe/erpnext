@@ -908,7 +908,9 @@ def get_outstanding_invoices(
 	min_outstanding=None,
 	max_outstanding=None,
 	accounting_dimensions=None,
-	vouchers=None,
+	vouchers=None,  # list of dicts [{'voucher_type': '', 'voucher_no': ''}] for filtering
+	limit=None,  # passed by reconciliation tool
+	voucher_no=None,  # filter passed by reconciliation tool
 ):
 
 	ple = qb.DocType("Payment Ledger Entry")
@@ -941,6 +943,8 @@ def get_outstanding_invoices(
 		max_outstanding=max_outstanding,
 		get_invoices=True,
 		accounting_dimensions=accounting_dimensions or [],
+		limit=limit,
+		voucher_no=voucher_no,
 	)
 
 	for d in invoice_list:
@@ -1678,12 +1682,13 @@ class QueryPaymentLedger(object):
 		self.voucher_posting_date = []
 		self.min_outstanding = None
 		self.max_outstanding = None
+		self.limit = self.voucher_no = None
 
 	def reset(self):
 		# clear filters
 		self.vouchers.clear()
 		self.common_filter.clear()
-		self.min_outstanding = self.max_outstanding = None
+		self.min_outstanding = self.max_outstanding = self.limit = None
 
 		# clear result
 		self.voucher_outstandings.clear()
@@ -1697,6 +1702,7 @@ class QueryPaymentLedger(object):
 
 		filter_on_voucher_no = []
 		filter_on_against_voucher_no = []
+
 		if self.vouchers:
 			voucher_types = set([x.voucher_type for x in self.vouchers])
 			voucher_nos = set([x.voucher_no for x in self.vouchers])
@@ -1706,6 +1712,10 @@ class QueryPaymentLedger(object):
 
 			filter_on_against_voucher_no.append(ple.against_voucher_type.isin(voucher_types))
 			filter_on_against_voucher_no.append(ple.against_voucher_no.isin(voucher_nos))
+
+		if self.voucher_no:
+			filter_on_voucher_no.append(ple.voucher_no.like(f"%{self.voucher_no}%"))
+			filter_on_against_voucher_no.append(ple.against_voucher_no.like(f"%{self.voucher_no}%"))
 
 		# build outstanding amount filter
 		filter_on_outstanding_amount = []
@@ -1822,6 +1832,11 @@ class QueryPaymentLedger(object):
 				)
 			)
 
+		if self.limit:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.limit(self.limit)
+			)
+
 		# execute SQL
 		self.voucher_outstandings = self.cte_query_voucher_amount_and_outstanding.run(as_dict=True)
 
@@ -1835,6 +1850,8 @@ class QueryPaymentLedger(object):
 		get_payments=False,
 		get_invoices=False,
 		accounting_dimensions=None,
+		limit=None,
+		voucher_no=None,
 	):
 		"""
 		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
@@ -1856,6 +1873,8 @@ class QueryPaymentLedger(object):
 		self.max_outstanding = max_outstanding
 		self.get_payments = get_payments
 		self.get_invoices = get_invoices
+		self.limit = limit
+		self.voucher_no = voucher_no
 		self.query_for_outstanding()
 
 		return self.voucher_outstandings
