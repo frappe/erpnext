@@ -476,9 +476,11 @@
   },
   {
    "default": "1",
+   "depends_on": "eval: !doc.is_scrap_item",
    "fieldname": "recalculate_rate",
    "fieldtype": "Check",
-   "label": "Recalculate Rate"
+   "label": "Recalculate Rate",
+   "read_only_depends_on": "eval: doc.is_scrap_item"
   },
   {
    "fieldname": "serial_and_batch_bundle",
@@ -519,6 +521,7 @@
   {
    "fieldname": "reference_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Reference Name",
    "no_copy": 1,
    "read_only": 1
@@ -527,7 +530,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-24 21:57:15.897010",
+ "modified": "2023-08-25 09:33:47.232140",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
