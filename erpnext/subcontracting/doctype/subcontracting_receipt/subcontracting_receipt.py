@@ -171,6 +171,7 @@ class SubcontractingReceipt(SubcontractingController):
 								"rejected_warehouse": self.rejected_warehouse,
 								"service_cost_per_qty": 0,
 								"reference_name": item.name,
+								"recalculate_rate": 0,
 							},
 						)
 
@@ -239,23 +240,24 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.items:
-			if item.qty and not item.is_scrap_item:
-				if item.name in rm_cost_map:
-					item.rm_supp_cost = rm_cost_map[item.name]
-					item.rm_cost_per_qty = item.rm_supp_cost / item.qty
-					rm_cost_map.pop(item.name)
+			if not item.is_scrap_item:
+				if item.qty:
+					if item.name in rm_cost_map:
+						item.rm_supp_cost = rm_cost_map[item.name]
+						item.rm_cost_per_qty = item.rm_supp_cost / item.qty
+						rm_cost_map.pop(item.name)
 
-				if item.name in scrap_cost_map:
-					item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
-					scrap_cost_map.pop(item.name)
+					if item.name in scrap_cost_map:
+						item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
+						scrap_cost_map.pop(item.name)
 
-			if item.recalculate_rate:
-				item.rate = (
-					flt(item.rm_cost_per_qty)
-					+ flt(item.service_cost_per_qty)
-					+ flt(item.additional_cost_per_qty)
-					- flt(item.scrap_cost_per_qty)
-				)
+				if item.recalculate_rate:
+					item.rate = (
+						flt(item.rm_cost_per_qty)
+						+ flt(item.service_cost_per_qty)
+						+ flt(item.additional_cost_per_qty)
+						- flt(item.scrap_cost_per_qty)
+					)
 
 			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
 			item.amount = flt(item.qty) * flt(item.rate)
