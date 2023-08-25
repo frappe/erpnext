@@ -830,12 +830,7 @@ erpnext.accounts.bank_reconciliation.ActionsPanel = class ActionsPanel {
 					let value = this.create_field_group.get_value("document_type");
 					let fields = this.create_field_group;
 
-					fields.get_field("project").df.hidden = value === "Journal Entry";
-					fields.get_field("cost_center").df.hidden = value === "Journal Entry";
-
-					fields.get_field("journal_entry_type").df.hidden = value === "Payment Entry";
 					fields.get_field("journal_entry_type").df.reqd = value === "Journal Entry";
-					fields.get_field("second_account").df.hidden = value === "Payment Entry";
 					fields.get_field("second_account").df.reqd = value === "Journal Entry";
 
 					this.create_field_group.refresh();
@@ -850,7 +845,7 @@ erpnext.accounts.bank_reconciliation.ActionsPanel = class ActionsPanel {
 				fieldname: "reference_number",
 				fieldtype: "Data",
 				label: __("Reference Number"),
-				default: this.transaction.reference_number || this.transaction.description,
+				default: this.transaction.reference_number || this.transaction.description.slice(0, 140),
 			},
 			{
 				fieldname: "posting_date",
@@ -891,7 +886,7 @@ erpnext.accounts.bank_reconciliation.ActionsPanel = class ActionsPanel {
 				options:
 				`Bank Entry\nJournal Entry\nInter Company Journal Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation\nDeferred Revenue\nDeferred Expense`,
 				default: "Bank Entry",
-				hidden: 1,
+				depends_on: "eval: doc.document_type == 'Journal Entry'",
 			},
 			{
 				fieldname: "second_account",
@@ -906,7 +901,7 @@ erpnext.accounts.bank_reconciliation.ActionsPanel = class ActionsPanel {
 						},
 					};
 				},
-				hidden: 1,
+				depends_on: "eval: doc.document_type == 'Journal Entry'",
 			},
 			{
 				fieldname: "party_type",
@@ -943,12 +938,14 @@ erpnext.accounts.bank_reconciliation.ActionsPanel = class ActionsPanel {
 				fieldtype: "Link",
 				label: "Project",
 				options: "Project",
+				depends_on: "eval: doc.document_type == 'Payment Entry'",
 			},
 			{
 				fieldname: "cost_center",
 				fieldtype: "Link",
 				label: "Cost Center",
 				options: "Cost Center",
+				depends_on: "eval: doc.document_type == 'Payment Entry'",
 			},
 			{
 				fieldtype: "Section Break"
