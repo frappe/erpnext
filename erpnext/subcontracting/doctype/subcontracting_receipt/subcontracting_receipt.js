@@ -3,7 +3,7 @@
 
 frappe.provide('erpnext.buying');
 
-erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Receipt");
+erpnext.landed_cost_taxes_and_charges.setup_triggers('Subcontracting Receipt');
 
 frappe.ui.form.on('Subcontracting Receipt', {
 	setup: (frm) => {
@@ -77,13 +77,13 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		});
 
-		frm.set_query("serial_and_batch_bundle", "supplied_items", (doc, cdt, cdn) => {
+		frm.set_query('serial_and_batch_bundle', 'supplied_items', (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
 			return {
 				filters: {
 					'item_code': row.rm_item_code,
 					'voucher_type': doc.doctype,
-					'voucher_no': ["in", [doc.name, ""]],
+					'voucher_no': ['in', [doc.name, '']],
 					'is_cancelled': 0,
 				}
 			}
@@ -180,6 +180,23 @@ frappe.ui.form.on('Subcontracting Receipt', {
 	rejected_warehouse: (frm) => {
 		set_warehouse_in_children(frm.doc.items, 'rejected_warehouse', frm.doc.rejected_warehouse);
 	},
+
+	get_scrap_items: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: 'get_scrap_items',
+			args: {
+				recalculate_rate: true
+			},
+			freeze: true,
+			freeze_message: __('Getting Scrap Items'),
+			callback: (r) => {
+				if (!r.exc) {
+					frm.refresh();
+				}
+			}
+		});
+	},
 });
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
@@ -203,6 +220,12 @@ frappe.ui.form.on('Subcontracting Receipt Item', {
 
 	rate(frm) {
 		set_missing_values(frm);
+	},
+
+	recalculate_rate(frm) {
+		if (frm.doc.recalculate_rate) {
+			set_missing_values(frm);
+		}
 	},
 
 	items_remove: function(frm) {

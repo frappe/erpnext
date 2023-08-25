@@ -148,7 +148,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.supplied_items = []
 
 	@frappe.whitelist()
-	def get_scrap_items(self):
+	def get_scrap_items(self, recalculate_rate=False):
 		if (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "BOM"
@@ -163,42 +163,43 @@ class SubcontractingReceipt(SubcontractingController):
 						self.append(
 							"items",
 							{
+								"is_scrap_item": 1,
+								"reference_name": item.name,
 								"item_code": scrap_item.item_code,
 								"item_name": scrap_item.item_name,
 								"qty": qty,
 								"stock_uom": scrap_item.stock_uom,
+								"recalculate_rate": 1,
 								"rate": scrap_item.rate,
+								"rm_cost_per_qty": 0,
+								"service_cost_per_qty": 0,
+								"additional_cost_per_qty": 0,
+								"scrap_cost_per_qty": scrap_item.rate,
 								"amount": qty * scrap_item.rate,
-								"is_scrap_item": 1,
 								"warehouse": self.set_warehouse,
 								"rejected_warehouse": self.rejected_warehouse,
-								"service_cost_per_qty": 0,
-								"reference_name": item.name,
-								"recalculate_rate": 0,
 							},
 						)
-			else:
+
+			if recalculate_rate:
 				self.calculate_additional_costs()
 				self.calculate_items_qty_and_amount()
 
-	def remove_scrap_items(self):
+	def remove_scrap_items(self, recalculate_rate=False):
 		for item in list(self.items):
 			if item.is_scrap_item:
 				self.remove(item)
 			else:
 				item.scrap_cost_per_qty = 0
 
+		if recalculate_rate:
+			self.calculate_items_qty_and_amount()
+
 	@frappe.whitelist()
 	def set_missing_values(self):
-		self.calculate_additional_costs()
-		self.calculate_supplied_items_qty_and_amount()
-		self.calculate_items_qty_and_amount()
-
-	def calculate_supplied_items_qty_and_amount(self):
-		for item in self.get("supplied_items") or []:
-			item.amount = item.rate * item.consumed_qty
-
 		self.set_available_qty_for_consumption()
+		self.calculate_additional_costs()
+		self.calculate_items_qty_and_amount()
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
@@ -233,6 +234,8 @@ class SubcontractingReceipt(SubcontractingController):
 	def calculate_items_qty_and_amount(self):
 		rm_cost_map = {}
 		for item in self.get("supplied_items") or []:
+			item.amount = flt(item.consumed_qty) * flt(item.rate)
+
 			if item.reference_name in rm_cost_map:
 				rm_cost_map[item.reference_name] += item.amount
 			else:
@@ -241,15 +244,18 @@ class SubcontractingReceipt(SubcontractingController):
 		scrap_cost_map = {}
 		for item in self.get("items") or []:
 			if item.is_scrap_item:
+				if item.recalculate_rate:
+					item.rate = flt(item.scrap_cost_per_qty) + flt(item.additional_cost_per_qty)
+
+				item.amount = flt(item.qty) * flt(item.rate)
+
 				if item.reference_name in scrap_cost_map:
 					scrap_cost_map[item.reference_name] += item.amount
 				else:
 					scrap_cost_map[item.reference_name] = item.amount
-			else:
-				item.scrap_cost_per_qty = 0
 
 		total_qty = total_amount = 0
-		for item in self.items:
+		for item in self.get("items") or []:
 			if not item.is_scrap_item:
 				if item.qty:
 					if item.name in rm_cost_map:
@@ -260,6 +266,8 @@ class SubcontractingReceipt(SubcontractingController):
 					if item.name in scrap_cost_map:
 						item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
 						scrap_cost_map.pop(item.name)
+					else:
+						item.scrap_cost_per_qty = 0
 
 				if item.recalculate_rate:
 					item.rate = (
