@@ -52,14 +52,14 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		}));
 
-		frm.set_query('expense_account', 'items', function () {
+		frm.set_query('expense_account', 'items', () => {
 			return {
 				query: 'erpnext.controllers.queries.get_expense_account',
 				filters: { 'company': frm.doc.company }
 			};
 		});
 
-		frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
+		frm.set_query('batch_no', 'items', (doc, cdt, cdn) => {
 			var row = locals[cdt][cdn];
 			return {
 				filters: {
@@ -68,7 +68,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		});
 
-		frm.set_query('batch_no', 'supplied_items', function(doc, cdt, cdn) {
+		frm.set_query('batch_no', 'supplied_items', (doc, cdt, cdn) => {
 			var row = locals[cdt][cdn];
 			return {
 				filters: {
@@ -101,7 +101,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 
 		let batch_no_field = frm.get_docfield('items', 'batch_no');
 		if (batch_no_field) {
-			batch_no_field.get_route_options_for_new_doc = function(row) {
+			batch_no_field.get_route_options_for_new_doc = (row) => {
 				return {
 					'item': row.doc.item_code
 				}
@@ -111,7 +111,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 
 	refresh: (frm) => {
 		if (frm.doc.docstatus > 0) {
-			frm.add_custom_button(__('Stock Ledger'), function () {
+			frm.add_custom_button(__('Stock Ledger'), () => {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					from_date: frm.doc.posting_date,
@@ -122,7 +122,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				frappe.set_route('query-report', 'Stock Ledger');
 			}, __('View'));
 
-			frm.add_custom_button(__('Accounting Ledger'), function () {
+			frm.add_custom_button(__('Accounting Ledger'), () => {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					from_date: frm.doc.posting_date,
@@ -136,7 +136,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		}
 
 		if (!frm.doc.is_return && frm.doc.docstatus == 1 && frm.doc.per_returned < 100) {
-			frm.add_custom_button(__('Subcontract Return'), function () {
+			frm.add_custom_button(__('Subcontract Return'), () => {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return',
 					frm: frm
@@ -146,7 +146,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		}
 
 		if (frm.doc.docstatus == 0) {
-			frm.add_custom_button(__('Subcontracting Order'), function () {
+			frm.add_custom_button(__('Subcontracting Order'), () => {
 				if (!frm.doc.supplier) {
 					frappe.throw({
 						title: __('Mandatory'),
@@ -200,18 +200,18 @@ frappe.ui.form.on('Subcontracting Receipt', {
 });
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
-	amount: function (frm, cdt, cdn) {
+	amount: (frm, cdt, cdn) => {
 		set_missing_values(frm);
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
 
-	expense_account: function (frm, cdt, cdn) {
+	expense_account: (frm, cdt, cdn) => {
 		frm.events.set_account_currency(frm, cdt, cdn);
 	},
 
-	additional_costs_remove: function(frm) {
-        set_missing_values(frm);
-    }
+	additional_costs_remove: (frm) => {
+		set_missing_values(frm);
+	}
 });
 
 frappe.ui.form.on('Subcontracting Receipt Item', {
@@ -233,9 +233,9 @@ frappe.ui.form.on('Subcontracting Receipt Item', {
 		}
 	},
 
-	items_remove: function(frm) {
-        set_missing_values(frm);
-    }
+	items_remove: (frm) => {
+		set_missing_values(frm);
+	}
 });
 
 frappe.ui.form.on('Subcontracting Receipt Supplied Item', {
