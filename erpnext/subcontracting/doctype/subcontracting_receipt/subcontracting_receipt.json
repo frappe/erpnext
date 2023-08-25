@@ -40,6 +40,7 @@
   "col_break_warehouse",
   "supplier_warehouse",
   "items_section",
+  "get_scrap_items",
   "items",
   "section_break0",
   "total_qty",
@@ -626,12 +627,18 @@
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
    "print_hide": 1
+  },
+  {
+   "fieldname": "get_scrap_items",
+   "fieldtype": "Button",
+   "label": "Get Scrap Items",
+   "options": "get_scrap_items"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-06 18:43:16.171842",
+ "modified": "2023-08-25 10:02:11.546559",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

@@ -204,6 +204,10 @@ frappe.ui.form.on('Subcontracting Receipt Item', {
 	rate(frm) {
 		set_missing_values(frm);
 	},
+
+	items_remove: function(frm) {
+        set_missing_values(frm);
+    }
 });
 
 frappe.ui.form.on('Subcontracting Receipt Supplied Item', {

@@ -147,6 +147,7 @@ class SubcontractingReceipt(SubcontractingController):
 		):
 			self.supplied_items = []
 
+	@frappe.whitelist()
 	def get_scrap_items(self):
 		if (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
@@ -176,11 +177,16 @@ class SubcontractingReceipt(SubcontractingController):
 								"recalculate_rate": 0,
 							},
 						)
+			else:
+				self.calculate_additional_costs()
+				self.calculate_items_qty_and_amount()
 
 	def remove_scrap_items(self):
 		for item in list(self.items):
 			if item.is_scrap_item:
 				self.remove(item)
+			else:
+				item.scrap_cost_per_qty = 0
 
 	@frappe.whitelist()
 	def set_missing_values(self):
@@ -239,6 +245,8 @@ class SubcontractingReceipt(SubcontractingController):
 					scrap_cost_map[item.reference_name] += item.amount
 				else:
 					scrap_cost_map[item.reference_name] = item.amount
+			else:
+				item.scrap_cost_per_qty = 0
 
 		total_qty = total_amount = 0
 		for item in self.items:
