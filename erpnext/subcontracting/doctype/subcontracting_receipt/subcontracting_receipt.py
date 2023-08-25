@@ -169,12 +169,12 @@ class SubcontractingReceipt(SubcontractingController):
 								"item_name": scrap_item.item_name,
 								"qty": qty,
 								"stock_uom": scrap_item.stock_uom,
-								"recalculate_rate": 1,
+								"recalculate_rate": 0,
 								"rate": scrap_item.rate,
 								"rm_cost_per_qty": 0,
 								"service_cost_per_qty": 0,
 								"additional_cost_per_qty": 0,
-								"scrap_cost_per_qty": scrap_item.rate,
+								"scrap_cost_per_qty": 0,
 								"amount": qty * scrap_item.rate,
 								"warehouse": self.set_warehouse,
 								"rejected_warehouse": self.rejected_warehouse,
@@ -244,9 +244,6 @@ class SubcontractingReceipt(SubcontractingController):
 		scrap_cost_map = {}
 		for item in self.get("items") or []:
 			if item.is_scrap_item:
-				if item.recalculate_rate:
-					item.rate = flt(item.scrap_cost_per_qty) + flt(item.additional_cost_per_qty)
-
 				item.amount = flt(item.qty) * flt(item.rate)
 
 				if item.reference_name in scrap_cost_map:

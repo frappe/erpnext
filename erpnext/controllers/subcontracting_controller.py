@@ -895,19 +895,24 @@ class SubcontractingController(StockController):
 
 		if self.total_additional_costs:
 			if self.distribute_additional_costs_based_on == "Amount":
-				total_amt = sum(flt(item.amount) for item in self.get("items"))
+				total_amt = sum(
+					flt(item.amount) for item in self.get("items") if not item.get("is_scrap_item")
+				)
 				for item in self.items:
-					item.additional_cost_per_qty = (
-						(item.amount * self.total_additional_costs) / total_amt
-					) / item.qty
+					if not item.get("is_scrap_item"):
+						item.additional_cost_per_qty = (
+							(item.amount * self.total_additional_costs) / total_amt
+						) / item.qty
 			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items"))
+				total_qty = sum(flt(item.qty) for item in self.get("items") if not item.get("is_scrap_item"))
 				additional_cost_per_qty = self.total_additional_costs / total_qty
 				for item in self.items:
-					item.additional_cost_per_qty = additional_cost_per_qty
+					if not item.get("is_scrap_item"):
+						item.additional_cost_per_qty = additional_cost_per_qty
 		else:
 			for item in self.items:
-				item.additional_cost_per_qty = 0
+				if not item.get("is_scrap_item"):
+					item.additional_cost_per_qty = 0
 
 	@frappe.whitelist()
 	def get_current_stock(self):

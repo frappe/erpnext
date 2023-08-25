@@ -201,12 +201,17 @@ frappe.ui.form.on('Subcontracting Receipt', {
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
 	amount: function (frm, cdt, cdn) {
+		set_missing_values(frm);
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
 
 	expense_account: function (frm, cdt, cdn) {
 		frm.events.set_account_currency(frm, cdt, cdn);
-	}
+	},
+
+	additional_costs_remove: function(frm) {
+        set_missing_values(frm);
+    }
 });
 
 frappe.ui.form.on('Subcontracting Receipt Item', {
