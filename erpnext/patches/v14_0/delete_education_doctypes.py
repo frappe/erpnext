@@ -43,8 +43,17 @@ def execute():
 		frappe.delete_doc("Number Card", card, ignore_missing=True, force=True)
 
 	doctypes = frappe.get_all("DocType", {"module": "education", "custom": 0}, pluck="name")
+
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
+
+	portal_settings = frappe.get_doc("Portal Settings")
+
+	for row in portal_settings.get("menu"):
+		if row.reference_doctype in doctypes:
+			row.delete()
+
+	portal_settings.save()
 
 	frappe.delete_doc("Module Def", "Education", ignore_missing=True, force=True)
 
