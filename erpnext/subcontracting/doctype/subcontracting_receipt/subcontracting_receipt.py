@@ -45,20 +45,22 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate(self):
 		self.reset_supplied_items()
+		self.validate_posting_time()
+
+		if getdate(self.posting_date) > getdate(nowdate()):
+			frappe.throw(_("Posting Date cannot be future date"))
+
 		super(SubcontractingReceipt, self).validate()
 
 		if self.is_new() and self.get("_action") == "save":
 			self.get_scrap_items()
 
 		self.set_missing_values()
-		self.validate_posting_time()
 
 		if self.get("_action") == "submit":
+			self.validate_scrap_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
-
-		if getdate(self.posting_date) > getdate(nowdate()):
-			frappe.throw(_("Posting Date cannot be future date"))
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
@@ -267,6 +269,28 @@ class SubcontractingReceipt(SubcontractingController):
 		else:
 			self.total_qty = total_qty
 			self.total = total_amount
+
+	def validate_scrap_items(self):
+		for item in self.items:
+			if item.is_scrap_item:
+				if not item.qty:
+					frappe.throw(
+						_("Row #{0}: Scrap Item Qty cannot be zero").format(item.idx),
+					)
+
+				if item.rejected_qty:
+					frappe.throw(
+						_("Row #{0}: Rejected Qty cannot be set for Scrap Item {1}.").format(
+							item.idx, frappe.bold(item.item_code)
+						),
+					)
+
+				if not item.reference_name:
+					frappe.throw(
+						_("Row #{0}: Finished Good reference is mandatory for Scrap Item {1}.").format(
+							item.idx, frappe.bold(item.item_code)
+						),
+					)
 
 	def validate_accepted_warehouse(self):
 		for item in self.get("items"):
