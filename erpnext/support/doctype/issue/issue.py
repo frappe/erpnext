@@ -8,12 +8,19 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.core.utils import get_parent_doc
+from frappe.desk.form.assign_to import add
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils import (
+	date_diff,
+	get_datetime,
+	get_link_to_form,
+	now_datetime,
+	time_diff_in_seconds,
+)
 from frappe.utils.user import is_website_user
 
 
@@ -391,3 +398,32 @@ def get_holidays(holiday_list_name):
 	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
 	holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
 	return holidays
+
+
+@frappe.whitelist()
+def create_new_task_from_issue(self, assign_to):
+	self = frappe.json.loads(self)
+	doc = frappe.new_doc("Task")
+	doc.subject = self.get("subject")
+	doc.issue = self.get("name")
+	doc.description = self.get("description")
+	doc.priority = self.get("priority")
+	doc.status = self.get("status")
+	doc.project = self.get("project")
+	doc.save()
+	args = {
+		"assign_to": [assign_to],
+		"doctype": "Task",
+		"name": doc.name,
+	}
+	add(args)
+	frappe.msgprint("Task Created Successfully , {0}".format(get_link_to_form("Task", doc.name)))
+
+
+@frappe.whitelist()
+def get_if_task_exist(self):
+	self = frappe.json.loads(self)
+	if name := frappe.db.exists("Task", {"issue": self.get("name")}):
+		return name
+	else:
+		return
