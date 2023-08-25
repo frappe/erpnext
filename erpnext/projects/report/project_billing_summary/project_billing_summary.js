@@ -25,5 +25,10 @@ frappe.query_reports["Project Billing Summary"] = {
 			default: frappe.datetime.add_days(frappe.datetime.month_start(),-1),
 			reqd: 1
 		},
+		{
+			fieldname:"include_draft_timesheets",
+			label: __("Include Timesheets in Draft Status"),
+			fieldtype: "Check",
+		},
 	]
 }

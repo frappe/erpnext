@@ -117,6 +117,9 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				name: __("Document Name"),
 				editable: false,
 				width: 1,
+				format: (value, row) => {
+					return frappe.form.formatters.Link(value, {options: row[2].content});
+				},
 			},
 			{
 				name: __("Reference Date"),

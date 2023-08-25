@@ -53,7 +53,7 @@ class ProductionPlan(Document):
 		data = sales_order_query(filters={"company": self.company, "sales_orders": sales_orders})
 
 		title = _("Production Plan Already Submitted")
-		if not data:
+		if not data and sales_orders:
 			msg = _("No items are available in the sales order {0} for production").format(sales_orders[0])
 			if len(sales_orders) > 1:
 				sales_orders = ", ".join(sales_orders)
@@ -347,7 +347,7 @@ class ProductionPlan(Document):
 			if not data.pending_qty:
 				continue
 
-			item_details = get_item_details(data.item_code)
+			item_details = get_item_details(data.item_code, throw=False)
 			if self.combine_items:
 				if item_details.bom_no in refs:
 					refs[item_details.bom_no]["so_details"].append(
@@ -794,6 +794,9 @@ class ProductionPlan(Document):
 
 			if not row.item_code:
 				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
+
+			if not row.bom_no:
+				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
 			bom_data = []
 
