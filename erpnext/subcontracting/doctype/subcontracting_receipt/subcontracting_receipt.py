@@ -149,41 +149,37 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def get_scrap_items(self, recalculate_rate=False):
-		if (
-			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
-			== "BOM"
-		):
-			self.remove_scrap_items()
+		self.remove_scrap_items()
 
-			for item in list(self.items):
-				if item.bom:
-					bom = frappe.get_doc("BOM", item.bom)
-					for scrap_item in bom.scrap_items:
-						qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
-						self.append(
-							"items",
-							{
-								"is_scrap_item": 1,
-								"reference_name": item.name,
-								"item_code": scrap_item.item_code,
-								"item_name": scrap_item.item_name,
-								"qty": qty,
-								"stock_uom": scrap_item.stock_uom,
-								"recalculate_rate": 0,
-								"rate": scrap_item.rate,
-								"rm_cost_per_qty": 0,
-								"service_cost_per_qty": 0,
-								"additional_cost_per_qty": 0,
-								"scrap_cost_per_qty": 0,
-								"amount": qty * scrap_item.rate,
-								"warehouse": self.set_warehouse,
-								"rejected_warehouse": self.rejected_warehouse,
-							},
-						)
+		for item in list(self.items):
+			if item.bom:
+				bom = frappe.get_doc("BOM", item.bom)
+				for scrap_item in bom.scrap_items:
+					qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
+					self.append(
+						"items",
+						{
+							"is_scrap_item": 1,
+							"reference_name": item.name,
+							"item_code": scrap_item.item_code,
+							"item_name": scrap_item.item_name,
+							"qty": qty,
+							"stock_uom": scrap_item.stock_uom,
+							"recalculate_rate": 0,
+							"rate": scrap_item.rate,
+							"rm_cost_per_qty": 0,
+							"service_cost_per_qty": 0,
+							"additional_cost_per_qty": 0,
+							"scrap_cost_per_qty": 0,
+							"amount": qty * scrap_item.rate,
+							"warehouse": self.set_warehouse,
+							"rejected_warehouse": self.rejected_warehouse,
+						},
+					)
 
-			if recalculate_rate:
-				self.calculate_additional_costs()
-				self.calculate_items_qty_and_amount()
+		if recalculate_rate:
+			self.calculate_additional_costs()
+			self.calculate_items_qty_and_amount()
 
 	def remove_scrap_items(self, recalculate_rate=False):
 		for item in list(self.items):
