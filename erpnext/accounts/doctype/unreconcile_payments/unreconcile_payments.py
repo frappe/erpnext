@@ -4,6 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 
 from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries, update_voucher_outstanding
@@ -78,6 +79,11 @@ def get_linked_payments_for_doc(doctype, txt, searchfield, start, page_len, filt
 		_dn = filters.get("docname")
 		ple = qb.DocType("Payment Ledger Entry")
 		if _dt in ["Sales Invoice", "Purchase Invoice"]:
+			criteria = [(ple.delinked == 0), (ple.against_voucher_no == _dn), (ple.amount < 0)]
+
+			if txt:
+				criteria.append(ple.voucher_no.like(f"%{txt}%"))
+
 			res = (
 				qb.from_(ple)
 				.select(
@@ -85,7 +91,7 @@ def get_linked_payments_for_doc(doctype, txt, searchfield, start, page_len, filt
 					ple.voucher_no,
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
 				)
-				.where((ple.delinked == 0) & (ple.against_voucher_no == _dn) & (ple.amount < 0))
+				.where(Criterion.all(criteria))
 				.groupby(ple.against_voucher_no)
 				.run(as_dict=True)
 			)

@@ -219,6 +219,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			add_filters_group: 0,
 			date_field: "posting_date",
 			columns: ["voucher_type", "voucher_no", "allocated_amount"],
+			primary_action_label: "Un-Reconcile",
+			title: "Un-Reconcile Payments",
 			get_query() {
 				return query_args;
 			},
