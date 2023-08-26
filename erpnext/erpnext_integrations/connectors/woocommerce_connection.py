@@ -43,7 +43,7 @@ def _order(*args, **kwargs):
 		event = "created"
 	# Ignore the test ping issued during WooCommerce webhook configuration
 	# Ref: https://github.com/woocommerce/woocommerce/issues/15642
-	if frappe.request.data.decode('utf-8').startswith('webhook_id='):
+	if frappe.request.data.decode("utf-8").startswith("webhook_id="):
 		return "success"
 	elif frappe.request and frappe.request.data:
 		verify_request()
