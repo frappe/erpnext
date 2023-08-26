@@ -6424,12 +6424,8 @@ Hotel Reservation User,Utilisateur chargé des réservations d'hôtel,
 Hotel Room Reservation Item,Article de réservation de la chambre d'hôtel,
 Hotel Settings,Paramètres d'Hotel,
 Default Taxes and Charges,Taxes et frais par défaut,
-<<<<<<< HEAD
-Default Invoice Naming Series,Numéro de série par défaut pour les factures,
-Additional Salary,Salaire supplémentaire,
-=======
 Default Invoice Naming Series,Masque de numérotation par défaut pour les factures,
->>>>>>> e462edc628 (chore: update fr translation for Naming Series (#36785))
+Additional Salary,Salaire supplémentaire,
 HR,RH,
 HR-ADS-.YY.-.MM.-,HR-ADS-.YY .-. MM.-,
 Salary Component,Composante Salariale,
@@ -9862,16 +9858,6 @@ Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de dé
 Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
 Control Historical Stock Transactions,Controle de l'historique des stransaction de stock
 No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
-<<<<<<< HEAD
-Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
-Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
-"If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.","Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire"
-Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent
-Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix
-Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
-Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
-Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
-=======
 Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées,
 Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée,
 "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
@@ -9880,7 +9866,6 @@ Update Existing Price List Rate,Mise a jour automatique du prix dans les listes 
 Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock,
 Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions,
 Have Default Naming Series for Batch ID?,Masque de numérotation par défaut pour les Lots ou Séries,
->>>>>>> e462edc628 (chore: update fr translation for Naming Series (#36785))
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
 Allowed Items,Articles autorisés
 Party Specific Item,Restriction d'article disponible
@@ -9907,39 +9892,6 @@ Interview Feedback,Retour d'entretien
 Journal Energy Point,Historique des points d'énergies
 Billing Address Details,Adresse de facturation (détails)
 Supplier Address Details,Adresse Fournisseur (détails)
-<<<<<<< HEAD
-Retail,Commerce
-Users,Utilisateurs
-Permission Manager,Gestion des permissions
-Fetch Timesheet,Récuprer les temps saisis
-Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur
-Quality Inspection(s),Inspection(s) Qualité
-Set Advances and Allocate (FIFO),Affecter les encours au réglement
-Apply Putaway Rule,Appliquer la régle de routage d'entrepot
-Delete Transactions,Supprimer les transactions
-Default Payment Discount Account,Compte par défaut des paiements de remise
-Unrealized Profit / Loss Account,Compte de perte
-Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés
-Publish in Website,Publier sur le Site Web
-List View,Vue en liste
-Allow Excess Material Transfer,Autoriser les transfert de stock supérieurs à l'attendue
-Allow transferring raw materials even after the Required Quantity is fulfilled,Autoriser les transfert  de matiéres premiére mais si la quantité requise est atteinte
-Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations de correction de coût pour la valorisation des produits finis
-Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications
-System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications
-Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication
-Quality Inspection Parameter,Paramétre des Inspection Qualité
-Parameter Group,Groupe de paramétre
-E Commerce Settings,Paramétrage E-Commerce
-Follow these steps to create a landing page for your store:,Suivez les intructions suivantes pour créer votre page d'accueil de boutique en ligne
-Show Price in Quotation,Afficher les prix sur les devis
-Add-ons,Extensions
-Enable Wishlist,Activer la liste de souhaits
-Enable Reviews and Ratings,Activer les avis et notes
-Enable Recommendations,Activer les recommendations
-Item Search Settings,Paramétrage de la recherche d'article
-Purchase demande,Demande de materiel
-=======
 Retail,Commerce,
 Users,Utilisateurs,
 Permission Manager,Gestion des permissions,
@@ -9983,4 +9935,3 @@ Receivable Accounts,Compte de débit
 Mention if a non-standard receivable account,Veuillez mentionner s'il s'agit d'un compte débiteur non standard
 Allow Purchase,Autoriser à l'achat
 Inventory Settings,Paramétrage de l'inventaire
->>>>>>> e462edc628 (chore: update fr translation for Naming Series (#36785))
