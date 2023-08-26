@@ -177,6 +177,50 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				}, __('Create'));
 			}
 		}
+
+		if (doc.docstatus == 1) {
+			frappe.call({
+				"method": "erpnext.accounts.doctype.unreconcile_payments.unreconcile_payments.doc_has_payments",
+				"args": {
+					"doctype": this.frm.doc.doctype,
+					"docname": this.frm.doc.name
+				},
+				callback: function(r) {
+					if (r.message) {
+						me.frm.add_custom_button(__("Un-Reconcile"), function() {
+							me.unreconcile_prompt();
+						});
+					}
+				}
+			});
+		}
+	}
+
+	unreconcile_prompt() {
+		// get linked payments
+		let query_args = {
+			query:"erpnext.accounts.doctype.unreconcile_payments.unreconcile_payments.get_linked_payments_for_doc",
+			filters: {
+				doctype: this.frm.doc.doctype,
+				docname: this.frm.doc.name
+			}
+		}
+
+		new frappe.ui.form.MultiSelectDialog({
+			doctype: "Payment Ledger Entry",
+			target: this.cur_frm,
+			setters: { },
+			add_filters_group: 0,
+			date_field: "posting_date",
+			columns: ["voucher_type", "voucher_no", "allocated_amount"],
+			get_query() {
+				return query_args;
+			},
+			action(selections) {
+				console.log(selections);
+			}
+		});
+
 	}
 
 	make_maintenance_schedule() {
