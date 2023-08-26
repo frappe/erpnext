@@ -97,7 +97,7 @@ class SubcontractingController(StockController):
 			if not is_stock_item:
 				frappe.throw(_("Row {0}: Item {1} must be a stock item.").format(item.idx, item.item_name))
 
-			if not item.is_scrap_item:
+			if not item.get("is_scrap_item"):
 				if not is_sub_contracted_item:
 					frappe.throw(
 						_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
