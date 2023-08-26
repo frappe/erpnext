@@ -225,6 +225,7 @@ erpnext.PointOfSale.Controller = class {
 		voucher.pos_opening_entry = this.pos_opening;
 		voucher.period_end_date = frappe.datetime.now_datetime();
 		voucher.posting_date = frappe.datetime.now_date();
+		voucher.posting_time = frappe.datetime.now_time();
 		frappe.set_route('Form', 'POS Closing Entry', voucher.name);
 	}
 
@@ -605,7 +606,6 @@ erpnext.PointOfSale.Controller = class {
 				i => i.item_code === item_code
 					&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 					&& (i.uom === uom)
-					&& (i.rate == rate)
 			);
 		}
 

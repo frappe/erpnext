@@ -41,7 +41,10 @@ def _order(*args, **kwargs):
 	if frappe.flags.woocomm_test_order_data:
 		order = frappe.flags.woocomm_test_order_data
 		event = "created"
-
+	# Ignore the test ping issued during WooCommerce webhook configuration
+	# Ref: https://github.com/woocommerce/woocommerce/issues/15642
+	if frappe.request.data.decode('utf-8').startswith('webhook_id='):
+		return "success"
 	elif frappe.request and frappe.request.data:
 		verify_request()
 		try:
@@ -81,7 +84,9 @@ def link_customer_and_address(raw_billing_data, raw_shipping_data, customer_name
 	customer.save()
 
 	if customer_exists:
-		frappe.rename_doc("Customer", old_name, customer_name)
+		# Fixes https://github.com/frappe/erpnext/issues/33708
+		if old_name != customer_name:
+			frappe.rename_doc("Customer", old_name, customer_name)
 		for address_type in (
 			"Billing",
 			"Shipping",

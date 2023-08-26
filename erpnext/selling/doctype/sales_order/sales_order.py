@@ -49,7 +49,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def onload(self) -> None:
-		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
+		if frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			if self.has_unreserved_stock():
 				self.set_onload("has_unreserved_stock", True)
 
@@ -107,18 +107,26 @@ class SalesOrder(SellingController):
 				and customer = %s",
 				(self.po_no, self.name, self.customer),
 			)
-			if (
-				so
-				and so[0][0]
-				and not cint(
+			if so and so[0][0]:
+				if cint(
 					frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
-				)
-			):
-				frappe.msgprint(
-					_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
-						so[0][0], self.po_no
+				):
+					frappe.msgprint(
+						_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
+							frappe.bold(so[0][0]), frappe.bold(self.po_no)
+						)
 					)
-				)
+				else:
+					frappe.throw(
+						_(
+							"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
+						).format(
+							frappe.bold(so[0][0]),
+							frappe.bold(self.po_no),
+							frappe.bold(_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")),
+							get_link_to_form("Selling Settings", "Selling Settings"),
+						)
+					)
 
 	def validate_for_items(self):
 		for d in self.get("items"):
@@ -620,7 +628,7 @@ def make_material_request(source_name, target_doc=None):
 		# qty is for packed items, because packed items don't have stock_qty field
 		qty = source.get("qty")
 		target.project = source_parent.project
-		target.qty = qty - requested_item_qty.get(source.name, 0) - source.delivered_qty
+		target.qty = qty - requested_item_qty.get(source.name, 0) - flt(source.get("delivered_qty"))
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
 		args = target.as_dict().copy()
@@ -654,7 +662,7 @@ def make_material_request(source_name, target_doc=None):
 				"doctype": "Material Request Item",
 				"field_map": {"name": "sales_order_item", "parent": "sales_order"},
 				"condition": lambda doc: not frappe.db.exists("Product Bundle", doc.item_code)
-				and (doc.stock_qty - doc.delivered_qty) > requested_item_qty.get(doc.name, 0),
+				and (doc.stock_qty - flt(doc.get("delivered_qty"))) > requested_item_qty.get(doc.name, 0),
 				"postprocess": update_item,
 			},
 		},

@@ -45,7 +45,7 @@ class PriceList(Document):
 
 		doc_before_save = self.get_doc_before_save()
 		currency_changed = self.currency != doc_before_save.currency
-		affects_cart = self.name == frappe.get_cached_value("E Commerce Settings", None, "price_list")
+		affects_cart = self.name == frappe.db.get_single_value("E Commerce Settings", "price_list")
 
 		if currency_changed and affects_cart:
 			validate_cart_settings()

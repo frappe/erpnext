@@ -14,6 +14,7 @@ from frappe.contacts.doctype.address.address import (
 from frappe.contacts.doctype.contact.contact import get_contact_details
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder.functions import Abs, Date, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -706,6 +707,7 @@ def get_payment_terms_template(party_name, party_type, company=None):
 	if party_type not in ("Customer", "Supplier"):
 		return
 	template = None
+
 	if party_type == "Customer":
 		customer = frappe.get_cached_value(
 			"Customer", party_name, fieldname=["payment_terms", "customer_group"], as_dict=1
@@ -922,30 +924,32 @@ def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 def get_partywise_advanced_payment_amount(
 	party_type, posting_date=None, future_payment=0, company=None, party=None
 ):
-	cond = "1=1"
+	ple = frappe.qb.DocType("Payment Ledger Entry")
+	query = (
+		frappe.qb.from_(ple)
+		.select(ple.party, Abs(Sum(ple.amount).as_("amount")))
+		.where(
+			(ple.party_type.isin(party_type))
+			& (ple.amount < 0)
+			& (ple.against_voucher_no == ple.voucher_no)
+			& (ple.delinked == 0)
+		)
+		.groupby(ple.party)
+	)
+
 	if posting_date:
 		if future_payment:
-			cond = "(posting_date <= '{0}' OR DATE(creation) <= '{0}')" "".format(posting_date)
+			query = query.where((ple.posting_date <= posting_date) | (Date(ple.creation) <= posting_date))
 		else:
-			cond = "posting_date <= '{0}'".format(posting_date)
+			query = query.where(ple.posting_date <= posting_date)
 
 	if company:
-		cond += "and company = {0}".format(frappe.db.escape(company))
+		query = query.where(ple.company == company)
 
 	if party:
-		cond += "and party = {0}".format(frappe.db.escape(party))
+		query = query.where(ple.party == party)
 
-	data = frappe.db.sql(
-		""" SELECT party, sum({0}) as amount
-		FROM `tabGL Entry`
-		WHERE
-			party_type = %s and against_voucher is null
-			and is_cancelled = 0
-			and {1} GROUP BY party""".format(
-			("credit") if party_type == "Customer" else "debit", cond
-		),
-		party_type,
-	)
+	data = query.run()
 	if data:
 		return frappe._dict(data)
 

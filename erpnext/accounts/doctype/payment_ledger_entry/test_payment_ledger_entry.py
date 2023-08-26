@@ -294,7 +294,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		cr_note1.return_against = si3.name
 		cr_note1 = cr_note1.save().submit()
 
-		pl_entries = (
+		pl_entries_si3 = (
 			qb.from_(ple)
 			.select(
 				ple.voucher_type,
@@ -309,7 +309,24 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 			.run(as_dict=True)
 		)
 
-		expected_values = [
+		pl_entries_cr_note1 = (
+			qb.from_(ple)
+			.select(
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.against_voucher_type,
+				ple.against_voucher_no,
+				ple.amount,
+				ple.delinked,
+			)
+			.where(
+				(ple.against_voucher_type == cr_note1.doctype) & (ple.against_voucher_no == cr_note1.name)
+			)
+			.orderby(ple.creation)
+			.run(as_dict=True)
+		)
+
+		expected_values_for_si3 = [
 			{
 				"voucher_type": si3.doctype,
 				"voucher_no": si3.name,
@@ -317,18 +334,21 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 				"against_voucher_no": si3.name,
 				"amount": amount,
 				"delinked": 0,
-			},
+			}
+		]
+		# credit/debit notes post ledger entries against itself
+		expected_values_for_cr_note1 = [
 			{
 				"voucher_type": cr_note1.doctype,
 				"voucher_no": cr_note1.name,
-				"against_voucher_type": si3.doctype,
-				"against_voucher_no": si3.name,
+				"against_voucher_type": cr_note1.doctype,
+				"against_voucher_no": cr_note1.name,
 				"amount": -amount,
 				"delinked": 0,
 			},
 		]
-		self.assertEqual(pl_entries[0], expected_values[0])
-		self.assertEqual(pl_entries[1], expected_values[1])
+		self.assertEqual(pl_entries_si3, expected_values_for_si3)
+		self.assertEqual(pl_entries_cr_note1, expected_values_for_cr_note1)
 
 	def test_je_against_inv_and_note(self):
 		ple = self.ple

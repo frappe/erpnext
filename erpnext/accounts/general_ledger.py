@@ -28,6 +28,7 @@ def make_gl_entries(
 ):
 	if gl_map:
 		if not cancel:
+			make_acc_dimensions_offsetting_entry(gl_map)
 			validate_accounting_period(gl_map)
 			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
@@ -49,6 +50,63 @@ def make_gl_entries(
 				)
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
+
+def make_acc_dimensions_offsetting_entry(gl_map):
+	accounting_dimensions_to_offset = get_accounting_dimensions_for_offsetting_entry(
+		gl_map, gl_map[0].company
+	)
+	no_of_dimensions = len(accounting_dimensions_to_offset)
+	if no_of_dimensions == 0:
+		return
+
+	offsetting_entries = []
+
+	for gle in gl_map:
+		for dimension in accounting_dimensions_to_offset:
+			offsetting_entry = gle.copy()
+			debit = flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0
+			credit = flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0
+			offsetting_entry.update(
+				{
+					"account": dimension.offsetting_account,
+					"debit": debit,
+					"credit": credit,
+					"debit_in_account_currency": debit,
+					"credit_in_account_currency": credit,
+					"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension.name),
+					"against_voucher": None,
+				}
+			)
+			offsetting_entry["against_voucher_type"] = None
+			offsetting_entries.append(offsetting_entry)
+
+	gl_map += offsetting_entries
+
+
+def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
+	acc_dimension = frappe.qb.DocType("Accounting Dimension")
+	dimension_detail = frappe.qb.DocType("Accounting Dimension Detail")
+
+	acc_dimensions = (
+		frappe.qb.from_(acc_dimension)
+		.inner_join(dimension_detail)
+		.on(acc_dimension.name == dimension_detail.parent)
+		.select(acc_dimension.fieldname, acc_dimension.name, dimension_detail.offsetting_account)
+		.where(
+			(acc_dimension.disabled == 0)
+			& (dimension_detail.company == company)
+			& (dimension_detail.automatically_post_balancing_accounting_entry == 1)
+		)
+	).run(as_dict=True)
+
+	accounting_dimensions_to_offset = []
+	for acc_dimension in acc_dimensions:
+		values = set([entry.get(acc_dimension.fieldname) for entry in gl_map])
+		if len(values) > 1:
+			accounting_dimensions_to_offset.append(acc_dimension)
+
+	return accounting_dimensions_to_offset
 
 
 def validate_disabled_accounts(gl_map):
@@ -480,6 +538,10 @@ def get_round_off_account_and_cost_center(
 	round_off_account, round_off_cost_center = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
+
+	# Use expense account as fallback
+	if not round_off_account:
+		round_off_account = frappe.get_cached_value("Company", company, "default_expense_account")
 
 	meta = frappe.get_meta(voucher_type)
 

@@ -225,7 +225,8 @@ class MaterialRequest(BuyingController):
 					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
 
 					if mr_qty_allowance:
-						allowed_qty = d.qty + (d.qty * (mr_qty_allowance / 100))
+						allowed_qty = flt((d.qty + (d.qty * (mr_qty_allowance / 100))), d.precision("ordered_qty"))
+
 						if d.ordered_qty and d.ordered_qty > allowed_qty:
 							frappe.throw(
 								_(
@@ -655,7 +656,10 @@ def make_stock_entry(source_name, target_doc=None):
 					"job_card_item": "job_card_item",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.stock_qty,
+				"condition": lambda doc: (
+					flt(doc.ordered_qty, doc.precision("ordered_qty"))
+					< flt(doc.stock_qty, doc.precision("ordered_qty"))
+				),
 			},
 		},
 		target_doc,

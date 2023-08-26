@@ -229,7 +229,7 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		if (
-			cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate"))
+			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
 			and not self.is_return
 			and not self.is_internal_supplier
 		):
@@ -536,6 +536,7 @@ class PurchaseInvoice(BuyingController):
 					merge_entries=False,
 					from_repost=from_repost,
 				)
+				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
 				provisional_entries = [a for a in gl_entries if a.voucher_type == "Purchase Receipt"]
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -580,7 +581,6 @@ class PurchaseInvoice(BuyingController):
 			self.get_asset_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
-		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
@@ -628,9 +628,7 @@ class PurchaseInvoice(BuyingController):
 						"credit_in_account_currency": base_grand_total
 						if self.party_account_currency == self.company_currency
 						else grand_total,
-						"against_voucher": self.return_against
-						if cint(self.is_return) and self.return_against
-						else self.name,
+						"against_voucher": self.name,
 						"against_voucher_type": self.doctype,
 						"project": self.project,
 						"cost_center": self.cost_center,
@@ -968,30 +966,6 @@ class PurchaseInvoice(BuyingController):
 						self.negative_expense_to_be_booked += flt(
 							item.item_tax_amount, item.precision("item_tax_amount")
 						)
-
-	def make_precision_loss_gl_entry(self, gl_entries):
-		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
-		)
-
-		precision_loss = self.get("base_net_total") - flt(
-			self.get("net_total") * self.conversion_rate, self.precision("net_total")
-		)
-
-		if precision_loss:
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": round_off_account,
-						"against": self.supplier,
-						"credit": precision_loss,
-						"cost_center": round_off_cost_center
-						if self.use_company_roundoff_cost_center
-						else self.cost_center or round_off_cost_center,
-						"remarks": _("Net total calculation precision loss"),
-					}
-				)
-			)
 
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
@@ -1439,6 +1413,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Item Valuation",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 			"Serial and Batch Bundle",
@@ -1666,12 +1642,8 @@ class PurchaseInvoice(BuyingController):
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
 				# Check if outstanding amount is 0 due to debit note issued against invoice
-				elif (
-					outstanding_amount <= 0
-					and self.is_return == 0
-					and frappe.db.get_value(
-						"Purchase Invoice", {"is_return": 1, "return_against": self.name, "docstatus": 1}
-					)
+				elif self.is_return == 0 and frappe.db.get_value(
+					"Purchase Invoice", {"is_return": 1, "return_against": self.name, "docstatus": 1}
 				):
 					self.status = "Debit Note Issued"
 				elif self.is_return == 1:

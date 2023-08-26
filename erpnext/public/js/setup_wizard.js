@@ -24,12 +24,14 @@ erpnext.setup.slides_settings = [
 				fieldtype: 'Data',
 				reqd: 1
 			},
+			{ fieldtype: "Column Break" },
 			{
 				fieldname: 'company_abbr',
 				label: __('Company Abbreviation'),
 				fieldtype: 'Data',
-				hidden: 1
+				reqd: 1
 			},
+			{ fieldtype: "Section Break" },
 			{
 				fieldname: 'chart_of_accounts', label: __('Chart of Accounts'),
 				options: "", fieldtype: 'Select'
@@ -38,6 +40,13 @@ erpnext.setup.slides_settings = [
 			{ fieldname: 'fy_start_date', label: __('Financial Year Begins On'), fieldtype: 'Date', reqd: 1 },
 			// end date should be hidden (auto calculated)
 			{ fieldname: 'fy_end_date', label: __('End Date'), fieldtype: 'Date', reqd: 1, hidden: 1 },
+			{ fieldtype: "Section Break" },
+			{
+				fieldname: 'setup_demo',
+				label: __('Generate Demo Data for Exploration'),
+				fieldtype: 'Check',
+				description: __('If checked, we will create demo data for you to explore the system. This demo data can be erased later.')
+			},
 		],
 
 		onload: function (slide) {
@@ -134,18 +143,20 @@ erpnext.setup.slides_settings = [
 				me.charts_modal(slide, chart_template);
 			});
 
-			slide.get_input("company_name").on("change", function () {
+			slide.get_input("company_name").on("input", function () {
 				let parts = slide.get_input("company_name").val().split(" ");
 				let abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
 				slide.get_field("company_abbr").set_value(abbr.slice(0, 10).toUpperCase());
 			}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
 
 			slide.get_input("company_abbr").on("change", function () {
-				if (slide.get_input("company_abbr").val().length > 10) {
+				let abbr = slide.get_input("company_abbr").val();
+				if (abbr.length > 10) {
 					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
-					slide.get_field("company_abbr").set_value("");
+					abbr = abbr.slice(0, 10);
 				}
-			});
+				slide.get_field("company_abbr").set_value(abbr);
+			}).val(frappe.boot.sysdefaults.company_abbr || "").trigger("change");
 		},
 
 		charts_modal: function(slide, chart_template) {

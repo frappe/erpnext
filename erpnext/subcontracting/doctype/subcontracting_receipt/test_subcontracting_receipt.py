@@ -506,6 +506,125 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertNotEqual(scr.supplied_items[0].rate, prev_cost)
 		self.assertEqual(scr.supplied_items[0].rate, sr.items[0].valuation_rate)
 
+	def test_subcontracting_receipt_raw_material_rate(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		# Step - 1: Set Backflush Based On as "BOM"
+		set_backflush_based_on("BOM")
+
+		# Step - 2: Create FG and RM Items
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item1 = make_item(properties={"is_stock_item": 1}).name
+		rm_item2 = make_item(properties={"is_stock_item": 1}).name
+
+		# Step - 3: Create BOM for FG Item
+		bom = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2])
+		for rm_item in bom.items:
+			self.assertEqual(rm_item.rate, 0)
+			self.assertEqual(rm_item.amount, 0)
+		bom = bom.name
+
+		# Step - 4: Create PO and SCO
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 100,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 100,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		for rm_item in sco.supplied_items:
+			self.assertEqual(rm_item.rate, 0)
+			self.assertEqual(rm_item.amount, 0)
+
+		# Step - 5: Inward Raw Materials
+		rm_items = get_rm_items(sco.supplied_items)
+		for rm_item in rm_items:
+			rm_item["rate"] = 100
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		# Step - 6: Transfer RM's to Subcontractor
+		se = make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		for item in se.items:
+			self.assertEqual(item.qty, 100)
+			self.assertEqual(item.basic_rate, 100)
+			self.assertEqual(item.amount, item.qty * item.basic_rate)
+
+		# Step - 7: Create Subcontracting Receipt
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+		scr.load_from_db()
+		for rm_item in scr.supplied_items:
+			self.assertEqual(rm_item.consumed_qty, 100)
+			self.assertEqual(rm_item.rate, 100)
+			self.assertEqual(rm_item.amount, rm_item.consumed_qty * rm_item.rate)
+
+	def test_quality_inspection_for_subcontracting_receipt(self):
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		set_backflush_based_on("BOM")
+		fg_item = "Subcontracted Item SA1"
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.save()
+
+		# Enable `Inspection Required before Purchase` in Item Master
+		frappe.db.set_value("Item", fg_item, "inspection_required_before_purchase", 1)
+
+		# ValidationError should be raised as Quality Inspection is not created/linked
+		self.assertRaises(frappe.ValidationError, scr1.submit)
+
+		qa = create_quality_inspection(
+			reference_type="Subcontracting Receipt",
+			reference_name=scr1.name,
+			inspection_type="Incoming",
+			item_code=fg_item,
+		)
+		scr1.reload()
+		self.assertEqual(scr1.items[0].quality_inspection, qa.name)
+
+		# SCR should be submitted successfully as Quality Inspection is set
+		scr1.submit()
+		qa.cancel()
+		scr1.reload()
+		scr1.cancel()
+
+		scr2 = make_subcontracting_receipt(sco.name)
+		scr2.save()
+
+		# Disable `Inspection Required before Purchase` in Item Master
+		frappe.db.set_value("Item", fg_item, "inspection_required_before_purchase", 0)
+
+		# ValidationError should not be raised as `Inspection Required before Purchase` is disabled
+		scr2.submit()
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)

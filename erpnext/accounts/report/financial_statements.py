@@ -188,6 +188,7 @@ def get_data(
 			filters,
 			gl_entries_by_account,
 			ignore_closing_entries=ignore_closing_entries,
+			root_type=root_type,
 		)
 
 	calculate_values(
@@ -334,12 +335,10 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 			for period in period_list:
 				total_row.setdefault(period.key, 0.0)
 				total_row[period.key] += row.get(period.key, 0.0)
-				row[period.key] = row.get(period.key, 0.0)
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
 			total_row["opening_balance"] += row["opening_balance"]
-			row["total"] = ""
 
 	if "total" in total_row:
 		out.append(total_row)
@@ -417,13 +416,28 @@ def set_gl_entries_by_account(
 	gl_entries_by_account,
 	ignore_closing_entries=False,
 	ignore_opening_entries=False,
+	root_type=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
+	account_filters = {
+		"company": company,
+		"is_group": 0,
+		"lft": (">=", root_lft),
+		"rgt": ("<=", root_rgt),
+	}
+
+	if root_type:
+		account_filters.update(
+			{
+				"root_type": root_type,
+			}
+		)
+
 	accounts_list = frappe.db.get_all(
 		"Account",
-		filters={"company": company, "is_group": 0, "lft": (">=", root_lft), "rgt": ("<=", root_rgt)},
+		filters=account_filters,
 		pluck="name",
 	)
 
@@ -623,7 +637,13 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	if periodicity != "Yearly":
 		if not accumulated_values:
 			columns.append(
-				{"fieldname": "total", "label": _("Total"), "fieldtype": "Currency", "width": 150}
+				{
+					"fieldname": "total",
+					"label": _("Total"),
+					"fieldtype": "Currency",
+					"width": 150,
+					"options": "currency",
+				}
 			)
 
 	return columns

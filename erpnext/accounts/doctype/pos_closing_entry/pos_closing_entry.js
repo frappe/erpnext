@@ -153,7 +153,7 @@ frappe.ui.form.on('POS Closing Entry', {
 frappe.ui.form.on('POS Closing Entry Detail', {
 	closing_amount: (frm, cdt, cdn) => {
 		const row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount));
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.closing_amount - row.expected_amount));
 	}
 })
 
@@ -185,6 +185,7 @@ function refresh_payments(d, frm) {
 		}
 		if (payment) {
 			payment.expected_amount += flt(p.amount);
+			payment.closing_amount = payment.expected_amount;
 			payment.difference = payment.closing_amount - payment.expected_amount;
 		} else {
 			frm.add_child("payment_reconciliation", {

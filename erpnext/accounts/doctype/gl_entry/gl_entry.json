@@ -32,7 +32,11 @@
   "finance_book",
   "to_rename",
   "due_date",
-  "is_cancelled"
+  "is_cancelled",
+  "transaction_currency",
+  "debit_in_transaction_currency",
+  "credit_in_transaction_currency",
+  "transaction_exchange_rate"
  ],
  "fields": [
   {
@@ -253,15 +257,40 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "transaction_currency",
+   "fieldtype": "Link",
+   "label": "Transaction Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "transaction_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Transaction Exchange Rate"
+  },
+  {
+   "fieldname": "debit_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Debit Amount in Transaction Currency",
+   "options": "transaction_currency"
+  },
+  {
+   "fieldname": "credit_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Credit Amount in Transaction Currency",
+   "options": "transaction_currency"
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-04-07 16:22:33.766994",
+ "links": [],
+ "modified": "2023-08-16 21:38:44.072267",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -290,5 +319,6 @@
  "quick_entry": 1,
  "search_fields": "voucher_no,account,posting_date,against_voucher",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

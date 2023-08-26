@@ -27,8 +27,10 @@
   "bank_cash_account",
   "cost_center",
   "sec_break1",
+  "invoice_name",
   "invoices",
   "column_break_15",
+  "payment_name",
   "payments",
   "sec_break2",
   "allocation"
@@ -137,6 +139,7 @@
    "label": "Minimum Invoice Amount"
   },
   {
+   "default": "50",
    "description": "System will fetch all the entries if limit value is zero.",
    "fieldname": "invoice_limit",
    "fieldtype": "Int",
@@ -167,6 +170,7 @@
    "label": "Maximum Payment Amount"
   },
   {
+   "default": "50",
    "description": "System will fetch all the entries if limit value is zero.",
    "fieldname": "payment_limit",
    "fieldtype": "Int",
@@ -194,13 +198,23 @@
    "label": "Default Advance Account",
    "mandatory_depends_on": "doc.party_type",
    "options": "Account"
+  },
+  {
+   "fieldname": "invoice_name",
+   "fieldtype": "Data",
+   "label": "Filter on Invoice"
+  },
+  {
+   "fieldname": "payment_name",
+   "fieldtype": "Data",
+   "label": "Filter on Payment"
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2023-06-09 13:02:48.718362",
+ "modified": "2023-08-15 05:35:50.109290",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

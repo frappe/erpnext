@@ -1273,10 +1273,11 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.save()
 		pi.submit()
 
+		creditors_account = pi.credit_to
+
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 37500.0],
-			["_Test Payable USD - _TC", -35000.0],
-			["Exchange Gain/Loss - _TC", -2500.0],
+			["_Test Payable USD - _TC", -37500.0],
 		]
 
 		gl_entries = frappe.db.sql(
@@ -1292,6 +1293,31 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.balance)
+
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 0)
+
+		total_debit_amount = frappe.db.get_all(
+			"Journal Entry Account",
+			{"account": creditors_account, "docstatus": 1, "reference_name": pi.name},
+			"sum(debit) as amount",
+			group_by="reference_name",
+		)[0].amount
+		self.assertEqual(flt(total_debit_amount, 2), 2500)
+		jea_parent = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"account": creditors_account,
+				"docstatus": 1,
+				"reference_name": pi.name,
+				"debit": 2500,
+				"debit_in_account_currency": 0,
+			},
+			fields=["parent"],
+		)[0]
+		self.assertEqual(
+			frappe.db.get_value("Journal Entry", jea_parent.parent, "voucher_type"), "Exchange Gain Or Loss"
+		)
 
 		pi_2 = make_purchase_invoice(
 			supplier="_Test Supplier USD",
@@ -1317,10 +1343,12 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi_2.save()
 		pi_2.submit()
 
+		pi_2.reload()
+		self.assertEqual(pi_2.outstanding_amount, 0)
+
 		expected_gle = [
 			["_Test Account Cost for Goods Sold - _TC", 36500.0],
-			["_Test Payable USD - _TC", -35000.0],
-			["Exchange Gain/Loss - _TC", -1500.0],
+			["_Test Payable USD - _TC", -36500.0],
 		]
 
 		gl_entries = frappe.db.sql(
@@ -1351,11 +1379,38 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.balance)
 
+		total_debit_amount = frappe.db.get_all(
+			"Journal Entry Account",
+			{"account": creditors_account, "docstatus": 1, "reference_name": pi_2.name},
+			"sum(debit) as amount",
+			group_by="reference_name",
+		)[0].amount
+		self.assertEqual(flt(total_debit_amount, 2), 1500)
+		jea_parent_2 = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"account": creditors_account,
+				"docstatus": 1,
+				"reference_name": pi_2.name,
+				"debit": 1500,
+				"debit_in_account_currency": 0,
+			},
+			fields=["parent"],
+		)[0]
+		self.assertEqual(
+			frappe.db.get_value("Journal Entry", jea_parent_2.parent, "voucher_type"),
+			"Exchange Gain Or Loss",
+		)
+
 		pi.reload()
 		pi.cancel()
 
+		self.assertEqual(frappe.db.get_value("Journal Entry", jea_parent.parent, "docstatus"), 2)
+
 		pi_2.reload()
 		pi_2.cancel()
+
+		self.assertEqual(frappe.db.get_value("Journal Entry", jea_parent_2.parent, "docstatus"), 2)
 
 		pay.reload()
 		pay.cancel()
@@ -1736,6 +1791,107 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
 
+	def test_payment_allocation_for_payment_terms(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_pr_against_po,
+			create_purchase_order,
+		)
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+		)
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		automatically_fetch_payment_terms()
+		frappe.db.set_value(
+			"Payment Terms Template",
+			"_Test Payment Term Template",
+			"allocate_payment_based_on_payment_terms",
+			0,
+		)
+
+		po = create_purchase_order(do_not_save=1)
+		po.payment_terms_template = "_Test Payment Term Template"
+		po.save()
+		po.submit()
+
+		pr = create_pr_against_po(po.name, received_qty=4)
+		pi = make_pi_from_pr(pr.name)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 1000)
+
+		frappe.db.set_value(
+			"Payment Terms Template",
+			"_Test Payment Term Template",
+			"allocate_payment_based_on_payment_terms",
+			1,
+		)
+		pi = make_pi_from_pr(pr.name)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500)
+
+		automatically_fetch_payment_terms(enable=0)
+		frappe.db.set_value(
+			"Payment Terms Template",
+			"_Test Payment Term Template",
+			"allocate_payment_based_on_payment_terms",
+			0,
+		)
+
+	def test_offsetting_entries_for_accounting_dimensions(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.report.trial_balance.test_trial_balance import (
+			clear_dimension_defaults,
+			create_accounting_dimension,
+			disable_dimension,
+		)
+
+		create_account(
+			account_name="Offsetting",
+			company="_Test Company",
+			parent_account="Temporary Accounts - _TC",
+		)
+
+		create_accounting_dimension(company="_Test Company", offsetting_account="Offsetting - _TC")
+
+		branch1 = frappe.new_doc("Branch")
+		branch1.branch = "Location 1"
+		branch1.insert(ignore_if_duplicate=True)
+		branch2 = frappe.new_doc("Branch")
+		branch2.branch = "Location 2"
+		branch2.insert(ignore_if_duplicate=True)
+
+		pi = make_purchase_invoice(
+			company="_Test Company",
+			customer="_Test Supplier",
+			do_not_save=True,
+			do_not_submit=True,
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
+		)
+		pi.branch = branch1.branch
+		pi.items[0].branch = branch2.branch
+		pi.save()
+		pi.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate(), branch2.branch],
+			["Creditors - _TC", 0.0, 1000, nowdate(), branch1.branch],
+			["Offsetting - _TC", 1000, 0.0, nowdate(), branch1.branch],
+			["Offsetting - _TC", 0.0, 1000, nowdate(), branch2.branch],
+		]
+
+		check_gl_entries(
+			self,
+			pi.name,
+			expected_gle,
+			nowdate(),
+			voucher_type="Purchase Invoice",
+			additional_columns=["branch"],
+		)
+		clear_dimension_defaults("Branch")
+		disable_dimension()
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
@@ -1748,9 +1904,16 @@ def set_advance_flag(company, flag, default_account):
 	)
 
 
-def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="Purchase Invoice"):
+def check_gl_entries(
+	doc,
+	voucher_no,
+	expected_gle,
+	posting_date,
+	voucher_type="Purchase Invoice",
+	additional_columns=None,
+):
 	gl = frappe.qb.DocType("GL Entry")
-	q = (
+	query = (
 		frappe.qb.from_(gl)
 		.select(gl.account, gl.debit, gl.credit, gl.posting_date)
 		.where(
@@ -1761,13 +1924,24 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 		)
 		.orderby(gl.posting_date, gl.account, gl.creation)
 	)
-	gl_entries = q.run(as_dict=True)
+
+	if additional_columns:
+		for col in additional_columns:
+			query = query.select(gl[col])
+
+	gl_entries = query.run(as_dict=True)
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+		if additional_columns:
+			j = 4
+			for col in additional_columns:
+				doc.assertEqual(expected_gle[i][j], gle[col])
+				j += 1
 
 
 def create_tax_witholding_category(category_name, company, account):

@@ -33,7 +33,14 @@ frappe.query_reports["Tax Withholding Details"] = {
 					frappe.throw(__("Please select Party Type first"));
 				}
 				return party_type;
-			}
+			},
+			"get_query": function() {
+				return {
+					"filters": {
+						"tax_withholding_category": ["!=",""],
+					}
+				}
+			},
 		},
 		{
 			"fieldname":"from_date",

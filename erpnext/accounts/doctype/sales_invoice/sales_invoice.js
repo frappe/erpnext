@@ -37,7 +37,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		super.onload();
 
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log',
-							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger"];
+							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger", "Repost Accounting Ledger"];
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -98,8 +98,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount!=0
-			&& !(cint(doc.is_return) && doc.return_against)) {
+		if (doc.docstatus == 1 && doc.outstanding_amount!=0) {
 			this.frm.add_custom_button(
 				__('Payment'),
 				() => this.make_payment_entry(),

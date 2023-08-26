@@ -263,6 +263,7 @@ erpnext.patches.v15_0.saudi_depreciation_warning
 erpnext.patches.v15_0.delete_saudi_doctypes
 erpnext.patches.v14_0.show_loan_management_deprecation_warning
 execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
+erpnext.patches.v14_0.delete_education_module_portal_menu_items
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -320,8 +321,8 @@ erpnext.patches.v15_0.update_gpa_and_ndb_for_assdeprsch
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances #14-07-2023
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
-# below migration patches should always run last
-erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
+erpnext.patches.v14_0.update_subscription_details
 execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
 erpnext.patches.v15_0.enable_all_leads
 erpnext.patches.v14_0.update_company_in_ldc
@@ -338,3 +339,6 @@ erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
 execute:frappe.defaults.clear_default("fiscal_year")
 erpnext.patches.v15_0.remove_exotel_integration
 erpnext.patches.v14_0.single_to_multi_dunning
+execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for_items', 0)
+# below migration patch should always run last
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger

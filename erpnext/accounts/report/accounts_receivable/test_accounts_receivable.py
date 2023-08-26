@@ -8,20 +8,17 @@ from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
+from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-class TestAccountsReceivable(FrappeTestCase):
+class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 	def setUp(self):
-		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabSales Order` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabPayment Entry` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabPayment Ledger Entry` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabJournal Entry` where company='_Test Company 2'")
-		frappe.db.sql("delete from `tabExchange Rate Revaluation` where company='_Test Company 2'")
-
-		self.create_usd_account()
+		self.create_company()
+		self.create_customer()
+		self.create_item()
+		self.create_usd_receivable_account()
+		self.clear_old_entries()
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -49,29 +46,84 @@ class TestAccountsReceivable(FrappeTestCase):
 			debtors_usd.account_type = debtors.account_type
 			self.debtors_usd = debtors_usd.save().name
 
+	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False):
+		frappe.set_user("Administrator")
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			price_list_rate=100,
+			do_not_save=1,
+		)
+		if not no_payment_schedule:
+			si.append(
+				"payment_schedule",
+				dict(due_date=getdate(add_days(today(), 30)), invoice_portion=30.00, payment_amount=30),
+			)
+			si.append(
+				"payment_schedule",
+				dict(due_date=getdate(add_days(today(), 60)), invoice_portion=50.00, payment_amount=50),
+			)
+			si.append(
+				"payment_schedule",
+				dict(due_date=getdate(add_days(today(), 90)), invoice_portion=20.00, payment_amount=20),
+			)
+		si = si.save()
+		if not do_not_submit:
+			si = si.submit()
+		return si
+
+	def create_payment_entry(self, docname):
+		pe = get_payment_entry("Sales Invoice", docname, bank_account=self.cash, party_amount=40)
+		pe.paid_from = self.debit_to
+		pe.insert()
+		pe.submit()
+
+	def create_credit_note(self, docname):
+		credit_note = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item=self.item,
+			qty=-1,
+			debit_to=self.debit_to,
+			cost_center=self.cost_center,
+			is_return=1,
+			return_against=docname,
+		)
+
+		return credit_note
+
 	def test_accounts_receivable(self):
 		filters = {
-			"company": "_Test Company 2",
+			"company": self.company,
 			"based_on_payment_terms": 1,
 			"report_date": today(),
 			"range1": 30,
 			"range2": 60,
 			"range3": 90,
 			"range4": 120,
+			"show_remarks": True,
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms
-		name = make_sales_invoice().name
+		si = self.create_sales_invoice()
+		name = si.name
+
 		report = execute(filters)
 
-		expected_data = [[100, 30], [100, 50], [100, 20]]
+		expected_data = [[100, 30, "No Remarks"], [100, 50, "No Remarks"], [100, 20, "No Remarks"]]
 
 		for i in range(3):
 			row = report[1][i - 1]
-			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced])
+			self.assertEqual(expected_data[i - 1], [row.invoice_grand_total, row.invoiced, row.remarks])
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after payment
-		make_payment(name)
+		self.create_payment_entry(si.name)
 		report = execute(filters)
 
 		expected_data_after_payment = [[100, 50, 10, 40], [100, 20, 0, 20]]
@@ -84,10 +136,10 @@ class TestAccountsReceivable(FrappeTestCase):
 			)
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
-		make_credit_note(name)
+		self.create_credit_note(si.name)
 		report = execute(filters)
 
-		expected_data_after_credit_note = [100, 0, 0, 40, -40, "Debtors - _TC2"]
+		expected_data_after_credit_note = [100, 0, 0, 40, -40, self.debit_to]
 
 		row = report[1][0]
 		self.assertEqual(
@@ -108,21 +160,20 @@ class TestAccountsReceivable(FrappeTestCase):
 		"""
 
 		so = make_sales_order(
-			company="_Test Company 2",
-			customer="_Test Customer 2",
-			warehouse="Finished Goods - _TC2",
-			currency="EUR",
-			debit_to="Debtors - _TC2",
-			income_account="Sales - _TC2",
-			expense_account="Cost of Goods Sold - _TC2",
-			cost_center="Main - _TC2",
+			company=self.company,
+			customer=self.customer,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
 		)
 
 		pe = get_payment_entry(so.doctype, so.name)
 		pe = pe.save().submit()
 
 		filters = {
-			"company": "_Test Company 2",
+			"company": self.company,
 			"based_on_payment_terms": 0,
 			"report_date": today(),
 			"range1": 30,
@@ -147,34 +198,32 @@ class TestAccountsReceivable(FrappeTestCase):
 		)
 
 	@change_settings(
-		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
 	def test_exchange_revaluation_for_party(self):
 		"""
-		Exchange Revaluation for party on Receivable/Payable shoule be included
+		Exchange Revaluation for party on Receivable/Payable should be included
 		"""
 
-		company = "_Test Company 2"
-		customer = "_Test Customer 2"
-
 		# Using Exchange Gain/Loss account for unrealized as well.
-		company_doc = frappe.get_doc("Company", company)
+		company_doc = frappe.get_doc("Company", self.company)
 		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
 		company_doc.save()
 
-		si = make_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
 		si.currency = "USD"
-		si.conversion_rate = 0.90
+		si.conversion_rate = 80
 		si.debit_to = self.debtors_usd
 		si = si.save().submit()
 
 		# Exchange Revaluation
 		err = frappe.new_doc("Exchange Rate Revaluation")
-		err.company = company
+		err.company = self.company
 		err.posting_date = today()
 		accounts = err.get_accounts_data()
 		err.extend("accounts", accounts)
-		err.accounts[0].new_exchange_rate = 0.95
+		err.accounts[0].new_exchange_rate = 85
 		row = err.accounts[0]
 		row.new_balance_in_base_currency = flt(
 			row.new_exchange_rate * flt(row.balance_in_account_currency)
@@ -189,7 +238,7 @@ class TestAccountsReceivable(FrappeTestCase):
 		je = je.submit()
 
 		filters = {
-			"company": company,
+			"company": self.company,
 			"report_date": today(),
 			"range1": 30,
 			"range2": 60,
@@ -198,7 +247,7 @@ class TestAccountsReceivable(FrappeTestCase):
 		}
 		report = execute(filters)
 
-		expected_data_for_err = [0, -5, 0, 5]
+		expected_data_for_err = [0, -500, 0, 500]
 		row = [x for x in report[1] if x.voucher_type == je.doctype and x.voucher_no == je.name][0]
 		self.assertEqual(
 			expected_data_for_err,
@@ -214,46 +263,43 @@ class TestAccountsReceivable(FrappeTestCase):
 		"""
 		Payment against credit/debit note should be considered against the parent invoice
 		"""
-		company = "_Test Company 2"
-		customer = "_Test Customer 2"
 
-		si1 = make_sales_invoice()
+		si1 = self.create_sales_invoice()
 
-		pe = get_payment_entry("Sales Invoice", si1.name, bank_account="Cash - _TC2")
-		pe.paid_from = "Debtors - _TC2"
+		pe = get_payment_entry(si1.doctype, si1.name, bank_account=self.cash)
+		pe.paid_from = self.debit_to
 		pe.insert()
 		pe.submit()
 
-		cr_note = make_credit_note(si1.name)
+		cr_note = self.create_credit_note(si1.name)
 
-		si2 = make_sales_invoice()
+		si2 = self.create_sales_invoice()
 
 		# manually link cr_note with si2 using journal entry
 		je = frappe.new_doc("Journal Entry")
-		je.company = company
+		je.company = self.company
 		je.voucher_type = "Credit Note"
 		je.posting_date = today()
 
-		debit_account = "Debtors - _TC2"
 		debit_entry = {
-			"account": debit_account,
+			"account": self.debit_to,
 			"party_type": "Customer",
-			"party": customer,
+			"party": self.customer,
 			"debit": 100,
 			"debit_in_account_currency": 100,
 			"reference_type": cr_note.doctype,
 			"reference_name": cr_note.name,
-			"cost_center": "Main - _TC2",
+			"cost_center": self.cost_center,
 		}
 		credit_entry = {
-			"account": debit_account,
+			"account": self.debit_to,
 			"party_type": "Customer",
-			"party": customer,
+			"party": self.customer,
 			"credit": 100,
 			"credit_in_account_currency": 100,
 			"reference_type": si2.doctype,
 			"reference_name": si2.name,
-			"cost_center": "Main - _TC2",
+			"cost_center": self.cost_center,
 		}
 
 		je.append("accounts", debit_entry)
@@ -261,7 +307,7 @@ class TestAccountsReceivable(FrappeTestCase):
 		je = je.save().submit()
 
 		filters = {
-			"company": company,
+			"company": self.company,
 			"report_date": today(),
 			"range1": 30,
 			"range2": 60,
@@ -271,64 +317,254 @@ class TestAccountsReceivable(FrappeTestCase):
 		report = execute(filters)
 		self.assertEqual(report[1], [])
 
+	def test_group_by_party(self):
+		si1 = self.create_sales_invoice(do_not_submit=True)
+		si1.posting_date = add_days(today(), -1)
+		si1.save().submit()
+		si2 = self.create_sales_invoice(do_not_submit=True)
+		si2.items[0].rate = 85
+		si2.save().submit()
 
-def make_sales_invoice(no_payment_schedule=False, do_not_submit=False):
-	frappe.set_user("Administrator")
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"group_by_party": True,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 5)
 
-	si = create_sales_invoice(
-		company="_Test Company 2",
-		customer="_Test Customer 2",
-		currency="EUR",
-		warehouse="Finished Goods - _TC2",
-		debit_to="Debtors - _TC2",
-		income_account="Sales - _TC2",
-		expense_account="Cost of Goods Sold - _TC2",
-		cost_center="Main - _TC2",
-		do_not_save=1,
-	)
+		# assert voucher rows
+		expected_voucher_rows = [
+			[100.0, 100.0, 100.0, 100.0],
+			[85.0, 85.0, 85.0, 85.0],
+		]
+		voucher_rows = []
+		for x in report[0:2]:
+			voucher_rows.append(
+				[x.invoiced, x.outstanding, x.invoiced_in_account_currency, x.outstanding_in_account_currency]
+			)
+		self.assertEqual(expected_voucher_rows, voucher_rows)
 
-	if not no_payment_schedule:
-		si.append(
-			"payment_schedule",
-			dict(due_date=getdate(add_days(today(), 30)), invoice_portion=30.00, payment_amount=30),
+		# assert total rows
+		expected_total_rows = [
+			[self.customer, 185.0, 185.0],  # party total
+			{},  # empty row for padding
+			["Total", 185.0, 185.0],  # grand total
+		]
+		party_total_row = report[2]
+		self.assertEqual(
+			expected_total_rows[0],
+			[
+				party_total_row.get("party"),
+				party_total_row.get("invoiced"),
+				party_total_row.get("outstanding"),
+			],
 		)
-		si.append(
-			"payment_schedule",
-			dict(due_date=getdate(add_days(today(), 60)), invoice_portion=50.00, payment_amount=50),
+		empty_row = report[3]
+		self.assertEqual(expected_total_rows[1], empty_row)
+		grand_total_row = report[4]
+		self.assertEqual(
+			expected_total_rows[2],
+			[
+				grand_total_row.get("party"),
+				grand_total_row.get("invoiced"),
+				grand_total_row.get("outstanding"),
+			],
 		)
-		si.append(
-			"payment_schedule",
-			dict(due_date=getdate(add_days(today(), 90)), invoice_portion=20.00, payment_amount=20),
+
+	def test_future_payments(self):
+		si = self.create_sales_invoice()
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.paid_amount = 90.0
+		pe.references[0].allocated_amount = 90.0
+		pe.save().submit()
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"show_future_payments": True,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+
+		expected_data = [100.0, 100.0, 10.0, 90.0]
+
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
 		)
 
-	si = si.save()
+		pe.cancel()
+		# full payment in future date
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.save().submit()
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, 0.0, 100.0]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)
 
-	if not do_not_submit:
-		si = si.submit()
+		pe.cancel()
+		# over payment in future date
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.paid_amount = 110
+		pe.save().submit()
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 2)
+		expected_data = [[100.0, 0.0, 100.0, 0.0, 100.0], [0.0, 10.0, -10.0, -10.0, 0.0]]
+		for idx, row in enumerate(report):
+			self.assertEqual(
+				expected_data[idx],
+				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+			)
 
-	return si
+	def test_sales_person(self):
+		sales_person = (
+			frappe.get_doc({"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True})
+			.insert()
+			.submit()
+		)
+		si = self.create_sales_invoice(do_not_submit=True)
+		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
+		si.save().submit()
 
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"sales_person": sales_person.name,
+			"show_sales_person": True,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
 
-def make_payment(docname):
-	pe = get_payment_entry("Sales Invoice", docname, bank_account="Cash - _TC2", party_amount=40)
-	pe.paid_from = "Debtors - _TC2"
-	pe.insert()
-	pe.submit()
+		expected_data = [100.0, 100.0, sales_person.name]
 
+		row = report[0]
+		self.assertEqual(expected_data, [row.invoiced, row.outstanding, row.sales_person])
 
-def make_credit_note(docname):
-	credit_note = create_sales_invoice(
-		company="_Test Company 2",
-		customer="_Test Customer 2",
-		currency="EUR",
-		qty=-1,
-		warehouse="Finished Goods - _TC2",
-		debit_to="Debtors - _TC2",
-		income_account="Sales - _TC2",
-		expense_account="Cost of Goods Sold - _TC2",
-		cost_center="Main - _TC2",
-		is_return=1,
-		return_against=docname,
-	)
+	def test_cost_center_filter(self):
+		si = self.create_sales_invoice()
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"cost_center": self.cost_center,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, self.cost_center]
+		row = report[0]
+		self.assertEqual(expected_data, [row.invoiced, row.outstanding, row.cost_center])
 
-	return credit_note
+	def test_customer_group_filter(self):
+		si = self.create_sales_invoice()
+		cus_group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"customer_group": cus_group,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, cus_group]
+		row = report[0]
+		self.assertEqual(expected_data, [row.invoiced, row.outstanding, row.customer_group])
+
+		filters.update({"customer_group": "Individual"})
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 0)
+
+	def test_party_account_filter(self):
+		si1 = self.create_sales_invoice()
+		self.customer2 = (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "Jane Doe",
+					"type": "Individual",
+					"default_currency": "USD",
+				}
+			)
+			.insert()
+			.submit()
+		)
+
+		si2 = self.create_sales_invoice(do_not_submit=True)
+		si2.posting_date = add_days(today(), -1)
+		si2.customer = self.customer2
+		si2.currency = "USD"
+		si2.conversion_rate = 80
+		si2.debit_to = self.debtors_usd
+		si2.save().submit()
+
+		# Filter on company currency receivable account
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"party_account": self.debit_to,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, self.debit_to, si1.currency]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.party_account, row.account_currency]
+		)
+
+		# Filter on USD receivable account
+		filters.update({"party_account": self.debtors_usd})
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [8000.0, 8000.0, self.debtors_usd, si2.currency]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.party_account, row.account_currency]
+		)
+
+		# without filter on party account
+		filters.pop("party_account")
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 2)
+		expected_data = [
+			[8000.0, 8000.0, 100.0, 100.0, self.debtors_usd, si2.currency],
+			[100.0, 100.0, 100.0, 100.0, self.debit_to, si1.currency],
+		]
+		for idx, row in enumerate(report):
+			self.assertEqual(
+				expected_data[idx],
+				[
+					row.invoiced,
+					row.outstanding,
+					row.invoiced_in_account_currency,
+					row.outstanding_in_account_currency,
+					row.party_account,
+					row.account_currency,
+				],
+			)

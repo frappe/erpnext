@@ -259,7 +259,7 @@ def get_opening_balance(
 		lft, rgt = frappe.db.get_value("Cost Center", filters.cost_center, ["lft", "rgt"])
 		cost_center = frappe.qb.DocType("Cost Center")
 		opening_balance = opening_balance.where(
-			closing_balance.cost_center.in_(
+			closing_balance.cost_center.isin(
 				frappe.qb.from_(cost_center)
 				.select("name")
 				.where((cost_center.lft >= lft) & (cost_center.rgt <= rgt))

@@ -549,6 +549,26 @@ class TestSalesOrder(FrappeTestCase):
 		workflow.is_active = 0
 		workflow.save()
 
+	def test_material_request_for_product_bundle(self):
+		# Create the Material Request from the sales order for the Packing Items
+		# Check whether the material request has the correct packing item or not.
+		if not frappe.db.exists("Item", "_Test Product Bundle Item New 1"):
+			bundle_item = make_item("_Test Product Bundle Item New 1", {"is_stock_item": 0})
+			bundle_item.append(
+				"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+			)
+			bundle_item.save(ignore_permissions=True)
+
+		make_item("_Packed Item New 2", {"is_stock_item": 1})
+		make_product_bundle("_Test Product Bundle Item New 1", ["_Packed Item New 2"], 2)
+
+		so = make_sales_order(
+			item_code="_Test Product Bundle Item New 1",
+		)
+
+		mr = make_material_request(so.name)
+		self.assertEqual(mr.items[0].item_code, "_Packed Item New 2")
+
 	def test_bin_details_of_packed_item(self):
 		# test Update Items with product bundle
 		if not frappe.db.exists("Item", "_Test Product Bundle Item New"):
@@ -1894,7 +1914,7 @@ def make_sales_order(**args):
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"
-	so.po_no = args.po_no or "12345"
+	so.po_no = args.po_no or ""
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
 

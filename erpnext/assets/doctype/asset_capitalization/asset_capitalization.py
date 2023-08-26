@@ -18,6 +18,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.stock_controller import StockController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -329,7 +330,7 @@ class AssetCapitalization(StockController):
 				gl_entries = self.get_gl_entries()
 
 			if gl_entries:
-				make_gl_entries(gl_entries, from_repost=from_repost)
+				make_gl_entries(gl_entries, merge_entries=False, from_repost=from_repost)
 		elif self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -358,9 +359,6 @@ class AssetCapitalization(StockController):
 		self.get_gl_entries_for_consumed_service_items(
 			gl_entries, target_account, target_against, precision
 		)
-
-		if not self.stock_items and not self.service_items and self.are_all_asset_items_non_depreciable:
-			return []
 
 		self.get_gl_entries_for_target_item(gl_entries, target_against, precision)
 
@@ -511,12 +509,20 @@ class AssetCapitalization(StockController):
 		asset_doc.gross_purchase_amount = total_target_asset_value
 		asset_doc.purchase_receipt_amount = total_target_asset_value
 		asset_doc.flags.ignore_validate = True
+		asset_doc.flags.asset_created_via_asset_capitalization = True
 		asset_doc.insert()
 
 		self.target_asset = asset_doc.name
 
 		self.target_fixed_asset_account = get_asset_category_account(
 			"fixed_asset_account", item=self.target_item_code, company=asset_doc.company
+		)
+
+		add_asset_activity(
+			asset_doc.name,
+			_("Asset created after Asset Capitalization {0} was submitted").format(
+				get_link_to_form("Asset Capitalization", self.name)
+			),
 		)
 
 		frappe.msgprint(
@@ -542,9 +548,30 @@ class AssetCapitalization(StockController):
 
 	def set_consumed_asset_status(self, asset):
 		if self.docstatus == 1:
-			asset.set_status("Capitalized" if self.target_is_fixed_asset else "Decapitalized")
+			if self.target_is_fixed_asset:
+				asset.set_status("Capitalized")
+				add_asset_activity(
+					asset.name,
+					_("Asset capitalized after Asset Capitalization {0} was submitted").format(
+						get_link_to_form("Asset Capitalization", self.name)
+					),
+				)
+			else:
+				asset.set_status("Decapitalized")
+				add_asset_activity(
+					asset.name,
+					_("Asset decapitalized after Asset Capitalization {0} was submitted").format(
+						get_link_to_form("Asset Capitalization", self.name)
+					),
+				)
 		else:
 			asset.set_status()
+			add_asset_activity(
+				asset.name,
+				_("Asset restored after Asset Capitalization {0} was cancelled").format(
+					get_link_to_form("Asset Capitalization", self.name)
+				),
+			)
 
 
 @frappe.whitelist()

@@ -179,6 +179,7 @@ def get_balance_on(
 	in_account_currency=True,
 	cost_center=None,
 	ignore_account_permission=False,
+	account_type=None,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -254,6 +255,21 @@ def get_balance_on(
 		else:
 			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
 
+	if account_type:
+		accounts = frappe.db.get_all(
+			"Account",
+			filters={"company": company, "account_type": account_type, "is_group": 0},
+			pluck="name",
+			order_by="lft",
+		)
+
+		cond.append(
+			"""
+			gle.account in (%s)
+		"""
+			% (", ".join([frappe.db.escape(account) for account in accounts]))
+		)
+
 	if party_type and party:
 		cond.append(
 			"""gle.party_type = %s and gle.party = %s """
@@ -263,7 +279,8 @@ def get_balance_on(
 	if company:
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
-	if account or (party_type and party):
+	if account or (party_type and party) or account_type:
+
 		if in_account_currency:
 			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
 		else:
@@ -276,7 +293,6 @@ def get_balance_on(
 				select_field, " and ".join(cond)
 			)
 		)[0][0]
-
 		# if bal is None, return 0
 		return flt(bal)
 
@@ -459,6 +475,9 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
 				update_reference_in_journal_entry(entry, doc, do_not_save=True)
+				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
+				# amount and account in args
+				doc.make_exchange_gain_loss_journal(args)
 			else:
 				update_reference_in_payment_entry(
 					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
@@ -618,9 +637,7 @@ def update_reference_in_payment_entry(
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate
-		if not d.exchange_gain_loss
-		else payment_entry.get_exchange_rate(),
+		"exchange_rate": d.exchange_rate if d.exchange_gain_loss else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.exchange_gain_loss,  # only populated from invoice in case of advance allocation
 		"account": d.account,
 	}
@@ -642,26 +659,46 @@ def update_reference_in_payment_entry(
 		new_row.docstatus = 1
 		new_row.update(reference_details)
 
-	if d.difference_amount and d.difference_account:
-		account_details = {
-			"account": d.difference_account,
-			"cost_center": payment_entry.cost_center
-			or frappe.get_cached_value("Company", payment_entry.company, "cost_center"),
-		}
-		if d.difference_amount:
-			account_details["amount"] = d.difference_amount
-
-		payment_entry.set_gain_or_loss(account_details=account_details)
-
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
+	payment_entry.make_exchange_gain_loss_journal()
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
+
+
+def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
+	"""
+	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
+	"""
+	if parent_doc.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
+		journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"reference_type": parent_doc.doctype,
+				"reference_name": parent_doc.name,
+				"docstatus": 1,
+			},
+			fields=["parent"],
+			as_list=1,
+		)
+
+		if journals:
+			gain_loss_journals = frappe.db.get_all(
+				"Journal Entry",
+				filters={
+					"name": ["in", [x[0] for x in journals]],
+					"voucher_type": "Exchange Gain Or Loss",
+					"docstatus": 1,
+				},
+				as_list=1,
+			)
+			for doc in gain_loss_journals:
+				frappe.get_doc("Journal Entry", doc[0]).cancel()
 
 
 def unlink_ref_doc_from_payment_entries(ref_doc):
@@ -871,6 +908,9 @@ def get_outstanding_invoices(
 	min_outstanding=None,
 	max_outstanding=None,
 	accounting_dimensions=None,
+	vouchers=None,  # list of dicts [{'voucher_type': '', 'voucher_no': ''}] for filtering
+	limit=None,  # passed by reconciliation tool
+	voucher_no=None,  # filter passed by reconciliation tool
 ):
 
 	ple = qb.DocType("Payment Ledger Entry")
@@ -896,12 +936,15 @@ def get_outstanding_invoices(
 
 	ple_query = QueryPaymentLedger()
 	invoice_list = ple_query.get_voucher_outstandings(
+		vouchers=vouchers,
 		common_filter=common_filter,
 		posting_date=posting_date,
 		min_outstanding=min_outstanding,
 		max_outstanding=max_outstanding,
 		get_invoices=True,
 		accounting_dimensions=accounting_dimensions or [],
+		limit=limit,
+		voucher_no=voucher_no,
 	)
 
 	for d in invoice_list:
@@ -1639,12 +1682,13 @@ class QueryPaymentLedger(object):
 		self.voucher_posting_date = []
 		self.min_outstanding = None
 		self.max_outstanding = None
+		self.limit = self.voucher_no = None
 
 	def reset(self):
 		# clear filters
 		self.vouchers.clear()
 		self.common_filter.clear()
-		self.min_outstanding = self.max_outstanding = None
+		self.min_outstanding = self.max_outstanding = self.limit = None
 
 		# clear result
 		self.voucher_outstandings.clear()
@@ -1658,6 +1702,7 @@ class QueryPaymentLedger(object):
 
 		filter_on_voucher_no = []
 		filter_on_against_voucher_no = []
+
 		if self.vouchers:
 			voucher_types = set([x.voucher_type for x in self.vouchers])
 			voucher_nos = set([x.voucher_no for x in self.vouchers])
@@ -1667,6 +1712,10 @@ class QueryPaymentLedger(object):
 
 			filter_on_against_voucher_no.append(ple.against_voucher_type.isin(voucher_types))
 			filter_on_against_voucher_no.append(ple.against_voucher_no.isin(voucher_nos))
+
+		if self.voucher_no:
+			filter_on_voucher_no.append(ple.voucher_no.like(f"%{self.voucher_no}%"))
+			filter_on_against_voucher_no.append(ple.against_voucher_no.like(f"%{self.voucher_no}%"))
 
 		# build outstanding amount filter
 		filter_on_outstanding_amount = []
@@ -1783,6 +1832,11 @@ class QueryPaymentLedger(object):
 				)
 			)
 
+		if self.limit:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.limit(self.limit)
+			)
+
 		# execute SQL
 		self.voucher_outstandings = self.cte_query_voucher_amount_and_outstanding.run(as_dict=True)
 
@@ -1796,6 +1850,8 @@ class QueryPaymentLedger(object):
 		get_payments=False,
 		get_invoices=False,
 		accounting_dimensions=None,
+		limit=None,
+		voucher_no=None,
 	):
 		"""
 		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
@@ -1817,6 +1873,79 @@ class QueryPaymentLedger(object):
 		self.max_outstanding = max_outstanding
 		self.get_payments = get_payments
 		self.get_invoices = get_invoices
+		self.limit = limit
+		self.voucher_no = voucher_no
 		self.query_for_outstanding()
 
 		return self.voucher_outstandings
+
+
+def create_gain_loss_journal(
+	company,
+	party_type,
+	party,
+	party_account,
+	gain_loss_account,
+	exc_gain_loss,
+	dr_or_cr,
+	reverse_dr_or_cr,
+	ref1_dt,
+	ref1_dn,
+	ref1_detail_no,
+	ref2_dt,
+	ref2_dn,
+	ref2_detail_no,
+) -> str:
+	journal_entry = frappe.new_doc("Journal Entry")
+	journal_entry.voucher_type = "Exchange Gain Or Loss"
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+	journal_entry.multi_currency = 1
+
+	party_account_currency = frappe.get_cached_value("Account", party_account, "account_currency")
+
+	if not gain_loss_account:
+		frappe.throw(_("Please set default Exchange Gain/Loss Account in Company {}").format(company))
+	gain_loss_account_currency = get_account_currency(gain_loss_account)
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
+
+	if gain_loss_account_currency != company_currency:
+		frappe.throw(_("Currency for {0} must be {1}").format(gain_loss_account, company_currency))
+
+	journal_account = frappe._dict(
+		{
+			"account": party_account,
+			"party_type": party_type,
+			"party": party,
+			"account_currency": party_account_currency,
+			"exchange_rate": 0,
+			"cost_center": erpnext.get_default_cost_center(company),
+			"reference_type": ref1_dt,
+			"reference_name": ref1_dn,
+			"reference_detail_no": ref1_detail_no,
+			dr_or_cr: abs(exc_gain_loss),
+			dr_or_cr + "_in_account_currency": 0,
+		}
+	)
+
+	journal_entry.append("accounts", journal_account)
+
+	journal_account = frappe._dict(
+		{
+			"account": gain_loss_account,
+			"account_currency": gain_loss_account_currency,
+			"exchange_rate": 1,
+			"cost_center": erpnext.get_default_cost_center(company),
+			"reference_type": ref2_dt,
+			"reference_name": ref2_dn,
+			"reference_detail_no": ref2_detail_no,
+			reverse_dr_or_cr + "_in_account_currency": 0,
+			reverse_dr_or_cr: abs(exc_gain_loss),
+		}
+	)
+
+	journal_entry.append("accounts", journal_account)
+
+	journal_entry.save()
+	journal_entry.submit()
+	return journal_entry.name

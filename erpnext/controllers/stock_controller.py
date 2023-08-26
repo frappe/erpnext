@@ -15,7 +15,7 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 	process_gl_map,
 )
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
@@ -534,6 +534,7 @@ class StockController(AccountsController):
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
 
 	def make_gl_entries_on_cancel(self):
+		cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 		if frappe.db.sql(
 			"""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""",
@@ -598,6 +599,7 @@ class StockController(AccountsController):
 		inspection_fieldname_map = {
 			"Purchase Receipt": "inspection_required_before_purchase",
 			"Purchase Invoice": "inspection_required_before_purchase",
+			"Subcontracting Receipt": "inspection_required_before_purchase",
 			"Sales Invoice": "inspection_required_before_delivery",
 			"Delivery Note": "inspection_required_before_delivery",
 		}
