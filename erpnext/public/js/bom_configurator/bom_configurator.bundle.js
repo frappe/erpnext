@@ -383,7 +383,7 @@ class BOMConfigurator {
 
 		frappe.views.trees["BOM Configurator"].tree.load_children(node);
 
-		while (true) {
+		while (node) {
 			item_row = response.message.items.filter(item => item.name === node.data.name);
 
 			if (item_row?.length) {
@@ -402,12 +402,8 @@ class BOMConfigurator {
 			);
 
 			$($(parent_dom).find(".fg-item-amt")[0]).html(total_amount);
-
-			if (node.is_root) {
-				break;
-			}
-
 			node = node.parent_node;
+
 		}
 
 	}
