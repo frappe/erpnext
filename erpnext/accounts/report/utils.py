@@ -367,7 +367,7 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 
 
 def get_opening_row(party_type, party, from_date, company):
-	party_account = get_party_account(party_type, party, company, include_advance=True)
+	party_account = get_party_account(party_type, party=party, company=company)
 	gle = frappe.qb.DocType("GL Entry")
 	return (
 		frappe.qb.from_(gle)
