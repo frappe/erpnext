@@ -411,9 +411,7 @@ def get_invoices(filters, additional_query_columns):
 		filters, query, doctype="Purchase Invoice", child_doctype="Purchase Invoice Item"
 	)
 	if filters.get("include_payments"):
-		party_account = get_party_account(
-			"Supplier", filters.get("supplier"), filters.get("company"), include_advance=True
-		)
+		party_account = get_party_account("Supplier", filters.get("supplier"), filters.get("company"))
 		query = query.where(pi.credit_to.isin(party_account))
 	invoices = query.run(as_dict=True)
 	return invoices
@@ -425,9 +423,7 @@ def get_payments(filters):
 		account_fieldname="paid_to",
 		party="supplier",
 		party_name="supplier_name",
-		party_account=get_party_account(
-			"Supplier", filters.supplier, filters.company, include_advance=True
-		),
+		party_account=get_party_account("Supplier", filters.supplier, filters.company),
 	)
 	payment_entries = get_payment_entries(filters, args)
 	journal_entries = get_journal_entries(filters, args)
