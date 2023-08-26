@@ -69,11 +69,17 @@ frappe.ui.form.on("Sales Order", {
 				}
 			}
 
-			// Stock Reservation > Unreserve/Reserved Stock button will be only visible if the SO has reserved stock.
+			// Stock Reservation > Unreserve button will be only visible if the SO has un-delivered reserved stock.
 			if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
 				frm.add_custom_button(__('Unreserve'), () => frm.events.cancel_stock_reservation_entries(frm), __('Stock Reservation'));
-				frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
 			}
+
+			frm.doc.items.forEach(item => {
+				if (flt(item.stock_reserved_qty) > 0) {
+					frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
+					return;
+				}
+			});
 		}
 
 		if (frm.doc.docstatus === 0) {

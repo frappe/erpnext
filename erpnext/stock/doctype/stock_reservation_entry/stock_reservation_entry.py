@@ -736,7 +736,7 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
 
 	if get_stock_reservation_entries_for_voucher(
-		voucher_type, voucher_no, voucher_detail_no, fields=["name"]
+		voucher_type, voucher_no, voucher_detail_no, fields=["name"], ignore_status=True
 	):
 		return True
 
