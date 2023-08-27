@@ -55,7 +55,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		super(SubcontractingReceipt, self).validate()
 
-		if self.is_new() and self.get("_action") == "save":
+		if self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
 			self.get_scrap_items()
 
 		self.set_missing_values()

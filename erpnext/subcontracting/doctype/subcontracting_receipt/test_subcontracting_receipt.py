@@ -686,6 +686,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		# Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
+		scr.get_scrap_items()
 
 		# Test - 1: Scrap Items should be fetched from BOM in items table with `is_scrap_item` = 1
 		scr_scrap_items = set([item.item_code for item in scr.items if item.is_scrap_item])

@@ -591,6 +591,13 @@ def create_subcontracting_order(**args):
 				for idx, val in enumerate(sco.items):
 					val.warehouse = warehouses[idx]
 
+	warehouses = set()
+	for item in sco.items:
+		warehouses.add(item.warehouse)
+
+	if len(warehouses) == 1:
+		sco.set_warehouse = list(warehouses)[0]
+
 	if not args.do_not_save:
 		sco.insert()
 		if not args.do_not_submit:
