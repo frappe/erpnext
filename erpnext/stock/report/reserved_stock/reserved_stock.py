@@ -61,7 +61,6 @@ def get_data(filters):
 	)
 
 	for field in [
-		"company",
 		"item_code",
 		"warehouse",
 		"voucher_type",

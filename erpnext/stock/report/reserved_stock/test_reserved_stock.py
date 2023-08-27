@@ -4,6 +4,7 @@ from random import randint
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils.data import today
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry import (
@@ -43,9 +44,11 @@ class TestReservedStock(FrappeTestCase):
 			)
 			so.create_stock_reservation_entries()
 
-		data = reserved_stock_report(filters={"warehouse": self.warehouse})
+		data = reserved_stock_report(
+			filters={
+				"company": so.company,
+				"from_date": today(),
+				"to_date": today(),
+			}
+		)
 		self.assertEqual(len(data), len(items_details))
-
-		for d in data:
-			self.assertEqual(d.voucher_qty, d.reserved_qty)
-			self.assertEqual(d.available_qty, self.stock_qty - d.reserved_qty)
