@@ -59,6 +59,7 @@
   "closing_settings_tab",
   "period_closing_settings_section",
   "acc_frozen_upto",
+  "ignore_account_closing_balance",
   "column_break_25",
   "frozen_accounts_modifier",
   "tab_break_dpet",
@@ -410,6 +411,13 @@
   },
   {
    "default": "0",
+   "description": "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) ",
+   "fieldname": "ignore_account_closing_balance",
+   "fieldtype": "Check",
+   "label": "Ignore Account Closing Balance"
+  },
+  {
+   "default": "0",
    "description": "Tax Amount will be rounded on a row(items) level",
    "fieldname": "round_row_wise_tax",
    "fieldtype": "Check",
@@ -421,7 +429,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-22 20:11:00.042840",
+ "modified": "2023-08-28 00:12:02.740633",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
