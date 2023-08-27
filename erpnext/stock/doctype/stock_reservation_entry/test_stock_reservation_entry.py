@@ -419,11 +419,11 @@ class TestStockReservationEntry(FrappeTestCase):
 				"Sales Order", so.name, item.name, fields=["status", "delivered_qty", "reserved_qty"]
 			)[0]
 
-			# Test - 3: After Delivery Note, SRE Delivered Qty should be equal to SRE Reserved Qty.
-			self.assertEqual(sre_details.delivered_qty, sre_details.reserved_qty)
-
-			# Test - 4: After Delivery Note, SRE status should be `Delivered`.
+			# Test - 3: After Delivery Note, SRE status should be `Delivered`.
 			self.assertEqual(sre_details.status, "Delivered")
+
+			# Test - 4: After Delivery Note, SRE Delivered Qty should be equal to SRE Reserved Qty.
+			self.assertEqual(sre_details.delivered_qty, sre_details.reserved_qty)
 
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
@@ -458,6 +458,34 @@ class TestStockReservationEntry(FrappeTestCase):
 
 				# Test - 6: Reserved Serial/Batch Nos should be equal to Delivered Serial/Batch Nos.
 				self.assertSetEqual(reserved_sb_details, delivered_sb_details)
+
+		dn.cancel()
+		so.load_from_db()
+
+		for item in so.items:
+			sre_details = get_stock_reservation_entries_for_voucher(
+				"Sales Order",
+				so.name,
+				item.name,
+				fields=["name", "status", "delivered_qty", "reservation_based_on"],
+			)[0]
+
+			# Test - 7: After Delivery Note cancellation, SRE status should be `Reserved`.
+			self.assertEqual(sre_details.status, "Reserved")
+
+			# Test - 8: After Delivery Note cancellation, SRE Delivered Qty should be `0`.
+			self.assertEqual(sre_details.delivered_qty, 0)
+
+			if sre_details.reservation_based_on == "Serial and Batch":
+				sb_entries = frappe.db.get_all(
+					"Serial and Batch Entry",
+					filters={"parenttype": "Stock Reservation Entry", "parent": sre_details.name},
+					fields=["delivered_qty"],
+				)
+
+				for sb_entry in sb_entries:
+					# Test - 9: After Delivery Note cancellation, SB Entry Delivered Qty should be `0`.
+					self.assertEqual(sb_entry.delivered_qty, 0)
 
 	@change_settings(
 		"Stock Settings",
