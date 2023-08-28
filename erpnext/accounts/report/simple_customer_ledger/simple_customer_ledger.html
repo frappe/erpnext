@@ -82,26 +82,31 @@
 
 	<table class="table  table-bordered align-center">
 		<thead style="font-size:1.4rem; font-weight:bold">
-			<tr> <th colspan="6" style="text-align: center;">{%= __("Outstanding Balance Summary in Days") %}</th></tr>
 			<tr>
-				<th width="16.6%">{%= __("0-30") %}</th>
-				<th width="16.6%" >{%= __("31 - 45") %} </th>
-				<th width="16.6%">{%= __("45 - 60") %}</th>
-				<th width="16.6%">{%= __("61 - 75") %}</th>
-				<th width="16.6%">{%= __("76 - 90") %}</th>
-				<th width="17%">{%= __("90+") %}</th>
+				<th colspan="6" style="text-align: center;">{{ __("Outstanding Balance Summary in Days") }}</th>
+			</tr>
+			<tr>
+				<th width="16.6%">{{ __("0-30") }}</th>
+				<th width="16.6%">{{ __("31 - 45") }}</th>
+				<th width="16.6%">{{ __("45 - 60") }}</th>
+				<th width="16.6%">{{ __("61 - 75") }}</th>
+				<th width="16.6%">{{ __("76 - 90") }}</th>
+				<th width="17%">{{ __("90+") }}</th>
 			</tr>
 		</thead>
 		<tbody style="font-size: 1rem; white-space:nowrap;text-align: center;">
 			<tr>
-				<td>{%= data[data.length-1].range1 %}	 </td>					
-				<td>{%= data[data.length-1].range2 %}	 </td>	
-				<td>{%= data[data.length-1].range3 %}	 </td>	
-				<td>{%= data[data.length-1].range4 %}	 </td>	
-				<td>{%= data[data.length-1].range5 %}	 </td>	
-				<td>{%= data[data.length-1].range6 %}	 </td>									
-			</tr>	
-	
+				{% for item in data %}
+					{% if item.ranges %}
+					<td>{{ format_currency(item.ranges.range1, data[0].currency) }}</td>
+                    <td>{{ format_currency(item.ranges.range2, data[0].currency) }}</td>
+                    <td>{{ format_currency(item.ranges.range3, data[0].currency) }}</td>
+                    <td>{{ format_currency(item.ranges.range4, data[0].currency) }}</td>
+                    <td>{{ format_currency(item.ranges.range5, data[0].currency) }}</td>
+                    <td>{{ format_currency(item.ranges.range6, data[0].currency) }}</td>
+					{% endif %}
+				{% endfor %}
+			</tr>
 		</tbody>
 	
 	</table>

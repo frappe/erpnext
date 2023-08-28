@@ -93,12 +93,13 @@ class SimpleCustomerLedger():
 					ele.age=delta.days
 		
 			data.append(ele)
-		
+			
+		data.sort(key=lambda x: x['posting_date'])
 		
 		data.insert(0,opening_line)
-		ranges=self.calculate_ranges(invoices,data[0])
-		data.append(ranges)
-
+		ranges=self.calculate_ranges(invoices,data[0])		
+		data.append({'ranges':ranges})
+		
 		self.data=data
 	
 	def calculate_ranges(self, invoices,op):	
@@ -141,7 +142,7 @@ class SimpleCustomerLedger():
 			{
 				'fieldname': 'posting_date',
 				'label': _('Date'),
-				'fieldtype': 'Data',
+				'fieldtype': 'Date',
 				'align': 'left',
 				'width': 140
 			},
