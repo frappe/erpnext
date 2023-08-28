@@ -220,18 +220,27 @@ class AccountsController(TransactionBase):
 			.run(as_dict=True)
 		)
 
-		references_map = frappe._dict()
-		for x in rows:
-			references_map.setdefault(x.parent, []).append(x.name)
+		if rows:
+			references_map = frappe._dict()
+			for x in rows:
+				references_map.setdefault(x.parent, []).append(x.name)
 
-		for doc, rows in references_map.items():
-			unreconcile_doc = frappe.get_doc("Unreconcile Payments", doc)
-			for row in rows:
-				unreconcile_doc.remove(unreconcile_doc.get("allocations", {"name": row})[0])
+			for doc, rows in references_map.items():
+				unreconcile_doc = frappe.get_doc("Unreconcile Payments", doc)
+				for row in rows:
+					unreconcile_doc.remove(unreconcile_doc.get("allocations", {"name": row})[0])
 
-			unreconcile_doc.flags.ignore_validate_update_after_submit = True
-			unreconcile_doc.flags.ignore_links = True
-			unreconcile_doc.save(ignore_permissions=True)
+				unreconcile_doc.flags.ignore_validate_update_after_submit = True
+				unreconcile_doc.flags.ignore_links = True
+				unreconcile_doc.save(ignore_permissions=True)
+
+		# delete docs upon parent doc deletion
+		unreconcile_docs = frappe.db.get_all("Unreconcile Payments", filters={"voucher_no": self.name})
+		for x in unreconcile_docs:
+			_doc = frappe.get_doc("Unreconcile Payments", x.name)
+			if _doc.docstatus == 1:
+				_doc.cancel()
+			_doc.delete()
 
 	def on_trash(self):
 		# delete references in 'Repost Payment Ledger'
