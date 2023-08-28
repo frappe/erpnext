@@ -1,10 +1,11 @@
 import frappe
+from frappe import qb
 
 from erpnext.stock.doctype.item.test_item import create_item
 
 
 class AccountsTestMixin:
-	def create_customer(self, customer_name, currency=None):
+	def create_customer(self, customer_name="_Test Customer", currency=None):
 		if not frappe.db.exists("Customer", customer_name):
 			customer = frappe.new_doc("Customer")
 			customer.customer_name = customer_name
@@ -17,7 +18,7 @@ class AccountsTestMixin:
 		else:
 			self.customer = customer_name
 
-	def create_supplier(self, supplier_name, currency=None):
+	def create_supplier(self, supplier_name="_Test Supplier", currency=None):
 		if not frappe.db.exists("Supplier", supplier_name):
 			supplier = frappe.new_doc("Supplier")
 			supplier.supplier_name = supplier_name
@@ -31,7 +32,7 @@ class AccountsTestMixin:
 		else:
 			self.supplier = supplier_name
 
-	def create_item(self, item_name, is_stock=0, warehouse=None, company=None):
+	def create_item(self, item_name="_Test Item", is_stock=0, warehouse=None, company=None):
 		item = create_item(item_name, is_stock_item=is_stock, warehouse=warehouse, company=company)
 		self.item = item.name
 
@@ -62,19 +63,56 @@ class AccountsTestMixin:
 		self.debit_usd = "Debtors USD - " + abbr
 		self.cash = "Cash - " + abbr
 		self.creditors = "Creditors - " + abbr
+		self.retained_earnings = "Retained Earnings - " + abbr
 
-		# create bank account
-		bank_account = "HDFC - " + abbr
-		if frappe.db.exists("Account", bank_account):
-			self.bank = bank_account
-		else:
-			bank_acc = frappe.get_doc(
+		# Deferred revenue, expense and bank accounts
+		other_accounts = [
+			frappe._dict(
 				{
-					"doctype": "Account",
+					"attribute_name": "deferred_revenue",
+					"account_name": "Deferred Revenue",
+					"parent_account": "Current Liabilities - " + abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "deferred_expense",
+					"account_name": "Deferred Expense",
+					"parent_account": "Current Assets - " + abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "bank",
 					"account_name": "HDFC",
 					"parent_account": "Bank Accounts - " + abbr,
-					"company": self.company,
 				}
-			)
-			bank_acc.save()
-			self.bank = bank_acc.name
+			),
+		]
+		for acc in other_accounts:
+			acc_name = acc.account_name + " - " + abbr
+			if frappe.db.exists("Account", acc_name):
+				setattr(self, acc.attribute_name, acc_name)
+			else:
+				new_acc = frappe.get_doc(
+					{
+						"doctype": "Account",
+						"account_name": acc.account_name,
+						"parent_account": acc.parent_account,
+						"company": self.company,
+					}
+				)
+				new_acc.save()
+				setattr(self, acc.attribute_name, new_acc.name)
+
+	def clear_old_entries(self):
+		doctype_list = [
+			"GL Entry",
+			"Payment Ledger Entry",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Payment Entry",
+			"Journal Entry",
+		]
+		for doctype in doctype_list:
+			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()

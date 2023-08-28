@@ -214,8 +214,8 @@ class ReceivablePayableReport(object):
 		for party_type in self.party_type:
 			if self.filters.get(scrub(party_type)):
 				amount = ple.amount_in_account_currency
-		else:
-			amount = ple.amount
+			else:
+				amount = ple.amount
 		amount_in_account_currency = ple.amount_in_account_currency
 
 		# update voucher
@@ -1090,7 +1090,10 @@ class ReceivablePayableReport(object):
 			.where(
 				(je.company == self.filters.company)
 				& (je.posting_date.lte(self.filters.report_date))
-				& (je.voucher_type == "Exchange Rate Revaluation")
+				& (
+					(je.voucher_type == "Exchange Rate Revaluation")
+					| (je.voucher_type == "Exchange Gain Or Loss")
+				)
 			)
 			.run()
 		)

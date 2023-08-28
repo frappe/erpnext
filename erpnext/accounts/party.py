@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import (
 from frappe.contacts.doctype.contact.contact import get_contact_details
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
-from frappe.query_builder.functions import Date, Sum
+from frappe.query_builder.functions import Abs, Date, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -884,35 +884,34 @@ def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 
 
 def get_partywise_advanced_payment_amount(
-	party_type, posting_date=None, future_payment=0, company=None, party=None, account_type=None
+	party_type, posting_date=None, future_payment=0, company=None, party=None
 ):
-	gle = frappe.qb.DocType("GL Entry")
+	ple = frappe.qb.DocType("Payment Ledger Entry")
 	query = (
-		frappe.qb.from_(gle)
-		.select(gle.party)
+		frappe.qb.from_(ple)
+		.select(ple.party, Abs(Sum(ple.amount).as_("amount")))
 		.where(
-			(gle.party_type.isin(party_type)) & (gle.against_voucher.isnull()) & (gle.is_cancelled == 0)
+			(ple.party_type.isin(party_type))
+			& (ple.amount < 0)
+			& (ple.against_voucher_no == ple.voucher_no)
+			& (ple.delinked == 0)
 		)
-		.groupby(gle.party)
+		.groupby(ple.party)
 	)
-	if account_type == "Receivable":
-		query = query.select(Sum(gle.credit).as_("amount"))
-	else:
-		query = query.select(Sum(gle.debit).as_("amount"))
 
 	if posting_date:
 		if future_payment:
-			query = query.where((gle.posting_date <= posting_date) | (Date(gle.creation) <= posting_date))
+			query = query.where((ple.posting_date <= posting_date) | (Date(ple.creation) <= posting_date))
 		else:
-			query = query.where(gle.posting_date <= posting_date)
+			query = query.where(ple.posting_date <= posting_date)
 
 	if company:
-		query = query.where(gle.company == company)
+		query = query.where(ple.company == company)
 
 	if party:
-		query = query.where(gle.party == party)
+		query = query.where(ple.party == party)
 
-	data = query.run(as_dict=True)
+	data = query.run()
 	if data:
 		return frappe._dict(data)
 
