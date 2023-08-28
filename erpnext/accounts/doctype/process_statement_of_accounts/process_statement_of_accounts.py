@@ -65,19 +65,17 @@ def get_report_pdf(doc, consolidated=True):
 		filters = get_common_filters(doc)
 
 		if doc.report == "General Ledger":
-			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
-		else:
-			filters.update(get_ar_filters(doc, entry))
-
-		if doc.report == "General Ledger":
 			col, res = get_soa(filters)
 			for x in [0, -2, -1]:
 				res[x]["account"] = res[x]["account"].replace("'", "")
 			if len(res) == 3:
 				continue
 		else:
+			filters.update(get_ar_filters(doc, entry))
 			ar_res = get_ar_soa(filters)
 			col, res = ar_res[0], ar_res[1]
+			if not res:
+				continue
 
 		statement_dict[entry.customer] = get_html(doc, filters, entry, col, res, ageing)
 
