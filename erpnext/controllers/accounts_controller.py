@@ -211,6 +211,28 @@ class AccountsController(TransactionBase):
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
+	def _remove_references_in_unreconcile(self):
+		upe = frappe.qb.DocType("UnReconcile Payment Entries")
+		rows = (
+			frappe.qb.from_(upe)
+			.select(upe.name, upe.parent)
+			.where((upe.reference_doctype == self.doctype) & (upe.reference_name == self.name))
+			.run(as_dict=True)
+		)
+
+		references_map = frappe._dict()
+		for x in rows:
+			references_map.setdefault(x.parent, []).append(x.name)
+
+		for doc, rows in references_map.items():
+			unreconcile_doc = frappe.get_doc("Unreconcile Payments", doc)
+			for row in rows:
+				unreconcile_doc.remove(unreconcile_doc.get("allocations", {"name": row})[0])
+
+			unreconcile_doc.flags.ignore_validate_update_after_submit = True
+			unreconcile_doc.flags.ignore_links = True
+			unreconcile_doc.save(ignore_permissions=True)
+
 	def on_trash(self):
 		# delete references in 'Repost Payment Ledger'
 		rpi = frappe.qb.DocType("Repost Payment Ledger Items")
@@ -218,10 +240,7 @@ class AccountsController(TransactionBase):
 			(rpi.voucher_type == self.doctype) & (rpi.voucher_no == self.name)
 		).run()
 
-		upe = frappe.qb.DocType("UnReconcile Payment Entries")
-		frappe.qb.from_(upe).delete().where(
-			(upe.reference_doctype == self.doctype) & (upe.reference_name == self.name)
-		).run()
+		self._remove_references_in_unreconcile()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
