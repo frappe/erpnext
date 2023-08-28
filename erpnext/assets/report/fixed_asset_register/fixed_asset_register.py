@@ -156,6 +156,8 @@ def get_data(filters):
 
 
 def prepare_chart_data(data, filters):
+	if not data:
+		return
 	labels_values_map = {}
 	if filters.filter_based_on not in ("Date Range", "Fiscal Year"):
 		filters_filter_based_on = "Date Range"
