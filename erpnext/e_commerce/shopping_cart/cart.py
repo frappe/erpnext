@@ -517,6 +517,8 @@ def get_party(user=None):
 			}
 		)
 
+		customer.append("portal_users", {"user": user})
+
 		if debtors_account:
 			customer.update({"accounts": [{"company": cart_settings.company, "account": debtors_account}]})
 

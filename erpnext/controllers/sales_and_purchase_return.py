@@ -345,6 +345,8 @@ def make_return_doc(
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
+			if source.tax_withholding_category:
+				doc.set_onload("supplier_tds", source.tax_withholding_category)
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
