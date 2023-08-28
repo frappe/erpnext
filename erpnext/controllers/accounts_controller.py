@@ -218,6 +218,11 @@ class AccountsController(TransactionBase):
 			(rpi.voucher_type == self.doctype) & (rpi.voucher_no == self.name)
 		).run()
 
+		upe = frappe.qb.DocType("UnReconcile Payment Entries")
+		frappe.qb.from_(upe).delete().where(
+			(upe.reference_doctype == self.doctype) & (upe.reference_name == self.name)
+		).run()
+
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
 			ple = frappe.qb.DocType("Payment Ledger Entry")
