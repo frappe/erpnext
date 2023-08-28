@@ -1248,6 +1248,7 @@ class TestPaymentEntry(FrappeTestCase):
 		so = make_sales_order(do_not_save=True)
 		so.items[0].rate = 99.55
 		so.save().submit()
+		self.assertGreater(so.rounded_total, 0.0)
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
 		pe.paid_from = "Debtors - _TC"
 		pe.paid_amount = 45.55
@@ -1255,6 +1256,7 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.save().submit()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
 		pe.paid_from = "Debtors - _TC"
+		# No validation error should be thrown here.
 		pe.save().submit()
 
 		so.reload()
