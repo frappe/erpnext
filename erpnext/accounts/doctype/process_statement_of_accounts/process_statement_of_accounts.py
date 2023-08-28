@@ -26,7 +26,13 @@ class ProcessStatementOfAccounts(Document):
 		if not self.subject:
 			self.subject = "Statement Of Accounts for {{ customer.customer_name }}"
 		if not self.body:
-			self.body = "Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}."
+			if self.report == "General Ledger":
+				body_str = " from {{ doc.from_date }} to {{ doc.to_date }}."
+			else:
+				body_str = " until {{ doc.posting_date }}."
+			self.body = "Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts" + body_str
+		if not self.pdf_name:
+			self.pdf_name = "{{ customer.customer_name }}"
 
 		validate_template(self.subject)
 		validate_template(self.body)
@@ -139,6 +145,7 @@ def get_ar_filters(doc, entry):
 	return {
 		"report_date": doc.posting_date if doc.posting_date else None,
 		"customer": entry.customer,
+		"customer_name": entry.customer_name if entry.customer_name else None,
 		"payment_terms_template": doc.payment_terms_template if doc.payment_terms_template else None,
 		"sales_partner": doc.sales_partner if doc.sales_partner else None,
 		"sales_person": doc.sales_person if doc.sales_person else None,
@@ -368,10 +375,18 @@ def send_emails(document_name, from_scheduler=False):
 
 	if report:
 		for customer, report_pdf in report.items():
-			attachments = [{"fname": customer + ".pdf", "fcontent": report_pdf}]
+			context = get_context(customer, doc)
+			filename = frappe.render_template(doc.pdf_name, context)
+			attachments = [{"fname": filename + ".pdf", "fcontent": report_pdf}]
 
 			recipients, cc = get_recipients_and_cc(customer, doc)
+<<<<<<< HEAD
 			context = get_context(customer, doc)
+=======
+			if not recipients:
+				continue
+
+>>>>>>> 5c2a949593 (feat: add field for specifying pdf name)
 			subject = frappe.render_template(doc.subject, context)
 			message = frappe.render_template(doc.body, context)
 
