@@ -8,6 +8,7 @@ from frappe.utils import cint, flt, getdate, nowdate
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 
 class SubcontractingReceipt(SubcontractingController):
@@ -159,6 +160,17 @@ class SubcontractingReceipt(SubcontractingController):
 				bom = frappe.get_doc("BOM", item.bom)
 				for scrap_item in bom.scrap_items:
 					qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
+					rate = (
+						get_valuation_rate(
+							scrap_item.item_code,
+							self.set_warehouse,
+							self.doctype,
+							self.name,
+							currency=erpnext.get_company_currency(self.company),
+							company=self.company,
+						)
+						or scrap_item.rate
+					)
 					self.append(
 						"items",
 						{
@@ -169,12 +181,12 @@ class SubcontractingReceipt(SubcontractingController):
 							"qty": qty,
 							"stock_uom": scrap_item.stock_uom,
 							"recalculate_rate": 0,
-							"rate": scrap_item.rate,
+							"rate": rate,
 							"rm_cost_per_qty": 0,
 							"service_cost_per_qty": 0,
 							"additional_cost_per_qty": 0,
 							"scrap_cost_per_qty": 0,
-							"amount": qty * scrap_item.rate,
+							"amount": qty * rate,
 							"warehouse": self.set_warehouse,
 							"rejected_warehouse": self.rejected_warehouse,
 						},
