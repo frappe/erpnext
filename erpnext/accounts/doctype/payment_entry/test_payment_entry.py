@@ -1244,6 +1244,22 @@ class TestPaymentEntry(FrappeTestCase):
 		template.allocate_payment_based_on_payment_terms = 1
 		template.save()
 
+	def test_allocation_validation_for_sales_order(self):
+		so = make_sales_order(do_not_save=True)
+		so.items[0].rate = 99.55
+		so.save().submit()
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = 45.55
+		pe.references[0].allocated_amount = 45.55
+		pe.save().submit()
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.save().submit()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, so.rounded_total)
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
