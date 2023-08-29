@@ -38,24 +38,6 @@ frappe.query_reports["Accounts Payable"] = {
 			}
 		},
 		{
-			"fieldname": "supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier",
-			on_change: () => {
-				var supplier = frappe.query_report.get_filter_value('supplier');
-				if (supplier) {
-					frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
-						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-					});
-				} else {
-					frappe.query_report.set_filter_value('tax_id', "");
-				}
-
-				frappe.query_report.refresh();
-			}
-		},
-		{
 			"fieldname": "party_account",
 			"label": __("Payable Account"),
 			"fieldtype": "Link",
@@ -113,12 +95,6 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Payment Terms Template"
 		},
 		{
-			"fieldname": "supplier_group",
-			"label": __("Supplier Group"),
-			"fieldtype": "Link",
-			"options": "Supplier Group"
-		},
-		{
 			"fieldname": "party_type",
 			"label": __("Party Type"),
 			"fieldtype": "Link",
@@ -130,6 +106,25 @@ frappe.query_reports["Accounts Payable"] = {
 					}
 				};
 			},
+			on_change: () => {
+				frappe.query_report.set_filter_value('party', "");
+				// hide supplier group and group_by_supplier filter if party type is employee
+				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') === "Employee")
+				frappe.query_report.toggle_filter_display('group_by_party', frappe.query_report.get_filter_value('party_type') === "Employee")
+			}
+
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
+		},
+		{
+			"fieldname": "supplier_group",
+			"label": __("Supplier Group"),
+			"fieldtype": "Link",
+			"options": "Supplier Group",
 		},
 		{
 			"fieldname": "group_by_party",
