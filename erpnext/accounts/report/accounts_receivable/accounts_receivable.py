@@ -212,7 +212,7 @@ class ReceivablePayableReport(object):
 
 		# amount in "Party Currency", if its supplied. If not, amount in company currency
 		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
+			if party_type == self.filters.get("party_type") and self.filters.get("supplier"):
 				amount = ple.amount_in_account_currency
 			else:
 				amount = ple.amount
@@ -799,6 +799,9 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get(party_type_field):
 			self.qb_selection_filter.append(self.ple.party == self.filters.get(party_type_field))
+
+		if self.filters.get("party_type"):
+			self.qb_selection_filter.append(self.filters.party_type == self.ple.party_type)
 
 		if self.filters.party_account:
 			self.qb_selection_filter.append(self.ple.account == self.filters.party_account)
