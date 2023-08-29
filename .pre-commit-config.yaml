@@ -40,6 +40,7 @@ repos:
       - id: flake8
         additional_dependencies: [
           'flake8-bugbear',
+          'flake8-tuple',
         ]
         args: ['--config', '.github/helper/.flake8_strict']
         exclude: ".*setup.py$"

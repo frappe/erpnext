@@ -436,24 +436,6 @@ class BuyingController(SubcontractingController):
 
 			# validate rate with ref PR
 
-	def validate_rejected_warehouse(self):
-		for item in self.get("items"):
-			if flt(item.rejected_qty) and not item.rejected_warehouse:
-				if self.rejected_warehouse:
-					item.rejected_warehouse = self.rejected_warehouse
-
-				if not item.rejected_warehouse:
-					frappe.throw(
-						_("Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}").format(
-							item.idx, item.item_code
-						)
-					)
-
-			if item.get("rejected_warehouse") and (item.get("rejected_warehouse") == item.get("warehouse")):
-				frappe.throw(
-					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
-				)
-
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
 		for d in self.get("items"):
