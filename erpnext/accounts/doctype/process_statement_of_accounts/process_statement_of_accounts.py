@@ -371,7 +371,7 @@ def download_statements(document_name):
 
 
 @frappe.whitelist()
-def send_emails(document_name, from_scheduler=False):
+def send_emails(document_name, from_scheduler=False, posting_date=None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	report = get_report_pdf(doc, consolidated=False)
 
@@ -403,7 +403,7 @@ def send_emails(document_name, from_scheduler=False):
 			)
 
 		if doc.enable_auto_email and from_scheduler:
-			new_to_date = getdate(today())
+			new_to_date = getdate(posting_date or today())
 			if doc.frequency == "Weekly":
 				new_to_date = add_days(new_to_date, 7)
 			else:
@@ -414,6 +414,8 @@ def send_emails(document_name, from_scheduler=False):
 			)
 			doc.db_set("to_date", new_to_date, commit=True)
 			doc.db_set("from_date", new_from_date, commit=True)
+			doc.db_set("posting_date", new_to_date, commit=True)
+			doc.db_set("report", doc.report, commit=True)
 		return True
 	else:
 		return False
@@ -423,7 +425,8 @@ def send_emails(document_name, from_scheduler=False):
 def send_auto_email():
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
-		filters={"to_date": format_date(today()), "enable_auto_email": 1},
+		filters={"enable_auto_email": 1},
+		or_filters={"to_date": format_date(today()), "posting_date": format_date(today())},
 	)
 	for entry in selected:
 		send_emails(entry.name, from_scheduler=True)
