@@ -54,7 +54,7 @@ class UnreconcilePayments(Document):
 
 
 @frappe.whitelist()
-def doc_has_payments(doctype, docname):
+def doc_has_references(doctype, docname):
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
 		return frappe.db.count(
 			"Payment Ledger Entry",
