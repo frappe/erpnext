@@ -412,8 +412,8 @@ class TestProductionPlan(FrappeTestCase):
 
 	def test_production_plan_for_subcontracting_po(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.subcontracting.doctype.service_item_and_finished_goods_map.test_service_item_and_finished_goods_map import (
-			create_service_item_and_finished_goods_map,
+		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
+			create_subcontracting_bom,
 		)
 
 		fg_item = "Test Motherboard 1"
@@ -434,7 +434,12 @@ class TestProductionPlan(FrappeTestCase):
 		item_doc.save()
 
 		service_item = make_item(properties={"is_stock_item": 0}).name
-		create_service_item_and_finished_goods_map(service_item, fg_item)
+		create_subcontracting_bom(
+			{
+				"finished_good": fg_item,
+				"service_item": service_item,
+			}
+		)
 
 		plan = create_production_plan(
 			item_code="Test Laptop 1", planned_qty=10, use_multi_level_bom=1, do_not_submit=True
