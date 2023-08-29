@@ -31,5 +31,17 @@ frappe.ui.form.on("Service Item and Finished Goods Map", {
                 }
             }
         });
+
+        frm.set_query("bom", "finished_goods_detail", (doc, cdt, cdn) => {
+            var row = locals[cdt][cdn];
+
+            return {
+                filters: {
+                    docstatus: 1,
+                    is_active: 1,
+                    item: row.finished_good_item,
+                }
+            }
+        });
     }
 });
