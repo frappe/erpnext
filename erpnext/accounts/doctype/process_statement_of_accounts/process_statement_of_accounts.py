@@ -412,10 +412,11 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 			doc.add_comment(
 				"Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now())
 			)
-			doc.db_set("to_date", new_to_date, commit=True)
-			doc.db_set("from_date", new_from_date, commit=True)
-			doc.db_set("posting_date", new_to_date, commit=True)
-			doc.db_set("report", doc.report, commit=True)
+			if doc.report == "General Ledger":
+				doc.db_set("to_date", new_to_date, commit=True)
+				doc.db_set("from_date", new_from_date, commit=True)
+			else:
+				doc.db_set("posting_date", new_to_date, commit=True)
 		return True
 	else:
 		return False
