@@ -4,7 +4,7 @@ erpnext.accounts.unreconcile_payments = {
 	add_unreconcile_btn(frm) {
 		if (frm.doc.docstatus == 1) {
 			frappe.call({
-				"method": "erpnext.accounts.doctype.unreconcile_payments.unreconcile_payments.doc_has_payments",
+				"method": "erpnext.accounts.doctype.unreconcile_payments.unreconcile_payments.doc_has_references",
 				"args": {
 					"doctype": frm.doc.doctype,
 					"docname": frm.doc.name
