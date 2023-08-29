@@ -20,6 +20,34 @@ erpnext.accounts.unreconcile_payments = {
 		}
 	},
 
+	build_selection_map(frm, selections) {
+		// assuming each row is an individual voucher
+		// pass this to server side method that creates unreconcile doc for each row
+		let selection_map = [];
+		if (['Sales Invoice', 'Purchase Invoice'].includes(frm.doc.doctype)) {
+			selection_map = selections.map(function(elem) {
+				return {
+					company: elem.company,
+					voucher_type: elem.voucher_type,
+					voucher_no: elem.voucher_no,
+					against_voucher_type: frm.doc.doctype,
+					against_voucher_no: frm.doc.name
+				};
+			});
+		} else if (['Payment Entry', 'Journal Entry'].includes(frm.doc.doctype)) {
+			selection_map = selections.map(function(elem) {
+				return {
+					company: elem.company,
+					voucher_type: frm.doc.doctype,
+					voucher_no: frm.doc.name,
+					against_voucher_type: elem.voucher_type,
+					against_voucher_no: elem.voucher_no,
+				};
+			});
+		}
+		return selection_map;
+	},
+
 	build_unreconcile_dialog(frm) {
 		if (['Sales Invoice', 'Purchase Invoice', 'Payment Entry', 'Journal Entry'].includes(frm.doc.doctype)) {
 			let child_table_fields = [
@@ -61,23 +89,9 @@ erpnext.accounts.unreconcile_payments = {
 
 								let selected_allocations = values.allocations.filter(x=>x.__checked);
 								if (selected_allocations.length > 0) {
-									// assuming each row is an individual voucher
-									// pass this to server side method that creates unreconcile doc for each row
-									if (['Sales Invoice', 'Purchase Invoice'].includes(frm.doc.doctype)) {
-										let selection_map = selected_allocations.map(function(elem) {
-											return {
-												company: elem.company,
-												voucher_type: elem.voucher_type,
-												voucher_no: elem.voucher_no,
-												against_voucher_type: frm.doc.doctype,
-												against_voucher_no: frm.doc.name
-											};
-
-										});
-
-										erpnext.utils.create_unreconcile_docs(selection_map);
-										d.hide();
-									}
+									let selection_map = erpnext.accounts.unreconcile_payments.build_selection_map(frm, selected_allocations);
+									erpnext.accounts.unreconcile_payments.create_unreconcile_docs(selection_map);
+									d.hide();
 
 								} else {
 									frappe.msgprint("No Selection");
