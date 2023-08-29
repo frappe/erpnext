@@ -472,27 +472,28 @@ class PurchaseReceipt(BuyingController):
 
 					# Amount added through landed-cos-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
-						for account, amount in landed_cost_entries[(d.item_code, d.name)].items():
-							account_currency = get_account_currency(account)
-							credit_amount = (
-								flt(amount["base_amount"])
-								if (amount["base_amount"] or account_currency != self.company_currency)
-								else flt(amount["amount"])
-							)
+						if (d.item_code, d.name) in landed_cost_entries:
+							for account, amount in landed_cost_entries[(d.item_code, d.name)].items():
+								account_currency = get_account_currency(account)
+								credit_amount = (
+									flt(amount["base_amount"])
+									if (amount["base_amount"] or account_currency != self.company_currency)
+									else flt(amount["amount"])
+								)
 
-							self.add_gl_entry(
-								gl_entries=gl_entries,
-								account=account,
-								cost_center=d.cost_center,
-								debit=0.0,
-								credit=credit_amount,
-								remarks=remarks,
-								against_account=warehouse_account_name,
-								credit_in_account_currency=flt(amount["amount"]),
-								account_currency=account_currency,
-								project=d.project,
-								item=d,
-							)
+								self.add_gl_entry(
+									gl_entries=gl_entries,
+									account=account,
+									cost_center=d.cost_center,
+									debit=0.0,
+									credit=credit_amount,
+									remarks=remarks,
+									against_account=warehouse_account_name,
+									credit_in_account_currency=flt(amount["amount"]),
+									account_currency=account_currency,
+									project=d.project,
+									item=d,
+								)
 
 					if d.rate_difference_with_purchase_invoice and stock_rbnb:
 						account_currency = get_account_currency(stock_rbnb)
