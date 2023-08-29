@@ -1,7 +1,6 @@
 [
     {
         "doctype": "Item Group",
-        "item_group_name": "Demo Item Group",
-        "parent_item_group": "All Item Groups"
+        "item_group_name": "Demo Item Group"
     }
 ]

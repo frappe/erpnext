@@ -214,8 +214,8 @@ class ReceivablePayableReport(object):
 		for party_type in self.party_type:
 			if self.filters.get(scrub(party_type)):
 				amount = ple.amount_in_account_currency
-		else:
-			amount = ple.amount
+			else:
+				amount = ple.amount
 		amount_in_account_currency = ple.amount_in_account_currency
 
 		# update voucher
@@ -436,12 +436,11 @@ class ReceivablePayableReport(object):
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
 		for term in row.payment_terms:
-
-			# update "paid" and "oustanding" for this term
+			# update "paid" and "outstanding" for this term
 			if not term.paid:
 				self.allocate_closing_to_term(row, term, "paid")
 
-			# update "credit_note" and "oustanding" for this term
+			# update "credit_note" and "outstanding" for this term
 			if term.outstanding:
 				self.allocate_closing_to_term(row, term, "credit_note")
 
@@ -453,7 +452,8 @@ class ReceivablePayableReport(object):
 			"""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_term, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
+				si.total_advance, ps.due_date, ps.payment_term, ps.payment_amount, ps.base_payment_amount,
+				ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -469,6 +469,10 @@ class ReceivablePayableReport(object):
 		original_row = frappe._dict(row)
 		row.payment_terms = []
 
+		# Advance allocated during invoicing is not considered in payment terms
+		# Deduct that from paid amount pre allocation
+		row.paid -= flt(payment_terms_details[0].total_advance)
+
 		# If no or single payment terms, no need to split the row
 		if len(payment_terms_details) <= 1:
 			return
@@ -483,7 +487,7 @@ class ReceivablePayableReport(object):
 		) and d.currency == d.party_account_currency:
 			invoiced = d.payment_amount
 		else:
-			invoiced = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
+			invoiced = d.base_payment_amount
 
 		row.payment_terms.append(
 			term.update(
@@ -1086,7 +1090,10 @@ class ReceivablePayableReport(object):
 			.where(
 				(je.company == self.filters.company)
 				& (je.posting_date.lte(self.filters.report_date))
-				& (je.voucher_type == "Exchange Rate Revaluation")
+				& (
+					(je.voucher_type == "Exchange Rate Revaluation")
+					| (je.voucher_type == "Exchange Gain Or Loss")
+				)
 			)
 			.run()
 		)

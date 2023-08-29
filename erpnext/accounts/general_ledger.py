@@ -539,6 +539,10 @@ def get_round_off_account_and_cost_center(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
 
+	# Use expense account as fallback
+	if not round_off_account:
+		round_off_account = frappe.get_cached_value("Company", company, "default_expense_account")
+
 	meta = frappe.get_meta(voucher_type)
 
 	# Give first preference to parent cost center for round off GLE

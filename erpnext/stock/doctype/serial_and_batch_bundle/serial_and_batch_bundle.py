@@ -3,7 +3,7 @@
 
 import collections
 import csv
-from collections import defaultdict
+from collections import Counter, defaultdict
 from typing import Dict, List
 
 import frappe
@@ -1197,6 +1197,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 		filters=[
 			["POS Invoice", "consolidated_invoice", "is", "not set"],
 			["POS Invoice", "docstatus", "=", 1],
+			["POS Invoice", "is_return", "=", 0],
 			["POS Invoice Item", "item_code", "=", kwargs.item_code],
 			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
 		],
@@ -1214,7 +1215,6 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 		ignore_serial_nos.append(d.serial_no)
 
-	# Will be deprecated in v16
 	returned_serial_nos = []
 	for pos_invoice in pos_invoices:
 		if pos_invoice.serial_no:
@@ -1242,8 +1242,13 @@ def get_reserved_serial_nos_for_pos(kwargs):
 				child_doc, parent_doc, ignore_voucher_detail_no=kwargs.get("ignore_voucher_detail_no")
 			)
 		)
+	# Counter is used to create a hashmap of serial nos, which contains count of each serial no
+	# so we subtract returned serial nos from ignore serial nos after creating a counter of each to get the items which we need 	to ignore(which are sold)
 
-	return list(set(ignore_serial_nos) - set(returned_serial_nos))
+	ignore_serial_nos_counter = Counter(ignore_serial_nos)
+	returned_serial_nos_counter = Counter(returned_serial_nos)
+
+	return list(ignore_serial_nos_counter - returned_serial_nos_counter)
 
 
 def get_reserved_batches_for_pos(kwargs):

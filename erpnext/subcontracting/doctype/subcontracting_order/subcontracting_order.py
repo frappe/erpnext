@@ -203,7 +203,10 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 		{
 			"Subcontracting Order": {
 				"doctype": "Subcontracting Receipt",
-				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"set_warehouse": "set_warehouse",
+				},
 				"validation": {
 					"docstatus": ["=", 1],
 				},

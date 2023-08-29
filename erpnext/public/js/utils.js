@@ -114,6 +114,10 @@ $.extend(erpnext.utils, {
 	},
 
 	view_serial_batch_nos: function(frm) {
+		if (!frm.doc?.items) {
+			return;
+		}
+
 		let bundle_ids = frm.doc.items.filter(d => d.serial_and_batch_bundle);
 
 		if (bundle_ids?.length) {
@@ -579,7 +583,9 @@ erpnext.utils.update_child_items = function(opts) {
 			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
-			"uom": d.uom
+			"uom": d.uom,
+			"fg_item": d.fg_item,
+			"fg_item_qty": d.fg_item_qty,
 		}
 	});
 
@@ -675,6 +681,37 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldname: "conversion_factor",
 			label: __("Conversion Factor"),
 			precision: get_precision('conversion_factor')
+		})
+	}
+
+	if (frm.doc.doctype == 'Purchase Order' && frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
+		fields.push({
+			fieldtype:'Link',
+			fieldname:'fg_item',
+			options: 'Item',
+			reqd: 1,
+			in_list_view: 0,
+			read_only: 0,
+			disabled: 0,
+			label: __('Finished Good Item'),
+			get_query: () => {
+				return {
+					filters: {
+						'is_stock_item': 1,
+						'is_sub_contracted_item': 1,
+						'default_bom': ['!=', '']
+					}
+				}
+			},
+		}, {
+			fieldtype:'Float',
+			fieldname:'fg_item_qty',
+			reqd: 1,
+			default: 0,
+			read_only: 0,
+			in_list_view: 0,
+			label: __('Finished Good Item Qty'),
+			precision: get_precision('fg_item_qty')
 		})
 	}
 

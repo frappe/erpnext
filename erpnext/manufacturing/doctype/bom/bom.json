@@ -78,6 +78,10 @@
   "show_items",
   "show_operations",
   "web_long_description",
+  "reference_section",
+  "bom_creator",
+  "bom_creator_item",
+  "column_break_oxbz",
   "amended_from",
   "connections_tab"
  ],
@@ -233,7 +237,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual"
   },
   {
    "allow_on_submit": 1,
@@ -599,6 +603,32 @@
    "fieldname": "operating_cost_per_bom_quantity",
    "fieldtype": "Currency",
    "label": "Operating Cost Per BOM Quantity"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "bom_creator",
+   "fieldtype": "Link",
+   "label": "BOM Creator",
+   "no_copy": 1,
+   "options": "BOM Creator",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_creator_item",
+   "fieldtype": "Data",
+   "label": "BOM Creator Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_oxbz",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -606,7 +636,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-06 12:47:58.514795",
+ "modified": "2023-08-07 11:38:08.152294",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

@@ -4,6 +4,7 @@
         "supplier": "Zuckerman Security Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -20,6 +21,7 @@
         "supplier": "MA Inc.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -36,6 +38,7 @@
         "supplier": "Summit Traders Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -52,6 +55,7 @@
         "supplier": "Zuckerman Security Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -68,6 +72,7 @@
         "supplier": "MA Inc.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -84,6 +89,7 @@
         "supplier": "Summit Traders Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -100,6 +106,7 @@
         "supplier": "Zuckerman Security Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -116,6 +123,7 @@
         "supplier": "MA Inc.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -132,6 +140,7 @@
         "supplier": "Summit Traders Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",
@@ -148,6 +157,7 @@
         "supplier": "Zuckerman Security Ltd.",
         "doctype": "Purchase Order",
         "update_stock": 1,
+        "disable_rounded_total": 1,
         "items": [
             {
                 "doctype": "Purchase Order Item",

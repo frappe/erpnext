@@ -56,7 +56,6 @@ class Asset(AccountsController):
 
 	def on_submit(self):
 		self.validate_in_use_date()
-		self.set_status()
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
@@ -72,6 +71,7 @@ class Asset(AccountsController):
 						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 					).format(asset_depr_schedules_links)
 				)
+		self.set_status()
 		add_asset_activity(self.name, _("Asset submitted"))
 
 	def on_cancel(self):
@@ -96,11 +96,14 @@ class Asset(AccountsController):
 					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 				).format(asset_depr_schedules_links)
 			)
-		if not frappe.db.exists(
-			{
-				"doctype": "Asset Activity",
-				"asset": self.name,
-			}
+		if (
+			not frappe.db.exists(
+				{
+					"doctype": "Asset Activity",
+					"asset": self.name,
+				}
+			)
+			and not self.flags.asset_created_via_asset_capitalization
 		):
 			add_asset_activity(self.name, _("Asset created"))
 

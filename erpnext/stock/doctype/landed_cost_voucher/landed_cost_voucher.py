@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
 
 import erpnext
@@ -19,19 +20,7 @@ class LandedCostVoucher(Document):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
-				pr_items = frappe.db.sql(
-					"""select pr_item.item_code, pr_item.description,
-					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name,
-					pr_item.cost_center, pr_item.is_fixed_asset
-					from `tab{doctype} Item` pr_item where parent = %s
-					and exists(select name from tabItem
-						where name = pr_item.item_code and (is_stock_item = 1 or is_fixed_asset=1))
-					""".format(
-						doctype=pr.receipt_document_type
-					),
-					pr.receipt_document,
-					as_dict=True,
-				)
+				pr_items = get_pr_items(pr)
 
 				for d in pr_items:
 					item = self.append("items")
@@ -247,3 +236,30 @@ class LandedCostVoucher(Document):
 						),
 						tuple([item.valuation_rate] + serial_nos),
 					)
+
+
+def get_pr_items(purchase_receipt):
+	item = frappe.qb.DocType("Item")
+	pr_item = frappe.qb.DocType(purchase_receipt.receipt_document_type + " Item")
+	return (
+		frappe.qb.from_(pr_item)
+		.inner_join(item)
+		.on(item.name == pr_item.item_code)
+		.select(
+			pr_item.item_code,
+			pr_item.description,
+			pr_item.qty,
+			pr_item.base_rate,
+			pr_item.base_amount,
+			pr_item.name,
+			pr_item.cost_center,
+			pr_item.is_fixed_asset,
+			ConstantColumn(purchase_receipt.receipt_document_type).as_("receipt_document_type"),
+			ConstantColumn(purchase_receipt.receipt_document).as_("receipt_document"),
+		)
+		.where(
+			(pr_item.parent == purchase_receipt.receipt_document)
+			& ((item.is_stock_item == 1) | (item.is_fixed_asset == 1))
+		)
+		.run(as_dict=True)
+	)
