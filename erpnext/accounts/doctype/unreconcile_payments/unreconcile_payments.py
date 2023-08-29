@@ -117,15 +117,22 @@ def get_linked_payments_for_doc(
 
 
 @frappe.whitelist()
-def create_unreconcile_doc_for_selection(
-	company: str = None, dt: str = None, dn: str = None, selections: list = None
-):
+def create_unreconcile_doc_for_selection(selections=None):
 	if selections:
+		selections = frappe.json.loads(selections)
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payments")
-			unrecon.company = company
-			unrecon.voucher_type = dt
-			unrecon.voucher_type = dn
+			unrecon.company = row.get("company")
+			unrecon.voucher_type = row.get("voucher_type")
+			unrecon.voucher_no = row.get("voucher_no")
 			unrecon.add_references()
+
 			# remove unselected references
+			unrecon.allocations = [
+				x
+				for x in unrecon.allocations
+				if x.reference_doctype == row.get("against_voucher_type")
+				and x.reference_name == row.get("against_voucher_no")
+			]
+			unrecon.save().submit()

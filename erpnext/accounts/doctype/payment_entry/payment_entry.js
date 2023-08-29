@@ -154,6 +154,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
 		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(frm);
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
 	},
 
 	validate_company: (frm) => {

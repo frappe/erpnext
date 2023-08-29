@@ -184,22 +184,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			}
 		}
 
-		if (doc.docstatus == 1) {
-			frappe.call({
-				"method": "erpnext.accounts.doctype.unreconcile_payments.unreconcile_payments.doc_has_payments",
-				"args": {
-					"doctype": this.frm.doc.doctype,
-					"docname": this.frm.doc.name
-				},
-				callback: function(r) {
-					if (r.message) {
-						me.frm.add_custom_button(__("Un-Reconcile"), function() {
-							erpnext.utils.build_unreconcile_dialog(cur_frm);
-						});
-					}
-				}
-			});
-		}
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(me.frm);
 	}
 
 
