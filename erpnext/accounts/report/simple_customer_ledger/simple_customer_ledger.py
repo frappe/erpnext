@@ -66,7 +66,7 @@ class SimpleCustomerLedger():
 				.where(gl_entries.posting_date>=start_date)
 				.where(gl_entries.posting_date<=end_date)
 				.groupby(gl_entries.voucher_no)
-				.orderby(gl_entries.creation)
+				.orderby(gl_entries.posting_date)
 			)
 		result=query.run(as_dict=True)
 
