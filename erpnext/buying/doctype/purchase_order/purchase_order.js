@@ -119,9 +119,9 @@ frappe.ui.form.on("Purchase Order", {
 		}
 	},
 
-	get_service_items_for_finished_goods: function(fg_item) {
+	get_subcontracting_boms_for_finished_goods: function(fg_item) {
 		return frappe.call({
-			method:"erpnext.subcontracting.doctype.service_item_and_finished_goods_map.service_item_and_finished_goods_map.get_service_items_for_finished_goods",
+			method:"erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.get_subcontracting_boms_for_finished_goods",
 			args: {
 				fg_items: fg_item
 			},
@@ -146,9 +146,9 @@ frappe.ui.form.on("Purchase Order Item", {
 			var row = locals[cdt][cdn];
 
 			if (row.fg_item) {
-				var result = await frm.events.get_service_items_for_finished_goods(row.fg_item)
+				var result = await frm.events.get_subcontracting_boms_for_finished_goods(row.fg_item)
 
-				if (result.message) {
+				if (result.message && Object.keys(result.message).length) {
 					frappe.model.set_value(cdt, cdn, "item_code", result.message.service_item);
 					frappe.model.set_value(cdt, cdn, "qty", flt(row.fg_item_qty) * flt(result.message.conversion_factor));
 					frappe.model.set_value(cdt, cdn, "uom", result.message.service_item_uom);
@@ -162,7 +162,7 @@ frappe.ui.form.on("Purchase Order Item", {
 			var row = locals[cdt][cdn];
 
 			if (row.fg_item) {
-				var result = await frm.events.get_service_items_for_finished_goods(row.fg_item)
+				var result = await frm.events.get_subcontracting_boms_for_finished_goods(row.fg_item)
 
 				if (result.message && row.item_code == result.message.service_item && row.uom == result.message.service_item_uom) {
 					frappe.model.set_value(cdt, cdn, "qty", flt(row.fg_item_qty) * flt(result.message.conversion_factor));
