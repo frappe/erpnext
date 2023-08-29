@@ -765,7 +765,6 @@ class ReceivablePayableReport(object):
 		self.or_filters = []
 
 		self.add_common_filters(party_type_field=self.filters.party_type)
-		print(self.filters.party_type, "hehhe")
 		if self.filters.party_type == "Customer":
 			self.add_customer_filters()
 
