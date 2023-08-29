@@ -11,11 +11,6 @@ from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries, update_v
 
 
 class UnreconcilePayments(Document):
-	# def validate(self):
-	# 	parent = set([alloc.parent for alloc in self.allocations])
-	# 	if len(parent) != 1:
-	# 		pass
-
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
 		if self.voucher_type == "Payment Entry":
