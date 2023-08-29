@@ -64,3 +64,22 @@ class SubcontractingBOM(Document):
 
 	def set_conversion_factor(self):
 		self.conversion_factor = flt(self.service_item_qty) / flt(self.finished_good_qty)
+
+
+@frappe.whitelist()
+def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
+	if fg_items:
+		filters = {"is_active": 1}
+
+		if isinstance(fg_items, list):
+			filters["finished_good"] = ["in", fg_items]
+		else:
+			filters["finished_good"] = fg_items
+
+		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=["*"]):
+			if isinstance(fg_items, list):
+				return {d.finished_good: d for d in subcontracting_boms}
+			else:
+				return subcontracting_boms[0]
+
+	return {}

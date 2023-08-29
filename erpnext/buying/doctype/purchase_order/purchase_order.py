@@ -28,8 +28,8 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
-from erpnext.subcontracting.doctype.service_item_and_finished_goods_map.service_item_and_finished_goods_map import (
-	get_service_items_for_finished_goods,
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+	get_subcontracting_boms_for_finished_goods,
 )
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -462,16 +462,16 @@ class PurchaseOrder(BuyingController):
 			d.fg_item for d in self.items if (not d.item_code and d.fg_item)
 		}
 
-		if service_item_details := get_service_items_for_finished_goods(
+		if subcontracting_boms := get_subcontracting_boms_for_finished_goods(
 			finished_goods_without_service_item
 		):
 			for item in self.items:
-				if not item.item_code and item.fg_item in service_item_details:
-					service_item_detail = service_item_details[item.fg_item]
+				if not item.item_code and item.fg_item in subcontracting_boms:
+					subcontracting_bom = subcontracting_boms[item.fg_item]
 
-					item.item_code = service_item_detail.service_item
-					item.qty = flt(item.fg_item_qty) * flt(service_item_detail.conversion_factor)
-					item.uom = service_item_detail.service_item_uom
+					item.item_code = subcontracting_bom.service_item
+					item.qty = flt(item.fg_item_qty) * flt(subcontracting_bom.conversion_factor)
+					item.uom = subcontracting_bom.service_item_uom
 
 	def can_update_items(self) -> bool:
 		result = True
