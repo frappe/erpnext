@@ -82,10 +82,10 @@ def get_linked_payments_for_doc(
 		ple = qb.DocType("Payment Ledger Entry")
 		if _dt in ["Sales Invoice", "Purchase Invoice"]:
 			criteria = [
+				(ple.company == company),
 				(ple.delinked == 0),
 				(ple.against_voucher_no == _dn),
 				(ple.amount < 0),
-				(ple.company == company),
 			]
 
 			res = (
@@ -102,17 +102,26 @@ def get_linked_payments_for_doc(
 			)
 			return res
 		else:
-			return frappe.db.get_all(
-				"Payment Ledger Entry",
-				filters={
-					"delinked": 0,
-					"voucher_no": _dn,
-					"against_voucher_no": ["!=", _dn],
-					"amount": ["<", 0],
-				},
-				group_by="against_voucher_no",
-				fields=["against_voucher_type", "against_voucher_no", "Sum(amount_in_account_currency)"],
+			criteria = [
+				(ple.company == company),
+				(ple.delinked == 0),
+				(ple.voucher_no == _dn),
+				(ple.against_voucher_no != _dn),
+			]
+
+			query = (
+				qb.from_(ple)
+				.select(
+					ple.company,
+					ple.against_voucher_type.as_("voucher_type"),
+					ple.against_voucher_no.as_("voucher_no"),
+					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+				)
+				.where(Criterion.all(criteria))
+				.groupby(ple.against_voucher_no)
 			)
+			res = query.run(as_dict=True)
+			return res
 	return []
 
 
