@@ -23,6 +23,7 @@
   {
    "fieldname": "parent_quality_procedure",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Parent Procedure",
    "options": "Quality Procedure"
   },
