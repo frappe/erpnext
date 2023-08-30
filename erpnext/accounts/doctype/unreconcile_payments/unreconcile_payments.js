@@ -6,7 +6,7 @@ frappe.ui.form.on("Unreconcile Payments", {
 		frm.set_query("voucher_type", function() {
 			return {
 				filters: {
-					name: "Payment Entry"
+					name: ["in", ["Payment Entry", "Journal Entry"]]
 				}
 			}
 		});
