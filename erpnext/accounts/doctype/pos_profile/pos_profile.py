@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, scrub
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
 
@@ -208,11 +208,11 @@ def required_accounting_dimensions():
 		.inner_join(c)
 		.on(p.name == c.parent)
 		.select(c.parent)
-		.where(c.mandatory_for_bs == 1 or c.mandatory_for_pl == 1)
+		.where((c.mandatory_for_bs == 1) | (c.mandatory_for_pl == 1))
 		.where(p.disabled == 0)
 	).run(as_dict=1)
 
-	acc_dim_names = [d.parent.lower() for d in acc_dim_doc]
+	acc_dim_names = [scrub(d.parent) for d in acc_dim_doc]
 	return acc_dim_names
 
 

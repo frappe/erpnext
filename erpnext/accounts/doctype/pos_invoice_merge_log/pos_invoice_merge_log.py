@@ -87,11 +87,11 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_docs = [
 			frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices
 		]
-		accounting_dimensions = get_accounting_dimensions()
-		for d in pos_invoice_docs:
-			for dimension in accounting_dimensions:
-				dimension_value = frappe.db.get_value("POS Profile", d.pos_profile, dimension)
-				d.set(dimension, dimension_value)
+		# accounting_dimensions = get_accounting_dimensions()
+		# for d in pos_invoice_docs:
+		# 	for dimension in accounting_dimensions:
+		# 		dimension_value = frappe.db.get_value("POS Profile", d.pos_profile, dimension)
+		# 		d.set(dimension, dimension_value)
 
 		returns = [d for d in pos_invoice_docs if d.get("is_return") == 1]
 		sales = [d for d in pos_invoice_docs if d.get("is_return") == 0]
@@ -250,6 +250,10 @@ class POSInvoiceMergeLog(Document):
 		invoice.disable_rounded_total = cint(
 			frappe.db.get_value("POS Profile", invoice.pos_profile, "disable_rounded_total")
 		)
+		accounting_dimensions = get_accounting_dimensions()
+		for dimension in accounting_dimensions:
+			dimension_value = frappe.db.get_value("POS Profile", invoice.pos_profile, dimension)
+			invoice.set(dimension, dimension_value)
 
 		if self.merge_invoices_based_on == "Customer Group":
 			invoice.flags.ignore_pos_profile = True
