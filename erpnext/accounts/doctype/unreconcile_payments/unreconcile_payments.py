@@ -2,15 +2,21 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import qb
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
+from frappe.utils.data import comma_and
 
 from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries, update_voucher_outstanding
 
 
 class UnreconcilePayments(Document):
+	def validate(self):
+		self.supported_types = ["Payment Entry", "Journal Entry"]
+		if not self.voucher_type in self.supported_types:
+			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
+
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
 		allocated_references = []
@@ -26,14 +32,24 @@ class UnreconcilePayments(Document):
 				.run(as_dict=True)
 			)
 		elif self.voucher_type == "Journal Entry":
-			jea = qb.DocType("Journal Entry Account")
+			# for journals, using payment ledger to fetch allocation.
+			# this way we can avoid vaildating account type and reference details individually on child table
+
+			ple = qb.DocType("Payment Ledger Entry")
 			allocated_references = (
-				qb.from_(jea)
+				qb.from_(ple)
 				.select(
-					jea.reference_type, jea.reference_name, Sum(jea.allocated_amount).as_("allocated_amount")
+					ple.against_voucher_type.as_("reference_doctype"),
+					ple.against_voucher_no.as_("reference_name"),
+					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
 				)
-				.where((jea.docstatus == 1) & (jea.parent == self.voucher_no))
-				.groupby(jea.reference_name)
+				.where(
+					(ple.docstatus == 1)
+					& (ple.voucher_type == self.voucher_type)
+					& (ple.voucher_no == self.voucher_no)
+					& (ple.voucher_no != ple.against_voucher_no)
+				)
+				.groupby(ple.against_voucher_type, ple.against_voucher_no)
 				.run(as_dict=True)
 			)
 
