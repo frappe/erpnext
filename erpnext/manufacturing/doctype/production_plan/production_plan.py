@@ -53,7 +53,7 @@ class ProductionPlan(Document):
 		data = sales_order_query(filters={"company": self.company, "sales_orders": sales_orders})
 
 		title = _("Production Plan Already Submitted")
-		if not data:
+		if not data and sales_orders:
 			msg = _("No items are available in the sales order {0} for production").format(sales_orders[0])
 			if len(sales_orders) > 1:
 				sales_orders = ", ".join(sales_orders)

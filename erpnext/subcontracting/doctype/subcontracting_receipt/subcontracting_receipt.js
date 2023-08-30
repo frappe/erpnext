@@ -22,7 +22,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 						to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
 						company: frm.doc.company,
 						show_cancelled_entries: frm.doc.docstatus === 2
-					};
+					}
 					frappe.set_route('query-report', 'Stock Ledger');
 				}, __('View'));
 
@@ -34,7 +34,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 						company: frm.doc.company,
 						group_by: 'Group by Voucher (Consolidated)',
 						show_cancelled_entries: frm.doc.docstatus === 2
-					};
+					}
 					frappe.set_route('query-report', 'General Ledger');
 				}, __('View'));
 		}
@@ -94,7 +94,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 					company: frm.doc.company,
 					is_group: 0
 				}
-			};
+			}
 		});
 
 		frm.set_query('rejected_warehouse', () => {
@@ -103,7 +103,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 					company: frm.doc.company,
 					is_group: 0
 				}
-			};
+			}
 		});
 
 		frm.set_query('supplier_warehouse', () => {
@@ -112,7 +112,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 					company: frm.doc.company,
 					is_group: 0
 				}
-			};
+			}
 		});
 
 		frm.set_query('warehouse', 'items', () => ({
@@ -129,10 +129,12 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		}));
 
-		frm.set_query('expense_account', 'items', () => ({
+		frm.set_query('expense_account', 'items', () => {
+			return {
 				query: 'erpnext.controllers.queries.get_expense_account',
 				filters: { 'company': frm.doc.company }
-			}));
+			}
+		});
 
 		frm.set_query('batch_no', 'items', (doc, cdt, cdn) => {
 			var row = locals[cdt][cdn];
@@ -140,7 +142,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				filters: {
 					item: row.item_code
 				}
-			};
+			}
 		});
 
 		frm.set_query('batch_no', 'supplied_items', (doc, cdt, cdn) => {
@@ -149,7 +151,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				filters: {
 					item: row.rm_item_code
 				}
-			};
+			}
 		});
 
 		frm.set_query('serial_and_batch_bundle', 'supplied_items', (doc, cdt, cdn) => {
@@ -171,7 +173,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 					'item_code': row.doc.rm_item_code,
 					'voucher_type': frm.doc.doctype,
 				}
-			};
+			}
 		}
 
 		let batch_no_field = frm.get_docfield('items', 'batch_no');
@@ -180,7 +182,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				return {
 					'item': row.doc.item_code
 				}
-			};
+			}
 		}
 	},
 
@@ -190,15 +192,37 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			transaction_controller.setup_quality_inspection();
 		}
 	},
+
+	get_scrap_items: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: 'get_scrap_items',
+			args: {
+				recalculate_rate: true
+			},
+			freeze: true,
+			freeze_message: __('Getting Scrap Items'),
+			callback: (r) => {
+				if (!r.exc) {
+					frm.refresh();
+				}
+			}
+		});
+	},
 });
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
 	amount: (frm, cdt, cdn) => {
+		set_missing_values(frm);
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
 
 	expense_account: (frm, cdt, cdn) => {
 		frm.events.set_account_currency(frm, cdt, cdn);
+	},
+
+	additional_costs_remove: (frm) => {
+		set_missing_values(frm);
 	}
 });
 
@@ -214,6 +238,16 @@ frappe.ui.form.on('Subcontracting Receipt Item', {
 	rate(frm) {
 		set_missing_values(frm);
 	},
+
+	recalculate_rate(frm) {
+		if (frm.doc.recalculate_rate) {
+			set_missing_values(frm);
+		}
+	},
+
+	items_remove: (frm) => {
+		set_missing_values(frm);
+	},
 });
 
 frappe.ui.form.on('Subcontracting Receipt Supplied Item', {
@@ -225,7 +259,7 @@ frappe.ui.form.on('Subcontracting Receipt Supplied Item', {
 let set_warehouse_in_children = (child_table, warehouse_field, warehouse) => {
 	let transaction_controller = new erpnext.TransactionController();
 	transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
-};
+}
 
 let set_missing_values = (frm) => {
 	frappe.call({
@@ -235,4 +269,4 @@ let set_missing_values = (frm) => {
 			if (!r.exc) frm.refresh();
 		},
 	});
-};
+}

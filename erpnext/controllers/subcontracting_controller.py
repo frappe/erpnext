@@ -55,6 +55,23 @@ class SubcontractingController(StockController):
 		else:
 			super(SubcontractingController, self).validate()
 
+	def validate_rejected_warehouse(self):
+		for item in self.get("items"):
+			if flt(item.rejected_qty) and not item.rejected_warehouse:
+				if self.rejected_warehouse:
+					item.rejected_warehouse = self.rejected_warehouse
+				else:
+					frappe.throw(
+						_("Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}").format(
+							item.idx, item.item_code
+						)
+					)
+
+			if item.get("rejected_warehouse") and (item.get("rejected_warehouse") == item.get("warehouse")):
+				frappe.throw(
+					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
+				)
+
 	def remove_empty_rows(self):
 		for key in ["service_items", "items", "supplied_items"]:
 			if self.get(key):
@@ -80,23 +97,27 @@ class SubcontractingController(StockController):
 			if not is_stock_item:
 				frappe.throw(_("Row {0}: Item {1} must be a stock item.").format(item.idx, item.item_name))
 
-			if not is_sub_contracted_item:
-				frappe.throw(
-					_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
-				)
+			if not item.get("is_scrap_item"):
+				if not is_sub_contracted_item:
+					frappe.throw(
+						_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
+					)
 
-			if item.bom:
-				bom = frappe.get_doc("BOM", item.bom)
-				if not bom.is_active:
-					frappe.throw(
-						_("Row {0}: Please select an active BOM for Item {1}.").format(item.idx, item.item_name)
-					)
-				if bom.item != item.item_code:
-					frappe.throw(
-						_("Row {0}: Please select an valid BOM for Item {1}.").format(item.idx, item.item_name)
-					)
+				if item.bom:
+					is_active, bom_item = frappe.get_value("BOM", item.bom, ["is_active", "item"])
+
+					if not is_active:
+						frappe.throw(
+							_("Row {0}: Please select an active BOM for Item {1}.").format(item.idx, item.item_name)
+						)
+					if bom_item != item.item_code:
+						frappe.throw(
+							_("Row {0}: Please select an valid BOM for Item {1}.").format(item.idx, item.item_name)
+						)
+				else:
+					frappe.throw(_("Row {0}: Please select a BOM for Item {1}.").format(item.idx, item.item_name))
 			else:
-				frappe.throw(_("Row {0}: Please select a BOM for Item {1}.").format(item.idx, item.item_name))
+				item.bom = None
 
 	def __get_data_before_save(self):
 		item_dict = {}
@@ -874,19 +895,24 @@ class SubcontractingController(StockController):
 
 		if self.total_additional_costs:
 			if self.distribute_additional_costs_based_on == "Amount":
-				total_amt = sum(flt(item.amount) for item in self.get("items"))
+				total_amt = sum(
+					flt(item.amount) for item in self.get("items") if not item.get("is_scrap_item")
+				)
 				for item in self.items:
-					item.additional_cost_per_qty = (
-						(item.amount * self.total_additional_costs) / total_amt
-					) / item.qty
+					if not item.get("is_scrap_item"):
+						item.additional_cost_per_qty = (
+							(item.amount * self.total_additional_costs) / total_amt
+						) / item.qty
 			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items"))
+				total_qty = sum(flt(item.qty) for item in self.get("items") if not item.get("is_scrap_item"))
 				additional_cost_per_qty = self.total_additional_costs / total_qty
 				for item in self.items:
-					item.additional_cost_per_qty = additional_cost_per_qty
+					if not item.get("is_scrap_item"):
+						item.additional_cost_per_qty = additional_cost_per_qty
 		else:
 			for item in self.items:
-				item.additional_cost_per_qty = 0
+				if not item.get("is_scrap_item"):
+					item.additional_cost_per_qty = 0
 
 	@frappe.whitelist()
 	def get_current_stock(self):
