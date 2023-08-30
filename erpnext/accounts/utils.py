@@ -693,38 +693,62 @@ def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
 				frappe.get_doc("Journal Entry", doc[0]).cancel()
 
 
-def update_accounting_ledgers_after_reference_removal(ref_type: str = None, ref_no: str = None):
+def update_accounting_ledgers_after_reference_removal(
+	ref_type: str = None, ref_no: str = None, payment_name: str = None
+):
 	# General Ledger
 	gle = qb.DocType("GL Entry")
-	qb.update(gle).set(gle.against_voucher_type, None).set(gle.against_voucher, None).set(
-		gle.modified, now()
-	).set(gle.modified_by, frappe.session.user).where(
-		(gle.against_voucher_type == ref_type) & (gle.against_voucher == ref_no)
-	).run()
+	gle_update_query = (
+		qb.update(gle)
+		.set(gle.against_voucher_type, None)
+		.set(gle.against_voucher, None)
+		.set(gle.modified, now())
+		.set(gle.modified_by, frappe.session.user)
+		.where((gle.against_voucher_type == ref_type) & (gle.against_voucher == ref_no))
+	)
+
+	if payment_name:
+		gle_update_query = gle_update_query.where(gle.voucher_no == payment_name)
+	gle_update_query.run()
 
 	# Payment Ledger
 	ple = qb.DocType("Payment Ledger Entry")
-	qb.update(ple).set(ple.against_voucher_type, ple.voucher_type).set(
-		ple.against_voucher_no, ple.voucher_no
-	).set(ple.modified, now()).set(ple.modified_by, frappe.session.user).where(
-		(ple.against_voucher_type == ref_type) & (ple.against_voucher_no == ref_no) & (ple.delinked == 0)
-	).run()
+	ple_update_query = (
+		qb.update(ple)
+		.set(ple.against_voucher_type, ple.voucher_type)
+		.set(ple.against_voucher_no, ple.voucher_no)
+		.set(ple.modified, now())
+		.set(ple.modified_by, frappe.session.user)
+		.where(
+			(ple.against_voucher_type == ref_type)
+			& (ple.against_voucher_no == ref_no)
+			& (ple.delinked == 0)
+		)
+	)
+
+	if payment_name:
+		ple_update_query = ple_update_query.where(ple.voucher_no == payment_name)
+	ple_update_query.run()
 
 
 def remove_ref_from_advance_section(ref_doc: object = None):
+	# TODO: this might need some testing
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
 		ref_doc.set("advances", [])
 		adv_type = qb.DocType(f"{ref_doc.doctype} Advance")
 		qb.from_(adv_type).delete().where(adv_type.parent == ref_doc.name).run()
 
 
-def unlink_ref_doc_from_payment_entries(ref_doc):
-	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
-	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name)
-	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name)
+def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str = None):
+	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
+	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name, payment_name)
+	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name, payment_name)
+	remove_ref_from_advance_section(ref_doc)
 
 
-def remove_ref_doc_link_from_jv(ref_type, ref_no):
+def remove_ref_doc_link_from_jv(
+	ref_type: str = None, ref_no: str = None, payment_name: str = None
+):
 	jea = qb.DocType("Journal Entry Account")
 
 	linked_jv = (
@@ -736,13 +760,23 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 		.run(as_list=1)
 	)
 	linked_jv = convert_to_list(linked_jv)
+	# remove reference only from specified payment
+	linked_jv = [x for x in linked_jv if x == payment_name] if payment_name else linked_jv
 
 	if linked_jv:
-		qb.update(jea).set(jea.reference_type, None).set(jea.reference_name, None).set(
-			jea.modified, now()
-		).set(jea.modified_by, frappe.session.user).where(
-			(jea.reference_type == ref_type) & (jea.reference_name == ref_no)
-		).run()
+		update_query = (
+			qb.update(jea)
+			.set(jea.reference_type, None)
+			.set(jea.reference_name, None)
+			.set(jea.modified, now())
+			.set(jea.modified_by, frappe.session.user)
+			.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no))
+		)
+
+		if payment_name:
+			update_query = update_query.where(jea.parent == payment_name)
+
+		update_query.run()
 
 		frappe.msgprint(_("Journal Entries {0} are un-linked").format("\n".join(linked_jv)))
 
@@ -754,7 +788,9 @@ def convert_to_list(result):
 	return [x[0] for x in result]
 
 
-def remove_ref_doc_link_from_pe(ref_type, ref_no):
+def remove_ref_doc_link_from_pe(
+	ref_type: str = None, ref_no: str = None, payment_name: str = None
+):
 	per = qb.DocType("Payment Entry Reference")
 	pay = qb.DocType("Payment Entry")
 
@@ -767,13 +803,24 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 		.run(as_list=1)
 	)
 	linked_pe = convert_to_list(linked_pe)
+	# remove reference only from specified payment
+	linked_pe = [x for x in linked_pe if x == payment_name] if payment_name else linked_pe
 
 	if linked_pe:
-		qb.update(per).set(per.allocated_amount, 0).set(per.modified, now()).set(
-			per.modified_by, frappe.session.user
-		).where(
-			(per.docstatus.lt(2) & (per.reference_doctype == ref_type) & (per.reference_name == ref_no))
-		).run()
+		update_query = (
+			qb.update(per)
+			.set(per.allocated_amount, 0)
+			.set(per.modified, now())
+			.set(per.modified_by, frappe.session.user)
+			.where(
+				(per.docstatus.lt(2) & (per.reference_doctype == ref_type) & (per.reference_name == ref_no))
+			)
+		)
+
+		if payment_name:
+			update_query = update_query.where(per.parent == payment_name)
+
+		update_query.run()
 
 		for pe in linked_pe:
 			try:
