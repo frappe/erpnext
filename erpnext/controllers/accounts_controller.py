@@ -200,9 +200,9 @@ class AccountsController(TransactionBase):
 			# apply tax withholding only if checked and applicable
 			self.set_tax_withholding()
 
-		validate_regional(self)
-
-		validate_einvoice_fields(self)
+		with temporary_flag("company", self.company):
+			validate_regional(self)
+			validate_einvoice_fields(self)
 
 		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
 			apply_pricing_rule_on_transaction(self)

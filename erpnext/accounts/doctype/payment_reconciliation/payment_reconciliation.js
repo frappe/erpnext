@@ -151,6 +151,15 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.refresh();
 	}
 
+	invoice_name() {
+		this.frm.trigger("get_unreconciled_entries");
+	}
+
+	payment_name() {
+		this.frm.trigger("get_unreconciled_entries");
+	}
+
+
 	clear_child_tables() {
 		this.frm.clear_table("invoices");
 		this.frm.clear_table("payments");
