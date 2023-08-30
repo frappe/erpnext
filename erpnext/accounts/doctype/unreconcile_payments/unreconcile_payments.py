@@ -20,38 +20,26 @@ class UnreconcilePayments(Document):
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
 		allocated_references = []
-		if self.voucher_type == "Payment Entry":
-			per = qb.DocType("Payment Entry Reference")
-			allocated_references = (
-				qb.from_(per)
-				.select(
-					per.reference_doctype, per.reference_name, Sum(per.allocated_amount).as_("allocated_amount")
-				)
-				.where((per.docstatus == 1) & (per.parent == self.voucher_no))
-				.groupby(per.reference_name)
-				.run(as_dict=True)
+		ple = qb.DocType("Payment Ledger Entry")
+		allocated_references = (
+			qb.from_(ple)
+			.select(
+				ple.account,
+				ple.party_type,
+				ple.party,
+				ple.against_voucher_type.as_("reference_doctype"),
+				ple.against_voucher_no.as_("reference_name"),
+				Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
 			)
-		elif self.voucher_type == "Journal Entry":
-			# for journals, using payment ledger to fetch allocation.
-			# this way we can avoid vaildating account type and reference details individually on child table
-
-			ple = qb.DocType("Payment Ledger Entry")
-			allocated_references = (
-				qb.from_(ple)
-				.select(
-					ple.against_voucher_type.as_("reference_doctype"),
-					ple.against_voucher_no.as_("reference_name"),
-					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
-				)
-				.where(
-					(ple.docstatus == 1)
-					& (ple.voucher_type == self.voucher_type)
-					& (ple.voucher_no == self.voucher_no)
-					& (ple.voucher_no != ple.against_voucher_no)
-				)
-				.groupby(ple.against_voucher_type, ple.against_voucher_no)
-				.run(as_dict=True)
+			.where(
+				(ple.docstatus == 1)
+				& (ple.voucher_type == self.voucher_type)
+				& (ple.voucher_no == self.voucher_no)
+				& (ple.voucher_no != ple.against_voucher_no)
 			)
+			.groupby(ple.against_voucher_type, ple.against_voucher_no)
+			.run(as_dict=True)
+		)
 
 		return allocated_references
 
@@ -65,19 +53,11 @@ class UnreconcilePayments(Document):
 		# todo: add more granular unlinking
 		# different amounts for same invoice should be individually unlinkable
 
-		payment_type, paid_from, paid_to, party_type, party = frappe.db.get_all(
-			self.voucher_type,
-			filters={"name": self.voucher_no},
-			fields=["payment_type", "paid_from", "paid_to", "party_type", "party"],
-			as_list=1,
-		)[0]
-		account = paid_from if payment_type == "Receive" else paid_to
-
 		for alloc in self.allocations:
 			doc = frappe.get_doc(alloc.reference_doctype, alloc.reference_name)
 			unlink_ref_doc_from_payment_entries(doc)
 			update_voucher_outstanding(
-				alloc.reference_doctype, alloc.reference_name, account, party_type, party
+				alloc.reference_doctype, alloc.reference_name, alloc.account, alloc.party_type, alloc.party
 			)
 			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)
 
