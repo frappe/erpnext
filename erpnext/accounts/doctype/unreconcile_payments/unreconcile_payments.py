@@ -13,6 +13,7 @@ from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries, update_v
 class UnreconcilePayments(Document):
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
+		allocated_references = []
 		if self.voucher_type == "Payment Entry":
 			per = qb.DocType("Payment Entry Reference")
 			allocated_references = (
@@ -24,7 +25,19 @@ class UnreconcilePayments(Document):
 				.groupby(per.reference_name)
 				.run(as_dict=True)
 			)
-			return allocated_references
+		elif self.voucher_type == "Journal Entry":
+			jea = qb.DocType("Journal Entry Account")
+			allocated_references = (
+				qb.from_(jea)
+				.select(
+					jea.reference_type, jea.reference_name, Sum(jea.allocated_amount).as_("allocated_amount")
+				)
+				.where((jea.docstatus == 1) & (jea.parent == self.voucher_no))
+				.groupby(jea.reference_name)
+				.run(as_dict=True)
+			)
+
+		return allocated_references
 
 	def add_references(self):
 		allocations = self.get_allocations_from_payment()
@@ -92,7 +105,7 @@ def get_linked_payments_for_doc(
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
 				)
 				.where(Criterion.all(criteria))
-				.groupby(ple.against_voucher_no)
+				.groupby(ple.voucher_no, ple.against_voucher_no)
 				.run(as_dict=True)
 			)
 			return res
