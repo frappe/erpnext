@@ -766,9 +766,7 @@ def remove_ref_doc_link_from_jv(
 	linked_jv = (
 		qb.from_(jea)
 		.select(jea.parent)
-		.select(
-			(jea.reference_type == ref_type) & (jea.reference_name == ref_no) & (jea.docstatus.lt(2))
-		)
+		.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no) & (jea.docstatus.lt(2)))
 		.run(as_list=1)
 	)
 	linked_jv = convert_to_list(linked_jv)

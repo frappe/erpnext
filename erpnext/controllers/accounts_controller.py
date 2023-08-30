@@ -212,7 +212,7 @@ class AccountsController(TransactionBase):
 		validate_einvoice_fields(self)
 
 	def _remove_references_in_unreconcile(self):
-		upe = frappe.qb.DocType("UnReconcile Payment Entries")
+		upe = frappe.qb.DocType("Unreconcile Payment Entries")
 		rows = (
 			frappe.qb.from_(upe)
 			.select(upe.name, upe.parent)
