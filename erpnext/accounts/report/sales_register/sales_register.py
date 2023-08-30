@@ -11,8 +11,8 @@ from pypika import Order
 
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
+	apply_common_conditions,
 	get_advance_taxes_and_charges,
-	get_conditions,
 	get_journal_entries,
 	get_opening_row,
 	get_party_details,
@@ -415,14 +415,8 @@ def get_account_columns(invoice_list, include_payments):
 
 def get_invoices(filters, additional_query_columns):
 	si = frappe.qb.DocType("Sales Invoice")
-	invoice_item = frappe.qb.DocType("Sales Invoice Item")
-	invoice_payment = frappe.qb.DocType("Sales Invoice Payment")
 	query = (
 		frappe.qb.from_(si)
-		.inner_join(invoice_item)
-		.on(si.name == invoice_item.parent)
-		.left_join(invoice_payment)
-		.on(si.name == invoice_payment.parent)
 		.select(
 			ConstantColumn("Sales Invoice").as_("doctype"),
 			si.name,
@@ -447,16 +441,34 @@ def get_invoices(filters, additional_query_columns):
 		.where((si.docstatus == 1))
 		.orderby(si.posting_date, si.name, order=Order.desc)
 	)
+
 	if additional_query_columns:
 		for col in additional_query_columns:
 			query = query.select(col)
+
 	if filters.get("customer"):
 		query = query.where(si.customer == filters.customer)
-	query = get_conditions(
+
+	query = get_conditions(filters, query, "Sales Invoice")
+	query = apply_common_conditions(
 		filters, query, doctype="Sales Invoice", child_doctype="Sales Invoice Item"
 	)
+
 	invoices = query.run(as_dict=True)
 	return invoices
+
+
+def get_conditions(filters, query, doctype):
+	parent_doc = frappe.qb.DocType(doctype)
+	if filters.get("owner"):
+		query = query.where(parent_doc.owner == filters.owner)
+
+	if filters.get("mode_of_payment"):
+		payment_doc = frappe.qb.DocType("Sales Invoice Payment")
+		query = query.inner_join(payment_doc).on(parent_doc.name == payment_doc.parent)
+		query = query.where(payment_doc.mode_of_payment == filters.mode_of_payment).distinct()
+
+	return query
 
 
 def get_payments(filters):

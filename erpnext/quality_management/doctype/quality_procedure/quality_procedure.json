@@ -116,7 +116,7 @@
    "link_fieldname": "procedure"
   }
  ],
- "modified": "2023-08-29 12:49:53.963370",
+ "modified": "2023-08-28 22:33:36.483420",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",
@@ -143,7 +143,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Desk User",
    "share": 1,
    "write": 1
   }

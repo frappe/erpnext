@@ -999,14 +999,14 @@ class PaymentEntry(AccountsController):
 		if self.payment_type == "Internal Transfer":
 			remarks = [
 				_("Amount {0} {1} transferred from {2} to {3}").format(
-					self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to
+					_(self.paid_from_account_currency), self.paid_amount, self.paid_from, self.paid_to
 				)
 			]
 		else:
 
 			remarks = [
 				_("Amount {0} {1} {2} {3}").format(
-					self.party_account_currency,
+					_(self.party_account_currency),
 					self.paid_amount if self.payment_type == "Receive" else self.received_amount,
 					_("received from") if self.payment_type == "Receive" else _("to"),
 					self.party,
@@ -1023,14 +1023,14 @@ class PaymentEntry(AccountsController):
 				if d.allocated_amount:
 					remarks.append(
 						_("Amount {0} {1} against {2} {3}").format(
-							self.party_account_currency, d.allocated_amount, d.reference_doctype, d.reference_name
+							_(self.party_account_currency), d.allocated_amount, d.reference_doctype, d.reference_name
 						)
 					)
 
 		for d in self.get("deductions"):
 			if d.amount:
 				remarks.append(
-					_("Amount {0} {1} deducted against {2}").format(self.company_currency, d.amount, d.account)
+					_("Amount {0} {1} deducted against {2}").format(_(self.company_currency), d.amount, d.account)
 				)
 
 		self.set("remarks", "\n".join(remarks))
@@ -1993,10 +1993,15 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		if not total_amount:
 			if party_account_currency == company_currency:
 				# for handling cases that don't have multi-currency (base field)
-				total_amount = ref_doc.get("base_grand_total") or ref_doc.get("grand_total")
+				total_amount = (
+					ref_doc.get("base_rounded_total")
+					or ref_doc.get("rounded_total")
+					or ref_doc.get("base_grand_total")
+					or ref_doc.get("grand_total")
+				)
 				exchange_rate = 1
 			else:
-				total_amount = ref_doc.get("grand_total")
+				total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc.

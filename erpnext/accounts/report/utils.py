@@ -256,7 +256,8 @@ def get_journal_entries(filters, args):
 		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
-	query = get_conditions(filters, query, doctype="Journal Entry", payments=True)
+	query = apply_common_conditions(filters, query, doctype="Journal Entry", payments=True)
+
 	journal_entries = query.run(as_dict=True)
 	return journal_entries
 
@@ -284,28 +285,17 @@ def get_payment_entries(filters, args):
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
-	query = get_conditions(filters, query, doctype="Payment Entry", payments=True)
+	query = apply_common_conditions(filters, query, doctype="Payment Entry", payments=True)
 	payment_entries = query.run(as_dict=True)
 	return payment_entries
 
 
-def get_conditions(filters, query, doctype, child_doctype=None, payments=False):
+def apply_common_conditions(filters, query, doctype, child_doctype=None, payments=False):
 	parent_doc = frappe.qb.DocType(doctype)
 	if child_doctype:
 		child_doc = frappe.qb.DocType(child_doctype)
 
-	if parent_doc.get_table_name() == "tabSales Invoice":
-		if filters.get("owner"):
-			query = query.where(parent_doc.owner == filters.owner)
-		if filters.get("mode_of_payment"):
-			payment_doc = frappe.qb.DocType("Sales Invoice Payment")
-			query = query.where(payment_doc.mode_of_payment == filters.mode_of_payment)
-		if not payments:
-			if filters.get("brand"):
-				query = query.where(child_doc.brand == filters.brand)
-	else:
-		if filters.get("mode_of_payment"):
-			query = query.where(parent_doc.mode_of_payment == filters.mode_of_payment)
+	join_required = False
 
 	if filters.get("company"):
 		query = query.where(parent_doc.company == filters.company)
@@ -320,13 +310,26 @@ def get_conditions(filters, query, doctype, child_doctype=None, payments=False):
 	else:
 		if filters.get("cost_center"):
 			query = query.where(child_doc.cost_center == filters.cost_center)
+			join_required = True
 		if filters.get("warehouse"):
 			query = query.where(child_doc.warehouse == filters.warehouse)
+			join_required = True
 		if filters.get("item_group"):
 			query = query.where(child_doc.item_group == filters.item_group)
+			join_required = True
+
+	if not payments:
+		if filters.get("brand"):
+			query = query.where(child_doc.brand == filters.brand)
+			join_required = True
+
+	if join_required:
+		query = query.inner_join(child_doc).on(parent_doc.name == child_doc.parent)
+		query = query.distinct()
 
 	if parent_doc.get_table_name() != "tabJournal Entry":
 		query = filter_invoices_based_on_dimensions(filters, query, parent_doc)
+
 	return query
 
 
