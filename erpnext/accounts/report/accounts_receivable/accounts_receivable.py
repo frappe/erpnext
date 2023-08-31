@@ -764,12 +764,17 @@ class ReceivablePayableReport(object):
 		self.qb_selection_filter = []
 		self.or_filters = []
 
-		self.add_common_filters(party_type_field=self.filters.party_type)
-		if self.filters.party_type == "Customer":
-			self.add_customer_filters()
+		for party_type in self.party_type:
+			party_type_field = scrub(party_type)
+			self.or_filters.append(self.ple.party_type == party_type)
 
-		elif self.filters.party_type == "Supplier":
-			self.add_supplier_filters()
+			self.add_common_filters(party_type_field=party_type_field)
+
+			if party_type_field == "customer":
+				self.add_customer_filters()
+
+			elif party_type_field == "supplier":
+				self.add_supplier_filters()
 
 		if self.filters.cost_center:
 			self.get_cost_center_conditions()
