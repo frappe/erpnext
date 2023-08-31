@@ -526,11 +526,15 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	source_exchange_rate: function(frm) {
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		if (frm.doc.paid_amount) {
 			frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 			// target exchange rate should always be same as source if both account currencies is same
 			if(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
 				frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
+				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
+			} else if (company_currency == frm.doc.paid_to_account_currency) {
+				frm.set_value("received_amount", frm.doc.base_paid_amount);
 				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 			}
 
@@ -543,6 +547,7 @@ frappe.ui.form.on('Payment Entry', {
 
 	target_exchange_rate: function(frm) {
 		frm.set_paid_amount_based_on_received_amount = true;
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		if (frm.doc.received_amount) {
 			frm.set_value("base_received_amount",
@@ -551,6 +556,9 @@ frappe.ui.form.on('Payment Entry', {
 			if(!frm.doc.source_exchange_rate &&
 					(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency)) {
 				frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
+				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
+			} else if (company_currency == frm.doc.paid_from_account_currency) {
+				frm.set_value("paid_amount", frm.doc.base_received_amount);
 				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
 			}
 
