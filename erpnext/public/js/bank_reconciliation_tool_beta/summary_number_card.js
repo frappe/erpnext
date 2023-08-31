@@ -1,16 +1,17 @@
 frappe.provide("erpnext.accounts.bank_reconciliation");
 
 erpnext.accounts.bank_reconciliation.SummaryCard = class SummaryCard {
-	// {
-	//		$wrapper : $wrapper,
-	//		values: {
-	//			"Amount": [120, "text-blue"],
-	//			"Unallocated Amount": [200]
-	//		},
-	//		wrapper_class: "custom-style",
-	//		currency: "USD"
-	//	}
-
+	/**
+	 * {
+	 * 	$wrapper: $wrapper,
+	 * 	values: {
+	 * 		"Amount": [120, "text-blue"],
+	 * 		"Unallocated Amount": [200]
+	 * 	},
+	 * 	wrapper_class: "custom-style",
+	 * 	currency: "USD"
+	 * }
+	*/
 	constructor(opts) {
 		Object.assign(this, opts);
 		this.make();

@@ -26,7 +26,7 @@ frappe.ui.form.on("Bank Reconciliation Tool Beta", {
 
 	onload: function (frm) {
 		// Set default filter dates
-		let today = frappe.datetime.get_today()
+		let today = frappe.datetime.get_today();
 		frm.doc.bank_statement_from_date = frappe.datetime.add_months(today, -1);
 		frm.doc.bank_statement_to_date = today;
 	},
@@ -89,27 +89,6 @@ frappe.ui.form.on("Bank Reconciliation Tool Beta", {
 			__("Upload a Bank Statement"),
 			() => frm.events.route_to_bank_statement_import(frm),
 		);
-	},
-
-	setup_empty_state: function(frm) {
-		frm.$reconciliation_area.empty();
-		let empty_area = frm.$reconciliation_area.append(`
-			<div class="bank-reco-beta-empty-state">
-				<p>
-					${__("Set Filters and Get Bank Transactions")}
-				</p>
-				<p>${__("Or")}</p>
-			</div>
-		`).find(".bank-reco-beta-empty-state");
-
-		frappe.utils.add_custom_button(
-			__("Upload a Bank Statement"),
-			() => frm.events.route_to_bank_statement_import(frm),
-			"",
-			__("Upload a Bank Statement"),
-			"btn-primary",
-			$(empty_area),
-		)
 	},
 
 	route_to_bank_statement_import(frm) {
@@ -204,6 +183,27 @@ frappe.ui.form.on("Bank Reconciliation Tool Beta", {
 				},
 			});
 		}
+	},
+
+	setup_empty_state: function(frm) {
+		frm.$reconciliation_area.empty();
+		let empty_area = frm.$reconciliation_area.append(`
+			<div class="bank-reco-beta-empty-state">
+				<p>
+					${__("Set Filters and Get Bank Transactions")}
+				</p>
+				<p>${__("Or")}</p>
+			</div>
+		`).find(".bank-reco-beta-empty-state");
+
+		frappe.utils.add_custom_button(
+			__("Upload a Bank Statement"),
+			() => frm.events.route_to_bank_statement_import(frm),
+			"",
+			__("Upload a Bank Statement"),
+			"btn-primary",
+			$(empty_area),
+		)
 	},
 
 	render_summary: function(frm) {

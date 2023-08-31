@@ -59,6 +59,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "bank_account",
    "fieldname": "account_opening_balance",
    "fieldtype": "Currency",
    "label": "Account Opening Balance",
@@ -66,6 +67,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "bank_account",
    "fieldname": "bank_statement_closing_balance",
    "fieldtype": "Currency",
    "label": "Closing Balance",
@@ -119,7 +121,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-24 15:29:55.140942",
+ "modified": "2023-08-31 16:18:36.244114",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Reconciliation Tool Beta",

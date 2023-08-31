@@ -91,7 +91,7 @@ erpnext.accounts.bank_reconciliation.PanelManager = class PanelManager {
 	}
 
 	render_actions_panel() {
-		this.actions_panel =  new erpnext.accounts.bank_reconciliation.ActionsPanel({
+		this.actions_panel =  new erpnext.accounts.bank_reconciliation.ActionsPanelManager({
 			$wrapper: this.$panel_wrapper,
 			transaction: this.active_transaction,
 			doc: this.doc,
@@ -192,7 +192,7 @@ erpnext.accounts.bank_reconciliation.PanelManager = class PanelManager {
 	}
 
 	refresh_transaction(updated_amount=null, reference_number=null, party_type=null, party=null) {
-		// Update the transaction object's unallocated_amount **OR** other details
+		// Update the transaction object's & view's unallocated_amount **OR** other details
 		let id = this.active_transaction.name;
 		let current_index = this.transactions.findIndex(({name}) => name === id);
 
@@ -218,6 +218,7 @@ erpnext.accounts.bank_reconciliation.PanelManager = class PanelManager {
 	}
 
 	move_to_next_transaction() {
+		// Remove the current transaction from the list and move to the next/previous one
 		let id = this.active_transaction.name;
 		let $current_transaction = this.$list_container.find("#" + id);
 		let current_index = this.transactions.findIndex(({name}) => name === id);
