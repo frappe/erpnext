@@ -48,7 +48,11 @@ erpnext.get_sales_trends_filters = function() {
 			"label": __("Fiscal Year"),
 			"fieldtype": "Link",
 			"options":'Fiscal Year',
+<<<<<<< HEAD
 			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+=======
+			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today())
+>>>>>>> 420536ca52 (fix: Set the default filter in All Trends Report)
 		},
 		{
 			"fieldname":"company",
