@@ -244,6 +244,7 @@ def get_conditions(filters):
 
 
 def get_invoices(filters, additional_query_columns):
+<<<<<<< HEAD
 	conditions = get_conditions(filters)
 	return frappe.db.sql(
 		"""
@@ -255,6 +256,72 @@ def get_invoices(filters, additional_query_columns):
 		where docstatus = 1 {1}
 		order by posting_date desc, name desc""".format(
 			additional_query_columns, conditions
+=======
+	pi = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(pi)
+		.select(
+			ConstantColumn("Purchase Invoice").as_("doctype"),
+			pi.name,
+			pi.posting_date,
+			pi.credit_to,
+			pi.supplier,
+			pi.supplier_name,
+			pi.tax_id,
+			pi.bill_no,
+			pi.bill_date,
+			pi.remarks,
+			pi.base_net_total,
+			pi.base_grand_total,
+			pi.base_rounded_total,
+			pi.outstanding_amount,
+			pi.mode_of_payment,
+		)
+		.where((pi.docstatus == 1))
+		.orderby(pi.posting_date, pi.name, order=Order.desc)
+	)
+
+	if additional_query_columns:
+		for col in additional_query_columns:
+			query = query.select(col)
+
+	if filters.get("supplier"):
+		query = query.where(pi.supplier == filters.supplier)
+
+	query = get_conditions(filters, query, "Purchase Invoice")
+
+	query = apply_common_conditions(
+		filters, query, doctype="Purchase Invoice", child_doctype="Purchase Invoice Item"
+	)
+
+	if filters.get("include_payments"):
+		party_account = get_party_account(
+			"Supplier", filters.get("supplier"), filters.get("company"), include_advance=True
+		)
+		query = query.where(pi.credit_to.isin(party_account))
+
+	invoices = query.run(as_dict=True)
+	return invoices
+
+
+def get_conditions(filters, query, doctype):
+	parent_doc = frappe.qb.DocType(doctype)
+
+	if filters.get("mode_of_payment"):
+		query = query.where(parent_doc.mode_of_payment == filters.mode_of_payment)
+
+	return query
+
+
+def get_payments(filters):
+	args = frappe._dict(
+		account="credit_to",
+		account_fieldname="paid_to",
+		party="supplier",
+		party_name="supplier_name",
+		party_account=get_party_account(
+			"Supplier", filters.supplier, filters.company, include_advance=True
+>>>>>>> d73daafe77 (fix: tax accounts in sales register)
 		),
 		filters,
 		as_dict=1,

@@ -23,8 +23,16 @@ def _execute(filters, additional_table_columns=None):
 		filters = frappe._dict({})
 
 	invoice_list = get_invoices(filters, get_query_columns(additional_table_columns))
+<<<<<<< HEAD
 	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
 		invoice_list, additional_table_columns
+=======
+	if filters.get("include_payments"):
+		invoice_list += get_payments(filters)
+
+	columns, income_accounts, unrealized_profit_loss_accounts, tax_accounts = get_columns(
+		invoice_list, additional_table_columns, include_payments
+>>>>>>> d73daafe77 (fix: tax accounts in sales register)
 	)
 
 	if not invoice_list:
