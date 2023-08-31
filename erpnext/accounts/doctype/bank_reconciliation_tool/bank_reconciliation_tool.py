@@ -303,9 +303,9 @@ def auto_reconcile_vouchers(
 		vouchers = list(
 			map(
 				lambda entry: {
-					"payment_doctype": entry[1],
-					"payment_name": entry[2],
-					"amount": entry[4],
+					"payment_doctype": entry.get("doctype"),
+					"payment_name": entry.get("name"),
+					"amount": entry.get("paid_amount"),
 				},
 				linked_payments,
 			)
@@ -390,19 +390,13 @@ def subtract_allocations(gl_account, vouchers):
 	"Look up & subtract any existing Bank Transaction allocations"
 	copied = []
 	for voucher in vouchers:
-		rows = get_total_allocated_amount(voucher[1], voucher[2])
-		amount = None
-		for row in rows:
-			if row["gl_account"] == gl_account:
-				amount = row["total"]
-				break
+		rows = get_total_allocated_amount(voucher.get("doctype"), voucher.get("name"))
+		filtered_row = list(filter(lambda row: row.get("gl_account") == gl_account, rows))
 
-		if amount:
-			l = list(voucher)
-			l[3] -= amount
-			copied.append(tuple(l))
-		else:
-			copied.append(voucher)
+		if amount := None if not filtered_row else filtered_row[0]["total"]:
+			voucher["paid_amount"] -= amount
+
+		copied.append(voucher)
 	return copied
 
 
@@ -449,7 +443,9 @@ def check_matching(
 			or []
 		)
 
-	return sorted(matching_vouchers, key=lambda x: x[0], reverse=True) if matching_vouchers else []
+	return (
+		sorted(matching_vouchers, key=lambda x: x["rank"], reverse=True) if matching_vouchers else []
+	)
 
 
 def get_matching_vouchers_for_bank_reconciliation(
@@ -489,12 +485,12 @@ def get_matching_vouchers_for_bank_reconciliation(
 		)
 
 	vouchers = []
-
 	for query in queries:
 		vouchers.extend(
 			frappe.db.sql(
 				query,
 				filters,
+				as_dict=True,
 			)
 		)
 
