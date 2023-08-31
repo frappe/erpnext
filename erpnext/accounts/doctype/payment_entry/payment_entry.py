@@ -2300,7 +2300,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				received_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					received_amount = paid_amount / doc.get("conversion_rate", 1)
 				else:
 					received_amount = paid_amount * doc.get("conversion_rate", 1)
@@ -2309,7 +2309,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				paid_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					paid_amount = received_amount / doc.get("conversion_rate", 1)
 				else:
 					# if party account currency and bank currency is different then populate paid amount as well
