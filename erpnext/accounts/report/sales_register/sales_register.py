@@ -38,7 +38,7 @@ def _execute(filters, additional_table_columns=None):
 	if filters.get("include_payments"):
 		invoice_list += get_payments(filters)
 
-	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(
+	columns, income_accounts, unrealized_profit_loss_accounts, tax_accounts = get_columns(
 		invoice_list, additional_table_columns, include_payments
 	)
 
