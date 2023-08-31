@@ -62,7 +62,7 @@ frappe.ui.form.on("Bank Reconciliation Tool Beta", {
 
 		frm.add_custom_button(__("Auto Reconcile"), function() {
 			frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.auto_reconcile_vouchers",
+				method: "erpnext.accounts.doctype.bank_reconciliation_tool_beta.bank_reconciliation_tool_beta.auto_reconcile_vouchers",
 				args: {
 					bank_account: frm.doc.bank_account,
 					from_date: frm.doc.bank_statement_from_date,
