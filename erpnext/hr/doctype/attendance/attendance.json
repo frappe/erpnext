@@ -13,6 +13,7 @@
   "employee_name",
   "working_hours",
   "status",
+  "half_day_session",
   "leave_type",
   "leave_application",
   "column_break0",
@@ -199,13 +200,18 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "half_day_session",
+   "fieldtype": "Data",
+   "label": "Half Day Session"
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2023-08-30 14:45:28.638365",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

@@ -60,7 +60,7 @@
   },
   {
    "fieldname": "max_continuous_days_allowed",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Maximum Consecutive Leaves Allowed",
    "oldfieldname": "max_days_allowed",
@@ -224,11 +224,10 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2022-05-09 05:01:38.957545",
+ "modified": "2023-08-14 14:38:37.192086",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -260,6 +259,5 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "track_changes": 1
 }

@@ -24,6 +24,27 @@
 		{% } %}
 	</tbody>
 </table>
+
+<table class="table table-bordered small">
+	<thead>
+		<tr>
+			<th style="width: 20%">{{ __("Monthly Allocated Leaves") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Total Used Leaves") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Balance") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Total Available") }}</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+		<tr>
+			<td class="text-right"> {{ allocation_value }} </td>
+			<td class="text-right"> {{ total_now_taken_leave_positive }} </td>
+			<td class="text-right"> {{ balance }} </td>
+			<td class="text-right"> {{total_available }} </td>
+		</tr>
+	</tbody>
+</table>
 {% else %}
 <p style="margin-top: 30px;"> No Leave has been allocated. </p>
 {% endif %}
+

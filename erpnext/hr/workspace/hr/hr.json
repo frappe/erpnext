@@ -1,11 +1,6 @@
 {
  "category": "Modules",
- "charts": [
-  {
-   "chart_name": "Outgoing Salary",
-   "label": "Outgoing Salary"
-  }
- ],
+ "charts": [],
  "creation": "2020-03-02 15:48:58.322521",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -107,7 +102,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Employee Lifecycle",
    "onboard": 0,
@@ -202,7 +197,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Shift Management",
    "onboard": 0,
@@ -346,7 +341,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Attendance",
    "onboard": 0,
@@ -403,7 +398,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Expense Claims",
    "onboard": 0,
@@ -439,7 +434,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Settings",
    "onboard": 0,
@@ -476,7 +471,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Fleet Management",
    "onboard": 0,
@@ -522,7 +517,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Recruitment",
    "onboard": 0,
@@ -596,47 +591,43 @@
    "type": "Link"
   },
   {
-    "hidden": 0,
-    "is_query_report": 0,
-    "label": "Interview Type",
-    "link_count": 0,
-    "link_to": "Interview Type",
-    "link_type": "DocType",
-    "onboard": 0,
-    "type": "Link"
-   },
-   {
-    "hidden": 0,
-    "is_query_report": 0,
-    "label": "Interview Round",
-    "link_count": 0,
-    "link_to": "Interview Round",
-    "link_type": "DocType",
-    "onboard": 0,
-    "type": "Link"
-   },
-   {
-    "hidden": 0,
-    "is_query_report": 0,
-    "label": "Interview",
-    "link_count": 0,
-    "link_to": "Interview",
-    "link_type": "DocType",
-    "onboard": 0,
-    "type": "Link"
-   },
-   {
-    "hidden": 0,
-    "is_query_report": 0,
-    "label": "Interview Feedback",
-    "link_count": 0,
-    "link_to": "Interview Feedback",
-    "link_type": "DocType",
-    "onboard": 0,
-    "type": "Link"
-   },
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Interview Type",
+   "link_to": "Interview Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
   {
    "hidden": 0,
+   "is_query_report": 0,
+   "label": "Interview Round",
+   "link_to": "Interview Round",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Interview",
+   "link_to": "Interview",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Interview Feedback",
+   "link_to": "Interview Feedback",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Loans",
    "onboard": 0,
@@ -673,7 +664,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Training",
    "onboard": 0,
@@ -720,7 +711,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Performance",
    "onboard": 0,
@@ -767,7 +758,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Key Reports",
    "onboard": 0,
@@ -834,7 +825,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Other Reports",
    "onboard": 0,
@@ -881,7 +872,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-05-30 17:19:40.524444",
+ "modified": "2023-08-09 14:53:59.724263",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -905,29 +896,6 @@
    "link_to": "Leave Application",
    "stats_filter": "{\"status\":\"Open\"}",
    "type": "DocType"
-  },
-  {
-   "label": "Attendance",
-   "link_to": "Attendance",
-   "stats_filter": "",
-   "type": "DocType"
-  },
-  {
-   "label": "Job Applicant",
-   "link_to": "Job Applicant",
-   "type": "DocType"
-  },
-  {
-   "label": "Monthly Attendance Sheet",
-   "link_to": "Monthly Attendance Sheet",
-   "type": "Report"
-  },
-  {
-   "format": "{} Open",
-   "label": "Dashboard",
-   "link_to": "Human Resource",
-   "stats_filter": "{\n    \"status\": \"Open\"\n}",
-   "type": "Dashboard"
   }
  ]
 }
