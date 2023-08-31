@@ -10,12 +10,10 @@ from frappe.utils import cint, flt
 from pypika.terms import Parameter
 
 from erpnext import get_default_cost_center
-from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
-	get_total_allocated_amount,
-)
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	reconcile_vouchers,
 )
+from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
 from erpnext.accounts.utils import get_account_currency
 
 
@@ -402,7 +400,7 @@ def get_matching_vouchers_for_bank_reconciliation(
 	filter_by_reference_date,
 	from_reference_date,
 	to_reference_date,
-	filters
+	filters,
 ):
 	# get queries to get matching vouchers
 	account_from_to = "paid_to" if transaction.deposit > 0.0 else "paid_from"
@@ -511,6 +509,7 @@ def get_matching_queries(
 
 	return queries
 
+
 def get_bt_matching_query(exact_match, transaction, exact_party_match):
 	# get matching bank transaction query
 	# find bank transactions in the same bank account with opposite sign
@@ -519,14 +518,10 @@ def get_bt_matching_query(exact_match, transaction, exact_party_match):
 	field = "deposit" if transaction.withdrawal > 0.0 else "withdrawal"
 
 	ref_rank = (
-		frappe.qb.terms.Case()
-		.when(bt.reference_number == transaction.reference_number, 1)
-		.else_(0)
+		frappe.qb.terms.Case().when(bt.reference_number == transaction.reference_number, 1).else_(0)
 	)
 	unallocated_rank = (
-		frappe.qb.terms.Case()
-		.when(bt.unallocated_amount == transaction.unallocated_amount, 1)
-		.else_(0)
+		frappe.qb.terms.Case().when(bt.unallocated_amount == transaction.unallocated_amount, 1).else_(0)
 	)
 
 	amount_equality = getattr(bt, field) == transaction.unallocated_amount
@@ -569,6 +564,7 @@ def get_bt_matching_query(exact_match, transaction, exact_party_match):
 		query = query.where(party_condition)
 
 	return str(query)
+
 
 def get_pe_matching_query(
 	exact_match,
@@ -789,9 +785,7 @@ def get_pi_matching_query(exact_match, exact_party_match, currency):
 
 	amount_equality = purchase_invoice.paid_amount == Parameter("%(amount)s")
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
-	amount_condition = (
-		amount_equality if exact_match else purchase_invoice.paid_amount > 0.0
-	)
+	amount_condition = amount_equality if exact_match else purchase_invoice.paid_amount > 0.0
 
 	party_condition = purchase_invoice.supplier == Parameter("%(party)s")
 	party_rank = frappe.qb.terms.Case().when(party_condition, 1).else_(0)
