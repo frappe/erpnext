@@ -474,10 +474,12 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
-				update_reference_in_journal_entry(entry, doc, do_not_save=True)
+				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
 				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
 				# amount and account in args
-				doc.make_exchange_gain_loss_journal(args)
+				# referenced_row is used to deduplicate gain/loss journal
+				entry.update({"referenced_row": referenced_row})
+				doc.make_exchange_gain_loss_journal([entry])
 			else:
 				update_reference_in_payment_entry(
 					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
@@ -626,6 +628,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	journal_entry.flags.ignore_validate_update_after_submit = True
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
+
+	return new_row.name
 
 
 def update_reference_in_payment_entry(
@@ -1901,6 +1905,7 @@ def create_gain_loss_journal(
 	journal_entry.company = company
 	journal_entry.posting_date = nowdate()
 	journal_entry.multi_currency = 1
+	journal_entry.is_system_generated = True
 
 	party_account_currency = frappe.get_cached_value("Account", party_account, "account_currency")
 
