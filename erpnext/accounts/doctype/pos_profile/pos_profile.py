@@ -23,9 +23,9 @@ class POSProfile(Document):
 				frappe.throw(
 					_(
 						"{0} is a mandatory Accounting Dimension. <br>"
-						"Please set a value for {0} in Accounting Dimensions section.".format(
-							unscrub(frappe.bold(acc_dim)),
-						)
+						"Please set a value for {0} in Accounting Dimensions section."
+					).format(
+						unscrub(frappe.bold(acc_dim)),
 					),
 					title=_("Mandatory Accounting Dimension"),
 				)
