@@ -134,14 +134,6 @@ frappe.ui.form.on('POS Profile', {
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
-		frappe.call({
-			method: 'erpnext.accounts.doctype.pos_profile.pos_profile.required_accounting_dimensions',
-			callback: function(r) {
-				r.message.forEach((acc_dim) => {
-					frm.toggle_reqd(acc_dim, true);
-				})
-			}
-		});
 	},
 
 	company: function(frm) {
