@@ -1354,7 +1354,7 @@ class AccountsController(TransactionBase):
 					{
 						"account": self.additional_discount_account,
 						"against": supplier_or_customer,
-						dr_or_cr: self.discount_amount,
+						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -1626,6 +1626,7 @@ class AccountsController(TransactionBase):
 					and party_account_currency != self.company_currency
 					and self.currency != party_account_currency
 				):
+
 					frappe.throw(
 						_("Accounting Entry for {0}: {1} can only be made in currency: {2}").format(
 							party_type, party, party_account_currency
