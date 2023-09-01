@@ -108,9 +108,9 @@ frappe.query_reports["Accounts Payable"] = {
 			},
 			on_change: () => {
 				frappe.query_report.set_filter_value('party', "");
-				// hide supplier group and group_by_supplier filter if party type is employee
-				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') === "Employee")
-				frappe.query_report.toggle_filter_display('group_by_party', frappe.query_report.get_filter_value('party_type') === "Employee")
+				let party_type = frappe.query_report.get_filter_value('party_type');
+				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') !== "Supplier");
+
 			}
 
 		},
@@ -125,6 +125,7 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Supplier Group"),
 			"fieldtype": "Link",
 			"options": "Supplier Group",
+			"hidden": 1
 		},
 		{
 			"fieldname": "group_by_party",
@@ -140,12 +141,6 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname": "show_remarks",
 			"label": __("Show Remarks"),
 			"fieldtype": "Check",
-		},
-		{
-			"fieldname": "tax_id",
-			"label": __("Tax Id"),
-			"fieldtype": "Data",
-			"hidden": 1
 		},
 		{
 			"fieldname": "show_future_payments",
