@@ -10,7 +10,7 @@
   "due_date",
   "bill_no",
   "payment_term",
-  "deallocation_payment",
+  "deallocate_payment",
   "column_break_4",
   "total_amount",
   "outstanding_amount",
