@@ -10,6 +10,7 @@
   "due_date",
   "bill_no",
   "payment_term",
+  "deallocation_payment",
   "column_break_4",
   "total_amount",
   "outstanding_amount",
@@ -108,6 +109,12 @@
    "fieldtype": "Link",
    "label": "Account",
    "options": "Account"
+  },
+  {
+    "allow_on_submit": 1,
+    "fieldname": "deallocate_payment",
+    "fieldtype": "Button",
+    "label": "Deallocate Payment"
   }
  ],
  "index_web_pages_for_search": 1,

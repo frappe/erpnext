@@ -1400,6 +1400,27 @@ frappe.ui.form.on('Payment Entry Reference', {
 
 	references_remove: function(frm) {
 		frm.events.set_total_allocated_amount(frm);
+	},
+
+	deallocate_payment: function(frm,cdt,cdn){
+		let d = locals[cdt][cdn];
+		if (frm.doc.docstatus == 1){
+			frappe.call({
+				method:"erpnext.accounts.doctype.payment_entry.payment_entry.deallocate_payment",
+				args:{
+					"child_doc_name":d.name,
+					"parent_doc_name":frm.doc.name,
+					"reference_doctype":d.reference_doctype,
+					"reference_name":d.reference_name,
+                    "self":frm.doc
+				},
+				callback: function(r){
+					if (r.message){
+						frappe.msgprint(r.message)
+					}
+				}
+			})
+		}
 	}
 })
 
