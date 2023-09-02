@@ -941,6 +941,51 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_je, [])
 
+	def test_24_journal_against_multiple_invoices(self):
+		si1 = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1)
+		si2 = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1)
+
+		# Payment
+		je = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=75,
+			acc2=self.cash,
+			acc1_amount=-2,
+			acc2_amount=-150,
+			acc2_exc_rate=1,
+		)
+		je.accounts[0].party_type = "Customer"
+		je.accounts[0].party = self.customer
+		je = je.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 2)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		si1.reload()
+		si2.reload()
+
+		self.assertEqual(si1.outstanding_amount, 0)
+		self.assertEqual(si2.outstanding_amount, 0)
+		self.assert_ledger_outstanding(si1.doctype, si1.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(si2.doctype, si2.name, 0.0, 0.0)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		# remove payment JE from list
+		exc_je_for_si1 = [x for x in self.get_journals_for(si1.doctype, si1.name) if x.parent != je.name]
+		exc_je_for_si2 = [x for x in self.get_journals_for(si2.doctype, si2.name) if x.parent != je.name]
+		exc_je_for_je = [x for x in self.get_journals_for(je.doctype, je.name) if x.parent != je.name]
+		self.assertEqual(len(exc_je_for_si1), 1)
+		self.assertEqual(len(exc_je_for_si2), 1)
+		self.assertEqual(len(exc_je_for_je), 2)
+
 	def test_30_cr_note_against_sales_invoice(self):
 		"""
 		Reconciling Cr Note against Sales Invoice, both having different exchange rates
