@@ -977,7 +977,7 @@ class TestAccountsController(FrappeTestCase):
 		self.assert_ledger_outstanding(si1.doctype, si1.name, 0.0, 0.0)
 		self.assert_ledger_outstanding(si2.doctype, si2.name, 0.0, 0.0)
 
-		# Exchange Gain/Loss Journal should've been cancelled
+		# Exchange Gain/Loss Journal should've been created
 		# remove payment JE from list
 		exc_je_for_si1 = [x for x in self.get_journals_for(si1.doctype, si1.name) if x.parent != je.name]
 		exc_je_for_si2 = [x for x in self.get_journals_for(si2.doctype, si2.name) if x.parent != je.name]
@@ -985,6 +985,15 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(len(exc_je_for_si1), 1)
 		self.assertEqual(len(exc_je_for_si2), 1)
 		self.assertEqual(len(exc_je_for_je), 2)
+
+		si1.cancel()
+		# Gain/Loss JE of si1 should've been cancelled
+		exc_je_for_si1 = [x for x in self.get_journals_for(si1.doctype, si1.name) if x.parent != je.name]
+		exc_je_for_si2 = [x for x in self.get_journals_for(si2.doctype, si2.name) if x.parent != je.name]
+		exc_je_for_je = [x for x in self.get_journals_for(je.doctype, je.name) if x.parent != je.name]
+		self.assertEqual(len(exc_je_for_si1), 0)
+		self.assertEqual(len(exc_je_for_si2), 1)
+		self.assertEqual(len(exc_je_for_je), 1)
 
 	def test_30_cr_note_against_sales_invoice(self):
 		"""
