@@ -46,8 +46,7 @@ frappe.query_reports["Accounts Receivable"] = {
 				var customer = frappe.query_report.get_filter_value('customer');
 				var company = frappe.query_report.get_filter_value('company');
 				if (customer) {
-					frappe.db.get_value('Customer', customer, ["tax_id", "customer_name", "payment_terms"], function(value) {
-						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
+					frappe.db.get_value('Customer', customer, ["customer_name", "payment_terms"], function(value) {
 						frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
 						frappe.query_report.set_filter_value('payment_terms', value["payment_terms"]);
 					});
@@ -59,7 +58,6 @@ frappe.query_reports["Accounts Receivable"] = {
 						}
 					}, "Customer");
 				} else {
-					frappe.query_report.set_filter_value('tax_id', "");
 					frappe.query_report.set_filter_value('customer_name', "");
 					frappe.query_report.set_filter_value('credit_limit', "");
 					frappe.query_report.set_filter_value('payment_terms', "");
@@ -171,12 +169,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname": "show_sales_person",
 			"label": __("Show Sales Person"),
 			"fieldtype": "Check",
-		},
-		{
-			"fieldname": "tax_id",
-			"label": __("Tax Id"),
-			"fieldtype": "Data",
-			"hidden": 1
 		},
 		{
 			"fieldname": "show_remarks",

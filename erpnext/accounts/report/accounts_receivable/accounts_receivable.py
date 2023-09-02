@@ -211,11 +211,10 @@ class ReceivablePayableReport(object):
 			return
 
 		# amount in "Party Currency", if its supplied. If not, amount in company currency
-		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
-				amount = ple.amount_in_account_currency
-			else:
-				amount = ple.amount
+		if self.filters.get("party_type") and self.filters.get("party"):
+			amount = ple.amount_in_account_currency
+		else:
+			amount = ple.amount
 		amount_in_account_currency = ple.amount_in_account_currency
 
 		# update voucher
@@ -426,10 +425,9 @@ class ReceivablePayableReport(object):
 		# customer / supplier name
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
-		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
-				row.currency = row.account_currency
-				break
+
+		if self.filters.get("party_type") and self.filters.get("party"):
+			row.currency = row.account_currency
 		else:
 			row.currency = self.company_currency
 
@@ -765,6 +763,7 @@ class ReceivablePayableReport(object):
 	def prepare_conditions(self):
 		self.qb_selection_filter = []
 		self.or_filters = []
+
 		for party_type in self.party_type:
 			party_type_field = scrub(party_type)
 			self.or_filters.append(self.ple.party_type == party_type)
@@ -799,6 +798,12 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get(party_type_field):
 			self.qb_selection_filter.append(self.ple.party == self.filters.get(party_type_field))
+
+		if self.filters.get("party_type"):
+			self.qb_selection_filter.append(self.filters.party_type == self.ple.party_type)
+
+		if self.filters.get("party"):
+			self.qb_selection_filter.append(self.filters.party == self.ple.party)
 
 		if self.filters.party_account:
 			self.qb_selection_filter.append(self.ple.account == self.filters.party_account)
