@@ -435,10 +435,8 @@ class TestProductionPlan(FrappeTestCase):
 
 		service_item = make_item(properties={"is_stock_item": 0}).name
 		create_subcontracting_bom(
-			{
-				"finished_good": fg_item,
-				"service_item": service_item,
-			}
+			finished_good=fg_item,
+			service_item=service_item,
 		)
 
 		plan = create_production_plan(
