@@ -246,8 +246,13 @@ class POSInvoiceMergeLog(Document):
 			frappe.db.get_value("POS Profile", invoice.pos_profile, "disable_rounded_total")
 		)
 		accounting_dimensions = get_accounting_dimensions()
+		dimension_values = frappe.db.get_all(
+			"POS Profile",
+			filters={"name": invoice.pos_profile},
+			fields=accounting_dimensions,
+		)[0]
 		for dimension in accounting_dimensions:
-			dimension_value = frappe.db.get_value("POS Profile", invoice.pos_profile, dimension)
+			dimension_value = dimension_values.get(dimension)
 			invoice.set(dimension, dimension_value)
 
 		if self.merge_invoices_based_on == "Customer Group":
