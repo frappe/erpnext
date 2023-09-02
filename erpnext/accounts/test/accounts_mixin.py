@@ -126,6 +126,28 @@ class AccountsTestMixin:
 			acc = frappe.get_doc("Account", name)
 		self.debtors_usd = acc.name
 
+	def create_usd_payable_account(self):
+		account_name = "Creditors USD"
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": account_name, "company": self.company}
+		):
+			acc = frappe.new_doc("Account")
+			acc.account_name = account_name
+			acc.parent_account = "Accounts Payable - " + self.company_abbr
+			acc.company = self.company
+			acc.account_currency = "USD"
+			acc.account_type = "Payable"
+			acc.insert()
+		else:
+			name = frappe.db.get_value(
+				"Account",
+				filters={"account_name": account_name, "company": self.company},
+				fieldname="name",
+				pluck=True,
+			)
+			acc = frappe.get_doc("Account", name)
+		self.creditors_usd = acc.name
+
 	def clear_old_entries(self):
 		doctype_list = [
 			"GL Entry",
