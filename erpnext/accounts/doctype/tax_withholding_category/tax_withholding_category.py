@@ -268,9 +268,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 						net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details
 					)
 				else:
-					tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
+					tax_amount = net_total * tax_details.rate / 100
 			else:
-				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
+				tax_amount = net_total * tax_details.rate / 100
 
 			# once tds is deducted, not need to add vouchers in the invoice
 			voucher_wise_amount = {}

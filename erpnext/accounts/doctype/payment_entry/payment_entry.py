@@ -1867,10 +1867,15 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		if not total_amount:
 			if party_account_currency == company_currency:
 				# for handling cases that don't have multi-currency (base field)
-				total_amount = ref_doc.get("base_grand_total") or ref_doc.get("grand_total")
+				total_amount = (
+					ref_doc.get("base_rounded_total")
+					or ref_doc.get("rounded_total")
+					or ref_doc.get("base_grand_total")
+					or ref_doc.get("grand_total")
+				)
 				exchange_rate = 1
 			else:
-				total_amount = ref_doc.get("grand_total")
+				total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc.
@@ -2162,7 +2167,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				received_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					received_amount = paid_amount / doc.get("conversion_rate", 1)
 				else:
 					received_amount = paid_amount * doc.get("conversion_rate", 1)
@@ -2171,7 +2176,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				paid_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					paid_amount = received_amount / doc.get("conversion_rate", 1)
 				else:
 					# if party account currency and bank currency is different then populate paid amount as well
