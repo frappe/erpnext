@@ -918,6 +918,7 @@ def get_outstanding_invoices(
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
 	if account:
+		# breakpoint()
 		root_type, account_type = frappe.get_cached_value(
 			"Account", account, ["root_type", "account_type"]
 		)
