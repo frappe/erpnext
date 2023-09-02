@@ -1164,7 +1164,7 @@ def parse_naming_series_variable(doc, variable):
 
 
 @frappe.whitelist()
-def get_coa(doctype, parent, is_root, chart=None):
+def get_coa(doctype, parent, is_root=None, chart=None):
 	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 		build_tree_from_json,
 	)
