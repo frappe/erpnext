@@ -3096,7 +3096,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 		if has_reserved_stock(parent.doctype, parent.name):
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
-			parent.create_stock_reservation_entries()
+
+			if parent.per_picked == 0:
+				parent.create_stock_reservation_entries()
 
 
 @erpnext.allow_regional

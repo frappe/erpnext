@@ -2,6 +2,10 @@ import frappe
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cint, flt
 
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
+)
+
 
 @frappe.whitelist()
 def get_data(
@@ -57,6 +61,7 @@ def get_data(
 		limit_page_length=21,
 	)
 
+	sre_reserved_stock_details = get_reserved_stock(item_code, warehouse)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	for item in items:
@@ -70,6 +75,7 @@ def get_data(
 				"reserved_qty_for_production": flt(item.reserved_qty_for_production, precision),
 				"reserved_qty_for_sub_contract": flt(item.reserved_qty_for_sub_contract, precision),
 				"actual_qty": flt(item.actual_qty, precision),
+				"reserved_stock": sre_reserved_stock_details.get((item.item_code, item.warehouse), 0),
 			}
 		)
 	return items
