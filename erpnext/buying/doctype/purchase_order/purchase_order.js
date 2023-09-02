@@ -127,6 +127,15 @@ frappe.ui.form.on("Purchase Order", {
 			},
 		});
 	},
+
+	get_subcontracting_boms_for_service_item: function(service_item) {
+		return frappe.call({
+			method:"erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.get_subcontracting_boms_for_service_item",
+			args: {
+				service_item: service_item
+			},
+		});
+	},
 });
 
 frappe.ui.form.on("Purchase Order Item", {
@@ -137,6 +146,54 @@ frappe.ui.form.on("Purchase Order Item", {
 				erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
 			} else {
 				set_schedule_date(frm);
+			}
+		}
+	},
+
+	item_code: async function(frm, cdt, cdn) {
+		if (frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
+			var row = locals[cdt][cdn];
+
+			if (row.item_code && !row.fg_item) {
+				var result = await frm.events.get_subcontracting_boms_for_service_item(row.item_code)
+
+				if (result.message && Object.keys(result.message).length) {
+					var finished_goods = Object.keys(result.message);
+
+					// Set FG if only one active Subcontracting BOM is found
+					if (finished_goods.length === 1) {
+						row.fg_item = result.message[finished_goods[0]].finished_good;
+						row.uom = result.message[finished_goods[0]].finished_good_uom;
+						refresh_field("items");
+					} else {
+						const dialog = new frappe.ui.Dialog({
+							title: __("Select Finished Good"),
+							size: "small",
+							fields: [
+								{
+									fieldname: "finished_good",
+									fieldtype: "Autocomplete",
+									label: __("Finished Good"),
+									options: finished_goods,
+								}
+							],
+							primary_action_label: __("Select"),
+							primary_action: () => {
+								var subcontracting_bom = result.message[dialog.get_value("finished_good")];
+
+								if (subcontracting_bom) {
+									row.fg_item = subcontracting_bom.finished_good;
+									row.uom = subcontracting_bom.finished_good_uom;
+									refresh_field("items");
+								}
+
+								dialog.hide();
+							},
+						});
+
+						dialog.show();
+					}
+				}
 			}
 		}
 	},

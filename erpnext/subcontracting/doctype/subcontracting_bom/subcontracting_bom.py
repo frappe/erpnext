@@ -83,3 +83,15 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
 				return subcontracting_boms[0]
 
 	return {}
+
+
+@frappe.whitelist()
+def get_subcontracting_boms_for_service_item(service_item: str) -> dict:
+	if service_item:
+		filters = {"is_active": 1, "service_item": service_item}
+		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=["*"])
+
+		if Subcontracting_boms:
+			return {d.finished_good: d for d in Subcontracting_boms}
+
+	return {}
