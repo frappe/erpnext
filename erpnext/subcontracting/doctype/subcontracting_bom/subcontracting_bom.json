@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:SB-{finished_good}-{####}",
+ "autoname": "format:SB-{####}",
  "creation": "2023-08-29 12:43:20.417184",
  "default_view": "List",
  "doctype": "DocType",
@@ -128,7 +128,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-29 16:51:24.381754",
+ "modified": "2023-09-03 16:51:43.558295",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting BOM",
