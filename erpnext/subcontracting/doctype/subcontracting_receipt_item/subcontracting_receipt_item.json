@@ -29,7 +29,6 @@
   "rate_and_amount",
   "rate",
   "amount",
-  "recalculate_rate",
   "column_break_19",
   "rm_cost_per_qty",
   "service_cost_per_qty",
@@ -196,7 +195,6 @@
    "options": "currency",
    "print_width": "100px",
    "read_only": 1,
-   "read_only_depends_on": "eval: doc.recalculate_rate",
    "width": "100px"
   },
   {
@@ -468,16 +466,65 @@
    "label": "Accounting Details"
   },
   {
+<<<<<<< HEAD
    "default": "1",
    "fieldname": "recalculate_rate",
    "fieldtype": "Check",
    "label": "Recalculate Rate"
+=======
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "rejected_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Rejected Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.bom",
+   "fieldname": "is_scrap_item",
+   "fieldtype": "Check",
+   "label": "Is Scrap Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.bom"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.is_scrap_item",
+   "fieldname": "scrap_cost_per_qty",
+   "fieldtype": "Float",
+   "label": "Scrap Cost Per Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Name",
+   "no_copy": 1,
+   "read_only": 1
+>>>>>>> cd8ddae7c5 (refactor: remove `Recalculate Rate` from SCR Item (#36929))
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-07-06 18:44:45.599761",
+=======
+ "modified": "2023-09-03 17:04:21.214316",
+>>>>>>> cd8ddae7c5 (refactor: remove `Recalculate Rate` from SCR Item (#36929))
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
