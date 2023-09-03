@@ -116,7 +116,7 @@ class PaymentReconciliation(Document):
 				"Journal Entry" as reference_type, t1.name as reference_name,
 				t1.posting_date, t1.remark as remarks, t2.name as reference_row,
 				{dr_or_cr} as amount, t2.is_advance, t2.exchange_rate,
-				t2.account_currency as currency
+				t2.account_currency as currency, t2.cost_center as cost_center
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
@@ -209,6 +209,7 @@ class PaymentReconciliation(Document):
 								"amount": -(inv.outstanding_in_account_currency),
 								"posting_date": inv.posting_date,
 								"currency": inv.currency,
+								"cost_center": inv.cost_center,
 							}
 						)
 					)
@@ -357,6 +358,7 @@ class PaymentReconciliation(Document):
 				"allocated_amount": allocated_amount,
 				"difference_amount": pay.get("difference_amount"),
 				"currency": inv.get("currency"),
+				"cost_center": pay.get("cost_center"),
 			}
 		)
 
@@ -431,6 +433,7 @@ class PaymentReconciliation(Document):
 				"allocated_amount": flt(row.get("allocated_amount")),
 				"difference_amount": flt(row.get("difference_amount")),
 				"difference_account": row.get("difference_account"),
+				"cost_center": row.get("cost_center"),
 			}
 		)
 
@@ -603,7 +606,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						inv.dr_or_cr: abs(inv.allocated_amount),
 						"reference_type": inv.against_voucher_type,
 						"reference_name": inv.against_voucher,
-						"cost_center": erpnext.get_default_cost_center(company),
+						"cost_center": inv.cost_center or erpnext.get_default_cost_center(company),
 						"exchange_rate": inv.exchange_rate,
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
 					},
@@ -618,7 +621,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						),
 						"reference_type": inv.voucher_type,
 						"reference_name": inv.voucher_no,
-						"cost_center": erpnext.get_default_cost_center(company),
+						"cost_center": inv.cost_center or erpnext.get_default_cost_center(company),
 						"exchange_rate": inv.exchange_rate,
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
 					},
@@ -657,4 +660,5 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				inv.against_voucher_type,
 				inv.against_voucher,
 				None,
+				inv.cost_center,
 			)
