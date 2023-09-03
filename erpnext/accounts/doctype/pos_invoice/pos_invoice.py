@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
-
+import collections
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -55,6 +55,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
 		self.validate_company_with_pos_company()
+		self.validate_duplicate_serial_and_batch_no()
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
@@ -154,6 +155,27 @@ class POSInvoice(SalesInvoice):
 				).format(item.idx, bold_invalid_serial_nos),
 				title=_("Item Unavailable"),
 			)
+
+	def validate_duplicate_serial_and_batch_no(self):
+		serial_nos = []
+		batch_nos = []
+
+		for row in self.get("items"):
+			if row.serial_no:
+				serial_nos = row.serial_no.split("\n")
+
+			if row.batch_no and not row.serial_no:
+				batch_nos.append(row.batch_no)
+
+		if serial_nos:
+			for key, value in collections.Counter(serial_nos).items():
+				if value > 1:
+					frappe.throw(_("Duplicate Serial No {0} found").format("key"))
+
+		if batch_nos:
+			for key, value in collections.Counter(batch_nos).items():
+				if value > 1:
+					frappe.throw(_("Duplicate Batch No {0} found").format("key"))
 
 	def validate_pos_reserved_batch_qty(self, item):
 		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no": item.batch_no}
