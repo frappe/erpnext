@@ -181,13 +181,6 @@ frappe.ui.form.on('Subcontracting Receipt Item', {
 	rate(frm) {
 		set_missing_values(frm);
 	},
-<<<<<<< HEAD
-=======
-
-	items_remove: (frm) => {
-		set_missing_values(frm);
-	},
->>>>>>> cd8ddae7c5 (refactor: remove `Recalculate Rate` from SCR Item (#36929))
 });
 
 frappe.ui.form.on('Subcontracting Receipt Supplied Item', {
