@@ -593,12 +593,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						inv.dr_or_cr: abs(inv.allocated_amount),
 						"reference_type": inv.against_voucher_type,
 						"reference_name": inv.against_voucher,
-<<<<<<< HEAD
-						"cost_center": erpnext.get_default_cost_center(company),
-=======
 						"cost_center": inv.cost_center or erpnext.get_default_cost_center(company),
-						"exchange_rate": inv.exchange_rate,
->>>>>>> d6a3b9a5c7 (refactor: use payment's CC for gain/loss if company default is unset)
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
 						"exchange_rate": inv.exchange_rate,
 					},
@@ -613,12 +608,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 						),
 						"reference_type": inv.voucher_type,
 						"reference_name": inv.voucher_no,
-<<<<<<< HEAD
-						"cost_center": erpnext.get_default_cost_center(company),
-=======
 						"cost_center": inv.cost_center or erpnext.get_default_cost_center(company),
-						"exchange_rate": inv.exchange_rate,
->>>>>>> d6a3b9a5c7 (refactor: use payment's CC for gain/loss if company default is unset)
 						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
 						"exchange_rate": inv.exchange_rate,
 					},

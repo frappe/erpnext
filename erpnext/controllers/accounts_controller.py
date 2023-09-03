@@ -969,35 +969,6 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
-<<<<<<< HEAD
-=======
-	def make_precision_loss_gl_entry(self, gl_entries):
-		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
-		)
-
-		precision_loss = self.get("base_net_total") - flt(
-			self.get("net_total") * self.conversion_rate, self.precision("net_total")
-		)
-
-		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
-		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
-
-		if precision_loss:
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": round_off_account,
-						"against": against,
-						credit_or_debit: precision_loss,
-						"cost_center": round_off_cost_center
-						if self.use_company_roundoff_cost_center
-						else self.cost_center or round_off_cost_center,
-						"remarks": _("Net total calculation precision loss"),
-					}
-				)
-			)
-
 	def gain_loss_journal_already_booked(
 		self,
 		gain_loss_account,
@@ -1036,7 +1007,6 @@ class AccountsController(TransactionBase):
 					return True
 		return False
 
->>>>>>> 79c6f0165b (fix: deduplicate gain/loss JE creation for journals as payment)
 	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
