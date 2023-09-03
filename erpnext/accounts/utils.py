@@ -1754,6 +1754,7 @@ class QueryPaymentLedger(object):
 				ple.posting_date,
 				ple.due_date,
 				ple.account_currency.as_("currency"),
+				ple.cost_center.as_("cost_center"),
 				Sum(ple.amount).as_("amount"),
 				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
 			)
@@ -1816,6 +1817,7 @@ class QueryPaymentLedger(object):
 				).as_("paid_amount_in_account_currency"),
 				Table("vouchers").due_date,
 				Table("vouchers").currency,
+				Table("vouchers").cost_center.as_("cost_center"),
 			)
 			.where(Criterion.all(filter_on_outstanding_amount))
 		)
@@ -1899,6 +1901,7 @@ def create_gain_loss_journal(
 	ref2_dt,
 	ref2_dn,
 	ref2_detail_no,
+	cost_center,
 ) -> str:
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
@@ -1924,7 +1927,7 @@ def create_gain_loss_journal(
 			"party": party,
 			"account_currency": party_account_currency,
 			"exchange_rate": 0,
-			"cost_center": erpnext.get_default_cost_center(company),
+			"cost_center": cost_center or erpnext.get_default_cost_center(company),
 			"reference_type": ref1_dt,
 			"reference_name": ref1_dn,
 			"reference_detail_no": ref1_detail_no,
@@ -1940,7 +1943,7 @@ def create_gain_loss_journal(
 			"account": gain_loss_account,
 			"account_currency": gain_loss_account_currency,
 			"exchange_rate": 1,
-			"cost_center": erpnext.get_default_cost_center(company),
+			"cost_center": cost_center or erpnext.get_default_cost_center(company),
 			"reference_type": ref2_dt,
 			"reference_name": ref2_dn,
 			"reference_detail_no": ref2_detail_no,
