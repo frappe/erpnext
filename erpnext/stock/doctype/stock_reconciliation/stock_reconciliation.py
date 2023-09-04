@@ -149,6 +149,14 @@ class StockReconciliation(StockController):
 					)
 				)
 
+			if row.batch_no and row.current_qty and row.current_qty < 0:
+				self.validation_messages.append(
+					_get_msg(
+						row_num,
+						f"The Current Quantity {bold(row.current_qty)} should not be negative for the {bold(row.item_code)} and the batch no {bold(row.batch_no)}. Please add positive quantity to the batch no.",
+					)
+				)
+
 			# validate warehouse
 			if not frappe.db.get_value("Warehouse", row.warehouse):
 				self.validation_messages.append(_get_msg(row_num, _("Warehouse not found in the system")))
@@ -605,6 +613,7 @@ class StockReconciliation(StockController):
 					"name",
 				)
 				and current_qty
+				and abs(flt(current_qty, precesion)) != abs(flt(row.current_qty, precesion))
 			):
 				new_sle = self.get_sle_for_items(row)
 				new_sle.actual_qty = current_qty * -1
