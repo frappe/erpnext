@@ -2434,7 +2434,7 @@ def get_common_query(
 	limit,
 	condition,
 ):
-	account_type = frappe.db.get_value("Account", party_account, "account_type")
+	account_type = frappe.db.get_value("Party Type", party_type, "account_type")
 	payment_type = "Receive" if account_type == "Receivable" else "Pay"
 	payment_entry = frappe.qb.DocType("Payment Entry")
 
