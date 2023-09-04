@@ -15,7 +15,6 @@
   "posting_date",
   "clearance_date",
   "rate_of_interest",
-  "payroll_payable_account",
   "is_term_loan",
   "repay_from_salary",
   "payment_details_section",
@@ -41,6 +40,7 @@
   "amended_from",
   "accounting_details_section",
   "payment_account",
+  "payroll_payable_account",
   "penalty_income_account",
   "column_break_36",
   "loan_account"
@@ -263,6 +263,7 @@
   {
    "default": "0",
    "fetch_from": "against_loan.repay_from_salary",
+   "fetch_if_empty": 1,
    "fieldname": "repay_from_salary",
    "fieldtype": "Check",
    "label": "Repay From Salary"
@@ -280,6 +281,7 @@
    "label": "Accounting Details"
   },
   {
+    "depends_on": "eval:!doc.repay_from_salary",
    "fetch_from": "against_loan.payment_account",
    "fetch_if_empty": 1,
    "fieldname": "payment_account",
