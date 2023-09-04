@@ -298,6 +298,8 @@ def get_conditions(filters):
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+	if filters.get("item_group"):
+		conditions += """and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s"""
 
 	if not filters.get("group_by"):
 		conditions += (
