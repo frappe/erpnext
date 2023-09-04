@@ -324,12 +324,22 @@ def get_journal_entry_party_map(journal_entries):
 
 
 def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
-	common_fields = ["name", "tax_withholding_category"]
+	common_fields = ["name"]
 	fields_dict = {
-		"Purchase Invoice": ["base_tax_withholding_net_total", "grand_total", "base_total"],
+		"Purchase Invoice": [
+			"tax_withholding_category",
+			"base_tax_withholding_net_total",
+			"grand_total",
+			"base_total",
+		],
 		"Sales Invoice": ["base_net_total", "grand_total", "base_total"],
-		"Payment Entry": ["paid_amount", "paid_amount_after_tax", "base_paid_amount"],
-		"Journal Entry": ["total_amount"],
+		"Payment Entry": [
+			"tax_withholding_category",
+			"paid_amount",
+			"paid_amount_after_tax",
+			"base_paid_amount",
+		],
+		"Journal Entry": ["tax_withholding_category", "total_amount"],
 	}
 
 	entries = frappe.get_all(
