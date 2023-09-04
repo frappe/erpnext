@@ -281,7 +281,7 @@
    "label": "Accounting Details"
   },
   {
-    "depends_on": "eval:!doc.repay_from_salary",
+   "depends_on": "eval:!doc.repay_from_salary",
    "fetch_from": "against_loan.payment_account",
    "fetch_if_empty": 1,
    "fieldname": "payment_account",
