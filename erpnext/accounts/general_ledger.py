@@ -28,6 +28,7 @@ def make_gl_entries(
 ):
 	if gl_map:
 		if not cancel:
+			print("fffffffffffffffffffffffffffffffffff")
 			validate_accounting_period(gl_map)
 			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
@@ -224,6 +225,11 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
+	print("11111111111111111")
+	
+	print("222222222222222222222222")
+	
+
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
@@ -396,6 +402,8 @@ def make_reverse_gl_entries(
 		)
 
 	if gl_entries:
+		print(gl_entries)
+		print("jljdsljfkhdkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkg")
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])

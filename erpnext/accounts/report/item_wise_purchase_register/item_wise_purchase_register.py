@@ -69,6 +69,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			"item_code": d.item_code,
 			"item_name": item_record.item_name if item_record else d.item_name,
 			"item_group": item_record.item_group if item_record else d.item_group,
+			"brand":item_record.brand if item_record else d.brand,
 			"description": d.description,
 			"invoice": d.parent,
 			"posting_date": d.posting_date,
@@ -144,7 +145,41 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 def get_columns(additional_table_columns, filters):
 
 	columns = []
-
+	columns.extend([
+		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
+		{
+				"label": _("Invoice"),
+				"fieldname": "invoice",
+				"fieldtype": "Link",
+				"options": "Purchase Invoice",
+				"width": 120,
+			},
+	])
+	if filters.get("group_by") not in ("Item", "Item Group"):
+		columns.extend(
+			[
+				{
+					"label": _("Item Group"),
+					"fieldname": "item_group",
+					"fieldtype": "Link",
+					"options": "Item Group",
+					"width": 120,
+				},
+				
+				
+				
+			]
+		)
+	if filters.get("group_by") != ("Brand"):
+		columns.extend(
+			[
+		{
+		"label": _("Brand"),
+		"fieldname": "brand",
+		"fieldtype": "Link",
+		"options": "Brand",
+		"width": 120,
+		}])
 	if filters.get("group_by") != ("Item"):
 		columns.extend(
 			[
@@ -155,34 +190,17 @@ def get_columns(additional_table_columns, filters):
 					"options": "Item",
 					"width": 120,
 				},
-				{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 120},
+				{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 120,"hidden":1},
 			]
 		)
 
-	if filters.get("group_by") not in ("Item", "Item Group"):
-		columns.extend(
-			[
-				{
-					"label": _("Item Group"),
-					"fieldname": "item_group",
-					"fieldtype": "Link",
-					"options": "Item Group",
-					"width": 120,
-				}
-			]
-		)
+	
 
 	columns.extend(
 		[
-			{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 150},
-			{
-				"label": _("Invoice"),
-				"fieldname": "invoice",
-				"fieldtype": "Link",
-				"options": "Purchase Invoice",
-				"width": 120,
-			},
-			{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
+			{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 150,"hidden":1},
+			
+			
 		]
 	)
 
@@ -196,7 +214,7 @@ def get_columns(additional_table_columns, filters):
 					"options": "Supplier",
 					"width": 120,
 				},
-				{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 120},
+				{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 120,"hidden":1},
 			]
 		)
 
@@ -210,13 +228,16 @@ def get_columns(additional_table_columns, filters):
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 80,
+			"hidden":1
 		},
 		{
 			"label": _("Mode Of Payment"),
 			"fieldname": "mode_of_payment",
 			"fieldtype": "Link",
 			"options": "Mode of Payment",
+			"hidden":1,
 			"width": 120,
+			
 		},
 		{
 			"label": _("Project"),
@@ -224,12 +245,15 @@ def get_columns(additional_table_columns, filters):
 			"fieldtype": "Link",
 			"options": "Project",
 			"width": 80,
+			
+			"hidden":1,
 		},
 		{
 			"label": _("Company"),
 			"fieldname": "company",
 			"fieldtype": "Link",
 			"options": "Company",
+			"hidden":1,
 			"width": 80,
 		},
 		{
@@ -251,6 +275,7 @@ def get_columns(additional_table_columns, filters):
 			"fieldname": "expense_account",
 			"fieldtype": "Link",
 			"options": "Account",
+			"hidden":1,
 			"width": 100,
 		},
 		{"label": _("Stock Qty"), "fieldname": "stock_qty", "fieldtype": "Float", "width": 100},
@@ -259,6 +284,7 @@ def get_columns(additional_table_columns, filters):
 			"fieldname": "stock_uom",
 			"fieldtype": "Link",
 			"options": "UOM",
+			"hidden":1,
 			"width": 100,
 		},
 		{
@@ -294,10 +320,21 @@ def get_conditions(filters):
 		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
 		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
+		("branch", " and ifnull(`tabPurchase Invoice`.branch, '') =%(branch)s"),
 		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"),
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+	if filters.get("item_group"):
+		parent_grps = [filters.get("item_group")]
+		child_groups = []
+		for i in parent_grps:
+			child_groups.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i]}, pluck='name')+frappe.get_all('Item Group', filters={'name':['in', i], "is_group":0}, pluck='name'))
+			parent_grps.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i], 'is_group':1}, pluck='name'))
+		
+		child_groups+=parent_grps
+
+		conditions += f"""and ifnull(`tabPurchase Invoice Item`.item_group, '') in ("{'","'.join(child_groups)}")"""
 
 	if not filters.get("group_by"):
 		conditions += (
@@ -305,7 +342,6 @@ def get_conditions(filters):
 		)
 	else:
 		conditions += get_group_by_conditions(filters, "Purchase Invoice")
-
 	return conditions
 
 
@@ -326,12 +362,14 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice`.unrealized_profit_loss_account,
 			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description,
 			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`,
+			`tabPurchase Invoice Item`.`brand`,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
 			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
+		
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
 		`tabPurchase Invoice`.docstatus = 1 %s
 	""".format(
@@ -340,12 +378,12 @@ def get_items(filters, additional_query_columns):
 		% (conditions),
 		filters,
 		as_dict=1,
+		debug=1
 	)
 
 
 def get_aii_accounts():
 	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))
-
 
 def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()

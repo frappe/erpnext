@@ -187,6 +187,7 @@ def get_tds_docs(filters):
 	tds_accounts = frappe.get_all(
 		"Tax Withholding Account", {"company": filters.get("company")}, pluck="account"
 	)
+	print(tds_accounts)
 
 	query_filters = {
 		"account": ("in", tds_accounts),
@@ -199,14 +200,14 @@ def get_tds_docs(filters):
 		del query_filters["account"]
 		del query_filters["against"]
 		or_filters = {"against": filters.get("supplier"), "party": filters.get("supplier")}
-
+	
 	tds_docs = frappe.get_all(
 		"GL Entry",
 		filters=query_filters,
 		or_filters=or_filters,
 		fields=["voucher_no", "voucher_type", "against", "party"],
 	)
-
+	# print(tds_docs)
 	for d in tds_docs:
 		if d.voucher_type == "Purchase Invoice":
 			purchase_invoices.append(d.voucher_no)

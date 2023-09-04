@@ -27,7 +27,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	)
 
 	if not invoice_list:
-		msgprint(_("No record found"))
+		# msgprint(_("No record found"))
 		return columns, invoice_list
 
 	invoice_income_map = get_invoice_income_map(invoice_list)
@@ -54,6 +54,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			"posting_date": inv.posting_date,
 			"customer": inv.customer,
 			"customer_name": inv.customer_name,
+			"billing_address_gstin":inv.billing_address_gstin
 		}
 
 		if additional_query_columns:
@@ -147,6 +148,12 @@ def get_columns(invoice_list, additional_table_columns):
 			"width": 120,
 		},
 		{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 120},
+		{
+			"fieldname": "billing_address_gstin",
+			"label": "GSTIN/UIN of Recipient",
+			"fieldtype": "Data",
+			"width": 150,
+		},
 	]
 
 	if additional_table_columns:
@@ -363,6 +370,9 @@ def get_conditions(filters):
 	if filters.get("owner"):
 		conditions += " and owner = %(owner)s"
 
+	if filters.get("company_gstin"):
+		conditions += " and company_gstin = %(company_gstin)s"
+
 	def get_sales_invoice_item_field_condition(field, table="Sales Invoice Item") -> str:
 		if not filters.get(field) or field in accounting_dimensions_list:
 			return ""
@@ -406,10 +416,25 @@ def get_invoices(filters, additional_query_columns):
 		additional_query_columns = ", " + ", ".join(additional_query_columns)
 
 	conditions = get_conditions(filters)
+	a=frappe.db.sql(
+		"""
+		select name, posting_date, debit_to, project, customer,
+		customer_name,company_gstin as billing_address_gstin, owner, remarks, territory, tax_id, customer_group,
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
+		is_internal_customer, represents_company, company {0}
+		from `tabSales Invoice`
+		where docstatus = 1 %s order by posting_date desc, name desc""".format(
+			additional_query_columns or ""
+		)
+		% conditions,
+		filters,
+		as_dict=1,
+	)
+	print(a)
 	return frappe.db.sql(
 		"""
 		select name, posting_date, debit_to, project, customer,
-		customer_name, owner, remarks, territory, tax_id, customer_group,
+		customer_name,company_gstin as billing_address_gstin, owner, remarks, territory, tax_id, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
 		is_internal_customer, represents_company, company {0}
 		from `tabSales Invoice`
@@ -556,3 +581,28 @@ def get_mode_of_payments(invoice_list):
 			mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
 
 	return mode_of_payments
+
+
+
+
+@frappe.whitelist()
+def get_company_gstins(company):
+	address = frappe.qb.DocType("Address")
+	links = frappe.qb.DocType("Dynamic Link")
+
+	addresses = (
+		frappe.qb.from_(address)
+		.inner_join(links)
+		.on(address.name == links.parent)
+		.select(address.gstin)
+		.distinct()
+		.where(links.link_doctype == "Company")
+		.where(links.link_name == company)
+		.where(address.gstin.isnotnull())
+		.where(address.gstin != "")
+		.run(as_dict=1)
+	)
+
+	address_list = [""] + [d.gstin for d in addresses]
+	print(address_list)
+	return address_list

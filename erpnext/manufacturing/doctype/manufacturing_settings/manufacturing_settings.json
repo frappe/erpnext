@@ -7,9 +7,9 @@
  "field_order": [
   "raw_materials_consumption_section",
   "material_consumption",
-  "column_break_3",
-  "backflush_raw_materials_based_on",
+  "column_break_5quxt",
   "capacity_planning",
+  "backflush_raw_materials_based_on",
   "disable_capacity_planning",
   "allow_overtime",
   "allow_production_on_holidays",
@@ -55,10 +55,6 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Allow Production on Holidays"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
   },
   {
    "default": "30",
@@ -194,13 +190,17 @@
    "fieldname": "job_card_excess_transfer",
    "fieldtype": "Check",
    "label": "Allow Excess Material Transfer"
+  },
+  {
+   "fieldname": "column_break_5quxt",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 22:09:09.401559",
+ "modified": "2023-06-14 10:49:47.006311",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

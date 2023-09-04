@@ -79,6 +79,7 @@ class SalarySlip(TransactionBase):
 			self.get_working_days_details(lwp=self.leave_without_pay)
 
 		self.calculate_net_pay()
+		
 		self.compute_year_to_date()
 		self.compute_month_to_date()
 		self.compute_component_wise_year_to_date()
@@ -413,7 +414,7 @@ class SalarySlip(TransactionBase):
 			},
 			fields=["COUNT(*) as marked_days"],
 		)[0].marked_days
-
+		
 		return unmarked_days
 
 	def get_unmarked_days_based_on_doj_or_relieving(
@@ -461,7 +462,7 @@ class SalarySlip(TransactionBase):
 		if not cint(include_holidays_in_total_working_days):
 			holidays = self.get_holidays_for_employee(start_date, end_date)
 			payment_days -= len(holidays)
-
+		
 		return payment_days
 
 	def get_holidays_for_employee(self, start_date, end_date):
@@ -602,13 +603,13 @@ class SalarySlip(TransactionBase):
 		self.base_gross_pay = flt(
 			flt(self.gross_pay) * flt(self.exchange_rate), self.precision("base_gross_pay")
 		)
-
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
 
 		self.add_applicable_loans()
 		self.set_precision_for_component_amounts()
 		self.set_net_pay()
+	
 
 	def set_net_pay(self):
 		self.total_deduction = self.get_component_totals("deductions")
@@ -1223,7 +1224,9 @@ class SalarySlip(TransactionBase):
 		return future_recurring_additional_amount
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
+	
 		amount, additional_amount = row.amount, row.additional_amount
+
 		timesheet_component = frappe.db.get_value(
 			"Salary Structure", self.salary_structure, "salary_component"
 		)
@@ -1241,6 +1244,7 @@ class SalarySlip(TransactionBase):
 				or (relieving_date and getdate(self.end_date) > relieving_date)
 			)
 		):
+	
 			additional_amount = flt(
 				(flt(row.additional_amount) * flt(self.payment_days) / cint(self.total_working_days)),
 				row.precision("additional_amount"),
@@ -1267,7 +1271,6 @@ class SalarySlip(TransactionBase):
 			"Salary Component", row.salary_component, "round_to_the_nearest_integer"
 		):
 			amount, additional_amount = rounded(amount or 0), rounded(additional_amount or 0)
-
 		return amount, additional_amount
 
 	def calculate_unclaimed_taxable_benefits(self, payroll_period):
@@ -1405,6 +1408,7 @@ class SalarySlip(TransactionBase):
 				else:
 					amount = flt(d.amount, d.precision("amount"))
 				total += amount
+		
 		return total
 
 	def get_joining_and_relieving_dates(self):

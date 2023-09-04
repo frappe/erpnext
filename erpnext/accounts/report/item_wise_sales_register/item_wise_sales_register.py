@@ -66,6 +66,7 @@ def _execute(
 			"item_code": d.item_code,
 			"item_name": item_record.item_name if item_record else d.item_name,
 			"item_group": item_record.item_group if item_record else d.item_group,
+			"brand": item_record.brand if item_record else d.brand,
 			"description": d.description,
 			"invoice": d.parent,
 			"posting_date": d.posting_date,
@@ -244,7 +245,16 @@ def get_columns(additional_table_columns, filters):
 			"width": 120,
 		},
 	]
-
+	if filters.get("group_by") != ("Brand"):
+		columns.extend(
+			[
+		{
+		"label": _("Brand"),
+		"fieldname": "brand",
+		"fieldtype": "Link",
+		"options": "Brand",
+		"width": 120,
+		}])
 	if filters.get("group_by") != "Territory":
 		columns.extend(
 			[
@@ -339,6 +349,7 @@ def get_conditions(filters, additional_conditions=None):
 	for opts in (
 		("company", " and company=%(company)s"),
 		("customer", " and `tabSales Invoice`.customer = %(customer)s"),
+		
 		("item_code", " and `tabSales Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabSales Invoice`.posting_date>=%(from_date)s"),
 		("to_date", " and `tabSales Invoice`.posting_date<=%(to_date)s"),
@@ -356,12 +367,21 @@ def get_conditions(filters, additional_conditions=None):
 
 	if filters.get("warehouse"):
 		conditions += """and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s"""
+	if filters.get("shipping_address"):
+		conditions += """and ifnull(`tabSales Invoice`.shipping_address_name, '') = %(shipping_address)s"""
 
 	if filters.get("brand"):
 		conditions += """and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s"""
 
 	if filters.get("item_group"):
-		conditions += """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
+		parent_grps = [filters.get("item_group")]
+		child_groups = []
+		for i in parent_grps:
+			child_groups.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i]}, pluck='name')+frappe.get_all('Item Group', filters={'name':['in', i], "is_group":0}, pluck='name'))
+			parent_grps.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i], 'is_group':1}, pluck='name'))
+		
+		child_groups+=parent_grps
+		conditions += f"""and ifnull(`tabSales Invoice Item`.item_group, '') in ("{'","'.join(child_groups)}")"""
 
 	if not filters.get("group_by"):
 		conditions += (
@@ -379,6 +399,8 @@ def get_group_by_conditions(filters, doctype):
 	elif filters.get("group_by") == "Item":
 		return "ORDER BY `tab{0} Item`.`item_code`".format(doctype)
 	elif filters.get("group_by") == "Item Group":
+		return "ORDER BY `tab{0} Item`.{1}".format(doctype, frappe.scrub(filters.get("group_by")))
+	elif filters.get("group_by") == "Brand":
 		return "ORDER BY `tab{0} Item`.{1}".format(doctype, frappe.scrub(filters.get("group_by")))
 	elif filters.get("group_by") in ("Customer", "Customer Group", "Territory", "Supplier"):
 		return "ORDER BY `tab{0}`.{1}".format(doctype, frappe.scrub(filters.get("group_by")))
@@ -403,6 +425,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
 			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
 			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
+			`tabSales Invoice Item`.`brand`,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
@@ -702,6 +725,17 @@ def get_display_value(filters, group_by_field, item):
 			)
 		else:
 			value = item.get("item_code", "")
+	elif filters.get("group_by") == "Brand":
+		if item.get("brand") != item.get("brand"):
+			value = (
+				cstr(item.get("brand"))
+				+ "<br><br>"
+				+ "<span style='font-weight: normal'>"
+				+ cstr(item.get("brand"))
+				+ "</span>"
+			)
+		else:
+			value = item.get("brand", "")
 	elif filters.get("group_by") in ("Customer", "Supplier"):
 		party = frappe.scrub(filters.get("group_by"))
 		if item.get(party) != item.get(party + "_name"):
@@ -727,6 +761,9 @@ def get_group_by_and_display_fields(filters):
 	elif filters.get("group_by") == "Invoice":
 		group_by_field = "parent"
 		subtotal_display_field = "item_code"
+	elif filters.get("group_by") == "Brand":
+		group_by_field = "parent"
+		subtotal_display_field = "item_code"
 	else:
 		group_by_field = frappe.scrub(filters.get("group_by"))
 		subtotal_display_field = "item_code"
@@ -745,3 +782,6 @@ def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	for tax in tax_columns:
 		total_row.setdefault(frappe.scrub(tax + " Amount"), 0.0)
 		total_row[frappe.scrub(tax + " Amount")] += flt(item[frappe.scrub(tax + " Amount")])
+
+
+

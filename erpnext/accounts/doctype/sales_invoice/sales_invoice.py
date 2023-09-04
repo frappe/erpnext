@@ -970,6 +970,9 @@ class SalesInvoice(SellingController):
 			)
 
 			if self.docstatus == 1:
+				print("ggggggggggggggggggggggggggggggggggggggggggggggggggggggg")
+				print(gl_entries)
+				print("jjjjjjjjjjjjjjjjjjjhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhf")
 				make_gl_entries(
 					gl_entries,
 					update_outstanding=update_outstanding,
@@ -1036,9 +1039,9 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict(
 					{
-						"account": self.debit_to,
-						"party_type": "Customer",
-						"party": self.customer,
+						"account": "FF Online Sales - TCW",
+						"party_type": "Supplier",
+						"party": "FIREFOX BIKES PRIVATE LIMITED",
 						"due_date": self.due_date,
 						"against": self.against_income_account,
 						"debit": base_grand_total,

@@ -47,7 +47,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,inv.billing_address_gstin]
 
 		if additional_query_columns:
 			for col in additional_query_columns:
@@ -106,6 +106,7 @@ def get_columns(invoice_list, additional_table_columns):
 		_("Posting Date") + ":Date:80",
 		_("Supplier Id") + "::120",
 		_("Supplier Name") + "::120",
+		_("GSTIN/UIN of Recipient") + "::120"
 	]
 
 	if additional_table_columns:
@@ -205,6 +206,8 @@ def get_conditions(filters):
 		conditions += """ and exists(select name from `tabPurchase Invoice Item`
 			 where parent=`tabPurchase Invoice`.name
 			 	and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
+	if filters.get("company_gstin"):
+		conditions += " and company_gstin = %(company_gstin)s"
 
 	if filters.get("warehouse"):
 		conditions += """ and exists(select name from `tabPurchase Invoice Item`
@@ -251,7 +254,7 @@ def get_invoices(filters, additional_query_columns):
 	return frappe.db.sql(
 		"""
 		select
-			name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
+			name, posting_date, credit_to, supplier, supplier_name,company_gstin as billing_address_gstin, tax_id, bill_no, bill_date,
 			remarks, base_net_total, base_grand_total, outstanding_amount,
 			mode_of_payment {0}
 		from `tabPurchase Invoice`

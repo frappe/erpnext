@@ -9,7 +9,20 @@ frappe.query_reports["GSTR-1"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"reqd": 1,
-			"default": frappe.defaults.get_user_default("Company")
+			"default": frappe.defaults.get_user_default("Company"),
+			onchange: function(){
+				frappe.call({
+					method: 'erpnext.regional.report.gstr_1.gstr_1.get_company_gstins',
+					args: {
+						company: frappe.query_report.page.fields_dict.company.get_value() 
+					},
+					callback: function(r) {
+						frappe.query_report.page.fields_dict.company_gstin.df.options = r.message;
+						frappe.query_report.page.fields_dict.company_gstin.refresh();
+					}
+				});
+		
+			}
 		},
 		{
 			"fieldname": "company_address",
@@ -24,7 +37,8 @@ frappe.query_reports["GSTR-1"] = {
 						"filters": { link_doctype: 'Company', link_name: company }
 					};
 				}
-			}
+			},
+			
 		},
 		{
 			"fieldname": "company_gstin",
@@ -103,3 +117,17 @@ frappe.query_reports["GSTR-1"] = {
 		});
 	}
 }
+setTimeout(()=>{
+	frappe.query_report.page.fields_dict.company.df.onchange = function(){
+		frappe.call({
+			method: 'erpnext.regional.report.gstr_1.gstr_1.get_company_gstins',
+			args: {
+				company: frappe.query_report.page.fields_dict.company.get_value() 
+			},
+			callback: function(r) {
+				frappe.query_report.page.fields_dict.company_gstin.df.options = r.message;
+				frappe.query_report.page.fields_dict.company_gstin.refresh();
+			}
+		});
+	}
+}, 100)
