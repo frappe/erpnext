@@ -12,7 +12,10 @@
 					</a>
 				{% endif %}
 			</div>
-			<div class="col-sm-4">
+			<div class="col-sm-1" style="margin-top: 8px;" title="{{ __("Reserved Stock") }}">
+				<a data-name="{{ d.reserved_stock }}">{{ d.reserved_stock }}</a>
+			</div>
+			<div class="col-sm-3">
 				<span class="inline-graph">
 					<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
 						<span class="inline-graph-count">{{ d.total_reserved }}</span>

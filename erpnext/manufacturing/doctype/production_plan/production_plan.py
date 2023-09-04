@@ -673,6 +673,7 @@ class ProductionPlan(Document):
 
 				po.append("items", po_data)
 
+			po.set_service_items_for_finished_goods()
 			po.set_missing_values()
 			po.flags.ignore_mandatory = True
 			po.flags.ignore_validate = True

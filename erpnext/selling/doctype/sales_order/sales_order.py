@@ -31,7 +31,6 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
@@ -283,7 +282,7 @@ class SalesOrder(SellingController):
 		self.db_set("status", "Cancelled")
 
 		self.update_blanket_order()
-		cancel_stock_reservation_entries("Sales Order", self.name)
+		self.cancel_stock_reservation_entries()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
@@ -535,138 +534,26 @@ class SalesOrder(SellingController):
 		return False
 
 	@frappe.whitelist()
-	def create_stock_reservation_entries(self, items_details=None, notify=True):
+	def create_stock_reservation_entries(self, items_details=None, notify=True) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_available_qty_to_reserve,
-			validate_stock_reservation_settings,
+			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		validate_stock_reservation_settings(self)
+		create_stock_reservation_entries(so=self, items_details=items_details, notify=notify)
 
-		allow_partial_reservation = frappe.db.get_single_value(
-			"Stock Settings", "allow_partial_reservation"
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
+		"""Cancel Stock Reservation Entries for Sales Order Items."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
 		)
 
-		items = []
-		if items_details:
-			for item in items_details:
-				so_item = frappe.get_doc("Sales Order Item", item["name"])
-				so_item.reserve_stock = 1
-				so_item.warehouse = item["warehouse"]
-				so_item.qty_to_reserve = flt(item["qty_to_reserve"]) * flt(so_item.conversion_factor)
-				items.append(so_item)
-
-		sre_count = 0
-		reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", self.name)
-		for item in items or self.get("items"):
-			# Skip if `Reserved Stock` is not checked for the item.
-			if not item.get("reserve_stock"):
-				continue
-
-			# Skip if Non-Stock Item.
-			if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
-				frappe.msgprint(
-					_("Row #{0}: Stock cannot be reserved for a non-stock Item {1}").format(
-						item.idx, frappe.bold(item.item_code)
-					),
-					title=_("Stock Reservation"),
-					indicator="yellow",
-				)
-				item.db_set("reserve_stock", 0)
-				continue
-
-			# Skip if Group Warehouse.
-			if frappe.get_cached_value("Warehouse", item.warehouse, "is_group"):
-				frappe.msgprint(
-					_("Row #{0}: Stock cannot be reserved in group warehouse {1}.").format(
-						item.idx, frappe.bold(item.warehouse)
-					),
-					title=_("Stock Reservation"),
-					indicator="yellow",
-				)
-				continue
-
-			unreserved_qty = get_unreserved_qty(item, reserved_qty_details)
-
-			# Stock is already reserved for the item, notify the user and skip the item.
-			if unreserved_qty <= 0:
-				frappe.msgprint(
-					_("Row #{0}: Stock is already reserved for the Item {1}.").format(
-						item.idx, frappe.bold(item.item_code)
-					),
-					title=_("Stock Reservation"),
-					indicator="yellow",
-				)
-				continue
-
-			available_qty_to_reserve = get_available_qty_to_reserve(item.item_code, item.warehouse)
-
-			# No stock available to reserve, notify the user and skip the item.
-			if available_qty_to_reserve <= 0:
-				frappe.msgprint(
-					_("Row #{0}: No available stock to reserve for the Item {1} in Warehouse {2}.").format(
-						item.idx, frappe.bold(item.item_code), frappe.bold(item.warehouse)
-					),
-					title=_("Stock Reservation"),
-					indicator="orange",
-				)
-				continue
-
-			# The quantity which can be reserved.
-			qty_to_be_reserved = min(unreserved_qty, available_qty_to_reserve)
-
-			if hasattr(item, "qty_to_reserve"):
-				if item.qty_to_reserve <= 0:
-					frappe.msgprint(
-						_("Row #{0}: Quantity to reserve for the Item {1} should be greater than 0.").format(
-							item.idx, frappe.bold(item.item_code)
-						),
-						title=_("Stock Reservation"),
-						indicator="orange",
-					)
-					continue
-				else:
-					qty_to_be_reserved = min(qty_to_be_reserved, item.qty_to_reserve)
-
-			# Partial Reservation
-			if qty_to_be_reserved < unreserved_qty:
-				if not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve")):
-					frappe.msgprint(
-						_("Row #{0}: Only {1} available to reserve for the Item {2}").format(
-							item.idx,
-							frappe.bold(str(qty_to_be_reserved / item.conversion_factor) + " " + item.uom),
-							frappe.bold(item.item_code),
-						),
-						title=_("Stock Reservation"),
-						indicator="orange",
-					)
-
-				# Skip the item if `Partial Reservation` is disabled in the Stock Settings.
-				if not allow_partial_reservation:
-					continue
-
-			# Create and Submit Stock Reservation Entry
-			sre = frappe.new_doc("Stock Reservation Entry")
-			sre.item_code = item.item_code
-			sre.warehouse = item.warehouse
-			sre.voucher_type = self.doctype
-			sre.voucher_no = self.name
-			sre.voucher_detail_no = item.name
-			sre.available_qty = available_qty_to_reserve
-			sre.voucher_qty = item.stock_qty
-			sre.reserved_qty = qty_to_be_reserved
-			sre.company = self.company
-			sre.stock_uom = item.stock_uom
-			sre.project = self.project
-			sre.save()
-			sre.submit()
-
-			sre_count += 1
-
-		if sre_count and notify:
-			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
+		cancel_stock_reservation_entries(
+			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
+		)
 
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
@@ -813,8 +700,31 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
+def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_details_for_voucher,
+		get_sre_reserved_qty_details_for_voucher,
+		get_ssb_bundle_for_voucher,
+	)
+
+	if not kwargs:
+		kwargs = {
+			"for_reserved_stock": frappe.flags.args and frappe.flags.args.for_reserved_stock,
+			"skip_item_mapping": frappe.flags.args and frappe.flags.args.skip_item_mapping,
+		}
+
+	kwargs = frappe._dict(kwargs)
+
+	sre_details = {}
+	if kwargs.for_reserved_stock:
+		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
+
+	mapper = {
+		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
+	}
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
@@ -832,6 +742,18 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 		make_packing_list(target)
 
+	def condition(doc):
+		if doc.name in sre_details:
+			del sre_details[doc.name]
+			return False
+
+		# make_mapped_doc sets js `args` into `frappe.flags.args`
+		if frappe.flags.args and frappe.flags.args.delivery_dates:
+			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
+				return False
+
+		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
+
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
@@ -847,21 +769,7 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				or item_group.get("buying_cost_center")
 			)
 
-	mapper = {
-		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
-		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-	}
-
-	if not skip_item_mapping:
-
-		def condition(doc):
-			# make_mapped_doc sets js `args` into `frappe.flags.args`
-			if frappe.flags.args and frappe.flags.args.delivery_dates:
-				if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
-					return False
-			return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
-
+	if not kwargs.skip_item_mapping:
 		mapper["Sales Order Item"] = {
 			"doctype": "Delivery Note Item",
 			"field_map": {
@@ -869,11 +777,56 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
-			"postprocess": update_item,
 			"condition": condition,
+			"postprocess": update_item,
 		}
 
-	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
+	so = frappe.get_doc("Sales Order", source_name)
+	target_doc = get_mapped_doc("Sales Order", so.name, mapper, target_doc)
+
+	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
+		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
+
+		if sre_list:
+
+			def update_dn_item(source, target, source_parent):
+				update_item(source, target, so)
+
+			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
+
+			for sre in sre_list:
+				if not condition(so_items[sre.voucher_detail_no]):
+					continue
+
+				dn_item = get_mapped_doc(
+					"Sales Order Item",
+					sre.voucher_detail_no,
+					{
+						"Sales Order Item": {
+							"doctype": "Delivery Note Item",
+							"field_map": {
+								"rate": "rate",
+								"name": "so_detail",
+								"parent": "against_sales_order",
+							},
+							"postprocess": update_dn_item,
+						}
+					},
+				)
+
+				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+
+				target_doc.append("items", dn_item)
+			else:
+				# Correct rows index.
+				for idx, item in enumerate(target_doc.items):
+					item.idx = idx + 1
+
+	# Should be called after mapping items.
+	set_missing_values(so, target_doc)
 	target_doc.set_onload("ignore_price_list", True)
 
 	return target_doc
@@ -1436,6 +1389,16 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 def create_pick_list(source_name, target_doc=None):
 	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
+	def validate_sales_order():
+		so = frappe.get_doc("Sales Order", source_name)
+		for item in so.items:
+			if item.stock_reserved_qty > 0:
+				frappe.throw(
+					_(
+						"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
+					).format(frappe.bold(source_name))
+				)
+
 	def update_item_quantity(source, target, source_parent) -> None:
 		picked_qty = flt(source.picked_qty) / (flt(source.conversion_factor) or 1)
 		qty_to_be_picked = flt(source.qty) - max(picked_qty, flt(source.delivered_qty))
@@ -1458,6 +1421,9 @@ def create_pick_list(source_name, target_doc=None):
 			and item.delivered_by_supplier != 1
 			and not is_product_bundle(item.item_code)
 		)
+
+	# Don't allow a Pick List to be created against a Sales Order that has reserved stock.
+	validate_sales_order()
 
 	doc = get_mapped_doc(
 		"Sales Order",

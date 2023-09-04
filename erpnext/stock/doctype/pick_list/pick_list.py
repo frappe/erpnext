@@ -29,6 +29,14 @@ from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class PickList(Document):
+	def onload(self) -> None:
+		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
+			if self.has_unreserved_stock():
+				self.set_onload("has_unreserved_stock", True)
+
+		if self.has_reserved_stock():
+			self.set_onload("has_reserved_stock", True)
+
 	def validate(self):
 		self.validate_for_qty()
 
@@ -47,7 +55,27 @@ class PickList(Document):
 				)
 
 	def before_submit(self):
+		self.validate_sales_order()
 		self.validate_picked_items()
+
+	def validate_sales_order(self):
+		"""Raises an exception if the `Sales Order` has reserved stock."""
+
+		if self.purpose != "Delivery":
+			return
+
+		so_list = set(location.sales_order for location in self.locations if location.sales_order)
+
+		if so_list:
+			for so in so_list:
+				so_doc = frappe.get_doc("Sales Order", so)
+				for item in so_doc.items:
+					if item.stock_reserved_qty > 0:
+						frappe.throw(
+							_(
+								"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
+							).format(frappe.bold(so))
+						)
 
 	def validate_picked_items(self):
 		for item in self.locations:
@@ -70,8 +98,19 @@ class PickList(Document):
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
 
+	def on_update_after_submit(self) -> None:
+		if self.has_reserved_stock():
+			msg = _(
+				"The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
+			)
+			frappe.throw(msg)
+
 	def on_cancel(self):
-		self.ignore_linked_doctypes = "Serial and Batch Bundle"
+		self.ignore_linked_doctypes = [
+			"Serial and Batch Bundle",
+			"Stock Reservation Entry",
+			"Delivery Note",
+		]
 
 		self.update_status()
 		self.update_bundle_picked_qty()
@@ -185,6 +224,36 @@ class PickList(Document):
 
 		for sales_order in sales_orders:
 			frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
+
+	@frappe.whitelist()
+	def create_stock_reservation_entries(self, notify=True) -> None:
+		"""Creates Stock Reservation Entries for Sales Order Items against Pick List."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			create_stock_reservation_entries_for_so_items,
+		)
+
+		so_details = {}
+		for location in self.locations:
+			if location.warehouse and location.sales_order and location.sales_order_item:
+				so_details.setdefault(location.sales_order, []).append(location)
+
+		if so_details:
+			for so, locations in so_details.items():
+				so_doc = frappe.get_doc("Sales Order", so)
+				create_stock_reservation_entries_for_so_items(
+					so=so_doc, items_details=locations, against_pick_list=True, notify=notify
+				)
+
+	@frappe.whitelist()
+	def cancel_stock_reservation_entries(self, notify=True) -> None:
+		"""Cancel Stock Reservation Entries for Sales Order Items created against Pick List."""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(against_pick_list=self.name, notify=notify)
 
 	def validate_picked_qty(self, data):
 		over_delivery_receipt_allowance = 100 + flt(
@@ -447,6 +516,26 @@ class PickList(Document):
 			else:
 				possible_bundles.append(0)
 		return int(flt(min(possible_bundles), precision or 6))
+
+	def has_unreserved_stock(self):
+		if self.purpose == "Delivery":
+			for location in self.locations:
+				if (
+					location.sales_order
+					and location.sales_order_item
+					and (flt(location.picked_qty) - flt(location.stock_reserved_qty)) > 0
+				):
+					return True
+
+		return False
+
+	def has_reserved_stock(self):
+		if self.purpose == "Delivery":
+			for location in self.locations:
+				if location.sales_order and location.sales_order_item and flt(location.stock_reserved_qty) > 0:
+					return True
+
+		return False
 
 
 def update_pick_list_status(pick_list):
@@ -781,7 +870,8 @@ def create_dn_with_so(sales_dict, pick_list):
 	for customer in sales_dict:
 		for so in sales_dict[customer]:
 			delivery_note = None
-			delivery_note = create_delivery_note_from_sales_order(so, delivery_note, skip_item_mapping=True)
+			kwargs = {"skip_item_mapping": True}
+			delivery_note = create_delivery_note_from_sales_order(so, delivery_note, kwargs=kwargs)
 			break
 		if delivery_note:
 			# map all items of all sales orders of that customer

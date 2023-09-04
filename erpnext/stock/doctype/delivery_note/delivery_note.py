@@ -279,6 +279,8 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		self.update_stock_reservation_entries()
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -297,55 +299,141 @@ class DeliveryNote(SellingController):
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
-		# Don't update Delivered Qty on Return or Cancellation.
-		if self.is_return or self._action == "cancel":
+		# Don't update Delivered Qty on Return.
+		if self.is_return:
 			return
 
-		for item in self.get("items"):
-			# Skip if `Sales Order` or `Sales Order Item` reference is not set.
-			if not item.against_sales_order or not item.so_detail:
-				continue
+		if self._action == "submit":
+			for item in self.get("items"):
+				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
+				if not item.against_sales_order or not item.so_detail:
+					continue
 
-			sre_list = frappe.db.get_all(
-				"Stock Reservation Entry",
-				{
-					"docstatus": 1,
-					"voucher_type": "Sales Order",
-					"voucher_no": item.against_sales_order,
-					"voucher_detail_no": item.so_detail,
-					"warehouse": item.warehouse,
-					"status": ["not in", ["Delivered", "Cancelled"]],
-				},
-				order_by="creation",
-			)
+				sre_list = frappe.db.get_all(
+					"Stock Reservation Entry",
+					{
+						"docstatus": 1,
+						"voucher_type": "Sales Order",
+						"voucher_no": item.against_sales_order,
+						"voucher_detail_no": item.so_detail,
+						"warehouse": item.warehouse,
+						"status": ["not in", ["Delivered", "Cancelled"]],
+					},
+					order_by="creation",
+				)
 
-			# Skip if no Stock Reservation Entries.
-			if not sre_list:
-				continue
+				# Skip if no Stock Reservation Entries.
+				if not sre_list:
+					continue
 
-			available_qty_to_deliver = item.stock_qty
-			for sre in sre_list:
-				if available_qty_to_deliver <= 0:
-					break
+				qty_to_deliver = item.stock_qty
+				for sre in sre_list:
+					if qty_to_deliver <= 0:
+						break
 
-				sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
 
-				# `Delivered Qty` should be less than or equal to `Reserved Qty`.
-				qty_to_be_deliver = min(sre_doc.reserved_qty - sre_doc.delivered_qty, available_qty_to_deliver)
+					qty_can_be_deliver = 0
+					if sre_doc.reservation_based_on == "Serial and Batch":
+						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						if sre_doc.has_serial_no:
+							delivered_serial_nos = [d.serial_no for d in sbb.entries]
+							for entry in sre_doc.sb_entries:
+								if entry.serial_no in delivered_serial_nos:
+									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
+									entry.db_update()
+									qty_can_be_deliver += 1
+									delivered_serial_nos.remove(entry.serial_no)
+						else:
+							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
+							for entry in sre_doc.sb_entries:
+								if entry.batch_no in delivered_batch_qty:
+									delivered_qty = min(
+										(entry.qty - entry.delivered_qty), delivered_batch_qty[entry.batch_no]
+									)
+									entry.delivered_qty += delivered_qty
+									entry.db_update()
+									qty_can_be_deliver += delivered_qty
+									delivered_batch_qty[entry.batch_no] -= delivered_qty
+					else:
+						# `Delivered Qty` should be less than or equal to `Reserved Qty`.
+						qty_can_be_deliver = min((sre_doc.reserved_qty - sre_doc.delivered_qty), qty_to_deliver)
 
-				sre_doc.delivered_qty += qty_to_be_deliver
-				sre_doc.db_update()
+					sre_doc.delivered_qty += qty_can_be_deliver
+					sre_doc.db_update()
 
-				# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
-				sre_doc.update_status()
+					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
+					sre_doc.update_status()
 
-				available_qty_to_deliver -= qty_to_be_deliver
+					qty_to_deliver -= qty_can_be_deliver
+
+		if self._action == "cancel":
+			for item in self.get("items"):
+				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
+				if not item.against_sales_order or not item.so_detail:
+					continue
+
+				sre_list = frappe.db.get_all(
+					"Stock Reservation Entry",
+					{
+						"docstatus": 1,
+						"voucher_type": "Sales Order",
+						"voucher_no": item.against_sales_order,
+						"voucher_detail_no": item.so_detail,
+						"warehouse": item.warehouse,
+						"status": ["in", ["Partially Delivered", "Delivered"]],
+					},
+					order_by="creation",
+				)
+
+				# Skip if no Stock Reservation Entries.
+				if not sre_list:
+					continue
+
+				qty_to_undelivered = item.stock_qty
+				for sre in sre_list:
+					if qty_to_undelivered <= 0:
+						break
+
+					sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+
+					qty_can_be_undelivered = 0
+					if sre_doc.reservation_based_on == "Serial and Batch":
+						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						if sre_doc.has_serial_no:
+							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
+							for entry in sre_doc.sb_entries:
+								if entry.serial_no in serial_nos_to_undelivered:
+									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
+									entry.db_update()
+									qty_can_be_undelivered += 1
+									serial_nos_to_undelivered.remove(entry.serial_no)
+						else:
+							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
+							for entry in sre_doc.sb_entries:
+								if entry.batch_no in batch_qty_to_undelivered:
+									undelivered_qty = min(entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no])
+									entry.delivered_qty -= undelivered_qty
+									entry.db_update()
+									qty_can_be_undelivered += undelivered_qty
+									batch_qty_to_undelivered[entry.batch_no] -= undelivered_qty
+					else:
+						# `Qty to Undelivered` should be less than or equal to `Delivered Qty`.
+						qty_can_be_undelivered = min(sre_doc.delivered_qty, qty_to_undelivered)
+
+					sre_doc.delivered_qty -= qty_can_be_undelivered
+					sre_doc.db_update()
+
+					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
+					sre_doc.update_status()
+
+					qty_to_undelivered -= qty_can_be_undelivered
 
 	def validate_against_stock_reservation_entries(self):
 		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_reserved_qty_details_for_voucher_detail_no,
+			get_sre_reserved_warehouses_for_voucher,
 		)
 
 		# Don't validate if Return
@@ -357,26 +445,30 @@ class DeliveryNote(SellingController):
 			if not item.against_sales_order or not item.so_detail:
 				continue
 
-			sre_data = get_sre_reserved_qty_details_for_voucher_detail_no(
+			reserved_warehouses = get_sre_reserved_warehouses_for_voucher(
 				"Sales Order", item.against_sales_order, item.so_detail
 			)
 
 			# Skip if stock is not reserved.
-			if not sre_data:
+			if not reserved_warehouses:
 				continue
 
 			# Set `Warehouse` from SRE if not set.
 			if not item.warehouse:
-				item.warehouse = sre_data[0]
+				item.warehouse = reserved_warehouses[0]
 			else:
-				# Throw if `Warehouse` is different from SRE.
-				if item.warehouse != sre_data[0]:
-					frappe.throw(
-						_("Row #{0}: Stock is reserved for Item {1} in Warehouse {2}.").format(
-							item.idx, frappe.bold(item.item_code), frappe.bold(sre_data[0])
+				# Throw if `Warehouse` not in Reserved Warehouses.
+				if item.warehouse not in reserved_warehouses:
+					msg = _("Row #{0}: Stock is reserved for item {1} in warehouse {2}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(reserved_warehouses[0])
+						if len(reserved_warehouses) == 1
+						else _("{0} and {1}").format(
+							frappe.bold(", ".join(reserved_warehouses[:-1])), frappe.bold(reserved_warehouses[-1])
 						),
-						title=_("Stock Reservation Warehouse Mismatch"),
 					)
+					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
