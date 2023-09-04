@@ -52,13 +52,15 @@
   "company",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "template_task"
  ],
  "fields": [
   {
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Subject",
    "reqd": 1,
@@ -138,6 +140,7 @@
    "fieldname": "parent_task",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Parent Task",
    "options": "Task",
    "search_index": 1
@@ -382,6 +385,12 @@
    "fieldtype": "Date",
    "label": "Completed On",
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
+  },
+  {
+   "fieldname": "template_task",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Template Task"
   }
  ],
  "icon": "fa fa-check",
@@ -389,7 +398,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
+<<<<<<< HEAD
  "modified": "2022-06-23 16:58:47.005241",
+=======
+ "modified": "2023-09-06 13:52:05.861175",
+>>>>>>> b4bcd9ba3f (feat: new field in `Task` to hold ref of Template Task)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
