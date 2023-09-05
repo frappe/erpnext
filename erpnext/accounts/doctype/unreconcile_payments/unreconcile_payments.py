@@ -8,7 +8,11 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils.data import comma_and
 
-from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries, update_voucher_outstanding
+from erpnext.accounts.utils import (
+	cancel_exchange_gain_loss_journal,
+	unlink_ref_doc_from_payment_entries,
+	update_voucher_outstanding,
+)
 
 
 class UnreconcilePayments(Document):
@@ -51,12 +55,11 @@ class UnreconcilePayments(Document):
 			self.append("allocations", alloc)
 
 	def on_submit(self):
-		# todo: add more granular unlinking
-		# different amounts for same invoice should be individually unlinkable
-
+		# todo: more granular unreconciliation
 		for alloc in self.allocations:
 			doc = frappe.get_doc(alloc.reference_doctype, alloc.reference_name)
 			unlink_ref_doc_from_payment_entries(doc, self.voucher_no)
+			cancel_exchange_gain_loss_journal(doc, self.voucher_type, self.voucher_no)
 			update_voucher_outstanding(
 				alloc.reference_doctype, alloc.reference_name, alloc.account, alloc.party_type, alloc.party
 			)
@@ -104,6 +107,7 @@ def get_linked_payments_for_doc(
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.voucher_no, ple.against_voucher_no)
+				.having(qb.Field("allocated_amount") > 0)
 				.run(as_dict=True)
 			)
 			return res
@@ -122,6 +126,7 @@ def get_linked_payments_for_doc(
 					ple.against_voucher_type.as_("voucher_type"),
 					ple.against_voucher_no.as_("voucher_no"),
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+					ple.account_currency,
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.against_voucher_no)
