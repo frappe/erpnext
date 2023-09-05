@@ -12,6 +12,7 @@
   "reference_doctype",
   "reference_name",
   "allocated_amount",
+  "account_currency",
   "unlinked"
  ],
  "fields": [
@@ -24,9 +25,10 @@
   },
   {
    "fieldname": "allocated_amount",
-   "fieldtype": "Int",
+   "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Allocated Amount"
+   "label": "Allocated Amount",
+   "options": "account_currency"
   },
   {
    "default": "0",
@@ -57,12 +59,19 @@
    "fieldname": "party",
    "fieldtype": "Data",
    "label": "Party"
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-30 10:58:45.322668",
+ "modified": "2023-09-05 09:33:28.620149",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Unreconcile Payment Entries",

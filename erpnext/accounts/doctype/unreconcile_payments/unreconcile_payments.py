@@ -30,6 +30,7 @@ class UnreconcilePayments(Document):
 				ple.against_voucher_type.as_("reference_doctype"),
 				ple.against_voucher_no.as_("reference_name"),
 				Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+				ple.account_currency,
 			)
 			.where(
 				(ple.docstatus == 1)
@@ -99,6 +100,7 @@ def get_linked_payments_for_doc(
 					ple.voucher_type,
 					ple.voucher_no,
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+					ple.account_currency,
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.voucher_no, ple.against_voucher_no)
