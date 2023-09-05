@@ -56,18 +56,17 @@ def get_plan_rate(
 		prorate = frappe.db.get_single_value("Subscription Settings", "prorate")
 
 		if prorate:
-			prorate_factor = flt(
-				date_diff(start_date, get_first_day(start_date))
-				/ date_diff(get_last_day(start_date), get_first_day(start_date)),
-				1,
-			)
-
-			prorate_factor += flt(
-				date_diff(get_last_day(end_date), end_date)
-				/ date_diff(get_last_day(end_date), get_first_day(end_date)),
-				1,
-			)
-
-			cost -= plan.cost * prorate_factor
-
+			cost -= plan.cost * get_prorate_factor(start_date, end_date)
 		return cost
+
+
+def get_prorate_factor(start_date, end_date):
+	total_days_to_skip = date_diff(start_date, get_first_day(start_date))
+	total_days_in_month = int(get_last_day(start_date).strftime("%d"))
+	prorate_factor = flt(total_days_to_skip / total_days_in_month)
+
+	total_days_to_skip = date_diff(get_last_day(end_date), end_date)
+	total_days_in_month = int(get_last_day(end_date).strftime("%d"))
+	prorate_factor += flt(total_days_to_skip / total_days_in_month)
+
+	return prorate_factor
