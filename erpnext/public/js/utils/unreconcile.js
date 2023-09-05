@@ -3,6 +3,12 @@ frappe.provide('erpnext.accounts');
 erpnext.accounts.unreconcile_payments = {
 	add_unreconcile_btn(frm) {
 		if (frm.doc.docstatus == 1) {
+			if(((frm.doc.doctype == "Journal Entry") && (frm.doc.voucher_type != "Journal Entry"))
+			   || !["Purchase Invoice", "Sales Invoice", "Journal Entry", "Payment Entry"].includes(frm.doc.doctype)
+			  ) {
+				return;
+			}
+
 			frappe.call({
 				"method": "erpnext.accounts.doctype.unreconcile_payments.unreconcile_payments.doc_has_references",
 				"args": {
