@@ -467,6 +467,10 @@ class ReceivablePayableReport(object):
 		original_row = frappe._dict(row)
 		row.payment_terms = []
 
+		# Cr Note's don't have Payment Terms
+		if not payment_terms_details:
+			return
+
 		# Advance allocated during invoicing is not considered in payment terms
 		# Deduct that from paid amount pre allocation
 		row.paid -= flt(payment_terms_details[0].total_advance)
