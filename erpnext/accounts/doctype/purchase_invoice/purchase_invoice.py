@@ -266,9 +266,7 @@ class PurchaseInvoice(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
-		asset_items = [d.is_fixed_asset for d in self.items if d.is_fixed_asset]
-		if len(asset_items) > 0:
-			asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+		asset_received_but_not_billed = None
 
 		if self.update_stock:
 			self.validate_item_code()
@@ -362,6 +360,8 @@ class PurchaseInvoice(BuyingController):
 					)
 				item.expense_account = asset_category_account
 			elif item.is_fixed_asset and item.pr_detail:
+				if not asset_received_but_not_billed:
+					asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
@@ -969,7 +969,7 @@ class PurchaseInvoice(BuyingController):
 						)
 
 	def get_asset_gl_entry(self, gl_entries):
-		arbnb_account = self.get_company_default("asset_received_but_not_billed")
+		arbnb_account = None
 		eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
 
 		for item in self.get("items"):
@@ -982,6 +982,8 @@ class PurchaseInvoice(BuyingController):
 					"Asset Received But Not Billed",
 					"Fixed Asset",
 				]:
+					if not arbnb_account:
+						arbnb_account = self.get_company_default("asset_received_but_not_billed")
 					item.expense_account = arbnb_account
 
 				if not self.update_stock:
