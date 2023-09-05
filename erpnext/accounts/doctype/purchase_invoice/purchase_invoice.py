@@ -970,7 +970,8 @@ class PurchaseInvoice(BuyingController):
 
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = None
-		eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+		eiiav_account = None
+		asset_eiiav_currency = None
 
 		for item in self.get("items"):
 			if item.is_fixed_asset:
@@ -1006,7 +1007,10 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					if item.item_tax_amount:
-						asset_eiiav_currency = get_account_currency(eiiav_account)
+						if not eiiav_account or not asset_eiiav_currency:
+							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+							asset_eiiav_currency = get_account_currency(eiiav_account)
+
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -1049,7 +1053,10 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-						asset_eiiav_currency = get_account_currency(eiiav_account)
+						if not eiiav_account or not asset_eiiav_currency:
+							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+							asset_eiiav_currency = get_account_currency(eiiav_account)
+
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -1071,6 +1078,9 @@ class PurchaseInvoice(BuyingController):
 
 					# Assets are bought through this document then it will be linked to this document
 					if flt(item.landed_cost_voucher_amount):
+						if not eiiav_account:
+							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+
 						gl_entries.append(
 							self.get_gl_dict(
 								{
