@@ -13,14 +13,16 @@ from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_cate
 	create_tax_withholding_category,
 )
 from erpnext.accounts.report.tds_payable_monthly.tds_payable_monthly import execute
+from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class TestTdsPayableMonthly(FrappeTestCase):
+class TestTdsPayableMonthly(AccountsTestMixin, FrappeTestCase):
 	def setUp(self):
-		delete_docs()
+		self.create_company()
+		self.clear_old_entries()
 		create_tax_accounts()
-		create_tax_categories()
+		create_tcs_category()
 
 	def test_tax_withholding_for_customers(self):
 		si = create_sales_invoice(rate=1000)
@@ -30,8 +32,8 @@ class TestTdsPayableMonthly(FrappeTestCase):
 		)
 		result = execute(filters)[1]
 		expected_values = [
-			[pe.name, "TCS", 0.075, 2550, 0.9, 2550.9],
-			[si.name, "TCS", 0.075, 1000, 0.9, 1000.9],
+			[pe.name, "TCS", 0.075, 2550, 0.53, 2550.53],
+			[si.name, "TCS", 0.075, 1000, 0.53, 1000.53],
 		]
 		self.check_expected_values(result, expected_values)
 
@@ -47,14 +49,7 @@ class TestTdsPayableMonthly(FrappeTestCase):
 			self.assertEqual(voucher.grand_total, voucher_expected_values[5])
 
 	def tearDown(self):
-		delete_docs()
-
-
-def delete_docs():
-	frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company'")
-	frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company'")
-	frappe.db.sql("delete from `tabGL Entry` where company='_Test Company'")
-	frappe.db.sql("delete from `tabPayment Entry` where company='_Test Company'")
+		self.clear_old_entries()
 
 
 def create_tax_accounts():
@@ -72,7 +67,7 @@ def create_tax_accounts():
 		).insert(ignore_if_duplicate=True)
 
 
-def create_tax_categories():
+def create_tcs_category():
 	fiscal_year = get_fiscal_year(today(), company="_Test Company")
 	from_date = fiscal_year[1]
 	to_date = fiscal_year[2]
@@ -106,7 +101,7 @@ def create_tcs_payment_entry():
 		{
 			"account_head": "TCS - _TC",
 			"charge_type": "Actual",
-			"tax_amount": 0.9,
+			"tax_amount": 0.53,
 			"add_deduct_tax": "Add",
 			"description": "Test",
 			"cost_center": "Main - _TC",
