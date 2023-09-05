@@ -53,7 +53,8 @@ erpnext.accounts.unreconcile_payments = {
 			let child_table_fields = [
 				{ label: __("Voucher Type"), fieldname: "voucher_type", fieldtype: "Dynamic Link", options: "DocType", in_list_view: 1, read_only: 1},
 				{ label: __("Voucher No"), fieldname: "voucher_no", fieldtype: "Link", options: "voucher_type", in_list_view: 1, read_only: 1 },
-				{ label: __("Allocated Amount"), fieldname: "allocated_amount", fieldtype: "Float", in_list_view: 1, read_only: 1 },
+				{ label: __("Allocated Amount"), fieldname: "allocated_amount", fieldtype: "Currency", in_list_view: 1, read_only: 1 , options: "account_currency"},
+				{ label: __("Currency"), fieldname: "account_currency", fieldtype: "Currency", read_only: 1},
 			]
 			let unreconcile_dialog_fields = [
 				{
@@ -83,7 +84,7 @@ erpnext.accounts.unreconcile_payments = {
 							title: 'Un-Reconcile Allocations',
 							fields: unreconcile_dialog_fields,
 							size: 'large',
-							cannot_add_rows: 1,
+							cannot_add_rows: true,
 							primary_action_label: 'Un-Reconcile',
 							primary_action(values) {
 
