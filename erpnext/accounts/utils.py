@@ -663,7 +663,9 @@ def update_reference_in_payment_entry(
 		payment_entry.save(ignore_permissions=True)
 
 
-def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
+def cancel_exchange_gain_loss_journal(
+	parent_doc: dict | object, referenced_dt: str = None, referenced_dn: str = None
+) -> None:
 	"""
 	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
 	"""
@@ -690,7 +692,18 @@ def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
 				as_list=1,
 			)
 			for doc in gain_loss_journals:
-				frappe.get_doc("Journal Entry", doc[0]).cancel()
+				gain_loss_je = frappe.get_doc("Journal Entry", doc[0])
+				if referenced_dt and referenced_dn:
+					references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
+					if (
+						len(references) == 2
+						and (referenced_dt, referenced_dn) in references
+						and (parent_doc.doctype, parent_doc.name) in references
+					):
+						# only cancel JE generated against parent_doc and referenced_dn
+						gain_loss_je.cancel()
+				else:
+					gain_loss_je.cancel()
 
 
 def update_accounting_ledgers_after_reference_removal(
