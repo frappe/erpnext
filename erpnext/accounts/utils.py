@@ -1888,6 +1888,7 @@ class QueryPaymentLedger(object):
 
 def create_gain_loss_journal(
 	company,
+	posting_date,
 	party_type,
 	party,
 	party_account,
@@ -1906,7 +1907,7 @@ def create_gain_loss_journal(
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
 	journal_entry.company = company
-	journal_entry.posting_date = nowdate()
+	journal_entry.posting_date = posting_date or nowdate()
 	journal_entry.multi_currency = 1
 	journal_entry.is_system_generated = True
 
