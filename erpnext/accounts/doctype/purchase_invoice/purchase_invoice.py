@@ -1069,47 +1069,43 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
-					# When update stock is checked
 					# Assets are bought through this document then it will be linked to this document
-					if self.update_stock:
-						if flt(item.landed_cost_voucher_amount):
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": eiiav_account,
-										"against": cwip_account,
-										"cost_center": item.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"credit": flt(item.landed_cost_voucher_amount),
-										"project": item.project or self.project,
-									},
-									item=item,
-								)
+					if flt(item.landed_cost_voucher_amount):
+						gl_entries.append(
+							self.get_gl_dict(
+								{
+									"account": eiiav_account,
+									"against": cwip_account,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(item.landed_cost_voucher_amount),
+									"project": item.project or self.project,
+								},
+								item=item,
 							)
-
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": cwip_account,
-										"against": eiiav_account,
-										"cost_center": item.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"debit": flt(item.landed_cost_voucher_amount),
-										"project": item.project or self.project,
-									},
-									item=item,
-								)
-							)
-
-						# update gross amount of assets bought through this document
-						assets = frappe.db.get_all(
-							"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
 						)
-						for asset in assets:
-							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
+
+						gl_entries.append(
+							self.get_gl_dict(
+								{
+									"account": cwip_account,
+									"against": eiiav_account,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"debit": flt(item.landed_cost_voucher_amount),
+									"project": item.project or self.project,
+								},
+								item=item,
 							)
+						)
+
+					# update gross amount of assets bought through this document
+					assets = frappe.db.get_all(
+						"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
+					)
+					for asset in assets:
+						frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
+						frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
 		return gl_entries
 
