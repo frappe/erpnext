@@ -2359,6 +2359,7 @@ def get_advance_payment_entries(
 	limit=None,
 	condition=None,
 ):
+<<<<<<< HEAD
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	currency_field = (
 		"paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
@@ -2370,6 +2371,84 @@ def get_advance_payment_entries(
 
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
+=======
+
+	payment_entries = []
+	payment_entry = frappe.qb.DocType("Payment Entry")
+
+	if order_list or against_all_orders:
+		q = get_common_query(
+			party_type,
+			party,
+			party_account,
+			limit,
+			condition,
+		)
+		payment_ref = frappe.qb.DocType("Payment Entry Reference")
+
+		q = q.inner_join(payment_ref).on(payment_entry.name == payment_ref.parent)
+		q = q.select(
+			(payment_ref.allocated_amount).as_("amount"),
+			(payment_ref.name).as_("reference_row"),
+			(payment_ref.reference_name).as_("against_order"),
+		)
+
+		q = q.where(payment_ref.reference_doctype == order_doctype)
+		if order_list:
+			q = q.where(payment_ref.reference_name.isin(order_list))
+
+		allocated = list(q.run(as_dict=True))
+		payment_entries += allocated
+	if include_unallocated:
+		q = get_common_query(
+			party_type,
+			party,
+			party_account,
+			limit,
+			condition,
+		)
+		q = q.select((payment_entry.unallocated_amount).as_("amount"))
+		q = q.where(payment_entry.unallocated_amount > 0)
+
+		unallocated = list(q.run(as_dict=True))
+		payment_entries += unallocated
+	return payment_entries
+
+
+def get_common_query(
+	party_type,
+	party,
+	party_account,
+	limit,
+	condition,
+):
+	account_type = frappe.db.get_value("Party Type", party_type, "account_type")
+	payment_type = "Receive" if account_type == "Receivable" else "Pay"
+	payment_entry = frappe.qb.DocType("Payment Entry")
+
+	q = (
+		frappe.qb.from_(payment_entry)
+		.select(
+			ConstantColumn("Payment Entry").as_("reference_type"),
+			(payment_entry.name).as_("reference_name"),
+			payment_entry.posting_date,
+			(payment_entry.remarks).as_("remarks"),
+		)
+		.where(payment_entry.payment_type == payment_type)
+		.where(payment_entry.party_type == party_type)
+		.where(payment_entry.party == party)
+		.where(payment_entry.docstatus == 1)
+	)
+
+	if payment_type == "Receive":
+		q = q.select((payment_entry.paid_from_account_currency).as_("currency"))
+		q = q.select(payment_entry.paid_from)
+		q = q.where(payment_entry.paid_from.isin(party_account))
+	else:
+		q = q.select((payment_entry.paid_to_account_currency).as_("currency"))
+		q = q.select(payment_entry.paid_to)
+		q = q.where(payment_entry.paid_to.isin(party_account))
+>>>>>>> d2f03c8a65 (fix: payment recon not showing payment entry when party_type is Student (#36920))
 
 	if order_list or against_all_orders:
 		if order_list:

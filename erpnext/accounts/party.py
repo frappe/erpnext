@@ -409,6 +409,43 @@ def get_party_account(party_type, party=None, company=None):
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
+<<<<<<< HEAD
+=======
+	if include_advance and party_type in ["Customer", "Supplier", "Student"]:
+		advance_account = get_party_advance_account(party_type, party, company)
+		if advance_account:
+			return [account, advance_account]
+		else:
+			return [account]
+
+	return account
+
+
+def get_party_advance_account(party_type, party, company):
+	account = frappe.db.get_value(
+		"Party Account",
+		{"parenttype": party_type, "parent": party, "company": company},
+		"advance_account",
+	)
+
+	if not account:
+		party_group_doctype = "Customer Group" if party_type == "Customer" else "Supplier Group"
+		group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
+		account = frappe.db.get_value(
+			"Party Account",
+			{"parenttype": party_group_doctype, "parent": group, "company": company},
+			"advance_account",
+		)
+
+	if not account:
+		account_name = (
+			"default_advance_received_account"
+			if party_type == "Customer"
+			else "default_advance_paid_account"
+		)
+		account = frappe.get_cached_value("Company", company, account_name)
+
+>>>>>>> d2f03c8a65 (fix: payment recon not showing payment entry when party_type is Student (#36920))
 	return account
 
 
