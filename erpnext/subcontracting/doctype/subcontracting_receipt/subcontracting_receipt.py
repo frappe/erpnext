@@ -180,7 +180,6 @@ class SubcontractingReceipt(SubcontractingController):
 							"item_name": scrap_item.item_name,
 							"qty": qty,
 							"stock_uom": scrap_item.stock_uom,
-							"recalculate_rate": 0,
 							"rate": rate,
 							"rm_cost_per_qty": 0,
 							"service_cost_per_qty": 0,
@@ -277,13 +276,12 @@ class SubcontractingReceipt(SubcontractingController):
 					else:
 						item.scrap_cost_per_qty = 0
 
-				if item.recalculate_rate:
-					item.rate = (
-						flt(item.rm_cost_per_qty)
-						+ flt(item.service_cost_per_qty)
-						+ flt(item.additional_cost_per_qty)
-						- flt(item.scrap_cost_per_qty)
-					)
+				item.rate = (
+					flt(item.rm_cost_per_qty)
+					+ flt(item.service_cost_per_qty)
+					+ flt(item.additional_cost_per_qty)
+					- flt(item.scrap_cost_per_qty)
+				)
 
 			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
 			item.amount = flt(item.qty) * flt(item.rate)
