@@ -304,7 +304,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 		"docstatus": 1,
 	}
 
-	if doctype != "Sales Invoice":
+	if doctype != "Sales Invoice" and not tax_details.get('consider_party_ledger_amount'):
 		filters.update(
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
@@ -314,25 +314,30 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	for d in invoices_details:
 		vouchers.append(d.name)
 		voucher_wise_amount.update({d.name: {"amount": d.base_net_total, "voucher_type": doctype}})
+	
+	cond = ''
+	if tax_details.get('consider_party_ledger_amount'):
+		cond = " AND j.docstatus = 1 "  # Condition when 'consider_party_ledger_amount' is True
+	else:
+		cond = f" AND j.apply_tds = 1 AND j.tax_withholding_category = '{tax_details.get('tax_withholding_category')}' "  # Condition when 'consider_party_ledger_amount' is False
 
+	# Execute the SQL query with the condition
 	journal_entries_details = frappe.db.sql(
-		"""
+		f"""
 		SELECT j.name, ja.credit - ja.debit AS amount
-			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
+		FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
 		WHERE
 			j.name = ja.parent
 			AND j.docstatus = 1
 			AND j.is_opening = 'No'
-			AND j.posting_date between %s and %s
-			AND ja.party in %s
-			AND j.apply_tds = 1
-			AND j.tax_withholding_category = %s
+			AND j.posting_date BETWEEN %s AND %s
+			AND ja.party IN %s
+			{cond}  # Include the condition here
 	""",
 		(
 			tax_details.from_date,
 			tax_details.to_date,
 			tuple(parties),
-			tax_details.get("tax_withholding_category"),
 		),
 		as_dict=1,
 	)
