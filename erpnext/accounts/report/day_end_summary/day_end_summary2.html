@@ -10,7 +10,7 @@
         font-size: 14px;
     }
     .border {
-        border: 1px solid #000; /* Add your desired border color and style */
+        border: 1px solid #000;
     }
 
     /* Media Print Styles */
@@ -41,19 +41,16 @@
             overflow-x: auto;
         }
 
-        .col-sm-6 {
+        .col-sm-6, .col-sm-4, .col-sm-2 {
             width: 100% !important;
             margin-bottom: 10px;
-        }
-
-        .col-sm-4,
-        .col-sm-2 {
-            width: 100% !important;
         }
     }
 </style>
 
-<p class="text-right text-muted">{{ __("Printed On ") }}{{ frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) }}</p>
+<p class="text-right text-muted">
+    {{ __("Printed On ") }}{{ frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) }}
+</p>
 
 <div class="container">
     <div class="row">
@@ -67,14 +64,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in data %}
-                        {% if row["paid_amount"] %}
-                            <tr>
-                                <td class="large-font">{{ row["sales_person"] }}</td>
-                                <td class="large-font">{{ row["territory"] }}</td>
-                                <td class="text-right large-font">{{ row["paid_amount"] }}</td>
-                            </tr>
-                        {% endif %}
+                    {% for row in data if row["paid_amount"] %}
+                        <tr>
+                            <td class="large-font">{{ row["sales_person"] }}</td>
+                            <td class="large-font">{{ row["territory"] }}</td>
+                            <td class="text-right large-font">{{ row["paid_amount"] }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
@@ -98,20 +93,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in data %}
-                        {% if row["account"] %}
-                            <tr>
-                                <td class="large-font">{{ row["account"].replace(" - AT", "") }}</td>
-                                <td class="large-font">{{ row["party"] ? row["party"] + (row["remarks"] ? " : " + row["remarks"] : "") : "" }}</td>
-                                <td class="text-right large-font">{{ row["expense_amount"] }}</td>
-                            </tr>
-                        {% endif %}
+                    {% for row in data if row["account"] %}
+                        <tr>
+                            <td class="large-font">{{ row["account"].replace(" - AT", "") }}</td>
+                            <td class="large-font">
+                                {% if row["party"] %}
+                                    {{ row["party"] }}
+                                    {% if row["remarks"] %}
+                                        : {{ row["remarks"] }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="text-right large-font">{{ row["expense_amount"] }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr class="table-primary font-weight-bold">
                         <td colspan="2">{{ __("Total") }}</td>
-                        <td class="text-right large-font">{{ data[-1].totals.today_expenses if data and data[-1].totals else 0 }}</td>
+                        <td class="text-right large-font">
+                            {{ data|sum("expense_amount", if_missing=0) }}
+                        </td>
                     </tr>
                 </tfoot>
             </table>
@@ -120,10 +122,14 @@
 
     <div class="row border rounded p-3">
         <div class="col-4">{{ __("Total Cash in Hand:") }}</div>
-        <div class="col-6 font-weight-bold large-font">{{ data[-1].totals.cash_in_hand if data and data[-1].totals else 0 }}</div>
+        <div class="col-6 font-weight-bold large-font">
+            {{ data[-1].totals.cash_in_hand | default(0) }}
+        </div>
     </div>
     <div class="row border rounded p-3">
         <div class="col-4">{{ __("Bank:") }}</div>
-        <div class="col-6 font-weight-bold large-font">{{ data[-1].totals.bank_in_hand if data and data[-1].totals else 0 }}</div>
+        <div class="col-6 font-weight-bold large-font">
+            {{ data[-1].totals.bank_in_hand | default(0) }}
+        </div>
     </div>
 </div>
