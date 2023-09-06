@@ -41,14 +41,8 @@ class Asset(AccountsController):
 		self.validate_item()
 		self.validate_cost_center()
 		self.set_missing_values()
-<<<<<<< HEAD
-		self.prepare_depreciation_data()
-=======
 		self.validate_finance_books()
-		if not self.split_from:
-			self.prepare_depreciation_data()
-			update_draft_asset_depr_schedules(self)
->>>>>>> 0077659e93 (chore: asset finance books validation (#36979))
+		self.prepare_depreciation_data()
 		self.validate_gross_and_purchase_amount()
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
