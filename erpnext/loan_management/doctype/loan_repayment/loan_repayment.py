@@ -502,6 +502,7 @@ def create_repayment_entry(
 	amount_paid,
 	penalty_amount=None,
 	payroll_payable_account=None,
+	process_payroll_accounting_entry_based_on_employee=0,
 ):
 
 	lr = frappe.get_doc(
@@ -518,6 +519,7 @@ def create_repayment_entry(
 			"amount_paid": amount_paid,
 			"loan_type": loan_type,
 			"payroll_payable_account": payroll_payable_account,
+			"process_payroll_accounting_entry_based_on_employee": process_payroll_accounting_entry_based_on_employee,
 		}
 	).insert()
 
