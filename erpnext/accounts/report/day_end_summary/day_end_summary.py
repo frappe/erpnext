@@ -82,21 +82,6 @@ class DayEndSummaryReport():
 		if expenses: self.data.extend(expenses)	
 		if payments: self.data.extend(payments)	
 
-		summary={
-			'cash_in_hand':self.cash_in_hand,
-   			'today_cash':self.today_cash,
-			'bank_in_hand':self.bank_in_hand,
-			'today_collection':self.total_paid,
-			'today_expenses':self.total_expenses,
-			'today_sales':self.total_sales,
-			'total_supplier_payment': self.total_payments,
-			'account_receivable':self.acc_receivable
-			}
-		data= self.data
-		data.append({'totals':summary})
-		
-		return data
-
 	
 	def get_chart(self, filters):		
 		salesItem = frappe.qb.DocType('Sales Invoice Item')
