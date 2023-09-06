@@ -35,7 +35,7 @@
 
 			</tr>
 		</thead>
-		<tbody style="font-size: 1rem; white-space:nowrap;">
+		<tbody style="font-size: 0.9rem; white-space:nowrap; line-height: 0.8rem;">
 			{% for(var i=0, l=data.length; i<l; i++) { %}
 				<tr style="text-align: left; max-width: 90%">
 					<td style="text-align: left">{%= data[i]["posting_date"] %}	 </td>					
@@ -44,7 +44,7 @@
 							{%=data[i]['remarks'].includes('Amount PKR') || data[i]['remarks'].includes('No Remarks')?'': ": " + data[i]['remarks'] %}
 						{%  } %}
 					</td>
-					<td style="text-align: center;">	
+					<td style="text-align: left;">	
 						{%= data[i]["voucher_no"] %}
 					</td>
 					<td style="text-align: center;">	
@@ -53,23 +53,23 @@
 					<td style="text-align: center;">	
 						{%= data[i]["weight"] %}
 					</td>
-					<td style="text-align: center; font-size:1.4rem">	
+					<td style="text-align: center;">	
 						{%= data[i]["debit"]==0?'': data[i]["debit"]%}
 					</td>
-					<td style="text-align: center; font-size:1.4rem">	
+					<td style="text-align: center;">	
 						{%= data[i]["credit"]==0?'': data[i]["credit"]%}
 					</td>
-					<td style="text-align: center; font-size:1.4rem">	
+					<td style="text-align: center;">	
 						{%= data[i]["misc_credit"]==0?'': data[i]["misc_credit"]%}
 					</td>
-					<td style="text-align: right; font-size:1.4rem; font-weight:bold">
+					<td style="text-align: right; font-weight:bold">
 							{%= format_currency( data[i]["balance"]? (data[i]["balance"].toFixed()):0, data[i]["currency"]).split(".")[0] %}
 					</td>									
 				</tr>
 			{% } %}
 
 		</tbody>
-		<tfoot style="background-color: gainsboro; font-size:1.4rem; font-weight:bold">
+		<tfoot style="background-color: gainsboro; font-size: 0.8rem; font-weight:bold">
 			<td colspan="4"></td>
 			<td style="text-align: center;">{%= data.filter(f=> f.hasOwnProperty('weight')).map(i=> i["weight"]).reduce((v,t)=>v+t,0) %}</td>
 			<td style="text-align: center;">{%= format_currency(data.filter(f=> f.hasOwnProperty('debit')).map(i=> i["debit"]).reduce((v,t)=>v + Math.ceil(t*100)/100,0), data[0]["currency"]) %}</td>
@@ -81,7 +81,7 @@
 
 
 	<table class="table  table-bordered align-center">
-		<thead style="font-size:1.4rem; font-weight:bold">
+		<thead style="font-size:1.4rem; font-weight:bold;">
 			<tr>
 				<th colspan="6" style="text-align: center;">{{ __("Outstanding Balance Summary in Days") }}</th>
 			</tr>

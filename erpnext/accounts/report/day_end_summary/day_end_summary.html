@@ -1,77 +1,128 @@
 <style>
 	.print-format {
-		padding: 4mm;
-		font-size: 8.0pt !important;
+        padding: 4mm;
+        font-size: 10.0pt !important;
+    }
+    .print-format td {
+        vertical-align: middle !important;
+    }
+	.large-font {
+		font-size: 14px;
 	}
-	.print-format td {
-		vertical-align:middle !important;
+	.border {
+		border: 1px solid #000; /* Add your desired border color and style */
 	}
-</style>
+
+    /* Media Print Styles */
+    @media print {
+        body {
+            margin: 5;
+            padding: 3;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 5;
+            padding: 3;
+        }
+
+        .table {
+            width: 100%;
+        }
+
+        .text-sm-right {
+            text-align: right;
+        }
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 767px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .col-sm-6 {
+            width: 100% !important;
+            margin-bottom: 10px;
+        }
+
+        .col-sm-4,
+        .col-sm-2 {
+            width: 100% !important;
+        }
+	}
+	</style>
+	
 	<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+	
 	<div class="container">
-	<h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
-	<div class="row">
-		{% if (filters.customer) { %}
-		<div class="col text-center font-weight-light"> 
-			{{ __("Customer Name: ") }} {%= filters.customer %} 
+		<div class="row">
+			<div class="col-sm-6 mb-4">
+				<table class="table table-bordered table-sm table-responsive">
+					<thead class="thead-light">
+						<tr>
+							<th scope="col">{{ __("Sales Person") }}</th>
+							<th scope="col">{{ __("Territory") }}</th>
+							<th scope="col">{{ __("Amount") }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for (var i = 0; i < data.length; i++) { var row = data[i]; %}
+							{% if (row["paid_amount"]) { %}
+								<tr>
+									<td class="large-font">{{ row["sales_person"] }}</td>
+									<td class="large-font">{{ row["territory"] }}</td>
+									<td class="text-right large-font">{{ row["paid_amount"] }}</td>
+								</tr>
+							{% } %}
+						{% } %}
+					</tbody>
+					<tfoot>
+						<tr class="table-primary font-weight-bold">
+							<td colspan="2">{{ __("Total") }}</td>
+							<td class="text-right large-font">{%= data.reduce((total, row) => total + (row["paid_amount"] || 0), 0) %}</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			<div class="col-sm-6 mb-4">
+				<table class="table table-bordered table-sm">
+					<thead class="thead-light">
+						<tr>
+							<th colspan="3" class="text-center">{{ __("Expense / Payments") }}</th>
+						</tr>
+						<tr>
+							<th>{{ __("Head") }}</th>
+							<th>{{ __("Detail") }}</th>
+							<th>{{ __("Amount") }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for (var i = 0; i < data.length; i++) { var row = data[i]; %}
+							{% if (row["account"]) { %}
+								<tr>
+									<td class="large-font">{{ row["account"].replace(/ - AT$/, '') }}</td>
+									<td class="large-font">{{ row["party"] ? `${row["party"]}${row["remarks"] ? ' : ' + row["remarks"] : ''}` : '' }}</td>
+									<td class="text-right large-font">{{ row["expense_amount"] }}</td>
+								</tr>
+							{% } %}
+						{% } %}
+					</tbody>
+					<tfoot>
+						<tr class="table-primary font-weight-bold">
+							<td colspan="2">{{ __("Total") }}</td>
+							<td class="text-right large-font">{%= data?.[data.length - 1]?.totals?.today_expenses ?? 0 %}</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
 		</div>
-		{% } %}
 
-		{% if (filters.sales_person) { %}
-		<div 	class="col text-center font-weight-light"> 
-			{{ __("Sales Person: ") }} {%= filters.sales_person %} 
+		<div class="row border rounded p-3">
+			<div class="col-4">{{ __("Total Cash in Hand:") }}</div>
+			<div class="col-6 font-weight-bold large-font">{%= data?.[data.length - 1]?.totals?.cash_in_hand ?? 0 %}</div>
 		</div>
-		{% }  %}			
-
-		{% if (filters.territory) { %}
-		<div 	class="col text-center font-weight-light"> 
-			{{ __("Sector: ") }}	{%= filters.territory %} 
+		<div class="row border rounded p-3">
+			<div class="col-4">{{ __("Bank:") }}</div>
+			<div class="col-6 font-weight-bold large-font">{%= data?.[data.length - 1]?.totals?.bank_in_hand ?? 0 %}</div>
 		</div>
-		{% }  %}
-	</div>
-	<table class="table table-borderless align-right">
-		<thead>
-			<tr>
-				<th width="40%">{%= __("Customer Name") %}</th>
-				<th width="23%" >{%= __("Address") %} </th>
-				{% if (!filters.territory && !filters.sales_person) { %}
-					<th width="3%">{%= __("Territory") %}</th>
-				{% }%}
-				{% if (!filters.territory && !filters.sales_person) { %}
-				<th width="4%">{%= __("Agent") %}</th>
-			{% }%}
-				<th width="9%">{%= __("OverDue") %}</th>
-				<th width="13%">{%= __("Total Balance") %}</th>
-				<th width="4%">{%= __("Code") %}</th>
-				<th width="4%">{%= __("") %}</th>
-			</tr>
-		</thead>
-		<tbody style="font-size: 1rem; white-space:nowrap;">
-			{% for(var i=0, l=data.length; i<l; i++) { %}
-				<tr style="font-size: 10px;">
-					<td>{%= data[i]["party"] %}	 </td>					
-					<td>{%= data[i]["primary_address"]?
-						data[i]["primary_address"].replaceAll("<br>"," ").replace("Pakistan",""):
-						"" %}</td>
-						{% if (!filters.territory && !filters.sales_person) { %}
-							<td>{%= data[i]["territory"] %}	 </td>
-						{%} %}
-						{% if (!filters.territory && !filters.sales_person) { %}
-							<td>{%= data[i]["sales_person"] %}	 </td>
-						{%} %}
-					<td style="text-align: right">
-						{%= format_currency(data[i]["total_due"], data[i]["currency"]) %}
-					</td>
-					<td style="text-align: center">
-							{%= format_currency(data[i]["outstanding"].toFixed(), data[i]["currency"]).split(".")[0] %}
-					</td>
-					<td style="text-align: right">	
-						{%= data[i]["party"]?data[i]["party"].split("-",2)[0]:"" %}
-					</td>
-
-					<td></td>
-									
-				</tr>
-			{% } %}
-		</tbody>
-	</table>

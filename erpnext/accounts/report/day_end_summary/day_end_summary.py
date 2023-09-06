@@ -1,11 +1,7 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import (today,get_link_to_form, get_url_to_report, global_date_format, now,
-						format_time,flt)
+from frappe.utils import (today)
 from six import iteritems
 from frappe.query_builder.functions import Sum, Concat
 from functools import reduce
@@ -15,10 +11,11 @@ import random
 
 
 def execute(filters=None):
-	return CollectionReport().run(filters)
+	return DayEndSummaryReport().run(filters)
 
-class CollectionReport():
+class DayEndSummaryReport():
 	def run(self, filters):
+			
 		self.get_columns()
 		self.get_data(filters)
 		message="Daily Collection Report"
@@ -28,6 +25,9 @@ class CollectionReport():
 		return self.columns, self.data,message,self.chart,self.summary
 
 	def get_data(self, filters):
+		
+		if filters is None:
+			filters = dict(report_date= today())
 		self.data=[]
 		pEntry 		= 	frappe.qb.DocType('Payment Entry')
 		journal 	= 	frappe.qb.DocType('Journal Entry')
@@ -48,7 +48,7 @@ class CollectionReport():
 			.select(accounts.account,accounts.party,accounts.user_remark,accounts.debit.as_("expense_amount"), account_details) \
 			.join(accounts) \
 			.on(journal.name == accounts.parent) \
-			.where(journal.posting_date==filters.report_date) \
+			.where(journal.posting_date==filters['report_date']) \
       		.where(journal.docstatus==1) \
 			.where(accounts.account!='Cash - AT') \
             .where(accounts.debit!=0) \
@@ -56,7 +56,7 @@ class CollectionReport():
 
 		collections = (frappe.qb.from_(pEntry)
 					.select(paid_amount,pEntry.sales_person,pEntry.territory)
-					.where(pEntry.posting_date == filters.report_date)
+					.where(pEntry.posting_date == filters['report_date'])
 					.where(pEntry.payment_type == 'Receive')
 					.where(pEntry.party_type== 'Customer')
 					.where(pEntry.docstatus==1)
@@ -65,7 +65,7 @@ class CollectionReport():
 					.select(pEntry.party_type.as_('account'),pEntry.party,
 						pEntry.remarks, payment_details,
 						pEntry.paid_amount.as_("expense_amount"))
-					.where(pEntry.posting_date == filters.report_date)
+					.where(pEntry.posting_date == filters['report_date'])
 					.where(pEntry.paid_to=='Creditors - AT')).run(as_dict=True)		
 
 		if collections is not None and collections:
@@ -90,7 +90,7 @@ class CollectionReport():
 			.join(sales) \
 			.on(sales.name == salesItem.parent) \
 			.select(salesItem.brand,Sum(salesItem.qty).as_("qty"), Sum(salesItem.net_amount).as_("net_amount")) \
-			.where(sales.posting_date == filters.report_date) \
+			.where(sales.posting_date == filters['report_date']) \
 			.groupby(salesItem.brand).run(as_dict=True)
 
 
@@ -116,7 +116,7 @@ class CollectionReport():
 		.select((Sum(gl.debit)-Sum(gl.credit)).as_("value")) \
 		.where(gl.account.isin(['Cash - AT','Cash In Hand - AT' ]) ) \
       	.where(gl.docstatus==1) \
-        .where(gl.posting_date== filters.report_date) \
+        .where(gl.posting_date== filters['report_date']) \
         .run(as_dict=True)[0].value        
   
 
@@ -226,73 +226,3 @@ class CollectionReport():
 		},
 		
 		]
-
-
-def get_report_content():
-	report = frappe.get_doc('Report', 'Day End Summary')
-	filters= {"report_date":today()}
-	columns, data = report.get_data(filters = filters, as_dict=True, ignore_prepared_report=True)
-	
-	if data is None or len(data)==0 :
-		return None
-	# columns, data = make_links(columns, data)
-	# columns = update_field_types(columns)
-	return get_html_table(columns, data)
-
-
-def make_links(columns, data):
-	for row in data:
-		doc_name = row.get('name')
-		for col in columns:
-			if not row.get(col.fieldname):
-				continue			
-			if col.fieldtype == "Link":
-				if col.options and col.options != "Currency":
-					row[col.fieldname] = get_link_to_form(col.options, row[col.fieldname])
-			elif col.fieldtype == "Dynamic Link":
-				if col.options and row.get(col.options):
-					row[col.fieldname] = get_link_to_form(row[col.options], row[col.fieldname])
-			elif col.fieldtype == "Currency":
-				doc = frappe.get_doc(col.parent, doc_name) if doc_name and col.parent else None
-				# Pass the Document to get the currency based on docfield option
-				row[col.fieldname] = frappe.format_value(row[col.fieldname], col, doc=doc)
-	return columns, data
-
-def update_field_types(columns):
-	for col in columns:
-		if col.fieldtype in  ("Link", "Dynamic Link", "Currency")  and col.options != "Currency":
-			col.fieldtype = "Data"
-			col.options = ""
-	return columns
-
-def get_html_table(columns=None, data=None):
-	date_time = global_date_format(now()) + ' ' + format_time(now())
-	report='Day End Summary'
-
-	totals= data[-1]["totals"]
-
-	return frappe.render_template('erpnext/accounts/report/day_end_summary/day_end_summary2.html', {
-		'title': 'Day End Summary Report',
-		'date_time': date_time,
-		'columns': columns,
-		'data': data,
-		'report_name': report,
-		'totals': totals
-	})
-
-def send():
-	email_to=['alwahabs@gmail.com','ankhan.1976@gmail.com']
-	data = get_report_content()
-	if not data:
-		return
-
-	attachments = None
-	message = data
-
-	frappe.sendmail(
-		recipients = email_to,
-		subject = 'Day End Summary Report',
-		message = message,
-		attachments = attachments,
-		reference_name = 'Day End Summary'
-	)

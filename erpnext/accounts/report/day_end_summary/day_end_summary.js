@@ -5,7 +5,7 @@ frappe.query_reports["Day End Summary"] = {
     		{
 		    	"fieldname":"report_date",
 		    	"label": __("Date"),
-		    	"fieldtype": "Date",
+		    	"fieldtype": "Data",
 		    	"default": frappe.datetime.get_today(),
 		    	"reqd": 1
         	},
