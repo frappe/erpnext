@@ -81,6 +81,8 @@ class DayEndSummaryReport():
 		if collections: self.data.extend(collections)
 		if expenses: self.data.extend(expenses)	
 		if payments: self.data.extend(payments)	
+		
+		return self.data
 
 	
 	def get_chart(self, filters):		
