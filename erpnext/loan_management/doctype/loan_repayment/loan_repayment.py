@@ -405,6 +405,16 @@ class LoanRepayment(AccountsController):
 		else:
 			payment_account = self.payment_account
 
+		payment_party_type = ""
+		payment_party = ""
+
+		if (
+			hasattr(self, "process_payroll_accounting_entry_based_on_employee")
+			and self.process_payroll_accounting_entry_based_on_employee
+		):
+			payment_party_type = "Employee"
+			payment_party = self.applicant
+
 		if self.total_penalty_paid:
 			gle_map.append(
 				self.get_gl_dict(
@@ -452,6 +462,8 @@ class LoanRepayment(AccountsController):
 					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
+					"party_type": payment_party_type,
+					"party": payment_party,
 				}
 			)
 		)
