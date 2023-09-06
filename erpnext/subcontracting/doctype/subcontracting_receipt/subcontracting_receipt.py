@@ -176,10 +176,9 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
 
-			if item.recalculate_rate:
-				item.rate = (
-					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
-				)
+			item.rate = (
+				flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
+			)
 
 			item.received_qty = item.qty + flt(item.rejected_qty)
 			item.amount = item.qty * item.rate

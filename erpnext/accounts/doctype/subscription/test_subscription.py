@@ -694,3 +694,23 @@ class TestSubscription(unittest.TestCase):
 		# Check the currency of the created invoice
 		currency = frappe.db.get_value("Sales Invoice", subscription.invoices[0].invoice, "currency")
 		self.assertEqual(currency, "USD")
+
+	def test_plan_rate_for_midmonth_start_date(self):
+		subscription = frappe.new_doc("Subscription")
+		subscription.party_type = "Supplier"
+		subscription.party = "_Test Supplier"
+		subscription.generate_invoice_at_period_start = 1
+		subscription.follow_calendar_months = 1
+		subscription.generate_new_invoices_past_due_date = 1
+		subscription.start_date = "2023-04-08"
+		subscription.end_date = "2024-02-27"
+		subscription.append("plans", {"plan": "_Test Plan Name 4", "qty": 1})
+		subscription.save()
+
+		subscription.process()
+
+		self.assertEqual(len(subscription.invoices), 1)
+		pi = frappe.get_doc("Purchase Invoice", subscription.invoices[0].invoice)
+		self.assertEqual(pi.total, 55333.33)
+
+		subscription.delete()

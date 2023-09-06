@@ -969,6 +969,44 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
+	def gain_loss_journal_already_booked(
+		self,
+		gain_loss_account,
+		exc_gain_loss,
+		ref2_dt,
+		ref2_dn,
+		ref2_detail_no,
+	) -> bool:
+		"""
+		Check if gain/loss is booked
+		"""
+		if res := frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"docstatus": 1,
+				"account": gain_loss_account,
+				"reference_type": ref2_dt,  # this will be Journal Entry
+				"reference_name": ref2_dn,
+				"reference_detail_no": ref2_detail_no,
+			},
+			pluck="parent",
+		):
+			# deduplicate
+			res = list({x for x in res})
+			if exc_vouchers := frappe.db.get_all(
+				"Journal Entry",
+				filters={"name": ["in", res], "voucher_type": "Exchange Gain Or Loss"},
+				fields=["voucher_type", "total_debit", "total_credit"],
+			):
+				booked_voucher = exc_vouchers[0]
+				if (
+					booked_voucher.total_debit == exc_gain_loss
+					and booked_voucher.total_credit == exc_gain_loss
+					and booked_voucher.voucher_type == "Exchange Gain Or Loss"
+				):
+					return True
+		return False
+
 	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
@@ -997,27 +1035,37 @@ class AccountsController(TransactionBase):
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-							je = create_gain_loss_journal(
-								self.company,
-								arg.get("party_type"),
-								arg.get("party"),
-								party_account,
+							if not self.gain_loss_journal_already_booked(
 								gain_loss_account,
 								difference_amount,
-								dr_or_cr,
-								reverse_dr_or_cr,
-								arg.get("against_voucher_type"),
-								arg.get("against_voucher"),
-								arg.get("idx"),
 								self.doctype,
 								self.name,
-								arg.get("idx"),
-							)
-							frappe.msgprint(
-								_("Exchange Gain/Loss amount has been booked through {0}").format(
-									get_link_to_form("Journal Entry", je)
+								arg.get("referenced_row"),
+							):
+								posting_date = frappe.db.get_value(arg.voucher_type, arg.voucher_no, "posting_date")
+								je = create_gain_loss_journal(
+									self.company,
+									posting_date,
+									arg.get("party_type"),
+									arg.get("party"),
+									party_account,
+									gain_loss_account,
+									difference_amount,
+									dr_or_cr,
+									reverse_dr_or_cr,
+									arg.get("against_voucher_type"),
+									arg.get("against_voucher"),
+									arg.get("idx"),
+									self.doctype,
+									self.name,
+									arg.get("referenced_row"),
+									arg.get("cost_center"),
 								)
-							)
+								frappe.msgprint(
+									_("Exchange Gain/Loss amount has been booked through {0}").format(
+										get_link_to_form("Journal Entry", je)
+									)
+								)
 
 			if self.get("doctype") == "Payment Entry":
 				# For Payment Entry, exchange_gain_loss field in the `references` table is the trigger for journal creation
@@ -1077,6 +1125,7 @@ class AccountsController(TransactionBase):
 
 						je = create_gain_loss_journal(
 							self.company,
+							self.posting_date,
 							self.party_type,
 							self.party,
 							party_account,
@@ -1090,6 +1139,7 @@ class AccountsController(TransactionBase):
 							self.doctype,
 							self.name,
 							d.idx,
+							self.cost_center,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1354,7 +1404,7 @@ class AccountsController(TransactionBase):
 					{
 						"account": self.additional_discount_account,
 						"against": supplier_or_customer,
-						dr_or_cr: self.discount_amount,
+						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -1626,6 +1676,7 @@ class AccountsController(TransactionBase):
 					and party_account_currency != self.company_currency
 					and self.currency != party_account_currency
 				):
+
 					frappe.throw(
 						_("Accounting Entry for {0}: {1} can only be made in currency: {2}").format(
 							party_type, party, party_account_currency
