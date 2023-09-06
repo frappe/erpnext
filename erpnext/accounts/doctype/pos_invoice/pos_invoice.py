@@ -1,6 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
-
+import collections
 
 import frappe
 from frappe import _
@@ -43,6 +43,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
 		self.validate_change_amount()
+		self.validate_duplicate_serial_and_batch_no()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
 		self.validate_warehouse()
@@ -154,6 +155,27 @@ class POSInvoice(SalesInvoice):
 				).format(item.idx, bold_invalid_serial_nos),
 				title=_("Item Unavailable"),
 			)
+
+	def validate_duplicate_serial_and_batch_no(self):
+		serial_nos = []
+		batch_nos = []
+
+		for row in self.get("items"):
+			if row.serial_no:
+				serial_nos = row.serial_no.split("\n")
+
+			if row.batch_no and not row.serial_no:
+				batch_nos.append(row.batch_no)
+
+		if serial_nos:
+			for key, value in collections.Counter(serial_nos).items():
+				if value > 1:
+					frappe.throw(_("Duplicate Serial No {0} found").format("key"))
+
+		if batch_nos:
+			for key, value in collections.Counter(batch_nos).items():
+				if value > 1:
+					frappe.throw(_("Duplicate Batch No {0} found").format("key"))
 
 	def validate_pos_reserved_batch_qty(self, item):
 		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no": item.batch_no}

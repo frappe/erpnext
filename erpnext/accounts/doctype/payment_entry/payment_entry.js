@@ -538,7 +538,9 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 			}
 
-			frm.events.set_unallocated_amount(frm);
+			// set_unallocated_amount is called by below method,
+			// no need trigger separately
+			frm.events.set_total_allocated_amount(frm);
 		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
@@ -562,7 +564,9 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
 			}
 
-			frm.events.set_unallocated_amount(frm);
+			// set_unallocated_amount is called by below method,
+			// no need trigger separately
+			frm.events.set_total_allocated_amount(frm);
 		}
 		frm.set_paid_amount_based_on_received_amount = false;
 
@@ -878,12 +882,18 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_total_allocated_amount: function(frm) {
+		let exchange_rate = 1;
+		if (frm.doc.payment_type == "Receive") {
+			exchange_rate = frm.doc.source_exchange_rate;
+		} else if (frm.doc.payment_type == "Pay") {
+			exchange_rate = frm.doc.target_exchange_rate;
+		}
 		var total_allocated_amount = 0.0;
 		var base_total_allocated_amount = 0.0;
 		$.each(frm.doc.references || [], function(i, row) {
 			if (row.allocated_amount) {
 				total_allocated_amount += flt(row.allocated_amount);
-				base_total_allocated_amount += flt(flt(row.allocated_amount)*flt(row.exchange_rate),
+				base_total_allocated_amount += flt(flt(row.allocated_amount)*flt(exchange_rate),
 					precision("base_paid_amount"));
 			}
 		});
