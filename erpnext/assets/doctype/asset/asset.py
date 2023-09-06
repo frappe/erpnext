@@ -1385,26 +1385,41 @@ def get_straight_line_or_manual_depr_amount(
 			daily_depr_amount = (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
 			) / date_diff(
-				add_months(
-					row.depreciation_start_date,
-					flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
-					* row.frequency_of_depreciation,
-				),
-				add_months(
-					row.depreciation_start_date,
-					flt(
-						row.total_number_of_depreciations
-						- asset.number_of_depreciations_booked
-						- number_of_pending_depreciations
+				get_last_day(
+					add_months(
+						row.depreciation_start_date,
+						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
+						* row.frequency_of_depreciation,
 					)
-					* row.frequency_of_depreciation,
+				),
+				add_days(
+					get_last_day(
+						add_months(
+							row.depreciation_start_date,
+							flt(
+								row.total_number_of_depreciations
+								- asset.number_of_depreciations_booked
+								- number_of_pending_depreciations
+								- 1
+							)
+							* row.frequency_of_depreciation,
+						)
+					),
+					1,
 				),
 			)
-			to_date = add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
-			from_date = add_months(
-				row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+
+			to_date = get_last_day(
+				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
 			)
-			return daily_depr_amount * date_diff(to_date, from_date)
+			from_date = add_days(
+				get_last_day(
+					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+				),
+				1,
+			)
+
+			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
 		else:
 			return (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
@@ -1417,18 +1432,29 @@ def get_straight_line_or_manual_depr_amount(
 				- flt(asset.opening_accumulated_depreciation)
 				- flt(row.expected_value_after_useful_life)
 			) / date_diff(
-				add_months(
-					row.depreciation_start_date,
-					flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
-					* row.frequency_of_depreciation,
+				get_last_day(
+					add_months(
+						row.depreciation_start_date,
+						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
+						* row.frequency_of_depreciation,
+					)
 				),
-				row.depreciation_start_date,
+				add_days(
+					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
+				),
 			)
-			to_date = add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
-			from_date = add_months(
-				row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+
+			to_date = get_last_day(
+				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
 			)
-			return daily_depr_amount * date_diff(to_date, from_date)
+			from_date = add_days(
+				get_last_day(
+					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+				),
+				1,
+			)
+
+			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
 		else:
 			return (
 				flt(asset.gross_purchase_amount)
