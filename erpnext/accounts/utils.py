@@ -458,10 +458,12 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
-				update_reference_in_journal_entry(entry, doc, do_not_save=True)
+				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
 				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
 				# amount and account in args
-				doc.make_exchange_gain_loss_journal(args)
+				# referenced_row is used to deduplicate gain/loss journal
+				entry.update({"referenced_row": referenced_row})
+				doc.make_exchange_gain_loss_journal([entry])
 			else:
 				update_reference_in_payment_entry(
 					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
@@ -604,6 +606,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	journal_entry.flags.ignore_validate_update_after_submit = True
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
+
+	return new_row.name
 
 
 def update_reference_in_payment_entry(
@@ -1720,6 +1724,7 @@ class QueryPaymentLedger(object):
 				ple.posting_date,
 				ple.due_date,
 				ple.account_currency.as_("currency"),
+				ple.cost_center.as_("cost_center"),
 				Sum(ple.amount).as_("amount"),
 				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
 			)
@@ -1782,6 +1787,7 @@ class QueryPaymentLedger(object):
 				).as_("paid_amount_in_account_currency"),
 				Table("vouchers").due_date,
 				Table("vouchers").currency,
+				Table("vouchers").cost_center.as_("cost_center"),
 			)
 			.where(Criterion.all(filter_on_outstanding_amount))
 		)
@@ -1852,6 +1858,7 @@ class QueryPaymentLedger(object):
 
 def create_gain_loss_journal(
 	company,
+	posting_date,
 	party_type,
 	party,
 	party_account,
@@ -1865,12 +1872,14 @@ def create_gain_loss_journal(
 	ref2_dt,
 	ref2_dn,
 	ref2_detail_no,
+	cost_center,
 ) -> str:
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
 	journal_entry.company = company
-	journal_entry.posting_date = nowdate()
+	journal_entry.posting_date = posting_date or nowdate()
 	journal_entry.multi_currency = 1
+	journal_entry.is_system_generated = True
 
 	party_account_currency = frappe.get_cached_value("Account", party_account, "account_currency")
 
@@ -1889,7 +1898,7 @@ def create_gain_loss_journal(
 			"party": party,
 			"account_currency": party_account_currency,
 			"exchange_rate": 0,
-			"cost_center": erpnext.get_default_cost_center(company),
+			"cost_center": cost_center or erpnext.get_default_cost_center(company),
 			"reference_type": ref1_dt,
 			"reference_name": ref1_dn,
 			"reference_detail_no": ref1_detail_no,
@@ -1905,7 +1914,7 @@ def create_gain_loss_journal(
 			"account": gain_loss_account,
 			"account_currency": gain_loss_account_currency,
 			"exchange_rate": 1,
-			"cost_center": erpnext.get_default_cost_center(company),
+			"cost_center": cost_center or erpnext.get_default_cost_center(company),
 			"reference_type": ref2_dt,
 			"reference_name": ref2_dn,
 			"reference_detail_no": ref2_detail_no,
