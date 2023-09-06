@@ -49,7 +49,7 @@
 </style>
 
 <p class="text-right text-muted">
-    {{ __("Printed On ") }}{{ frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) }}
+    {{ _("Printed On ") }}{{ frappe.utils.now()  }}
 </p>
 
 <div class="container">
@@ -58,9 +58,9 @@
             <table class="table table-bordered table-sm table-responsive">
                 <thead class="thead-light">
                     <tr>
-                        <th scope="col">{{ __("Sales Person") }}</th>
-                        <th scope="col">{{ __("Territory") }}</th>
-                        <th scope="col">{{ __("Amount") }}</th>
+                        <th scope="col">{{ ("Sales Person") }}</th>
+                        <th scope="col">{{ _("Territory") }}</th>
+                        <th scope="col">{{ _("Amount") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,8 +74,10 @@
                 </tbody>
                 <tfoot>
                     <tr class="table-primary font-weight-bold">
-                        <td colspan="2">{{ __("Total") }}</td>
-                        <td class="text-right large-font">{{ data|sum("paid_amount") }}</td>
+                        <td colspan="2">{{ ("Total") }}</td>
+                        <td class="text-right large-font">
+							{{data[-1].totals.today_collection }}
+							</td>
                     </tr>
                 </tfoot>
             </table>
@@ -84,12 +86,12 @@
             <table class="table table-bordered table-sm">
                 <thead class="thead-light">
                     <tr>
-                        <th colspan="3" class="text-center">{{ __("Expense / Payments") }}</th>
+                        <th colspan="3" class="text-center">{{ _("Expense / Payments") }}</th>
                     </tr>
                     <tr>
-                        <th>{{ __("Head") }}</th>
-                        <th>{{ __("Detail") }}</th>
-                        <th>{{ __("Amount") }}</th>
+                        <th>{{ ("Head") }}</th>
+                        <th>{{ _("Detail") }}</th>
+                        <th>{{ _("Amount") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -104,15 +106,17 @@
                                     {% endif %}
                                 {% endif %}
                             </td>
-                            <td class="text-right large-font">{{ row["expense_amount"] }}</td>
+                            <td class="text-right large-font">
+								{{  row['expense_amount'] }}
+							</td>
                         </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr class="table-primary font-weight-bold">
-                        <td colspan="2">{{ __("Total") }}</td>
+                        <td colspan="2">{{ _("Total") }}</td>
                         <td class="text-right large-font">
-                            {{ data|sum("expense_amount", if_missing=0) }}
+                            {{ data[-1].totals.today_expenses  }}
                         </td>
                     </tr>
                 </tfoot>
@@ -121,13 +125,13 @@
     </div>
 
     <div class="row border rounded p-3">
-        <div class="col-4">{{ __("Total Cash in Hand:") }}</div>
+        <div class="col-4">{{ ("Total Cash in Hand:") }}</div>
         <div class="col-6 font-weight-bold large-font">
             {{ data[-1].totals.cash_in_hand | default(0) }}
         </div>
     </div>
     <div class="row border rounded p-3">
-        <div class="col-4">{{ __("Bank:") }}</div>
+        <div class="col-4">{{ _("Bank:") }}</div>
         <div class="col-6 font-weight-bold large-font">
             {{ data[-1].totals.bank_in_hand | default(0) }}
         </div>
