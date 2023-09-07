@@ -1,23 +1,38 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from random import randint
+
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 
+from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	cancel_stock_reservation_entries,
+	get_sre_reserved_qty_details_for_voucher,
+	get_stock_reservation_entries_for_voucher,
+	has_reserved_stock,
+)
 from erpnext.stock.utils import get_stock_balance
 
 
 class TestStockReservationEntry(FrappeTestCase):
 	def setUp(self) -> None:
-		self.items = create_items()
-		create_material_receipt(self.items)
+		self.warehouse = "_Test Warehouse - _TC"
+		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+		create_material_receipt(
+			items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100
+		)
 
 	def tearDown(self) -> None:
+		cancel_all_stock_reservation_entries()
 		return super().tearDown()
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			validate_stock_reservation_settings,
@@ -47,28 +62,29 @@ class TestStockReservationEntry(FrappeTestCase):
 			get_available_qty_to_reserve,
 		)
 
-		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
-
 		# Case - 1: When `Reserved Qty` is `0`, Available Qty to Reserve = Actual Qty
-		cancel_all_stock_reservation_entries()
-		available_qty_to_reserve = get_available_qty_to_reserve(item_code, warehouse)
-		expected_available_qty_to_reserve = get_stock_balance(item_code, warehouse)
+		available_qty_to_reserve = get_available_qty_to_reserve(self.sr_item.name, self.warehouse)
+		expected_available_qty_to_reserve = get_stock_balance(self.sr_item.name, self.warehouse)
 
 		self.assertEqual(available_qty_to_reserve, expected_available_qty_to_reserve)
 
 		# Case - 2: When `Reserved Qty` is `> 0`, Available Qty to Reserve = Actual Qty - Reserved Qty
 		sre = make_stock_reservation_entry(
-			item_code=item_code,
-			warehouse=warehouse,
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
 			ignore_validate=True,
 		)
-		available_qty_to_reserve = get_available_qty_to_reserve(item_code, warehouse)
-		expected_available_qty_to_reserve = get_stock_balance(item_code, warehouse) - sre.reserved_qty
+		available_qty_to_reserve = get_available_qty_to_reserve(self.sr_item.name, self.warehouse)
+		expected_available_qty_to_reserve = (
+			get_stock_balance(self.sr_item.name, self.warehouse) - sre.reserved_qty
+		)
 
 		self.assertEqual(available_qty_to_reserve, expected_available_qty_to_reserve)
 
 	def test_update_status(self) -> None:
 		sre = make_stock_reservation_entry(
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
 			reserved_qty=30,
 			ignore_validate=True,
 			do_not_submit=True,
@@ -109,14 +125,12 @@ class TestStockReservationEntry(FrappeTestCase):
 		sre.load_from_db()
 		self.assertEqual(sre.status, "Cancelled")
 
-	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
 	def test_update_reserved_qty_in_voucher(self) -> None:
-		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
-
 		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
-			item_code=item_code,
-			warehouse=warehouse,
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
 			qty=50,
 			rate=100,
 			do_not_submit=True,
@@ -128,8 +142,8 @@ class TestStockReservationEntry(FrappeTestCase):
 
 		# Step - 2: Create a `Stock Reservation Entry[1]` for the `Sales Order Item`
 		sre1 = make_stock_reservation_entry(
-			item_code=item_code,
-			warehouse=warehouse,
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
 			voucher_type="Sales Order",
 			voucher_no=so.name,
 			voucher_detail_no=so.items[0].name,
@@ -143,8 +157,8 @@ class TestStockReservationEntry(FrappeTestCase):
 
 		# Step - 3: Create a `Stock Reservation Entry[2]` for the `Sales Order Item`
 		sre2 = make_stock_reservation_entry(
-			item_code=item_code,
-			warehouse=warehouse,
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
 			voucher_type="Sales Order",
 			voucher_no=so.name,
 			voucher_detail_no=so.items[0].name,
@@ -163,26 +177,32 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
 
-		# Step - 5: Cancel `Stock Reservation Entry[2]`
+		# Step - 5: Update `Stock Reservation Entry[2]` Reserved Qty
+		sre2.reserved_qty += sre1.reserved_qty
+		sre2.save()
+		so.load_from_db()
+		sre1.load_from_db()
+		self.assertEqual(sre2.status, "Reserved")
+		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
+
+		# Step - 6: Cancel `Stock Reservation Entry[2]`
 		sre2.cancel()
 		so.load_from_db()
 		sre2.load_from_db()
 		self.assertEqual(sre1.status, "Cancelled")
 		self.assertEqual(so.items[0].stock_reserved_qty, 0)
 
-	@change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
 	def test_cant_consume_reserved_stock(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)
 		from erpnext.stock.stock_ledger import NegativeStockError
 
-		item_code, warehouse = "SR Item 1", "_Test Warehouse - _TC"
-
 		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
-			item_code=item_code,
-			warehouse=warehouse,
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
 			qty=50,
 			rate=100,
 			do_not_submit=True,
@@ -192,13 +212,13 @@ class TestStockReservationEntry(FrappeTestCase):
 		so.save()
 		so.submit()
 
-		actual_qty = get_stock_balance(item_code, warehouse)
+		actual_qty = get_stock_balance(self.sr_item.name, self.warehouse)
 
 		# Step - 2: Try to consume (Transfer/Issue/Deliver) the Available Qty via Stock Entry or Delivery Note, should throw `NegativeStockError`.
 		se = make_stock_entry(
-			item_code=item_code,
+			item_code=self.sr_item.name,
 			qty=actual_qty,
-			from_warehouse=warehouse,
+			from_warehouse=self.warehouse,
 			rate=100,
 			purpose="Material Issue",
 			do_not_submit=True,
@@ -210,9 +230,9 @@ class TestStockReservationEntry(FrappeTestCase):
 		cancel_stock_reservation_entries(so.doctype, so.name)
 
 		se = make_stock_entry(
-			item_code=item_code,
+			item_code=self.sr_item.name,
 			qty=actual_qty,
-			from_warehouse=warehouse,
+			from_warehouse=self.warehouse,
 			rate=100,
 			purpose="Material Issue",
 			do_not_submit=True,
@@ -220,52 +240,369 @@ class TestStockReservationEntry(FrappeTestCase):
 		se.submit()
 		se.cancel()
 
+	@change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 0,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	def test_stock_reservation_against_sales_order(self) -> None:
+		items_details = create_items()
+		se = create_material_receipt(items_details, self.warehouse, qty=10)
+
+		item_list = []
+		for item_code, properties in items_details.items():
+			item_list.append(
+				{
+					"item_code": item_code,
+					"warehouse": self.warehouse,
+					"qty": randint(11, 100),
+					"uom": properties.stock_uom,
+					"rate": randint(10, 400),
+				}
+			)
+
+		so = make_sales_order(
+			item_list=item_list,
+			warehouse=self.warehouse,
+		)
+
+		# Test - 1: Stock should not be reserved if the Available Qty to Reserve is less than the Ordered Qty and Partial Reservation is disabled in Stock Settings.
+		with change_settings("Stock Settings", {"allow_partial_reservation": 0}):
+			so.create_stock_reservation_entries()
+			self.assertFalse(has_reserved_stock("Sales Order", so.name))
+
+		# Test - 2: Stock should be Partially Reserved if the Partial Reservation is enabled in Stock Settings.
+		with change_settings("Stock Settings", {"allow_partial_reservation": 1}):
+			so.create_stock_reservation_entries()
+			so.load_from_db()
+			self.assertTrue(has_reserved_stock("Sales Order", so.name))
+
+			for item in so.items:
+				sre_details = get_stock_reservation_entries_for_voucher(
+					"Sales Order", so.name, item.name, fields=["reserved_qty", "status"]
+				)[0]
+				self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
+				self.assertEqual(sre_details.status, "Partially Reserved")
+
+			se.cancel()
+
+			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
+			create_material_receipt(items_details, self.warehouse, qty=110)
+			so.create_stock_reservation_entries()
+			so.load_from_db()
+
+			reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", so.name)
+			for item in so.items:
+				reserved_qty = reserved_qty_details[item.name]
+				self.assertEqual(item.stock_reserved_qty, reserved_qty)
+				self.assertEqual(item.stock_qty, item.stock_reserved_qty)
+
+			# Test - 4: Stock should get unreserved on cancellation of Stock Reservation Entries.
+			cancel_stock_reservation_entries("Sales Order", so.name)
+			so.load_from_db()
+			self.assertFalse(has_reserved_stock("Sales Order", so.name))
+
+			for item in so.items:
+				self.assertEqual(item.stock_reserved_qty, 0)
+
+			# Test - 5: Re-reserve the stock.
+			so.create_stock_reservation_entries()
+			self.assertTrue(has_reserved_stock("Sales Order", so.name))
+
+			# Test - 6: Stock should get unreserved on cancellation of Sales Order.
+			so.cancel()
+			so.load_from_db()
+			self.assertFalse(has_reserved_stock("Sales Order", so.name))
+
+			for item in so.items:
+				self.assertEqual(item.stock_reserved_qty, 0)
+
+			# Create Sales Order and Reserve Stock.
+			so = make_sales_order(
+				item_list=item_list,
+				warehouse=self.warehouse,
+			)
+			so.create_stock_reservation_entries()
+
+			# Test - 7: Partial Delivery against Sales Order.
+			dn1 = make_delivery_note(so.name)
+
+			for item in dn1.items:
+				item.qty = randint(1, 10)
+
+			dn1.save()
+			dn1.submit()
+
+			for item in so.items:
+				sre_details = get_stock_reservation_entries_for_voucher(
+					"Sales Order", so.name, item.name, fields=["delivered_qty", "status"]
+				)[0]
+				self.assertGreater(sre_details.delivered_qty, 0)
+				self.assertEqual(sre_details.status, "Partially Delivered")
+
+			# Test - 8: Over Delivery against Sales Order, SRE Delivered Qty should not be greater than the SRE Reserved Qty.
+			with change_settings("Stock Settings", {"over_delivery_receipt_allowance": 100}):
+				dn2 = make_delivery_note(so.name)
+
+				for item in dn2.items:
+					item.qty += randint(1, 10)
+
+				dn2.save()
+				dn2.submit()
+
+			for item in so.items:
+				sre_details = get_stock_reservation_entries_for_voucher(
+					"Sales Order",
+					so.name,
+					item.name,
+					fields=["reserved_qty", "delivered_qty"],
+					ignore_status=True,
+				)
+
+				for sre_detail in sre_details:
+					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
+
+	@change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
+	def test_auto_reserve_serial_and_batch(self) -> None:
+		items_details = create_items()
+		create_material_receipt(items_details, self.warehouse, qty=100)
+
+		item_list = []
+		for item_code, properties in items_details.items():
+			item_list.append(
+				{
+					"item_code": item_code,
+					"warehouse": self.warehouse,
+					"qty": randint(11, 100),
+					"uom": properties.stock_uom,
+					"rate": randint(10, 400),
+				}
+			)
+
+		so = make_sales_order(
+			item_list=item_list,
+			warehouse=self.warehouse,
+		)
+		so.create_stock_reservation_entries()
+		so.load_from_db()
+
+		for item in so.items:
+			sre_details = get_stock_reservation_entries_for_voucher(
+				"Sales Order", so.name, item.name, fields=["status", "reserved_qty"]
+			)[0]
+
+			# Test - 1: SRE Reserved Qty should be updated in Sales Order Item.
+			self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
+
+			# Test - 2: SRE status should be `Reserved`.
+			self.assertEqual(sre_details.status, "Reserved")
+
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		dn.save()
+		dn.submit()
+
+		for item in so.items:
+			sre_details = get_stock_reservation_entries_for_voucher(
+				"Sales Order", so.name, item.name, fields=["status", "delivered_qty", "reserved_qty"]
+			)[0]
+
+			# Test - 3: After Delivery Note, SRE status should be `Delivered`.
+			self.assertEqual(sre_details.status, "Delivered")
+
+			# Test - 4: After Delivery Note, SRE Delivered Qty should be equal to SRE Reserved Qty.
+			self.assertEqual(sre_details.delivered_qty, sre_details.reserved_qty)
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		for item in dn.items:
+			if item.serial_and_batch_bundle:
+				reserved_sb_entries = (
+					frappe.qb.from_(sre)
+					.inner_join(sb_entry)
+					.on(sre.name == sb_entry.parent)
+					.select(sb_entry.serial_no, sb_entry.batch_no, sb_entry.qty, sb_entry.delivered_qty)
+					.where(
+						(sre.voucher_type == "Sales Order")
+						& (sre.voucher_no == item.against_sales_order)
+						& (sre.voucher_detail_no == item.so_detail)
+					)
+				).run(as_dict=True)
+
+				reserved_sb_details: set[tuple] = set()
+				for sb_details in reserved_sb_entries:
+					# Test - 5: After Delivery Note, SB Entry Delivered Qty should be equal to SB Entry Reserved Qty.
+					self.assertEqual(sb_details.qty, sb_details.delivered_qty)
+
+					reserved_sb_details.add((sb_details.serial_no, sb_details.batch_no, -1 * sb_details.qty))
+
+				delivered_sb_entries = frappe.db.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": item.serial_and_batch_bundle},
+					fields=["serial_no", "batch_no", "qty"],
+					as_list=True,
+				)
+				delivered_sb_details: set[tuple] = set(delivered_sb_entries)
+
+				# Test - 6: Reserved Serial/Batch Nos should be equal to Delivered Serial/Batch Nos.
+				self.assertSetEqual(reserved_sb_details, delivered_sb_details)
+
+		dn.cancel()
+		so.load_from_db()
+
+		for item in so.items:
+			sre_details = get_stock_reservation_entries_for_voucher(
+				"Sales Order",
+				so.name,
+				item.name,
+				fields=["name", "status", "delivered_qty", "reservation_based_on"],
+			)[0]
+
+			# Test - 7: After Delivery Note cancellation, SRE status should be `Reserved`.
+			self.assertEqual(sre_details.status, "Reserved")
+
+			# Test - 8: After Delivery Note cancellation, SRE Delivered Qty should be `0`.
+			self.assertEqual(sre_details.delivered_qty, 0)
+
+			if sre_details.reservation_based_on == "Serial and Batch":
+				sb_entries = frappe.db.get_all(
+					"Serial and Batch Entry",
+					filters={"parenttype": "Stock Reservation Entry", "parent": sre_details.name},
+					fields=["delivered_qty"],
+				)
+
+				for sb_entry in sb_entries:
+					# Test - 9: After Delivery Note cancellation, SB Entry Delivered Qty should be `0`.
+					self.assertEqual(sb_entry.delivered_qty, 0)
+
+	@change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
+	def test_stock_reservation_from_pick_list(self):
+		items_details = create_items()
+		create_material_receipt(items_details, self.warehouse, qty=100)
+
+		item_list = []
+		for item_code, properties in items_details.items():
+			item_list.append(
+				{
+					"item_code": item_code,
+					"warehouse": self.warehouse,
+					"qty": randint(11, 100),
+					"uom": properties.stock_uom,
+					"rate": randint(10, 400),
+				}
+			)
+
+		so = make_sales_order(
+			item_list=item_list,
+			warehouse=self.warehouse,
+		)
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+		pl.load_from_db()
+		so.load_from_db()
+
+		for item in so.items:
+			sre_details = get_stock_reservation_entries_for_voucher(
+				"Sales Order", so.name, item.name, fields=["reserved_qty"]
+			)[0]
+
+			# Test - 1: SRE Reserved Qty should be updated in Sales Order Item.
+			self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+		for location in pl.locations:
+			# Test - 2: Reserved Qty should be updated in Pick List Item.
+			self.assertEqual(location.stock_reserved_qty, location.qty)
+
+			if location.serial_and_batch_bundle:
+				picked_sb_entries = frappe.db.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": location.serial_and_batch_bundle},
+					fields=["serial_no", "batch_no", "qty"],
+					as_list=True,
+				)
+				picked_sb_details: set[tuple] = set(picked_sb_entries)
+
+				reserved_sb_entries = (
+					frappe.qb.from_(sre)
+					.inner_join(sb_entry)
+					.on(sre.name == sb_entry.parent)
+					.select(sb_entry.serial_no, sb_entry.batch_no, sb_entry.qty)
+					.where(
+						(sre.voucher_type == "Sales Order")
+						& (sre.voucher_no == location.sales_order)
+						& (sre.voucher_detail_no == location.sales_order_item)
+						& (sre.against_pick_list == pl.name)
+						& (sre.against_pick_list_item == location.name)
+					)
+				).run(as_dict=True)
+				reserved_sb_details: set[tuple] = {
+					(sb_details.serial_no, sb_details.batch_no, -1 * sb_details.qty)
+					for sb_details in reserved_sb_entries
+				}
+
+				# Test - 3: Reserved Serial/Batch Nos should be equal to Picked Serial/Batch Nos.
+				self.assertSetEqual(picked_sb_details, reserved_sb_details)
+
 
 def create_items() -> dict:
-	from erpnext.stock.doctype.item.test_item import make_item
-
-	items_details = {
-		# Stock Items
-		"SR Item 1": {"is_stock_item": 1, "valuation_rate": 100},
-		"SR Item 2": {"is_stock_item": 1, "valuation_rate": 200, "stock_uom": "Kg"},
-		# Batch Items
-		"SR Batch Item 1": {
-			"is_stock_item": 1,
-			"valuation_rate": 100,
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SRBI-1-.#####.",
-		},
-		"SR Batch Item 2": {
+	items_properties = [
+		# SR STOCK ITEM
+		{"is_stock_item": 1, "valuation_rate": 100},
+		# SR SERIAL ITEM
+		{
 			"is_stock_item": 1,
 			"valuation_rate": 200,
+			"has_serial_no": 1,
+			"serial_no_series": "SRSI-.#####",
+		},
+		# SR BATCH ITEM
+		{
+			"is_stock_item": 1,
+			"valuation_rate": 300,
 			"has_batch_no": 1,
 			"create_new_batch": 1,
-			"batch_number_series": "SRBI-2-.#####.",
-			"stock_uom": "Kg",
+			"batch_number_series": "SRBI-.#####.",
 		},
-		# Serial Item
-		"SR Serial Item 1": {
+		# SR SERIAL AND BATCH ITEM
+		{
 			"is_stock_item": 1,
-			"valuation_rate": 100,
+			"valuation_rate": 400,
 			"has_serial_no": 1,
-			"serial_no_series": "SRSI-1-.#####",
-		},
-		# Batch and Serial Item
-		"SR Batch and Serial Item 1": {
-			"is_stock_item": 1,
-			"valuation_rate": 100,
+			"serial_no_series": "SRSBI-.#####",
 			"has_batch_no": 1,
 			"create_new_batch": 1,
-			"batch_number_series": "SRBSI-1-.#####.",
-			"has_serial_no": 1,
-			"serial_no_series": "SRBSI-1-.#####",
+			"batch_number_series": "SRSBI-.#####.",
 		},
-	}
+	]
 
 	items = {}
-	for item_code, properties in items_details.items():
-		items[item_code] = make_item(item_code, properties)
+	for properties in items_properties:
+		item = make_item(properties=properties)
+		items[item.name] = item
 
 	return items
 
@@ -313,7 +650,7 @@ def make_stock_reservation_entry(**args):
 	doc = frappe.new_doc("Stock Reservation Entry")
 	args = frappe._dict(args)
 
-	doc.item_code = args.item_code or "SR Item 1"
+	doc.item_code = args.item_code
 	doc.warehouse = args.warehouse or "_Test Warehouse - _TC"
 	doc.voucher_type = args.voucher_type
 	doc.voucher_no = args.voucher_no

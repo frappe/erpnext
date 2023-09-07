@@ -702,7 +702,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	on_submit() {
-		refresh_field("items");
+		this.refresh_serial_batch_bundle_field();
+	}
+
+	refresh_serial_batch_bundle_field() {
+		frappe.route_hooks.after_submit = (frm_obj) => {
+			frm_obj.reload_doc();
+		}
 	}
 
 	update_qty(cdt, cdn) {

@@ -409,7 +409,7 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
-	if include_advance and party_type in ["Customer", "Supplier"]:
+	if include_advance and party_type in ["Customer", "Supplier", "Student"]:
 		advance_account = get_party_advance_account(party_type, party, company)
 		if advance_account:
 			return [account, advance_account]

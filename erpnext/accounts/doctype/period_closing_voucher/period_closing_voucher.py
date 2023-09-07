@@ -126,7 +126,7 @@ class PeriodClosingVoucher(AccountsController):
 	def make_gl_entries(self, get_opening_entries=False):
 		gl_entries = self.get_gl_entries()
 		closing_entries = self.get_grouped_gl_entries(get_opening_entries=get_opening_entries)
-		if len(gl_entries) > 5000:
+		if len(gl_entries + closing_entries) > 3000:
 			frappe.enqueue(
 				process_gl_entries,
 				gl_entries=gl_entries,
