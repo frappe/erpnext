@@ -84,6 +84,7 @@ class Project(Document):
 				issue=task_details.issue,
 				is_group=task_details.is_group,
 				color=task_details.color,
+				template_task=task_details.name,
 			)
 		).insert()
 
@@ -103,9 +104,13 @@ class Project(Document):
 		return date
 
 	def dependency_mapping(self, template_tasks, project_tasks):
-		for template_task in template_tasks:
-			project_task = list(filter(lambda x: x.subject == template_task.subject, project_tasks))[0]
-			project_task = frappe.get_doc("Task", project_task.name)
+		for project_task in project_tasks:
+			if project_task.get("template_task"):
+				template_task = frappe.get_doc("Task", project_task.template_task)
+			else:
+				template_task = list(filter(lambda x: x.subject == project_task.subject, template_tasks))[0]
+				template_task = frappe.get_doc("Task", template_task.name)
+
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
