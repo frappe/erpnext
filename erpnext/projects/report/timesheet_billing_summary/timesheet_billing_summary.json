@@ -1,0 +1,41 @@
+{
+    "add_total_row": 1,
+    "columns": [],
+    "creation": "2023-08-31 15:18:07.311364",
+    "disable_prepared_report": 0,
+    "disabled": 0,
+    "docstatus": 0,
+    "doctype": "Report",
+    "filters": [],
+    "idx": 0,
+    "is_standard": "Yes",
+    "modified": "2023-09-01 11:27:02.935419",
+    "modified_by": "Administrator",
+    "module": "Projects",
+    "name": "Timesheet Billing Summary",
+    "owner": "Administrator",
+    "prepared_report": 0,
+    "ref_doctype": "Timesheet",
+    "report_name": "Timesheet Billing Summary",
+    "report_type": "Script Report",
+    "roles": [
+     {
+      "role": "Projects User"
+     },
+     {
+      "role": "Manufacturing User"
+     },
+     {
+      "role": "Accounts User"
+     },
+     {
+      "role": "HR User"
+     },
+     {
+      "role": "Employee"
+     },
+     {
+      "role": "Employee Self Service"
+     }
+    ]
+   }
