@@ -125,6 +125,7 @@ class Project(Document):
 					filter(lambda x: x.subject == child_task_subject, project_tasks)
 				)
 				if len(corresponding_project_task):
+					project_task.reload()  # reload, as it might have been updated in the previous iteration
 					project_task.append("depends_on", {"task": corresponding_project_task[0].name})
 					project_task.save()
 
