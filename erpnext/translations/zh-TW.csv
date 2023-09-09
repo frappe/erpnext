@@ -150,7 +150,6 @@ Tax Withholding Category,預扣稅類別
 Cancel the journal entry {0} first,首先取消日記條目{0}
 BOM is not specified for subcontracting item {0} at row {1},沒有為行{1}的轉包商品{0}指定BOM,
 {0} Result submittted,{0}結果提交
-Timespan,時間跨度
 Help Results for,幫助結果
 Select Warehouse...,選擇倉庫...
 Advertising,廣告
@@ -316,7 +315,6 @@ Woocommerce Settings,Woocommerce設置
 Sales Orders,銷售訂單
 Multiple Loyalty Program found for the Customer. Please select manually.,為客戶找到多個忠誠度計劃。請手動選擇。
 Valuation,計價
-Set as Default,設為預設
 Purchase Order Trends,採購訂單趨勢
 Go to Customers,轉到客戶
 Late Checkin,延遲入住
@@ -336,7 +334,6 @@ Updated via 'Time Log',經由“時間日誌”更新
 Select the customer or supplier.,選擇客戶或供應商。
 Advance amount cannot be greater than {0} {1},提前量不能大於{0} {1}
 "Time slot skiped, the slot {0} to {1} overlap exisiting slot {2} to {3}",時隙滑動，時隙{0}到{1}與現有時隙{2}重疊到{3}
-Series List for this Transaction,本交易系列表
 Enable Perpetual Inventory,啟用永久庫存
 Charges Incurred,收費發生
 Default Payroll Payable Account,默認情況下，應付職工薪酬帳戶
@@ -1193,7 +1190,6 @@ Setup your Institute in ERPNext,在ERPNext中設置您的研究所
 Hold,持有
 Alternate Item,替代項目
 Progress Details,進度細節
-Request Data,請求數據
 Date of Joining,加入日期
 Is Subcontracted,轉包
 Item Attribute Values,項目屬性值
@@ -1580,7 +1576,6 @@ Disable Marketplace,禁用市場
 Trial Balance,試算表
 Setting up Employees,建立職工
 Hotel Reservation User,酒店預訂用戶
-Please select prefix first,請先選擇前綴稱號
 Subscription Settings,訂閱設置
 Update Auto Repeat Reference,更新自動重複參考
 Work Done,工作完成
@@ -1730,7 +1725,6 @@ BOM {0} does not belong to Item {1},BOM {0}不屬於項目{1}
 Target Distribution,目標分佈
 06-Finalization of Provisional assessment,06-定期評估
 Bank Account No.,銀行賬號
-This is the number of the last created transaction with this prefix,這就是以這個前綴的最後一個創建的事務數
 "Scorecard variables can be used, as well as:
 {total_score} (the total score from that period),
 {period_number} (the number of periods to present day)
@@ -1882,7 +1876,6 @@ Office Rent,辦公室租金
 Setup SMS gateway settings,設置短信閘道設置
 Common Name,通用名稱
 Import Failed!,導入失敗！
-No address added yet.,尚未新增地址。
 Workstation Working Hour,工作站工作時間
 Blood Pressure,血壓
 Analyst,分析人士
@@ -1964,7 +1957,6 @@ Two-way,雙向
 Day to Send,發送日
 Manage Sample Collection,管理樣品收集
 Ignore Existing Ordered Quantity,忽略現有的訂購數量
-Please set the series to be used.,請設置要使用的系列。
 Tobacco Past Use,煙草過去使用
 Brand Name,商標名稱
 Transporter Details,貨運公司細節
@@ -2178,7 +2170,6 @@ Non Profit Member,非盈利會員
 {0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.,{0} {1}：需要的損益“科目成本中心{2}。請設置為公司默認的成本中心。
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,客戶群組存在相同名稱，請更改客戶名稱或重新命名客戶群組
 Area,區
-New Contact,新建聯絡人
 Company Description,公司介紹
 Parent Territory,家長領地
 Place of Supply,供貨地點
@@ -2694,7 +2685,6 @@ Electronics,電子
 Debit ({0}),借記卡（{0}）
 Allow Same Item Multiple Times,多次允許相同的項目
 Raise Material Request when stock reaches re-order level,當庫存到達需重新訂購水平時提高物料需求
-Contact Details,聯絡方式
 Received Date,接收日期
 "If you have created a standard template in Sales Taxes and Charges Template, select one and click on the button below.",如果您已經創建了銷售稅和費模板標準模板，選擇一個，然後點擊下面的按鈕。
 Basic Amount (Company Currency),基本金額（公司幣種）
@@ -2740,7 +2730,6 @@ Exchange Gain/Loss,兌換收益/損失
 Lost Reason,失落的原因
 Enable Amazon,啟用亞馬遜
 Row #{0}: Account {1} does not belong to company {2},行＃{0}：科目{1}不屬於公司{2}
-Unable to find DocType {0},無法找到DocType {0}
 Sample Size,樣本大小
 Please enter Receipt Document,請輸入收據憑證
 All items have already been invoiced,所有項目已開具發票
@@ -2825,10 +2814,8 @@ This document is over limit by {0} {1} for item {4}. Are you making another {3} 
 Please set recurring after saving,請設置保存後復發
 Select change amount account,選擇變化量科目
 Price List Currency,價格表之貨幣
-User must always select,用戶必須始終選擇
 Allow Negative Stock,允許負庫存
 Installation Note,安裝注意事項
-Topic,話題
 Cash Flow from Financing,從融資現金流
 Budget Account,預算科目
 Verified By,認證機構
@@ -3889,7 +3876,6 @@ Not Billed,不發單
 Both Warehouse must belong to same Company,這兩個倉庫必須屬於同一個公司
 Default Leave Policy,默認離開政策
 Shop URL,商店網址
-No contacts added yet.,尚未新增聯絡人。
 Landed Cost Voucher Amount,到岸成本憑證金額
 Item Balance (Simple),物品餘額（簡單）
 Bills raised by Suppliers.,由供應商提出的帳單。
@@ -4202,7 +4188,6 @@ Rate,單價
 Address Name,地址名稱
 From BOM,從BOM,
 Assessment Code,評估準則
-Basic,基本的
 Stock transactions before {0} are frozen,{0}前的庫存交易被凍結
 Please click on 'Generate Schedule',請點擊“生成表”
 Reference No is mandatory if you entered Reference Date,如果你輸入的參考日期，參考編號是強制性的
@@ -4326,7 +4311,6 @@ Student Email,學生電子郵件
 "Allergies, Medical and Surgical History",過敏，醫療和外科史
 Add to Cart,添加到購物車
 Group By,集團通過
-Interests,興趣
 Enable / disable currencies.,啟用／禁用的貨幣。
 Could not submit some Salary Slips,無法提交一些薪資單
 Get Entries,獲取條目
@@ -4355,7 +4339,6 @@ Work Order not created,工作訂單未創建
 "An amount of {0} already claimed for the component {1},\
 						 set the amount equal or greater than {2}",已為組件{1}申請的金額{0}，設置等於或大於{2}的金額
 Shipping Rule Conditions,送貨規則條件
-Export Type,導出類型
 The new BOM after replacement,更換後的新物料清單
 Point of Sale,銷售點
 Received Amount,收金額
@@ -4421,7 +4404,6 @@ No Customers yet!,還沒有客戶！
 Healthcare Service Unit,醫療服務單位
 Cash Flow Statement,現金流量表
 No material request created,沒有創建重要請求
-License,執照
 Please remove this Invoice {0} from C-Form {1},請刪除此發票{0}從C-表格{1}
 Against Voucher Type,對憑證類型
 Phone (R),電話（R）
@@ -4550,7 +4532,6 @@ Please select the assessment group other than 'All Assessment Groups',請選擇�
 Row {0}: Cost center is required for an item {1},行{0}：項目{1}需要費用中心
 Optional,可選的
 {0} variants created.,創建了{0}個變體。
-Region,區域
 Optional. This setting will be used to filter in various transactions.,可選。此設置將被應用於過濾各種交易進行。
 Negative Valuation Rate is not allowed,負面評價率是不允許的
 Weekly Off,每週關閉
@@ -4637,7 +4618,6 @@ Posting Time,登錄時間
 % Amount Billed,（％）金額已開立帳單
 Telephone Expenses,電話費
 Logo,標誌
-Check this if you want to force the user to select a series before saving. There will be no default if you check this.,如果要強制用戶在儲存之前選擇了一系列，則勾選此項。如果您勾選此項，則將沒有預設值。
 No Item with Serial No {0},沒有序號{0}的品項
 Open Notifications,打開通知
 Difference Amount (Company Currency),差異金額（公司幣種）
@@ -4896,7 +4876,6 @@ From No,來自No,
 Actual Time in Hours (via Timesheet),實際時間（小時）
 History In Company,公司歷史
 Customer Primary Address,客戶主要地址
-Newsletters,簡訊
 Reference No.,參考編號。
 Description/Strength,說明/力量
 Create New Payment/Journal Entry,創建新的付款/日記賬分錄
@@ -5105,7 +5084,6 @@ Enable Deferred Revenue,啟用延期收入
 Opening Accumulated Depreciation must be less than equal to {0},打開累計折舊必須小於等於{0}
 Warehouse Name,倉庫名稱
 Actual start date must be less than actual end date,實際開始日期必須小於實際結束日期
-Select Transaction,選擇交易
 Please enter Approving Role or Approving User,請輸入核准角色或審批用戶
 Write Off Entry,核銷進入
 Rate Of Materials Based On,材料成本基於
@@ -5362,7 +5340,6 @@ Staffing Plan Details,人員配置計劃詳情
 Serial No Service Contract Expiry,序號服務合同到期
 You cannot credit and debit same account at the same time,你無法將貸方與借方在同一時間記在同一科目
 Adults' pulse rate is anywhere between 50 and 80 beats per minute.,成年人的脈率在每分鐘50到80次之間。
-Help HTML,HTML幫助
 Student Group Creation Tool,學生組創建工具
 Variant Based On,基於變異對
 Total weightage assigned should be 100%. It is {0},分配的總權重應為100 ％ 。這是{0}
@@ -5537,7 +5514,6 @@ Stock Qty,庫存數量
 Stock Qty,庫存數量
 Default Shipping Account,默認運輸科目
 Error: Not a valid id?,錯誤：沒有有效的身份證？
-Update Series Number,更新序列號
 Equity,公平
 {0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry,{0} {1}：“損益”科目類型{2}不允許進入開
 Printing Details,印刷詳情
@@ -5772,7 +5748,6 @@ Voucher Type,憑證類型
 Max Retry Limit,最大重試限制
 Price List not found or disabled,價格表未找到或被禁用
 Price,價格
-Last Sync On,上次同步開啟
 Guardian,監護人
 All communications including and above this shall be moved into the new Issue,包括及以上的所有通信均應移至新發行中
 Item Alternative,項目選擇
