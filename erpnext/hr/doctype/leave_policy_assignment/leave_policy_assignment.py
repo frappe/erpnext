@@ -119,7 +119,7 @@ class LeavePolicyAssignment(Document):
 		new_leaves_allocated = self.get_new_leaves(
 			leave_type, new_leaves_allocated, leave_type_details, date_of_joining
 		)
-		frappe.msgprint(str(new_leaves_allocated))
+		# frappe.msgprint(str(new_leaves_allocated))
 
 		allocation = frappe.get_doc(
 			dict(

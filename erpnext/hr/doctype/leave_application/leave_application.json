@@ -99,6 +99,7 @@
   {
    "fieldname": "leave_balance",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Leave Balance Before Application",
    "no_copy": 1,
    "read_only": 1
@@ -222,6 +223,7 @@
   {
    "fieldname": "salary_slip",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salary Slip",
    "options": "Salary Slip",
    "print_hide": 1
@@ -281,7 +283,8 @@
   {
    "fieldname": "lwp_count",
    "fieldtype": "Float",
-   "label": "LWP Count"
+   "label": "LWP Count",
+   "read_only": 1
   },
   {
    "fieldname": "total_used_leaves",
@@ -292,13 +295,14 @@
   {
    "fieldname": "current_leave_type_count",
    "fieldtype": "Float",
-   "label": "Current Leave Type Count"
+   "label": "Current Leave Type Count",
+   "read_only": 1
   },
   {
    "fieldname": "half_day_session",
    "fieldtype": "Select",
    "label": "Half Day Session",
-   "options": "\nSession 1st\nSession 2nd"
+   "options": "\nSession 1\nSession 2"
   }
  ],
  "icon": "fa fa-calendar",
@@ -306,7 +310,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-08-30 11:48:03.707134",
+ "modified": "2023-09-06 13:51:42.889102",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",

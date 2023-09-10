@@ -5,10 +5,11 @@
 		<tr>
 			<th style="width: 16%">{{ __("Leave Type") }}</th>
 			<th style="width: 16%" class="text-right">{{ __("Total Allocated Leave(s)") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Expired Leave(s)") }}</th>
+			<!-- <th style="width: 16%" class="text-right">{{ __("Expired Leave(s)") }}</th> -->
 			<th style="width: 16%" class="text-right">{{ __("Used Leave(s)") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Leave(s) Pending Approval") }}</th>
 			<th style="width: 16%" class="text-right">{{ __("Available Leave(s)") }}</th>
+			<th style="width: 16%" class="text-right">{{ __("Leave(s) Pending Approval") }}</th>
+			<th style="width: 16%" class="text-right">{{ __("Projected Available Leave(s)") }}</th> <!-- New column header -->
 		</tr>
 	</thead>
 	<tbody>
@@ -16,10 +17,11 @@
 			<tr>
 				<td> {%= key %} </td>
 				<td class="text-right"> {%= value["total_leaves"] %} </td>
-				<td class="text-right"> {%= value["expired_leaves"] %} </td>
+				<!-- <td class="text-right"> {%= value["expired_leaves"] %} </td> -->
 				<td class="text-right"> {%= value["leaves_taken"] %} </td>
-				<td class="text-right"> {%= value["leaves_pending_approval"] %} </td>
 				<td class="text-right"> {%= value["remaining_leaves"] %} </td>
+				<td class="text-right"> {%= value["leaves_pending_approval"] %} </td>
+				<td class="text-right"> {%= value["remaining_leaves"] - value["leaves_pending_approval"] %} </td> 
 			</tr>
 		{% } %}
 	</tbody>
@@ -28,18 +30,18 @@
 <table class="table table-bordered small">
 	<thead>
 		<tr>
-			<th style="width: 20%">{{ __("Monthly Allocated Leaves") }}</th>
-			<th style="width: 20%" class="text-right">{{ __("Total Used Leaves") }}</th>
-			<th style="width: 20%" class="text-right">{{ __("Balance") }}</th>
-			<th style="width: 20%" class="text-right">{{ __("Total Available") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Opening balance") }}</th>
+			<th style="width: 20%">{{ __("Monthly leave Add") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Applied Leave") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Total balance Leave") }}</th>
 		</tr>
 	</thead>
 	<tbody>
 		
 		<tr>
+			<td class="text-right"> {{ balance - 2.5}} </td>
 			<td class="text-right"> {{ allocation_value }} </td>
 			<td class="text-right"> {{ total_now_taken_leave_positive }} </td>
-			<td class="text-right"> {{ balance }} </td>
 			<td class="text-right"> {{total_available }} </td>
 		</tr>
 	</tbody>

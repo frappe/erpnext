@@ -185,7 +185,8 @@ frappe.ui.form.on("Leave Application", {
 		var half_day_datepicker = frm.fields_dict.half_day_date.datepicker;
 		half_day_datepicker.update({
 			minDate: frappe.datetime.str_to_obj(frm.doc.from_date),
-			maxDate: frappe.datetime.str_to_obj(frm.doc.to_date)
+			maxDate: frappe.datetime.str_to_obj(frm.doc.to_date),
+		
 		});
 	},
 
@@ -264,6 +265,10 @@ frappe.ui.form.on("Leave Application", {
 						frm.doc.current_leave_type_count = current_leave_type_count;
 						frm.refresh_field('current_leave_type_count');
 						
+						
+						
+						
+						
 
 					}
 				}
@@ -311,6 +316,33 @@ frappe.ui.form.on('Leave Application', {
 		}
 	}
 });
+// frappe.ui.form.on('Leave Application', {
+//     before_save: function(frm) {
+//         var maxDays = parseFloat(frm.doc.total_available);
+
+//         if (maxDays && (frm.doc.total_leave_days > maxDays)) {
+//             var message = __('You have {0} available leave days this month. Considering {1} days as Leave Without Pay (LWP). Do you want to proceed?')
+//                 .replace('{0}', frm.doc.total_available)
+//                 .replace('{1}', frm.doc.lwp_count);
+
+//             frappe.confirm(message, function(result) {
+//                 if (result) {
+                   
+//                     frm.save();
+//                 } else {
+//                     // User canceled, do nothing
+//                     frappe.throw(__('Operation canceled.'));
+//                 }
+//             });
+
+//             // Return false to prevent the form from being saved immediately
+//             return false;
+//         }
+//     }
+// });
+
+
+
 frappe.tour["Leave Application"] = [
 	{
 		fieldname: "employee",
