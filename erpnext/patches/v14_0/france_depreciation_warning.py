@@ -7,6 +7,6 @@ def execute():
 		return
 	click.secho(
 		"Feature for Feature Region will be remove in version-15 and moved to a separate app\n"
-		"Please install the app to continue using the regionnal France features: git@github.com:scopen-coop/erpnext_france.git",
+		"Please install the app to continue using the regionnal France features: https://github.com/scopen-coop/erpnext_france.git",
 		fg="yellow",
 	)
