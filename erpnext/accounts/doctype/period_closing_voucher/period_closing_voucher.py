@@ -97,7 +97,7 @@ class PeriodClosingVoucher(AccountsController):
 
 		pce = frappe.db.sql(
 			"""select name from `tabPeriod Closing Voucher`
-			where posting_date > %s and fiscal_year = %s and docstatus = 1 and company = %s""",
+			where posting_date >= %s and fiscal_year = %s and docstatus = 1 and company = %s""",
 			(self.posting_date, self.fiscal_year, self.company),
 		)
 		if pce and pce[0][0]:
@@ -134,7 +134,7 @@ class PeriodClosingVoucher(AccountsController):
 				voucher_name=self.name,
 				company=self.company,
 				closing_date=self.posting_date,
-				queue="long",
+				timeout=3000,
 			)
 			frappe.msgprint(
 				_("The GL Entries will be processed in the background, it can take a few minutes."),
