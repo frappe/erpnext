@@ -380,7 +380,7 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 			recipients, cc = get_recipients_and_cc(customer, doc)
 			if not recipients:
 				continue
-				
+
 			subject = frappe.render_template(doc.subject, context)
 			message = frappe.render_template(doc.body, context)
 
