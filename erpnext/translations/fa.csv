@@ -113,7 +113,6 @@ Add Item,این مورد را اضافه کنید,
 Add Items,اضافه کردن محصولات,
 Add Leads,اضافه کردن موارد,
 Add Multiple Tasks,اضافه کردن کارهای چندگانه,
-Add Row,اضافه کردن ردیف,
 Add Sales Partners,اضافه کردن همکاران فروش,
 Add Serial No,اضافه کردن سریال بدون,
 Add Students,اضافه کردن دانش آموزان,
@@ -211,9 +210,7 @@ An academic term with this 'Academic Year' {0} and 'Term Name' {1} already exist
 An error occurred during the update process,یک خطا در طول فرایند به روز رسانی رخ داد,
 "An item exists with same name ({0}), please change the item group name or rename the item",یک مورد را با همین نام وجود دارد ({0})، لطفا نام گروه مورد تغییر یا تغییر نام آیتم,
 Analyst,روانکاو,
-Analytics,تجزیه و تحلیل ترافیک,
 Annual Billing: {0},صدور صورت حساب سالانه: {0},
-Anonymous,ناشناس,
 Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' for fiscal year {4},یکی دیگر از حسابهای بودجه {0} در حال حاضر در برابر {1} &#39;{2}&#39; و حساب &#39;{3}&#39; برای سال مالی {4} وجود دارد,
 Another Period Closing Entry {0} has been made after {1},یکی دیگر از ورودی اختتامیه دوره {0} شده است پس از ساخته شده {1},
 Another Sales Person {0} exists with the same Employee id,یک نفر دیگر فروش {0} با شناسه کارمند همان وجود دارد,
@@ -283,7 +280,6 @@ Attendance has been marked successfully.,حضور و غیاب با موفقیت 
 Attendance not submitted for {0} as {1} on leave.,حضور به دلیل {0} به عنوان {1} در بازنشستگی ارائه نشده است.,
 Attribute table is mandatory,جدول ویژگی الزامی است,
 Attribute {0} selected multiple times in Attributes Table,ویژگی {0} چند بار در صفات جدول انتخاب,
-Author,نویسنده,
 Authorized Signatory,امضای مجاز,
 Auto Material Requests Generated,درخواست مواد تولید خودکار,
 Auto Repeat,خودکار تکرار,
@@ -340,7 +336,6 @@ Barcode {0} is not a valid {1} code,بارکد {0} یک کد معتبر {1} نی
 Base URL,URL پایه,
 Based On,بر اساس,
 Based On Payment Terms,براساس شرایط پرداخت,
-Basic,پایه,
 Batch,دسته,
 Batch Entries,ورودی های دسته ای,
 Batch ID is mandatory,دسته ID الزامی است,
@@ -361,7 +356,6 @@ Bill of Materials (BOM),صورت مواد (BOM),
 Billable Hours,ساعت قابل پرداخت,
 Billed,فاکتور شده,
 Billed Amount,مقدار فاکتور شده,
-Billing,صدور صورت حساب,
 Billing Address,نشانی صورتحساب,
 Billing Address is same as Shipping Address,آدرس صورتحساب همان آدرس حمل و نقل است,
 Billing Amount,مقدار حسابداری,
@@ -560,7 +554,6 @@ Consumed Amount,مقدار مصرف,
 Consumed Qty,مصرف تعداد,
 Consumer Products,محصولات مصرفی,
 Contact,تماس,
-Contact Details,اطلاعات تماس,
 Contact Us,تماس با ما,
 Content,مقدار,
 Content Masters,کارشناسی ارشد محتوا,
@@ -715,7 +708,6 @@ Date of Commencement should be greater than Date of Incorporation,تاریخ ش�
 Date of Joining,تاریخ پیوستن,
 Date of Joining must be greater than Date of Birth,تاریخ پیوستن باید بیشتر از تاریخ تولد شود,
 Date of Transaction,تاریخ معامله,
-Datetime,زمان قرار,
 Day,روز,
 Debit,بدهی,
 Debit ({0}),بده ({0}),
@@ -874,7 +866,6 @@ Employee Transfer cannot be submitted before Transfer Date ,انتقال کار�
 Employee cannot report to himself.,کارمند نمی تواند به خود گزارش دهید.,
 Employee {0} has already applied for {1} between {2} and {3} : ,کارکنان {0} قبلا برای {1} بین {2} و {3} درخواست شده است:,
 Employee {0} of grade {1} have no default leave policy,کارمند {0} درجه {1} هیچ خط مشی پیش فرض ترک ندارد,
-Enable,قادر ساختن,
 Enable / disable currencies.,فعال / غیر فعال کردن ارز.,
 Enabled,فعال,
 "Enabling 'Use for Shopping Cart', as Shopping Cart is enabled and there should be at least one Tax Rule for Shopping Cart",فعال کردن «استفاده برای سبد خرید، به عنوان سبد خرید فعال باشد و باید حداقل یک قانون مالیاتی برای سبد خرید وجود داشته باشد,
@@ -905,7 +896,6 @@ Error in formula or condition: {0},اشکال در فرمول یا شرایط: {
 Error: Not a valid id?,خطا: نه یک شناسه معتبر است؟,
 Estimated Cost,هزینه تخمین زده شده,
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:",حتی اگر قوانین قیمت گذاری های متعدد را با بالاترین اولویت وجود دارد، سپس زیر اولویت های داخلی می شود:,
-Event,واقعه,
 Exchange Gain/Loss,تبادل کاهش / افزایش,
 Exchange Rate Revaluation master.,استاد ارزشیابی نرخ ارز.,
 Exchange Rate must be same as {0} {1} ({2}),نرخ ارز باید به همان صورت {0} {1} ({2}),
@@ -1032,7 +1022,6 @@ From and To dates required,از و به تاریخ های الزامی,
 From value must be less than to value in row {0},از مقدار باید کمتر از ارزش در ردیف شود {0},
 From {0} | {1} {2},از {0} | {1} {2},
 Fulfillment,انجام,
-Full,پر شده,
 Full Name,نام و نام خانوادگی,
 Fully Depreciated,به طور کامل مستهلک,
 Furnitures and Fixtures,مبلمان و لامپ,
@@ -1185,7 +1174,6 @@ Individual,فردی,
 Ineligible ITC,ITC واجد شرایط نیست,
 Initiated,آغاز,
 Inpatient Record,ضبط بستری,
-Insert,درج,
 Installation Note,نصب و راه اندازی توجه داشته باشید,
 Installation Note {0} has already been submitted,نصب و راه اندازی {0} توجه داشته باشید در حال حاضر ارائه شده است,
 Installation date cannot be before delivery date for Item {0},تاریخ نصب و راه اندازی نمی تواند قبل از تاریخ تحویل برای مورد است {0},
@@ -1197,7 +1185,6 @@ Insufficient Stock,سهام کافی,
 Insurance Start date should be less than Insurance End date,تاریخ بیمه شروع باید کمتر از تاریخ پایان باشد بیمه,
 Integrated Tax,مالیات یکپارچه,
 Inter-State Supplies,لوازم بین دولتی,
-Interests,منافع,
 Internet Publishing,انتشارات اینترنت,
 Intra-State Supplies,لوازم داخل کشور,
 Introduction,معرفی,
@@ -1316,7 +1303,6 @@ Lab result datetime cannot be before testing datetime,datetime date نت نمی 
 Lab testing datetime cannot be before collection datetime,datetime آزمایشی آزمایش قبل از تاریخ date collection نمی تواند باشد,
 Label,برچسب,
 Laboratory,آزمایشگاه,
-Language Name,نام زبان,
 Large,بزرگ,
 Last Communication,ارتباطات آخرین,
 Last Communication Date,آخرین تاریخ ارتباطات,
@@ -1347,8 +1333,6 @@ Letter Head,نامه سر,
 Letter Heads for print templates.,سران نامه برای قالب چاپ.,
 Level,سطح,
 Liability,مسئوليت,
-License,مجوز,
-Limit,حد,
 Limit Crossed,محدودیت عبور,
 Link to Material Request,پیوند به درخواست مواد,
 List of all share transactions,فهرست همه تراکنشهای اشتراکی,
@@ -1359,7 +1343,6 @@ Loan Start Date and Loan Period are mandatory to save the Invoice Discounting,ت
 Loans (Liabilities),وام (بدهی),
 Loans and Advances (Assets),وام و پیشرفت (دارایی),
 Local,محلی,
-Log,ورود,
 Logs for maintaining sms delivery status,سیاهههای مربوط به حفظ وضعیت تحویل اس ام اس,
 Lost,از دست رفته,
 Lost Reasons,دلایل گمشده,
@@ -1445,7 +1428,6 @@ Medical Code Standard,کد استاندارد پزشکی,
 Medical Department,گروه پزشکی,
 Medical Record,پرونده پزشکی,
 Medium,متوسط,
-Meeting,ملاقات,
 Member Activity,فعالیت اعضاء,
 Member ID,شناسه عضو,
 Member Name,نام عضو,
@@ -1495,7 +1477,6 @@ Multiple Loyalty Program found for the Customer. Please select manually.,برن�
 Multiple Variants,گزینه های چندگانه,
 Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year,سال مالی متعدد برای تاریخ {0} وجود داشته باشد. لطفا شرکت راه در سال مالی,
 Music,موسیقی,
-My Account,حساب من,
 Name error: {0},error نام: {0},
 Name of new Account. Note: Please don't create accounts for Customers and Suppliers,نام حساب کاربری جدید. توجه: لطفا حساب برای مشتریان و تامین کنندگان ایجاد نمی,
 Name or Email is mandatory,نام و نام خانوادگی پست الکترونیک و یا اجباری است,
@@ -1538,7 +1519,6 @@ New Warehouse Name,جدید نام انبار,
 New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},حد اعتبار جدید کمتر از مقدار برجسته فعلی برای مشتری است. حد اعتبار به حداقل می شود {0},
 New task,وظیفه جدید,
 New {0} pricing rules are created,جدید {0} قوانین قیمت گذاری ایجاد می شود,
-Newsletters,خبرنامه,
 Newspaper Publishers,روزنامه,
 Next,بعد,
 Next Contact By cannot be same as the Lead Email Address,بعد تماس با نمی تواند همان آدرس ایمیل سرب,
@@ -1726,7 +1706,6 @@ Party Type,نوع حزب,
 Party Type and Party is mandatory for {0} account,نوع حزب و حزب برای حساب {0} اجباری است,
 Party Type is mandatory,نوع حزب الزامی است,
 Party is mandatory,حزب الزامی است,
-Password,رمز عبور,
 Past Due Date,تاریخ تحویل گذشته,
 Patient,صبور,
 Patient Appointment,قرار ملاقات بیمار,
@@ -1784,7 +1763,6 @@ Personal Details,اطلاعات شخصی,
 Pharmaceutical,دارویی,
 Pharmaceuticals,داروسازی,
 Physician,پزشک,
-Pincode,Pincode,
 Place Of Supply (State/UT),محل عرضه (ایالت / UT),
 Place Order,محل سفارش,
 Plan Name,نام برنامه,
@@ -1896,7 +1874,6 @@ Please select correct account,لطفا به حساب صحیح را انتخاب 
 Please select date,لطفا تاریخ را انتخاب کنید,
 Please select item code,لطفا کد مورد را انتخاب کنید,
 Please select month and year,لطفا ماه و سال را انتخاب کنید,
-Please select prefix first,لطفا ابتدا پیشوند انتخاب کنید,
 Please select the Company,لطفا شرکت را انتخاب کنید,
 Please select the Multiple Tier Program type for more than one collection rules.,لطفا نوع برنامه چند مرحله ای را برای بیش از یک مجموعه قوانین مجموعه انتخاب کنید.,
 Please select the assessment group other than 'All Assessment Groups',لطفا گروه ارزیابی غیر از &#39;همه گروه ارزیابی &quot;را انتخاب کنید,
@@ -1913,7 +1890,6 @@ Please set Company,لطفا مجموعه شرکت,
 Please set Company filter blank if Group By is 'Company',لطفا مجموعه شرکت فیلتر خالی اگر گروه توسط است شرکت &#39;,
 Please set Default Payroll Payable Account in Company {0},لطفا پیش فرض حقوق و دستمزد پرداختنی حساب تعیین شده در شرکت {0},
 Please set Depreciation related Accounts in Asset Category {0} or Company {1},لطفا حساب مربوط استهلاک در دارایی رده {0} یا شرکت {1},
-Please set Email Address,لطفا آدرس ایمیل,
 Please set GST Accounts in GST Settings,لطفا حسابهای GST را در تنظیمات GST تنظیم کنید,
 Please set Hotel Room Rate on {},لطفا قیمت اتاق هتل را برای {} تنظیم کنید,
 Please set Number of Depreciations Booked,لطفا تعداد مجموعه ای از Depreciations رزرو,
@@ -1936,7 +1912,6 @@ Please set the Default Cost Center in {0} company.,لطفا مرکز هزینه 
 Please set the Email ID for the Student to send the Payment Request,لطفا برای شناسایی ایمیل برای دانشجو برای ارسال درخواست پرداخت تنظیم کنید,
 Please set the Item Code first,لطفا ابتدا کد مورد را تنظیم کنید,
 Please set the Payment Schedule,لطفا برنامه پرداخت را تنظیم کنید,
-Please set the series to be used.,لطفا مجموعه ای را که استفاده می کنید تنظیم کنید,
 Please set {0} for address {1},لطفا {0} را برای آدرس {1} تنظیم کنید,
 Please setup Students under Student Groups,لطفا دانشجویان را در گروه های دانشجویی قرار دهید,
 Please specify Company,لطفا شرکت مشخص,
@@ -1953,7 +1928,6 @@ Point of Sale,نقطه ای از فروش,
 Point-of-Sale,نقطه از فروش,
 Point-of-Sale Profile,نقطه از فروش مشخصات,
 Portal,پرتال,
-Portal Settings,تنظیمات پورتال,
 Possible Supplier,کننده ممکن,
 Postal Expenses,هزینه پستی,
 Posting Date,تاریخ ارسال,
@@ -2152,12 +2126,10 @@ Reference No and Reference Date is mandatory for Bank transaction,مرجع و ت
 Reference No is mandatory if you entered Reference Date,مرجع بدون اجباری است اگر شما وارد مرجع تاریخ,
 Reference No.,شماره مرجع.,
 Reference Number,شماره مرجع,
-Reference Owner,مرجع مالک,
 Reference Type,نوع مرجع,
 "Reference: {0}, Item Code: {1} and Customer: {2}",مرجع: {0}، کد مورد: {1} و ضوابط: {2},
 References,مراجع,
 Refresh Token,تازه کردن رمز,
-Region,منطقه,
 Register,ثبت نام,
 Rejected,رد,
 Related,مربوط,
@@ -2179,7 +2151,6 @@ Repeat Customers,مشتریان تکرار,
 Replace BOM and update latest price in all BOMs,جایگزین BOM و به روز رسانی آخرین قیمت در تمام BOMs,
 Replied,پاسخ,
 Report,گزارش,
-Report Builder,گزارش ساز,
 Report Type,نوع گزارش,
 Report Type is mandatory,نوع گزارش الزامی است,
 Reports,گزارش ها,
@@ -2355,13 +2326,11 @@ Salutation,سلام,
 Same Company is entered more than once,همان شرکت است وارد بیش از یک بار,
 Same item cannot be entered multiple times.,آیتم همان نمی تواند وارد شود چند بار.,
 Same supplier has been entered multiple times,منبع همان وارد شده است چندین بار,
-Sample,نمونه,
 Sample Collection,مجموعه نمونه,
 Sample quantity {0} cannot be more than received quantity {1},مقدار نمونه {0} نمیتواند بیش از مقدار دریافتی باشد {1},
 Sanctioned,تحریم,
 Sand,شن,
 Saturday,روز شنبه,
-Saved,ذخیره,
 Saving {0},صرفه جویی در {0},
 Scan Barcode,اسکن بارکد,
 Schedule,برنامه,
@@ -2463,7 +2432,6 @@ Serialized Inventory,پرسشنامه سریال,
 Series Updated,سری به روز رسانی,
 Series Updated Successfully,سری به روز رسانی با موفقیت,
 Series is mandatory,سری الزامی است,
-Series {0} already used in {1},سری {0} در حال حاضر در مورد استفاده {1},
 Service,سرویس,
 Service Level Agreement,توافق نامه سطح خدمات,
 Service Level Agreement.,توافق نامه سطح خدمات.,
@@ -2479,7 +2447,6 @@ Set Status,تنظیم وضعیت,
 Set Tax Rule for shopping cart,مجموعه قوانین مالیاتی برای سبد خرید,
 Set as Closed,تنظیم به عنوان بسته,
 Set as Completed,تنظیم به عنوان تکمیل شده است,
-Set as Default,تنظیم به عنوان پیشفرض,
 Set as Lost,تنظیم به عنوان از دست رفته,
 Set as Open,تنظیم به عنوان گسترش,
 Set default inventory account for perpetual inventory,تنظیم حساب موجودی به طور پیش فرض برای موجودی دائمی,
@@ -2511,7 +2478,6 @@ Share Type,نوع توزیع,
 Shareholder,صاحب سهام,
 Ship To State,کشتی به دولت,
 Shipments,محموله,
-Shipping,حمل,
 Shipping Address,حمل و نقل آدرس,
 "Shipping Address does not have country, which is required for this Shipping Rule",آدرس حمل و نقل کشور ندارد، که برای این قانون حمل و نقل مورد نیاز است,
 Shipping rule only applicable for Buying,قوانین حمل و نقل فقط برای خرید قابل استفاده است,
@@ -2564,7 +2530,6 @@ Split,شکاف,
 Split Batch,دسته تقسیم,
 Split Issue,موضوع تقسیم شده,
 Sports,ورزشی,
-Standard,استاندارد,
 Standard Buying,خرید استاندارد,
 Standard Selling,فروش استاندارد,
 Standard contract terms for Sales or Purchase.,شرایط قرارداد استاندارد برای فروش و یا خرید.,
@@ -2731,7 +2696,6 @@ Temporary Opening,افتتاح موقت,
 Terms and Conditions,شرایط و ضوابط,
 Terms and Conditions Template,شرایط و ضوابط الگو,
 Territory,منطقه,
-Test,تست,
 Thank you for your business!,از کار شما متشکرم!,
 The 'From Package No.' field must neither be empty nor it's value less than 1.,شماره &quot;از بسته بندی&quot; فیلد نباید خالی باشد و ارزش آن کمتر از 1 باشد.,
 The Brand,نام تجاری,
@@ -2892,7 +2856,6 @@ Total {0} ({1}),مجموع {0} ({1}),
 Total(Amt),مجموع (AMT),
 Total(Qty),مجموع (تعداد),
 Traceability,قابلیت ردیابی,
-Traceback,ردیابی,
 Track Leads by Lead Source.,پیگیری بر اساس منبع سرب,
 Transaction,معامله,
 Transaction Date,تاریخ تراکنش,
@@ -2930,7 +2893,6 @@ UOM,UOM,
 UOM Conversion factor is required in row {0},عامل UOM تبدیل در ردیف مورد نیاز است {0},
 UOM coversion factor required for UOM: {0} in Item: {1},عامل coversion UOM مورد نیاز برای UOM: {0} در مورد: {1},
 URL,URL,
-Unable to find DocType {0},Unable to find DocType {0},
 Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually,قادر به پیدا کردن نرخ ارز برای {0} به {1} برای تاریخ های کلیدی {2}. لطفا یک رکورد ارز دستی ایجاد کنید,
 Unable to find score starting at {0}. You need to have standing scores covering 0 to 100,نمیتوان نتیجه را با {0} پیدا کرد. شما باید امتیازات ایستاده را پوشش دهید 0 تا 100,
 Unable to find variable: ,قادر به پیدا کردن متغیر نیست,
@@ -3051,7 +3013,6 @@ Website Manager,مدیر وب سایت,
 Website Settings,تنظیمات وب سایت,
 Wednesday,چهار شنبه,
 Week,هفته,
-Weekdays,روزهای کاری,
 Weekly,هفتگی,
 "Weight is mentioned,\nPlease mention ""Weight UOM"" too",وزن ذکر شده است، \ n لطفا ذکر &quot;وزن UOM&quot; بیش از حد,
 Welcome email sent,ایمیل ارسال,
@@ -3072,7 +3033,6 @@ Work Order {0} must be cancelled before cancelling this Sales Order,سفارش �
 Work Order {0} must be submitted,سفارش کار {0} باید ارائه شود,
 Work Orders Created: {0},دستور کار ایجاد شده: {0},
 Work-in-Progress Warehouse is required before Submit,کار در حال پیشرفت انبار قبل از ارسال مورد نیاز است,
-Workflow,گردش کار,
 Working,کار,
 Working Hours,ساعات کاری,
 Workstation,ایستگاه های کاری,
@@ -3102,7 +3062,6 @@ You have entered duplicate items. Please rectify and try again.,شما وارد 
 You need to be a user other than Administrator with System Manager and Item Manager roles to register on Marketplace.,برای ثبت نام در Marketplace، باید کاربر دیگری غیر از Administrator با مدیر سیستم و نقش Item باشد.,
 You need to be a user with System Manager and Item Manager roles to add users to Marketplace.,شما باید کاربر با مدیران سیستم و نقش مدیر گروه باشید تا کاربران را به Marketplace اضافه کنید.,
 You need to be a user with System Manager and Item Manager roles to register on Marketplace.,برای ثبت نام در Marketplace، باید کاربر با مدیر سیستم مدیریت و نقش آیتم باشد.,
-You need to be logged in to access this page,شما نیاز به ورود برای دسترسی به این صفحه,
 You need to enable Shopping Cart,شما نیاز به فعال کردن سبد خرید هستید,
 You will lose records of previously generated invoices. Are you sure you want to restart this subscription?,شما سوابق فاکتورهای قبلا تولید را از دست خواهید داد. آیا مطمئن هستید که می خواهید این اشتراک را مجددا راه اندازی کنید؟,
 Your Organization,سازمان شما,
@@ -3218,7 +3177,6 @@ on,بر,
 Assigned To,اختصاص یافته به,
 Chat,گپ زدن,
 Completed By,تکمیل شده توسط,
-County,شهرستان,
 Day of Week,روز هفته,
 "Dear System Manager,",مدیر محترم سیستم،,
 Default Value,مقدار پیش فرض,
@@ -3229,31 +3187,21 @@ Error Message,پیغام خطا,
 Fieldtype,Fieldtype,
 Help Articles,راهنما مقاله,
 ID,شناسه,
-Images,تصاویر,
 Import,واردات,
 Language,زبان,
 Likes,دوست دارد,
 Merge with existing,ادغام با موجود,
-Office,دفتر,
 Orientation,گرایش,
 Parent,والدین,
-Passive,غیر فعال,
 Payment Failed,پرداخت ناموفق,
-Permanent,دائمي,
 Personal,شخصی,
-Plant,گیاه,
 Post,پست,
-Postal,پستی,
 Postal Code,کد پستی,
-Previous,قبلی,
 Provider,ارائه دهنده,
 Read Only,فقط خواندنی,
 Recipient,گیرنده,
 Reviews,بررسی ها,
 Sender,فرستنده,
-Shop,فروشگاه,
-Subsidiary,فرعی,
-There is some problem with the file url: {0},بعضی از مشکل با آدرس فایل وجود دارد: {0},
 There were errors while sending email. Please try again.,بودند خطاهای هنگام ارسال ایمیل وجود دارد. لطفا دوباره تلاش کنید.,
 Values Changed,مقادیر تغییر,
 or,یا,
@@ -3280,19 +3228,16 @@ Quality Feedback,بازخورد کیفیت,
 Quality Feedback Template,الگوی بازخورد کیفیت,
 Rules for applying different promotional schemes.,قوانین استفاده از طرح های تبلیغاتی مختلف.,
 Show {0},نمایش {0},
-"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}",{0} کاراکترهای خاص به جز &quot;-&quot; ، &quot;#&quot; ، &quot;.&quot; ، &quot;/&quot; ، &quot;{{&quot; و &quot;}}&quot; در سریال نامگذاری مجاز نیستند,
 Target Details,جزئیات هدف,
 {0} already has a Parent Procedure {1}.,{0} در حال حاضر یک روش والدین {1} دارد.,
 API,API,
 Annual,سالیانه,
 Change,تغییر,
 Contact Email,تماس با ایمیل,
-Export Type,نوع صادرات,
 From Date,از تاریخ,
 Group By,دسته بندی بر اساس,
 Invalid URL,URL نامعتبر است,
 Landscape,چشم انداز,
-Last Sync On,آخرین همگام سازی در,
 Naming Series,نامگذاری سری,
 No data to export,داده ای برای صادرات وجود ندارد,
 Portrait,پرتره,
@@ -3302,7 +3247,6 @@ Scheduler is inactive. Cannot import data.,زمانبند غیرفعال است.
 Show Document,نمایش سند,
 Show Traceback,نمایش ردگیری,
 Video,فیلم,
-Webhook Secret,راز وب,
 % Of Grand Total,٪ از تعداد کل,
 <b>Company</b> is a mandatory filter.,<b>شرکت</b> فیلتر اجباری است.,
 <b>From Date</b> is a mandatory filter.,<b>از تاریخ</b> فیلتر اجباری است.,
@@ -3358,7 +3302,6 @@ BOM 2,BOM 2,
 BOM Comparison Tool,ابزار مقایسه BOM,
 BOM recursion: {0} cannot be child of {1},بازگشت BOM: {0} نمی تواند فرزند {1 باشد,
 BOM recursion: {0} cannot be parent or child of {1},بازگشت BOM: {0} نمی تواند پدر و مادر یا فرزند {1 باشد,
-Back to Home,بازگشت به خانه,
 Back to Messages,بازگشت به پیام ها,
 Bank Data mapper doesn't exist,نقشه بردار داده بانکی وجود ندارد,
 Bank Details,جزئیات بانک,
@@ -3420,7 +3363,6 @@ Ctrl+Enter to submit,Ctrl + برای ارسال وارد شوید,
 Currency,پول,
 Current Status,وضعیت فعلی,
 Customer PO,سفارش خرید مشتری,
-Customize,سفارشی,
 Daily,روزانه,
 Date,تاریخ,
 Date of Birth cannot be greater than Joining Date.,تاریخ تولد نمی تواند بیشتر از تاریخ عضویت باشد.,
@@ -3454,7 +3396,6 @@ E-Way Bill JSON cannot be generated for Sales Return as of now,بیل جی اس�
 ERPNext could not find any matching payment entry,ERPNext نمی تواند هیچ ورودی پرداختی مطابق با آن را پیدا کند,
 Earliest Age,زودرس ترین سن,
 Edit Details,جزئیات ویرایش,
-Edit Profile,ویرایش پروفایل,
 Either GST Transporter ID or Vehicle No is required if Mode of Transport is Road,اگر حالت حمل و نقل جاده ای باشد ، یا GST Transporter ID یا وسیله نقلیه شماره لازم است,
 Email,پست الکترونیک,
 Email Campaigns,کمپین های ایمیل,
@@ -3482,7 +3423,6 @@ Failed to add Domain,دامنه اضافه نشد,
 Fetch Items from Warehouse,گرفتن موارد از انبار,
 Fetching...,واکشی ...,
 Field,رشته,
-File Manager,مدیریت فایل,
 Filters,فیلترها,
 Finding linked payments,یافتن پرداختهای مرتبط,
 Fleet Management,مدیریت ناوگان,
@@ -3521,7 +3461,6 @@ Incoming call from {0},تماس ورودی از {0,
 Incorrect Warehouse,انبار نادرست,
 Invalid Barcode. There is no Item attached to this barcode.,بارکد نامعتبر است. هیچ موردی به این بارکد وصل نشده است.,
 Invalid credentials,گواهی نامه نامعتبر,
-Invite as User,دعوت به عنوان کاربر,
 Issue Priority.,اولویت شماره,
 Issue Type.,نوع مقاله.,
 "It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.",به نظر می رسد یک مشکل با پیکربندی نوار خط سرور وجود دارد. در صورت خرابی، مقدار به حساب شما بازپرداخت خواهد شد.,
@@ -3564,7 +3503,6 @@ New Expense,هزینه جدید,
 New Invoice,فاکتور جدید,
 New Payment,پرداخت جدید,
 New release date should be in the future,تاریخ انتشار جدید باید در آینده باشد,
-Newsletter,عضویت در خبرنامه,
 No Account matched these filters: {},هیچ حساب با این فیلترها مطابقت ندارد: {},
 No communication found.,هیچ ارتباطی یافت نشد,
 No correct answer is set for {0},هیچ پاسخ صحیحی برای {0 set تعیین نشده است,
@@ -3640,7 +3578,6 @@ Please set {0},لطفا {0 set تعیین کنید,customer
 Please setup a default bank account for company {0},لطفاً یک حساب بانکی پیش فرض برای شرکت {0 تنظیم کنید,
 Please specify,لطفا مشخص کنید,
 Please specify a {0},لطفاً {0 را مشخص کنید,lead
-Printing,چاپ,
 Priority,اولویت,
 Priority has been changed to {0}.,اولویت به {0 تغییر یافته است.,
 Priority {0} has been repeated.,اولویت {0} تکرار شده است.,
@@ -3649,7 +3586,6 @@ Profitability,سودآوری,
 Project,پروژه,
 Provide the academic year and set the starting and ending date.,سال تحصیلی را تهیه کنید و تاریخ شروع و پایان را تعیین کنید.,
 Public token is missing for this bank,نشان عمومی برای این بانک وجود ندارد,
-Publish,انتشار,
 Publish 1 Item,انتشار 1 مورد,
 Publish Items,انتشار موارد,
 Publish More Items,انتشار موارد بیشتر,
@@ -3677,7 +3613,6 @@ Reconcile this account,این حساب را دوباره سازگار کنید,
 Reconciled,آشتی کرد,
 Recruitment,استخدام,
 Red,قرمز,
-Refreshing,تازه کردن,
 Release date must be in the future,تاریخ انتشار باید در آینده باشد,
 Relieving Date must be greater than or equal to Date of Joining,Relieve Date باید بیشتر یا مساوی تاریخ عضویت باشد,
 Rename,تغییر نام,
@@ -3721,7 +3656,6 @@ Search Items ...,جستجوی موارد ...,
 Search for a payment,جستجوی پرداخت,
 Search for anything ...,جستجوی هر چیزی ...,
 Search results for,نتایج جستجو برای,
-Select All,انتخاب همه,
 Select Difference Account,حساب کاربری تفاوت را انتخاب کنید,
 Select a Default Priority.,اولویت پیش فرض را انتخاب کنید.,
 Select a company,شرکتی را انتخاب کنید,
@@ -3740,11 +3674,9 @@ Server Error,خطای سرور,
 Service Level Agreement has been changed to {0}.,توافق نامه سطح خدمات به {0 changed تغییر یافته است.,
 Service Level Agreement was reset.,توافق نامه سطح خدمات دوباره تنظیم شد.,
 Service Level Agreement with Entity Type {0} and Entity {1} already exists.,توافق نامه سطح خدمات با نهاد نوع {0} و واحد 1} در حال حاضر وجود دارد.,
-Set,تنظیم,
 Set Meta Tags,برچسب های متا را تنظیم کنید,
 Set {0} in company {1},company 0} در شرکت {1,
 Setup,برپایی,
-Setup Wizard,راه اندازی جادوگر,
 Shift Management,مدیریت تغییر,
 Show Future Payments,نمایش پرداختهای آینده,
 Show Linked Delivery Notes,نمایش یادداشتهای تحویل پیوند شده,
@@ -3815,7 +3747,6 @@ Unpublish Item,عدم انتشار مورد,
 Unreconciled,نامشخص,
 Unsupported GST Category for E-Way Bill JSON generation,دسته پشتیبانی نشده پشتیبانی نشده برای نسل بیل بی سیم JSON,
 Update,به روز رسانی,
-Update Details,جزئیات را به روز کنید,
 Update Taxes for Items,مالیات ها را برای موارد به روز کنید,
 "Upload a bank statement, link or reconcile a bank account",بیانیه بانکی را بارگیری کنید ، پیوند دهید یا یک حساب بانکی آشتی دهید,
 Upload a statement,بیانیه را بارگذاری کنید,
@@ -3839,7 +3770,6 @@ Workday {0} has been repeated.,روز کاری {0} تکرار شده است.,
 XML Files Processed,XML پرونده ها پردازش می شوند,
 Year,سال,
 Yearly,سالیانه,
-You,شما,
 You are not allowed to enroll for this course,شما مجاز به ثبت نام در این دوره نیستید,
 You are not enrolled in program {0},شما در برنامه ثبت نام نشده اید {0,
 You can Feature upto 8 items.,شما می توانید ویژگی های تا 8 مورد.,
@@ -3856,7 +3786,6 @@ and,و,
 e-Way Bill already exists for this document,قبض e-Way قبلاً برای این سند موجود است,
 woocommerce - {0},woocommerce - {0},
 {0} Coupon used are {1}. Allowed quantity is exhausted,{0} کوپن مورد استفاده 1 {است. مقدار مجاز خسته است,
-{0} Name,{0} نام,
 {0} Operations: {1},{0} عملیات: {1,
 {0} bank transaction(s) created,transaction 0 transaction تراکنش بانکی ایجاد شده است,
 {0} bank transaction(s) created and {1} errors,transaction 0 transaction تراکنش های بانکی ایجاد شده و خطاهای 1 {,
@@ -3875,17 +3804,13 @@ Total Expense This Year,کل هزینه امسال,
 Total Income,درآمد کلی,
 Total Income This Year,درآمد کل امسال,
 Barcode,بارکد,
-Bold,جسورانه,
-Center,مرکز,
 Clear,پاک کردن,
-Comment,اظهار نظر,
 Comments,نظرات,
 DocType,DocType,
 Download,دانلود,
 Left,چپ,
 Link,ارتباط دادن,
 New,جدید,
-Not Found,پیدا نشد,
 Print,چاپ,
 Reference Name,نام مرجع,
 Refresh,تازه کردن,
@@ -3908,7 +3833,6 @@ Write Off,کسر کردن,
 Email Id,آدرس ایمیل,
 No,بدون,
 Reference Doctype,Doctype مرجع,
-User Id,شناسه کاربر,
 Yes,بله,
 Actual ,واقعی,
 Add to cart,اضافه کردن به سبد,
@@ -4304,7 +4228,6 @@ Section Leader,رهبر بخش,
 e.g Adjustments for:,به عنوان مثال تنظیمات برای:,
 Section Subtotal,زیرمجموعه بخش,
 Section Footer,پاورقی بخش,
-Position,موقعیت,
 Cash Flow Mapping,نمودار جریان نقدی,
 Select Maximum Of 1,حداکثر 1 را انتخاب کنید,
 Is Finance Cost,هزینه مالی است,
@@ -4936,7 +4859,6 @@ Ignore holidays,تعطیلات را نادیده بگیرید,
 Previous Business Day,روز کاری قبلی,
 Next Business Day,روز کسب و کار بعدی,
 Urgent,فوری,
-Crop,محصول,
 Crop Name,نام محصول,
 Scientific Name,نام علمی,
 "You can define all the tasks which need to carried out for this crop here. The day field is used to mention the day on which the task needs to be carried out, 1 being the 1st day, etc.. ",شما می توانید تمام وظایفی را که لازم است برای این محصول در اینجا انجام دهید تعریف کنید. فیلد روز برای اشاره به روزی که کار باید انجام شود، 1 روز اول و غیره است.,
@@ -5441,7 +5363,6 @@ Course Start Date,البته تاریخ شروع,
 To TIme,به زمان,
 Course End Date,البته پایان تاریخ,
 Course Topic,موضوع دوره,
-Topic,موضوع,
 Topic Name,نام موضوع,
 Education Settings,تنظیمات تحصیلی,
 Current Academic Year,سال جاری علمی,
@@ -5516,7 +5437,6 @@ Boarding Student,دانشجویی شبانه روزی,
 Check this if the Student is residing at the Institute's Hostel.,این بررسی در صورتی که دانشجو است ساکن در خوابگاه مؤسسه است.,
 Walking,پیاده روی,
 Institute's Bus,اتوبوس موسسه,
-Public Transport,حمل و نقل عمومی,
 Self-Driving Vehicle,خودرو بدون راننده,
 Pick/Drop by Guardian,انتخاب / قطره های نگهبان,
 Enrolled courses,دوره های ثبت نام,
@@ -5697,7 +5617,6 @@ Default Warehouse,به طور پیش فرض انبار,
 Default Cost Center,مرکز هزینه به طور پیش فرض,
 Undeposited Funds Account,حساب صندوق غیرقانونی,
 Shopify Log,Shopify ورود,
-Request Data,درخواست داده,
 Shopify Settings,Shopify تنظیمات,
 status html,وضعیت HTML,
 Enable Shopify,فعال سازی Shopify,
@@ -5817,7 +5736,6 @@ Body Parts,اعضای بدن,
 Exercise Instructions,دستورالعمل ورزش,
 Exercise Video,فیلم ورزش,
 Exercise Steps,مراحل ورزش,
-Steps,مراحل,
 Steps Table,جدول مراحل,
 Exercise Type Step,مرحله تمرین نوع,
 Max number of visit,حداکثر تعداد بازدید,
@@ -6001,7 +5919,6 @@ Patient Encounter Diagnosis,تشخیص برخورد بیمار,
 Patient Encounter Symptom,علائم برخورد بیمار,
 HLC-PMR-.YYYY.-,HLC-PMR- .YYYY.-,
 Attach Medical Record,پرونده پزشکی را ضمیمه کنید,
-Reference DocType,DOCTYPE مرجع,
 Spouse,همسر,
 Family,خانواده,
 Schedule Details,جزئیات برنامه,
@@ -6983,16 +6900,8 @@ Show this slideshow at the top of the page,نمایش تصاویر به صورت
 HTML / Banner that will show on the top of product list.,HTML / بنر که در بالای لیست محصولات نشان خواهد داد.,
 Set prefix for numbering series on your transactions,تنظیم پیشوند برای شماره سری در معاملات خود را,
 Setup Series,راه اندازی سری,
-Select Transaction,انتخاب معامله,
-Help HTML,راهنما HTML,
-Series List for this Transaction,فهرست سری ها برای این تراکنش,
-User must always select,کاربر همیشه باید انتخاب کنید,
-Check this if you want to force the user to select a series before saving. There will be no default if you check this.,بررسی این اگر شما می خواهید به زور کاربر برای انتخاب یک سری قبل از ذخیره. خواهد شد وجود ندارد به طور پیش فرض اگر شما این تیک بزنید.,
 Update Series,به روز رسانی سری,
 Change the starting / current sequence number of an existing series.,تغییر شروع / شماره توالی فعلی از یک سری موجود است.,
-Prefix,پیشوند,
-This is the number of the last created transaction with this prefix,این تعداد از آخرین معامله ایجاد شده با این پیشوند است,
-Update Series Number,به روز رسانی سری شماره,
 Quotation Lost Reason,نقل قول را فراموش کرده اید دلیل,
 A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,توزیع کننده شخص ثالث / فروشنده / نماینده کمیسیون / وابسته به / نمایندگی فروش که به فروش می رساند محصولات شرکت برای کمیسیون.,
 Sales Partner Name,نام شریک فروش,
@@ -7687,7 +7596,6 @@ Trial Balance for Party,تعادل دادگاه برای حزب,
 Warehouse wise Item Balance Age and Value,انبار عاقل عنصر تعادل سن و ارزش,
 Work Order Stock Report,سفارش کار سفارش سفارش,
 Work Orders in Progress,دستور کار در حال پیشرفت است,
-Validation Error,خطای اعتبار سنجی,
 Automatically Process Deferred Accounting Entry,پردازش خودکار حساب کاربری معوق,
 Bank Clearance,ترخیص بانکی,
 Bank Clearance Detail,جزئیات ترخیص بانک,
@@ -7724,45 +7632,7 @@ Therapy: ,درمان:,
 Therapy Plan: ,طرح درمانی:,
 Total Counts Targeted: ,تعداد کل مورد نظر:,
 Total Counts Completed: ,تعداد کل انجام شده:,
-Andaman and Nicobar Islands,جزایر آندامان و نیکوبار,
-Andhra Pradesh,آندرا پرادش,
-Arunachal Pradesh,آروناچال پرادش,
-Assam,آسام,
-Bihar,بیهار,
-Chandigarh,چندیگر,
-Chhattisgarh,چتیسگر,
-Dadra and Nagar Haveli,دادرا و ناگار هاولی,
-Daman and Diu,دامن و دیو,
-Delhi,دهلی,
-Goa,گوا,
-Gujarat,گجرات,
-Haryana,هاریانا,
-Himachal Pradesh,هیماچال پرادش,
-Jammu and Kashmir,جامو و کشمیر,
-Jharkhand,جارخند,
-Karnataka,کارناتاکا,
-Kerala,کرالا,
-Lakshadweep Islands,جزایر لاکشادویپ,
-Madhya Pradesh,مادیا پرادش,
-Maharashtra,ماهاراشترا,
-Manipur,مانیپور,
-Meghalaya,مگالایا,
-Mizoram,میزورام,
-Nagaland,ناگالند,
-Odisha,ادیشا,
-Other Territory,قلمرو دیگر,
-Pondicherry,Pondicherry,
-Punjab,پنجاب,
-Rajasthan,راجستان,
-Sikkim,سیکیم,
-Tamil Nadu,تامیل نادو,
-Telangana,تلانگانا,
-Tripura,تریپورا,
-Uttar Pradesh,اوتار پرادش,
-Uttarakhand,اوتاراکند,
-West Bengal,بنگال غربی,
 Is Mandatory,اجباری است,
-Published on,منتشر شده در,
 Service Received But Not Billed,خدمات دریافت شده اما قبض نشده است,
 Deferred Accounting Settings,تنظیمات حسابداری معوق,
 Book Deferred Entries Based On,مطالب به تعویق افتادن کتاب بر اساس,
@@ -8035,8 +7905,6 @@ Worksheet Print,چاپ صفحه کار,
 Worksheet Instructions,دستورالعمل کاربرگ,
 Result Legend Print,نتیجه چاپ افسانه,
 Print Position,موقعیت چاپ,
-Bottom,پایین,
-Top,بالا,
 Both,هر دو,
 Result Legend,نتیجه افسانه,
 Lab Tests,تست های آزمایشگاهی,
@@ -8844,3 +8712,39 @@ Enable European Access,دسترسی اروپا را فعال کنید,
 Creating Purchase Order ...,در حال ایجاد سفارش خرید ...,
 "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.",از تامین کنندگان پیش فرض موارد زیر یک تأمین کننده انتخاب کنید. هنگام انتخاب ، سفارش خرید فقط در مورد کالاهای متعلق به تنها تامین کننده انتخاب شده انجام می شود.,
 Row #{}: You must select {} serial numbers for item {}.,ردیف شماره {}: شما باید {} شماره سریال را برای مورد {} انتخاب کنید.,
+Add Comment,اضافه کردن نظر,
+More...,بیش...,
+Notes,یادداشت,
+Payment Gateway,دروازه پرداخت,
+Payment Gateway Name,نام دروازه پرداخت,
+Payments,پرداخت,
+Plan Name,نام برنامه,
+Portal,پرتال,
+Scan Barcode,اسکن بارکد,
+Some information is missing,برخی از اطلاعات از دست رفته است,
+Successful,موفق شدن,
+Tools,ابزار,
+Use Sandbox,استفاده از گودال ماسهبازی,
+Busy,مشغول,
+Completed By,تکمیل شده توسط,
+Payment Failed,پرداخت ناموفق,
+Column {0},ستون {0,
+Field Mapping,نقشه برداری درست,
+Not Specified,مشخص نشده است,
+Update Type,نوع بروزرسانی,
+Dr,دکتر,
+End Time,پایان زمان,
+Fetching...,واکشی ...,
+"It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.",به نظر می رسد یک مشکل با پیکربندی نوار خط سرور وجود دارد. در صورت خرابی، مقدار به حساب شما بازپرداخت خواهد شد.,
+Looks like someone sent you to an incomplete URL. Please ask them to look into it.,به نظر می رسد کسی که شما را به URL های ناقص ارسال می شود. لطفا از آنها بخواهید به آن نگاه کنید.,
+Master,استاد,
+Pay,پرداخت,
+You can also copy-paste this link in your browser,شما همچنین می توانید این لینک را در مرورگر خود کپی-پیست کنید,
+Verified By,تایید شده توسط,
+Invalid naming series (. missing) for {0},سری نامگذاری نامعتبر است (. وجود ندارد) برای {0},
+Phone Number,شماره تلفن,
+Account SID,حساب SID,
+Global Defaults,به طور پیش فرض جهانی,
+Is Mandatory,اجباری است,
+WhatsApp,واتس اپ,
+Make a call,تماس بگیر,
