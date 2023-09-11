@@ -378,13 +378,9 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 			attachments = [{"fname": filename + ".pdf", "fcontent": report_pdf}]
 
 			recipients, cc = get_recipients_and_cc(customer, doc)
-<<<<<<< HEAD
-			context = get_context(customer, doc)
-=======
 			if not recipients:
 				continue
-
->>>>>>> 5c2a949593 (feat: add field for specifying pdf name)
+				
 			subject = frappe.render_template(doc.subject, context)
 			message = frappe.render_template(doc.body, context)
 
