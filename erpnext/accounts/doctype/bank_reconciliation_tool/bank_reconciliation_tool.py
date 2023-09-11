@@ -412,6 +412,18 @@ def check_matching(
 	to_reference_date,
 ):
 	exact_match = True if "exact_match" in document_types else False
+	queries = get_queries(
+		bank_account,
+		company,
+		transaction,
+		document_types,
+		from_date,
+		to_date,
+		filter_by_reference_date,
+		from_reference_date,
+		to_reference_date,
+		exact_match,
+	)
 
 	filters = {
 		"amount": transaction.unallocated_amount,
@@ -423,32 +435,15 @@ def check_matching(
 	}
 
 	matching_vouchers = []
-
-	# get matching vouchers from all the apps
-	for method_name in frappe.get_hooks("get_matching_vouchers_for_bank_reconciliation"):
-		matching_vouchers.extend(
-			frappe.get_attr(method_name)(
-				bank_account,
-				company,
-				transaction,
-				document_types,
-				from_date,
-				to_date,
-				filter_by_reference_date,
-				from_reference_date,
-				to_reference_date,
-				exact_match,
-				filters,
-			)
-			or []
-		)
+	for query in queries:
+		matching_vouchers.extend(frappe.db.sql(query, filters, as_dict=True))
 
 	return (
 		sorted(matching_vouchers, key=lambda x: x["rank"], reverse=True) if matching_vouchers else []
 	)
 
 
-def get_matching_vouchers_for_bank_reconciliation(
+def get_queries(
 	bank_account,
 	company,
 	transaction,
@@ -459,7 +454,6 @@ def get_matching_vouchers_for_bank_reconciliation(
 	from_reference_date,
 	to_reference_date,
 	exact_match,
-	filters,
 ):
 	# get queries to get matching vouchers
 	account_from_to = "paid_to" if transaction.deposit > 0.0 else "paid_from"
@@ -484,17 +478,7 @@ def get_matching_vouchers_for_bank_reconciliation(
 			or []
 		)
 
-	vouchers = []
-	for query in queries:
-		vouchers.extend(
-			frappe.db.sql(
-				query,
-				filters,
-				as_dict=True,
-			)
-		)
-
-	return vouchers
+	return queries
 
 
 def get_matching_queries(
