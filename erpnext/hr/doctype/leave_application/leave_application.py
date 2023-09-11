@@ -238,6 +238,7 @@ class LeaveApplication(Document):
 		holiday_dates = []
 		if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
 			holiday_dates = get_holiday_dates_for_employee(self.employee, self.from_date, self.to_date)
+			frappe.msgprint(str(holiday_dates))
 #-----------------------------------------------------------------------------------------------------------------------
 		lwp_dates = []
 		leave_type_dates = []
@@ -271,6 +272,9 @@ class LeaveApplication(Document):
 							my_counter = leave_days_current
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
+								
 								if my_counter > 0:
 									leave_dates.append((date,'session1',"leave type"))
 									leave_dates.append((date,'session2',"leave type"))
@@ -286,6 +290,8 @@ class LeaveApplication(Document):
 							my_counter = int(leave_days_current) + 1
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if my_counter > 0:
 									if my_counter == 1:
 										if self.lwp_count == 0:
@@ -310,6 +316,8 @@ class LeaveApplication(Document):
 					else:
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if str(dt) == str(self.to_date):       # check for proper variable to match
 										leave_dates.append((date,'session1',"lwp"))
 
@@ -325,6 +333,8 @@ class LeaveApplication(Document):
 						my_counter = leave_days_current
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
+							if date in holiday_dates:
+									continue
 							if  str(dt) == str(self.from_date):      # check for proper variable to match
 								leave_dates.append((date,"session2","leave_type"))
 								my_counter = my_counter - 0.5 
@@ -350,6 +360,8 @@ class LeaveApplication(Document):
 					else:
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if str(dt) == str(self.from_date):       # check for proper variable to match
 										leave_dates.append((date,'session2',"lwp"))
 
@@ -367,6 +379,8 @@ class LeaveApplication(Document):
 						my_counter = leave_days_current
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
+							if date in holiday_dates:
+									continue
 							if my_counter > 0:
 								leave_dates.append((date,'session1',"leave type"))
 								leave_dates.append((date,'session2',"leave type"))
@@ -380,6 +394,8 @@ class LeaveApplication(Document):
 							my_counter = int(leave_days_current) + 1
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if my_counter > 0:
 									if my_counter == 1:
 										leave_dates.append((date,"session1","leave type"))  
@@ -394,6 +410,8 @@ class LeaveApplication(Document):
 				else:
 					for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
+							if date in holiday_dates:
+									continue
 							leave_dates.append((date,'session1',"lwp"))
 							leave_dates.append((date,'session2',"lwp"))
 
@@ -408,6 +426,8 @@ class LeaveApplication(Document):
 		unique_leave_type_dates_set = set(leave_type_dates)
 		unique_lwp_dates = list(unique_lwp_dates_set)
 		unique_leave_type_dates = list(unique_leave_type_dates_set)
+		# frappe.msgprint("lwp"+str(unique_lwp_dates))
+		# frappe.msgprint("leave type"+str(unique_leave_type_dates))
 
 		for selected_leave in unique_leave_type_dates:
 			attendance_name = frappe.db.exists(
@@ -878,6 +898,10 @@ class LeaveApplication(Document):
 			except frappe.OutgoingEmailError:
 				pass
 	def calculate_unique_dates(self):
+		holiday_dates = []
+		if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
+			holiday_dates = get_holiday_dates_for_employee(self.employee, self.from_date, self.to_date)
+			# frappe.msgprint(str(holiday_dates))
 		lwp_dates = []
 		leave_type_dates = []
 		leave_dates = []
@@ -914,6 +938,8 @@ class LeaveApplication(Document):
 							my_counter = leave_days_current
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if my_counter > 0:
 									leave_dates.append((date,'session1',"leave type"))
 									leave_dates.append((date,'session2',"leave type"))
@@ -929,6 +955,8 @@ class LeaveApplication(Document):
 							my_counter = int(leave_days_current) + 1
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if my_counter > 0:
 									if my_counter == 1:
 										leave_dates.append((date,"session1","leave type"))  
@@ -947,6 +975,8 @@ class LeaveApplication(Document):
 					else:
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if str(dt) == str(self.to_date):       # check for proper variable to match
 										leave_dates.append((date,'session1',"lwp"))
 
@@ -963,6 +993,8 @@ class LeaveApplication(Document):
 						my_counter = leave_days_current
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
+							if date in holiday_dates:
+									continue
 							if  str(dt) == str(self.from_date):      # check for proper variable to match
 								# frappe.msgprint(str(dt))
 								leave_dates.append((date,"session2","leave_type"))
@@ -989,6 +1021,8 @@ class LeaveApplication(Document):
 					else:
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if str(dt) == str(self.from_date):       # check for proper variable to match
 										leave_dates.append((date,'session2',"lwp"))
 
@@ -1004,6 +1038,8 @@ class LeaveApplication(Document):
 						my_counter = leave_days_current
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
+							if date in holiday_dates:
+									continue
 							if my_counter > 0:
 								leave_dates.append((date,'session1',"leave type"))
 								leave_dates.append((date,'session2',"leave type"))
@@ -1017,6 +1053,8 @@ class LeaveApplication(Document):
 							my_counter = int(leave_days_current) + 1
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
+								if date in holiday_dates:
+									continue
 								if my_counter > 0:
 									if my_counter == 1:
 										leave_dates.append((date,"session1","leave type"))  
@@ -1031,6 +1069,8 @@ class LeaveApplication(Document):
 				else:
 					for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
+							if date in holiday_dates:
+									continue
 							leave_dates.append((date,'session1',"lwp"))
 							leave_dates.append((date,'session2',"lwp"))
 
@@ -1515,7 +1555,6 @@ def get_leaves_for_period(
 	employee: str, leave_type: str, from_date: str, to_date: str, skip_expired_leaves: bool = True
 ) -> float:
 	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
-	frappe.msgprint(str(leave_entries))
 	leave_days = 0
 
 	for leave_entry in leave_entries:
@@ -1540,71 +1579,67 @@ def get_leaves_for_period(
 			if leave_entry.to_date > getdate(to_date):
 				leave_entry.to_date = to_date
 
-			half_day = 0
-			half_day_date = None
-			# fetch half day date for leaves with half days
-			if leave_entry.leaves % 1 or leave_entry.session_date:
-				half_day = 1
-				half_day_date = frappe.db.get_value(
-					"Leave Application", {"name": leave_entry.transaction_name}, ["half_day_date"]
-				)
-				session_date = leave_entry.session_date
-				# half_day_date =leave_entry.if_half_day
+			# half_day = 0
+			# half_day_date = None
+			# # fetch half day date for leaves with half days
+			# if leave_entry.leaves % 1 or leave_entry.session_date:
+			# 	half_day = 1
+			# 	half_day_date = frappe.db.get_value(
+			# 		"Leave Application", {"name": leave_entry.transaction_name}, ["half_day_date"]
+			# 	)
+			# 	session_date = leave_entry.session_date
+			# 	frappe.msgprint("session date:"+str(session_date))
+			# 	# half_day_date =leave_entry.if_half_day
 				
 				
 				
 			leave_days += (
-				get_number_of_leave_days(
-					employee,
-					leave_type,
-					leave_entry.from_date,
-					leave_entry.to_date,
-					session_date,
-					half_day,
-					half_day_date,
-					holiday_list=leave_entry.holiday_list,
-				)
-				* -1
+				leave_entry.leaves
+			
 			)
-			frappe.msgprint(str(leave_days))
+		
 			
 	
 
 	return leave_days
-# def calculate_leave_days(
-# 	employee: str,
-# 	leave_type: str,
-# 	from_date: str,
-# 	to_date: str,
-# 	half_day: Optional[int] = None,
-# 	half_day_date: Optional[str] = None,
-# 	session_date: Optional[str] = None,
-# 	holiday_list: Optional[str] = None,
-# ) -> float:
-# 	"""Returns number of leave days between 2 dates after considering half day and holidays
-# 	(Based on the include_holiday setting in Leave Type)"""
-# 	frappe.msgprint(str(session_date))
-# 	if cint(half_day) == 1:
-# 		if getdate(from_date) == getdate(to_date):
-# 			number_of_days = 0.5
-# 		elif half_day_date
-# 			number_of_days = date_diff(to_date, from_date) + 0.5
-# 		else:
-# 			number_of_days = date_diff(to_date, from_date) + 1
+def calculate_leave_days(
+	employee: str,
+	leave_type: str,
+	from_date: str,
+	to_date: str,
+	half_day: Optional[int] = None,
+	half_day_date: Optional[str] = None,
+	session_date: Optional[str] = None,
+	holiday_list: Optional[str] = None,
+) -> float:
+	"""Returns number of leave days between 2 dates after considering half day and holidays
+	(Based on the include_holiday setting in Leave Type)"""
+	if cint(half_day) == 1:
+		if getdate(from_date) == getdate(to_date):
+			number_of_days = 0.5
+		elif half_day_date and getdate(from_date) <= getdate(half_day_date) <= getdate(to_date):
+			number_of_days = date_diff(to_date, from_date) + 0.5
+		elif session_date and getdate(from_date) <= getdate(session_date) <= getdate(to_date):
+			number_of_days = date_diff(to_date, from_date) + 0.5
+		else:
+			number_of_days = date_diff(to_date, from_date) + 1
 
-# 	else:
-# 		number_of_days = date_diff(to_date, from_date) + 1
-# 	if session_date and getdate(from_date) <= getdate(session_date) <= getdate(to_date):
-# 		number_of_days -= 0.5
+		
+		
 
-# 	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
-# 		number_of_days = flt(number_of_days) - flt(
-# 			get_holidays(employee, from_date, to_date, holiday_list=holiday_list)
-# 		)
+	else:
+		number_of_days = date_diff(to_date, from_date) + 1
+	# if session_date and getdate(from_date) <= getdate(session_date) <= getdate(to_date):
+	# 	number_of_days -= 0.5
+
+	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
+		number_of_days = flt(number_of_days) - flt(
+			get_holidays(employee, from_date, to_date, holiday_list=holiday_list)
+		)
 		
 		
 		
-# 	return number_of_days
+	return number_of_days
 
 
 def get_leave_entries(employee, leave_type, from_date, to_date ):
