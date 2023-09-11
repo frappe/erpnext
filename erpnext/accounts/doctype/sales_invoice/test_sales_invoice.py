@@ -2322,7 +2322,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1
-		item.deferred_revenue_account = deferred_account
+		item.item_defaults[0].deferred_revenue_account = deferred_account
 		item.no_of_months = 12
 		item.save()
 
@@ -3102,7 +3102,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_expense = 1
-		item.deferred_revenue_account = deferred_account
+		item.item_defaults[0].deferred_revenue_account = deferred_account
 		item.save()
 
 		si = create_sales_invoice(
