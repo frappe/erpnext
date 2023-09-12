@@ -161,6 +161,7 @@ class BOMCreator(Document):
 	def on_submit(self):
 		self.enqueue_create_boms()
 
+	@frappe.whitelist()
 	def enqueue_create_boms(self):
 		frappe.enqueue(
 			self.create_boms,
@@ -220,6 +221,18 @@ class BOMCreator(Document):
 			frappe.msgprint(_("BOMs creation failed"))
 
 	def create_bom(self, row, production_item_wise_rm):
+		bom_creator_item = row.name if row.name != self.name else ""
+		if frappe.db.exists(
+			"BOM",
+			{
+				"bom_creator": self.name,
+				"item": row.item_code,
+				"bom_creator_item": bom_creator_item,
+				"docstatus": 1,
+			},
+		):
+			return
+
 		bom = frappe.new_doc("BOM")
 		bom.update(
 			{
@@ -228,7 +241,7 @@ class BOMCreator(Document):
 				"quantity": row.qty,
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
-				"bom_creator_item": row.name if row.name != self.name else "",
+				"bom_creator_item": bom_creator_item,
 				"rm_cost_as_per": "Manual",
 			}
 		)
