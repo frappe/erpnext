@@ -398,11 +398,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
-<<<<<<< HEAD
- "modified": "2022-06-23 16:58:47.005241",
-=======
  "modified": "2023-09-06 13:52:05.861175",
->>>>>>> b4bcd9ba3f (feat: new field in `Task` to hold ref of Template Task)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
