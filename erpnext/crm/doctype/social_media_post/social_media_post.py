@@ -11,7 +11,7 @@ from frappe.model.document import Document
 
 class SocialMediaPost(Document):
 	def validate(self):
-		if not self.twitter and not self.linkedin:
+		if not self.linkedin:
 			frappe.throw(_("Select atleast one Social Media Platform to Share on."))
 
 		if self.scheduled_time:
@@ -33,10 +33,6 @@ class SocialMediaPost(Document):
 
 	@frappe.whitelist()
 	def delete_post(self):
-		if self.twitter and self.twitter_post_id:
-			twitter = frappe.get_doc("Twitter Settings")
-			twitter.delete_tweet(self.twitter_post_id)
-
 		if self.linkedin and self.linkedin_post_id:
 			linkedin = frappe.get_doc("LinkedIn Settings")
 			linkedin.delete_post(self.linkedin_post_id)
@@ -49,19 +45,11 @@ class SocialMediaPost(Document):
 		if self.linkedin and self.linkedin_post_id:
 			linkedin = frappe.get_doc("LinkedIn Settings")
 			response["linkedin"] = linkedin.get_post(self.linkedin_post_id)
-		if self.twitter and self.twitter_post_id:
-			twitter = frappe.get_doc("Twitter Settings")
-			response["twitter"] = twitter.get_tweet(self.twitter_post_id)
-
 		return response
 
 	@frappe.whitelist()
 	def post(self):
 		try:
-			if self.twitter and not self.twitter_post_id:
-				twitter = frappe.get_doc("Twitter Settings")
-				twitter_post = twitter.post(self.text, self.image)
-				self.db_set("twitter_post_id", twitter_post.id)
 			if self.linkedin and not self.linkedin_post_id:
 				linkedin = frappe.get_doc("LinkedIn Settings")
 				linkedin_post = linkedin.post(self.linkedin_post, self.title, self.image)
