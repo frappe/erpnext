@@ -279,20 +279,19 @@ def get_conditions(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	if filters.get("include_dimensions"):
-		accounting_dimensions = get_accounting_dimensions(as_list=False)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
-		if accounting_dimensions:
-			for dimension in accounting_dimensions:
-				if not dimension.disabled:
-					if filters.get(dimension.fieldname):
-						if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-							filters[dimension.fieldname] = get_dimension_with_children(
-								dimension.document_type, filters.get(dimension.fieldname)
-							)
-							conditions.append("{0} in %({0})s".format(dimension.fieldname))
-						else:
-							conditions.append("{0} in %({0})s".format(dimension.fieldname))
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if not dimension.disabled:
+				if filters.get(dimension.fieldname):
+					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+						filters[dimension.fieldname] = get_dimension_with_children(
+							dimension.document_type, filters.get(dimension.fieldname)
+						)
+						conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					else:
+						conditions.append("{0} in %({0})s".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
