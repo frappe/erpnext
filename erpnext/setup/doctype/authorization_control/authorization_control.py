@@ -95,7 +95,9 @@ class AuthorizationControl(TransactionBase):
 					(doctype_name, total, based_on),
 				)
 
-			self.get_appr_user_role(appr, doctype_name, total, based_on, cond + add_cond2, master_name, company)
+			self.get_appr_user_role(
+				appr, doctype_name, total, based_on, cond + add_cond2, master_name, company
+			)
 
 	def bifurcate_based_on_type(self, doctype_name, total, av_dis, based_on, doc_obj, val, company):
 		add_cond = ""
