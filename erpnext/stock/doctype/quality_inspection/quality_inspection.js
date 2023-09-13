@@ -6,6 +6,14 @@ cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 frappe.ui.form.on("Quality Inspection", {
 
 	setup: function(frm) {
+		frm.set_query("reference_name", function() {
+			return {
+				filters: {
+					"docstatus": ["!=", 2],
+				}
+			}
+		});
+
 		frm.set_query("batch_no", function() {
 			return {
 				filters: {
