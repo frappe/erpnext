@@ -903,11 +903,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-11-29 16:47:41.364387",
-=======
  "modified": "2023-09-13 16:22:40.825092",
->>>>>>> d2f3286115 (fix: ignore user permissions for `From Warehouse` in PR)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
