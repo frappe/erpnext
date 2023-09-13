@@ -191,7 +191,7 @@ class TestBOMCreator(FrappeTestCase):
 		)
 
 		doc = make_bom_creator(
-			name="Bicycle BOM",
+			name="Bicycle BOM Test",
 			company="_Test Company",
 			item_code=final_product,
 			qty=1,
