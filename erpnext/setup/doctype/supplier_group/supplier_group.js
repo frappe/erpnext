@@ -30,6 +30,7 @@ frappe.ui.form.on("Supplier Group", {
 		frm.set_query('account', 'accounts', function (doc, cdt, cdn) {
 			return {
 				filters: {
+					'root_type': 'Liability',
 					'account_type': 'Payable',
 					'company': locals[cdt][cdn].company,
 					"is_group": 0

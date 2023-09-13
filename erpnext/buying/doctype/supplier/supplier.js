@@ -12,6 +12,7 @@ frappe.ui.form.on("Supplier", {
 			return {
 				filters: {
 					'account_type': 'Payable',
+					'root_type': 'Liability',
 					'company': d.company,
 					"is_group": 0
 				}

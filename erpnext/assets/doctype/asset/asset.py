@@ -46,6 +46,7 @@ class Asset(AccountsController):
 		self.validate_item()
 		self.validate_cost_center()
 		self.set_missing_values()
+		self.validate_finance_books()
 		if not self.split_from:
 			self.prepare_depreciation_data()
 			update_draft_asset_depr_schedules(self)
@@ -56,7 +57,6 @@ class Asset(AccountsController):
 
 	def on_submit(self):
 		self.validate_in_use_date()
-		self.set_status()
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
@@ -72,6 +72,7 @@ class Asset(AccountsController):
 						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 					).format(asset_depr_schedules_links)
 				)
+		self.set_status()
 		add_asset_activity(self.name, _("Asset submitted"))
 
 	def on_cancel(self):
@@ -96,11 +97,14 @@ class Asset(AccountsController):
 					"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 				).format(asset_depr_schedules_links)
 			)
-		if not frappe.db.exists(
-			{
-				"doctype": "Asset Activity",
-				"asset": self.name,
-			}
+		if (
+			not frappe.db.exists(
+				{
+					"doctype": "Asset Activity",
+					"asset": self.name,
+				}
+			)
+			and not self.flags.asset_created_via_asset_capitalization
 		):
 			add_asset_activity(self.name, _("Asset created"))
 
@@ -196,6 +200,27 @@ class Asset(AccountsController):
 		if self.item_code and not self.get("finance_books"):
 			finance_books = get_item_details(self.item_code, self.asset_category)
 			self.set("finance_books", finance_books)
+
+	def validate_finance_books(self):
+		if not self.calculate_depreciation or len(self.finance_books) == 1:
+			return
+
+		finance_books = set()
+
+		for d in self.finance_books:
+			if d.finance_book in finance_books:
+				frappe.throw(
+					_("Row #{}: Please use a different Finance Book.").format(d.idx),
+					title=_("Duplicate Finance Book"),
+				)
+			else:
+				finance_books.add(d.finance_book)
+
+			if not d.finance_book:
+				frappe.throw(
+					_("Row #{}: Finance Book should not be empty since you're using multiple.").format(d.idx),
+					title=_("Missing Finance Book"),
+				)
 
 	def validate_asset_values(self):
 		if not self.asset_category:
@@ -837,7 +862,7 @@ def make_journal_entry(asset_name):
 	je.voucher_type = "Depreciation Entry"
 	je.naming_series = depreciation_series
 	je.company = asset.company
-	je.remark = _("Depreciation Entry against asset {0}").format(asset_name)
+	je.remark = ("Depreciation Entry against asset {0}").format(asset_name)
 
 	je.append(
 		"accounts",

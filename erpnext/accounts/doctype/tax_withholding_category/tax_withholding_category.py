@@ -100,11 +100,14 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	tax_details = get_tax_withholding_details(tax_withholding_category, posting_date, inv.company)
 
 	if not tax_details:
-		frappe.throw(
-			_("Please set associated account in Tax Withholding Category {0} against Company {1}").format(
-				tax_withholding_category, inv.company
-			)
+		frappe.msgprint(
+			_(
+				"Skipping Tax Withholding Category {0} as there is no associated account set for Company {1} in it."
+			).format(tax_withholding_category, inv.company)
 		)
+		if inv.doctype == "Purchase Invoice":
+			return {}, [], {}
+		return {}
 
 	if party_type == "Customer" and not tax_details.cumulative_threshold:
 		# TCS is only chargeable on sum of invoiced value
@@ -262,14 +265,20 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
 			if ldc:
-				tax_amount = get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total)
+				limit_consumed = get_limit_consumed(ldc, parties)
+				if is_valid_certificate(ldc, posting_date, limit_consumed):
+					tax_amount = get_lower_deduction_amount(
+						net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details
+					)
+				else:
+					tax_amount = net_total * tax_details.rate / 100
 			else:
-				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
+				tax_amount = net_total * tax_details.rate / 100
 
 			# once tds is deducted, not need to add vouchers in the invoice
 			voucher_wise_amount = {}
 		else:
-			tax_amount = get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers)
+			tax_amount = get_tds_amount(ldc, parties, inv, tax_details, vouchers)
 
 	elif party_type == "Customer":
 		if tax_deducted:
@@ -416,7 +425,7 @@ def get_deducted_tax(taxable_vouchers, tax_details):
 	return sum(entries)
 
 
-def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
+def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 	tds_amount = 0
 	invoice_filters = {"name": ("in", vouchers), "docstatus": 1, "apply_tds": 1}
 
@@ -496,15 +505,10 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 			net_total += inv.tax_withholding_net_total
 			supp_credit_amt = net_total - cumulative_threshold
 
-		if ldc and is_valid_certificate(
-			ldc.valid_from,
-			ldc.valid_upto,
-			inv.get("posting_date") or inv.get("transaction_date"),
-			tax_deducted,
-			inv.tax_withholding_net_total,
-			ldc.certificate_limit,
-		):
-			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
+		if ldc and is_valid_certificate(ldc, inv.get("posting_date") or inv.get("transaction_date"), 0):
+			tds_amount = get_lower_deduction_amount(
+				supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details
+			)
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
 
@@ -582,8 +586,7 @@ def get_invoice_total_without_tcs(inv, tax_details):
 	return inv.grand_total - tcs_tax_row_amount
 
 
-def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
-	tds_amount = 0
+def get_limit_consumed(ldc, parties):
 	limit_consumed = frappe.db.get_value(
 		"Purchase Invoice",
 		{
@@ -597,37 +600,29 @@ def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 		"sum(tax_withholding_net_total)",
 	)
 
-	if is_valid_certificate(
-		ldc.valid_from, ldc.valid_upto, posting_date, limit_consumed, net_total, ldc.certificate_limit
-	):
-		tds_amount = get_ltds_amount(
-			net_total, limit_consumed, ldc.certificate_limit, ldc.rate, tax_details
-		)
-
-	return tds_amount
+	return limit_consumed
 
 
-def get_ltds_amount(current_amount, deducted_amount, certificate_limit, rate, tax_details):
-	if certificate_limit - flt(deducted_amount) - flt(current_amount) >= 0:
+def get_lower_deduction_amount(
+	current_amount, limit_consumed, certificate_limit, rate, tax_details
+):
+	if certificate_limit - flt(limit_consumed) - flt(current_amount) >= 0:
 		return current_amount * rate / 100
 	else:
-		ltds_amount = certificate_limit - flt(deducted_amount)
+		ltds_amount = certificate_limit - flt(limit_consumed)
 		tds_amount = current_amount - ltds_amount
 
 		return ltds_amount * rate / 100 + tds_amount * tax_details.rate / 100
 
 
-def is_valid_certificate(
-	valid_from, valid_upto, posting_date, deducted_amount, current_amount, certificate_limit
-):
-	valid = False
+def is_valid_certificate(ldc, posting_date, limit_consumed):
+	available_amount = flt(ldc.certificate_limit) - flt(limit_consumed)
+	if (
+		getdate(ldc.valid_from) <= getdate(posting_date) <= getdate(ldc.valid_upto)
+	) and available_amount > 0:
+		return True
 
-	available_amount = flt(certificate_limit) - flt(deducted_amount)
-
-	if (getdate(valid_from) <= getdate(posting_date) <= getdate(valid_upto)) and available_amount > 0:
-		valid = True
-
-	return valid
+	return False
 
 
 def normal_round(number):

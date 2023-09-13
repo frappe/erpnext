@@ -23,6 +23,7 @@ frappe.ui.form.on("Customer", {
 			let d  = locals[cdt][cdn];
 			let filters = {
 				'account_type': 'Receivable',
+				'root_type': 'Asset',
 				'company': d.company,
 				"is_group": 0
 			};

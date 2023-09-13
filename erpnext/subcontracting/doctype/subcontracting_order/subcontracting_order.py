@@ -128,8 +128,12 @@ class SubcontractingOrder(SubcontractingController):
 		for si in self.service_items:
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
-				bom = frappe.db.get_value("BOM", {"item": item.item_code, "is_active": 1, "is_default": 1})
-
+				bom = (
+					frappe.db.get_value(
+						"Subcontracting BOM", {"finished_good": item.item_code, "is_active": 1}, "finished_good_bom"
+					)
+					or item.default_bom
+				)
 				items.append(
 					{
 						"item_code": item.item_code,
@@ -203,7 +207,10 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 		{
 			"Subcontracting Order": {
 				"doctype": "Subcontracting Receipt",
-				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"set_warehouse": "set_warehouse",
+				},
 				"validation": {
 					"docstatus": ["=", 1],
 				},

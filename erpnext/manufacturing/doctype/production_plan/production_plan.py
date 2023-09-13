@@ -53,7 +53,7 @@ class ProductionPlan(Document):
 		data = sales_order_query(filters={"company": self.company, "sales_orders": sales_orders})
 
 		title = _("Production Plan Already Submitted")
-		if not data:
+		if not data and sales_orders:
 			msg = _("No items are available in the sales order {0} for production").format(sales_orders[0])
 			if len(sales_orders) > 1:
 				sales_orders = ", ".join(sales_orders)
@@ -347,7 +347,7 @@ class ProductionPlan(Document):
 			if not data.pending_qty:
 				continue
 
-			item_details = get_item_details(data.item_code)
+			item_details = get_item_details(data.item_code, throw=False)
 			if self.combine_items:
 				if item_details.bom_no in refs:
 					refs[item_details.bom_no]["so_details"].append(
@@ -673,6 +673,7 @@ class ProductionPlan(Document):
 
 				po.append("items", po_data)
 
+			po.set_service_items_for_finished_goods()
 			po.set_missing_values()
 			po.flags.ignore_mandatory = True
 			po.flags.ignore_validate = True
@@ -725,7 +726,7 @@ class ProductionPlan(Document):
 
 			# key for Sales Order:Material Request Type:Customer
 			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
-			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
+			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if not key in material_request_map:
 				# make a new MR for the combination
@@ -794,6 +795,9 @@ class ProductionPlan(Document):
 
 			if not row.item_code:
 				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
+
+			if not row.bom_no:
+				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
 			bom_data = []
 

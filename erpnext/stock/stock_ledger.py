@@ -647,7 +647,7 @@ class update_entries_after(object):
 
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)
-		val = frappe._dict({"sle": dependant_sle, "dependent_voucher_detail_nos": []})
+		val = frappe._dict({"sle": dependant_sle})
 
 		if key not in self.distinct_item_warehouses:
 			self.distinct_item_warehouses[key] = val
@@ -661,6 +661,8 @@ class update_entries_after(object):
 
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
 				val.sle_changed = True
+				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
+				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
 			elif dependant_sle.voucher_detail_no not in set(dependent_voucher_detail_nos):
@@ -1212,9 +1214,15 @@ class update_entries_after(object):
 			if msg:
 				if self.reserved_stock:
 					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
-					msg = "{0} As {1} units are reserved, you are allowed to consume only {2} units.".format(
-						msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
-					)
+
+					if allowed_qty > 0:
+						msg = "{0} As {1} units are reserved for other sales orders, you are allowed to consume only {2} units.".format(
+							msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
+						)
+					else:
+						msg = "{0} As the full stock is reserved for other sales orders, you're not allowed to consume the stock.".format(
+							msg,
+						)
 
 				msg_list.append(msg)
 

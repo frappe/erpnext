@@ -474,10 +474,12 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
-				update_reference_in_journal_entry(entry, doc, do_not_save=True)
+				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
 				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
 				# amount and account in args
-				doc.make_exchange_gain_loss_journal(args)
+				# referenced_row is used to deduplicate gain/loss journal
+				entry.update({"referenced_row": referenced_row})
+				doc.make_exchange_gain_loss_journal([entry])
 			else:
 				update_reference_in_payment_entry(
 					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
@@ -489,14 +491,13 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		gl_map = doc.build_gl_map()
 		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
-		if voucher_type == "Payment Entry":
-			doc.make_advance_gl_entries()
-
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
 			update_voucher_outstanding(
 				entry.against_voucher_type, entry.against_voucher, entry.account, entry.party_type, entry.party
 			)
+			if voucher_type == "Payment Entry":
+				doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
 
 		frappe.flags.ignore_party_validation = False
 
@@ -626,6 +627,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	journal_entry.flags.ignore_validate_update_after_submit = True
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
+
+	return new_row.name
 
 
 def update_reference_in_payment_entry(
@@ -908,6 +911,9 @@ def get_outstanding_invoices(
 	min_outstanding=None,
 	max_outstanding=None,
 	accounting_dimensions=None,
+	vouchers=None,  # list of dicts [{'voucher_type': '', 'voucher_no': ''}] for filtering
+	limit=None,  # passed by reconciliation tool
+	voucher_no=None,  # filter passed by reconciliation tool
 ):
 
 	ple = qb.DocType("Payment Ledger Entry")
@@ -933,12 +939,15 @@ def get_outstanding_invoices(
 
 	ple_query = QueryPaymentLedger()
 	invoice_list = ple_query.get_voucher_outstandings(
+		vouchers=vouchers,
 		common_filter=common_filter,
 		posting_date=posting_date,
 		min_outstanding=min_outstanding,
 		max_outstanding=max_outstanding,
 		get_invoices=True,
 		accounting_dimensions=accounting_dimensions or [],
+		limit=limit,
+		voucher_no=voucher_no,
 	)
 
 	for d in invoice_list:
@@ -1153,12 +1162,17 @@ def get_autoname_with_number(number_value, doc_title, company):
 
 def parse_naming_series_variable(doc, variable):
 	if variable == "FY":
-		date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
-		return get_fiscal_year(date=date, company=doc.get("company"))[0]
+		if doc:
+			date = doc.get("posting_date") or doc.get("transaction_date")
+			company = doc.get("company")
+		else:
+			date = getdate()
+			company = None
+		return get_fiscal_year(date=date, company=company)[0]
 
 
 @frappe.whitelist()
-def get_coa(doctype, parent, is_root, chart=None):
+def get_coa(doctype, parent, is_root=None, chart=None):
 	from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 		build_tree_from_json,
 	)
@@ -1676,12 +1690,13 @@ class QueryPaymentLedger(object):
 		self.voucher_posting_date = []
 		self.min_outstanding = None
 		self.max_outstanding = None
+		self.limit = self.voucher_no = None
 
 	def reset(self):
 		# clear filters
 		self.vouchers.clear()
 		self.common_filter.clear()
-		self.min_outstanding = self.max_outstanding = None
+		self.min_outstanding = self.max_outstanding = self.limit = None
 
 		# clear result
 		self.voucher_outstandings.clear()
@@ -1695,6 +1710,7 @@ class QueryPaymentLedger(object):
 
 		filter_on_voucher_no = []
 		filter_on_against_voucher_no = []
+
 		if self.vouchers:
 			voucher_types = set([x.voucher_type for x in self.vouchers])
 			voucher_nos = set([x.voucher_no for x in self.vouchers])
@@ -1704,6 +1720,10 @@ class QueryPaymentLedger(object):
 
 			filter_on_against_voucher_no.append(ple.against_voucher_type.isin(voucher_types))
 			filter_on_against_voucher_no.append(ple.against_voucher_no.isin(voucher_nos))
+
+		if self.voucher_no:
+			filter_on_voucher_no.append(ple.voucher_no.like(f"%{self.voucher_no}%"))
+			filter_on_against_voucher_no.append(ple.against_voucher_no.like(f"%{self.voucher_no}%"))
 
 		# build outstanding amount filter
 		filter_on_outstanding_amount = []
@@ -1738,6 +1758,7 @@ class QueryPaymentLedger(object):
 				ple.posting_date,
 				ple.due_date,
 				ple.account_currency.as_("currency"),
+				ple.cost_center.as_("cost_center"),
 				Sum(ple.amount).as_("amount"),
 				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
 			)
@@ -1800,6 +1821,7 @@ class QueryPaymentLedger(object):
 				).as_("paid_amount_in_account_currency"),
 				Table("vouchers").due_date,
 				Table("vouchers").currency,
+				Table("vouchers").cost_center.as_("cost_center"),
 			)
 			.where(Criterion.all(filter_on_outstanding_amount))
 		)
@@ -1820,6 +1842,11 @@ class QueryPaymentLedger(object):
 				)
 			)
 
+		if self.limit:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.limit(self.limit)
+			)
+
 		# execute SQL
 		self.voucher_outstandings = self.cte_query_voucher_amount_and_outstanding.run(as_dict=True)
 
@@ -1833,6 +1860,8 @@ class QueryPaymentLedger(object):
 		get_payments=False,
 		get_invoices=False,
 		accounting_dimensions=None,
+		limit=None,
+		voucher_no=None,
 	):
 		"""
 		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
@@ -1854,6 +1883,8 @@ class QueryPaymentLedger(object):
 		self.max_outstanding = max_outstanding
 		self.get_payments = get_payments
 		self.get_invoices = get_invoices
+		self.limit = limit
+		self.voucher_no = voucher_no
 		self.query_for_outstanding()
 
 		return self.voucher_outstandings
@@ -1861,6 +1892,7 @@ class QueryPaymentLedger(object):
 
 def create_gain_loss_journal(
 	company,
+	posting_date,
 	party_type,
 	party,
 	party_account,
@@ -1874,12 +1906,14 @@ def create_gain_loss_journal(
 	ref2_dt,
 	ref2_dn,
 	ref2_detail_no,
+	cost_center,
 ) -> str:
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
 	journal_entry.company = company
-	journal_entry.posting_date = nowdate()
+	journal_entry.posting_date = posting_date or nowdate()
 	journal_entry.multi_currency = 1
+	journal_entry.is_system_generated = True
 
 	party_account_currency = frappe.get_cached_value("Account", party_account, "account_currency")
 
@@ -1898,7 +1932,7 @@ def create_gain_loss_journal(
 			"party": party,
 			"account_currency": party_account_currency,
 			"exchange_rate": 0,
-			"cost_center": erpnext.get_default_cost_center(company),
+			"cost_center": cost_center or erpnext.get_default_cost_center(company),
 			"reference_type": ref1_dt,
 			"reference_name": ref1_dn,
 			"reference_detail_no": ref1_detail_no,
@@ -1914,7 +1948,7 @@ def create_gain_loss_journal(
 			"account": gain_loss_account,
 			"account_currency": gain_loss_account_currency,
 			"exchange_rate": 1,
-			"cost_center": erpnext.get_default_cost_center(company),
+			"cost_center": cost_center or erpnext.get_default_cost_center(company),
 			"reference_type": ref2_dt,
 			"reference_name": ref2_dn,
 			"reference_detail_no": ref2_detail_no,

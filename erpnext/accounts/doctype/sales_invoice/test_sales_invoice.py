@@ -1500,8 +1500,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(party_credited, 1000)
 
 		# Check outstanding amount
-		self.assertFalse(si1.outstanding_amount)
-		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount"), -1000)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 2500)
 
 	def test_gle_made_when_asset_is_returned(self):
 		create_asset_data()
@@ -3376,6 +3376,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
 
+	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
 	def test_sales_return_negative_rate(self):
 		si = create_sales_invoice(is_return=1, qty=-2, rate=-10, do_not_save=True)
 		self.assertRaises(frappe.ValidationError, si.save)

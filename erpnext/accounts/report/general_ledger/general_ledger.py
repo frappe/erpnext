@@ -182,12 +182,18 @@ def get_gl_entries(filters, accounting_dimensions):
 	if accounting_dimensions:
 		dimension_fields = ", ".join(accounting_dimensions) + ","
 
+	transaction_currency_fields = ""
+	if filters.get("add_values_in_transaction_currency"):
+		transaction_currency_fields = (
+			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
+		)
+
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, {dimension_fields}
-			cost_center, project,
+			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening, creation {select_fields}
 		from `tabGL Entry`
@@ -195,6 +201,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		{order_by_statement}
 	""".format(
 			dimension_fields=dimension_fields,
+			transaction_currency_fields=transaction_currency_fields,
 			select_fields=select_fields,
 			conditions=get_conditions(filters),
 			order_by_statement=order_by_statement,
@@ -272,20 +279,19 @@ def get_conditions(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	if filters.get("include_dimensions"):
-		accounting_dimensions = get_accounting_dimensions(as_list=False)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
-		if accounting_dimensions:
-			for dimension in accounting_dimensions:
-				if not dimension.disabled:
-					if filters.get(dimension.fieldname):
-						if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-							filters[dimension.fieldname] = get_dimension_with_children(
-								dimension.document_type, filters.get(dimension.fieldname)
-							)
-							conditions.append("{0} in %({0})s".format(dimension.fieldname))
-						else:
-							conditions.append("{0} in %({0})s".format(dimension.fieldname))
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if not dimension.disabled:
+				if filters.get(dimension.fieldname):
+					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+						filters[dimension.fieldname] = get_dimension_with_children(
+							dimension.document_type, filters.get(dimension.fieldname)
+						)
+						conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					else:
+						conditions.append("{0} in %({0})s".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -428,6 +434,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 	for gle in gl_entries:
 		group_by_value = gle.get(group_by)
+		gle.voucher_type = _(gle.voucher_type)
 
 		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries):
 			if not group_by_voucher_consolidated:
@@ -562,6 +569,34 @@ def get_columns(filters):
 			"fieldtype": "Float",
 			"width": 130,
 		},
+	]
+
+	if filters.get("add_values_in_transaction_currency"):
+		columns += [
+			{
+				"label": _("Debit (Transaction)"),
+				"fieldname": "debit_in_transaction_currency",
+				"fieldtype": "Currency",
+				"width": 130,
+				"options": "transaction_currency",
+			},
+			{
+				"label": _("Credit (Transaction)"),
+				"fieldname": "credit_in_transaction_currency",
+				"fieldtype": "Currency",
+				"width": 130,
+				"options": "transaction_currency",
+			},
+			{
+				"label": "Transaction Currency",
+				"fieldname": "transaction_currency",
+				"fieldtype": "Link",
+				"options": "Currency",
+				"width": 70,
+			},
+		]
+
+	columns += [
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
 		{
 			"label": _("Voucher No"),

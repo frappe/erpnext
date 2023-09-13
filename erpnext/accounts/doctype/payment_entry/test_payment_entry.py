@@ -702,7 +702,50 @@ class TestPaymentEntry(FrappeTestCase):
 		pe2.submit()
 
 		# create return entry against si1
-		create_sales_invoice(is_return=1, return_against=si1.name, qty=-1)
+		cr_note = create_sales_invoice(is_return=1, return_against=si1.name, qty=-1)
+		si1_outstanding = frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount")
+
+		# create JE(credit note) manually against si1 and cr_note
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": si1.company,
+				"voucher_type": "Credit Note",
+				"posting_date": nowdate(),
+			}
+		)
+		je.append(
+			"accounts",
+			{
+				"account": si1.debit_to,
+				"party_type": "Customer",
+				"party": si1.customer,
+				"debit": 0,
+				"credit": 100,
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": 100,
+				"reference_type": si1.doctype,
+				"reference_name": si1.name,
+				"cost_center": si1.items[0].cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": cr_note.debit_to,
+				"party_type": "Customer",
+				"party": cr_note.customer,
+				"debit": 100,
+				"credit": 0,
+				"debit_in_account_currency": 100,
+				"credit_in_account_currency": 0,
+				"reference_type": cr_note.doctype,
+				"reference_name": cr_note.name,
+				"cost_center": cr_note.items[0].cost_center,
+			},
+		)
+		je.save().submit()
+
 		si1_outstanding = frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount")
 		self.assertEqual(si1_outstanding, -100)
 
@@ -1200,6 +1243,24 @@ class TestPaymentEntry(FrappeTestCase):
 		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
 		template.allocate_payment_based_on_payment_terms = 1
 		template.save()
+
+	def test_allocation_validation_for_sales_order(self):
+		so = make_sales_order(do_not_save=True)
+		so.items[0].rate = 99.55
+		so.save().submit()
+		self.assertGreater(so.rounded_total, 0.0)
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		pe.paid_amount = 45.55
+		pe.references[0].allocated_amount = 45.55
+		pe.save().submit()
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
+		pe.paid_from = "Debtors - _TC"
+		# No validation error should be thrown here.
+		pe.save().submit()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, so.rounded_total)
 
 
 def create_payment_entry(**args):

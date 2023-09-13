@@ -10,9 +10,11 @@ from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
+from frappe.utils.user import is_website_user
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
+from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
@@ -85,6 +87,7 @@ class Project(Document):
 				issue=task_details.issue,
 				is_group=task_details.is_group,
 				color=task_details.color,
+				template_task=task_details.name,
 			)
 		).insert()
 
@@ -104,9 +107,13 @@ class Project(Document):
 		return date
 
 	def dependency_mapping(self, template_tasks, project_tasks):
-		for template_task in template_tasks:
-			project_task = list(filter(lambda x: x.subject == template_task.subject, project_tasks))[0]
-			project_task = frappe.get_doc("Task", project_task.name)
+		for project_task in project_tasks:
+			if project_task.get("template_task"):
+				template_task = frappe.get_doc("Task", project_task.template_task)
+			else:
+				template_task = list(filter(lambda x: x.subject == project_task.subject, template_tasks))[0]
+				template_task = frappe.get_doc("Task", template_task.name)
+
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
@@ -118,6 +125,7 @@ class Project(Document):
 					filter(lambda x: x.subject == child_task_subject, project_tasks)
 				)
 				if len(corresponding_project_task):
+					project_task.reload()  # reload, as it might have been updated in the previous iteration
 					project_task.append("depends_on", {"task": corresponding_project_task[0].name})
 					project_task.save()
 
@@ -318,9 +326,20 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 def get_project_list(
 	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
 ):
+	user = frappe.session.user
+	customers, suppliers = get_customers_suppliers("Project", frappe.session.user)
+
+	ignore_permissions = False
+	if is_website_user():
+		if not filters:
+			filters = []
+
+		if customers:
+			filters.append([doctype, "customer", "in", customers])
+
+		ignore_permissions = True
+
 	meta = frappe.get_meta(doctype)
-	if not filters:
-		filters = []
 
 	fields = "distinct *"
 
@@ -351,18 +370,26 @@ def get_project_list(
 		limit_start=limit_start,
 		limit_page_length=limit_page_length,
 		order_by=order_by,
+		ignore_permissions=ignore_permissions,
 	)
 
 
 def get_list_context(context=None):
-	return {
-		"show_sidebar": True,
-		"show_search": True,
-		"no_breadcrumbs": True,
-		"title": _("Projects"),
-		"get_list": get_project_list,
-		"row_template": "templates/includes/projects/project_row.html",
-	}
+	from erpnext.controllers.website_list_for_contact import get_list_context
+
+	list_context = get_list_context(context)
+	list_context.update(
+		{
+			"show_sidebar": True,
+			"show_search": True,
+			"no_breadcrumbs": True,
+			"title": _("Projects"),
+			"get_list": get_project_list,
+			"row_template": "templates/includes/projects/project_row.html",
+		}
+	)
+
+	return list_context
 
 
 @frappe.whitelist()

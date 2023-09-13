@@ -404,14 +404,11 @@ class AssetCapitalization(StockController):
 	def get_gl_entries_for_consumed_asset_items(
 		self, gl_entries, target_account, target_against, precision
 	):
-		self.are_all_asset_items_non_depreciable = True
-
 		# Consumed Assets
 		for item in self.asset_items:
 			asset = frappe.get_doc("Asset", item.asset)
 
 			if asset.calculate_depreciation:
-				self.are_all_asset_items_non_depreciable = False
 				notes = _(
 					"This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
 				).format(
@@ -509,6 +506,7 @@ class AssetCapitalization(StockController):
 		asset_doc.gross_purchase_amount = total_target_asset_value
 		asset_doc.purchase_receipt_amount = total_target_asset_value
 		asset_doc.flags.ignore_validate = True
+		asset_doc.flags.asset_created_via_asset_capitalization = True
 		asset_doc.insert()
 
 		self.target_asset = asset_doc.name
