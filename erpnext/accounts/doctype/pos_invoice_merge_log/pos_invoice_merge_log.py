@@ -252,6 +252,14 @@ class POSInvoiceMergeLog(Document):
 
 		for dimension in accounting_dimensions:
 			dimension_value = dimension_values.get(dimension)
+			# If none then dimension is not set in POS Profile
+			if dimension_value == None:
+				frappe.throw(
+					_("Please set {} in {}").format(
+						frappe.bold(dimension), frappe.get_desk_link("POS Profile", invoice.pos_profile)
+					)
+				)
+
 			invoice.set(dimension, dimension_value)
 
 		if self.merge_invoices_based_on == "Customer Group":
