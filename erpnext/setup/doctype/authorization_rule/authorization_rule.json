@@ -46,7 +46,7 @@
    "label": "Based On",
    "oldfieldname": "based_on",
    "oldfieldtype": "Select",
-   "options": "\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nNot Applicable",
+   "options": "\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nItem Group wise Discount\nNot Applicable",
    "reqd": 1
   },
   {
@@ -54,14 +54,14 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Customer or Item",
-   "options": "Customer\nItem",
+   "options": "Customer\nItem\nItem Group",
    "read_only": 1
   },
   {
    "fieldname": "master_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Customer / Item Name",
+   "label": "Customer / Item / Item Group",
    "oldfieldname": "master_name",
    "oldfieldtype": "Link",
    "options": "customer_or_item"
@@ -162,7 +162,7 @@
  "icon": "fa fa-shield",
  "idx": 1,
  "links": [],
- "modified": "2022-07-01 11:19:45.643991",
+ "modified": "2023-09-11 10:29:02.863193",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Authorization Rule",
