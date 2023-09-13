@@ -23,7 +23,7 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:10.3
+        image: mariadb:10.6
         env:
           MARIADB_ROOT_PASSWORD: 'root'
         ports:
@@ -103,30 +103,36 @@ jobs:
         run: |
           cd ~/frappe-bench/
           wget https://erpnext.com/files/v10-erpnext.sql.gz
+          bench remove-app payments --force
           bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
 
-          for version in $(seq 12 13)
-          do
-              echo "Updating to v$version"
-              branch_name="version-$version-hotfix"
 
-              git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
-              git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+          function update_to_version() {
+            version=$1
+            py=$2
 
-              git -C "apps/frappe" checkout -q -f $branch_name
-              git -C "apps/erpnext" checkout -q -f $branch_name
+            branch_name="version-$version-hotfix"
+            echo "Updating to v$version"
 
-              rm -rf ~/frappe-bench/env
-              bench setup env --python python3.7
-              bench pip install -e ./apps/payments
-              bench pip install -e ./apps/erpnext
+            # Fetch and checkout branches
+            git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
+            git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+            git -C "apps/frappe" checkout -q -f $branch_name
+            git -C "apps/erpnext" checkout -q -f $branch_name
 
-              bench --site test_site migrate
-          done
+            # Resetup env and install apps
+            rm -rf ~/frappe-bench/env
+            bench -v setup env --python $py
+            bench pip install -e ./apps/erpnext
 
+            bench --site test_site migrate
+          }
+
+          update_to_version 13 python3.7
+          update_to_version 14 python3.10
 
           echo "Updating to latest version"
           git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
@@ -134,8 +140,6 @@ jobs:
 
           rm -rf ~/frappe-bench/env
           bench -v setup env --python python3.10
-          bench pip install -e ./apps/payments
           bench pip install -e ./apps/erpnext
 
           bench --site test_site migrate
-          bench --site test_site install-app payments
