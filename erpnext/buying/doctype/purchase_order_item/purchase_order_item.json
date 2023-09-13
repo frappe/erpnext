@@ -845,13 +845,60 @@
    "label": "Sales Order Packed Item",
    "no_copy": 1,
    "print_hide": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item",
+   "fieldtype": "Link",
+   "label": "Finished Good",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "options": "Item"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Qty",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
+  },
+  {
+   "depends_on": "eval:parent.is_internal_supplier",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply TDS"
+>>>>>>> d2f3286115 (fix: ignore user permissions for `From Warehouse` in PR)
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-02-02 13:10:18.398976",
+=======
+ "modified": "2023-09-13 16:22:40.825092",
+>>>>>>> d2f3286115 (fix: ignore user permissions for `From Warehouse` in PR)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
