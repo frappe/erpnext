@@ -1268,6 +1268,7 @@
    "depends_on": "eval: doc.is_internal_customer",
    "fieldname": "set_target_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Set Target Warehouse",
    "no_copy": 1,
@@ -1335,7 +1336,11 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-09-16 17:46:17.701904",
+=======
+ "modified": "2023-09-04 14:15:28.363184",
+>>>>>>> 0e83190c19 (fix: incorrect stock ledger entries in DN (#36944))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
