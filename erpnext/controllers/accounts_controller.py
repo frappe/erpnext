@@ -2148,7 +2148,9 @@ def get_advance_payment_entries(
 ):
 	party_account_field = "paid_from" if party_type in ["Customer", "Student"] else "paid_to"
 	currency_field = (
-		"paid_from_account_currency" if party_type in ["Customer", "Student"] else "paid_to_account_currency"
+		"paid_from_account_currency"
++		if party_type in ["Customer", "Student"]
++		else "paid_to_account_currency"
 	)
 	payment_type = "Receive" if party_type in ["Customer", "Student"] else "Pay"
 	exchange_rate_field = (
