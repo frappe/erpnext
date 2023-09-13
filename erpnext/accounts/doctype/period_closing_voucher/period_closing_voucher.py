@@ -136,6 +136,17 @@ class PeriodClosingVoucher(AccountsController):
 				closing_date=self.posting_date,
 				timeout=3000,
 			)
+
+			frappe.enqueue(
+				process_closing_entries,
+				gl_entries=gl_entries,
+				closing_entries=closing_entries,
+				voucher_name=self.name,
+				company=self.company,
+				closing_date=self.posting_date,
+				timeout=3000,
+			)
+
 			frappe.msgprint(
 				_("The GL Entries will be processed in the background, it can take a few minutes."),
 				alert=True,
@@ -323,21 +334,29 @@ class PeriodClosingVoucher(AccountsController):
 
 
 def process_gl_entries(gl_entries, closing_entries, voucher_name, company, closing_date):
-	from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
-		make_closing_entries,
-	)
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	try:
 		if gl_entries:
 			make_gl_entries(gl_entries, merge_entries=False)
-
-		make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
 		frappe.db.set_value("Period Closing Voucher", voucher_name, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
 		frappe.db.set_value("Period Closing Voucher", voucher_name, "gle_processing_status", "Failed")
+
+
+def process_closing_entries(gl_entries, closing_entries, voucher_name, company, closing_date):
+	from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
+		make_closing_entries,
+	)
+
+	try:
+		if gl_entries + closing_entries:
+			make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error(e)
 
 
 def make_reverse_gl_entries(voucher_type, voucher_no):
