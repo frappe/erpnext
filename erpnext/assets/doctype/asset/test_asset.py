@@ -743,18 +743,18 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2023-01-31", 1019.18, 1019.18],
-			["2023-02-28", 920.55, 1939.73],
-			["2023-03-31", 1019.18, 2958.91],
-			["2023-04-30", 986.3, 3945.21],
-			["2023-05-31", 1019.18, 4964.39],
-			["2023-06-30", 986.3, 5950.69],
-			["2023-07-31", 1019.18, 6969.87],
-			["2023-08-31", 1019.18, 7989.05],
-			["2023-09-30", 986.3, 8975.35],
-			["2023-10-31", 1019.18, 9994.53],
-			["2023-11-30", 986.3, 10980.83],
-			["2023-12-31", 1019.17, 12000.0],
+			["2023-01-31", 1021.98, 1021.98],
+			["2023-02-28", 923.08, 1945.06],
+			["2023-03-31", 1021.98, 2967.04],
+			["2023-04-30", 989.01, 3956.05],
+			["2023-05-31", 1021.98, 4978.03],
+			["2023-06-30", 989.01, 5967.04],
+			["2023-07-31", 1021.98, 6989.02],
+			["2023-08-31", 1021.98, 8011.0],
+			["2023-09-30", 989.01, 9000.01],
+			["2023-10-31", 1021.98, 10021.99],
+			["2023-11-30", 989.01, 11011.0],
+			["2023-12-31", 989.0, 12000.0],
 		]
 
 		schedules = [
@@ -1332,6 +1332,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 1",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 1,
 				"total_number_of_depreciations": 3,
@@ -1342,6 +1343,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 2",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 1,
 				"total_number_of_depreciations": 6,
@@ -1352,6 +1354,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 3",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 3,
@@ -1381,6 +1384,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 1",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 3,
@@ -1391,6 +1395,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 2",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 6,
@@ -1646,6 +1651,15 @@ def create_asset_data():
 
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 1"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 1"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 2"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 2"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 3"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 3"}).insert()
 
 
 def create_asset(**args):

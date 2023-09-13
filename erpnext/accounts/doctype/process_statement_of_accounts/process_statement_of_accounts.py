@@ -26,7 +26,13 @@ class ProcessStatementOfAccounts(Document):
 		if not self.subject:
 			self.subject = "Statement Of Accounts for {{ customer.customer_name }}"
 		if not self.body:
-			self.body = "Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}."
+			if self.report == "General Ledger":
+				body_str = " from {{ doc.from_date }} to {{ doc.to_date }}."
+			else:
+				body_str = " until {{ doc.posting_date }}."
+			self.body = "Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts" + body_str
+		if not self.pdf_name:
+			self.pdf_name = "{{ customer.customer_name }}"
 
 		validate_template(self.subject)
 		validate_template(self.body)
@@ -58,19 +64,17 @@ def get_report_pdf(doc, consolidated=True):
 		filters = get_common_filters(doc)
 
 		if doc.report == "General Ledger":
-			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
-		else:
-			filters.update(get_ar_filters(doc, entry))
-
-		if doc.report == "General Ledger":
 			col, res = get_soa(filters)
 			for x in [0, -2, -1]:
 				res[x]["account"] = res[x]["account"].replace("'", "")
 			if len(res) == 3:
 				continue
 		else:
+			filters.update(get_ar_filters(doc, entry))
 			ar_res = get_ar_soa(filters)
 			col, res = ar_res[0], ar_res[1]
+			if not res:
+				continue
 
 		statement_dict[entry.customer] = get_html(doc, filters, entry, col, res, ageing)
 
@@ -139,6 +143,7 @@ def get_ar_filters(doc, entry):
 	return {
 		"report_date": doc.posting_date if doc.posting_date else None,
 		"customer": entry.customer,
+		"customer_name": entry.customer_name if entry.customer_name else None,
 		"payment_terms_template": doc.payment_terms_template if doc.payment_terms_template else None,
 		"sales_partner": doc.sales_partner if doc.sales_partner else None,
 		"sales_person": doc.sales_person if doc.sales_person else None,
@@ -362,16 +367,20 @@ def download_statements(document_name):
 
 
 @frappe.whitelist()
-def send_emails(document_name, from_scheduler=False):
+def send_emails(document_name, from_scheduler=False, posting_date=None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	report = get_report_pdf(doc, consolidated=False)
 
 	if report:
 		for customer, report_pdf in report.items():
-			attachments = [{"fname": customer + ".pdf", "fcontent": report_pdf}]
+			context = get_context(customer, doc)
+			filename = frappe.render_template(doc.pdf_name, context)
+			attachments = [{"fname": filename + ".pdf", "fcontent": report_pdf}]
 
 			recipients, cc = get_recipients_and_cc(customer, doc)
-			context = get_context(customer, doc)
+			if not recipients:
+				continue
+
 			subject = frappe.render_template(doc.subject, context)
 			message = frappe.render_template(doc.body, context)
 
@@ -390,7 +399,7 @@ def send_emails(document_name, from_scheduler=False):
 			)
 
 		if doc.enable_auto_email and from_scheduler:
-			new_to_date = getdate(today())
+			new_to_date = getdate(posting_date or today())
 			if doc.frequency == "Weekly":
 				new_to_date = add_days(new_to_date, 7)
 			else:
@@ -399,8 +408,11 @@ def send_emails(document_name, from_scheduler=False):
 			doc.add_comment(
 				"Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now())
 			)
-			doc.db_set("to_date", new_to_date, commit=True)
-			doc.db_set("from_date", new_from_date, commit=True)
+			if doc.report == "General Ledger":
+				doc.db_set("to_date", new_to_date, commit=True)
+				doc.db_set("from_date", new_from_date, commit=True)
+			else:
+				doc.db_set("posting_date", new_to_date, commit=True)
 		return True
 	else:
 		return False
@@ -410,7 +422,8 @@ def send_emails(document_name, from_scheduler=False):
 def send_auto_email():
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
-		filters={"to_date": format_date(today()), "enable_auto_email": 1},
+		filters={"enable_auto_email": 1},
+		or_filters={"to_date": format_date(today()), "posting_date": format_date(today())},
 	)
 	for entry in selected:
 		send_emails(entry.name, from_scheduler=True)
