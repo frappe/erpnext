@@ -130,12 +130,12 @@ class HolidayList(Document):
 		for row in self.holidays:
 			if row.holiday_date in unique_dates:
 				frappe.throw(
-					_("Holiday Date {0} appears Multiple times in row {1} & {2}").format(
-						row.holiday_date, unique_dates.index(row.holiday_date) + 1, row.idx
+					_("Holiday Date {0} added multiple times").format(
+						frappe.bold(row.holiday_date)
 					)
 				)
-			else:
-				unique_dates.append(row.holiday_date)
+
+			unique_dates.append(row.holiday_date)
 
 
 @frappe.whitelist()
