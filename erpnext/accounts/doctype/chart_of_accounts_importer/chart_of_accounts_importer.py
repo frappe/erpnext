@@ -495,6 +495,17 @@ def set_default_accounts(company):
 			),
 		}
 	)
+	if "hrms" in frappe.get_installed_apps():
+		company.update(
+			{
+				"default_payroll_payable_account": frappe.db.get_value(
+			        "Account", {"account_name": _("Payroll Payable"), "company": company.name, "is_group": 0}
+		        ),
+				"default_employee_advance_account": frappe.db.get_value(
+			        "Account", {"account_name": _("Employee Advances"), "company": company.name, "is_group": 0}
+		        )
+			}
+		)
 
 	company.save()
 	install_country_fixtures(company.name, company.country)
