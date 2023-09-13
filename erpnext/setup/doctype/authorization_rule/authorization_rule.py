@@ -47,6 +47,7 @@ class AuthorizationRule(Document):
 			"Average Discount",
 			"Customerwise Discount",
 			"Itemwise Discount",
+			"Item Group wise Discount",
 		]:
 			frappe.throw(
 				_("Cannot set authorization on basis of Discount for {0}").format(self.transaction)
