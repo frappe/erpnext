@@ -195,6 +195,9 @@ class TestSupplier(FrappeTestCase):
 def create_supplier(**args):
 	args = frappe._dict(args)
 
+	if not args.supplier_name:
+		args.supplier_name = frappe.generate_hash()
+
 	if frappe.db.exists("Supplier", args.supplier_name):
 		return frappe.get_doc("Supplier", args.supplier_name)
 
