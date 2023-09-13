@@ -325,6 +325,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 		voucher_wise_amount.update({d.name: {"amount": d.base_net_total, "voucher_type": doctype}})
 	
 	cond = ''
+	
 	if tax_details.get('consider_party_ledger_amount'):
 		cond = " AND j.docstatus = 1 "  # Condition when 'consider_party_ledger_amount' is True
 	else:
