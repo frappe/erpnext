@@ -2146,11 +2146,11 @@ def get_advance_payment_entries(
 	limit=None,
 	condition=None,
 ):
-	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
+	party_account_field = "paid_from" if party_type in ["Customer", "Student"] else "paid_to"
 	currency_field = (
-		"paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
+		"paid_from_account_currency" if party_type in ["Customer", "Student"] else "paid_to_account_currency"
 	)
-	payment_type = "Receive" if party_type == "Customer" else "Pay"
+	payment_type = "Receive" if party_type in ["Customer", "Student"] else "Pay"
 	exchange_rate_field = (
 		"source_exchange_rate" if payment_type == "Receive" else "target_exchange_rate"
 	)
