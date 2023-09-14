@@ -48,6 +48,11 @@ frappe.ui.form.on('Quotation', {
 				}
 			}
 		});
+	},
+
+	refresh: function(frm) {
+		frm.trigger("set_label");
+		frm.trigger("set_dynamic_field_label");
 
 		let sbb_field = frm.get_docfield('packed_items', 'serial_and_batch_bundle');
 		if (sbb_field) {
@@ -59,11 +64,6 @@ frappe.ui.form.on('Quotation', {
 				}
 			};
 		}
-	},
-
-	refresh: function(frm) {
-		frm.trigger("set_label");
-		frm.trigger("set_dynamic_field_label");
 	},
 
 	quotation_to: function(frm) {

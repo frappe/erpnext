@@ -65,17 +65,6 @@ frappe.ui.form.on('Pick List', {
 				}
 			}
 		});
-
-		let sbb_field = frm.get_docfield('locations', 'serial_and_batch_bundle');
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					'item_code': row.doc.item_code,
-					'warehouse': row.doc.warehouse,
-					'voucher_type': frm.doc.doctype,
-				}
-			};
-		}
 	},
 	set_item_locations:(frm, save) => {
 		if (!(frm.doc.locations && frm.doc.locations.length)) {
@@ -131,6 +120,17 @@ frappe.ui.form.on('Pick List', {
 					frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
 				}
 			}
+		}
+
+		let sbb_field = frm.get_docfield('locations', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
 		}
 	},
 	work_order: (frm) => {
