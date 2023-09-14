@@ -503,7 +503,8 @@ def set_default_accounts(company):
 		        ),
 				"default_employee_advance_account": frappe.db.get_value(
 			        "Account", {"account_name": _("Employee Advances"), "company": company.name, "is_group": 0}
-		        )
+		        ),
+				"default_expense_claim_payable_account": company.default_payable_account
 			}
 		)
 
