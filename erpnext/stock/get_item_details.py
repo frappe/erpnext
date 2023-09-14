@@ -696,7 +696,7 @@ def get_default_discount_account(args, item):
 def get_default_deferred_account(args, item, fieldname=None):
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		return (
-			frappe.db.get_value(
+			frappe.db.get_cached_value(
 				"Item Default",
 				{"parent": args.item_code, "company": args.get("company")},
 				fieldname,
