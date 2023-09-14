@@ -211,12 +211,45 @@ class AccountsController(TransactionBase):
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
+	def _remove_references_in_unreconcile(self):
+		upe = frappe.qb.DocType("Unreconcile Payment Entries")
+		rows = (
+			frappe.qb.from_(upe)
+			.select(upe.name, upe.parent)
+			.where((upe.reference_doctype == self.doctype) & (upe.reference_name == self.name))
+			.run(as_dict=True)
+		)
+
+		if rows:
+			references_map = frappe._dict()
+			for x in rows:
+				references_map.setdefault(x.parent, []).append(x.name)
+
+			for doc, rows in references_map.items():
+				unreconcile_doc = frappe.get_doc("Unreconcile Payments", doc)
+				for row in rows:
+					unreconcile_doc.remove(unreconcile_doc.get("allocations", {"name": row})[0])
+
+				unreconcile_doc.flags.ignore_validate_update_after_submit = True
+				unreconcile_doc.flags.ignore_links = True
+				unreconcile_doc.save(ignore_permissions=True)
+
+		# delete docs upon parent doc deletion
+		unreconcile_docs = frappe.db.get_all("Unreconcile Payments", filters={"voucher_no": self.name})
+		for x in unreconcile_docs:
+			_doc = frappe.get_doc("Unreconcile Payments", x.name)
+			if _doc.docstatus == 1:
+				_doc.cancel()
+			_doc.delete()
+
 	def on_trash(self):
 		# delete references in 'Repost Payment Ledger'
 		rpi = frappe.qb.DocType("Repost Payment Ledger Items")
 		frappe.qb.from_(rpi).delete().where(
 			(rpi.voucher_type == self.doctype) & (rpi.voucher_no == self.name)
 		).run()
+
+		self._remove_references_in_unreconcile()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
@@ -1023,6 +1056,44 @@ class AccountsController(TransactionBase):
 				)
 			)
 
+	def gain_loss_journal_already_booked(
+		self,
+		gain_loss_account,
+		exc_gain_loss,
+		ref2_dt,
+		ref2_dn,
+		ref2_detail_no,
+	) -> bool:
+		"""
+		Check if gain/loss is booked
+		"""
+		if res := frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"docstatus": 1,
+				"account": gain_loss_account,
+				"reference_type": ref2_dt,  # this will be Journal Entry
+				"reference_name": ref2_dn,
+				"reference_detail_no": ref2_detail_no,
+			},
+			pluck="parent",
+		):
+			# deduplicate
+			res = list({x for x in res})
+			if exc_vouchers := frappe.db.get_all(
+				"Journal Entry",
+				filters={"name": ["in", res], "voucher_type": "Exchange Gain Or Loss"},
+				fields=["voucher_type", "total_debit", "total_credit"],
+			):
+				booked_voucher = exc_vouchers[0]
+				if (
+					booked_voucher.total_debit == exc_gain_loss
+					and booked_voucher.total_credit == exc_gain_loss
+					and booked_voucher.voucher_type == "Exchange Gain Or Loss"
+				):
+					return True
+		return False
+
 	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
@@ -1051,27 +1122,37 @@ class AccountsController(TransactionBase):
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-							je = create_gain_loss_journal(
-								self.company,
-								arg.get("party_type"),
-								arg.get("party"),
-								party_account,
+							if not self.gain_loss_journal_already_booked(
 								gain_loss_account,
 								difference_amount,
-								dr_or_cr,
-								reverse_dr_or_cr,
-								arg.get("against_voucher_type"),
-								arg.get("against_voucher"),
-								arg.get("idx"),
 								self.doctype,
 								self.name,
-								arg.get("idx"),
-							)
-							frappe.msgprint(
-								_("Exchange Gain/Loss amount has been booked through {0}").format(
-									get_link_to_form("Journal Entry", je)
+								arg.get("referenced_row"),
+							):
+								posting_date = frappe.db.get_value(arg.voucher_type, arg.voucher_no, "posting_date")
+								je = create_gain_loss_journal(
+									self.company,
+									posting_date,
+									arg.get("party_type"),
+									arg.get("party"),
+									party_account,
+									gain_loss_account,
+									difference_amount,
+									dr_or_cr,
+									reverse_dr_or_cr,
+									arg.get("against_voucher_type"),
+									arg.get("against_voucher"),
+									arg.get("idx"),
+									self.doctype,
+									self.name,
+									arg.get("referenced_row"),
+									arg.get("cost_center"),
 								)
-							)
+								frappe.msgprint(
+									_("Exchange Gain/Loss amount has been booked through {0}").format(
+										get_link_to_form("Journal Entry", je)
+									)
+								)
 
 			if self.get("doctype") == "Payment Entry":
 				# For Payment Entry, exchange_gain_loss field in the `references` table is the trigger for journal creation
@@ -1131,6 +1212,7 @@ class AccountsController(TransactionBase):
 
 						je = create_gain_loss_journal(
 							self.company,
+							self.posting_date,
 							self.party_type,
 							self.party,
 							party_account,
@@ -1144,6 +1226,7 @@ class AccountsController(TransactionBase):
 							self.doctype,
 							self.name,
 							d.idx,
+							self.cost_center,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1381,7 +1464,7 @@ class AccountsController(TransactionBase):
 					{
 						"account": self.additional_discount_account,
 						"against": supplier_or_customer,
-						dr_or_cr: self.discount_amount,
+						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -1653,6 +1736,7 @@ class AccountsController(TransactionBase):
 					and party_account_currency != self.company_currency
 					and self.currency != party_account_currency
 				):
+
 					frappe.throw(
 						_("Accounting Entry for {0}: {1} can only be made in currency: {2}").format(
 							party_type, party, party_account_currency
@@ -2386,7 +2470,8 @@ def get_common_query(
 	limit,
 	condition,
 ):
-	payment_type = "Receive" if party_type == "Customer" else "Pay"
+	account_type = frappe.db.get_value("Party Type", party_type, "account_type")
+	payment_type = "Receive" if account_type == "Receivable" else "Pay"
 	payment_entry = frappe.qb.DocType("Payment Entry")
 
 	q = (
@@ -2403,7 +2488,7 @@ def get_common_query(
 		.where(payment_entry.docstatus == 1)
 	)
 
-	if party_type == "Customer":
+	if payment_type == "Receive":
 		q = q.select((payment_entry.paid_from_account_currency).as_("currency"))
 		q = q.select(payment_entry.paid_from)
 		q = q.where(payment_entry.paid_from.isin(party_account))
@@ -3095,7 +3180,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 		if has_reserved_stock(parent.doctype, parent.name):
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
-			parent.create_stock_reservation_entries()
+
+			if parent.per_picked == 0:
+				parent.create_stock_reservation_entries()
 
 
 @erpnext.allow_regional

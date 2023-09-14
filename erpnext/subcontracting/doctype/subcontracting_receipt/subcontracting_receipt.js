@@ -145,6 +145,14 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		});
 
+		frm.set_query('serial_and_batch_bundle', 'items', (doc, cdt, cdn) => {
+			return frm.events.get_serial_and_batch_bundle_filters(doc, cdt, cdn);
+		});
+
+		frm.set_query('rejected_serial_and_batch_bundle', 'items', (doc, cdt, cdn) => {
+			return frm.events.get_serial_and_batch_bundle_filters(doc, cdt, cdn);
+		});
+
 		frm.set_query('batch_no', 'supplied_items', (doc, cdt, cdn) => {
 			var row = locals[cdt][cdn];
 			return {
@@ -166,22 +174,54 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}
 		});
 
-		let sbb_field = frm.get_docfield('supplied_items', 'serial_and_batch_bundle');
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					'item_code': row.doc.rm_item_code,
-					'voucher_type': frm.doc.doctype,
-				}
-			}
-		}
-
 		let batch_no_field = frm.get_docfield('items', 'batch_no');
 		if (batch_no_field) {
 			batch_no_field.get_route_options_for_new_doc = (row) => {
 				return {
 					'item': row.doc.item_code
 				}
+			}
+		}
+
+		let item_sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
+		if (item_sbb_field) {
+			item_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			}
+		}
+
+		let rejected_item_sbb_field = frm.get_docfield('items', 'rejected_serial_and_batch_bundle');
+		if (rejected_item_sbb_field) {
+			rejected_item_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			}
+		}
+
+		let rm_sbb_field = frm.get_docfield('supplied_items', 'serial_and_batch_bundle');
+		if (rm_sbb_field) {
+			rm_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.rm_item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			}
+		}
+	},
+
+	get_serial_and_batch_bundle_filters: (doc, cdt, cdn) => {
+		let row = locals[cdt][cdn];
+		return {
+			filters: {
+				'item_code': row.item_code,
+				'voucher_type': doc.doctype,
+				'voucher_no': ['in', [doc.name, '']],
+				'is_cancelled': 0,
 			}
 		}
 	},
@@ -237,12 +277,6 @@ frappe.ui.form.on('Subcontracting Receipt Item', {
 
 	rate(frm) {
 		set_missing_values(frm);
-	},
-
-	recalculate_rate(frm) {
-		if (frm.doc.recalculate_rate) {
-			set_missing_values(frm);
-		}
 	},
 
 	items_remove: (frm) => {

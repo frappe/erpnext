@@ -393,6 +393,7 @@ def get_invoices(filters, additional_query_columns):
 			pi.remarks,
 			pi.base_net_total,
 			pi.base_grand_total,
+			pi.base_rounded_total,
 			pi.outstanding_amount,
 			pi.mode_of_payment,
 		)

@@ -3,6 +3,9 @@
 
 frappe.provide("erpnext.item");
 
+const SALES_DOCTYPES = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'];
+const PURCHASE_DOCTYPES = ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'];
+
 frappe.ui.form.on("Item", {
 	setup: function(frm) {
 		frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
@@ -890,7 +893,13 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		let new_child_doc = frappe.model.add_child(new_doc, child_doctype, parentfield);
 		new_child_doc.item_code = frm.doc.name;
 		new_child_doc.item_name = frm.doc.item_name;
-		new_child_doc.uom = frm.doc.stock_uom;
+		if (in_list(SALES_DOCTYPES, doctype) && frm.doc.sales_uom) {
+			new_child_doc.uom = frm.doc.sales_uom;
+		} else if (in_list(PURCHASE_DOCTYPES, doctype) && frm.doc.purchase_uom) {
+			new_child_doc.uom = frm.doc.purchase_uom;
+		} else {
+			new_child_doc.uom = frm.doc.stock_uom;
+		}
 		new_child_doc.description = frm.doc.description;
 		if (!new_child_doc.qty) {
 			new_child_doc.qty = 1.0;

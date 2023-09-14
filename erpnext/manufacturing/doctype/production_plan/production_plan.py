@@ -673,6 +673,7 @@ class ProductionPlan(Document):
 
 				po.append("items", po_data)
 
+			po.set_service_items_for_finished_goods()
 			po.set_missing_values()
 			po.flags.ignore_mandatory = True
 			po.flags.ignore_validate = True
@@ -725,7 +726,7 @@ class ProductionPlan(Document):
 
 			# key for Sales Order:Material Request Type:Customer
 			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
-			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
+			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if not key in material_request_map:
 				# make a new MR for the combination

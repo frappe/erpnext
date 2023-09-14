@@ -129,7 +129,7 @@ def trigger_job_for_doc(docname: str | None = None):
 			frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Running")
 			job_name = f"start_processing_{docname}"
 			if not is_job_running(job_name):
-				job = frappe.enqueue(
+				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
 					queue="long",
 					is_async=True,
@@ -147,7 +147,7 @@ def trigger_job_for_doc(docname: str | None = None):
 			# Resume tasks for running doc
 			job_name = f"start_processing_{docname}"
 			if not is_job_running(job_name):
-				job = frappe.enqueue(
+				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
 					queue="long",
 					is_async=True,
@@ -224,7 +224,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 
 			job_name = f"process_{doc}_fetch_and_allocate"
 			if not is_job_running(job_name):
-				job = frappe.enqueue(
+				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.fetch_and_allocate",
 					queue="long",
 					timeout="3600",
@@ -245,7 +245,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 			if not allocated:
 				job_name = f"process__{doc}_fetch_and_allocate"
 				if not is_job_running(job_name):
-					job = frappe.enqueue(
+					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.fetch_and_allocate",
 						queue="long",
 						timeout="3600",
@@ -263,7 +263,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 				else:
 					reconcile_job_name = f"process_{doc}_reconcile"
 				if not is_job_running(reconcile_job_name):
-					job = frappe.enqueue(
+					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
 						queue="long",
 						timeout="3600",
@@ -350,7 +350,7 @@ def fetch_and_allocate(doc: str) -> None:
 					reconcile_job_name = f"process_{doc}_reconcile"
 
 				if not is_job_running(reconcile_job_name):
-					job = frappe.enqueue(
+					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
 						queue="long",
 						timeout="3600",
@@ -462,7 +462,7 @@ def reconcile(doc: None | str = None) -> None:
 								reconcile_job_name = f"process_{doc}_reconcile"
 
 							if not is_job_running(reconcile_job_name):
-								job = frappe.enqueue(
+								frappe.enqueue(
 									method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
 									queue="long",
 									timeout="3600",

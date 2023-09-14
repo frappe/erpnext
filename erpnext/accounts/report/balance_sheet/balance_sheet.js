@@ -15,7 +15,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function () {
 		fieldtype: "Check",
 		default: 1,
 	});
-	console.log(frappe.query_reports["Balance Sheet"]["filters"]);
 
 	frappe.query_reports["Balance Sheet"]["filters"].push({
 		fieldname: "include_default_book_entries",

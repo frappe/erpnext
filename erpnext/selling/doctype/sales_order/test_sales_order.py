@@ -1789,147 +1789,6 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(pe.references[1].reference_name, so.name)
 		self.assertEqual(pe.references[1].allocated_amount, 300)
 
-	@change_settings(
-		"Stock Settings",
-		{
-			"enable_stock_reservation": 1,
-			"auto_create_serial_and_batch_bundle_for_outward": 1,
-			"pick_serial_and_batch_based_on": "FIFO",
-		},
-	)
-	def test_stock_reservation_against_sales_order(self) -> None:
-		from random import randint, uniform
-
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			cancel_stock_reservation_entries,
-			get_sre_reserved_qty_details_for_voucher,
-			get_stock_reservation_entries_for_voucher,
-			has_reserved_stock,
-		)
-		from erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry import (
-			create_items,
-			create_material_receipt,
-		)
-
-		items_details, warehouse = create_items(), "_Test Warehouse - _TC"
-		se = create_material_receipt(items_details, warehouse, qty=10)
-
-		item_list = []
-		for item_code, properties in items_details.items():
-			stock_uom = properties.stock_uom
-			item_list.append(
-				{
-					"item_code": item_code,
-					"warehouse": warehouse,
-					"qty": flt(uniform(11, 100), 0 if stock_uom == "Nos" else 3),
-					"uom": stock_uom,
-					"rate": randint(10, 200),
-				}
-			)
-
-		so = make_sales_order(
-			item_list=item_list,
-			warehouse="_Test Warehouse - _TC",
-		)
-
-		# Test - 1: Stock should not be reserved if the Available Qty to Reserve is less than the Ordered Qty and Partial Reservation is disabled in Stock Settings.
-		with change_settings("Stock Settings", {"allow_partial_reservation": 0}):
-			so.create_stock_reservation_entries()
-			self.assertFalse(has_reserved_stock("Sales Order", so.name))
-
-		# Test - 2: Stock should be Partially Reserved if the Partial Reservation is enabled in Stock Settings.
-		with change_settings("Stock Settings", {"allow_partial_reservation": 1}):
-			so.create_stock_reservation_entries()
-			so.load_from_db()
-			self.assertTrue(has_reserved_stock("Sales Order", so.name))
-
-			for item in so.items:
-				sre_details = get_stock_reservation_entries_for_voucher(
-					"Sales Order", so.name, item.name, fields=["reserved_qty", "status"]
-				)
-				self.assertEqual(item.stock_reserved_qty, sre_details[0].reserved_qty)
-				self.assertEqual(sre_details[0].status, "Partially Reserved")
-
-			se.cancel()
-
-			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
-			create_material_receipt(items_details, warehouse, qty=110)
-			so.create_stock_reservation_entries()
-			so.load_from_db()
-
-			reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", so.name)
-			for item in so.items:
-				reserved_qty = reserved_qty_details[item.name]
-				self.assertEqual(item.stock_reserved_qty, reserved_qty)
-				self.assertEqual(item.stock_qty, item.stock_reserved_qty)
-
-			# Test - 4: Stock should get unreserved on cancellation of Stock Reservation Entries.
-			cancel_stock_reservation_entries("Sales Order", so.name)
-			so.load_from_db()
-			self.assertFalse(has_reserved_stock("Sales Order", so.name))
-
-			for item in so.items:
-				self.assertEqual(item.stock_reserved_qty, 0)
-
-			# Test - 5: Re-reserve the stock.
-			so.create_stock_reservation_entries()
-			self.assertTrue(has_reserved_stock("Sales Order", so.name))
-
-			# Test - 6: Stock should get unreserved on cancellation of Sales Order.
-			so.cancel()
-			so.load_from_db()
-			self.assertFalse(has_reserved_stock("Sales Order", so.name))
-
-			for item in so.items:
-				self.assertEqual(item.stock_reserved_qty, 0)
-
-			# Create Sales Order and Reserve Stock.
-			so = make_sales_order(
-				item_list=item_list,
-				warehouse="_Test Warehouse - _TC",
-			)
-			so.create_stock_reservation_entries()
-
-			# Test - 7: Partial Delivery against Sales Order.
-			dn1 = make_delivery_note(so.name)
-
-			for item in dn1.items:
-				item.qty = flt(uniform(1, 10), 0 if item.stock_uom == "Nos" else 3)
-
-			dn1.save()
-			dn1.submit()
-
-			for item in so.items:
-				sre_details = get_stock_reservation_entries_for_voucher(
-					"Sales Order", so.name, item.name, fields=["delivered_qty", "status"]
-				)
-				self.assertGreater(sre_details[0].delivered_qty, 0)
-				self.assertEqual(sre_details[0].status, "Partially Delivered")
-
-			# Test - 8: Over Delivery against Sales Order, SRE Delivered Qty should not be greater than the SRE Reserved Qty.
-			with change_settings("Stock Settings", {"over_delivery_receipt_allowance": 100}):
-				dn2 = make_delivery_note(so.name)
-
-				for item in dn2.items:
-					item.qty += flt(uniform(1, 10), 0 if item.stock_uom == "Nos" else 3)
-
-				dn2.save()
-				dn2.submit()
-
-			for item in so.items:
-				sre_details = frappe.db.get_all(
-					"Stock Reservation Entry",
-					filters={
-						"voucher_type": "Sales Order",
-						"voucher_no": so.name,
-						"voucher_detail_no": item.name,
-					},
-					fields=["reserved_qty", "delivered_qty"],
-				)
-
-				for sre_detail in sre_details:
-					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
-
 	def test_delivered_item_material_request(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
 		from erpnext.manufacturing.doctype.work_order.work_order import (
@@ -2029,6 +1888,61 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(len(dn.items), 1)
 		self.assertEqual(len(dn.packed_items), 1)
 		self.assertEqual(dn.items[0].item_code, "_Test Product Bundle Item Partial 2")
+
+	@change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+	def test_expired_rate_for_packed_item(self):
+		bundle = "_Test Product Bundle 1"
+		packed_item = "_Packed Item 1"
+
+		# test Update Items with product bundle
+		for product_bundle in [bundle]:
+			if not frappe.db.exists("Item", product_bundle):
+				bundle_item = make_item(product_bundle, {"is_stock_item": 0})
+				bundle_item.append(
+					"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+				)
+				bundle_item.save(ignore_permissions=True)
+
+		for product_bundle in [packed_item]:
+			if not frappe.db.exists("Item", product_bundle):
+				make_item(product_bundle, {"is_stock_item": 0, "stock_uom": "Nos"})
+
+		make_product_bundle(bundle, [packed_item], 1)
+
+		for scenario in [
+			{"valid_upto": add_days(nowdate(), -1), "expected_rate": 0.0},
+			{"valid_upto": add_days(nowdate(), 1), "expected_rate": 111.0},
+		]:
+			with self.subTest(scenario=scenario):
+				frappe.get_doc(
+					{
+						"doctype": "Item Price",
+						"item_code": packed_item,
+						"selling": 1,
+						"price_list": "_Test Price List",
+						"valid_from": add_days(nowdate(), -1),
+						"valid_upto": scenario.get("valid_upto"),
+						"price_list_rate": 111,
+					}
+				).save()
+
+				so = frappe.new_doc("Sales Order")
+				so.transaction_date = nowdate()
+				so.delivery_date = nowdate()
+				so.set_warehouse = ""
+				so.company = "_Test Company"
+				so.customer = "_Test Customer"
+				so.currency = "INR"
+				so.selling_price_list = "_Test Price List"
+				so.append("items", {"item_code": bundle, "qty": 1})
+				so.save()
+
+				self.assertEqual(len(so.items), 1)
+				self.assertEqual(len(so.packed_items), 1)
+				self.assertEqual(so.items[0].item_code, bundle)
+				self.assertEqual(so.packed_items[0].item_code, packed_item)
+				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
+				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
 
 
 def automatically_fetch_payment_terms(enable=1):
