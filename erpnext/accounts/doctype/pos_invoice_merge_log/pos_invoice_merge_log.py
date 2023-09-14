@@ -245,11 +245,10 @@ class POSInvoiceMergeLog(Document):
 		dimension_values = frappe.db.get_value(
 			"POS Profile", {"name": invoice.pos_profile}, accounting_dimensions, as_dict=1
 		)
-
 		for dimension in accounting_dimensions:
 			dimension_value = dimension_values.get(dimension)
 			# If none then dimension is not set in POS Profile
-			if dimension_value == "":
+			if dimension_value == "" or dimension_value is None:
 				frappe.throw(
 					_("Please set Accounting Dimension {} in {}").format(
 						frappe.bold(frappe.unscrub(dimension)),

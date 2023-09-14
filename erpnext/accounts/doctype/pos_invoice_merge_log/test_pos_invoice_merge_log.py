@@ -465,29 +465,35 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.db.sql("delete from `tabPOS Invoice`")
 
 	def test_pos_closing_for_required_accounting_dimension_in_pos_profile(self):
-		# create accounting dimension with mandatory for balance sheet
+		"""
+		test case to check whether we can create POS Closing Entry without mandatory accounting dimension
+		"""
+
 		create_dimension()
 		pos_profile = make_pos_profile(do_not_insert=1)
 
 		self.assertRaises(frappe.ValidationError, pos_profile.insert)
 
-		# set pos profile with accounting dimension
 		pos_profile.location = "Block 1"
 		pos_profile.insert()
 		self.assertTrue(frappe.db.exists("POS Profile", pos_profile.name))
 
-		# create user
 		test_user = init_user_and_profile(do_not_create_pos_profile=1)
-		# enable_dimension()
 
-		# create opening entry
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
-		# breakpoint()
 		pos_inv1 = create_pos_invoice(rate=350, do_not_submit=1, pos_profile=pos_profile.name)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.submit()
 
+		# if in between a mandatory accounting dimension is added to the POS Profile then
+		accounting_dimension_bank = frappe.get_doc("Accounting Dimension", {"document_type": "Bank"})
+		accounting_dimension_bank.append("dimension_defaults", {"mandatory_for_bs": 1})
+		accounting_dimension_bank.save()
+
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
-		pcv_doc.submit()
-		# self.assertRaises(frappe.ValidationError, pcv_doc.submit())
-		self.assertTrue(frappe.db.exists("POS Closing Entry", pcv_doc.name))
+		# will assert coz the new mandatory accounting dimension bank is not set in POS Profile
+		self.assertRaises(frappe.ValidationError, pcv_doc.submit)
+
+		accounting_dimension_bank = frappe.get_doc("Accounting Dimension", {"document_type": "Bank"})
+		accounting_dimension_bank.append("dimension_defaults", {"mandatory_for_bs": 0})
+		accounting_dimension_bank.save()
