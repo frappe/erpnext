@@ -79,14 +79,14 @@ class TestAccount(unittest.TestCase):
 		)
 
 		create_account(
-			account_name="Debtors INR",
+			account_name="Receivable INR",
 			parent_account="Current Assets - _TC",
 			company="_Test Company",
 			account_currency="INR",
 		)
 
 		create_account(
-			account_name="Debtors USD",
+			account_name="Receivable USD",
 			parent_account="Current Assets - _TC",
 			company="_Test Company",
 			account_currency="USD",
@@ -126,8 +126,8 @@ class TestAccount(unittest.TestCase):
 		self.assertRaises(
 			InvalidAccountMergeError,
 			merge_account,
-			"Debtors INR - _TC",
-			"Debtors USD - _TC",
+			"Receivable INR - _TC",
+			"Receivable USD - _TC",
 		)
 
 	def test_account_sync(self):
