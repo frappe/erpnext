@@ -337,31 +337,13 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	make_in_transit_stock_entry(frm) {
-		frappe.prompt(
-			[
-				{
-					label: __('In Transit Warehouse'),
-					fieldname: 'in_transit_warehouse',
-					fieldtype: 'Link',
-					options: 'Warehouse',
-					reqd: 1,
-					get_query: () => {
-						return{
-							filters: {
-								'company': frm.doc.company,
-								'is_group': 0,
-								'warehouse_type': 'Transit'
-							}
-						}
-					}
-				}
-			],
-			(values) => {
+		erpnext.utils.prompt_in_transit_warehouse(
+			(in_transit_warehouse) => {
 				frappe.call({
 					method: "erpnext.stock.doctype.material_request.material_request.make_in_transit_stock_entry",
 					args: {
 						source_name: frm.doc.name,
-						in_transit_warehouse: values.in_transit_warehouse
+						in_transit_warehouse,
 					},
 					callback: function(r) {
 						if (r.message) {
@@ -371,9 +353,10 @@ frappe.ui.form.on('Material Request', {
 					}
 				})
 			},
+			frm.doc.company,
 			__('In Transit Transfer'),
 			__("Create Stock Entry")
-		)
+		);
 	},
 
 	create_pick_list: (frm) => {

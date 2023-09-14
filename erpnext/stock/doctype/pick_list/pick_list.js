@@ -10,7 +10,8 @@ frappe.ui.form.on('Pick List', {
 
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
-			'Stock Entry': 'Stock Entry',
+			'Material Transfer': 'Material Transfer',
+			'Material Transfer (In Transit)': 'Material Transfer (In Transit)'
 		};
 
 		frm.set_query('parent_warehouse', () => {
@@ -112,7 +113,8 @@ frappe.ui.form.on('Pick List', {
 				if (frm.doc.purpose === 'Delivery') {
 					frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
 				} else {
-					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
+					frm.add_custom_button(__('Material Transfer'), () => frm.trigger('create_stock_entry'), __('Create'));
+					frm.add_custom_button(__('Material Transfer (In Transit)'), () => frm.trigger('create_stock_entry_in_transit'), __('Create'));
 				}
 			});
 
@@ -180,12 +182,17 @@ frappe.ui.form.on('Pick List', {
 
 	},
 	create_stock_entry: (frm) => {
-		frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
-			'pick_list': frm.doc,
-		}).then(stock_entry => {
-			frappe.model.sync(stock_entry);
-			frappe.set_route("Form", 'Stock Entry', stock_entry.name);
-		});
+		create_stock_entry(frm.doc);
+	},
+	create_stock_entry_in_transit: (frm) => {
+		erpnext.utils.prompt_in_transit_warehouse(
+			(in_transit_warehouse) => {
+				create_stock_entry(frm.doc, in_transit_warehouse);
+			},
+			frm.doc.company,
+			__('In Transit Transfer'),
+			__("Create Stock Entry"),
+		);
 	},
 	update_pick_list_stock: (frm) => {
 		frm.events.set_item_locations(frm, true);
@@ -307,4 +314,14 @@ function get_item_details(item_code, uom=null) {
 			uom
 		});
 	}
+}
+
+function create_stock_entry(pick_list, in_transit_warehouse=null) {
+	return frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
+		pick_list,
+		in_transit_warehouse
+	}).then(stock_entry => {
+		frappe.model.sync(stock_entry);
+		frappe.set_route("Form", 'Stock Entry', stock_entry.name);
+	});
 }

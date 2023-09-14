@@ -19,6 +19,7 @@ import "./utils/dimension_tree_filter";
 import "./utils/ledger_preview.js";
 import "./utils/unreconcile.js";
 import "./utils/barcode_scanner";
+import "./utils/in_transit_warehouse";
 import "./telephony";
 import "./templates/call_link.html";
 import "./bulk_transaction_processing";

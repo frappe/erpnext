@@ -962,7 +962,7 @@ def update_packed_item_details(pick_list: "PickList", delivery_note) -> None:
 
 
 @frappe.whitelist()
-def create_stock_entry(pick_list):
+def create_stock_entry(pick_list: str, in_transit_warehouse: str = None):
 	pick_list = frappe.get_doc(json.loads(pick_list))
 	validate_item_locations(pick_list)
 
@@ -980,6 +980,12 @@ def create_stock_entry(pick_list):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
+
+	if in_transit_warehouse:
+		stock_entry.add_to_transit = 1
+		stock_entry.to_warehouse = in_transit_warehouse
+		for item in stock_entry.items:
+			item.t_warehouse = in_transit_warehouse
 
 	stock_entry.set_missing_values()
 
