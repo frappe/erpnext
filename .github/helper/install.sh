@@ -68,6 +68,6 @@ if [ "$TYPE" == "server" ]; then bench setup requirements --dev; fi
 
 wait $wkpid
 
-bench start &> ~/frappe-bench/bench_start.log &
+bench start &>> ~/frappe-bench/bench_start.log &
 CI=Yes bench build --app frappe &
 bench --site test_site reinstall --yes

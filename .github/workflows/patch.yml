@@ -127,9 +127,11 @@ jobs:
             git -C "apps/erpnext" checkout -q -f $branch_name
 
             # Resetup env and install apps
+            pgrep honcho | xargs kill
             rm -rf ~/frappe-bench/env
             bench -v setup env --python $py
             bench pip install -e ./apps/erpnext
+            bench start &>> ~/frappe-bench/bench_start.log &
 
             bench --site test_site migrate
           }
