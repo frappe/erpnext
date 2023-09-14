@@ -423,9 +423,6 @@ scheduler_events = {
 			"erpnext.stock.reorder_item.reorder_item",
 		],
 	},
-	"all": [
-		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts",
-	],
 	"hourly": [
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
