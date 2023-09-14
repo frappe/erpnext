@@ -149,6 +149,9 @@ def init_user_and_profile(**args):
 	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
+	if args.get("do_not_create_pos_profile"):
+		return test_user
+
 	pos_profile = make_pos_profile(**args)
 	pos_profile.append("applicable_for_users", {"default": 1, "user": user})
 

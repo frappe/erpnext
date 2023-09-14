@@ -7,12 +7,23 @@ import unittest
 import frappe
 from frappe.tests.utils import change_settings
 
-from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+	create_dimension,
+	disable_dimension,
+)
+from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+	make_closing_entry_from_opening,
+)
+from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
+	init_user_and_profile,
+	make_pos_profile,
+)
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
@@ -452,3 +463,31 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+
+	def test_pos_closing_for_required_accounting_dimension_in_pos_profile(self):
+		# create accounting dimension with mandatory for balance sheet
+		create_dimension()
+		pos_profile = make_pos_profile(do_not_insert=1)
+
+		self.assertRaises(frappe.ValidationError, pos_profile.insert)
+
+		# set pos profile with accounting dimension
+		pos_profile.location = "Block 1"
+		pos_profile.insert()
+		self.assertTrue(frappe.db.exists("POS Profile", pos_profile.name))
+
+		# create user
+		test_user = init_user_and_profile(do_not_create_pos_profile=1)
+		# enable_dimension()
+
+		# create opening entry
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		# breakpoint()
+		pos_inv1 = create_pos_invoice(rate=350, do_not_submit=1, pos_profile=pos_profile.name)
+		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+		pos_inv1.submit()
+
+		pcv_doc = make_closing_entry_from_opening(opening_entry)
+		pcv_doc.submit()
+		# self.assertRaises(frappe.ValidationError, pcv_doc.submit())
+		self.assertTrue(frappe.db.exists("POS Closing Entry", pcv_doc.name))
