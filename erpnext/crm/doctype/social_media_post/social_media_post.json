@@ -12,14 +12,8 @@
   "scheduled_time",
   "post_status",
   "column_break_6",
-  "twitter",
   "linkedin",
-  "twitter_post_id",
   "linkedin_post_id",
-  "content",
-  "text",
-  "column_break_14",
-  "tweet_preview",
   "linkedin_section",
   "linkedin_post",
   "column_break_15",
@@ -29,21 +23,9 @@
  ],
  "fields": [
   {
-   "fieldname": "text",
-   "fieldtype": "Small Text",
-   "label": "Tweet",
-   "mandatory_depends_on": "eval:doc.twitter ==1"
-  },
-  {
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image"
-  },
-  {
-   "default": "1",
-   "fieldname": "twitter",
-   "fieldtype": "Check",
-   "label": "Twitter"
   },
   {
    "default": "1",
@@ -61,27 +43,12 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.twitter ==1",
-   "fieldname": "content",
-   "fieldtype": "Section Break",
-   "label": "Twitter"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "post_status",
    "fieldtype": "Select",
    "label": "Post Status",
    "no_copy": 1,
    "options": "\nScheduled\nPosted\nCancelled\nDeleted\nError",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "twitter_post_id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Twitter Post Id",
-   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -104,14 +71,6 @@
    "fieldname": "column_break_6",
    "fieldtype": "Column Break",
    "label": "Share On"
-  },
-  {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "tweet_preview",
-   "fieldtype": "HTML"
   },
   {
    "collapsible": 1,
@@ -152,10 +111,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-14 14:24:59.821223",
+ "modified": "2023-09-14 11:24:29.105683",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -203,6 +163,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 frappe.ui.form.on('Social Media Post', {
 	validate: function(frm) {
-		if (frm.doc.twitter === 0 && frm.doc.linkedin === 0) {
+		if (frm.doc.linkedin === 0) {
 			frappe.throw(__("Select atleast one Social Media Platform to Share on."));
 		}
 		if (frm.doc.scheduled_time) {
@@ -45,13 +45,6 @@ frappe.ui.form.on('Social Media Post', {
 					}
 
 					let datasets = [], colors = [];
-					if (r.message && r.message.twitter) {
-						colors.push('#1DA1F2');
-						datasets.push({
-							name: 'Twitter',
-							values: [r.message.twitter.favorite_count, r.message.twitter.retweet_count]
-						});
-					}
 					if (r.message && r.message.linkedin) {
 						colors.push('#0077b5');
 						datasets.push({
@@ -104,13 +97,6 @@ frappe.ui.form.on('Social Media Post', {
 
 			if (frm.doc.post_status !='Deleted') {
 				let html='';
-				if (frm.doc.twitter) {
-					let color = frm.doc.twitter_post_id ? "green" : "red";
-					let status = frm.doc.twitter_post_id ? "Posted" : "Not Posted";
-					html += `<div class="col-xs-6">
-								<span class="indicator whitespace-nowrap ${color}"><span>Twitter : ${status} </span></span>
-							</div>` ;
-				}
 				if (frm.doc.linkedin) {
 					let color = frm.doc.linkedin_post_id ? "green" : "red";
 					let status = frm.doc.linkedin_post_id ? "Posted" : "Not Posted";
