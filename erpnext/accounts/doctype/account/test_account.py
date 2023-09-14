@@ -414,6 +414,7 @@ def create_account(**kwargs):
 			)
 		)
 		account.save()
+		return account.name
 	else:
 		account = frappe.get_doc(
 			dict(
