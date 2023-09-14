@@ -45,9 +45,7 @@ jobs:
       - name: Setup Python
         uses: "actions/setup-python@v4"
         with:
-          python-version: |
-              3.7
-              3.10
+          python-version: '3.10'
 
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -115,7 +113,6 @@ jobs:
 
           function update_to_version() {
             version=$1
-            py=$2
 
             branch_name="version-$version-hotfix"
             echo "Updating to v$version"
@@ -129,22 +126,21 @@ jobs:
             # Resetup env and install apps
             pgrep honcho | xargs kill
             rm -rf ~/frappe-bench/env
-            bench -v setup env --python $py
+            bench -v setup env
             bench pip install -e ./apps/erpnext
             bench start &>> ~/frappe-bench/bench_start.log &
 
             bench --site test_site migrate
           }
 
-          update_to_version 13 python3.7
-          update_to_version 14 python3.10
+          update_to_version 14
 
           echo "Updating to latest version"
           git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
           rm -rf ~/frappe-bench/env
-          bench -v setup env --python python3.10
+          bench -v setup env
           bench pip install -e ./apps/erpnext
 
           bench --site test_site migrate
