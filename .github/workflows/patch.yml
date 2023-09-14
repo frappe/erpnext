@@ -146,3 +146,14 @@ jobs:
           bench pip install -e ./apps/erpnext
 
           bench --site test_site migrate
+
+      - name: Show bench output
+        if: ${{ always() }}
+        run: |
+          cd ~/frappe-bench
+          cat bench_start.log || true
+          cd logs
+          for f in ./*.log*; do
+            echo "Printing log: $f";
+            cat $f
+          done
