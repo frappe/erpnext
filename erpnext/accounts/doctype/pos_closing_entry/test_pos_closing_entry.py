@@ -179,6 +179,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		)
 		accounting_dimension_department.mandatory_for_bs = 0
 		accounting_dimension_department.save()
+		disable_dimension()
 
 
 def init_user_and_profile(**args):

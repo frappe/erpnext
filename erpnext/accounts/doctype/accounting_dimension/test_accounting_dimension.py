@@ -130,30 +130,6 @@ def create_dimension():
 		dimension1.disabled = 0
 		dimension1.save()
 
-	if not frappe.db.exists("Accounting Dimension", {"document_type": "Branch"}):
-		dimension2 = frappe.get_doc(
-			{
-				"doctype": "Accounting Dimension",
-				"document_type": "Branch",
-			}
-		)
-
-		dimension2.append(
-			"dimension_defaults",
-			{
-				"company": "_Test Company",
-				"reference_document": "Branch",
-				"default_dimension": "Branch 1",
-			},
-		)
-
-		dimension2.insert()
-		dimension2.save()
-	else:
-		dimension2 = frappe.get_doc("Accounting Dimension", "Branch")
-		dimension2.disabled = 0
-		dimension2.save()
-
 
 def disable_dimension():
 	dimension1 = frappe.get_doc("Accounting Dimension", "Department")
