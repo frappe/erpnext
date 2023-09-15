@@ -139,9 +139,11 @@ jobs:
           git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
+          pgrep honcho | xargs kill
           rm -rf ~/frappe-bench/env
           bench -v setup env
           bench pip install -e ./apps/erpnext
+          bench start &>> ~/frappe-bench/bench_start.log &
 
           bench --site test_site migrate
 
