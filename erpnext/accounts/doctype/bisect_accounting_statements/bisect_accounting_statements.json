@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-09-15 21:28:28.054773",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from",
+  "column_break_qxbi",
+  "to"
+ ],
+ "fields": [
+  {
+   "fieldname": "from",
+   "fieldtype": "Date",
+   "label": "From"
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Date",
+   "label": "To"
+  },
+  {
+   "fieldname": "column_break_qxbi",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-09-15 21:36:21.516679",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bisect Accounting Statements",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
