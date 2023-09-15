@@ -470,7 +470,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		"""
 
 		create_dimension()
-		pos_profile = make_pos_profile(do_not_insert=1)
+		pos_profile = make_pos_profile(do_not_insert=1, do_not_set_accounting_dimension=1)
 
 		self.assertRaises(frappe.ValidationError, pos_profile.insert)
 
@@ -486,14 +486,16 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		pos_inv1.submit()
 
 		# if in between a mandatory accounting dimension is added to the POS Profile then
-		accounting_dimension_bank = frappe.get_doc("Accounting Dimension", {"document_type": "Bank"})
-		accounting_dimension_bank.append("dimension_defaults", {"mandatory_for_bs": 1})
-		accounting_dimension_bank.save()
+		accounting_dimension_department = frappe.get_doc("Accounting Dimension", {"name": "Department"})
+		accounting_dimension_department.dimension_defaults[0].mandatory_for_bs = 1
+		accounting_dimension_department.save()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
 		# will assert coz the new mandatory accounting dimension bank is not set in POS Profile
 		self.assertRaises(frappe.ValidationError, pcv_doc.submit)
 
-		accounting_dimension_bank = frappe.get_doc("Accounting Dimension", {"document_type": "Bank"})
-		accounting_dimension_bank.append("dimension_defaults", {"mandatory_for_bs": 0})
-		accounting_dimension_bank.save()
+		accounting_dimension_department = frappe.get_doc(
+			"Accounting Dimension Detail", {"parent": "Department"}
+		)
+		accounting_dimension_department.mandatory_for_bs = 0
+		accounting_dimension_department.save()

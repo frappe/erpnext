@@ -5,7 +5,10 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes
+from erpnext.accounts.doctype.pos_profile.pos_profile import (
+	get_child_nodes,
+	required_accounting_dimensions,
+)
 from erpnext.stock.get_item_details import get_pos_profile
 
 test_dependencies = ["Item"]
@@ -118,6 +121,7 @@ def make_pos_profile(**args):
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"write_off_account": args.write_off_account or "_Test Write Off - _TC",
 			"write_off_cost_center": args.write_off_cost_center or "_Test Write Off Cost Center - _TC",
+			"location": "Block 1" if not args.do_not_set_accounting_dimension else None,
 		}
 	)
 

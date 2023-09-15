@@ -247,8 +247,8 @@ class POSInvoiceMergeLog(Document):
 		)
 		for dimension in accounting_dimensions:
 			dimension_value = dimension_values.get(dimension)
-			# If none then dimension is not set in POS Profile
-			if dimension_value == "" or dimension_value is None:
+
+			if not dimension_value:
 				frappe.throw(
 					_("Please set Accounting Dimension {} in {}").format(
 						frappe.bold(frappe.unscrub(dimension)),
