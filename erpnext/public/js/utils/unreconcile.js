@@ -19,7 +19,7 @@ erpnext.accounts.unreconcile_payments = {
 					if (r.message) {
 						frm.add_custom_button(__("Un-Reconcile"), function() {
 							erpnext.accounts.unreconcile_payments.build_unreconcile_dialog(frm);
-						});
+						}, __('Actions'));
 					}
 				}
 			});
