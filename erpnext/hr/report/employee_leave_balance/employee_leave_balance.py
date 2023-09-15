@@ -163,7 +163,7 @@ def get_opening_balance(
 	else:
 		# else directly get leave balance on the previous day
 		opening_balance = get_leave_balance_on(employee, leave_type, opening_balance_date)
-
+	
 	return opening_balance
 
 

@@ -678,9 +678,35 @@ def get_holidays_for_employee(
 	if only_non_weekly:
 		filters["weekly_off"] = False
 
-	holidays = frappe.get_all("Holiday", fields=["description", "holiday_date"], filters=filters)
+	holidays = frappe.get_all("Holiday", fields=["description", "holiday_date" , "weekly_off"], filters=filters)
+
 
 	return holidays
+
+def get_employee_holidays(
+	employee, start_date, end_date, raise_exception=True, only_non_weekly=False
+):
+	"""Get Holidays for a given employee
+
+	`employee` (str)
+	`start_date` (str or datetime)
+	`end_date` (str or datetime)
+	`raise_exception` (bool)
+	`only_non_weekly` (bool)
+
+	return: list of dicts with `holiday_date` and `description`
+	"""
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception=raise_exception)
+
+	if not holiday_list:
+		return []
+
+	filters = {"parent": holiday_list, "holiday_date": ("between", [start_date, end_date])}
+	if only_non_weekly:
+		filters["weekly_off"] = False
+	employee_holidays = frappe.get_all("Holiday", fields=["description", "holiday_date" , "weekly_off"], filters=filters)
+	return employee_holidays
+
 
 
 @erpnext.allow_regional

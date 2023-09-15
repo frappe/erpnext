@@ -242,18 +242,18 @@ class LeaveApplication(Document):
 		holiday_dates = []
 		if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
 			holiday_dates = get_holiday_dates_for_employee(self.employee, self.from_date, self.to_date)
-			# frappe.msgprint(str(holiday_dates))
+			
 
 		employee_holiday = []
 		
 		employee_holiday = get_employee_holidays(self.employee, self.from_date, self.to_date)
-		# frappe.msgprint("***employee holidays*****"+str(employee_holiday))
+		
 		filtered_holidays = []
 		for holiday in employee_holiday:
 			date = holiday['holiday_date']
 			weekly_off = holiday['weekly_off']
 			filtered_holidays.append([date, {'weekly_off': weekly_off}])
-		# frappe.msgprint("***employee holidays*****"+str(filtered_holidays))
+		
 
 #-----------------------------------------------------------------------------------------------------------------------
 		lwp_dates = []
@@ -298,22 +298,22 @@ class LeaveApplication(Document):
 								for holiday in filtered_holidays:
 									holiday_date, weekly_off_info = holiday
 									if self.to_date == holiday_date.strftime("%Y-%m-%d"):
-										# frappe.msgprint("weekly_off"+str(weekly_off_info))
+										
 										if weekly_off_info.get('weekly_off') == 1:
 											to_date_is_wo = True
 									if date == holiday_date.strftime("%Y-%m-%d"):
-										# frappe.msgprint("#########"+str(date))
+									
 										should_continue = True
 										if weekly_off_info.get('weekly_off') == 1:
 											weekly_off = True
 											should_continue = False
 										break
 								if date == self.from_date and weekly_off == True:
-									# frappe.msgprint("from date continue:"+str(date))
+									
 									should_continue =True
 									from_date_is_wo = True
 								elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
-									# frappe.msgprint("for +1:"+str(date))
+								
 									should_continue =True
 								elif date == self.to_date and weekly_off:
 									should_continue = True
@@ -914,7 +914,7 @@ class LeaveApplication(Document):
 
 	def validate_balance_leaves(self):
 		if self.from_date and self.to_date:
-			self.total_leave_days = get_number_of_leave_days(
+			self.total_leave_days = number_of_leave_days(
 				self.employee, self.leave_type, self.from_date, self.to_date, self.half_day, self.half_day_date
 			)
 
@@ -924,7 +924,7 @@ class LeaveApplication(Document):
 						"The day(s) on which you are applying for leave are holidays. You need not apply for leave."
 					)
 				)
-
+			allocation_records = get_leave_allocation_records(self.employee, self.from_date, self.leave_type)
 			if not is_lwp(self.leave_type):
 				leave_balance = get_leave_balance_on(
 					self.employee,
@@ -935,11 +935,17 @@ class LeaveApplication(Document):
 					for_consumption=True,
 				)
 				self.leave_balance = leave_balance.get("leave_balance")
-				leave_balance_for_consumption = leave_balance.get("leave_balance_for_consumption")
-				# frappe.msgprint(str(leave_balance_for_consumption))
-
+				if self.leave_type in allocation_records:
+					allocation = allocation_records[self.leave_type]
+					from_date = allocation.get("from_date")
+					to_date = allocation.get("to_date")
+				leaves_pending = get_leaves_pending_approval_for_period(
+            	self.employee, self.leave_type, from_date, to_date
+				)
+				leave_balance_for_consumption = leave_balance.get("leave_balance_for_consumption") - leaves_pending
+			
 				if self.status != "Rejected" and (
-					leave_balance_for_consumption < self.current_leave_type_count or not leave_balance_for_consumption
+					leave_balance_for_consumption < 0 
 				):
 					self.show_insufficient_balance_message(leave_balance_for_consumption)
 
@@ -1173,6 +1179,19 @@ class LeaveApplication(Document):
 		if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
 			holiday_dates = get_holiday_dates_for_employee(self.employee, self.from_date, self.to_date)
 			# frappe.msgprint(str(holiday_dates))
+
+		employee_holiday = []
+		
+		employee_holiday = get_employee_holidays(self.employee, self.from_date, self.to_date)
+		# frappe.msgprint("***employee holidays*****"+str(employee_holiday))
+		filtered_holidays = []
+		for holiday in employee_holiday:
+			date = holiday['holiday_date']
+			weekly_off = holiday['weekly_off']
+			filtered_holidays.append([date, {'weekly_off': weekly_off}])
+		# frappe.msgprint("***employee holidays*****"+str(filtered_holidays))
+
+#-----------------------------------------------------------------------------------------------------------------------
 		lwp_dates = []
 		leave_type_dates = []
 		leave_dates = []
@@ -1195,23 +1214,52 @@ class LeaveApplication(Document):
 		else:
 			tot_leave_sessions = self.total_leave_days *2
 			if self.half_day_date:
-
-				# frappe.msgprint("tot_leave_sessions: " + str(tot_leave_sessions))
 				if self.half_day_date == self.to_date:
-					# frappe.msgprint(str(self.to_date))
 					lwp_sessions = self.lwp_count *2
-					# frappe.msgprint("lwp_sessions: " + str(lwp_sessions))
 					leave_sessions = tot_leave_sessions - lwp_sessions
 					leave_days_current = leave_sessions/2
-					# frappe.msgprint("leave_days_current: " + str(leave_days_current))
+					
 					if leave_days_current > 0:
 						if int(leave_days_current) ==  leave_days_current:
 							my_counter = leave_days_current
+							from_date_is_wo = False
+							to_date_is_wo = False
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
 								# if date in holiday_dates:
 								# 	continue
+								should_continue = False
+								weekly_off = False
+								
+								for holiday in filtered_holidays:
+									holiday_date, weekly_off_info = holiday
+									if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("weekly_off"+str(weekly_off_info))
+										if weekly_off_info.get('weekly_off') == 1:
+											to_date_is_wo = True
+									if date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("#########"+str(date))
+										should_continue = True
+										if weekly_off_info.get('weekly_off') == 1:
+											weekly_off = True
+											should_continue = False
+										break
+								if date == self.from_date and weekly_off == True:
+									# frappe.msgprint("from date continue:"+str(date))
+									should_continue =True
+									from_date_is_wo = True
+								elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+									# frappe.msgprint("for +1:"+str(date))
+									should_continue =True
+								elif date == self.to_date and weekly_off:
+									should_continue = True
+								elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+									should_continue = True
+								if should_continue == True:
+									continue
 
+								
+								
 								if my_counter > 0:
 									leave_dates.append((date,'session1',"leave type"))
 									leave_dates.append((date,'session2',"leave type"))
@@ -1225,14 +1273,50 @@ class LeaveApplication(Document):
 										leave_dates.append((date,'session2',"lwp"))
 						else:
 							my_counter = int(leave_days_current) + 1
+							from_date_is_wo = False
+							to_date_is_wo = False
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
-								if date in holiday_dates:
+								# if date in holiday_dates:
+								# 	continue
+				
+								should_continue = False
+								weekly_off = False
+								
+								for holiday in filtered_holidays:
+									holiday_date, weekly_off_info = holiday
+									if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("weekly_off"+str(weekly_off_info))
+										if weekly_off_info.get('weekly_off') == 1:
+											to_date_is_wo = True
+									if date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("****Date****"+str(date))
+										should_continue = True
+										if weekly_off_info.get('weekly_off') == 1:
+											weekly_off = True
+											should_continue = False
+										break
+								if date == self.from_date and weekly_off == True:
+									# frappe.msgprint("from date continue:"+str(date))
+									should_continue =True
+									from_date_is_wo = True
+								elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+									# frappe.msgprint("for +1:"+str(date))
+									should_continue =True
+								elif date == self.to_date and weekly_off:
+									should_continue = True
+								elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+									should_continue = True
+								if should_continue == True:
 									continue
 								if my_counter > 0:
 									if my_counter == 1:
-										leave_dates.append((date,"session1","leave type"))  
-										leave_dates.append((date,"session2","lwp"))
+										if self.lwp_count == 0:
+											leave_dates.append((date,"session1","leave type"))
+										else:
+											leave_dates.append((date,'session1',"leave type"))
+											leave_dates.append((date,'session2',"lwp")) 
+										# leave_dates.append((date,"session2","lwp"))
 									else:
 										leave_dates.append((date,"session1","leave type"))
 										leave_dates.append((date,"session2","leave type"))
@@ -1240,14 +1324,47 @@ class LeaveApplication(Document):
 
 								else:
 									if str(dt) == str(self.to_date): 
+										
+										      # check for proper variable to match
 										leave_dates.append((date,'session1',"lwp"))
 									else:
 										leave_dates.append((date,'session1',"lwp"))
 										leave_dates.append((date,'session2',"lwp"))
 					else:
+						from_date_is_wo = False
+						to_date_is_wo = False
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
-								if date in holiday_dates:
+								# if date in holiday_dates:
+								# 	continue
+								should_continue = False
+								weekly_off = False
+								
+								for holiday in filtered_holidays:
+									holiday_date, weekly_off_info = holiday
+									if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("weekly_off"+str(weekly_off_info))
+										if weekly_off_info.get('weekly_off') == 1:
+											to_date_is_wo = True
+									if date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("#########"+str(date))
+										should_continue = True
+										if weekly_off_info.get('weekly_off') == 1:
+											weekly_off = True
+											should_continue = False
+										break
+								if date == self.from_date and weekly_off == True:
+									# frappe.msgprint("from date continue:"+str(date))
+									should_continue =True
+									from_date_is_wo = True
+								elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+									# frappe.msgprint("for +1:"+str(date))
+									should_continue =True
+								elif date == self.to_date and weekly_off:
+									should_continue = True
+								elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+									should_continue = True
+								if should_continue == True:
 									continue
 								if str(dt) == str(self.to_date):       # check for proper variable to match
 										leave_dates.append((date,'session1',"lwp"))
@@ -1258,17 +1375,48 @@ class LeaveApplication(Document):
 				else:
 
 					lwp_sessions = self.lwp_count *2
-					# frappe.msgprint(str(lwp_sessions))
 					leave_sessions = tot_leave_sessions - lwp_sessions
 					leave_days_current = leave_sessions/2
 					if leave_days_current > 0:
 						my_counter = leave_days_current
+						from_date_is_wo = False
+						to_date_is_wo = False
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
-							if date in holiday_dates:
-									continue
+							# if date in holiday_dates:
+							# 		continue
+							should_continue = False
+							weekly_off = False
+							
+							for holiday in filtered_holidays:
+								holiday_date, weekly_off_info = holiday
+								if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+									# frappe.msgprint("weekly_off"+str(weekly_off_info))
+									if weekly_off_info.get('weekly_off') == 1:
+										to_date_is_wo = True
+								if date == holiday_date.strftime("%Y-%m-%d"):
+									# frappe.msgprint("#########"+str(date))
+									should_continue = True
+									if weekly_off_info.get('weekly_off') == 1:
+										weekly_off = True
+										should_continue = False
+									break
+							if date == self.from_date and weekly_off == True:
+								# frappe.msgprint("from date continue:"+str(date))
+								should_continue =True
+								from_date_is_wo = True
+							elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+								# frappe.msgprint("for +1:"+str(date))
+								should_continue =True
+							elif date == self.to_date and weekly_off:
+								should_continue = True
+							elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+								should_continue = True
+							if should_continue == True:
+								continue
+							
+							
 							if  str(dt) == str(self.from_date):      # check for proper variable to match
-								# frappe.msgprint(str(dt))
 								leave_dates.append((date,"session2","leave_type"))
 								my_counter = my_counter - 0.5 
 							else:
@@ -1291,10 +1439,42 @@ class LeaveApplication(Document):
 									leave_dates.append((date,'session2',"lwp"))
 
 					else:
+						from_date_is_wo = False
+						to_date_is_wo = False
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
-								if date in holiday_dates:
+								# if date in holiday_dates:
+								# 	continue
+								should_continue = False
+								weekly_off = False
+							
+								for holiday in filtered_holidays:
+									holiday_date, weekly_off_info = holiday
+									if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("weekly_off"+str(weekly_off_info))
+										if weekly_off_info.get('weekly_off') == 1:
+											to_date_is_wo = True
+									if date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("#########"+str(date))
+										should_continue = True
+										if weekly_off_info.get('weekly_off') == 1:
+											weekly_off = True
+											should_continue = False
+										break
+								if date == self.from_date and weekly_off == True:
+									# frappe.msgprint("from date continue:"+str(date))
+									should_continue =True
+									from_date_is_wo = True
+								elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+									# frappe.msgprint("for +1:"+str(date))
+									should_continue =True
+								elif date == self.to_date and weekly_off:
+									should_continue = True
+								elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+									should_continue = True
+								if should_continue == True:
 									continue
+								
 								if str(dt) == str(self.from_date):       # check for proper variable to match
 										leave_dates.append((date,'session2',"lwp"))
 
@@ -1303,15 +1483,49 @@ class LeaveApplication(Document):
 									leave_dates.append((date,'session2',"lwp"))
 			else:
 				lwp_sessions = self.lwp_count *2
+				# frappe.msgprint("lwp_sessions: " + str(lwp_sessions))
 				leave_sessions = tot_leave_sessions - lwp_sessions
 				leave_days_current = leave_sessions/2
+				# frappe.msgprint("leave_days_current: " + str(leave_days_current))
 				if leave_days_current > 0:
 					if int(leave_days_current) ==  leave_days_current:
 						my_counter = leave_days_current
+						from_date_is_wo = False
+						to_date_is_wo = False
 						for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
-							if date in holiday_dates:
-									continue
+							# if date in holiday_dates:
+							# 		continue
+							should_continue = False
+							weekly_off = False
+							
+							for holiday in filtered_holidays:
+								holiday_date, weekly_off_info = holiday
+								if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+									# frappe.msgprint("weekly_off"+str(weekly_off_info))
+									if weekly_off_info.get('weekly_off') == 1:
+										to_date_is_wo = True
+								if date == holiday_date.strftime("%Y-%m-%d"):
+									# frappe.msgprint("#########"+str(date))
+									should_continue = True
+									if weekly_off_info.get('weekly_off') == 1:
+										weekly_off = True
+										should_continue = False
+									break
+							if date == self.from_date and weekly_off == True:
+								# frappe.msgprint("from date continue:"+str(date))
+								should_continue =True
+								from_date_is_wo = True
+							elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+								# frappe.msgprint("for +1:"+str(date))
+								should_continue =True
+							elif date == self.to_date and weekly_off:
+								should_continue = True
+							elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+								should_continue = True
+							if should_continue == True:
+								continue
+								
 							if my_counter > 0:
 								leave_dates.append((date,'session1',"leave type"))
 								leave_dates.append((date,'session2',"leave type"))
@@ -1323,9 +1537,40 @@ class LeaveApplication(Document):
 				
 					else:
 							my_counter = int(leave_days_current) + 1
+							from_date_is_wo = False
+							to_date_is_wo = False
 							for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 								date = dt.strftime("%Y-%m-%d")
-								if date in holiday_dates:
+								# if date in holiday_dates:
+								# 	continue
+								should_continue = False
+								weekly_off = False
+							
+								for holiday in filtered_holidays:
+									holiday_date, weekly_off_info = holiday
+									if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("weekly_off"+str(weekly_off_info))
+										if weekly_off_info.get('weekly_off') == 1:
+											to_date_is_wo = True
+									if date == holiday_date.strftime("%Y-%m-%d"):
+										# frappe.msgprint("#########"+str(date))
+										should_continue = True
+										if weekly_off_info.get('weekly_off') == 1:
+											weekly_off = True
+											should_continue = False
+										break
+								if date == self.from_date and weekly_off == True:
+									# frappe.msgprint("from date continue:"+str(date))
+									should_continue =True
+									from_date_is_wo = True
+								elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+									# frappe.msgprint("for +1:"+str(date))
+									should_continue =True
+								elif date == self.to_date and weekly_off:
+									should_continue = True
+								elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+									should_continue = True
+								if should_continue == True:
 									continue
 								if my_counter > 0:
 									if my_counter == 1:
@@ -1339,13 +1584,46 @@ class LeaveApplication(Document):
 									leave_dates.append((date,'session1',"lwp"))
 									leave_dates.append((date,'session2',"lwp"))
 				else:
+					from_date_is_wo = False
+					to_date_is_wo = False
 					for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 							date = dt.strftime("%Y-%m-%d")
-							if date in holiday_dates:
-									continue
+							# if date in holiday_dates:
+							# 		continue
+							should_continue = False
+							weekly_off = False
+							
+							for holiday in filtered_holidays:
+								holiday_date, weekly_off_info = holiday
+								if self.to_date == holiday_date.strftime("%Y-%m-%d"):
+									# frappe.msgprint("weekly_off"+str(weekly_off_info))
+									if weekly_off_info.get('weekly_off') == 1:
+										to_date_is_wo = True
+								if date == holiday_date.strftime("%Y-%m-%d"):
+									# frappe.msgprint("#########"+str(date))
+									should_continue = True
+									if weekly_off_info.get('weekly_off') == 1:
+										weekly_off = True
+										should_continue = False
+									break
+							if date == self.from_date and weekly_off == True:
+								# frappe.msgprint("from date continue:"+str(date))
+								should_continue =True
+								from_date_is_wo = True
+							elif date == (getdate(self.from_date) + timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off  and from_date_is_wo :
+								# frappe.msgprint("for +1:"+str(date))
+								should_continue =True
+							elif date == self.to_date and weekly_off:
+								should_continue = True
+							elif date == (getdate(self.to_date) - timedelta(days=1)).strftime("%Y-%m-%d") and weekly_off and to_date_is_wo:
+								should_continue = True
+							if should_continue == True:
+								continue
 							leave_dates.append((date,'session1',"lwp"))
 							leave_dates.append((date,'session2',"lwp"))
 
+
+		# frappe.msgprint("Selected Leave Dates: " + str(leave_dates))
 		for date, session, leave_type in leave_dates:
 			if leave_type == 'lwp':
 				lwp_dates.append(date)
@@ -1451,7 +1729,7 @@ class LeaveApplication(Document):
 			first_alloc_end = add_days(alloc_on_to_date.from_date, -1)
 			second_alloc_start = alloc_on_to_date.from_date
 
-		leaves_in_first_alloc = get_number_of_leave_days(
+		leaves_in_first_alloc = number_of_leave_days(
 			self.employee,
 			self.leave_type,
 			self.from_date,
@@ -1459,7 +1737,7 @@ class LeaveApplication(Document):
 			self.half_day,
 			self.half_day_date,
 		)
-		leaves_in_second_alloc = get_number_of_leave_days(
+		leaves_in_second_alloc = number_of_leave_days(
 			self.employee,
 			self.leave_type,
 			second_alloc_start,
@@ -1490,7 +1768,7 @@ class LeaveApplication(Document):
 		"""Splits leave application into two ledger entries to consider expiry of allocation"""
 		raise_exception = False if frappe.flags.in_patch else True
 
-		leaves = get_number_of_leave_days(
+		leaves = number_of_leave_days(
 			self.employee, self.leave_type, self.from_date, expiry_date, self.half_day, self.half_day_date
 		)
 
@@ -1507,7 +1785,7 @@ class LeaveApplication(Document):
 
 		if getdate(expiry_date) != getdate(self.to_date):
 			start_date = add_days(expiry_date, 1)
-			leaves = get_number_of_leave_days(
+			leaves = number_of_leave_days(
 				self.employee, self.leave_type, start_date, self.to_date, self.half_day, self.half_day_date
 			)
 
@@ -1533,16 +1811,6 @@ def get_allocation_expiry_for_cf_leaves(
 		fields=["to_date"],
 	)
 	return expiry[0]["to_date"] if expiry else ""
-# def find_common_dates_with_condition(self):
-#     unique_lwp_dates, unique_leave_type_dates = self.calculate_unique_dates()
-#     common_date = None
-#     frappe.msgprint('++++++++++++'+str(common_date)) 
-#     for date in unique_lwp_dates:
-#         if date in unique_leave_type_dates:
-#             common_date = date
-#             break 
-#     return common_date
-
 
 @frappe.whitelist()
 def number_of_leave_days(
@@ -1619,103 +1887,100 @@ def number_of_leave_days(
 	return number_of_days
 
 @frappe.whitelist()
-def get_number_of_leave_days(
-	employee: str,
-	leave_type: str,
-	from_date: str,
-	to_date: str,
-	half_day: Optional[int] = None,
-	half_day_date: Optional[str] = None,
-	holiday_list: Optional[str] = None,
-) -> float:
-	"""Returns number of leave days between 2 dates after considering half day and holidays
-	(Based on the include_holiday setting in Leave Type)"""
-	if cint(half_day) == 1:
-		if getdate(from_date) == getdate(to_date):
-			number_of_days = 0.5
-		elif half_day_date and getdate(from_date) <= getdate(half_day_date) <= getdate(to_date):
-			number_of_days = date_diff(to_date, from_date) + 0.5
-		else:
-			number_of_days = date_diff(to_date, from_date) + 1
-
-	else:
-		number_of_days = date_diff(to_date, from_date) + 1
-
-	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
-		number_of_days = flt(number_of_days) - flt(
-			get_holidays(employee, from_date, to_date, holiday_list=holiday_list)
-		)
-		
-		
-	return number_of_days
-
-
-@frappe.whitelist()
-def get_leave_details(employee, date, to_date):
-    from datetime import datetime 
-    from dateutil.relativedelta import relativedelta
-    
-    from_date_obj = datetime.strptime(date, '%Y-%m-%d').date()
-    to_date_obj = datetime.strptime(to_date, '%Y-%m-%d').date()
-
-    from_date_month_start = from_date_obj.replace(day=1)
-    to_date_month_end = from_date_month_start + relativedelta(day=31)
-
-    allocation_records = get_leave_allocation_records(employee, date)
-    leave_allocation = {}
-    total_leaves_allocated = sum(allocation['total_leaves_allocated'] for allocation in allocation_records.values())
-
-    # Calculate monthly allocation value
-    monthly_allocation = calculate_monthly_allocation(total_leaves_allocated, from_date_obj, to_date_obj)
-    allocation_value = next(iter(monthly_allocation.values()))
-
-    total_monthly_taken_leaves_positive = 0
-    total_now_taken_leave_positive = 0
-
-    for d in allocation_records:
-        allocation = allocation_records[d]
-        remaining_leaves = get_leave_balance_on(
+def get_leave_details(employee, date, to_date, leave_type):
+	from datetime import datetime
+	from dateutil.relativedelta import relativedelta
+	
+	from_date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+	to_date_obj = datetime.strptime(to_date, '%Y-%m-%d').date()
+	
+	from_date_month_start = from_date_obj.replace(day=1)
+	to_date_month_end = from_date_month_start + relativedelta(day=31)
+	
+	allocation_records = get_leave_allocation_records(employee, date)
+	
+	leave_allocation = {}
+	total_leaves_allocated = sum(allocation['total_leaves_allocated'] for allocation in allocation_records.values())
+	
+	# Calculate monthly allocation value
+	monthly_allocation = calculate_monthly_allocation(total_leaves_allocated, from_date_obj, to_date_obj)
+	allocation_value = next(iter(monthly_allocation.values()))
+	current_year = datetime.now().year
+	current_month = datetime.now().month
+	
+	total_monthly_taken_leaves_positive = 0
+	total_now_taken_leave_positive = 0
+	total_pending_leaves_positive = 0
+	
+	for d in allocation_records:
+		allocation = allocation_records[d]
+		remaining_leaves = get_leave_balance_on(
             employee, d, date, to_date=allocation.to_date, consider_all_leaves_in_the_allocation_period=True
         )
-	
-
-        end_date = allocation.to_date
-        leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
-        monthly_taken_leaves = get_leaves_for_period(employee, d, from_date_month_start, to_date_month_end)
-        now_taken_leave = get_leaves_for_period(employee, d, allocation.from_date, end_date)
-        now_taken_leave_positive = abs(now_taken_leave)
-        total_now_taken_leave_positive += now_taken_leave_positive 
-
-        leaves_pending = get_leaves_pending_approval_for_period(
+		end_date = allocation.to_date
+		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
+		monthly_taken_leaves = get_leaves_for_period(employee, d, from_date_month_start, to_date_month_end)
+		now_taken_leave = get_leaves_for_period(employee, d, allocation.from_date, end_date)
+		now_taken_leave_positive = abs(now_taken_leave)
+		total_now_taken_leave_positive += now_taken_leave_positive
+		leaves_pending_approval = get_leaves_pending_approval_for_period(
             employee, d, allocation.from_date, end_date
         )
-        expired_leaves = allocation.total_leaves_allocated - (remaining_leaves + leaves_taken)
-	
-
-        leave_allocation[d] = {
+		total_pending_leaves = abs(leaves_pending_approval)
+		total_pending_leaves_positive += total_pending_leaves
+		
+		expired_leaves = allocation.total_leaves_allocated - (remaining_leaves + leaves_taken)
+		leave_allocation[d] = {
             "total_leaves": allocation.total_leaves_allocated,
             "expired_leaves": max(0, expired_leaves),
             "leaves_taken": leaves_taken,
             "monthly_taken_leaves": monthly_taken_leaves,
-            "leaves_pending_approval": leaves_pending,
+            "leaves_pending_approval": leaves_pending_approval,
             "remaining_leaves": remaining_leaves,
         }
-    
-    balance = allocation_value * from_date_obj.month
-    total_available = balance - total_now_taken_leave_positive
 
-    lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
-    
-    return {
-        "leave_allocation": leave_allocation,
-        "leave_approver": get_leave_approver(employee),
-        "lwps": lwp,
-        "total_now_taken_leave_positive": total_now_taken_leave_positive,
-        "balance": balance,
-        "allocation_value": allocation_value,
-        "total_available": total_available,
-    }
+	allocation_records = get_leave_allocation_records(employee, date, leave_type)
+	
+	if not allocation_records:
+		return
+	if leave_type in allocation_records:
+		allocation = allocation_records[leave_type]
+		assignment_date = allocation.get("from_date")
+		balance = 0
+		joining_date = frappe.db.get_value("Employee", {"name": employee}, "date_of_joining")
+		
+		if leave_type == "Apprentice leave":
+			
+			
+			if joining_date.year == current_year:
+				if joining_date.day <= 15:
+					balance = (current_month - joining_date.month) * 2 + 2
+				else:
+					balance = (current_month - joining_date.month) * 2 + 1
+			else:
+				balance = current_month * allocation_value
+		else:
+			if current_month == assignment_date.month and current_year == assignment_date.year:
+				balance = (current_month - assignment_date.month) * allocation_value + allocation_value
+			elif current_year > assignment_date.year:
+				balance = 0
 
+		
+	applied_leave = total_now_taken_leave_positive + total_pending_leaves_positive
+	total_available = balance - applied_leave
+	
+
+	lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
+
+	return {
+		"leave_allocation": leave_allocation,
+		"leave_approver": get_leave_approver(employee),
+		"lwps": lwp,
+		"applied_leave": applied_leave,
+		"balance": balance,
+		"allocation_value": allocation_value,
+		"total_available": total_available,
+	}
 
 from dateutil.relativedelta import relativedelta
 
@@ -1812,6 +2077,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 			Min(Ledger.from_date).as_("from_date"),
 			Max(Ledger.to_date).as_("to_date"),
 			Ledger.leave_type,
+			Ledger.transaction_name
 		)
 		.where(
 			(Ledger.from_date <= date)
@@ -1842,9 +2108,12 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 					"unused_leaves": d.cf_leaves,
 					"new_leaves_allocated": d.new_leaves,
 					"leave_type": d.leave_type,
+					"leave_policy_assignment": d.leave_policy_assignment,
+					"transaction_name": d.transaction_name
 				}
 			),
 		)
+		
 	return allocated_leaves
 
 
@@ -1861,6 +2130,7 @@ def get_leaves_pending_approval_for_period(
 		},
 		fields=["SUM(current_leave_type_count) as leaves"],
 	)[0]
+	
 	return leaves["leaves"] if leaves["leaves"] else 0.0
 
 
@@ -1903,6 +2173,7 @@ def get_leaves_for_period(
 	leave_days = 0
 
 	for leave_entry in leave_entries:
+		# frappe.msgprint(str(leave_entry))
 		inclusive_period = leave_entry.from_date >= getdate(
 			from_date
 		) and leave_entry.to_date <= getdate(to_date)
@@ -1937,7 +2208,7 @@ def get_leaves_for_period(
 			# 	# half_day_date =leave_entry.if_half_day
 				
 				
-				
+			
 			leave_days += (
 				leave_entry.leaves
 			
@@ -2222,7 +2493,7 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 			if leave_app.to_date > getdate(to_date):
 				leave_app.to_date = to_date
 
-			leave_days += get_number_of_leave_days(
+			leave_days += number_of_leave_days(
 				employee, leave_type, leave_app.from_date, leave_app.to_date
 			)
 
