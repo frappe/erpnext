@@ -134,15 +134,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			});
-
-			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
-			if (sbb_field) {
-				sbb_field.get_route_options_for_new_doc = (row) => {
-					return {
-						'item_code': row.doc.item_code,
-					}
-				};
-			}
 		}
 
 		if(
@@ -207,15 +198,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		let batch_no_field = this.frm.get_docfield("items", "batch_no");
-		if (batch_no_field) {
-			batch_no_field.get_route_options_for_new_doc = function(row) {
-				return {
-					"item": row.doc.item_code
-				}
-			};
-		}
-
 		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
 			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
 				var item = locals[cdt][cdn];
@@ -267,6 +249,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			]);
+		}
+
+		if(this.frm.fields_dict['items'].grid.get_field('serial_and_batch_bundle')) {
+			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
+			if (sbb_field) {
+				sbb_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item_code': row.doc.item_code,
+					}
+				};
+			}
+		}
+
+		if(this.frm.fields_dict['items'].grid.get_field('batch_no')) {
+			let batch_no_field = this.frm.get_docfield('items', 'batch_no');
+			if (batch_no_field) {
+				batch_no_field.get_route_options_for_new_doc = function(row) {
+					return {
+						'item': row.doc.item_code
+					}
+				};
+			}
 		}
 	}
 
@@ -358,7 +362,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	refresh() {
-
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_dynamic_labels();

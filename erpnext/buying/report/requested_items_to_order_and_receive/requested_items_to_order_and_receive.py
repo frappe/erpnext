@@ -7,7 +7,7 @@ import copy
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import date_diff, flt, getdate
+from frappe.utils import cint, date_diff, flt, getdate
 
 
 def execute(filters=None):
@@ -47,8 +47,10 @@ def get_data(filters):
 			mr.transaction_date.as_("date"),
 			mr_item.schedule_date.as_("required_date"),
 			mr_item.item_code.as_("item_code"),
-			Sum(Coalesce(mr_item.stock_qty, 0)).as_("qty"),
-			Coalesce(mr_item.stock_uom, "").as_("uom"),
+			Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
+			Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),
+			Coalesce(mr_item.uom, "").as_("uom"),
+			Coalesce(mr_item.stock_uom, "").as_("stock_uom"),
 			Sum(Coalesce(mr_item.ordered_qty, 0)).as_("ordered_qty"),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
 			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.received_qty, 0))).as_(
@@ -96,7 +98,7 @@ def get_conditions(filters, query, mr, mr_item):
 
 
 def update_qty_columns(row_to_update, data_row):
-	fields = ["qty", "ordered_qty", "received_qty", "qty_to_receive", "qty_to_order"]
+	fields = ["qty", "stock_qty", "ordered_qty", "received_qty", "qty_to_receive", "qty_to_order"]
 	for field in fields:
 		row_to_update[field] += flt(data_row[field])
 
@@ -104,16 +106,20 @@ def update_qty_columns(row_to_update, data_row):
 def prepare_data(data, filters):
 	"""Prepare consolidated Report data and Chart data"""
 	material_request_map, item_qty_map = {}, {}
+	precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	for row in data:
 		# item wise map for charts
 		if not row["item_code"] in item_qty_map:
 			item_qty_map[row["item_code"]] = {
-				"qty": row["qty"],
-				"ordered_qty": row["ordered_qty"],
-				"received_qty": row["received_qty"],
-				"qty_to_receive": row["qty_to_receive"],
-				"qty_to_order": row["qty_to_order"],
+				"qty": flt(row["stock_qty"], precision),
+				"stock_qty": flt(row["stock_qty"], precision),
+				"stock_uom": row["stock_uom"],
+				"uom": row["uom"],
+				"ordered_qty": flt(row["ordered_qty"], precision),
+				"received_qty": flt(row["received_qty"], precision),
+				"qty_to_receive": flt(row["qty_to_receive"], precision),
+				"qty_to_order": flt(row["qty_to_order"], precision),
 			}
 		else:
 			item_entry = item_qty_map[row["item_code"]]
@@ -200,8 +206,14 @@ def get_columns(filters):
 				{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
 				{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 200},
 				{
-					"label": _("Stock UOM"),
+					"label": _("UOM"),
 					"fieldname": "uom",
+					"fieldtype": "Data",
+					"width": 100,
+				},
+				{
+					"label": _("Stock UOM"),
+					"fieldname": "stock_uom",
 					"fieldtype": "Data",
 					"width": 100,
 				},
@@ -211,10 +223,17 @@ def get_columns(filters):
 	columns.extend(
 		[
 			{
-				"label": _("Stock Qty"),
+				"label": _("Qty"),
 				"fieldname": "qty",
 				"fieldtype": "Float",
-				"width": 120,
+				"width": 140,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Qty in Stock UOM"),
+				"fieldname": "stock_qty",
+				"fieldtype": "Float",
+				"width": 140,
 				"convertible": "qty",
 			},
 			{
