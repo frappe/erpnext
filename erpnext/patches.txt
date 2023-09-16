@@ -342,7 +342,5 @@ execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for
 erpnext.patches.v15_0.correct_asset_value_if_je_with_workflow
 erpnext.patches.v15_0.delete_woocommerce_settings_doctype
 erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
-execute:frappe.delete_doc('DocType', 'Twitter Settings', ignore_missing=True)
-execute:frappe.delete_doc('DocType', 'LinkedIn Settings', ignore_missing=True)
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
