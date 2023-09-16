@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.utils import get_link_to_form, parse_json
 
 SLE_FIELDS = (
 	"name",
@@ -258,3 +259,35 @@ def get_columns():
 			"label": _("H - J"),
 		},
 	]
+
+
+@frappe.whitelist()
+def create_reposting_entries(rows, item_code=None, warehouse=None):
+	if isinstance(rows, str):
+		rows = parse_json(rows)
+
+	entries = []
+	for row in rows:
+		row = frappe._dict(row)
+
+		try:
+			doc = frappe.get_doc(
+				{
+					"doctype": "Repost Item Valuation",
+					"based_on": "Item and Warehouse",
+					"status": "Queued",
+					"item_code": item_code or row.item_code,
+					"warehouse": warehouse or row.warehouse,
+					"posting_date": row.posting_date,
+					"posting_time": row.posting_time,
+					"allow_nagative_stock": 1,
+				}
+			).submit()
+
+			entries.append(get_link_to_form("Repost Item Valuation", doc.name))
+		except frappe.DuplicateEntryError:
+			continue
+
+	if entries:
+		entries = ", ".join(entries)
+		frappe.msgprint(_("Reposting entries created: {0}").format(entries))
