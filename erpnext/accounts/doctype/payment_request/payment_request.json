@@ -231,6 +231,28 @@
    "label": "SWIFT Number"
   },
   {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
    "depends_on": "eval: doc.payment_request_type == 'Inward'",
    "fieldname": "recipient_and_message",
    "fieldtype": "Section Break",
@@ -246,7 +268,8 @@
    "fieldname": "email_to",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "To"
+   "label": "To",
+   "options": "Email"
   },
   {
    "depends_on": "eval: doc.payment_channel != \"Phone\"",
@@ -317,9 +340,10 @@
   },
   {
    "fieldname": "payment_url",
-   "fieldtype": "Small Text",
    "hidden": 1,
-   "label": "payment_url",
+   "fieldtype": "Data",
+   "length": 500,
+   "options": "URL",
    "read_only": 1
   },
   {
@@ -344,6 +368,14 @@
    "read_only": 1
   },
   {
+   "fetch_from": "payment_gateway_account.payment_channel",
+   "fieldname": "payment_channel",
+   "fieldtype": "Select",
+   "label": "Payment Channel",
+   "options": "\nEmail\nPhone",
+   "read_only": 1
+  },
+  {
    "fieldname": "payment_order",
    "fieldtype": "Link",
    "label": "Payment Order",
@@ -358,43 +390,13 @@
    "options": "Payment Request",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fetch_from": "payment_gateway_account.payment_channel",
-   "fieldname": "payment_channel",
-   "fieldtype": "Select",
-   "label": "Payment Channel",
-   "options": "\nEmail\nPhone",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-21 16:56:40.115737",
+ "modified": "2023-09-16 14:15:02.510890",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
