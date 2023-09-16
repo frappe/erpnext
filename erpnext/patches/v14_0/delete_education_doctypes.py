@@ -46,8 +46,6 @@ def execute():
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
-<<<<<<< HEAD
-=======
 	titles = [
 		"Fees",
 		"Student Admission",
@@ -59,7 +57,6 @@ def execute():
 	for item in items:
 		frappe.delete_doc("Portal Menu Item", item, ignore_missing=True, force=True)
 
->>>>>>> 099468e3cf (fix: company wise deferred accounting fields in item (#37023))
 	frappe.delete_doc("Module Def", "Education", ignore_missing=True, force=True)
 
 	click.secho(
