@@ -162,10 +162,13 @@ class BuyingController(SubcontractingController):
 		purchase_doc_field = (
 			"purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
 		)
-		not_cancelled_asset = [
-			d.name
-			for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
-		]
+		not_cancelled_asset = []
+		if self.return_against:
+			not_cancelled_asset = [
+				d.name
+				for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
+			]
+
 		if self.is_return and len(not_cancelled_asset):
 			frappe.throw(
 				_(
