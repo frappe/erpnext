@@ -117,15 +117,6 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
-		let sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					'item_code': row.doc.item_code,
-					'voucher_type': frm.doc.doctype,
-				}
-			};
-		}
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
@@ -361,6 +352,16 @@ frappe.ui.form.on('Stock Entry', {
 
 		if(!check_should_not_attach_bom_items(frm.doc.bom_no)) {
 			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		}
+
+		let sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
 		}
 	},
 
