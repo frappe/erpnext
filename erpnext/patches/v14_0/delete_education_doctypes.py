@@ -47,13 +47,16 @@ def execute():
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
-	portal_settings = frappe.get_doc("Portal Settings")
-
-	for row in portal_settings.get("menu"):
-		if row.reference_doctype in doctypes:
-			row.delete()
-
-	portal_settings.save()
+	titles = [
+		"Fees",
+		"Student Admission",
+		"Grant Application",
+		"Chapter",
+		"Certification Application",
+	]
+	items = frappe.get_all("Portal Menu Item", filters=[["title", "in", titles]], pluck="name")
+	for item in items:
+		frappe.delete_doc("Portal Menu Item", item, ignore_missing=True, force=True)
 
 	frappe.delete_doc("Module Def", "Education", ignore_missing=True, force=True)
 
