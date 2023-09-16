@@ -338,6 +338,12 @@ erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances #15-07-2023
 execute:frappe.defaults.clear_default("fiscal_year")
 execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for_items', 0)
+<<<<<<< HEAD
 erpnext.patches.v14_0.correct_asset_value_if_je_with_workflow
+=======
+erpnext.patches.v15_0.correct_asset_value_if_je_with_workflow
+erpnext.patches.v15_0.delete_woocommerce_settings_doctype
+erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
+>>>>>>> 099468e3cf (fix: company wise deferred accounting fields in item (#37023))
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

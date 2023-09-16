@@ -41,7 +41,7 @@ def execute():
 	for card in cards:
 		frappe.delete_doc("Number Card", card, ignore_missing=True, force=True)
 
-	titles = ["Lab Test", "Prescription", "Patient Appointment"]
+	titles = ["Lab Test", "Prescription", "Patient Appointment", "Patient"]
 	items = frappe.get_all("Portal Menu Item", filters=[["title", "in", titles]], pluck="name")
 	for item in items:
 		frappe.delete_doc("Portal Menu Item", item, ignore_missing=True, force=True)
