@@ -198,6 +198,8 @@ def validate_budget_records(args, budget_records, expense_amount):
 			yearly_action, monthly_action = get_actions(args, budget)
 
 			if yearly_action in ("Stop", "Warn"):
+				breakpoint()
+
 				compare_expense_with_budget(
 					args, flt(budget.budget_amount), _("Annual"), yearly_action, budget.budget_against, amount
 				)
