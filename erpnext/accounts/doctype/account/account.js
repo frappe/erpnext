@@ -137,9 +137,6 @@ frappe.ui.form.on("Account", {
 					args: {
 						old: frm.doc.name,
 						new: data.name,
-						is_group: frm.doc.is_group,
-						root_type: frm.doc.root_type,
-						company: frm.doc.company,
 					},
 					callback: function (r) {
 						if (!r.exc) {
