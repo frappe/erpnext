@@ -897,11 +897,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "make_attachments_public": 1,
-<<<<<<< HEAD
- "modified": "2023-07-14 17:18:18.658942",
-=======
  "modified": "2023-09-11 13:46:32.688051",
->>>>>>> 099468e3cf (fix: company wise deferred accounting fields in item (#37023))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
