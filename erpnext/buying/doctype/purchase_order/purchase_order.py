@@ -53,8 +53,8 @@ class PurchaseOrder(BuyingController):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
-	# def before_save(self):
-	# 	self.validate_budget()
+	def before_save(self):
+		self.validate_budget()
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()
