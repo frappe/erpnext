@@ -249,7 +249,7 @@ class PaymentRequest(Document):
 		if (
 			party_account_currency == ref_doc.company_currency and party_account_currency != self.currency
 		):
-			party_amount = ref_doc.base_grand_total
+			party_amount = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
 		else:
 			party_amount = self.grand_total
 
