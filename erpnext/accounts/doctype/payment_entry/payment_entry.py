@@ -1152,8 +1152,25 @@ class PaymentEntry(AccountsController):
 					)
 
 				make_reverse_gl_entries(gl_entries=gl_entries, partial_cancel=True)
-			else:
-				make_gl_entries(gl_entries)
+				return
+
+			# same reference added to payment entry
+			for gl_entry in gl_entries.copy():
+				if frappe.db.exists(
+					"GL Entry",
+					{
+						"account": gl_entry.account,
+						"voucher_type": gl_entry.voucher_type,
+						"voucher_no": gl_entry.voucher_no,
+						"voucher_detail_no": gl_entry.voucher_detail_no,
+						"debit": gl_entry.debit,
+						"credit": gl_entry.credit,
+						"is_cancelled": 0,
+					},
+				):
+					gl_entries.remove(gl_entry)
+
+			make_gl_entries(gl_entries)
 
 	def make_invoice_liability_entry(self, gl_entries, invoice):
 		args_dict = {
