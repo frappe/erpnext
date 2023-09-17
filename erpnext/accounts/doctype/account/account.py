@@ -18,6 +18,10 @@ class BalanceMismatchError(frappe.ValidationError):
 	pass
 
 
+class InvalidAccountMergeError(frappe.ValidationError):
+	pass
+
+
 class Account(NestedSet):
 	nsm_parent_field = "parent_account"
 
@@ -444,24 +448,51 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 
 @frappe.whitelist()
-def merge_account(old, new, is_group, root_type, company):
+def merge_account(old, new):
 	# Validate properties before merging
+<<<<<<< HEAD
 	if not frappe.db.exists("Account", new):
 		throw(_("Account {0} does not exist").format(new))
 
 	val = list(frappe.db.get_value("Account", new, ["is_group", "root_type", "company"]))
 
 	if val != [cint(is_group), root_type, company]:
+=======
+	new_account = frappe.get_cached_doc("Account", new)
+	old_account = frappe.get_cached_doc("Account", old)
+
+	if not new_account:
+		throw(_("Account {0} does not exist").format(new))
+
+	if (
+		cint(new_account.is_group),
+		new_account.root_type,
+		new_account.company,
+		cstr(new_account.account_currency),
+	) != (
+		cint(old_account.is_group),
+		old_account.root_type,
+		old_account.company,
+		cstr(old_account.account_currency),
+	):
+>>>>>>> 5e21e7cd1d (fix: Don't allow merging accounts with different currency (#37074))
 		throw(
-			_(
-				"""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company"""
-			)
+			msg=_(
+				"""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"""
+			),
+			title=("Invalid Accounts"),
+			exc=InvalidAccountMergeError,
 		)
 
+<<<<<<< HEAD
 	if is_group and frappe.db.get_value("Account", new, "parent_account") == old:
 		frappe.db.set_value(
 			"Account", new, "parent_account", frappe.db.get_value("Account", old, "parent_account")
 		)
+=======
+	if old_account.is_group and new_account.parent_account == old:
+		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
+>>>>>>> 5e21e7cd1d (fix: Don't allow merging accounts with different currency (#37074))
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
 
