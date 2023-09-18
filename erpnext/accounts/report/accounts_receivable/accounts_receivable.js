@@ -38,31 +38,30 @@ frappe.query_reports["Accounts Receivable"] = {
 			}
 		},
 		{
-			"fieldname": "customer",
-			"label": __("Customer"),
+			"fieldname": "party_type",
+			"label": __("Party Type"),
 			"fieldtype": "Link",
-			"options": "Customer",
+			"options": "Party Type",
+			"Default": "Customer",
+			get_query: () => {
+				return {
+					filters: {
+						'account_type': 'Receivable'
+					}
+				};
+			},
 			on_change: () => {
-				var customer = frappe.query_report.get_filter_value('customer');
-				var company = frappe.query_report.get_filter_value('company');
-				if (customer) {
-					frappe.db.get_value('Customer', customer, ["customer_name", "payment_terms"], function(value) {
-						frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
-						frappe.query_report.set_filter_value('payment_terms', value["payment_terms"]);
-					});
+				frappe.query_report.set_filter_value('party', "");
+				let party_type = frappe.query_report.get_filter_value('party_type');
+				frappe.query_report.toggle_filter_display('customer_group', frappe.query_report.get_filter_value('party_type') !== "Customer");
 
-					frappe.db.get_value('Customer Credit Limit', {'parent': customer, 'company': company},
-						["credit_limit"], function(value) {
-						if (value) {
-							frappe.query_report.set_filter_value('credit_limit', value["credit_limit"]);
-						}
-					}, "Customer");
-				} else {
-					frappe.query_report.set_filter_value('customer_name', "");
-					frappe.query_report.set_filter_value('credit_limit', "");
-					frappe.query_report.set_filter_value('payment_terms', "");
-				}
 			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
 		},
 		{
 			"fieldname": "party_account",
