@@ -1171,6 +1171,7 @@
    "depends_on": "is_internal_supplier",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set From Warehouse",
    "options": "Warehouse"
   },
@@ -1271,7 +1272,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-24 11:16:41.195340",
+ "modified": "2023-09-13 16:21:07.361700",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

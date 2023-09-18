@@ -323,8 +323,10 @@ class StockBalanceReport(object):
 		for field in ["item_code", "brand"]:
 			if not self.filters.get(field):
 				continue
-
-			query = query.where(item_table[field] == self.filters.get(field))
+			elif field == "item_code":
+				query = query.where(item_table.name == self.filters.get(field))
+			else:
+				query = query.where(item_table[field] == self.filters.get(field))
 
 		return query
 

@@ -8,9 +8,24 @@
 	}
 	</style>
 
+	<div id="header-html" class="hidden-pdf">
+		{% if letter_head.content %}
+		<div class="letter-head text-center">{{ letter_head.content }}</div>
+		<hr style="height:2px;border-width:0;color:black;background-color:black;">
+		{% endif %}
+	</div>
+	<div id="footer-html" class="visible-pdf">
+		{% if letter_head.footer %}
+		<div class="letter-head-footer">
+			<hr style="border-width:0;color:black;background-color:black;padding-bottom:2px;">
+			{{ letter_head.footer }}
+		</div>
+		{% endif %}
+	</div>
+
 	<h2 class="text-center" style="margin-top:0">{{ _(report.report_name) }}</h2>
 	<h4 class="text-center">
-		{{ filters.customer }}
+		{{ filters.customer_name }}
 	</h4>
 	<h6 class="text-center">
 		{% if (filters.tax_id) %}
@@ -340,5 +355,10 @@
 			</tr>
 		</tbody>
 	</table>
+	{% endif %}
+	{% if terms_and_conditions %}
+	<div>
+		{{ terms_and_conditions }}
+	</div>
 	{% endif %}
 	<p class="text-right text-muted">{{ _("Printed On ") }}{{ frappe.utils.now() }}</p>

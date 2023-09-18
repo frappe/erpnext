@@ -207,6 +207,9 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 			"conversion_rate": doc.get("conversion_rate"),
 		}
 	)
+	if not row_data.get("transaction_date"):
+		row_data.update({"transaction_date": doc.get("transaction_date")})
+
 	rate = get_price_list_rate(row_data, item_doc).get("price_list_rate")
 
 	pi_row.rate = rate or item_data.get("valuation_rate") or 0.0

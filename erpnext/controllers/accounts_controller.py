@@ -1042,8 +1042,10 @@ class AccountsController(TransactionBase):
 								self.name,
 								arg.get("referenced_row"),
 							):
+								posting_date = frappe.db.get_value(arg.voucher_type, arg.voucher_no, "posting_date")
 								je = create_gain_loss_journal(
 									self.company,
+									posting_date,
 									arg.get("party_type"),
 									arg.get("party"),
 									party_account,
@@ -1123,6 +1125,7 @@ class AccountsController(TransactionBase):
 
 						je = create_gain_loss_journal(
 							self.company,
+							self.posting_date,
 							self.party_type,
 							self.party,
 							party_account,

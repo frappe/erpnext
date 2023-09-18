@@ -2024,6 +2024,49 @@ class TestPurchaseReceipt(FrappeTestCase):
 		ste7.reload()
 		self.assertEqual(ste7.items[0].valuation_rate, valuation_rate)
 
+	def test_purchase_receipt_provisional_accounting(self):
+		# Step - 1: Create Supplier with Default Currency as USD
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		supplier = create_supplier(default_currency="USD")
+
+		# Step - 2: Setup Company for Provisional Accounting
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		provisional_account = create_account(
+			account_name="Provision Account",
+			parent_account="Current Liabilities - _TC",
+			company="_Test Company",
+		)
+		company = frappe.get_doc("Company", "_Test Company")
+		company.enable_provisional_accounting_for_non_stock_items = 1
+		company.default_provisional_account = provisional_account
+		company.save()
+
+		# Step - 3: Create Non-Stock Item
+		item = make_item(properties={"is_stock_item": 0})
+
+		# Step - 4: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			qty=2,
+			item_code=item.name,
+			company=company.name,
+			supplier=supplier.name,
+			currency=supplier.default_currency,
+		)
+
+		# Test - 1: Total and Base Total should not be the same as the currency is different
+		self.assertNotEqual(flt(pr.total, 2), flt(pr.base_total, 2))
+		self.assertEqual(flt(pr.total * pr.conversion_rate, 2), flt(pr.base_total, 2))
+
+		# Test - 2: Sum of Debit or Credit should be equal to Purchase Receipt Base Total
+		amount = frappe.db.get_value("GL Entry", {"docstatus": 1, "voucher_no": pr.name}, ["sum(debit)"])
+		expected_amount = pr.base_total
+		self.assertEqual(amount, expected_amount)
+
+		company.enable_provisional_accounting_for_non_stock_items = 0
+		company.save()
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

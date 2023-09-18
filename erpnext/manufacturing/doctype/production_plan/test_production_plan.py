@@ -2,7 +2,7 @@
 # See license.txt
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_to_date, flt, now_datetime, nowdate
+from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -58,6 +58,9 @@ class TestProductionPlan(FrappeTestCase):
 		pln = create_production_plan(item_code="Test Production Item 1")
 		self.assertTrue(len(pln.mr_items), 2)
 
+		for row in pln.mr_items:
+			row.schedule_date = add_to_date(nowdate(), days=10)
+
 		pln.make_material_request()
 		pln.reload()
 		self.assertTrue(pln.status, "Material Requested")
@@ -70,6 +73,13 @@ class TestProductionPlan(FrappeTestCase):
 		)
 
 		self.assertTrue(len(material_requests), 2)
+
+		for row in material_requests:
+			mr_schedule_date = getdate(frappe.db.get_value("Material Request", row[0], "schedule_date"))
+
+			expected_date = getdate(add_to_date(nowdate(), days=10))
+
+			self.assertEqual(mr_schedule_date, expected_date)
 
 		pln.make_work_order()
 		work_orders = frappe.get_all(
