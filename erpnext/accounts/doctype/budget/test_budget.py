@@ -143,10 +143,11 @@ class TestBudget(unittest.TestCase):
 		)
 		frappe.db.set_value("Budget", budget.name, "fiscal_year", fiscal_year)
 
-		po = create_purchase_order(transaction_date=nowdate(), do_not_submit=True)
+		po = create_purchase_order(transaction_date=nowdate(), do_not_submit=True, do_not_save=True)
 
 		po.set_missing_values()
 
+		self.assertRaises(BudgetError, po.save)
 		self.assertRaises(BudgetError, po.submit)
 
 		budget.load_from_db()
