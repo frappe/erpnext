@@ -45,7 +45,6 @@ class POSInvoice(SalesInvoice):
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
 		self.validate_change_amount()
-		self.validate_duplicate_serial_and_batch_no()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
 		self.validate_warehouse()
