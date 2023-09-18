@@ -7,31 +7,53 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "from",
+  "from_date",
   "column_break_qxbi",
-  "to"
+  "to_date",
+  "section_break_3x70",
+  "period_from",
+  "column_break_5ett",
+  "period_to"
  ],
  "fields": [
   {
-   "fieldname": "from",
-   "fieldtype": "Date",
-   "label": "From"
-  },
-  {
-   "fieldname": "to",
-   "fieldtype": "Date",
-   "label": "To"
-  },
-  {
    "fieldname": "column_break_qxbi",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_3x70",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "period_from",
+   "fieldtype": "Date",
+   "label": "Period From"
+  },
+  {
+   "fieldname": "column_break_5ett",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "period_to",
+   "fieldtype": "Date",
+   "label": "Period To"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-15 21:36:21.516679",
+ "modified": "2023-09-16 08:02:33.472406",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
