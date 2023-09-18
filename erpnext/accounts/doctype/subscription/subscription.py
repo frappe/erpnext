@@ -511,11 +511,9 @@ class Subscription(Document):
 		1. `process_for_active`
 		2. `process_for_past_due`
 		"""
-		print(posting_date)
 		if not self.is_current_invoice_generated(
 			self.current_invoice_start, self.current_invoice_end
 		) and self.can_generate_new_invoice(posting_date):
-			print("Ininininin")
 			self.generate_invoice()
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
@@ -684,7 +682,6 @@ def process_all(
 		filters["name"] = subscription
 
 	for subscription in frappe.get_all("Subscription", filters, pluck="name"):
-		print(subscription, "####")
 		try:
 			subscription = frappe.get_doc("Subscription", subscription)
 			subscription.process(posting_date)
