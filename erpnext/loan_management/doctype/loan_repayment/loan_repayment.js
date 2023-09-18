@@ -9,7 +9,9 @@ frappe.ui.form.on('Loan Repayment', {
 	// },
 
 	setup: function(frm) {
-		frm.add_fetch("against_loan", "repay_from_salary", "repay_from_salary");
+		if (frappe.meta.has_field("Loan Repayment", "repay_from_salary")) {
+			frm.add_fetch("against_loan", "repay_from_salary", "repay_from_salary");
+		}
 	},
 
 	onload: function(frm) {
