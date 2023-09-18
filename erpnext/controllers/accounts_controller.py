@@ -162,6 +162,9 @@ class AccountsController(TransactionBase):
 		self.disable_tax_included_prices_for_internal_transfer()
 		self.set_incoming_rate()
 
+		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
+			apply_pricing_rule_on_transaction(self)
+
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 
@@ -204,9 +207,6 @@ class AccountsController(TransactionBase):
 		with temporary_flag("company", self.company):
 			validate_regional(self)
 			validate_einvoice_fields(self)
-
-		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
-			apply_pricing_rule_on_transaction(self)
 
 	def before_cancel(self):
 		validate_einvoice_fields(self)
