@@ -430,7 +430,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.collect_project_status",
 	],
 	"hourly_long": [
-		"erpnext.accounts.doctype.subscription.subscription.process_all",
+		"erpnext.accounts.doctype.process_subscription.process_subscription.create_subscription_process",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction",
 	],
