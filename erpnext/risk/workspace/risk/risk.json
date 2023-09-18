@@ -1,0 +1,87 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"qXbnfWvTE6\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Reports &amp; Masters</span>\",\"col\":12}},{\"id\":\"8d82-wbQUm\",\"type\":\"card\",\"data\":{\"card_name\":\"Scorecard\",\"col\":4}}]",
+ "creation": "2023-09-21 21:24:07.517484",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "quality-3",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Risk",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scorecard",
+   "link_count": 0,
+   "link_to": "Scorecard",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scorecard",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scorecard",
+   "link_count": 0,
+   "link_to": "Scorecard",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scorecard Variable",
+   "link_count": 0,
+   "link_to": "Scorecard Variable",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scorecard Criteria",
+   "link_count": 0,
+   "link_to": "Scorecard Criteria",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scorecard Standing",
+   "link_count": 0,
+   "link_to": "Scorecard Standing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2023-09-21 22:04:44.075242",
+ "modified_by": "Administrator",
+ "module": "Risk",
+ "name": "Risk",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 9.0,
+ "shortcuts": [],
+ "title": "Risk"
+}

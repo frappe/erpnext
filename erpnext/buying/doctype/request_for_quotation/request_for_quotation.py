@@ -43,7 +43,7 @@ class RequestforQuotation(BuyingController):
 		for d in self.suppliers:
 			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, "prevent_rfqs")
 			if prevent_rfqs:
-				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
+				standing = frappe.db.get_value("Scorecard", d.supplier, "status")
 				frappe.throw(
 					_("RFQs are not allowed for {0} due to a scorecard standing of {1}").format(
 						d.supplier, standing
@@ -51,10 +51,10 @@ class RequestforQuotation(BuyingController):
 				)
 			warn_rfqs = frappe.db.get_value("Supplier", d.supplier, "warn_rfqs")
 			if warn_rfqs:
-				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
+				standing = frappe.db.get_value("Scorecard", d.supplier, "status")
 				frappe.msgprint(
 					_(
-						"{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution."
+						"{0} currently has a {1} Scorecard standing, and RFQs to this supplier should be issued with caution."
 					).format(d.supplier, standing),
 					title=_("Caution"),
 					indicator="orange",

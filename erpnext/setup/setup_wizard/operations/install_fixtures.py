@@ -290,8 +290,8 @@ def install(country=None):
 		}
 	]
 
-	# Records for the Supplier Scorecard
-	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
+	# Records for the Scorecard
+	from erpnext.risk.doctype.scorecard.scorecard import make_default_records
 
 	make_default_records()
 	make_records(records)

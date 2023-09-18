@@ -441,7 +441,7 @@ scheduler_events = {
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
-		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
+		"erpnext.risk.doctype.scorecard.scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
 		"erpnext.assets.doctype.asset.asset.update_maintenance_status",
 		"erpnext.assets.doctype.asset.asset.make_post_gl_entry",

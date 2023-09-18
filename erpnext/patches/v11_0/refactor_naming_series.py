@@ -56,7 +56,7 @@ doctype_series_map = {
 	"Stock Reconciliation": "MAT-RECO-.YYYY.-",
 	"Supplier": "SUP-.YYYY.-",
 	"Supplier Quotation": "PUR-SQTN-.YYYY.-",
-	"Supplier Scorecard Period": "PU-SSP-.YYYY.-",
+	"Scorecard Period": "PU-SSP-.YYYY.-",
 	"Timesheet": "TS-.YYYY.-",
 	"Vehicle Log": "HR-VLOG-.YYYY.-",
 	"Warranty Claim": "SER-WRN-.YYYY.-",

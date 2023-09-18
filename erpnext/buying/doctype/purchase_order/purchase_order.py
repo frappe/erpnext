@@ -156,7 +156,7 @@ class PurchaseOrder(BuyingController):
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, "prevent_pos")
 		if prevent_po:
-			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, "status")
+			standing = frappe.db.get_value("Scorecard", self.supplier, "status")
 			if standing:
 				frappe.throw(
 					_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(
@@ -166,10 +166,10 @@ class PurchaseOrder(BuyingController):
 
 		warn_po = frappe.db.get_value("Supplier", self.supplier, "warn_pos")
 		if warn_po:
-			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, "status")
+			standing = frappe.db.get_value("Scorecard", self.supplier, "status")
 			frappe.msgprint(
 				_(
-					"{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
+					"{0} currently has a {1} Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
 				).format(self.supplier, standing),
 				title=_("Caution"),
 				indicator="orange",
