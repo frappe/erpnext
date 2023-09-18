@@ -530,14 +530,19 @@ class Subscription(Document):
 	def can_generate_new_invoice(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
 		if self.cancelation_date:
 			return False
-		elif self.generate_invoice_at_period_start and (
+
+		if self.has_outstanding_invoice() and not self.generate_new_invoices_past_due_date:
+			return False
+
+		if self.generate_invoice_at == "Beginning of the current subscription period" and (
 			getdate(posting_date) == getdate(self.current_invoice_start) or self.is_new_subscription()
 		):
 			return True
+		elif self.generate_invoice_at == "Days before the current subscription period" and (
+			getdate(posting_date) == getdate(add_days(self.current_invoice_start, -1 * self.number_of_days))
+		):
+			return True
 		elif getdate(posting_date) == getdate(self.current_invoice_end):
-			if self.has_outstanding_invoice() and not self.generate_new_invoices_past_due_date:
-				return False
-
 			return True
 		else:
 			return False

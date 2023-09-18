@@ -24,8 +24,9 @@
   "current_invoice_start",
   "current_invoice_end",
   "days_until_due",
+  "generate_invoice_at",
+  "number_of_days",
   "cancel_at_period_end",
-  "generate_invoice_at_period_start",
   "sb_4",
   "plans",
   "sb_1",
@@ -106,12 +107,6 @@
    "fieldname": "cancel_at_period_end",
    "fieldtype": "Check",
    "label": "Cancel At End Of Period"
-  },
-  {
-   "default": "0",
-   "fieldname": "generate_invoice_at_period_start",
-   "fieldtype": "Check",
-   "label": "Generate Invoice At Beginning Of Period"
   },
   {
    "allow_on_submit": 1,
@@ -240,6 +235,20 @@
    "fieldname": "submit_invoice",
    "fieldtype": "Check",
    "label": "Submit Generated Invoices"
+  },
+  {
+   "default": "End of the current subscription period",
+   "fieldname": "generate_invoice_at",
+   "fieldtype": "Select",
+   "label": "Generate Invoice At",
+   "options": "End of the current subscription period\nBeginning of the currency subscription period\nDays before the current subscription period"
+  },
+  {
+   "depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\"",
+   "fieldname": "number_of_days",
+   "fieldtype": "Int",
+   "label": "Number of Days",
+   "mandatory_depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\""
   }
  ],
  "index_web_pages_for_search": 1,
@@ -255,7 +264,7 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2022-02-18 23:24:57.185054",
+ "modified": "2023-09-18 12:03:22.085499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
