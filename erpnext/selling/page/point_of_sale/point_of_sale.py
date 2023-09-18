@@ -100,11 +100,13 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	)
 
 	result = []
-
+	
+	search_result = []
 	if search_term:
-		result = search_by_term(search_term, warehouse, price_list) or []
-		if result:
-			return result
+		search_result = search_by_term(search_term, warehouse, price_list) or []
+		if search_result:
+			for item in search_result['items']:
+				result.append(item)
 
 	if not frappe.db.exists("Item Group", item_group):
 		item_group = get_root_of("Item Group")
@@ -156,44 +158,34 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		as_dict=1,
 	)
 
-	# return (empty) list if there are no results
-	if not items_data:
-		return result
-
-	for item in items_data:
-		uoms = frappe.get_doc("Item", item.item_code).get("uoms", [])
-
-		item.actual_qty, _ = get_stock_availability(item.item_code, warehouse)
-		item.uom = item.stock_uom
-
-		item_price = frappe.get_all(
+	if items_data:
+		items = [d.item_code for d in items_data]
+		item_prices_data = frappe.get_all(
 			"Item Price",
-			fields=["price_list_rate", "currency", "uom", "batch_no"],
-			filters={
-				"price_list": price_list,
-				"item_code": item.item_code,
-				"selling": True,
-			},
+			fields=["item_code", "price_list_rate", "currency"],
+			filters={"price_list": price_list, "item_code": ["in", items]},
 		)
 
-		if not item_price:
-			result.append(item)
+		item_prices = {}
+		for d in item_prices_data:
+			item_prices[d.item_code] = d
 
-		for price in item_price:
-			uom = next(filter(lambda x: x.uom == price.uom, uoms), {})
+		for item in items_data:
+			item_code = item.item_code
+			item_price = item_prices.get(item_code) or {}
+			item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 
-			if price.uom != item.stock_uom and uom and uom.conversion_factor:
-				item.actual_qty = item.actual_qty // uom.conversion_factor
-
-			result.append(
+			row = {}
+			row.update(item)
+			row.update(
 				{
-					**item,
-					"price_list_rate": price.get("price_list_rate"),
-					"currency": price.get("currency"),
-					"uom": price.uom or item.uom,
-					"batch_no": price.batch_no,
+					"price_list_rate": item_price.get("price_list_rate"),
+					"currency": item_price.get("currency"),
+					"actual_qty": item_stock_qty,
 				}
 			)
+			result.append(row)    
+    
 	return {"items": result}
 
 
