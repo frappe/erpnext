@@ -568,3 +568,40 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 					row.account_currency,
 				],
 			)
+
+	def test_usd_customer_filter(self):
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": self.customer,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.currency = "USD"
+		si.conversion_rate = 80
+		si.debit_to = self.debtors_usd
+		si.save().submit()
+		name = si.name
+
+		# check invoice grand total and invoiced column's value for 3 payment terms
+		report = execute(filters)
+
+		expected = {
+			"voucher_type": si.doctype,
+			"voucher_no": si.name,
+			"party_account": self.debtors_usd,
+			"customer_name": self.customer,
+			"invoiced": 100.0,
+			"outstanding": 100.0,
+			"account_currency": "USD",
+		}
+		self.assertEqual(len(report[1]), 1)
+		report_output = report[1][0]
+		for field in expected:
+			with self.subTest(field=field):
+				self.assertEqual(report_output.get(field), expected.get(field))
