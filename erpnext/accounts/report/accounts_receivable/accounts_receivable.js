@@ -173,24 +173,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname": "show_remarks",
 			"label": __("Show Remarks"),
 			"fieldtype": "Check",
-		},
-		{
-			"fieldname": "customer_name",
-			"label": __("Customer Name"),
-			"fieldtype": "Data",
-			"hidden": 1
-		},
-		{
-			"fieldname": "payment_terms",
-			"label": __("Payment Tems"),
-			"fieldtype": "Data",
-			"hidden": 1
-		},
-		{
-			"fieldname": "credit_limit",
-			"label": __("Credit Limit"),
-			"fieldtype": "Currency",
-			"hidden": 1
 		}
 	],
 
