@@ -40,6 +40,12 @@ class ProductionPlan(Document):
 		self._rename_temporary_references()
 		validate_uom_is_integer(self, "stock_uom", "planned_qty")
 		self.validate_sales_orders()
+		self.validate_material_request_type()
+
+	def validate_material_request_type(self):
+		for row in self.get("mr_items"):
+			if row.from_warehouse and row.material_request_type != "Material Transfer":
+				row.from_warehouse = ""
 
 	@frappe.whitelist()
 	def validate_sales_orders(self, sales_order=None):
@@ -749,7 +755,9 @@ class ProductionPlan(Document):
 				"items",
 				{
 					"item_code": item.item_code,
-					"from_warehouse": item.from_warehouse,
+					"from_warehouse": item.from_warehouse
+					if material_request_type == "Material Transfer"
+					else None,
 					"qty": item.quantity,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
