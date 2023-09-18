@@ -117,12 +117,6 @@ frappe.ui.form.on('Account', {
 					args: {
 						old: frm.doc.name,
 						new: data.name,
-<<<<<<< HEAD
-						is_group: frm.doc.is_group,
-						root_type: frm.doc.root_type,
-						company: frm.doc.company
-=======
->>>>>>> 5e21e7cd1d (fix: Don't allow merging accounts with different currency (#37074))
 					},
 					callback: function(r) {
 						if(!r.exc) {
