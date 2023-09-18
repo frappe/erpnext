@@ -125,6 +125,8 @@ class MaterialRequest(BuyingController):
 
 	def before_save(self):
 		self.set_status(update=True)
+		if self.material_request_type == "Purchase":
+			self.validate_budget()
 
 	def before_submit(self):
 		self.set_status(update=True)

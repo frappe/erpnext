@@ -109,13 +109,12 @@ class Budget(Document):
 
 def validate_expense_against_budget(args, expense_amount=0):
 	args = frappe._dict(args)
-
 	if args.get("company") and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)
-	# breakpoint()
+
 	if not args.account:
 		args.account = args.get("expense_account")
 
@@ -218,7 +217,6 @@ def validate_budget_records(args, budget_records, expense_amount):
 def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against, amount=0):
 	actual_expense = get_actual_expense(args)
 	total_expense = actual_expense + amount
-	# breakpoint()
 
 	if total_expense > budget_amount:
 		if actual_expense > budget_amount:
@@ -269,11 +267,11 @@ def get_actions(args, budget):
 
 def get_amount(args, budget):
 	amount = 0
-	# breakpoint()
 	if args.get("doctype") == "Material Request" and budget.for_material_request:
 		amount = (
 			get_requested_amount(args, budget) + get_ordered_amount(args, budget) + get_actual_expense(args)
 		)
+		amount = args.get("amount")
 
 	elif args.get("doctype") == "Purchase Order" and budget.for_purchase_order:
 		# amount = get_ordered_amount(args, budget) + get_actual_expense(args)
