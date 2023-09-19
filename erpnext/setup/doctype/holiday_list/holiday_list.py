@@ -93,11 +93,7 @@ class HolidayList(Document):
 
 		for day in self.get("holidays"):
 			if not (getdate(self.from_date) <= getdate(day.holiday_date) <= getdate(self.to_date)):
-				frappe.throw(
-					_("The holiday on {0} is not between From Date and To Date").format(
-						formatdate(day.holiday_date)
-					)
-				)
+				frappe.throw(_("Holiday Date {0} added multiple times").format(frappe.bold(row.holiday_date)))
 
 	def get_weekly_off_date_list(self, start_date, end_date):
 		start_date, end_date = getdate(start_date), getdate(end_date)
