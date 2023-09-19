@@ -24,7 +24,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def test_accounts_receivable_with_supplier(self):
+	def test_accounts_payable_for_foreign_currency_supplier(self):
 		pi = self.create_purchase_invoice(do_not_submit=True)
 		pi.currency = "USD"
 		pi.conversion_rate = 80
