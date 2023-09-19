@@ -112,7 +112,6 @@
   {
    "default": "0",
    "fetch_from": "dunning_type.dunning_fee",
-   "fetch_if_empty": 1,
    "fieldname": "dunning_fee",
    "fieldtype": "Currency",
    "label": "Dunning Fee",
@@ -172,7 +171,6 @@
   {
    "default": "0",
    "fetch_from": "dunning_type.rate_of_interest",
-   "fetch_if_empty": 1,
    "fieldname": "rate_of_interest",
    "fieldtype": "Float",
    "label": "Rate of Interest (%) Yearly"
@@ -381,7 +379,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-15 15:46:53.865712",
+ "modified": "2023-09-19 12:52:39.769625",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
