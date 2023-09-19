@@ -4,11 +4,8 @@
 import json
 
 import frappe
-<<<<<<< HEAD
-=======
 from frappe import _
 from frappe.utils import get_link_to_form, parse_json
->>>>>>> 9c9d0ecb73 (feat: provision to create RIV from `Stock Ledger Invariant Check` report (#37115))
 
 SLE_FIELDS = (
 	"name",
