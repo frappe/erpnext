@@ -6,7 +6,12 @@
 frappe.ui.form.on('Loan Repayment', {
 	// refresh: function(frm) {
 
-	// }
+	// },
+
+	setup: function(frm) {
+		frm.add_fetch("against_loan", "repay_from_salary", "repay_from_salary");
+	},
+
 	onload: function(frm) {
 		frm.set_query('against_loan', function() {
 			return {
