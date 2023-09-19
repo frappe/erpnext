@@ -75,7 +75,7 @@ def get_data(
 				"reserved_qty_for_production": flt(item.reserved_qty_for_production, precision),
 				"reserved_qty_for_sub_contract": flt(item.reserved_qty_for_sub_contract, precision),
 				"actual_qty": flt(item.actual_qty, precision),
-				"reserved_stock": sre_reserved_stock_details.get((item.item_code, item.warehouse), 0),
+				"reserved_stock": sre_reserved_stock_details,
 			}
 		)
 	return items
