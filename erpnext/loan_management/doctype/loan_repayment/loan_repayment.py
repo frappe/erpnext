@@ -81,6 +81,11 @@ class LoanRepayment(AccountsController):
 		if amounts.get("due_date"):
 			self.due_date = amounts.get("due_date")
 
+		if self.repay_from_salary and not self.payroll_payable_account:
+			frappe.throw(_("Please set Payroll Payable Account in Loan Repayment"))
+		elif not self.repay_from_salary and self.payroll_payable_account:
+			self.repay_from_salary = 1
+
 	def check_future_entries(self):
 		future_repayment_date = frappe.db.get_value(
 			"Loan Repayment",
