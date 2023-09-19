@@ -345,7 +345,7 @@ class Subscription(Document):
 		invoice.set_posting_time = 1
 		invoice.posting_date = (
 			self.current_invoice_start
-			if self.generate_invoice_at_period_start
+			if self.generate_invoice_at == "Beginning of the current subscription period"
 			else self.current_invoice_end
 		)
 
@@ -439,7 +439,7 @@ class Subscription(Document):
 			prorate_factor = get_prorata_factor(
 				self.current_invoice_end,
 				self.current_invoice_start,
-				cint(self.generate_invoice_at_period_start),
+				cint(self.generate_invoice_at == "Beginning of the current subscription period"),
 			)
 
 		items = []
@@ -632,7 +632,10 @@ class Subscription(Document):
 			frappe.throw(_("subscription is already cancelled."), InvoiceCancelled)
 
 		to_generate_invoice = (
-			True if self.status == "Active" and not self.generate_invoice_at_period_start else False
+			True
+			if self.status == "Active"
+			and not self.generate_invoice_at == "Beginning of the current subscription period"
+			else False
 		)
 		self.status = "Cancelled"
 		self.cancelation_date = nowdate()

@@ -87,12 +87,14 @@
    "fieldname": "current_invoice_start",
    "fieldtype": "Date",
    "label": "Current Invoice Start Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "current_invoice_end",
    "fieldtype": "Date",
    "label": "Current Invoice End Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -241,7 +243,8 @@
    "fieldname": "generate_invoice_at",
    "fieldtype": "Select",
    "label": "Generate Invoice At",
-   "options": "End of the current subscription period\nBeginning of the currency subscription period\nDays before the current subscription period"
+   "options": "End of the current subscription period\nBeginning of the current subscription period\nDays before the current subscription period",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\"",
@@ -264,7 +267,7 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2023-09-18 12:03:22.085499",
+ "modified": "2023-09-18 17:48:21.900252",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
