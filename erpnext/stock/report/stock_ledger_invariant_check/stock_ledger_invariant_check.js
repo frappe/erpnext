@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 
-const DIFFERNCE_FIELD_NAMES = [
+const DIFFERENCE_FIELD_NAMES = [
 	'difference_in_qty',
 	'fifo_qty_diff',
 	'fifo_value_diff',
@@ -37,7 +37,7 @@ frappe.query_reports['Stock Ledger Invariant Check'] = {
 
 	formatter (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
-		if (DIFFERNCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
+		if (DIFFERENCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = '<span style="color:red">' + value + '</span>';
 		}
 		return value;
