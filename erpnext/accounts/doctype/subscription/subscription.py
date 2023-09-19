@@ -26,12 +26,30 @@ from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_pla
 from erpnext.accounts.party import get_party_account_currency
 
 
+<<<<<<< HEAD
+=======
+class InvoiceCancelled(frappe.ValidationError):
+	pass
+
+
+class InvoiceNotCancelled(frappe.ValidationError):
+	pass
+
+
+DateTimeLikeObject = Union[str, datetime.date]
+
+
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 class Subscription(Document):
 	def before_insert(self):
 		# update start just before the subscription doc is created
 		self.update_subscription_period(self.start_date)
 
+<<<<<<< HEAD
 	def update_subscription_period(self, date=None, return_date=False):
+=======
+	def update_subscription_period(self, date: Optional["DateTimeLikeObject"] = None):
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Subscription period is the period to be billed. This method updates the
 		beginning of the billing period and end of the billing period.
@@ -40,19 +58,29 @@ class Subscription(Document):
 		`current_invoice_start` and the end of the billing period is represented
 		as `current_invoice_end`.
 
+<<<<<<< HEAD
 		If return_date is True, it wont update the start and end dates.
 		This is implemented to get the dates to check if is_current_invoice_generated
 		"""
+=======
+	def _get_subscription_period(self, date: Optional["DateTimeLikeObject"] = None):
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		_current_invoice_start = self.get_current_invoice_start(date)
 		_current_invoice_end = self.get_current_invoice_end(_current_invoice_start)
 
 		if return_date:
 			return _current_invoice_start, _current_invoice_end
 
+<<<<<<< HEAD
 		self.current_invoice_start = _current_invoice_start
 		self.current_invoice_end = _current_invoice_end
 
 	def get_current_invoice_start(self, date=None):
+=======
+	def get_current_invoice_start(
+		self, date: Optional["DateTimeLikeObject"] = None
+	) -> Union[datetime.date, str]:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		This returns the date of the beginning of the current billing period.
 		If the `date` parameter is not given , it will be automatically set as today's
@@ -75,7 +103,13 @@ class Subscription(Document):
 
 		return _current_invoice_start
 
+<<<<<<< HEAD
 	def get_current_invoice_end(self, date=None):
+=======
+	def get_current_invoice_end(
+		self, date: Optional["DateTimeLikeObject"] = None
+	) -> Union[datetime.date, str]:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		This returns the date of the end of the current billing period.
 
@@ -188,6 +222,7 @@ class Subscription(Document):
 		"""
 		Sets the `Subscription` `status` based on the preference set in `Subscription Settings`.
 
+<<<<<<< HEAD
 		Used when the `Subscription` needs to decide what to do after the current generated
 		invoice is past it's due date and grace period.
 		"""
@@ -196,32 +231,56 @@ class Subscription(Document):
 			self.status = "Cancelled" if cint(subscription_settings.cancel_after_grace) else "Unpaid"
 
 	def set_subscription_status(self):
+=======
+	def set_subscription_status(self, posting_date: Optional["DateTimeLikeObject"] = None) -> None:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Sets the status of the `Subscription`
 		"""
 		if self.is_trialling():
 			self.status = "Trialling"
+<<<<<<< HEAD
 		elif self.status == "Active" and self.end_date and getdate() > getdate(self.end_date):
 			self.status = "Completed"
 		elif self.is_past_grace_period():
 			subscription_settings = frappe.get_single("Subscription Settings")
 			self.status = "Cancelled" if cint(subscription_settings.cancel_after_grace) else "Unpaid"
+=======
+		elif (
+			self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date)
+		):
+			self.status = "Completed"
+		elif self.is_past_grace_period():
+			self.status = self.get_status_for_past_grace_period()
+			self.cancelation_date = getdate(posting_date) if self.status == "Cancelled" else None
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		elif self.current_invoice_is_past_due() and not self.is_past_grace_period():
 			self.status = "Past Due Date"
 		elif not self.has_outstanding_invoice():
 			self.status = "Active"
 		elif self.is_new_subscription():
 			self.status = "Active"
+<<<<<<< HEAD
 		self.save()
 
 	def is_trialling(self):
+=======
+
+	def is_trialling(self) -> bool:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Returns `True` if the `Subscription` is in trial period.
 		"""
 		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
 
 	@staticmethod
+<<<<<<< HEAD
 	def period_has_passed(end_date):
+=======
+	def period_has_passed(
+		end_date: Union[str, datetime.date], posting_date: Optional["DateTimeLikeObject"] = None
+	) -> bool:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Returns true if the given `end_date` has passed
 		"""
@@ -229,10 +288,25 @@ class Subscription(Document):
 		if not end_date:
 			return True
 
+<<<<<<< HEAD
 		end_date = getdate(end_date)
 		return getdate() > getdate(end_date)
 
 	def is_past_grace_period(self):
+=======
+		return getdate(posting_date) > getdate(end_date)
+
+	def get_status_for_past_grace_period(self) -> str:
+		cancel_after_grace = cint(frappe.get_value("Subscription Settings", None, "cancel_after_grace"))
+		status = "Unpaid"
+
+		if cancel_after_grace:
+			status = "Cancelled"
+
+		return status
+
+	def is_past_grace_period(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Returns `True` if the grace period for the `Subscription` has passed
 		"""
@@ -241,9 +315,18 @@ class Subscription(Document):
 			subscription_settings = frappe.get_single("Subscription Settings")
 			grace_period = cint(subscription_settings.grace_period)
 
+<<<<<<< HEAD
 			return getdate() > add_days(current_invoice.due_date, grace_period)
 
 	def current_invoice_is_past_due(self, current_invoice=None):
+=======
+		grace_period = cint(frappe.get_value("Subscription Settings", None, "grace_period"))
+		return getdate(posting_date) >= getdate(add_days(self.current_invoice.due_date, grace_period))
+
+	def current_invoice_is_past_due(
+		self, posting_date: Optional["DateTimeLikeObject"] = None
+	) -> bool:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Returns `True` if the current generated invoice is overdue
 		"""
@@ -255,11 +338,15 @@ class Subscription(Document):
 		else:
 			return getdate() > getdate(current_invoice.due_date)
 
+<<<<<<< HEAD
 	def get_current_invoice(self):
 		"""
 		Returns the most recent generated invoice.
 		"""
 		doctype = "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
+=======
+		return getdate(posting_date) >= getdate(self.current_invoice.due_date)
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 
 		if len(self.invoices):
 			current = self.invoices[-1]
@@ -282,7 +369,14 @@ class Subscription(Document):
 		self.validate_to_follow_calendar_months()
 		self.cost_center = erpnext.get_default_cost_center(self.get("company"))
 
+<<<<<<< HEAD
 	def validate_trial_period(self):
+=======
+		if self.is_new():
+			self.set_subscription_status()
+
+	def validate_trial_period(self) -> None:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Runs sanity checks on trial period dates for the `Subscription`
 		"""
@@ -317,11 +411,22 @@ class Subscription(Document):
 					_("Billing Interval in Subscription Plan must be Month to follow calendar months")
 				)
 
+<<<<<<< HEAD
 	def after_insert(self):
 		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
 		self.set_subscription_status()
 
 	def generate_invoice(self, prorate=0):
+=======
+		if billing_info[0]["billing_interval"] != "Month":
+			frappe.throw(_("Billing Interval in Subscription Plan must be Month to follow calendar months"))
+
+	def generate_invoice(
+		self,
+		from_date: Optional[Union[str, datetime.date]] = None,
+		to_date: Optional[Union[str, datetime.date]] = None,
+	) -> Document:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
 		saves the `Subscription`.
@@ -356,7 +461,7 @@ class Subscription(Document):
 		invoice.set_posting_time = 1
 		invoice.posting_date = (
 			self.current_invoice_start
-			if self.generate_invoice_at_period_start
+			if self.generate_invoice_at == "Beginning of the current subscription period"
 			else self.current_invoice_end
 		)
 
@@ -442,7 +547,13 @@ class Subscription(Document):
 		"""
 		if prorate:
 			prorate_factor = get_prorata_factor(
+<<<<<<< HEAD
 				self.current_invoice_end, self.current_invoice_start, self.generate_invoice_at_period_start
+=======
+				self.current_invoice_end,
+				self.current_invoice_start,
+				cint(self.generate_invoice_at == "Beginning of the current subscription period"),
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 			)
 
 		items = []
@@ -502,22 +613,42 @@ class Subscription(Document):
 
 		return items
 
+<<<<<<< HEAD
 	def process(self):
+=======
+	@frappe.whitelist()
+	def process(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		To be called by task periodically. It checks the subscription and takes appropriate action
 		as need be. It calls either of these methods depending the `Subscription` status:
 		1. `process_for_active`
 		2. `process_for_past_due`
 		"""
+<<<<<<< HEAD
 		if self.status == "Active":
 			self.process_for_active()
 		elif self.status in ["Past Due Date", "Unpaid"]:
 			self.process_for_past_due_date()
+=======
+		if not self.is_current_invoice_generated(
+			self.current_invoice_start, self.current_invoice_end
+		) and self.can_generate_new_invoice(posting_date):
+			self.generate_invoice()
+			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
-		self.set_subscription_status()
+		if self.cancel_at_period_end and (
+			getdate(posting_date) >= getdate(self.current_invoice_end)
+			or getdate(posting_date) >= getdate(self.end_date)
+		):
+			self.cancel_subscription()
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
+
+		self.set_subscription_status(posting_date=posting_date)
 
 		self.save()
 
+<<<<<<< HEAD
 	def is_postpaid_to_invoice(self):
 		return getdate() > getdate(self.current_invoice_end) or (
 			getdate() >= getdate(self.current_invoice_end)
@@ -526,6 +657,26 @@ class Subscription(Document):
 
 	def is_prepaid_to_invoice(self):
 		if not self.generate_invoice_at_period_start:
+=======
+	def can_generate_new_invoice(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+		if self.cancelation_date:
+			return False
+
+		if self.has_outstanding_invoice() and not self.generate_new_invoices_past_due_date:
+			return False
+
+		if self.generate_invoice_at == "Beginning of the current subscription period" and (
+			getdate(posting_date) == getdate(self.current_invoice_start) or self.is_new_subscription()
+		):
+			return True
+		elif self.generate_invoice_at == "Days before the current subscription period" and (
+			getdate(posting_date) == getdate(add_days(self.current_invoice_start, -1 * self.number_of_days))
+		):
+			return True
+		elif getdate(posting_date) == getdate(self.current_invoice_end):
+			return True
+		else:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 			return False
 
 		if self.is_new_subscription() and getdate() >= getdate(self.current_invoice_start):
@@ -654,7 +805,26 @@ class Subscription(Document):
 				self.generate_invoice(prorate=to_prorate)
 			self.save()
 
+<<<<<<< HEAD
 	def restart_subscription(self):
+=======
+		to_generate_invoice = (
+			True
+			if self.status == "Active"
+			and not self.generate_invoice_at == "Beginning of the current subscription period"
+			else False
+		)
+		self.status = "Cancelled"
+		self.cancelation_date = nowdate()
+
+		if to_generate_invoice:
+			self.generate_invoice(self.current_invoice_start, self.cancelation_date)
+
+		self.save()
+
+	@frappe.whitelist()
+	def restart_subscription(self, posting_date: Optional["DateTimeLikeObject"] = None) -> None:
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 		"""
 		This sets the subscription as active. The subscription will be made to be like a new
 		subscription and the `Subscription` will lose all the history of generated invoices
@@ -669,10 +839,17 @@ class Subscription(Document):
 		else:
 			frappe.throw(_("You cannot restart a Subscription that is not cancelled."))
 
+<<<<<<< HEAD
 	def get_precision(self):
 		invoice = self.get_current_invoice()
 		if invoice:
 			return invoice.precision("grand_total")
+=======
+		self.status = "Active"
+		self.cancelation_date = None
+		self.update_subscription_period(posting_date or nowdate())
+		self.save()
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 
 
 def get_calendar_months(billing_interval):
@@ -696,6 +873,7 @@ def get_prorata_factor(period_end, period_start, is_prepaid):
 	return prorate_factor
 
 
+<<<<<<< HEAD
 def process_all():
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
@@ -720,6 +898,23 @@ def process(data):
 		try:
 			subscription = frappe.get_doc("Subscription", data["name"])
 			subscription.process()
+=======
+def process_all(
+	subscription: str | None, posting_date: Optional["DateTimeLikeObject"] = None
+) -> None:
+	"""
+	Task to updates the status of all `Subscription` apart from those that are cancelled
+	"""
+	filters = {"status": ("!=", "Cancelled")}
+
+	if subscription:
+		filters["name"] = subscription
+
+	for subscription in frappe.get_all("Subscription", filters, pluck="name"):
+		try:
+			subscription = frappe.get_doc("Subscription", subscription)
+			subscription.process(posting_date)
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
 			frappe.db.commit()
 		except frappe.ValidationError:
 			frappe.db.rollback()

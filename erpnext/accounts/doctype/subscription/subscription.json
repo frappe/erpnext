@@ -23,8 +23,9 @@
   "current_invoice_start",
   "current_invoice_end",
   "days_until_due",
+  "generate_invoice_at",
+  "number_of_days",
   "cancel_at_period_end",
-  "generate_invoice_at_period_start",
   "sb_4",
   "plans",
   "sb_1",
@@ -89,12 +90,14 @@
    "fieldname": "current_invoice_start",
    "fieldtype": "Date",
    "label": "Current Invoice Start Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "current_invoice_end",
    "fieldtype": "Date",
    "label": "Current Invoice End Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -109,12 +112,6 @@
    "fieldname": "cancel_at_period_end",
    "fieldtype": "Check",
    "label": "Cancel At End Of Period"
-  },
-  {
-   "default": "0",
-   "fieldname": "generate_invoice_at_period_start",
-   "fieldtype": "Check",
-   "label": "Generate Invoice At Beginning Of Period"
   },
   {
    "allow_on_submit": 1,
@@ -259,12 +256,47 @@
    "default": "1",
    "fieldname": "submit_invoice",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "label": "Submit Invoice Automatically"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2021-04-19 15:24:27.550797",
+=======
+   "label": "Submit Generated Invoices"
+  },
+  {
+   "default": "End of the current subscription period",
+   "fieldname": "generate_invoice_at",
+   "fieldtype": "Select",
+   "label": "Generate Invoice At",
+   "options": "End of the current subscription period\nBeginning of the current subscription period\nDays before the current subscription period",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\"",
+   "fieldname": "number_of_days",
+   "fieldtype": "Int",
+   "label": "Number of Days",
+   "mandatory_depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\""
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Buying",
+   "link_doctype": "Purchase Invoice",
+   "link_fieldname": "subscription"
+  },
+  {
+   "group": "Selling",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "subscription"
+  }
+ ],
+ "modified": "2023-09-18 17:48:21.900252",
+>>>>>>> e19e04b050 (feat: Add a process document for Subscription (#37126))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
