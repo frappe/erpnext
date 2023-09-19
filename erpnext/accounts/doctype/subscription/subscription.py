@@ -200,8 +200,6 @@ class Subscription(Document):
 		elif not self.has_outstanding_invoice() or self.is_new_subscription():
 			self.status = "Active"
 
-		self.save()
-
 	def is_trialling(self) -> bool:
 		"""
 		Returns `True` if the `Subscription` is in trial period.
@@ -271,6 +269,9 @@ class Subscription(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center(self.get("company"))
 
+		if self.is_new():
+			self.set_subscription_status()
+
 	def validate_trial_period(self) -> None:
 		"""
 		Runs sanity checks on trial period dates for the `Subscription`
@@ -305,10 +306,6 @@ class Subscription(Document):
 
 		if billing_info[0]["billing_interval"] != "Month":
 			frappe.throw(_("Billing Interval in Subscription Plan must be Month to follow calendar months"))
-
-	def after_insert(self) -> None:
-		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
-		self.set_subscription_status()
 
 	def generate_invoice(
 		self,
@@ -523,7 +520,7 @@ class Subscription(Document):
 		):
 			self.cancel_subscription()
 
-		self.set_subscription_status()
+		self.set_subscription_status(posting_date=posting_date)
 
 		self.save()
 
