@@ -1769,9 +1769,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# Check GL Entry against payment doctype
 		expected_gle = [
-			["Advances Paid - _TC", 0.0, 500, nowdate()],
+			["Advances Paid - _TC", 500.0, 0.0, nowdate()],
+			["Advances Paid - _TC", 0.0, 500.0, nowdate()],
 			["Cash - _TC", 0.0, 500, nowdate()],
-			["Creditors - _TC", 500, 0.0, nowdate()],
 			["Creditors - _TC", 500, 0.0, nowdate()],
 		]
 
