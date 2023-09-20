@@ -43,16 +43,16 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 
 	onload(report) {
 		report.page.add_inner_button(__("Create Reposting Entries"), function() {
-			let message = `<div>
-				<p>
-					Reposting Entries will change the value of
-					accounts Stock In Hand, and Stock Expenses
-					in the Trial Balance report and will also change
-					the Balance Value in the Stock Balance report.
-				</p>
-				<p>Are you sure you want to create Reposting Entries?</p>
-				</div>
-			`;
+			let message = `
+				<div>
+					<p>
+						Reposting Entries will change the value of
+						accounts Stock In Hand, and Stock Expenses
+						in the Trial Balance report and will also change
+						the Balance Value in the Stock Balance report.
+					</p>
+					<p>Are you sure you want to create Reposting Entries?</p>
+				</div>`;
 
 			frappe.confirm(__(message), () => {
 				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
