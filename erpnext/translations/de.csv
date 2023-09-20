@@ -1969,12 +1969,8 @@ Please check Multi Currency option to allow accounts with other currency,"Bitte 
 Please click on 'Generate Schedule',"Bitte auf ""Zeitplan generieren"" klicken",
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},"Bitte auf ""Zeitplan generieren"" klicken, um die Seriennummer für Artikel {0} abzurufen",
 Please click on 'Generate Schedule' to get schedule,"Bitte auf ""Zeitplan generieren"" klicken, um den Zeitplan zu erhalten",
-<<<<<<< HEAD
 Please confirm once you have completed your training,"Bitte bestätigen Sie, sobald Sie Ihre Ausbildung abgeschlossen haben",
-Please create purchase receipt or purchase invoice for the item {0},Bitte erstellen Sie eine Kaufquittung oder eine Kaufrechnung für den Artikel {0},
-=======
 Please create purchase receipt or purchase invoice for the item {0},Bitte erstellen Sie eine Kaufquittung oder eine Eingangsrechnungen für den Artikel {0},
->>>>>>> 84a9000db2 (fix: german translation of Sales and Purchase Invoice (#37122))
 Please define grade for Threshold 0%,Bitte definieren Sie Grade for Threshold 0%,
 Please enable Applicable on Booking Actual Expenses,Bitte aktivieren Sie Anwendbar bei der Buchung von tatsächlichen Ausgaben,
 Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses,Bitte aktivieren Sie Anwendbar bei Bestellung und Anwendbar bei Buchung von tatsächlichen Ausgaben,
