@@ -618,6 +618,8 @@ class AccountsController(TransactionBase):
 						or 1
 					)
 
+			add_taxes_from_tax_template(item, self, db_insert=False)
+
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
 
@@ -2588,7 +2590,7 @@ def get_supplier_block_status(party_name):
 def set_child_tax_template_and_map(item, child_item, parent_doc):
 	args = {
 		"item_code": item.item_code,
-		"posting_date": parent_doc.transaction_date,
+		"posting_date": parent_doc.get("transaction_date") or parent_doc.get("posting_date"),
 		"tax_category": parent_doc.get("tax_category"),
 		"company": parent_doc.get("company"),
 	}
@@ -2620,6 +2622,8 @@ def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):
 						"charge_type": "On Net Total",
 						"account_head": tax_type,
 						"rate": tax_rate,
+						"category": "Total",
+						"add_deduct_tax": "Add",
 					}
 				)
 				if parent_doc.doctype == "Purchase Order":
