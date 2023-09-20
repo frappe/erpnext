@@ -40,16 +40,6 @@ frappe.ui.form.on('Asset Repair', {
 				}
 			}
 		});
-
-		let sbb_field = frm.get_docfield('stock_items', 'serial_and_batch_bundle');
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					'item_code': row.doc.item_code,
-					'voucher_type': frm.doc.doctype,
-				}
-			};
-		}
 	},
 
 	refresh: function(frm) {
@@ -60,6 +50,16 @@ frappe.ui.form.on('Asset Repair', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			});
+		}
+
+		let sbb_field = frm.get_docfield('stock_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
 		}
 	},
 

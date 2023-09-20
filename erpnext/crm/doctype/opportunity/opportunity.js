@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 frappe.provide("erpnext.crm");
-erpnext.pre_sales.set_as_lost("Quotation");
+erpnext.pre_sales.set_as_lost("Opportunity");
 erpnext.sales_common.setup_selling_controller();
 
 

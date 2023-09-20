@@ -190,10 +190,13 @@ class BuyingController(SubcontractingController):
 		purchase_doc_field = (
 			"purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
 		)
-		not_cancelled_asset = [
-			d.name
-			for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
-		]
+		not_cancelled_asset = []
+		if self.return_against:
+			not_cancelled_asset = [
+				d.name
+				for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
+			]
+
 		if self.is_return and len(not_cancelled_asset):
 			frappe.throw(
 				_(
@@ -435,24 +438,6 @@ class BuyingController(SubcontractingController):
 				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
 
 			# validate rate with ref PR
-
-	def validate_rejected_warehouse(self):
-		for item in self.get("items"):
-			if flt(item.rejected_qty) and not item.rejected_warehouse:
-				if self.rejected_warehouse:
-					item.rejected_warehouse = self.rejected_warehouse
-
-				if not item.rejected_warehouse:
-					frappe.throw(
-						_("Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}").format(
-							item.idx, item.item_code
-						)
-					)
-
-			if item.get("rejected_warehouse") and (item.get("rejected_warehouse") == item.get("warehouse")):
-				frappe.throw(
-					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
-				)
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
@@ -759,7 +744,7 @@ class BuyingController(SubcontractingController):
 				"company": self.company,
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
-				"calculate_depreciation": 1,
+				"calculate_depreciation": 0,
 				"purchase_receipt_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
 				"asset_quantity": row.qty if is_grouped_asset else 0,

@@ -211,9 +211,8 @@ class ReceivablePayableReport(object):
 			return
 
 		# amount in "Party Currency", if its supplied. If not, amount in company currency
-		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
-				amount = ple.amount_in_account_currency
+		if self.filters.get("party_type") and self.filters.get("party"):
+			amount = ple.amount_in_account_currency
 		else:
 			amount = ple.amount
 		amount_in_account_currency = ple.amount_in_account_currency
@@ -426,22 +425,20 @@ class ReceivablePayableReport(object):
 		# customer / supplier name
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
-		for party_type in self.party_type:
-			if self.filters.get(scrub(party_type)):
-				row.currency = row.account_currency
-				break
+
+		if self.filters.get("party_type") and self.filters.get("party"):
+			row.currency = row.account_currency
 		else:
 			row.currency = self.company_currency
 
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
 		for term in row.payment_terms:
-
-			# update "paid" and "oustanding" for this term
+			# update "paid" and "outstanding" for this term
 			if not term.paid:
 				self.allocate_closing_to_term(row, term, "paid")
 
-			# update "credit_note" and "oustanding" for this term
+			# update "credit_note" and "outstanding" for this term
 			if term.outstanding:
 				self.allocate_closing_to_term(row, term, "credit_note")
 
@@ -453,7 +450,8 @@ class ReceivablePayableReport(object):
 			"""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_term, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
+				si.total_advance, ps.due_date, ps.payment_term, ps.payment_amount, ps.base_payment_amount,
+				ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -469,6 +467,14 @@ class ReceivablePayableReport(object):
 		original_row = frappe._dict(row)
 		row.payment_terms = []
 
+		# Cr Note's don't have Payment Terms
+		if not payment_terms_details:
+			return
+
+		# Advance allocated during invoicing is not considered in payment terms
+		# Deduct that from paid amount pre allocation
+		row.paid -= flt(payment_terms_details[0].total_advance)
+
 		# If no or single payment terms, no need to split the row
 		if len(payment_terms_details) <= 1:
 			return
@@ -483,7 +489,7 @@ class ReceivablePayableReport(object):
 		) and d.currency == d.party_account_currency:
 			invoiced = d.payment_amount
 		else:
-			invoiced = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
+			invoiced = d.base_payment_amount
 
 		row.payment_terms.append(
 			term.update(
@@ -761,16 +767,14 @@ class ReceivablePayableReport(object):
 	def prepare_conditions(self):
 		self.qb_selection_filter = []
 		self.or_filters = []
+
 		for party_type in self.party_type:
-			party_type_field = scrub(party_type)
-			self.or_filters.append(self.ple.party_type == party_type)
+			self.add_common_filters()
 
-			self.add_common_filters(party_type_field=party_type_field)
-
-			if party_type_field == "customer":
+			if self.account_type == "Receivable":
 				self.add_customer_filters()
 
-			elif party_type_field == "supplier":
+			elif self.account_type == "Payable":
 				self.add_supplier_filters()
 
 		if self.filters.cost_center:
@@ -786,15 +790,18 @@ class ReceivablePayableReport(object):
 		]
 		self.qb_selection_filter.append(self.ple.cost_center.isin(cost_center_list))
 
-	def add_common_filters(self, party_type_field):
+	def add_common_filters(self):
 		if self.filters.company:
 			self.qb_selection_filter.append(self.ple.company == self.filters.company)
 
 		if self.filters.finance_book:
 			self.qb_selection_filter.append(self.ple.finance_book == self.filters.finance_book)
 
-		if self.filters.get(party_type_field):
-			self.qb_selection_filter.append(self.ple.party == self.filters.get(party_type_field))
+		if self.filters.get("party_type"):
+			self.qb_selection_filter.append(self.filters.party_type == self.ple.party_type)
+
+		if self.filters.get("party"):
+			self.qb_selection_filter.append(self.filters.party == self.ple.party)
 
 		if self.filters.party_account:
 			self.qb_selection_filter.append(self.ple.account == self.filters.party_account)
@@ -956,6 +963,20 @@ class ReceivablePayableReport(object):
 				fieldtype="Link",
 				options="Contact",
 			)
+		if self.filters.party_type == "Customer":
+			self.add_column(
+				_("Customer Name"),
+				fieldname="customer_name",
+				fieldtype="Link",
+				options="Customer",
+			)
+		elif self.filters.party_type == "Supplier":
+			self.add_column(
+				_("Supplier Name"),
+				fieldname="supplier_name",
+				fieldtype="Link",
+				options="Supplier",
+			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")
 		self.add_column(label=_("Voucher Type"), fieldname="voucher_type", fieldtype="Data")
@@ -1086,7 +1107,10 @@ class ReceivablePayableReport(object):
 			.where(
 				(je.company == self.filters.company)
 				& (je.posting_date.lte(self.filters.report_date))
-				& (je.voucher_type == "Exchange Rate Revaluation")
+				& (
+					(je.voucher_type == "Exchange Rate Revaluation")
+					| (je.voucher_type == "Exchange Gain Or Loss")
+				)
 			)
 			.run()
 		)

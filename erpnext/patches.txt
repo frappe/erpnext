@@ -322,8 +322,6 @@ erpnext.patches.v14_0.update_closing_balances #14-07-2023
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
 erpnext.patches.v14_0.update_subscription_details
-# below migration patches should always run last
-erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
 erpnext.patches.v15_0.enable_all_leads
 erpnext.patches.v14_0.update_company_in_ldc
@@ -340,3 +338,11 @@ erpnext.buying.doctype.supplier.patches.migrate_supplier_portal_users
 execute:frappe.defaults.clear_default("fiscal_year")
 erpnext.patches.v15_0.remove_exotel_integration
 erpnext.patches.v14_0.single_to_multi_dunning
+execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for_items', 0)
+erpnext.patches.v15_0.correct_asset_value_if_je_with_workflow
+erpnext.patches.v15_0.delete_woocommerce_settings_doctype
+erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
+erpnext.patches.v14_0.update_invoicing_period_in_subscription
+execute:frappe.delete_doc("Page", "welcome-to-erpnext")
+# below migration patch should always run last
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger

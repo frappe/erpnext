@@ -192,7 +192,7 @@
   }
  ],
  "links": [],
- "modified": "2023-04-21 17:16:56.192560",
+ "modified": "2023-08-28 22:17:54.740924",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
@@ -213,7 +213,7 @@
   },
   {
    "read": 1,
-   "role": "All"
+   "role": "Desk User"
   }
  ],
  "sort_field": "modified",

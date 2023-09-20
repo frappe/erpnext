@@ -2,7 +2,7 @@
 # See license.txt
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_to_date, flt, now_datetime, nowdate
+from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -58,6 +58,9 @@ class TestProductionPlan(FrappeTestCase):
 		pln = create_production_plan(item_code="Test Production Item 1")
 		self.assertTrue(len(pln.mr_items), 2)
 
+		for row in pln.mr_items:
+			row.schedule_date = add_to_date(nowdate(), days=10)
+
 		pln.make_material_request()
 		pln.reload()
 		self.assertTrue(pln.status, "Material Requested")
@@ -70,6 +73,13 @@ class TestProductionPlan(FrappeTestCase):
 		)
 
 		self.assertTrue(len(material_requests), 2)
+
+		for row in material_requests:
+			mr_schedule_date = getdate(frappe.db.get_value("Material Request", row[0], "schedule_date"))
+
+			expected_date = getdate(add_to_date(nowdate(), days=10))
+
+			self.assertEqual(mr_schedule_date, expected_date)
 
 		pln.make_work_order()
 		work_orders = frappe.get_all(
@@ -412,11 +422,15 @@ class TestProductionPlan(FrappeTestCase):
 
 	def test_production_plan_for_subcontracting_po(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
+			create_subcontracting_bom,
+		)
 
-		bom_tree_1 = {"Test Laptop 1": {"Test Motherboard 1": {"Test Motherboard Wires 1": {}}}}
+		fg_item = "Test Motherboard 1"
+		bom_tree_1 = {"Test Laptop 1": {fg_item: {"Test Motherboard Wires 1": {}}}}
 		create_nested_bom(bom_tree_1, prefix="")
 
-		item_doc = frappe.get_doc("Item", "Test Motherboard 1")
+		item_doc = frappe.get_doc("Item", fg_item)
 		company = "_Test Company"
 
 		item_doc.is_sub_contracted_item = 1
@@ -428,6 +442,12 @@ class TestProductionPlan(FrappeTestCase):
 			item_doc.append("item_defaults", {"company": company, "default_supplier": "_Test Supplier"})
 
 		item_doc.save()
+
+		service_item = make_item(properties={"is_stock_item": 0}).name
+		create_subcontracting_bom(
+			finished_good=fg_item,
+			service_item=service_item,
+		)
 
 		plan = create_production_plan(
 			item_code="Test Laptop 1", planned_qty=10, use_multi_level_bom=1, do_not_submit=True
@@ -445,7 +465,8 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(po_doc.items[0].qty, 10.0)
 		self.assertEqual(po_doc.items[0].fg_item_qty, 10.0)
 		self.assertEqual(po_doc.items[0].fg_item_qty, 10.0)
-		self.assertEqual(po_doc.items[0].fg_item, "Test Motherboard 1")
+		self.assertEqual(po_doc.items[0].fg_item, fg_item)
+		self.assertEqual(po_doc.items[0].item_code, service_item)
 
 	def test_production_plan_combine_subassembly(self):
 		"""
@@ -1076,6 +1097,41 @@ class TestProductionPlan(FrappeTestCase):
 			frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan")
 		)
 		self.assertEqual(reserved_qty_after_mr, before_qty)
+
+	def test_from_warehouse_for_purchase_material_request(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_make_bin
+
+		create_item("RM-TEST-123 For Purchase", valuation_rate=100)
+		bin_name = get_or_make_bin("RM-TEST-123 For Purchase", "_Test Warehouse - _TC")
+		t_warehouse = create_warehouse("_Test Store - _TC")
+		make_stock_entry(
+			item_code="Raw Material Item 1",
+			qty=5,
+			rate=100,
+			target=t_warehouse,
+		)
+
+		plan = create_production_plan(item_code="Test Production Item 1", do_not_save=1)
+		mr_items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": t_warehouse}]
+		)
+
+		for d in mr_items:
+			plan.append("mr_items", d)
+
+		plan.save()
+
+		for row in plan.mr_items:
+			if row.material_request_type == "Material Transfer":
+				self.assertEqual(row.from_warehouse, t_warehouse)
+
+			row.material_request_type = "Purchase"
+
+		plan.save()
+
+		for row in plan.mr_items:
+			self.assertFalse(row.from_warehouse)
 
 	def test_skip_available_qty_for_sub_assembly_items(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom

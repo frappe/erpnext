@@ -7,13 +7,14 @@ from itertools import chain
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cstr, flt, formatdate, getdate
+from frappe.utils import add_months, cstr, flt, formatdate, getdate, nowdate, today
 
 from erpnext.accounts.report.financial_statements import (
 	get_fiscal_year_data,
 	get_period_list,
 	validate_fiscal_year,
 )
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 
 
@@ -37,15 +38,26 @@ def get_conditions(filters):
 
 	if filters.get("company"):
 		conditions["company"] = filters.company
+
 	if filters.filter_based_on == "Date Range":
+		if not filters.from_date and not filters.to_date:
+			filters.from_date = add_months(nowdate(), -12)
+			filters.to_date = nowdate()
+
 		conditions[date_field] = ["between", [filters.from_date, filters.to_date]]
-	if filters.filter_based_on == "Fiscal Year":
+	elif filters.filter_based_on == "Fiscal Year":
+		if not filters.from_fiscal_year and not filters.to_fiscal_year:
+			default_fiscal_year = get_fiscal_year(today())[0]
+			filters.from_fiscal_year = default_fiscal_year
+			filters.to_fiscal_year = default_fiscal_year
+
 		fiscal_year = get_fiscal_year_data(filters.from_fiscal_year, filters.to_fiscal_year)
 		validate_fiscal_year(fiscal_year, filters.from_fiscal_year, filters.to_fiscal_year)
 		filters.year_start_date = getdate(fiscal_year.year_start_date)
 		filters.year_end_date = getdate(fiscal_year.year_end_date)
 
 		conditions[date_field] = ["between", [filters.year_start_date, filters.year_end_date]]
+
 	if filters.get("only_existing_assets"):
 		conditions["is_existing_asset"] = filters.get("only_existing_assets")
 	if filters.get("asset_category"):
@@ -144,6 +156,8 @@ def get_data(filters):
 
 
 def prepare_chart_data(data, filters):
+	if not data:
+		return
 	labels_values_map = {}
 	if filters.filter_based_on not in ("Date Range", "Fiscal Year"):
 		filters_filter_based_on = "Date Range"

@@ -14,9 +14,6 @@ def set_print_templates_for_item_table(doc, settings):
 		}
 	}
 
-	if doc.meta.get_field("items"):
-		doc.meta.get_field("items").hide_in_print_layout = ["uom", "stock_uom"]
-
 	doc.flags.compact_item_fields = ["description", "qty", "rate", "amount"]
 
 	if settings.compact_item_print:

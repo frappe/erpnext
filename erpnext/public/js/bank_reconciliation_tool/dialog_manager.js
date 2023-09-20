@@ -104,6 +104,9 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				name: __("Document Name"),
 				editable: false,
 				width: 1,
+				format: (value, row) => {
+					return frappe.form.formatters.Link(value, {options: row[2].content});
+				},
 			},
 			{
 				name: __("Reference Date"),
@@ -131,12 +134,12 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	format_row(row) {
 		return [
-			row[1], // Document Type
-			frappe.form.formatters.Link(row[2], {options: row[1]}), // Document Name
-			row[5] || row[8], // Reference Date
-			format_currency(row[3], row[9]), // Remaining
-			row[4], // Reference Number
-			row[6], // Party
+			row["doctype"],
+			row["name"],
+			row["reference_date"] || row["posting_date"],
+			format_currency(row["paid_amount"], row["currency"]),
+			row["reference_no"],
+			row["party"],
 		];
 	}
 

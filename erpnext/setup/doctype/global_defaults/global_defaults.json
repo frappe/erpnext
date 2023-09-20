@@ -12,7 +12,8 @@
   "default_currency",
   "hide_currency_symbol",
   "disable_rounded_total",
-  "disable_in_words"
+  "disable_in_words",
+  "demo_company"
  ],
  "fields": [
   {
@@ -71,6 +72,14 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Disable In Words"
+  },
+  {
+   "fieldname": "demo_company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Demo Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cog",

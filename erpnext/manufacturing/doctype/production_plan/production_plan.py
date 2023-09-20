@@ -40,6 +40,12 @@ class ProductionPlan(Document):
 		self._rename_temporary_references()
 		validate_uom_is_integer(self, "stock_uom", "planned_qty")
 		self.validate_sales_orders()
+		self.validate_material_request_type()
+
+	def validate_material_request_type(self):
+		for row in self.get("mr_items"):
+			if row.from_warehouse and row.material_request_type != "Material Transfer":
+				row.from_warehouse = ""
 
 	@frappe.whitelist()
 	def validate_sales_orders(self, sales_order=None):
@@ -53,7 +59,7 @@ class ProductionPlan(Document):
 		data = sales_order_query(filters={"company": self.company, "sales_orders": sales_orders})
 
 		title = _("Production Plan Already Submitted")
-		if not data:
+		if not data and sales_orders:
 			msg = _("No items are available in the sales order {0} for production").format(sales_orders[0])
 			if len(sales_orders) > 1:
 				sales_orders = ", ".join(sales_orders)
@@ -347,7 +353,7 @@ class ProductionPlan(Document):
 			if not data.pending_qty:
 				continue
 
-			item_details = get_item_details(data.item_code)
+			item_details = get_item_details(data.item_code, throw=False)
 			if self.combine_items:
 				if item_details.bom_no in refs:
 					refs[item_details.bom_no]["so_details"].append(
@@ -673,6 +679,7 @@ class ProductionPlan(Document):
 
 				po.append("items", po_data)
 
+			po.set_service_items_for_finished_goods()
 			po.set_missing_values()
 			po.flags.ignore_mandatory = True
 			po.flags.ignore_validate = True
@@ -725,7 +732,7 @@ class ProductionPlan(Document):
 
 			# key for Sales Order:Material Request Type:Customer
 			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
-			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
+			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if not key in material_request_map:
 				# make a new MR for the combination
@@ -749,7 +756,9 @@ class ProductionPlan(Document):
 				"items",
 				{
 					"item_code": item.item_code,
-					"from_warehouse": item.from_warehouse,
+					"from_warehouse": item.from_warehouse
+					if material_request_type == "Material Transfer"
+					else None,
 					"qty": item.quantity,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
@@ -794,6 +803,9 @@ class ProductionPlan(Document):
 
 			if not row.item_code:
 				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
+
+			if not row.bom_no:
+				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
 			bom_data = []
 

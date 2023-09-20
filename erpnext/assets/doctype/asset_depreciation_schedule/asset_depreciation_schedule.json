@@ -19,6 +19,7 @@
   "depreciation_method",
   "total_number_of_depreciations",
   "rate_of_depreciation",
+  "daily_depreciation",
   "column_break_8",
   "frequency_of_depreciation",
   "expected_value_after_useful_life",
@@ -174,12 +175,21 @@
    "label": "Number of Depreciations Booked",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
+   "fieldname": "daily_depreciation",
+   "fieldtype": "Check",
+   "label": "Daily Depreciation",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-26 16:37:23.734806",
+ "modified": "2023-08-10 22:22:09.722968",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",

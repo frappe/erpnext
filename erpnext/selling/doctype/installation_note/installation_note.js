@@ -18,6 +18,14 @@ frappe.ui.form.on('Installation Note', {
 				}
 			}
 		});
+	},
+	onload: function(frm) {
+		if(!frm.doc.status) {
+			frm.set_value({ status:'Draft'});
+		}
+		if(frm.doc.__islocal) {
+			frm.set_value({inst_date: frappe.datetime.get_today()});
+		}
 
 		let sbb_field = frm.get_docfield('items', 'serial_and_batch_bundle');
 		if (sbb_field) {
@@ -27,14 +35,6 @@ frappe.ui.form.on('Installation Note', {
 					'voucher_type': frm.doc.doctype,
 				}
 			};
-		}
-	},
-	onload: function(frm) {
-		if(!frm.doc.status) {
-			frm.set_value({ status:'Draft'});
-		}
-		if(frm.doc.__islocal) {
-			frm.set_value({inst_date: frappe.datetime.get_today()});
 		}
 	},
 	customer: function(frm) {

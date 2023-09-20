@@ -69,9 +69,9 @@ class StockSettings(Document):
 				)
 
 	def cant_change_valuation_method(self):
-		db_valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
+		previous_valuation_method = self.get_doc_before_save().get("valuation_method")
 
-		if db_valuation_method and db_valuation_method != self.valuation_method:
+		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
 			# which does not have it's own valuation method
 			sle = frappe.db.sql(
@@ -108,13 +108,8 @@ class StockSettings(Document):
 		if frappe.flags.in_test:
 			return
 
-		db_allow_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-		db_enable_stock_reservation = frappe.db.get_single_value(
-			"Stock Settings", "enable_stock_reservation"
-		)
-
 		# Change in value of `Allow Negative Stock`
-		if db_allow_negative_stock != self.allow_negative_stock:
+		if self.has_value_changed("allow_negative_stock"):
 
 			# Disable -> Enable: Don't allow if `Stock Reservation` is enabled
 			if self.allow_negative_stock and self.enable_stock_reservation:
@@ -125,7 +120,7 @@ class StockSettings(Document):
 				)
 
 		# Change in value of `Enable Stock Reservation`
-		if db_enable_stock_reservation != self.enable_stock_reservation:
+		if self.has_value_changed("enable_stock_reservation"):
 
 			# Disable -> Enable
 			if self.enable_stock_reservation:

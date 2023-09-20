@@ -12,6 +12,8 @@ from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
+from erpnext.accounts.doctype.pos_profile.pos_profile import required_accounting_dimensions
+
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):
@@ -95,7 +97,6 @@ class POSInvoiceMergeLog(Document):
 			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
 		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
-
 		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
 
 	def on_cancel(self):
@@ -108,7 +109,6 @@ class POSInvoiceMergeLog(Document):
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
-
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
@@ -241,6 +241,22 @@ class POSInvoiceMergeLog(Document):
 		invoice.disable_rounded_total = cint(
 			frappe.db.get_value("POS Profile", invoice.pos_profile, "disable_rounded_total")
 		)
+		accounting_dimensions = required_accounting_dimensions()
+		dimension_values = frappe.db.get_value(
+			"POS Profile", {"name": invoice.pos_profile}, accounting_dimensions, as_dict=1
+		)
+		for dimension in accounting_dimensions:
+			dimension_value = dimension_values.get(dimension)
+
+			if not dimension_value:
+				frappe.throw(
+					_("Please set Accounting Dimension {} in {}").format(
+						frappe.bold(frappe.unscrub(dimension)),
+						frappe.get_desk_link("POS Profile", invoice.pos_profile),
+					)
+				)
+
+			invoice.set(dimension, dimension_value)
 
 		if self.merge_invoices_based_on == "Customer Group":
 			invoice.flags.ignore_pos_profile = True
@@ -385,6 +401,7 @@ def split_invoices(invoices):
 		for d in invoices
 		if d.is_return and d.return_against
 	]
+
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
 			if not item.serial_no and not item.serial_and_batch_bundle:
@@ -426,11 +443,9 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 				)
 				merge_log.customer = customer
 				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
-
 				merge_log.set("pos_invoices", _invoices)
 				merge_log.save(ignore_permissions=True)
 				merge_log.submit()
-
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
 			closing_entry.db_set("error_message", "")

@@ -1,4 +1,5 @@
 import frappe
+from frappe import qb
 
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -59,7 +60,6 @@ class AccountsTestMixin:
 		self.income_account = "Sales - " + abbr
 		self.expense_account = "Cost of Goods Sold - " + abbr
 		self.debit_to = "Debtors - " + abbr
-		self.debit_usd = "Debtors USD - " + abbr
 		self.cash = "Cash - " + abbr
 		self.creditors = "Creditors - " + abbr
 		self.retained_earnings = "Retained Earnings - " + abbr
@@ -103,3 +103,63 @@ class AccountsTestMixin:
 				)
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
+
+	def create_usd_receivable_account(self):
+		account_name = "Debtors USD"
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": account_name, "company": self.company}
+		):
+			acc = frappe.new_doc("Account")
+			acc.account_name = account_name
+			acc.parent_account = "Accounts Receivable - " + self.company_abbr
+			acc.company = self.company
+			acc.account_currency = "USD"
+			acc.account_type = "Receivable"
+			acc.insert()
+		else:
+			name = frappe.db.get_value(
+				"Account",
+				filters={"account_name": account_name, "company": self.company},
+				fieldname="name",
+				pluck=True,
+			)
+			acc = frappe.get_doc("Account", name)
+		self.debtors_usd = acc.name
+
+	def create_usd_payable_account(self):
+		account_name = "Creditors USD"
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": account_name, "company": self.company}
+		):
+			acc = frappe.new_doc("Account")
+			acc.account_name = account_name
+			acc.parent_account = "Accounts Payable - " + self.company_abbr
+			acc.company = self.company
+			acc.account_currency = "USD"
+			acc.account_type = "Payable"
+			acc.insert()
+		else:
+			name = frappe.db.get_value(
+				"Account",
+				filters={"account_name": account_name, "company": self.company},
+				fieldname="name",
+				pluck=True,
+			)
+			acc = frappe.get_doc("Account", name)
+		self.creditors_usd = acc.name
+
+	def clear_old_entries(self):
+		doctype_list = [
+			"GL Entry",
+			"Payment Ledger Entry",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Payment Entry",
+			"Journal Entry",
+			"Sales Order",
+			"Exchange Rate Revaluation",
+			"Bank Account",
+			"Bank Transaction",
+		]
+		for doctype in doctype_list:
+			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()

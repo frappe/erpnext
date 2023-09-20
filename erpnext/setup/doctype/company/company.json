@@ -33,22 +33,17 @@
   "fax",
   "website",
   "address_html",
+  "registration_info",
+  "registration_details",
+  "lft",
+  "rgt",
+  "old_parent",
+  "accounts_tab",
   "section_break_28",
   "create_chart_of_accounts_based_on",
   "existing_company",
   "column_break_26",
   "chart_of_accounts",
-  "charts_section",
-  "sales_settings",
-  "default_buying_terms",
-  "sales_monthly_history",
-  "monthly_sales_target",
-  "total_monthly_sales",
-  "column_break_goals",
-  "default_selling_terms",
-  "default_warehouse_for_sales_return",
-  "credit_limit",
-  "transactions_annual_history",
   "default_settings",
   "default_bank_account",
   "default_cash_account",
@@ -75,16 +70,12 @@
   "column_break_fwcf",
   "default_advance_received_account",
   "default_advance_paid_account",
-  "auto_accounting_for_stock_settings",
-  "enable_perpetual_inventory",
-  "enable_provisional_accounting_for_non_stock_items",
-  "default_inventory_account",
-  "stock_adjustment_account",
-  "default_in_transit_warehouse",
-  "column_break_32",
-  "stock_received_but_not_billed",
-  "default_provisional_account",
-  "expenses_included_in_valuation",
+  "exchange_rate_revaluation_settings_section",
+  "auto_exchange_rate_revaluation",
+  "auto_err_frequency",
+  "submit_err_jv",
+  "budget_detail",
+  "exception_budget_approver_role",
   "fixed_asset_defaults",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
@@ -95,17 +86,29 @@
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
-  "exchange_rate_revaluation_settings_section",
-  "auto_exchange_rate_revaluation",
-  "auto_err_frequency",
-  "submit_err_jv",
-  "budget_detail",
-  "exception_budget_approver_role",
-  "registration_info",
-  "registration_details",
-  "lft",
-  "rgt",
-  "old_parent"
+  "buying_and_selling_tab",
+  "sales_settings",
+  "default_buying_terms",
+  "sales_monthly_history",
+  "monthly_sales_target",
+  "total_monthly_sales",
+  "column_break_goals",
+  "default_selling_terms",
+  "default_warehouse_for_sales_return",
+  "credit_limit",
+  "transactions_annual_history",
+  "stock_tab",
+  "auto_accounting_for_stock_settings",
+  "enable_perpetual_inventory",
+  "enable_provisional_accounting_for_non_stock_items",
+  "default_inventory_account",
+  "stock_adjustment_account",
+  "default_in_transit_warehouse",
+  "column_break_32",
+  "stock_received_but_not_billed",
+  "default_provisional_account",
+  "expenses_included_in_valuation",
+  "dashboard_tab"
  ],
  "fields": [
   {
@@ -210,11 +213,6 @@
    "no_copy": 1,
    "options": "default_currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "charts_section",
-   "fieldtype": "Section Break",
-   "label": "Default Values"
   },
   {
    "fieldname": "default_currency",
@@ -535,7 +533,6 @@
    "options": "Account"
   },
   {
-   "collapsible": 1,
    "fieldname": "budget_detail",
    "fieldtype": "Section Break",
    "label": "Budget Detail"
@@ -680,7 +677,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
    "label": "Fixed Asset Defaults"
@@ -758,6 +754,27 @@
    "fieldname": "submit_err_jv",
    "fieldtype": "Check",
    "label": "Submit ERR Journals?"
+  },
+  {
+   "fieldname": "accounts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "buying_and_selling_tab",
+   "fieldtype": "Tab Break",
+   "label": "Buying and Selling"
+  },
+  {
+   "fieldname": "stock_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock"
+  },
+  {
+   "fieldname": "dashboard_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dashboard",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-building",
@@ -765,7 +782,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-07-07 05:41:41.537256",
+ "modified": "2023-09-10 21:53:13.860791",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

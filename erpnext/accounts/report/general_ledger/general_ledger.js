@@ -188,6 +188,11 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "show_net_values_in_party_account",
 			"label": __("Show Net Values in Party Account"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "add_values_in_transaction_currency",
+			"label": __("Add Columns in Transaction Currency"),
+			"fieldtype": "Check"
 		}
 	]
 }

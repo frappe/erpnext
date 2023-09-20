@@ -86,8 +86,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if(doc.docstatus == 1 && doc.outstanding_amount != 0
-			&& !(doc.is_return && doc.return_against) && !doc.on_hold) {
+		if(doc.docstatus == 1 && doc.outstanding_amount != 0 && !doc.on_hold) {
 			this.frm.add_custom_button(
 				__('Payment'),
 				() => this.make_payment_entry(),
@@ -162,6 +161,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(me.frm);
 	}
 
 	unblock_invoice() {
