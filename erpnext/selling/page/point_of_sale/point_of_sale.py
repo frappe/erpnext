@@ -7,7 +7,6 @@ from typing import Dict, Optional
 
 import frappe
 from frappe.utils import cint
-from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
@@ -106,13 +105,16 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		if result:
 			return result
 
-	if not frappe.db.exists("Item Group", item_group):
-		item_group = get_root_of("Item Group")
+	if isinstance(item_group, str):
+		try:
+			item_group = json.loads(item_group)
+		except ValueError:
+			item_group = [item_group]
+
+	item_group = tuple(item_group)
 
 	condition = get_conditions(search_term)
 	condition += get_item_group_condition(pos_profile)
-
-	lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 
 	bin_join_selection, bin_join_condition = "", ""
 	if hide_unavailable_items:
@@ -137,7 +139,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			AND item.has_variants = 0
 			AND item.is_sales_item = 1
 			AND item.is_fixed_asset = 0
-			AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+			AND item.item_group in %(item_group)s
 			AND {condition}
 			{bin_join_condition}
 		ORDER BY
@@ -146,13 +148,11 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			{page_length} offset {start}""".format(
 			start=cint(start),
 			page_length=cint(page_length),
-			lft=cint(lft),
-			rgt=cint(rgt),
 			condition=condition,
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition,
 		),
-		{"warehouse": warehouse},
+		{"warehouse": warehouse, "item_group": item_group},
 		as_dict=1,
 	)
 

@@ -38,8 +38,12 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	async load_items_data() {
 		if (!this.item_group) {
-			const res = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name");
-			this.parent_item_group = res.message.name;
+			const res = await frappe.db.get_list("Item Group", {
+				order_by: "lft",
+				pluck:"name",
+			});
+
+			this.parent_item_group = res;
 		}
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
@@ -55,7 +59,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
-
+		// debugger;
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
