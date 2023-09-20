@@ -769,15 +769,12 @@ class ReceivablePayableReport(object):
 		self.or_filters = []
 
 		for party_type in self.party_type:
-			party_type_field = scrub(party_type)
-			self.or_filters.append(self.ple.party_type == party_type)
+			self.add_common_filters()
 
-			self.add_common_filters(party_type_field=party_type_field)
-
-			if party_type_field == "customer":
+			if self.account_type == "Receivable":
 				self.add_customer_filters()
 
-			elif party_type_field == "supplier":
+			elif self.account_type == "Payable":
 				self.add_supplier_filters()
 
 		if self.filters.cost_center:
@@ -793,15 +790,12 @@ class ReceivablePayableReport(object):
 		]
 		self.qb_selection_filter.append(self.ple.cost_center.isin(cost_center_list))
 
-	def add_common_filters(self, party_type_field):
+	def add_common_filters(self):
 		if self.filters.company:
 			self.qb_selection_filter.append(self.ple.company == self.filters.company)
 
 		if self.filters.finance_book:
 			self.qb_selection_filter.append(self.ple.finance_book == self.filters.finance_book)
-
-		if self.filters.get(party_type_field):
-			self.qb_selection_filter.append(self.ple.party == self.filters.get(party_type_field))
 
 		if self.filters.get("party_type"):
 			self.qb_selection_filter.append(self.filters.party_type == self.ple.party_type)
@@ -968,6 +962,20 @@ class ReceivablePayableReport(object):
 				fieldname="customer_primary_contact",
 				fieldtype="Link",
 				options="Contact",
+			)
+		if self.filters.party_type == "Customer":
+			self.add_column(
+				_("Customer Name"),
+				fieldname="customer_name",
+				fieldtype="Link",
+				options="Customer",
+			)
+		elif self.filters.party_type == "Supplier":
+			self.add_column(
+				_("Supplier Name"),
+				fieldname="supplier_name",
+				fieldtype="Link",
+				options="Supplier",
 			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")

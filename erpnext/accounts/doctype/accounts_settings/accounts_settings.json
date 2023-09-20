@@ -66,7 +66,9 @@
   "report_settings_sb",
   "banking_tab",
   "enable_party_matching",
-  "enable_fuzzy_matching"
+  "enable_fuzzy_matching",
+  "tab_break_dpet",
+  "show_balance_in_coa"
  ],
  "fields": [
   {
@@ -416,6 +418,17 @@
    "fieldname": "ignore_account_closing_balance",
    "fieldtype": "Check",
    "label": "Ignore Account Closing Balance"
+  },
+  {
+   "fieldname": "tab_break_dpet",
+   "fieldtype": "Tab Break",
+   "label": "Chart Of Accounts"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_balance_in_coa",
+   "fieldtype": "Check",
+   "label": "Show Balances in Chart Of Accounts"
   }
  ],
  "icon": "icon-cog",

@@ -15,8 +15,10 @@ def get_data():
 		},
 		"internal_links": {
 			"Sales Order": ["items", "sales_order"],
-			"Delivery Note": ["items", "delivery_note"],
 			"Timesheet": ["timesheets", "time_sheet"],
+		},
+		"internal_and_external_links": {
+			"Delivery Note": ["items", "delivery_note"],
 		},
 		"transactions": [
 			{
