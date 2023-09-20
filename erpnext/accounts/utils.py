@@ -472,7 +472,9 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		# cancel advance entry
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
-		_delete_pl_entries(voucher_type, voucher_no)
+
+		if not (voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account):
+			_delete_pl_entries(voucher_type, voucher_no)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -494,16 +496,19 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
-		gl_map = doc.build_gl_map()
-		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
+
+		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
+			# both ledgers must be posted to for `Advance as Liability`
+			doc.make_gl_entries()
+		else:
+			gl_map = doc.build_gl_map()
+			create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
 			update_voucher_outstanding(
 				entry.against_voucher_type, entry.against_voucher, entry.account, entry.party_type, entry.party
 			)
-			if voucher_type == "Payment Entry":
-				doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
 
 		frappe.flags.ignore_party_validation = False
 
