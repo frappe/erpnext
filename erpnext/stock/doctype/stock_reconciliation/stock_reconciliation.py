@@ -167,6 +167,14 @@ class StockReconciliation(StockController):
 			if flt(row.valuation_rate) < 0:
 				self.validation_messages.append(_get_msg(row_num, _("Negative Valuation Rate is not allowed")))
 
+			if row.batch_no and frappe.get_cached_value("Batch", row.batch_no, "item") != row.item_code:
+				self.validation_messages.append(
+					_get_msg(
+						row_num,
+						_("Batch {0} does not belong to item {1}").format(bold(row.batch_no), bold(row.item_code)),
+					)
+				)
+
 			if row.qty and row.valuation_rate in ["", None]:
 				row.valuation_rate = get_stock_balance(
 					row.item_code, row.warehouse, self.posting_date, self.posting_time, with_valuation_rate=True
