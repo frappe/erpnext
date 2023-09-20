@@ -18,6 +18,10 @@
   "auto_insert_price_list_rate_if_missing",
   "column_break_12",
   "update_existing_price_list_rate",
+  "conversion_factor_section",
+  "allow_to_edit_stock_uom_qty_for_sales",
+  "column_break_lznj",
+  "allow_to_edit_stock_uom_qty_for_purchase",
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -358,10 +362,6 @@
    "label": "Allow Partial Reservation"
   },
   {
-   "fieldname": "section_break_plhx",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_mhzc",
    "fieldtype": "Column Break"
   },
@@ -400,6 +400,27 @@
    "fieldname": "auto_reserve_stock_for_sales_order",
    "fieldtype": "Check",
    "label": "Auto Reserve Stock for Sales Order"
+  },
+  {
+   "fieldname": "conversion_factor_section",
+   "fieldtype": "Section Break",
+   "label": "Stock UOM Quantity"
+  },
+  {
+   "fieldname": "column_break_lznj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_sales",
+   "fieldtype": "Check",
+   "label": "Allow to Edit Stock UOM Qty for Sales Documents"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_purchase",
+   "fieldtype": "Check",
+   "label": "Allow to Edit Stock UOM Qty for Purchase Documents"
   }
  ],
  "icon": "icon-cog",
