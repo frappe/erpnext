@@ -205,17 +205,10 @@ def get_data(filters=None):
 			if not report_data:
 				continue
 
-			if filters.difference_in == "Qty":
-				row = get_row_having_qty_difference(report_data, precision)
-			elif filters.difference_in == "Value":
-				row = get_row_having_value_difference(report_data, precision)
-			elif filters.difference_in == "Valuation":
-				row = get_row_having_valuation_difference(report_data, precision)
-			else:
-				row = get_row_having_any_difference(report_data, precision)
-
-			if row:
-				data.append(add_item_warehouse_details(row, item_warehouse))
+			for row in report_data:
+				if has_difference(row, precision, filters.difference_in):
+					data.append(add_item_warehouse_details(row, item_warehouse))
+					break
 
 	return data
 
@@ -250,40 +243,29 @@ def get_item_warehouse_combinations(filters: dict = None) -> dict:
 	return query.run(as_dict=1)
 
 
-def get_row_having_qty_difference(data, precision=3):
-	for row in data:
-		if flt(row.difference_in_qty, precision) or flt(row.fifo_qty_diff, precision):
-			return row
+def has_difference(row, precision, difference_in):
+	has_qty_difference = flt(row.difference_in_qty, precision) or flt(row.fifo_qty_diff, precision)
+	has_value_difference = (
+		flt(row.diff_value_diff, precision)
+		or flt(row.fifo_value_diff, precision)
+		or flt(row.fifo_difference_diff, precision)
+	)
+	has_valuation_difference = flt(row.valuation_diff, precision) or flt(
+		row.fifo_valuation_diff, precision
+	)
 
+	if difference_in == "Qty" and has_qty_difference:
+		return True
+	elif difference_in == "Value" and has_value_difference:
+		return True
+	elif difference_in == "Valuation" and has_valuation_difference:
+		return True
+	elif difference_in not in ["Qty", "Value", "Valuation"] and (
+		has_qty_difference or has_value_difference or has_valuation_difference
+	):
+		return True
 
-def get_row_having_value_difference(data, precision=3):
-	for row in data:
-		if (
-			flt(row.diff_value_diff, precision)
-			or flt(row.fifo_value_diff, precision)
-			or flt(row.fifo_difference_diff, precision)
-		):
-			return row
-
-
-def get_row_having_valuation_difference(data, precision=3):
-	for row in data:
-		if flt(row.valuation_diff, precision) or flt(row.fifo_valuation_diff, precision):
-			return row
-
-
-def get_row_having_any_difference(data, precision=3):
-	for row in data:
-		if (
-			flt(row.difference_in_qty, precision)
-			or flt(row.fifo_qty_diff, precision)
-			or flt(row.diff_value_diff, precision)
-			or flt(row.fifo_value_diff, precision)
-			or flt(row.fifo_difference_diff, precision)
-			or flt(row.valuation_diff, precision)
-			or flt(row.fifo_valuation_diff, precision)
-		):
-			return row
+	return False
 
 
 def add_item_warehouse_details(row, item_warehouse):
