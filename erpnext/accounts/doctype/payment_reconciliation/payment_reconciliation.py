@@ -19,7 +19,7 @@ from erpnext.accounts.utils import (
 	get_outstanding_invoices,
 	reconcile_against_document,
 )
-from erpnext.controllers.accounts_controller import get_advance_payment_entries
+from erpnext.controllers.accounts_controller import get_advance_payment_entries_for_regional
 
 
 class PaymentReconciliation(Document):
@@ -78,7 +78,7 @@ class PaymentReconciliation(Document):
 		if self.payment_name:
 			condition.update({"name": self.payment_name})
 
-		payment_entries = get_advance_payment_entries(
+		payment_entries = get_advance_payment_entries_for_regional(
 			self.party_type,
 			self.party,
 			party_account,
@@ -363,6 +363,7 @@ class PaymentReconciliation(Document):
 		)
 
 	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
+		adjust_allocations_for_taxes(self)
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -663,3 +664,8 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				None,
 				inv.cost_center,
 			)
+
+
+@erpnext.allow_regional
+def adjust_allocations_for_taxes(doc):
+	pass

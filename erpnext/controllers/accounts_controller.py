@@ -169,7 +169,6 @@ class AccountsController(TransactionBase):
 				self.validate_value("base_grand_total", ">=", 0)
 
 			validate_return(self)
-			self.set_total_in_words()
 
 		self.validate_all_documents_schedule()
 
@@ -207,6 +206,8 @@ class AccountsController(TransactionBase):
 
 		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
 			apply_pricing_rule_on_transaction(self)
+
+		self.set_total_in_words()
 
 	def before_cancel(self):
 		validate_einvoice_fields(self)
@@ -968,7 +969,7 @@ class AccountsController(TransactionBase):
 			party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated
 		)
 
-		payment_entries = get_advance_payment_entries(
+		payment_entries = get_advance_payment_entries_for_regional(
 			party_type, party, party_account, order_doctype, order_list, include_unallocated
 		)
 
@@ -2407,6 +2408,11 @@ def get_advance_journal_entries(
 
 	journal_entries = q.run(as_dict=True)
 	return list(journal_entries)
+
+
+@erpnext.allow_regional
+def get_advance_payment_entries_for_regional(*args, **kwargs):
+	return get_advance_payment_entries(*args, **kwargs)
 
 
 def get_advance_payment_entries(
