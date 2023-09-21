@@ -522,6 +522,31 @@ class PurchaseInvoice(BuyingController):
 
 		self.process_common_party_accounting()
 
+	def on_update_after_submit(self):
+		if hasattr(self, "repost_required"):
+			fields_to_check = [
+				"cash_bank_account",
+				"write_off_account" "unrealized_profit_loss_account",
+			]
+			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
+			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+			self.validate_deferred_accounting_before_repost()
+			self.validate_write_off_account()
+			self.validate_expense_account()
+			self.db_set("repost_required", self.needs_repost)
+
+	def validate_deferred_accounting_before_repost(self):
+		# validate if deferred expense is enabled for any item
+		# Don't allow to update the invoice if deferred expense is enabled
+		if self.needs_repost:
+			for item in self.get("items"):
+				if item.enable_deferred_expense:
+					frappe.throw(
+						_(
+							"Deferred Expense is enabled for item {0}. You cannot update the invoice after submission."
+						).format(item.item_code)
+					)
+
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
