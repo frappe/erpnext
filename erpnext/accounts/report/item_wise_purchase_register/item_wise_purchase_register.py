@@ -333,7 +333,6 @@ def get_conditions(filters):
 			parent_grps.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i], 'is_group':1}, pluck='name'))
 		
 		child_groups+=parent_grps
-
 		conditions += f"""and ifnull(`tabPurchase Invoice Item`.item_group, '') in ("{'","'.join(child_groups)}")"""
 
 	if not filters.get("group_by"):
