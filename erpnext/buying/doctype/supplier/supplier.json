@@ -45,12 +45,13 @@
   "column_break1",
   "contact_html",
   "primary_address_and_contact_detail_section",
-  "supplier_primary_contact",
-  "mobile_no",
-  "email_id",
   "column_break_44",
   "supplier_primary_address",
   "primary_address",
+  "column_break_mglr",
+  "supplier_primary_contact",
+  "mobile_no",
+  "email_id",
   "accounting_tab",
   "payment_terms",
   "default_accounts_section",
@@ -469,6 +470,10 @@
   {
    "fieldname": "column_break_1mqv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mglr",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -481,7 +486,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-06-26 14:20:00.961554",
+ "modified": "2023-09-21 12:24:20.398889",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
