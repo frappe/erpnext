@@ -166,6 +166,7 @@
   "against_expense_account",
   "column_break_63",
   "unrealized_profit_loss_account",
+  "repost_required",
   "subscription_section",
   "subscription",
   "auto_repeat",
@@ -191,8 +192,7 @@
   "inter_company_invoice_reference",
   "is_old_subcontracting_flow",
   "remarks",
-  "connections_tab",
-  "column_break_38"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -990,6 +990,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cash_bank_account",
    "fieldtype": "Link",
    "label": "Cash/Bank Account",
@@ -1053,6 +1054,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:flt(doc.write_off_amount)!=0",
    "fieldname": "write_off_account",
    "fieldtype": "Link",
@@ -1217,6 +1219,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
@@ -1349,6 +1352,7 @@
    "options": "Project"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.is_internal_supplier",
    "description": "Unrealized Profit/Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
@@ -1505,10 +1509,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_38",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_50",
    "fieldtype": "Column Break"
   },
@@ -1578,13 +1578,22 @@
    "fieldname": "use_company_roundoff_cost_center",
    "fieldtype": "Check",
    "label": "Use Company Default Round Off Cost Center"
+  },
+  {
+   "default": "0",
+   "fieldname": "repost_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Repost Required",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-25 17:22:59.145031",
+ "modified": "2023-09-21 12:22:04.545106",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
