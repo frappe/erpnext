@@ -355,41 +355,31 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
 
 		if (scan_serial_no) {
+			// let serial_no_exists = this.dialog.fields_dict.entries
 			let existing_row = this.dialog.fields_dict.entries.df.data.filter(d => {
 				if (d.serial_no === scan_serial_no) {
 					return d
 				}
 			});
-
 			if (existing_row?.length) {
 				frappe.throw(__('Serial No {0} already exists', [scan_serial_no]));
 			}
 
-			if (!this.item.has_batch_no) {
-				this.dialog.fields_dict.entries.df.data.push({
-					serial_no: scan_serial_no
-				});
+			fields = this.item.has_batch_no ? ["name", "batch_no"] : ["name"];
+			frappe.db.get_value(
+				"Serial No",
+				{"serial_no": scan_serial_no, "item_code": this.item.item_code},
+				fields=fields,
+				(res) => {
+					if (res.exc || !res.message) return;
 
-				this.dialog.fields_dict.scan_serial_no.set_value('');
-			} else {
-				frappe.call({
-					method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_batch_no_from_serial_no',
-					args: {
-						serial_no: scan_serial_no,
-					},
-					callback: (r) => {
-						if (r.message) {
-							this.dialog.fields_dict.entries.df.data.push({
-								serial_no: scan_serial_no,
-								batch_no: r.message
-							});
-
-							this.dialog.fields_dict.scan_serial_no.set_value('');
-						}
-					}
-
-				})
-			}
+					this.dialog.fields_dict.entries.df.data.push({
+						serial_no: res.message.name,
+						batch_no: res.message.batch_no
+					});
+					this.dialog.fields_dict.scan_serial_no.set_value('');
+				}
+			);
 		} else if (scan_batch_no) {
 			let existing_row = this.dialog.fields_dict.entries.df.data.filter(d => {
 				if (d.batch_no === scan_batch_no) {

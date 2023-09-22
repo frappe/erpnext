@@ -1649,7 +1649,11 @@ class SalesInvoice(SellingController):
 
 	def set_serial_no_against_delivery_note(self):
 		for item in self.items:
-			if item.serial_no and item.delivery_note and item.qty != len(get_serial_nos(item.serial_no)):
+			if (
+				item.serial_no
+				and item.delivery_note
+				and item.qty != len(get_serial_nos(item.serial_no, item.item_code))
+			):
 				item.serial_no = get_delivery_note_serial_no(item.item_code, item.qty, item.delivery_note)
 
 	def validate_serial_against_delivery_note(self):
@@ -1663,10 +1667,10 @@ class SalesInvoice(SellingController):
 				continue
 
 			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
-			dn_serial_nos = set(get_serial_nos(serial_nos))
+			dn_serial_nos = set(get_serial_nos(serial_nos, item.item_code))
 
 			serial_nos = item.serial_no or ""
-			si_serial_nos = set(get_serial_nos(serial_nos))
+			si_serial_nos = set(get_serial_nos(serial_nos, item.item_code))
 			serial_no_diff = si_serial_nos - dn_serial_nos
 
 			if serial_no_diff:

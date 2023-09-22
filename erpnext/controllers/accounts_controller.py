@@ -666,7 +666,7 @@ class AccountsController(TransactionBase):
 								item_conversion_factor = item.get("conversion_factor") or 1.0
 								item_qty = abs(item.get("qty")) * item_conversion_factor
 
-								if item_qty != len(get_serial_nos(item.get("serial_no"))):
+								if item_qty != len(get_serial_nos(item.get("serial_no", item.item_code))):
 									item.set(fieldname, value)
 
 							elif (

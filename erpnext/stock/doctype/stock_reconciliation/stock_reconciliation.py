@@ -570,7 +570,7 @@ class StockReconciliation(StockController):
 			if not d.serial_no:
 				continue
 
-			serial_nos = get_serial_nos(d.serial_no)
+			serial_nos = get_serial_nos(d.serial_no, d.item_code)
 			self.update_valuation_rate_for_serial_nos(d, serial_nos)
 
 	def update_valuation_rate_for_serial_nos(self, row, serial_nos):
@@ -585,7 +585,7 @@ class StockReconciliation(StockController):
 		"""Insert Stock Ledger Entries"""
 
 		if not serial_nos and row.serial_no:
-			serial_nos = get_serial_nos(row.serial_no)
+			serial_nos = get_serial_nos(row.serial_no, row.item_code)
 
 		data = frappe._dict(
 			{

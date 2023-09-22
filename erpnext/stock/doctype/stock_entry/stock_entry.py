@@ -2916,11 +2916,11 @@ def get_available_materials(work_order) -> dict:
 					item_data.batch_details[batch_no] += qty
 
 			if row.serial_no:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
+				item_data.serial_nos.extend(get_serial_nos(row.serial_no, row.item_code))
 				item_data.serial_nos.sort()
 
 			if row.serial_nos:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
+				item_data.serial_nos.extend(get_serial_nos(row.serial_nos, row.item_code))
 				item_data.serial_nos.sort()
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
@@ -2934,11 +2934,11 @@ def get_available_materials(work_order) -> dict:
 					item_data.batch_details[batch_no] += qty
 
 			if row.serial_no:
-				for serial_no in get_serial_nos(row.serial_no):
+				for serial_no in get_serial_nos(row.serial_no, row.item_code):
 					item_data.serial_nos.remove(serial_no)
 
 			if row.serial_nos:
-				for serial_no in get_serial_nos(row.serial_nos):
+				for serial_no in get_serial_nos(row.serial_nos, row.item_code):
 					item_data.serial_nos.remove(serial_no)
 
 	return available_materials

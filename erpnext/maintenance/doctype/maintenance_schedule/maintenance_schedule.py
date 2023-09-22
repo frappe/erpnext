@@ -443,7 +443,7 @@ def get_serial_nos_from_schedule(item_code, schedule=None):
 		)
 
 	if serial_nos:
-		serial_nos = get_serial_nos(serial_nos)
+		serial_nos = get_serial_nos(serial_nos, item_code)
 
 	return serial_nos
 

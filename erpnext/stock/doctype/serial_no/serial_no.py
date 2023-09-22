@@ -64,6 +64,37 @@ class SerialNo(StockController):
 		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
 
+	def autoname(self):
+		self.name = self.serial_no
+
+		if frappe.db.get_single_value("Stock Settings", "allow_duplicate_serial_nos"):
+			self.validate_duplicate_in_same_item()
+			self.name = self.autoname_duplicate_serial_no()
+
+	def autoname_duplicate_serial_no(self):
+		"""
+		If duplicate serial no already exists in another item
+		and this behaviour is permitted, append a number to the name to maintain uniqueness.
+		If not, return the name as is.
+		"""
+		duplicate_count_in_other_items = frappe.db.count(
+			"Serial No", {"serial_no": self.serial_no, "item_code": ("!=", self.item_code)}
+		)
+		if duplicate_count_in_other_items > 0:
+			return f"{self.serial_no}-{duplicate_count_in_other_items}"
+		else:
+			return self.name
+
+	def validate_duplicate_in_same_item(self):
+		"""Check to make sure duplicates are not allowed in the same item."""
+		if frappe.db.exists("Serial No", {"serial_no": self.serial_no, "item_code": self.item_code}):
+			frappe.throw(
+				msg=_("Serial No {0} already exists for Item {1}").format(
+					frappe.bold(self.serial_no), frappe.bold(self.item_code)
+				),
+				title=_("Duplicate"),
+			)
+
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
 			frappe.throw(
@@ -111,7 +142,7 @@ class SerialNo(StockController):
 		# Find the exact match
 		sle_exists = False
 		for d in sl_entries:
-			if self.name.upper() in get_serial_nos(d.serial_no):
+			if self.name.upper() in get_serial_nos(d.serial_no, self.item_code):
 				sle_exists = True
 				break
 
@@ -121,18 +152,25 @@ class SerialNo(StockController):
 			)
 
 
-def get_available_serial_nos(serial_no_series, qty) -> List[str]:
+def get_available_serial_nos(serial_no_series, qty, item_code) -> List[str]:
 	serial_nos = []
 	for i in range(cint(qty)):
-		serial_nos.append(get_new_serial_number(serial_no_series))
+		serial_nos.append(get_new_serial_number(serial_no_series, item_code))
 
 	return serial_nos
 
 
-def get_new_serial_number(series):
+def get_new_serial_number(series, item_code):
 	sr_no = make_autoname(series, "Serial No")
-	if frappe.db.exists("Serial No", sr_no):
+	filters = {"name": sr_no}
+
+	if frappe.db.get_single_value("Stock Settings", "allow_duplicate_serial_nos"):
+		# if duplicate serial nos are allowed, check duplicacy within same item
+		filters["item_code"] = item_code
+
+	if frappe.db.exists("Serial No", filters):
 		sr_no = get_new_serial_number(series)
+
 	return sr_no
 
 
@@ -147,20 +185,23 @@ def get_items_html(serial_nos, item_code):
 	)
 
 
-def get_serial_nos(serial_no):
+def get_serial_nos(serial_no, item_code):
+	def _get_serial_no_name(serial_no):
+		"""Serial No field can be the same across different items."""
+		return frappe.db.get_value("Serial No", {"serial_no": serial_no, "item_code": item_code}, "name")
+
 	if isinstance(serial_no, list):
 		return serial_no
 
-	return [
-		s.strip() for s in cstr(serial_no).strip().upper().replace(",", "\n").split("\n") if s.strip()
-	]
+	split_serial_nos = cstr(serial_no).strip().upper().replace(",", "\n").split("\n")
+	return [_get_serial_no_name(s.strip()) for s in split_serial_nos if s.strip()]
 
 
-def clean_serial_no_string(serial_no: str) -> str:
+def clean_serial_no_string(serial_no: str, item_code: str) -> str:
 	if not serial_no:
 		return ""
 
-	serial_no_list = get_serial_nos(serial_no)
+	serial_no_list = get_serial_nos(serial_no, item_code)
 	return "\n".join(serial_no_list)
 
 
@@ -203,6 +244,7 @@ def auto_fetch_serial_number(
 	for_doctype: Optional[str] = None,
 	exclude_sr_nos=None,
 ) -> List[str]:
+	"""NOTE: Unused but kept for backward compatibility."""
 
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
@@ -210,7 +252,7 @@ def auto_fetch_serial_number(
 		exclude_sr_nos = []
 	else:
 		exclude_sr_nos = safe_json_loads(exclude_sr_nos)
-		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos)))
+		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos), item_code))
 
 	if batch_nos:
 		batch_nos_list = safe_json_loads(batch_nos)
@@ -234,6 +276,7 @@ def auto_fetch_serial_number(
 def get_delivered_serial_nos(serial_nos):
 	"""
 	Returns serial numbers that delivered from the list of serial numbers
+	NOTE: Unused but kept for backward compatibility.
 	"""
 	from frappe.query_builder.functions import Coalesce
 
@@ -279,9 +322,9 @@ def get_pos_reserved_serial_nos(filters):
 	returned_sr_nos = set()
 	for d in pos_transacted_sr_nos:
 		if d.is_return == 0:
-			[reserved_sr_nos.add(x) for x in get_serial_nos(d.serial_no)]
+			[reserved_sr_nos.add(x) for x in get_serial_nos(d.serial_no, filters.get("item_code"))]
 		elif d.is_return == 1:
-			[returned_sr_nos.add(x) for x in get_serial_nos(d.serial_no)]
+			[returned_sr_nos.add(x) for x in get_serial_nos(d.serial_no, filters.get("item_code"))]
 
 	reserved_sr_nos = list(reserved_sr_nos - returned_sr_nos)
 

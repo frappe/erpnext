@@ -145,7 +145,7 @@ def get_args_for_future_sle(row):
 def validate_serial_no(sle):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	for sn in get_serial_nos(sle.serial_no):
+	for sn in get_serial_nos(sle.serial_no, sle.item_code):
 		args = copy.deepcopy(sle)
 		args.serial_no = sn
 		args.warehouse = ""

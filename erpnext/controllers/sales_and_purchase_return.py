@@ -134,7 +134,7 @@ def validate_returned_items(doc):
 					if d.qty and not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
 					else:
-						serial_nos = get_serial_nos(d.serial_no)
+						serial_nos = get_serial_nos(d.serial_no, d.item_code)
 						for s in serial_nos:
 							if s not in ref.serial_no:
 								frappe.throw(
@@ -229,7 +229,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		item_dict["rejected_qty"] += ref_item_row.rejected_qty
 
 	if ref_item_row.get("serial_no"):
-		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
+		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no, ref_item_row.item_code)
 
 	if ref_item_row.get("batch_no"):
 		item_dict["batch_no"].append(ref_item_row.batch_no)
@@ -707,6 +707,7 @@ def get_returned_serial_nos(
 	fields = [
 		f"`{'tab' + child_doc.doctype}`.`{serial_no_field}`",
 		f"`{'tab' + child_doc.doctype}`.`{old_field}`",
+		f"`{'tab' + child_doc.doctype}`.`item_code`",
 	]
 
 	filters = [
@@ -724,7 +725,7 @@ def get_returned_serial_nos(
 	for row in frappe.get_all(parent_doc.doctype, fields=fields, filters=filters):
 		ids.append(row.get("serial_and_batch_bundle"))
 		if row.get(old_field):
-			serial_nos.extend(get_serial_nos_from_serial_no(row.get(old_field)))
+			serial_nos.extend(get_serial_nos_from_serial_no(row.get(old_field), row.get("item_code")))
 
 	serial_nos.extend(get_serial_nos(ids))
 

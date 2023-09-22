@@ -30,7 +30,7 @@ def prepare_serial_nos(data):
 		if not row.serial_nos:
 			continue
 
-		for serial_no in get_serial_nos(row.serial_nos):
+		for serial_no in get_serial_nos(row.serial_nos, row.item_code):
 			sle = copy.deepcopy(row)
 			sle.serial_no = serial_no
 			sle.qty = 1 if sle.actual_qty > 0 else -1

@@ -1240,7 +1240,7 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 				serial_nos.difference_update(sns)
 
 		elif d.serial_no:
-			sns = get_serial_nos(d.serial_no)
+			sns = get_serial_nos(d.serial_no, d.item_code)
 			if d.actual_qty > 0:
 				serial_nos.update(sns)
 			else:
@@ -1306,7 +1306,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	returned_serial_nos = []
 	for pos_invoice in pos_invoices:
 		if pos_invoice.serial_no:
-			ignore_serial_nos.extend(get_serial_nos(pos_invoice.serial_no))
+			ignore_serial_nos.extend(get_serial_nos(pos_invoice.serial_no, kwargs.item_code))
 
 		if pos_invoice.is_return:
 			continue

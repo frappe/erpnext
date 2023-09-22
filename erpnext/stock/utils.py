@@ -141,6 +141,7 @@ def get_stock_balance(
 
 
 def get_serial_nos_data_after_transactions(args):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	serial_nos = set()
 	args = frappe._dict(args)
@@ -163,19 +164,13 @@ def get_serial_nos_data_after_transactions(args):
 	)
 
 	for stock_ledger_entry in stock_ledger_entries:
-		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)
+		changed_serial_no = get_serial_nos(stock_ledger_entry.serial_no, args.item_code)
 		if stock_ledger_entry.actual_qty > 0:
 			serial_nos.update(changed_serial_no)
 		else:
 			serial_nos.difference_update(changed_serial_no)
 
 	return "\n".join(serial_nos)
-
-
-def get_serial_nos_data(serial_nos):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-	return get_serial_nos(serial_nos)
 
 
 @frappe.whitelist()

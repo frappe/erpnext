@@ -88,7 +88,7 @@ class StockController(AccountsController):
 				serial_nos = frappe.get_all(
 					"Serial No",
 					fields=["batch_no", "name", "warehouse"],
-					filters={"name": ("in", get_serial_nos(d.serial_no))},
+					filters={"name": ("in", get_serial_nos(d.serial_no, d.item_code))},
 				)
 
 				for row in serial_nos:
@@ -119,12 +119,12 @@ class StockController(AccountsController):
 		for row in self.get("items"):
 			if hasattr(row, "serial_no") and row.serial_no:
 				# remove extra whitespace and store one serial no on each line
-				row.serial_no = clean_serial_no_string(row.serial_no)
+				row.serial_no = clean_serial_no_string(row.serial_no, row.item_code)
 
 		for row in self.get("packed_items") or []:
 			if hasattr(row, "serial_no") and row.serial_no:
 				# remove extra whitespace and store one serial no on each line
-				row.serial_no = clean_serial_no_string(row.serial_no)
+				row.serial_no = clean_serial_no_string(row.serial_no, row.item_code)
 
 	def get_gl_entries(
 		self, warehouse_account=None, default_expense_account=None, default_cost_center=None

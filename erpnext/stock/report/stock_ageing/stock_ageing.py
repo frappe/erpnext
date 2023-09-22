@@ -242,7 +242,7 @@ class FIFOSlots:
 				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
 				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
-			serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
+			serial_nos = get_serial_nos(d.serial_no, d.name) if d.serial_no else []
 
 			if d.actual_qty > 0:
 				self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)

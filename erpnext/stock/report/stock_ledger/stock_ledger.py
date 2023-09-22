@@ -77,13 +77,17 @@ def execute(filters=None):
 
 
 def update_available_serial_nos(available_serial_nos, sle):
-	serial_nos = get_serial_nos(sle.serial_no)
+	serial_nos = get_serial_nos(sle.serial_no, sle.item_code)
 	key = (sle.item_code, sle.warehouse)
 	if key not in available_serial_nos:
 		stock_balance = get_stock_balance_for(
 			sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time
 		)
-		serials = get_serial_nos(stock_balance["serial_nos"]) if stock_balance["serial_nos"] else []
+		serials = (
+			get_serial_nos(stock_balance["serial_nos"], sle.item_code)
+			if stock_balance["serial_nos"]
+			else []
+		)
 		available_serial_nos.setdefault(key, serials)
 
 	existing_serial_no = available_serial_nos[key]

@@ -259,7 +259,7 @@ class LandedCostVoucher(Document):
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
 			if not item.is_fixed_asset and item.serial_no:
-				serial_nos = get_serial_nos(item.serial_no)
+				serial_nos = get_serial_nos(item.serial_no, item.item_code)
 				if serial_nos:
 					frappe.db.sql(
 						"update `tabSerial No` set purchase_rate=%s where name in ({0})".format(

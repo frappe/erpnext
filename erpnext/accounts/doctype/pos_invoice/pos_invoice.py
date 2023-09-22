@@ -376,7 +376,7 @@ class POSInvoice(SalesInvoice):
 					title=_("Invalid Item"),
 				)
 			if d.get("serial_no"):
-				serial_nos = get_serial_nos(d.serial_no)
+				serial_nos = get_serial_nos(d.serial_no, d.item_code)
 				for sr in serial_nos:
 					serial_no_exists = frappe.db.sql(
 						"""

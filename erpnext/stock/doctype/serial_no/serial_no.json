@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "field:serial_no",
  "creation": "2013-05-16 10:59:15",
  "description": "Distinct unit of an Item",
  "doctype": "DocType",
@@ -54,12 +53,12 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Serial No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "item_code",
@@ -284,7 +283,6 @@
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -323,5 +321,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "serial_no",
  "track_changes": 1
 }

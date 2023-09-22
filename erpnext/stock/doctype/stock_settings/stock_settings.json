@@ -44,6 +44,7 @@
   "auto_reserve_serial_and_batch",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
+  "allow_duplicate_serial_nos",
   "auto_create_serial_and_batch_bundle_for_outward",
   "pick_serial_and_batch_based_on",
   "column_break_mhzc",
@@ -420,6 +421,13 @@
    "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
    "fieldtype": "Check",
    "label": "Auto Reserve Stock for Sales Order on Purchase"
+  },
+  {
+   "default": "0",
+   "description": "Allows duplicacy across separate items. Maintains uniqeness within an item.",
+   "fieldname": "allow_duplicate_serial_nos",
+   "fieldtype": "Check",
+   "label": "Allow Duplicate Serial Nos Between Items"
   }
  ],
  "icon": "icon-cog",
