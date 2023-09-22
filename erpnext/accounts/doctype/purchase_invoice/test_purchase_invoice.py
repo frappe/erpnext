@@ -1710,6 +1710,65 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
+<<<<<<< HEAD
+=======
+	def test_advance_entries_as_asset(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Paid",
+			company="_Test Company",
+			account_type="Receivable",
+		)
+
+		set_advance_flag(company="_Test Company", flag=1, default_account=account)
+
+		pe = create_payment_entry(
+			company="_Test Company",
+			payment_type="Pay",
+			party_type="Supplier",
+			party="_Test Supplier",
+			paid_from="Cash - _TC",
+			paid_to="Creditors - _TC",
+			paid_amount=500,
+		)
+		pe.submit()
+
+		pi = make_purchase_invoice(
+			company="_Test Company",
+			do_not_save=True,
+			do_not_submit=True,
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
+		)
+		pi.base_grand_total = 1000
+		pi.grand_total = 1000
+		pi.set_advances()
+		for advance in pi.advances:
+			advance.allocated_amount = 500 if advance.reference_name == pe.name else 0
+		pi.save()
+		pi.submit()
+
+		self.assertEqual(pi.advances[0].allocated_amount, 500)
+
+		# Check GL Entry against payment doctype
+		expected_gle = [
+			["Advances Paid - _TC", 0.0, 500, nowdate()],
+			["Cash - _TC", 0.0, 500, nowdate()],
+			["Creditors - _TC", 500, 0.0, nowdate()],
+			["Creditors - _TC", 500, 0.0, nowdate()],
+		]
+
+		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
+
+		pi.load_from_db()
+		self.assertEqual(pi.outstanding_amount, 500)
+
+		set_advance_flag(company="_Test Company", flag=0, default_account="")
+
+>>>>>>> c66c438575 (test: reposted acc entries for pi)
 	def test_gl_entries_for_standalone_debit_note(self):
 		make_purchase_invoice(qty=5, rate=500, update_stock=True)
 
@@ -1796,7 +1855,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		pi = make_purchase_invoice(
 			company="_Test Company",
-			customer="_Test Supplier",
 			do_not_save=True,
 			do_not_submit=True,
 			rate=1000,
@@ -1825,6 +1883,32 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		)
 		clear_dimension_defaults("Branch")
 		disable_dimension()
+
+	def test_repost_accounting_entries(self):
+		pi = make_purchase_invoice(
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
+		)
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 1000, nowdate()],
+		]
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+
+		pi.items[0].expense_account = "Service - _TC"
+		pi.save()
+		pi.load_from_db()
+		self.assertTrue(pi.repost_required)
+		pi.repost_accounting_entries()
+
+		expected_gle = [
+			["Creditors - _TC", 0.0, 1000, nowdate()],
+			["Service - _TC", 1000, 0.0, nowdate()],
+		]
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		pi.load_from_db()
+		self.assertFalse(pi.repost_required)
 
 
 def check_gl_entries(

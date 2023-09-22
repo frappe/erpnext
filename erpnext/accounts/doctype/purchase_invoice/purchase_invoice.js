@@ -60,7 +60,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		if (this.frm.doc.repost_required && this.frm.doc.docstatus===1) {
-			this.frm.set_intro(__("Accounting entries for this invoice needs to be reposted. Please click on 'Repost' button to update."));
+			this.frm.set_intro(__("Accounting entries for this invoice need to be reposted. Please click on 'Repost' button to update."));
 			this.frm.add_custom_button(__('Repost Accounting Entries'),
 				() => {
 					this.frm.call({
@@ -70,7 +70,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 						freeze_message: __('Reposting...'),
 						callback: (r) => {
 							if (!r.exc) {
-								frappe.msgprint(__('Accounting Entries are reposted'));
+								frappe.msgprint(__('Accounting Entries are reposted.'));
 								me.frm.refresh();
 							}
 						}
