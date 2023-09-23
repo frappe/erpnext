@@ -11,6 +11,9 @@ from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate,
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	validate_docs_for_deferred_accounting,
+)
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
 	get_total_in_party_account_currency,
@@ -487,6 +490,11 @@ class PurchaseInvoice(BuyingController):
 						_("Stock cannot be updated against Purchase Receipt {0}").format(item.purchase_receipt)
 					)
 
+	def validate_for_repost(self):
+		self.validate_write_off_account()
+		self.validate_expense_account()
+		validate_docs_for_deferred_accounting([], [self.name])
+
 	def on_submit(self):
 		super(PurchaseInvoice, self).on_submit()
 
@@ -538,8 +546,7 @@ class PurchaseInvoice(BuyingController):
 			]
 			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
 			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			self.validate_write_off_account()
-			self.validate_expense_account()
+			self.validate_for_repost()
 			self.db_set("repost_required", self.needs_repost)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
