@@ -543,17 +543,6 @@ class SalesInvoice(SellingController):
 						).format(item.item_code)
 					)
 
-	@frappe.whitelist()
-	def repost_accounting_entries(self):
-		if self.repost_required:
-			self.docstatus = 2
-			self.make_gl_entries_on_cancel()
-			self.docstatus = 1
-			self.make_gl_entries()
-			self.db_set("repost_required", 0)
-		else:
-			frappe.throw(_("No updates pending for reposting"))
-
 	def set_paid_amount(self):
 		paid_amount = 0.0
 		base_paid_amount = 0.0
