@@ -539,10 +539,10 @@ class SalesInvoice(SellingController):
 				"taxes": ("account_head",),
 			}
 			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			self.validate_deferred_accounting_before_repost()
 			self.validate_accounts()
 			self.db_set("repost_required", self.needs_repost)
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 			# validate if deferred revenue is enabled for any item
 			# Don't allow to update the invoice if deferred revenue is enabled
@@ -580,6 +580,8 @@ class SalesInvoice(SellingController):
 =======
 >>>>>>> 68effd93bd (refactor: move reposting logic to common controller)
 
+=======
+>>>>>>> a856091ff4 (refactor: remove repeated validation for voucher)
 	def set_paid_amount(self):
 		paid_amount = 0.0
 		base_paid_amount = 0.0
