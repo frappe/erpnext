@@ -2189,10 +2189,11 @@ class AccountsController(TransactionBase):
 	@frappe.whitelist()
 	def repost_accounting_entries(self):
 		if self.repost_required:
-			self.docstatus = 2
-			self.make_gl_entries_on_cancel()
-			self.docstatus = 1
-			self.make_gl_entries()
+			repost_ledger = frappe.new_doc("Repost Accounting Ledger")
+			repost_ledger.company = self.company
+			repost_ledger.append("vouchers", {"voucher_type": self.doctype, "voucher_no": self.name})
+			repost_ledger.insert()
+			repost_ledger.submit()
 			self.db_set("repost_required", 0)
 		else:
 			frappe.throw(_("No updates pending for reposting"))
