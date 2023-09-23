@@ -157,9 +157,14 @@
 	},
 
 	"Botswana": {
-		"Botswana Tax": {
+		"Botswana Tax 14%": {
 			"account_name": "VAT",
-			"tax_rate": 12.00
+			"tax_rate": 14.00
+		}
+		"Botswana Tax 12%": {
+			"account_name": "VAT",
+			"tax_rate": 12.00,
+			"default": 1
 		}
 	},
 
