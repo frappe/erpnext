@@ -858,7 +858,6 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		}
 
-		let outstanding_amount;
 		$.each(frm.doc.references || [], function(i, row) {
 			if (frappe.flags.allocate_payment_amount == 0) {
 				//If allocate payment amount checkbox is unchecked, set zero to allocate amount
