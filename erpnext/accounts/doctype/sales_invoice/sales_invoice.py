@@ -527,21 +527,8 @@ class SalesInvoice(SellingController):
 				"taxes": ("account_head",),
 			}
 			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			self.validate_deferred_accounting_before_repost()
 			self.validate_accounts()
 			self.db_set("repost_required", self.needs_repost)
-
-	def validate_deferred_accounting_before_repost(self):
-		# validate if deferred revenue is enabled for any item
-		# Don't allow to update the invoice if deferred revenue is enabled
-		if self.needs_repost:
-			for item in self.get("items"):
-				if item.enable_deferred_revenue:
-					frappe.throw(
-						_(
-							"Deferred Revenue is enabled for item {0}. You cannot update the invoice after submission."
-						).format(item.item_code)
-					)
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
