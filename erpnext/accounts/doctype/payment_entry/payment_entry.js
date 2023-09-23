@@ -864,19 +864,15 @@ frappe.ui.form.on('Payment Entry', {
 				//If allocate payment amount checkbox is unchecked, set zero to allocate amount
 				row.allocated_amount = 0;
 
-			} else if (frappe.flags.allocate_payment_amount != 0 && (row.payment_term || !row.allocated_amount || paid_amount_change)) {
-				if(row.payment_term)
-					outstanding_amount = row.allocated_amount;
-				else
-					outstanding_amount = row.outstanding_amount;
-				if (outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
-					row.allocated_amount = (outstanding_amount >= allocated_positive_outstanding) ?
-						allocated_positive_outstanding : outstanding_amount;
+			} else if (frappe.flags.allocate_payment_amount != 0 && (!row.allocated_amount || paid_amount_change)) {
+				if (row.outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
+					row.allocated_amount = (row.outstanding_amount >= allocated_positive_outstanding) ?
+						allocated_positive_outstanding : row.outstanding_amount;
 					allocated_positive_outstanding -= flt(row.allocated_amount);
 
-				} else if (outstanding_amount < 0 && allocated_negative_outstanding) {
-					row.allocated_amount = (Math.abs(outstanding_amount) >= allocated_negative_outstanding) ?
-						-1*allocated_negative_outstanding : outstanding_amount;
+				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
+					row.allocated_amount = (Math.abs(row.outstanding_amount) >= allocated_negative_outstanding) ?
+						-1*allocated_negative_outstanding : row.outstanding_amount;
 					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
 				}
 			}
