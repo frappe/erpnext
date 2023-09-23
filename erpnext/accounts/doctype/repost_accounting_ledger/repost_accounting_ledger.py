@@ -139,14 +139,17 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		job_name = "repost_accounting_ledger_" + self.name
-		frappe.enqueue(
-			method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
-			account_repost_doc=self.name,
-			is_async=True,
-			job_name=job_name,
-		)
-		frappe.msgprint(_("Repost has started in the background"))
+		if len(self.vouchers) > 1:
+			job_name = "repost_accounting_ledger_" + self.name
+			frappe.enqueue(
+				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
+				account_repost_doc=self.name,
+				is_async=True,
+				job_name=job_name,
+			)
+			frappe.msgprint(_("Repost has started in the background"))
+		else:
+			start_repost(self.name)
 
 
 @frappe.whitelist()
