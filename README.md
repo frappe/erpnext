@@ -4,7 +4,7 @@
     </a>
     <h2>ERPNext</h2>
     <p align="center">
-        <p>ERP made simple</p>
+        <p>ERP made simple to do</p>
     </p>
 
 [![CI](https://github.com/frappe/erpnext/actions/workflows/server-tests.yml/badge.svg?branch=develop)](https://github.com/frappe/erpnext/actions/workflows/server-tests.yml)
