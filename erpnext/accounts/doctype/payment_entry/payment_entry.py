@@ -1087,46 +1087,57 @@ class PaymentEntry(AccountsController):
 				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
 			)
 
-			for d in self.get("references"):
-				cost_center = self.cost_center
-				if d.reference_doctype == "Sales Invoice" and not cost_center:
-					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
-
+			if self.book_advance_payments_in_separate_party_account:
 				gle = party_gl_dict.copy()
-
-				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
-
-				if self.book_advance_payments_in_separate_party_account:
-					against_voucher_type = "Payment Entry"
-					against_voucher = self.name
+				if self.payment_type == "Receive":
+					amount = self.base_paid_amount
 				else:
-					against_voucher_type = d.reference_doctype
-					against_voucher = d.reference_name
+					amount = self.base_received_amount
 
 				gle.update(
 					{
-						dr_or_cr: allocated_amount_in_company_currency,
-						dr_or_cr + "_in_account_currency": d.allocated_amount,
-						"against_voucher_type": against_voucher_type,
-						"against_voucher": against_voucher,
-						"cost_center": cost_center,
+						dr_or_cr: amount,
+						dr_or_cr + "_in_account_currency": amount,
+						"against_voucher_type": "Payment Entry",
+						"against_voucher": self.name,
+						"cost_center": self.cost_center,
 					}
 				)
 				gl_entries.append(gle)
+			else:
+				for d in self.get("references"):
+					cost_center = self.cost_center
+					if d.reference_doctype == "Sales Invoice" and not cost_center:
+						cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
 
-			if self.unallocated_amount:
-				exchange_rate = self.get_exchange_rate()
-				base_unallocated_amount = self.unallocated_amount * exchange_rate
+					gle = party_gl_dict.copy()
 
-				gle = party_gl_dict.copy()
-				gle.update(
-					{
-						dr_or_cr + "_in_account_currency": self.unallocated_amount,
-						dr_or_cr: base_unallocated_amount,
-					}
-				)
+					allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
 
-				gl_entries.append(gle)
+					gle.update(
+						{
+							dr_or_cr: allocated_amount_in_company_currency,
+							dr_or_cr + "_in_account_currency": d.allocated_amount,
+							"against_voucher_type": d.reference_doctype,
+							"against_voucher": d.reference_name,
+							"cost_center": cost_center,
+						}
+					)
+					gl_entries.append(gle)
+
+				if self.unallocated_amount:
+					exchange_rate = self.get_exchange_rate()
+					base_unallocated_amount = self.unallocated_amount * exchange_rate
+
+					gle = party_gl_dict.copy()
+					gle.update(
+						{
+							dr_or_cr + "_in_account_currency": self.unallocated_amount,
+							dr_or_cr: base_unallocated_amount,
+						}
+					)
+
+					gl_entries.append(gle)
 
 	def make_advance_gl_entries(self, against_voucher_type=None, against_voucher=None, cancel=0):
 		if self.book_advance_payments_in_separate_party_account:

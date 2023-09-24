@@ -466,10 +466,8 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		# cancel advance entry
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
-		_delete_pl_entries(voucher_type, voucher_no)
-
-		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
-			_delete_gl_entries(voucher_type, voucher_no)
+		if not (voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account):
+			_delete_pl_entries(voucher_type, voucher_no)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -494,7 +492,7 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			# both ledgers must be posted to for `Advance as Liability`
-			doc.make_gl_entries()
+			doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
 			create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
