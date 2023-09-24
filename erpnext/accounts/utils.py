@@ -581,6 +581,10 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	"""
 	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
 
+	# Update Advance Paid in SO/PO since they might be getting unlinked
+	if jv_detail.get("reference_type") in ("Sales Order", "Purchase Order"):
+		frappe.get_doc(jv_detail.reference_type, jv_detail.reference_name).set_total_advance_paid()
+
 	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
 		# adjust the unreconciled balance
 		amount_in_account_currency = flt(d["unadjusted_amount"]) - flt(d["allocated_amount"])
@@ -647,6 +651,13 @@ def update_reference_in_payment_entry(
 
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
+
+		# Update Advance Paid in SO/PO since they are getting unlinked
+		if existing_row.get("reference_doctype") in ("Sales Order", "Purchase Order"):
+			frappe.get_doc(
+				existing_row.reference_doctype, existing_row.reference_name
+			).set_total_advance_paid()
+
 		original_row = existing_row.as_dict().copy()
 		existing_row.update(reference_details)
 
@@ -674,7 +685,9 @@ def update_reference_in_payment_entry(
 		payment_entry.save(ignore_permissions=True)
 
 
-def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
+def cancel_exchange_gain_loss_journal(
+	parent_doc: dict | object, referenced_dt: str = None, referenced_dn: str = None
+) -> None:
 	"""
 	Cancel Exchange Gain/Loss for Sales/Purchase Invoice, if they have any.
 	"""
@@ -701,75 +714,146 @@ def cancel_exchange_gain_loss_journal(parent_doc: dict | object) -> None:
 				as_list=1,
 			)
 			for doc in gain_loss_journals:
-				frappe.get_doc("Journal Entry", doc[0]).cancel()
+				gain_loss_je = frappe.get_doc("Journal Entry", doc[0])
+				if referenced_dt and referenced_dn:
+					references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
+					if (
+						len(references) == 2
+						and (referenced_dt, referenced_dn) in references
+						and (parent_doc.doctype, parent_doc.name) in references
+					):
+						# only cancel JE generated against parent_doc and referenced_dn
+						gain_loss_je.cancel()
+				else:
+					gain_loss_je.cancel()
 
 
-def unlink_ref_doc_from_payment_entries(ref_doc):
-	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
-	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name)
-
-	frappe.db.sql(
-		"""update `tabGL Entry`
-		set against_voucher_type=null, against_voucher=null,
-		modified=%s, modified_by=%s
-		where against_voucher_type=%s and against_voucher=%s
-		and voucher_no != ifnull(against_voucher, '')""",
-		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name),
+def update_accounting_ledgers_after_reference_removal(
+	ref_type: str = None, ref_no: str = None, payment_name: str = None
+):
+	# General Ledger
+	gle = qb.DocType("GL Entry")
+	gle_update_query = (
+		qb.update(gle)
+		.set(gle.against_voucher_type, None)
+		.set(gle.against_voucher, None)
+		.set(gle.modified, now())
+		.set(gle.modified_by, frappe.session.user)
+		.where((gle.against_voucher_type == ref_type) & (gle.against_voucher == ref_no))
 	)
 
+	if payment_name:
+		gle_update_query = gle_update_query.where(gle.voucher_no == payment_name)
+	gle_update_query.run()
+
+	# Payment Ledger
 	ple = qb.DocType("Payment Ledger Entry")
+	ple_update_query = (
+		qb.update(ple)
+		.set(ple.against_voucher_type, ple.voucher_type)
+		.set(ple.against_voucher_no, ple.voucher_no)
+		.set(ple.modified, now())
+		.set(ple.modified_by, frappe.session.user)
+		.where(
+			(ple.against_voucher_type == ref_type)
+			& (ple.against_voucher_no == ref_no)
+			& (ple.delinked == 0)
+		)
+	)
 
-	qb.update(ple).set(ple.against_voucher_type, ple.voucher_type).set(
-		ple.against_voucher_no, ple.voucher_no
-	).set(ple.modified, now()).set(ple.modified_by, frappe.session.user).where(
-		(ple.against_voucher_type == ref_doc.doctype)
-		& (ple.against_voucher_no == ref_doc.name)
-		& (ple.delinked == 0)
-	).run()
+	if payment_name:
+		ple_update_query = ple_update_query.where(ple.voucher_no == payment_name)
+	ple_update_query.run()
 
+
+def remove_ref_from_advance_section(ref_doc: object = None):
+	# TODO: this might need some testing
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
 		ref_doc.set("advances", [])
-
-		frappe.db.sql(
-			"""delete from `tab{0} Advance` where parent = %s""".format(ref_doc.doctype), ref_doc.name
-		)
+		adv_type = qb.DocType(f"{ref_doc.doctype} Advance")
+		qb.from_(adv_type).delete().where(adv_type.parent == ref_doc.name).run()
 
 
-def remove_ref_doc_link_from_jv(ref_type, ref_no):
-	linked_jv = frappe.db.sql_list(
-		"""select parent from `tabJournal Entry Account`
-		where reference_type=%s and reference_name=%s and docstatus < 2""",
-		(ref_type, ref_no),
+def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str = None):
+	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
+	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name, payment_name)
+	update_accounting_ledgers_after_reference_removal(ref_doc.doctype, ref_doc.name, payment_name)
+	remove_ref_from_advance_section(ref_doc)
+
+
+def remove_ref_doc_link_from_jv(
+	ref_type: str = None, ref_no: str = None, payment_name: str = None
+):
+	jea = qb.DocType("Journal Entry Account")
+
+	linked_jv = (
+		qb.from_(jea)
+		.select(jea.parent)
+		.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no) & (jea.docstatus.lt(2)))
+		.run(as_list=1)
 	)
+	linked_jv = convert_to_list(linked_jv)
+	# remove reference only from specified payment
+	linked_jv = [x for x in linked_jv if x == payment_name] if payment_name else linked_jv
 
 	if linked_jv:
-		frappe.db.sql(
-			"""update `tabJournal Entry Account`
-			set reference_type=null, reference_name = null,
-			modified=%s, modified_by=%s
-			where reference_type=%s and reference_name=%s
-			and docstatus < 2""",
-			(now(), frappe.session.user, ref_type, ref_no),
+		update_query = (
+			qb.update(jea)
+			.set(jea.reference_type, None)
+			.set(jea.reference_name, None)
+			.set(jea.modified, now())
+			.set(jea.modified_by, frappe.session.user)
+			.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no))
 		)
+
+		if payment_name:
+			update_query = update_query.where(jea.parent == payment_name)
+
+		update_query.run()
 
 		frappe.msgprint(_("Journal Entries {0} are un-linked").format("\n".join(linked_jv)))
 
 
-def remove_ref_doc_link_from_pe(ref_type, ref_no):
-	linked_pe = frappe.db.sql_list(
-		"""select parent from `tabPayment Entry Reference`
-		where reference_doctype=%s and reference_name=%s and docstatus < 2""",
-		(ref_type, ref_no),
+def convert_to_list(result):
+	"""
+	Convert tuple to list
+	"""
+	return [x[0] for x in result]
+
+
+def remove_ref_doc_link_from_pe(
+	ref_type: str = None, ref_no: str = None, payment_name: str = None
+):
+	per = qb.DocType("Payment Entry Reference")
+	pay = qb.DocType("Payment Entry")
+
+	linked_pe = (
+		qb.from_(per)
+		.select(per.parent)
+		.where(
+			(per.reference_doctype == ref_type) & (per.reference_name == ref_no) & (per.docstatus.lt(2))
+		)
+		.run(as_list=1)
 	)
+	linked_pe = convert_to_list(linked_pe)
+	# remove reference only from specified payment
+	linked_pe = [x for x in linked_pe if x == payment_name] if payment_name else linked_pe
 
 	if linked_pe:
-		frappe.db.sql(
-			"""update `tabPayment Entry Reference`
-			set allocated_amount=0, modified=%s, modified_by=%s
-			where reference_doctype=%s and reference_name=%s
-			and docstatus < 2""",
-			(now(), frappe.session.user, ref_type, ref_no),
+		update_query = (
+			qb.update(per)
+			.set(per.allocated_amount, 0)
+			.set(per.modified, now())
+			.set(per.modified_by, frappe.session.user)
+			.where(
+				(per.docstatus.lt(2) & (per.reference_doctype == ref_type) & (per.reference_name == ref_no))
+			)
 		)
+
+		if payment_name:
+			update_query = update_query.where(per.parent == payment_name)
+
+		update_query.run()
 
 		for pe in linked_pe:
 			try:
@@ -784,19 +868,13 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 				msg += _("Please cancel payment entry manually first")
 				frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
 
-			frappe.db.sql(
-				"""update `tabPayment Entry` set total_allocated_amount=%s,
-				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s
-				where name=%s""",
-				(
-					pe_doc.total_allocated_amount,
-					pe_doc.base_total_allocated_amount,
-					pe_doc.unallocated_amount,
-					now(),
-					frappe.session.user,
-					pe,
-				),
-			)
+			qb.update(pay).set(pay.total_allocated_amount, pe_doc.total_allocated_amount).set(
+				pay.base_total_allocated_amount, pe_doc.base_total_allocated_amount
+			).set(pay.unallocated_amount, pe_doc.unallocated_amount).set(pay.modified, now()).set(
+				pay.modified_by, frappe.session.user
+			).where(
+				pay.name == pe
+			).run()
 
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 

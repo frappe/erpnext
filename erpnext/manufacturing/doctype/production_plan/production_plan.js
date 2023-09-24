@@ -476,6 +476,15 @@ frappe.ui.form.on("Material Request Plan Item", {
 				}
 			})
 		}
+	},
+
+	material_request_type(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.from_warehouse &&
+			row.material_request_type !== "Material Transfer") {
+				frappe.model.set_value(cdt, cdn, 'from_warehouse', '');
+		}
 	}
 });
 

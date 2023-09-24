@@ -194,11 +194,17 @@ class SellingController(StockController):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
+		allow_to_edit_stock_qty = frappe.db.get_single_value(
+			"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+		)
+
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+				if allow_to_edit_stock_qty:
+					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):

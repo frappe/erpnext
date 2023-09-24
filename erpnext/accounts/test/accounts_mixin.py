@@ -158,6 +158,8 @@ class AccountsTestMixin:
 			"Journal Entry",
 			"Sales Order",
 			"Exchange Rate Revaluation",
+			"Bank Account",
+			"Bank Transaction",
 		]
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
