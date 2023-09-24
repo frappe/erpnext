@@ -65,6 +65,7 @@ def get_report_pdf(doc, consolidated=True):
 		filters = get_common_filters(doc)
 
 		if doc.report == "General Ledger":
+			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
 			col, res = get_soa(filters)
 			for x in [0, -2, -1]:
 				res[x]["account"] = res[x]["account"].replace("'", "")
