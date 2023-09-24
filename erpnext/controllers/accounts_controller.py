@@ -540,6 +540,7 @@ class AccountsController(TransactionBase):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
 
+					add_taxes_from_tax_template(item, self, db_insert=False)
 					args["doctype"] = self.doctype
 					args["name"] = self.name
 					args["child_docname"] = item.name
