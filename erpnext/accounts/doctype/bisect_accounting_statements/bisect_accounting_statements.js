@@ -19,6 +19,33 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		);
 		// frm.change_custom_button_type(__('Bisect'), null, 'primary');
 	},
+	bisect_left(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: 'bisect_left',
+			callback: (r) => {
+				console.log(r);
+			}
+		});
+	},
+	bisect_right(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: 'bisect_right',
+			callback: (r) => {
+				console.log(r);
+			}
+		});
+	},
+	move_up(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: 'move_up',
+			callback: (r) => {
+				console.log(r);
+			}
+		});
+	},
 	build_tree(frm) {
 		frm.call({
 			doc: frm.doc,

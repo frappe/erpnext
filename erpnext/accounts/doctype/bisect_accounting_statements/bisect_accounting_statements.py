@@ -124,8 +124,12 @@ class BTree(object):
 		tree = json.loads(tree)
 		for x in tree:
 			x = frappe._dict(x)
-			n = Node(x.parent, x.period, x.left_child, x.right_child)
-			n.period = x.period
+			n = Node(x.parent, None, x.left_child, x.right_child)
+			date_format = guess_date_format(x.period[0])
+			n.period = (
+				datetime.datetime.strptime(x.period[0], date_format),
+				datetime.datetime.strptime(x.period[1], date_format),
+			)
 			n.difference = x.difference
 			x.profit_and_loss_summary = x.profit_and_loss_summary
 			x.balance_sheet_summary = x.balance_sheet_summary
@@ -187,9 +191,37 @@ class BisectAccountingStatements(Document):
 		for x in self.tree_instance.btree:
 			print(x)
 
-		print("Root", self.tree_instnace.current_node)
+		print("Root", self.tree_instance.current_node)
 
 		self.tree = json.dumps(self.tree_instance.as_list())
-		self.current_node = json.dumps(self.tree_intance.btree[0].as_dict())
+		self.current_node = json.dumps(self.tree_instance.btree[0].as_dict())
 
-		print(guess_date_format(json.loads(self.current_node)["period"][0]))
+	@frappe.whitelist()
+	def bisect_left(self):
+		if self.tree_instance.current_node is not None:
+			if self.tree_instance.current_node.left_child is not None:
+				self.current_node = self.tree_instance.btree[self.tree_instance.current_node.left_child]
+				self.current_node = json.dumps(self.current_node.as_dict())
+				self.save()
+			else:
+				frappe.msgprint("No more children on Left")
+
+	@frappe.whitelist()
+	def bisect_right(self):
+		if self.tree_instance.current_node is not None:
+			if self.tree_instance.current_node.right_child is not None:
+				self.current_node = self.tree_instance.btree[self.tree_instance.current_node.right_child]
+				self.current_node = json.dumps(self.current_node.as_dict())
+				self.save()
+			else:
+				frappe.msgprint("No more children on Right")
+
+	@frappe.whitelist()
+	def move_up(self):
+		if self.tree_instance.current_node is not None:
+			if self.tree_instance.current_node.parent is not None:
+				self.current_node = self.tree_instance.btree[self.tree_instance.current_node.parent]
+				self.current_node = json.dumps(self.current_node.as_dict())
+				self.save()
+			else:
+				frappe.msgprint("Reached Root")
