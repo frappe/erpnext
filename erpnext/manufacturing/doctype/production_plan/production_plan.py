@@ -40,6 +40,12 @@ class ProductionPlan(Document):
 		self._rename_temporary_references()
 		validate_uom_is_integer(self, "stock_uom", "planned_qty")
 		self.validate_sales_orders()
+		self.validate_material_request_type()
+
+	def validate_material_request_type(self):
+		for row in self.get("mr_items"):
+			if row.from_warehouse and row.material_request_type != "Material Transfer":
+				row.from_warehouse = ""
 
 	@frappe.whitelist()
 	def validate_sales_orders(self, sales_order=None):
@@ -725,7 +731,7 @@ class ProductionPlan(Document):
 
 			# key for Sales Order:Material Request Type:Customer
 			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
-			schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
+			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
 			if not key in material_request_map:
 				# make a new MR for the combination
@@ -749,7 +755,9 @@ class ProductionPlan(Document):
 				"items",
 				{
 					"item_code": item.item_code,
-					"from_warehouse": item.from_warehouse,
+					"from_warehouse": item.from_warehouse
+					if material_request_type == "Material Transfer"
+					else None,
 					"qty": item.quantity,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,

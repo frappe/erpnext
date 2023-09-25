@@ -296,6 +296,7 @@
    "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse"
   },
@@ -356,7 +357,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-25 17:19:31.662662",
+ "modified": "2023-09-15 12:07:24.789471",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
