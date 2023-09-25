@@ -10,10 +10,8 @@
   "from_date",
   "column_break_qxbi",
   "to_date",
-  "section_break_3x70",
-  "period_from",
-  "column_break_5ett",
-  "period_to"
+  "column_break_iwny",
+  "algorithm"
  ],
  "fields": [
   {
@@ -31,29 +29,22 @@
    "label": "To Date"
   },
   {
-   "fieldname": "section_break_3x70",
-   "fieldtype": "Section Break"
+   "default": "BFS",
+   "fieldname": "algorithm",
+   "fieldtype": "Select",
+   "label": "Algorithm",
+   "options": "BFS\nDFS"
   },
   {
-   "fieldname": "period_from",
-   "fieldtype": "Date",
-   "label": "Period From"
-  },
-  {
-   "fieldname": "column_break_5ett",
+   "fieldname": "column_break_iwny",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "period_to",
-   "fieldtype": "Date",
-   "label": "Period To"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-16 08:02:33.472406",
+ "modified": "2023-09-25 10:50:53.887235",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
