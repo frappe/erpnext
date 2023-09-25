@@ -906,6 +906,7 @@ class JournalEntry(AccountsController):
 							"party_type": d.party_type,
 							"due_date": self.due_date,
 							"party": d.party,
+							"against_type": "Account",
 							"against": d.against_account,
 							"debit": flt(d.debit, d.precision("debit")),
 							"credit": flt(d.credit, d.precision("credit")),
