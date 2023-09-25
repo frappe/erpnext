@@ -414,7 +414,7 @@ class POSInvoice(SalesInvoice):
 				selling_price_list = (
 					customer_price_list or customer_group_price_list or profile.get("selling_price_list")
 				)
-				if customer_currency != profile.get("currency"):
+				if customer_currency and customer_currency != profile.get("currency"):
 					self.set("currency", customer_currency)
 
 			else:

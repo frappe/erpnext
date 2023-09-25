@@ -48,12 +48,13 @@
   "column_break1",
   "contact_html",
   "primary_address_and_contact_detail",
-  "customer_primary_contact",
-  "mobile_no",
-  "email_id",
   "column_break_26",
   "customer_primary_address",
   "primary_address",
+  "column_break_nwor",
+  "customer_primary_contact",
+  "mobile_no",
+  "email_id",
   "tax_tab",
   "taxation_section",
   "tax_id",
@@ -337,12 +338,12 @@
    "label": "Default Accounts"
   },
   {
-    "description": "Mention if non-standard Receivable account",
-    "fieldname": "accounts",
-    "fieldtype": "Table",
-    "label": "Accounts",
-    "options": "Party Account"
-   },
+   "description": "Mention if non-standard Receivable account",
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Party Account"
+  },
   {
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
@@ -566,6 +567,10 @@
    "fieldtype": "Table",
    "label": "Customer Portal Users",
    "options": "Portal User"
+  },
+  {
+   "fieldname": "column_break_nwor",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -579,7 +584,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-09-12 16:50:44.281951",
+ "modified": "2023-09-21 12:23:20.706020",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

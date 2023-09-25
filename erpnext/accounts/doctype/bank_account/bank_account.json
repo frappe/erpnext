@@ -13,6 +13,7 @@
   "account_type",
   "account_subtype",
   "column_break_7",
+  "disabled",
   "is_default",
   "is_company_account",
   "company",
@@ -199,10 +200,16 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Branch Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "links": [],
- "modified": "2022-05-04 15:49:42.620630",
+ "modified": "2023-09-22 21:31:34.763977",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
