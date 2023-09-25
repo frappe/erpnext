@@ -164,6 +164,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[sle.warehouse]["account"],
+									"against_type": "Account",
 									"against": expense_account,
 									"cost_center": item_row.cost_center,
 									"project": item_row.project or self.get("project"),
@@ -180,6 +181,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
+									"against_type": "Account",
 									"against": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -212,6 +214,7 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": expense_account,
+							"against_type": "Account",
 							"against": warehouse_asset_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get("project"),
@@ -228,6 +231,7 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": warehouse_asset_account,
+							"against_type": "Account",
 							"against": expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
@@ -834,6 +838,7 @@ class StockController(AccountsController):
 			"cost_center": cost_center,
 			"debit": debit,
 			"credit": credit,
+			"against_type": "Account",
 			"against": against_account,
 			"remarks": remarks,
 		}
