@@ -6,6 +6,7 @@ import json
 from typing import Dict, Optional
 
 import frappe
+from frappe.query_builder import Order
 from frappe.utils import cint
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
@@ -113,48 +114,37 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	item_group = tuple(item_group)
 
-	condition = get_conditions(search_term)
-	condition += get_item_group_condition(pos_profile)
-
-	bin_join_selection, bin_join_condition = "", ""
-	if hide_unavailable_items:
-		bin_join_selection = ", `tabBin` bin"
-		bin_join_condition = (
-			"AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
+	Item = frappe.qb.DocType("Item")
+	items_query = (
+		frappe.qb.from_(Item)
+		.select(
+			Item.name.as_("item_code"),
+			Item.item_name,
+			Item.description,
+			Item.stock_uom,
+			Item.image.as_("item_image"),
+			Item.is_stock_item,
 		)
-
-	items_data = frappe.db.sql(
-		"""
-		SELECT
-			item.name AS item_code,
-			item.item_name,
-			item.description,
-			item.stock_uom,
-			item.image AS item_image,
-			item.is_stock_item
-		FROM
-			`tabItem` item {bin_join_selection}
-		WHERE
-			item.disabled = 0
-			AND item.has_variants = 0
-			AND item.is_sales_item = 1
-			AND item.is_fixed_asset = 0
-			AND item.item_group in %(item_group)s
-			AND {condition}
-			{bin_join_condition}
-		ORDER BY
-			item.name asc
-		LIMIT
-			{page_length} offset {start}""".format(
-			start=cint(start),
-			page_length=cint(page_length),
-			condition=condition,
-			bin_join_selection=bin_join_selection,
-			bin_join_condition=bin_join_condition,
-		),
-		{"warehouse": warehouse, "item_group": item_group},
-		as_dict=1,
+		.where(
+			(Item.disabled == 0)
+			& (Item.has_variants == 0)
+			& (Item.is_sales_item == 1)
+			& (Item.is_fixed_asset == 0)
+			& (Item.item_group.isin(item_group))
+		)
+		.orderby(Item.name, order=Order.asc)
+		.limit(page_length)
+		.offset(cint(start))
 	)
+
+	if hide_unavailable_items:
+		Bin = frappe.qb.DocType("Bin")
+		items_query = items_query.join(Bin).on(
+			(Bin.warehouse == warehouse) & (Bin.item_code == Item.name) & (Bin.actual_qty > 0)
+		)
+	items_query = get_conditions(Item, items_query, search_term)
+	items_query = get_item_group_condition(Item, items_query, pos_profile)
+	items_data = items_query.run(as_dict=1, debug=True)
 
 	# return (empty) list if there are no results
 	if not items_data:
@@ -202,36 +192,18 @@ def search_for_serial_or_batch_or_barcode_number(search_value: str) -> Dict[str,
 	return scan_barcode(search_value)
 
 
-def get_conditions(search_term):
-	condition = "("
-	condition += """item.name like {search_term}
-		or item.item_name like {search_term}""".format(
-		search_term=frappe.db.escape("%" + search_term + "%")
+def get_conditions(Item, query, search_term):
+	query = query.where(
+		(Item.name.like(f"%{search_term}%")) | (Item.item_name.like(f"%{search_term}%"))
 	)
-	condition += add_search_fields_condition(search_term)
-	condition += ")"
-
-	return condition
+	return query
 
 
-def add_search_fields_condition(search_term):
-	condition = ""
-	search_fields = frappe.get_all("POS Search Fields", fields=["fieldname"])
-	if search_fields:
-		for field in search_fields:
-			condition += " or item.`{0}` like {1}".format(
-				field["fieldname"], frappe.db.escape("%" + search_term + "%")
-			)
-	return condition
-
-
-def get_item_group_condition(pos_profile):
-	cond = "and 1=1"
+def get_item_group_condition(Item, query, pos_profile):
 	item_groups = get_item_groups(pos_profile)
 	if item_groups:
-		cond = "and item.item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
-
-	return cond % tuple(item_groups)
+		query = query.where(Item.item_group.isin(tuple(item.strip("' ") for item in item_groups)))
+	return query
 
 
 @frappe.whitelist()
