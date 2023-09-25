@@ -1892,11 +1892,16 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		clear_dimension_defaults("Branch")
 		disable_dimension()
 
+	@change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):
 		# create a supplier
 		supplier = create_supplier(
 			supplier_name="_Test Supplier Without Group", without_supplier_group=True
 		).name
+
+		supplier_doc = frappe.get_doc("Supplier", supplier)
+
+		self.assertEqual(supplier_doc.supplier_group, None)
 
 		po = create_purchase_order(
 			supplier=supplier,
