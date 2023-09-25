@@ -207,25 +207,20 @@ def make_company():
 	return company
 
 
-def make_customer(customer=None, without_customer_group=False):
+def make_customer(customer=None):
 	customer_name = customer or "Opening Customer"
 	customer = frappe.get_doc(
 		{
 			"doctype": "Customer",
 			"customer_name": customer_name,
+			"customer_group": "All Customer Groups",
 			"customer_type": "Company",
 			"territory": "All Territories",
 		}
 	)
-	if not without_customer_group:
-		customer.customer_group = "All Customer Groups"
 
 	if not frappe.db.exists("Customer", customer_name):
 		customer.insert(ignore_permissions=True)
 		return customer.name
 	else:
 		return frappe.db.exists("Customer", customer_name)
-
-
-def make_customer_without_customer_group(customer=None):
-	return make_customer(customer, without_customer_group=True)

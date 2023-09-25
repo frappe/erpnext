@@ -26,6 +26,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -3400,20 +3401,23 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
 
-	def test_sales_invoice_with_customer_without_group(self):
-
-		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
-			make_customer_without_customer_group,
-		)
-
+	@change_settings("Selling Settings", {"customer_group": None, "territory": None})
+	def test_sales_invoice_without_customer_group_and_territory(self):
 		# create a customer
-		customer = make_customer_without_customer_group(
-			customer="_Test Customer Without Customer Group "
-		)
+		if not frappe.db.exists("Customer", "_Test Simple Customer"):
+			customer_dict = get_customer_dict("_Test Simple Customer")
+			customer_dict.pop("customer_group")
+			customer_dict.pop("territory")
+			customer = frappe.get_doc(customer_dict).insert(ignore_permissions=True)
+
+			self.assertEqual(customer.customer_group, None)
+			self.assertEqual(customer.territory, None)
 
 		# create a sales invoice
-		si = create_sales_invoice(customer=customer)
+		si = create_sales_invoice(customer="_Test Simple Customer")
 		self.assertEqual(si.docstatus, 1)
+		self.assertEqual(si.customer_group, None)
+		self.assertEqual(si.territory, None)
 
 	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
 	def test_sales_return_negative_rate(self):
