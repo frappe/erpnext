@@ -17,6 +17,7 @@
   "account_currency",
   "debit_in_account_currency",
   "credit_in_account_currency",
+  "against_type",
   "against",
   "against_voucher_type",
   "against_voucher",
@@ -129,12 +130,20 @@
    "options": "account_currency"
   },
   {
+   "fieldname": "against_type",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Against Type",
+   "options": "DocType"
+  },
+  {
    "fieldname": "against",
-   "fieldtype": "Text",
+   "fieldtype": "Dynamic Link",
    "in_filter": 1,
    "label": "Against",
    "oldfieldname": "against",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "options": "against_type"
   },
   {
    "fieldname": "against_voucher_type",
@@ -286,7 +295,7 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2023-08-16 21:38:44.072267",
+ "modified": "2023-09-25 12:03:23.031733",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
