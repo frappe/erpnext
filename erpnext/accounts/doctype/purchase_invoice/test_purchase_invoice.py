@@ -1892,6 +1892,24 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		clear_dimension_defaults("Branch")
 		disable_dimension()
 
+	def test_purchase_invoice_without_supplier_group(self):
+		# create a supplier
+		supplier = create_supplier(
+			supplier_name="_Test Supplier Without Group", without_supplier_group=True
+		).name
+
+		po = create_purchase_order(
+			supplier=supplier,
+			rate=3000,
+			item="_Test Non Stock Item",
+			posting_date="2021-09-15",
+		)
+
+		pi = make_purchase_invoice(supplier=supplier)
+
+		self.assertEqual(po.docstatus, 1)
+		self.assertEqual(pi.docstatus, 1)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(

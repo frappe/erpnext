@@ -3400,6 +3400,21 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
 
+	def test_sales_invoice_with_customer_without_group(self):
+
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer_without_customer_group,
+		)
+
+		# create a customer
+		customer = make_customer_without_customer_group(
+			customer="_Test Customer Without Customer Group "
+		)
+
+		# create a sales invoice
+		si = create_sales_invoice(customer=customer)
+		self.assertEqual(si.docstatus, 1)
+
 	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
 	def test_sales_return_negative_rate(self):
 		si = create_sales_invoice(is_return=1, qty=-2, rate=-10, do_not_save=True)
