@@ -11,7 +11,14 @@
   "column_break_qxbi",
   "to_date",
   "column_break_iwny",
-  "algorithm"
+  "algorithm",
+  "section_break_lwr2",
+  "current_from_date",
+  "column_break_uuic",
+  "current_to_date",
+  "section_break_zbty",
+  "current_node",
+  "tree"
  ],
  "fields": [
   {
@@ -38,13 +45,45 @@
   {
    "fieldname": "column_break_iwny",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zbty",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tree",
+   "fieldtype": "JSON",
+   "label": "Tree"
+  },
+  {
+   "fieldname": "current_node",
+   "fieldtype": "JSON",
+   "label": "Current Node"
+  },
+  {
+   "fieldname": "section_break_lwr2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "current_from_date",
+   "fieldtype": "Date",
+   "label": "Current From Date"
+  },
+  {
+   "fieldname": "current_to_date",
+   "fieldtype": "Date",
+   "label": "Current To Date"
+  },
+  {
+   "fieldname": "column_break_uuic",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-25 10:50:53.887235",
+ "modified": "2023-09-25 17:05:13.384320",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
