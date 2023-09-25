@@ -1,6 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import datetime
 from collections import deque
 from math import floor
 
@@ -9,6 +10,36 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
+
+
+class Node(object):
+	def __init__(self):
+		self.parent = None
+		self.left_child = None
+		self.right_child = None
+
+		self.current_period = None
+		self.difference = 0.0
+		self.profit_and_loss_summary = 0.0
+		self.balance_sheet_summary = 0.0
+
+	def update_parent(self):
+		pass
+
+	def update_left_child(self):
+		pass
+
+	def update_right_child(self):
+		pass
+
+	def make_node(
+		self,
+		parent: int = None,
+		period: (datetime, datetime) = None,
+		left: int = None,
+		right: int = None,
+	):
+		current_period = period
 
 
 class BisectAccountingStatements(Document):
