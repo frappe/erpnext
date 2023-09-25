@@ -47,7 +47,7 @@ class TestBankTransaction(FrappeTestCase):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertTrue(linked_payments[0][6] == "Conrad Electronic")
+		self.assertTrue(linked_payments[0]["party"] == "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
@@ -93,7 +93,7 @@ class TestBankTransaction(FrappeTestCase):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertTrue(linked_payments[0][3])
+		self.assertTrue(linked_payments[0]["paid_amount"])
 
 	# Check error if already reconciled
 	def test_already_reconciled(self):
@@ -188,7 +188,7 @@ class TestBankTransaction(FrappeTestCase):
 		repayment_entry = create_loan_and_repayment()
 
 		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
-		self.assertEqual(linked_payments[0][2], repayment_entry.name)
+		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
 
 
 @if_lending_app_installed

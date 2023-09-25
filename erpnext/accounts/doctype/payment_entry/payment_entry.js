@@ -9,7 +9,7 @@ erpnext.accounts.taxes.setup_tax_filters("Advance Taxes and Charges");
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payments', 'Unreconcile Payment Entries'];
 
 		if(frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
@@ -154,6 +154,13 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
 		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(frm);
+		if(frm.doc.references.find((elem) => {return elem.exchange_gain_loss != 0})) {
+			frm.add_custom_button(__("View Exchange Gain/Loss Journals"), function() {
+				frappe.set_route("List", "Journal Entry", {"voucher_type": "Exchange Gain Or Loss", "reference_name": frm.doc.name});
+			}, __('Actions'));
+
+		}
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
 	},
 
 	validate_company: (frm) => {

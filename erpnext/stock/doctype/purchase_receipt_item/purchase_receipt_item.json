@@ -34,8 +34,8 @@
   "sample_quantity",
   "tracking_section",
   "received_stock_qty",
-  "stock_qty",
   "col_break_tracking_section",
+  "stock_qty",
   "returned_qty",
   "rate_and_amount",
   "price_list_rate",
@@ -858,7 +858,8 @@
   },
   {
    "fieldname": "tracking_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Qty as Per Stock UOM"
   },
   {
    "fieldname": "col_break_tracking_section",
@@ -1060,7 +1061,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-26 12:55:15.234477",
+ "modified": "2023-08-11 16:16:16.504549",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

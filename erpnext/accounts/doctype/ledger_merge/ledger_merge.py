@@ -48,9 +48,6 @@ def start_merge(docname):
 				merge_account(
 					row.account,
 					ledger_merge.account,
-					ledger_merge.is_group,
-					ledger_merge.root_type,
-					ledger_merge.company,
 				)
 				row.db_set("merged", 1)
 				frappe.db.commit()

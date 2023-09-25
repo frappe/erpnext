@@ -77,6 +77,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		}
 
 		frm.trigger('setup_quality_inspection');
+		frm.trigger('set_route_options_for_new_doc');
 	},
 
 	set_warehouse: (frm) => {
@@ -85,6 +86,23 @@ frappe.ui.form.on('Subcontracting Receipt', {
 
 	rejected_warehouse: (frm) => {
 		set_warehouse_in_children(frm.doc.items, 'rejected_warehouse', frm.doc.rejected_warehouse);
+	},
+
+	get_scrap_items: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: 'get_scrap_items',
+			args: {
+				recalculate_rate: true
+			},
+			freeze: true,
+			freeze_message: __('Getting Scrap Items'),
+			callback: (r) => {
+				if (!r.exc) {
+					frm.refresh();
+				}
+			}
+		});
 	},
 
 	set_queries: (frm) => {
@@ -173,7 +191,28 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				}
 			}
 		});
+	},
 
+	get_serial_and_batch_bundle_filters: (doc, cdt, cdn) => {
+		let row = locals[cdt][cdn];
+		return {
+			filters: {
+				'item_code': row.item_code,
+				'voucher_type': doc.doctype,
+				'voucher_no': ['in', [doc.name, '']],
+				'is_cancelled': 0,
+			}
+		}
+	},
+
+	setup_quality_inspection: (frm) => {
+		if (!frm.is_new() && frm.doc.docstatus === 0 && !frm.doc.is_return) {
+			let transaction_controller = new erpnext.TransactionController({ frm: frm });
+			transaction_controller.setup_quality_inspection();
+		}
+	},
+
+	set_route_options_for_new_doc: (frm) => {
 		let batch_no_field = frm.get_docfield('items', 'batch_no');
 		if (batch_no_field) {
 			batch_no_field.get_route_options_for_new_doc = (row) => {
@@ -212,42 +251,6 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				}
 			}
 		}
-	},
-
-	get_serial_and_batch_bundle_filters: (doc, cdt, cdn) => {
-		let row = locals[cdt][cdn];
-		return {
-			filters: {
-				'item_code': row.item_code,
-				'voucher_type': doc.doctype,
-				'voucher_no': ['in', [doc.name, '']],
-				'is_cancelled': 0,
-			}
-		}
-	},
-
-	setup_quality_inspection: (frm) => {
-		if (!frm.is_new() && frm.doc.docstatus === 0 && !frm.doc.is_return) {
-			let transaction_controller = new erpnext.TransactionController({ frm: frm });
-			transaction_controller.setup_quality_inspection();
-		}
-	},
-
-	get_scrap_items: (frm) => {
-		frappe.call({
-			doc: frm.doc,
-			method: 'get_scrap_items',
-			args: {
-				recalculate_rate: true
-			},
-			freeze: true,
-			freeze_message: __('Getting Scrap Items'),
-			callback: (r) => {
-				if (!r.exc) {
-					frm.refresh();
-				}
-			}
-		});
 	},
 });
 

@@ -50,6 +50,8 @@ frappe.ui.form.on("Journal Entry", {
 					frm.trigger("make_inter_company_journal_entry");
 				}, __('Make'));
 		}
+
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
 	},
 
 	make_inter_company_journal_entry: function(frm) {
