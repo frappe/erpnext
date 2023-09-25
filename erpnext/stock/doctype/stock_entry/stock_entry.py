@@ -1360,6 +1360,7 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": account,
+								"against_type": "Account",
 								"against": d.expense_account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -1374,6 +1375,7 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": d.expense_account,
+								"against_type": "Account",
 								"against": account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
