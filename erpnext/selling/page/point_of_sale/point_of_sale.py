@@ -144,7 +144,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		)
 	items_query = get_conditions(Item, items_query, search_term)
 	items_query = get_item_group_condition(Item, items_query, pos_profile)
-	items_data = items_query.run(as_dict=1, debug=True)
+	items_data = items_query.run(as_dict=1)
 
 	# return (empty) list if there are no results
 	if not items_data:
