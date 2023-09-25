@@ -21,9 +21,7 @@ class BisectAccountingStatements(Document):
 				continue
 
 			cur_floor = floor(delta.days / 2)
-			next_to_date = cur_frm_date + relativedelta(days=+cur_floor)
-			left = (cur_frm_date, next_to_date)
+			left = (cur_frm_date, (cur_frm_date + relativedelta(days=+cur_floor)))
+			right = ((cur_frm_date + relativedelta(days=+(cur_floor + 1))), cur_to_date)
 			period_list.append(left)
-			next_frm_date = cur_frm_date + relativedelta(days=+(cur_floor + 1))
-			right = (next_frm_date, cur_to_date)
 			period_list.append(right)
