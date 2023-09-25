@@ -7097,8 +7097,8 @@ Max Discount (%),Réduction Max (%),
 No of Months,Nombre de mois,
 Customer Items,Articles du clients,
 Inspection Criteria,Critères d'Inspection,
-Inspection Required before Purchase,Inspection Requise avant Achat,
-Inspection Required before Delivery,Inspection Requise avant Livraison,
+Inspection Required before Purchase,Inspection Requise à la réception,
+Inspection Required before Delivery,Inspection Requise à l'expedition,
 Default BOM,Nomenclature par Défaut,
 Supply Raw Materials for Purchase,Fournir les Matières Premières pour l'Achat,
 If subcontracted to a vendor,Si sous-traité à un fournisseur,
@@ -8840,3 +8840,21 @@ Global Defaults,Valeurs par Défaut Globales,
 Is Mandatory,Est obligatoire,
 WhatsApp,WhatsApp,
 Make a call,Passer un coup de téléphone,
+No of Employees,Nb de salarié(e)s
+No. of Employees,Nb de salarié(e)s
+Annual Revenue,CA annuel
+Qualified By,Qualifié par
+Qualified on,Qualifié le
+Open Tasks,Tâche à faire ouverte
+No open task,Pas de Tâche à faire ouverte
+Open Events,Evénements ouvert
+No open event,Pas Evénements ouvert
+New Task,Nv. Tâche à faire
+No Notes,Pas de note
+New Note,Nouvelle Note
+Prospect Owner,Resp. du Prospect
+Deal Owner,Resp. de l'opportunité
+Stage,Etape
+Probability,Probabilité
+Closing,Clôture
+Allow Sales,Autoriser à la vente
