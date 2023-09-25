@@ -14,15 +14,15 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		frm.add_custom_button(__('Up'), () =>
 			frm.trigger("move_up")
 		);
-		frm.add_custom_button(__('Bisect'), () =>
-			frm.trigger("bisect")
+		frm.add_custom_button(__('Build Tree'), () =>
+			frm.trigger("build_tree")
 		);
 		// frm.change_custom_button_type(__('Bisect'), null, 'primary');
 	},
-	bisect(frm) {
+	build_tree(frm) {
 		frm.call({
 			doc: frm.doc,
-			method: 'bisect',
+			method: 'build_tree',
 			callback: (r) => {
 				console.log(r);
 			}
