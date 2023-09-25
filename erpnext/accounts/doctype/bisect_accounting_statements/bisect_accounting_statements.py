@@ -6,6 +6,7 @@ from math import floor
 
 import frappe
 from dateutil.relativedelta import relativedelta
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
@@ -57,3 +58,14 @@ class BisectAccountingStatements(Document):
 		print("Periods: ", len(periods))
 		for x in periods:
 			print(x)
+
+	def validate(self):
+		self.validate_dates()
+
+	def validate_dates(self):
+		if getdate(self.from_date) > getdate(self.to_date):
+			frappe.throw(
+				_("From Date: {0} cannot be greater than To date: {1}").format(
+					frappe.bold(self.from_date), frappe.bold(self.to_date)
+				)
+			)
