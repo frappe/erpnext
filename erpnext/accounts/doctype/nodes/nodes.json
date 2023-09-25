@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2023-09-25 22:01:33.961832",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "root",
+  "left_child",
+  "right_child",
+  "period_from_date",
+  "period_to_date",
+  "difference",
+  "balance_sheet_summary",
+  "profit_loss_summary"
+ ],
+ "fields": [
+  {
+   "fieldname": "root",
+   "fieldtype": "Link",
+   "label": "Root",
+   "options": "Nodes"
+  },
+  {
+   "fieldname": "left_child",
+   "fieldtype": "Link",
+   "label": "Left Child",
+   "options": "Nodes"
+  },
+  {
+   "fieldname": "right_child",
+   "fieldtype": "Link",
+   "label": "Right Child",
+   "options": "Nodes"
+  },
+  {
+   "fieldname": "period_from_date",
+   "fieldtype": "Datetime",
+   "label": "Period_from_date"
+  },
+  {
+   "fieldname": "period_to_date",
+   "fieldtype": "Datetime",
+   "label": "Period To Date"
+  },
+  {
+   "fieldname": "difference",
+   "fieldtype": "Float",
+   "label": "Difference"
+  },
+  {
+   "fieldname": "balance_sheet_summary",
+   "fieldtype": "Float",
+   "label": "Balance Sheet Summary"
+  },
+  {
+   "fieldname": "profit_loss_summary",
+   "fieldtype": "Float",
+   "label": "Profit and Loss Summary"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-09-25 22:05:49.577861",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Nodes",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
