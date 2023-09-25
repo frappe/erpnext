@@ -265,20 +265,21 @@ def get_dimension_with_children(doctype, dimensions):
 
 @frappe.whitelist()
 def get_dimensions(with_cost_center_and_project=False):
-	dimension_filters = frappe.db.sql(
-		"""
-		SELECT label, fieldname, document_type
-		FROM `tabAccounting Dimension`
-		WHERE disabled = 0
-	""",
-		as_dict=1,
-	)
 
-	default_dimensions = frappe.db.sql(
-		"""SELECT p.fieldname, c.company, c.default_dimension
-		FROM `tabAccounting Dimension Detail` c, `tabAccounting Dimension` p
-		WHERE c.parent = p.name""",
-		as_dict=1,
+	c = frappe.qb.DocType("Accounting Dimension Detail")
+	p = frappe.qb.DocType("Accounting Dimension")
+	dimension_filters = (
+		frappe.qb.from_(p)
+		.select(p.label, p.fieldname, p.document_type)
+		.where(p.disabled == 0)
+		.run(as_dict=1)
+	)
+	default_dimensions = (
+		frappe.qb.from_(c)
+		.inner_join(p)
+		.on(c.parent == p.name)
+		.select(p.fieldname, c.company, c.default_dimension)
+		.run(as_dict=1)
 	)
 
 	if isinstance(with_cost_center_and_project, str):

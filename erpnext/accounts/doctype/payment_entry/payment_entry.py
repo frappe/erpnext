@@ -98,7 +98,6 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
-		self.make_advance_gl_entries()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_payment_schedule()
@@ -149,10 +148,11 @@ class PaymentEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payments",
+			"Unreconcile Payment Entries",
 		)
 		super(PaymentEntry, self).on_cancel()
 		self.make_gl_entries(cancel=1)
-		self.make_advance_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.delink_advance_entry_references()
@@ -1060,6 +1060,8 @@ class PaymentEntry(AccountsController):
 		else:
 			self.make_exchange_gain_loss_journal()
 
+		self.make_advance_gl_entries(cancel=cancel)
+
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
 			if self.payment_type == "Receive":
@@ -1128,7 +1130,7 @@ class PaymentEntry(AccountsController):
 		if self.book_advance_payments_in_separate_party_account:
 			gl_entries = []
 			for d in self.get("references"):
-				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
 					if not (against_voucher_type and against_voucher) or (
 						d.reference_doctype == against_voucher_type and d.reference_name == against_voucher
 					):
@@ -1150,8 +1152,25 @@ class PaymentEntry(AccountsController):
 					)
 
 				make_reverse_gl_entries(gl_entries=gl_entries, partial_cancel=True)
-			else:
-				make_gl_entries(gl_entries)
+				return
+
+			# same reference added to payment entry
+			for gl_entry in gl_entries.copy():
+				if frappe.db.exists(
+					"GL Entry",
+					{
+						"account": gl_entry.account,
+						"voucher_type": gl_entry.voucher_type,
+						"voucher_no": gl_entry.voucher_no,
+						"voucher_detail_no": gl_entry.voucher_detail_no,
+						"debit": gl_entry.debit,
+						"credit": gl_entry.credit,
+						"is_cancelled": 0,
+					},
+				):
+					gl_entries.remove(gl_entry)
+
+			make_gl_entries(gl_entries)
 
 	def make_invoice_liability_entry(self, gl_entries, invoice):
 		args_dict = {
@@ -1164,6 +1183,13 @@ class PaymentEntry(AccountsController):
 			"voucher_detail_no": invoice.name,
 		}
 
+		posting_date = frappe.db.get_value(
+			invoice.reference_doctype, invoice.reference_name, "posting_date"
+		)
+
+		if getdate(posting_date) < getdate(self.posting_date):
+			posting_date = self.posting_date
+
 		dr_or_cr = "credit" if invoice.reference_doctype == "Sales Invoice" else "debit"
 		args_dict["account"] = invoice.account
 		args_dict[dr_or_cr] = invoice.allocated_amount
@@ -1172,6 +1198,7 @@ class PaymentEntry(AccountsController):
 			{
 				"against_voucher_type": invoice.reference_doctype,
 				"against_voucher": invoice.reference_name,
+				"posting_date": posting_date,
 			}
 		)
 		gle = self.get_gl_dict(
@@ -1578,6 +1605,14 @@ def get_outstanding_reference_documents(args, validate=False):
 				fieldname, args.get(date_fields[0]), args.get(date_fields[1])
 			)
 			posting_and_due_date.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
+		elif args.get(date_fields[0]):
+			# if only from date is supplied
+			condition += " and {0} >= '{1}'".format(fieldname, args.get(date_fields[0]))
+			posting_and_due_date.append(ple[fieldname].gte(args.get(date_fields[0])))
+		elif args.get(date_fields[1]):
+			# if only to date is supplied
+			condition += " and {0} <= '{1}'".format(fieldname, args.get(date_fields[1]))
+			posting_and_due_date.append(ple[fieldname].lte(args.get(date_fields[1])))
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))

@@ -165,7 +165,7 @@ class StockBalanceReport(object):
 
 	def get_sre_reserved_qty_details(self) -> dict:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_reserved_qty_for_item_and_warehouse as get_reserved_qty_details,
+			get_sre_reserved_qty_for_items_and_warehouses as get_reserved_qty_details,
 		)
 
 		item_code_list, warehouse_list = [], []
@@ -339,8 +339,10 @@ class StockBalanceReport(object):
 		for field in ["item_code", "brand"]:
 			if not self.filters.get(field):
 				continue
-
-			query = query.where(item_table[field] == self.filters.get(field))
+			elif field == "item_code":
+				query = query.where(item_table.name == self.filters.get(field))
+			else:
+				query = query.where(item_table[field] == self.filters.get(field))
 
 		return query
 

@@ -14,7 +14,7 @@ class StockReservationEntry(Document):
 
 		self.validate_amended_doc()
 		self.validate_mandatory()
-		self.validate_for_group_warehouse()
+		self.validate_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 		self.validate_uom_is_integer()
@@ -74,7 +74,7 @@ class StockReservationEntry(Document):
 				msg = _("{0} is required").format(self.meta.get_label(d))
 				frappe.throw(msg)
 
-	def validate_for_group_warehouse(self) -> None:
+	def validate_group_warehouse(self) -> None:
 		"""Raises an exception if `Warehouse` is a Group Warehouse."""
 
 		if frappe.get_cached_value("Warehouse", self.warehouse, "is_group"):
@@ -544,10 +544,36 @@ def get_available_serial_nos_to_reserve(
 	return available_serial_nos_list
 
 
-def get_sre_reserved_qty_for_item_and_warehouse(
-	item_code: str | list, warehouse: str | list = None
-) -> float | dict:
-	"""Returns `Reserved Qty` for Item and Warehouse combination OR a dict like {("item_code", "warehouse"): "reserved_qty", ... }."""
+def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str = None) -> float:
+	"""Returns current `Reserved Qty` for Item and Warehouse combination."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
+		.groupby(sre.item_code, sre.warehouse)
+	)
+
+	if warehouse:
+		query = query.where(sre.warehouse == warehouse)
+
+	reserved_qty = query.run(as_list=True)
+
+	return flt(reserved_qty[0][0]) if reserved_qty else 0.0
+
+
+def get_sre_reserved_qty_for_items_and_warehouses(
+	item_code_list: list, warehouse_list: list = None
+) -> dict:
+	"""Returns a dict like {("item_code", "warehouse"): "reserved_qty", ... }."""
+
+	if not item_code_list:
+		return {}
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
@@ -557,29 +583,20 @@ def get_sre_reserved_qty_for_item_and_warehouse(
 			sre.warehouse,
 			Sum(sre.reserved_qty - sre.delivered_qty).as_("reserved_qty"),
 		)
-		.where((sre.docstatus == 1) & (sre.status.notin(["Delivered", "Cancelled"])))
+		.where(
+			(sre.docstatus == 1)
+			& sre.item_code.isin(item_code_list)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+		)
 		.groupby(sre.item_code, sre.warehouse)
 	)
 
-	query = (
-		query.where(sre.item_code.isin(item_code))
-		if isinstance(item_code, list)
-		else query.where(sre.item_code == item_code)
-	)
-
-	if warehouse:
-		query = (
-			query.where(sre.warehouse.isin(warehouse))
-			if isinstance(warehouse, list)
-			else query.where(sre.warehouse == warehouse)
-		)
+	if warehouse_list:
+		query = query.where(sre.warehouse.isin(warehouse_list))
 
 	data = query.run(as_dict=True)
 
-	if isinstance(item_code, str) and isinstance(warehouse, str):
-		return data[0]["reserved_qty"] if data else 0.0
-	else:
-		return {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in data} if data else {}
+	return {(d["item_code"], d["warehouse"]): d["reserved_qty"] for d in data} if data else {}
 
 
 def get_sre_reserved_qty_details_for_voucher(voucher_type: str, voucher_no: str) -> dict:
@@ -711,7 +728,7 @@ def get_serial_batch_entries_for_voucher(sre_name: str) -> list[dict]:
 	).run(as_dict=True)
 
 
-def get_ssb_bundle_for_voucher(sre: dict) -> object | None:
+def get_ssb_bundle_for_voucher(sre: dict) -> object:
 	"""Returns a new `Serial and Batch Bundle` against the provided SRE."""
 
 	sb_entries = get_serial_batch_entries_for_voucher(sre["name"])

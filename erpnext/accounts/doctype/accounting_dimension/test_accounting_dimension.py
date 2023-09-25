@@ -84,12 +84,22 @@ def create_dimension():
 	frappe.set_user("Administrator")
 
 	if not frappe.db.exists("Accounting Dimension", {"document_type": "Department"}):
-		frappe.get_doc(
+		dimension = frappe.get_doc(
 			{
 				"doctype": "Accounting Dimension",
 				"document_type": "Department",
 			}
-		).insert()
+		)
+		dimension.append(
+			"dimension_defaults",
+			{
+				"company": "_Test Company",
+				"reference_document": "Department",
+				"default_dimension": "_Test Department - _TC",
+			},
+		)
+		dimension.insert()
+		dimension.save()
 	else:
 		dimension = frappe.get_doc("Accounting Dimension", "Department")
 		dimension.disabled = 0

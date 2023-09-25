@@ -769,6 +769,9 @@ erpnext.utils.update_child_items = function(opts) {
 	dialog.show();
 }
 
+
+
+
 erpnext.utils.map_current_doc = function(opts) {
 	function _map() {
 		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {

@@ -33,7 +33,7 @@ class PeriodClosingVoucher(AccountsController):
 	def on_cancel(self):
 		self.validate_future_closing_vouchers()
 		self.db_set("gle_processing_status", "In Progress")
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		gle_count = frappe.db.count(
 			"GL Entry",
 			{"voucher_type": "Period Closing Voucher", "voucher_no": self.name, "is_cancelled": 0},
