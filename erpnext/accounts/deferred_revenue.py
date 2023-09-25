@@ -358,9 +358,11 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 
 		account_currency = get_account_currency(item.expense_account or item.income_account)
 		if doc.doctype == "Sales Invoice":
+			against_type = "Customer"
 			against, project = doc.customer, doc.project
 			credit_account, debit_account = item.income_account, item.deferred_revenue_account
 		else:
+			against_type = "Supplier"
 			against, project = doc.supplier, item.project
 			credit_account, debit_account = item.deferred_expense_account, item.expense_account
 
@@ -413,6 +415,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 				doc,
 				credit_account,
 				debit_account,
+				against_type,
 				against,
 				amount,
 				base_amount,
@@ -494,6 +497,7 @@ def make_gl_entries(
 	doc,
 	credit_account,
 	debit_account,
+	against_type,
 	against,
 	amount,
 	base_amount,
@@ -515,6 +519,7 @@ def make_gl_entries(
 		doc.get_gl_dict(
 			{
 				"account": credit_account,
+				"against_type": against_type,
 				"against": against,
 				"credit": base_amount,
 				"credit_in_account_currency": amount,
@@ -534,6 +539,7 @@ def make_gl_entries(
 		doc.get_gl_dict(
 			{
 				"account": debit_account,
+				"against_type": against_type,
 				"against": against,
 				"debit": base_amount,
 				"debit_in_account_currency": amount,
