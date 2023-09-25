@@ -419,7 +419,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.return_against || doc.is_debit_note",
+   "depends_on": "eval:doc.is_return || doc.is_debit_note",
    "fieldname": "return_against",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -428,7 +428,6 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only_depends_on": "eval:doc.is_return",
    "search_index": 1
   },
   {
