@@ -25,9 +25,19 @@ def get_context(context):
 
 
 def get_stock_availability(item_code, warehouse):
-	stock_qty = frappe.utils.flt(
-		frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
-	)
+	from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+	if warehouse and frappe.get_cached_value("Warehouse", warehouse, "is_group") == 1:
+		warehouses = get_child_warehouses(warehouse)
+	else:
+		warehouses = [warehouse] if warehouse else []
+
+	stock_qty = 0.0
+	for warehouse in warehouses:
+		stock_qty += frappe.utils.flt(
+			frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+		)
+
 	return bool(stock_qty)
 
 

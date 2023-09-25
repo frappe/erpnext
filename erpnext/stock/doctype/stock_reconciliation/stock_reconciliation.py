@@ -346,7 +346,7 @@ class StockReconciliation(StockController):
 		"""Raises an exception if there is any reserved stock for the items in the Stock Reconciliation."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_reserved_qty_for_item_and_warehouse as get_sre_reserved_qty_details,
+			get_sre_reserved_qty_for_items_and_warehouses as get_sre_reserved_qty_details,
 		)
 
 		item_code_list, warehouse_list = [], []

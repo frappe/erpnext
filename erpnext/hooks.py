@@ -423,9 +423,6 @@ scheduler_events = {
 			"erpnext.stock.reorder_item.reorder_item",
 		],
 	},
-	"all": [
-		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts",
-	],
 	"hourly": [
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
@@ -433,7 +430,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.collect_project_status",
 	],
 	"hourly_long": [
-		"erpnext.accounts.doctype.subscription.subscription.process_all",
+		"erpnext.accounts.doctype.process_subscription.process_subscription.create_subscription_process",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction",
 	],
@@ -557,8 +554,6 @@ accounting_dimension_doctypes = [
 get_matching_queries = (
 	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
 )
-
-get_matching_vouchers_for_bank_reconciliation = "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_vouchers_for_bank_reconciliation"
 
 get_amounts_not_reflected_in_system_for_bank_reconciliation_statement = "erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement.get_amounts_not_reflected_in_system_for_bank_reconciliation_statement"
 

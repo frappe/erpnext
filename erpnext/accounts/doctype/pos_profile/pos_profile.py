@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, scrub, unscrub
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
 
@@ -14,6 +14,21 @@ class POSProfile(Document):
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
 		self.validate_payment_methods()
+		self.validate_accounting_dimensions()
+
+	def validate_accounting_dimensions(self):
+		acc_dim_names = required_accounting_dimensions()
+		for acc_dim in acc_dim_names:
+			if not self.get(acc_dim):
+				frappe.throw(
+					_(
+						"{0} is a mandatory Accounting Dimension. <br>"
+						"Please set a value for {0} in Accounting Dimensions section."
+					).format(
+						unscrub(frappe.bold(acc_dim)),
+					),
+					title=_("Mandatory Accounting Dimension"),
+				)
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
@@ -150,6 +165,24 @@ def get_child_nodes(group_type, root):
 		),
 		as_dict=1,
 	)
+
+
+def required_accounting_dimensions():
+
+	p = frappe.qb.DocType("Accounting Dimension")
+	c = frappe.qb.DocType("Accounting Dimension Detail")
+
+	acc_dim_doc = (
+		frappe.qb.from_(p)
+		.inner_join(c)
+		.on(p.name == c.parent)
+		.select(c.parent)
+		.where((c.mandatory_for_bs == 1) | (c.mandatory_for_pl == 1))
+		.where(p.disabled == 0)
+	).run(as_dict=1)
+
+	acc_dim_names = [scrub(d.parent) for d in acc_dim_doc]
+	return acc_dim_names
 
 
 @frappe.whitelist()

@@ -111,8 +111,8 @@ def place_order():
 				item_stock = get_web_item_qty_in_stock(item.item_code, "website_warehouse")
 				if not cint(item_stock.in_stock):
 					throw(_("{0} Not in Stock").format(item.item_code))
-				if item.qty > item_stock.stock_qty[0][0]:
-					throw(_("Only {0} in Stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
+				if item.qty > item_stock.stock_qty:
+					throw(_("Only {0} in Stock for item {1}").format(item_stock.stock_qty, item.item_code))
 
 	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
@@ -150,6 +150,10 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 			empty_card = True
 
 	else:
+		warehouse = frappe.get_cached_value(
+			"Website Item", {"item_code": item_code}, "website_warehouse"
+		)
+
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
 			quotation.append(
@@ -159,11 +163,13 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 					"item_code": item_code,
 					"qty": qty,
 					"additional_notes": additional_notes,
+					"warehouse": warehouse,
 				},
 			)
 		else:
 			quotation_items[0].qty = qty
 			quotation_items[0].additional_notes = additional_notes
+			quotation_items[0].warehouse = warehouse
 
 	apply_cart_settings(quotation=quotation)
 
@@ -317,6 +323,10 @@ def decorate_quotation_doc(doc):
 				fields = fields[2:]
 
 		d.update(frappe.db.get_value("Website Item", {"item_code": item_code}, fields, as_dict=True))
+		website_warehouse = frappe.get_cached_value(
+			"Website Item", {"item_code": item_code}, "website_warehouse"
+		)
+		d.warehouse = website_warehouse
 
 	return doc
 
