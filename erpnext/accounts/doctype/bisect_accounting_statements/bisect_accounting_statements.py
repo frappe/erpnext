@@ -66,7 +66,6 @@ class BTree(object):
 		cur_node = root_node
 		period_list = deque([root_node])
 
-		periods = []
 		while period_list:
 			cur_node = period_list.popleft()
 			cur_node_index = len(self.btree) - 1
@@ -97,7 +96,6 @@ class BTree(object):
 		cur_node = root_node
 		period_list = [root_node]
 
-		periods = []
 		while period_list:
 			cur_node = period_list.pop()
 			cur_node_index = len(self.btree) - 1
