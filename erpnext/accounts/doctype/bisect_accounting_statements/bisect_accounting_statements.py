@@ -58,33 +58,51 @@ class BTree(object):
 		return lst
 
 	def bfs(self, from_date: datetime, to_date: datetime):
-		root_node = Node(parent=None, period=(getdate(from_date), getdate(to_date)))
-		root_node.parent = None
+		node = frappe.new_doc("Nodes")
+		node.period_from_date = from_date
+		node.period_to_date = to_date
+		node.root = None
+		node.insert()
 
-		# add root node to tree
-		self.btree.append(root_node)
-		cur_node = root_node
-		period_list = deque([root_node])
+		period_list = deque([node])
 
 		while period_list:
 			cur_node = period_list.popleft()
-			cur_node_index = len(self.btree) - 1
 
-			delta = cur_node.period[1] - cur_node.period[0]
+			print(cur_node.as_dict())
+			delta = cur_node.period_to_date - cur_node.period_from_date
 			if delta.days == 0:
 				continue
 			else:
 				cur_floor = floor(delta.days / 2)
-				left = (cur_node.period[0], (cur_node.period[0] + relativedelta(days=+cur_floor)))
-				left_node = Node(parent=cur_node_index, period=left)
-				self.btree.append(left_node)
-				cur_node.left_child = len(self.btree) - 1
+				left = (
+					cur_node.period_from_date,
+					(cur_node.period_from_date + relativedelta(days=+cur_floor)),
+				)
+				left_node = frappe.get_doc(
+					{
+						"doctype": "Nodes",
+						"period_from_date": cur_node.period_from_date,
+						"period_to_date": left,
+						"root": cur_node.name,
+					}
+				).insert()
+				cur_node.left_child = left_node.name
 				period_list.append(left_node)
 
-				right = ((cur_node.period[0] + relativedelta(days=+(cur_floor + 1))), cur_node.period[1])
-				right_node = Node(parent=cur_node_index, period=right)
-				self.btree.append(right_node)
-				cur_node.right_child = len(self.btree) - 1
+				right = (
+					(cur_node.period_from_date + relativedelta(days=+(cur_floor + 1))),
+					cur_node.period_to_date,
+				)
+				right_node = frappe.get_doc(
+					{
+						"doctype": "Nodes",
+						"period_from_date": right,
+						"period_to_date": cur_node.period_to_date,
+						"root": cur_node.name,
+					}
+				).insert()
+				cur_node.right_child = right_node
 				period_list.append(right_node)
 
 	def dfs(self, from_date: datetime, to_date: datetime):
@@ -144,6 +162,7 @@ class BTree(object):
 		self.current_node = n
 
 	def build_tree(self, from_date: datetime, to_date: datetime, alogrithm: str):
+		frappe.db.delete("Nodes")
 		if alogrithm == "BFS":
 			self.bfs(from_date, to_date)
 
