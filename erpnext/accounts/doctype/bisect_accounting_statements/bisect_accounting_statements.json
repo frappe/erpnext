@@ -13,8 +13,7 @@
   "column_break_iwny",
   "algorithm",
   "section_break_zbty",
-  "current_node",
-  "tree"
+  "current_node"
  ],
  "fields": [
   {
@@ -23,12 +22,12 @@
   },
   {
    "fieldname": "from_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "From Date"
   },
   {
    "fieldname": "to_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "To Date"
   },
   {
@@ -47,21 +46,17 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "tree",
-   "fieldtype": "JSON",
-   "label": "Tree"
-  },
-  {
    "fieldname": "current_node",
-   "fieldtype": "JSON",
-   "label": "Current Node"
+   "fieldtype": "Link",
+   "label": "Current Node",
+   "options": "Nodes"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-25 21:15:47.905386",
+ "modified": "2023-09-26 12:09:23.649156",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
