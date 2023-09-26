@@ -1,5 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
+
+
 import collections
 
 import frappe
@@ -43,7 +45,6 @@ class POSInvoice(SalesInvoice):
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
 		self.validate_change_amount()
-		self.validate_duplicate_serial_and_batch_no()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
 		self.validate_warehouse()
@@ -56,6 +57,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
 		self.validate_company_with_pos_company()
+		self.validate_duplicate_serial_no()
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
@@ -156,26 +158,17 @@ class POSInvoice(SalesInvoice):
 				title=_("Item Unavailable"),
 			)
 
-	def validate_duplicate_serial_and_batch_no(self):
+	def validate_duplicate_serial_no(self):
 		serial_nos = []
-		batch_nos = []
 
 		for row in self.get("items"):
 			if row.serial_no:
 				serial_nos = row.serial_no.split("\n")
 
-			if row.batch_no and not row.serial_no:
-				batch_nos.append(row.batch_no)
-
 		if serial_nos:
 			for key, value in collections.Counter(serial_nos).items():
 				if value > 1:
 					frappe.throw(_("Duplicate Serial No {0} found").format("key"))
-
-		if batch_nos:
-			for key, value in collections.Counter(batch_nos).items():
-				if value > 1:
-					frappe.throw(_("Duplicate Batch No {0} found").format("key"))
 
 	def validate_pos_reserved_batch_qty(self, item):
 		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no": item.batch_no}
@@ -683,7 +676,7 @@ def get_bundle_availability(bundle_item_code, warehouse):
 		item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
 		available_qty = item_bin_qty - item_pos_reserved_qty
 
-		max_available_bundles = available_qty / item.stock_qty
+		max_available_bundles = available_qty / item.qty
 		if bundle_bin_qty > max_available_bundles and frappe.get_value(
 			"Item", item.item_code, "is_stock_item"
 		):
