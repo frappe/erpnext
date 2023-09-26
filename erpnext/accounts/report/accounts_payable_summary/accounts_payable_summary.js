@@ -72,10 +72,27 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			}
 		},
 		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
+			"fieldname": "party_type",
+			"label": __("Party Type"),
 			"fieldtype": "Link",
-			"options": "Supplier"
+			"options": "Party Type",
+			get_query: () => {
+				return {
+					filters: {
+						'account_type': 'Payable'
+					}
+				};
+			},
+			on_change: () => {
+				frappe.query_report.set_filter_value('party', "");
+				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') !== "Supplier");
+			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
 		},
 		{
 			"fieldname":"payment_terms_template",
