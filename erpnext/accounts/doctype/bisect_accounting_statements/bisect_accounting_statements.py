@@ -116,6 +116,20 @@ class BisectAccountingStatements(Document):
 		root = frappe.db.get_all("Nodes", filters={"root": ["is", "not set"]})[0]
 		frappe.db.set_single_value("Bisect Accounting Statements", "current_node", root.name)
 
+	def get_report_summary(self):
+		filters = {
+			"company": self.company,
+			"filter_based_on": "Date Range",
+			"period_start_date": self.current_from_date,
+			"period_end_date": self.current_to_date,
+			"periodicity": "Yearly",
+		}
+		pl_summary = frappe.get_doc("Report", "Profit and Loss Statement")
+		self.p_l_summary = pl_summary.execute_script_report(filters=filters)[5]
+		bs_summary = frappe.get_doc("Report", "Balance Sheet")
+		self.b_s_summary = bs_summary.execute_script_report(filters=filters)[5]
+		self.difference = abs(self.p_l_summary - self.b_s_summary)
+
 	@frappe.whitelist()
 	def bisect_left(self):
 		if self.current_node is not None:
@@ -123,8 +137,9 @@ class BisectAccountingStatements(Document):
 			if cur_node.left_child is not None:
 				lft_node = frappe.get_doc("Nodes", cur_node.left_child)
 				self.current_node = cur_node.left_child
-				self.from_date = lft_node.period_from_date
-				self.to_date = lft_node.period_to_date
+				self.current_from_date = lft_node.period_from_date
+				self.current_to_date = lft_node.period_to_date
+				self.get_report_summary()
 				self.save()
 			else:
 				frappe.msgprint("No more children on Left")
@@ -136,8 +151,9 @@ class BisectAccountingStatements(Document):
 			if cur_node.right_child is not None:
 				rgt_node = frappe.get_doc("Nodes", cur_node.right_child)
 				self.current_node = cur_node.right_child
-				self.from_date = rgt_node.period_from_date
-				self.to_date = rgt_node.period_to_date
+				self.current_from_date = rgt_node.period_from_date
+				self.current_to_date = rgt_node.period_to_date
+				self.get_report_summary()
 				self.save()
 			else:
 				frappe.msgprint("No more children on Right")
@@ -149,8 +165,9 @@ class BisectAccountingStatements(Document):
 			if cur_node.root is not None:
 				root = frappe.get_doc("Nodes", cur_node.root)
 				self.current_node = cur_node.root
-				self.from_date = root.period_from_date
-				self.to_date = root.period_to_date
+				self.current_from_date = root.period_from_date
+				self.current_to_date = root.period_to_date
+				self.get_report_summary()
 				self.save()
 			else:
 				frappe.msgprint("Reached Root")
