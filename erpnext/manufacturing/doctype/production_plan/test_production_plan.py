@@ -1029,6 +1029,59 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(after_qty, before_qty)
 
+	def test_resered_qty_for_production_plan_for_work_order(self):
+		from erpnext.stock.utils import get_or_make_bin
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		pln = create_production_plan(item_code="Test Production Item 1")
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		self.assertEqual(after_qty - before_qty, 1)
+
+		pln.make_work_order()
+
+		work_orders = []
+		for row in frappe.get_all("Work Order", filters={"production_plan": pln.name}, fields=["name"]):
+			wo_doc = frappe.get_doc("Work Order", row.name)
+			wo_doc.source_warehouse = "_Test Warehouse - _TC"
+			wo_doc.wip_warehouse = "_Test Warehouse 1 - _TC"
+			wo_doc.fg_warehouse = "_Test Warehouse - _TC"
+			for d in wo_doc.required_items:
+				d.source_warehouse = "_Test Warehouse - _TC"
+				make_stock_entry(
+					item_code=d.item_code,
+					qty=d.required_qty,
+					rate=100,
+					target="_Test Warehouse - _TC",
+				)
+
+			wo_doc.submit()
+			work_orders.append(wo_doc)
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		self.assertEqual(after_qty, before_qty)
+
+		rm_work_order = None
+		for wo_doc in work_orders:
+			for d in wo_doc.required_items:
+				if d.item_code == "Raw Material Item 1":
+					rm_work_order = wo_doc
+					break
+
+		if rm_work_order:
+			s = frappe.get_doc(make_se_from_wo(rm_work_order.name, "Material Transfer for Manufacture", 1))
+			s.submit()
+			bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+			after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+			self.assertEqual(after_qty, before_qty)
+
 	def test_resered_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
 

@@ -1497,16 +1497,17 @@ def get_reserved_qty_for_production(
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
 
+	if check_production_plan:
+		qty_field = wo_item.required_qty
+	else:
+		qty_field = Case()
+		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+
 	query = (
 		frappe.qb.from_(wo)
 		.from_(wo_item)
-		.select(
-			Sum(
-				Case()
-				.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-				.else_(wo_item.required_qty - wo_item.consumed_qty)
-			)
-		)
+		.select(Sum(qty_field))
 		.where(
 			(wo_item.item_code == item_code)
 			& (wo_item.parent == wo.name)
