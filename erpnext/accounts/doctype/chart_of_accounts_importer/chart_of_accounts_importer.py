@@ -294,10 +294,8 @@ def build_response_as_excel(writer):
 
 
 @frappe.whitelist()
-def download_template(file_type, template_type):
-	data = frappe._dict(frappe.local.form_dict)
-
-	writer = get_template(template_type)
+def download_template(file_type, template_type, company):
+	writer = get_template(template_type, company)
 
 	if file_type == "CSV":
 		# download csv file
@@ -308,8 +306,7 @@ def download_template(file_type, template_type):
 		build_response_as_excel(writer)
 
 
-def get_template(template_type):
-
+def get_template(template_type, company):
 	fields = [
 		"Account Name",
 		"Parent Account",
@@ -335,34 +332,17 @@ def get_template(template_type):
 				["", "", "", "", 0, account_type.get("account_type"), account_type.get("root_type")]
 			)
 	else:
-		writer = get_sample_template(writer)
+		writer = get_sample_template(writer, company)
 
 	return writer
 
 
-def get_sample_template(writer):
-	template = [
-		["Application Of Funds(Assets)", "", "", "", 1, "", "Asset"],
-		["Sources Of Funds(Liabilities)", "", "", "", 1, "", "Liability"],
-		["Equity", "", "", "", 1, "", "Equity"],
-		["Expenses", "", "", "", 1, "", "Expense"],
-		["Income", "", "", "", 1, "", "Income"],
-		["Bank Accounts", "Application Of Funds(Assets)", "", "", 1, "Bank", "Asset"],
-		["Cash In Hand", "Application Of Funds(Assets)", "", "", 1, "Cash", "Asset"],
-		["Stock Assets", "Application Of Funds(Assets)", "", "", 1, "Stock", "Asset"],
-		["Cost Of Goods Sold", "Expenses", "", "", 0, "Cost of Goods Sold", "Expense"],
-		["Asset Depreciation", "Expenses", "", "", 0, "Depreciation", "Expense"],
-		["Fixed Assets", "Application Of Funds(Assets)", "", "", 0, "Fixed Asset", "Asset"],
-		["Accounts Payable", "Sources Of Funds(Liabilities)", "", "", 0, "Payable", "Liability"],
-		["Accounts Receivable", "Application Of Funds(Assets)", "", "", 1, "Receivable", "Asset"],
-		["Stock Expenses", "Expenses", "", "", 0, "Stock Adjustment", "Expense"],
-		["Sample Bank", "Bank Accounts", "", "", 0, "Bank", "Asset"],
-		["Cash", "Cash In Hand", "", "", 0, "Cash", "Asset"],
-		["Stores", "Stock Assets", "", "", 0, "Stock", "Asset"],
-	]
-
-	for row in template:
-		writer.writerow(row)
+def get_sample_template(writer, company):
+	currency = frappe.db.get_value("Company", company, "default_currency")
+	with open(os.path.join(os.path.dirname(__file__), "coa_sample_template.csv"), "r") as f:
+		for row in f:
+			row = row.strip().split(",") + [currency]
+			writer.writerow(row)
 
 	return writer
 
@@ -481,6 +461,7 @@ def set_default_accounts(company):
 	from erpnext.setup.doctype.company.company import install_country_fixtures
 
 	company = frappe.get_doc("Company", company)
+	unset_app_based_default_accounts(company)
 	company.update(
 		{
 			"default_receivable_account": frappe.db.get_value(
@@ -499,3 +480,8 @@ def set_default_accounts(company):
 	company.save()
 	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()
+
+
+def unset_app_based_default_accounts(company):
+	for account in frappe.get_hooks("default_company_account_fields"):
+		company.update({account: None})

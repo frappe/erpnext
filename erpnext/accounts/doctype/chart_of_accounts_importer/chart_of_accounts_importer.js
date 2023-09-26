@@ -53,10 +53,18 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 								of Accounts. Please enter the account names and add more rows as per your requirement.`);
 						}
 					}
-				}
+				},
+				{
+					label : "Company",
+					fieldname: "company",
+					fieldtype: "Link",
+					reqd: 1,
+					hidden: 1,
+					default: frm.doc.company,
+				},
 			],
 			primary_action: function() {
-				var data = d.get_values();
+				let data = d.get_values();
 
 				if (!data.template_type) {
 					frappe.throw(__('Please select <b>Template Type</b> to download template'));
@@ -66,7 +74,8 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 					'/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template',
 					{
 						file_type: data.file_type,
-						template_type: data.template_type
+						template_type: data.template_type,
+						company: data.company
 					}
 				);
 
