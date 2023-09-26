@@ -95,15 +95,23 @@ class PeriodClosingVoucher(AccountsController):
 
 		self.check_if_previous_year_closed()
 
-		pce = frappe.db.sql(
-			"""select name from `tabPeriod Closing Voucher`
-			where posting_date >= %s and fiscal_year = %s and docstatus = 1 and company = %s""",
-			(self.posting_date, self.fiscal_year, self.company),
+		pcv = frappe.qb.DocType("Period Closing Voucher")
+		existing_entry = (
+			frappe.qb.from_(pcv)
+			.select(pcv.name)
+			.where(
+				(pcv.posting_date >= self.posting_date)
+				& (pcv.fiscal_year == self.fiscal_year)
+				& (pcv.docstatus == 1)
+				& (pcv.company == self.company)
+			)
+			.run()
 		)
-		if pce and pce[0][0]:
+
+		if existing_entry and existing_entry[0][0]:
 			frappe.throw(
 				_("Another Period Closing Entry {0} has been made after {1}").format(
-					pce[0][0], self.posting_date
+					existing_entry[0][0], self.posting_date
 				)
 			)
 
@@ -130,10 +138,7 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.enqueue(
 				process_gl_entries,
 				gl_entries=gl_entries,
-				closing_entries=closing_entries,
 				voucher_name=self.name,
-				company=self.company,
-				closing_date=self.posting_date,
 				timeout=3000,
 			)
 
@@ -152,7 +157,8 @@ class PeriodClosingVoucher(AccountsController):
 				alert=True,
 			)
 		else:
-			process_gl_entries(gl_entries, closing_entries, self.name, self.company, self.posting_date)
+			process_gl_entries(gl_entries, self.name)
+			process_closing_entries(gl_entries, closing_entries, self.name, self.company, self.posting_date)
 
 	def get_grouped_gl_entries(self, get_opening_entries=False):
 		closing_entries = []
@@ -333,7 +339,7 @@ class PeriodClosingVoucher(AccountsController):
 		return query.run(as_dict=1)
 
 
-def process_gl_entries(gl_entries, closing_entries, voucher_name, company, closing_date):
+def process_gl_entries(gl_entries, voucher_name):
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	try:
