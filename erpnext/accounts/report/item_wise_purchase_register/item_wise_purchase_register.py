@@ -293,10 +293,18 @@ def get_conditions(filters):
 		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
 		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
 		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"),
-		("item_group", " and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s"),
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+	if filters.get("item_group"):
+		parent_grps = [filters.get("item_group")]
+		child_groups = []
+		for i in parent_grps:
+			child_groups.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i]}, pluck='name')+frappe.get_all('Item Group', filters={'name':['in', i], "is_group":0}, pluck='name'))
+			parent_grps.extend(frappe.get_all('Item Group', filters={'parent_item_group':['in', i], 'is_group':1}, pluck='name'))
+		
+		child_groups+=parent_grps
+		conditions += f"""and ifnull(`tabPurchase Invoice Item`.item_group, '') in ("{'","'.join(child_groups)}")"""
 
 	if not filters.get("group_by"):
 		conditions += (
