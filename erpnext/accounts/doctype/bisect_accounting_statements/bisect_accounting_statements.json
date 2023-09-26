@@ -61,12 +61,14 @@
   {
    "fieldname": "current_node",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Current Node",
    "options": "Nodes"
   },
   {
    "fieldname": "sandbox",
    "fieldtype": "HTML",
+   "hidden": 1,
    "label": "sandbox"
   },
   {
@@ -129,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-26 21:07:14.290963",
+ "modified": "2023-09-26 21:25:48.779453",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
