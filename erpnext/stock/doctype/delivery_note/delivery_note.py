@@ -138,7 +138,9 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
-		self.validate_duplicate_serial_nos()
+
+		if self.get("_action") == "submit":
+			self.validate_duplicate_serial_nos()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
