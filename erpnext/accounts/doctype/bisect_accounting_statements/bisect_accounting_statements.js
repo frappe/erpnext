@@ -17,7 +17,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		frm.add_custom_button(__('Build Tree'), () =>
 			frm.trigger("build_tree")
 		);
-		// frm.change_custom_button_type(__('Bisect'), null, 'primary');
 	},
 	bisect_left(frm) {
 		frm.call({
@@ -54,5 +53,5 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 				console.log(r);
 			}
 		});
-	}
+	},
 });

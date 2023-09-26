@@ -7,13 +7,26 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
+  "column_break_hcam",
   "from_date",
   "column_break_qxbi",
   "to_date",
   "column_break_iwny",
   "algorithm",
   "section_break_zbty",
-  "current_node"
+  "current_node",
+  "sandbox",
+  "section_break_hmsy",
+  "current_from_date",
+  "column_break_uqyd",
+  "current_to_date",
+  "section_break_hbyo",
+  "p_l_summary",
+  "column_break_aivo",
+  "b_s_summary",
+  "column_break_gvwx",
+  "difference"
  ],
  "fields": [
   {
@@ -50,13 +63,73 @@
    "fieldtype": "Link",
    "label": "Current Node",
    "options": "Nodes"
+  },
+  {
+   "fieldname": "sandbox",
+   "fieldtype": "HTML",
+   "label": "sandbox"
+  },
+  {
+   "fieldname": "section_break_hmsy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "current_from_date",
+   "fieldtype": "Datetime",
+   "label": "Current From Date"
+  },
+  {
+   "fieldname": "current_to_date",
+   "fieldtype": "Datetime",
+   "label": "Current To Date"
+  },
+  {
+   "fieldname": "column_break_uqyd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_hbyo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "p_l_summary",
+   "fieldtype": "Data",
+   "label": "P&L Summary"
+  },
+  {
+   "fieldname": "b_s_summary",
+   "fieldtype": "Data",
+   "label": "Balance Sheet Summary"
+  },
+  {
+   "fieldname": "difference",
+   "fieldtype": "Data",
+   "label": "Difference"
+  },
+  {
+   "fieldname": "column_break_aivo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_gvwx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_hcam",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-26 12:09:23.649156",
+ "modified": "2023-09-26 21:07:14.290963",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
