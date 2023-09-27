@@ -72,10 +72,28 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			}
 		},
 		{
-			"fieldname":"customer",
-			"label": __("Customer"),
+			"fieldname": "party_type",
+			"label": __("Party Type"),
 			"fieldtype": "Link",
-			"options": "Customer"
+			"options": "Party Type",
+			"Default": "Customer",
+			get_query: () => {
+				return {
+					filters: {
+						'account_type': 'Receivable'
+					}
+				};
+			},
+			on_change: () => {
+				frappe.query_report.set_filter_value('party', "");
+				frappe.query_report.toggle_filter_display('customer_group', frappe.query_report.get_filter_value('party_type') !== "Customer");
+			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
 		},
 		{
 			"fieldname":"customer_group",
