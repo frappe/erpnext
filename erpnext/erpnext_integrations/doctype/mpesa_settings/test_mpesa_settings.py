@@ -72,7 +72,7 @@ class TestMpesaSettings(unittest.TestCase):
 		pos_invoice.append(
 			"payments", {"mode_of_payment": "Mpesa-Payment", "account": mpesa_account, "amount": 500}
 		)
-		pos_invoice.contact_mobile = "test@example.com"
+		pos_invoice.contact_mobile = "093456543894"
 		pos_invoice.currency = "KES"
 		pos_invoice.save()
 
@@ -125,7 +125,7 @@ class TestMpesaSettings(unittest.TestCase):
 		pos_invoice.append(
 			"payments", {"mode_of_payment": "Mpesa-Payment", "account": mpesa_account, "amount": 1000}
 		)
-		pos_invoice.contact_mobile = "test@example.com"
+		pos_invoice.contact_mobile = "093456543894"
 		pos_invoice.currency = "KES"
 		pos_invoice.save()
 
@@ -183,7 +183,7 @@ class TestMpesaSettings(unittest.TestCase):
 		pos_invoice.append(
 			"payments", {"mode_of_payment": "Mpesa-Payment", "account": mpesa_account, "amount": 1000}
 		)
-		pos_invoice.contact_mobile = "test@example.com"
+		pos_invoice.contact_mobile = "093456543894"
 		pos_invoice.currency = "KES"
 		pos_invoice.save()
 
