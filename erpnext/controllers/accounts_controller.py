@@ -1491,7 +1491,7 @@ class AccountsController(TransactionBase):
 						"account": self.additional_discount_account,
 						"against": supplier_or_customer,
 						dr_or_cr: self.base_discount_amount,
-						"cost_center": self.cost_center,
+						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},
 					item=self,
 				)
