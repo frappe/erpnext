@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_cvfg",
   "company",
   "column_break_hcam",
   "from_date",
@@ -90,17 +91,17 @@
   },
   {
    "fieldname": "p_l_summary",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "read_only": 1
   },
   {
    "fieldname": "b_s_summary",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "read_only": 1
   },
   {
    "fieldname": "difference",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "read_only": 1
   },
   {
@@ -159,13 +160,17 @@
    "fieldname": "bisecting_to",
    "fieldtype": "Heading",
    "label": "Bisecting To"
+  },
+  {
+   "fieldname": "section_break_cvfg",
+   "fieldtype": "Section Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-27 16:08:18.155873",
+ "modified": "2023-09-27 16:22:10.670836",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
