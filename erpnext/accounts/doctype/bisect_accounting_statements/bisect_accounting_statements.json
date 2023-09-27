@@ -58,23 +58,25 @@
   {
    "fieldname": "current_node",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Current Node",
    "options": "Nodes"
   },
   {
    "fieldname": "section_break_hmsy",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "current_from_date",
    "fieldtype": "Datetime",
-   "label": "Current From Date"
+   "label": "Current From Date",
+   "read_only": 1
   },
   {
    "fieldname": "current_to_date",
    "fieldtype": "Datetime",
-   "label": "Current To Date"
+   "label": "Current To Date",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_uqyd",
@@ -87,17 +89,20 @@
   {
    "fieldname": "p_l_summary",
    "fieldtype": "Data",
-   "label": "P&L Summary"
+   "label": "P&L Summary",
+   "read_only": 1
   },
   {
    "fieldname": "b_s_summary",
    "fieldtype": "Data",
-   "label": "Balance Sheet Summary"
+   "label": "Balance Sheet Summary",
+   "read_only": 1
   },
   {
    "fieldname": "difference",
    "fieldtype": "Data",
-   "label": "Difference"
+   "label": "Difference",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_aivo",
@@ -123,7 +128,8 @@
   },
   {
    "fieldname": "section_break_8ph9",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "bisect_heatmap",
@@ -135,7 +141,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-27 12:10:40.044935",
+ "modified": "2023-09-27 14:32:09.962067",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
