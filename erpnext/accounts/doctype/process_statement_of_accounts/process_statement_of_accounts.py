@@ -146,7 +146,7 @@ def get_ar_filters(doc, entry):
 	return {
 		"report_date": doc.posting_date if doc.posting_date else None,
 		"party_type": "Customer",
-		"party": entry.customer,
+		"party": [entry.customer],
 		"customer_name": entry.customer_name if entry.customer_name else None,
 		"payment_terms_template": doc.payment_terms_template if doc.payment_terms_template else None,
 		"sales_partner": doc.sales_partner if doc.sales_partner else None,
