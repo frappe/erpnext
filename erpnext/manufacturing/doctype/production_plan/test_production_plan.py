@@ -1230,6 +1230,64 @@ class TestProductionPlan(FrappeTestCase):
 			if row.item_code == "SubAssembly2 For SUB Test":
 				self.assertEqual(row.quantity, 10)
 
+	def test_transfer_and_purchase_mrp_for_purchase_uom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		bom_tree = {
+			"Test FG Item INK PEN": {
+				"Test RM Item INK": {},
+			}
+		}
+
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": "Test RM Item INK", "uom": "Kg"}):
+			doc = frappe.get_doc("Item", "Test RM Item INK")
+			doc.purchase_uom = "Kg"
+			doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.5})
+			doc.save()
+
+		wh1 = create_warehouse("PNE Warehouse", company="_Test Company")
+		wh2 = create_warehouse("MBE Warehouse", company="_Test Company")
+		mrp_warhouse = create_warehouse("MRPBE Warehouse", company="_Test Company")
+
+		make_stock_entry(
+			item_code="Test RM Item INK",
+			qty=2,
+			rate=100,
+			target=wh1,
+		)
+
+		make_stock_entry(
+			item_code="Test RM Item INK",
+			qty=2,
+			rate=100,
+			target=wh2,
+		)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		plan.for_warehouse = mrp_warhouse
+
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": wh1}, {"warehouse": wh2}]
+		)
+
+		for row in items:
+			row = frappe._dict(row)
+			if row.material_request_type == "Material Transfer":
+				self.assertTrue(row.from_warehouse in [wh1, wh2])
+				self.assertEqual(row.quantity, 2)
+
+			if row.material_request_type == "Purchase":
+				self.assertTrue(row.warehouse == mrp_warhouse)
+				self.assertEqual(row.quantity, 12)
+
 
 def create_production_plan(**args):
 	"""
