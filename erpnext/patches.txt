@@ -269,6 +269,7 @@ erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
+erpnext.patches.v14_0.france_depreciation_warning
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -333,7 +334,7 @@ erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
 erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v14_0.enable_allow_existing_serial_no
-erpnext.patches.v14_0.set_report_in_process_SOA 
+erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances #15-07-2023
 execute:frappe.defaults.clear_default("fiscal_year")

@@ -108,11 +108,8 @@ frappe.query_reports["Accounts Payable"] = {
 			},
 			on_change: () => {
 				frappe.query_report.set_filter_value('party', "");
-				let party_type = frappe.query_report.get_filter_value('party_type');
 				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') !== "Supplier");
-
 			}
-
 		},
 		{
 			"fieldname":"party",
