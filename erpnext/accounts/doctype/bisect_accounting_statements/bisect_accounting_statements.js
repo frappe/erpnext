@@ -58,6 +58,8 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		frm.call({
 			doc: frm.doc,
 			method: 'bisect_left',
+			freeze: true,
+			freeze_message: __("Bisecting Left ..."),
 			callback: (r) => {
 				frm.trigger("render_heatmap");
 			}
@@ -66,6 +68,8 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 	bisect_right(frm) {
 		frm.call({
 			doc: frm.doc,
+			freeze: true,
+			freeze_message: __("Bisecting Right ..."),
 			method: 'bisect_right',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
@@ -75,6 +79,8 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 	move_up(frm) {
 		frm.call({
 			doc: frm.doc,
+			freeze: true,
+			freeze_message: __("Moving up in tree ..."),
 			method: 'move_up',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
@@ -84,6 +90,8 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 	build_tree(frm) {
 		frm.call({
 			doc: frm.doc,
+			freeze: true,
+			freeze_message: __("Rebuilding BTree for period ..."),
 			method: 'build_tree',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
