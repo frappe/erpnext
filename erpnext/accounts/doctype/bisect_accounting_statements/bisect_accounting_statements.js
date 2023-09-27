@@ -44,7 +44,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 
 		new frappe.Chart(".bisect_heatmap_location", {
 			type: "heatmap",
-			title: "Bisecting On",
 			data: {
 				dataPoints: datapoints,
 				start: new Date(frm.doc.from_date),
