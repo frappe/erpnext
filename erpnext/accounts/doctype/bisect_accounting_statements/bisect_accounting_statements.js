@@ -50,7 +50,7 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 				start: new Date(frm.doc.from_date),
 				end: new Date(frm.doc.to_date),
 			},
-			countLabel: 'Difference',
+			countLabel: 'Bisecting',
 			discreteDomains: 1,
 		});
 	},
