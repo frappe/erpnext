@@ -16,12 +16,12 @@
   "algorithm",
   "section_break_8ph9",
   "current_node",
+  "section_break_ngid",
+  "bisect_heatmap",
   "section_break_hmsy",
   "current_from_date",
   "column_break_uqyd",
   "current_to_date",
-  "section_break_ngid",
-  "bisect_heatmap",
   "section_break_hbyo",
   "p_l_summary",
   "column_break_aivo",
@@ -63,19 +63,18 @@
   },
   {
    "fieldname": "section_break_hmsy",
-   "fieldtype": "Section Break",
-   "hidden": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "current_from_date",
    "fieldtype": "Datetime",
-   "label": "Current From Date",
+   "label": "Bisecting From",
    "read_only": 1
   },
   {
    "fieldname": "current_to_date",
    "fieldtype": "Datetime",
-   "label": "Current To Date",
+   "label": "Bisecting To",
    "read_only": 1
   },
   {
@@ -141,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-27 15:10:36.394474",
+ "modified": "2023-09-27 15:52:14.083727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
