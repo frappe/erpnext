@@ -573,7 +573,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"party_type": "Customer",
-			"party": self.customer,
+			"party": [self.customer],
 			"report_date": today(),
 			"range1": 30,
 			"range2": 60,
