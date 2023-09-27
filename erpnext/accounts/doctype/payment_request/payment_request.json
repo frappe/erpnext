@@ -317,9 +317,16 @@
   },
   {
    "fieldname": "payment_url",
+<<<<<<< HEAD
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "payment_url",
+=======
+   "fieldtype": "Data",
+   "hidden": 1,
+   "length": 500,
+   "options": "URL",
+>>>>>>> 8c5fcb8257 (fix: PCV posting issues (#37029))
    "read_only": 1
   },
   {
@@ -394,7 +401,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-12-21 16:56:40.115737",
+=======
+ "modified": "2023-09-27 09:51:42.277638",
+>>>>>>> 8c5fcb8257 (fix: PCV posting issues (#37029))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
