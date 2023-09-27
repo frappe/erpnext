@@ -114,7 +114,11 @@ class BisectAccountingStatements(Document):
 
 		# set root as current node
 		root = frappe.db.get_all("Bisect Nodes", filters={"root": ["is", "not set"]})[0]
-		frappe.db.set_single_value("Bisect Accounting Statements", "current_node", root.name)
+		self.get_report_summary()
+		self.current_node = root.name
+		self.current_from_date = self.from_date
+		self.current_to_date = self.to_date
+		self.save()
 
 	def get_report_summary(self):
 		filters = {
