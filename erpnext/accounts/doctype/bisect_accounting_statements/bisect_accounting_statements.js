@@ -28,11 +28,18 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		// milliseconds in a day
 		let msiad=24*60*60*1000;
 		let datapoints = {};
-		let fr_dt = new Date(frm.doc.current_from_date).getTime();
-		let to_dt = new Date(frm.doc.current_to_date).getTime();
+		let fr_dt = new Date(frm.doc.from_date).getTime();
+		let to_dt = new Date(frm.doc.to_date).getTime();
+		let bisect_start = new Date(frm.doc.current_from_date).getTime();
+		let bisect_end = new Date(frm.doc.current_to_date).getTime();
+
 		for(let x=fr_dt; x <= to_dt; x+=msiad){
 			let epoch_in_seconds = x/1000;
-			datapoints[epoch_in_seconds] = 1;
+			if ((bisect_start <= x) && (x <= bisect_end )) {
+				datapoints[epoch_in_seconds] = 1.0;
+			} else {
+				datapoints[epoch_in_seconds] = 0.0;
+			}
 		}
 		console.log(datapoints);
 
@@ -45,7 +52,7 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 				end: new Date(frm.doc.to_date),
 			},
 			countLabel: 'Difference',
-			discreteDomains: 1
+			discreteDomains: 1,
 		});
 	},
 	bisect_left(frm) {
