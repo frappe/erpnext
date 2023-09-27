@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "autoincrement",
- "creation": "2023-09-25 22:01:33.961832",
+ "creation": "2023-09-27 14:56:38.112462",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -21,19 +21,19 @@
    "fieldname": "root",
    "fieldtype": "Link",
    "label": "Root",
-   "options": "Nodes"
+   "options": "Bisect Nodes"
   },
   {
    "fieldname": "left_child",
    "fieldtype": "Link",
    "label": "Left Child",
-   "options": "Nodes"
+   "options": "Bisect Nodes"
   },
   {
    "fieldname": "right_child",
    "fieldtype": "Link",
    "label": "Right Child",
-   "options": "Nodes"
+   "options": "Bisect Nodes"
   },
   {
    "fieldname": "period_from_date",
@@ -63,10 +63,10 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-25 22:05:49.577861",
+ "modified": "2023-09-27 15:09:27.715523",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Nodes",
+ "name": "Bisect Nodes",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [

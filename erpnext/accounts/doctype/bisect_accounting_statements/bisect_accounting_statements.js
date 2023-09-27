@@ -41,7 +41,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 				datapoints[epoch_in_seconds] = 0.0;
 			}
 		}
-		console.log(datapoints);
 
 		new frappe.Chart(".bisect_heatmap_location", {
 			type: "heatmap",
@@ -61,7 +60,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			method: 'bisect_left',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-				console.log(r);
 			}
 		});
 	},
@@ -71,7 +69,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			method: 'bisect_right',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-				console.log(r);
 			}
 		});
 	},
@@ -81,7 +78,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			method: 'move_up',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-				console.log(r);
 			}
 		});
 	},
@@ -91,7 +87,6 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			method: 'build_tree',
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-				console.log(r);
 			}
 		});
 	},
