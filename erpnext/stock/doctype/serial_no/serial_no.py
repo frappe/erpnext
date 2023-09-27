@@ -185,10 +185,18 @@ def get_items_html(serial_nos, item_code):
 	)
 
 
-def get_serial_nos(serial_no, item_code):
+def get_serial_nos(serial_no, item_code=None):
 	def _get_serial_no_name(serial_no):
 		"""Serial No field can be the same across different items."""
+		if not item_code:
+			return serial_no
+
 		return frappe.db.get_value("Serial No", {"serial_no": serial_no, "item_code": item_code}, "name")
+
+	if not item_code and frappe.db.get_single_value("Stock Settings", "allow_duplicate_serial_nos"):
+		frappe.throw(
+			msg=_("Item Code is mandatory if duplicate Serial Nos are allowed"), title=_("API Error")
+		)
 
 	if isinstance(serial_no, list):
 		return serial_no
@@ -197,7 +205,7 @@ def get_serial_nos(serial_no, item_code):
 	return [_get_serial_no_name(s.strip()) for s in split_serial_nos if s.strip()]
 
 
-def clean_serial_no_string(serial_no: str, item_code: str) -> str:
+def clean_serial_no_string(serial_no: str, item_code: str = None) -> str:
 	if not serial_no:
 		return ""
 
