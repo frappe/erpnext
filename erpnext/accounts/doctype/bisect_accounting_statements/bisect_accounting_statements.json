@@ -128,7 +128,8 @@
   },
   {
    "fieldname": "section_break_8ph9",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "bisect_heatmap",
@@ -140,7 +141,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-27 15:05:44.285832",
+ "modified": "2023-09-27 15:10:36.394474",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
