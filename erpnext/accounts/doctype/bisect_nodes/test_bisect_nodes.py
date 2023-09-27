@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestNodes(FrappeTestCase):
+class TestBisectNodes(FrappeTestCase):
 	pass
