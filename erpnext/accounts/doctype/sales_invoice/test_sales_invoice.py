@@ -1783,6 +1783,10 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 
 	def test_outstanding_amount_after_advance_payment_entry_cancellation(self):
+		"""Test impact of advance PE submission/cancellation on SI and SO."""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sales_order = make_sales_order(item_code="138-CMS Shoe", qty=1, price_list_rate=500)
 		pe = frappe.get_doc(
 			{
 				"doctype": "Payment Entry",
@@ -1802,10 +1806,25 @@ class TestSalesInvoice(unittest.TestCase):
 				"paid_to": "_Test Cash - _TC",
 			}
 		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": sales_order.name,
+				"total_amount": sales_order.grand_total,
+				"outstanding_amount": sales_order.grand_total,
+				"allocated_amount": 300,
+			},
+		)
 		pe.insert()
 		pe.submit()
 
+		sales_order.reload()
+		self.assertEqual(sales_order.advance_paid, 300)
+
 		si = frappe.copy_doc(test_records[0])
+		si.items[0].sales_order = sales_order.name
+		si.items[0].so_detail = sales_order.get("items")[0].name
 		si.is_pos = 0
 		si.append(
 			"advances",
@@ -1813,6 +1832,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"doctype": "Sales Invoice Advance",
 				"reference_type": "Payment Entry",
 				"reference_name": pe.name,
+				"reference_row": pe.references[0].name,
 				"advance_amount": 300,
 				"allocated_amount": 300,
 				"remarks": pe.remarks,
@@ -1821,7 +1841,13 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		si.load_from_db()
+		si.reload()
+		pe.reload()
+		sales_order.reload()
+
+		# Check if SO is unlinked/replaced by SI in PE & if SO advance paid is 0
+		self.assertEqual(pe.references[0].reference_name, si.name)
+		self.assertEqual(sales_order.advance_paid, 0.0)
 
 		# check outstanding after advance allocation
 		self.assertEqual(
@@ -1829,11 +1855,9 @@ class TestSalesInvoice(unittest.TestCase):
 			flt(si.rounded_total - si.total_advance, si.precision("outstanding_amount")),
 		)
 
-		# added to avoid Document has been modified exception
-		pe = frappe.get_doc("Payment Entry", pe.name)
 		pe.cancel()
+		si.reload()
 
-		si.load_from_db()
 		# check outstanding after advance cancellation
 		self.assertEqual(
 			flt(si.outstanding_amount),
