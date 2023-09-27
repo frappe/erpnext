@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class Nodes(Document):
+class BisectNodes(Document):
 	pass

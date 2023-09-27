@@ -27,7 +27,7 @@ class BisectAccountingStatements(Document):
 
 	def bfs(self, from_date: datetime, to_date: datetime):
 		# Make Root node
-		node = frappe.new_doc("Nodes")
+		node = frappe.new_doc("Bisect Nodes")
 		node.root = None
 		node.period_from_date = from_date
 		node.period_to_date = to_date
@@ -42,7 +42,7 @@ class BisectAccountingStatements(Document):
 			else:
 				cur_floor = floor(delta.days / 2)
 				next_to_date = cur_node.period_from_date + relativedelta(days=+cur_floor)
-				left_node = frappe.new_doc("Nodes")
+				left_node = frappe.new_doc("Bisect Nodes")
 				left_node.period_from_date = cur_node.period_from_date
 				left_node.period_to_date = next_to_date
 				left_node.root = cur_node.name
@@ -51,7 +51,7 @@ class BisectAccountingStatements(Document):
 				period_queue.append(left_node)
 
 				next_from_date = cur_node.period_from_date + relativedelta(days=+(cur_floor + 1))
-				right_node = frappe.new_doc("Nodes")
+				right_node = frappe.new_doc("Bisect Nodes")
 				right_node.period_from_date = next_from_date
 				right_node.period_to_date = cur_node.period_to_date
 				right_node.root = cur_node.name
@@ -63,7 +63,7 @@ class BisectAccountingStatements(Document):
 
 	def dfs(self, from_date: datetime, to_date: datetime):
 		# Make Root node
-		node = frappe.new_doc("Nodes")
+		node = frappe.new_doc("Bisect Nodes")
 		node.root = None
 		node.period_from_date = from_date
 		node.period_to_date = to_date
@@ -78,7 +78,7 @@ class BisectAccountingStatements(Document):
 			else:
 				cur_floor = floor(delta.days / 2)
 				next_to_date = cur_node.period_from_date + relativedelta(days=+cur_floor)
-				left_node = frappe.new_doc("Nodes")
+				left_node = frappe.new_doc("Bisect Nodes")
 				left_node.period_from_date = cur_node.period_from_date
 				left_node.period_to_date = next_to_date
 				left_node.root = cur_node.name
@@ -87,7 +87,7 @@ class BisectAccountingStatements(Document):
 				period_stack.append(left_node)
 
 				next_from_date = cur_node.period_from_date + relativedelta(days=+(cur_floor + 1))
-				right_node = frappe.new_doc("Nodes")
+				right_node = frappe.new_doc("Bisect Nodes")
 				right_node.period_from_date = next_from_date
 				right_node.period_to_date = cur_node.period_to_date
 				right_node.root = cur_node.name
@@ -99,7 +99,7 @@ class BisectAccountingStatements(Document):
 
 	@frappe.whitelist()
 	def build_tree(self):
-		frappe.db.delete("Nodes")
+		frappe.db.delete("Bisect Nodes")
 
 		# Convert str to datetime format
 		dt_format = guess_date_format(self.from_date)
@@ -113,7 +113,7 @@ class BisectAccountingStatements(Document):
 			self.dfs(from_date, to_date)
 
 		# set root as current node
-		root = frappe.db.get_all("Nodes", filters={"root": ["is", "not set"]})[0]
+		root = frappe.db.get_all("Bisect Nodes", filters={"root": ["is", "not set"]})[0]
 		frappe.db.set_single_value("Bisect Accounting Statements", "current_node", root.name)
 
 	def get_report_summary(self):
@@ -133,9 +133,9 @@ class BisectAccountingStatements(Document):
 	@frappe.whitelist()
 	def bisect_left(self):
 		if self.current_node is not None:
-			cur_node = frappe.get_doc("Nodes", self.current_node)
+			cur_node = frappe.get_doc("Bisect Nodes", self.current_node)
 			if cur_node.left_child is not None:
-				lft_node = frappe.get_doc("Nodes", cur_node.left_child)
+				lft_node = frappe.get_doc("Bisect Nodes", cur_node.left_child)
 				self.current_node = cur_node.left_child
 				self.current_from_date = lft_node.period_from_date
 				self.current_to_date = lft_node.period_to_date
@@ -147,9 +147,9 @@ class BisectAccountingStatements(Document):
 	@frappe.whitelist()
 	def bisect_right(self):
 		if self.current_node is not None:
-			cur_node = frappe.get_doc("Nodes", self.current_node)
+			cur_node = frappe.get_doc("Bisect Nodes", self.current_node)
 			if cur_node.right_child is not None:
-				rgt_node = frappe.get_doc("Nodes", cur_node.right_child)
+				rgt_node = frappe.get_doc("Bisect Nodes", cur_node.right_child)
 				self.current_node = cur_node.right_child
 				self.current_from_date = rgt_node.period_from_date
 				self.current_to_date = rgt_node.period_to_date
@@ -161,9 +161,9 @@ class BisectAccountingStatements(Document):
 	@frappe.whitelist()
 	def move_up(self):
 		if self.current_node is not None:
-			cur_node = frappe.get_doc("Nodes", self.current_node)
+			cur_node = frappe.get_doc("Bisect Nodes", self.current_node)
 			if cur_node.root is not None:
-				root = frappe.get_doc("Nodes", cur_node.root)
+				root = frappe.get_doc("Bisect Nodes", cur_node.root)
 				self.current_node = cur_node.root
 				self.current_from_date = root.period_from_date
 				self.current_to_date = root.period_to_date
