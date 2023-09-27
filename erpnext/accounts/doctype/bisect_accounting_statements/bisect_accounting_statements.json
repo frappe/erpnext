@@ -14,13 +14,14 @@
   "to_date",
   "column_break_iwny",
   "algorithm",
-  "section_break_zbty",
+  "section_break_8ph9",
   "current_node",
-  "sandbox",
   "section_break_hmsy",
   "current_from_date",
   "column_break_uqyd",
   "current_to_date",
+  "section_break_ngid",
+  "bisect_heatmap",
   "section_break_hbyo",
   "p_l_summary",
   "column_break_aivo",
@@ -55,21 +56,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_zbty",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "current_node",
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Current Node",
    "options": "Nodes"
-  },
-  {
-   "fieldname": "sandbox",
-   "fieldtype": "HTML",
-   "hidden": 1,
-   "label": "sandbox"
   },
   {
    "fieldname": "section_break_hmsy",
@@ -125,13 +116,26 @@
   {
    "fieldname": "column_break_hcam",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ngid",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_8ph9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bisect_heatmap",
+   "fieldtype": "HTML",
+   "label": "Heatmap"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-26 21:25:48.779453",
+ "modified": "2023-09-27 12:10:40.044935",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
