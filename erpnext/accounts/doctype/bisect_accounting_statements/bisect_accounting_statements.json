@@ -19,14 +19,19 @@
   "section_break_ngid",
   "bisect_heatmap",
   "section_break_hmsy",
+  "bisecting_from",
   "current_from_date",
   "column_break_uqyd",
+  "bisecting_to",
   "current_to_date",
   "section_break_hbyo",
+  "heading_cppb",
   "p_l_summary",
   "column_break_aivo",
+  "balance_sheet_summary",
   "b_s_summary",
   "column_break_gvwx",
+  "difference_heading",
   "difference"
  ],
  "fields": [
@@ -68,13 +73,11 @@
   {
    "fieldname": "current_from_date",
    "fieldtype": "Datetime",
-   "label": "Bisecting From",
    "read_only": 1
   },
   {
    "fieldname": "current_to_date",
    "fieldtype": "Datetime",
-   "label": "Bisecting To",
    "read_only": 1
   },
   {
@@ -88,19 +91,16 @@
   {
    "fieldname": "p_l_summary",
    "fieldtype": "Data",
-   "label": "P&L Summary",
    "read_only": 1
   },
   {
    "fieldname": "b_s_summary",
    "fieldtype": "Data",
-   "label": "Balance Sheet Summary",
    "read_only": 1
   },
   {
    "fieldname": "difference",
    "fieldtype": "Data",
-   "label": "Difference",
    "read_only": 1
   },
   {
@@ -134,13 +134,38 @@
    "fieldname": "bisect_heatmap",
    "fieldtype": "HTML",
    "label": "Heatmap"
+  },
+  {
+   "fieldname": "heading_cppb",
+   "fieldtype": "Heading",
+   "label": "Profit and Loss Summary"
+  },
+  {
+   "fieldname": "balance_sheet_summary",
+   "fieldtype": "Heading",
+   "label": "Balance Sheet Summary"
+  },
+  {
+   "fieldname": "difference_heading",
+   "fieldtype": "Heading",
+   "label": "Difference"
+  },
+  {
+   "fieldname": "bisecting_from",
+   "fieldtype": "Heading",
+   "label": "Bisecting From"
+  },
+  {
+   "fieldname": "bisecting_to",
+   "fieldtype": "Heading",
+   "label": "Bisecting To"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-27 15:52:14.083727",
+ "modified": "2023-09-27 16:08:18.155873",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Accounting Statements",
