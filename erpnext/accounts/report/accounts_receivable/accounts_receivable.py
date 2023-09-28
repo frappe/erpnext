@@ -791,6 +791,9 @@ class ReceivablePayableReport(object):
 		self.qb_selection_filter.append(self.ple.cost_center.isin(cost_center_list))
 
 	def add_common_filters(self):
+		self.qb_selection_filter.append(
+			self.ple.against_voucher_type.notin(["Purchase Order", "Sales Order"])
+		)
 		if self.filters.company:
 			self.qb_selection_filter.append(self.ple.company == self.filters.company)
 
