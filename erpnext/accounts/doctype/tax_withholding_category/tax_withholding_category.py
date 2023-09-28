@@ -326,31 +326,35 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	
 	cond = ""
 	
-	if tax_details.get("consider_party_ledger_amount"):
-		cond = " AND j.docstatus = 1 "  # Condition when 'consider_party_ledger_amount' is True
-	else:
-		cond = f" AND j.apply_tds = 1 AND j.tax_withholding_category = '{tax_details.get('tax_withholding_category')}' "  # Condition when 'consider_party_ledger_amount' is False
+	filters = {
+		"posting_date": ["between", [tax_details.get("from_date"), tax_details.get("to_date")]],
+		"is_opening": "No"
+	}
 
-	# Execute the SQL query with the condition
-	journal_entries_details = frappe.db.sql(
-		f"""
-		SELECT j.name, ja.credit - ja.debit AS amount
-		FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
-		WHERE
-			j.name = ja.parent
-			AND j.docstatus = 1
-			AND j.is_opening = 'No'
-			AND j.posting_date BETWEEN %s AND %s
-			AND ja.party IN %s
-			{cond}  # Include the condition here
-	""",
-		(
-			tax_details.from_date,
-			tax_details.to_date,
-			tuple(parties),
-		),
-		as_dict=1,
+	if tax_details.get("consider_party_ledger_amount"):
+		filters["docstatus"] = 1
+	else:
+		filters["apply_tds"] = 1
+		filters["tax_withholding_category"] = tax_details.get("tax_withholding_category")
+
+	journal_entries_details = frappe.get_list(
+		"Journal Entry",
+		filters=filters,
+		fields=["name"],
+		as_list=False
 	)
+
+	# Fetch amounts from Journal Entry Account
+	amounts = {}
+	for entry in journal_entries_details:
+		entry_name = entry.get("name")
+		ja = frappe.get_list(
+			"Journal Entry Account",
+			filters={"parent": entry_name,"party": ["in", parties]},
+			fields=["sum(credit - debit) as amount"],
+			as_list=True
+		)
+		entry.update({"amount":ja[0][0]})	
 
 	if journal_entries_details:
 		for d in journal_entries_details:
