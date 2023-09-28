@@ -469,10 +469,8 @@ class WorkOrder(Document):
 		if self.has_batch_no:
 			self.create_batch_for_finished_good()
 
-		args = {"item_code": self.production_item, "work_order": self.name}
-
 		if self.has_serial_no:
-			self.make_serial_nos(args)
+			self.make_serial_nos()
 
 	def create_batch_for_finished_good(self):
 		total_qty = self.qty
@@ -520,14 +518,16 @@ class WorkOrder(Document):
 		for row in frappe.get_all("Batch", filters={"reference_name": self.name}):
 			frappe.delete_doc("Batch", row.name)
 
-	def make_serial_nos(self, args):
+	def make_serial_nos(self):
 		item_details = frappe.get_cached_value(
 			"Item", self.production_item, ["serial_no_series", "item_name", "description"], as_dict=1
 		)
 
 		serial_nos = []
 		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
+			serial_nos = get_available_serial_nos(
+				item_details.serial_no_series, self.qty, self.production_item
+			)
 
 		if not serial_nos:
 			return

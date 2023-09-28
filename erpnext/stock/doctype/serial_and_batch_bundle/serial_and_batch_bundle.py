@@ -793,7 +793,7 @@ def get_serial_batch_from_csv(item_code, file_path):
 		serial_nos, batch_nos = parse_csv_file_to_get_serial_batch(reader)
 
 	if serial_nos:
-		make_serial_nos(item_code, serial_nos)
+		serial_nos = make_serial_nos(item_code, serial_nos)
 
 	if batch_nos:
 		make_batch_nos(item_code, batch_nos)
@@ -858,7 +858,7 @@ def get_serial_batch_from_data(item_code, kwargs):
 				continue
 			serial_nos.append({"serial_no": serial_no, "qty": 1})
 
-		make_serial_nos(item_code, serial_nos)
+	serial_nos = make_serial_nos(item_code, serial_nos)
 
 	return serial_nos, batch_nos
 
@@ -870,13 +870,19 @@ def make_serial_nos(item_code, serial_nos):
 
 	serial_nos_details = []
 	user = frappe.session.user
+	doc = frappe.new_doc("Serial No")  # hack for naming
+
 	for serial_no in serial_nos:
-		if frappe.db.exists("Serial No", serial_no):
+		if frappe.db.exists("Serial No", {"serial_no": serial_no, "item_code": item_code}):
 			continue
+
+		# Since Serial No field and it's docname can be different, set name
+		doc.serial_no, doc.item_code = serial_no, item.item_code
+		doc.set_new_name(force=True)
 
 		serial_nos_details.append(
 			(
-				serial_no,
+				doc.name,
 				serial_no,
 				now(),
 				now(),
@@ -905,6 +911,9 @@ def make_serial_nos(item_code, serial_nos):
 	frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	frappe.msgprint(_("Serial Nos are created successfully"), alert=True)
+
+	# Return newly named serial nos
+	return [{"serial_no": serial_no[0], "qty": 1} for serial_no in serial_nos_details]
 
 
 def make_batch_nos(item_code, batch_nos):
