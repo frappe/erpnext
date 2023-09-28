@@ -1508,6 +1508,10 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
+	stock_uom, purchase_uom = frappe.db.get_value(
+		"Item", item.get("item_code"), ["stock_uom", "purchase_uom"]
+	)
+
 	locations = get_available_item_locations(
 		item.get("item_code"), warehouses, item.get("quantity"), company, ignore_validation=True
 	)
@@ -1517,6 +1521,10 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	for d in locations:
 		if required_qty <= 0:
 			return
+
+		conversion_factor = 1.0
+		if purchase_uom != stock_uom and purchase_uom == item["uom"]:
+			conversion_factor = get_uom_conversion_factor(item["item_code"], item["uom"])
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
@@ -1530,25 +1538,14 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 			}
 		)
 
-		required_qty -= quantity
+		required_qty -= quantity / conversion_factor
 		new_mr_items.append(new_dict)
 
 	# raise purchase request for remaining qty
-	if required_qty:
-		stock_uom, purchase_uom = frappe.db.get_value(
-			"Item", item["item_code"], ["stock_uom", "purchase_uom"]
-		)
 
-		if purchase_uom != stock_uom and purchase_uom == item["uom"]:
-			conversion_factor = get_uom_conversion_factor(item["item_code"], item["uom"])
-			if not (conversion_factor or frappe.flags.show_qty_in_stock_uom):
-				frappe.throw(
-					_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(
-						purchase_uom, stock_uom, item["item_code"]
-					)
-				)
-
-			required_qty = required_qty / conversion_factor
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
+	if flt(required_qty, precision) > 0:
+		required_qty = required_qty
 
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
