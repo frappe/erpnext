@@ -102,7 +102,8 @@ def set_ageing(doc, entry):
 			"range2": 60,
 			"range3": 90,
 			"range4": 120,
-			"customer": entry.customer,
+			"party_type": "Customer",
+			"party": entry.customer,
 		}
 	)
 	col1, ageing = get_ageing(ageing_filters)
