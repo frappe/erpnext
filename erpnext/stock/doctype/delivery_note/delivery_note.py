@@ -1066,6 +1066,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 	def update_stop_details(source_doc, target_doc, source_parent):
 		target_doc.customer = source_parent.customer
@@ -1080,19 +1081,29 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 
 	delivery_notes = []
 
+=======
+def make_delivery_trip(source_name, target_doc=None):
+	if not target_doc:
+		target_doc = frappe.new_doc("Delivery Trip")
+>>>>>>> 28c75b8f4d (chore(stock): use the into child mapper mapper frappe/frappe#22592)
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
 		{
-			"Delivery Note": {"doctype": "Delivery Trip", "validation": {"docstatus": ["=", 1]}},
-			"Delivery Note Item": {
+			"Delivery Note": {
 				"doctype": "Delivery Stop",
-				"field_map": {"parent": "delivery_note"},
-				"condition": lambda item: item.parent not in delivery_notes,
-				"postprocess": update_stop_details,
+				"validation": {"docstatus": ["=", 1]},
+				"on_parent": target_doc,
+				"field_map": {
+					"name": "delivery_note",
+					"shipping_address_name": "address",
+					"shipping_address": "customer_address",
+					"contact_person": "contact",
+					"contact_display": "customer_contact",
+				},
 			},
 		},
-		target_doc,
+		ignore_child_tables=True,
 	)
 
 	return doclist
