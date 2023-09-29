@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 import frappe
+from frappe.core.utils import find
 from frappe.utils import flt
 from rapidfuzz import fuzz, process
 
@@ -112,7 +113,8 @@ class AutoMatchbyPartyNameDescription:
 
 		for party in parties:
 			filters = {"status": "Active"} if party == "Employee" else {"disabled": 0}
-			names = frappe.get_all(party, filters=filters, pluck=party.lower() + "_name")
+			field = party.lower() + "_name"
+			names = frappe.get_all(party, filters=filters, fields=[f"{field} as party_name", "name"])
 
 			for field in ["bank_party_name", "description"]:
 				if not self.get(field):
@@ -131,12 +133,18 @@ class AutoMatchbyPartyNameDescription:
 
 	def fuzzy_search_and_return_result(self, party, names, field) -> Union[Tuple, None]:
 		skip = False
-		result = process.extract(query=self.get(field), choices=names, scorer=fuzz.token_set_ratio)
+		result = process.extract(
+			query=self.get(field),
+			choices=[name.get("party_name") for name in names],
+			scorer=fuzz.token_set_ratio,
+		)
 		party_name, skip = self.process_fuzzy_result(result)
 
 		if not party_name:
 			return None, skip
 
+		# Get Party Docname from the list of dicts
+		party_name = find(names, lambda x: x["party_name"] == party_name).get("name")
 		return (
 			party,
 			party_name,
