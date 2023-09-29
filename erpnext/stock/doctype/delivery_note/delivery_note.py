@@ -849,32 +849,23 @@ def make_sales_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_trip(source_name, target_doc=None):
-	def update_stop_details(source_doc, target_doc, source_parent):
-		target_doc.customer = source_parent.customer
-		target_doc.address = source_parent.shipping_address_name
-		target_doc.customer_address = source_parent.shipping_address
-		target_doc.contact = source_parent.contact_person
-		target_doc.customer_contact = source_parent.contact_display
-		target_doc.grand_total = source_parent.grand_total
-
-		# Append unique Delivery Notes in Delivery Trip
-		delivery_notes.append(target_doc.delivery_note)
-
-	delivery_notes = []
-
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
 		{
-			"Delivery Note": {"doctype": "Delivery Trip"},
-			"Delivery Note Item": {
+			"Delivery Note": {
 				"doctype": "Delivery Stop",
-				"field_map": {"parent": "delivery_note"},
-				"condition": lambda item: item.parent not in delivery_notes,
-				"postprocess": update_stop_details,
+				"on_parent": target_doc,
+				"field_map": {
+					"name": "delivery_note",
+					"shipping_address_name": "address",
+					"shipping_address": "customer_address",
+					"contact_person": "contact",
+					"contact_display": "customer_contact",
+				},
 			},
 		},
-		target_doc,
+		ignore_child_tables=True,
 	)
 
 	return doclist
