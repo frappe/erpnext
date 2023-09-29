@@ -20,12 +20,6 @@ frappe.listview_settings['Delivery Note'] = {
 			const docnames = doclist.get_checked_items(true);
 
 			if (selected_docs.length > 0) {
-				for (let doc of selected_docs) {
-					if (!doc.docstatus) {
-						frappe.throw(__("Cannot create a Delivery Trip from Draft documents."));
-					}
-				}
-
 				frappe.new_doc("Delivery Trip")
 					.then(() => {
 						// Empty out the child table before inserting new ones

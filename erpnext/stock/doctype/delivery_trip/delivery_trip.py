@@ -27,6 +27,8 @@ class DeliveryTrip(Document):
 		if self._action == "submit" and not self.driver:
 			frappe.throw(_("A driver must be set to submit."))
 
+		if self._action == "submit":
+			self.validate_delivery_note_not_draft()
 		self.validate_stop_addresses()
 
 	def on_submit(self):
@@ -44,6 +46,22 @@ class DeliveryTrip(Document):
 		for stop in self.delivery_stops:
 			if not stop.customer_address:
 				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
+
+	def validate_delivery_note_not_draft(self):
+		delivery_notes = list(
+			set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note)
+		)
+		draft_delivery_notes = frappe.get_all(
+			"Delivery Note",
+			{"status": "Draft", "name": ["in", delivery_notes]},
+			pluck="name",
+		)
+		if draft_delivery_notes:
+			frappe.throw(
+				_(
+					"Delivery Notes may not be in Draft to submit. The following Delivery Notes are in draft {0}"
+				).format(", ".join(draft_delivery_notes))
+			)
 
 	def update_status(self):
 		status = {0: "Draft", 1: "Scheduled", 2: "Cancelled"}[self.docstatus]

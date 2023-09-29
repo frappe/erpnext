@@ -860,7 +860,7 @@ def make_delivery_trip(source_name, target_doc=None):
 		"Delivery Note",
 		source_name,
 		{
-			"Delivery Note": {"doctype": "Delivery Trip", "validation": {"docstatus": ["=", 1]}},
+			"Delivery Note": {"doctype": "Delivery Trip"},
 			"Delivery Note Item": {
 				"doctype": "Delivery Stop",
 				"field_map": {"parent": "delivery_note"},
