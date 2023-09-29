@@ -30,15 +30,10 @@ frappe.listview_settings["Delivery Note"] = {
 			const docnames = doclist.get_checked_items(true);
 
 			if (selected_docs.length > 0) {
-				for (let doc of selected_docs) {
-					if (!doc.docstatus) {
-						frappe.throw(__("Cannot create a Delivery Trip from Draft documents."));
-					}
-				}
-
-				frappe.new_doc("Delivery Trip").then(() => {
-					// Empty out the child table before inserting new ones
-					cur_frm.set_value("delivery_stops", []);
+				frappe.new_doc("Delivery Trip")
+					.then(() => {
+						// Empty out the child table before inserting new ones
+						cur_frm.set_value("delivery_stops", []);
 
 					// We don't want to use `map_current_doc` since it brings up
 					// the dialog to select more items. We just want the mapper
