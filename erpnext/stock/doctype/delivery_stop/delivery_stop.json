@@ -86,7 +86,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fieldname": "lock", 
+   "fieldname": "locked",
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
