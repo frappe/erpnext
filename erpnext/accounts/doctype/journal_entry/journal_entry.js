@@ -51,7 +51,15 @@ frappe.ui.form.on("Journal Entry", {
 				}, __('Make'));
 		}
 	},
-
+	before_save: function(frm) {
+		if ((frm.doc.docstatus == 0) && (!frm.doc.is_system_generated)) {
+			let payment_entry_references = frm.doc.accounts.filter(elem => (elem.reference_type == "Payment Entry"));
+			if (payment_entry_references.length > 0) {
+				let rows = payment_entry_references.map(x => "#"+x.idx);
+				frappe.throw(__("Rows: {0} have 'Payment Entry' as reference_type. This should not be set manually.", [frappe.utils.comma_and(rows)]));
+			}
+		}
+	},
 	make_inter_company_journal_entry: function(frm) {
 		var d = new frappe.ui.Dialog({
 			title: __("Select Company"),
