@@ -48,6 +48,20 @@ class ProcessStatementOfAccounts(Document):
 
 
 def get_report_pdf(doc, consolidated=True):
+	statement_dict = get_statement_dict(doc)
+	if not bool(statement_dict):
+		return False
+	elif consolidated:
+		delimiter = '<div style="page-break-before: always;"></div>' if doc.include_break else ""
+		result = delimiter.join(list(statement_dict.values()))
+		return get_pdf(result, {"orientation": doc.orientation})
+	else:
+		for customer, statement_html in statement_dict.items():
+			statement_dict[customer] = get_pdf(statement_html, {"orientation": doc.orientation})
+		return statement_dict
+
+
+def get_statement_dict(doc, get_statement_dict=False):
 	statement_dict = {}
 	ageing = ""
 
@@ -78,18 +92,11 @@ def get_report_pdf(doc, consolidated=True):
 			if not res:
 				continue
 
-		statement_dict[entry.customer] = get_html(doc, filters, entry, col, res, ageing)
+		statement_dict[entry.customer] = (
+			[res, ageing] if get_statement_dict else get_html(doc, filters, entry, col, res, ageing)
+		)
 
-	if not bool(statement_dict):
-		return False
-	elif consolidated:
-		delimiter = '<div style="page-break-before: always;"></div>' if doc.include_break else ""
-		result = delimiter.join(list(statement_dict.values()))
-		return get_pdf(result, {"orientation": doc.orientation})
-	else:
-		for customer, statement_html in statement_dict.items():
-			statement_dict[customer] = get_pdf(statement_html, {"orientation": doc.orientation})
-		return statement_dict
+	return statement_dict
 
 
 def set_ageing(doc, entry):
@@ -103,7 +110,7 @@ def set_ageing(doc, entry):
 			"range3": 90,
 			"range4": 120,
 			"party_type": "Customer",
-			"party": entry.customer,
+			"party": [entry.customer],
 		}
 	)
 	col1, ageing = get_ageing(ageing_filters)
