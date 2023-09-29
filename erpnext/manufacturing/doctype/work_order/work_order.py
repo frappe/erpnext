@@ -1489,7 +1489,7 @@ def get_serial_nos_for_job_card(row, wo_doc):
 		fields=["serial_no"],
 		filters={"docstatus": ("<", 2), "work_order": wo_doc.name, "operation_id": row.name},
 	):
-		used_serial_nos.extend(get_serial_nos(d.serial_no, wo_doc.item))
+		used_serial_nos.extend(get_serial_nos(d.serial_no, wo_doc.production_item))
 
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
 	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
