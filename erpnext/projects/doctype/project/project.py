@@ -67,6 +67,7 @@ class Project(Document):
 				tmp_task_details.append(template_task_details)
 				task = self.create_task_from_template(template_task_details)
 				project_tasks.append(task)
+
 			self.dependency_mapping(tmp_task_details, project_tasks)
 
 	def create_task_from_template(self, task_details):
@@ -105,36 +106,28 @@ class Project(Document):
 
 	def dependency_mapping(self, template_tasks, project_tasks):
 		for project_task in project_tasks:
-			if project_task.get("template_task"):
-				template_task = frappe.get_doc("Task", project_task.template_task)
-			else:
-				template_task = list(filter(lambda x: x.subject == project_task.subject, template_tasks))[0]
-				template_task = frappe.get_doc("Task", template_task.name)
+			template_task = frappe.get_doc("Task", project_task.template_task)
 
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
 	def check_depends_on_value(self, template_task, project_task, project_tasks):
 		if template_task.get("depends_on") and not project_task.get("depends_on"):
+			project_template_map = {pt.template_task: pt for pt in project_tasks}
+
 			for child_task in template_task.get("depends_on"):
-				child_task_subject = frappe.db.get_value("Task", child_task.task, "subject")
-				corresponding_project_task = list(
-					filter(lambda x: x.subject == child_task_subject, project_tasks)
-				)
-				if len(corresponding_project_task):
+				if project_template_map and project_template_map.get(child_task.task):
 					project_task.reload()  # reload, as it might have been updated in the previous iteration
-					project_task.append("depends_on", {"task": corresponding_project_task[0].name})
+					project_task.append("depends_on", {"task": project_template_map.get(child_task.task).name})
 					project_task.save()
 
 	def check_for_parent_tasks(self, template_task, project_task, project_tasks):
 		if template_task.get("parent_task") and not project_task.get("parent_task"):
-			parent_task_subject = frappe.db.get_value("Task", template_task.get("parent_task"), "subject")
-			corresponding_project_task = list(
-				filter(lambda x: x.subject == parent_task_subject, project_tasks)
-			)
-			if len(corresponding_project_task):
-				project_task.parent_task = corresponding_project_task[0].name
-				project_task.save()
+			for pt in project_tasks:
+				if pt.template_task == template_task.parent_task:
+					project_task.parent_task = pt.name
+					project_task.save()
+					break
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data:

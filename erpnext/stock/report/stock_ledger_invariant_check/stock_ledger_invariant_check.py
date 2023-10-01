@@ -186,7 +186,7 @@ def get_columns():
 		{
 			"fieldname": "fifo_queue_qty",
 			"fieldtype": "Float",
-			"label": _("(C) Total qty in queue"),
+			"label": _("(C) Total Qty in Queue"),
 		},
 		{
 			"fieldname": "fifo_qty_diff",
@@ -211,52 +211,52 @@ def get_columns():
 		{
 			"fieldname": "stock_value_difference",
 			"fieldtype": "Float",
-			"label": _("(F) Stock Value Difference"),
+			"label": _("(F) Change in Stock Value"),
 		},
 		{
 			"fieldname": "stock_value_from_diff",
 			"fieldtype": "Float",
-			"label": _("Balance Stock Value using (F)"),
+			"label": _("(G) Sum of Change in Stock Value"),
 		},
 		{
 			"fieldname": "diff_value_diff",
 			"fieldtype": "Float",
-			"label": _("K - D"),
+			"label": _("G - D"),
 		},
 		{
 			"fieldname": "fifo_stock_diff",
 			"fieldtype": "Float",
-			"label": _("(G) Stock Value difference (FIFO queue)"),
+			"label": _("(H) Change in Stock Value (FIFO Queue)"),
 		},
 		{
 			"fieldname": "fifo_difference_diff",
 			"fieldtype": "Float",
-			"label": _("F - G"),
+			"label": _("H - F"),
 		},
 		{
 			"fieldname": "valuation_rate",
 			"fieldtype": "Float",
-			"label": _("(H) Valuation Rate"),
+			"label": _("(I) Valuation Rate"),
 		},
 		{
 			"fieldname": "fifo_valuation_rate",
 			"fieldtype": "Float",
-			"label": _("(I) Valuation Rate as per FIFO"),
+			"label": _("(J) Valuation Rate as per FIFO"),
 		},
 		{
 			"fieldname": "fifo_valuation_diff",
 			"fieldtype": "Float",
-			"label": _("H - I"),
+			"label": _("I - J"),
 		},
 		{
 			"fieldname": "balance_value_by_qty",
 			"fieldtype": "Float",
-			"label": _("(J) Valuation = Value (D) ÷ Qty (A)"),
+			"label": _("(K) Valuation = Value (D) ÷ Qty (A)"),
 		},
 		{
 			"fieldname": "valuation_diff",
 			"fieldtype": "Float",
-			"label": _("H - J"),
+			"label": _("I - K"),
 		},
 	]
 

@@ -1234,14 +1234,10 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 		dn.items[0].serial_no = "\n".join(serial_nos[:2])
 		dn.append("items", dn.items[0].as_dict())
+		dn.save()
 
 		# Test - 1: ValidationError should be raised
-		self.assertRaises(frappe.ValidationError, dn.save)
-
-		# Step - 4: Submit Delivery Note with unique Serial Nos
-		dn.items[1].serial_no = "\n".join(serial_nos[2:])
-		dn.save()
-		dn.submit()
+		self.assertRaises(frappe.ValidationError, dn.submit)
 
 	def tearDown(self):
 		frappe.db.rollback()
