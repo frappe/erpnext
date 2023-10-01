@@ -475,6 +475,7 @@
    "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Supplier Warehouse",
    "options": "Warehouse"
   },
@@ -1272,7 +1273,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-13 16:21:07.361700",
+ "modified": "2023-10-01 20:58:07.851037",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
