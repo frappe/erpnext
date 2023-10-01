@@ -1575,11 +1575,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-07-04 17:23:59.145031",
-=======
  "modified": "2023-10-01 21:01:47.282533",
->>>>>>> e7f4b7b190 (fix: ignore user permissions for `Source Warehouse` (#37313))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
