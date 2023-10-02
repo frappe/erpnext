@@ -1744,7 +1744,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		pi = make_purchase_invoice(
 			company="_Test Company",
-			customer="_Test Supplier",
 			do_not_save=True,
 			do_not_submit=True,
 			rate=1000,
@@ -1862,7 +1861,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		pi = make_purchase_invoice(
 			company="_Test Company",
-			customer="_Test Supplier",
 			do_not_save=True,
 			do_not_submit=True,
 			rate=1000,
@@ -1891,6 +1889,32 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		)
 		clear_dimension_defaults("Branch")
 		disable_dimension()
+
+	def test_repost_accounting_entries(self):
+		pi = make_purchase_invoice(
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
+		)
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 1000, nowdate()],
+		]
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+
+		pi.items[0].expense_account = "Service - _TC"
+		pi.save()
+		pi.load_from_db()
+		self.assertTrue(pi.repost_required)
+		pi.repost_accounting_entries()
+
+		expected_gle = [
+			["Creditors - _TC", 0.0, 1000, nowdate()],
+			["Service - _TC", 1000, 0.0, nowdate()],
+		]
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		pi.load_from_db()
+		self.assertFalse(pi.repost_required)
 
 	@change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):
