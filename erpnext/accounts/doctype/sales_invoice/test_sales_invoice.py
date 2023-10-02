@@ -49,9 +49,13 @@ class TestSalesInvoice(FrappeTestCase):
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
+		self.remove_accounts_frozen_date()
 
 	def tearDown(self):
 		frappe.db.rollback()
+
+	def remove_accounts_frozen_date(self):
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
