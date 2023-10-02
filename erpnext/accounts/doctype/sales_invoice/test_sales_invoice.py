@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
-from frappe.tests.utils import change_settings
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 import erpnext
@@ -45,13 +45,16 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
 
 
-class TestSalesInvoice(unittest.TestCase):
+class TestSalesInvoice(FrappeTestCase):
 	def setUp(self):
 		from erpnext.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import create_items
 
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
