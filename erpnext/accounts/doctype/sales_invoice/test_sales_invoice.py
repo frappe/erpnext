@@ -49,6 +49,7 @@ class TestSalesInvoice(FrappeTestCase):
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -3206,6 +3207,7 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		acc_settings = frappe.get_single("Accounts Settings")
 		acc_settings.book_deferred_entries_via_journal_entry = 0
 		acc_settings.submit_journal_entries = 0
@@ -3216,6 +3218,8 @@ class TestSalesInvoice(FrappeTestCase):
 		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 >>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
 
+=======
+>>>>>>> 8ebe5733ac (refactor(test): fix broken test cases in Sales Invoice)
 	def test_standalone_serial_no_return(self):
 		si = create_sales_invoice(
 			item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1
