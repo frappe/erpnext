@@ -150,6 +150,22 @@ frappe.ui.form.on("Customer", {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
 			}, __('Create'));
 
+			frm.add_custom_button(__('Quotation'), function () {
+				frappe.model.with_doctype('Quotation', function() {
+					var so = frappe.model.get_new_doc('Quotation');
+					so.party_name = frm.doc.name; // Set the current customer as the SO customer
+					frappe.set_route('Form', 'Quotation', so.name);
+				});
+			}, __('Create'));
+
+			frm.add_custom_button(__('Sales Order'), function () {
+				frappe.model.with_doctype('Sales Order', function() {
+					var so = frappe.model.get_new_doc('Sales Order');
+					so.customer = frm.doc.name; // Set the current customer as the SO customer
+					frappe.set_route('Form', 'Sales Order', so.name);
+				});
+			}, __('Create'));
+
 			frm.add_custom_button(__('Get Customer Group Details'), function () {
 				frm.trigger("get_customer_group_details");
 			}, __('Actions'));
