@@ -3112,6 +3112,53 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", over_billing_allowance)
 
+	def test_max_overdue_invoice_count(self):
+		"""
+		Test a case where invoice is raised against customer with
+		overdue bills exceeding the limit
+		"""
+		max_allowed_overdue_bills = frappe.db.get_single_value(
+			"Accounts Settings", "max_allowed_overdue_bills"
+		)
+		overdue_controller = frappe.db.get_single_value("Accounts Settings", "overdue_controller")
+		frappe.db.set_single_value(
+			"Accounts Settings", {"max_allowed_overdue_bills": 1, "overdue_controller": ""}
+		)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Overdue Bill Customer",
+				"customer_group": "All Customer Groups",
+				"customer_type": "Company",
+				"territory": "All Territories",
+			}
+		)
+		while frappe.db.exists("Customer", customer.customer_name):
+			customer.customer_name = f"{customer.customer_name}-1"
+		customer.insert(ignore_permissions=True)
+
+		overdue_inv = create_sales_invoice(
+			customer=customer.name,
+			posting_date=add_days(getdate(), -1),
+		)
+		overdue_inv.due_date = add_days(getdate(), -1)
+		overdue_inv.submit()
+
+		si = create_sales_invoice(customer=customer.name)
+		with self.assertRaises(frappe.ValidationError) as err:
+			si.save()
+
+		self.assertTrue("overdue invoice(s) against them" in str(err.exception).lower())
+
+		frappe.db.set_single_value(
+			"Accounts Settings",
+			{
+				"max_allowed_overdue_bills": max_allowed_overdue_bills,
+				"overdue_controller": overdue_controller,
+			},
+		)
+
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",
