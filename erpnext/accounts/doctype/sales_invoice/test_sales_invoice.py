@@ -49,13 +49,9 @@ class TestSalesInvoice(FrappeTestCase):
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
-		self.remove_accounts_frozen_date()
 
 	def tearDown(self):
 		frappe.db.rollback()
-
-	def remove_accounts_frozen_date(self):
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -3083,8 +3079,12 @@ class TestSalesInvoice(FrappeTestCase):
 			si.commission_rate = commission_rate
 			self.assertRaises(frappe.ValidationError, si.save)
 
+	@change_settings("Accounts Settings", {"acc_frozen_upto": add_days(getdate(), 1)})
 	def test_sales_invoice_submission_post_account_freezing_date(self):
+<<<<<<< HEAD
 		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", add_days(getdate(), 1))
+=======
+>>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
 		si = create_sales_invoice(do_not_save=True)
 		si.posting_date = add_days(getdate(), 1)
 		si.save()
@@ -3093,8 +3093,11 @@ class TestSalesInvoice(FrappeTestCase):
 		si.posting_date = getdate()
 		si.submit()
 
+<<<<<<< HEAD
 		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
 
+=======
+>>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
 	def test_over_billing_case_against_delivery_note(self):
 		"""
 		Test a case where duplicating the item with qty = 1 in the invoice
@@ -3123,17 +3126,19 @@ class TestSalesInvoice(FrappeTestCase):
 
 		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", over_billing_allowance)
 
+	@change_settings(
+		"Accounts Settings",
+		{
+			"book_deferred_entries_via_journal_entry": 1,
+			"submit_journal_entries": 1,
+		},
+	)
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC",
 			company="_Test Company",
 		)
-
-		acc_settings = frappe.get_single("Accounts Settings")
-		acc_settings.book_deferred_entries_via_journal_entry = 1
-		acc_settings.submit_journal_entries = 1
-		acc_settings.save()
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_expense = 1
@@ -3200,12 +3205,16 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(expected_gle[i][2], gle.debit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
+<<<<<<< HEAD
 		acc_settings = frappe.get_single("Accounts Settings")
 		acc_settings.book_deferred_entries_via_journal_entry = 0
 		acc_settings.submit_journal_entries = 0
 		acc_settings.save()
 
 		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
+=======
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
+>>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
 
 	def test_standalone_serial_no_return(self):
 		si = create_sales_invoice(
