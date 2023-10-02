@@ -32,6 +32,7 @@
   "column_break_19",
   "add_taxes_from_item_tax_template",
   "book_tax_discount_loss",
+  "round_row_wise_tax",
   "print_settings",
   "show_inclusive_tax_in_print",
   "show_taxes_as_table_in_print",
@@ -49,6 +50,10 @@
   "role_allowed_to_over_bill",
   "credit_controller",
   "make_payment_via_journal_entry",
+  "overdue_settings_section",
+  "max_allowed_overdue_bills",
+  "column_break_nkiw",
+  "overdue_controller",
   "pos_tab",
   "pos_setting_section",
   "post_change_gl_entries",
@@ -414,6 +419,35 @@
    "fieldname": "ignore_account_closing_balance",
    "fieldtype": "Check",
    "label": "Ignore Account Closing Balance"
+  },
+  {
+   "default": "0",
+   "description": "Tax Amount will be rounded on a row(items) level",
+   "fieldname": "round_row_wise_tax",
+   "fieldtype": "Check",
+   "label": "Round Tax Amount Row-wise"
+  },
+  {
+   "fieldname": "overdue_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Overdue Settings"
+  },
+  {
+   "description": "The maximum number of bills that can be overdue against a customer after which no new invoice can be raised",
+   "fieldname": "max_allowed_overdue_bills",
+   "fieldtype": "Int",
+   "label": "Max Allowed Overdue Bills"
+  },
+  {
+   "fieldname": "column_break_nkiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Users with this role are allowed to bill even if the maximum allowed overdue bill count exceeds",
+   "fieldname": "overdue_controller",
+   "fieldtype": "Link",
+   "label": "Role allowed to bypass Overdue Limit",
+   "options": "Role"
   }
  ],
  "icon": "icon-cog",
@@ -421,7 +455,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-07-27 15:05:34.000264",
+ "modified": "2023-10-02 21:35:51.995947",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

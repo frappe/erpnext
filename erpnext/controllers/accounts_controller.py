@@ -1497,6 +1497,45 @@ class AccountsController(TransactionBase):
 				)
 			)
 
+	def validate_overdue_bill_count(self):
+		if self.doctype != "Sales Invoice":
+			return
+
+		max_allowed_overdue_bills = frappe.db.get_value(
+			"Accounts Settings", None, "max_allowed_overdue_bills", cache=True
+		)
+
+		if not flt(max_allowed_overdue_bills):
+			return
+
+		overdue_controller = frappe.db.get_value(
+			"Accounts Settings", None, "overdue_controller", cache=True
+		)
+
+		overdue_invoices = frappe.db.get_all(
+			self.doctype,
+			{"customer": self.customer, "docstatus": 1, "status": "Overdue", "name": ["!=", self.name]},
+			pluck="name",
+		)
+
+		if flt(len(overdue_invoices)) >= flt(max_allowed_overdue_bills):
+			msg = f"""
+				Cannot raise and invoice against {self.customer} as there
+				are {max_allowed_overdue_bills} or more overdue invoice(s) against them.
+				To allow more, please set allowance in Accounts Settings.<br>
+				Overdue invoice(s):
+			"""
+			msg += "<br><ul>"
+
+			for d in overdue_invoices:
+				msg += f"<li>{get_link_to_form('Sales Invoice', d)}</li>"
+			msg += "</li></ul>"
+
+			if overdue_controller in frappe.get_roles():
+				frappe.msgprint(_(msg), alert=True, indicator="yellow")
+			else:
+				frappe.throw(_(msg), title=_("Overdue Invoice Limit Reached"))
+
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
 		from erpnext.controllers.status_updater import get_allowance_for
 

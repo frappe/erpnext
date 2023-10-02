@@ -138,6 +138,7 @@ class SalesInvoice(SellingController):
 		self.set_against_income_account()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
+		self.validate_overdue_bill_count()
 		if not self.is_return:
 			self.validate_serial_numbers()
 		else:
