@@ -616,6 +616,7 @@
    "fieldname": "relieving_date",
    "fieldtype": "Date",
    "label": "Relieving Date",
+   "no_copy": 1,
    "mandatory_depends_on": "eval:doc.status == \"Left\"",
    "oldfieldname": "relieving_date",
    "oldfieldtype": "Date"
