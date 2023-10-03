@@ -97,12 +97,12 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		# Test General Ledger Entries
 		expected_gle = {
-			"_Test Fixed Asset - TCP1": 3000,
+			"_Test Fixed Asset - TCP1": 2999.99,
 			"Expenses Included In Asset Valuation - TCP1": -1000,
 			"_Test Warehouse - TCP1": -2000,
+			"Round Off - TCP1": 0.01,
 		}
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
-
 		self.assertEqual(actual_gle, expected_gle)
 
 		# Test Stock Ledger Entries
@@ -187,9 +187,10 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test General Ledger Entries
 		default_expense_account = frappe.db.get_value("Company", company, "default_expense_account")
 		expected_gle = {
-			"_Test Fixed Asset - _TC": 3000,
+			"_Test Fixed Asset - _TC": 2999.99,
 			"Expenses Included In Asset Valuation - _TC": -1000,
 			default_expense_account: -2000,
+			"Round Off - _TC": 0.01,
 		}
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 
@@ -303,9 +304,10 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		# Test General Ledger Entries
 		expected_gle = {
-			"_Test Warehouse - TCP1": consumed_asset_value_before_disposal,
 			"_Test Accumulated Depreciations - TCP1": accumulated_depreciation,
 			"_Test Fixed Asset - TCP1": -consumed_asset_purchase_value,
+			"_Test Warehouse - TCP1": consumed_asset_value_before_disposal - 0.01,
+			"Round Off - TCP1": 0.01,
 		}
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 		self.assertEqual(actual_gle, expected_gle)
