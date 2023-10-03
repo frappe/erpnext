@@ -460,6 +460,12 @@ cur_frm.set_query("expense_account", "items", function(doc) {
 	}
 });
 
+cur_frm.set_query("wip_composite_asset", "items", function() {
+	return {
+		filters: {'is_composite_asset': 1, 'docstatus': 0 }
+	}
+});
+
 cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && d.expense_account){
