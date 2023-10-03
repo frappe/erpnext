@@ -180,7 +180,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
