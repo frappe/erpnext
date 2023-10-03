@@ -23,7 +23,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
-	item_details = get_item_details(items, sl_entries, include_uom)
+	item_details = get_item_details(items, sl_entries, include_uom, filters)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
@@ -42,7 +42,7 @@ def execute(filters=None):
 	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(filters)
 
 	for sle in sl_entries:
-		item_detail = item_details[sle.item_code]
+		item_detail = item_details.get(sle.item_code, {})
 
 		sle.update(item_detail)
 
@@ -69,10 +69,12 @@ def execute(filters=None):
 
 		data.append(sle)
 
-		if include_uom:
+		if include_uom or (filters and filters.show_qty_in_secondary_uom):
 			conversion_factors.append(item_detail.conversion_factor)
 
-	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+	update_included_uom_in_report(
+		columns, data, include_uom, conversion_factors, secondary_uom=filters.show_qty_in_secondary_uom
+	)
 	return columns, data
 
 
@@ -121,6 +123,17 @@ def get_columns(filters):
 			"width": 90,
 		},
 	]
+
+	if filters.show_qty_in_secondary_uom:
+		columns.append(
+			{
+				"label": _("Secondary UOM"),
+				"fieldname": "secondary_uom",
+				"fieldtype": "Link",
+				"options": "UOM",
+				"width": 130,
+			}
+		)
 
 	for dimension in get_inventory_dimensions():
 		columns.append(
@@ -348,7 +361,7 @@ def get_items(filters):
 	return items
 
 
-def get_item_details(items, sl_entries, include_uom):
+def get_item_details(items, sl_entries, include_uom, filters=None):
 	item_details = {}
 	if not items:
 		items = list(set(d.item_code for d in sl_entries))
@@ -359,21 +372,36 @@ def get_item_details(items, sl_entries, include_uom):
 	item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(item)
-		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.select(
+			item.name,
+			item.item_name,
+			item.description,
+			item.item_group,
+			item.brand,
+			item.stock_uom,
+			item.secondary_uom,
+		)
 		.where(item.name.isin(items))
 	)
 
-	if include_uom:
+	if include_uom or (filters and filters.show_qty_in_secondary_uom):
 		ucd = frappe.qb.DocType("UOM Conversion Detail")
-		query = (
-			query.left_join(ucd)
-			.on((ucd.parent == item.name) & (ucd.uom == include_uom))
-			.select(ucd.conversion_factor)
+		uom_query = (
+			frappe.qb.from_(ucd).select(ucd.parent, ucd.conversion_factor).where(ucd.parent.isin(items))
 		)
+
+		if include_uom:
+			uom_query = uom_query.where(ucd.uom == include_uom)
+
+		elif filters and filters.show_qty_in_secondary_uom:
+			uom_query = uom_query.where(ucd.is_secondary_uom == 1)
+
+		uom_res = frappe._dict(uom_query.run(as_list=True))
 
 	res = query.run(as_dict=True)
 
 	for item in res:
+		item.conversion_factor = uom_res.get(item.name) or 1
 		item_details.setdefault(item.name, item)
 
 	return item_details

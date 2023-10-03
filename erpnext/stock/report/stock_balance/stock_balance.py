@@ -68,6 +68,9 @@ class StockBalanceReport(object):
 		if not self.columns:
 			self.columns = self.get_columns()
 
+		if self.filters.get("show_qty_in_secondary_uom"):
+			self.show_qty_in_secondary_uom()
+
 		self.add_additional_uom_columns()
 
 		return self.columns, self.data
@@ -201,6 +204,7 @@ class StockBalanceReport(object):
 				"company": entry.company,
 				"currency": self.company_currency,
 				"stock_uom": entry.stock_uom,
+				"secondary_uom": entry.secondary_uom,
 				"item_name": entry.item_name,
 				"opening_qty": opening_data.get("bal_qty") or 0.0,
 				"opening_val": opening_data.get("bal_val") or 0.0,
@@ -274,6 +278,7 @@ class StockBalanceReport(object):
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,
+				item_table.secondary_uom,
 			)
 			.where((sle.docstatus < 2) & (sle.is_cancelled == 0))
 			.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
@@ -383,7 +388,7 @@ class StockBalanceReport(object):
 					"fieldname": "stock_uom",
 					"fieldtype": "Link",
 					"options": "UOM",
-					"width": 90,
+					"width": 100,
 				},
 				{
 					"label": _("Balance Qty"),
@@ -391,6 +396,9 @@ class StockBalanceReport(object):
 					"fieldtype": "Float",
 					"width": 100,
 					"convertible": "qty",
+					"secondary_uom_field": "secondary_uom"
+					if self.filters.get("show_qty_in_secondary_uom")
+					else None,
 				},
 				{
 					"label": _("Balance Value"),
@@ -471,7 +479,13 @@ class StockBalanceReport(object):
 		conversion_factors = self.get_itemwise_conversion_factor()
 		add_additional_uom_columns(self.columns, self.data, self.filters.include_uom, conversion_factors)
 
-	def get_itemwise_conversion_factor(self):
+	def show_qty_in_secondary_uom(self):
+		conversion_factors = self.get_itemwise_conversion_factor(secondary_uom=True)
+		add_additional_uom_columns(
+			self.columns, self.data, self.filters.include_uom, conversion_factors, secondary_uom=True
+		)
+
+	def get_itemwise_conversion_factor(self, secondary_uom=False):
 		items = []
 		if self.filters.item_code or self.filters.item_group:
 			items = [d.item_code for d in self.data]
@@ -483,8 +497,13 @@ class StockBalanceReport(object):
 				table.conversion_factor,
 				table.parent,
 			)
-			.where((table.parenttype == "Item") & (table.uom == self.filters.include_uom))
+			.where((table.parenttype == "Item"))
 		)
+
+		if secondary_uom:
+			query = query.where(table.is_secondary_uom == 1)
+		else:
+			query = query.where(table.uom == self.filters.include_uom)
 
 		if items:
 			query = query.where(table.parent.isin(items))
@@ -579,6 +598,7 @@ def filter_items_with_no_transactions(
 				"item_group",
 				"project",
 				"stock_uom",
+				"secondary_uom",
 				"company",
 				"opening_fifo_queue",
 			]:

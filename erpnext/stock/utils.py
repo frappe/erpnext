@@ -392,8 +392,10 @@ def validate_disabled_warehouse(warehouse):
 		)
 
 
-def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
-	if not include_uom or not conversion_factors:
+def update_included_uom_in_report(
+	columns, result, include_uom, conversion_factors, secondary_uom=False
+):
+	if (not include_uom and not secondary_uom) or not conversion_factors:
 		return
 
 	convertible_cols = {}
@@ -411,8 +413,12 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 			columns.insert(
 				idx + 1,
 				{
-					"label": "{0} (per {1})".format(d.get("label"), include_uom),
-					"fieldname": "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
+					"label": "{0} (per {1})".format(
+						d.get("label"), include_uom if not secondary_uom else _("Secondary UOM")
+					),
+					"fieldname": "{0}_{1}".format(
+						d.get("fieldname"), frappe.scrub(include_uom) if not secondary_uom else "alt"
+					),
 					"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
 				},
 			)
@@ -423,6 +429,7 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		for key, value in data:
 			if key not in convertible_columns:
 				continue
+
 			# If no conversion factor for the UOM, defaults to 1
 			if not conversion_factors[row_idx]:
 				conversion_factors[row_idx] = 1
@@ -435,7 +442,7 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
 			else:
-				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
+				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom) if not secondary_uom else "alt")
 				update_dict_values.append([row, new_key, new_value])
 
 	for data in update_dict_values:
@@ -454,8 +461,10 @@ def get_available_serial_nos(args):
 	)
 
 
-def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
-	if not include_uom or not conversion_factors:
+def add_additional_uom_columns(
+	columns, result, include_uom, conversion_factors, secondary_uom=False
+):
+	if (not include_uom and not secondary_uom) or not conversion_factors:
 		return
 
 	convertible_column_map = {}
@@ -463,15 +472,32 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 		col = columns[col_idx]
 		if isinstance(col, dict) and col.get("convertible") in ["rate", "qty"]:
 			next_col = col_idx + 1
-			columns.insert(next_col, col.copy())
+			new_col = col.copy()
+			if secondary_uom:
+				new_col["width"] = 140
+			columns.insert(next_col, new_col)
 			columns[next_col]["fieldname"] += "_alt"
 			convertible_column_map[col.get("fieldname")] = frappe._dict(
 				{"converted_col": columns[next_col]["fieldname"], "for_type": col.get("convertible")}
 			)
 			if col.get("convertible") == "rate":
-				columns[next_col]["label"] += " (per {})".format(include_uom)
+				columns[next_col]["label"] += (
+					" (per {})".format(include_uom) if not secondary_uom else _(" (Secondary UOM)")
+				)
 			else:
-				columns[next_col]["label"] += " ({})".format(include_uom)
+				columns[next_col]["label"] += (
+					" ({})".format(include_uom) if not secondary_uom else _(" (Secondary UOM)")
+				)
+
+			if col.get("secondary_uom_field"):
+				next_col = col_idx + 1
+				new_col = col.copy()
+				new_col["fieldname"] = col.get("secondary_uom_field")
+				new_col["label"] = _("Secondary UOM")
+				new_col["fieldtype"] = "Link"
+				new_col["options"] = "UOM"
+				new_col["width"] = 130
+				columns.insert(next_col, new_col)
 
 	for row_idx, row in enumerate(result):
 		for convertible_col, data in convertible_column_map.items():

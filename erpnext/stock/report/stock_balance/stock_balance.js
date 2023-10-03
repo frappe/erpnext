@@ -101,6 +101,13 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": 'Check',
 			"default": 1
 		},
+		{
+			"fieldname": 'show_qty_in_secondary_uom',
+			"label": __('Show Qty in Secondary UOM'),
+			"fieldtype": 'Check',
+			"default": 0,
+			"depends_on": "eval:!doc.include_uom"
+		},
 	],
 
 	"formatter": function (value, row, column, data, default_formatter) {

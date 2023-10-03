@@ -115,6 +115,7 @@ class Item(Document):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.validate_item_tax_net_rate_range()
+		self.set_is_secondary_uom()
 		set_item_tax_from_hsn_code(self)
 
 		if not self.is_new():
@@ -138,6 +139,17 @@ class Item(Document):
 			if self.valuation_rate:
 				frappe.throw(_('"Customer Provided Item" cannot have Valuation Rate'))
 			self.default_material_request_type = "Customer Provided"
+
+	def set_is_secondary_uom(self):
+		if not self.secondary_uom:
+			return
+
+		for row in self.uoms:
+			if row.uom == self.secondary_uom:
+				row.is_secondary_uom = 1
+
+			elif row.is_secondary_uom:
+				row.is_secondary_uom = 0
 
 	def add_price(self, price_list=None):
 		"""Add a new price"""

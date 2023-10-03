@@ -242,6 +242,18 @@ frappe.ui.form.on("Item", {
 
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
+	},
+
+	secondary_uom(frm) {
+		if (frm.doc.secondary_uom) {
+			frm.doc.uoms.forEach(row => {
+				if (row.uom === frm.doc.secondary_uom && !row.is_secondary_uom) {
+					frappe.model.set_value(row.doctype, row.name, 'is_secondary_uom', 1);
+				} else if (row.is_secondary_uom && row.uom !== frm.doc.stock_uom) {
+					frappe.model.set_value(row.doctype, row.name, 'is_secondary_uom', 0);
+				}
+			})
+		}
 	}
 });
 
