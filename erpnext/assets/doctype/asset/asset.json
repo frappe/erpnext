@@ -564,11 +564,7 @@
    "table_fieldname": "accounts"
   }
  ],
-<<<<<<< HEAD
- "modified": "2023-07-28 20:12:44.819616",
-=======
  "modified": "2023-10-03 23:28:26.732269",
->>>>>>> 4907e7acd4 (feat: wip composite asset)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
