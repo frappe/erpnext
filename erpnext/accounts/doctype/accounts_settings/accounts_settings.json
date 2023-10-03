@@ -425,6 +425,7 @@
    "label": "Overdue Settings"
   },
   {
+   "default": "0",
    "description": "The maximum number of bills that can be overdue against a customer after which no new invoice can be raised",
    "fieldname": "max_allowed_overdue_bills",
    "fieldtype": "Int",
@@ -447,7 +448,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-02 23:49:31.987665",
+ "modified": "2023-10-03 10:28:08.790268",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
