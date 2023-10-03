@@ -239,7 +239,7 @@ frappe.ui.form.on('Asset', {
 
 		datatable.style.setStyle(`.dt-scrollable`, {'font-size': '0.75rem', 'margin-bottom': '1rem', 'margin-left': '0.35rem', 'margin-right': '0.35rem'});
 		datatable.style.setStyle(`.dt-header`, {'margin-left': '0.35rem', 'margin-right': '0.35rem'});
-		datatable.style.setStyle(`.dt-cell--header`, {'color': 'var(--text-muted)'});
+		datatable.style.setStyle(`.dt-cell--header .dt-cell__content`, {'color': 'var(--gray-600)', 'font-size': 'var(--text-sm)'});
 		datatable.style.setStyle(`.dt-cell`, {'color': 'var(--text-color)'});
 		datatable.style.setStyle(`.dt-cell--col-1`, {'text-align': 'center'});
 		datatable.style.setStyle(`.dt-cell--col-2`, {'font-weight': 600});
@@ -340,7 +340,8 @@ frappe.ui.form.on('Asset', {
 			method: "erpnext.assets.doctype.asset.asset.get_item_details",
 			args: {
 				item_code: frm.doc.item_code,
-				asset_category: frm.doc.asset_category
+				asset_category: frm.doc.asset_category,
+				gross_purchase_amount: frm.doc.gross_purchase_amount
 			},
 			callback: function(r, rt) {
 				if(r.message) {
@@ -546,7 +547,21 @@ frappe.ui.form.on('Asset', {
 				}
 			});
 		}
-	}
+	},
+
+	set_salvage_value_percentage_or_expected_value_after_useful_life: function(frm, row, salvage_value_percentage_changed, expected_value_after_useful_life_changed) {
+		if (expected_value_after_useful_life_changed) {
+			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = true;
+			const new_salvage_value_percentage = flt((row.expected_value_after_useful_life * 100) / frm.doc.gross_purchase_amount, precision("salvage_value_percentage", row));
+			frappe.model.set_value(row.doctype, row.name, "salvage_value_percentage", new_salvage_value_percentage);
+			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = false;
+		} else if (salvage_value_percentage_changed) {
+			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = true;
+			const new_expected_value_after_useful_life = flt(frm.doc.gross_purchase_amount * (row.salvage_value_percentage / 100), precision('gross_purchase_amount'));
+			frappe.model.set_value(row.doctype, row.name, "expected_value_after_useful_life", new_expected_value_after_useful_life);
+			frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life = false;
+		}
+	},
 });
 
 frappe.ui.form.on('Asset Finance Book', {
@@ -557,7 +572,17 @@ frappe.ui.form.on('Asset Finance Book', {
 
 	expected_value_after_useful_life: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
+		if (!frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life) {
+			frm.events.set_salvage_value_percentage_or_expected_value_after_useful_life(frm, row, false, true);
+		}
 		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	salvage_value_percentage: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!frappe.flags.from_set_salvage_value_percentage_or_expected_value_after_useful_life) {
+			frm.events.set_salvage_value_percentage_or_expected_value_after_useful_life(frm, row, true, false);
+		}
 	},
 
 	frequency_of_depreciation: function(frm, cdt, cdn) {
