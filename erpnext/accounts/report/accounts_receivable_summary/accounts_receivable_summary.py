@@ -99,7 +99,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 			# Add all amount columns
 			for k in list(self.party_total[d.party]):
-				if type(self.party_total[d.party][k]) == float:
+				if isinstance(self.party_total[d.party][k], float):
 					self.party_total[d.party][k] += d.get(k) or 0.0
 
 			# set territory, customer_group, sales person etc
