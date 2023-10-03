@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, time_diff_in_hours
+from erpnext.projects.report.billing_summary import get_billable_and_total_duration
 
 
 def get_columns():
@@ -141,15 +142,3 @@ def get_timesheet_details(filters, timesheet_list):
 		timesheet_details_map.setdefault(d.parent, []).append(d)
 
 	return timesheet_details_map
-
-
-def get_billable_and_total_duration(activity, start_time, end_time):
-	precision = frappe.get_precision("Timesheet Detail", "hours")
-	activity_duration = time_diff_in_hours(end_time, start_time)
-	billing_duration = 0.0
-	if activity.is_billable:
-		billing_duration = activity.billing_hours
-		if activity_duration != activity.billing_hours:
-			billing_duration = activity_duration * activity.billing_hours / activity.hours
-
-	return flt(activity_duration, precision), flt(billing_duration, precision)
