@@ -572,6 +572,17 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
+			if (
+				self.currency
+				and buying_or_selling == "Buying"
+				and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
+				and self.doctype == "Purchase Invoice"
+			):
+				self.use_transaction_date_exchange_rate = True
+				self.conversion_rate = get_exchange_rate(
+					self.currency, self.company_currency, transaction_date, args
+				)
+
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
