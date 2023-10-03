@@ -6,6 +6,7 @@ from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
+	get_completed_production_plans,
 	get_items_for_material_requests,
 	get_sales_orders,
 	get_warehouse_list,
@@ -1091,6 +1092,50 @@ class TestProductionPlan(FrappeTestCase):
 			after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 			self.assertEqual(after_qty, before_qty)
+
+	def test_resered_qty_for_production_plan_for_less_rm_qty(self):
+		from erpnext.stock.utils import get_or_make_bin
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		pln = create_production_plan(item_code="Test Production Item 1", planned_qty=10)
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		self.assertEqual(after_qty - before_qty, 10)
+
+		pln.make_work_order()
+
+		plans = []
+		for row in frappe.get_all("Work Order", filters={"production_plan": pln.name}, fields=["name"]):
+			wo_doc = frappe.get_doc("Work Order", row.name)
+			wo_doc.source_warehouse = "_Test Warehouse - _TC"
+			wo_doc.wip_warehouse = "_Test Warehouse 1 - _TC"
+			wo_doc.fg_warehouse = "_Test Warehouse - _TC"
+			for d in wo_doc.required_items:
+				d.source_warehouse = "_Test Warehouse - _TC"
+				print(d.required_qty, "before")
+				d.required_qty -= 5
+				make_stock_entry(
+					item_code=d.item_code,
+					qty=d.required_qty,
+					rate=100,
+					target="_Test Warehouse - _TC",
+				)
+
+			wo_doc.submit()
+			plans.append(pln.name)
+
+		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		self.assertEqual(after_qty, before_qty)
+
+		completed_plans = get_completed_production_plans()
+		for plan in plans:
+			self.assertTrue(plan in completed_plans)
 
 	def test_resered_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
