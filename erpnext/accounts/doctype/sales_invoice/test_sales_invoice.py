@@ -3117,10 +3117,6 @@ class TestSalesInvoice(unittest.TestCase):
 		Test a case where invoice is raised against customer with
 		overdue bills exceeding the limit
 		"""
-		max_allowed_overdue_bills = frappe.db.get_single_value(
-			"Accounts Settings", "max_allowed_overdue_bills"
-		)
-		overdue_controller = frappe.db.get_single_value("Accounts Settings", "overdue_controller")
 		frappe.db.set_single_value(
 			"Accounts Settings", {"max_allowed_overdue_bills": 1, "overdue_controller": ""}
 		)
@@ -3154,8 +3150,8 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.set_single_value(
 			"Accounts Settings",
 			{
-				"max_allowed_overdue_bills": max_allowed_overdue_bills,
-				"overdue_controller": overdue_controller,
+				"max_allowed_overdue_bills": 0,
+				"overdue_controller": "",
 			},
 		)
 
