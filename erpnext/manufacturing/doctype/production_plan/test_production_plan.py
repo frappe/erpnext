@@ -1116,7 +1116,6 @@ class TestProductionPlan(FrappeTestCase):
 			wo_doc.fg_warehouse = "_Test Warehouse - _TC"
 			for d in wo_doc.required_items:
 				d.source_warehouse = "_Test Warehouse - _TC"
-				print(d.required_qty, "before")
 				d.required_qty -= 5
 				make_stock_entry(
 					item_code=d.item_code,
