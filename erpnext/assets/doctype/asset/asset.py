@@ -234,7 +234,7 @@ class Asset(AccountsController):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
-		if not flt(self.gross_purchase_amount):
+		if not flt(self.gross_purchase_amount) and not self.is_composite_asset:
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
@@ -1164,6 +1164,15 @@ def create_asset_repair(asset, asset_name):
 	asset_repair = frappe.new_doc("Asset Repair")
 	asset_repair.update({"asset": asset, "asset_name": asset_name})
 	return asset_repair
+
+
+@frappe.whitelist()
+def create_asset_capitalization(asset):
+	asset_capitalization = frappe.new_doc("Asset Capitalization")
+	asset_capitalization.update(
+		{"target_asset": asset, "capitalization_method": "Choose a WIP composite asset"}
+	)
+	return asset_capitalization
 
 
 @frappe.whitelist()
