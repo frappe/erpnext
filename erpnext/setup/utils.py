@@ -113,13 +113,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		if not value:
 			import requests
 
-			api_url = "https://api.exchangerate.host/convert"
-			response = requests.get(
-				api_url, params={"date": transaction_date, "from": from_currency, "to": to_currency}
-			)
+			api_url = f"https://api.frankfurter.app/{transaction_date}"
+			response = requests.get(api_url, params={"from": from_currency, "to": to_currency})
+
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["result"]
+			value = response.json()["rates"][to_currency]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
