@@ -234,7 +234,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Capitalization",
 			capitalization_method="Choose a WIP composite asset",
-			target_asset=wip_composite_asset,
+			target_asset=wip_composite_asset.name,
 			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
