@@ -77,15 +77,18 @@ class DeliveryTrip(Document):
 			processed_so_details=set()
 			for sales_order in sales_orders:
 				# sales_order_doc = frappe.get_doc("Sales Order", sales_order['sales_order'])
-				status = invoices.get(sales_order['parent'], 0)
+				invoice_status = invoices.get(sales_order['parent'], 0)
 
 				if sales_order['sales_order'] in processed_so_details:
 					continue
 
 				processed_so_details.add(sales_order['sales_order'])
 
-				delivery_status = 'Not Delivered' if cancel else ('Fully Delivered' if status == 1 else 'In Transit')
+				delivery_status = 'Not Delivered' if cancel else ('Fully Delivered' if invoice_status == 1 else 'In Transit')
 				frappe.db.set_value("Sales Order", sales_order['sales_order'], "delivery_status", delivery_status)
+
+				order_status = 'To Deliver' if cancel else ('Completed' if invoice_status == 1 else 'To Deliver and Bill')
+				frappe.db.set_value("Sales Order", sales_order['sales_order'], "status", order_status)
 
 	def update_sales_invoices(self, cancel=False):
 			"""
