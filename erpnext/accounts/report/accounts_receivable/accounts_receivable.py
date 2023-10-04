@@ -801,7 +801,7 @@ class ReceivablePayableReport(object):
 			self.qb_selection_filter.append(self.filters.party_type == self.ple.party_type)
 
 		if self.filters.get("party"):
-			self.qb_selection_filter.append(self.filters.party == self.ple.party)
+			self.qb_selection_filter.append(self.ple.party.isin(self.filters.party))
 
 		if self.filters.party_account:
 			self.qb_selection_filter.append(self.ple.account == self.filters.party_account)

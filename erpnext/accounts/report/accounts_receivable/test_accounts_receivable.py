@@ -573,7 +573,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"party_type": "Customer",
-			"party": self.customer,
+			"party": [self.customer],
 			"report_date": today(),
 			"range1": 30,
 			"range2": 60,
@@ -605,3 +605,41 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		for field in expected:
 			with self.subTest(field=field):
 				self.assertEqual(report_output.get(field), expected.get(field))
+
+	def test_multi_select_party_filter(self):
+		self.customer1 = self.customer
+		self.create_customer("_Test Customer 2")
+		self.customer2 = self.customer
+		self.create_customer("_Test Customer 3")
+		self.customer3 = self.customer
+
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": [self.customer1, self.customer3],
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+
+		si1 = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si1.customer = self.customer1
+		si1.save().submit()
+
+		si2 = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si2.customer = self.customer2
+		si2.save().submit()
+
+		si3 = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si3.customer = self.customer3
+		si3.save().submit()
+
+		# check invoice grand total and invoiced column's value for 3 payment terms
+		report = execute(filters)
+
+		expected_output = {self.customer1, self.customer3}
+		self.assertEqual(len(report[1]), 2)
+		output_for = set([x.party for x in report[1]])
+		self.assertEqual(output_for, expected_output)

@@ -72,18 +72,11 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			}
 		},
 		{
-			"fieldname": "party_type",
+			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Link",
-			"options": "Party Type",
-			get_query: () => {
-				return {
-					filters: {
-						'account_type': 'Payable'
-					}
-				};
-			},
-			on_change: () => {
+			"fieldtype": "Autocomplete",
+			options: get_party_type_options(),
+			on_change: function() {
 				frappe.query_report.set_filter_value('party', "");
 				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') !== "Supplier");
 			}
@@ -91,8 +84,15 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		{
 			"fieldname":"party",
 			"label": __("Party"),
-			"fieldtype": "Dynamic Link",
-			"options": "party_type",
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				if (!frappe.query_report.filters) return;
+
+				let party_type = frappe.query_report.get_filter_value('party_type');
+				if (!party_type) return;
+
+				return frappe.db.get_link_options(party_type, txt);
+			},
 		},
 		{
 			"fieldname":"payment_terms_template",
@@ -122,3 +122,15 @@ frappe.query_reports["Accounts Payable Summary"] = {
 }
 
 erpnext.utils.add_dimensions('Accounts Payable Summary', 9);
+
+function get_party_type_options() {
+	let options = [];
+	frappe.db.get_list(
+		"Party Type", {filters:{"account_type": "Payable"}, fields:['name']}
+	).then((res) => {
+		res.forEach((party_type) => {
+			options.push(party_type.name);
+		});
+	});
+	return options;
+}
