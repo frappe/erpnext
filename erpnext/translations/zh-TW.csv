@@ -7776,6 +7776,7 @@ DocType: Travel Itinerary,Preferred Area for Lodging,住宿的首選地區
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +25,Cart is Empty,車是空的
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +430,"Item {0} has no Serial No. Only serilialized items \
 						can have delivery based on Serial No",項目{0}沒有序列號只有serilialized items \可以根據序列號進行交付
+<<<<<<< HEAD
 DocType: Work Order,Actual Operating Cost,實際運行成本
 DocType: Payment Entry,Cheque/Reference No,支票/參考編號
 DocType: Soil Texture,Clay Loam,粘土Loam
@@ -7854,3 +7855,105 @@ apps/erpnext/erpnext/accounts/doctype/account/account.py +238,Account {0} does n
 DocType: Training Event,Training Program,培訓計劃
 DocType: Account,Cash,現金
 DocType: Employee,Short biography for website and other publications.,網站和其他出版物的短的傳記。
+=======
+Actual Operating Cost,實際運行成本
+Cheque/Reference No,支票/參考編號
+Clay Loam,粘土Loam,
+Root cannot be edited.,root不能被編輯。
+Units of Measure,測量的單位
+Default Tax Withholding Config,預設稅款預扣配置
+Allow Production on Holidays,允許假日生產
+Customer's Purchase Order Date,客戶的採購訂單日期
+Default Finance Book,默認金融書
+Show Public Attachments,顯示公共附件
+Edit Publishing Details,編輯發布細節
+Package Weight Details,包裝重量詳情
+Reservation Time,預訂時間
+Payment Gateway Account,網路支付閘道科目
+After payment completion redirect user to selected page.,支付完成後重定向用戶選擇的頁面。
+Existing Company,現有的公司
+Result Emailed,電子郵件結果
+"Tax Category has been changed to ""Total"" because all the Items are non-stock items",稅項類別已更改為“合計”，因為所有物品均為非庫存物品
+Total Holidays,總假期
+Missing email template for dispatch. Please set one in Delivery Settings.,缺少發送的電子郵件模板。請在“傳遞設置”中設置一個。
+Mark as Present,標記為現
+Indicator Color,指示燈顏色
+To Receive and Bill,準備收料及接收發票
+Row #{0}: Reqd by Date cannot be before Transaction Date,行號{0}：按日期請求不能在交易日期之前
+Featured Products,特色產品
+Select Serial No,選擇序列號
+Designer,設計師
+Terms and Conditions Template,條款及細則範本
+Delivery Details,交貨細節
+Cost Center is required in row {0} in Taxes table for type {1},成本中心是必需的行{0}稅表型{1}
+Program Code,程序代碼
+Terms and Conditions Help,條款和條件幫助
+Item-wise Purchase Register,項目明智的購買登記
+Expiry Date,到期時間
+Employee name and designation in print,員工姓名和印刷品名稱
+accounts-browser,科目瀏覽器
+Please select Category first,請先選擇分類
+Project master.,專案主持。
+"To allow over-billing or over-ordering, update ""Allowance"" in Stock Settings or the Item.",要允許對賬單或過度訂貨，庫存設置或更新項目“津貼”。
+Contract Terms,合同條款
+Do not show any symbol like $ etc next to currencies.,不要顯示如$等任何貨幣符號。
+Credit Days,信貸天
+Please select Patient to get Lab Tests,請選擇患者以獲得實驗室測試
+Make Student Batch,讓學生批
+Allow Transfer for Manufacture,允許轉移製造
+Get Items from BOM,從物料清單取得項目
+Lead Time Days,交貨期天
+Is Income Tax Expense,是所得稅費用
+Your order is out for delivery!,您的訂單已發貨！
+Row #{0}: Posting Date must be same as purchase date {1} of asset {2},行＃{0}：過帳日期必須是相同的購買日期{1}資產的{2}
+Check this if the Student is residing at the Institute's Hostel.,如果學生住在學院的旅館，請檢查。
+Please enter Sales Orders in the above table,請在上表中輸入銷售訂單
+Stock Summary,庫存摘要
+Transfer an asset from one warehouse to another,從一個倉庫轉移資產到另一
+Bill of Materials,材料清單
+Row {0}: Party Type and Party is required for Receivable / Payable account {1},行{0}：參與方類型和參與方需要應收/應付科目{1}
+Update Items,更新項目
+Ref Date,參考日期
+Reason for Leaving,離職原因
+Operating Cost(Company Currency),營業成本（公司貨幣）
+Shelf Life In Days,保質期天數
+Is Opening,是開幕
+Expense Approvers,費用審批人
+Row {0}: Debit entry can not be linked with a {1},行{0}：借方條目不能與{1}連接
+Subscription Section,認購科
+Account {0} does not exist,科目{0}不存在
+Cash,現金
+Short biography for website and other publications.,網站和其他出版物的短的傳記。
+"It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.",看起來服務器的條帶配置存在問題。如果失敗，這筆款項將退還給您的賬戶。
+Completed By,完成
+What do you need help with?,你有什麼需要幫助的？
+Interest,利益
+Make ,使
+Other Settings,其他設置
+Dr,博士
+Payment Failed,支付失敗
+Portal,門戶
+Lft,LFT,
+Master,主
+Tasks,任務
+You can also copy-paste this link in your browser,您也可以複製粘貼此鏈接到瀏覽器
+Profile,輪廓
+For,對於
+Add Comment,添加評論
+Mobile Number,手機號碼
+End Time,結束時間
+Task Name,任務名稱
+Restart,重新開始
+Pay,付
+From Date must be before To Date,起始日期必須早於終點日期
+Notes,筆記
+Docs Search,Google文檔搜索
+Template Name,模板名稱
+Payment Gateway Name,支付網關名稱
+Running,運行
+Looks like someone sent you to an incomplete URL. Please ask them to look into it.,貌似有人送你一個不完整的URL。請讓他們尋找到它。
+Payment Gateway,支付網關
+Address and Contacts,地址和聯絡方式
+Plan Name,計劃名稱
+Reject,拒絕
+>>>>>>> 4b8dc8a35c (refactor: migrate translations from HRMS)
