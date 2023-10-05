@@ -317,7 +317,10 @@ Auto Repeat,Otomatik Tekrarla,
 Auto repeat document updated,Otomatik tekrar dokümanı güncellendi,
 Automotive,Otomotiv,
 Available,Mevcut,
+<<<<<<< HEAD
 Available Leaves,Mevcut yaprakları,
+=======
+>>>>>>> 4b4efbc7a6 (refactor: migrate translations to HRMS)
 Available Qty,Mevcut Miktar,
 Available Selling,Mevcut satış,
 Available for use date is required,Kullanılabilir olacağı tarih gereklidir,
@@ -1225,9 +1228,14 @@ House rented dates should be atleast 15 days apart,Kiralanan kiralık evlerin en
 How Pricing Rule is applied?,Fiyatlandırma Kuralı Nasıl Uygulanır?,
 Hub Category,Hub Kategorisi,
 Hub Sync ID,Hub Senkronizasyon Kimliği,
+<<<<<<< HEAD
 Human Resource,İnsan kaynakları,
 Human Resources,İnsan kaynakları,
 IFSC Code,IFSC Kodu,
+=======
+Human Resource,İnsan Kaynağı,
+Human Resources,İnsan Kaynakları,
+>>>>>>> 4b4efbc7a6 (refactor: migrate translations to HRMS)
 IGST Amount,IGST Tutarı,
 IP Address,IP adresi,
 ITC Available (whether in full op part),ITC Available (tam bölümlerinde olsun),
@@ -1832,7 +1840,6 @@ Organization Name,Kuruluş Adı,
 Other,Diğer,
 Other Reports,Diğer raporlar,
 "Other outward supplies(Nil rated,Exempted)","Diğer dış sarf malzemeleri (Nil puan, Muaf)",
-Others,Diğer,
 Out Qty,Çıkış Miktarı,
 Out Value,Out Değeri,
 Out of Order,Bozuk,
@@ -3069,8 +3076,12 @@ Total (Without Tax),Toplam (Vergisiz),
 Total Absent,Toplam Yok,
 Total Achieved,Toplam Elde,
 Total Actual,Gerçek Toplam,
+<<<<<<< HEAD
 Total Allocated Leaves,Toplam Tahsis Edilen Yapraklar,
 Total Amount,Toplam tutar,
+=======
+Total Amount,Toplam Tutar,
+>>>>>>> 4b4efbc7a6 (refactor: migrate translations to HRMS)
 Total Amount Credited,Kredili Toplam Tutar,
 Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges,Satın Alma Makbuzu Öğeler tablosundaki toplam Uygulanabilir Masraflar Toplam Vergi ve Masraflar aynı olmalıdır,
 Total Budget,Toplam bütçe,
@@ -3195,8 +3206,12 @@ Updating Variants...,Varyantlar Güncelleniyor ...,
 Upload your letter head and logo. (you can edit them later).,Mektup baş ve logosu yükleyin. (Daha sonra bunları düzenleyebilirsiniz).,
 Upper Income,Üst gelir,
 Use Sandbox,Kullanım Sandbox,
+<<<<<<< HEAD
 Used Leaves,Kullanılan yapraklar,
 User,kullanıcı,
+=======
+User,Kullanıcı,
+>>>>>>> 4b4efbc7a6 (refactor: migrate translations to HRMS)
 User ID,Kullanıcı kimliği,
 User ID not set for Employee {0},Çalışan {0} için kullanıcı kimliği ayarlanmamış,
 User Remark,Kullanıcı Açıklaması,
@@ -8992,17 +9007,21 @@ Payroll Cost Center,Bordro Maliyet Merkezi,
 Approvers,Onaylayanlar,
 The first Approver in the list will be set as the default Approver.,"Listedeki ilk Onaylayan, varsayılan Onaylayan olarak ayarlanacaktır.",
 Shift Request Approver,Vardiya İsteği Onaylayıcısı,
-PAN Number,PAN Numarası,
 Provident Fund Account,İhtiyat Fonu Hesabı,
 MICR Code,MICR Kodu,
 Repay unclaimed amount from salary,Talep edilmeyen tutarı maaştan geri ödeyin,
 Deduction from salary,Maaştan kesinti,
+<<<<<<< HEAD
 Expired Leaves,Süresi Dolan Yapraklar,
 Reference No,Referans Numarası,
 Haircut percentage is the percentage difference between market value of the Loan Security and the value ascribed to that Loan Security when used as collateral for that loan.,"Kesinti yüzdesi, Kredi Teminatının piyasa değeri ile o kredi için teminat olarak kullanıldığında o Kredi Güvencesine atfedilen değer arasındaki yüzde farkıdır.",
 Loan To Value Ratio expresses the ratio of the loan amount to the value of the security pledged. A loan security shortfall will be triggered if this falls below the specified value for any loan ,"Kredi Değere Oranı, kredi tutarının taahhüt edilen menkul kıymetin değerine oranını ifade eder. Herhangi bir kredi için belirtilen değerin altına düşerse bir kredi güvenlik açığı tetiklenir",
 If this is not checked the loan by default will be considered as a Demand Loan,"Bu kontrol edilmezse, varsayılan olarak kredi bir Talep Kredisi olarak kabul edilecektir.",
 This account is used for booking loan repayments from the borrower and also disbursing loans to the borrower,"Bu hesap, borçludan kredi geri ödemeleri rezervasyonu yapmak ve ayrıca borçluya kredi vermek için kullanılır.",
+=======
+If this is not checked the loan by default will be considered as a Demand Loan,"Bu kontrol reddedilirse, varsayılan olarak kredi bir Talep Kredisi olarak kabul edilecektir.",
+This account is used for booking loan repayments from the borrower and also disbursing loans to the borrower,"Bu hesap, borçludan kredi geri ödemelerini yapmak ve ayrıca borçluya kredi vermek için kullanılır.",
+>>>>>>> 4b4efbc7a6 (refactor: migrate translations to HRMS)
 This account is capital account which is used to allocate capital for loan disbursal account ,"Bu hesap, kredi ödeme hesabına sermaye tahsis etmek için kullanılan sermaye hesabıdır.",
 This account will be used for booking loan interest accruals,"Bu hesap, kredi faiz tahakkukları için kullanılacaktır.",
 This account will be used for booking penalties levied due to delayed repayments,"Bu hesap, geciken geri ödemeler nedeniyle alınan rezervasyon cezaları için kullanılacaktır.",
