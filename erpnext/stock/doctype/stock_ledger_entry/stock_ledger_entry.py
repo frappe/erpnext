@@ -12,12 +12,9 @@ from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
-<<<<<<< HEAD
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle
-=======
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.stock_ledger import get_previous_sle
->>>>>>> 1480acabb0 (feat: validate negative stock for inventory dimension (#37373))
 
 
 class StockFreezeError(frappe.ValidationError):
