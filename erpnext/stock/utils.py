@@ -94,6 +94,7 @@ def get_stock_balance(
 	posting_time=None,
 	with_valuation_rate=False,
 	with_serial_no=False,
+	inventory_dimensions_dict=None,
 ):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
@@ -113,7 +114,13 @@ def get_stock_balance(
 		"posting_time": posting_time,
 	}
 
-	last_entry = get_previous_sle(args)
+	extra_cond = ""
+	if inventory_dimensions_dict:
+		for field, value in inventory_dimensions_dict.items():
+			args[field] = value
+			extra_cond += f" and {field} = %({field})s"
+
+	last_entry = get_previous_sle(args, extra_cond=extra_cond)
 
 	if with_valuation_rate:
 		if with_serial_no:
