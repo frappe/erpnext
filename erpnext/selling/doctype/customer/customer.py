@@ -650,7 +650,7 @@ def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc(
 		{
 			"doctype": "Contact",
-			"first_name": args.get("name"),
+			"first_name": args.get("customer_name"),
 			"is_primary_contact": is_primary_contact,
 			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 		}
@@ -659,12 +659,16 @@ def make_contact(args, is_primary_contact=1):
 		contact.add_email(args.get("email_id"), is_primary=True)
 	if args.get("mobile_no"):
 		contact.add_phone(args.get("mobile_no"), is_primary_mobile_no=True)
-	contact.insert()
+
+	if flags := args.get("flags"):
+		contact.insert(ignore_permissions=flags.get("ignore_permissions"))
+	else:
+		contact.insert()
 
 	return contact
 
 
-def make_address(args, is_primary_address=1):
+def make_address(args, is_primary_address=1, is_shipping_address=1):
 	reqd_fields = []
 	for field in ["city", "country"]:
 		if not args.get(field):
@@ -680,16 +684,23 @@ def make_address(args, is_primary_address=1):
 	address = frappe.get_doc(
 		{
 			"doctype": "Address",
-			"address_title": args.get("name"),
+			"address_title": args.get("customer_name"),
 			"address_line1": args.get("address_line1"),
 			"address_line2": args.get("address_line2"),
 			"city": args.get("city"),
 			"state": args.get("state"),
 			"pincode": args.get("pincode"),
 			"country": args.get("country"),
+			"is_primary_address": is_primary_address,
+			"is_shipping_address": is_shipping_address,
 			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 		}
-	).insert()
+	)
+
+	if flags := args.get("flags"):
+		address.insert(ignore_permissions=flags.get("ignore_permissions"))
+	else:
+		address.insert()
 
 	return address
 
