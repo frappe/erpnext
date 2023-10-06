@@ -8,12 +8,43 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import cint, nowdate
 
 from erpnext.stock.utils import check_pending_reposting
 
 
 class AccountsSettings(Document):
+	@frappe.whitelist()
+	def validate_access_key(self):
+		if self.service_provider == "exchangerate.host":
+			if not self.access_key:
+				frappe.throw(_("Access Key is required for exchangerate.host"))
+			else:
+				import requests
+
+				# Validate access key
+				api_url = "https://api.exchangerate.host/convert"
+				response = requests.get(
+					api_url,
+					params={
+						"access_key": self.access_key,
+						"transaction_date": nowdate(),
+						"amount": 1,
+						"from": "USD",
+						"to": "INR",
+					},
+				)
+				# exchangerate.host return 200 for all requests. Can't rely on it to raise exception
+				if not response.json()["success"]:
+					frappe.throw(
+						title=_("Service Provider Error"),
+						msg=_("Currency exchange rate serivce provider: {0} returned Error. {1}").format(
+							frappe.bold(self.service_provider), response.json()
+						),
+						exc=frappe.ValidationError,
+					)
+				frappe.msgprint(msg=_("Success"), title=_("Access Key Validation"))
+
 	def on_update(self):
 		frappe.clear_cache()
 

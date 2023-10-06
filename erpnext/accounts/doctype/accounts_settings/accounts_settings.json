@@ -47,6 +47,9 @@
   "allow_stale",
   "stale_days",
   "service_provider",
+  "column_break_eiyok",
+  "access_key",
+  "validate_access_key",
   "report_settings_sb",
   "use_custom_cash_flow"
  ],
@@ -303,10 +306,28 @@
    "label": "Show Taxes as Table in Print"
   },
   {
+   "default": "frankfurter.app",
    "fieldname": "service_provider",
    "fieldtype": "Select",
    "label": "Service Provider",
    "options": "frankfurter.app\nexchangerate.host"
+  },
+  {
+   "depends_on": "eval:doc.service_provider == \"exchangerate.host\"",
+   "description": "Access Key is mandatory for exchangerate.host",
+   "fieldname": "access_key",
+   "fieldtype": "Data",
+   "label": "Access Key"
+  },
+  {
+   "depends_on": "eval:doc.service_provider == \"exchangerate.host\"",
+   "fieldname": "validate_access_key",
+   "fieldtype": "Button",
+   "label": "Validate Access Key"
+  },
+  {
+   "fieldname": "column_break_eiyok",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -314,7 +335,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-06 15:05:51.999404",
+ "modified": "2023-10-07 14:20:01.779208",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

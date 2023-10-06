@@ -4,6 +4,12 @@
 frappe.ui.form.on('Accounts Settings', {
 	refresh: function(frm) {
 
+	},
+	validate_access_key(frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: "validate_access_key"
+		});
 	}
 });
 
