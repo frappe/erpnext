@@ -113,12 +113,30 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		if not value:
 			import requests
 
-			api_url = f"https://api.frankfurter.app/{transaction_date}"
-			response = requests.get(api_url, params={"from": from_currency, "to": to_currency})
+			if currency_settings.service_provider == "exchangerate.host":
+				api_url = "https://api.exchangerate.host/convert"
+				response = requests.get(
+					api_url,
+					params={
+						"access_key": currency_settings.access_key,
+						"transaction_date": transaction_date,
+						"amount": 1,
+						"from": from_currency,
+						"to": to_currency,
+					},
+				)
+				# exchangerate.host return 200 for all requests. Can't rely on it to raise exception
+				value = response.json()["result"]
+				if not response.json()["success"]:
+					raise frappe.ValidationError
+
+			else:
+				api_url = f"https://api.frankfurter.app/{transaction_date}"
+				response = requests.get(api_url, params={"from": from_currency, "to": to_currency})
+				value = response.json()["rates"][to_currency]
 
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["rates"][to_currency]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
