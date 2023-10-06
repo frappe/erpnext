@@ -46,6 +46,7 @@
   "currency_exchange_section",
   "allow_stale",
   "stale_days",
+  "service_provider",
   "report_settings_sb",
   "use_custom_cash_flow"
  ],
@@ -282,32 +283,38 @@
    "label": "Enable Common Party Accounting"
   },
   {
-    "default": "0",
-    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
-    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
-    "fieldtype": "Check",
-    "label": "Allow multi-currency invoices against single party account"
-   },
-   {
-    "default": "0",
-    "description": "Split Early Payment Discount Loss into Income and Tax Loss",
-    "fieldname": "book_tax_discount_loss",
-    "fieldtype": "Check",
-    "label": "Book Tax Loss on Early Payment Discount"
-   },
-   {
-    "default": "0",
-    "fieldname": "show_taxes_as_table_in_print",
-    "fieldtype": "Check",
-    "label": "Show Taxes as Table in Print"
-   }
+   "default": "0",
+   "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
+   "fieldname": "allow_multi_currency_invoices_against_single_party_account",
+   "fieldtype": "Check",
+   "label": "Allow multi-currency invoices against single party account"
+  },
+  {
+   "default": "0",
+   "description": "Split Early Payment Discount Loss into Income and Tax Loss",
+   "fieldname": "book_tax_discount_loss",
+   "fieldtype": "Check",
+   "label": "Book Tax Loss on Early Payment Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
+  },
+  {
+   "fieldname": "service_provider",
+   "fieldtype": "Select",
+   "label": "Service Provider",
+   "options": "frankfurter.app\nexchangerate.host"
+  }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-13 18:47:46.430291",
+ "modified": "2023-10-06 15:05:51.999404",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
