@@ -956,6 +956,10 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 		total_amount += total_billable_amount
 		total_billed_amount += flt(item.billed_amt)
+
+		if pr_doc.get("is_return") and not total_amount and total_billed_amount:
+			total_amount = total_billed_amount
+
 		if adjust_incoming_rate:
 			adjusted_amt = 0.0
 			if item.billed_amt and item.amount:
