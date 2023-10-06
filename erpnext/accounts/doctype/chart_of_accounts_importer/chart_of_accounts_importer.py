@@ -459,8 +459,14 @@ def unset_existing_data(company):
 		as_dict=True,
 	)
 
+	custom_linked = frappe.db.sql(
+		'''select fieldname from `tabCustom Field`
+		where fieldtype="Link" and options="Account" and dt="Company"''',
+		as_dict=True,
+	)
+
 	# remove accounts data from company
-	update_values = {d.fieldname: "" for d in linked}
+	update_values = {d.fieldname: "" for d in linked + custom_linked}
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
