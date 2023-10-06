@@ -24,13 +24,10 @@ from frappe.utils import (
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
-<<<<<<< HEAD
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
-=======
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
->>>>>>> 1480acabb0 (feat: validate negative stock for inventory dimension (#37373))
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -715,10 +712,6 @@ class update_entries_after(object):
 		):
 			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
-<<<<<<< HEAD
-		if sle.serial_and_batch_bundle:
-			self.calculate_valuation_for_serial_batch_bundle(sle)
-=======
 		dimensions = get_inventory_dimensions()
 		has_dimensions = False
 		if dimensions:
@@ -726,20 +719,8 @@ class update_entries_after(object):
 				if sle.get(dimension.get("fieldname")):
 					has_dimensions = True
 
-		if get_serial_nos(sle.serial_no):
-			self.get_serialized_values(sle)
-			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
-				self.wh_data.qty_after_transaction = sle.qty_after_transaction
-
-			self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
-				self.wh_data.valuation_rate
-			)
-		elif sle.batch_no and frappe.db.get_value(
-			"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
-		):
-			self.update_batched_values(sle)
->>>>>>> 1480acabb0 (feat: validate negative stock for inventory dimension (#37373))
+		if sle.serial_and_batch_bundle:
+			self.calculate_valuation_for_serial_batch_bundle(sle)
 		else:
 			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no and not has_dimensions:
 				# assert
