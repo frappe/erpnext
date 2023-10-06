@@ -2,6 +2,28 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Workstation", {
+	set_illustration_image(frm) {
+		let status_image_field = frm.doc.status == "Production" ? frm.doc.on_status_image : frm.doc.off_status_image;
+		if (status_image_field) {
+			frm.sidebar.image_wrapper.find(".sidebar-image").attr("src", status_image_field);
+		}
+	},
+
+	refresh(frm) {
+		frm.trigger("set_illustration_image");
+		frm.trigger("prepapre_dashboard");
+	},
+
+	prepapre_dashboard(frm) {
+		let $parent = $(frm.fields_dict["workstation_dashboard"].wrapper);
+		$parent.empty();
+
+		let workstation_dashboard = new WorkstationDashboard({
+			wrapper: $parent,
+			frm: frm
+		});
+	},
+
 	onload(frm) {
 		if(frm.is_new())
 		{
@@ -54,3 +76,42 @@ frappe.tour['Workstation'] = [
 
 
 ];
+
+
+class WorkstationDashboard {
+	constructor({ wrapper, frm }) {
+		this.$wrapper = $(wrapper);
+		this.frm = frm;
+
+		this.prepapre_dashboard();
+	}
+
+	prepapre_dashboard() {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.workstation.workstation.get_job_cards",
+			args: {
+				workstation: this.frm.doc.name
+			},
+			callback: (r) => {
+				if (r.message) {
+					this.render_job_cards(r.message);
+				}
+			}
+		});
+	}
+
+	render_job_cards(job_cards) {
+		let template  = frappe.render_template("workstation_job_card", {
+			data: job_cards
+		});
+
+		this.$wrapper.html(template);
+		this.$wrapper.find(".collapse-indicator-job").on("click", (e) => {
+			$(e.currentTarget).closest(".form-dashboard-section").find(".section-body-job-card").toggleClass("hide")
+			if ($(e.currentTarget).closest(".form-dashboard-section").find(".section-body-job-card").hasClass("hide"))
+				$(e.currentTarget).html(frappe.utils.icon("es-line-down", "sm", "mb-1"))
+			else
+				$(e.currentTarget).html(frappe.utils.icon("es-line-up", "sm", "mb-1"))
+		});
+	}
+}
