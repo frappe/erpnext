@@ -148,8 +148,8 @@ def get_opening_lp(customer):
 
 @frappe.whitelist()
 def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None, include_expired_entry=False):
-    
-	# expire_date=today()
+
+    # expire_date=today()
     acquired_list=[]
     used_list=[]
     expired_list=[]
@@ -192,7 +192,7 @@ def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None
     #     loyalty_points = sum(loyalty_points_list)
     #     if loyalty_points < 0:
     #         loyalty_points = 0
-    
-    # return {"loyalty_points":loyalty_points+get_opening_lp(customer),"total_spent":sum(used_list)}
-
-    return {'loyalty_points':loyalty_points+get_opening_lp(customer), 'total_spent': sum(used_list)}	
+    total_lp=loyalty_points+get_opening_lp(customer)
+    if total_lp<0:
+        return {"loyalty_points":0}
+    return {"loyalty_points":total_lp}
