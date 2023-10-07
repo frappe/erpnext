@@ -94,20 +94,8 @@ def get_statement_dict(doc, get_statement_dict=False):
 		statement_dict[entry.customer] = (
 			[res, ageing] if get_statement_dict else get_html(doc, filters, entry, col, res, ageing)
 		)
-
-<<<<<<< HEAD
-	if not bool(statement_dict):
-		return False
-	elif consolidated:
-		result = "".join(list(statement_dict.values()))
-		return get_pdf(result, {"orientation": doc.orientation})
-	else:
-		for customer, statement_html in statement_dict.items():
-			statement_dict[customer] = get_pdf(statement_html, {"orientation": doc.orientation})
-		return statement_dict
-=======
+		
 	return statement_dict
->>>>>>> 67f878ff8c (refactor: separate function for statement dict)
 
 
 def set_ageing(doc, entry):
