@@ -94,7 +94,7 @@ def get_statement_dict(doc, get_statement_dict=False):
 		statement_dict[entry.customer] = (
 			[res, ageing] if get_statement_dict else get_html(doc, filters, entry, col, res, ageing)
 		)
-		
+
 	return statement_dict
 
 
