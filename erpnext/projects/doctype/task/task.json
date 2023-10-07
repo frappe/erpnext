@@ -52,7 +52,8 @@
   "company",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "template_task"
  ],
  "fields": [
   {
@@ -382,6 +383,12 @@
    "fieldtype": "Date",
    "label": "Completed On",
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
+  },
+  {
+   "fieldname": "template_task",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Template Task"
   }
  ],
  "icon": "fa fa-check",
@@ -389,7 +396,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2023-04-17 21:06:50.174418",
+ "modified": "2023-09-28 13:52:05.861175",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

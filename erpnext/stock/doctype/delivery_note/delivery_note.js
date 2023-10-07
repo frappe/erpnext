@@ -150,6 +150,9 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 						}
 						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+							args: {
+								for_reserved_stock: 1
+							},
 							source_doctype: "Sales Order",
 							target: me.frm,
 							setters: {

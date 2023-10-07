@@ -65,17 +65,6 @@ frappe.ui.form.on('Pick List', {
 				}
 			}
 		});
-
-		let sbb_field = frm.get_docfield('locations', 'serial_and_batch_bundle');
-		if (sbb_field) {
-			sbb_field.get_route_options_for_new_doc = (row) => {
-				return {
-					'item_code': row.doc.item_code,
-					'warehouse': row.doc.warehouse,
-					'voucher_type': frm.doc.doctype,
-				}
-			};
-		}
 	},
 	set_item_locations:(frm, save) => {
 		if (!(frm.doc.locations && frm.doc.locations.length)) {
@@ -115,6 +104,33 @@ frappe.ui.form.on('Pick List', {
 					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
 				}
 			});
+
+			if (frm.doc.purpose === 'Delivery' && frm.doc.status === 'Open') {
+				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					frm.add_custom_button(__('Reserve'), () => frm.events.create_stock_reservation_entries(frm), __('Stock Reservation'));
+				}
+
+				if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
+					frm.add_custom_button(__('Unreserve'), () => {
+						frappe.confirm(
+							__('The reserved stock will be released. Are you certain you wish to proceed?'),
+							() => frm.events.cancel_stock_reservation_entries(frm)
+						)
+					}, __('Stock Reservation'));
+					frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
+				}
+			}
+		}
+
+		let sbb_field = frm.get_docfield('locations', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
 		}
 	},
 	work_order: (frm) => {
@@ -209,6 +225,49 @@ frappe.ui.form.on('Pick List', {
 		};
 		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
 		barcode_scanner.process_scan();
+	},
+	create_stock_reservation_entries: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "create_stock_reservation_entries",
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __("Reserving Stock..."),
+			callback: (r) => {
+				frm.doc.__onload.has_unreserved_stock = false;
+				frm.reload_doc();
+			}
+		});
+	},
+	cancel_stock_reservation_entries: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "cancel_stock_reservation_entries",
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __('Unreserving Stock...'),
+			callback: (r) => {
+				frm.doc.__onload.has_reserved_stock = false;
+				frm.reload_doc();
+			}
+		});
+	},
+	show_reserved_stock(frm) {
+		// Get the latest modified date from the locations table.
+		var to_date = moment(new Date(Math.max(...frm.doc.locations.map(e => new Date(e.modified))))).format('YYYY-MM-DD');
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: moment(frm.doc.creation).format('YYYY-MM-DD'),
+			to_date: to_date,
+			voucher_type: "Sales Order",
+			against_pick_list: frm.doc.name,
+		}
+		frappe.set_route("query-report", "Reserved Stock");
 	}
 });
 

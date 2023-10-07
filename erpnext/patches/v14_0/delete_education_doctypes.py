@@ -43,8 +43,20 @@ def execute():
 		frappe.delete_doc("Number Card", card, ignore_missing=True, force=True)
 
 	doctypes = frappe.get_all("DocType", {"module": "education", "custom": 0}, pluck="name")
+
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
+
+	titles = [
+		"Fees",
+		"Student Admission",
+		"Grant Application",
+		"Chapter",
+		"Certification Application",
+	]
+	items = frappe.get_all("Portal Menu Item", filters=[["title", "in", titles]], pluck="name")
+	for item in items:
+		frappe.delete_doc("Portal Menu Item", item, ignore_missing=True, force=True)
 
 	frappe.delete_doc("Module Def", "Education", ignore_missing=True, force=True)
 

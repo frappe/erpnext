@@ -12,6 +12,7 @@ frappe.ui.form.on("Supplier", {
 			return {
 				filters: {
 					'account_type': 'Payable',
+					'root_type': 'Liability',
 					'company': d.company,
 					"is_group": 0
 				}
@@ -87,7 +88,7 @@ frappe.ui.form.on("Supplier", {
 			}, __("View"));
 
 			frm.add_custom_button(__('Accounts Payable'), function () {
-				frappe.set_route('query-report', 'Accounts Payable', { supplier: frm.doc.name });
+				frappe.set_route('query-report', 'Accounts Payable', { party_type: "Supplier", party: frm.doc.name });
 			}, __("View"));
 
 			frm.add_custom_button(__('Bank Account'), function () {

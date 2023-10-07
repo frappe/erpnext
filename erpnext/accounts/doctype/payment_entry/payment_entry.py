@@ -98,7 +98,6 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
-		self.make_advance_gl_entries()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_payment_schedule()
@@ -149,10 +148,11 @@ class PaymentEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payments",
+			"Unreconcile Payment Entries",
 		)
 		super(PaymentEntry, self).on_cancel()
 		self.make_gl_entries(cancel=1)
-		self.make_advance_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.delink_advance_entry_references()
@@ -856,6 +856,11 @@ class PaymentEntry(AccountsController):
 				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 
+			# on rare case, when `exchange_rate` is unset, gain/loss amount is incorrectly calculated
+			# for base currency transactions
+			if d.exchange_rate is None:
+				d.exchange_rate = 1
+
 			allocated_amount_in_pe_exchange_rate = flt(
 				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
 			)
@@ -999,14 +1004,14 @@ class PaymentEntry(AccountsController):
 		if self.payment_type == "Internal Transfer":
 			remarks = [
 				_("Amount {0} {1} transferred from {2} to {3}").format(
-					self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to
+					_(self.paid_from_account_currency), self.paid_amount, self.paid_from, self.paid_to
 				)
 			]
 		else:
 
 			remarks = [
 				_("Amount {0} {1} {2} {3}").format(
-					self.party_account_currency,
+					_(self.party_account_currency),
 					self.paid_amount if self.payment_type == "Receive" else self.received_amount,
 					_("received from") if self.payment_type == "Receive" else _("to"),
 					self.party,
@@ -1023,14 +1028,14 @@ class PaymentEntry(AccountsController):
 				if d.allocated_amount:
 					remarks.append(
 						_("Amount {0} {1} against {2} {3}").format(
-							self.party_account_currency, d.allocated_amount, d.reference_doctype, d.reference_name
+							_(self.party_account_currency), d.allocated_amount, d.reference_doctype, d.reference_name
 						)
 					)
 
 		for d in self.get("deductions"):
 			if d.amount:
 				remarks.append(
-					_("Amount {0} {1} deducted against {2}").format(self.company_currency, d.amount, d.account)
+					_("Amount {0} {1} deducted against {2}").format(_(self.company_currency), d.amount, d.account)
 				)
 
 		self.set("remarks", "\n".join(remarks))
@@ -1054,6 +1059,8 @@ class PaymentEntry(AccountsController):
 			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 		else:
 			self.make_exchange_gain_loss_journal()
+
+		self.make_advance_gl_entries(cancel=cancel)
 
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
@@ -1123,7 +1130,7 @@ class PaymentEntry(AccountsController):
 		if self.book_advance_payments_in_separate_party_account:
 			gl_entries = []
 			for d in self.get("references"):
-				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
 					if not (against_voucher_type and against_voucher) or (
 						d.reference_doctype == against_voucher_type and d.reference_name == against_voucher
 					):
@@ -1145,8 +1152,25 @@ class PaymentEntry(AccountsController):
 					)
 
 				make_reverse_gl_entries(gl_entries=gl_entries, partial_cancel=True)
-			else:
-				make_gl_entries(gl_entries)
+				return
+
+			# same reference added to payment entry
+			for gl_entry in gl_entries.copy():
+				if frappe.db.exists(
+					"GL Entry",
+					{
+						"account": gl_entry.account,
+						"voucher_type": gl_entry.voucher_type,
+						"voucher_no": gl_entry.voucher_no,
+						"voucher_detail_no": gl_entry.voucher_detail_no,
+						"debit": gl_entry.debit,
+						"credit": gl_entry.credit,
+						"is_cancelled": 0,
+					},
+				):
+					gl_entries.remove(gl_entry)
+
+			make_gl_entries(gl_entries)
 
 	def make_invoice_liability_entry(self, gl_entries, invoice):
 		args_dict = {
@@ -1159,6 +1183,13 @@ class PaymentEntry(AccountsController):
 			"voucher_detail_no": invoice.name,
 		}
 
+		posting_date = frappe.db.get_value(
+			invoice.reference_doctype, invoice.reference_name, "posting_date"
+		)
+
+		if getdate(posting_date) < getdate(self.posting_date):
+			posting_date = self.posting_date
+
 		dr_or_cr = "credit" if invoice.reference_doctype == "Sales Invoice" else "debit"
 		args_dict["account"] = invoice.account
 		args_dict[dr_or_cr] = invoice.allocated_amount
@@ -1167,6 +1198,7 @@ class PaymentEntry(AccountsController):
 			{
 				"against_voucher_type": invoice.reference_doctype,
 				"against_voucher": invoice.reference_name,
+				"posting_date": posting_date,
 			}
 		)
 		gle = self.get_gl_dict(
@@ -1573,6 +1605,14 @@ def get_outstanding_reference_documents(args, validate=False):
 				fieldname, args.get(date_fields[0]), args.get(date_fields[1])
 			)
 			posting_and_due_date.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
+		elif args.get(date_fields[0]):
+			# if only from date is supplied
+			condition += " and {0} >= '{1}'".format(fieldname, args.get(date_fields[0]))
+			posting_and_due_date.append(ple[fieldname].gte(args.get(date_fields[0])))
+		elif args.get(date_fields[1]):
+			# if only to date is supplied
+			condition += " and {0} <= '{1}'".format(fieldname, args.get(date_fields[1]))
+			posting_and_due_date.append(ple[fieldname].lte(args.get(date_fields[1])))
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
@@ -1993,10 +2033,15 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		if not total_amount:
 			if party_account_currency == company_currency:
 				# for handling cases that don't have multi-currency (base field)
-				total_amount = ref_doc.get("base_grand_total") or ref_doc.get("grand_total")
+				total_amount = (
+					ref_doc.get("base_rounded_total")
+					or ref_doc.get("rounded_total")
+					or ref_doc.get("base_grand_total")
+					or ref_doc.get("grand_total")
+				)
 				exchange_rate = 1
 			else:
-				total_amount = ref_doc.get("grand_total")
+				total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc.
@@ -2295,7 +2340,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				received_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					received_amount = paid_amount / doc.get("conversion_rate", 1)
 				else:
 					received_amount = paid_amount * doc.get("conversion_rate", 1)
@@ -2304,7 +2349,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				paid_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					paid_amount = received_amount / doc.get("conversion_rate", 1)
 				else:
 					# if party account currency and bank currency is different then populate paid amount as well

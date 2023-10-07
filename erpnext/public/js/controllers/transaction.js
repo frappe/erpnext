@@ -134,15 +134,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			});
-
-			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
-			if (sbb_field) {
-				sbb_field.get_route_options_for_new_doc = (row) => {
-					return {
-						'item_code': row.doc.item_code,
-					}
-				};
-			}
 		}
 
 		if(
@@ -207,15 +198,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		let batch_no_field = this.frm.get_docfield("items", "batch_no");
-		if (batch_no_field) {
-			batch_no_field.get_route_options_for_new_doc = function(row) {
-				return {
-					"item": row.doc.item_code
-				}
-			};
-		}
-
 		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
 			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
 				var item = locals[cdt][cdn];
@@ -242,6 +224,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 	}
+
+	toggle_enable_for_stock_uom(field) {
+		frappe.db.get_single_value('Stock Settings', field)
+		.then(value => {
+			this.frm.fields_dict["items"].grid.toggle_enable("stock_qty", value);
+		});
+	}
+
 	onload() {
 		var me = this;
 
@@ -267,6 +257,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			]);
+		}
+
+		if(this.frm.fields_dict['items'].grid.get_field('serial_and_batch_bundle')) {
+			let sbb_field = this.frm.get_docfield('items', 'serial_and_batch_bundle');
+			if (sbb_field) {
+				sbb_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item_code': row.doc.item_code,
+					}
+				};
+			}
+		}
+
+		if(this.frm.fields_dict['items'].grid.get_field('batch_no')) {
+			let batch_no_field = this.frm.get_docfield('items', 'batch_no');
+			if (batch_no_field) {
+				batch_no_field.get_route_options_for_new_doc = function(row) {
+					return {
+						'item': row.doc.item_code
+					}
+				};
+			}
 		}
 	}
 
@@ -358,7 +370,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	refresh() {
-
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_dynamic_labels();
@@ -702,7 +713,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	on_submit() {
-		refresh_field("items");
+		this.refresh_serial_batch_bundle_field();
+	}
+
+	refresh_serial_batch_bundle_field() {
+		frappe.route_hooks.after_submit = (frm_obj) => {
+			frm_obj.reload_doc();
+		}
 	}
 
 	update_qty(cdt, cdn) {
@@ -1180,6 +1197,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			() => this.calculate_stock_uom_rate(doc, cdt, cdn),
 			() => this.apply_pricing_rule(item, true)
 		]);
+	}
+
+	stock_qty(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		item.conversion_factor = 1.0;
+		if (item.stock_qty) {
+			item.conversion_factor = flt(item.stock_qty) / flt(item.qty);
+		}
+
+		refresh_field("conversion_factor", item.name, item.parentfield);
 	}
 
 	calculate_stock_uom_rate(doc, cdt, cdn) {

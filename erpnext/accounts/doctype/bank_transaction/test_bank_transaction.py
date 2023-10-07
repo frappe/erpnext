@@ -47,7 +47,7 @@ class TestBankTransaction(FrappeTestCase):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertTrue(linked_payments[0][6] == "Conrad Electronic")
+		self.assertTrue(linked_payments[0]["party"] == "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
@@ -93,7 +93,7 @@ class TestBankTransaction(FrappeTestCase):
 			from_date=bank_transaction.date,
 			to_date=utils.today(),
 		)
-		self.assertTrue(linked_payments[0][3])
+		self.assertTrue(linked_payments[0]["paid_amount"])
 
 	# Check error if already reconciled
 	def test_already_reconciled(self):
@@ -188,7 +188,7 @@ class TestBankTransaction(FrappeTestCase):
 		repayment_entry = create_loan_and_repayment()
 
 		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
-		self.assertEqual(linked_payments[0][2], repayment_entry.name)
+		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
 
 
 @if_lending_app_installed
@@ -410,7 +410,7 @@ def add_vouchers():
 def create_loan_and_repayment():
 	from lending.loan_management.doctype.loan.test_loan import (
 		create_loan,
-		create_loan_type,
+		create_loan_product,
 		create_repayment_entry,
 		make_loan_disbursement_entry,
 	)
@@ -420,7 +420,7 @@ def create_loan_and_repayment():
 
 	from erpnext.setup.doctype.employee.test_employee import make_employee
 
-	create_loan_type(
+	create_loan_product(
 		"Personal Loan",
 		500000,
 		8.4,
@@ -441,7 +441,7 @@ def create_loan_and_repayment():
 			"applicant_type": "Employee",
 			"company": "_Test Company",
 			"applicant": applicant,
-			"loan_type": "Personal Loan",
+			"loan_product": "Personal Loan",
 			"loan_amount": 5000,
 			"repayment_method": "Repay Fixed Amount per Period",
 			"monthly_repayment_amount": 500,

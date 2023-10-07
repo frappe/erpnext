@@ -379,7 +379,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 		}
 	)
 
-	set_address_details(out, lead, "Lead")
+	set_address_details(out, lead, "Lead", company=company)
 
 	taxes_and_charges = set_taxes(
 		None,

@@ -6,8 +6,10 @@ erpnext.financial_statements = {
 		if (data && column.fieldname=="account") {
 			value = data.account_name || value;
 
-			column.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+			if (data.account) {
+				column.link_onclick =
+					"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+			}
 			column.is_tree = true;
 		}
 

@@ -1214,9 +1214,15 @@ class update_entries_after(object):
 			if msg:
 				if self.reserved_stock:
 					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
-					msg = "{0} As {1} units are reserved, you are allowed to consume only {2} units.".format(
-						msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
-					)
+
+					if allowed_qty > 0:
+						msg = "{0} As {1} units are reserved for other sales orders, you are allowed to consume only {2} units.".format(
+							msg, frappe.bold(self.reserved_stock), frappe.bold(allowed_qty)
+						)
+					else:
+						msg = "{0} As the full stock is reserved for other sales orders, you're not allowed to consume the stock.".format(
+							msg,
+						)
 
 				msg_list.append(msg)
 
@@ -1458,8 +1464,6 @@ def get_valuation_rate(
 	if not company:
 		company = frappe.get_cached_value("Warehouse", warehouse, "company")
 
-	last_valuation_rate = None
-
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
 		batch_obj = BatchNoValuation(
@@ -1476,21 +1480,18 @@ def get_valuation_rate(
 		return batch_obj.get_incoming_rate()
 
 	# Get valuation rate from last sle for the same item and warehouse
-	if not last_valuation_rate or last_valuation_rate[0][0] is None:
-		last_valuation_rate = frappe.db.sql(
-			"""select valuation_rate
-			from `tabStock Ledger Entry` force index (item_warehouse)
-			where
-				item_code = %s
-				AND warehouse = %s
-				AND valuation_rate >= 0
-				AND is_cancelled = 0
-				AND NOT (voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""",
-			(item_code, warehouse, voucher_no, voucher_type),
-		)
-
-	if last_valuation_rate:
+	if last_valuation_rate := frappe.db.sql(
+		"""select valuation_rate
+		from `tabStock Ledger Entry` force index (item_warehouse)
+		where
+			item_code = %s
+			AND warehouse = %s
+			AND valuation_rate >= 0
+			AND is_cancelled = 0
+			AND NOT (voucher_no = %s AND voucher_type = %s)
+		order by posting_date desc, posting_time desc, name desc limit 1""",
+		(item_code, warehouse, voucher_no, voucher_type),
+	):
 		return flt(last_valuation_rate[0][0])
 
 	# If negative stock allowed, and item delivered without any incoming entry,

@@ -56,6 +56,8 @@ class StockSettings(Document):
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
 		self.validate_stock_reservation()
+		self.change_precision_for_for_sales()
+		self.change_precision_for_purchase()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -69,9 +71,9 @@ class StockSettings(Document):
 				)
 
 	def cant_change_valuation_method(self):
-		db_valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
+		previous_valuation_method = self.get_doc_before_save().get("valuation_method")
 
-		if db_valuation_method and db_valuation_method != self.valuation_method:
+		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
 			# which does not have it's own valuation method
 			sle = frappe.db.sql(
@@ -108,13 +110,8 @@ class StockSettings(Document):
 		if frappe.flags.in_test:
 			return
 
-		db_allow_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-		db_enable_stock_reservation = frappe.db.get_single_value(
-			"Stock Settings", "enable_stock_reservation"
-		)
-
 		# Change in value of `Allow Negative Stock`
-		if db_allow_negative_stock != self.allow_negative_stock:
+		if self.has_value_changed("allow_negative_stock"):
 
 			# Disable -> Enable: Don't allow if `Stock Reservation` is enabled
 			if self.allow_negative_stock and self.enable_stock_reservation:
@@ -125,7 +122,7 @@ class StockSettings(Document):
 				)
 
 		# Change in value of `Enable Stock Reservation`
-		if db_enable_stock_reservation != self.enable_stock_reservation:
+		if self.has_value_changed("enable_stock_reservation"):
 
 			# Disable -> Enable
 			if self.enable_stock_reservation:
@@ -171,6 +168,56 @@ class StockSettings(Document):
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
+
+	def change_precision_for_for_sales(self):
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and (
+			doc_before_save.allow_to_edit_stock_uom_qty_for_sales
+			== self.allow_to_edit_stock_uom_qty_for_sales
+		):
+			return
+
+		if self.allow_to_edit_stock_uom_qty_for_sales:
+			doctypes = ["Sales Order Item", "Sales Invoice Item", "Delivery Note Item", "Quotation Item"]
+			self.make_property_setter_for_precision(doctypes)
+
+	def change_precision_for_purchase(self):
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and (
+			doc_before_save.allow_to_edit_stock_uom_qty_for_purchase
+			== self.allow_to_edit_stock_uom_qty_for_purchase
+		):
+			return
+
+		if self.allow_to_edit_stock_uom_qty_for_purchase:
+			doctypes = [
+				"Purchase Order Item",
+				"Purchase Receipt Item",
+				"Purchase Invoice Item",
+				"Request for Quotation Item",
+				"Supplier Quotation Item",
+				"Material Request Item",
+			]
+			self.make_property_setter_for_precision(doctypes)
+
+	@staticmethod
+	def make_property_setter_for_precision(doctypes):
+		for doctype in doctypes:
+			if property_name := frappe.db.exists(
+				"Property Setter",
+				{"doc_type": doctype, "field_name": "conversion_factor", "property": "precision"},
+			):
+				frappe.db.set_value("Property Setter", property_name, "value", 9)
+				continue
+
+			make_property_setter(
+				doctype,
+				"conversion_factor",
+				"precision",
+				9,
+				"Float",
+				validate_fields_for_doctype=False,
+			)
 
 	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
 		make_property_setter(

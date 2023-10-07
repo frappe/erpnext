@@ -516,7 +516,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-04-14 18:20:05.044791",
+ "modified": "2023-08-28 22:28:00.104413",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -527,7 +527,7 @@
    "permlevel": 1,
    "read": 1,
    "report": 1,
-   "role": "All"
+   "role": "Desk User"
   },
   {
    "create": 1,

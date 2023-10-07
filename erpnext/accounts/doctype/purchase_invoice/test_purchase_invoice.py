@@ -1164,7 +1164,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		item = create_item("_Test Item for Deferred Accounting", is_purchase_item=True)
 		item.enable_deferred_expense = 1
-		item.deferred_expense_account = deferred_account
+		item.item_defaults[0].deferred_expense_account = deferred_account
 		item.save()
 
 		pi = make_purchase_invoice(item=item.name, qty=1, rate=100, do_not_save=True)
@@ -1744,7 +1744,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		pi = make_purchase_invoice(
 			company="_Test Company",
-			customer="_Test Supplier",
 			do_not_save=True,
 			do_not_submit=True,
 			rate=1000,
@@ -1862,7 +1861,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		pi = make_purchase_invoice(
 			company="_Test Company",
-			customer="_Test Supplier",
 			do_not_save=True,
 			do_not_submit=True,
 			rate=1000,
@@ -1891,6 +1889,32 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		)
 		clear_dimension_defaults("Branch")
 		disable_dimension()
+
+	def test_repost_accounting_entries(self):
+		pi = make_purchase_invoice(
+			rate=1000,
+			price_list_rate=1000,
+			qty=1,
+		)
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate()],
+			["Creditors - _TC", 0.0, 1000, nowdate()],
+		]
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+
+		pi.items[0].expense_account = "Service - _TC"
+		pi.save()
+		pi.load_from_db()
+		self.assertTrue(pi.repost_required)
+		pi.repost_accounting_entries()
+
+		expected_gle = [
+			["Creditors - _TC", 0.0, 1000, nowdate()],
+			["Service - _TC", 1000, 0.0, nowdate()],
+		]
+		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		pi.load_from_db()
+		self.assertFalse(pi.repost_required)
 
 
 def set_advance_flag(company, flag, default_account):

@@ -11,6 +11,9 @@ from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate,
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	validate_docs_for_deferred_accounting,
+)
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
 	get_total_in_party_account_currency,
@@ -266,9 +269,7 @@ class PurchaseInvoice(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
-		asset_items = [d.is_fixed_asset for d in self.items if d.is_fixed_asset]
-		if len(asset_items) > 0:
-			asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+		asset_received_but_not_billed = None
 
 		if self.update_stock:
 			self.validate_item_code()
@@ -362,6 +363,8 @@ class PurchaseInvoice(BuyingController):
 					)
 				item.expense_account = asset_category_account
 			elif item.is_fixed_asset and item.pr_detail:
+				if not asset_received_but_not_billed:
+					asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
@@ -484,6 +487,11 @@ class PurchaseInvoice(BuyingController):
 						_("Stock cannot be updated against Purchase Receipt {0}").format(item.purchase_receipt)
 					)
 
+	def validate_for_repost(self):
+		self.validate_write_off_account()
+		self.validate_expense_account()
+		validate_docs_for_deferred_accounting([], [self.name])
+
 	def on_submit(self):
 		super(PurchaseInvoice, self).on_submit()
 
@@ -521,6 +529,18 @@ class PurchaseInvoice(BuyingController):
 		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
+
+	def on_update_after_submit(self):
+		if hasattr(self, "repost_required"):
+			fields_to_check = [
+				"cash_bank_account",
+				"write_off_account",
+				"unrealized_profit_loss_account",
+			]
+			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
+			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+			self.validate_for_repost()
+			self.db_set("repost_required", self.needs_repost)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
@@ -759,21 +779,22 @@ class PurchaseInvoice(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": account,
-										"against": item.expense_account,
-										"cost_center": item.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"credit": flt(amount["base_amount"]),
-										"credit_in_account_currency": flt(amount["amount"]),
-										"project": item.project or self.project,
-									},
-									item=item,
+						if (item.item_code, item.name) in landed_cost_entries:
+							for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
+								gl_entries.append(
+									self.get_gl_dict(
+										{
+											"account": account,
+											"against": item.expense_account,
+											"cost_center": item.cost_center,
+											"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+											"credit": flt(amount["base_amount"]),
+											"credit_in_account_currency": flt(amount["amount"]),
+											"project": item.project or self.project,
+										},
+										item=item,
+									)
 								)
-							)
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -968,8 +989,9 @@ class PurchaseInvoice(BuyingController):
 						)
 
 	def get_asset_gl_entry(self, gl_entries):
-		arbnb_account = self.get_company_default("asset_received_but_not_billed")
-		eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+		arbnb_account = None
+		eiiav_account = None
+		asset_eiiav_currency = None
 
 		for item in self.get("items"):
 			if item.is_fixed_asset:
@@ -981,6 +1003,8 @@ class PurchaseInvoice(BuyingController):
 					"Asset Received But Not Billed",
 					"Fixed Asset",
 				]:
+					if not arbnb_account:
+						arbnb_account = self.get_company_default("asset_received_but_not_billed")
 					item.expense_account = arbnb_account
 
 				if not self.update_stock:
@@ -1003,7 +1027,10 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					if item.item_tax_amount:
-						asset_eiiav_currency = get_account_currency(eiiav_account)
+						if not eiiav_account or not asset_eiiav_currency:
+							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+							asset_eiiav_currency = get_account_currency(eiiav_account)
+
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -1046,7 +1073,10 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-						asset_eiiav_currency = get_account_currency(eiiav_account)
+						if not eiiav_account or not asset_eiiav_currency:
+							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
+							asset_eiiav_currency = get_account_currency(eiiav_account)
+
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -1066,47 +1096,46 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
-					# When update stock is checked
 					# Assets are bought through this document then it will be linked to this document
-					if self.update_stock:
-						if flt(item.landed_cost_voucher_amount):
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": eiiav_account,
-										"against": cwip_account,
-										"cost_center": item.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"credit": flt(item.landed_cost_voucher_amount),
-										"project": item.project or self.project,
-									},
-									item=item,
-								)
-							)
+					if flt(item.landed_cost_voucher_amount):
+						if not eiiav_account:
+							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
 
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": cwip_account,
-										"against": eiiav_account,
-										"cost_center": item.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"debit": flt(item.landed_cost_voucher_amount),
-										"project": item.project or self.project,
-									},
-									item=item,
-								)
+						gl_entries.append(
+							self.get_gl_dict(
+								{
+									"account": eiiav_account,
+									"against": cwip_account,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(item.landed_cost_voucher_amount),
+									"project": item.project or self.project,
+								},
+								item=item,
 							)
-
-						# update gross amount of assets bought through this document
-						assets = frappe.db.get_all(
-							"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
 						)
-						for asset in assets:
-							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
+
+						gl_entries.append(
+							self.get_gl_dict(
+								{
+									"account": cwip_account,
+									"against": eiiav_account,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"debit": flt(item.landed_cost_voucher_amount),
+									"project": item.project or self.project,
+								},
+								item=item,
 							)
+						)
+
+					# update gross amount of assets bought through this document
+					assets = frappe.db.get_all(
+						"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
+					)
+					for asset in assets:
+						frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
+						frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
 		return gl_entries
 

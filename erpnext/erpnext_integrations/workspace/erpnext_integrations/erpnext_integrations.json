@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"e88ADOJ7WC\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Integrations</b></span>\",\"col\":12}},{\"id\":\"G0tyx9WOfm\",\"type\":\"card\",\"data\":{\"card_name\":\"Backup\",\"col\":4}},{\"id\":\"nu4oSjH5Rd\",\"type\":\"card\",\"data\":{\"card_name\":\"Authentication\",\"col\":4}},{\"id\":\"nG8cdkpzoc\",\"type\":\"card\",\"data\":{\"card_name\":\"Google Services\",\"col\":4}},{\"id\":\"4hwuQn6E95\",\"type\":\"card\",\"data\":{\"card_name\":\"Communication Channels\",\"col\":4}},{\"id\":\"sEGAzTJRmq\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"ZC6xu-cLBR\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+ "content": "[{\"id\":\"e88ADOJ7WC\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Integrations</b></span>\",\"col\":12}},{\"id\":\"pZEYOOCdB0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Browse Apps\",\"col\":3}},{\"id\":\"St7AHbhVOr\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nu4oSjH5Rd\",\"type\":\"card\",\"data\":{\"card_name\":\"Authentication\",\"col\":4}},{\"id\":\"G0tyx9WOfm\",\"type\":\"card\",\"data\":{\"card_name\":\"Backup\",\"col\":4}},{\"id\":\"nG8cdkpzoc\",\"type\":\"card\",\"data\":{\"card_name\":\"Google Services\",\"col\":4}},{\"id\":\"4hwuQn6E95\",\"type\":\"card\",\"data\":{\"card_name\":\"Communication Channels\",\"col\":4}},{\"id\":\"sEGAzTJRmq\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}}]",
  "creation": "2020-08-20 19:30:48.138801",
  "custom_blocks": [],
  "docstatus": 0,
@@ -221,27 +221,9 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Settings",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Woocommerce Settings",
-   "link_count": 0,
-   "link_to": "Woocommerce Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:26.984717",
+ "modified": "2023-08-29 15:48:59.010704",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
@@ -253,6 +235,14 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 21.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Browse Apps",
+   "type": "URL",
+   "url": "https://frappecloud.com/marketplace"
+  }
+ ],
  "title": "ERPNext Integrations"
 }

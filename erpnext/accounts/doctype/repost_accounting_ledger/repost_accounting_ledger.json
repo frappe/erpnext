@@ -55,7 +55,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-27 15:47:58.975034",
+ "modified": "2023-09-26 14:21:27.362567",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger",
@@ -77,5 +77,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

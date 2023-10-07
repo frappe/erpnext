@@ -34,8 +34,8 @@
   "sample_quantity",
   "tracking_section",
   "received_stock_qty",
-  "stock_qty",
   "col_break_tracking_section",
+  "stock_qty",
   "returned_qty",
   "rate_and_amount",
   "price_list_rate",
@@ -117,6 +117,7 @@
   "accounting_details_section",
   "expense_account",
   "item_tax_rate",
+  "wip_composite_asset",
   "column_break_102",
   "provisional_expense_account",
   "accounting_dimensions_section",
@@ -858,7 +859,8 @@
   },
   {
    "fieldname": "tracking_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Qty as Per Stock UOM"
   },
   {
    "fieldname": "col_break_tracking_section",
@@ -1055,12 +1057,18 @@
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No"
+  },
+  {
+   "fieldname": "wip_composite_asset",
+   "fieldtype": "Link",
+   "label": "WIP Composite Asset",
+   "options": "Asset"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-26 12:55:15.234477",
+ "modified": "2023-10-03 21:11:50.547261",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
