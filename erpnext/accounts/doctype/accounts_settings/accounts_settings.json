@@ -46,6 +46,10 @@
   "currency_exchange_section",
   "allow_stale",
   "stale_days",
+  "service_provider",
+  "column_break_eiyok",
+  "access_key",
+  "validate_access_key",
   "report_settings_sb",
   "use_custom_cash_flow"
  ],
@@ -282,32 +286,56 @@
    "label": "Enable Common Party Accounting"
   },
   {
-    "default": "0",
-    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
-    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
-    "fieldtype": "Check",
-    "label": "Allow multi-currency invoices against single party account"
-   },
-   {
-    "default": "0",
-    "description": "Split Early Payment Discount Loss into Income and Tax Loss",
-    "fieldname": "book_tax_discount_loss",
-    "fieldtype": "Check",
-    "label": "Book Tax Loss on Early Payment Discount"
-   },
-   {
-    "default": "0",
-    "fieldname": "show_taxes_as_table_in_print",
-    "fieldtype": "Check",
-    "label": "Show Taxes as Table in Print"
-   }
+   "default": "0",
+   "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
+   "fieldname": "allow_multi_currency_invoices_against_single_party_account",
+   "fieldtype": "Check",
+   "label": "Allow multi-currency invoices against single party account"
+  },
+  {
+   "default": "0",
+   "description": "Split Early Payment Discount Loss into Income and Tax Loss",
+   "fieldname": "book_tax_discount_loss",
+   "fieldtype": "Check",
+   "label": "Book Tax Loss on Early Payment Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_as_table_in_print",
+   "fieldtype": "Check",
+   "label": "Show Taxes as Table in Print"
+  },
+  {
+   "default": "frankfurter.app",
+   "fieldname": "service_provider",
+   "fieldtype": "Select",
+   "label": "Service Provider",
+   "options": "frankfurter.app\nexchangerate.host"
+  },
+  {
+   "depends_on": "eval:doc.service_provider == \"exchangerate.host\"",
+   "description": "Access Key is mandatory for exchangerate.host",
+   "fieldname": "access_key",
+   "fieldtype": "Data",
+   "label": "Access Key"
+  },
+  {
+   "depends_on": "eval:doc.service_provider == \"exchangerate.host\"",
+   "fieldname": "validate_access_key",
+   "fieldtype": "Button",
+   "label": "Validate Access Key"
+  },
+  {
+   "fieldname": "column_break_eiyok",
+   "fieldtype": "Column Break"
+  }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-06-13 18:47:46.430291",
+ "modified": "2023-10-07 14:20:01.779208",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
