@@ -3,6 +3,7 @@
 
 import copy
 import unittest
+from contextlib import contextmanager
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
@@ -42,6 +43,30 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+
+
+@contextmanager
+def set_max_overdue(count=1):
+	"""
+	Context manager for setting max overdue invoice count for testing
+	"""
+	try:
+		account_settings = frappe.get_doc("Accounts Settings")
+		previous_max_allowed_overdue_bills = account_settings.max_allowed_overdue_bills
+		previous_overdue_controller = account_settings.overdue_controller
+
+		account_settings.max_allowed_overdue_bills = count
+		account_settings.overdue_controller = None
+		account_settings.save()
+
+		yield
+
+	finally:
+		# restore holiday list setup
+		account_settings = frappe.get_doc("Accounts Settings")
+		account_settings.max_allowed_overdue_bills = previous_max_allowed_overdue_bills
+		account_settings.overdue_controller = previous_overdue_controller
+		account_settings.save()
 
 
 class TestSalesInvoice(unittest.TestCase):
@@ -3112,15 +3137,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", over_billing_allowance)
 
+	@set_max_overdue(1)
 	def test_max_overdue_invoice_count(self):
 		"""
 		Test a case where invoice is raised against customer with
 		overdue bills exceeding the limit
 		"""
-		frappe.db.set_single_value(
-			"Accounts Settings", {"max_allowed_overdue_bills": 1, "overdue_controller": ""}
-		)
-
 		customer = frappe.get_doc(
 			{
 				"doctype": "Customer",
@@ -3146,14 +3168,6 @@ class TestSalesInvoice(unittest.TestCase):
 			si.save()
 
 		self.assertTrue("overdue invoice(s) against them" in str(err.exception).lower())
-
-		frappe.db.set_single_value(
-			"Accounts Settings",
-			{
-				"max_allowed_overdue_bills": 0,
-				"overdue_controller": "",
-			},
-		)
 
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
