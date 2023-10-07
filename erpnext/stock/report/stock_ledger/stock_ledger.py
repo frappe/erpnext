@@ -19,16 +19,25 @@ from erpnext.stock.utils import (
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
+	if filters.get("include_uom") and filters.get("type") != "Default UOM":
+		frappe.throw(str("Cannot select filters <b> Include UOM </b> and <b>Select UOM</b> together!"))
 	include_uom = filters.get("include_uom")
+	if filters.get("type") == "Purchase UOM":
+		type = "Purchase UOM"
+	elif filters.get("type") == "Sales UOM":
+		type = "Sales UOM"
+	else:
+		type = ""
 	columns = get_columns(filters)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
-	item_details = get_item_details(items, sl_entries, include_uom)
+	item_details = get_item_details(items, sl_entries, include_uom, type)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	data = []
 	conversion_factors = []
+	type_conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
 		conversion_factors.append(0)
@@ -43,7 +52,6 @@ def execute(filters=None):
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
-
 		sle.update(item_detail)
 
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
@@ -71,8 +79,13 @@ def execute(filters=None):
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
-
-	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+		if filters.get("type") == "Sales UOM" or filters.get("type") == "Purchase UOM":
+			type_conversion_factors.append(
+				(item_detail.conversion_factor, item_detail.uom, filters.get("type"))
+			)
+	update_included_uom_in_report(
+		columns, data, include_uom, conversion_factors, type_conversion_factors
+	)
 	return columns, data
 
 
@@ -344,7 +357,7 @@ def get_items(filters):
 	return items
 
 
-def get_item_details(items, sl_entries, include_uom):
+def get_item_details(items, sl_entries, include_uom, type):
 	item_details = {}
 	if not items:
 		items = list(set(d.item_code for d in sl_entries))
@@ -359,19 +372,35 @@ def get_item_details(items, sl_entries, include_uom):
 		.where(item.name.isin(items))
 	)
 
+	ucd = frappe.qb.DocType("UOM Conversion Detail")
 	if include_uom:
-		ucd = frappe.qb.DocType("UOM Conversion Detail")
 		query = (
 			query.left_join(ucd)
 			.on((ucd.parent == item.name) & (ucd.uom == include_uom))
 			.select(ucd.conversion_factor)
 		)
+	if type == "Sales UOM":
+		query = (
+			query.left_join(ucd)
+			.on((ucd.parent == item.name) & (ucd.uom == item.sales_uom))
+			.select(ucd.conversion_factor)
+			.as_("sales_uom_con")
+			.select(ucd.uom)
+			.as_("sales_uom")
+		)
+	elif type == "Purchase UOM":
+		query = (
+			query.left_join(ucd)
+			.on((ucd.parent == item.name) & (ucd.uom == item.purchase_uom))
+			.select(ucd.conversion_factor)
+			.as_("purchase_uom_con")
+			.select(ucd.uom)
+			.as_("purchase_uom")
+		)
 
 	res = query.run(as_dict=True)
-
 	for item in res:
 		item_details.setdefault(item.name, item)
-
 	return item_details
 
 

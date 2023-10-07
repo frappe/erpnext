@@ -403,11 +403,11 @@ def validate_disabled_warehouse(warehouse):
 		)
 
 
-def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
-	if not include_uom or not conversion_factors:
+def update_included_uom_in_report(
+	columns, result, include_uom, conversion_factors, type_conversion_factors
+):
+	if not include_uom and not conversion_factors and not type_conversion_factors:
 		return
-
-	convertible_cols = {}
 	is_dict_obj = False
 	if isinstance(result[0], dict):
 		is_dict_obj = True
@@ -417,41 +417,70 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		key = d.get("fieldname") if is_dict_obj else idx
 		if d.get("convertible"):
 			convertible_columns.setdefault(key, d.get("convertible"))
-
 			# Add new column to show qty/rate as per the selected UOM
-			columns.insert(
-				idx + 1,
-				{
-					"label": "{0} (per {1})".format(d.get("label"), include_uom),
-					"fieldname": "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
-					"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
-				},
-			)
+			if include_uom:
+				columns.insert(
+					idx + 1,
+					{
+						"label": "{0} (per {1})".format(d.get("label"), include_uom),
+						"fieldname": "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
+						"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
+					},
+				)
+			elif type_conversion_factors:
+				columns.insert(
+					idx + 1,
+					{
+						"label": "{0} ({1})".format(d.get("label"), type_conversion_factors[0][2]),
+						"fieldname": "{0}_{1}_qty".format(
+							d.get("fieldname"), frappe.scrub(type_conversion_factors[0][2])
+						),
+						"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
+						"width": 120,
+					},
+				)
+				if key == "in_qty":
+					columns.insert(
+						idx + 1,
+						{"label": "UOM", "fieldname": "uom", "fieldtype": "Data", "width": 100},
+					)
 
 	update_dict_values = []
+	type_update_dict_values = []
 	for row_idx, row in enumerate(result):
 		data = row.items() if is_dict_obj else enumerate(row)
 		for key, value in data:
 			if key not in convertible_columns:
 				continue
 			# If no conversion factor for the UOM, defaults to 1
-			if not conversion_factors[row_idx]:
-				conversion_factors[row_idx] = 1
+			if conversion_factors:
+				if not conversion_factors[row_idx]:
+					conversion_factors[row_idx] = 1
 
-			if convertible_columns.get(key) == "rate":
-				new_value = flt(value) * conversion_factors[row_idx]
-			else:
-				new_value = flt(value) / conversion_factors[row_idx]
-
+				if convertible_columns.get(key) == "rate":
+					new_value = flt(value) * conversion_factors[row_idx]
+				else:
+					new_value = flt(value) / conversion_factors[row_idx]
+			if type_conversion_factors:
+				if not type_conversion_factors[0][0]:
+					type_conversion_factors[0][0] = 1
+				new_value = flt(value) / type_conversion_factors[0][0]
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
-			else:
+			elif include_uom:
 				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
 				update_dict_values.append([row, new_key, new_value])
-
-	for data in update_dict_values:
-		row, key, value = data
-		row[key] = value
+			else:
+				new_key1 = "{0}_{1}_qty".format(key, frappe.scrub(type_conversion_factors[0][2]))
+				type_update_dict_values.append([row, new_key1, new_value])
+	if include_uom:
+		for data in update_dict_values:
+			row, key, value = data
+			row[key] = value
+	else:
+		for data in type_update_dict_values:
+			row, key, value = data
+			row[key] = value
 
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):

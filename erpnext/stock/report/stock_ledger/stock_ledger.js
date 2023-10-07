@@ -82,7 +82,14 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
-		}
+		},
+		{
+			"fieldname": "type",
+			"label": __("Select UOM"),
+			"fieldtype": "Select",
+			"options": ["Default UOM","Purchase UOM", "Sales UOM"] ,
+			"default": "Default UOM",
+		},
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
