@@ -24,10 +24,10 @@ from frappe.utils import (
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
