@@ -531,7 +531,6 @@ class StockReconciliation(StockController):
 		if not row.batch_no:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
-
 		dimensions = get_inventory_dimensions()
 		has_dimensions = False
 		for dimension in dimensions:
