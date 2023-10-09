@@ -909,7 +909,7 @@ class AccountsController(TransactionBase):
 			party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated
 		)
 
-		payment_entries = get_advance_payment_entries(
+		payment_entries = get_advance_payment_entries_for_regional(
 			party_type, party, party_account, order_doctype, order_list, include_unallocated
 		)
 
@@ -2347,6 +2347,11 @@ def get_advance_journal_entries(
 	)
 
 	return list(journal_entries)
+
+
+@erpnext.allow_regional
+def get_advance_payment_entries_for_regional(*args, **kwargs):
+	return get_advance_payment_entries(*args, **kwargs)
 
 
 def get_advance_payment_entries(
