@@ -304,10 +304,13 @@ def get_accounts_with_children(accounts):
 	for d in accounts:
 		account = frappe.get_cached_doc("Account", d)
 		if account:
-			children = frappe.get_all(
-				"Account", filters={"lft": [">=", account.lft], "rgt": ["<=", account.rgt]}
-			)
-			all_accounts += [c.name for c in children]
+			if account.is_group:
+				children = frappe.get_all(
+					"Account", filters={"lft": [">=", account.lft], "rgt": ["<=", account.rgt]}
+				)
+				all_accounts += [c.name for c in children]
+			else:
+				all_accounts.append(account.name)
 		else:
 			frappe.throw(_("Account: {0} does not exist").format(d))
 
