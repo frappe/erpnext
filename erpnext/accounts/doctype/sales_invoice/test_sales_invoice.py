@@ -3164,10 +3164,10 @@ class TestSalesInvoice(unittest.TestCase):
 		overdue_inv.submit()
 
 		si = create_sales_invoice(customer=customer.name)
-		with self.assertRaises(frappe.ValidationError) as err:
-			si.save()
+		self.assertRaises(frappe.ValidationError, si.save)
 
-		self.assertTrue("overdue invoice(s) against them" in str(err.exception).lower())
+		overdue_inv.cancel()
+		si.save()
 
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
