@@ -358,10 +358,10 @@ class WorkOrder(Document):
 		else:
 			self.update_work_order_qty_in_so()
 
+		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
-		self.update_ordered_qty()
 		self.create_job_card()
 
 	def on_cancel(self):
@@ -1513,22 +1513,26 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 
 
 def get_reserved_qty_for_production(
-	item_code: str, warehouse: str, check_production_plan: bool = False
+	item_code: str,
+	warehouse: str,
+	completed_production_plans: list = None,
+	check_production_plan: bool = False,
 ) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
 
+	if check_production_plan:
+		qty_field = wo_item.required_qty
+	else:
+		qty_field = Case()
+		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+
 	query = (
 		frappe.qb.from_(wo)
 		.from_(wo_item)
-		.select(
-			Sum(
-				Case()
-				.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-				.else_(wo_item.required_qty - wo_item.consumed_qty)
-			)
-		)
+		.select(Sum(qty_field))
 		.where(
 			(wo_item.item_code == item_code)
 			& (wo_item.parent == wo.name)
@@ -1544,6 +1548,9 @@ def get_reserved_qty_for_production(
 
 	if check_production_plan:
 		query = query.where(wo.production_plan.isnotnull())
+
+	if completed_production_plans:
+		query = query.where(wo.production_plan.notin(completed_production_plans))
 
 	return query.run()[0][0] or 0.0
 

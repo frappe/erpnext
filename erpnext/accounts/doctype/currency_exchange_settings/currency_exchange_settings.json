@@ -9,6 +9,7 @@
   "disabled",
   "service_provider",
   "api_endpoint",
+  "access_key",
   "url",
   "column_break_3",
   "help",
@@ -84,12 +85,18 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "depends_on": "eval:doc.service_provider == 'exchangerate.host';",
+   "fieldname": "access_key",
+   "fieldtype": "Data",
+   "label": "Access Key"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-01-09 12:19:03.955906",
+ "modified": "2023-10-04 15:30:25.333860",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",

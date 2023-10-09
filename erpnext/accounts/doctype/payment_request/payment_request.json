@@ -268,8 +268,7 @@
    "fieldname": "email_to",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "To",
-   "options": "Email"
+   "label": "To"
   },
   {
    "depends_on": "eval: doc.payment_channel != \"Phone\"",
@@ -340,8 +339,8 @@
   },
   {
    "fieldname": "payment_url",
-   "hidden": 1,
    "fieldtype": "Data",
+   "hidden": 1,
    "length": 500,
    "options": "URL",
    "read_only": 1
@@ -396,7 +395,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-16 14:15:02.510890",
+ "modified": "2023-09-27 09:51:42.277638",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

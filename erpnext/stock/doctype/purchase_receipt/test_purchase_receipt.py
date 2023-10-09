@@ -2060,6 +2060,32 @@ class TestPurchaseReceipt(FrappeTestCase):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
+	def test_purchase_return_status_with_debit_note(self):
+		pr = make_purchase_receipt(rejected_qty=10, received_qty=10, rate=100, do_not_save=1)
+		pr.items[0].qty = 0
+		pr.items[0].stock_qty = 0
+		pr.submit()
+
+		return_pr = make_purchase_receipt(
+			is_return=1,
+			return_against=pr.name,
+			qty=0,
+			rejected_qty=10 * -1,
+			received_qty=10 * -1,
+			do_not_save=1,
+		)
+		return_pr.items[0].qty = 0.0
+		return_pr.items[0].stock_qty = 0.0
+		return_pr.submit()
+
+		self.assertEqual(return_pr.status, "To Bill")
+
+		pi = make_purchase_invoice(return_pr.name)
+		pi.submit()
+
+		return_pr.reload()
+		self.assertEqual(return_pr.status, "Completed")
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
