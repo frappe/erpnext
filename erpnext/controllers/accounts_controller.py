@@ -1520,11 +1520,7 @@ class AccountsController(TransactionBase):
 
 		if flt(len(overdue_invoices)) >= flt(max_allowed_overdue_bills):
 			msg = _(
-				"""
-				Cannot raise and invoice against {0} as there
-				are {1} or more overdue invoice(s) against them.
-				To allow more, please set allowance in Accounts Settings.
-				"""
+				"Cannot raise and invoice against {0} as there are {1} or more overdue invoice(s) against them. To allow more, please set allowance in Accounts Settings."
 			).format(self.customer, max_allowed_overdue_bills)
 			msg += "<br>"
 			msg += _("Overdue invoice(s):")

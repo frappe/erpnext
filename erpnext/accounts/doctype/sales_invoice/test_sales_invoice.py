@@ -3164,7 +3164,7 @@ class TestSalesInvoice(unittest.TestCase):
 		overdue_inv.submit()
 
 		si = create_sales_invoice(customer=customer.name)
-		self.assertRaises(frappe.ValidationError, si.save)
+		self.assertRaises(frappe.exceptions.ValidationError, si.save)
 
 		overdue_inv.cancel()
 		si.save()
