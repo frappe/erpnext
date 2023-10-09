@@ -15,9 +15,13 @@
 				{{ doc.items_preview }}
 			</div>
 		</div>
-		{% if doc.get('grand_total') %}
+		{% if doc.is_rounded_total_disabled() and doc.get('grand_total') %}
 			<div class="col-sm-3 text-right font-weight-bold item-total">
 				{{ doc.get_formatted("grand_total") }}
+			</div>
+		{% elif doc.get('rounded_total') %}
+			<div class="col-sm-3 text-right font-weight-bold item-total">
+				{{ doc.get_formatted("rounded_total") }}
 			</div>
 		{% endif %}
 	</div>
