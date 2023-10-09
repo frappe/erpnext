@@ -35,8 +35,12 @@ def get_data(filters):
 			sq_item.parent,
 			sq_item.item_code,
 			sq_item.qty,
+			sq.currency,
 			sq_item.stock_qty,
 			sq_item.amount,
+			sq_item.base_rate,
+			sq_item.base_amount,
+			sq.price_list_currency,
 			sq_item.uom,
 			sq_item.stock_uom,
 			sq_item.request_for_quotation,
@@ -105,7 +109,11 @@ def prepare_data(supplier_quotation_data, filters):
 			"qty": data.get("qty"),
 			"price": flt(data.get("amount") * exchange_rate, float_precision),
 			"uom": data.get("uom"),
+			"price_list_currency": data.get("price_list_currency"),
+			"currency": data.get("currency"),
 			"stock_uom": data.get("stock_uom"),
+			"base_amount": flt(data.get("base_amount"), float_precision),
+			"base_rate": flt(data.get("base_rate"), float_precision),
 			"request_for_quotation": data.get("request_for_quotation"),
 			"valid_till": data.get("valid_till"),
 			"lead_time_days": data.get("lead_time_days"),
@@ -183,6 +191,8 @@ def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
 
 
 def get_columns(filters):
+	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+
 	group_by_columns = [
 		{
 			"fieldname": "supplier_name",
@@ -204,10 +214,17 @@ def get_columns(filters):
 		{"fieldname": "uom", "label": _("UOM"), "fieldtype": "Link", "options": "UOM", "width": 90},
 		{"fieldname": "qty", "label": _("Quantity"), "fieldtype": "Float", "width": 80},
 		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"width": 110,
+		},
+		{
 			"fieldname": "price",
 			"label": _("Price"),
 			"fieldtype": "Currency",
-			"options": "Company:company:default_currency",
+			"options": "currency",
 			"width": 110,
 		},
 		{
@@ -221,8 +238,22 @@ def get_columns(filters):
 			"fieldname": "price_per_unit",
 			"label": _("Price per Unit (Stock UOM)"),
 			"fieldtype": "Currency",
-			"options": "Company:company:default_currency",
+			"options": "currency",
 			"width": 120,
+		},
+		{
+			"fieldname": "base_amount",
+			"label": _("Price ({0})").format(currency),
+			"fieldtype": "Currency",
+			"options": "price_list_currency",
+			"width": 180,
+		},
+		{
+			"fieldname": "base_rate",
+			"label": _("Price Per Unit ({0})").format(currency),
+			"fieldtype": "Currency",
+			"options": "price_list_currency",
+			"width": 180,
 		},
 		{
 			"fieldname": "quotation",
