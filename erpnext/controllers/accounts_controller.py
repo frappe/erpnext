@@ -1498,7 +1498,7 @@ class AccountsController(TransactionBase):
 			)
 
 	def validate_overdue_bill_count(self):
-		if self.doctype != "Sales Invoice":
+		if self.doctype not in ["Sales Invoice", "Delivery Note"]:
 			return
 
 		max_allowed_overdue_bills = frappe.db.get_single_value(
@@ -1513,7 +1513,7 @@ class AccountsController(TransactionBase):
 		)
 
 		overdue_invoices = frappe.db.get_all(
-			self.doctype,
+			"Sales Invoice",
 			{"customer": self.customer, "docstatus": 1, "status": "Overdue", "name": ["!=", self.name]},
 			pluck="name",
 		)

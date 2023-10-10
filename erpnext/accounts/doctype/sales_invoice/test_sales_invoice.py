@@ -3164,10 +3164,10 @@ class TestSalesInvoice(unittest.TestCase):
 		overdue_inv.submit()
 
 		si = create_sales_invoice(customer=customer.name)
-		self.assertRaises(frappe.exceptions.ValidationError, si.save)
+		self.assertRaises(frappe.exceptions.ValidationError, si.submit)
 
 		overdue_inv.cancel()
-		si.save()
+		si.submit()
 
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
@@ -3764,7 +3764,7 @@ def create_internal_supplier(supplier_name, represents_company, allowed_to_inter
 
 
 def setup_accounts():
-	## Create internal transfer account
+	# Create internal transfer account
 	account = create_account(
 		account_name="Unrealized Profit",
 		parent_account="Current Liabilities - TCP1",
