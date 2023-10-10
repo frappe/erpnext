@@ -457,6 +457,8 @@ class GrossProfitGenerator(object):
 						new_row.qty += flt(row.qty)
 						new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
 						new_row.base_amount += flt(row.base_amount, self.currency_precision)
+						if self.filters.get("group_by") == "Sales Person":
+							new_row.allocated_amount += flt(row.allocated_amount, self.currency_precision)
 				new_row = self.set_average_rate(new_row)
 				self.grouped_data.append(new_row)
 			else:
