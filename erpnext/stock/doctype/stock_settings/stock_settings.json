@@ -428,7 +428,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-09-01 16:16:34.018947",
+ "modified": "2023-10-01 14:22:36.136111",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -442,6 +442,10 @@
    "role": "Stock Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
   }
  ],
  "quick_entry": 1,
