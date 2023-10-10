@@ -378,3 +378,4 @@ erpnext.patches.v13_0.update_schedule_type_in_loans
 erpnext.patches.v13_0.update_asset_value_for_manual_depr_entries
 erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v13_0.correct_asset_value_if_je_with_workflow
+execute:frappe.db.set_value("Accounts Settings", "Accounts Settings", "service_provider", "frankfurter.app")
