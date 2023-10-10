@@ -48,6 +48,20 @@ class ProcessStatementOfAccounts(Document):
 
 
 def get_report_pdf(doc, consolidated=True):
+	statement_dict = get_statement_dict(doc)
+	if not bool(statement_dict):
+		return False
+	elif consolidated:
+		delimiter = '<div style="page-break-before: always;"></div>' if doc.include_break else ""
+		result = delimiter.join(list(statement_dict.values()))
+		return get_pdf(result, {"orientation": doc.orientation})
+	else:
+		for customer, statement_html in statement_dict.items():
+			statement_dict[customer] = get_pdf(statement_html, {"orientation": doc.orientation})
+		return statement_dict
+
+
+def get_statement_dict(doc, get_statement_dict=False):
 	statement_dict = {}
 	ageing = ""
 
@@ -65,6 +79,7 @@ def get_report_pdf(doc, consolidated=True):
 		filters = get_common_filters(doc)
 
 		if doc.report == "General Ledger":
+			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
 			col, res = get_soa(filters)
 			for x in [0, -2, -1]:
 				res[x]["account"] = res[x]["account"].replace("'", "")
@@ -77,18 +92,11 @@ def get_report_pdf(doc, consolidated=True):
 			if not res:
 				continue
 
-		statement_dict[entry.customer] = get_html(doc, filters, entry, col, res, ageing)
+		statement_dict[entry.customer] = (
+			[res, ageing] if get_statement_dict else get_html(doc, filters, entry, col, res, ageing)
+		)
 
-	if not bool(statement_dict):
-		return False
-	elif consolidated:
-		delimiter = '<div style="page-break-before: always;"></div>' if doc.include_break else ""
-		result = delimiter.join(list(statement_dict.values()))
-		return get_pdf(result, {"orientation": doc.orientation})
-	else:
-		for customer, statement_html in statement_dict.items():
-			statement_dict[customer] = get_pdf(statement_html, {"orientation": doc.orientation})
-		return statement_dict
+	return statement_dict
 
 
 def set_ageing(doc, entry):
@@ -101,7 +109,8 @@ def set_ageing(doc, entry):
 			"range2": 60,
 			"range3": 90,
 			"range4": 120,
-			"customer": entry.customer,
+			"party_type": "Customer",
+			"party": [entry.customer],
 		}
 	)
 	col1, ageing = get_ageing(ageing_filters)
@@ -144,7 +153,8 @@ def get_gl_filters(doc, entry, tax_id, presentation_currency):
 def get_ar_filters(doc, entry):
 	return {
 		"report_date": doc.posting_date if doc.posting_date else None,
-		"customer": entry.customer,
+		"party_type": "Customer",
+		"party": [entry.customer],
 		"customer_name": entry.customer_name if entry.customer_name else None,
 		"payment_terms_template": doc.payment_terms_template if doc.payment_terms_template else None,
 		"sales_partner": doc.sales_partner if doc.sales_partner else None,

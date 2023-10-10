@@ -418,6 +418,10 @@ class BuyingController(SubcontractingController):
 					item.bom = None
 
 	def set_qty_as_per_stock_uom(self):
+		allow_to_edit_stock_qty = frappe.db.get_single_value(
+			"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"
+		)
+
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
 				# Check if item code is present
@@ -431,6 +435,11 @@ class BuyingController(SubcontractingController):
 					d.received_stock_qty = flt(d.received_qty) * flt(
 						d.conversion_factor, d.precision("conversion_factor")
 					)
+
+				if allow_to_edit_stock_qty:
+					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
+					if d.get("received_stock_qty"):
+						d.received_stock_qty = flt(d.received_stock_qty, d.precision("received_stock_qty"))
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):

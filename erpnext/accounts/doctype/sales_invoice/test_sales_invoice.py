@@ -26,6 +26,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -1801,6 +1802,10 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 
 	def test_outstanding_amount_after_advance_payment_entry_cancellation(self):
+		"""Test impact of advance PE submission/cancellation on SI and SO."""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sales_order = make_sales_order(item_code="138-CMS Shoe", qty=1, price_list_rate=500)
 		pe = frappe.get_doc(
 			{
 				"doctype": "Payment Entry",
@@ -1820,10 +1825,25 @@ class TestSalesInvoice(unittest.TestCase):
 				"paid_to": "_Test Cash - _TC",
 			}
 		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": sales_order.name,
+				"total_amount": sales_order.grand_total,
+				"outstanding_amount": sales_order.grand_total,
+				"allocated_amount": 300,
+			},
+		)
 		pe.insert()
 		pe.submit()
 
+		sales_order.reload()
+		self.assertEqual(sales_order.advance_paid, 300)
+
 		si = frappe.copy_doc(test_records[0])
+		si.items[0].sales_order = sales_order.name
+		si.items[0].so_detail = sales_order.get("items")[0].name
 		si.is_pos = 0
 		si.append(
 			"advances",
@@ -1831,6 +1851,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"doctype": "Sales Invoice Advance",
 				"reference_type": "Payment Entry",
 				"reference_name": pe.name,
+				"reference_row": pe.references[0].name,
 				"advance_amount": 300,
 				"allocated_amount": 300,
 				"remarks": pe.remarks,
@@ -1839,7 +1860,13 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		si.load_from_db()
+		si.reload()
+		pe.reload()
+		sales_order.reload()
+
+		# Check if SO is unlinked/replaced by SI in PE & if SO advance paid is 0
+		self.assertEqual(pe.references[0].reference_name, si.name)
+		self.assertEqual(sales_order.advance_paid, 0.0)
 
 		# check outstanding after advance allocation
 		self.assertEqual(
@@ -1847,11 +1874,9 @@ class TestSalesInvoice(unittest.TestCase):
 			flt(si.rounded_total - si.total_advance, si.precision("outstanding_amount")),
 		)
 
-		# added to avoid Document has been modified exception
-		pe = frappe.get_doc("Payment Entry", pe.name)
 		pe.cancel()
+		si.reload()
 
-		si.load_from_db()
 		# check outstanding after advance cancellation
 		self.assertEqual(
 			flt(si.outstanding_amount),
@@ -3375,6 +3400,24 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.outstanding_amount, 0)
 
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
+
+	@change_settings("Selling Settings", {"customer_group": None, "territory": None})
+	def test_sales_invoice_without_customer_group_and_territory(self):
+		# create a customer
+		if not frappe.db.exists("Customer", "_Test Simple Customer"):
+			customer_dict = get_customer_dict("_Test Simple Customer")
+			customer_dict.pop("customer_group")
+			customer_dict.pop("territory")
+			customer = frappe.get_doc(customer_dict).insert(ignore_permissions=True)
+
+			self.assertEqual(customer.customer_group, None)
+			self.assertEqual(customer.territory, None)
+
+		# create a sales invoice
+		si = create_sales_invoice(customer="_Test Simple Customer")
+		self.assertEqual(si.docstatus, 1)
+		self.assertEqual(si.customer_group, None)
+		self.assertEqual(si.territory, None)
 
 	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
 	def test_sales_return_negative_rate(self):

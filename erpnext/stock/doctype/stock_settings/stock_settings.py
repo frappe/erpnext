@@ -56,6 +56,8 @@ class StockSettings(Document):
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
 		self.validate_stock_reservation()
+		self.change_precision_for_for_sales()
+		self.change_precision_for_purchase()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -166,6 +168,56 @@ class StockSettings(Document):
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
+
+	def change_precision_for_for_sales(self):
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and (
+			doc_before_save.allow_to_edit_stock_uom_qty_for_sales
+			== self.allow_to_edit_stock_uom_qty_for_sales
+		):
+			return
+
+		if self.allow_to_edit_stock_uom_qty_for_sales:
+			doctypes = ["Sales Order Item", "Sales Invoice Item", "Delivery Note Item", "Quotation Item"]
+			self.make_property_setter_for_precision(doctypes)
+
+	def change_precision_for_purchase(self):
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and (
+			doc_before_save.allow_to_edit_stock_uom_qty_for_purchase
+			== self.allow_to_edit_stock_uom_qty_for_purchase
+		):
+			return
+
+		if self.allow_to_edit_stock_uom_qty_for_purchase:
+			doctypes = [
+				"Purchase Order Item",
+				"Purchase Receipt Item",
+				"Purchase Invoice Item",
+				"Request for Quotation Item",
+				"Supplier Quotation Item",
+				"Material Request Item",
+			]
+			self.make_property_setter_for_precision(doctypes)
+
+	@staticmethod
+	def make_property_setter_for_precision(doctypes):
+		for doctype in doctypes:
+			if property_name := frappe.db.exists(
+				"Property Setter",
+				{"doc_type": doctype, "field_name": "conversion_factor", "property": "precision"},
+			):
+				frappe.db.set_value("Property Setter", property_name, "value", 9)
+				continue
+
+			make_property_setter(
+				doctype,
+				"conversion_factor",
+				"precision",
+				9,
+				"Float",
+				validate_fields_for_doctype=False,
+			)
 
 	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
 		make_property_setter(
