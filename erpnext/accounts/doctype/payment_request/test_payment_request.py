@@ -19,6 +19,7 @@ PAYMENT_URL = "https://example.com/payment"
 payment_gateways = [
 	{"doctype": "Payment Gateway", "gateway": "_Test Gateway"},
 	{"doctype": "Payment Gateway", "gateway": "_Test Gateway Phone"},
+	{"doctype": "Payment Gateway", "gateway": "_Test Gateway Other"},
 ]
 
 payment_method = [
@@ -33,6 +34,13 @@ payment_method = [
 		"doctype": "Payment Gateway Account",
 		"payment_gateway": "_Test Gateway",
 		"payment_account": "_Test Bank USD - _TC",
+		"currency": "USD",
+	},
+	{
+		"doctype": "Payment Gateway Account",
+		"payment_gateway": "_Test Gateway Other",
+		"payment_account": "_Test Bank USD - _TC",
+		"payment_channel": "Other",
 		"currency": "USD",
 	},
 	{
@@ -114,6 +122,21 @@ class TestPaymentRequest(unittest.TestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+			payment_gateway_account="_Test Gateway Other - USD",
+			submit_doc=True,
+			return_doc=True,
+		)
+		self.assertEqual(pr.payment_channel, "Other")
+		self.assertEqual(pr.mute_email, True)
+
+		self.assertEqual(pr.payment_url, PAYMENT_URL)
+		self.assertEqual(self.send_email.call_count, 0)
+		self.assertEqual(self._get_payment_gateway_controller.call_count, 1)
+		pr.cancel()
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
 			payment_gateway_account="_Test Gateway - USD",  # email channel
 			submit_doc=False,
 			return_doc=True,
@@ -124,9 +147,9 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEqual(pr.payment_channel, "Email")
 		self.assertEqual(pr.mute_email, False)
 
-		self.assertIsNone(pr.payment_url)
+		self.assertEqual(pr.payment_url, PAYMENT_URL)
 		self.assertEqual(self.send_email.call_count, 0)  # hence: no increment
-		self.assertEqual(self._get_payment_gateway_controller.call_count, 1)
+		self.assertEqual(self._get_payment_gateway_controller.call_count, 2)
 		pr.cancel()
 
 		pr = make_payment_request(

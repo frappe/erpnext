@@ -165,14 +165,13 @@ class PaymentRequest(Document):
 			self.db_set("status", "Requested")
 
 		if self.payment_request_type == "Inward":
-			send_mail = self.payment_gateway_validation() if self.payment_gateway else None
-			if send_mail and not (self.mute_email or self.flags.mute_email):
-				self.set_payment_request_url()
-				self.send_email()
-				self.make_communication_entry()
-
-			elif self.payment_channel == "Phone":
+			if self.payment_channel == "Phone":
 				self.request_phone_payment()
+			else:
+				self.set_payment_request_url()
+				if not (self.mute_email or self.flags.mute_email):
+					self.send_email()
+					self.make_communication_entry()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
@@ -231,7 +230,7 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
-		if self.payment_account and self.payment_channel != "Phone":
+		if self.payment_account and self.payment_gateway and self.payment_gateway_validation():
 			self.payment_url = self.get_payment_url()
 
 		if self.payment_url:
