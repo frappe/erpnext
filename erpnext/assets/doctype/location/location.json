@@ -11,7 +11,6 @@
   "location_name",
   "parent_location",
   "cb_details",
-  "is_container",
   "is_group",
   "sb_location_details",
   "latitude",
@@ -47,13 +46,6 @@
   {
    "fieldname": "cb_details",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Check if it is a hydroponic unit",
-   "fieldname": "is_container",
-   "fieldtype": "Check",
-   "label": "Is Container"
   },
   {
    "bold": 1,
@@ -142,7 +134,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2023-08-29 12:49:33.290527",
+ "modified": "2023-10-08 23:08:08.221666",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",

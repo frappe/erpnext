@@ -43,7 +43,6 @@ def execute():
 						"doctype": "Location",
 						"location_name": land_unit.get("land_unit_name"),
 						"parent_location": land_unit.get("parent_land_unit") or "All Land Units",
-						"is_container": land_unit.get("is_container"),
 						"is_group": land_unit.get("is_group"),
 						"latitude": land_unit.get("latitude"),
 						"longitude": land_unit.get("longitude"),
