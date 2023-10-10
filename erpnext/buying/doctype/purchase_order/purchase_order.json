@@ -1272,7 +1272,6 @@
    "show_dashboard": 1
   },
   {
-   "default": "Not Initiated",
    "fieldname": "advance_payment_status",
    "fieldtype": "Select",
    "hidden": 1,
