@@ -300,6 +300,54 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# Raise the error for backdated deliver note entry cancel
 		# self.assertRaises(SerialNoExistsInFutureTransactionError, dn.cancel)
 
+	@change_settings("Stock Settings", {"allow_duplicate_serial_nos": 1})
+	def test_allow_duplicate_serial_no(self):
+		"""
+		Test the creation of two Serial Nos with same serial no but different item.
+		Both will have different names as the primary differentiator.
+
+		CASE: Two items purchased from different Suppliers have the same Serial No,
+		which need to be maintained in the system.
+		"""
+		item = make_item(
+			item_code="Test SN Item A",
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TSN-A-.####",
+			},
+		)
+		pr = make_purchase_receipt(item_code=item.name, qty=1, rate=500)
+		serial_nos = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+
+		# Create a new bundle with same serial no from the PR for a different item
+		item_2 = make_item(
+			item_code="Test SN Item B",
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+			},
+		)
+		new_bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"item_code": item_2.name,
+				"warehouse": pr.items[0].warehouse,
+				"type_of_transaction": "Inward",
+				"voucher_type": "Purchase Receipt",
+			}
+		)
+		# Simulate manual addition of serial no via text field/CSV import in S&B Bundle
+		new_bundle.add_serial_batch({"serial_nos": serial_nos[0]})
+		new_bundle.submit()
+
+		shared_serial_nos = frappe.get_all(
+			"Serial No", {"serial_no": "TSN-A-0001"}, ["name", "serial_no"]
+		)
+		self.assertEqual(len(shared_serial_nos), 2)
+		self.assertEqual(shared_serial_nos[0].serial_no, shared_serial_nos[1].serial_no)
+		self.assertNotEqual(shared_serial_nos[0].name, shared_serial_nos[1].name)
+
 	def test_purchase_receipt_gl_entry(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
