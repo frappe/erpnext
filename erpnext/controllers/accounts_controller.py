@@ -1967,6 +1967,12 @@ class AccountsController(TransactionBase):
 				)
 
 			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			frappe.db.set_value(
+				self.doctype,
+				self.name,
+				"advance_payment_status",
+				"Partially Paid" if advance_paid < order_total else "Paid",
+			)
 
 	@property
 	def company_abbr(self):
