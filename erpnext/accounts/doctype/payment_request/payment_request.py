@@ -180,13 +180,6 @@ class PaymentRequest(Document):
 		if self.payment_url:
 			self.db_set("payment_url", self.payment_url)
 
-		if (
-			self.payment_url
-			or not self.payment_gateway_account
-			or (self.payment_gateway_account and self.payment_channel == "Phone")
-		):
-			self.db_set("status", "Initiated")
-
 	def get_payment_url(self):
 		if self.reference_doctype != "Fees":
 			data = frappe.db.get_value(
