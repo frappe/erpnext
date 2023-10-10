@@ -229,16 +229,18 @@ class PaymentEntry(AccountsController):
 
 				# if no payment template is used by invoice and has a custom term(no `payment_term`), then invoice outstanding will be in 'None' key
 				latest = latest.get(d.payment_term) or latest.get(None)
-
 				# The reference has already been fully paid
 				if not latest:
 					frappe.throw(
 						_("{0} {1} has already been fully paid.").format(_(d.reference_doctype), d.reference_name)
 					)
 				# The reference has already been partly paid
-				elif latest.outstanding_amount < latest.invoice_amount and flt(
-					d.outstanding_amount, d.precision("outstanding_amount")
-				) != flt(latest.outstanding_amount, d.precision("outstanding_amount")):
+				elif (
+					latest.outstanding_amount < latest.invoice_amount
+					and flt(d.outstanding_amount, d.precision("outstanding_amount"))
+					!= flt(latest.outstanding_amount, d.precision("outstanding_amount"))
+					and d.payment_term == ""
+				):
 					frappe.throw(
 						_(
 							"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
@@ -1602,11 +1604,10 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 										"voucher_type": d.voucher_type,
 										"posting_date": d.posting_date,
 										"invoice_amount": flt(d.invoice_amount),
-										"outstanding_amount": flt(d.outstanding_amount),
-										"payment_term_outstanding": payment_term_outstanding,
-										"allocated_amount": payment_term_outstanding
+										"outstanding_amount": payment_term_outstanding
 										if payment_term_outstanding
 										else d.outstanding_amount,
+										"payment_term_outstanding": payment_term_outstanding,
 										"payment_amount": payment_term.payment_amount,
 										"payment_term": payment_term.payment_term,
 									}
