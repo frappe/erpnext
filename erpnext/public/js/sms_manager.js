@@ -73,14 +73,25 @@ erpnext.SMSManager = function SMSManager(doc) {
 	}
 	this.make_dialog = function() {
 		var d = new frappe.ui.Dialog({
-			title: 'Send SMS',
+			title: 'Send SMS / WA',
 			width: 400,
 			fields: [
 				{fieldname:'number', fieldtype:'Data', label:'Mobile Number', reqd:1},
 				{fieldname:'message', fieldtype:'Text', label:'Message', reqd:1},
-				{fieldname:'send', fieldtype:'Button', label:'Send'}
+				{fieldname:'send', fieldtype:'Button', label:'Send'},
+				{fieldname:'send_wa_link', fieldtype:'Button', label:'Send with WA (Link)'}
 			]
 		})
+		d.fields_dict.send_wa_link.input.onclick = function() {
+			var btn = d.fields_dict.send_wa_link.input;
+			var v = me.dialog.get_values();
+			if(v) {
+				$(btn).set_working();
+				window.open(`https://api.whatsapp.com/send?phone=${v.number}&text=${encodeURIComponent(v.message)}`, "_blank");
+				$(btn).done_working();
+				me.dialog.hide();
+			}
+		}
 		d.fields_dict.send.input.onclick = function() {
 			var btn = d.fields_dict.send.input;
 			var v = me.dialog.get_values();
