@@ -349,6 +349,9 @@ class PurchaseOrder(BuyingController):
 		self.validate_budget()
 		self.update_reserved_qty_for_subcontract()
 
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Initiated"
+
 		frappe.get_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
 		)

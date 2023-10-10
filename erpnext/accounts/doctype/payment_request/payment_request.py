@@ -115,6 +115,17 @@ class PaymentRequest(Document):
 		elif self.payment_channel == "Phone":
 			self.request_phone_payment()
 
+		if (
+			self.reference_doctype in ["Sales Order"] and ref_doc.advance_payment_status == "Not Requested"
+		):
+			ref_doc.db_set("advance_payment_status", "Requested")
+
+		if (
+			self.reference_doctype in ["Purchase Order"]
+			and ref_doc.advance_payment_status == "Not Initiated"
+		):
+			ref_doc.db_set("advance_payment_status", "Initiated")
+
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
 		request_amount = self.get_request_amount()

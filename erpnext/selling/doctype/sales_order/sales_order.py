@@ -88,6 +88,8 @@ class SalesOrder(SellingController):
 			self.billing_status = "Not Billed"
 		if not self.delivery_status:
 			self.delivery_status = "Not Delivered"
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
