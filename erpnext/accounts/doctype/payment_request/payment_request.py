@@ -94,21 +94,17 @@ class PaymentRequest(Document):
 		elif self.payment_request_type == "Inward":
 			self.db_set("status", "Requested")
 
-		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		shopping_cart_flow = ref_doc.get("order_type") == "Shopping Cart"
 
-		if (
-			hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart"
-		) or self.flags.mute_email:
-			send_mail = False
-
-		if send_mail and self.payment_channel != "Phone":
+		if self.payment_channel == "Phone":
+			self.request_phone_payment()
+		elif not shopping_cart_flow:
 			self.set_payment_request_url()
+
+		if self.get("payment_channel", default="Email") == "Email" and not self.flags.mute_email and not shopping_cart_flow:
 			self.send_email()
 			self.make_communication_entry()
-
-		elif self.payment_channel == "Phone":
-			self.request_phone_payment()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
@@ -169,7 +165,7 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
-		if self.payment_account and self.payment_channel != "Phone":
+		if self.payment_account and self.payment_gateway and self.payment_gateway_validation():
 			self.payment_url = self.get_payment_url()
 
 		if self.payment_url:
