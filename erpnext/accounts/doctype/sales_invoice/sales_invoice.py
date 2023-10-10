@@ -551,46 +551,6 @@ class SalesInvoice(SellingController):
 			self.validate_for_repost()
 			self.db_set("repost_required", self.needs_repost)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-			# validate if deferred revenue is enabled for any item
-			# Don't allow to update the invoice if deferred revenue is enabled
-=======
-	def validate_deferred_accounting_before_repost(self):
-		# validate if deferred revenue is enabled for any item
-		# Don't allow to update the invoice if deferred revenue is enabled
-		if self.needs_repost:
->>>>>>> 68effd93bd (refactor: move reposting logic to common controller)
-			for item in self.get("items"):
-				if item.enable_deferred_revenue:
-					frappe.throw(
-						_(
-							"Deferred Revenue is enabled for item {0}. You cannot update the invoice after submission."
-						).format(item.item_code)
-					)
-<<<<<<< HEAD
-
-			self.db_set("repost_required", needs_repost)
-
-	def check_if_child_table_updated(
-		self, child_table, doc_before_update, fields_to_check, accounting_dimensions
-	):
-		# Check if any field affecting accounting entry is altered
-		for index, item in enumerate(self.get(child_table)):
-			for field in fields_to_check:
-				if doc_before_update.get(child_table)[index].get(field) != item.get(field):
-					return True
-
-			for dimension in accounting_dimensions:
-				if doc_before_update.get(child_table)[index].get(dimension) != item.get(dimension):
-					return True
-
-		return False
-=======
->>>>>>> 68effd93bd (refactor: move reposting logic to common controller)
-
-=======
->>>>>>> a856091ff4 (refactor: remove repeated validation for voucher)
 	def set_paid_amount(self):
 		paid_amount = 0.0
 		base_paid_amount = 0.0

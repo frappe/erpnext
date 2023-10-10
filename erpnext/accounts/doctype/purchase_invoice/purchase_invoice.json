@@ -1584,11 +1584,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2023-10-01 21:01:47.282533",
-=======
- "modified": "2023-09-21 12:22:04.545106",
->>>>>>> e922ec60eb (feat: allow on submit fields)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
