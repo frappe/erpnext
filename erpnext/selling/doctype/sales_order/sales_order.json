@@ -1643,7 +1643,6 @@
    "report_hide": 1
   },
   {
-   "default": "Not Requested",
    "fieldname": "advance_payment_status",
    "fieldtype": "Select",
    "hidden": 1,
