@@ -11,6 +11,13 @@ from erpnext.projects.report.billing_summary import get_billable_and_total_durat
 def get_columns():
 	return [
 		{
+			"label": _("Project"),
+			"fieldtype": "Link",
+			"fieldname": "project",
+			"options": "Project",
+			"width": 300,
+		},
+		{
 			"label": _("Employee ID"),
 			"fieldtype": "Link",
 			"fieldname": "employee",
