@@ -380,7 +380,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				{"serial_no": scan_serial_no, "item_code": this.item.item_code},
 				fields=fields,
 				(res) => {
-					if (res.exc || !res.message) return;
+					if (res.exc || !res.message) {
+						frappe.throw(
+							__(
+								"Serial No {0} does not belong to Item {1}",
+								[scan_serial_no.bold(), this.item.item_code.bold()]
+							)
+						);
+					};
 
 					this.dialog.fields_dict.entries.df.data.push({
 						serial_no: res.message.name,
