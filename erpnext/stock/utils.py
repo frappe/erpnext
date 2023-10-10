@@ -125,7 +125,7 @@ def get_stock_balance(
 
 	if with_valuation_rate:
 		if with_serial_no:
-			serial_nos = get_serial_nos_data_after_transactions(args)
+			serial_nos = get_serial_nos_data_after_transactions(filters=args)
 
 			return (
 				(last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
@@ -140,22 +140,22 @@ def get_stock_balance(
 		return last_entry.qty_after_transaction if last_entry else 0.0
 
 
-def get_serial_nos_data_after_transactions(args):
+def get_serial_nos_data_after_transactions(filters):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	serial_nos = set()
-	args = frappe._dict(args)
+	filters = frappe._dict(filters)
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	stock_ledger_entries = (
 		frappe.qb.from_(sle)
 		.select("serial_no", "actual_qty")
 		.where(
-			(sle.item_code == args.item_code)
-			& (sle.warehouse == args.warehouse)
+			(sle.item_code == filters.item_code)
+			& (sle.warehouse == filters.warehouse)
 			& (
 				CombineDatetime(sle.posting_date, sle.posting_time)
-				< CombineDatetime(args.posting_date, args.posting_time)
+				< CombineDatetime(filters.posting_date, filters.posting_time)
 			)
 			& (sle.is_cancelled == 0)
 		)
@@ -164,7 +164,7 @@ def get_serial_nos_data_after_transactions(args):
 	)
 
 	for stock_ledger_entry in stock_ledger_entries:
-		changed_serial_no = get_serial_nos(stock_ledger_entry.serial_no, args.item_code)
+		changed_serial_no = get_serial_nos(stock_ledger_entry.serial_no, filters.item_code)
 		if stock_ledger_entry.actual_qty > 0:
 			serial_nos.update(changed_serial_no)
 		else:
