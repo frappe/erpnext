@@ -937,6 +937,17 @@ frappe.form.link_formatters['Project'] = function(value, doc) {
 	}
 };
 
+frappe.form.link_formatters['Serial No'] = function(value, doc) {
+	if (doc && value && doc.serial_no_name && doc.serial_no_name !== value) {
+		console.log(value, doc);
+		return value + ': ' + doc.serial_no_name;
+	} else if (!value && doc && doc.serial_no) {
+		return doc.serial_no;
+	} else {
+		return value;
+	}
+}
+
 // add description on posting time
 $(document).on('app_ready', function() {
 	if(!frappe.datetime.is_timezone_same()) {

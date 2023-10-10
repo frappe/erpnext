@@ -13,6 +13,7 @@
   "column_break0",
   "customer",
   "serial_no",
+  "serial_no_name",
   "section_break_7",
   "complaint",
   "issue_details",
@@ -374,6 +375,13 @@
    "options": "Warranty Claim",
    "print_hide": 1,
    "width": "150px"
+  },
+  {
+   "fetch_from": "serial_no.serial_no",
+   "fieldname": "serial_no_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Serial No Name"
   }
  ],
  "icon": "fa fa-bug",
