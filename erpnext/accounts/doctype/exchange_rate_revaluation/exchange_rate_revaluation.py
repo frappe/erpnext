@@ -467,6 +467,16 @@ class ExchangeRateRevaluation(Document):
 				else "credit_in_account_currency"
 			)
 
+			balance_in_account_currency = flt(
+				abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")
+			)
+			difference_amount = (
+				flt(d.get("new_exchange_rate"), d.precision("new_exchange_rate")) * balance_in_account_currency
+			)
+			difference_amount -= (
+				flt(d.get("current_exchange_rate"), d.precision("current_exchange_rate"))
+				* balance_in_account_currency
+			)
 			journal_entry_accounts.append(
 				{
 					"account": d.get("account"),
@@ -503,28 +513,26 @@ class ExchangeRateRevaluation(Document):
 					"reference_name": self.name,
 				}
 			)
+			journal_entry_accounts.append(
+				{
+					"party_type": d.get("party_type"),
+					"party": d.get("party"),
+					"account": unrealized_exchange_gain_loss_account,
+					"balance": get_balance_on(unrealized_exchange_gain_loss_account),
+					"debit_in_account_currency": abs(difference_amount) if difference_amount < 0 else 0,
+					"credit_in_account_currency": difference_amount if difference_amount > 0 else 0,
+					"cost_center": erpnext.get_default_cost_center(self.company),
+					"exchange_rate": 1,
+					"reference_type": "Exchange Rate Revaluation",
+					"reference_name": self.name,
+				}
+			)
 
 		journal_entry.set("accounts", journal_entry_accounts)
 		journal_entry.set_amounts_in_company_currency()
 		journal_entry.set_total_debit_credit()
 
 		self.gain_loss_unbooked += journal_entry.difference - self.gain_loss_unbooked
-		journal_entry.append(
-			"accounts",
-			{
-				"account": unrealized_exchange_gain_loss_account,
-				"balance": get_balance_on(unrealized_exchange_gain_loss_account),
-				"debit_in_account_currency": abs(self.gain_loss_unbooked)
-				if self.gain_loss_unbooked < 0
-				else 0,
-				"credit_in_account_currency": self.gain_loss_unbooked if self.gain_loss_unbooked > 0 else 0,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"exchange_rate": 1,
-				"reference_type": "Exchange Rate Revaluation",
-				"reference_name": self.name,
-			},
-		)
-
 		journal_entry.set_amounts_in_company_currency()
 		journal_entry.set_total_debit_credit()
 		journal_entry.save()
