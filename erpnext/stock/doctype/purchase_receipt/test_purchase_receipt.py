@@ -1996,6 +1996,132 @@ class TestPurchaseReceipt(FrappeTestCase):
 		ste7.reload()
 		self.assertEqual(ste7.items[0].valuation_rate, valuation_rate)
 
+<<<<<<< HEAD
+=======
+	def test_purchase_receipt_provisional_accounting(self):
+		# Step - 1: Create Supplier with Default Currency as USD
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		supplier = create_supplier(default_currency="USD")
+
+		# Step - 2: Setup Company for Provisional Accounting
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		provisional_account = create_account(
+			account_name="Provision Account",
+			parent_account="Current Liabilities - _TC",
+			company="_Test Company",
+		)
+		company = frappe.get_doc("Company", "_Test Company")
+		company.enable_provisional_accounting_for_non_stock_items = 1
+		company.default_provisional_account = provisional_account
+		company.save()
+
+		# Step - 3: Create Non-Stock Item
+		item = make_item(properties={"is_stock_item": 0})
+
+		# Step - 4: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			qty=2,
+			item_code=item.name,
+			company=company.name,
+			supplier=supplier.name,
+			currency=supplier.default_currency,
+		)
+
+		# Test - 1: Total and Base Total should not be the same as the currency is different
+		self.assertNotEqual(flt(pr.total, 2), flt(pr.base_total, 2))
+		self.assertEqual(flt(pr.total * pr.conversion_rate, 2), flt(pr.base_total, 2))
+
+		# Test - 2: Sum of Debit or Credit should be equal to Purchase Receipt Base Total
+		amount = frappe.db.get_value("GL Entry", {"docstatus": 1, "voucher_no": pr.name}, ["sum(debit)"])
+		expected_amount = pr.base_total
+		self.assertEqual(amount, expected_amount)
+
+		company.enable_provisional_accounting_for_non_stock_items = 0
+		company.save()
+
+	def test_purchase_return_status_with_debit_note(self):
+		pr = make_purchase_receipt(rejected_qty=10, received_qty=10, rate=100, do_not_save=1)
+		pr.items[0].qty = 0
+		pr.items[0].stock_qty = 0
+		pr.submit()
+
+		return_pr = make_purchase_receipt(
+			is_return=1,
+			return_against=pr.name,
+			qty=0,
+			rejected_qty=10 * -1,
+			received_qty=10 * -1,
+			do_not_save=1,
+		)
+		return_pr.items[0].qty = 0.0
+		return_pr.items[0].stock_qty = 0.0
+		return_pr.submit()
+
+		self.assertEqual(return_pr.status, "To Bill")
+
+		pi = make_purchase_invoice(return_pr.name)
+		pi.submit()
+
+		return_pr.reload()
+		self.assertEqual(return_pr.status, "Completed")
+
+	def test_valuation_rate_in_return_purchase_receipt_for_moving_average(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.stock_ledger import get_previous_sle
+
+		# Step - 1: Create an Item (Valuation Method = Moving Average)
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		# Step - 2: Create a Purchase Receipt (Qty = 10, Rate = 100)
+		pr = make_purchase_receipt(qty=10, rate=100, item_code=item_code)
+
+		# Step - 3: Create a Material Receipt Stock Entry (Qty = 100, Basic Rate = 10)
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			purpose="Material Receipt",
+			item_code=item_code,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+		)
+
+		# Step - 4: Create a Material Issue Stock Entry (Qty = 100, Basic Rate = 18.18 [Auto Fetched])
+		make_stock_entry(
+			purpose="Material Issue", item_code=item_code, from_warehouse=warehouse, qty=100
+		)
+
+		# Step - 5: Create a Return Purchase Return (Qty = -8, Rate = 100 [Auto fetched])
+		return_pr = make_purchase_receipt(
+			is_return=1,
+			return_against=pr.name,
+			item_code=item_code,
+			qty=-8,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": return_pr.name, "voucher_detail_no": return_pr.items[0].name},
+			["posting_date", "posting_time", "outgoing_rate", "valuation_rate"],
+			as_dict=1,
+		)
+		previous_sle_valuation_rate = get_previous_sle(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": sle.posting_date,
+				"posting_time": sle.posting_time,
+			}
+		).get("valuation_rate")
+
+		# Test - 1: Valuation Rate should be equal to Outgoing Rate
+		self.assertEqual(flt(sle.outgoing_rate, 2), flt(sle.valuation_rate, 2))
+
+		# Test - 2: Valuation Rate should be equal to Previous SLE Valuation Rate
+		self.assertEqual(flt(sle.valuation_rate, 2), flt(previous_sle_valuation_rate, 2))
+
+>>>>>>> 26ad688584 (fix: negative valuation rate in PR return (#37424))
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
