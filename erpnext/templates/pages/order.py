@@ -4,8 +4,6 @@
 import frappe
 from frappe import _
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import show_attachments
-
 
 def get_context(context):
 	context.no_cache = 1
@@ -13,9 +11,6 @@ def get_context(context):
 	context.doc = frappe.get_doc(frappe.form_dict.doctype, frappe.form_dict.name)
 	if hasattr(context.doc, "set_indicator"):
 		context.doc.set_indicator()
-
-	if show_attachments():
-		context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
 
 	context.parents = frappe.form_dict.parents
 	context.title = frappe.form_dict.name
