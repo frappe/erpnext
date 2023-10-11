@@ -30,6 +30,7 @@ frappe.ui.form.on("Customer Group", {
 		frm.set_query('account', 'accounts', function (doc, cdt, cdn) {
 			return {
 				filters: {
+					'root_type': 'Asset',
 					"account_type": 'Receivable',
 					"company": locals[cdt][cdn].company,
 					"is_group": 0

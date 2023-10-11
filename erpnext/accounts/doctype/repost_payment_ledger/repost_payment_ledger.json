@@ -99,7 +99,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-08 07:38:40.079038",
+ "modified": "2023-09-26 14:21:35.719727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger",
@@ -155,5 +155,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

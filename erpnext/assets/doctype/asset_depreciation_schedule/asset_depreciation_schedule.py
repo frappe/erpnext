@@ -577,26 +577,41 @@ def get_straight_line_or_manual_depr_amount(
 			daily_depr_amount = (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
 			) / date_diff(
-				add_months(
-					row.depreciation_start_date,
-					flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
-					* row.frequency_of_depreciation,
-				),
-				add_months(
-					row.depreciation_start_date,
-					flt(
-						row.total_number_of_depreciations
-						- asset.number_of_depreciations_booked
-						- number_of_pending_depreciations
+				get_last_day(
+					add_months(
+						row.depreciation_start_date,
+						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
+						* row.frequency_of_depreciation,
 					)
-					* row.frequency_of_depreciation,
+				),
+				add_days(
+					get_last_day(
+						add_months(
+							row.depreciation_start_date,
+							flt(
+								row.total_number_of_depreciations
+								- asset.number_of_depreciations_booked
+								- number_of_pending_depreciations
+								- 1
+							)
+							* row.frequency_of_depreciation,
+						)
+					),
+					1,
 				),
 			)
-			to_date = add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
-			from_date = add_months(
-				row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+
+			to_date = get_last_day(
+				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
 			)
-			return daily_depr_amount * date_diff(to_date, from_date)
+			from_date = add_days(
+				get_last_day(
+					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+				),
+				1,
+			)
+
+			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
 		else:
 			return (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
@@ -609,18 +624,29 @@ def get_straight_line_or_manual_depr_amount(
 				- flt(asset.opening_accumulated_depreciation)
 				- flt(row.expected_value_after_useful_life)
 			) / date_diff(
-				add_months(
-					row.depreciation_start_date,
-					flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
-					* row.frequency_of_depreciation,
+				get_last_day(
+					add_months(
+						row.depreciation_start_date,
+						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
+						* row.frequency_of_depreciation,
+					)
 				),
-				row.depreciation_start_date,
+				add_days(
+					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
+				),
 			)
-			to_date = add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
-			from_date = add_months(
-				row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+
+			to_date = get_last_day(
+				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
 			)
-			return daily_depr_amount * date_diff(to_date, from_date)
+			from_date = add_days(
+				get_last_day(
+					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+				),
+				1,
+			)
+
+			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
 		else:
 			return (
 				flt(asset.gross_purchase_amount)
@@ -779,9 +805,20 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 def get_temp_asset_depr_schedule_doc(
 	asset_doc, row, date_of_disposal=None, date_of_return=None, update_asset_finance_book_row=False
 ):
-	asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
+	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+		asset_doc.name, "Active", row.finance_book
+	)
 
-	asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
+	if not current_asset_depr_schedule_doc:
+		frappe.throw(
+			_("Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}").format(
+				asset_doc.name, row.finance_book
+			)
+		)
+
+	temp_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+
+	temp_asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
 		asset_doc,
 		row,
 		date_of_disposal,
@@ -789,7 +826,7 @@ def get_temp_asset_depr_schedule_doc(
 		update_asset_finance_book_row,
 	)
 
-	return asset_depr_schedule_doc
+	return temp_asset_depr_schedule_doc
 
 
 @frappe.whitelist()

@@ -39,6 +39,7 @@
   {
    "fieldname": "parent_location",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Parent Location",
    "options": "Location",
    "search_index": 1
@@ -141,11 +142,11 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2020-05-08 16:11:11.375701",
+ "modified": "2023-08-29 12:49:33.290527",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
- "name_case": "Title Case",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_location",
  "owner": "Administrator",
  "permissions": [
@@ -224,5 +225,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

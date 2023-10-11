@@ -23,6 +23,7 @@ frappe.ui.form.on("Customer", {
 			let d  = locals[cdt][cdn];
 			let filters = {
 				'account_type': 'Receivable',
+				'root_type': 'Asset',
 				'company': d.company,
 				"is_group": 0
 			};
@@ -137,7 +138,7 @@ frappe.ui.form.on("Customer", {
 			// custom buttons
 
 			frm.add_custom_button(__('Accounts Receivable'), function () {
-				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
+				frappe.set_route('query-report', 'Accounts Receivable', { party_type: "Customer", party: frm.doc.name });
 			}, __('View'));
 
 			frm.add_custom_button(__('Accounting Ledger'), function () {

@@ -1090,7 +1090,7 @@ def get_subcontracting_order(**args):
 		po = frappe.get_doc("Purchase Order", args.get("po_name"))
 
 		if po.is_subcontracted:
-			return create_subcontracting_order(po_name=po.name, **args)
+			return create_subcontracting_order(**args)
 
 	if not args.service_items:
 		service_items = [

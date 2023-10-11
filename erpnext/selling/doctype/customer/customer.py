@@ -17,11 +17,7 @@ from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext.accounts.party import (  # noqa
-	get_dashboard_info,
-	get_timeline_data,
-	validate_party_accounts,
-)
+from erpnext.accounts.party import get_dashboard_info, validate_party_accounts  # noqa
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
 

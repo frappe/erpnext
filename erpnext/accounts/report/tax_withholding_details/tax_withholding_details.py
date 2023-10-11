@@ -257,7 +257,7 @@ def get_tds_docs(filters):
 	}
 
 	party = frappe.get_all(filters.get("party_type"), pluck="name")
-	query_filters.update({"against": ("in", party)})
+	or_filters.update({"against": ("in", party), "voucher_type": "Journal Entry"})
 
 	if filters.get("party"):
 		del query_filters["account"]
@@ -294,7 +294,7 @@ def get_tds_docs(filters):
 
 	if journal_entries:
 		journal_entry_party_map = get_journal_entry_party_map(journal_entries)
-		get_doc_info(journal_entries, "Journal Entry", tax_category_map)
+		get_doc_info(journal_entries, "Journal Entry", tax_category_map, net_total_map)
 
 	return (
 		tds_documents,
@@ -309,7 +309,11 @@ def get_journal_entry_party_map(journal_entries):
 	journal_entry_party_map = {}
 	for d in frappe.db.get_all(
 		"Journal Entry Account",
-		{"parent": ("in", journal_entries), "party_type": "Supplier", "party": ("is", "set")},
+		{
+			"parent": ("in", journal_entries),
+			"party_type": ("in", ("Supplier", "Customer")),
+			"party": ("is", "set"),
+		},
 		["parent", "party"],
 	):
 		if d.parent not in journal_entry_party_map:
@@ -320,41 +324,39 @@ def get_journal_entry_party_map(journal_entries):
 
 
 def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
-	if doctype == "Purchase Invoice":
-		fields = [
-			"name",
+	common_fields = ["name"]
+	fields_dict = {
+		"Purchase Invoice": [
 			"tax_withholding_category",
 			"base_tax_withholding_net_total",
 			"grand_total",
 			"base_total",
-		]
-	elif doctype == "Sales Invoice":
-		fields = ["name", "base_net_total", "grand_total", "base_total"]
-	elif doctype == "Payment Entry":
-		fields = [
-			"name",
+		],
+		"Sales Invoice": ["base_net_total", "grand_total", "base_total"],
+		"Payment Entry": [
 			"tax_withholding_category",
 			"paid_amount",
 			"paid_amount_after_tax",
 			"base_paid_amount",
-		]
-	else:
-		fields = ["name", "tax_withholding_category"]
+		],
+		"Journal Entry": ["tax_withholding_category", "total_amount"],
+	}
 
-	entries = frappe.get_all(doctype, filters={"name": ("in", vouchers)}, fields=fields)
+	entries = frappe.get_all(
+		doctype, filters={"name": ("in", vouchers)}, fields=common_fields + fields_dict[doctype]
+	)
 
 	for entry in entries:
 		tax_category_map.update({entry.name: entry.tax_withholding_category})
 		if doctype == "Purchase Invoice":
-			net_total_map.update(
-				{entry.name: [entry.base_tax_withholding_net_total, entry.grand_total, entry.base_total]}
-			)
+			value = [entry.base_tax_withholding_net_total, entry.grand_total, entry.base_total]
 		elif doctype == "Sales Invoice":
-			net_total_map.update({entry.name: [entry.base_net_total, entry.grand_total, entry.base_total]})
+			value = [entry.base_net_total, entry.grand_total, entry.base_total]
 		elif doctype == "Payment Entry":
-			net_total_map.update(
-				{entry.name: [entry.paid_amount, entry.paid_amount_after_tax, entry.base_paid_amount]}
-			)
+			value = [entry.paid_amount, entry.paid_amount_after_tax, entry.base_paid_amount]
+		else:
+			value = [entry.total_amount] * 3
+		net_total_map.update({entry.name: value})
 
 
 def get_tax_rate_map(filters):

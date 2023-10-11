@@ -38,24 +38,6 @@ frappe.query_reports["Accounts Payable"] = {
 			}
 		},
 		{
-			"fieldname": "supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier",
-			on_change: () => {
-				var supplier = frappe.query_report.get_filter_value('supplier');
-				if (supplier) {
-					frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
-						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-					});
-				} else {
-					frappe.query_report.set_filter_value('tax_id', "");
-				}
-
-				frappe.query_report.refresh();
-			}
-		},
-		{
 			"fieldname": "party_account",
 			"label": __("Payable Account"),
 			"fieldtype": "Link",
@@ -113,10 +95,34 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Payment Terms Template"
 		},
 		{
+			"fieldname":"party_type",
+			"label": __("Party Type"),
+			"fieldtype": "Autocomplete",
+			options: get_party_type_options(),
+			on_change: function() {
+				frappe.query_report.set_filter_value('party', "");
+				frappe.query_report.toggle_filter_display('supplier_group', frappe.query_report.get_filter_value('party_type') !== "Supplier");
+			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				if (!frappe.query_report.filters) return;
+
+				let party_type = frappe.query_report.get_filter_value('party_type');
+				if (!party_type) return;
+
+				return frappe.db.get_link_options(party_type, txt);
+			},
+		},
+		{
 			"fieldname": "supplier_group",
 			"label": __("Supplier Group"),
 			"fieldtype": "Link",
-			"options": "Supplier Group"
+			"options": "Supplier Group",
+			"hidden": 1
 		},
 		{
 			"fieldname": "group_by_party",
@@ -132,12 +138,6 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname": "show_remarks",
 			"label": __("Show Remarks"),
 			"fieldtype": "Check",
-		},
-		{
-			"fieldname": "tax_id",
-			"label": __("Tax Id"),
-			"fieldtype": "Data",
-			"hidden": 1
 		},
 		{
 			"fieldname": "show_future_payments",
@@ -164,3 +164,15 @@ frappe.query_reports["Accounts Payable"] = {
 }
 
 erpnext.utils.add_dimensions('Accounts Payable', 9);
+
+function get_party_type_options() {
+	let options = [];
+	frappe.db.get_list(
+		"Party Type", {filters:{"account_type": "Payable"}, fields:['name']}
+	).then((res) => {
+		res.forEach((party_type) => {
+			options.push(party_type.name);
+		});
+	});
+	return options;
+}

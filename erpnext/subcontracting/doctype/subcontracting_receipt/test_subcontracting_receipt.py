@@ -23,6 +23,7 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	make_subcontracted_items,
 	set_backflush_based_on,
 )
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -507,8 +508,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr.supplied_items[0].rate, sr.items[0].valuation_rate)
 
 	def test_subcontracting_receipt_raw_material_rate(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
 		# Step - 1: Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")
 
@@ -566,6 +565,135 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			self.assertEqual(rm_item.consumed_qty, 100)
 			self.assertEqual(rm_item.rate, 100)
 			self.assertEqual(rm_item.amount, rm_item.consumed_qty * rm_item.rate)
+
+	def test_quality_inspection_for_subcontracting_receipt(self):
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		set_backflush_based_on("BOM")
+		fg_item = "Subcontracted Item SA1"
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.save()
+
+		# Enable `Inspection Required before Purchase` in Item Master
+		frappe.db.set_value("Item", fg_item, "inspection_required_before_purchase", 1)
+
+		# ValidationError should be raised as Quality Inspection is not created/linked
+		self.assertRaises(frappe.ValidationError, scr1.submit)
+
+		qa = create_quality_inspection(
+			reference_type="Subcontracting Receipt",
+			reference_name=scr1.name,
+			inspection_type="Incoming",
+			item_code=fg_item,
+		)
+		scr1.reload()
+		self.assertEqual(scr1.items[0].quality_inspection, qa.name)
+
+		# SCR should be submitted successfully as Quality Inspection is set
+		scr1.submit()
+		qa.cancel()
+		scr1.reload()
+		scr1.cancel()
+
+		scr2 = make_subcontracting_receipt(sco.name)
+		scr2.save()
+
+		# Disable `Inspection Required before Purchase` in Item Master
+		frappe.db.set_value("Item", fg_item, "inspection_required_before_purchase", 0)
+
+		# ValidationError should not be raised as `Inspection Required before Purchase` is disabled
+		scr2.submit()
+
+	def test_scrap_items_for_subcontracting_receipt(self):
+		set_backflush_based_on("BOM")
+
+		fg_item = "Subcontracted Item SA1"
+
+		# Create Raw Materials
+		raw_materials = [
+			make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name,
+			make_item(properties={"is_stock_item": 1, "valuation_rate": 200}).name,
+		]
+
+		# Create Scrap Items
+		scrap_item_1 = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		scrap_item_2 = make_item(properties={"is_stock_item": 1, "valuation_rate": 20}).name
+		scrap_items = [scrap_item_1, scrap_item_2]
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			},
+		]
+
+		# Create BOM with Scrap Items
+		bom = make_bom(
+			item=fg_item, raw_materials=raw_materials, rate=100, currency="INR", do_not_submit=True
+		)
+		for idx, item in enumerate(bom.items):
+			item.qty = 1 * (idx + 1)
+		for idx, item in enumerate(scrap_items):
+			bom.append(
+				"scrap_items",
+				{
+					"item_code": item,
+					"stock_qty": 1 * (idx + 1),
+					"rate": 10 * (idx + 1),
+				},
+			)
+		bom.save()
+		bom.submit()
+
+		# Create PO and SCO
+		sco = get_subcontracting_order(service_items=service_items)
+
+		# Inward Raw Materials
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		# Transfer RM's to Subcontractor
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create Subcontracting Receipt
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.get_scrap_items()
+
+		# Test - 1: Scrap Items should be fetched from BOM in items table with `is_scrap_item` = 1
+		scr_scrap_items = set([item.item_code for item in scr.items if item.is_scrap_item])
+		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
+		self.assertEqual(scr_scrap_items, set(scrap_items))
+
+		scr.submit()
 
 
 def make_return_subcontracting_receipt(**args):

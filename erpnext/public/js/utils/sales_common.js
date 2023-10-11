@@ -8,6 +8,7 @@ erpnext.sales_common = {
 		erpnext.selling.SellingController = class SellingController extends erpnext.TransactionController {
 			setup() {
 				super.setup();
+				this.toggle_enable_for_stock_uom("allow_to_edit_stock_uom_qty_for_sales");
 				this.frm.email_field = "contact_email";
 			}
 

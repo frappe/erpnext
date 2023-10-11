@@ -12,6 +12,9 @@ frappe.ui.form.on("Authorization Rule", {
 		} else if(frm.doc.based_on==="Itemwise Discount") {
 			unhide_field("master_name");
 			frm.set_value("customer_or_item", "Item");
+		} else if(frm.doc.based_on==="Item Group wise Discount") {
+			unhide_field("master_name");
+			frm.set_value("customer_or_item", "Item Group");
 		} else {
 			frm.set_value("customer_or_item", "");
 			frm.set_value("master_name", "");
@@ -80,6 +83,13 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 		return {
 			doctype: "Item",
 			query: "erpnext.controllers.queries.item_query"
+		}
+	else if (doc.based_on==="Item Group wise Discount")
+		return {
+			doctype: "Item Group",
+			filters: {
+				"is_group": 0
+			}
 		}
 	else
 		return {

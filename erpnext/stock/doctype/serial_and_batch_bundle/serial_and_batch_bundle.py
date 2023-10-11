@@ -66,7 +66,7 @@ class SerialandBatchBundle(Document):
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
 		kwargs = {"item_code": self.item_code, "warehouse": self.warehouse}
 		if self.voucher_type == "POS Invoice":
-			kwargs["ignore_voucher_no"] = self.voucher_no
+			kwargs["ignore_voucher_nos"] = [self.voucher_no]
 
 		available_serial_nos = get_available_serial_nos(frappe._dict(kwargs))
 
@@ -1098,8 +1098,8 @@ def get_available_serial_nos(kwargs):
 	if kwargs.warehouse:
 		filters["warehouse"] = kwargs.warehouse
 
-	# Since SLEs are not present against POS invoices, need to ignore serial nos present in the POS invoice
-	ignore_serial_nos = get_reserved_serial_nos_for_pos(kwargs)
+	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
+	ignore_serial_nos = get_reserved_serial_nos(kwargs)
 
 	# To ignore serial nos in the same record for the draft state
 	if kwargs.get("ignore_serial_nos"):
@@ -1180,6 +1180,20 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 	return serial_nos
 
 
+def get_reserved_serial_nos(kwargs) -> list:
+	"""Returns a list of `Serial No` reserved in POS Invoice and Stock Reservation Entry."""
+
+	ignore_serial_nos = []
+
+	# Extend the list by serial nos reserved in POS Invoice
+	ignore_serial_nos.extend(get_reserved_serial_nos_for_pos(kwargs))
+
+	# Extend the list by serial nos reserved via SRE
+	ignore_serial_nos.extend(get_reserved_serial_nos_for_sre(kwargs))
+
+	return ignore_serial_nos
+
+
 def get_reserved_serial_nos_for_pos(kwargs):
 	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1199,7 +1213,7 @@ def get_reserved_serial_nos_for_pos(kwargs):
 			["POS Invoice", "docstatus", "=", 1],
 			["POS Invoice", "is_return", "=", 0],
 			["POS Invoice Item", "item_code", "=", kwargs.item_code],
-			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
+			["POS Invoice", "name", "not in", kwargs.ignore_voucher_nos],
 		],
 	)
 
@@ -1251,7 +1265,37 @@ def get_reserved_serial_nos_for_pos(kwargs):
 	return list(ignore_serial_nos_counter - returned_serial_nos_counter)
 
 
-def get_reserved_batches_for_pos(kwargs):
+def get_reserved_serial_nos_for_sre(kwargs) -> list:
+	"""Returns a list of `Serial No` reserved in Stock Reservation Entry."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sb_entry.serial_no)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == kwargs.item_code)
+			& (sre.reserved_qty >= sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+			& (sre.reservation_based_on == "Serial and Batch")
+		)
+	)
+
+	if kwargs.warehouse:
+		query = query.where(sre.warehouse == kwargs.warehouse)
+
+	if kwargs.ignore_voucher_nos:
+		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
+
+	return [row[0] for row in query.run()]
+
+
+def get_reserved_batches_for_pos(kwargs) -> dict:
+	"""Returns a dict of `Batch No` followed by the `Qty` reserved in POS Invoices."""
+
 	pos_batches = frappe._dict()
 	pos_invoices = frappe.get_all(
 		"POS Invoice",
@@ -1267,7 +1311,7 @@ def get_reserved_batches_for_pos(kwargs):
 			["POS Invoice", "consolidated_invoice", "is", "not set"],
 			["POS Invoice", "docstatus", "=", 1],
 			["POS Invoice Item", "item_code", "=", kwargs.item_code],
-			["POS Invoice", "name", "!=", kwargs.ignore_voucher_no],
+			["POS Invoice", "name", "not in", kwargs.ignore_voucher_nos],
 		],
 	)
 
@@ -1278,7 +1322,7 @@ def get_reserved_batches_for_pos(kwargs):
 	]
 
 	if not ids:
-		return []
+		return {}
 
 	if ids:
 		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
@@ -1314,14 +1358,65 @@ def get_reserved_batches_for_pos(kwargs):
 	return pos_batches
 
 
+def get_reserved_batches_for_sre(kwargs) -> dict:
+	"""Returns a dict of `Batch No` followed by the `Qty` reserved in Stock Reservation Entry."""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.batch_no, sre.warehouse, (-1 * Sum(sb_entry.qty - sb_entry.delivered_qty)).as_("qty")
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == kwargs.item_code)
+			& (sre.reserved_qty >= sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+			& (sre.reservation_based_on == "Serial and Batch")
+		)
+		.groupby(sb_entry.batch_no, sre.warehouse)
+	)
+
+	if kwargs.batch_no:
+		if isinstance(kwargs.batch_no, list):
+			query = query.where(sb_entry.batch_no.isin(kwargs.batch_no))
+		else:
+			query = query.where(sb_entry.batch_no == kwargs.batch_no)
+
+	if kwargs.warehouse:
+		query = query.where(sre.warehouse == kwargs.warehouse)
+
+	if kwargs.ignore_voucher_nos:
+		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
+
+	data = query.run(as_dict=True)
+
+	reserved_batches_details = frappe._dict()
+	if data:
+		reserved_batches_details = frappe._dict(
+			{
+				(d.batch_no, d.warehouse): frappe._dict({"warehouse": d.warehouse, "qty": d.qty}) for d in data
+			}
+		)
+
+	return reserved_batches_details
+
+
 def get_auto_batch_nos(kwargs):
 	available_batches = get_available_batches(kwargs)
 	qty = flt(kwargs.qty)
 
-	pos_invoice_batches = get_reserved_batches_for_pos(kwargs)
 	stock_ledgers_batches = get_stock_ledgers_batches(kwargs)
-	if stock_ledgers_batches or pos_invoice_batches:
-		update_available_batches(available_batches, stock_ledgers_batches, pos_invoice_batches)
+	pos_invoice_batches = get_reserved_batches_for_pos(kwargs)
+	sre_reserved_batches = get_reserved_batches_for_sre(kwargs)
+
+	if stock_ledgers_batches or pos_invoice_batches or sre_reserved_batches:
+		update_available_batches(
+			available_batches, stock_ledgers_batches, pos_invoice_batches, sre_reserved_batches
+		)
 
 	available_batches = list(filter(lambda x: x.qty > 0, available_batches))
 
@@ -1364,8 +1459,8 @@ def get_qty_based_available_batches(available_batches, qty):
 	return batches
 
 
-def update_available_batches(available_batches, reserved_batches=None, pos_invoice_batches=None):
-	for batches in [reserved_batches, pos_invoice_batches]:
+def update_available_batches(available_batches, *reserved_batches) -> None:
+	for batches in reserved_batches:
 		if batches:
 			for key, data in batches.items():
 				batch_no, warehouse = key

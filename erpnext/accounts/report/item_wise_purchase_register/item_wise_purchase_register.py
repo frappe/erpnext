@@ -287,12 +287,13 @@ def get_conditions(filters):
 	conditions = ""
 
 	for opts in (
-		("company", " and company=%(company)s"),
+		("company", " and `tabPurchase Invoice`.company=%(company)s"),
 		("supplier", " and `tabPurchase Invoice`.supplier = %(supplier)s"),
 		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
 		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
 		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"),
+		("item_group", " and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s"),
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]

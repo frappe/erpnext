@@ -18,6 +18,10 @@
   "auto_insert_price_list_rate_if_missing",
   "column_break_12",
   "update_existing_price_list_rate",
+  "conversion_factor_section",
+  "allow_to_edit_stock_uom_qty_for_sales",
+  "column_break_lznj",
+  "allow_to_edit_stock_uom_qty_for_purchase",
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -34,8 +38,10 @@
   "stock_reservation_tab",
   "enable_stock_reservation",
   "column_break_rx3e",
-  "reserve_stock_on_sales_order_submission",
+  "auto_reserve_stock_for_sales_order",
   "allow_partial_reservation",
+  "serial_and_batch_reservation_section",
+  "auto_reserve_serial_and_batch",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
   "auto_create_serial_and_batch_bundle_for_outward",
@@ -59,7 +65,8 @@
   "stock_frozen_upto_days",
   "column_break_26",
   "role_allowed_to_create_edit_back_dated_transactions",
-  "stock_auth_role"
+  "stock_auth_role",
+  "section_break_plhx"
  ],
  "fields": [
   {
@@ -337,17 +344,10 @@
   },
   {
    "default": "0",
+   "description": "Allows to keep aside a specific quantity of inventory for a particular order.",
    "fieldname": "enable_stock_reservation",
    "fieldtype": "Check",
    "label": "Enable Stock Reservation"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: doc.enable_stock_reservation",
-   "description": "If enabled, <b>Stock Reservation Entries</b> will be created on submission of <b>Sales Order</b>",
-   "fieldname": "reserve_stock_on_sales_order_submission",
-   "fieldtype": "Check",
-   "label": "Reserve Stock on Sales Order Submission"
   },
   {
    "fieldname": "column_break_rx3e",
@@ -356,14 +356,10 @@
   {
    "default": "1",
    "depends_on": "eval: doc.enable_stock_reservation",
-   "description": "If enabled, <b>Partial Stock Reservation Entries</b> can be created. For example, If you have a <b>Sales Order</b> of 100 units and the Available Stock is 90 units then a Stock Reservation Entry will be created for 90 units. ",
+   "description": "If enabled, <b>Partial Stock Reservation Entries</b> can be created. For example, If you have a Sales Order of 100 units and the Available Stock is 90 units then a Stock Reservation Entry will be created for 90 units. ",
    "fieldname": "allow_partial_reservation",
    "fieldtype": "Check",
    "label": "Allow Partial Reservation"
-  },
-  {
-   "fieldname": "section_break_plhx",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_mhzc",
@@ -383,6 +379,48 @@
    "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
    "fieldtype": "Check",
    "label": "Auto Create Serial and Batch Bundle For Outward"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "If enabled, Serial and Batch Nos will be auto-reserved based on <b>Pick Serial / Batch Based On</b>",
+   "fieldname": "auto_reserve_serial_and_batch",
+   "fieldtype": "Check",
+   "label": "Auto Reserve Serial and Batch Nos"
+  },
+  {
+   "fieldname": "serial_and_batch_reservation_section",
+   "fieldtype": "Section Break",
+   "label": "Serial and Batch Reservation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "If enabled, <b>Stock Reservation Entries</b> will be created on submission of <b>Sales Order</b>",
+   "fieldname": "auto_reserve_stock_for_sales_order",
+   "fieldtype": "Check",
+   "label": "Auto Reserve Stock for Sales Order"
+  },
+  {
+   "fieldname": "conversion_factor_section",
+   "fieldtype": "Section Break",
+   "label": "Stock UOM Quantity"
+  },
+  {
+   "fieldname": "column_break_lznj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_sales",
+   "fieldtype": "Check",
+   "label": "Allow to Edit Stock UOM Qty for Sales Documents"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_purchase",
+   "fieldtype": "Check",
+   "label": "Allow to Edit Stock UOM Qty for Purchase Documents"
   }
  ],
  "icon": "icon-cog",
@@ -390,7 +428,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-29 15:10:54.959411",
+ "modified": "2023-10-01 14:22:36.136111",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -404,6 +442,10 @@
    "role": "Stock Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
   }
  ],
  "quick_entry": 1,
