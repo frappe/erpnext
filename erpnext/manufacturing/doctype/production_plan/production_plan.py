@@ -8,7 +8,6 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	add_days,
@@ -1617,21 +1616,13 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
 
-	completed_production_plans = get_completed_production_plans()
+	non_completed_production_plans = get_non_completed_production_plans()
 
-	case = Case()
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(
-			Sum(
-				child.quantity
-				* IfNull(
-					case.when(child.material_request_type == "Purchase", child.conversion_factor).else_(1.0), 1.0
-				)
-			)
-		)
+		.select(Sum(child.required_bom_qty))
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
@@ -1640,8 +1631,8 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 		)
 	)
 
-	if completed_production_plans:
-		query = query.where(table.name.notin(completed_production_plans))
+	if non_completed_production_plans:
+		query = query.where(table.name.isin(non_completed_production_plans))
 
 	query = query.run()
 
@@ -1652,7 +1643,7 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 
 	reserved_qty_for_production = flt(
 		get_reserved_qty_for_production(
-			item_code, warehouse, completed_production_plans, check_production_plan=True
+			item_code, warehouse, non_completed_production_plans, check_production_plan=True
 		)
 	)
 
@@ -1662,7 +1653,7 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	return reserved_qty_for_production_plan - reserved_qty_for_production
 
 
-def get_completed_production_plans():
+def get_non_completed_production_plans():
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Production Plan Item")
 
@@ -1674,7 +1665,7 @@ def get_completed_production_plans():
 		.where(
 			(table.docstatus == 1)
 			& (table.status.notin(["Completed", "Closed"]))
-			& (child.ordered_qty >= child.planned_qty)
+			& (child.planned_qty > child.ordered_qty)
 		)
 	).run(as_dict=True)
 
