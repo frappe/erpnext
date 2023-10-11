@@ -658,14 +658,16 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
-				rate = get_rate_for_return(
-					sle.voucher_type,
-					sle.voucher_no,
-					sle.item_code,
-					voucher_detail_no=sle.voucher_detail_no,
-					sle=sle,
-				)
-
+				if self.valuation_method == "Moving Average":
+					rate = self.data[self.args.warehouse].previous_sle.valuation_rate
+				else:
+					rate = get_rate_for_return(
+						sle.voucher_type,
+						sle.voucher_no,
+						sle.item_code,
+						voucher_detail_no=sle.voucher_detail_no,
+						sle=sle,
+					)
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
