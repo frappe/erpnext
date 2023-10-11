@@ -220,7 +220,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-15 08:26:04.041861",
+ "modified": "2023-10-11 03:19:17.758603",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -252,6 +252,10 @@
    "role": "Purchase Master Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "All"
   }
  ],
  "quick_entry": 1,

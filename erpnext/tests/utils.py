@@ -17,7 +17,7 @@ def create_test_contact_and_address():
 	frappe.db.sql("delete from tabAddress")
 	frappe.db.sql("delete from `tabDynamic Link`")
 
-	frappe.get_doc(
+	add_doc = frappe.get_doc(
 		{
 			"doctype": "Address",
 			"address_title": "_Test Address for Customer",

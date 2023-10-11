@@ -28,7 +28,6 @@ class TestShoppingCart(unittest.TestCase):
 
 	def setUp(self):
 		frappe.set_user("Administrator")
-		create_test_contact_and_address()
 		self.enable_shopping_cart()
 		if not frappe.db.exists("Website Item", {"item_code": "_Test Item"}):
 			make_website_item(frappe.get_cached_doc("Item", "_Test Item"))
@@ -41,12 +40,17 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("Administrator")
 		self.disable_shopping_cart()
 
+	@staticmethod
+	def setup_address_and_contact():
+		create_test_contact_and_address()
+
 	@classmethod
 	def tearDownClass(cls):
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_get_cart_new_user(self):
 		self.login_as_new_user()
+		self.setup_address_and_contact()
 
 		# test if lead is created and quotation with new lead is fetched
 		quotation = _get_cart_quotation()
@@ -68,11 +72,6 @@ class TestShoppingCart(unittest.TestCase):
 			self.assertEqual(quotation.contact_email, frappe.session.user)
 			return quotation
 
-		self.login_as_customer(
-			"test_contact_two_customer@example.com", "_Test Contact 2 For _Test Customer"
-		)
-		validate_quotation()
-
 		self.login_as_customer()
 		quotation = validate_quotation()
 
@@ -80,6 +79,7 @@ class TestShoppingCart(unittest.TestCase):
 
 	def test_add_to_cart(self):
 		self.login_as_customer()
+		self.setup_address_and_contact()
 
 		# clear existing quotations
 		self.clear_existing_quotations()
@@ -133,6 +133,7 @@ class TestShoppingCart(unittest.TestCase):
 	def test_tax_rule(self):
 		self.create_tax_rule()
 		self.login_as_customer()
+		self.setup_address_and_contact()
 		quotation = self.create_quotation()
 
 		from erpnext.accounts.party import set_taxes
