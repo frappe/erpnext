@@ -2093,6 +2093,60 @@ class TestPurchaseReceipt(FrappeTestCase):
 		return_pr.reload()
 		self.assertEqual(return_pr.status, "Completed")
 
+	def test_valuation_rate_in_return_purchase_receipt_for_moving_average(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.stock_ledger import get_previous_sle
+
+		# Step - 1: Create an Item (Valuation Method = Moving Average)
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		# Step - 2: Create a Purchase Receipt (Qty = 10, Rate = 100)
+		pr = make_purchase_receipt(qty=10, rate=100, item_code=item_code)
+
+		# Step - 3: Create a Material Receipt Stock Entry (Qty = 100, Basic Rate = 10)
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			purpose="Material Receipt",
+			item_code=item_code,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+		)
+
+		# Step - 4: Create a Material Issue Stock Entry (Qty = 100, Basic Rate = 18.18 [Auto Fetched])
+		make_stock_entry(
+			purpose="Material Issue", item_code=item_code, from_warehouse=warehouse, qty=100
+		)
+
+		# Step - 5: Create a Return Purchase Return (Qty = -8, Rate = 100 [Auto fetched])
+		return_pr = make_purchase_receipt(
+			is_return=1,
+			return_against=pr.name,
+			item_code=item_code,
+			qty=-8,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": return_pr.name, "voucher_detail_no": return_pr.items[0].name},
+			["posting_date", "posting_time", "outgoing_rate", "valuation_rate"],
+			as_dict=1,
+		)
+		previous_sle_valuation_rate = get_previous_sle(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": sle.posting_date,
+				"posting_time": sle.posting_time,
+			}
+		).get("valuation_rate")
+
+		# Test - 1: Valuation Rate should be equal to Outgoing Rate
+		self.assertEqual(flt(sle.outgoing_rate, 2), flt(sle.valuation_rate, 2))
+
+		# Test - 2: Valuation Rate should be equal to Previous SLE Valuation Rate
+		self.assertEqual(flt(sle.valuation_rate, 2), flt(previous_sle_valuation_rate, 2))
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
