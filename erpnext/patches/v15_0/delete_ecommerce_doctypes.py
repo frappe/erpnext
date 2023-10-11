@@ -6,6 +6,9 @@ def execute():
 	if "webshop" in frappe.get_installed_apps():
 		return
 
+	if not frappe.db.table_exists("Website Item"):
+		return
+
 	doctypes = [
 		"E Commerce Settings",
 		"Website Item",

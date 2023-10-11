@@ -3,7 +3,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_url, nowdate
+from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
