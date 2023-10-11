@@ -37,6 +37,7 @@
   "col_break3",
   "is_advance",
   "user_remark",
+  "against_type",
   "against_account"
  ],
  "fields": [
@@ -249,12 +250,13 @@
   },
   {
    "fieldname": "against_account",
-   "fieldtype": "Text",
+   "fieldtype": "Dynamic Link",
    "hidden": 1,
    "label": "Against Account",
    "no_copy": 1,
    "oldfieldname": "against_account",
    "oldfieldtype": "Text",
+   "options": "against_type",
    "print_hide": 1
   },
   {
@@ -279,12 +281,20 @@
    "hidden": 1,
    "label": "Reference Detail No",
    "no_copy": 1
+  },
+  {
+   "fieldname": "against_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Against Type",
+   "options": "DocType",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-16 14:11:13.507807",
+ "modified": "2023-10-11 13:05:21.489496",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
