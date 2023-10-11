@@ -680,23 +680,39 @@ class JournalEntry(AccountsController):
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			for d in self.get("accounts"):
 				if d.reference_type == "Sales Invoice":
-					field = "customer"
+					against_type = "Customer"
 				else:
-					field = "supplier"
+					against_type = "Supplier"
 
-				d.against_account = frappe.db.get_value(d.reference_type, d.reference_name, field)
+				d.against_type = against_type
+				d.against_account = frappe.db.get_value(
+					d.reference_type, d.reference_name, against_type.lower()
+				)
 		else:
 			for d in self.get("accounts"):
 				if flt(d.debit) > 0:
-					accounts_debited.append(d.party or d.account)
+					accounts_debited.append(d)
 				if flt(d.credit) > 0:
-					accounts_credited.append(d.party or d.account)
+					accounts_credited.append(d)
 
 			for d in self.get("accounts"):
-				if flt(d.debit) > 0:
-					d.against_account = ", ".join(list(set(accounts_credited)))
-				if flt(d.credit) > 0:
-					d.against_account = ", ".join(list(set(accounts_debited)))
+				if d.exchange_rate != 1.0:
+					d.against_type = d.party_type
+					d.against_account = d.party
+				elif flt(d.debit) > 0:
+					for acc in accounts_credited:
+						if acc.party == d.party:
+							d.against_type = "Account"
+							d.against_account = d.account
+							d.party_type = ""
+							d.party = ""
+				elif flt(d.credit) > 0:
+					for acc in accounts_debited:
+						if acc.party == d.party:
+							d.against_type = "Account"
+							d.against_account = d.account
+							d.party_type = ""
+							d.party = ""
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
@@ -906,7 +922,7 @@ class JournalEntry(AccountsController):
 							"party_type": d.party_type,
 							"due_date": self.due_date,
 							"party": d.party,
-							"against_type": "Account",
+							"against_type": d.against_type,
 							"against": d.against_account,
 							"debit": flt(d.debit, d.precision("debit")),
 							"credit": flt(d.credit, d.precision("credit")),
