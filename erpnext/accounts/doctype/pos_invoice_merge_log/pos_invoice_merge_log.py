@@ -196,7 +196,7 @@ class POSInvoiceMergeLog(Document):
 						update_item_wise_tax_detail(t, tax)
 						found = True
 				if not found:
-					tax.charge_type = "Actual" if tax.charge_type is None else tax.charge_type
+					tax.charge_type = "Actual" if tax.charge_type is None else tax.charge_type 
 					tax.idx = idx
 					idx += 1
 					tax.included_in_print_rate = 0
