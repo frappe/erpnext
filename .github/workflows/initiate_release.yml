@@ -30,23 +30,3 @@ jobs:
           head: version-${{ matrix.version }}-hotfix
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-  beta-release:
-    name: Release
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-
-    steps:
-      - uses: octokit/request-action@v2.x
-        with:
-          route: POST /repos/{owner}/{repo}/pulls
-          owner: frappe
-          repo: erpnext
-          title: |-
-            "chore: release v15 beta"
-          body: "Automated beta release."
-          base: version-15-beta
-          head: develop
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

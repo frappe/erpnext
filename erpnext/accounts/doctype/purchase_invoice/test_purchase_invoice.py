@@ -1916,6 +1916,32 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.load_from_db()
 		self.assertFalse(pi.repost_required)
 
+	@change_settings("Buying Settings", {"supplier_group": None})
+	def test_purchase_invoice_without_supplier_group(self):
+		# Create a Supplier
+		test_supplier_name = "_Test Supplier Without Supplier Group"
+		if not frappe.db.exists("Supplier", test_supplier_name):
+			supplier = frappe.get_doc(
+				{
+					"doctype": "Supplier",
+					"supplier_name": test_supplier_name,
+				}
+			).insert(ignore_permissions=True)
+
+			self.assertEqual(supplier.supplier_group, None)
+
+		po = create_purchase_order(
+			supplier=test_supplier_name,
+			rate=3000,
+			item="_Test Non Stock Item",
+			posting_date="2021-09-15",
+		)
+
+		pi = make_purchase_invoice(supplier=test_supplier_name)
+
+		self.assertEqual(po.docstatus, 1)
+		self.assertEqual(pi.docstatus, 1)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
