@@ -5,13 +5,15 @@
 from datetime import date
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, formatdate, get_datetime, getdate
+from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -48,6 +50,69 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
+		self.validate_inventory_dimension_negative_stock()
+
+	def validate_inventory_dimension_negative_stock(self):
+		extra_cond = ""
+		kwargs = {}
+
+		dimensions = self._get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		for dimension, values in dimensions.items():
+			kwargs[dimension] = values.get("value")
+			extra_cond += f" and {dimension} = %({dimension})s"
+
+		kwargs.update(
+			{
+				"item_code": self.item_code,
+				"warehouse": self.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"company": self.company,
+			}
+		)
+
+		sle = get_previous_sle(kwargs, extra_cond=extra_cond)
+		if sle:
+			flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+			diff = sle.qty_after_transaction + flt(self.actual_qty)
+			diff = flt(diff, flt_precision)
+			if diff < 0 and abs(diff) > 0.0001:
+				self.throw_validation_error(diff, dimensions)
+
+	def throw_validation_error(self, diff, dimensions):
+		dimension_msg = _(", with the inventory {0}: {1}").format(
+			"dimensions" if len(dimensions) > 1 else "dimension",
+			", ".join(f"{bold(d.doctype)} ({d.value})" for k, d in dimensions.items()),
+		)
+
+		msg = _(
+			"{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
+		).format(
+			abs(diff),
+			frappe.get_desk_link("Item", self.item_code),
+			frappe.get_desk_link("Warehouse", self.warehouse),
+			dimension_msg,
+			self.posting_date,
+			self.posting_time,
+			frappe.get_desk_link(self.voucher_type, self.voucher_no),
+		)
+
+		frappe.throw(msg, title=_("Inventory Dimension Negative Stock"))
+
+	def _get_inventory_dimensions(self):
+		inv_dimensions = get_inventory_dimensions()
+		inv_dimension_dict = {}
+		for dimension in inv_dimensions:
+			if not dimension.get("validate_negative_stock") or not self.get(dimension.fieldname):
+				continue
+
+			dimension["value"] = self.get(dimension.fieldname)
+			inv_dimension_dict.setdefault(dimension.fieldname, dimension)
+
+		return inv_dimension_dict
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
