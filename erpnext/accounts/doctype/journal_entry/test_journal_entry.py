@@ -415,6 +415,68 @@ class TestJournalEntry(unittest.TestCase):
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		self.assertEqual(expected_account_balance, account_balance)
 
+	def test_repost_accounting_entries(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		jv.multi_currency = 0
+		jv.submit()
+
+		self.voucher_no = jv.name
+
+		self.fields = [
+			"account",
+			"debit_in_account_currency",
+			"credit_in_account_currency",
+			"cost_center",
+		]
+
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": 100,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+			{
+				"account": "_Test Cash - _TC",
+				"debit_in_account_currency": 100,
+				"credit_in_account_currency": 0,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		]
+
+		self.check_gl_entries()
+
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		jv.accounts[0].account = "_Test Bank - _TC"
+		jv.accounts[0].cost_center = "_Test Cost Center for BS Account - _TC"
+		jv.accounts[1].account = "_Test Cash - _TC"
+
+		jv.save()
+		jv.load_from_db()
+		self.assertTrue(jv.repost_required)
+		jv.repost_accounting_entries()
+
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
+				"debit_in_account_currency": 100,
+				"credit_in_account_currency": 0,
+				"cost_center": "_Test Cost Center for BS Account - _TC",
+			},
+			{
+				"account": "_Test Cash - _TC",
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": 100,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		]
+
+		self.check_gl_entries()
+
 	def check_gl_entries(self):
 		gl = frappe.qb.DocType("GL Entry")
 		query = frappe.qb.from_(gl)
