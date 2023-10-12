@@ -184,7 +184,6 @@ var update_jv_details = function(doc, r) {
 	$.each(r, function(i, d) {
 		var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 		frappe.model.set_value(row.doctype, row.name, "account", d.account)
-		frappe.model.set_value(row.doctype, row.name, "balance", d.balance)
 	});
 	refresh_field("accounts");
 }
@@ -193,7 +192,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 	onload() {
 		this.load_defaults();
 		this.setup_queries();
-		this.setup_balance_formatter();
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
 
@@ -290,19 +288,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		});
 
 
-	}
-
-	setup_balance_formatter() {
-		const formatter = function(value, df, options, doc) {
-			var currency = frappe.meta.get_field_currency(df, doc);
-			var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
-			return "<div style='text-align: right'>"
-				+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
-				+ " " + dr_or_cr
-				+ "</div>";
-		};
-		this.frm.fields_dict.accounts.grid.update_docfield_property('balance', 'formatter', formatter);
-		this.frm.fields_dict.accounts.grid.update_docfield_property('party_balance', 'formatter', formatter);
 	}
 
 	reference_name(doc, cdt, cdn) {
