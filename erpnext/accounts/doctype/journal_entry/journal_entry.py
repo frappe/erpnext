@@ -1410,8 +1410,8 @@ def get_party_account_and_balance(company, party_type, party, cost_center=None):
 
 
 @frappe.whitelist()
-def get_account_balance_and_party_type(
-	account, date, company, debit=None, credit=None, exchange_rate=None, cost_center=None
+def get_account_details_and_party_type(
+	account, date, company, debit=None, credit=None, exchange_rate=None
 ):
 	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
@@ -1433,7 +1433,6 @@ def get_account_balance_and_party_type(
 		party_type = ""
 
 	grid_values = {
-		"balance": get_balance_on(account, date, cost_center=cost_center),
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,

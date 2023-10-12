@@ -397,11 +397,11 @@ frappe.ui.form.on("Journal Entry Account", {
 		}
 	},
 	cost_center: function(frm, dt, dn) {
-		erpnext.journal_entry.set_account_balance(frm, dt, dn);
+		erpnext.journal_entry.set_account_details(frm, dt, dn);
 	},
 
 	account: function(frm, dt, dn) {
-		erpnext.journal_entry.set_account_balance(frm, dt, dn);
+		erpnext.journal_entry.set_account_details(frm, dt, dn);
 	},
 
 	debit_in_account_currency: function(frm, cdt, cdn) {
@@ -585,14 +585,14 @@ $.extend(erpnext.journal_entry, {
 });
 
 $.extend(erpnext.journal_entry, {
-	set_account_balance: function(frm, dt, dn) {
+	set_account_details: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		if(d.account) {
 			if(!frm.doc.company) frappe.throw(__("Please select Company first"));
 			if(!frm.doc.posting_date) frappe.throw(__("Please select Posting Date first"));
 
 			return frappe.call({
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_details_and_party_type",
 				args: {
 					account: d.account,
 					date: frm.doc.posting_date,
@@ -600,7 +600,6 @@ $.extend(erpnext.journal_entry, {
 					debit: flt(d.debit_in_account_currency),
 					credit: flt(d.credit_in_account_currency),
 					exchange_rate: d.exchange_rate,
-					cost_center: d.cost_center
 				},
 				callback: function(r) {
 					if(r.message) {
