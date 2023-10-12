@@ -166,43 +166,37 @@ class TestJournalEntry(unittest.TestCase):
 		jv.get("accounts")[1].credit_in_account_currency = 5000
 		jv.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select account, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
-			order by account asc""",
-			jv.name,
-			as_dict=1,
-		)
+		self.voucher_no = jv.name
 
-		self.assertTrue(gl_entries)
+		self.fields = [
+			"account",
+			"account_currency",
+			"debit",
+			"debit_in_account_currency",
+			"credit",
+			"credit_in_account_currency",
+		]
 
-		expected_values = {
-			"_Test Bank USD - _TC": {
-				"account_currency": "USD",
-				"debit": 5000,
-				"debit_in_account_currency": 100,
-				"credit": 0,
-				"credit_in_account_currency": 0,
-			},
-			"_Test Bank - _TC": {
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
 				"account_currency": "INR",
 				"debit": 0,
 				"debit_in_account_currency": 0,
 				"credit": 5000,
 				"credit_in_account_currency": 5000,
 			},
-		}
+			{
+				"account": "_Test Bank USD - _TC",
+				"account_currency": "USD",
+				"debit": 5000,
+				"debit_in_account_currency": 100,
+				"credit": 0,
+				"credit_in_account_currency": 0,
+			},
+		]
 
-		for field in (
-			"account_currency",
-			"debit",
-			"debit_in_account_currency",
-			"credit",
-			"credit_in_account_currency",
-		):
-			for i, gle in enumerate(gl_entries):
-				self.assertEqual(expected_values[gle.account][field], gle[field])
+		self.check_gl_entries()
 
 		# cancel
 		jv.cancel()
@@ -228,43 +222,37 @@ class TestJournalEntry(unittest.TestCase):
 		rjv.posting_date = nowdate()
 		rjv.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select account, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
-			order by account asc""",
-			rjv.name,
-			as_dict=1,
-		)
+		self.voucher_no = rjv.name
 
-		self.assertTrue(gl_entries)
+		self.fields = [
+			"account",
+			"account_currency",
+			"debit",
+			"credit",
+			"debit_in_account_currency",
+			"credit_in_account_currency",
+		]
 
-		expected_values = {
-			"_Test Bank USD - _TC": {
+		self.expected_gle = [
+			{
+				"account": "_Test Bank USD - _TC",
 				"account_currency": "USD",
 				"debit": 0,
 				"debit_in_account_currency": 0,
 				"credit": 5000,
 				"credit_in_account_currency": 100,
 			},
-			"Sales - _TC": {
+			{
+				"account": "Sales - _TC",
 				"account_currency": "INR",
 				"debit": 5000,
 				"debit_in_account_currency": 5000,
 				"credit": 0,
 				"credit_in_account_currency": 0,
 			},
-		}
+		]
 
-		for field in (
-			"account_currency",
-			"debit",
-			"debit_in_account_currency",
-			"credit",
-			"credit_in_account_currency",
-		):
-			for i, gle in enumerate(gl_entries):
-				self.assertEqual(expected_values[gle.account][field], gle[field])
+		self.check_gl_entries()
 
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD
@@ -344,23 +332,25 @@ class TestJournalEntry(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 
-		expected_values = {
-			"_Test Cash - _TC": {"cost_center": cost_center},
-			"_Test Bank - _TC": {"cost_center": cost_center},
-		}
+		self.voucher_no = jv.name
 
-		gl_entries = frappe.db.sql(
-			"""select account, cost_center, debit, credit
-			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
-			order by account asc""",
-			jv.name,
-			as_dict=1,
-		)
+		self.fields = [
+			"account",
+			"cost_center",
+		]
 
-		self.assertTrue(gl_entries)
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
+				"cost_center": cost_center,
+			},
+			{
+				"account": "_Test Cash - _TC",
+				"cost_center": cost_center,
+			},
+		]
 
-		for gle in gl_entries:
-			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+		self.check_gl_entries()
 
 	def test_jv_with_project(self):
 		from erpnext.projects.doctype.project.test_project import make_project
@@ -387,23 +377,22 @@ class TestJournalEntry(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 
-		expected_values = {
-			"_Test Cash - _TC": {"project": project_name},
-			"_Test Bank - _TC": {"project": project_name},
-		}
+		self.voucher_no = jv.name
 
-		gl_entries = frappe.db.sql(
-			"""select account, project, debit, credit
-			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
-			order by account asc""",
-			jv.name,
-			as_dict=1,
-		)
+		self.fields = ["account", "project"]
 
-		self.assertTrue(gl_entries)
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
+				"project": project_name,
+			},
+			{
+				"account": "_Test Cash - _TC",
+				"project": project_name,
+			},
+		]
 
-		for gle in gl_entries:
-			self.assertEqual(expected_values[gle.account]["project"], gle.project)
+		self.check_gl_entries()
 
 	def test_jv_account_and_party_balance_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -425,6 +414,24 @@ class TestJournalEntry(unittest.TestCase):
 		expected_account_balance = account_balance - 100
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		self.assertEqual(expected_account_balance, account_balance)
+
+	def check_gl_entries(self):
+		gl = frappe.qb.DocType("GL Entry")
+		query = frappe.qb.from_(gl)
+		for field in self.fields:
+			query = query.select(gl[field])
+
+		query = query.where(
+			(gl.voucher_type == "Journal Entry")
+			& (gl.voucher_no == self.voucher_no)
+			& (gl.is_cancelled == 0)
+		).orderby(gl.account)
+
+		gl_entries = query.run(as_dict=True)
+
+		for i in range(len(self.expected_gle)):
+			for field in self.fields:
+				self.assertEqual(self.expected_gle[i][field], gl_entries[i][field])
 
 
 def make_journal_entry(
