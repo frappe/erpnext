@@ -9,12 +9,10 @@
  "field_order": [
   "account",
   "account_type",
-  "balance",
   "col_break1",
   "bank_account",
   "party_type",
   "party",
-  "party_balance",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -64,17 +62,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "balance",
-   "fieldtype": "Currency",
-   "label": "Account Balance",
-   "no_copy": 1,
-   "oldfieldname": "balance",
-   "oldfieldtype": "Data",
-   "options": "account_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": ":Company",
    "description": "If Income or Expense",
    "fieldname": "cost_center",
@@ -106,14 +93,6 @@
    "in_list_view": 1,
    "label": "Party",
    "options": "party_type"
-  },
-  {
-   "fieldname": "party_balance",
-   "fieldtype": "Currency",
-   "label": "Party Balance",
-   "options": "account_currency",
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "fieldname": "currency_section",
@@ -284,7 +263,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-16 14:11:13.507807",
+ "modified": "2023-10-12 11:52:46.397186",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
