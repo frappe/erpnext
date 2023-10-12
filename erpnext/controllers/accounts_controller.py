@@ -3256,7 +3256,7 @@ def check_if_child_table_updated(
 	# Check if any field affecting accounting entry is altered
 	for index, item in enumerate(child_table_before_update):
 		for field in fields_to_check:
-			if child_table_before_update[index].get(field) != item.get(field):
+			if child_table_after_update[index].get(field) != item.get(field):
 				return True
 
 	return False
