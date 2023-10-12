@@ -15,7 +15,7 @@ frappe.ui.form.on("Journal Entry", {
 		erpnext.toggle_naming_series();
 
 		if (frm.doc.repost_required && frm.doc.docstatus===1) {
-			frm.set_intro(__("Accounting entries for this invoice need to be reposted. Please click on 'Repost' button to update."));
+			frm.set_intro(__("Accounting entries for this Journal Entry need to be reposted. Please click on 'Repost' button to update."));
 			frm.add_custom_button(__('Repost Accounting Entries'),
 				() => {
 					frm.call({
