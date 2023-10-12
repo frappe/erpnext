@@ -68,7 +68,6 @@ class JournalEntry(AccountsController):
 		self.set_print_format_fields()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
-		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
 		self.validate_depr_entry_voucher_type()
 
@@ -1061,21 +1060,6 @@ class JournalEntry(AccountsController):
 		if not self.get("accounts"):
 			frappe.throw(_("Accounts table cannot be blank."))
 
-	def set_account_and_party_balance(self):
-		account_balance = {}
-		party_balance = {}
-		for d in self.get("accounts"):
-			if d.account not in account_balance:
-				account_balance[d.account] = get_balance_on(account=d.account, date=self.posting_date)
-
-			if (d.party_type, d.party) not in party_balance:
-				party_balance[(d.party_type, d.party)] = get_balance_on(
-					party_type=d.party_type, party=d.party, date=self.posting_date, company=self.company
-				)
-
-			d.account_balance = account_balance[d.account]
-			d.party_balance = party_balance[(d.party_type, d.party)]
-
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
@@ -1241,8 +1225,6 @@ def get_payment_entry(ref_doc, args):
 			"account_type": frappe.get_cached_value("Account", args.get("party_account"), "account_type"),
 			"account_currency": args.get("party_account_currency")
 			or get_account_currency(args.get("party_account")),
-			"balance": get_balance_on(args.get("party_account")),
-			"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
 			"exchange_rate": exchange_rate,
 			args.get("amount_field_party"): args.get("amount"),
 			"is_advance": args.get("is_advance"),
@@ -1406,7 +1388,7 @@ def get_party_account_and_currency(company, party_type, party):
 def get_account_details_and_party_type(
 	account, date, company, debit=None, credit=None, exchange_rate=None
 ):
-	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
+	"""Returns dict of account details and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
