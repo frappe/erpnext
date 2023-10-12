@@ -1390,21 +1390,14 @@ def get_outstanding(args):
 
 
 @frappe.whitelist()
-def get_party_account_and_balance(company, party_type, party, cost_center=None):
+def get_party_account_and_currency(company, party_type, party):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	account = get_party_account(party_type, party, company)
 
-	account_balance = get_balance_on(account=account, cost_center=cost_center)
-	party_balance = get_balance_on(
-		party_type=party_type, party=party, company=company, cost_center=cost_center
-	)
-
 	return {
 		"account": account,
-		"balance": account_balance,
-		"party_balance": party_balance,
 		"account_currency": frappe.get_cached_value("Account", account, "account_currency"),
 	}
 
