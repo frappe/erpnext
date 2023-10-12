@@ -2216,27 +2216,20 @@ class AccountsController(TransactionBase):
 		doc_before_update = self.get_doc_before_save()
 		accounting_dimensions = get_accounting_dimensions() + ["cost_center", "project"]
 
-		# Check if opening entry check updated
-		needs_repost = doc_before_update.get("is_opening") != self.is_opening
+		# Parent Level Accounts excluding party account
+		fields_to_check += accounting_dimensions
+		for field in fields_to_check:
+			if doc_before_update.get(field) != self.get(field):
+				return True
 
-		if not needs_repost:
-			# Parent Level Accounts excluding party account
-			fields_to_check += accounting_dimensions
-			for field in fields_to_check:
-				if doc_before_update.get(field) != self.get(field):
-					needs_repost = 1
-					break
+		# Check for child tables
+		for table in child_tables:
+			if check_if_child_table_updated(
+				doc_before_update.get(table), self.get(table), child_tables[table]
+			):
+				return True
 
-			if not needs_repost:
-				# Check for child tables
-				for table in child_tables:
-					needs_repost = check_if_child_table_updated(
-						doc_before_update.get(table), self.get(table), child_tables[table]
-					)
-					if needs_repost:
-						break
-
-		return needs_repost
+		return False
 
 	@frappe.whitelist()
 	def repost_accounting_entries(self):

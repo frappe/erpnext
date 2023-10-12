@@ -530,6 +530,7 @@ class SalesInvoice(SellingController):
 				"write_off_account",
 				"loyalty_redemption_account",
 				"unrealized_profit_loss_account",
+				"is_opening",
 			]
 			child_tables = {
 				"items": ("income_account", "expense_account", "discount_account"),

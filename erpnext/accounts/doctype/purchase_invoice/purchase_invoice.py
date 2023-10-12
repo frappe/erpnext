@@ -536,6 +536,7 @@ class PurchaseInvoice(BuyingController):
 				"cash_bank_account",
 				"write_off_account",
 				"unrealized_profit_loss_account",
+				"is_opening",
 			]
 			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
 			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
