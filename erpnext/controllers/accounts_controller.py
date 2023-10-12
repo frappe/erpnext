@@ -3251,15 +3251,12 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 def check_if_child_table_updated(
 	child_table_before_update, child_table_after_update, fields_to_check
 ):
-	accounting_dimensions = get_accounting_dimensions() + ["cost_center", "project"]
+	fields_to_check = list(fields_to_check) + get_accounting_dimensions() + ["cost_center", "project"]
+
 	# Check if any field affecting accounting entry is altered
-	for index, item in enumerate(child_table_after_update):
+	for index, item in enumerate(child_table_before_update):
 		for field in fields_to_check:
 			if child_table_before_update[index].get(field) != item.get(field):
-				return True
-
-		for dimension in accounting_dimensions:
-			if child_table_before_update[index].get(dimension) != item.get(dimension):
 				return True
 
 	return False
