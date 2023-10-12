@@ -123,7 +123,7 @@ class Employee(NestedSet):
 			user.gender = self.gender
 
 		if self.image:
-			if not user.user_image or self.has_value_changed(self.image):
+			if not user.user_image or self.has_value_changed("image"):
 				user.user_image = self.image
 				try:
 					frappe.get_doc(
