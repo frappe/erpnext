@@ -385,13 +385,12 @@ frappe.ui.form.on("Journal Entry Account", {
 		if(!d.account && d.party_type && d.party) {
 			if(!frm.doc.company) frappe.throw(__("Please select Company"));
 			return frm.call({
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_currency",
 				child: d,
 				args: {
 					company: frm.doc.company,
 					party_type: d.party_type,
 					party: d.party,
-					cost_center: d.cost_center
 				}
 			});
 		}
