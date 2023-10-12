@@ -32,7 +32,6 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
-from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 
 
@@ -122,7 +121,6 @@ class Item(Document):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 
 	def on_update(self):
-		invalidate_cache_for_item(self)
 		self.update_variants()
 		self.update_item_price()
 
@@ -1100,14 +1098,6 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	)
 
 	return out
-
-
-def invalidate_cache_for_item(doc):
-	"""Invalidate Item Group cache and rebuild ItemVariantsCacheManager."""
-	invalidate_cache_for(doc, doc.item_group)
-
-	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
-		invalidate_cache_for(doc, doc.old_item_group)
 
 
 def check_stock_uom_with_bin(item, stock_uom):
