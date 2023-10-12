@@ -149,6 +149,13 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def validate_for_repost(self):
+		self.validate_party()
+		self.validate_multi_currency()
+		if not frappe.flags.is_reverse_depr_entry:
+			self.validate_against_jv()
+			self.validate_stock_accounts()
+
 	def submit(self):
 		if len(self.accounts) > 100:
 			msgprint(_("The task has been enqueued as a background job."), alert=True)
@@ -176,6 +183,7 @@ class JournalEntry(AccountsController):
 		if hasattr(self, "repost_required"):
 			child_tables = {"accounts": ("account", "account_type", "bank_account")}
 			self.needs_repost = self.check_if_fields_updated([], child_tables)
+			self.validate_for_repost()
 			self.db_set("repost_required", self.needs_repost)
 
 	def on_cancel(self):
