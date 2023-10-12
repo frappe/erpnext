@@ -45,7 +45,10 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
     <a href="https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/frappe/frappe_docker/main/pwd.yml">
       <img src="https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png" alt="Try in PWD" height="37"/>
     </a>
-</div>
+    <a href="https://elest.io/open-source/erpnext">
+        <img src="https://pub-da36157c854648669813f3f76c526c2b.r2.dev/deploy-on-elestio-black.png" height="40">
+    </a>
+</div><br>
 
 > Login for the PWD site: (username: Administrator, password: admin)
 
