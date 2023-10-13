@@ -900,7 +900,7 @@ class ReceivablePayableReport(object):
 
 	def get_party_details(self, party):
 		if not party in self.party_details:
-			if self.party_type == "Customer":
+			if "Customer" in self.party_type:
 				fields = ["customer_name", "territory", "customer_group", "customer_primary_contact","primary_address","sales_person"]
 
 				if self.filters.get("sales_partner"):
