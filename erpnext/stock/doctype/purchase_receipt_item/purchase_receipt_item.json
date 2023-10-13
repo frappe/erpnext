@@ -117,6 +117,7 @@
   "accounting_details_section",
   "expense_account",
   "item_tax_rate",
+  "wip_composite_asset",
   "column_break_102",
   "provisional_expense_account",
   "accounting_dimensions_section",
@@ -186,7 +187,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -1056,12 +1056,18 @@
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No"
+  },
+  {
+   "fieldname": "wip_composite_asset",
+   "fieldtype": "Link",
+   "label": "WIP Composite Asset",
+   "options": "Asset"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-11 16:16:16.504549",
+ "modified": "2023-10-03 21:11:50.547261",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

@@ -12,6 +12,7 @@
   "column_break_5",
   "frequency_of_depreciation",
   "depreciation_start_date",
+  "salvage_value_percentage",
   "expected_value_after_useful_life",
   "value_after_depreciation",
   "rate_of_depreciation"
@@ -91,12 +92,17 @@
    "fieldname": "daily_depreciation",
    "fieldtype": "Check",
    "label": "Daily Depreciation"
+  },
+  {
+   "fieldname": "salvage_value_percentage",
+   "fieldtype": "Percent",
+   "label": "Salvage Value Percentage"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-08-10 22:10:36.576199",
+ "modified": "2023-09-29 15:39:52.740594",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
