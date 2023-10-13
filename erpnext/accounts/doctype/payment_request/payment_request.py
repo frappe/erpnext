@@ -88,13 +88,15 @@ class PaymentRequest(Document):
 				)
 
 	def on_submit(self):
+		self.payment_gateway_validation()
+
 		if self.payment_request_type == "Outward":
 			self.db_set("status", "Initiated")
 			return
 		elif self.payment_request_type == "Inward":
 			self.db_set("status", "Requested")
 
-		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
+		send_mail = bool(self.payment_gateway)
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (
@@ -159,14 +161,11 @@ class PaymentRequest(Document):
 			si.submit()
 
 	def payment_gateway_validation(self):
-		try:
-			controller = _get_payment_gateway_controller(self.payment_gateway)
-			if hasattr(controller, "on_payment_request_submission"):
-				return controller.on_payment_request_submission(self)
-			else:
-				return True
-		except Exception:
-			return False
+		controller = _get_payment_gateway_controller(self.payment_gateway)
+		if hasattr(controller, "on_payment_request_submission"):
+			return controller.on_payment_request_submission(self)
+		else:
+			return True
 
 	def set_payment_request_url(self):
 		if self.payment_account and self.payment_channel != "Phone":

@@ -1,7 +1,20 @@
 [
   {
+    "doctype": "DocType",
+    "module": "Accounts",
+    "custom": 1,
+    "fields": [{"label": "Name", "fieldname": "name", "fieldtype": "Data"}],
+    "name": "Test Gateway Settings"
+  },
+  {
+    "doctype": "Test Gateway Settings",
+    "name": "_Test Gateway Controller"
+  },
+  {
     "doctype": "Payment Gateway",
-    "gateway": "_Test Gateway"
+    "gateway": "_Test Gateway",
+    "gateway_settings": "Test Gateway Settings",
+    "gateway_controller": "_Test Gateway Controller"
   },
   {
     "doctype": "Payment Gateway Account",
