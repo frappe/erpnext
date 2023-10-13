@@ -368,28 +368,29 @@ class PaymentRequest(Document):
 		if not status:
 			return
 
-		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
-
 		if status in ["Authorized", "Completed"]:
-			redirect_to = None
 			self.set_as_paid()
+			self.on_payment_authorized_redirect()
 
-			# if shopping cart enabled and in session
-			if (
-				shopping_cart_settings.enabled
-				and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest"
-			) and self.payment_channel != "Phone":
+	def on_payment_authorized_redirect(self):
+		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
+		redirect_to = None
+		# if shopping cart enabled and in session
+		if (
+			shopping_cart_settings.enabled
+			and hasattr(frappe.local, "session")
+			and frappe.local.session.user != "Guest"
+		) and self.payment_channel != "Phone":
 
-				success_url = shopping_cart_settings.payment_success_url
-				if success_url:
-					redirect_to = ({"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}).get(
-						success_url, "/me"
-					)
-				else:
-					redirect_to = get_url("/orders/{0}".format(self.reference_name))
+			success_url = shopping_cart_settings.payment_success_url
+			if success_url:
+				redirect_to = ({"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}).get(
+					success_url, "/me"
+				)
+			else:
+				redirect_to = get_url("/orders/{0}".format(self.reference_name))
 
-			return redirect_to
+		return redirect_to
 
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
