@@ -1617,30 +1617,30 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-def get_future_sle_with_negative_qty(args):
-	sle = frappe.qb.DocType("Stock Ledger Entry")
+def get_future_sle_with_negative_qty(sle):
+	SLE = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
-		frappe.qb.from_(sle)
+		frappe.qb.from_(SLE)
 		.select(
-			sle.qty_after_transaction, sle.posting_date, sle.posting_time, sle.voucher_type, sle.voucher_no
+			SLE.qty_after_transaction, SLE.posting_date, SLE.posting_time, SLE.voucher_type, SLE.voucher_no
 		)
 		.where(
-			(sle.item_code == args.item_code)
-			& (sle.warehouse == args.warehouse)
-			& (sle.voucher_no != args.voucher_no)
+			(SLE.item_code == sle.item_code)
+			& (SLE.warehouse == sle.warehouse)
+			& (SLE.voucher_no != sle.voucher_no)
 			& (
-				CombineDatetime(sle.posting_date, sle.posting_time)
-				>= CombineDatetime(args.posting_date, args.posting_time)
+				CombineDatetime(SLE.posting_date, SLE.posting_time)
+				>= CombineDatetime(sle.posting_date, sle.posting_time)
 			)
-			& (sle.is_cancelled == 0)
-			& (sle.qty_after_transaction < 0)
+			& (SLE.is_cancelled == 0)
+			& (SLE.qty_after_transaction < 0)
 		)
-		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.orderby(CombineDatetime(SLE.posting_date, SLE.posting_time))
 		.limit(1)
 	)
 
-	if args.voucher_type == "Stock Reconciliation" and args.batch_no:
-		query = query.where(sle.batch_no == args.batch_no)
+	if sle.voucher_type == "Stock Reconciliation" and sle.batch_no:
+		query = query.where(SLE.batch_no == sle.batch_no)
 
 	return query.run(as_dict=True)
 
