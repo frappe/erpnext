@@ -36,7 +36,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		self.get_party_total(args)
 
 		for party, party_dict in iteritems(self.party_total):
-			if party_dict.over_due < 500:
+			if party_dict.over_due < 1000:
 				continue
 
 			row = frappe._dict()
@@ -46,8 +46,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			if self.party_naming_by == "Naming Series":
 				row.party_name = frappe.get_cached_value(self.party_type, party, scrub(self.party_type) + "_name")
 
-			row.update(party_dict)		
-
+			row.update(party_dict)	
+			
 			self.data.append(row)
 
 	def get_party_total(self, args):
@@ -76,6 +76,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"range4": 0.0,
 			"range5": 0.0,
 			"over_due": 0.0,
+			"age_in_days":0,
 			"sales_person": '',
 			"primary_address": '',
 			"due_date": getdate()
@@ -84,9 +85,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 	def set_party_details(self, row):
 		self.party_total[row.party].currency = row.currency
 
-		for key in ('territory', 'customer_group'):
-			if row.get(key):
-				self.party_total[row.party][key] = row.get(key)
+		if row.territory:
+			self.party_total[row.party].territory =row.territory
 
 		if row.sales_person:
 			self.party_total[row.party].sales_person =row.sales_person
@@ -96,13 +96,17 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		if row.over_due:
 			self.party_total[row.party].over_due +=row.over_due
+		
+		if row.posting_date:
+			self.party_total[row.party].age_in_days = (getdate() - row.posting_date).days
+
 
 	def get_columns(self):
 		self.columns = []
 		self.add_column(label=_(self.party_type), fieldname='party',
 			fieldtype='Link', options=self.party_type, width=200)
 		self.add_column(label="Address", fieldname='primary_address', 
-			fieldtype='Link', options='Address', width=160)
+			fieldtype='Link', options='Address', width=120)
 
 		self.add_column(label=_('Territory'), fieldname='territory', 
 			fieldtype='Link', options='Territory',  width=80)
@@ -114,6 +118,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.setup_ageing_columns()
 
 		self.add_column(label="Total OverDue", fieldname='over_due')
+		self.add_column(label="Age", fieldname='age_in_days', width=50, fieldtype='Int' )
 		self.add_column(_('Balance'), fieldname='outstanding')
 
 
