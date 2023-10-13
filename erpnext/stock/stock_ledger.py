@@ -1618,25 +1618,31 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 
 
 def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
-		"""
-		select
-			qty_after_transaction, posting_date, posting_time,
-			voucher_type, voucher_no
-		from `tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
-			and is_cancelled = 0
-			and qty_after_transaction < 0
-		order by timestamp(posting_date, posting_time) asc
-		limit 1
-	""",
-		args,
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.qty_after_transaction, sle.posting_date, sle.posting_time, sle.voucher_type, sle.voucher_no
+		)
+		.where(
+			(sle.item_code == args.item_code)
+			& (sle.warehouse == args.warehouse)
+			& (sle.voucher_no != args.voucher_no)
+			& (
+				CombineDatetime(sle.posting_date, sle.posting_time)
+				>= CombineDatetime(args.posting_date, args.posting_time)
+			)
+			& (sle.is_cancelled == 0)
+			& (sle.qty_after_transaction < 0)
+		)
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.limit(1)
 	)
+
+	if args.voucher_type == "Stock Reconciliation" and args.batch_no:
+		query = query.where(sle.batch_no == args.batch_no)
+
+	return query.run(as_dict=True)
 
 
 def get_future_sle_with_negative_batch_qty(args):
