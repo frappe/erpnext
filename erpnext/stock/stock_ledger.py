@@ -659,7 +659,7 @@ class update_entries_after(object):
 				)
 
 				if self.valuation_method == "Moving Average":
-					rate = self.data[self.args.warehouse].previous_sle.valuation_rate
+					rate = flt(self.data[self.args.warehouse].previous_sle.valuation_rate)
 				else:
 					rate = get_rate_for_return(
 						sle.voucher_type,
