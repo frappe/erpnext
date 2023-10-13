@@ -604,9 +604,9 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")
 		create_batch_item_with_batch("Testing Batch Item 2", "002")
 		sr = create_stock_reconciliation(
-			item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002", do_not_submit=True
+			item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002", do_not_save=True
 		)
-		self.assertRaises(frappe.ValidationError, sr.submit)
+		self.assertRaises(frappe.ValidationError, sr.save)
 
 	def test_serial_no_cancellation(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -915,6 +915,46 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		# Check if Negative Stock is blocked
 		self.assertRaises(frappe.ValidationError, sr.submit)
+
+	def test_batch_item_validation(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(
+			"Test Batch Item Original",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		sr = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=100,
+			basic_rate=100,
+			posting_date=nowdate(),
+		)
+
+		new_item_code = self.make_item(
+			"Test Batch Item New 1",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+			},
+		).name
+
+		sr = create_stock_reconciliation(
+			item_code=new_item_code,
+			warehouse="_Test Warehouse - _TC",
+			qty=10,
+			rate=100,
+			batch_no=sr.items[0].batch_no,
+			do_not_save=True,
+		)
+
+		self.assertRaises(frappe.ValidationError, sr.save)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

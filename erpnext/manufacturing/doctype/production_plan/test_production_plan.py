@@ -6,8 +6,8 @@ from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
-	get_completed_production_plans,
 	get_items_for_material_requests,
+	get_non_completed_production_plans,
 	get_sales_orders,
 	get_warehouse_list,
 )
@@ -1132,9 +1132,9 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(after_qty, before_qty)
 
-		completed_plans = get_completed_production_plans()
+		completed_plans = get_non_completed_production_plans()
 		for plan in plans:
-			self.assertTrue(plan in completed_plans)
+			self.assertFalse(plan in completed_plans)
 
 	def test_resered_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
