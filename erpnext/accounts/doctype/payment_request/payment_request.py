@@ -20,7 +20,6 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
-from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.utilities import payment_app_import_guard
 
 
@@ -393,6 +392,9 @@ class PaymentRequest(Document):
 
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
+			with payment_app_import_guard():
+				from payments.payment_gateways.stripe_integration import create_stripe_subscription
+
 			return create_stripe_subscription(gateway_controller, data)
 
 
