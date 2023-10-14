@@ -119,12 +119,16 @@ class PaymentRequest(Document):
 			self.reference_doctype in ["Sales Order"] and ref_doc.advance_payment_status == "Not Requested"
 		):
 			ref_doc.db_set("advance_payment_status", "Requested")
+			ref_doc.set_status(update=True)
+			ref_doc.notify_update()
 
 		if (
 			self.reference_doctype in ["Purchase Order"]
 			and ref_doc.advance_payment_status == "Not Initiated"
 		):
 			ref_doc.db_set("advance_payment_status", "Initiated")
+			ref_doc.set_status(update=True)
+			ref_doc.notify_update()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
@@ -163,6 +167,39 @@ class PaymentRequest(Document):
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
+
+		if self.reference_doctype in ["Sales Order", "Purchase Order"]:
+
+			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+			if self.reference_doctype in ["Sales Order"] and ref_doc.advance_payment_status == "Requested":
+				peer_pr = frappe.db.count(
+					"Payment Request",
+					{
+						"reference_doctype": self.reference_doctype,
+						"reference_name": self.reference_name,
+						"docstatus": 1,
+					},
+				)
+				if not peer_pr:
+					ref_doc.db_set("advance_payment_status", "Not Requested")
+					ref_doc.set_status(update=True)
+					ref_doc.notify_update()
+
+			if (
+				self.reference_doctype in ["Purchase Order"] and ref_doc.advance_payment_status == "Initiated"
+			):
+				peer_pr = frappe.db.count(
+					"Payment Request",
+					{
+						"reference_doctype": self.reference_doctype,
+						"reference_name": self.reference_name,
+						"docstatus": 1,
+					},
+				)
+				if not peer_pr:
+					ref_doc.db_set("advance_payment_status", "Not Initiated")
+					ref_doc.set_status(update=True)
+					ref_doc.notify_update()
 
 	def make_invoice(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)

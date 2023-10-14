@@ -54,6 +54,10 @@ status_map = {
 			"eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1 and not self.skip_delivery_note",
 		],
 		[
+			"To Pay",
+			"eval:self.advance_payment_status == 'Requested' and self.docstatus == 1",
+		],
+		[
 			"Completed",
 			"eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed == 100 and self.docstatus == 1",
 		],
@@ -63,14 +67,18 @@ status_map = {
 	],
 	"Purchase Order": [
 		["Draft", None],
-		[
-			"To Receive and Bill",
-			"eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1",
-		],
 		["To Bill", "eval:self.per_received >= 100 and self.per_billed < 100 and self.docstatus == 1"],
 		[
 			"To Receive",
 			"eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1",
+		],
+		[
+			"To Receive and Bill",
+			"eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1",
+		],
+		[
+			"To Pay",
+			"eval:self.advance_payment_status == 'Initiated' and self.docstatus == 1",
 		],
 		[
 			"Completed",
