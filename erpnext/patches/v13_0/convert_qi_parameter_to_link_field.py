@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	frappe.reload_doc("stock", "doctype", "quality_inspection_parameter")
 	params = set()
@@ -7,13 +8,13 @@ def execute():
 	# get all parameters from QI readings table
 	for (p,) in frappe.db.get_all(
 		"Quality Inspection Reading", fields=["specification"], as_list=True
-		):
+	):
 		params.add(p.strip())
 
 	# get all parameters from QI Template as some may be unused in QI
 	for (p,) in frappe.db.get_all(
 		"Item Quality Inspection Parameter", fields=["specification"], as_list=True
-		):
+	):
 		params.add(p.strip())
 
 	# because db primary keys are case insensitive, so duplicates will cause an exception
