@@ -144,6 +144,7 @@ class DeliveryNote(SellingController):
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
+		self.set_product_bundle_reference_in_packed_items()  # should be called before `make_packing_list`
 		make_packing_list(self)
 
 		if self._action != "submit" and not self.is_return:
@@ -429,6 +430,17 @@ class DeliveryNote(SellingController):
 					)
 				else:
 					serial_nos.append(serial_no)
+
+	def set_product_bundle_reference_in_packed_items(self):
+		if self.packed_items and ((self.is_return and self.return_against) or self.amended_from):
+			if items_ref_map := {
+				item.dn_detail or item.get("_amended_from"): item.name
+				for item in self.items
+				if item.dn_detail or item.get("_amended_from")
+			}:
+				for item in self.packed_items:
+					if item.parent_detail_docname in items_ref_map:
+						item.parent_detail_docname = items_ref_map[item.parent_detail_docname]
 
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
