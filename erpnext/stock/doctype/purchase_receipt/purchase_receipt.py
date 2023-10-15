@@ -322,19 +322,23 @@ class PurchaseReceipt(BuyingController):
 			get_purchase_document_details,
 		)
 
+		provisional_accounting_for_non_stock_items = cint(
+			frappe.db.get_value(
+				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
+			)
+		)
+
 		stock_rbnb = None
-		if erpnext.is_perpetual_inventory_enabled(self.company):
+		if (
+			erpnext.is_perpetual_inventory_enabled(self.company)
+			or provisional_accounting_for_non_stock_items
+		):
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		warehouse_with_no_account = []
 		stock_items = self.get_stock_items()
-		provisional_accounting_for_non_stock_items = cint(
-			frappe.db.get_value(
-				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
-			)
-		)
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
