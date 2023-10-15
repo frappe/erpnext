@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import (
 	add_days,
 	add_months,
@@ -90,10 +91,14 @@ def create_parties():
 		customer.insert()
 
 
-class TestSubscription(unittest.TestCase):
+class TestSubscription(FrappeTestCase):
 	def setUp(self):
 		create_plan()
 		create_parties()
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_create_subscription_with_trial_with_correct_period(self):
 		subscription = frappe.new_doc("Subscription")
