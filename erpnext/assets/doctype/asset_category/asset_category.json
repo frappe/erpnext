@@ -9,13 +9,19 @@
  "engine": "InnoDB",
  "field_order": [
   "asset_category_name",
+  "is_group",
   "column_break_3",
+  "parent_asset_category",
   "depreciation_options",
   "enable_cwip_accounting",
+  "useful_life",
   "finance_book_detail",
   "finance_books",
   "section_break_2",
-  "accounts"
+  "accounts",
+  "lft",
+  "rgt",
+  "old_parent"
  ],
  "fields": [
   {
@@ -63,13 +69,64 @@
    "fieldname": "enable_cwip_accounting",
    "fieldtype": "Check",
    "label": "Enable Capital Work in Progress Accounting"
+  },
+  {
+   "fieldname": "useful_life",
+   "fieldtype": "Float",
+   "label": "Useful Life (in years)"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "description": "Only leaf nodes are allowed in asset",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Old Parent",
+   "options": "Asset Category",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "parent_asset_category",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Category",
+   "options": "Asset Category"
   }
  ],
+ "is_tree": 1,
  "links": [],
- "modified": "2021-02-24 15:05:38.621803",
+ "modified": "2023-10-16 13:01:43.290217",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Category",
+ "naming_rule": "By fieldname",
+ "nsm_parent_field": "parent_asset_category",
  "owner": "Administrator",
  "permissions": [
   {
@@ -114,5 +171,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
