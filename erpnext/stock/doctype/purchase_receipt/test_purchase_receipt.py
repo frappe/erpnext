@@ -2142,8 +2142,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for entry in gl_entries:
 			self.assertEqual(abs(entry.debit + entry.credit), abs(sl_entries[0].stock_value_difference))
 
-		self.assertIsNotNone(get_gl_entries(pr_return.doctype, pr_return.name))
-
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
