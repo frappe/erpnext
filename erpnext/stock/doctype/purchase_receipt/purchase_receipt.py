@@ -341,7 +341,7 @@ class PurchaseReceipt(BuyingController):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		for d in self.get("items"):
-			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
+			if d.item_code in stock_items and flt(d.qty) and (flt(d.valuation_rate) or self.is_return):
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value(
 						"Stock Ledger Entry",
