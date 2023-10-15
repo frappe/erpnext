@@ -2781,6 +2781,13 @@ class TestSalesInvoice(FrappeTestCase):
 			company="_Test Company",
 		)
 
+		tds_payable_account = create_account(
+			account_name="TDS Payable",
+			account_type="Tax",
+			parent_account="Duties and Taxes - _TC",
+			company="_Test Company",
+		)
+
 		si = create_sales_invoice(parent_cost_center="Main - _TC", do_not_save=1)
 		si.apply_discount_on = "Grand Total"
 		si.additional_discount_account = additional_discount_account
