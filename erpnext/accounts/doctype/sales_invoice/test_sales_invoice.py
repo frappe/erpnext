@@ -6,12 +6,8 @@ import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
-<<<<<<< HEAD
 from frappe.model.naming import make_autoname
-from frappe.tests.utils import change_settings
-=======
 from frappe.tests.utils import FrappeTestCase, change_settings
->>>>>>> c322e5f381 (test: use fixtures for sales and purchase invoice)
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 import erpnext
@@ -3091,10 +3087,6 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Accounts Settings", {"acc_frozen_upto": add_days(getdate(), 1)})
 	def test_sales_invoice_submission_post_account_freezing_date(self):
-<<<<<<< HEAD
-		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", add_days(getdate(), 1))
-=======
->>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
 		si = create_sales_invoice(do_not_save=True)
 		si.posting_date = add_days(getdate(), 1)
 		si.save()
@@ -3103,11 +3095,6 @@ class TestSalesInvoice(FrappeTestCase):
 		si.posting_date = getdate()
 		si.submit()
 
-<<<<<<< HEAD
-		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
-
-=======
->>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
 	def test_over_billing_case_against_delivery_note(self):
 		"""
 		Test a case where duplicating the item with qty = 1 in the invoice
@@ -3215,20 +3202,6 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(expected_gle[i][2], gle.debit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-		acc_settings = frappe.get_single("Accounts Settings")
-		acc_settings.book_deferred_entries_via_journal_entry = 0
-		acc_settings.submit_journal_entries = 0
-		acc_settings.save()
-
-		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
-=======
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
->>>>>>> 58065f31b1 (refactor(test): use @change_settings in sales invoice)
-
-=======
->>>>>>> 8ebe5733ac (refactor(test): fix broken test cases in Sales Invoice)
 	def test_standalone_serial_no_return(self):
 		si = create_sales_invoice(
 			item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1
