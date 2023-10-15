@@ -5,7 +5,7 @@
 import unittest
 
 import frappe
-from frappe.tests.utils import change_settings
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -38,7 +38,7 @@ test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Templ
 test_ignore = ["Serial No"]
 
 
-class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
+class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	@classmethod
 	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
@@ -47,6 +47,9 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_purchase_invoice_received_qty(self):
 		"""
