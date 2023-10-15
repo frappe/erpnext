@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import (today)
+from frappe.utils import (today, getdate,add_days)
 from six import iteritems
 from frappe.query_builder.functions import Sum, Concat
 from functools import reduce
@@ -37,10 +37,12 @@ class DayEndSummaryReport():
 		payment_details= Concat(pEntry.party,":",pEntry.remarks).as_("account_details")
 		self.total_paid	=	0
 		self.total_expenses=0
+		self.yesterday_expenses=0
 		self.cash_in_hand =0
 		self.bank_in_hand=0
 		self.today_cash=0
 		self.total_sales=0
+		self.total_yesterday_expenses =0
 		self.total_payments=0
 		self.acc_receivable=0
 
@@ -53,7 +55,19 @@ class DayEndSummaryReport():
 			.where(accounts.account!='Cash - AT') \
             .where(accounts.debit!=0) \
 			.run(as_dict=True)	
+		
+		_yesterday = add_days(getdate(filters['report_date']),-1).strftime("%Y-%m-%d")
 
+		yesterday_expenses = frappe.qb.from_(journal) \
+			.select(accounts.account.as_("yesterday_account"),accounts.party.as_("y_party"),accounts.user_remark.as_("y_remarks"),accounts.debit.as_("yesterday_expense_amount"), account_details.as_("y_account_details")) \
+			.join(accounts) \
+			.on(journal.name == accounts.parent) \
+			.where(journal.posting_date==_yesterday) \
+      		.where(journal.docstatus==1) \
+			.where(accounts.account!='Cash - AT') \
+            .where(accounts.debit!=0) \
+			.run(as_dict=True)	
+		
 		collections = (frappe.qb.from_(pEntry)
 					.select(paid_amount,pEntry.sales_person,pEntry.territory)
 					.where(pEntry.posting_date == filters['report_date'])
@@ -74,12 +88,16 @@ class DayEndSummaryReport():
 		if expenses is not None and expenses:
 			list=map(lambda value: value.expense_amount,expenses)
 			self.total_expenses=reduce(lambda total,value: total+value,list,0)
+		if yesterday_expenses is not None and yesterday_expenses:
+			list=map(lambda value: value.yesterday_expense_amount,yesterday_expenses)
+			self.total_yesterday_expenses=reduce(lambda total,value: total+value,list,0)
 		if payments is not None and payments:
 			list=map(lambda value: value.expense_amount,expenses)
 			self.total_payments=reduce(lambda total,value: total+value,list,0)
 
 		if collections: self.data.extend(collections)
 		if expenses: self.data.extend(expenses)	
+		if yesterday_expenses: self.data.extend(yesterday_expenses)
 		if payments: self.data.extend(payments)	
 
 	
@@ -135,6 +153,7 @@ class DayEndSummaryReport():
 			'bank_in_hand':self.bank_in_hand,
 			'today_collection':self.total_paid,
 			'today_expenses':self.total_expenses,
+			'yesterday_expenses':self.total_yesterday_expenses,
 			'today_sales':self.total_sales,
 			'total_supplier_payment': self.total_payments,
 			'account_receivable':self.acc_receivable

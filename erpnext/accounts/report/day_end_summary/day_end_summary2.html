@@ -121,6 +121,44 @@
                     </tr>
                 </tfoot>
             </table>
+            <table class="table table-bordered table-sm">
+                <thead class="thead-light">
+                    <tr>
+                        <th colspan="3" class="text-center">{{ _("Yesterday Expense ") }}</th>
+                    </tr>
+                    <tr>
+                        <th>{{ ("Head") }}</th>
+                        <th>{{ _("Detail") }}</th>
+                        <th>{{ _("Amount") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data if row["yesterday_account"] %}
+                        <tr>
+                            <td class="large-font">{{ row["yesterday_account"].replace(" - AT", "") }}</td>
+                            <td class="large-font">
+                                {% if row["y_party"] %}
+                                    {{ row["y_party"] }}
+                                    {% if row["y_remarks"] %}
+                                        : {{ row["y_remarks"] }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="text-right large-font">
+								{{  row['yesterday_expense_amount'] }}
+							</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="table-primary font-weight-bold">
+                        <td colspan="2">{{ _("Total") }}</td>
+                        <td class="text-right large-font">
+                            {{ data[-1].totals.yesterday_expenses  }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 
