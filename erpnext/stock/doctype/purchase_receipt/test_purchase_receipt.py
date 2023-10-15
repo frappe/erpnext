@@ -2093,7 +2093,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		return_pr.reload()
 		self.assertEqual(return_pr.status, "Completed")
 
-<<<<<<< HEAD
 	def test_valuation_rate_in_return_purchase_receipt_for_moving_average(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.stock_ledger import get_previous_sle
@@ -2147,7 +2146,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		# Test - 2: Valuation Rate should be equal to Previous SLE Valuation Rate
 		self.assertEqual(flt(sle.valuation_rate, 2), flt(previous_sle_valuation_rate, 2))
-=======
+
 	def test_purchase_return_with_zero_rate(self):
 		company = "_Test Company with perpetual inventory"
 
@@ -2203,9 +2202,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# Test - 3: SLE Stock Value Difference should be equal to Debit or Credit of GL Entries.
 		for entry in gl_entries:
 			self.assertEqual(abs(entry.debit + entry.credit), abs(sl_entries[0].stock_value_difference))
-
-		self.assertIsNotNone(get_gl_entries(pr_return.doctype, pr_return.name))
->>>>>>> 253d4782c6 (test: add test case for PR return with zero rate)
 
 
 def prepare_data_for_internal_transfer():
