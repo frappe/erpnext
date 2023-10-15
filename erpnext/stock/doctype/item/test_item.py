@@ -163,7 +163,7 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item With Item Tax Template",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 1",
@@ -178,7 +178,7 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 1",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 2",
@@ -193,7 +193,7 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 2",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 			{
 				"item_code": "_Test Item Override Group Item Tax Template",
@@ -208,12 +208,12 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item Override Group Item Tax Template",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 		]
 
 		expected_item_tax_map = {
-			None: {},
+			"": {},
 			"_Test Account Excise Duty @ 10 - _TC": {"_Test Account Excise Duty - _TC": 10},
 			"_Test Account Excise Duty @ 12 - _TC": {"_Test Account Excise Duty - _TC": 12},
 			"_Test Account Excise Duty @ 15 - _TC": {"_Test Account Excise Duty - _TC": 15},
