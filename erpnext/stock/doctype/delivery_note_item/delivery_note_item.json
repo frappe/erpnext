@@ -869,11 +869,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-07-25 11:58:28.101919",
-=======
  "modified": "2023-10-16 16:18:18.013379",
->>>>>>> 5b4528e614 (perf: index `dn_detail` in `Delivery Note Item`)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
