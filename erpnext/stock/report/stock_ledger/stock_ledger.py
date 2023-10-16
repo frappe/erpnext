@@ -20,18 +20,16 @@ from erpnext.stock.utils import (
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	if filters.get("include_uom") and filters.get("type") != "Default UOM":
-		frappe.throw(str("Cannot select filters <b> Include UOM </b> and <b>Select UOM</b> together!"))
+		frappe.throw(
+			_(
+				f"Cannot select filters {frappe.bold ('Include UOM')} and {frappe.bold('Select UOM')} together!"
+			)
+		)
 	include_uom = filters.get("include_uom")
-	if filters.get("type") == "Purchase UOM":
-		type = "Purchase UOM"
-	elif filters.get("type") == "Sales UOM":
-		type = "Sales UOM"
-	else:
-		type = ""
 	columns = get_columns(filters)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
-	item_details = get_item_details(items, sl_entries, include_uom, type)
+	item_details = get_item_details(items, sl_entries, include_uom, filters)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
@@ -361,7 +359,7 @@ def get_items(filters):
 	return items
 
 
-def get_item_details(items, sl_entries, include_uom, type):
+def get_item_details(items, sl_entries, include_uom, filters):
 	item_details = {}
 	if not items:
 		items = list(set(d.item_code for d in sl_entries))
@@ -370,34 +368,26 @@ def get_item_details(items, sl_entries, include_uom, type):
 		return item_details
 
 	item = frappe.qb.DocType("Item")
+	ucd = frappe.qb.DocType("UOM Conversion Detail")
 	query = (
 		frappe.qb.from_(item)
 		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.select(ucd.conversion_factor)
 		.where(item.name.isin(items))
 	)
-
-	ucd = frappe.qb.DocType("UOM Conversion Detail")
 	if include_uom:
-		query = (
-			query.left_join(ucd)
-			.on((ucd.parent == item.name) & (ucd.uom == include_uom))
-			.select(ucd.conversion_factor)
-		)
-	if type == "Sales UOM":
+		query = query.left_join(ucd).on((ucd.parent == item.name) & (ucd.uom == include_uom))
+	if filters.get("type") == "Sales UOM":
 		query = (
 			query.left_join(ucd)
 			.on((ucd.parent == item.name) & (ucd.uom == item.sales_uom))
-			.select(ucd.conversion_factor)
-			.as_("sales_uom_con")
 			.select(ucd.uom)
 			.as_("sales_uom")
 		)
-	elif type == "Purchase UOM":
+	elif filters.get("type") == "Purchase UOM":
 		query = (
 			query.left_join(ucd)
 			.on((ucd.parent == item.name) & (ucd.uom == item.purchase_uom))
-			.select(ucd.conversion_factor)
-			.as_("purchase_uom_con")
 			.select(ucd.uom)
 			.as_("purchase_uom")
 		)

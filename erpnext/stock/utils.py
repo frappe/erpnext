@@ -462,7 +462,9 @@ def update_included_uom_in_report(
 				else:
 					new_value = flt(value) / conversion_factors[row_idx]
 			if type_conversion_factors:
-				new_value = flt(value) / (type_conversion_factors[0][0] if type_conversion_factors[0][0] else 1)
+				new_value = flt(value) / (
+					type_conversion_factors[0][0] if type_conversion_factors[0][0] else 1
+				)
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
 			elif include_uom:
