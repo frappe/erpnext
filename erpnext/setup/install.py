@@ -33,6 +33,7 @@ def after_install():
 	add_standard_navbar_items()
 	add_app_name()
 	add_non_standard_user_types()
+	update_roles()
 	frappe.db.commit()
 
 
@@ -235,6 +236,12 @@ def create_custom_role(data):
 		frappe.get_doc(
 			{"doctype": "Role", "role_name": data.get("role"), "desk_access": 1, "is_custom": 1}
 		).insert(ignore_permissions=True)
+
+
+def update_roles():
+	website_user_roles = ("Customer", "Supplier")
+	for role in website_user_roles:
+		frappe.db.set_value("Role", role, "desk_access", 0)
 
 
 def create_user_type(user_type, data):
