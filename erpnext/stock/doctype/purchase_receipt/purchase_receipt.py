@@ -419,7 +419,12 @@ class PurchaseReceipt(BuyingController):
 						credit_amount = outgoing_amount
 
 					if credit_amount:
-						account = warehouse_account[d.from_warehouse]["account"] if d.from_warehouse else stock_rbnb
+						if d.from_warehouse:
+							account = warehouse_account[d.from_warehouse]["account"]
+						elif stock_rbnb:
+							account = stock_rbnb
+						else:
+							account = self.get_company_default("stock_received_but_not_billed")
 
 						self.add_gl_entry(
 							gl_entries=gl_entries,
