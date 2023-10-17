@@ -339,5 +339,6 @@ erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
 erpnext.patches.v14_0.update_invoicing_period_in_subscription
 execute:frappe.delete_doc("Page", "welcome-to-erpnext")
 erpnext.patches.v15_0.delete_payment_gateway_doctypes
+erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
