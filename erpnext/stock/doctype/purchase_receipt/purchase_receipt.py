@@ -351,7 +351,7 @@ class PurchaseReceipt(BuyingController):
 		)
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
-		def make_item_asset_inward_entries(item):
+		def make_item_asset_inward_entries(item, stock_value_diff):
 			if d.is_fixed_asset:
 				stock_asset_account_name = (
 					get_asset_category_account(
@@ -596,7 +596,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					outgoing_amount = d.base_net_amount + d.item_tax_amount
-					make_item_asset_inward_entries(d)
+					make_item_asset_inward_entries(d, stock_value_diff)
 					make_stock_received_but_not_billed_entry(d, outgoing_amount)
 					make_landed_cost_gl_entries(d)
 					make_rate_difference_entry(d)
