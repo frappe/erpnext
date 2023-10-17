@@ -143,6 +143,7 @@ def get_party_group(party_type):
 		"Customer": "customer_group",
 		"Supplier": "supplier_group",
 		"Sales Partner": "partner_type",
+		"Lead": "status",
 	}
 
 	return group[party_type]
