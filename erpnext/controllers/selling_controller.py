@@ -4,8 +4,12 @@
 
 import frappe
 from frappe import _, bold, throw
+<<<<<<< HEAD
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime
+=======
+from frappe.utils import cint, flt, get_link_to_form, nowtime
+>>>>>>> 7b9cedebf6 (fix: Ignore addr permission in internal code)
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -582,6 +586,12 @@ class SellingController(StockController):
 				)
 
 	def set_customer_address(self):
+		try:
+			from frappe.contacts.doctype.address.address import render_address
+		except ImportError:
+			# Older frappe versions where this function is not available
+			from frappe.contacts.doctype.address.address import get_address_display as render_address
+
 		address_dict = {
 			"customer_address": "address_display",
 			"shipping_address_name": "shipping_address",
@@ -591,7 +601,8 @@ class SellingController(StockController):
 
 		for address_field, address_display_field in address_dict.items():
 			if self.get(address_field):
-				self.set(address_display_field, get_address_display(self.get(address_field)))
+				address = frappe.call(render_address, self.get(address_field), ignore_permissions=True)
+				self.set(address_display_field, address)
 
 	def validate_for_duplicate_items(self):
 		check_list, chk_dupl_itm = [], []
