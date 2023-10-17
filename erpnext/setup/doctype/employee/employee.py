@@ -83,6 +83,8 @@ class Employee(NestedSet):
 
 	def update_user_permissions(self):
 		if not self.create_user_permission:
+			remove_user_permission("Employee", self.name, self.user_id)
+			remove_user_permission("Company", self.company, self.user_id)
 			return
 		if not has_permission("User Permission", ptype="write", raise_exception=False):
 			return
