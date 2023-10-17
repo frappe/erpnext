@@ -366,7 +366,7 @@ class PurchaseReceipt(BuyingController):
 				)
 
 				stock_value_diff = flt(item.net_amount) + flt(item.item_tax_amount / self.conversion_rate)
-			elif flt(item.valuation_rate) and flt(item.qty):
+			elif (flt(item.valuation_rate) or self.is_return) and flt(item.qty):
 				# If PR is sub-contracted and fg item rate is zero
 				# in that case if account for source and target warehouse are same,
 				# then GL entries should not be posted
