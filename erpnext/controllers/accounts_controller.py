@@ -617,6 +617,7 @@ class AccountsController(TransactionBase):
 
 			self.pricing_rules = []
 
+			selected_serial_nos_map = {}
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -628,6 +629,7 @@ class AccountsController(TransactionBase):
 					args["ignore_pricing_rule"] = (
 						self.ignore_pricing_rule if hasattr(self, "ignore_pricing_rule") else 0
 					)
+					args["ignore_serial_nos"] = selected_serial_nos_map.get(item.get("item_code"))
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
@@ -684,6 +686,11 @@ class AccountsController(TransactionBase):
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
 						self.set_pricing_rule_details(item, ret)
+
+					if ret.get("serial_no"):
+						selected_serial_nos_map.setdefault(item.get("item_code"), []).extend(
+							ret.get("serial_no").split("\n")
+						)
 				else:
 					# Transactions line item without item code
 
