@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -1283,6 +1283,33 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(return_dn.packed_items[0].batch_no, dn.packed_items[0].batch_no)
 		self.assertEqual(return_dn.packed_items[1].serial_no, dn.packed_items[1].serial_no)
+
+	@change_settings("Stock Settings", {"automatically_set_serial_nos_based_on_fifo": 1})
+	def test_delivery_note_for_repetitive_serial_item(self):
+		# Step - 1: Create Serial Item
+		item, warehouse = (
+			make_item(
+				properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TEST-SERIAL-.###"}
+			).name,
+			"_Test Warehouse - _TC",
+		)
+
+		# Step - 2: Inward Stock
+		make_stock_entry(item_code=item, target=warehouse, qty=5)
+
+		# Step - 3: Create Delivery Note with repetitive Serial Item
+		dn = create_delivery_note(item_code=item, warehouse=warehouse, qty=2, do_not_save=True)
+		dn.append("items", dn.items[0].as_dict())
+		dn.items[1].qty = 3
+		dn.save()
+		dn.submit()
+
+		# Test - 1: Serial Nos should be different for each line item
+		serial_nos = []
+		for item in dn.items:
+			for serial_no in item.serial_no.split("\n"):
+				self.assertNotIn(serial_no, serial_nos)
+				serial_nos.append(serial_no)
 
 	def tearDown(self):
 		frappe.db.rollback()
