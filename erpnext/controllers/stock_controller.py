@@ -73,11 +73,6 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus == 1:
-			gl_entries = []
-			gl_entries = self.get_asset_gl_entry(gl_entries)
-			make_gl_entries(gl_entries, from_repost=from_repost)
-
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
