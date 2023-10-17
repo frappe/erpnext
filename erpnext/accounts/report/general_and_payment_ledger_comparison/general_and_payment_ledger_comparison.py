@@ -133,15 +133,17 @@ class General_Payment_Ledger_Comparison(object):
 			self.gle_balances = set(val.gle) | self.gle_balances
 			self.ple_balances = set(val.ple) | self.ple_balances
 
-		self.diff1 = self.gle_balances.difference(self.ple_balances)
-		self.diff2 = self.ple_balances.difference(self.gle_balances)
+		self.variation_in_payment_ledger = self.gle_balances.difference(self.ple_balances)
+		self.variation_in_general_ledger = self.ple_balances.difference(self.gle_balances)
 		self.diff = frappe._dict({})
 
-		for x in self.diff1:
+		for x in self.variation_in_payment_ledger:
 			self.diff[(x[0], x[1], x[2], x[3])] = frappe._dict({"gl_balance": x[4]})
 
-		for x in self.diff2:
-			self.diff[(x[0], x[1], x[2], x[3])].update(frappe._dict({"pl_balance": x[4]}))
+		for x in self.variation_in_general_ledger:
+			self.diff.setdefault((x[0], x[1], x[2], x[3]), frappe._dict({"gl_balance": 0.0})).update(
+				frappe._dict({"pl_balance": x[4]})
+			)
 
 	def generate_data(self):
 		self.data = []

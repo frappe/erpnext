@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
-from frappe.tests.utils import change_settings
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 import erpnext
@@ -45,13 +45,17 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
 
 
-class TestSalesInvoice(unittest.TestCase):
+class TestSalesInvoice(FrappeTestCase):
 	def setUp(self):
 		from erpnext.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import create_items
 
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -179,6 +183,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
 		unlink_payment_on_cancel_of_invoice()
 
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_payment_entry_unlink_against_standalone_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -1300,6 +1305,7 @@ class TestSalesInvoice(unittest.TestCase):
 		dn.submit()
 		return dn
 
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
@@ -2775,6 +2781,13 @@ class TestSalesInvoice(unittest.TestCase):
 			company="_Test Company",
 		)
 
+		tds_payable_account = create_account(
+			account_name="TDS Payable",
+			account_type="Tax",
+			parent_account="Duties and Taxes - _TC",
+			company="_Test Company",
+		)
+
 		si = create_sales_invoice(parent_cost_center="Main - _TC", do_not_save=1)
 		si.apply_discount_on = "Grand Total"
 		si.additional_discount_account = additional_discount_account
@@ -3073,8 +3086,8 @@ class TestSalesInvoice(unittest.TestCase):
 			si.commission_rate = commission_rate
 			self.assertRaises(frappe.ValidationError, si.save)
 
+	@change_settings("Accounts Settings", {"acc_frozen_upto": add_days(getdate(), 1)})
 	def test_sales_invoice_submission_post_account_freezing_date(self):
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", add_days(getdate(), 1))
 		si = create_sales_invoice(do_not_save=True)
 		si.posting_date = add_days(getdate(), 1)
 		si.save()
@@ -3082,8 +3095,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, si.submit)
 		si.posting_date = getdate()
 		si.submit()
-
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def test_over_billing_case_against_delivery_note(self):
 		"""
@@ -3113,17 +3124,19 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", over_billing_allowance)
 
+	@change_settings(
+		"Accounts Settings",
+		{
+			"book_deferred_entries_via_journal_entry": 1,
+			"submit_journal_entries": 1,
+		},
+	)
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC",
 			company="_Test Company",
 		)
-
-		acc_settings = frappe.get_single("Accounts Settings")
-		acc_settings.book_deferred_entries_via_journal_entry = 1
-		acc_settings.submit_journal_entries = 1
-		acc_settings.save()
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_expense = 1
@@ -3189,13 +3202,6 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.credit)
 			self.assertEqual(expected_gle[i][2], gle.debit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
-
-		acc_settings = frappe.get_single("Accounts Settings")
-		acc_settings.book_deferred_entries_via_journal_entry = 0
-		acc_settings.submit_journal_entries = 0
-		acc_settings.save()
-
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def test_standalone_serial_no_return(self):
 		si = create_sales_invoice(
