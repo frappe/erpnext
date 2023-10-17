@@ -313,7 +313,6 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries)
-		# self.get_asset_gl_entry(gl_entries)
 
 		return process_gl_map(gl_entries)
 
@@ -351,34 +350,7 @@ class PurchaseReceipt(BuyingController):
 		)
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
-		def make_item_asset_inward_entries(item, stock_value_diff):
-			if d.is_fixed_asset:
-				stock_asset_account_name = (
-					get_asset_category_account(
-						asset_category=item.asset_category,
-						fieldname="capital_work_in_progress_account",
-						company=self.company,
-					)
-					if is_cwip_accounting_enabled(d.asset_category)
-					else get_asset_category_account(
-						asset_category=item.asset_category, fieldname="fixed_asset_account", company=self.company
-					)
-				)
-
-				stock_value_diff = flt(item.net_amount) + flt(item.item_tax_amount / self.conversion_rate)
-			elif (flt(item.valuation_rate) or self.is_return) and flt(item.qty):
-				# If PR is sub-contracted and fg item rate is zero
-				# in that case if account for source and target warehouse are same,
-				# then GL entries should not be posted
-				if (
-					flt(stock_value_diff) == flt(d.rm_supp_cost)
-					and warehouse_account.get(self.supplier_warehouse)
-					and stock_asset_account_name == supplier_warehouse_account
-				):
-					return
-
-				stock_asset_account_name = warehouse_account[item.warehouse]["account"]
-
+		def make_item_asset_inward_entries(item, stock_value_diff, stock_asset_account_name):
 			account_currency = get_account_currency(stock_asset_account_name)
 			self.add_gl_entry(
 				gl_entries=gl_entries,
@@ -402,20 +374,7 @@ class PurchaseReceipt(BuyingController):
 			)
 
 			if self.is_internal_transfer() and item.valuation_rate:
-				outgoing_amount = abs(
-					frappe.db.get_value(
-						"Stock Ledger Entry",
-						{
-							"voucher_type": "Purchase Receipt",
-							"voucher_no": self.name,
-							"voucher_detail_no": item.name,
-							"warehouse": item.from_warehouse,
-							"is_cancelled": 0,
-						},
-						"stock_value_difference",
-					)
-				)
-				credit_amount = outgoing_amount
+				credit_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse) or 0)
 
 			if credit_amount:
 				account = (
@@ -583,20 +542,37 @@ class PurchaseReceipt(BuyingController):
 				)
 
 				if warehouse_account.get(d.warehouse):
-					stock_value_diff = frappe.db.get_value(
-						"Stock Ledger Entry",
-						{
-							"voucher_type": "Purchase Receipt",
-							"voucher_no": self.name,
-							"voucher_detail_no": d.name,
-							"warehouse": d.warehouse,
-							"is_cancelled": 0,
-						},
-						"stock_value_difference",
-					)
-
+					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
 					outgoing_amount = d.base_net_amount + d.item_tax_amount
-					make_item_asset_inward_entries(d, stock_value_diff)
+
+					if d.is_fixed_asset:
+						stock_asset_account_name = (
+							get_asset_category_account(
+								asset_category=d.asset_category,
+								fieldname="capital_work_in_progress_account",
+								company=self.company,
+							)
+							if is_cwip_accounting_enabled(d.asset_category)
+							else get_asset_category_account(
+								asset_category=d.asset_category, fieldname="fixed_asset_account", company=self.company
+							)
+						)
+
+						stock_value_diff = flt(d.net_amount) + flt(d.item_tax_amount / self.conversion_rate)
+					elif (flt(d.valuation_rate) or self.is_return) and flt(d.qty):
+						stock_asset_account_name = warehouse_account[d.warehouse]["account"]
+
+					# If PR is sub-contracted and fg item rate is zero
+					# in that case if account for source and target warehouse are same,
+					# then GL entries should not be posted
+					if (
+						flt(stock_value_diff) == flt(d.rm_supp_cost)
+						and warehouse_account.get(self.supplier_warehouse)
+						and stock_asset_account_name == supplier_warehouse_account
+					):
+						continue
+
+					make_item_asset_inward_entries(d, stock_value_diff, stock_asset_account_name)
 					make_stock_received_but_not_billed_entry(d, outgoing_amount)
 					make_landed_cost_gl_entries(d)
 					make_rate_difference_entry(d)
@@ -745,18 +721,6 @@ class PurchaseReceipt(BuyingController):
 
 					i += 1
 
-	def get_asset_gl_entry(self, gl_entries):
-		for item in self.get("items"):
-			if item.is_fixed_asset:
-				if is_cwip_accounting_enabled(item.asset_category):
-					self.add_asset_gl_entries(item, gl_entries)
-				if flt(item.landed_cost_voucher_amount):
-					self.add_lcv_gl_entries(item, gl_entries)
-					# update assets gross amount by its valuation rate
-					# valuation rate is total of net rate, raw mat supp cost, tax amount, lcv amount per item
-
-		return gl_entries
-
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all(
 			"Asset", filters={"purchase_receipt": self.name, "item_code": item.item_code}
@@ -788,6 +752,20 @@ class PurchaseReceipt(BuyingController):
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 		self.load_from_db()
+
+
+def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
+	frappe.db.get_value(
+		"Stock Ledger Entry",
+		{
+			"voucher_type": "Purchase Receipt",
+			"voucher_no": voucher_no,
+			"voucher_detail_no": voucher_detail_no,
+			"warehouse": warehouse,
+			"is_cancelled": 0,
+		},
+		"stock_value_difference",
+	)
 
 
 def update_billed_amount_based_on_po(po_details, update_modified=True):
