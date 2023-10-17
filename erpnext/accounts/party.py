@@ -6,11 +6,7 @@ from typing import Optional
 
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.contacts.doctype.address.address import (
-	get_address_display,
-	get_company_address,
-	get_default_address,
-)
+from frappe.contacts.doctype.address.address import get_company_address, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
@@ -133,6 +129,7 @@ def _get_party_details(
 		party_address,
 		company_address,
 		shipping_address,
+		ignore_permissions=ignore_permissions,
 	)
 	set_contact_details(party_details, party, party_type)
 	set_other_values(party_details, party, party_type)
@@ -193,6 +190,8 @@ def set_address_details(
 	party_address=None,
 	company_address=None,
 	shipping_address=None,
+	*,
+	ignore_permissions=False
 ):
 	billing_address_field = (
 		"customer_address" if party_type == "Lead" else party_type.lower() + "_address"
@@ -205,13 +204,17 @@ def set_address_details(
 			get_fetch_values(doctype, billing_address_field, party_details[billing_address_field])
 		)
 	# address display
-	party_details.address_display = get_address_display(party_details[billing_address_field])
+	party_details.address_display = render_address(
+		party_details[billing_address_field], check_permissions=not ignore_permissions
+	)
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
 		party_details.shipping_address_name = shipping_address or get_party_shipping_address(
 			party_type, party.name
 		)
-		party_details.shipping_address = get_address_display(party_details["shipping_address_name"])
+		party_details.shipping_address = render_address(
+			party_details["shipping_address_name"], check_permissions=not ignore_permissions
+		)
 		if doctype:
 			party_details.update(
 				get_fetch_values(doctype, "shipping_address_name", party_details.shipping_address_name)
@@ -229,7 +232,7 @@ def set_address_details(
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
-				shipping_address_display=get_address_display(shipping_address),
+				shipping_address_display=render_address(shipping_address),
 				**get_fetch_values(doctype, "shipping_address", shipping_address)
 			)
 
@@ -238,7 +241,8 @@ def set_address_details(
 			party_details.update(
 				billing_address=party_details.company_address,
 				billing_address_display=(
-					party_details.company_address_display or get_address_display(party_details.company_address)
+					party_details.company_address_display
+					or render_address(party_details.company_address, check_permissions=False)
 				),
 				**get_fetch_values(doctype, "billing_address", party_details.company_address)
 			)
@@ -957,3 +961,13 @@ def add_party_account(party_type, party, company, account):
 		doc.append("accounts", accounts)
 
 		doc.save()
+
+
+def render_address(address, check_permissions=True):
+	try:
+		from frappe.contacts.doctype.address.address import render_address as _render
+	except ImportError:
+		# Older frappe versions where this function is not available
+		from frappe.contacts.doctype.address.address import get_address_display as _render
+
+	return frappe.call(_render, address, check_permissions=check_permissions)
