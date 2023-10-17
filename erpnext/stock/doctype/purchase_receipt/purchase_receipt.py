@@ -346,10 +346,6 @@ class PurchaseReceipt(BuyingController):
 			)
 		)
 
-		supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
-		supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get(
-			"account_currency"
-		)
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		def make_item_asset_inward_entries(item, stock_value_diff, stock_asset_account_name):
@@ -367,22 +363,26 @@ class PurchaseReceipt(BuyingController):
 			)
 
 		def make_stock_received_but_not_billed_entry(item, outgoing_amount):
+			account = (
+				warehouse_account[item.from_warehouse]["account"] if item.from_warehouse else stock_asset_rbnb
+			)
+			account_currency = get_account_currency(account)
+
 			# GL Entry for from warehouse or Stock Received but not billed
 			# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 			credit_amount = (
 				flt(item.base_net_amount, item.precision("base_net_amount"))
-				if credit_currency == self.company_currency
+				if account_currency == self.company_currency
 				else flt(item.net_amount, item.precision("net_amount"))
 			)
 
 			if self.is_internal_transfer() and item.valuation_rate:
-				credit_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse) or 0)
+				outgoing_amount = abs(
+					get_stock_value_difference(self.name, item.name, item.from_warehouse) or 0
+				)
+				credit_amount = outgoing_amount
 
 			if credit_amount:
-				account = (
-					warehouse_account[item.from_warehouse]["account"] if item.from_warehouse else stock_asset_rbnb
-				)
-
 				self.add_gl_entry(
 					gl_entries=gl_entries,
 					account=account,
@@ -392,7 +392,7 @@ class PurchaseReceipt(BuyingController):
 					remarks=remarks,
 					against_account=stock_asset_account_name,
 					debit_in_account_currency=-1 * credit_amount,
-					account_currency=credit_currency,
+					account_currency=account_currency,
 					item=item,
 				)
 
@@ -417,7 +417,7 @@ class PurchaseReceipt(BuyingController):
 							remarks=remarks,
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
-							account_currency=credit_currency,
+							account_currency=account_currency,
 							item=item,
 						)
 
@@ -430,7 +430,7 @@ class PurchaseReceipt(BuyingController):
 							remarks=remarks,
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
-							account_currency=credit_currency,
+							account_currency=account_currency,
 							item=item,
 						)
 
@@ -521,7 +521,7 @@ class PurchaseReceipt(BuyingController):
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", self.company, "cost_center"
 				)
-
+				account_currency = get_account_currency(loss_account)
 				self.add_gl_entry(
 					gl_entries=gl_entries,
 					account=loss_account,
@@ -530,22 +530,31 @@ class PurchaseReceipt(BuyingController):
 					credit=0.0,
 					remarks=remarks,
 					against_account=stock_asset_account_name,
-					account_currency=credit_currency,
+					account_currency=account_currency,
 					project=item.project,
 					item=item,
 				)
 
 		for d in self.get("items"):
 			if d.item_code in stock_items or d.is_fixed_asset:
-				credit_currency = (
-					get_account_currency(warehouse_account[d.from_warehouse]["account"])
-					if d.from_warehouse
-					else get_account_currency(stock_asset_rbnb)
-				)
-
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
 					outgoing_amount = d.base_net_amount + d.item_tax_amount
+
+					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
+					supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get(
+						"account_currency"
+					)
+
+					# If PR is sub-contracted and fg item rate is zero
+					# in that case if account for source and target warehouse are same,
+					# then GL entries should not be posted
+					if (
+						flt(stock_value_diff) == flt(d.rm_supp_cost)
+						and warehouse_account.get(self.supplier_warehouse)
+						and stock_asset_account_name == supplier_warehouse_account
+					):
+						continue
 
 					if d.is_fixed_asset:
 						stock_asset_account_name = (
@@ -563,16 +572,6 @@ class PurchaseReceipt(BuyingController):
 						stock_value_diff = flt(d.net_amount) + flt(d.item_tax_amount / self.conversion_rate)
 					elif (flt(d.valuation_rate) or self.is_return) and flt(d.qty):
 						stock_asset_account_name = warehouse_account[d.warehouse]["account"]
-
-					# If PR is sub-contracted and fg item rate is zero
-					# in that case if account for source and target warehouse are same,
-					# then GL entries should not be posted
-					if (
-						flt(stock_value_diff) == flt(d.rm_supp_cost)
-						and warehouse_account.get(self.supplier_warehouse)
-						and stock_asset_account_name == supplier_warehouse_account
-					):
-						continue
 
 					make_item_asset_inward_entries(d, stock_value_diff, stock_asset_account_name)
 					make_stock_received_but_not_billed_entry(d, outgoing_amount)
