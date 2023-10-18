@@ -879,6 +879,7 @@ def make_installation_note(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
+		target.stock_qty = obj.stock_qty
 
 	doclist = get_mapped_doc(
 		"Delivery Note",
