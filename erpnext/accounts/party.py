@@ -4,12 +4,16 @@
 
 import frappe
 from frappe import _, msgprint, scrub
+<<<<<<< HEAD
 from frappe.contacts.doctype.address.address import (
 	get_address_display,
 	get_company_address,
 	get_default_address,
 )
 from frappe.contacts.doctype.contact.contact import get_contact_details
+=======
+from frappe.contacts.doctype.address.address import get_company_address, get_default_address
+>>>>>>> 2851a41310 (fix: Issues related to RFQ and Supplier Quotation on Portal (#37565))
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (
@@ -277,7 +281,21 @@ def set_contact_details(party_details, party, party_type):
 			}
 		)
 	else:
-		party_details.update(get_contact_details(party_details.contact_person))
+		fields = [
+			"name as contact_person",
+			"full_name as contact_display",
+			"email_id as contact_email",
+			"mobile_no as contact_mobile",
+			"phone as contact_phone",
+			"designation as contact_designation",
+			"department as contact_department",
+		]
+
+		contact_details = frappe.db.get_value(
+			"Contact", party_details.contact_person, fields, as_dict=True
+		)
+
+		party_details.update(contact_details)
 
 
 def set_other_values(party_details, party, party_type):

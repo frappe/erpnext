@@ -73,6 +73,7 @@ rfq = Class.extend({
 
 	submit_rfq: function(){
 		$('.btn-sm').click(function(){
+			debugger
 			frappe.freeze();
 			frappe.call({
 				type: "POST",
@@ -82,6 +83,7 @@ rfq = Class.extend({
 				},
 				btn: this,
 				callback: function(r){
+					debugger
 					frappe.unfreeze();
 					if(r.message){
 						$('.btn-sm').hide()

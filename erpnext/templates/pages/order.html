@@ -1,5 +1,5 @@
 {% extends "templates/web.html" %}
-{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
+{% from "erpnext/templates/includes/macros.html" import product_image %}
 
 {% block breadcrumbs %}
 	{% include "templates/includes/breadcrumbs.html" %}
@@ -12,6 +12,7 @@
 {% endblock %}
 
 {% block header_actions %}
+<<<<<<< HEAD
 	<div class="dropdown">
 		<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 			<span class="font-md">{{ _('Actions') }}</span>
@@ -26,6 +27,28 @@
 				{{ _("Print") }}
 			</a>
 		</ul>
+=======
+	<div class="row">
+		<div class="dropdown">
+			<button class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+				<span class="font-md">{{ _('Actions') }}</span>
+				<b class="caret"></b>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-right" role="menu">
+				{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
+					<a class="dropdown-item"
+						href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
+						data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}
+					</a>
+				{% endif %}
+				<a class="dropdown-item"
+					href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank"
+					rel="noopener noreferrer">
+					{{ _("Print") }}
+				</a>
+			</ul>
+		</div>
+>>>>>>> 2851a41310 (fix: Issues related to RFQ and Supplier Quotation on Portal (#37565))
 	</div>
 {% endblock %}
 
@@ -106,6 +129,7 @@
 		</div>
 	</div>
 
+<<<<<<< HEAD
 	{% if enabled_checkout and ((doc.doctype=="Sales Order" and doc.per_billed <= 0)
 		or (doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0)) %}
 		<div class="panel panel-default">
@@ -154,6 +178,8 @@
 	{% endif %}
 
 
+=======
+>>>>>>> 2851a41310 (fix: Issues related to RFQ and Supplier Quotation on Portal (#37565))
 	{% if attachments %}
 		<div class="order-item-table">
 			<div class="row order-items order-item-header text-muted">
@@ -181,6 +207,7 @@
 	{% endif %}
 {% endblock %}
 
+<<<<<<< HEAD
 {% block script %}
 	<script> {% include "templates/pages/order.js" %} </script>
 	<script>
@@ -193,3 +220,29 @@
 		}
 	</script>
 {% endblock %}
+=======
+{% macro item_name_and_description(d) %}
+	<div class="row item_name_and_description">
+		<div class="col-xs-4 col-sm-2 order-image-col">
+			<div class="order-image h-100">
+				{% if d.thumbnail or d.image %}
+					{{ product_image(d.thumbnail or d.image, no_border=True) }}
+				{% else %}
+					<div class="no-image-cart-item" style="min-height: 100px;">
+						{{ frappe.utils.get_abbr(d.item_name) or "NA" }}
+					</div>
+				{% endif %}
+			</div>
+		</div>
+		<div class="col-xs-8 col-sm-10">
+			{{ d.item_code }}
+			<div class="text-muted small item-description">
+				{{ html2text(d.description) | truncate(140) }}
+			</div>
+			<span class="text-muted mt-2 d-l-n order-qty">
+				{{ _("Qty ") }}({{ d.get_formatted("qty") }})
+			</span>
+		</div>
+	</div>
+{% endmacro %}
+>>>>>>> 2851a41310 (fix: Issues related to RFQ and Supplier Quotation on Portal (#37565))
