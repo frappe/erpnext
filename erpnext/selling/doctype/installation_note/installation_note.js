@@ -45,8 +45,52 @@ frappe.ui.form.on('Installation Note', {
 	},
 	contact_person: function(frm) {
 		erpnext.utils.get_contact_details(frm);
+	},
+	validate: function(frm) {
+		$.each(frm.doc.items || [], function(i, d) {
+			if (d.uom && d.item_code) {
+				getUOMDetails(d.item_code, d.uom, d.qty, function(transfer_qty) {
+					frappe.model.set_value(d.doctype, d.name, 'stock_qty', transfer_qty);
+				});
+			}
+		});
 	}
 });
+
+frappe.ui.form.on('Installation Note Item', {
+	uom: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if (d.uom && d.item_code) {
+			getUOMDetails(d.item_code, d.uom, d.qty, function(transfer_qty) {
+				frappe.model.set_value(cdt, cdn, 'stock_qty', transfer_qty);
+			});
+		}
+	},
+	qty: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if (d.uom && d.item_code) {
+			getUOMDetails(d.item_code, d.uom, d.qty, function(transfer_qty) {
+				frappe.model.set_value(cdt, cdn, 'stock_qty', transfer_qty);
+			});
+		}
+	}
+});
+
+function getUOMDetails(item_code, uom, qty, callback) {
+	frappe.call({
+		method: "erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details",
+		args: {
+			item_code: item_code,
+			uom: uom,
+			qty: qty
+		},
+		callback: function(r) {
+			if (r.message) {
+				callback(r.message.transfer_qty);
+			}
+		}
+	});
+}
 
 frappe.provide("erpnext.selling");
 
