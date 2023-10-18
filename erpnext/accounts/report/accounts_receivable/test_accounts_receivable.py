@@ -1,6 +1,7 @@
 import unittest
 
 import frappe
+from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, today
 
@@ -22,29 +23,6 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
-
-	def create_usd_account(self):
-		name = "Debtors USD"
-		exists = frappe.db.get_list(
-			"Account", filters={"company": "_Test Company 2", "account_name": "Debtors USD"}
-		)
-		if exists:
-			self.debtors_usd = exists[0].name
-		else:
-			debtors = frappe.get_doc(
-				"Account",
-				frappe.db.get_list(
-					"Account", filters={"company": "_Test Company 2", "account_name": "Debtors"}
-				)[0].name,
-			)
-
-			debtors_usd = frappe.new_doc("Account")
-			debtors_usd.company = debtors.company
-			debtors_usd.account_name = "Debtors USD"
-			debtors_usd.account_currency = "USD"
-			debtors_usd.parent_account = debtors.parent_account
-			debtors_usd.account_type = debtors.account_type
-			self.debtors_usd = debtors_usd.save().name
 
 	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False):
 		frappe.set_user("Administrator")
@@ -643,3 +621,94 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(report[1]), 2)
 		output_for = set([x.party for x in report[1]])
 		self.assertEqual(output_for, expected_output)
+
+	def test_report_output_if_party_is_missing(self):
+		acc_name = "Additional Debtors"
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": acc_name, "company": self.company}
+		):
+			additional_receivable_acc = frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": acc_name,
+					"parent_account": "Accounts Receivable - " + self.company_abbr,
+					"company": self.company,
+					"account_type": "Receivable",
+				}
+			).save()
+			self.debtors2 = additional_receivable_acc.name
+
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"debit_in_account_currency": 150,
+				"credit_in_account_currency": 0,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debtors2,
+				"party_type": "Customer",
+				"party": self.customer,
+				"debit_in_account_currency": 200,
+				"credit_in_account_currency": 0,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.cash,
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": 350,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.save().submit()
+
+		# manually remove party from Payment Ledger
+		ple = qb.DocType("Payment Ledger Entry")
+		qb.update(ple).set(ple.party, None).where(ple.voucher_no == je.name).run()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+
+		report_ouput = execute(filters)[1]
+		expected_data = [
+			[self.debtors2, je.doctype, je.name, "Customer", self.customer, 200.0, 0.0, 0.0, 200.0],
+			[self.debit_to, je.doctype, je.name, "Customer", self.customer, 150.0, 0.0, 0.0, 150.0],
+		]
+		self.assertEqual(len(report_ouput), 2)
+		# fetch only required fields
+		report_output = [
+			[
+				x.party_account,
+				x.voucher_type,
+				x.voucher_no,
+				"Customer",
+				self.customer,
+				x.invoiced,
+				x.paid,
+				x.credit_note,
+				x.outstanding,
+			]
+			for x in report_ouput
+		]
+		# use account name to sort
+		# post sorting output should be [[Additional Debtors, ...], [Debtors, ...]]
+		report_output = sorted(report_output, key=lambda x: x[0])
+		self.assertEqual(expected_data, report_output)
