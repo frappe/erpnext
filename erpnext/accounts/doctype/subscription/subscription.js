@@ -18,6 +18,14 @@ frappe.ui.form.on('Subscription', {
 				}
 			};
 		});
+
+		frm.set_query('sales_tax_template', function () {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function (frm) {
