@@ -7,9 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "serial_and_batch_bundle",
   "serial_no",
+  "section_break_do9t5",
   "qty",
+  "stock_uom",
+  "column_break_pqf37",
+  "uom",
+  "conversion_factor",
+  "stock_qty",
+  "section_break_en5le",
   "description",
   "prevdoc_detail_docname",
   "prevdoc_docname",
@@ -30,11 +36,10 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
+   "in_list_view": 1,
    "label": "Serial No",
-   "no_copy": 1,
    "oldfieldname": "serial_no",
    "oldfieldtype": "Small Text",
-   "print_hide": 1,
    "print_width": "180px",
    "width": "180px"
   },
@@ -101,18 +106,47 @@
    "width": "150px"
   },
   {
-   "fieldname": "serial_and_batch_bundle",
+   "fieldname": "section_break_do9t5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_uom",
    "fieldtype": "Link",
-   "label": "Serial and Batch Bundle",
-   "no_copy": 1,
-   "options": "Serial and Batch Bundle",
-   "print_hide": 1
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pqf37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_en5le",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-12 13:47:08.257955",
+ "modified": "2023-10-18 11:12:15.482335",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Installation Note Item",
