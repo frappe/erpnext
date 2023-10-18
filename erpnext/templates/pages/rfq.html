@@ -1,7 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block header %}
-<h1>{{ doc.name }}</h1>
+<h1 style="margin-top: 10px;">{{ doc.name }}</h1>
 {% endblock %}
 
 {% block script %}
@@ -16,7 +16,7 @@
 {% if doc.items %}
 <button class="btn btn-primary btn-sm"
     type="button">
-    {{ _("Submit") }}</button>
+    {{ _("Make Quotation") }}</button>
 {% endif %}
 {% endblock %}
 
