@@ -225,38 +225,24 @@ def set_address_details(
 	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
 		if shipping_address:
 			party_details.update(
-<<<<<<< HEAD
 				{
 					"shipping_address": shipping_address,
-					"shipping_address_display": get_address_display(shipping_address),
+					"shipping_address_display": render_address(shipping_address),
 					**get_fetch_values(doctype, "shipping_address", shipping_address),
 				}
-=======
-				shipping_address=shipping_address,
-				shipping_address_display=render_address(shipping_address),
-				**get_fetch_values(doctype, "shipping_address", shipping_address)
->>>>>>> f4d74990fe (fix: E-commerce permissions)
 			)
 
 		if party_details.company_address:
 			# billing address
 			party_details.update(
-<<<<<<< HEAD
 				{
 					"billing_address": party_details.company_address,
 					"billing_address_display": (
-						party_details.company_address_display or get_address_display(party_details.company_address)
+						party_details.company_address_display
+						or render_address(party_details.company_address, check_permissions=True)
 					),
 					**get_fetch_values(doctype, "billing_address", party_details.company_address),
 				}
-=======
-				billing_address=party_details.company_address,
-				billing_address_display=(
-					party_details.company_address_display
-					or render_address(party_details.company_address, check_permissions=False)
-				),
-				**get_fetch_values(doctype, "billing_address", party_details.company_address)
->>>>>>> f4d74990fe (fix: E-commerce permissions)
 			)
 
 			# shipping address - if not already set
