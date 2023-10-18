@@ -8,6 +8,7 @@ from frappe.utils import cstr, getdate
 
 from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 class InstallationNote(TransactionBase):
@@ -66,7 +67,14 @@ class InstallationNote(TransactionBase):
 		for d in self.get("items"):
 			self.is_serial_no_added(d.item_code, d.serial_no)
 			if d.serial_no:
-				sr_list = get_valid_serial_nos(d.serial_no, d.qty, d.item_code)
+				sr_list_len = get_serial_nos(d.serial_no)
+				if len(sr_list_len) != round(d.stock_qty):
+					frappe.throw(_("The number of serial numbers for Item {0} does not match the stock quantity").format(d.item_code))
+				must_be_whole_number = frappe.get_value("UOM", d.stock_uom, "must_be_whole_number")
+				if not must_be_whole_number:
+					sr_list = get_valid_serial_nos(d.serial_no, round(d.stock_qty), d.item_code)
+				else:
+					sr_list = get_valid_serial_nos(d.serial_no, d.stock_qty, d.item_code)
 				self.is_serial_no_exist(d.item_code, sr_list)
 
 				prevdoc_s_no = self.get_prevdoc_serial_no(d.prevdoc_detail_docname)
