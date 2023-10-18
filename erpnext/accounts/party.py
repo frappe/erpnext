@@ -35,6 +35,7 @@ from erpnext import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 from erpnext.utilities.regional import temporary_flag
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
 SALES_TRANSACTION_TYPES = {
@@ -152,6 +153,11 @@ def _get_party_details(
 
 	if tax_template:
 		party_details["taxes_and_charges"] = tax_template
+		if party_type=="Supplier":
+			master_doctype='Purchase Taxes and Charges Template'
+		elif party_type=="Customer":
+			master_doctype='Sales Taxes and Charges Template'
+		party_details["taxes"]=get_taxes_and_charges(master_doctype=master_doctype,master_name=tax_template)
 
 	if cint(fetch_payment_terms_template):
 		party_details["payment_terms_template"] = get_payment_terms_template(
