@@ -70,7 +70,8 @@ def get_result(
 			if net_total_map.get(name):
 				if voucher_type == "Journal Entry":
 					# back calcalute total amount from rate and tax_amount
-					total_amount = grand_total = base_total = tax_amount / (rate / 100)
+					if rate:
+						total_amount = grand_total = base_total = tax_amount / (rate / 100)
 				else:
 					total_amount, grand_total, base_total = net_total_map.get(name)
 			else:
@@ -253,27 +254,7 @@ def get_tds_docs(filters):
 		"Tax Withholding Account", {"company": filters.get("company")}, pluck="account"
 	)
 
-	query_filters = {
-		"account": ("in", tds_accounts),
-		"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-		"is_cancelled": 0,
-		"against": ("not in", bank_accounts),
-	}
-
-	party = frappe.get_all(filters.get("party_type"), pluck="name")
-	or_filters.update({"against": ("in", party), "voucher_type": "Journal Entry"})
-
-	if filters.get("party"):
-		del query_filters["account"]
-		del query_filters["against"]
-		or_filters = {"against": filters.get("party"), "party": filters.get("party")}
-
-	tds_docs = frappe.get_all(
-		"GL Entry",
-		filters=query_filters,
-		or_filters=or_filters,
-		fields=["voucher_no", "voucher_type", "against", "party"],
-	)
+	tds_docs = get_tds_docs_query(filters, bank_accounts, tds_accounts).run(as_dict=True)
 
 	for d in tds_docs:
 		if d.voucher_type == "Purchase Invoice":
@@ -307,6 +288,47 @@ def get_tds_docs(filters):
 		journal_entry_party_map,
 		net_total_map,
 	)
+
+
+def get_tds_docs_query(filters, bank_accounts, tds_accounts):
+	if not tds_accounts:
+		frappe.throw(
+			_("No {} Accounts found for this company.".format(frappe.bold("Tax Withholding"))),
+			title="Accounts Missing Error",
+		)
+	gle = frappe.qb.DocType("GL Entry")
+	query = (
+		frappe.qb.from_(gle)
+		.select("voucher_no", "voucher_type", "against", "party")
+		.where((gle.is_cancelled == 0))
+	)
+
+	if filters.get("from_date"):
+		query = query.where(gle.posting_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		query = query.where(gle.posting_date <= filters.get("to_date"))
+
+	if bank_accounts:
+		query = query.where(gle.against.notin(bank_accounts))
+
+	if filters.get("party"):
+		party = [filters.get("party")]
+		query = query.where(
+			((gle.account.isin(tds_accounts) & gle.against.isin(party)))
+			| ((gle.voucher_type == "Journal Entry") & (gle.party == filters.get("party")))
+			| gle.party.isin(party)
+		)
+	else:
+		party = frappe.get_all(filters.get("party_type"), pluck="name")
+		query = query.where(
+			((gle.account.isin(tds_accounts) & gle.against.isin(party)))
+			| (
+				(gle.voucher_type == "Journal Entry")
+				& ((gle.party_type == filters.get("party_type")) | (gle.party_type == ""))
+			)
+			| gle.party.isin(party)
+		)
+	return query
 
 
 def get_journal_entry_party_map(journal_entries):
