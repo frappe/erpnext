@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        container: [1, 2, 3, 4]
+        container: [1, 2]
 
     name: Python Unit Tests
 
@@ -117,7 +117,7 @@ jobs:
           FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
 
       - name: Run Tests
-        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --with-coverage --total-builds 4 --build-number ${{ matrix.container }}'
+        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds 2 --build-number ${{ matrix.container }}'
         env:
           TYPE: server
           CI_BUILD_ID: ${{ github.run_id }}
@@ -126,27 +126,3 @@ jobs:
       - name: Show bench output
         if: ${{ always() }}
         run: cat ~/frappe-bench/bench_start.log || true
-
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-${{ matrix.container }}
-          path: /home/runner/frappe-bench/sites/coverage.xml
-
-  coverage:
-    name: Coverage Wrap Up
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-
-      - name: Upload coverage data
-        uses: codecov/codecov-action@v2
-        with:
-          name: MariaDB
-          fail_ci_if_error: true
-          verbose: true

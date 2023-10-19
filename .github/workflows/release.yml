@@ -2,7 +2,7 @@ name: Generate Semantic Release
 on:
   push:
     branches:
-      - version-13
+      - version-14
 jobs:
   release:
     name: Release
@@ -13,10 +13,12 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 18
+
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save
