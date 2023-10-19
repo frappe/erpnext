@@ -316,21 +316,24 @@ class StockReservationEntry(Document):
 	) -> None:
 		"""Updates total reserved qty in the Pick List."""
 
-		if self.against_pick_list and self.against_pick_list_item:
+		if (
+			self.from_voucher_type == "Pick List" and self.against_pick_list and self.from_voucher_detail_no
+		):
 			sre = frappe.qb.DocType("Stock Reservation Entry")
 			reserved_qty = (
 				frappe.qb.from_(sre)
 				.select(Sum(sre.reserved_qty))
 				.where(
 					(sre.docstatus == 1)
+					& (sre.from_voucher_type == "Pick List")
 					& (sre.against_pick_list == self.against_pick_list)
-					& (sre.against_pick_list_item == self.against_pick_list_item)
+					& (sre.from_voucher_detail_no == self.from_voucher_detail_no)
 				)
 			).run(as_list=True)[0][0] or 0
 
 			frappe.db.set_value(
 				"Pick List Item",
-				self.against_pick_list_item,
+				self.from_voucher_detail_no,
 				reserved_qty_field,
 				reserved_qty,
 				update_modified=update_modified,
@@ -803,7 +806,7 @@ def create_stock_reservation_entries_for_so_items(
 
 			if against_pick_list:
 				so_item.pick_list = item.get("parent")
-				so_item.pick_list_item = item.get("name")
+				so_item.from_voucher_detail_no = item.get("name")
 
 			items.append(so_item)
 
@@ -929,7 +932,7 @@ def create_stock_reservation_entries_for_so_items(
 		if against_pick_list:
 			sre.from_voucher_type = "Pick List"
 			sre.against_pick_list = item.pick_list
-			sre.against_pick_list_item = item.pick_list_item
+			sre.from_voucher_detail_no = item.from_voucher_detail_no
 
 		if item.serial_and_batch_bundle:
 			sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
