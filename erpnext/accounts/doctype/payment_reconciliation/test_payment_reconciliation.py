@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.stock.doctype.item.test_item import create_item
 
 test_dependencies = ["Item"]
@@ -151,6 +152,64 @@ class TestPaymentReconciliation(FrappeTestCase):
 		payment.posting_date = posting_date
 		return payment
 
+	def create_purchase_invoice(
+		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+	):
+		"""
+		Helper function to populate default values in sales invoice
+		"""
+		pinv = make_purchase_invoice(
+			qty=qty,
+			rate=rate,
+			company=self.company,
+			customer=self.supplier,
+			item_code=self.item,
+			item_name=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			parent_cost_center=self.cost_center,
+			update_stock=0,
+			currency="INR",
+			is_pos=0,
+			is_return=0,
+			return_against=None,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=do_not_save,
+			do_not_submit=do_not_submit,
+		)
+		return pinv
+
+	def create_purchase_order(
+		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+	):
+		"""
+		Helper function to populate default values in sales invoice
+		"""
+		pord = create_purchase_order(
+			qty=qty,
+			rate=rate,
+			company=self.company,
+			customer=self.supplier,
+			item_code=self.item,
+			item_name=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			parent_cost_center=self.cost_center,
+			update_stock=0,
+			currency="INR",
+			is_pos=0,
+			is_return=0,
+			return_against=None,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=do_not_save,
+			do_not_submit=do_not_submit,
+		)
+		return pord
+
 	def clear_old_entries(self):
 		doctype_list = [
 			"GL Entry",
@@ -163,13 +222,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
-	def create_payment_reconciliation(self):
+	def create_payment_reconciliation(self, party_is_customer=True):
 		pr = frappe.new_doc("Payment Reconciliation")
 		pr.company = self.company
-		pr.party_type = (
-			self.party_type if hasattr(self, "party_type") and self.party_type else "Customer"
-		)
-		pr.party = self.customer
+		pr.party_type = "Customer" if party_is_customer else "Supplier"
+		pr.party = self.customer if party_is_customer else self.supplier
 		pr.receivable_payable_account = get_party_account(pr.party_type, pr.party, pr.company)
 		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
 		return pr
@@ -931,6 +988,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 			if invoice.invoice_number == pi.name:
 				invoices.append(invoice.as_dict())
 				break
+
 		for payment in pr.payments:
 			if payment.reference_name == pi_return.name:
 				payments.append(payment.as_dict())
@@ -940,6 +998,121 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		# Should not raise frappe.exceptions.ValidationError: Total Debit must be equal to Total Credit.
 		pr.reconcile()
+
+	def test_reconciliation_from_purchase_order_to_multiple_invoices(self):
+		"""
+		Reconciling advance payment from PO/SO to multiple invoices should not cause overallocation
+		"""
+
+		self.supplier = "_Test Supplier"
+
+		pi1 = self.create_purchase_invoice(qty=10, rate=100)
+		pi2 = self.create_purchase_invoice(qty=10, rate=100)
+		po = self.create_purchase_order(qty=20, rate=100)
+		pay = get_payment_entry(po.doctype, po.name)
+		# Overpay Puchase Order
+		pay.paid_amount = 3000
+		pay.save().submit()
+		# assert total allocated and unallocated before reconciliation
+		self.assertEqual(
+			(
+				pay.references[0].reference_doctype,
+				pay.references[0].reference_name,
+				pay.references[0].allocated_amount,
+			),
+			(po.doctype, po.name, 2000),
+		)
+		self.assertEqual(pay.total_allocated_amount, 2000)
+		self.assertEqual(pay.unallocated_amount, 1000)
+		self.assertEqual(pay.difference_amount, 0)
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 2)
+		self.assertEqual(len(pr.payments), 2)
+
+		for x in pr.payments:
+			self.assertEqual((x.reference_type, x.reference_name), (pay.doctype, pay.name))
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		# partial allocation on pi1 and full allocate on pi2
+		pr.allocation[0].allocated_amount = 100
+		pr.reconcile()
+
+		# assert references and total allocated and unallocated amount
+		pay.reload()
+		self.assertEqual(len(pay.references), 3)
+		self.assertEqual(
+			(
+				pay.references[0].reference_doctype,
+				pay.references[0].reference_name,
+				pay.references[0].allocated_amount,
+			),
+			(po.doctype, po.name, 900),
+		)
+		self.assertEqual(
+			(
+				pay.references[1].reference_doctype,
+				pay.references[1].reference_name,
+				pay.references[1].allocated_amount,
+			),
+			(pi1.doctype, pi1.name, 100),
+		)
+		self.assertEqual(
+			(
+				pay.references[2].reference_doctype,
+				pay.references[2].reference_name,
+				pay.references[2].allocated_amount,
+			),
+			(pi2.doctype, pi2.name, 1000),
+		)
+		self.assertEqual(pay.total_allocated_amount, 2000)
+		self.assertEqual(pay.unallocated_amount, 1000)
+		self.assertEqual(pay.difference_amount, 0)
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 2)
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		# assert references and total allocated and unallocated amount
+		pay.reload()
+		self.assertEqual(len(pay.references), 3)
+		# PO references should be removed now
+		self.assertEqual(
+			(
+				pay.references[0].reference_doctype,
+				pay.references[0].reference_name,
+				pay.references[0].allocated_amount,
+			),
+			(pi1.doctype, pi1.name, 100),
+		)
+		self.assertEqual(
+			(
+				pay.references[1].reference_doctype,
+				pay.references[1].reference_name,
+				pay.references[1].allocated_amount,
+			),
+			(pi2.doctype, pi2.name, 1000),
+		)
+		self.assertEqual(
+			(
+				pay.references[2].reference_doctype,
+				pay.references[2].reference_name,
+				pay.references[2].allocated_amount,
+			),
+			(pi1.doctype, pi1.name, 900),
+		)
+		self.assertEqual(pay.total_allocated_amount, 2000)
+		self.assertEqual(pay.unallocated_amount, 1000)
+		self.assertEqual(pay.difference_amount, 0)
 
 
 def make_customer(customer_name, currency=None):
