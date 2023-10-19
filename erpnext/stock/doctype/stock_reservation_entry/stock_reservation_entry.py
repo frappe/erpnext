@@ -927,6 +927,7 @@ def create_stock_reservation_entries_for_so_items(
 		sre.project = sales_order.project
 
 		if against_pick_list:
+			sre.from_voucher_type = "Pick List"
 			sre.against_pick_list = item.pick_list
 			sre.against_pick_list_item = item.pick_list_item
 
