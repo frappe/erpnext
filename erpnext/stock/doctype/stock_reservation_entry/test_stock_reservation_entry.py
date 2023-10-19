@@ -556,7 +556,7 @@ class TestStockReservationEntry(FrappeTestCase):
 						& (sre.voucher_no == location.sales_order)
 						& (sre.voucher_detail_no == location.sales_order_item)
 						& (sre.from_voucher_type == "Pick List")
-						& (sre.against_pick_list == pl.name)
+						& (sre.from_voucher_no == pl.name)
 						& (sre.from_voucher_detail_no == location.name)
 					)
 				).run(as_dict=True)

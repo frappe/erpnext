@@ -265,7 +265,8 @@ frappe.ui.form.on('Pick List', {
 			from_date: moment(frm.doc.creation).format('YYYY-MM-DD'),
 			to_date: to_date,
 			voucher_type: "Sales Order",
-			against_pick_list: frm.doc.name,
+			from_voucher_type: "Pick List",
+			from_voucher_no: frm.doc.name,
 		}
 		frappe.set_route("query-report", "Reserved Stock");
 	}

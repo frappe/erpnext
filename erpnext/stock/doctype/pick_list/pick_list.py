@@ -242,7 +242,7 @@ class PickList(Document):
 			for so, locations in so_details.items():
 				so_doc = frappe.get_doc("Sales Order", so)
 				create_stock_reservation_entries_for_so_items(
-					sales_order=so_doc, items_details=locations, against_pick_list=True, notify=notify
+					sales_order=so_doc, items_details=locations, from_voucher_type="Pick List", notify=notify
 				)
 
 	@frappe.whitelist()
@@ -253,7 +253,9 @@ class PickList(Document):
 			cancel_stock_reservation_entries,
 		)
 
-		cancel_stock_reservation_entries(against_pick_list=self.name, notify=notify)
+		cancel_stock_reservation_entries(
+			from_voucher_type="Pick List", from_voucher_no=self.name, notify=notify
+		)
 
 	def validate_picked_qty(self, data):
 		over_delivery_receipt_allowance = 100 + flt(
