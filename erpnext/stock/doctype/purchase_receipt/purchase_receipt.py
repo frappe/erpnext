@@ -314,6 +314,11 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries)
+<<<<<<< HEAD
+=======
+		self.get_asset_gl_entry(gl_entries)
+		update_regional_gl_entries(gl_entries, self)
+>>>>>>> 77cc91d06b (fix: add regional support to extend purchase gl entries)
 
 		return process_gl_map(gl_entries)
 
@@ -758,8 +763,6 @@ class PurchaseReceipt(BuyingController):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
-		self.load_from_db()
-
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 	return frappe.db.get_value(
@@ -886,9 +889,6 @@ def get_billed_amount_against_po(po_items):
 
 
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
-	# Reload as billed amount was set in db directly
-	pr_doc.load_from_db()
-
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
@@ -914,7 +914,6 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
-	pr_doc.load_from_db()
 
 	if update_modified:
 		pr_doc.set_status(update=True)
@@ -1193,3 +1192,8 @@ def get_item_account_wise_additional_cost(purchase_document):
 
 def on_doctype_update():
 	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
+
+
+@erpnext.allow_regional
+def update_regional_gl_entries(gl_list, doc):
+	return
