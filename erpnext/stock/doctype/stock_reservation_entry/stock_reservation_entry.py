@@ -794,21 +794,20 @@ def create_stock_reservation_entries_for_so_items(
 
 	items = []
 	if items_details:
-		item_field = "sales_order_item" if from_voucher_type == "Pick List" else "name"
-
 		for item in items_details:
-			so_item = frappe.get_doc("Sales Order Item", item.get(item_field))
+			so_item = frappe.get_doc("Sales Order Item", item.get("name"))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
-				item.get("picked_qty") - item.get("stock_reserved_qty", 0)
-				if from_voucher_type == "Pick List"
-				else (flt(item.get("qty_to_reserve")) * flt(so_item.conversion_factor, 1))
+				flt(item.get("qty_to_reserve"))
+				if from_voucher_type in ["Pick List", "Purchase Receipt"]
+				else (
+					flt(item.get("qty_to_reserve"))
+					* (flt(item.get("conversion_factor")) or flt(so_item.conversion_factor) or 1)
+				)
 			)
+			so_item.from_voucher_no = item.get("from_voucher_no")
+			so_item.from_voucher_detail_no = item.get("from_voucher_detail_no")
 			so_item.serial_and_batch_bundle = item.get("serial_and_batch_bundle")
-
-			if from_voucher_type == "Pick List":
-				so_item.from_voucher_no = item.get("parent")
-				so_item.from_voucher_detail_no = item.get("name")
 
 			items.append(so_item)
 

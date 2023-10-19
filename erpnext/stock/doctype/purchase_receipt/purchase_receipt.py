@@ -846,14 +846,20 @@ class PurchaseReceipt(BuyingController):
 					"item_code": item.item_code,
 					"warehouse": item.warehouse,
 					"qty_to_reserve": item.stock_qty,
-					"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
+					"from_voucher_no": item.parent,
+					"from_voucher_detail_no": item.name,
+					"serial_and_batch_bundle": item.serial_and_batch_bundle,
 				}
 				so_items_details_map.setdefault(item.sales_order, []).append(item_details)
 
 		if so_items_details_map:
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(items_details)
+				so_doc.create_stock_reservation_entries(
+					items_details=items_details,
+					from_voucher_type="Purchase Receipt",
+					notify=True,
+				)
 
 
 def update_billed_amount_based_on_po(po_details, update_modified=True):

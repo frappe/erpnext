@@ -229,20 +229,27 @@ class PickList(Document):
 	def create_stock_reservation_entries(self, notify=True) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items against Pick List."""
 
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			create_stock_reservation_entries_for_so_items,
-		)
-
-		so_details = {}
+		so_items_details_map = {}
 		for location in self.locations:
 			if location.warehouse and location.sales_order and location.sales_order_item:
-				so_details.setdefault(location.sales_order, []).append(location)
+				item_details = {
+					"name": location.sales_order_item,
+					"item_code": location.item_code,
+					"warehouse": location.warehouse,
+					"qty_to_reserve": (flt(location.picked_qty) - flt(location.stock_reserved_qty)),
+					"from_voucher_no": location.parent,
+					"from_voucher_detail_no": location.name,
+					"serial_and_batch_bundle": location.serial_and_batch_bundle,
+				}
+				so_items_details_map.setdefault(location.sales_order, []).append(item_details)
 
-		if so_details:
-			for so, locations in so_details.items():
+		if so_items_details_map:
+			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_doc("Sales Order", so)
-				create_stock_reservation_entries_for_so_items(
-					sales_order=so_doc, items_details=locations, from_voucher_type="Pick List", notify=notify
+				so_doc.create_stock_reservation_entries(
+					items_details=items_details,
+					from_voucher_type="Pick List",
+					notify=notify,
 				)
 
 	@frappe.whitelist()
