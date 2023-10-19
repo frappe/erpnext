@@ -1066,7 +1066,7 @@ class PurchaseInvoice(BuyingController):
 								"debit_in_account_currency": (
 									base_asset_amount if cwip_account_currency == self.company_currency else asset_amount
 								),
-								"cost_center": self.cost_center,
+								"cost_center": item.cost_center or self.cost_center,
 								"project": item.project or self.project,
 							},
 							item=item,
