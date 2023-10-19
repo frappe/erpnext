@@ -301,3 +301,30 @@ def get_dimensions(with_cost_center_and_project=False):
 		default_dimensions_map[dimension.company][dimension.fieldname] = dimension.default_dimension
 
 	return dimension_filters, default_dimensions_map
+
+
+def create_accounting_dimensions_for_doctype(doctype):
+	accounting_dimensions = frappe.db.get_all(
+		"Accounting Dimension", fields=["fieldname", "label", "document_type", "disabled"]
+	)
+
+	if not accounting_dimensions:
+		return
+
+	for d in accounting_dimensions:
+		field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
+
+		if field:
+			continue
+
+		df = {
+			"fieldname": d.fieldname,
+			"label": d.label,
+			"fieldtype": "Link",
+			"options": d.document_type,
+			"insert_after": "accounting_dimensions_section",
+		}
+
+		create_custom_field(doctype, df, ignore_validate=True)
+
+	frappe.clear_cache(doctype=doctype)

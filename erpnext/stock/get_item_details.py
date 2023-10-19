@@ -160,6 +160,7 @@ def update_stock(args, out):
 		and out.warehouse
 		and out.stock_qty > 0
 	):
+		out["ignore_serial_nos"] = args.get("ignore_serial_nos")
 
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
@@ -1140,6 +1141,8 @@ def get_serial_nos_by_fifo(args, sales_order=None):
 			query = query.where(sn.sales_order == sales_order)
 		if args.batch_no:
 			query = query.where(sn.batch_no == args.batch_no)
+		if args.ignore_serial_nos:
+			query = query.where(sn.name.notin(args.ignore_serial_nos))
 
 		serial_nos = query.run(as_list=True)
 		serial_nos = [s[0] for s in serial_nos]
@@ -1450,6 +1453,7 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 					"item_code": args.get("item_code"),
 					"warehouse": args.get("warehouse"),
 					"stock_qty": args.get("stock_qty"),
+					"ignore_serial_nos": args.get("ignore_serial_nos"),
 				}
 			)
 			args = process_args(args)
