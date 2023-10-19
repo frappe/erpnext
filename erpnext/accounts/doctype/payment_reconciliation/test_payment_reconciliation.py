@@ -86,26 +86,44 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.customer5 = make_customer("_Test PR Customer 5", "EUR")
 
 	def create_account(self):
-		account_name = "Debtors EUR"
-		if not frappe.db.get_value(
-			"Account", filters={"account_name": account_name, "company": self.company}
-		):
-			acc = frappe.new_doc("Account")
-			acc.account_name = account_name
-			acc.parent_account = "Accounts Receivable - _PR"
-			acc.company = self.company
-			acc.account_currency = "EUR"
-			acc.account_type = "Receivable"
-			acc.insert()
-		else:
-			name = frappe.db.get_value(
-				"Account",
-				filters={"account_name": account_name, "company": self.company},
-				fieldname="name",
-				pluck=True,
-			)
-			acc = frappe.get_doc("Account", name)
-		self.debtors_eur = acc.name
+		accounts = [
+			{
+				"attribute": "debtors_eur",
+				"account_name": "Debtors EUR",
+				"parent_account": "Accounts Receivable - _PR",
+				"account_currency": "EUR",
+				"account_type": "Receivable",
+			},
+			{
+				"attribute": "creditors_usd",
+				"account_name": "Payable USD",
+				"parent_account": "Accounts Payable - _PR",
+				"account_currency": "USD",
+				"account_type": "Payable",
+			},
+		]
+
+		for x in accounts:
+			x = frappe._dict(x)
+			if not frappe.db.get_value(
+				"Account", filters={"account_name": x.account_name, "company": self.company}
+			):
+				acc = frappe.new_doc("Account")
+				acc.account_name = x.account_name
+				acc.parent_account = x.parent_account
+				acc.company = self.company
+				acc.account_currency = x.account_currency
+				acc.account_type = x.account_type
+				acc.insert()
+			else:
+				name = frappe.db.get_value(
+					"Account",
+					filters={"account_name": x.account_name, "company": self.company},
+					fieldname="name",
+					pluck=True,
+				)
+				acc = frappe.get_doc("Account", name)
+			setattr(self, x.attribute, acc.name)
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
@@ -963,9 +981,13 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(pr.allocation[0].difference_amount, 0)
 
 	def test_reconciliation_purchase_invoice_against_return(self):
-		pi = make_purchase_invoice(
-			supplier="_Test Supplier USD", currency="USD", conversion_rate=50
-		).submit()
+		self.supplier = "_Test Supplier USD"
+		pi = self.create_purchase_invoice(qty=5, rate=50, do_not_submit=True)
+		pi.supplier = self.supplier
+		pi.currency = "USD"
+		pi.conversion_rate = 50
+		pi.credit_to = self.creditors_usd
+		pi.save().submit()
 
 		pi_return = frappe.get_doc(pi.as_dict())
 		pi_return.name = None
@@ -975,11 +997,12 @@ class TestPaymentReconciliation(FrappeTestCase):
 		pi_return.items[0].qty = -pi_return.items[0].qty
 		pi_return.submit()
 
-		self.company = "_Test Company"
-		self.party_type = "Supplier"
-		self.customer = "_Test Supplier USD"
-
-		pr = self.create_payment_reconciliation()
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Supplier"
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
 		pr.get_unreconciled_entries()
 
 		invoices = []
