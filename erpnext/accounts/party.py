@@ -295,7 +295,9 @@ def set_contact_details(party_details, party, party_type):
 	else:
 		fields = [
 			"name as contact_person",
-			"full_name as contact_display",
+			"salutation",
+			"first_name",
+			"last_name",
 			"email_id as contact_email",
 			"mobile_no as contact_mobile",
 			"phone as contact_phone",
@@ -305,6 +307,17 @@ def set_contact_details(party_details, party, party_type):
 
 		contact_details = frappe.db.get_value(
 			"Contact", party_details.contact_person, fields, as_dict=True
+		)
+
+		contact_details.contact_display = " ".join(
+			filter(
+				None,
+				[
+					contact_details.get("salutation"),
+					contact_details.get("first_name"),
+					contact_details.get("last_name"),
+				],
+			)
 		)
 
 		party_details.update(contact_details)

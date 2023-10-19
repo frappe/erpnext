@@ -72,8 +72,7 @@ rfq = class rfq {
 	}
 
 	submit_rfq(){
-		$('.btn-sm').click(function(){
-			debugger
+		$('.btn-sm').click(function() {
 			frappe.freeze();
 			frappe.call({
 				type: "POST",
@@ -82,8 +81,7 @@ rfq = class rfq {
 					doc: doc
 				},
 				btn: this,
-				callback: function(r){
-					debugger
+				callback: function(r) {
 					frappe.unfreeze();
 					if(r.message){
 						$('.btn-sm').hide()
