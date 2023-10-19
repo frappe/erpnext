@@ -131,7 +131,7 @@
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual",
+   "options": "Company\nIndividual\nProprietorship\nPartnership",
    "reqd": 1
   },
   {
@@ -568,7 +568,11 @@
    "link_fieldname": "party"
   }
  ],
+<<<<<<< HEAD
  "modified": "2023-05-09 15:38:40.255193",
+=======
+ "modified": "2023-10-19 16:56:27.327035",
+>>>>>>> ed2457bddf (feat: proprietorship & partnership options in entity type)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
