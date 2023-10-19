@@ -97,7 +97,7 @@ def get_result(
 
 			row.update(
 				{
-					"section_code": tax_withholding_category,
+					"section_code": tax_withholding_category or "",
 					"entity_type": party_map.get(party, {}).get(party_type),
 					"rate": rate,
 					"total_amount": total_amount,
@@ -110,6 +110,8 @@ def get_result(
 				}
 			)
 			out.append(row)
+
+	out.sort(key=lambda x: x["section_code"])
 
 	return out
 
