@@ -71,8 +71,13 @@ rfq = Class.extend({
 		})
 	},
 
+<<<<<<< HEAD
 	submit_rfq: function(){
 		$('.btn-sm').click(function(){
+=======
+	submit_rfq(){
+		$('.btn-sm').click(function() {
+>>>>>>> e1504efd40 (fix: Issues related to RFQ and Supplier Quotation on Portal (backport #37565) (#37577))
 			frappe.freeze();
 			frappe.call({
 				type: "POST",
@@ -81,7 +86,7 @@ rfq = Class.extend({
 					doc: doc
 				},
 				btn: this,
-				callback: function(r){
+				callback: function(r) {
 					frappe.unfreeze();
 					if(r.message){
 						$('.btn-sm').hide()
