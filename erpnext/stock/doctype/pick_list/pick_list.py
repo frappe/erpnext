@@ -242,7 +242,7 @@ class PickList(Document):
 			for so, locations in so_details.items():
 				so_doc = frappe.get_doc("Sales Order", so)
 				create_stock_reservation_entries_for_so_items(
-					so=so_doc, items_details=locations, against_pick_list=True, notify=notify
+					sales_order=so_doc, items_details=locations, against_pick_list=True, notify=notify
 				)
 
 	@frappe.whitelist()

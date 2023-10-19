@@ -761,7 +761,7 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 
 
 def create_stock_reservation_entries_for_so_items(
-	so: object,
+	sales_order: object,
 	items_details: list[dict] = None,
 	against_pick_list: bool = False,
 	notify=True,
@@ -771,15 +771,17 @@ def create_stock_reservation_entries_for_so_items(
 	from erpnext.selling.doctype.sales_order.sales_order import get_unreserved_qty
 
 	if not against_pick_list and (
-		so.get("_action") == "submit"
-		and so.set_warehouse
-		and cint(frappe.get_cached_value("Warehouse", so.set_warehouse, "is_group"))
+		sales_order.get("_action") == "submit"
+		and sales_order.set_warehouse
+		and cint(frappe.get_cached_value("Warehouse", sales_order.set_warehouse, "is_group"))
 	):
 		return frappe.msgprint(
-			_("Stock cannot be reserved in the group warehouse {0}.").format(frappe.bold(so.set_warehouse))
+			_("Stock cannot be reserved in the group warehouse {0}.").format(
+				frappe.bold(sales_order.set_warehouse)
+			)
 		)
 
-	validate_stock_reservation_settings(so)
+	validate_stock_reservation_settings(sales_order)
 
 	allow_partial_reservation = frappe.db.get_single_value(
 		"Stock Settings", "allow_partial_reservation"
@@ -787,29 +789,28 @@ def create_stock_reservation_entries_for_so_items(
 
 	items = []
 	if items_details:
+		item_field = "sales_order_item" if against_pick_list else "name"
+
 		for item in items_details:
-			so_item = frappe.get_doc(
-				"Sales Order Item", item.get("sales_order_item") if against_pick_list else item.get("name")
-			)
-			so_item.reserve_stock = 1
+			so_item = frappe.get_doc("Sales Order Item", item.get(item_field))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
 				item.get("picked_qty") - item.get("stock_reserved_qty", 0)
 				if against_pick_list
 				else (flt(item.get("qty_to_reserve")) * flt(so_item.conversion_factor, 1))
 			)
+			so_item.serial_and_batch_bundle = item.get("serial_and_batch_bundle")
 
 			if against_pick_list:
 				so_item.pick_list = item.get("parent")
 				so_item.pick_list_item = item.get("name")
-				so_item.pick_list_sbb = item.get("serial_and_batch_bundle")
 
 			items.append(so_item)
 
 	sre_count = 0
-	reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", so.name)
+	reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", sales_order.name)
 
-	for item in items if items_details else so.get("items"):
+	for item in items if items_details else sales_order.get("items"):
 		# Skip if `Reserved Stock` is not checked for the item.
 		if not item.get("reserve_stock"):
 			continue
@@ -817,9 +818,9 @@ def create_stock_reservation_entries_for_so_items(
 		# Stock should be reserved from the Pick List if has Picked Qty.
 		if not against_pick_list and flt(item.picked_qty) > 0:
 			frappe.throw(
-				_(
-					"Row #{0}: Item {1} has been picked, please create a Stock Reservation from the Pick List."
-				).format(item.idx, frappe.bold(item.item_code))
+				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
+					item.idx, frappe.bold(item.item_code)
+				)
 			)
 
 		is_stock_item, has_serial_no, has_batch_no = frappe.get_cached_value(
@@ -915,33 +916,33 @@ def create_stock_reservation_entries_for_so_items(
 		sre.warehouse = item.warehouse
 		sre.has_serial_no = has_serial_no
 		sre.has_batch_no = has_batch_no
-		sre.voucher_type = so.doctype
-		sre.voucher_no = so.name
+		sre.voucher_type = sales_order.doctype
+		sre.voucher_no = sales_order.name
 		sre.voucher_detail_no = item.name
 		sre.available_qty = available_qty_to_reserve
 		sre.voucher_qty = item.stock_qty
 		sre.reserved_qty = qty_to_be_reserved
-		sre.company = so.company
+		sre.company = sales_order.company
 		sre.stock_uom = item.stock_uom
-		sre.project = so.project
+		sre.project = sales_order.project
 
 		if against_pick_list:
 			sre.against_pick_list = item.pick_list
 			sre.against_pick_list_item = item.pick_list_item
 
-			if item.pick_list_sbb:
-				sbb = frappe.get_doc("Serial and Batch Bundle", item.pick_list_sbb)
-				sre.reservation_based_on = "Serial and Batch"
-				for entry in sbb.entries:
-					sre.append(
-						"sb_entries",
-						{
-							"serial_no": entry.serial_no,
-							"batch_no": entry.batch_no,
-							"qty": 1 if has_serial_no else abs(entry.qty),
-							"warehouse": entry.warehouse,
-						},
-					)
+		if item.serial_and_batch_bundle:
+			sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+			sre.reservation_based_on = "Serial and Batch"
+			for entry in sbb.entries:
+				sre.append(
+					"sb_entries",
+					{
+						"serial_no": entry.serial_no,
+						"batch_no": entry.batch_no,
+						"qty": 1 if has_serial_no else abs(entry.qty),
+						"warehouse": entry.warehouse,
+					},
+				)
 
 		sre.save()
 		sre.submit()
