@@ -47,6 +47,7 @@ def get_result(
 	out = []
 	for name, details in gle_map.items():
 		tax_amount, total_amount, grand_total, base_total = 0, 0, 0, 0
+		bill_no, bill_date = "", ""
 		tax_withholding_category = tax_category_map.get(name)
 		rate = tax_rate_map.get(tax_withholding_category)
 
@@ -72,6 +73,8 @@ def get_result(
 					# back calcalute total amount from rate and tax_amount
 					if rate:
 						total_amount = grand_total = base_total = tax_amount / (rate / 100)
+				elif voucher_type == "Purchase Invoice":
+					total_amount, grand_total, base_total, bill_no, bill_date = net_total_map.get(name)
 				else:
 					total_amount, grand_total, base_total = net_total_map.get(name)
 			else:
@@ -107,6 +110,8 @@ def get_result(
 					"transaction_date": posting_date,
 					"transaction_type": voucher_type,
 					"ref_no": name,
+					"supplier_invoice_no": bill_no,
+					"supplier_invoice_date": bill_date,
 				}
 			)
 			out.append(row)
@@ -183,6 +188,28 @@ def get_columns(filters):
 	columns.extend(
 		[
 			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 100},
+		]
+	)
+	if filters.party_type == "Supplier":
+		columns.extend(
+			[
+				{
+					"label": _("Supplier Invoice No"),
+					"fieldname": "supplier_invoice_no",
+					"fieldtype": "Data",
+					"width": 120,
+				},
+				{
+					"label": _("Supplier Invoice Date"),
+					"fieldname": "supplier_invoice_date",
+					"fieldtype": "Date",
+					"width": 120,
+				},
+			]
+		)
+
+	columns.extend(
+		[
 			{
 				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
 				"fieldname": "rate",
@@ -352,6 +379,8 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 			"base_tax_withholding_net_total",
 			"grand_total",
 			"base_total",
+			"bill_no",
+			"bill_date",
 		],
 		"Sales Invoice": ["base_net_total", "grand_total", "base_total"],
 		"Payment Entry": [
@@ -370,7 +399,13 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 	for entry in entries:
 		tax_category_map.update({entry.name: entry.tax_withholding_category})
 		if doctype == "Purchase Invoice":
-			value = [entry.base_tax_withholding_net_total, entry.grand_total, entry.base_total]
+			value = [
+				entry.base_tax_withholding_net_total,
+				entry.grand_total,
+				entry.base_total,
+				entry.bill_no,
+				entry.bill_date,
+			]
 		elif doctype == "Sales Invoice":
 			value = [entry.base_net_total, entry.grand_total, entry.base_total]
 		elif doctype == "Payment Entry":
