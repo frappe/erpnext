@@ -555,8 +555,9 @@ class TestStockReservationEntry(FrappeTestCase):
 						(sre.voucher_type == "Sales Order")
 						& (sre.voucher_no == location.sales_order)
 						& (sre.voucher_detail_no == location.sales_order_item)
+						& (sre.from_voucher_type == "Pick List")
 						& (sre.against_pick_list == pl.name)
-						& (sre.against_pick_list_item == location.name)
+						& (sre.from_voucher_detail_no == location.name)
 					)
 				).run(as_dict=True)
 				reserved_sb_details: set[tuple] = {

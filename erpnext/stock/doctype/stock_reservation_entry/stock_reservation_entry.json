@@ -19,7 +19,7 @@
   "column_break_7dxj",
   "from_voucher_type",
   "against_pick_list",
-  "against_pick_list_item",
+  "from_voucher_detail_no",
   "section_break_xt4m",
   "stock_uom",
   "column_break_grdt",
@@ -283,15 +283,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "against_pick_list_item",
-   "fieldtype": "Data",
-   "label": "From Voucher Detail No",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
-  },
-  {
    "fieldname": "column_break_7dxj",
    "fieldtype": "Column Break"
   },
@@ -308,6 +299,15 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "from_voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "From Voucher Detail No",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "hide_toolbar": 1,
@@ -315,7 +315,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-19 16:09:08.418544",
+ "modified": "2023-10-19 16:26:46.598043",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
