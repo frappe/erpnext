@@ -158,14 +158,14 @@ def get_gle_map(documents):
 def get_columns(filters):
 	pan = "pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id"
 	columns = [
-		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
 		{
-			"label": _(filters.get("party_type")),
-			"fieldname": "party",
-			"fieldtype": "Dynamic Link",
-			"options": "party_type",
-			"width": 180,
+			"label": _("Section Code"),
+			"options": "Tax Withholding Category",
+			"fieldname": "section_code",
+			"fieldtype": "Link",
+			"width": 90,
 		},
+		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
 	]
 
 	if filters.naming_series == "Naming Series":
@@ -180,57 +180,50 @@ def get_columns(filters):
 
 	columns.extend(
 		[
-			{
-				"label": _("Date of Transaction"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 100,
-			},
-			{
-				"label": _("Section Code"),
-				"options": "Tax Withholding Category",
-				"fieldname": "section_code",
-				"fieldtype": "Link",
-				"width": 90,
-			},
 			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 100},
-			{
-				"label": _("Total Amount"),
-				"fieldname": "total_amount",
-				"fieldtype": "Float",
-				"width": 90,
-			},
 			{
 				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
 				"fieldname": "rate",
 				"fieldtype": "Percent",
-				"width": 90,
+				"width": 60,
 			},
 			{
-				"label": _("Tax Amount"),
-				"fieldname": "tax_amount",
+				"label": _("Total Amount"),
+				"fieldname": "total_amount",
 				"fieldtype": "Float",
-				"width": 90,
-			},
-			{
-				"label": _("Grand Total"),
-				"fieldname": "grand_total",
-				"fieldtype": "Float",
-				"width": 90,
+				"width": 120,
 			},
 			{
 				"label": _("Base Total"),
 				"fieldname": "base_total",
 				"fieldtype": "Float",
-				"width": 90,
+				"width": 120,
 			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 100},
+			{
+				"label": _("Tax Amount"),
+				"fieldname": "tax_amount",
+				"fieldtype": "Float",
+				"width": 120,
+			},
+			{
+				"label": _("Grand Total"),
+				"fieldname": "grand_total",
+				"fieldtype": "Float",
+				"width": 120,
+			},
+			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 130},
 			{
 				"label": _("Reference No."),
 				"fieldname": "ref_no",
 				"fieldtype": "Dynamic Link",
 				"options": "transaction_type",
 				"width": 180,
+			},
+			{
+				"label": _("Date of Transaction"),
+				"fieldname": "transaction_date",
+				"fieldtype": "Date",
+				"width": 100,
 			},
 		]
 	)
