@@ -18,7 +18,7 @@
   "voucher_detail_no",
   "column_break_7dxj",
   "from_voucher_type",
-  "against_pick_list",
+  "from_voucher_no",
   "from_voucher_detail_no",
   "section_break_xt4m",
   "stock_uom",
@@ -159,7 +159,7 @@
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
-   "read_only_depends_on": "eval: ((doc.reservation_based_on == \"Serial and Batch\") || (doc.against_pick_list) || (doc.delivered_qty > 0))",
+   "read_only_depends_on": "eval: ((doc.reservation_based_on == \"Serial and Batch\") || (doc.from_voucher_type == \"Pick List\") || (doc.delivered_qty > 0))",
    "width": "150px"
   },
   {
@@ -269,18 +269,7 @@
    "label": "Reservation Based On",
    "no_copy": 1,
    "options": "Qty\nSerial and Batch",
-   "read_only_depends_on": "eval: (doc.delivered_qty > 0 || doc.against_pick_list)"
-  },
-  {
-   "fieldname": "against_pick_list",
-   "fieldtype": "Dynamic Link",
-   "label": "From Voucher No",
-   "no_copy": 1,
-   "options": "from_voucher_type",
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1,
-   "search_index": 1
+   "read_only_depends_on": "eval: (doc.delivered_qty > 0 || doc.from_voucher_type == \"Pick List\")"
   },
   {
    "fieldname": "column_break_7dxj",
@@ -308,6 +297,17 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "from_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "From Voucher No",
+   "no_copy": 1,
+   "options": "from_voucher_type",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
   }
  ],
  "hide_toolbar": 1,
@@ -315,7 +315,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-19 16:26:46.598043",
+ "modified": "2023-10-19 16:41:16.545416",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

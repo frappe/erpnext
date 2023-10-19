@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from typing import Literal
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -113,7 +115,7 @@ class StockReservationEntry(Document):
 		"""Auto pick Serial and Batch Nos to reserve when `Reservation Based On` is `Serial and Batch`."""
 
 		if (
-			not self.against_pick_list
+			not self.from_voucher_type
 			and (self.get("_action") == "submit")
 			and (self.has_serial_no or self.has_batch_no)
 			and cint(frappe.db.get_single_value("Stock Settings", "auto_reserve_serial_and_batch"))
@@ -317,7 +319,7 @@ class StockReservationEntry(Document):
 		"""Updates total reserved qty in the Pick List."""
 
 		if (
-			self.from_voucher_type == "Pick List" and self.against_pick_list and self.from_voucher_detail_no
+			self.from_voucher_type == "Pick List" and self.from_voucher_no and self.from_voucher_detail_no
 		):
 			sre = frappe.qb.DocType("Stock Reservation Entry")
 			reserved_qty = (
@@ -326,7 +328,7 @@ class StockReservationEntry(Document):
 				.where(
 					(sre.docstatus == 1)
 					& (sre.from_voucher_type == "Pick List")
-					& (sre.against_pick_list == self.against_pick_list)
+					& (sre.from_voucher_no == self.from_voucher_no)
 					& (sre.from_voucher_detail_no == self.from_voucher_detail_no)
 				)
 			).run(as_list=True)[0][0] or 0
@@ -368,7 +370,7 @@ class StockReservationEntry(Document):
 			).format(self.status, self.doctype)
 			frappe.throw(msg)
 
-		if self.against_pick_list:
+		if self.from_voucher_type == "Pick List":
 			msg = _(
 				"Stock Reservation Entry created against a Pick List cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
 			)
@@ -766,14 +768,14 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 def create_stock_reservation_entries_for_so_items(
 	sales_order: object,
 	items_details: list[dict] = None,
-	against_pick_list: bool = False,
+	from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 	notify=True,
 ) -> None:
 	"""Creates Stock Reservation Entries for Sales Order Items."""
 
 	from erpnext.selling.doctype.sales_order.sales_order import get_unreserved_qty
 
-	if not against_pick_list and (
+	if not from_voucher_type and (
 		sales_order.get("_action") == "submit"
 		and sales_order.set_warehouse
 		and cint(frappe.get_cached_value("Warehouse", sales_order.set_warehouse, "is_group"))
@@ -792,20 +794,20 @@ def create_stock_reservation_entries_for_so_items(
 
 	items = []
 	if items_details:
-		item_field = "sales_order_item" if against_pick_list else "name"
+		item_field = "sales_order_item" if from_voucher_type == "Pick List" else "name"
 
 		for item in items_details:
 			so_item = frappe.get_doc("Sales Order Item", item.get(item_field))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
 				item.get("picked_qty") - item.get("stock_reserved_qty", 0)
-				if against_pick_list
+				if from_voucher_type == "Pick List"
 				else (flt(item.get("qty_to_reserve")) * flt(so_item.conversion_factor, 1))
 			)
 			so_item.serial_and_batch_bundle = item.get("serial_and_batch_bundle")
 
-			if against_pick_list:
-				so_item.pick_list = item.get("parent")
+			if from_voucher_type == "Pick List":
+				so_item.from_voucher_no = item.get("parent")
 				so_item.from_voucher_detail_no = item.get("name")
 
 			items.append(so_item)
@@ -819,7 +821,7 @@ def create_stock_reservation_entries_for_so_items(
 			continue
 
 		# Stock should be reserved from the Pick List if has Picked Qty.
-		if not against_pick_list and flt(item.picked_qty) > 0:
+		if not from_voucher_type == "Pick List" and flt(item.picked_qty) > 0:
 			frappe.throw(
 				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
 					item.idx, frappe.bold(item.item_code)
@@ -929,9 +931,9 @@ def create_stock_reservation_entries_for_so_items(
 		sre.stock_uom = item.stock_uom
 		sre.project = sales_order.project
 
-		if against_pick_list:
-			sre.from_voucher_type = "Pick List"
-			sre.against_pick_list = item.pick_list
+		if from_voucher_type:
+			sre.from_voucher_type = from_voucher_type
+			sre.from_voucher_no = item.from_voucher_no
 			sre.from_voucher_detail_no = item.from_voucher_detail_no
 
 		if item.serial_and_batch_bundle:
@@ -961,29 +963,37 @@ def cancel_stock_reservation_entries(
 	voucher_type: str = None,
 	voucher_no: str = None,
 	voucher_detail_no: str = None,
-	against_pick_list: str = None,
+	from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+	from_voucher_no: str = None,
+	from_voucher_detail_no: str = None,
 	sre_list: list[dict] = None,
 	notify: bool = True,
 ) -> None:
 	"""Cancel Stock Reservation Entries."""
 
-	if not sre_list and against_pick_list:
-		sre = frappe.qb.DocType("Stock Reservation Entry")
-		sre_list = (
-			frappe.qb.from_(sre)
-			.select(sre.name)
-			.where(
-				(sre.docstatus == 1)
-				& (sre.against_pick_list == against_pick_list)
-				& (sre.status.notin(["Delivered", "Cancelled"]))
+	if not sre_list:
+		if voucher_type and voucher_no:
+			sre_list = get_stock_reservation_entries_for_voucher(
+				voucher_type, voucher_no, voucher_detail_no, fields=["name"]
 			)
-			.orderby(sre.creation)
-		).run(as_dict=True)
+		elif from_voucher_type and from_voucher_no:
+			sre = frappe.qb.DocType("Stock Reservation Entry")
+			query = (
+				frappe.qb.from_(sre)
+				.select(sre.name)
+				.where(
+					(sre.docstatus == 1)
+					& (sre.from_voucher_type == from_voucher_type)
+					& (sre.from_voucher_no == from_voucher_no)
+					& (sre.status.notin(["Delivered", "Cancelled"]))
+				)
+				.orderby(sre.creation)
+			)
 
-	elif not sre_list and (voucher_type and voucher_no):
-		sre_list = get_stock_reservation_entries_for_voucher(
-			voucher_type, voucher_no, voucher_detail_no, fields=["name"]
-		)
+			if from_voucher_detail_no:
+				query = query.where(sre.from_voucher_detail_no == from_voucher_detail_no)
+
+			sre_list = query.run(as_dict=True)
 
 	if sre_list:
 		for sre in sre_list:
