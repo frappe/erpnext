@@ -899,6 +899,8 @@
   {
    "fieldname": "driver",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Driver",
    "options": "Driver",
    "print_hide": 1
@@ -1013,6 +1015,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Territory",
    "options": "Territory",
    "print_hide": 1
@@ -1401,7 +1404,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-04 14:15:28.363184",
+ "modified": "2023-10-18 11:28:41.070511",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
