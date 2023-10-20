@@ -314,6 +314,7 @@ class PurchaseReceipt(BuyingController):
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries)
 		self.get_asset_gl_entry(gl_entries)
+		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries)
 
@@ -821,16 +822,14 @@ class PurchaseReceipt(BuyingController):
 				po_details.append(d.purchase_order_item)
 
 		if po_details:
-			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
+			updated_pr += update_billed_amount_based_on_po(po_details, update_modified, self)
 
 		for pr in set(updated_pr):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
-		self.load_from_db()
 
-
-def update_billed_amount_based_on_po(po_details, update_modified=True):
+def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=None):
 	po_billed_amt_details = get_billed_amount_against_po(po_details)
 
 	# Get all Purchase Receipt Item rows against the Purchase Order Items
@@ -859,13 +858,19 @@ def update_billed_amount_based_on_po(po_details, update_modified=True):
 		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
 
 		if pr_item.billed_amt != billed_amt_agianst_pr:
-			frappe.db.set_value(
-				"Purchase Receipt Item",
-				pr_item.name,
-				"billed_amt",
-				billed_amt_agianst_pr,
-				update_modified=update_modified,
-			)
+			# update existing doc if possible
+			if pr_doc and pr_item.parent == pr_doc.name:
+				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
+				pr_item.db_set("billed_amt", billed_amt_agianst_pr, update_modified=update_modified)
+
+			else:
+				frappe.db.set_value(
+					"Purchase Receipt Item",
+					pr_item.name,
+					"billed_amt",
+					billed_amt_agianst_pr,
+					update_modified=update_modified,
+				)
 
 			updated_pr.append(pr_item.parent)
 
@@ -941,9 +946,6 @@ def get_billed_amount_against_po(po_items):
 
 
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
-	# Reload as billed amount was set in db directly
-	pr_doc.load_from_db()
-
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
@@ -969,7 +971,6 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
-	pr_doc.load_from_db()
 
 	if update_modified:
 		pr_doc.set_status(update=True)
@@ -1255,3 +1256,8 @@ def get_item_account_wise_additional_cost(purchase_document):
 
 def on_doctype_update():
 	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
+
+
+@erpnext.allow_regional
+def update_regional_gl_entries(gl_list, doc):
+	return
