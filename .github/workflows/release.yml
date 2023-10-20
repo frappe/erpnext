@@ -2,14 +2,14 @@ name: Generate Semantic Release
 on:
   push:
     branches:
-      - version-14
+      - version-15
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Entire Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
