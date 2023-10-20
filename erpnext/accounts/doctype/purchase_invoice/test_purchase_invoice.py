@@ -1626,115 +1626,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			0,
 		)
 
-
-<<<<<<< HEAD
-def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
-	gl_entries = frappe.db.sql(
-		"""select account, debit, credit, posting_date
-		from `tabGL Entry`
-		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
-		order by posting_date asc, account asc""",
-		(voucher_no, posting_date),
-		as_dict=1,
-=======
-		create_account(
-			account_name="Offsetting",
-			company="_Test Company",
-			parent_account="Temporary Accounts - _TC",
-		)
-
-		create_accounting_dimension(company="_Test Company", offsetting_account="Offsetting - _TC")
-
-		branch1 = frappe.new_doc("Branch")
-		branch1.branch = "Location 1"
-		branch1.insert(ignore_if_duplicate=True)
-		branch2 = frappe.new_doc("Branch")
-		branch2.branch = "Location 2"
-		branch2.insert(ignore_if_duplicate=True)
-
-		pi = make_purchase_invoice(
-			company="_Test Company",
-			do_not_save=True,
-			do_not_submit=True,
-			rate=1000,
-			price_list_rate=1000,
-			qty=1,
-		)
-		pi.branch = branch1.branch
-		pi.items[0].branch = branch2.branch
-		pi.save()
-		pi.submit()
-
-		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate(), branch2.branch],
-			["Creditors - _TC", 0.0, 1000, nowdate(), branch1.branch],
-			["Offsetting - _TC", 1000, 0.0, nowdate(), branch1.branch],
-			["Offsetting - _TC", 0.0, 1000, nowdate(), branch2.branch],
-		]
-
-		check_gl_entries(
-			self,
-			pi.name,
-			expected_gle,
-			nowdate(),
-			voucher_type="Purchase Invoice",
-			additional_columns=["branch"],
-		)
-		clear_dimension_defaults("Branch")
-		disable_dimension()
-
-	def test_repost_accounting_entries(self):
-		pi = make_purchase_invoice(
-			rate=1000,
-			price_list_rate=1000,
-			qty=1,
-		)
-		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 1000, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 1000, nowdate()],
-		]
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
-
-		pi.items[0].expense_account = "Service - _TC"
-		pi.save()
-		pi.load_from_db()
-		self.assertTrue(pi.repost_required)
-		pi.repost_accounting_entries()
-
-		expected_gle = [
-			["Creditors - _TC", 0.0, 1000, nowdate()],
-			["Service - _TC", 1000, 0.0, nowdate()],
-		]
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		pi.load_from_db()
-		self.assertFalse(pi.repost_required)
-
-	@change_settings("Buying Settings", {"supplier_group": None})
-	def test_purchase_invoice_without_supplier_group(self):
-		# Create a Supplier
-		test_supplier_name = "_Test Supplier Without Supplier Group"
-		if not frappe.db.exists("Supplier", test_supplier_name):
-			supplier = frappe.get_doc(
-				{
-					"doctype": "Supplier",
-					"supplier_name": test_supplier_name,
-				}
-			).insert(ignore_permissions=True)
-
-			self.assertEqual(supplier.supplier_group, None)
-
-		po = create_purchase_order(
-			supplier=test_supplier_name,
-			rate=3000,
-			item="_Test Non Stock Item",
-			posting_date="2021-09-15",
-		)
-
-		pi = make_purchase_invoice(supplier=test_supplier_name)
-
-		self.assertEqual(po.docstatus, 1)
-		self.assertEqual(pi.docstatus, 1)
-
 	def test_default_cost_center_for_purchase(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
@@ -1760,15 +1651,14 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		self.assertEqual(pi.items[0].cost_center, "_Test Cost Center Buying - _TC")
 
 
-def set_advance_flag(company, flag, default_account):
-	frappe.db.set_value(
-		"Company",
-		company,
-		{
-			"book_advance_payments_in_separate_party_account": flag,
-			"default_advance_paid_account": default_account,
-		},
->>>>>>> 14b009b093 (fix: incorrect cost center in the purchase invoice (#37591))
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql(
+		"""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Purchase Invoice' and voucher_no=%s and posting_date >= %s
+		order by posting_date asc, account asc""",
+		(voucher_no, posting_date),
+		as_dict=1,
 	)
 
 	for i, gle in enumerate(gl_entries):
