@@ -935,19 +935,27 @@ def create_stock_reservation_entries_for_so_items(
 			sre.from_voucher_no = item.from_voucher_no
 			sre.from_voucher_detail_no = item.from_voucher_detail_no
 
-		if item.serial_and_batch_bundle:
+		if item.get("serial_and_batch_bundle"):
 			sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 			sre.reservation_based_on = "Serial and Batch"
-			for entry in sbb.entries:
+
+			index, picked_qty = 0, 0
+			while index < len(sbb.entries) and picked_qty < qty_to_be_reserved:
+				entry = sbb.entries[index]
+				qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_be_reserved - picked_qty)
+
 				sre.append(
 					"sb_entries",
 					{
 						"serial_no": entry.serial_no,
 						"batch_no": entry.batch_no,
-						"qty": 1 if has_serial_no else abs(entry.qty),
+						"qty": qty,
 						"warehouse": entry.warehouse,
 					},
 				)
+
+				index += 1
+				picked_qty += qty
 
 		sre.save()
 		sre.submit()
