@@ -1626,6 +1626,30 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			0,
 		)
 
+	def test_default_cost_center_for_purchase(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+		for c_center in ["_Test Cost Center Selling", "_Test Cost Center Buying"]:
+			create_cost_center(cost_center_name=c_center)
+
+		item = create_item(
+			"_Test Cost Center Item For Purchase",
+			is_stock_item=1,
+			buying_cost_center="_Test Cost Center Buying - _TC",
+			selling_cost_center="_Test Cost Center Selling - _TC",
+		)
+
+		pi = make_purchase_invoice(
+			item=item.name, qty=1, rate=1000, update_stock=True, do_not_submit=True, cost_center=""
+		)
+
+		pi.items[0].cost_center = ""
+		pi.set_missing_values()
+		pi.calculate_taxes_and_totals()
+		pi.save()
+
+		self.assertEqual(pi.items[0].cost_center, "_Test Cost Center Buying - _TC")
+
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
