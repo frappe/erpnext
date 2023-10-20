@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-10-20 16:03:08.745657",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "column_break_fpira",
+  "total_records",
+  "column_break_xger5",
+  "status_code",
+  "section_break_cgev7",
+  "message",
+  "payload",
+  "response",
+  "last_execution"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status"
+  },
+  {
+   "fieldname": "column_break_fpira",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_records",
+   "fieldtype": "Int",
+   "label": "Total Records"
+  },
+  {
+   "fieldname": "column_break_xger5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_code",
+   "fieldtype": "Int",
+   "label": "Status Code"
+  },
+  {
+   "fieldname": "section_break_cgev7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message"
+  },
+  {
+   "fieldname": "payload",
+   "fieldtype": "Small Text",
+   "label": "Payload"
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Long Text",
+   "label": "Response"
+  },
+  {
+   "fieldname": "last_execution",
+   "fieldtype": "Data",
+   "label": "Last Execution"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-10-20 16:03:08.745657",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Indiamart Sync Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
