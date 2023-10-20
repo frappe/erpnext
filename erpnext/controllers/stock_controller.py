@@ -73,6 +73,8 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
+		update_regional_gl_entries(gl_entries, self)
+
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -850,8 +852,9 @@ class StockController(AccountsController):
 
 @frappe.whitelist()
 def show_accounting_ledger_preview(company, doctype, docname):
-	filters = {"company": company, "include_dimensions": 1}
+	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_doc(doctype, docname)
+	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
 
@@ -862,8 +865,9 @@ def show_accounting_ledger_preview(company, doctype, docname):
 
 @frappe.whitelist()
 def show_stock_ledger_preview(company, doctype, docname):
-	filters = {"company": company}
+	filters = frappe._dict(company=company)
 	doc = frappe.get_doc(doctype, docname)
+	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
 
@@ -1211,3 +1215,8 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+@erpnext.allow_regional
+def update_regional_gl_entries(gl_list, doc):
+	return

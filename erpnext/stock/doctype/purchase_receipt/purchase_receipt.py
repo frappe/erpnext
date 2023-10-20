@@ -874,9 +874,6 @@ def get_billed_amount_against_po(po_items):
 
 
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
-	# Reload as billed amount was set in db directly
-	pr_doc.load_from_db()
-
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
@@ -902,7 +899,6 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
-	pr_doc.load_from_db()
 
 	if update_modified:
 		pr_doc.set_status(update=True)
