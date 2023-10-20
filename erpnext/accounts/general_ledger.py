@@ -40,7 +40,7 @@ def make_gl_entries(
 					from_repost=from_repost,
 				)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
-			# Post GL Map proccess there may no be any GL Entries
+			# Post GL Map process there may no be any GL Entries
 			elif gl_map:
 				frappe.throw(
 					_(
