@@ -757,13 +757,14 @@ class PurchaseReceipt(BuyingController):
 				po_details.append(d.purchase_order_item)
 
 		if po_details:
-			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
+			updated_pr += update_billed_amount_based_on_po(po_details, update_modified, self)
 
 		for pr in set(updated_pr):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 
+<<<<<<< HEAD
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 	return frappe.db.get_value(
 		"Stock Ledger Entry",
@@ -779,6 +780,9 @@ def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 
 
 def update_billed_amount_based_on_po(po_details, update_modified=True):
+=======
+def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=None):
+>>>>>>> ff7108a3b1 (fix: update existing doc if possible)
 	po_billed_amt_details = get_billed_amount_against_po(po_details)
 
 	# Get all Purchase Receipt Item rows against the Purchase Order Items
@@ -807,13 +811,19 @@ def update_billed_amount_based_on_po(po_details, update_modified=True):
 		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
 
 		if pr_item.billed_amt != billed_amt_agianst_pr:
-			frappe.db.set_value(
-				"Purchase Receipt Item",
-				pr_item.name,
-				"billed_amt",
-				billed_amt_agianst_pr,
-				update_modified=update_modified,
-			)
+			# update existing doc if possible
+			if pr_doc and pr_item.parent == pr_doc.name:
+				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
+				pr_item.db_set("billed_amt", billed_amt_agianst_pr, update_modified=update_modified)
+
+			else:
+				frappe.db.set_value(
+					"Purchase Receipt Item",
+					pr_item.name,
+					"billed_amt",
+					billed_amt_agianst_pr,
+					update_modified=update_modified,
+				)
 
 			updated_pr.append(pr_item.parent)
 
