@@ -543,16 +543,15 @@ class PurchaseReceipt(BuyingController):
 				)
 			elif flt(d.qty) and (flt(d.valuation_rate) or self.is_return):
 				if d.is_fixed_asset:
-					stock_asset_account_name = (
-						get_asset_category_account(
-							asset_category=d.asset_category,
-							fieldname="capital_work_in_progress_account",
-							company=self.company,
-						)
+					account_type = (
+						"capital_work_in_progress_account"
 						if is_cwip_accounting_enabled(d.asset_category)
-						else get_asset_category_account(
-							asset_category=d.asset_category, fieldname="fixed_asset_account", company=self.company
-						)
+						else "fixed_asset_account"
+					)
+					stock_asset_account_name = get_asset_category_account(
+						asset_category=d.asset_category,
+						fieldname=account_type,
+						company=self.company,
 					)
 
 					stock_value_diff = flt(d.net_amount) + flt(d.item_tax_amount / self.conversion_rate)
