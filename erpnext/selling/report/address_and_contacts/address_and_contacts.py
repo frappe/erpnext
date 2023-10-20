@@ -43,10 +43,14 @@ def get_columns(filters):
 		"Email Id",
 		"Is Primary Contact:Check",
 	]
-	if filters.get("party_type") == "Supplier" and frappe.db.get_single_value("Buying Settings" , "supp_master_name") == ["Naming Series","Auto Name"]:
-		columns.insert(1 , "Supplier Name:Data:150")
-	if filters.get("party_type") == "Customer" and frappe.db.get_single_value("Selling Settings" , "cust_master_name") == ["Naming Series","Auto Name"]:
-		columns.insert(1 , "Customer Name:Data:150")
+	if filters.get("party_type") == "Supplier" and frappe.db.get_single_value(
++		"Buying Settings", "supp_master_name"
++	) == ["Naming Series", "Auto Name"]:
++		columns.insert(1, "Supplier Name:Data:150")
++	if filters.get("party_type") == "Customer" and frappe.db.get_single_value(
++		"Selling Settings", "cust_master_name"
++	) == ["Naming Series", "Auto Name"]:
++		columns.insert(1, "Customer Name:Data:150")
 	return columns
 
 
