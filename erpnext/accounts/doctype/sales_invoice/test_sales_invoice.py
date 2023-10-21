@@ -516,70 +516,72 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.grand_total, 5474.0)
 
 	def test_tax_calculation_with_item_tax_template(self):
+		import json
+
+		from erpnext.stock.get_item_details import get_item_details
+
+		# set tax template in item
+		item = frappe.get_cached_doc("Item", "_Test Item")
+		item.set(
+			"taxes",
+			[
+				{
+					"item_tax_template": "_Test Item Tax Template 1 - _TC",
+					"valid_from": add_days(nowdate(), -5),
+				}
+			],
+		)
+		item.save()
+
+		# create sales invoice with item
 		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
-		item_row = si.get("items")[0]
+		item_details = get_item_details(
+			doc=si,
+			args={
+				"item_code": item.item_code,
+				"company": si.company,
+				"doctype": "Sales Invoice",
+				"conversion_rate": 1.0,
+			},
+		)
+		tax_map = json.loads(item_details.item_tax_rate)
+		for tax in tax_map:
+			si.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": tax,
+					"rate": tax_map[tax],
+					"description": "Test",
+					"cost_center": "_Test Cost Center - _TC",
+				},
+			)
+		si.submit()
+		si.load_from_db()
 
-		add_items = [
-			(54, "_Test Account Excise Duty @ 12 - _TC"),
-			(288, "_Test Account Excise Duty @ 15 - _TC"),
-			(144, "_Test Account Excise Duty @ 20 - _TC"),
-			(430, "_Test Item Tax Template 1 - _TC"),
+		# check if correct tax values are applied from tax template
+		self.assertEqual(si.net_total, 386.4)
+
+		expected_taxes = [
+			{
+				"tax_amount": 19.32,
+				"total": 405.72,
+			},
+			{
+				"tax_amount": 38.64,
+				"total": 444.36,
+			},
+			{
+				"tax_amount": 57.96,
+				"total": 502.32,
+			},
 		]
-		for qty, item_tax_template in add_items:
-			item_row_copy = copy.deepcopy(item_row)
-			item_row_copy.qty = qty
-			item_row_copy.item_tax_template = item_tax_template
-			si.append("items", item_row_copy)
 
-		si.append(
-			"taxes",
-			{
-				"account_head": "_Test Account Excise Duty - _TC",
-				"charge_type": "On Net Total",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Excise Duty",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 11,
-			},
-		)
-		si.append(
-			"taxes",
-			{
-				"account_head": "_Test Account Education Cess - _TC",
-				"charge_type": "On Net Total",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Education Cess",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 0,
-			},
-		)
-		si.append(
-			"taxes",
-			{
-				"account_head": "_Test Account S&H Education Cess - _TC",
-				"charge_type": "On Net Total",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "S&H Education Cess",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 3,
-			},
-		)
-		si.insert()
+		for i in range(len(expected_taxes)):
+			for key in expected_taxes[i]:
+				self.assertEqual(expected_taxes[i][key], si.get("taxes")[i].get(key))
 
-		self.assertEqual(si.net_total, 4600)
-
-		self.assertEqual(si.get("taxes")[0].tax_amount, 502.41)
-		self.assertEqual(si.get("taxes")[0].total, 5102.41)
-
-		self.assertEqual(si.get("taxes")[1].tax_amount, 197.80)
-		self.assertEqual(si.get("taxes")[1].total, 5300.21)
-
-		self.assertEqual(si.get("taxes")[2].tax_amount, 375.36)
-		self.assertEqual(si.get("taxes")[2].total, 5675.57)
-
-		self.assertEqual(si.grand_total, 5675.57)
-		self.assertEqual(si.rounding_adjustment, 0.43)
-		self.assertEqual(si.rounded_total, 5676.0)
+		self.assertEqual(si.get("base_total_taxes_and_charges"), 115.92)
 
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
