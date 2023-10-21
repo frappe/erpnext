@@ -566,7 +566,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					stock_asset_account_name = get_asset_account(
-						"account_type", asset_category=d.asset_category, company=self.company
+						account_type, asset_category=d.asset_category, company=self.company
 					)
 
 					stock_value_diff = flt(d.net_amount) + flt(d.item_tax_amount / self.conversion_rate)
