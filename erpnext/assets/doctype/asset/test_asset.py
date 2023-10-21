@@ -19,7 +19,6 @@ from frappe.utils import (
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
-	get_asset_value_after_depreciation,
 	make_sales_invoice,
 	split_asset,
 	update_maintenance_status,
