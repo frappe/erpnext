@@ -534,7 +534,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual("Asset Received But Not Billed - _TC", doc.items[0].expense_account)
 
-	# CWIP: Capital Work In Progress
+	# Capital Work In Progress
 	def test_cwip_accounting(self):
 		pr = make_purchase_receipt(
 			item_code="Macbook Pro", qty=1, rate=5000, do_not_submit=True, location="Test Location"
