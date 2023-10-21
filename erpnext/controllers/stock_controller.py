@@ -62,7 +62,7 @@ class StockController(AccountsController):
 			)
 		)
 
-		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
+		is_asset_pr = any(d.get("is_fixed_asset") for d in self.get("items"))
 
 		if (
 			cint(erpnext.is_perpetual_inventory_enabled(self.company))
