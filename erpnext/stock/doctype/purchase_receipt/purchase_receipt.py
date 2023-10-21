@@ -13,7 +13,6 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -565,10 +564,9 @@ class PurchaseReceipt(BuyingController):
 						if is_cwip_accounting_enabled(d.asset_category)
 						else "fixed_asset_account"
 					)
-					stock_asset_account_name = get_asset_category_account(
-						asset_category=d.asset_category,
-						fieldname=account_type,
-						company=self.company,
+
+					stock_asset_account_name = get_asset_account(
+						"account_type", asset_category=d.asset_category, company=self.company
 					)
 
 					stock_value_diff = flt(d.net_amount) + flt(d.item_tax_amount / self.conversion_rate)
