@@ -80,9 +80,9 @@ class HolidayList(Document):
 		self.sort_holidays()
 
 	def sort_holidays(self):
-		self.holidays.sort(key=lambda x: getdate(x.holiday_date))
-		for i in range(len(self.holidays)):
-			self.holidays[i].idx = i + 1
+		self.holidays.sort(key=lambda x: (x.weekly_off, getdate(x.holiday_date)))
+		for row, idx in enumerate(self.holidays, start=1):
+			row.idx = idx
 
 	def get_holidays(self) -> list[date]:
 		return [getdate(holiday.holiday_date) for holiday in self.holidays]
