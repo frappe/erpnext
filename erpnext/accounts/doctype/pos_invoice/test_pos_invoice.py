@@ -5,11 +5,8 @@ import copy
 import unittest
 
 import frappe
-<<<<<<< HEAD
-=======
 from frappe import _
 from frappe.utils import add_days, nowdate
->>>>>>> b0d440c34b (fix: set empty value for tax template in item details (#37496))
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
