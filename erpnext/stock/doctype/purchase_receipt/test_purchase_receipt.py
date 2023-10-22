@@ -2050,6 +2050,21 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# Test - 2: Valuation Rate should be equal to Previous SLE Valuation Rate
 		self.assertEqual(flt(sle.valuation_rate, 2), flt(previous_sle_valuation_rate, 2))
 
+	def non_internal_transfer_purchase_receipt(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		pr_doc = make_purchase_receipt(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", pr_doc.company)
+		pr_doc.items[0].db_set("target_warehouse", "warehouse")
+
+		pr_doc.reload()
+
+		self.assertEqual(pr_doc.items[0].from_warehouse, warehouse.name)
+
+		pr_doc.save()
+		pr_doc.reload()
+		self.assertFalse(pr_doc.items[0].from_warehouse)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
