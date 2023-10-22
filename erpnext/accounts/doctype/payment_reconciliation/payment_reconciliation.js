@@ -216,6 +216,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.data = [];
 			const dialog = new frappe.ui.Dialog({
 				title: __("Select Difference Account"),
+				size: 'extra-large',
 				fields: [
 					{
 						fieldname: "allocation",
@@ -239,6 +240,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							in_list_view: 1,
 							read_only: 1
 						}, {
+							fieldtype:'Date',
+							fieldname:"gain_loss_posting_date",
+							label: __("Posting Date"),
+							in_list_view: 1,
+							reqd: 1,
+						}, {
+
 							fieldtype:'Link',
 							options: 'Account',
 							in_list_view: 1,
@@ -272,6 +280,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 					args.forEach(d => {
 						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
 							"difference_account", d.difference_account);
+
 					});
 
 					this.reconcile_payment_entries();
@@ -287,6 +296,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						'reference_name': d.reference_name,
 						'difference_amount': d.difference_amount,
 						'difference_account': d.difference_account,
+						'gain_loss_posting_date': d.gain_loss_posting_date
 					});
 				}
 			});
