@@ -186,6 +186,7 @@ class TestAsset(AssetSetup):
 	def test_is_fixed_asset_set(self):
 		asset = create_asset(is_existing_asset=1)
 		doc = frappe.new_doc("Purchase Invoice")
+		doc.company = "_Test Company"
 		doc.supplier = "_Test Supplier"
 		doc.append("items", {"item_code": "Macbook Pro", "qty": 1, "asset": asset.name})
 
@@ -520,7 +521,8 @@ class TestAsset(AssetSetup):
 		pr.submit()
 
 		expected_gle = (
-			("Asset Received But Not Billed - _TC", 0.0, 5250.0),
+			("_Test Account Shipping Charges - _TC", 0.0, 250.0),
+			("Asset Received But Not Billed - _TC", 0.0, 5000.0),
 			("CWIP Account - _TC", 5250.0, 0.0),
 		)
 
@@ -539,9 +541,8 @@ class TestAsset(AssetSetup):
 		expected_gle = (
 			("_Test Account Service Tax - _TC", 250.0, 0.0),
 			("_Test Account Shipping Charges - _TC", 250.0, 0.0),
-			("Asset Received But Not Billed - _TC", 5250.0, 0.0),
+			("Asset Received But Not Billed - _TC", 5000.0, 0.0),
 			("Creditors - _TC", 0.0, 5500.0),
-			("Expenses Included In Asset Valuation - _TC", 0.0, 250.0),
 		)
 
 		pi_gle = frappe.db.sql(
