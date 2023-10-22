@@ -368,6 +368,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 					args.forEach(d => {
 						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
 							"difference_account", d.difference_account);
+						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
+							"gain_loss_posting_date", d.gain_loss_posting_date);
 
 >>>>>>> 5323bb7bee (refactor: introduce fields in popup)
 					});
