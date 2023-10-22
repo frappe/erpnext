@@ -332,7 +332,7 @@ class PurchaseReceipt(BuyingController):
 		def validate_account(account_type):
 			frappe.throw(_("{0} account not found while submitting purchase receipt").format(account_type))
 
-		def make_item_asset_inward_entries(item, stock_value_diff, stock_asset_account_name):
+		def make_item_asset_inward_gl_entry(item, stock_value_diff, stock_asset_account_name):
 			account_currency = get_account_currency(stock_asset_account_name)
 
 			if not stock_asset_account_name:
@@ -356,7 +356,6 @@ class PurchaseReceipt(BuyingController):
 			)
 			account_currency = get_account_currency(account)
 
-			outgoing_amount = item.base_net_amount
 			# GL Entry for from warehouse or Stock Received but not billed
 			# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 			credit_amount = (
@@ -365,6 +364,7 @@ class PurchaseReceipt(BuyingController):
 				else flt(item.net_amount, item.precision("net_amount"))
 			)
 
+			outgoing_amount = item.base_net_amount
 			if self.is_internal_transfer() and item.valuation_rate:
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
@@ -381,7 +381,7 @@ class PurchaseReceipt(BuyingController):
 					credit=0.0,
 					remarks=remarks,
 					against_account=stock_asset_account_name,
-					debit_in_account_currency=-1 * credit_amount,
+					debit_in_account_currency=-1 * flt(outgoing_amount, item.precision("base_net_amount")),
 					account_currency=account_currency,
 					item=item,
 				)
@@ -569,7 +569,11 @@ class PurchaseReceipt(BuyingController):
 						account_type, asset_category=d.asset_category, company=self.company
 					)
 
-					stock_value_diff = flt(d.net_amount) + flt(d.item_tax_amount / self.conversion_rate)
+					stock_value_diff = (
+						flt(d.net_amount)
+						+ flt(d.item_tax_amount / self.conversion_rate)
+						+ flt(d.landed_cost_voucher_amount)
+					)
 				elif warehouse_account.get(d.warehouse):
 					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
 					stock_asset_account_name = warehouse_account[d.warehouse]["account"]
@@ -589,7 +593,7 @@ class PurchaseReceipt(BuyingController):
 						continue
 
 				if (flt(d.valuation_rate) or self.is_return or d.is_fixed_asset) and flt(d.qty):
-					make_item_asset_inward_entries(d, stock_value_diff, stock_asset_account_name)
+					make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
 					make_stock_received_but_not_billed_entry(d)
 					make_landed_cost_gl_entries(d)
 					make_rate_difference_entry(d)
