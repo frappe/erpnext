@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+import requests
 
 import json
 from typing import TYPE_CHECKING, List, Union
@@ -315,7 +316,6 @@ class WebsiteItem(WebsiteGenerator):
 			self.item_code, skip_quotation_creation=True
 		)
 
-	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
 		self.set("website_specifications", [])
 		if self.item_group:
@@ -467,3 +467,96 @@ def make_website_item(doc: "Item", save: bool = True) -> Union["WebsiteItem", Li
 	insert_item_to_index(website_item)
 
 	return [website_item.name, website_item.web_item_name]
+
+
+import requests
+import json
+from datetime import datetime
+
+def save_to_prom(doc, token):
+	headers = {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'Authorization': 'Bearer {}'.format(token)
+	}
+	product = requests.get(
+		"https://my.prom.ua/api/v1/products/by_external_id/{}".format(doc['name']),
+		headers=headers
+		).json().get('product')
+	if product:
+		presence_match = {
+			'+': 'available',
+			'-': 'not_available'
+		}
+		body = [{
+		'id': product['id'],
+		'price': doc['price_value']
+		}]
+		if doc.get('discount') and doc.get('discount_date_from') and doc.get('discount_date_to'):
+			body[0]['discount'] = {}
+			date_from = datetime.strptime(doc['discount_date_from'], "%Y-%m-%d")
+			date_to = datetime.strptime(doc['discount_date_to'], "%Y-%m-%d")
+			body[0]['discount']['date_start'] = date_from.strftime("%d.%m.%Y")
+			body[0]['discount']['date_end'] = date_to.strftime("%d.%m.%Y")
+			if doc['discount'][-1] == '%':
+				body[0]['discount']['value'] = float(doc['discount'][:-1])
+				body[0]['discount']['type'] = 'percent'
+			else:
+				body[0]['discount']['value'] = int(doc['discount'])
+				body[0]['discount']['type'] = 'amount'
+		else:
+			body[0]['discount'] = {}
+		# frappe.msgprint(f"{body[0]['discount']}")
+		# Availability
+		try:
+			order_days = int(doc['availability'])
+			body[0]['presence'] = "order"
+		except ValueError:
+			body[0]['presence'] = presence_match[doc['availability']]
+		# Name, description and keywords in ukrainian
+		if doc['translation']:
+			for i in doc['translation']:
+				if i['language'] == 'ru':
+					body[0]['name'] = i['specific_name']
+					body[0]['description'] = i['specific_description']
+					body[0]['keywords'] = i['search_requests']
+		# Wholesale prises
+		if doc['wholesale_price']:
+			body[0]['prices'] = [{'price':int(i['price']), 'minimum_order_quantity': int(i['minimum_order_quantity'])} for i in doc['wholesale_price']]
+		else:
+			body[0]['prices'] = []
+		resp = requests.post(
+		'https://my.prom.ua/api/v1/products/edit',
+		data=json.dumps(body),
+		headers=headers
+		).json()
+		if resp.get('errors'):
+			frappe.msgprint(f"Errors with wholesale prices or discount value/date. \
+		   Please, check if infomation is valid.")
+		else:
+			frappe.msgprint("Prices was successfully saved.")
+		body = {
+			'product_id': str(product['id']),
+			"lang": "uk",
+			"name": doc['web_item_name'],
+			"keywords": doc['search_terms'],
+			"description": doc['description']
+		}
+		resp = requests.put(
+			'https://my.prom.ua/api/v1/products/translation',
+			data=json.dumps(body),
+			headers=headers
+			).json()
+		
+		return True
+	else:
+		frappe.msgprint("Product is not found on Prom. You should import Item first.")
+		return None
+
+@frappe.whitelist()
+def save_to_prom_button(doc):
+	prom_settings = frappe.get_doc("Prom Settings", "Prom Settings")
+	token = prom_settings.get_password("prom_token")
+	doc = json.loads(doc)
+	success = save_to_prom(doc, token)
+	return f"{success}"
