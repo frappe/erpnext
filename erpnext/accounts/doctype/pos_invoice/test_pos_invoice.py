@@ -5,8 +5,6 @@ import copy
 import unittest
 
 import frappe
-from frappe import _
-from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -121,64 +119,70 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(inv.grand_total, 5474.0)
 
 	def test_tax_calculation_with_item_tax_template(self):
-		import json
+		inv = create_pos_invoice(qty=84, rate=4.6, do_not_save=1)
+		item_row = inv.get("items")[0]
 
-		from erpnext.stock.get_item_details import get_item_details
-
-		# set tax template in item
-		item = frappe.get_cached_doc("Item", "_Test Item")
-		item.set(
-			"taxes",
-			[
-				{
-					"item_tax_template": "_Test Account Excise Duty @ 15 - _TC",
-					"valid_from": add_days(nowdate(), -5),
-				}
-			],
-		)
-		item.save()
-
-		# create POS invoice with item
-		pos_inv = create_pos_invoice(qty=84, rate=4.6, do_not_save=True)
-		item_details = get_item_details(
-			doc=pos_inv,
-			args={
-				"item_code": item.item_code,
-				"company": pos_inv.company,
-				"doctype": "POS Invoice",
-				"conversion_rate": 1.0,
-			},
-		)
-		tax_map = json.loads(item_details.item_tax_rate)
-		for tax in tax_map:
-			pos_inv.append(
-				"taxes",
-				{
-					"charge_type": "On Net Total",
-					"account_head": tax,
-					"rate": tax_map[tax],
-					"description": "Test",
-					"cost_center": "_Test Cost Center - _TC",
-				},
-			)
-		pos_inv.submit()
-		pos_inv.load_from_db()
-
-		# check if correct tax values are applied from tax template
-		self.assertEqual(pos_inv.net_total, 386.4)
-
-		expected_taxes = [
-			{
-				"tax_amount": 57.96,
-				"total": 444.36,
-			},
+		add_items = [
+			(54, "_Test Account Excise Duty @ 12 - _TC"),
+			(288, "_Test Account Excise Duty @ 15 - _TC"),
+			(144, "_Test Account Excise Duty @ 20 - _TC"),
+			(430, "_Test Item Tax Template 1 - _TC"),
 		]
+		for qty, item_tax_template in add_items:
+			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.qty = qty
+			item_row_copy.item_tax_template = item_tax_template
+			inv.append("items", item_row_copy)
 
-		for i in range(len(expected_taxes)):
-			for key in expected_taxes[i]:
-				self.assertEqual(expected_taxes[i][key], pos_inv.get("taxes")[i].get(key))
+		inv.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Excise Duty - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Excise Duty",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 11,
+			},
+		)
+		inv.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Education Cess - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Education Cess",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 0,
+			},
+		)
+		inv.append(
+			"taxes",
+			{
+				"account_head": "_Test Account S&H Education Cess - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "S&H Education Cess",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 3,
+			},
+		)
+		inv.insert()
 
-		self.assertEqual(pos_inv.get("base_total_taxes_and_charges"), 57.96)
+		self.assertEqual(inv.net_total, 4600)
+
+		self.assertEqual(inv.get("taxes")[0].tax_amount, 502.41)
+		self.assertEqual(inv.get("taxes")[0].total, 5102.41)
+
+		self.assertEqual(inv.get("taxes")[1].tax_amount, 197.80)
+		self.assertEqual(inv.get("taxes")[1].total, 5300.21)
+
+		self.assertEqual(inv.get("taxes")[2].tax_amount, 375.36)
+		self.assertEqual(inv.get("taxes")[2].total, 5675.57)
+
+		self.assertEqual(inv.grand_total, 5675.57)
+		self.assertEqual(inv.rounding_adjustment, 0.43)
+		self.assertEqual(inv.rounded_total, 5676.0)
 
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		inv = create_pos_invoice(qty=1, rate=75, do_not_save=True)
