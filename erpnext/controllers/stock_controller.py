@@ -670,7 +670,6 @@ class StockController(AccountsController):
 	def validate_internal_transfer(self):
 		if self.doctype in ("Sales Invoice", "Delivery Note", "Purchase Invoice", "Purchase Receipt"):
 			if self.is_internal_transfer():
-				print("Inininininin")
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
