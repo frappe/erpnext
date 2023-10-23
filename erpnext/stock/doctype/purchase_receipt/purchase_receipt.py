@@ -491,7 +491,6 @@ class PurchaseReceipt(BuyingController):
 				return
 
 			# divisional loss adjustment
-			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 			valuation_amount_as_per_doc = (
 				flt(outgoing_amount, d.precision("base_net_amount"))
 				+ flt(item.landed_cost_voucher_amount)
@@ -505,13 +504,10 @@ class PurchaseReceipt(BuyingController):
 			)
 
 			if divisional_loss:
-				if self.is_return or flt(item.item_tax_amount):
-					loss_account = expenses_included_in_valuation
-				else:
-					loss_account = (
-						self.get_company_default("default_expense_account", ignore_validation=True)
-						or stock_asset_rbnb
-					)
+				loss_account = (
+					self.get_company_default("default_expense_account", ignore_validation=True)
+					or stock_asset_rbnb
+				)
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", self.company, "cost_center"
@@ -684,10 +680,8 @@ class PurchaseReceipt(BuyingController):
 
 		if negative_expense_to_be_booked and valuation_tax:
 			# Backward compatibility:
-			# If expenses_included_in_valuation account has been credited in against PI
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
-			# introduced in 2014 for backward compatibility of expenses already booked in expenses_included_in_valuation account
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
