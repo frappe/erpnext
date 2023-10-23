@@ -67,7 +67,7 @@ def setup_mappers(mappers):
 		mapping["finance_costs"] = []
 		mapping["finance_costs_adjustments"] = []
 		doc = frappe.get_doc("Cash Flow Mapper", mapping["name"])
-		mapping_names = [item.name for item in doc.accounts]
+		mapping_names = [item.mapping for item in doc.accounts]
 
 		if not mapping_names:
 			continue
