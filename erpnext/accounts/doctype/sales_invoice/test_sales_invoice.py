@@ -2540,7 +2540,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 		# tear down
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
 
 	def test_internal_transfer_gl_entry(self):
 		si = create_sales_invoice(
