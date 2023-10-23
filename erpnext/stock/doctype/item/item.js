@@ -175,7 +175,9 @@ frappe.ui.form.on("Item", {
 		frappe.call({
 			method: "erpnext.stock.doctype.item.item.get_asset_naming_series",
 			callback: function(r) {
-				frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
+				if (frm.doc.is_fixed_asset) {
+					frm.set_value("is_stock_item", 0);
+				}
 				frm.events.set_asset_naming_series(frm, r.message);
 			}
 		});
