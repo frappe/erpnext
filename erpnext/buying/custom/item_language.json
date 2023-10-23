@@ -1,0 +1,32 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Item Language",
+ "links": [],
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2023-02-06 16:25:58.062530",
+   "default_value": null,
+   "doc_type": "Item Language",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2023-02-06 16:25:58.062530",
+   "modified_by": "Administrator",
+   "module": null,
+   "name": "Item Language-main-search_fields",
+   "owner": "Administrator",
+   "property": "search_fields",
+   "property_type": "Data",
+   "row_name": null,
+   "value": "language,specific_name"
+  }
+ ],
+ "sync_on_migrate": 1
+}

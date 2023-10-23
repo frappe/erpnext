@@ -1,0 +1,35 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Item Barcode",
+ "links": [],
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2022-08-20 01:01:53.445711",
+   "default_value": null,
+   "doc_type": "Item Barcode",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "barcode",
+   "idx": 0,
+   "is_system_generated": 1,
+   "modified": "2022-08-20 01:01:53.445711",
+   "modified_by": "Administrator",
+   "module": null,
+   "name": "Item Barcode-barcode-hidden",
+   "owner": "Administrator",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "hidden",
+   "property_type": "Check",
+   "row_name": null,
+   "value": "0"
+  }
+ ],
+ "sync_on_migrate": 1
+}

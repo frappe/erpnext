@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:IMPORT-ST-{#####}",
+ "creation": "2023-06-23 12:42:17.785107",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "total",
+  "status",
+  "logs",
+  "import_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "total",
+   "fieldtype": "Int",
+   "label": "Total productes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Processing\nSuccess\nFatal\nPartial"
+  },
+  {
+   "fieldname": "logs",
+   "fieldtype": "Long Text",
+   "label": "Logs",
+   "read_only": 1
+  },
+  {
+   "fieldname": "import_id",
+   "fieldtype": "Data",
+   "label": "Import id",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-07-20 14:21:19.628359",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Prom Import Status",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Processing"
+  },
+  {
+   "color": "Green",
+   "title": "Success"
+  },
+  {
+   "color": "Red",
+   "title": "Fatal"
+  },
+  {
+   "color": "Orange",
+   "title": "Partial"
+  }
+ ]
+}

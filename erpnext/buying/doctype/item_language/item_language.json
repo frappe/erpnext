@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-02-06 16:10:47.299783",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "language",
+  "specific_name",
+  "specific_description",
+  "search_requests"
+ ],
+ "fields": [
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Language",
+   "options": "Language",
+   "reqd": 1
+  },
+  {
+   "fieldname": "specific_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Specific name"
+  },
+  {
+   "fieldname": "specific_description",
+   "fieldtype": "Text Editor",
+   "label": "Specific description"
+  },
+  {
+   "fieldname": "search_requests",
+   "fieldtype": "Text",
+   "label": "Search requests"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-02-07 12:13:04.413878",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Item Language",
+ "owner": "Administrator",
+ "permissions": [],
+ "search_fields": "language",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-03-14 16:20:38.520827",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "erp_key",
+  "erp_secret",
+  "url",
+  "prom_token",
+  "actions_section",
+  "import_prom_prod",
+  "export_prom_prod",
+  "get_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Base url",
+   "reqd": 1
+  },
+  {
+   "fieldname": "prom_token",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Token",
+   "reqd": 1
+  },
+  {
+   "fieldname": "import_prom_prod",
+   "fieldtype": "Button",
+   "label": "Import Prom products"
+  },
+  {
+   "fieldname": "actions_section",
+   "fieldtype": "Section Break",
+   "label": "Actions"
+  },
+  {
+   "fieldname": "erp_key",
+   "fieldtype": "Data",
+   "label": "ERP key"
+  },
+  {
+   "fieldname": "erp_secret",
+   "fieldtype": "Password",
+   "label": "ERP secret"
+  },
+  {
+   "fieldname": "export_prom_prod",
+   "fieldtype": "Button",
+   "label": "Export products to prom"
+  },
+  {
+   "fieldname": "get_order",
+   "fieldtype": "Button",
+   "label": "Get last order"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-06-23 12:17:00.077193",
+ "modified_by": "Administrator",
+ "module": "Integrations",
+ "name": "Prom Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
