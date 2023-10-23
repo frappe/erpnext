@@ -75,16 +75,13 @@
   "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
   "stock_adjustment_account",
-  "default_in_transit_warehouse",
   "column_break_32",
   "stock_received_but_not_billed",
   "default_provisional_account",
-  "expenses_included_in_valuation",
   "fixed_asset_defaults",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
   "series_for_depreciation_entry",
-  "expenses_included_in_asset_valuation",
   "column_break_40",
   "disposal_account",
   "depreciation_cost_center",
@@ -467,14 +464,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "expenses_included_in_valuation",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Expenses Included In Valuation",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "label": "Accumulated Depreciation Account",
@@ -492,12 +481,6 @@
    "fieldname": "series_for_depreciation_entry",
    "fieldtype": "Data",
    "label": "Series for Asset Depreciation Entry (Journal Entry)"
-  },
-  {
-   "fieldname": "expenses_included_in_asset_valuation",
-   "fieldtype": "Link",
-   "label": "Expenses Included In Asset Valuation",
-   "options": "Account"
   },
   {
    "fieldname": "column_break_40",
@@ -728,7 +711,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-07-07 05:41:41.537256",
+ "modified": "2023-10-23 10:19:24.322898",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

@@ -592,13 +592,12 @@ class PurchaseInvoice(BuyingController):
 
 	def get_gl_entries(self, warehouse_account=None):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
+		self.asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
-			self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-			self.asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
 		else:
 			self.stock_received_but_not_billed = None
-			self.expenses_included_in_valuation = None
 
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
@@ -921,40 +920,6 @@ class PurchaseInvoice(BuyingController):
 										item=item,
 									)
 								)
-
-					# If asset is bought through this document and not linked to PR
-					if self.update_stock and item.landed_cost_voucher_amount:
-						expenses_included_in_asset_valuation = self.get_company_default(
-							"expenses_included_in_asset_valuation"
-						)
-						# Amount added through landed-cost-voucher
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": expenses_included_in_asset_valuation,
-									"against": expense_account,
-									"cost_center": item.cost_center,
-									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"credit": flt(item.landed_cost_voucher_amount),
-									"project": item.project or self.project,
-								},
-								item=item,
-							)
-						)
-
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": expense_account,
-									"against": expenses_included_in_asset_valuation,
-									"cost_center": item.cost_center,
-									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"debit": flt(item.landed_cost_voucher_amount),
-									"project": item.project or self.project,
-								},
-								item=item,
-							)
-						)
 
 						# update gross amount of asset bought through this document
 						assets = frappe.db.get_all(
