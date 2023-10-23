@@ -833,13 +833,15 @@ def create_stock_reservation_entries_for_so_items(
 
 		# Skip if Non-Stock Item.
 		if not is_stock_item:
-			frappe.msgprint(
-				_("Row #{0}: Stock cannot be reserved for a non-stock Item {1}").format(
-					item.idx, frappe.bold(item.item_code)
-				),
-				title=_("Stock Reservation"),
-				indicator="yellow",
-			)
+			if not from_voucher_type:
+				frappe.msgprint(
+					_("Row #{0}: Stock cannot be reserved for a non-stock Item {1}").format(
+						item.idx, frappe.bold(item.item_code)
+					),
+					title=_("Stock Reservation"),
+					indicator="yellow",
+				)
+
 			item.db_set("reserve_stock", 0)
 			continue
 
@@ -858,13 +860,15 @@ def create_stock_reservation_entries_for_so_items(
 
 		# Stock is already reserved for the item, notify the user and skip the item.
 		if unreserved_qty <= 0:
-			frappe.msgprint(
-				_("Row #{0}: Stock is already reserved for the Item {1}.").format(
-					item.idx, frappe.bold(item.item_code)
-				),
-				title=_("Stock Reservation"),
-				indicator="yellow",
-			)
+			if not from_voucher_type:
+				frappe.msgprint(
+					_("Row #{0}: Stock is already reserved for the Item {1}.").format(
+						item.idx, frappe.bold(item.item_code)
+					),
+					title=_("Stock Reservation"),
+					indicator="yellow",
+				)
+
 			continue
 
 		available_qty_to_reserve = get_available_qty_to_reserve(item.item_code, item.warehouse)
@@ -872,7 +876,7 @@ def create_stock_reservation_entries_for_so_items(
 		# No stock available to reserve, notify the user and skip the item.
 		if available_qty_to_reserve <= 0:
 			frappe.msgprint(
-				_("Row #{0}: No available stock to reserve for the Item {1} in Warehouse {2}.").format(
+				_("Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}.").format(
 					item.idx, frappe.bold(item.item_code), frappe.bold(item.warehouse)
 				),
 				title=_("Stock Reservation"),
@@ -898,7 +902,9 @@ def create_stock_reservation_entries_for_so_items(
 
 		# Partial Reservation
 		if qty_to_be_reserved < unreserved_qty:
-			if not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve")):
+			if not from_voucher_type and (
+				not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve"))
+			):
 				msg = _("Row #{0}: Only {1} available to reserve for the Item {2}").format(
 					item.idx,
 					frappe.bold(str(qty_to_be_reserved / item.conversion_factor) + " " + item.uom),
