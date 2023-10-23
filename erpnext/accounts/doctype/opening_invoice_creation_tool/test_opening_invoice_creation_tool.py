@@ -218,6 +218,7 @@ def make_customer(customer=None):
 			"territory": "All Territories",
 		}
 	)
+
 	if not frappe.db.exists("Customer", customer_name):
 		customer.insert(ignore_permissions=True)
 		return customer.name

@@ -116,7 +116,7 @@ class ReceivablePayableReport(object):
 		# build all keys, since we want to exclude vouchers beyond the report date
 		for ple in self.ple_entries:
 			# get the balance object for voucher_type
-			key = (ple.voucher_type, ple.voucher_no, ple.party)
+			key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
 			if not key in self.voucher_balance:
 				self.voucher_balance[key] = frappe._dict(
 					voucher_type=ple.voucher_type,
@@ -183,7 +183,7 @@ class ReceivablePayableReport(object):
 			):
 				return
 
-		key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
+		key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)
 
 		# If payment is made against credit note
 		# and credit note is made against a Sales Invoice
@@ -192,13 +192,13 @@ class ReceivablePayableReport(object):
 			if ple.against_voucher_no in self.return_entries:
 				return_against = self.return_entries.get(ple.against_voucher_no)
 				if return_against:
-					key = (ple.against_voucher_type, return_against, ple.party)
+					key = (ple.account, ple.against_voucher_type, return_against, ple.party)
 
 		row = self.voucher_balance.get(key)
 
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
-			row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
+			row = self.voucher_balance.get((ple.account, ple.voucher_type, ple.voucher_no, ple.party))
 
 		row.party_type = ple.party_type
 		return row
@@ -801,7 +801,7 @@ class ReceivablePayableReport(object):
 			self.qb_selection_filter.append(self.filters.party_type == self.ple.party_type)
 
 		if self.filters.get("party"):
-			self.qb_selection_filter.append(self.filters.party == self.ple.party)
+			self.qb_selection_filter.append(self.ple.party.isin(self.filters.party))
 
 		if self.filters.party_account:
 			self.qb_selection_filter.append(self.ple.account == self.filters.party_account)

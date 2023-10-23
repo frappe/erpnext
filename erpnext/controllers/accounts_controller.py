@@ -13,6 +13,7 @@ from frappe.utils import (
 	add_days,
 	add_months,
 	cint,
+	comma_and,
 	flt,
 	fmt_money,
 	formatdate,
@@ -181,6 +182,17 @@ class AccountsController(TransactionBase):
 		self.validate_party_account_currency()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
+			if invalid_advances := [
+				x for x in self.advances if not x.reference_type or not x.reference_name
+			]:
+				frappe.throw(
+					_(
+						"Rows: {0} in {1} section are Invalid. Reference Name should point to a valid Payment Entry or Journal Entry."
+					).format(
+						frappe.bold(comma_and([x.idx for x in invalid_advances])), frappe.bold(_("Advance Payments"))
+					)
+				)
+
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
@@ -568,6 +580,17 @@ class AccountsController(TransactionBase):
 			elif self.currency == self.company_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
+				self.conversion_rate = get_exchange_rate(
+					self.currency, self.company_currency, transaction_date, args
+				)
+
+			if (
+				self.currency
+				and buying_or_selling == "Buying"
+				and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
+				and self.doctype == "Purchase Invoice"
+			):
+				self.use_transaction_date_exchange_rate = True
 				self.conversion_rate = get_exchange_rate(
 					self.currency, self.company_currency, transaction_date, args
 				)

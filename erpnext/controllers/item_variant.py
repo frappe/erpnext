@@ -9,6 +9,8 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, flt
 
+from erpnext.utilities.product import get_item_codes_by_attributes
+
 
 class ItemVariantExistsError(frappe.ValidationError):
 	pass
@@ -24,7 +26,8 @@ class ItemTemplateCannotHaveStock(frappe.ValidationError):
 
 @frappe.whitelist()
 def get_variant(template, args=None, variant=None, manufacturer=None, manufacturer_part_no=None):
-	"""Validates Attributes and their Values, then looks for an exactly
+	"""
+	Validates Attributes and their Values, then looks for an exactly
 	matching Item Variant
 
 	:param item: Template Item
@@ -34,13 +37,14 @@ def get_variant(template, args=None, variant=None, manufacturer=None, manufactur
 
 	if item_template.variant_based_on == "Manufacturer" and manufacturer:
 		return make_variant_based_on_manufacturer(item_template, manufacturer, manufacturer_part_no)
-	else:
-		if isinstance(args, str):
-			args = json.loads(args)
 
-		if not args:
-			frappe.throw(_("Please specify at least one attribute in the Attributes table"))
-		return find_variant(template, args, variant)
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	if not args:
+		frappe.throw(_("Please specify at least one attribute in the Attributes table"))
+
+	return find_variant(template, args, variant)
 
 
 def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part_no):
@@ -157,17 +161,6 @@ def get_attribute_values(item):
 
 
 def find_variant(template, args, variant_item_code=None):
-	conditions = [
-		"""(iv_attribute.attribute={0} and iv_attribute.attribute_value={1})""".format(
-			frappe.db.escape(key), frappe.db.escape(cstr(value))
-		)
-		for key, value in args.items()
-	]
-
-	conditions = " or ".join(conditions)
-
-	from erpnext.e_commerce.variant_selector.utils import get_item_codes_by_attributes
-
 	possible_variants = [
 		i for i in get_item_codes_by_attributes(args, template) if i != variant_item_code
 	]

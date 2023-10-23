@@ -2060,6 +2060,103 @@ class TestPurchaseReceipt(FrappeTestCase):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
+	def test_purchase_return_status_with_debit_note(self):
+		pr = make_purchase_receipt(rejected_qty=10, received_qty=10, rate=100, do_not_save=1)
+		pr.items[0].qty = 0
+		pr.items[0].stock_qty = 0
+		pr.submit()
+
+		return_pr = make_purchase_receipt(
+			is_return=1,
+			return_against=pr.name,
+			qty=0,
+			rejected_qty=10 * -1,
+			received_qty=10 * -1,
+			do_not_save=1,
+		)
+		return_pr.items[0].qty = 0.0
+		return_pr.items[0].stock_qty = 0.0
+		return_pr.submit()
+
+		self.assertEqual(return_pr.status, "To Bill")
+
+		pi = make_purchase_invoice(return_pr.name)
+		pi.submit()
+
+		return_pr.reload()
+		self.assertEqual(return_pr.status, "Completed")
+
+	def test_purchase_return_with_zero_rate(self):
+		company = "_Test Company with perpetual inventory"
+
+		# Step - 1: Create Item
+		item, warehouse = (
+			make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name,
+			"Stores - TCP1",
+		)
+
+		# Step - 2: Create Stock Entry (Material Receipt)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		se = make_stock_entry(
+			purpose="Material Receipt",
+			item_code=item,
+			qty=100,
+			basic_rate=100,
+			to_warehouse=warehouse,
+			company=company,
+		)
+
+		# Step - 3: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=5,
+			rate=0,
+			warehouse=warehouse,
+			company=company,
+		)
+
+		# Step - 4: Create Purchase Return
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.save()
+		pr_return.submit()
+
+		sl_entries = get_sl_entries(pr_return.doctype, pr_return.name)
+		gl_entries = get_gl_entries(pr_return.doctype, pr_return.name)
+
+		# Test - 1: SLE Stock Value Difference should be equal to Qty * Average Rate
+		average_rate = (
+			(se.items[0].qty * se.items[0].basic_rate) + (pr.items[0].qty * pr.items[0].rate)
+		) / (se.items[0].qty + pr.items[0].qty)
+		expected_stock_value_difference = pr_return.items[0].qty * average_rate
+		self.assertEqual(
+			flt(sl_entries[0].stock_value_difference, 2), flt(expected_stock_value_difference, 2)
+		)
+
+		# Test - 2: GL Entries should be created for Stock Value Difference
+		self.assertEqual(len(gl_entries), 2)
+
+		# Test - 3: SLE Stock Value Difference should be equal to Debit or Credit of GL Entries.
+		for entry in gl_entries:
+			self.assertEqual(abs(entry.debit + entry.credit), abs(sl_entries[0].stock_value_difference))
+
+	def non_internal_transfer_purchase_receipt(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		pr_doc = make_purchase_receipt(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", pr_doc.company)
+		pr_doc.items[0].db_set("target_warehouse", "warehouse")
+
+		pr_doc.reload()
+
+		self.assertEqual(pr_doc.items[0].from_warehouse, warehouse.name)
+
+		pr_doc.save()
+		pr_doc.reload()
+		self.assertFalse(pr_doc.items[0].from_warehouse)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

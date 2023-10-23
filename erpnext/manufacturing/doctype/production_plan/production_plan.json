@@ -228,7 +228,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled, the system won't create material requests for the available items.",
+   "description": "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
    "label": "Ignore Available Stock"
@@ -422,7 +422,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-28 13:37:43.926686",
+ "modified": "2023-09-29 11:41:03.246059",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

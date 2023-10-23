@@ -223,9 +223,6 @@ execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Catego
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.fix_invoice_statuses
-erpnext.patches.v13_0.create_website_items #30-09-2021
-erpnext.patches.v13_0.populate_e_commerce_settings
-erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v14_0.update_opportunity_currency_fields
@@ -242,7 +239,6 @@ erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.healthcare_deprecation_warning
 erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
-erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v14_0.migrate_crm_settings
 erpnext.patches.v13_0.wipe_serial_no_field_for_0_qty
@@ -257,6 +253,7 @@ erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v15_0.delete_taxjar_doctypes
+erpnext.patches.v15_0.delete_ecommerce_doctypes
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 erpnext.patches.v15_0.saudi_depreciation_warning
@@ -277,8 +274,6 @@ erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v14_0.migrate_cost_center_allocations
-erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
-erpnext.patches.v13_0.shopping_cart_to_ecommerce
 erpnext.patches.v13_0.update_reserved_qty_closed_wo
 erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.delete_amazon_mws_doctype
@@ -288,7 +283,6 @@ erpnext.patches.v14_0.update_batch_valuation_flag
 erpnext.patches.v14_0.delete_non_profit_doctypes
 erpnext.patches.v13_0.set_return_against_in_pos_invoice_references
 erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
-erpnext.patches.v13_0.copy_custom_field_filters_to_website_item
 erpnext.patches.v13_0.change_default_item_manufacturer_fieldtype
 erpnext.patches.v13_0.requeue_recoverable_reposts
 erpnext.patches.v14_0.discount_accounting_separation
@@ -344,5 +338,7 @@ erpnext.patches.v15_0.delete_woocommerce_settings_doctype
 erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
 erpnext.patches.v14_0.update_invoicing_period_in_subscription
 execute:frappe.delete_doc("Page", "welcome-to-erpnext")
+erpnext.patches.v15_0.delete_payment_gateway_doctypes
+erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

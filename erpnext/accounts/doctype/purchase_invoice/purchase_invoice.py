@@ -33,7 +33,7 @@ from erpnext.accounts.general_ledger import (
 )
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
-from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import validate_account_head
@@ -281,9 +281,6 @@ class PurchaseInvoice(BuyingController):
 			# in case of auto inventory accounting,
 			# expense account is always "Stock Received But Not Billed" for a stock item
 			# except opening entry, drop-ship entry and fixed asset items
-			if item.item_code:
-				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
-
 			if (
 				auto_accounting_for_stock
 				and item.item_code in stock_items
@@ -350,22 +347,26 @@ class PurchaseInvoice(BuyingController):
 							frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 						item.expense_account = stock_not_billed_account
-
-			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
+			elif item.is_fixed_asset and item.pr_detail:
+				if not asset_received_but_not_billed:
+					asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+				item.expense_account = asset_received_but_not_billed
+			elif item.is_fixed_asset:
+				account_type = (
+					"capital_work_in_progress_account"
+					if is_cwip_accounting_enabled(item.asset_category)
+					else "fixed_asset_account"
+				)
 				asset_category_account = get_asset_category_account(
-					"fixed_asset_account", item=item.item_code, company=self.company
+					account_type, item=item.item_code, company=self.company
 				)
 				if not asset_category_account:
-					form_link = get_link_to_form("Asset Category", asset_category)
+					form_link = get_link_to_form("Asset Category", item.asset_category)
 					throw(
 						_("Please set Fixed Asset Account in {} against {}.").format(form_link, self.company),
 						title=_("Missing Account"),
 					)
 				item.expense_account = asset_category_account
-			elif item.is_fixed_asset and item.pr_detail:
-				if not asset_received_but_not_billed:
-					asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
-				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -539,8 +540,9 @@ class PurchaseInvoice(BuyingController):
 			]
 			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
 			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			self.validate_for_repost()
-			self.db_set("repost_required", self.needs_repost)
+			if self.needs_repost:
+				self.validate_for_repost()
+				self.db_set("repost_required", self.needs_repost)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
@@ -586,6 +588,7 @@ class PurchaseInvoice(BuyingController):
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
 			self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+			self.asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
 		else:
 			self.stock_received_but_not_billed = None
 			self.expenses_included_in_valuation = None
@@ -596,9 +599,6 @@ class PurchaseInvoice(BuyingController):
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
 		self.make_precision_loss_gl_entry(gl_entries)
-
-		if self.check_asset_cwip_enabled():
-			self.get_asset_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
@@ -701,7 +701,11 @@ class PurchaseInvoice(BuyingController):
 				if item.item_code:
 					asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
-				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
+				if (
+					self.update_stock
+					and self.auto_accounting_for_stock
+					and (item.item_code in stock_items or item.is_fixed_asset)
+				):
 					# warehouse account
 					warehouse_debit_amount = self.make_stock_adjustment_entry(
 						gl_entries, item, voucher_wise_stock_value, account_currency
@@ -816,9 +820,7 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
-				elif not item.is_fixed_asset or (
-					item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)
-				):
+				else:
 					expense_account = (
 						item.expense_account
 						if (not item.enable_deferred_expense or self.is_return)
@@ -969,11 +971,16 @@ class PurchaseInvoice(BuyingController):
 						(item.purchase_receipt, valuation_tax_accounts),
 					)
 
+					stock_rbnb = (
+						self.asset_received_but_not_billed
+						if item.is_fixed_asset
+						else self.stock_received_but_not_billed
+					)
 					if not negative_expense_booked_in_pr:
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": self.stock_received_but_not_billed,
+									"account": stock_rbnb,
 									"against": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or _("Accounting Entry for Stock"),
@@ -988,156 +995,12 @@ class PurchaseInvoice(BuyingController):
 							item.item_tax_amount, item.precision("item_tax_amount")
 						)
 
-	def get_asset_gl_entry(self, gl_entries):
-		arbnb_account = None
-		eiiav_account = None
-		asset_eiiav_currency = None
-
-		for item in self.get("items"):
-			if item.is_fixed_asset:
-				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount / self.conversion_rate)
-				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
-
-				item_exp_acc_type = frappe.get_cached_value("Account", item.expense_account, "account_type")
-				if not item.expense_account or item_exp_acc_type not in [
-					"Asset Received But Not Billed",
-					"Fixed Asset",
-				]:
-					if not arbnb_account:
-						arbnb_account = self.get_company_default("asset_received_but_not_billed")
-					item.expense_account = arbnb_account
-
-				if not self.update_stock:
-					arbnb_currency = get_account_currency(item.expense_account)
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": item.expense_account,
-								"against": self.supplier,
-								"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-								"debit": base_asset_amount,
-								"debit_in_account_currency": (
-									base_asset_amount if arbnb_currency == self.company_currency else asset_amount
-								),
-								"cost_center": item.cost_center,
-								"project": item.project or self.project,
-							},
-							item=item,
-						)
-					)
-
-					if item.item_tax_amount:
-						if not eiiav_account or not asset_eiiav_currency:
-							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
-							asset_eiiav_currency = get_account_currency(eiiav_account)
-
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": eiiav_account,
-									"against": self.supplier,
-									"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-									"cost_center": item.cost_center,
-									"project": item.project or self.project,
-									"credit": item.item_tax_amount,
-									"credit_in_account_currency": (
-										item.item_tax_amount
-										if asset_eiiav_currency == self.company_currency
-										else item.item_tax_amount / self.conversion_rate
-									),
-								},
-								item=item,
-							)
-						)
-				else:
-					cwip_account = get_asset_account(
-						"capital_work_in_progress_account", asset_category=item.asset_category, company=self.company
-					)
-
-					cwip_account_currency = get_account_currency(cwip_account)
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": cwip_account,
-								"against": self.supplier,
-								"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-								"debit": base_asset_amount,
-								"debit_in_account_currency": (
-									base_asset_amount if cwip_account_currency == self.company_currency else asset_amount
-								),
-								"cost_center": self.cost_center,
-								"project": item.project or self.project,
-							},
-							item=item,
-						)
-					)
-
-					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-						if not eiiav_account or not asset_eiiav_currency:
-							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
-							asset_eiiav_currency = get_account_currency(eiiav_account)
-
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": eiiav_account,
-									"against": self.supplier,
-									"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-									"cost_center": item.cost_center,
-									"credit": item.item_tax_amount,
-									"project": item.project or self.project,
-									"credit_in_account_currency": (
-										item.item_tax_amount
-										if asset_eiiav_currency == self.company_currency
-										else item.item_tax_amount / self.conversion_rate
-									),
-								},
-								item=item,
-							)
-						)
-
-					# Assets are bought through this document then it will be linked to this document
-					if flt(item.landed_cost_voucher_amount):
-						if not eiiav_account:
-							eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
-
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": eiiav_account,
-									"against": cwip_account,
-									"cost_center": item.cost_center,
-									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"credit": flt(item.landed_cost_voucher_amount),
-									"project": item.project or self.project,
-								},
-								item=item,
-							)
-						)
-
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": cwip_account,
-									"against": eiiav_account,
-									"cost_center": item.cost_center,
-									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"debit": flt(item.landed_cost_voucher_amount),
-									"project": item.project or self.project,
-								},
-								item=item,
-							)
-						)
-
-					# update gross amount of assets bought through this document
-					assets = frappe.db.get_all(
-						"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
-					)
-					for asset in assets:
-						frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-						frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
-
-		return gl_entries
+		assets = frappe.db.get_all(
+			"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
+		)
+		for asset in assets:
+			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
+			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
 	def make_stock_adjustment_entry(
 		self, gl_entries, item, voucher_wise_stock_value, account_currency

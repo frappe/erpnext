@@ -17,22 +17,13 @@ pull_request_rules:
           - base=version-12
           - base=version-14
           - base=version-15
+          - base=version-16
     actions:
       close:
       comment:
           message: |
             @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
             https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
-
-  - name: Auto-close PRs on pre-release branch
-    conditions:
-      - base=version-13-pre-release
-    actions:
-      close:
-      comment:
-          message: |
-            @{{author}}, pre-release branch is not maintained anymore. Releases are directly done by merging hotfix branch to stable branches.
-
 
   - name: backport to develop
     conditions:
@@ -54,13 +45,13 @@ pull_request_rules:
         assignees:
           - "{{ author }}"
 
-  - name: backport to version-14-pre-release
+  - name: backport to version-15-hotfix
     conditions:
-      - label="backport version-14-pre-release"
+      - label="backport version-15-hotfix"
     actions:
       backport:
         branches:
-          - version-14-pre-release
+          - version-15-hotfix
         assignees:
           - "{{ author }}"
 
@@ -74,35 +65,6 @@ pull_request_rules:
         assignees:
           - "{{ author }}"
 
-  - name: backport to version-13-pre-release
-    conditions:
-      - label="backport version-13-pre-release"
-    actions:
-      backport:
-        branches:
-          - version-13-pre-release
-        assignees:
-          - "{{ author }}"
-
-  - name: backport to version-12-hotfix
-    conditions:
-      - label="backport version-12-hotfix"
-    actions:
-      backport:
-        branches:
-          - version-12-hotfix
-        assignees:
-          - "{{ author }}"
-
-  - name: backport to version-12-pre-release
-    conditions:
-      - label="backport version-12-pre-release"
-    actions:
-      backport:
-        branches:
-          - version-12-pre-release
-        assignees:
-          - "{{ author }}"
 
   - name: Automatic merge on CI success and review
     conditions:

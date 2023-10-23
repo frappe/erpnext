@@ -616,6 +616,7 @@
    "fieldname": "relieving_date",
    "fieldtype": "Date",
    "label": "Relieving Date",
+   "no_copy": 1,
    "mandatory_depends_on": "eval:doc.status == \"Left\"",
    "oldfieldname": "relieving_date",
    "oldfieldtype": "Date"
@@ -822,7 +823,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-03-30 15:57:05.174592",
+ "modified": "2023-10-04 10:57:05.174592",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

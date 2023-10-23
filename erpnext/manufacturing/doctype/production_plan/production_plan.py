@@ -1509,6 +1509,10 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
+	stock_uom, purchase_uom = frappe.db.get_value(
+		"Item", item.get("item_code"), ["stock_uom", "purchase_uom"]
+	)
+
 	locations = get_available_item_locations(
 		item.get("item_code"), warehouses, item.get("quantity"), company, ignore_validation=True
 	)
@@ -1518,6 +1522,10 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	for d in locations:
 		if required_qty <= 0:
 			return
+
+		conversion_factor = 1.0
+		if purchase_uom != stock_uom and purchase_uom == item["uom"]:
+			conversion_factor = get_uom_conversion_factor(item["item_code"], item["uom"])
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
@@ -1531,25 +1539,14 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 			}
 		)
 
-		required_qty -= quantity
+		required_qty -= quantity / conversion_factor
 		new_mr_items.append(new_dict)
 
 	# raise purchase request for remaining qty
-	if required_qty:
-		stock_uom, purchase_uom = frappe.db.get_value(
-			"Item", item["item_code"], ["stock_uom", "purchase_uom"]
-		)
 
-		if purchase_uom != stock_uom and purchase_uom == item["uom"]:
-			conversion_factor = get_uom_conversion_factor(item["item_code"], item["uom"])
-			if not (conversion_factor or frappe.flags.show_qty_in_stock_uom):
-				frappe.throw(
-					_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(
-						purchase_uom, stock_uom, item["item_code"]
-					)
-				)
-
-			required_qty = required_qty / conversion_factor
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
+	if flt(required_qty, precision) > 0:
+		required_qty = required_qty
 
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
@@ -1620,18 +1617,25 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
 
+	non_completed_production_plans = get_non_completed_production_plans()
+
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(Sum(child.quantity * IfNull(child.conversion_factor, 1.0)))
+		.select(Sum(child.required_bom_qty))
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
 			& (child.warehouse == warehouse)
 			& (table.status.notin(["Completed", "Closed"]))
 		)
-	).run()
+	)
+
+	if non_completed_production_plans:
+		query = query.where(table.name.isin(non_completed_production_plans))
+
+	query = query.run()
 
 	if not query:
 		return 0.0
@@ -1639,13 +1643,34 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	reserved_qty_for_production_plan = flt(query[0][0])
 
 	reserved_qty_for_production = flt(
-		get_reserved_qty_for_production(item_code, warehouse, check_production_plan=True)
+		get_reserved_qty_for_production(
+			item_code, warehouse, non_completed_production_plans, check_production_plan=True
+		)
 	)
 
 	if reserved_qty_for_production > reserved_qty_for_production_plan:
 		return 0.0
 
 	return reserved_qty_for_production_plan - reserved_qty_for_production
+
+
+def get_non_completed_production_plans():
+	table = frappe.qb.DocType("Production Plan")
+	child = frappe.qb.DocType("Production Plan Item")
+
+	query = (
+		frappe.qb.from_(table)
+		.inner_join(child)
+		.on(table.name == child.parent)
+		.select(table.name)
+		.where(
+			(table.docstatus == 1)
+			& (table.status.notin(["Completed", "Closed"]))
+			& (child.planned_qty > child.ordered_qty)
+		)
+	).run(as_dict=True)
+
+	return list(set([d.name for d in query]))
 
 
 def get_raw_materials_of_sub_assembly_items(
