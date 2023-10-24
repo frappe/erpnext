@@ -624,12 +624,7 @@ def update_reference_in_payment_entry(
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
 		"exchange_rate": d.exchange_rate if d.exchange_gain_loss else payment_entry.get_exchange_rate(),
-<<<<<<< HEAD
-		"exchange_gain_loss": d.exchange_gain_loss,  # only populated from invoice in case of advance allocation
-=======
 		"exchange_gain_loss": d.exchange_gain_loss,
-		"account": d.account,
->>>>>>> 23df4205f8 (fix: overallocation on Payment with PO/SO)
 	}
 
 	if d.voucher_detail_no:
