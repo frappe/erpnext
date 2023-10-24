@@ -31,9 +31,11 @@ class DeliveryTrip(Document):
 			self.validate_delivery_note_not_draft()
 		self.validate_stop_addresses()
 
+	def on_update(self):
+		self.update_delivery_notes()
+
 	def on_submit(self):
 		self.update_status()
-		self.update_delivery_notes()
 
 	def on_update_after_submit(self):
 		self.update_status()
@@ -97,18 +99,26 @@ class DeliveryTrip(Document):
 			"lr_date": self.departure_time,
 		}
 
+		delivery_notes_updated = set()
+
 		for delivery_note in delivery_notes:
 			note_doc = frappe.get_doc("Delivery Note", delivery_note)
 
 			for field, value in update_fields.items():
+				prev_value = getattr(note_doc, field)
 				value = None if delete else value
+				if prev_value != value:
+					delivery_notes_updated.add(delivery_note)
 				setattr(note_doc, field, value)
 
-			note_doc.flags.ignore_validate_update_after_submit = True
-			note_doc.save()
+			if delivery_note in delivery_notes_updated:
+				note_doc.flags.ignore_validate_update_after_submit = True
+				note_doc.save()
 
-		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
+		delivery_notes_updated = [
+			get_link_to_form("Delivery Note", note) for note in delivery_notes_updated
+		]
+		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes_updated)))
 
 	@frappe.whitelist()
 	def process_route(self, optimize):
