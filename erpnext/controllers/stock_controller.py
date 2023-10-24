@@ -76,8 +76,6 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-		update_regional_gl_entries(gl_entries, self)
-
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -1226,8 +1224,3 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 		repost_entries.append(repost_entry)
 
 	return repost_entries
-
-
-@erpnext.allow_regional
-def update_regional_gl_entries(gl_list, doc):
-	return
