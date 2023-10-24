@@ -95,6 +95,7 @@ class DeliveryTrip(Document):
 			"driver": self.driver,
 			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
+			"delivery_trip": self.name,
 			"lr_no": self.name,
 			"lr_date": self.departure_time,
 		}
