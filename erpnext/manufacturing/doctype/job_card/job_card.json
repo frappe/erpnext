@@ -434,11 +434,13 @@
   {
    "fieldname": "expected_start_date",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
    "label": "Expected Start Date"
   },
   {
    "fieldname": "expected_end_date",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
    "label": "Expected End Date"
   },
   {
@@ -511,7 +513,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-28 19:23:14.345214",
+ "modified": "2023-10-24 14:56:52.375153",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
