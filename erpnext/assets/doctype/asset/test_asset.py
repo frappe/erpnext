@@ -1789,6 +1789,7 @@ def create_asset_category():
 			"fixed_asset_account": "_Test Fixed Asset - _TC",
 			"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
 			"depreciation_expense_account": "_Test Depreciations - _TC",
+			"capital_work_in_progress_account": "CWIP Account - _TC",
 		},
 	)
 	asset_category.append(
