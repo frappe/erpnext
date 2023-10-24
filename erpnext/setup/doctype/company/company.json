@@ -75,6 +75,7 @@
   "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
   "stock_adjustment_account",
+  "default_in_transit_warehouse",
   "column_break_32",
   "stock_received_but_not_billed",
   "default_provisional_account",
