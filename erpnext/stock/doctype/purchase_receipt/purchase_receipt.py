@@ -553,7 +553,7 @@ class PurchaseReceipt(BuyingController):
 					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
 					or d.is_fixed_asset
 				):
-					return
+					continue
 
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
@@ -764,8 +764,6 @@ class PurchaseReceipt(BuyingController):
 		for pr in set(updated_pr):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
-
-		self.load_from_db()
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
