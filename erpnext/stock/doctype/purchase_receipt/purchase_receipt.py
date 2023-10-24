@@ -263,6 +263,7 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
+		self.reserve_stock_for_sales_order()
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
@@ -758,6 +759,37 @@ class PurchaseReceipt(BuyingController):
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 		self.load_from_db()
+
+	def reserve_stock_for_sales_order(self):
+		if self.is_return or not cint(
+			frappe.db.get_single_value("Stock Settings", "auto_reserve_stock_for_sales_order_on_purchase")
+		):
+			return
+
+		self.reload()  # reload to get the Serial and Batch Bundle Details
+
+		so_items_details_map = {}
+		for item in self.items:
+			if item.sales_order and item.sales_order_item:
+				item_details = {
+					"name": item.sales_order_item,
+					"item_code": item.item_code,
+					"warehouse": item.warehouse,
+					"qty_to_reserve": item.stock_qty,
+					"from_voucher_no": item.parent,
+					"from_voucher_detail_no": item.name,
+					"serial_and_batch_bundle": item.serial_and_batch_bundle,
+				}
+				so_items_details_map.setdefault(item.sales_order, []).append(item_details)
+
+		if so_items_details_map:
+			for so, items_details in so_items_details_map.items():
+				so_doc = frappe.get_doc("Sales Order", so)
+				so_doc.create_stock_reservation_entries(
+					items_details=items_details,
+					from_voucher_type="Purchase Receipt",
+					notify=True,
+				)
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
