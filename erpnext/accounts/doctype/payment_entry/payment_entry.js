@@ -152,16 +152,12 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
-<<<<<<< HEAD
-=======
-		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(frm);
 		if(frm.doc.references.find((elem) => {return elem.exchange_gain_loss != 0})) {
 			frm.add_custom_button(__("View Exchange Gain/Loss Journals"), function() {
 				frappe.set_route("List", "Journal Entry", {"voucher_type": "Exchange Gain Or Loss", "reference_name": frm.doc.name});
 			}, __('Actions'));
 
 		}
->>>>>>> 150728deaa (refactor: button on PE to filter associated Journals)
 		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
 	},
 
