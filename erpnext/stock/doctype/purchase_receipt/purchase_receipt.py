@@ -829,10 +829,6 @@ class PurchaseReceipt(BuyingController):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
-
-<<<<<<< HEAD
-def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=None):
-=======
 	def reserve_stock_for_sales_order(self):
 		if self.is_return or not cint(
 			frappe.db.get_single_value("Stock Settings", "auto_reserve_stock_for_sales_order_on_purchase")
@@ -865,8 +861,7 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 				)
 
 
-def update_billed_amount_based_on_po(po_details, update_modified=True):
->>>>>>> 64497c9228 (feat: reserve stock for SO on PR submission)
+def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=None):
 	po_billed_amt_details = get_billed_amount_against_po(po_details)
 
 	# Get all Purchase Receipt Item rows against the Purchase Order Items
