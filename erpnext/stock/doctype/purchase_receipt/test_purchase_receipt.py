@@ -927,6 +927,121 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.reload()
 		pr1.cancel()
 
+	def test_stock_transfer_from_purchase_receipt(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		pr1 = make_purchase_receipt(
+			warehouse="Stores - TCP1", company="_Test Company with perpetual inventory"
+		)
+
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+
+		pr = make_inter_company_purchase_receipt(dn1.name)
+		pr.items[0].from_warehouse = "Work In Progress - TCP1"
+		pr.items[0].warehouse = "Stores - TCP1"
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
+		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
+
+		self.assertFalse(gl_entries)
+
+		expected_sle = {"Work In Progress - TCP1": -5, "Stores - TCP1": 5}
+
+		for sle in sl_entries:
+			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
+
+		pr.cancel()
+		pr1.cancel()
+
+	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
+		create_warehouse(
+			"_Test Warehouse for Valuation",
+			company="_Test Company with perpetual inventory",
+			properties={"account": "_Test Account Stock In Hand - TCP1"},
+		)
+
+		pr1 = make_purchase_receipt(
+			warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+		)
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=50,
+			warehouse="Stores - TCP1",
+			target_warehouse="_Test Warehouse for Valuation - TCP1",
+		)
+
+		pr = make_inter_company_purchase_receipt(dn1.name)
+		pr.items[0].from_warehouse = "_Test Warehouse for Valuation - TCP1"
+		pr.items[0].warehouse = "Stores - TCP1"
+
+		pr.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Test",
+				"rate": 9,
+			},
+		)
+
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
+		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
+
+		expected_gle = [
+			["Stock In Hand - TCP1", 272.5, 0.0],
+			["_Test Account Stock In Hand - TCP1", 0.0, 250.0],
+			["_Test Account Shipping Charges - TCP1", 0.0, 22.5],
+		]
+
+		expected_sle = {"_Test Warehouse for Valuation - TCP1": -5, "Stores - TCP1": 5}
+
+		for sle in sl_entries:
+			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(gle.account, expected_gle[i][0])
+			self.assertEqual(gle.debit, expected_gle[i][1])
+			self.assertEqual(gle.credit, expected_gle[i][2])
+
+		pr.cancel()
+		pr1.cancel()
+
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
 		- Create PO
