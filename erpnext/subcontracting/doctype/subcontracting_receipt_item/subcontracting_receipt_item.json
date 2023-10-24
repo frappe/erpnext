@@ -29,7 +29,6 @@
   "rate_and_amount",
   "rate",
   "amount",
-  "recalculate_rate",
   "column_break_19",
   "rm_cost_per_qty",
   "service_cost_per_qty",
@@ -196,7 +195,6 @@
    "options": "currency",
    "print_width": "100px",
    "read_only": 1,
-   "read_only_depends_on": "eval: doc.recalculate_rate",
    "width": "100px"
   },
   {
@@ -466,18 +464,12 @@
    "fieldname": "accounting_details_section",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
-  },
-  {
-   "default": "1",
-   "fieldname": "recalculate_rate",
-   "fieldtype": "Check",
-   "label": "Recalculate Rate"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-06 18:44:45.599761",
+ "modified": "2023-09-03 17:04:21.214316",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

@@ -12,10 +12,35 @@ frappe.query_reports["TDS Payable Monthly"] = {
 			"default": frappe.defaults.get_default('company')
 		},
 		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier",
+			"fieldname":"party_type",
+			"label": __("Party Type"),
+			"fieldtype": "Select",
+			"options": ["Supplier", "Customer"],
+			"reqd": 1,
+			"default": "Supplier",
+			"on_change": function(){
+				frappe.query_report.set_filter_value("party", "");
+			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"get_options": function() {
+				var party_type = frappe.query_report.get_filter_value('party_type');
+				var party = frappe.query_report.get_filter_value('party');
+				if(party && !party_type) {
+					frappe.throw(__("Please select Party Type first"));
+				}
+				return party_type;
+			},
+			"get_query": function() {
+				return {
+					"filters": {
+						"tax_withholding_category": ["!=",""],
+					}
+				}
+			},
 		},
 		{
 			"fieldname":"from_date",

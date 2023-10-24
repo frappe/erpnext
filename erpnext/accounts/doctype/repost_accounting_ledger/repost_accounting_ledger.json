@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ACC-REPOST-{#####}",
+ "creation": "2023-07-04 13:07:32.923675",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "column_break_vpup",
+  "delete_cancelled_entries",
+  "section_break_metl",
+  "vouchers",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Repost Accounting Ledger",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vouchers",
+   "fieldtype": "Table",
+   "label": "Vouchers",
+   "options": "Repost Accounting Ledger Items"
+  },
+  {
+   "fieldname": "column_break_vpup",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_metl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_cancelled_entries",
+   "fieldtype": "Check",
+   "label": "Delete Cancelled Ledger Entries"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-09-26 14:21:27.362567",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Repost Accounting Ledger",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

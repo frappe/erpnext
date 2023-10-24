@@ -70,6 +70,13 @@
   "variant_based_on",
   "attributes",
   "accounting",
+  "deferred_accounting_section",
+  "enable_deferred_expense",
+  "no_of_months_exp",
+  "column_break_9s9o",
+  "enable_deferred_revenue",
+  "no_of_months",
+  "section_break_avcp",
   "item_defaults",
   "purchasing_tab",
   "purchase_uom",
@@ -85,10 +92,6 @@
   "delivered_by_supplier",
   "column_break2",
   "supplier_items",
-  "deferred_expense_section",
-  "enable_deferred_expense",
-  "deferred_expense_account",
-  "no_of_months_exp",
   "foreign_trade_details",
   "country_of_origin",
   "column_break_59",
@@ -99,10 +102,6 @@
   "is_sales_item",
   "column_break3",
   "max_discount",
-  "deferred_revenue",
-  "enable_deferred_revenue",
-  "deferred_revenue_account",
-  "no_of_months",
   "customer_details",
   "customer_items",
   "item_tax_section_break",
@@ -658,20 +657,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "collapsible": 1,
-   "fieldname": "deferred_revenue",
-   "fieldtype": "Section Break",
-   "label": "Deferred Revenue"
-  },
-  {
-   "depends_on": "enable_deferred_revenue",
-   "fieldname": "deferred_revenue_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Deferred Revenue Account",
-   "options": "Account"
-  },
-  {
    "default": "0",
    "fieldname": "enable_deferred_revenue",
    "fieldtype": "Check",
@@ -681,21 +666,7 @@
    "depends_on": "enable_deferred_revenue",
    "fieldname": "no_of_months",
    "fieldtype": "Int",
-   "label": "No of Months"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "deferred_expense_section",
-   "fieldtype": "Section Break",
-   "label": "Deferred Expense"
-  },
-  {
-   "depends_on": "enable_deferred_expense",
-   "fieldname": "deferred_expense_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Deferred Expense Account",
-   "options": "Account"
+   "label": "No of Months (Revenue)"
   },
   {
    "default": "0",
@@ -904,6 +875,20 @@
    "fieldname": "accounting",
    "fieldtype": "Tab Break",
    "label": "Accounting"
+  },
+  {
+   "fieldname": "column_break_9s9o",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_avcp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "deferred_accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting"
   }
  ],
  "icon": "fa fa-tag",
@@ -912,7 +897,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2023-07-14 17:18:18.658942",
+ "modified": "2023-09-11 13:46:32.688051",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -14,7 +14,8 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.utils import get_incoming_rate, get_valuation_method
 
 
 class QtyMismatchError(ValidationError):
@@ -162,10 +163,13 @@ class BuyingController(SubcontractingController):
 		purchase_doc_field = (
 			"purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
 		)
-		not_cancelled_asset = [
-			d.name
-			for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
-		]
+		not_cancelled_asset = []
+		if self.return_against:
+			not_cancelled_asset = [
+				d.name
+				for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
+			]
+
 		if self.is_return and len(not_cancelled_asset):
 			frappe.throw(
 				_(
@@ -475,6 +479,10 @@ class BuyingController(SubcontractingController):
 			if d.item_code not in stock_items:
 				continue
 
+			rejected_qty = 0.0
+			if flt(d.rejected_qty) != 0:
+				rejected_qty = flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty"))
+
 			if d.warehouse:
 				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 
@@ -495,6 +503,11 @@ class BuyingController(SubcontractingController):
 							},
 						)
 
+						if flt(rejected_qty) != 0:
+							from_warehouse_sle["actual_qty"] += -1 * rejected_qty
+							if d.rejected_serial_no:
+								from_warehouse_sle["serial_no"] += "\n" + cstr(d.rejected_serial_no).strip()
+
 						sl_entries.append(from_warehouse_sle)
 
 					sle = self.get_sl_entries(
@@ -502,9 +515,20 @@ class BuyingController(SubcontractingController):
 					)
 
 					if self.is_return:
-						outgoing_rate = get_rate_for_return(
-							self.doctype, self.name, d.item_code, self.return_against, item_row=d
-						)
+						if get_valuation_method(d.item_code) == "Moving Average":
+							previous_sle = get_previous_sle(
+								{
+									"item_code": d.item_code,
+									"warehouse": d.warehouse,
+									"posting_date": self.posting_date,
+									"posting_time": self.posting_time,
+								}
+							)
+							outgoing_rate = flt(previous_sle.get("valuation_rate"))
+						else:
+							outgoing_rate = get_rate_for_return(
+								self.doctype, self.name, d.item_code, self.return_against, item_row=d
+							)
 
 						sle.update({"outgoing_rate": outgoing_rate, "recalculate_rate": 1})
 						if d.from_warehouse:
@@ -520,6 +544,7 @@ class BuyingController(SubcontractingController):
 								else 0,
 							}
 						)
+
 					sl_entries.append(sle)
 
 					if d.from_warehouse and (
@@ -530,23 +555,30 @@ class BuyingController(SubcontractingController):
 							d, {"actual_qty": -1 * pr_qty, "warehouse": d.from_warehouse, "recalculate_rate": 1}
 						)
 
+						if flt(rejected_qty) != 0:
+							from_warehouse_sle["actual_qty"] += -1 * rejected_qty
+							if d.rejected_serial_no:
+								from_warehouse_sle["serial_no"] += "\n" + cstr(d.rejected_serial_no).strip()
+
 						sl_entries.append(from_warehouse_sle)
 
-			if flt(d.rejected_qty) != 0:
+			if flt(rejected_qty) != 0:
 				sl_entries.append(
 					self.get_sl_entries(
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": flt(flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")),
+							"actual_qty": rejected_qty,
 							"serial_no": cstr(d.rejected_serial_no).strip(),
 							"incoming_rate": 0.0,
+							"allow_zero_valuation_rate": True,
 						},
 					)
 				)
 
 		if self.get("is_old_subcontracting_flow"):
 			self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,

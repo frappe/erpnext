@@ -24,6 +24,7 @@
   "bill_for_rejected_quantity_in_purchase_invoice",
   "disable_last_purchase_rate",
   "show_pay_button",
+  "use_transaction_date_exchange_rate",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -164,6 +165,13 @@
    "fieldname": "over_order_allowance",
    "fieldtype": "Float",
    "label": "Over Order Allowance (%)"
+  },
+  {
+   "default": "0",
+   "description": "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate"
   }
  ],
  "icon": "fa fa-cog",
@@ -171,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-03-02 17:02:14.404622",
+ "modified": "2023-10-16 16:22:03.201078",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

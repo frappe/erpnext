@@ -7,7 +7,7 @@
 				{% if d.thumbnail or d.image %}
 					{{ product_image(d.thumbnail or d.image, no_border=True) }}
 				{% else %}
-					<div class="no-image-cart-item" style="min-height: 100px;">
+					<div class="no-image-cart-item" style="min-height: 50px;">
 						{{ frappe.utils.get_abbr(d.item_name) or "NA" }}
 					</div>
 				{% endif %}

@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"_38WStznya\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"t7o_K__1jB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Loan Application\",\"col\":3}},{\"id\":\"IRiNDC6w1p\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Loan\",\"col\":3}},{\"id\":\"xbbo0FYbq0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"7ZL4Bro-Vi\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yhyioTViZ3\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"oYFn4b1kSw\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan\",\"col\":4}},{\"id\":\"vZepJF5tl9\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Processes\",\"col\":4}},{\"id\":\"k-393Mjhqe\",\"type\":\"card\",\"data\":{\"card_name\":\"Disbursement and Repayment\",\"col\":4}},{\"id\":\"6crJ0DBiBJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Security\",\"col\":4}},{\"id\":\"Um5YwxVLRJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"_38WStznya\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"t7o_K__1jB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Loan Application\",\"col\":3}},{\"id\":\"IRiNDC6w1p\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Loan\",\"col\":3}},{\"id\":\"xbbo0FYbq0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"7ZL4Bro-Vi\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yhyioTViZ3\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"oYFn4b1kSw\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan\",\"col\":4}},{\"id\":\"vZepJF5tl9\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Processes\",\"col\":4}},{\"id\":\"k-393Mjhqe\",\"type\":\"card\",\"data\":{\"card_name\":\"Disbursement and Repayment\",\"col\":4}},{\"id\":\"6crJ0DBiBJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Loan Security\",\"col\":4}},{\"id\":\"Um5YwxVLRJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"g2NbPxffmo\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"UKb6Ko91Ju\",\"type\":\"paragraph\",\"data\":{\"text\":\"Loan Management module will be removed from ERPNext in Version 15. Please install the <a href=\\\"https://frappecloud.com/marketplace/apps/lending\\\" draggable=\\\"false\\\">Lending</a> app to continue using it.\",\"col\":12}}]",
  "creation": "2020-03-12 16:35:55.299820",
  "custom_blocks": [],
  "docstatus": 0,
@@ -280,7 +280,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:24.109945",
+ "modified": "2023-08-09 19:45:02.748408",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loans",

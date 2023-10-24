@@ -120,7 +120,9 @@ def get_data(filters):
 		ignore_opening_entries=True,
 	)
 
-	calculate_values(accounts, gl_entries_by_account, opening_balances)
+	calculate_values(
+		accounts, gl_entries_by_account, opening_balances, filters.get("show_net_values")
+	)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, parent_children_map, company_currency)
@@ -142,13 +144,19 @@ def get_opening_balances(filters):
 def get_rootwise_opening_balances(filters, report_type):
 	gle = []
 
-	last_period_closing_voucher = frappe.db.get_all(
-		"Period Closing Voucher",
-		filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", filters.from_date)},
-		fields=["posting_date", "name"],
-		order_by="posting_date desc",
-		limit=1,
+	last_period_closing_voucher = ""
+	ignore_closing_balances = frappe.db.get_single_value(
+		"Accounts Settings", "ignore_account_closing_balance"
 	)
+
+	if not ignore_closing_balances:
+		last_period_closing_voucher = frappe.db.get_all(
+			"Period Closing Voucher",
+			filters={"docstatus": 1, "company": filters.company, "posting_date": ("<", filters.from_date)},
+			fields=["posting_date", "name"],
+			order_by="posting_date desc",
+			limit=1,
+		)
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -253,7 +261,7 @@ def get_opening_balance(
 		lft, rgt = frappe.db.get_value("Cost Center", filters.cost_center, ["lft", "rgt"])
 		cost_center = frappe.qb.DocType("Cost Center")
 		opening_balance = opening_balance.where(
-			closing_balance.cost_center.in_(
+			closing_balance.cost_center.isin(
 				frappe.qb.from_(cost_center)
 				.select("name")
 				.where((cost_center.lft >= lft) & (cost_center.rgt <= rgt))
@@ -304,7 +312,7 @@ def get_opening_balance(
 	return gle
 
 
-def calculate_values(accounts, gl_entries_by_account, opening_balances):
+def calculate_values(accounts, gl_entries_by_account, opening_balances, show_net_values):
 	init = {
 		"opening_debit": 0.0,
 		"opening_credit": 0.0,
@@ -329,7 +337,8 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances):
 		d["closing_debit"] = d["opening_debit"] + d["debit"]
 		d["closing_credit"] = d["opening_credit"] + d["credit"]
 
-		prepare_opening_closing(d)
+		if show_net_values:
+			prepare_opening_closing(d)
 
 
 def calculate_total_row(accounts, company_currency):
@@ -369,7 +378,7 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 
 	for d in accounts:
 		# Prepare opening closing for group account
-		if parent_children_map.get(d.account):
+		if parent_children_map.get(d.account) and filters.get("show_net_values"):
 			prepare_opening_closing(d)
 
 		has_value = False

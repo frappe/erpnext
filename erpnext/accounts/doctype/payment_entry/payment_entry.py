@@ -24,7 +24,12 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
+from erpnext.accounts.utils import (
+	cancel_exchange_gain_loss_journal,
+	get_account_currency,
+	get_balance_on,
+	get_outstanding_invoices,
+)
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
 	get_supplier_block_status,
@@ -61,7 +66,7 @@ class PaymentEntry(AccountsController):
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
-		self.set_missing_ref_details()
+		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_party_details()
 		self.set_exchange_rate()
@@ -100,7 +105,12 @@ class PaymentEntry(AccountsController):
 			"Payment Ledger Entry",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
+			"Unreconcile Payments",
+			"Unreconcile Payment Entries",
 		)
+		super(PaymentEntry, self).on_cancel()
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
@@ -164,67 +174,104 @@ class PaymentEntry(AccountsController):
 				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
+	def term_based_allocation_enabled_for_reference(
+		self, reference_doctype: str, reference_name: str
+	) -> bool:
+		if (
+			reference_doctype
+			and reference_doctype in ["Sales Invoice", "Sales Order", "Purchase Order", "Purchase Invoice"]
+			and reference_name
+		):
+			if template := frappe.db.get_value(reference_doctype, reference_name, "payment_terms_template"):
+				return frappe.db.get_value(
+					"Payment Terms Template", template, "allocate_payment_based_on_payment_terms"
+				)
+		return False
+
 	def validate_allocated_amount_with_latest_data(self):
-		latest_references = get_outstanding_reference_documents(
-			{
-				"posting_date": self.posting_date,
-				"company": self.company,
-				"party_type": self.party_type,
-				"payment_type": self.payment_type,
-				"party": self.party,
-				"party_account": self.paid_from if self.payment_type == "Receive" else self.paid_to,
-				"get_outstanding_invoices": True,
-				"get_orders_to_be_billed": True,
-			}
-		)
-
-		# Group latest_references by (voucher_type, voucher_no)
-		latest_lookup = {}
-		for d in latest_references:
-			d = frappe._dict(d)
-			latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
-
-		for d in self.get("references"):
-			latest = (latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()).get(
-				d.payment_term
+		if self.references:
+			uniq_vouchers = set([(x.reference_doctype, x.reference_name) for x in self.references])
+			vouchers = [frappe._dict({"voucher_type": x[0], "voucher_no": x[1]}) for x in uniq_vouchers]
+			latest_references = get_outstanding_reference_documents(
+				{
+					"posting_date": self.posting_date,
+					"company": self.company,
+					"party_type": self.party_type,
+					"payment_type": self.payment_type,
+					"party": self.party,
+					"party_account": self.paid_from if self.payment_type == "Receive" else self.paid_to,
+					"get_outstanding_invoices": True,
+					"get_orders_to_be_billed": True,
+					"vouchers": vouchers,
+				}
 			)
 
-			# The reference has already been fully paid
-			if not latest:
-				frappe.throw(
-					_("{0} {1} has already been fully paid.").format(_(d.reference_doctype), d.reference_name)
-				)
-			# The reference has already been partly paid
-			elif latest.outstanding_amount < latest.invoice_amount and flt(
-				d.outstanding_amount, d.precision("outstanding_amount")
-			) != flt(latest.outstanding_amount, d.precision("outstanding_amount")):
+			# Group latest_references by (voucher_type, voucher_no)
+			latest_lookup = {}
+			for d in latest_references:
+				d = frappe._dict(d)
+				latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
 
-				frappe.throw(
-					_(
-						"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
-					).format(_(d.reference_doctype), d.reference_name)
-				)
+			for idx, d in enumerate(self.get("references"), start=1):
+				latest = latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()
 
-			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
-
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
-				frappe.throw(fail_message.format(d.idx))
-
-			if d.payment_term and (
-				(flt(d.allocated_amount)) > 0
-				and flt(d.allocated_amount) > flt(latest.payment_term_outstanding)
-			):
-				frappe.throw(
-					_(
-						"Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
-					).format(
-						d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
+				# If term based allocation is enabled, throw
+				if (
+					d.payment_term is None or d.payment_term == ""
+				) and self.term_based_allocation_enabled_for_reference(
+					d.reference_doctype, d.reference_name
+				):
+					frappe.throw(
+						_(
+							"{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
+						).format(frappe.bold(d.reference_name), frappe.bold(idx))
 					)
-				)
 
-			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
-				frappe.throw(fail_message.format(d.idx))
+				# if no payment template is used by invoice and has a custom term(no `payment_term`), then invoice outstanding will be in 'None' key
+				latest = latest.get(d.payment_term) or latest.get(None)
+				# The reference has already been fully paid
+				if not latest:
+					frappe.throw(
+						_("{0} {1} has already been fully paid.").format(_(d.reference_doctype), d.reference_name)
+					)
+				# The reference has already been partly paid
+				elif (
+					latest.outstanding_amount < latest.invoice_amount
+					and flt(d.outstanding_amount, d.precision("outstanding_amount"))
+					!= flt(latest.outstanding_amount, d.precision("outstanding_amount"))
+					and d.payment_term == ""
+				):
+					frappe.throw(
+						_(
+							"{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
+						).format(_(d.reference_doctype), d.reference_name)
+					)
+
+				fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
+
+				if (
+					d.payment_term
+					and (
+						(flt(d.allocated_amount)) > 0
+						and latest.payment_term_outstanding
+						and (flt(d.allocated_amount) > flt(latest.payment_term_outstanding))
+					)
+					and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
+				):
+					frappe.throw(
+						_(
+							"Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
+						).format(
+							d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term
+						)
+					)
+
+				if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+					frappe.throw(fail_message.format(d.idx))
+
+				# Check for negative outstanding invoices as well
+				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
+					frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -329,7 +376,7 @@ class PaymentEntry(AccountsController):
 			else:
 				if ref_doc:
 					if self.paid_from_account_currency == ref_doc.currency:
-						self.source_exchange_rate = ref_doc.get("exchange_rate")
+						self.source_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.source_exchange_rate:
 				self.source_exchange_rate = get_exchange_rate(
@@ -342,7 +389,7 @@ class PaymentEntry(AccountsController):
 		elif self.paid_to and not self.target_exchange_rate:
 			if ref_doc:
 				if self.paid_to_account_currency == ref_doc.currency:
-					self.target_exchange_rate = ref_doc.get("exchange_rate")
+					self.target_exchange_rate = ref_doc.get("exchange_rate") or ref_doc.get("conversion_rate")
 
 			if not self.target_exchange_rate:
 				self.target_exchange_rate = get_exchange_rate(
@@ -441,7 +488,7 @@ class PaymentEntry(AccountsController):
 				_(
 					"References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 				).format(
-					frappe.bold(comma_and((d.reference_name for d in references))),
+					frappe.bold(comma_and([d.reference_name for d in references])),
 					_(reference_doctype),
 				)
 				+ "<br><br>"
@@ -604,7 +651,9 @@ class PaymentEntry(AccountsController):
 		if not self.apply_tax_withholding_amount:
 			return
 
-		net_total = self.paid_amount
+		order_amount = self.get_order_net_total()
+
+		net_total = flt(order_amount) + flt(self.unallocated_amount)
 
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict(
@@ -648,6 +697,20 @@ class PaymentEntry(AccountsController):
 
 		for d in to_remove:
 			self.remove(d)
+
+	def get_order_net_total(self):
+		if self.party_type == "Supplier":
+			doctype = "Purchase Order"
+		else:
+			doctype = "Sales Order"
+
+		docnames = [d.reference_name for d in self.references if d.reference_doctype == doctype]
+
+		tax_withholding_net_total = frappe.db.get_value(
+			doctype, {"name": ["in", docnames]}, ["sum(base_tax_withholding_net_total)"]
+		)
+
+		return tax_withholding_net_total
 
 	def apply_taxes(self):
 		self.initialize_taxes()
@@ -735,10 +798,30 @@ class PaymentEntry(AccountsController):
 				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 		else:
+
+			# Use source/target exchange rate, so no difference amount is calculated.
+			# then update exchange gain/loss amount in reference table
+			# if there is an exchange gain/loss amount in reference table, submit a JE for that
+
+			exchange_rate = 1
+			if self.payment_type == "Receive":
+				exchange_rate = self.source_exchange_rate
+			elif self.payment_type == "Pay":
+				exchange_rate = self.target_exchange_rate
+
 			base_allocated_amount += flt(
-				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
 
+			# on rare case, when `exchange_rate` is unset, gain/loss amount is incorrectly calculated
+			# for base currency transactions
+			if d.exchange_rate is None:
+				d.exchange_rate = 1
+
+			allocated_amount_in_pe_exchange_rate = flt(
+				flt(d.allocated_amount) * flt(d.exchange_rate), self.precision("base_paid_amount")
+			)
+			d.exchange_gain_loss = base_allocated_amount - allocated_amount_in_pe_exchange_rate
 		return base_allocated_amount
 
 	def set_total_allocated_amount(self):
@@ -929,6 +1012,10 @@ class PaymentEntry(AccountsController):
 		gl_entries = self.build_gl_map()
 		gl_entries = process_gl_map(gl_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+		if cancel:
+			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
+		else:
+			self.make_exchange_gain_loss_journal()
 
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
@@ -1372,6 +1459,14 @@ def get_outstanding_reference_documents(args):
 				fieldname, args.get(date_fields[0]), args.get(date_fields[1])
 			)
 			posting_and_due_date.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
+		elif args.get(date_fields[0]):
+			# if only from date is supplied
+			condition += " and {0} >= '{1}'".format(fieldname, args.get(date_fields[0]))
+			posting_and_due_date.append(ple[fieldname].gte(args.get(date_fields[0])))
+		elif args.get(date_fields[1]):
+			# if only to date is supplied
+			condition += " and {0} <= '{1}'".format(fieldname, args.get(date_fields[1]))
+			posting_and_due_date.append(ple[fieldname].lte(args.get(date_fields[1])))
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
@@ -1390,6 +1485,7 @@ def get_outstanding_reference_documents(args):
 			min_outstanding=args.get("outstanding_amt_greater_than"),
 			max_outstanding=args.get("outstanding_amt_less_than"),
 			accounting_dimensions=accounting_dimensions_filter,
+			vouchers=args.get("vouchers") or None,
 		)
 
 		outstanding_invoices = split_invoices_based_on_payment_terms(
@@ -1508,7 +1604,9 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 										"voucher_type": d.voucher_type,
 										"posting_date": d.posting_date,
 										"invoice_amount": flt(d.invoice_amount),
-										"outstanding_amount": flt(d.outstanding_amount),
+										"outstanding_amount": payment_term_outstanding
+										if payment_term_outstanding
+										else d.outstanding_amount,
 										"payment_term_outstanding": payment_term_outstanding,
 										"payment_amount": payment_term.payment_amount,
 										"payment_term": payment_term.payment_term,
@@ -1785,10 +1883,15 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		if not total_amount:
 			if party_account_currency == company_currency:
 				# for handling cases that don't have multi-currency (base field)
-				total_amount = ref_doc.get("base_grand_total") or ref_doc.get("grand_total")
+				total_amount = (
+					ref_doc.get("base_rounded_total")
+					or ref_doc.get("rounded_total")
+					or ref_doc.get("base_grand_total")
+					or ref_doc.get("grand_total")
+				)
 				exchange_rate = 1
 			else:
-				total_amount = ref_doc.get("grand_total")
+				total_amount = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc.
@@ -1827,7 +1930,6 @@ def get_payment_entry(
 	payment_type=None,
 	reference_date=None,
 ):
-	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (
@@ -1968,7 +2070,7 @@ def get_payment_entry(
 	update_accounting_dimensions(pe, doc)
 
 	if party_account and bank:
-		pe.set_exchange_rate(ref_doc=reference_doc)
+		pe.set_exchange_rate(ref_doc=doc)
 		pe.set_amounts()
 
 		if discount_amount:
@@ -2081,7 +2183,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				received_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					received_amount = paid_amount / doc.get("conversion_rate", 1)
 				else:
 					received_amount = paid_amount * doc.get("conversion_rate", 1)
@@ -2090,7 +2192,7 @@ def set_paid_amount_and_received_amount(
 			if bank_amount:
 				paid_amount = bank_amount
 			else:
-				if company_currency != bank.account_currency:
+				if bank and company_currency != bank.account_currency:
 					paid_amount = received_amount / doc.get("conversion_rate", 1)
 				else:
 					# if party account currency and bank currency is different then populate paid amount as well

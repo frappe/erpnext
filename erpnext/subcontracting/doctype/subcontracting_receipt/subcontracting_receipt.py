@@ -176,10 +176,9 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
 
-			if item.recalculate_rate:
-				item.rate = (
-					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
-				)
+			item.rate = (
+				flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
+			)
 
 			item.received_qty = item.qty + flt(item.rejected_qty)
 			item.amount = item.qty * item.rate
@@ -268,17 +267,24 @@ class SubcontractingReceipt(SubcontractingController):
 				status = "Draft"
 			elif self.docstatus == 1:
 				status = "Completed"
+
 				if self.is_return:
 					status = "Return"
-					return_against = frappe.get_doc("Subcontracting Receipt", self.return_against)
-					return_against.run_method("update_status")
 				elif self.per_returned == 100:
 					status = "Return Issued"
+
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
+			if self.is_return:
+				frappe.get_doc("Subcontracting Receipt", self.return_against).update_status(
+					update_modified=update_modified
+				)
+
 		if status:
-			frappe.db.set_value("Subcontracting Receipt", self.name, "status", status, update_modified)
+			frappe.db.set_value(
+				"Subcontracting Receipt", self.name, "status", status, update_modified=update_modified
+			)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map

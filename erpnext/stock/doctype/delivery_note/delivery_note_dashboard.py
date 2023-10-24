@@ -14,6 +14,9 @@ def get_data():
 			"Material Request": ["items", "material_request"],
 			"Purchase Order": ["items", "purchase_order"],
 		},
+		"internal_and_external_links": {
+			"Sales Invoice": ["items", "against_sales_invoice"],
+		},
 		"transactions": [
 			{"label": _("Related"), "items": ["Sales Invoice", "Packing Slip", "Delivery Trip"]},
 			{"label": _("Reference"), "items": ["Sales Order", "Shipment", "Quality Inspection"]},

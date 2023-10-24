@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import comma_or, flt, getdate, now, nowdate
+from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate
 
 
 class OverAllowanceError(frappe.ValidationError):
@@ -232,6 +232,18 @@ class StatusUpdater(Document):
 
 				if hasattr(d, "qty") and d.qty > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
+
+				if not frappe.db.get_single_value("Selling Settings", "allow_negative_rates_for_items"):
+					if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
+						frappe.throw(
+							_(
+								"For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
+							).format(
+								frappe.bold(d.item_code),
+								frappe.bold(_("`Allow Negative rates for Items`")),
+								get_link_to_form("Selling Settings", "Selling Settings"),
+							),
+						)
 
 				if d.doctype == args["source_dt"] and d.get(args["join_field"]):
 					args["name"] = d.get(args["join_field"])

@@ -18,6 +18,7 @@ frappe.ui.form.on("Company", {
 		});
 	},
 	setup: function(frm) {
+		frm.__rename_queue = "long";
 		erpnext.company.setup_queries(frm);
 
 		frm.set_query("parent_company", function() {

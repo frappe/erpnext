@@ -12,11 +12,7 @@ from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
-from erpnext.assets.doctype.asset.asset import (
-	get_asset_account,
-	get_asset_category_account,
-	is_cwip_accounting_enabled,
-)
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -566,12 +562,8 @@ class PurchaseReceipt(BuyingController):
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 
 				if d.is_fixed_asset:
-					stock_asset_account_name = (
-						get_asset_category_account(
-							asset_category=d.asset_category,
-							fieldname="capital_work_in_progress_account",
-							company=self.company,
-						)
+					account_type = (
+						"capital_work_in_progress_account"
 						if is_cwip_accounting_enabled(d.asset_category)
 						else "fixed_asset_account"
 					)
@@ -646,7 +638,7 @@ class PurchaseReceipt(BuyingController):
 			account=provisional_account,
 			cost_center=item.cost_center,
 			debit=0.0,
-			credit=multiplication_factor * item.amount,
+			credit=multiplication_factor * item.base_amount,
 			remarks=remarks,
 			against_account=expense_account,
 			account_currency=credit_currency,
@@ -660,7 +652,7 @@ class PurchaseReceipt(BuyingController):
 			gl_entries=gl_entries,
 			account=expense_account,
 			cost_center=item.cost_center,
-			debit=multiplication_factor * item.amount,
+			debit=multiplication_factor * item.base_amount,
 			credit=0.0,
 			remarks=remarks,
 			against_account=provisional_account,
@@ -915,6 +907,10 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 
 		total_amount += total_billable_amount
 		total_billed_amount += flt(item.billed_amt)
+
+		if pr_doc.get("is_return") and not total_amount and total_billed_amount:
+			total_amount = total_billed_amount
+
 		if adjust_incoming_rate:
 			adjusted_amt = 0.0
 			if item.billed_amt and item.amount:

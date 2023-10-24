@@ -259,6 +259,10 @@ class ProductQuery:
 			)
 
 	def get_stock_availability(self, item):
+		from erpnext.templates.pages.wishlist import (
+			get_stock_availability as get_stock_availability_from_template,
+		)
+
 		"""Modify item object and add stock details."""
 		item.in_stock = False
 		warehouse = item.get("website_warehouse")
@@ -274,11 +278,7 @@ class ProductQuery:
 			else:
 				item.in_stock = True
 		elif warehouse:
-			# stock item and has warehouse
-			actual_qty = frappe.db.get_value(
-				"Bin", {"item_code": item.item_code, "warehouse": item.get("website_warehouse")}, "actual_qty"
-			)
-			item.in_stock = bool(flt(actual_qty))
+			item.in_stock = get_stock_availability_from_template(item.item_code, warehouse)
 
 	def get_cart_items(self):
 		customer = get_customer(silent=True)

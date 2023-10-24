@@ -3338,7 +3338,7 @@ You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global S
 You cannot delete Project Type 'External',Te ei saa projekti tüübi &quot;Väline&quot; kustutada,
 You cannot edit root node.,Sa ei saa redigeerida juursõlme.,
 You cannot restart a Subscription that is not cancelled.,Te ei saa tellimust uuesti katkestada.,
-You don't have enought Loyalty Points to redeem,"Teil pole lojaalsuspunkte, mida soovite lunastada",
+You don't have enough Loyalty Points to redeem,"Teil pole lojaalsuspunkte, mida soovite lunastada",
 You have already assessed for the assessment criteria {}.,Olete juba hinnanud hindamise kriteeriumid {}.,
 You have already selected items from {0} {1},Olete juba valitud objektide {0} {1},
 You have been invited to collaborate on the project: {0},Sind on kutsutud koostööd projekti: {0},

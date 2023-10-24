@@ -11,6 +11,9 @@ from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate,
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	validate_docs_for_deferred_accounting,
+)
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
 	get_total_in_party_account_currency,
@@ -232,7 +235,7 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		if (
-			cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate"))
+			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
 			and not self.is_return
 			and not self.is_internal_supplier
 		):
@@ -269,9 +272,7 @@ class PurchaseInvoice(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
-		asset_items = [d.is_fixed_asset for d in self.items if d.is_fixed_asset]
-		if len(asset_items) > 0:
-			asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+		asset_received_but_not_billed = None
 
 		if self.update_stock:
 			self.validate_item_code()
@@ -490,6 +491,11 @@ class PurchaseInvoice(BuyingController):
 						_("Stock cannot be updated against Purchase Receipt {0}").format(item.purchase_receipt)
 					)
 
+	def validate_for_repost(self):
+		self.validate_write_off_account()
+		self.validate_expense_account()
+		validate_docs_for_deferred_accounting([], [self.name])
+
 	def on_submit(self):
 		super(PurchaseInvoice, self).on_submit()
 
@@ -532,6 +538,19 @@ class PurchaseInvoice(BuyingController):
 
 		self.process_common_party_accounting()
 
+	def on_update_after_submit(self):
+		if hasattr(self, "repost_required"):
+			fields_to_check = [
+				"cash_bank_account",
+				"write_off_account",
+				"unrealized_profit_loss_account",
+			]
+			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
+			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+			if self.needs_repost:
+				self.validate_for_repost()
+				self.db_set("repost_required", self.needs_repost)
+
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
@@ -546,6 +565,7 @@ class PurchaseInvoice(BuyingController):
 					merge_entries=False,
 					from_repost=from_repost,
 				)
+				self.make_exchange_gain_loss_journal()
 			elif self.docstatus == 2:
 				provisional_entries = [a for a in gl_entries if a.voucher_type == "Purchase Receipt"]
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -588,7 +608,6 @@ class PurchaseInvoice(BuyingController):
 		self.make_precision_loss_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
-		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
@@ -773,21 +792,22 @@ class PurchaseInvoice(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": account,
-										"against": item.expense_account,
-										"cost_center": item.cost_center,
-										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-										"credit": flt(amount["base_amount"]),
-										"credit_in_account_currency": flt(amount["amount"]),
-										"project": item.project or self.project,
-									},
-									item=item,
+						if (item.item_code, item.name) in landed_cost_entries:
+							for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
+								gl_entries.append(
+									self.get_gl_dict(
+										{
+											"account": account,
+											"against": item.expense_account,
+											"cost_center": item.cost_center,
+											"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+											"credit": flt(amount["base_amount"]),
+											"credit_in_account_currency": flt(amount["amount"]),
+											"project": item.project or self.project,
+										},
+										item=item,
+									)
 								)
-							)
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -1294,6 +1314,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Item Valuation",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 		)

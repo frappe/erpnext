@@ -7,13 +7,14 @@ from itertools import chain
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cstr, flt, formatdate, getdate
+from frappe.utils import add_months, cstr, flt, formatdate, getdate, nowdate, today
 
 from erpnext.accounts.report.financial_statements import (
 	get_fiscal_year_data,
 	get_period_list,
 	validate_fiscal_year,
 )
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 
 
@@ -37,15 +38,26 @@ def get_conditions(filters):
 
 	if filters.get("company"):
 		conditions["company"] = filters.company
+
 	if filters.filter_based_on == "Date Range":
+		if not filters.from_date and not filters.to_date:
+			filters.from_date = add_months(nowdate(), -12)
+			filters.to_date = nowdate()
+
 		conditions[date_field] = ["between", [filters.from_date, filters.to_date]]
-	if filters.filter_based_on == "Fiscal Year":
+	elif filters.filter_based_on == "Fiscal Year":
+		if not filters.from_fiscal_year and not filters.to_fiscal_year:
+			default_fiscal_year = get_fiscal_year(today())[0]
+			filters.from_fiscal_year = default_fiscal_year
+			filters.to_fiscal_year = default_fiscal_year
+
 		fiscal_year = get_fiscal_year_data(filters.from_fiscal_year, filters.to_fiscal_year)
 		validate_fiscal_year(fiscal_year, filters.from_fiscal_year, filters.to_fiscal_year)
 		filters.year_start_date = getdate(fiscal_year.year_start_date)
 		filters.year_end_date = getdate(fiscal_year.year_end_date)
 
 		conditions[date_field] = ["between", [filters.year_start_date, filters.year_end_date]]
+
 	if filters.get("only_existing_assets"):
 		conditions["is_existing_asset"] = filters.get("only_existing_assets")
 	if filters.get("asset_category"):
@@ -54,12 +66,12 @@ def get_conditions(filters):
 		conditions["cost_center"] = filters.get("cost_center")
 
 	if status:
-		# In Store assets are those that are not sold or scrapped
+		# In Store assets are those that are not sold or scrapped or capitalized or decapitalized
 		operand = "not in"
 		if status not in "In Location":
 			operand = "in"
 
-		conditions["status"] = (operand, ["Sold", "Scrapped"])
+		conditions["status"] = (operand, ["Sold", "Scrapped", "Capitalized", "Decapitalized"])
 
 	return conditions
 
@@ -70,36 +82,6 @@ def get_data(filters):
 	conditions = get_conditions(filters)
 	pr_supplier_map = get_purchase_receipt_supplier_map()
 	pi_supplier_map = get_purchase_invoice_supplier_map()
-
-	group_by = frappe.scrub(filters.get("group_by"))
-
-	if group_by == "asset_category":
-		fields = ["asset_category", "gross_purchase_amount", "opening_accumulated_depreciation"]
-		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields, group_by=group_by)
-
-	elif group_by == "location":
-		fields = ["location", "gross_purchase_amount", "opening_accumulated_depreciation"]
-		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields, group_by=group_by)
-
-	else:
-		fields = [
-			"name as asset_id",
-			"asset_name",
-			"status",
-			"department",
-			"company",
-			"cost_center",
-			"calculate_depreciation",
-			"purchase_receipt",
-			"asset_category",
-			"purchase_date",
-			"gross_purchase_amount",
-			"location",
-			"available_for_use_date",
-			"purchase_invoice",
-			"opening_accumulated_depreciation",
-		]
-		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
 	assets_linked_to_fb = get_assets_linked_to_fb(filters)
 
@@ -113,6 +95,31 @@ def get_data(filters):
 		finance_book = None
 
 	depreciation_amount_map = get_asset_depreciation_amount_map(filters, finance_book)
+
+	group_by = frappe.scrub(filters.get("group_by"))
+
+	if group_by in ("asset_category", "location"):
+		data = get_group_by_data(group_by, conditions, assets_linked_to_fb, depreciation_amount_map)
+		return data
+
+	fields = [
+		"name as asset_id",
+		"asset_name",
+		"status",
+		"department",
+		"company",
+		"cost_center",
+		"calculate_depreciation",
+		"purchase_receipt",
+		"asset_category",
+		"purchase_date",
+		"gross_purchase_amount",
+		"location",
+		"available_for_use_date",
+		"purchase_invoice",
+		"opening_accumulated_depreciation",
+	]
+	assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
 	for asset in assets_record:
 		if (
@@ -136,7 +143,7 @@ def get_data(filters):
 			or pi_supplier_map.get(asset.purchase_invoice),
 			"gross_purchase_amount": asset.gross_purchase_amount,
 			"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
-			"depreciated_amount": get_depreciation_amount_of_asset(asset, depreciation_amount_map),
+			"depreciated_amount": depreciation_amount_map.get(asset.asset_id) or 0.0,
 			"available_for_use_date": asset.available_for_use_date,
 			"location": asset.location,
 			"asset_category": asset.asset_category,
@@ -149,6 +156,8 @@ def get_data(filters):
 
 
 def prepare_chart_data(data, filters):
+	if not data:
+		return
 	labels_values_map = {}
 	if filters.filter_based_on not in ("Date Range", "Fiscal Year"):
 		filters_filter_based_on = "Date Range"
@@ -230,12 +239,11 @@ def get_assets_linked_to_fb(filters):
 	return assets_linked_to_fb
 
 
-def get_depreciation_amount_of_asset(asset, depreciation_amount_map):
-	return depreciation_amount_map.get(asset.asset_id) or 0.0
-
-
 def get_asset_depreciation_amount_map(filters, finance_book):
-	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
+	start_date = (
+		filters.from_date if filters.filter_based_on == "Date Range" else filters.year_start_date
+	)
+	end_date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
 
 	asset = frappe.qb.DocType("Asset")
 	gle = frappe.qb.DocType("GL Entry")
@@ -256,23 +264,75 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		)
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)
+		.where(company.name == filters.company)
 		.where(asset.docstatus == 1)
-		.groupby(asset.name)
 	)
 
+	if filters.only_existing_assets:
+		query = query.where(asset.is_existing_asset == 1)
+	if filters.asset_category:
+		query = query.where(asset.asset_category == filters.asset_category)
+	if filters.cost_center:
+		query = query.where(asset.cost_center == filters.cost_center)
+	if filters.status:
+		if filters.status == "In Location":
+			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized", "Decapitalized"]))
+		else:
+			query = query.where(asset.status.isin(["Sold", "Scrapped", "Capitalized", "Decapitalized"]))
 	if finance_book:
 		query = query.where(
 			(gle.finance_book.isin([cstr(finance_book), ""])) | (gle.finance_book.isnull())
 		)
 	else:
 		query = query.where((gle.finance_book.isin([""])) | (gle.finance_book.isnull()))
-
 	if filters.filter_based_on in ("Date Range", "Fiscal Year"):
-		query = query.where(gle.posting_date <= date)
+		query = query.where(gle.posting_date >= start_date)
+		query = query.where(gle.posting_date <= end_date)
+
+	query = query.groupby(asset.name)
 
 	asset_depr_amount_map = query.run()
 
 	return dict(asset_depr_amount_map)
+
+
+def get_group_by_data(group_by, conditions, assets_linked_to_fb, depreciation_amount_map):
+	fields = [
+		group_by,
+		"name",
+		"gross_purchase_amount",
+		"opening_accumulated_depreciation",
+		"calculate_depreciation",
+	]
+	assets = frappe.db.get_all("Asset", filters=conditions, fields=fields)
+
+	data = []
+
+	for a in assets:
+		if assets_linked_to_fb and a.calculate_depreciation and a.name not in assets_linked_to_fb:
+			continue
+
+		a["depreciated_amount"] = depreciation_amount_map.get(a["name"], 0.0)
+		a["asset_value"] = (
+			a["gross_purchase_amount"] - a["opening_accumulated_depreciation"] - a["depreciated_amount"]
+		)
+
+		del a["name"]
+		del a["calculate_depreciation"]
+
+		idx = ([i for i, d in enumerate(data) if a[group_by] == d[group_by]] or [None])[0]
+		if idx is None:
+			data.append(a)
+		else:
+			for field in (
+				"gross_purchase_amount",
+				"opening_accumulated_depreciation",
+				"depreciated_amount",
+				"asset_value",
+			):
+				data[idx][field] = data[idx][field] + a[field]
+
+	return data
 
 
 def get_purchase_receipt_supplier_map():
@@ -313,35 +373,35 @@ def get_columns(filters):
 				"fieldtype": "Link",
 				"fieldname": frappe.scrub(filters.get("group_by")),
 				"options": filters.get("group_by"),
-				"width": 120,
+				"width": 216,
 			},
 			{
 				"label": _("Gross Purchase Amount"),
 				"fieldname": "gross_purchase_amount",
 				"fieldtype": "Currency",
 				"options": "company:currency",
-				"width": 100,
+				"width": 250,
 			},
 			{
 				"label": _("Opening Accumulated Depreciation"),
 				"fieldname": "opening_accumulated_depreciation",
 				"fieldtype": "Currency",
 				"options": "company:currency",
-				"width": 90,
+				"width": 250,
 			},
 			{
 				"label": _("Depreciated Amount"),
 				"fieldname": "depreciated_amount",
 				"fieldtype": "Currency",
 				"options": "company:currency",
-				"width": 100,
+				"width": 250,
 			},
 			{
 				"label": _("Asset Value"),
 				"fieldname": "asset_value",
 				"fieldtype": "Currency",
 				"options": "company:currency",
-				"width": 100,
+				"width": 250,
 			},
 		]
 

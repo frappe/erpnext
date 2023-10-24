@@ -2,6 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Bank Statement Import", {
+	onload(frm) {
+		frm.set_query("bank_account", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+	},
+
 	setup(frm) {
 		frappe.realtime.on("data_import_refresh", ({ data_import }) => {
 			frm.import_in_progress = false;
@@ -352,10 +362,11 @@ frappe.ui.form.on("Bank Statement Import", {
 
 	export_errored_rows(frm) {
 		open_url_post(
-			"/api/method/frappe.core.doctype.data_import.data_import.download_errored_template",
+			"/api/method/erpnext.accounts.doctype.bank_statement_import.bank_statement_import.download_errored_template",
 			{
 				data_import_name: frm.doc.name,
-			}
+			},
+			true
 		);
 	},
 

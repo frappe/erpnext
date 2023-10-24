@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+import collections
+
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
@@ -54,6 +56,8 @@ class POSInvoice(SalesInvoice):
 		self.validate_pos()
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
+		self.validate_company_with_pos_company()
+		self.validate_duplicate_serial_no()
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
@@ -153,6 +157,18 @@ class POSInvoice(SalesInvoice):
 				).format(item.idx, bold_invalid_serial_nos),
 				title=_("Item Unavailable"),
 			)
+
+	def validate_duplicate_serial_no(self):
+		serial_nos = []
+
+		for row in self.get("items"):
+			if row.serial_no:
+				serial_nos = row.serial_no.split("\n")
+
+		if serial_nos:
+			for key, value in collections.Counter(serial_nos).items():
+				if value > 1:
+					frappe.throw(_("Duplicate Serial No {0} found").format("key"))
 
 	def validate_pos_reserved_batch_qty(self, item):
 		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no": item.batch_no}
@@ -370,6 +386,14 @@ class POSInvoice(SalesInvoice):
 			if total_amount_in_payments and total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
+	def validate_company_with_pos_company(self):
+		if self.company != frappe.db.get_value("POS Profile", self.pos_profile, "company"):
+			frappe.throw(
+				_("Company {} does not match with POS Profile Company {}").format(
+					self.company, frappe.db.get_value("POS Profile", self.pos_profile, "company")
+				)
+			)
+
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
 			not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center
@@ -448,6 +472,7 @@ class POSInvoice(SalesInvoice):
 		profile = {}
 		if self.pos_profile:
 			profile = frappe.get_doc("POS Profile", self.pos_profile)
+			self.company = profile.get("company")
 
 		if not self.get("payments") and not for_validate:
 			update_multi_mode_option(self, profile)
@@ -493,7 +518,7 @@ class POSInvoice(SalesInvoice):
 				selling_price_list = (
 					customer_price_list or customer_group_price_list or profile.get("selling_price_list")
 				)
-				if customer_currency != profile.get("currency"):
+				if customer_currency and customer_currency != profile.get("currency"):
 					self.set("currency", customer_currency)
 
 			else:
@@ -651,7 +676,7 @@ def get_bundle_availability(bundle_item_code, warehouse):
 		item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
 		available_qty = item_bin_qty - item_pos_reserved_qty
 
-		max_available_bundles = available_qty / item.stock_qty
+		max_available_bundles = available_qty / item.qty
 		if bundle_bin_qty > max_available_bundles and frappe.get_value(
 			"Item", item.item_code, "is_stock_item"
 		):

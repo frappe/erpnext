@@ -8,7 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger', 'Asset', 'Asset Movement', 'Repost Accounting Ledger'];
 	},
 
 	refresh: function(frm) {
@@ -50,8 +50,18 @@ frappe.ui.form.on("Journal Entry", {
 					frm.trigger("make_inter_company_journal_entry");
 				}, __('Make'));
 		}
-	},
 
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
+	},
+	before_save: function(frm) {
+		if ((frm.doc.docstatus == 0) && (!frm.doc.is_system_generated)) {
+			let payment_entry_references = frm.doc.accounts.filter(elem => (elem.reference_type == "Payment Entry"));
+			if (payment_entry_references.length > 0) {
+				let rows = payment_entry_references.map(x => "#"+x.idx);
+				frappe.throw(__("Rows: {0} have 'Payment Entry' as reference_type. This should not be set manually.", [frappe.utils.comma_and(rows)]));
+			}
+		}
+	},
 	make_inter_company_journal_entry: function(frm) {
 		var d = new frappe.ui.Dialog({
 			title: __("Select Company"),

@@ -115,7 +115,7 @@ Add Customers,Ajouter des clients,
 Add Employees,Ajouter des employés,
 Add Item,Ajouter un Article,
 Add Items,Ajouter des articles,
-Add Leads,Créer des Prospects,
+Add Leads,Créer des Leads,
 Add Multiple Tasks,Ajouter plusieurs tâches,
 Add Row,Ajouter une Ligne,
 Add Sales Partners,Ajouter des partenaires commerciaux,
@@ -658,8 +658,8 @@ Create Invoice,Créer une facture,
 Create Invoices,Créer des factures,
 Create Job Card,Créer une carte de travail,
 Create Journal Entry,Créer une entrée de journal,
-Create Lead,Créer un Prospect,
-Create Leads,Créer des Prospects,
+Create Lead,Créer un Lead,
+Create Leads,Créer des Lead,
 Create Maintenance Visit,Créer une visite de maintenance,
 Create Material Request,Créer une demande de matériel,
 Create Multiple,Créer plusieurs,
@@ -951,7 +951,7 @@ End time cannot be before start time,L'heure de fin ne peut pas être avant l'he
 Ends On date cannot be before Next Contact Date.,La date de fin ne peut pas être avant la prochaine date de contact,
 Energy,Énergie,
 Engineer,Ingénieur,
-Enough Parts to Build,Pièces Suffisantes pour Construire
+Enough Parts to Build,Pièces Suffisantes pour Construire,
 Enroll,Inscrire,
 Enrolling student,Inscrire un étudiant,
 Enrolling students,Inscription des étudiants,
@@ -1426,13 +1426,12 @@ Last Purchase Price,Dernier prix d'achat,
 Last Purchase Rate,Dernier Prix d'Achat,
 Latest,Dernier,
 Latest price updated in all BOMs,Prix les plus récents mis à jour dans toutes les nomenclatures,
-Lead,Prospect,
-Lead Count,Nombre de Prospects,
+Lead Count,Nombre de Lead,
 Lead Owner,Responsable du Prospect,
-Lead Owner cannot be same as the Lead,Le Responsable du Prospect ne peut pas être identique au Prospect,
+Lead Owner cannot be same as the Lead,Le Responsable du Prospect ne peut pas être identique au Lead,
 Lead Time Days,Jours de Délai,
 Lead to Quotation,Du Prospect au Devis,
-"Leads help you get business, add all your contacts and more as your leads","Les prospects vous aident à obtenir des contrats, ajoutez tous vos contacts et plus dans votre liste de prospects",
+"Leads help you get business, add all your contacts and more as your leads","Les lead vous aident à obtenir des contrats, ajoutez tous vos contacts et plus dans votre liste de lead",
 Learn,Apprendre,
 Leave Approval Notification,Notification d'approbation de congés,
 Leave Blocked,Laisser Verrouillé,
@@ -1596,7 +1595,7 @@ Middle Name,Deuxième Nom,
 Middle Name (Optional),Deuxième Prénom (Optionnel),
 Min Amt can not be greater than Max Amt,Min Amt ne peut pas être supérieur à Max Amt,
 Min Qty can not be greater than Max Qty,Qté Min ne peut pas être supérieure à Qté Max,
-Minimum Lead Age (Days),Âge Minimum du Prospect (Jours),
+Minimum Lead Age (Days),Âge Minimum du lead (Jours),
 Miscellaneous Expenses,Charges Diverses,
 Missing Currency Exchange Rates for {0},Taux de Change Manquant pour {0},
 Missing email template for dispatch. Please set one in Delivery Settings.,Modèle de courrier électronique manquant pour l'envoi. Veuillez en définir un dans les paramètres de livraison.,
@@ -1676,7 +1675,7 @@ New {0} pricing rules are created,De nouvelles règles de tarification {0} sont 
 Newsletters,Newsletters,
 Newspaper Publishers,Éditeurs de journaux,
 Next,Suivant,
-Next Contact By cannot be same as the Lead Email Address,Prochain Contact Par ne peut être identique à l’Adresse Email du Prospect,
+Next Contact By cannot be same as the Lead Email Address,Prochain Contact Par ne peut être identique à l’Adresse Email du Lead,
 Next Contact Date cannot be in the past,La Date de Prochain Contact ne peut pas être dans le passé,
 Next Steps,Prochaines étapes,
 No Action,Pas d'action,
@@ -1808,9 +1807,9 @@ Operation Time must be greater than 0 for Operation {0},Temps de l'Opération do
 Operations,Opérations,
 Operations cannot be left blank,Les opérations ne peuvent pas être laissées vides,
 Opp Count,Compte d'Opportunités,
-Opp/Lead %,Opp / Prospect %,
+Opp/Lead %,Opp / Lead %,
 Opportunities,Opportunités,
-Opportunities by lead source,Opportunités par source de plomb,
+Opportunities by lead source,Opportunités par source de lead,
 Opportunity,Opportunité,
 Opportunity Amount,Montant de l'opportunité,
 Optional Holiday List not set for leave period {0},Une liste de vacances facultative n'est pas définie pour la période de congé {0},
@@ -2007,7 +2006,7 @@ Please mention Basic and HRA component in Company,Veuillez mentionner les compos
 Please mention Round Off Account in Company,Veuillez indiquer le Compte d’Arrondi de la Société,
 Please mention Round Off Cost Center in Company,Veuillez indiquer le Centre de Coûts d’Arrondi de la Société,
 Please mention no of visits required,Veuillez indiquer le nb de visites requises,
-Please mention the Lead Name in Lead {0},Veuillez mentionner le nom du Prospect dans le Prospect {0},
+Please mention the Lead Name in Lead {0},Veuillez mentionner le nom du Lead dans le Lead {0},
 Please pull items from Delivery Note,Veuillez récupérer les articles des Bons de Livraison,
 Please register the SIREN number in the company information file,Veuillez enregistrer le numéro SIREN dans la fiche d'information de la société,
 Please remove this Invoice {0} from C-Form {1},Veuillez retirez cette Facture {0} du C-Form {1},
@@ -2277,7 +2276,7 @@ Queued for replacing the BOM. It may take a few minutes.,En file d'attente pour 
 Queued for updating latest price in all Bill of Materials. It may take a few minutes.,Mise à jour des prix les plus récents dans toutes les nomenclatures en file d'attente. Cela peut prendre quelques minutes.,
 Quick Journal Entry,Écriture Rapide dans le Journal,
 Quot Count,Compte de Devis,
-Quot/Lead %,Devis / Prospects %,
+Quot/Lead %,Devis / Lead %,
 Quotation,Devis,
 Quotation {0} is cancelled,Devis {0} est annulée,
 Quotation {0} not of type {1},Le devis {0} n'est pas du type {1},
@@ -2285,7 +2284,7 @@ Quotations,Devis,
 "Quotations are proposals, bids you have sent to your customers","Les devis sont des propositions, offres que vous avez envoyées à vos clients",
 Quotations received from Suppliers.,Devis reçus des Fournisseurs.,
 Quotations: ,Devis :,
-Quotes to Leads or Customers.,Devis de Prospects ou Clients.,
+Quotes to Leads or Customers.,Devis de Lead ou Clients.,
 RFQs are not allowed for {0} due to a scorecard standing of {1},Les Appels d'Offres ne sont pas autorisés pour {0} en raison d'une note de {1} sur la fiche d'évaluation,
 Range,Plage,
 Rate,Prix,
@@ -2888,7 +2887,7 @@ Supplies made to UIN holders,Fournitures faites aux titulaires de l'UIN,
 Supplies made to Unregistered Persons,Fournitures faites à des personnes non inscrites,
 Suppliies made to Composition Taxable Persons,Suppleies à des personnes assujetties à la composition,
 Supply Type,Type d'approvisionnement,
-Support,"Assistance/Support",
+Support,Assistance/Support,
 Support Analytics,Analyse de l'assistance,
 Support Settings,Paramètres du module Assistance,
 Support Tickets,Ticket d'assistance,
@@ -3037,7 +3036,7 @@ To Date must be greater than From Date,La date de fin doit être supérieure à 
 To Date should be within the Fiscal Year. Assuming To Date = {0},La Date Finale doit être dans l'exercice. En supposant Date Finale = {0},
 To Datetime,À la Date,
 To Deliver,À Livrer,
-{}  To Deliver,{} à livrer
+{}  To Deliver,{} à livrer,
 To Deliver and Bill,À Livrer et Facturer,
 To Fiscal Year,À l'année fiscale,
 To GSTIN,GSTIN (Destination),
@@ -3122,7 +3121,7 @@ Total(Amt),Total (Mnt),
 Total(Qty),Total (Qté),
 Traceability,Traçabilité,
 Traceback,Retraçage,
-Track Leads by Lead Source.,Suivre les prospects par sources,
+Track Leads by Lead Source.,Suivre les leads par sources,
 Training,Formation,
 Training Event,Événement de formation,
 Training Events,Événements de formation,
@@ -3243,8 +3242,8 @@ View Chart of Accounts,Voir le plan comptable,
 View Fees Records,Voir les honoraires,
 View Form,Voir le formulaire,
 View Lab Tests,Afficher les tests de laboratoire,
-View Leads,Voir Prospects,
-View Ledger,Voir le Livre,
+View Leads,Voir Lead,
+View Ledger,Voir le Journal,
 View Now,Voir maintenant,
 View a list of all the help videos,Afficher la liste de toutes les vidéos d'aide,
 View in Cart,Voir Panier,
@@ -3338,7 +3337,7 @@ You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global S
 You cannot delete Project Type 'External',Vous ne pouvez pas supprimer le Type de Projet 'Externe',
 You cannot edit root node.,Vous ne pouvez pas modifier le nœud racine.,
 You cannot restart a Subscription that is not cancelled.,Vous ne pouvez pas redémarrer un abonnement qui n'est pas annulé.,
-You don't have enought Loyalty Points to redeem,Vous n'avez pas assez de points de fidélité à échanger,
+You don't have enough Loyalty Points to redeem,Vous n'avez pas assez de points de fidélité à échanger,
 You have already assessed for the assessment criteria {}.,Vous avez déjà évalué les critères d'évaluation {}.,
 You have already selected items from {0} {1},Vous avez déjà choisi des articles de {0} {1},
 You have been invited to collaborate on the project: {0},Vous avez été invité à collaborer sur le projet : {0},
@@ -3536,7 +3535,7 @@ Quality Feedback Template,Modèle de commentaires sur la qualité,
 Rules for applying different promotional schemes.,Règles d'application de différents programmes promotionnels.,
 Shift,Décalage,
 Show {0},Montrer {0},
-"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Caractères spéciaux sauf &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; Et &quot;}}&quot; non autorisés dans les séries de nommage {0}",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Caractères spéciaux sauf &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; Et &quot;}}&quot; non autorisés dans les masques de numérotation {0}",
 Target Details,Détails de la cible,
 {0} already has a Parent Procedure {1}.,{0} a déjà une procédure parent {1}.,
 API,API,
@@ -3551,7 +3550,7 @@ Importing {0} of {1},Importer {0} de {1},
 Invalid URL,URL invalide,
 Landscape,Paysage,
 Last Sync On,Dernière synchronisation le,
-Naming Series,Nom de série,
+Naming Series,Masque de numérotation,
 No data to export,Aucune donnée à exporter,
 Portrait,Portrait,
 Print Heading,Imprimer Titre,
@@ -3677,7 +3676,7 @@ Couldn't Set Service Level Agreement {0}.,Impossible de définir le contrat de s
 Country,Pays,
 Country Code in File does not match with country code set up in the system,Le code de pays dans le fichier ne correspond pas au code de pays configuré dans le système,
 Create New Contact,Créer un nouveau contact,
-Create New Lead,Créer une nouvelle piste,
+Create New Lead,Créer une nouvelle lead,
 Create Pick List,Créer une liste de choix,
 Create Quality Inspection for Item {0},Créer un contrôle qualité pour l'article {0},
 Creating Accounts...,Création de comptes ...,
@@ -3784,7 +3783,7 @@ Group Warehouses cannot be used in transactions. Please change the value of {0},
 Help,Aidez-moi,
 Help Article,Article d’Aide,
 "Helps you keep tracks of Contracts based on Supplier, Customer and Employee","Vous aide à garder une trace des contrats en fonction du fournisseur, client et employé",
-Helps you manage appointments with your leads,Vous aide à gérer les rendez-vous avec vos prospects,
+Helps you manage appointments with your leads,Vous aide à gérer les rendez-vous avec vos leads,
 Home,Accueil,
 IBAN is not valid,IBAN n'est pas valide,
 Import Data from CSV / Excel files.,Importer des données à partir de fichiers CSV / Excel,
@@ -3880,7 +3879,7 @@ Only expired allocation can be cancelled,Seule l'allocation expirée peut être 
 Only users with the {0} role can create backdated leave applications,Seuls les utilisateurs avec le rôle {0} peuvent créer des demandes de congé antidatées,
 Open,Ouvert,
 Open Contact,Contact ouvert,
-Open Lead,Ouvrir le Prospect,
+Open Lead,Ouvrir le Lead,
 Opening and Closing,Ouverture et fermeture,
 Operating Cost as per Work Order / BOM,Coût d'exploitation selon l'ordre de fabrication / nomenclature,
 Order Amount,Montant de la commande,
@@ -3926,7 +3925,7 @@ Please select another payment method. Stripe does not support transactions in cu
 Please select the customer.,S'il vous plaît sélectionner le client.,
 Please set a Supplier against the Items to be considered in the Purchase Order.,Veuillez définir un fournisseur par rapport aux articles à prendre en compte dans la Commande d'Achat.,
 Please set account heads in GST Settings for Compnay {0},Définissez les en-têtes de compte dans les paramètres de la TPS pour le service {0}.,
-Please set an email id for the Lead {0},Veuillez définir un identifiant de messagerie pour le prospect {0}.,
+Please set an email id for the Lead {0},Veuillez définir un identifiant de messagerie pour le lead {0}.,
 Please set default UOM in Stock Settings,Veuillez définir l'UdM par défaut dans les paramètres de stock,
 Please set filter based on Item or Warehouse due to a large amount of entries.,Veuillez définir le filtre en fonction de l'article ou de l'entrepôt en raison d'une grande quantité d'entrées.,
 Please set up the Campaign Schedule in the Campaign {0},Configurez le calendrier de la campagne dans la campagne {0}.,
@@ -4282,7 +4281,7 @@ Please set {0},Veuillez définir {0},supplier
 Draft,Brouillon,"docstatus,=,0"
 Cancelled,Annulé,"docstatus,=,2"
 Please setup Instructor Naming System in Education > Education Settings,Veuillez configurer le système de dénomination de l'instructeur dans Éducation&gt; Paramètres de l'éducation,
-Please set Naming Series for {0} via Setup > Settings > Naming Series,Veuillez définir la série de noms pour {0} via Configuration&gt; Paramètres&gt; Série de noms,
+Please set Naming Series for {0} via Setup > Settings > Naming Series,Veuillez définir le masque de numérotation pour {0} via Configuration&gt; Paramètres&gt; Série de noms,
 UOM Conversion factor ({0} -> {1}) not found for item: {2},Facteur de conversion UdM ({0} -&gt; {1}) introuvable pour l'article: {2},
 Item Code > Item Group > Brand,Code article&gt; Groupe d'articles&gt; Marque,
 Customer > Customer Group > Territory,Client&gt; Groupe de clients&gt; Territoire,
@@ -4297,7 +4296,7 @@ Fetch Serial Numbers based on FIFO,Récupérer les numéros de série basés sur
 Current Odometer Value should be greater than Last Odometer Value {0},La valeur actuelle de l'odomètre doit être supérieure à la dernière valeur de l'odomètre {0},
 No additional expenses has been added,Aucune dépense supplémentaire n'a été ajoutée,
 Asset{} {assets_link} created for {},Élément {} {assets_link} créé pour {},
-Row {}: Asset Naming Series is mandatory for the auto creation for item {},Ligne {}: la série de noms d'éléments est obligatoire pour la création automatique de l'élément {},
+Row {}: Asset Naming Series is mandatory for the auto creation for item {},Ligne {}: Le masque de numérotation d'éléments est obligatoire pour la création automatique de l'élément {},
 Assets not created for {0}. You will have to create asset manually.,Éléments non créés pour {0}. Vous devrez créer un actif manuellement.,
 {0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.,{0} {1} a des écritures comptables dans la devise {2} pour l'entreprise {3}. Veuillez sélectionner un compte à recevoir ou à payer avec la devise {2}.,
 Invalid Account,Compte invalide,
@@ -4321,7 +4320,7 @@ Advanced Settings,Réglages avancés,
 Path,Chemin,
 Components,Composants,
 Verified By,Vérifié Par,
-Invalid naming series (. missing) for {0},Série de noms non valide (. Manquante) pour {0},
+Invalid naming series (. missing) for {0},Masque de numérotation non valide (. Manquante) pour {0},
 Filter Based On,Filtre basé sur,
 Reqd by date,Reqd par date,
 Manufacturer Part Number <b>{0}</b> is invalid,Le numéro de <b>pièce du</b> fabricant <b>{0}</b> n'est pas valide,
@@ -4943,8 +4942,8 @@ Min Qty,Qté Min,
 Max Qty,Qté Max,
 Min Amt,Montant Min,
 Max Amt,Montant Max,
-"If rate is zero them item will be treated as ""Free Item""",Si le prix est à 0 alors l'article sera traité comme article gratuit
-Is Recursive,Est récursif
+"If rate is zero them item will be treated as ""Free Item""",Si le prix est à 0 alors l'article sera traité comme article gratuit,
+Is Recursive,Est récursif,
 "Discounts to be applied in sequential ranges like buy 1 get 1, buy 2 get 2, buy 3 get 3 and so on","La remise sera appliquée séquentiellement telque : acheter 1 => recupérer 1, acheter 2 => recupérer 2, acheter 3 => recupérer 3, etc..."
 Period Settings,Paramètres de période,
 Margin,Marge,
@@ -5600,7 +5599,7 @@ Call Log,Journal d'appel,
 Received By,Reçu par,
 Caller Information,Informations sur l'appelant,
 Contact Name,Nom du Contact,
-Lead Name,Nom du Prospect,
+Lead Name,Nom du Lead,
 Ringing,Sonnerie,
 Missed,Manqué,
 Call Duration in seconds,Durée d'appel en secondes,
@@ -5668,7 +5667,7 @@ Fulfilment Terms and Conditions,Termes et conditions d'exécution,
 Contract Template Fulfilment Terms,Conditions d'exécution du modèle de contrat,
 Email Campaign,Campagne Email,
 Email Campaign For ,Campagne d'email pour,
-Lead is an Organization,Le prospect est une organisation,
+Lead is an Organization,Le Lead est une organisation,
 CRM-LEAD-.YYYY.-,CRM-LEAD-.YYYY.-,
 Person Name,Nom de la Personne,
 Lost Quotation,Devis Perdu,
@@ -5683,7 +5682,7 @@ Next Contact Date,Date du Prochain Contact,
 Ends On,Se termine le,
 Address & Contact,Adresse &amp; Contact,
 Mobile No.,N° Mobile.,
-Lead Type,Type de Prospect,
+Lead Type,Type de Lead,
 Channel Partner,Partenaire de Canal,
 Consultant,Consultant,
 Market Segment,Part de Marché,
@@ -5706,7 +5705,7 @@ Opportunity Lost Reason,Raison perdue,
 Potential Sales Deal,Ventes Potentielles,
 CRM-OPP-.YYYY.-,CRM-OPP-YYYY.-,
 Opportunity From,Opportunité De,
-Customer / Lead Name,Nom du Client / Prospect,
+Customer / Lead Name,Nom du Client / Lead,
 Opportunity Type,Type d'Opportunité,
 Converted By,Converti par,
 Sales Stage,Stade de vente,
@@ -5716,7 +5715,7 @@ To Discuss,À Discuter,
 With Items,Avec Articles,
 Probability (%),Probabilité (%),
 Contact Info,Information du Contact,
-Customer / Lead Address,Adresse du Client / Prospect,
+Customer / Lead Address,Adresse du Lead / Prospect,
 Contact Mobile No,N° de Portable du Contact,
 Enter name of campaign if source of enquiry is campaign,Entrez le nom de la campagne si la source de l'enquête est une campagne,
 Opportunity Date,Date d'Opportunité,
@@ -5933,7 +5932,7 @@ Student Admission Program,Programme d'admission des étudiants,
 Minimum Age,Âge Minimum,
 Maximum Age,Âge Maximum,
 Application Fee,Frais de Dossier,
-Naming Series (for Student Applicant),Nom de série (pour un candidat étudiant),
+Naming Series (for Student Applicant),Masque de numérotation (pour un candidat étudiant),
 LMS Only,LMS seulement,
 EDU-APP-.YYYY.-,EDU-APP-YYYY.-,
 Application Status,État de la Demande,
@@ -6424,7 +6423,7 @@ Hotel Reservation User,Utilisateur chargé des réservations d'hôtel,
 Hotel Room Reservation Item,Article de réservation de la chambre d'hôtel,
 Hotel Settings,Paramètres d'Hotel,
 Default Taxes and Charges,Taxes et frais par défaut,
-Default Invoice Naming Series,Numéro de série par défaut pour les factures,
+Default Invoice Naming Series,Masque de numérotation par défaut pour les factures,
 Additional Salary,Salaire supplémentaire,
 HR,RH,
 HR-ADS-.YY.-.MM.-,HR-ADS-.YY .-. MM.-,
@@ -7240,7 +7239,7 @@ Replace,Remplacer,
 Update latest price in all BOMs,Mettre à jour le prix le plus récent dans toutes les nomenclatures,
 BOM Website Item,Article de nomenclature du Site Internet,
 BOM Website Operation,Opération de nomenclature du Site Internet,
-Operation Time,Durée de l'Opération
+Operation Time,Durée de l'Opération,
 PO-JOB.#####,PO-JOB. #####,
 Timing Detail,Détail du timing,
 Time Logs,Time Logs,
@@ -7645,7 +7644,7 @@ Campaign Schedules,Horaires de campagne,
 Buyer of Goods and Services.,Acheteur des Biens et Services.,
 CUST-.YYYY.-,CUST-.YYYY.-,
 Default Company Bank Account,Compte bancaire d'entreprise par défaut,
-From Lead,Du Prospect,
+From Lead,Du Lead,
 Account Manager,Gestionnaire de compte,
 Allow Sales Invoice Creation Without Sales Order,Autoriser la création de factures de vente sans commande client,
 Allow Sales Invoice Creation Without Delivery Note,Autoriser la création de factures de vente sans bon de livraison,
@@ -7672,7 +7671,7 @@ Installation Date,Date d'Installation,
 Installation Time,Temps d'Installation,
 Installation Note Item,Article Remarque d'Installation,
 Installed Qty,Qté Installée,
-Lead Source,Source du Prospect,
+Lead Source,Source du Lead,
 Period Start Date,Date de début de la période,
 Period End Date,Date de fin de la période,
 Cashier,Caissier,
@@ -8034,7 +8033,7 @@ Default Unit of Measure,Unité de Mesure par Défaut,
 Maintain Stock,Maintenir Stock,
 Standard Selling Rate,Prix de Vente Standard,
 Auto Create Assets on Purchase,Création automatique d'actifs à l'achat,
-Asset Naming Series,Nom de série de l'actif,
+Asset Naming Series,Masque de numérotation de l'actif,
 Over Delivery/Receipt Allowance (%),Surlivrance / indemnité de réception (%),
 Barcodes,Codes-barres,
 Shelf Life In Days,Durée de conservation en jours,
@@ -8053,7 +8052,7 @@ Serial Nos and Batches,N° de Série et Lots,
 Has Batch No,A un Numéro de Lot,
 Automatically Create New Batch,Créer un Nouveau Lot Automatiquement,
 Batch Number Series,Série de numéros de lots,
-"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Exemple: ABCD. #####. Si la série est définie et que le numéro de lot n'est pas mentionné dans les transactions, un numéro de lot sera automatiquement créé en avec cette série. Si vous préferez mentionner explicitement et systématiquement le numéro de lot pour cet article, laissez ce champ vide. Remarque: ce paramètre aura la priorité sur le préfixe de la série dans les paramètres de stock.",
+"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Exemple: ABCD. #####. Si le masque est définie et que le numéro de lot n'est pas mentionné dans les transactions, un numéro de lot sera automatiquement créé en avec ce masque. Si vous préferez mentionner explicitement et systématiquement le numéro de lot pour cet article, laissez ce champ vide. Remarque: ce paramètre aura la priorité sur le préfixe du masque dans les paramètres de stock.",
 Has Expiry Date,A une date d'expiration,
 Retain Sample,Conserver l'échantillon,
 Max Sample Quantity,Quantité maximum d'échantillon,
@@ -8353,8 +8352,8 @@ Inter Warehouse Transfer Settings,Paramètres de transfert entre entrepôts,
 Freeze Stock Entries,Geler les Entrées de Stocks,
 Stock Frozen Upto,Stock Gelé Jusqu'au,
 Batch Identification,Identification par lots,
-Use Naming Series,Utiliser la série de noms,
-Naming Series Prefix,Préfix du nom de série,
+Use Naming Series,Utiliser le masque de numérotation,
+Naming Series Prefix,Préfix du masque de numérotation,
 UOM Category,Catégorie d'unité de mesure (UdM),
 UOM Conversion Detail,Détails de Conversion de l'UdM,
 Variant Field,Champ de Variante,
@@ -8517,8 +8516,8 @@ Item-wise Sales Register,Registre des Ventes par Article,
 Items To Be Requested,Articles À Demander,
 Reserved,Réservé,
 Itemwise Recommended Reorder Level,Renouvellement Recommandé par Article,
-Lead Details,Détails du Prospect,
-Lead Owner Efficiency,Efficacité des Responsables des Prospects,
+Lead Details,Détails du Lead,
+Lead Owner Efficiency,Efficacité des Responsables des Leads,
 Loan Repayment and Closure,Remboursement et clôture de prêts,
 Loan Security Status,État de la sécurité du prêt,
 Lost Opportunity,Occasion perdue,
@@ -8824,7 +8823,7 @@ Is Inter State,Est Inter State,
 Purchase Details,Détails d'achat,
 Depreciation Posting Date,Date comptable de l'amortissement,
 "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a  ","Par défaut, le nom du fournisseur est défini selon le nom du fournisseur saisi. Si vous souhaitez que les fournisseurs soient nommés par un",
- choose the 'Naming Series' option.,choisissez l'option 'Naming Series'.,
+ choose the 'Naming Series' option.,choisissez l'option 'Masque de numérotation'.,
 Configure the default Price List when creating a new Purchase transaction. Item prices will be fetched from this Price List.,Configurez la liste de prix par défaut lors de la création d'une nouvelle transaction d'achat. Les prix des articles seront extraits de cette liste de prix.,
 "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master.","Si cette option est configurée «Oui», ERPNext vous empêchera de créer une facture d'achat ou un reçu sans créer d'abord une Commande d'Achat. Cette configuration peut être remplacée pour un fournisseur particulier en cochant la case «Autoriser la création de facture d'achat sans commmande d'achat» dans la fiche fournisseur.",
 "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master.","Si cette option est configurée «Oui», ERPNext vous empêchera de créer une facture d'achat sans créer d'abord un reçu d'achat. Cette configuration peut être remplacée pour un fournisseur particulier en cochant la case &quot;Autoriser la création de facture d'achat sans reçu d'achat&quot; dans la fiche fournisseur.",
@@ -9207,7 +9206,7 @@ Time Required (In Mins),Temps requis (en minutes),
 From Posting Date,À partir de la date de publication,
 To Posting Date,À la date de publication,
 No records found,Aucun enregistrement trouvé,
-Customer/Lead Name,Nom du client / prospect,
+Customer/Lead Name,Nom du client / lead,
 Unmarked Days,Jours non marqués,
 Jan,Jan,
 Feb,fév,
@@ -9471,7 +9470,7 @@ Row {0}: Loan Security {1} added multiple times,Ligne {0}: Garantie de prêt {1}
 Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save,Ligne n ° {0}: l'élément enfant ne doit pas être un ensemble de produits. Veuillez supprimer l'élément {1} et enregistrer,
 Credit limit reached for customer {0},Limite de crédit atteinte pour le client {0},
 Could not auto create Customer due to the following missing mandatory field(s):,Impossible de créer automatiquement le client en raison du ou des champs obligatoires manquants suivants:,
-Please create Customer from Lead {0}.,Veuillez créer un client à partir du prospect {0}.,
+Please create Customer from Lead {0}.,Veuillez créer un client à partir du lead {0}.,
 Mandatory Missing,Obligatoire manquant,
 Please set Payroll based on in Payroll settings,Veuillez définir la paie en fonction des paramètres de paie,
 Additional Salary: {0} already exist for Salary Component: {1} for period {2} and {3},Salaire supplémentaire: {0} existe déjà pour le composant de salaire: {1} pour la période {2} et {3},
@@ -9834,92 +9833,104 @@ Enable European Access,Activer l'accès européen,
 Creating Purchase Order ...,Création d'une commande d'achat ...,
 "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.","Sélectionnez un fournisseur parmi les fournisseurs par défaut des articles ci-dessous. Lors de la sélection, une commande d'achat sera effectué contre des articles appartenant uniquement au fournisseur sélectionné.",
 Row #{}: You must select {} serial numbers for item {}.,Ligne n ° {}: vous devez sélectionner {} numéros de série pour l'article {}.,
-Update Rate as per Last Purchase,Mettre à jour avec les derniers prix d'achats
-Company Shipping Address,Adresse d'expédition
-Shipping Address Details,Détail d'adresse d'expédition
-Company Billing Address,Adresse de la société de facturation
+Update Rate as per Last Purchase,Mettre à jour avec les derniers prix d'achats,
+Company Shipping Address,Adresse d'expédition,
+Shipping Address Details,Détail d'adresse d'expédition,
+Company Billing Address,Adresse de la société de facturation,
 Supplier Address Details,
-Bank Reconciliation Tool,Outil de réconcialiation d'écritures bancaires
-Supplier Contact,Contact fournisseur
-Subcontracting,Sous traitance
-Order Status,Statut de la commande
-Build,Personnalisations avancées
-Dispatch Address Name,Adresse de livraison intermédiaire
-Amount Eligible for Commission,Montant éligible à comission
-Grant Commission,Eligible aux commissions
-Stock Transactions Settings, Paramétre des transactions
-Role Allowed to Over Deliver/Receive, Rôle autorisé à dépasser cette limite
-Users with this role are allowed to over deliver/receive against orders above the allowance percentage,Rôle Utilisateur qui sont autorisé à livrée/commandé au-delà de la limite
-Over Transfer Allowance,Autorisation de limite de transfert
-Quality Inspection Settings,Paramétre de l'inspection qualité
-Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée
-Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série
-Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit
-Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
-Control Historical Stock Transactions,Controle de l'historique des stransaction de stock
+Bank Reconciliation Tool,Outil de réconcialiation d'écritures bancaires,
+Supplier Contact,Contact fournisseur,
+Subcontracting,Sous traitance,
+Order Status,Statut de la commande,
+Build,Personnalisations avancées,
+Dispatch Address Name,Adresse de livraison intermédiaire,
+Amount Eligible for Commission,Montant éligible à comission,
+Grant Commission,Eligible aux commissions,
+Stock Transactions Settings, Paramétre des transactions,
+Role Allowed to Over Deliver/Receive, Rôle autorisé à dépasser cette limite,
+Users with this role are allowed to over deliver/receive against orders above the allowance percentage,Rôle Utilisateur qui sont autorisé à livrée/commandé au-delà de la limite,
+Over Transfer Allowance,Autorisation de limite de transfert,
+Quality Inspection Settings,Paramétre de l'inspection qualité,
+Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée,
+Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série,
+Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit,
+Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture,
+Control Historical Stock Transactions,Controle de l'historique des stransaction de stock,
 No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
-Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
-Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
-"If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.","Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire"
-Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent
-Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix
-Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
-Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
-Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
+Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées,
+Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée,
+"If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",Les utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
+Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent,
+Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix,
+Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock,
+Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions,
+Have Default Naming Series for Batch ID?,Masque de numérotation par défaut pour les Lots ou Séries,
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
-Allowed Items,Articles autorisés
-Party Specific Item,Restriction d'article disponible
-Restrict Items Based On,Type de critére de restriction
-Based On Value,critére de restriction
+Allowed Items,Articles autorisés,
+Party Specific Item,Restriction d'article disponible,
+Restrict Items Based On,Type de critére de restriction,
+Based On Value,critére de restriction,
 Unit of Measure (UOM),Unité de mesure (UdM),
 Unit Of Measure (UOM),Unité de mesure (UdM),
-CRM Settings,Paramètres CRM
-Do Not Explode,Ne pas décomposer
-Quick Access, Accés rapides
-{}  Available,{} Disponible.s
-{} Pending,{} En attente.s
-{} To Bill,{} à facturer
-{}  To Receive,{} A recevoir
+CRM Settings,Paramètres CRM,
+Do Not Explode,Ne pas décomposer,
+Quick Access, Accés rapides,
+{}  Available,{} Disponible.s,
+{} Pending,{} En attente.s,
+{} To Bill,{} à facturer,
+{}  To Receive,{} A recevoir,
 {} Active,{} Actif.ve(s)
 {} Open,{} Ouvert.e(s)
-Incorrect Data Report,Rapport de données incohérentes
-Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots
-Incorrect Balance Qty After Transaction,Equilibre des quantités aprés une transaction
+Incorrect Data Report,Rapport de données incohérentes,
+Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots,
+Incorrect Balance Qty After Transaction,Equilibre des quantités aprés une transaction,
 Interview Type,Type d'entretien
 Interview Round,Cycle d'entretien
 Interview,Entretien
 Interview Feedback,Retour d'entretien
-Journal Energy Point,Historique des points d'énergies
+Journal Energy Point,Historique des points d'énergies,
 Billing Address Details,Adresse de facturation (détails)
 Supplier Address Details,Adresse Fournisseur (détails)
-Retail,Commerce
-Users,Utilisateurs
-Permission Manager,Gestion des permissions
-Fetch Timesheet,Récuprer les temps saisis
-Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur
-Quality Inspection(s),Inspection(s) Qualité
-Set Advances and Allocate (FIFO),Affecter les encours au réglement
-Apply Putaway Rule,Appliquer la régle de routage d'entrepot
-Delete Transactions,Supprimer les transactions
-Default Payment Discount Account,Compte par défaut des paiements de remise
-Unrealized Profit / Loss Account,Compte de perte
-Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés
-Publish in Website,Publier sur le Site Web
-List View,Vue en liste
-Allow Excess Material Transfer,Autoriser les transfert de stock supérieurs à l'attendue
-Allow transferring raw materials even after the Required Quantity is fulfilled,Autoriser les transfert  de matiéres premiére mais si la quantité requise est atteinte
-Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations de correction de coût pour la valorisation des produits finis
-Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications
-System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications
-Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication
-Quality Inspection Parameter,Paramétre des Inspection Qualité
-Parameter Group,Groupe de paramétre
-E Commerce Settings,Paramétrage E-Commerce
-Follow these steps to create a landing page for your store:,Suivez les intructions suivantes pour créer votre page d'accueil de boutique en ligne
-Show Price in Quotation,Afficher les prix sur les devis
-Add-ons,Extensions
-Enable Wishlist,Activer la liste de souhaits
-Enable Reviews and Ratings,Activer les avis et notes
-Enable Recommendations,Activer les recommendations
-Item Search Settings,Paramétrage de la recherche d'article
-Purchase demande,Demande de materiel
+Retail,Commerce,
+Users,Utilisateurs,
+Permission Manager,Gestion des permissions,
+Fetch Timesheet,Récuprer les temps saisis,
+Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur,
+Quality Inspection(s),Inspection(s) Qualite,
+Set Advances and Allocate (FIFO),Affecter les encours au réglement,
+Apply Putaway Rule,Appliquer la régle de routage d'entrepot,
+Delete Transactions,Supprimer les transactions,
+Default Payment Discount Account,Compte par défaut des paiements de remise,
+Unrealized Profit / Loss Account,Compte de perte,
+Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés,
+Publish in Website,Publier sur le Site Web,
+List View,Vue en liste,
+Allow Excess Material Transfer,Autoriser les transfert de stock supérieurs à l'attendue,
+Allow transferring raw materials even after the Required Quantity is fulfilled,Autoriser les transfert  de matiéres premiére mais si la quantité requise est atteinte,
+Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations de correction de coût pour la valorisation des produits finis,
+Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications,
+System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications,
+Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication,
+Quality Inspection Parameter,Paramétre des Inspection Qualite,
+Parameter Group,Groupe de paramétre,
+E Commerce Settings,Paramétrage E-Commerce,
+Follow these steps to create a landing page for your store:,Suivez les intructions suivantes pour créer votre page d'accueil de boutique en ligne,
+Show Price in Quotation,Afficher les prix sur les devis,
+Add-ons,Extensions,
+Enable Wishlist,Activer la liste de souhaits,
+Enable Reviews and Ratings,Activer les avis et notes,
+Enable Recommendations,Activer les recommendations,
+Item Search Settings,Paramétrage de la recherche d'article,
+Purchase demande,Demande de materiel,
+Internal Customer,Client interne
+Internal Supplier,Fournisseur interne
+Contact & Address,Contact et Adresse
+Primary Address and Contact,Adresse et contact principal
+Supplier Primary Contact,Contact fournisseur principal
+Supplier Primary Address,Adresse fournisseur principal
+From Opportunity,Depuis l'opportunité
+Default Receivable Accounts,Compte de débit par défaut
+Receivable Accounts,Compte de débit
+Mention if a non-standard receivable account,Veuillez mentionner s'il s'agit d'un compte débiteur non standard
+Allow Purchase,Autoriser à l'achat
+Inventory Settings,Paramétrage de l'inventaire

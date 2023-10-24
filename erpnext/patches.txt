@@ -269,6 +269,7 @@ erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
+erpnext.patches.v14_0.france_depreciation_warning
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -328,13 +329,18 @@ erpnext.patches.v14_0.set_pick_list_status
 erpnext.patches.v13_0.update_docs_link
 erpnext.patches.v14_0.enable_all_leads
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
-# below migration patches should always run last
-erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
 erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
 erpnext.patches.v14_0.cleanup_workspaces
 erpnext.patches.v14_0.enable_allow_existing_serial_no
-erpnext.patches.v14_0.set_report_in_process_SOA 
+erpnext.patches.v14_0.set_report_in_process_SOA
 erpnext.patches.v14_0.create_accounting_dimensions_for_closing_balance
 erpnext.patches.v14_0.update_closing_balances #15-07-2023
 execute:frappe.defaults.clear_default("fiscal_year")
+execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for_items', 0)
+erpnext.patches.v14_0.correct_asset_value_if_je_with_workflow
+erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
+erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
+# below migration patch should always run last
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger

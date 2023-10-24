@@ -119,19 +119,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		});
 
-		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
-			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
+		if(this.frm.fields_dict['items'].grid.get_field('batch_no')) {
+			this.frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
 				return me.set_query_for_batch(doc, cdt, cdn);
 			});
-
-			let batch_field = this.frm.get_docfield('items', 'batch_no');
-			if (batch_field) {
-				batch_field.get_route_options_for_new_doc = (row) => {
-					return {
-						'item': row.doc.item_code
-					}
-				};
-			}
 		}
 
 		if(
@@ -196,14 +187,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		let batch_no_field = this.frm.get_docfield("items", "batch_no");
-		if (batch_no_field) {
-			batch_no_field.get_route_options_for_new_doc = function(row) {
-				return {
-					"item": row.doc.item_code
-				}
-			};
-		}
 
 		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
 			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
@@ -256,6 +239,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			]);
+		}
+
+		if(this.frm.fields_dict['items'].grid.get_field('batch_no')) {
+			let batch_field = this.frm.get_docfield('items', 'batch_no');
+			if (batch_field) {
+				batch_field.get_route_options_for_new_doc = (row) => {
+					return {
+						'item': row.doc.item_code
+					}
+				};
+			}
 		}
 	}
 
@@ -969,6 +963,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
 	}
 
+	apply_discount_on_item(doc, cdt, cdn, field) {
+		var item = frappe.get_doc(cdt, cdn);
+		if(!item.price_list_rate) {
+			item[field] = 0.0;
+		} else {
+			this.price_list_rate(doc, cdt, cdn);
+		}
+		this.set_gross_profit(item);
+	}
+
 	shipping_rule() {
 		var me = this;
 		if(this.frm.doc.shipping_rule) {
@@ -1639,6 +1643,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						() => {
 							if(args.items.length) {
 								me._set_values_for_item_list(r.message.children);
+								$.each(r.message.children || [], function(i, d) {
+									me.apply_discount_on_item(d, d.doctype, d.name, 'discount_percentage');
+								});
 							}
 						},
 						() => { me.in_apply_price_list = false; }

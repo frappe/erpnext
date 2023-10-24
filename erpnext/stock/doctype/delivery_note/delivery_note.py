@@ -139,8 +139,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
+		if self.get("_action") == "submit":
+			self.validate_duplicate_serial_nos()
+
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
+		self.set_product_bundle_reference_in_packed_items()  # should be called before `make_packing_list`
 		make_packing_list(self)
 
 		if self._action != "submit" and not self.is_return:
@@ -411,6 +415,32 @@ class DeliveryNote(SellingController):
 			filters={"new_item_code": ["in", items_list]},
 			pluck="name",
 		)
+
+	def validate_duplicate_serial_nos(self):
+		serial_nos = []
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			for serial_no in item.serial_no.split("\n"):
+				if serial_no in serial_nos:
+					frappe.throw(
+						_("Row #{0}: Serial No {1} is already selected.").format(item.idx, serial_no),
+						title=_("Duplicate Serial No"),
+					)
+				else:
+					serial_nos.append(serial_no)
+
+	def set_product_bundle_reference_in_packed_items(self):
+		if self.packed_items and ((self.is_return and self.return_against) or self.amended_from):
+			if items_ref_map := {
+				item.dn_detail or item.get("_amended_from"): item.name
+				for item in self.items
+				if item.dn_detail or item.get("_amended_from")
+			}:
+				for item in self.packed_items:
+					if item.parent_detail_docname in items_ref_map:
+						item.parent_detail_docname = items_ref_map[item.parent_detail_docname]
 
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):

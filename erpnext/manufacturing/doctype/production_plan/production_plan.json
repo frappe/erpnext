@@ -228,10 +228,10 @@
   },
   {
    "default": "0",
-   "description": "To know more about projected quantity, <a href=\"https://erpnext.com/docs/user/manual/en/stock/projected-quantity\" style=\"text-decoration: underline;\" target=\"_blank\">click here</a>.",
+   "description": "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
-   "label": "Ignore Existing Projected Quantity"
+   "label": "Ignore Available Stock"
   },
   {
    "fieldname": "column_break_25",
@@ -339,7 +339,7 @@
    "depends_on": "eval:doc.get_items_from == 'Sales Order'",
    "fieldname": "combine_items",
    "fieldtype": "Check",
-   "label": "Consolidate Items"
+   "label": "Consolidate Sales Order Items"
   },
   {
    "fieldname": "section_break_25",
@@ -399,7 +399,7 @@
   },
   {
    "default": "0",
-   "description": "System consider the projected quantity to check available or will be available sub-assembly items ",
+   "description": "If this checkbox is enabled, then the system won\u2019t run the MRP for the available sub-assembly items.",
    "fieldname": "skip_available_sub_assembly_item",
    "fieldtype": "Check",
    "label": "Skip Available Sub Assembly Items"
@@ -422,7 +422,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-22 23:36:31.770517",
+ "modified": "2023-09-29 11:41:03.246059",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

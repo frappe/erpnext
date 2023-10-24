@@ -731,6 +731,40 @@ class TestDepreciationMethods(AssetSetup):
 
 		self.assertEqual(schedules, expected_schedules)
 
+	def test_schedule_for_straight_line_method_with_daily_depreciation(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2023-01-01",
+			purchase_date="2023-01-01",
+			gross_purchase_amount=12000,
+			depreciation_start_date="2023-01-31",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			daily_depreciation=1,
+		)
+
+		expected_schedules = [
+			["2023-01-31", 1021.98, 1021.98],
+			["2023-02-28", 923.08, 1945.06],
+			["2023-03-31", 1021.98, 2967.04],
+			["2023-04-30", 989.01, 3956.05],
+			["2023-05-31", 1021.98, 4978.03],
+			["2023-06-30", 989.01, 5967.04],
+			["2023-07-31", 1021.98, 6989.02],
+			["2023-08-31", 1021.98, 8011.0],
+			["2023-09-30", 989.01, 9000.01],
+			["2023-10-31", 1021.98, 10021.99],
+			["2023-11-30", 989.01, 11011.0],
+			["2023-12-31", 989.0, 12000.0],
+		]
+
+		schedules = [
+			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")
+		]
+
+		self.assertEqual(schedules, expected_schedules)
+
 	def test_schedule_for_double_declining_method(self):
 		asset = create_asset(
 			calculate_depreciation=1,
@@ -1299,6 +1333,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 1",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 1,
 				"total_number_of_depreciations": 3,
@@ -1309,6 +1344,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 2",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 1,
 				"total_number_of_depreciations": 6,
@@ -1319,6 +1355,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 3",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 3,
@@ -1348,6 +1385,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 1",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 3,
@@ -1358,6 +1396,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 2",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 6,
@@ -1614,6 +1653,15 @@ def create_asset_data():
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
 
+	if not frappe.db.exists("Finance Book", "Test Finance Book 1"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 1"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 2"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 2"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 3"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 3"}).insert()
+
 
 def create_asset(**args):
 	args = frappe._dict(args)
@@ -1639,6 +1687,7 @@ def create_asset(**args):
 			"location": args.location or "Test Location",
 			"asset_owner": args.asset_owner or "Company",
 			"is_existing_asset": args.is_existing_asset or 1,
+			"is_composite_asset": args.is_composite_asset or 0,
 			"asset_quantity": args.get("asset_quantity") or 1,
 			"depr_entry_posting_status": args.depr_entry_posting_status or "",
 		}
@@ -1654,6 +1703,7 @@ def create_asset(**args):
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
 				"depreciation_start_date": args.depreciation_start_date,
+				"daily_depreciation": args.daily_depreciation or 0,
 			},
 		)
 
