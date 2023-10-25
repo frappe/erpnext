@@ -998,7 +998,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
 
 		pr.cancel()
-		pr1.cancel()
 
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
@@ -1070,7 +1069,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(gle.credit, expected_gle[i][2])
 
 		pr.cancel()
-		pr1.cancel()
 
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
