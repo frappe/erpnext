@@ -1315,6 +1315,21 @@ class TestDeliveryNote(FrappeTestCase):
 		frappe.db.rollback()
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
 
+	def non_internal_transfer_delivery_note(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		dn = create_delivery_note(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", dn.company)
+		dn.items[0].db_set("target_warehouse", "warehouse")
+
+		dn.reload()
+
+		self.assertEqual(dn.items[0].target_warehouse, warehouse.name)
+
+		dn.save()
+		dn.reload()
+		self.assertFalse(dn.items[0].target_warehouse)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
