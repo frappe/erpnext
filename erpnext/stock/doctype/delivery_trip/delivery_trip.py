@@ -61,6 +61,9 @@ class DeliveryTrip(Document):
 	def on_update(self):
 		self.update_delivery_notes()
 
+	def on_trash(self):
+		self.update_delivery_notes(delete=True)
+
 	def on_submit(self):
 		self.update_status()
 
