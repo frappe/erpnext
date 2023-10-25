@@ -957,8 +957,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.reload()
 		pr1.cancel()
 
-<<<<<<< HEAD
-=======
 	def test_stock_transfer_from_purchase_receipt(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -1074,7 +1072,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 		pr1.cancel()
 
->>>>>>> 72d32a4901 (chore: fixed test cases related to Internal Transfer (#37659))
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
 		- Create PO
