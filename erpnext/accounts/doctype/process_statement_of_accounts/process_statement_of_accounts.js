@@ -8,7 +8,8 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 	},
 	refresh: function(frm){
 		if(!frm.doc.__islocal) {
-			frm.add_custom_button('Send Emails',function(){
+			frm.add_custom_button(__('Send Emails'), function(){
+				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."))
 				frappe.call({
 					method: "erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_emails",
 					args: {
@@ -24,8 +25,9 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 					}
 				});
 			});
-			frm.add_custom_button('Download',function(){
-				var url = frappe.urllib.get_full_url(
+			frm.add_custom_button(__('Download'), function(){
+				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."))
+				let url = frappe.urllib.get_full_url(
 					'/api/method/erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.download_statements?'
 					+ 'document_name='+encodeURIComponent(frm.doc.name))
 				$.ajax({
@@ -51,10 +53,31 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 				}
 			}
 		});
+		frm.set_query("account", function() {
+			return {
+				filters: {
+					'company': frm.doc.company
+				}
+			};
+		});
 		if(frm.doc.__islocal){
 			frm.set_value('from_date', frappe.datetime.add_months(frappe.datetime.get_today(), -1));
 			frm.set_value('to_date', frappe.datetime.get_today());
 		}
+	},
+	report: function(frm){
+		let filters = {
+			'company': frm.doc.company,
+		}
+		if(frm.doc.report == 'Accounts Receivable'){
+			filters['account_type'] = 'Receivable';
+		}
+		frm.set_query("account", function() {
+			return {
+				filters: filters
+			};
+		});
+
 	},
 	customer_collection: function(frm){
 		frm.set_value('collection_name', '');

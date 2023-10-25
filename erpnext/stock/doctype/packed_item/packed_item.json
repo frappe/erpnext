@@ -19,6 +19,8 @@
   "rate",
   "uom",
   "section_break_9",
+  "pick_serial_and_batch",
+  "serial_and_batch_bundle",
   "serial_no",
   "column_break_11",
   "batch_no",
@@ -26,8 +28,11 @@
   "section_break_13",
   "actual_qty",
   "projected_qty",
+  "ordered_qty",
+  "packed_qty",
   "column_break_16",
   "incoming_rate",
+  "picked_qty",
   "page_break",
   "prevdoc_doctype",
   "parent_detail_docname"
@@ -115,7 +120,8 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "label": "Serial No"
+   "label": "Serial No",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_11",
@@ -125,7 +131,8 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_13",
@@ -222,15 +229,54 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "label": "Ordered Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "picked_qty",
+   "fieldtype": "Float",
+   "label": "Picked Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.packed_qty",
+   "fieldname": "packed_qty",
+   "fieldtype": "Float",
+   "label": "Packed Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "pick_serial_and_batch",
+   "fieldtype": "Button",
+   "label": "Pick Serial / Batch No"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-01-28 16:03:30.780111",
+ "modified": "2023-04-28 13:16:38.460806",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",

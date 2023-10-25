@@ -130,10 +130,10 @@ erpnext.PointOfSale.ItemCart = class {
 			},
 			cols: 5,
 			keys: [
-				[ 1, 2, 3, __('Quantity') ],
-				[ 4, 5, 6, __('Discount') ],
-				[ 7, 8, 9, __('Rate') ],
-				[ '.', 0, __('Delete'), __('Remove') ]
+				[ 1, 2, 3, 'Quantity' ],
+				[ 4, 5, 6, 'Discount' ],
+				[ 7, 8, 9, 'Rate' ],
+				[ '.', 0, 'Delete', 'Remove' ]
 			],
 			css_classes: [
 				[ '', '', '', 'col-span-2' ],
@@ -286,7 +286,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.item_is_selected = false;
 			this.$cart_container.find('.cart-item-wrapper').css("background-color", "");
 		} else {
-			$cart_item.css("background-color", "var(--gray-50)");
+			$cart_item.css("background-color", "var(--control-bg)");
 			this.item_is_selected = true;
 			this.$cart_container.find('.cart-item-wrapper').not(item).css("background-color", "");
 		}
@@ -524,7 +524,8 @@ erpnext.PointOfSale.ItemCart = class {
 			const currency = this.events.get_frm().doc.currency;
 			const taxes_html = taxes.map(t => {
 				if (t.tax_amount_after_discount_amount == 0.0) return;
-				const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+				// if tax rate is 0, don't print it.
+				const description = /[0-9]+/.test(t.description) ? t.description : ((t.rate != 0) ? `${t.description} @ ${t.rate}%`: t.description);
 				return `<div class="tax-row">
 					<div class="tax-label">${description}</div>
 					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, currency)}</div>
@@ -608,7 +609,7 @@ erpnext.PointOfSale.ItemCart = class {
 			if (item_data.rate && item_data.amount && item_data.rate !== item_data.amount) {
 				return `
 					<div class="item-qty-rate">
-						<div class="item-qty"><span>${item_data.qty || 0}</span></div>
+						<div class="item-qty"><span>${item_data.qty || 0} ${item_data.uom}</span></div>
 						<div class="item-rate-amount">
 							<div class="item-rate">${format_currency(item_data.amount, currency)}</div>
 							<div class="item-amount">${format_currency(item_data.rate, currency)}</div>
@@ -617,7 +618,7 @@ erpnext.PointOfSale.ItemCart = class {
 			} else {
 				return `
 					<div class="item-qty-rate">
-						<div class="item-qty"><span>${item_data.qty || 0}</span></div>
+						<div class="item-qty"><span>${item_data.qty || 0} ${item_data.uom}</span></div>
 						<div class="item-rate-amount">
 							<div class="item-rate">${format_currency(item_data.rate, currency)}</div>
 						</div>
@@ -944,7 +945,7 @@ erpnext.PointOfSale.ItemCart = class {
 					`<div class="no-transactions-placeholder">No recent transactions found</div>`
 				)
 				return;
-			};
+			}
 
 			const elapsed_time = moment(res[0].posting_date+" "+res[0].posting_time).fromNow();
 			this.$customer_section.find('.customer-desc').html(`Last transacted ${elapsed_time}`);

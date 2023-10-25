@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "field:id",
- "creation": "2019-06-05 12:07:02.634534",
+ "creation": "2022-02-21 11:54:58.414784",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -9,6 +9,8 @@
   "id",
   "from",
   "to",
+  "call_received_by",
+  "employee_user_id",
   "medium",
   "start_time",
   "end_time",
@@ -20,6 +22,7 @@
   "recording_url",
   "recording_html",
   "section_break_11",
+  "type_of_call",
   "summary",
   "section_break_19",
   "links"
@@ -103,7 +106,8 @@
   },
   {
    "fieldname": "summary",
-   "fieldtype": "Small Text"
+   "fieldtype": "Small Text",
+   "label": "Summary"
   },
   {
    "fieldname": "section_break_11",
@@ -134,15 +138,37 @@
    "fieldname": "call_details_section",
    "fieldtype": "Section Break",
    "label": "Call Details"
+  },
+  {
+   "fieldname": "employee_user_id",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Employee User Id",
+   "options": "User"
+  },
+  {
+   "fieldname": "type_of_call",
+   "fieldtype": "Link",
+   "label": "Type Of Call",
+   "options": "Telephony Call Type"
+  },
+  {
+   "depends_on": "to",
+   "fieldname": "call_received_by",
+   "fieldtype": "Link",
+   "label": "Call Received By",
+   "options": "Employee",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-08 14:23:28.744844",
+ "modified": "2022-04-14 02:59:22.503202",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Call Log",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -164,6 +190,7 @@
  ],
  "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "from",
  "track_changes": 1,
  "track_views": 1

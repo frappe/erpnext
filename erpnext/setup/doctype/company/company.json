@@ -15,6 +15,7 @@
   "default_currency",
   "country",
   "is_group",
+  "default_holiday_list",
   "cb0",
   "default_letter_head",
   "tax_id",
@@ -32,28 +33,17 @@
   "fax",
   "website",
   "address_html",
+  "registration_info",
+  "registration_details",
+  "lft",
+  "rgt",
+  "old_parent",
+  "accounts_tab",
   "section_break_28",
   "create_chart_of_accounts_based_on",
   "existing_company",
   "column_break_26",
   "chart_of_accounts",
-  "charts_section",
-  "sales_settings",
-  "default_buying_terms",
-  "sales_monthly_history",
-  "monthly_sales_target",
-  "total_monthly_sales",
-  "column_break_goals",
-  "default_selling_terms",
-  "default_warehouse_for_sales_return",
-  "credit_limit",
-  "transactions_annual_history",
-  "hr_settings_section",
-  "default_holiday_list",
-  "default_expense_claim_payable_account",
-  "column_break_10",
-  "default_employee_advance_account",
-  "default_payroll_payable_account",
   "default_settings",
   "default_bank_account",
   "default_cash_account",
@@ -75,34 +65,48 @@
   "payment_terms",
   "cost_center",
   "default_finance_book",
-  "auto_accounting_for_stock_settings",
-  "enable_perpetual_inventory",
-  "enable_provisional_accounting_for_non_stock_items",
-  "default_inventory_account",
-  "stock_adjustment_account",
-  "default_in_transit_warehouse",
-  "column_break_32",
-  "stock_received_but_not_billed",
-  "default_provisional_account",
-  "expenses_included_in_valuation",
+  "advance_payments_section",
+  "book_advance_payments_in_separate_party_account",
+  "column_break_fwcf",
+  "default_advance_received_account",
+  "default_advance_paid_account",
+  "exchange_rate_revaluation_settings_section",
+  "auto_exchange_rate_revaluation",
+  "auto_err_frequency",
+  "submit_err_jv",
+  "budget_detail",
+  "exception_budget_approver_role",
   "fixed_asset_defaults",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
   "series_for_depreciation_entry",
-  "expenses_included_in_asset_valuation",
-  "repair_and_maintenance_account",
   "column_break_40",
   "disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
-  "budget_detail",
-  "exception_budget_approver_role",
-  "registration_info",
-  "registration_details",
-  "lft",
-  "rgt",
-  "old_parent"
+  "buying_and_selling_tab",
+  "sales_settings",
+  "default_buying_terms",
+  "sales_monthly_history",
+  "monthly_sales_target",
+  "total_monthly_sales",
+  "column_break_goals",
+  "default_selling_terms",
+  "default_warehouse_for_sales_return",
+  "credit_limit",
+  "transactions_annual_history",
+  "stock_tab",
+  "auto_accounting_for_stock_settings",
+  "enable_perpetual_inventory",
+  "enable_provisional_accounting_for_non_stock_items",
+  "default_inventory_account",
+  "stock_adjustment_account",
+  "column_break_32",
+  "stock_received_but_not_billed",
+  "default_provisional_account",
+  "default_in_transit_warehouse",
+  "dashboard_tab"
  ],
  "fields": [
   {
@@ -147,9 +151,8 @@
   },
   {
    "fieldname": "domain",
-   "fieldtype": "Link",
-   "label": "Domain",
-   "options": "Domain"
+   "fieldtype": "Data",
+   "label": "Domain"
   },
   {
    "fieldname": "parent_company",
@@ -210,11 +213,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "charts_section",
-   "fieldtype": "Section Break",
-   "label": "Default Values"
-  },
-  {
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -239,10 +237,6 @@
    "fieldtype": "Link",
    "label": "Default Warehouse for Sales Return",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "country",
@@ -376,13 +370,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "default_employee_advance_account",
-   "fieldtype": "Link",
-   "label": "Default Employee Advance Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "default_expense_account",
    "fieldtype": "Link",
@@ -415,24 +402,6 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Default Deferred Expense Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "default_payroll_payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Payroll Payable Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "default_expense_claim_payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Expense Claim Payable Account",
    "no_copy": 1,
    "options": "Account"
   },
@@ -499,14 +468,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "expenses_included_in_valuation",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Expenses Included In Valuation",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "label": "Accumulated Depreciation Account",
@@ -524,12 +485,6 @@
    "fieldname": "series_for_depreciation_entry",
    "fieldtype": "Data",
    "label": "Series for Asset Depreciation Entry (Journal Entry)"
-  },
-  {
-   "fieldname": "expenses_included_in_asset_valuation",
-   "fieldtype": "Link",
-   "label": "Expenses Included In Asset Valuation",
-   "options": "Account"
   },
   {
    "fieldname": "column_break_40",
@@ -562,7 +517,6 @@
    "options": "Account"
   },
   {
-   "collapsible": 1,
    "fieldname": "budget_detail",
    "fieldtype": "Section Break",
    "label": "Budget Detail"
@@ -703,25 +657,13 @@
    "options": "Account"
   },
   {
-   "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
-   "label": "HR & Payroll Settings"
-  },
-  {
    "fieldname": "column_break_26",
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
    "label": "Fixed Asset Defaults"
-  },
-  {
-   "fieldname": "repair_and_maintenance_account",
-   "fieldtype": "Link",
-   "label": "Repair and Maintenance Account",
-   "options": "Account"
   },
   {
    "fieldname": "section_break_28",
@@ -741,6 +683,82 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "fieldname": "advance_payments_section",
+   "fieldtype": "Section Break",
+   "label": "Advance Payments"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "fieldname": "default_advance_received_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Received Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "fieldname": "default_advance_paid_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Paid Account",
+   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_fwcf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>",
+   "fieldname": "book_advance_payments_in_separate_party_account",
+   "fieldtype": "Check",
+   "label": "Book Advance Payments in Separate Party Account"
+  },
+  {
+   "fieldname": "exchange_rate_revaluation_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Exchange Rate Revaluation Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_exchange_rate_revaluation",
+   "fieldtype": "Check",
+   "label": "Auto Create Exchange Rate Revaluation"
+  },
+  {
+   "fieldname": "auto_err_frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Daily\nWeekly"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_err_jv",
+   "fieldtype": "Check",
+   "label": "Submit ERR Journals?"
+  },
+  {
+   "fieldname": "accounts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "buying_and_selling_tab",
+   "fieldtype": "Tab Break",
+   "label": "Buying and Selling"
+  },
+  {
+   "fieldname": "stock_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock"
+  },
+  {
+   "fieldname": "dashboard_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dashboard",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-building",
@@ -748,7 +766,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-01-25 10:33:16.826067",
+ "modified": "2023-10-23 10:19:24.322898",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

@@ -11,7 +11,6 @@ RATE = 1
 
 
 class BinWiseValuation(ABC):
-
 	@abstractmethod
 	def add_stock(self, qty: float, rate: float) -> None:
 		pass
@@ -61,7 +60,7 @@ class FIFOValuation(BinWiseValuation):
 
 	# specifying the attributes to save resources
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
-	__slots__ = ["queue",]
+	__slots__ = ["queue"]
 
 	def __init__(self, state: Optional[List[StockBin]]):
 		self.queue: List[StockBin] = state if state is not None else []
@@ -74,9 +73,9 @@ class FIFOValuation(BinWiseValuation):
 	def add_stock(self, qty: float, rate: float) -> None:
 		"""Update fifo queue with new stock.
 
-			args:
-				qty: new quantity to add
-				rate: incoming rate of new quantity"""
+		args:
+		        qty: new quantity to add
+		        rate: incoming rate of new quantity"""
 
 		if not len(self.queue):
 			self.queue.append([0, 0])
@@ -101,12 +100,12 @@ class FIFOValuation(BinWiseValuation):
 		"""Remove stock from the queue and return popped bins.
 
 		args:
-			qty: quantity to remove
-			rate: outgoing rate
-			rate_generator: function to be called if queue is not found and rate is required.
+		        qty: quantity to remove
+		        rate: outgoing rate
+		        rate_generator: function to be called if queue is not found and rate is required.
 		"""
 		if not rate_generator:
-			rate_generator = lambda : 0.0  # noqa
+			rate_generator = lambda: 0.0  # noqa
 
 		consumed_bins = []
 		while qty:
@@ -122,13 +121,9 @@ class FIFOValuation(BinWiseValuation):
 						index = idx
 						break
 
-				# If no entry found with outgoing rate, collapse queue
+				# If no entry found with outgoing rate, consume as per FIFO
 				if index is None:  # nosemgrep
-					new_stock_value = sum(d[QTY] * d[RATE] for d in self.queue) - qty * outgoing_rate
-					new_stock_qty = sum(d[QTY] for d in self.queue) - qty
-					self.queue = [[new_stock_qty, new_stock_value / new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
-					consumed_bins.append([qty, outgoing_rate])
-					break
+					index = 0
 			else:
 				index = 0
 
@@ -169,7 +164,7 @@ class LIFOValuation(BinWiseValuation):
 
 	# specifying the attributes to save resources
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
-	__slots__ = ["stack",]
+	__slots__ = ["stack"]
 
 	def __init__(self, state: Optional[List[StockBin]]):
 		self.stack: List[StockBin] = state if state is not None else []
@@ -182,11 +177,11 @@ class LIFOValuation(BinWiseValuation):
 	def add_stock(self, qty: float, rate: float) -> None:
 		"""Update lifo stack with new stock.
 
-			args:
-				qty: new quantity to add
-				rate: incoming rate of new quantity.
+		args:
+		        qty: new quantity to add
+		        rate: incoming rate of new quantity.
 
-			Behaviour of this is same as FIFO valuation.
+		Behaviour of this is same as FIFO valuation.
 		"""
 		if not len(self.stack):
 			self.stack.append([0, 0])
@@ -205,19 +200,18 @@ class LIFOValuation(BinWiseValuation):
 				else:  # new balance qty is still negative, maintain same rate
 					self.stack[-1][QTY] = qty
 
-
 	def remove_stock(
 		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
 	) -> List[StockBin]:
 		"""Remove stock from the stack and return popped bins.
 
 		args:
-			qty: quantity to remove
-			rate: outgoing rate - ignored. Kept for backwards compatibility.
-			rate_generator: function to be called if stack is not found and rate is required.
+		        qty: quantity to remove
+		        rate: outgoing rate - ignored. Kept for backwards compatibility.
+		        rate_generator: function to be called if stack is not found and rate is required.
 		"""
 		if not rate_generator:
-			rate_generator = lambda : 0.0  # noqa
+			rate_generator = lambda: 0.0  # noqa
 
 		consumed_bins = []
 		while qty:
@@ -254,7 +248,7 @@ def round_off_if_near_zero(number: float, precision: int = 7) -> float:
 	"""Rounds off the number to zero only if number is close to zero for decimal
 	specified in precision. Precision defaults to 7.
 	"""
-	if abs(0.0 - flt(number)) < (1.0 / (10 ** precision)):
+	if abs(0.0 - flt(number)) < (1.0 / (10**precision)):
 		return 0.0
 
 	return flt(number)

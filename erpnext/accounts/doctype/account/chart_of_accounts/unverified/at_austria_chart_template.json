@@ -2,397 +2,438 @@
     "country_code": "at",
     "name": "Austria - Chart of Accounts",
     "tree": {
-        "Summe Abschreibungen und Aufwendungen": {
-            "7010 bis 7080 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)": {},
-            "7100 bis 7190 Sonstige Steuern": {
-                "account_type": "Tax"
-            },
-            "7200 bis 7290 Instandhaltung u. Reinigung durh Dritte, Entsorgung, Beleuchtung": {},
-            "7300 bis 7310 Transporte durch Dritte": {},
-            "7320 bis 7330 Kfz - Aufwand": {},
-            "7340 bis 7350 Reise- und Fahraufwand": {},
-            "7360 bis 7370 Tag- und N\u00e4chtigungsgelder": {},
-            "7380 bis 7390 Nachrichtenaufwand": {},
-            "7400 bis 7430 Miet- und Pachtaufwand": {},
-            "7440 bis 7470 Leasingaufwand": {},
-            "7480 bis 7490 Lizenzaufwand": {},
-            "7500 bis 7530 Aufwand f\u00fcr beigestelltes Personal": {},
-            "7540 bis 7570 Provisionen an Dritte": {},
-            "7580 bis 7590 Aufsichtsratsverg\u00fctungen": {},
-            "7610 bis 7620 Druckerzeugnisse und Vervielf\u00e4ltigungen": {},
-            "7650 bis 7680 Werbung und Repr\u00e4sentationen": {},
-            "7700 bis 7740 Versicherungen": {},
-            "7750 bis 7760 Beratungs- und Pr\u00fcfungsaufwand": {},
-            "7800 bis 7810 Schadensf\u00e4lle": {},
-            "7840 bis 7880 Verschiedene betriebliche Aufwendungen": {},
-            "7910 bis 7950 Aufwandsstellenrechung der Hersteller": {},
-            "Abschreibungen auf aktivierte Aufwendungen f\u00fcr das Ingangs. u. Erweitern des Betriebes": {},
-            "Abschreibungen vom Umlaufverm\u00f6gen, soweit diese die im Unternehmen \u00fcblichen Abschreibungen \u00fcbersteigen": {},
-            "Aufwandsstellenrechnung": {},
-            "Aus- und Fortbildung": {},
-            "Buchwert abgegangener Anlagen, ausgenommen Finanzanlagen": {},
-            "B\u00fcromaterial und Drucksorten": {},
-            "Fachliteratur und Zeitungen ": {},
-            "Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen": {},
-            "Mitgliedsbeitr\u00e4ge": {},
-            "Skontoertr\u00e4ge auf sonstige betriebliche Aufwendungen": {},
-            "Sonstige betrieblichen Aufwendungen": {},
-            "Spenden und Trinkgelder": {},
-            "Spesen des Geldverkehrs": {},
-            "Verluste aus dem Abgang vom Anlageverm\u00f6gen, ausgenommen Finanzanlagen": {},
-            "Vertriebskosten": {},
-            "Verwaltungskosten": {},
-            "root_type": "Expense"
-        },
-        "Summe Betriebliche Ertr\u00e4ge": {
-            "4400 bis 4490 Erl\u00f6sschm\u00e4lerungen": {},
-            "4500 bis 4570 Ver\u00e4nderungen des Bestandes an fertigen und unfertigen Erzeugn. sowie an noch nicht abrechenbaren Leistungen": {},
-            "4580 bis 4590 andere aktivierte Eigenleistungen": {},
-            "4600 bis 4620 Erl\u00f6se aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen": {},
-            "4630 bis 4650 Ertr\u00e4ge aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen": {},
-            "4660 bis 4670 Ertr\u00e4ge aus der Zuschreibung zum Anlageverm\u00f6gen, ausgen. Finanzanlagen": {},
-            "4700 bis 4790 Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen": {},
-            "4800 bis 4990 \u00dcbrige betriebliche Ertr\u00e4ge": {},
-            "Erl\u00f6se 0 % Ausfuhrlieferungen/Drittl\u00e4nder": {},
-            "Erl\u00f6se 10 %": {},
-            "Erl\u00f6se 20 %": {},
-            "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 10 % USt": {},
-            "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 20 % USt": {},
-            "Erl\u00f6se i.g. Lieferungen (stfr)": {},
-            "root_type": "Income"
-        },
-        "Summe Eigenkapital R\u00fccklagen Abschlusskonten": {
-            "9000 bis 9180 Gezeichnetes bzw. gewidmetes Kapital": {
-                "account_type": "Equity"
-            },
-            "9200 bis 9290 Kapitalr\u00fccklagen": {
-                "account_type": "Equity"
-            },
-            "9300 bis 9380 Gewinnr\u00fccklagen": {
-                "account_type": "Equity"
-            },
-            "9400 bis 9590 Bewertungsreserven uns sonst. unversteuerte R\u00fccklagen": {
-                "account_type": "Equity"
-            },
-            "9600 bis 9690 Privat und Verrechnungskonten bei Einzelunternehmen und Personengesellschaften": {},
-            "9700 bis 9790 Einlagen stiller Gesellschafter ": {},
-            "9900 bis 9999 Evidenzkonten": {},
-            "Bilanzgewinn (-verlust )": {
-                "account_type": "Equity"
-            },
-            "Er\u00f6ffnungsbilanz": {},
-            "Gewinn- und Verlustrechnung": {},
-            "Schlussbilanz": {},
-            "nicht eingeforderte ausstehende Einlagen": {
-                "account_type": "Equity"
-            },
-            "root_type": "Equity"
-        },
-        "Summe Finanzertr\u00e4ge und Aufwendungen": {
-            "8000 bis 8040 Ertr\u00e4ge aus Beteiligungen": {},
-            "8050 bis 8090 Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens": {},
-            "8100 bis 8130 Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge": {},
-            "8220 bis 8250 Aufwendungen aus Beteiligungen": {},
-            "8260 bis 8270 Aufwendungen aus sonst. Fiananzanlagen und aus Wertpapieren des Umlaufverm\u00f6gens": {},
-            "8280 bis 8340 Zinsen und \u00e4hnliche Aufwendungem": {},
-            "8400 bis 8440 Au\u00dferordentliche Ertr\u00e4ge": {},
-            "8450 bis 8490 Au\u00dferordentliche Aufwendungen": {},
-            "8500 bis 8590 Steuern vom Einkommen und vom Ertrag": {
-                "account_type": "Tax"
-            },
-            "8600 bis 8690 Aufl\u00f6sung unversteuerten R\u00fccklagen": {},
-            "8700 bis 8740 Aufl\u00f6sung von Kapitalr\u00fccklagen": {},
-            "8750 bis 8790 Aufl\u00f6sung von Gewinnr\u00fccklagen": {},
-            "8800 bis 8890 Zuweisung von unversteuerten R\u00fccklagen": {},
-            "Buchwert abgegangener Beteiligungen": {},
-            "Buchwert abgegangener Wertpapiere des Umlaufverm\u00f6gens": {},
-            "Buchwert abgegangener sonstiger Finanzanlagen": {},
-            "Erl\u00f6se aus dem Abgang von Beteiligungen": {},
-            "Erl\u00f6se aus dem Abgang von Wertpapieren des Umlaufverm\u00f6gens": {},
-            "Erl\u00f6se aus dem Abgang von sonstigen Finanzanlagen": {},
-            "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Finanzanlagen": {},
-            "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Wertpapieren des Umlaufverm\u00f6gens": {},
-            "Gewinabfuhr bzw. Verlust\u00fcberrechnung aus Ergebnisabf\u00fchrungsvertr\u00e4gen": {},
-            "nicht ausgenutzte Lieferantenskonti": {},
-            "root_type": "Income"
-        },
-        "Summe Fremdkapital": {
-            "3020 bis 3030 Steuerr\u00fcckstellungen": {},
-            "3040 bis 3090 Sonstige R\u00fcckstellungen": {},
-            "3110 bis 3170 Verbindlichkeiten gegen\u00fcber Kredidinstituten": {},
-            "3180 bis 3190 Verbindlichkeiten gegen\u00fcber Finanzinstituten": {},
-            "3380 bis 3390 Verbindlichkeiten aus der Annahme gezogener Wechsel u. d. Ausstellungen eigener Wechsel": {
+        "Klasse 0 Aktiva: Anlageverm\u00f6gen": {
+				"0100 Konzessionen ": {"account_type": "Fixed Asset"},
+				"0110 Patentrechte und Lizenzen ": {"account_type": "Fixed Asset"},
+				"0120 Datenverarbeitungsprogramme ": {"account_type": "Fixed Asset"},
+				"0130 Marken, Warenzeichen und Musterschutzrechte, sonstige Urheberrechte ": {"account_type": "Fixed Asset"},
+				"0140 Pacht- und Mietrechte ": {"account_type": "Fixed Asset"},
+				"0150 Bezugs- und ähnliche Rechte ": {"account_type": "Fixed Asset"},
+				"0160 Geschäfts-/Firmenwert ": {"account_type": "Fixed Asset"},
+				"0170 Umgründungsmehrwert ": {"account_type": "Fixed Asset"},
+				"0180 Geleistete Anzahlungen auf immaterielle Vermögensgegenstände": {"account_type": "Fixed Asset"},
+				"0190 Kumulierte Abschreibungen zu immateriellen Vermögensgegenständen ": {"account_type": "Fixed Asset"},
+				"0200 Unbebaute Grundstücke, soweit nicht landwirtschaftlich genutzt ": {"account_type": "Fixed Asset"},
+				"0210 Bebaute Grundstücke (Grundwert) ": {"account_type": "Fixed Asset"},
+				"0220 Landwirtschaftlich genutzte Grundstücke ": {"account_type": "Fixed Asset"},
+				"0230 Grundstücksgleiche Rechte ": {"account_type": "Fixed Asset"},
+				"0300 Betriebs- und Geschäftsgebäude auf eigenem Grund ": {"account_type": "Fixed Asset"},
+				"0310 Wohn- und Sozialgebäude auf eigenem Grund ": {"account_type": "Fixed Asset"},
+				"0320 Betriebs- und Geschäftsgebäude auf fremdem Grund ": {"account_type": "Fixed Asset"},
+				"0330 Wohn- und Sozialgebäude auf fremdem Grund ": {"account_type": "Fixed Asset"},
+				"0340 Grundstückseinrichtungen auf eigenem Grund ": {"account_type": "Fixed Asset"},
+				"0350 Grundstückseinrichtungen auf fremdem Grund ": {"account_type": "Fixed Asset"},
+				"0360 Bauliche Investitionen in fremden (gepachteten) Betriebs- und Geschäftsgebäuden": {"account_type": "Fixed Asset"},
+				"0370 Bauliche Investitionen in fremden (gepachteten) Wohn- und Sozialgebäuden": {"account_type": "Fixed Asset"},
+				"0390 Kumulierte Abschreibungen zu Grundstücken ": {"account_type": "Fixed Asset"},
+				"0400 Maschinen und Geräte ": {"account_type": "Fixed Asset"},				
+				"0500 Maschinenwerkzeuge ": {"account_type": "Fixed Asset"},
+				"0510 Allgemeine Werkzeuge und Handwerkzeuge ": {"account_type": "Fixed Asset"},
+				"0520 Prototypen, Formen, Modelle ": {"account_type": "Fixed Asset"},
+				"0530 Andere Erzeugungshilfsmittel (auch Softwarewerkzeuge)": {"account_type": "Fixed Asset"},
+				"0540 Hebezeuge und Montageanlagen ": {"account_type": "Fixed Asset"},
+				"0550 Geringwertige Vermögensgegenstände, soweit im Erzeugungsprozess ": {"account_type": "Fixed Asset"},
+				"0560 Festwerte technische Anlagen und Maschinen ": {"account_type": "Fixed Asset"},
+				"0590 Kumulierte Abschreibungen zu technischen Anlagen und Maschinen ": {"account_type": "Fixed Asset"},
+				"0600 Betriebs- und Geschäftsausstattung, soweit nicht gesondert angeführt ": {"account_type": "Fixed Asset"},
+				"0610 Andere Anlagen, soweit nicht gesondert angeführt ": {"account_type": "Fixed Asset"},
+				"0620 Büromaschinen, EDV-Anlagen ": {"account_type": "Fixed Asset"},
+				"0630 PKW und Kombis ": {"account_type": "Fixed Asset"},
+				"0640 LKW ": {"account_type": "Fixed Asset"},
+				"0650 Andere Beförderungsmittel ": {"account_type": "Fixed Asset"},
+				"0660 Gebinde ": {"account_type": "Fixed Asset"},
+				"0670 Geringwertige Vermögensgegenstände, soweit nicht im Erzeugungssprozess verwendet": {"account_type": "Fixed Asset"},
+				"0680 Festwerte außer technische Anlagen und Maschinen ": {"account_type": "Fixed Asset"},
+				"0690 Kumulierte Abschreibungen zu anderen Anlagen, Betriebs- und Geschäftsausstattung": {"account_type": "Fixed Asset"},
+				"0700 Geleistete Anzahlungen auf Sachanlagen ": {"account_type": "Fixed Asset"},
+				"0710 Anlagen in Bau ": {"account_type": "Fixed Asset"},
+				"0790 Kumulierte Abschreibungen zu geleisteten Anzahlungen auf Sachanlagen ": {"account_type": "Fixed Asset"},
+				"0800 Anteile an verbundenen Unternehmen ": {"account_type": "Fixed Asset"},
+				"0810 Beteiligungen an Gemeinschaftsunternehmen ": {"account_type": "Fixed Asset"},
+				"0820 Beteiligungen an angeschlossenen (assoziierten) Unternehmen ": {"account_type": "Fixed Asset"},
+				"0830 Eigene Anteile, Anteile an herrschenden oder mit Mehrheit beteiligten ": {"account_type": "Fixed Asset"},
+				"0840 Sonstige Beteiligungen ": {"account_type": "Fixed Asset"},
+				"0850 Ausleihungen an verbundene Unternehmen ": {"account_type": "Fixed Asset"},
+				"0860 Ausleihungen an Unternehmen mit Beteiligungsverhältnis": {"account_type": "Fixed Asset"},
+				"0870 Ausleihungen an Gesellschafter ": {"account_type": "Fixed Asset"},
+				"0880 Sonstige Ausleihungen ": {"account_type": "Fixed Asset"},
+				"0890 Anteile an Kapitalgesellschaften ohne Beteiligungscharakter ": {"account_type": "Fixed Asset"},
+				"0900 Anteile an Personengesellschaften ohne Beteiligungscharakter ": {"account_type": "Fixed Asset"},
+				"0910 Genossenschaftsanteile ohne Beteiligungscharakter ": {"account_type": "Fixed Asset"},
+				"0920 Anteile an Investmentfonds ": {"account_type": "Fixed Asset"},
+				"0930 Festverzinsliche Wertpapiere des Anlagevermögens ": {"account_type": "Fixed Asset"},
+				"0980 Geleistete Anzahlungen auf Finanzanlagen ": {"account_type": "Fixed Asset"},
+				"0990 Kumulierte Abschreibungen zu Finanzanlagen ": {"account_type": "Fixed Asset"},
+            "root_type": "Asset"
+        },    
+        "Klasse 1 Aktiva: Vorr\u00e4te": {
+            "1000 Bezugsverrechnung": {"account_type": "Stock"},
+            "1100 Rohstoffe": {"account_type": "Stock"},
+            "1200 Bezogene Teile": {"account_type": "Stock"},
+            "1300 Hilfsstoffe": {"account_type": "Stock"},
+            "1350 Betriebsstoffe": {"account_type": "Stock"},
+            "1360 Vorrat Energietraeger": {"account_type": "Stock"},            
+            "1400 Unfertige Erzeugnisse": {"account_type": "Stock"},
+            "1500 Fertige Erzeugnisse": {"account_type": "Stock"},
+            "1600 Handelswarenvorrat": {"account_type": "Stock Received But Not Billed"},
+            "1700 Noch nicht abrechenbare Leistungen": {"account_type": "Stock"},
+            "1900 Wertberichtigungen": {"account_type": "Stock"},
+            "1800 Geleistete Anzahlungen": {"account_type": "Stock"},
+            "1900 Wertberichtigungen": {"account_type": "Stock"},
+            "root_type": "Asset"
+        },    
+        "Klasse 3 Passiva: Verbindlichkeiten": {
+            "3000 Allgemeine Verbindlichkeiten (Schuld)": {"account_type": "Payable"},
+            "3010 R\u00fcckstellungen f\u00fcr Pensionen": {"account_type": "Payable"},
+            "3020 Steuerr\u00fcckstellungen": {"account_type": "Tax"},
+            "3041 Sonstige R\u00fcckstellungen": {"account_type": "Payable"},            
+            "3110 Verbindlichkeiten gegen\u00fcber Bank": {"account_type": "Payable"},
+            "3150 Verbindlichkeiten Darlehen": {"account_type": "Payable"},
+            "3185 Verbindlichkeiten Kreditkarte": {"account_type": "Payable"},            
+            "3380 Verbindlichkeiten aus der Annahme gezogener Wechsel u. d. Ausstellungen eigener Wechsel": {
                 "account_type": "Payable"
             },
-            "3400 bis 3470 Verbindlichkeiten gegen\u00fc. verb. Untern., Verbindl. gegen\u00fc. Untern., mit denen eine Beteiligungsverh\u00e4lnis besteht": {},
-            "3600 bis 3690 Verbindlichkeiten im Rahmen der sozialen Sicherheit": {},
-            "3700 bis 3890 \u00dcbrige sonstige Verbindlichkeiten": {},
-            "3900 bis 3990 Passive Rechnungsabgrenzungsposten": {},
-            "Anleihen (einschlie\u00dflich konvertibler)": {},
-            "Erhaltene Anzahlungenauf Bestellungen": {},
-            "R\u00fcckstellungen f\u00fcr Abfertigung": {},
-            "R\u00fcckstellungen f\u00fcr Pensionen": {},
-            "USt. \u00a719 /art (reverse charge)": {
+            "3400 Verbindlichkeiten gegen\u00fc. verb. Untern., Verbindl. gegen\u00fc. Untern., mit denen eine Beteiligungsverh\u00e4lnis besteht": {},
+            "3460 Verbindlichkeiten gegenueber Gesellschaftern": {"account_type": "Payable"},
+            "3470 Einlagen stiller Gesellschafter": {"account_type": "Payable"},
+            "3585 Verbindlichkeiten Lohnsteuer": {"account_type": "Tax"},             
+            "3590 Verbindlichkeiten Kommunalabgaben": {"account_type": "Tax"},  
+            "3595 Verbindlichkeiten Dienstgeberbeitrag": {"account_type": "Tax"},                       
+            "3600 Verbindlichkeiten Sozialversicherung": {"account_type": "Payable"},
+            "3640 Verbindlichkeiten Loehne und Gehaelter": {"account_type": "Payable"},            
+            "3700 Sonstige Verbindlichkeiten": {"account_type": "Payable"},
+            "3900 Passive Rechnungsabgrenzungsposten": {"account_type": "Payable"},
+            "3100 Anleihen (einschlie\u00dflich konvertibler)": {"account_type": "Payable"},
+            "3200 Erhaltene Anzahlungen auf Bestellungen": {"account_type": "Payable"},
+            "3040 R\u00fcckstellungen f\u00fcr Abfertigung": {"account_type": "Payable"},
+
+            "3530 USt. \u00a719 (reverse charge)": {
                 "account_type": "Tax"
             },
-            "Umsatzsteuer": {},
-            "Umsatzsteuer Zahllast": {
+            "3500 Verbindlichkeiten aus Umsatzsteuer": {"account_type": "Tax"},
+            "3580 Umsatzsteuer Zahllast": {
                 "account_type": "Tax"
             },
-            "Umsatzsteuer aus i.g. Erwerb 10%": {
+            "3510 Umsatzsteuer Inland 20%": {
                 "account_type": "Tax"
             },
-            "Umsatzsteuer aus i.g. Erwerb 20%": {
+            "3515 Umsatzsteuer Inland 10%": {
+                "account_type": "Tax"
+            },            
+            "3520 Umsatzsteuer aus i.g. Erwerb 20%": {
                 "account_type": "Tax"
             },
-            "Umsatzsteuer aus i.g. Lieferungen 10%": {
+            "3525 Umsatzsteuer aus i.g. Erwerb 10%": {
                 "account_type": "Tax"
-            },
-            "Umsatzsteuer aus i.g. Lieferungen 20%": {
-                "account_type": "Tax"
-            },
-            "Umsatzsteuer-Evidenzkonto f\u00fcr erhaltene Anzahlungen auf Bestellungen": {},
-            "Verbindlichkeiten aus Lieferungen u. Leistungen EU": {
+            },            
+            "3560 Umsatzsteuer-Evidenzkonto f\u00fcr erhaltene Anzahlungen auf Bestellungen": {},
+            "3360 Verbindlichkeiten aus Lieferungen u. Leistungen EU": {
                 "account_type": "Payable"
             },
-            "Verbindlichkeiten aus Lieferungen u. Leistungen Inland": {
+            "3000 Verbindlichkeiten aus Lieferungen u. Leistungen Inland": {
                 "account_type": "Payable"
             },
-            "Verbindlichkeiten aus Lieferungen u. Leistungen sonst. Ausland": {
+            "3370 Verbindlichkeiten aus Lieferungen u. Leistungen sonst. Ausland": {
                 "account_type": "Payable"
             },
-            "Verbindlichkeiten gegen\u00fcber Gesellschaften": {},
-            "Verrechnung Finanzamt": {
+            "3400 Verbindlichkeiten gegen\u00fcber verbundenen Unternehmen": {},
+            "3570 Verrechnung Finanzamt": {
                 "account_type": "Tax"
             },
             "root_type": "Liability"
-        },
-        "Summe Kontoklasse 0 Anlageverm\u00f6gen": {
-            "44 bis 49 Sonstige Maschinen und maschinelle Anlagen": {},
-            "920 bis 930 Festverzinsliche Wertpapiere des Anlageverm\u00f6gens": {},
-            "940 bis 970 Sonstige Finanzanlagen, Wertrechte": {},
-            "Allgemeine Werkzeuge und Handwerkzeuge": {},
-            "Andere Bef\u00f6rderungsmittel": {},
-            "Andere Betriebs- und Gesch\u00e4ftsausstattung": {},
-            "Andere Erzeugungshilfsmittel": {},
-            "Anlagen im Bau": {},
-            "Anteile an Investmentfonds": {},
-            "Anteile an Kapitalgesellschaften ohne Beteiligungscharakter": {},
-            "Anteile an Personengesellschaften ohne Beteiligungscharakter": {},
-            "Anteile an verbundenen Unternehmen": {},
-            "Antriebsmaschinen": {},
-            "Aufwendungen f\u00fcs das Ingangssetzen u. Erweitern eines Betriebes": {},
-            "Ausleihungen an  verbundene Unternehmen": {},
-            "Ausleihungen an  verbundene Unternehmen, mit denen ein Beteiligungsverh\u00e4lnis besteht": {},
-            "Bauliche Investitionen in fremden (gepachteten) Betriebs- und Gesch\u00e4ftsgeb\u00e4uden": {},
-            "Bauliche Investitionen in fremden (gepachteten) Wohn- und Sozialgeb\u00e4uden": {},
-            "Bebaute Grundst\u00fccke (Grundwert)": {},
-            "Beheizungs- und Beleuchtungsanlagen": {},
-            "Beteiligungen an Gemeinschaftunternehmen": {},
-            "Beteiligungen an angeschlossenen (assoziierten) Unternehmen": {},
-            "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf eigenem Grund": {},
-            "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf fremdem Grund": {},
-            "B\u00fcromaschinen, EDV - Anlagen": {},
-            "Datenverarbeitungsprogramme": {},
-            "Energieversorgungsanlagen": {},
-            "Fertigungsmaschinen": {},
-            "Gebinde": {},
-            "Geleistete Anzahlungen": {},
-            "Genossenschaften ohne Beteiligungscharakter": {},
-            "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit im Erzeugerprozess verwendet": {},
-            "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit nicht im Erzeugungsprozess verwendet": {},
-            "Gesch\u00e4fts(Firmen)wert": {},
-            "Grundst\u00fcckseinrichtunten auf eigenem Grund": {},
-            "Grundst\u00fcckseinrichtunten auf fremdem Grund": {},
-            "Grundst\u00fccksgleiche Rechte": {},
-            "Hebezeuge und Montageanlagen": {},
-            "Konzessionen": {},
-            "Kumulierte Abschreibungen": {},
-            "LKW": {},
-            "Marken, Warenzeichen und Musterschutzrechte": {},
-            "Maschinenwerkzeuge": {},
-            "Nachrichten- und Kontrollanlagen": {},
-            "PKW": {},
-            "Pacht- und Mietrechte": {},
-            "Patentrechte und Lizenzen": {},
-            "Sonstige Ausleihungen": {},
-            "Sonstige Beteiligungen": {},
-            "Transportanlagen": {},
-            "Unbebaute Grundst\u00fccke": {},
-            "Vorrichtungen, Formen und Modelle": {},
-            "Wohn- und Sozialgeb\u00e4ude auf eigenem Grund": {},
-            "Wohn- und Sozialgeb\u00e4ude auf fremdem Grund": {},
+        },      
+        "Klasse 2 Aktiva: Umlaufverm\u00f6gen, Rechnungsabgrenzungen": {
+            "2030 Forderungen aus Lieferungen und Leistungen Inland (0% USt, umsatzsteuerfrei)": {
+                "account_type": "Receivable"
+            },
+            "2010 Forderungen aus Lieferungen und Leistungen Inland (10% USt, umsatzsteuerfrei)": {
+                "account_type": "Receivable"
+            },
+            "2000 Forderungen aus Lieferungen und Leistungen Inland (20% USt, umsatzsteuerfrei)": {
+                "account_type": "Receivable"
+            },
+            "2040 Forderungen aus Lieferungen und Leistungen Inland (sonstiger USt-Satz)": {
+                "account_type": "Receivable"
+            },                                    
+            "2100 Forderungen aus Lieferungen und Leistungen EU": {
+                "account_type": "Receivable"
+            },
+            "2150 Forderungen aus Lieferungen und Leistungen Ausland (Nicht-EU)": {
+                "account_type": "Receivable"
+            },
+            "2200 Forderungen gegen\u00fcber verbundenen Unternehmen": {
+                "account_type": "Receivable"
+            },
+            "2250 Forderungen gegen\u00fcber Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
+                "account_type": "Receivable"
+            },
+            "2300 Sonstige Forderungen und Verm\u00f6gensgegenst\u00e4nde": {
+                "account_type": "Receivable"
+            },
+            "2630 Sonstige Wertpapiere": {
+                "account_type": "Stock"
+            },
+            "2750 Kassenbest\u00e4nde in Fremdw\u00e4hrung": {
+                "account_type": "Cash"
+            },
+            "2900 Aktive Rechnungsabrenzungsposten": {
+                "account_type": "Receivable"
+            },
+            "2600 Anteile an verbundenen Unternehmen": {
+                "account_type": "Equity"
+            },
+            "2680 Besitzwechsel ohne Forderungen": {
+                "account_type": "Receivable"
+            },
+            "2950 Aktiviertes Disagio": {
+                "account_type": "Receivable"
+            },
+            "2610 Eigene Anteile und Wertpapiere an mit Mehrheit beteiligten Unternehmen": {
+                "account_type": "Receivable"
+            },
+            "2570 Einfuhrumsatzsteuer (bezahlt)": {"account_type": "Tax"},
+            
+            "2460 Eingeforderte aber noch nicht eingezahlte Einlagen": {
+                "account_type": "Receivable"
+            },
+            "2180 Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland": {
+                "account_type": "Receivable"
+            },
+            "2130 Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. EU": {
+                "account_type": "Receivable"
+            },
+            "2080 Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ": {
+                "account_type": "Receivable"
+            },
+            "2270 Einzelwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
+                "account_type": "Receivable"
+            },
+            "2230 Einzelwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen": {
+                "account_type": "Receivable"
+            },
+            "2470 Einzelwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden": {
+                "account_type": "Receivable"
+            },
+            "2700 Kassenbestand": {
+                "account_type": "Cash"
+            },
+            "2190 Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. sonstiges Ausland": {
+                "account_type": "Receivable"
+            },
+            "2130 Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. EU": {
+                "account_type": "Receivable"
+            },
+            "2100 Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ": {
+                "account_type": "Receivable"
+            },
+            "2280 Pauschalwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
+                "account_type": "Receivable"
+            },
+            "2240 Pauschalwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen": {
+                "account_type": "Receivable"
+            },
+            "2480 Pauschalwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden": {
+                "account_type": "Receivable"
+            },
+            "2740 Postwertzeichen": {
+                "account_type": "Cash"
+            },
+            "2780 Schecks in Euro": {
+                "account_type": "Cash"
+            },
+            "2800 Guthaben bei Bank": {
+                "account_type": "Bank"
+            },  
+            "2801 Guthaben bei Bank - Sparkonto": {
+                "account_type": "Bank"
+            },                      
+            "2810 Guthaben bei Paypal": {
+                "account_type": "Bank"
+            },
+            "2930 Mietvorauszahlungen": {
+                "account_type": "Receivable"
+            },
+            "2980 Abgrenzung latenter Steuern": {
+                "account_type": "Receivable"
+            },
+            "2500 Vorsteuer": {
+                "account_type": "Receivable"
+            },
+            "2510 Vorsteuer Inland 10%": {
+                "account_type": "Tax"
+            },
+            "2895 Schwebende Geldbewegugen": {
+                "account_type": "Bank"
+            },            
+            "2513 Vorsteuer Inland 5%": {
+                "account_type": "Tax"
+            },
+            "2515 Vorsteuer Inland 20%": {
+                "account_type": "Tax"
+            },                        
+            "2520 Vorsteuer aus innergemeinschaftlichem Erwerb 10%": {
+                "account_type": "Tax"
+            },
+            "2525 Vorsteuer aus innergemeinschaftlichem Erwerb 20%": {
+                "account_type": "Tax"
+            },            
+            "2530 Vorsteuer \u00a719/Art 19 ( reverse charge ) ": {
+                "account_type": "Tax"
+            },
+            "2690 Wertberichtigungen zu Wertpapieren und Anteilen": {
+                "account_type": "Receivable"
+            },
             "root_type": "Asset"
         },
-        "Summe Personalaufwand": {
-            "6000 bis 6190 L\u00f6hne": {},
-            "6200 bis 6390 Geh\u00e4lter": {},
-            "6400 bis 6440 Aufwendungen f\u00fcr Abfertigungen": {},
-            "6450 bis 6490 Aufwendungen f\u00fcr Altersversorgung": {},
-            "6500 bis 6550 Gesetzlicher Sozialaufwand Arbeiter": {},
-            "6560 bis 6590 Gesetzlicher Sozialaufwand Angestellte": {},
-            "6600 bis 6650 Lohnabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte": {},
-            "6660 bis 6690 Gehaltsabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte": {},
-            "6700 bis 6890 Sonstige Sozialaufwendungen": {},
-            "Aufwandsstellenrechnung": {},
+          "Klasse 4: Betriebliche Erträge": {
+            "4000 Erlöse 20 %": {"account_type": "Income Account"},          
+            "4020 Erl\u00f6se 0 % steuerbefreit": {"account_type": "Income Account"},            
+            "4010 Erl\u00f6se 10 %": {"account_type": "Income Account"},
+            "4030 Erl\u00f6se 13 %": {"account_type": "Income Account"},            
+            "4040 Erl\u00f6se 0 % innergemeinschaftliche Lieferungen": {"account_type": "Income Account"},      
+            "4400 Erl\u00f6sreduktion 0 % steuerbefreit": {"account_type": "Expense Account"},            
+            "4410 Erl\u00f6sreduktion 10 %": {"account_type": "Expense Account"},
+            "4420 Erl\u00f6sreduktion 20 %": {"account_type": "Expense Account"},
+            "4430 Erl\u00f6sreduktion 13 %": {"account_type": "Expense Account"},            
+            "4440 Erl\u00f6sreduktion 0 % innergemeinschaftliche Lieferungen": {"account_type": "Expense Account"}, 
+            "4500 Ver\u00e4nderungen des Bestandes an fertigen und unfertigen Erzeugn. sowie an noch nicht abrechenbaren Leistungen": {"account_type": "Income Account"},
+            "4580 Aktivierte Eigenleistungen": {"account_type": "Income Account"},
+            "4600 Erl\u00f6se aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen": {"account_type": "Income Account"},
+            "4630 Ertr\u00e4ge aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen": {"account_type": "Income Account"},
+            "4660 Ertr\u00e4ge aus der Zuschreibung zum Anlageverm\u00f6gen, ausgen. Finanzanlagen": {"account_type": "Income Account"},
+            "4700 Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen": {"account_type": "Income Account"},
+            "4800 \u00dcbrige betriebliche Ertr\u00e4ge": {"account_type": "Income Account"},
+            "root_type": "Income"
+        },        
+        "Klasse 5: Aufwand f\u00fcr Material und Leistungen": {
+            "5000 Einkauf Partnerleistungen": {"account_type": "Cost of Goods Sold"},        
+            "5100 Verbrauch an Rohstoffen": {"account_type": "Cost of Goods Sold"},
+            "5200 Verbrauch von bezogenen Fertig- und Einzelteilen": {"account_type": "Cost of Goods Sold"},
+            "5300 Verbrauch von Hilfsstoffen": {"account_type": "Cost of Goods Sold"},
+            "5340 Verbrauch Verpackungsmaterial": {"account_type": "Cost of Goods Sold"},
+            "5470 Verbrauch von Kleinmaterial": {"account_type": "Cost of Goods Sold"},
+            "5450 Verbrauch von Reinigungsmaterial": {"account_type": "Cost of Goods Sold"},                                  
+            "5400 Verbrauch von Betriebsstoffen": {"account_type": "Cost of Goods Sold"},
+            "5500 Verbrauch von Werkzeugen und anderen Erzeugungshilfsmittel": {"account_type": "Cost of Goods Sold"},
+            "5600 Verbrauch von Brenn- und Treibstoffen, Energie und Wasser": {"account_type": "Cost of Goods Sold"},
+            "5700 Bearbeitung durch Dritte": {"account_type": "Cost of Goods Sold"},
+            "5900 Aufwandsstellenrechnung Material": {"account_type": "Cost of Goods Sold"},
+            "5820 Skontoertr\u00e4ge (20% USt.)": {"account_type": "Income Account"},
+            "5810 Skontoertr\u00e4ge (10% USt.)": {"account_type": "Income Account"},
+            "5010 Handelswareneinkauf 10 %": {"account_type": "Cost of Goods Sold"},
+            "5020 Handelswareneinkauf 20 %": {"account_type": "Cost of Goods Sold"},
+            "5040 Handelswareneinkauf innergemeinschaftlicher Erwerb 10 % VSt/10 % USt": {"account_type": "Cost of Goods Sold"},
+            "5050 Handelswareneinkauf innergemeinschaftlicher Erwerb 20 % VSt/20 % USt": {"account_type": "Cost of Goods Sold"},
+            "5070 Handelswareneinkauf innergemeinschaftlicher Erwerb ohne Vorsteuerabzug und 10 % USt": {"account_type": "Cost of Goods Sold"},
+            "5080 Handelswareneinkauf innergemeinschaftlicher Erwerb ohne Vorsteuerabzug und 20 % USt": {"account_type": "Cost of Goods Sold"},
             "root_type": "Expense"
         },
-        "Summe Umlaufverm\u00f6gen": {
-            "2000 bis 2007 Forderungen aus Lief. und Leist. Inland": {
-                "account_type": "Receivable"
-            },
-            "2100 bis 2120 Forderungen aus Lief. und Leist. EU": {
-                "account_type": "Receivable"
-            },
-            "2150 bis 2170 Forderungen aus Lief. und Leist. Ausland": {
-                "account_type": "Receivable"
-            },
-            "2200 bis 2220 Forderungen gegen\u00fcber verbundenen Unternehmen": {
-                "account_type": "Receivable"
-            },
-            "2250 bis 2270 Forderungen gegen\u00fcber Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                "account_type": "Receivable"
-            },
-            "2300 bis 2460 Sonstige Forderungen und Verm\u00f6gensgegenst\u00e4nde": {
-                "account_type": "Receivable"
-            },
-            "2630 bis 2670 Sonstige Wertpapiere": {
-                "account_type": "Receivable"
-            },
-            "2750 bis 2770 Kassenbest\u00e4nde in Fremdw\u00e4hrung": {
-                "account_type": "Receivable"
-            },
-            "Aktive Rechnungsabrenzungsposten": {
-                "account_type": "Receivable"
-            },
-            "Anteile an verbundenen Unternehmen": {
-                "account_type": "Receivable"
-            },
-            "Bank / Guthaben bei Kreditinstituten": {
-                "account_type": "Receivable"
-            },
-            "Besitzwechsel ...": {
-                "account_type": "Receivable"
-            },
-            "Disagio": {
-                "account_type": "Receivable"
-            },
-            "Eigene Anteile (Wertpapiere)": {
-                "account_type": "Receivable"
-            },
-            "Einfuhrumsatzsteuer (bezahlt)": {},
-            "Eingeforderte aber noch nicht eingezahlte Einlagen": {
-                "account_type": "Receivable"
-            },
-            "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland": {
-                "account_type": "Receivable"
-            },
-            "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. EU": {
-                "account_type": "Receivable"
-            },
-            "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ": {
-                "account_type": "Receivable"
-            },
-            "Einzelwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                "account_type": "Receivable"
-            },
-            "Einzelwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen": {
-                "account_type": "Receivable"
-            },
-            "Einzelwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden": {
-                "account_type": "Receivable"
-            },
-            "Kassenbestand": {
-                "account_type": "Receivable"
-            },
-            "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland": {
-                "account_type": "Receivable"
-            },
-            "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. EU": {
-                "account_type": "Receivable"
-            },
-            "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ": {
-                "account_type": "Receivable"
-            },
-            "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht": {
-                "account_type": "Receivable"
-            },
-            "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen": {
-                "account_type": "Receivable"
-            },
-            "Pauschalwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden": {
-                "account_type": "Receivable"
-            },
-            "Postwertzeichen": {
-                "account_type": "Receivable"
-            },
-            "Schecks in Inlandsw\u00e4hrung": {
-                "account_type": "Receivable"
-            },
-            "Sonstige Anteile": {
-                "account_type": "Receivable"
-            },
-            "Stempelmarken": {
-                "account_type": "Receivable"
-            },
-            "Steuerabgrenzung": {
-                "account_type": "Receivable"
-            },
-            "Unterschiedsbetrag gem. Abschnitt XII Pensionskassengesetz": {
-                "account_type": "Receivable"
-            },
-            "Unterschiedsbetrag zur gebotenen Pensionsr\u00fcckstellung": {
-                "account_type": "Receivable"
-            },
-            "Vorsteuer": {
-                "account_type": "Receivable"
-            },
-            "Vorsteuer aus ig. Erwerb 10%": {
-                "account_type": "Tax"
-            },
-            "Vorsteuer aus ig. Erwerb 20%": {
-                "account_type": "Tax"
-            },
-            "Vorsteuer \u00a719/Art 19 ( reverse charge ) ": {
-                "account_type": "Tax"
-            },
-            "Wertberichtigungen": {
-                "account_type": "Receivable"
-            },
-            "root_type": "Asset"
-        },
-        "Summe Vorr\u00e4te": {
-            "1000 bis 1090 Bezugsverrechnung": {},
-            "1100 bis 1190 Rohstoffe": {},
-            "1200 bis 1290 Bezogene Teile": {},
-            "1300 bis 1340 Hilfsstoffe": {},
-            "1350 bis 1390 Betriebsstoffe": {},
-            "1400 bis 1490 Unfertige Erzeugniss": {},
-            "1500 bis 1590 Fertige Erzeugniss": {},
-            "1600 bis 1690 Waren": {},
-            "1700 bis 1790 Noch nicht abgerechenbare Leistungen": {},
-            "1900 bis 1990 Wertberichtigungen": {},
-            "geleistete Anzahlungen": {},
-            "root_type": "Asset"
-        },
-        "Summe Wareneinsatz": {
-            "5100 bis 5190 Verbrauch an Rohstoffen": {},
-            "5200 bis 5290 Verbrauch von bezogenen Fertig- und Einzelteilen": {},
-            "5300 bis 5390 Verbrauch von Hilfsstoffen": {},
-            "5400 bis 5490 Verbrauch von Betriebsstoffen": {},
-            "5500 bis 5590 Verbrauch von Werkzeugen und anderen Erzeugungshilfsmittel": {},
-            "5600 bis 5690 Verbrauch von Brenn- und Treibstoffen, Energie und Wasser": {},
-            "5700 bis 5790 Sonstige bezogene Herstellungsleistungen": {},
-            "Aufwandsstellenrechnung": {},
-            "Skontoertr\u00e4ge auf Materialaufwand": {},
-            "Skontoertr\u00e4ge auf sonstige bezogene Herstellungsleistungen": {},
-            "Wareneinkauf 10 %": {},
-            "Wareneinkauf 20 %": {},
-            "Wareneinkauf igErwerb 10 % VSt/10 % USt": {},
-            "Wareneinkauf igErwerb 20 % VSt/20 % USt": {},
-            "Wareneinkauf igErwerb ohne Vorsteuerabzug und 10 % USt": {},
-            "Wareneinkauf igErwerb ohne Vorsteuerabzug und 20 % USt": {},
+        "Klasse 6: Personalaufwand": {
+            "6000 L\u00f6hne": {"account_type": "Payable"},
+            "6200 Geh\u00e4lter": {"account_type": "Payable"},
+            "6400 Aufwendungen f\u00fcr Abfertigungen": {"account_type": "Payable"},
+            "6450 Aufwendungen f\u00fcr Altersversorgung": {"account_type": "Payable"},
+            "6500 Gesetzlicher Sozialaufwand Arbeiter": {"account_type": "Payable"},
+            "6560 Gesetzlicher Sozialaufwand Angestellte": {"account_type": "Payable"},
+            "6600 Lohnabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte": {"account_type": "Payable"},
+            "6660 Gehaltsabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte": {"account_type": "Payable"},
+            "6700 Sonstige Sozialaufwendungen": {"account_type": "Payable"},
+            "6900 Aufwandsstellenrechnung Personal": {"account_type": "Payable"},
             "root_type": "Expense"
+        },       
+         "Klasse 7: Abschreibungen und sonstige betriebliche Aufwendungen": {
+            "7010 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)": {"account_type": "Depreciation"},
+            "7100 Sonstige Steuern und Geb\u00fchren": {"account_type": "Tax"},
+            "7200 Instandhaltung u. Reinigung durch Dritte, Entsorgung, Energie": {"account_type": "Expense Account"},
+            "7300 Transporte durch Dritte": {"account_type": "Expense Account"},
+            "7310 Fahrrad - Aufwand": {"account_type": "Expense Account"},
+            "7320 Kfz - Aufwand": {"account_type": "Expense Account"},
+            "7330 LKW - Aufwand": {"account_type": "Expense Account"},
+            "7340 Lastenrad - Aufwand": {"account_type": "Expense Account"},            
+            "7350 Reise- und Fahraufwand": {"account_type": "Expense Account"},
+            "7360 Tag- und N\u00e4chtigungsgelder": {"account_type": "Expense Account"},
+            "7380 Nachrichtenaufwand": {"account_type": "Expense Account"},
+            "7400 Miet- und Pachtaufwand": {"account_type": "Expense Account"},
+            "7440 Leasingaufwand": {"account_type": "Expense Account"},
+            "7480 Lizenzaufwand": {"account_type": "Expense Account"},
+            "7500 Aufwand f\u00fcr beigestelltes Personal": {"account_type": "Expense Account"},
+            "7540 Provisionen an Dritte": {"account_type": "Expense Account"},
+            "7580 Aufsichtsratsverg\u00fctungen": {"account_type": "Expense Account"},
+            "7610 Druckerzeugnisse und Vervielf\u00e4ltigungen": {"account_type": "Expense Account"},
+            "7650 Werbung und Repr\u00e4sentationen": {"account_type": "Expense Account"},
+            "7700 Versicherungen": {"account_type": "Expense Account"},
+            "7750 Beratungs- und Pr\u00fcfungsaufwand": {"account_type": "Expense Account"},
+            "7800 Forderungsverluste und Schadensf\u00e4lle": {"account_type": "Expense Account"},
+            "7840 Verschiedene betriebliche Aufwendungen": {"account_type": "Expense Account"},
+            "7910 Aufwandsstellenrechung der Hersteller": {"account_type": "Expense Account"},
+            "7060 Sofortabschreibungen geringwertig": {"account_type": "Expense Account"},
+            "7070 Abschreibungen vom Umlaufverm\u00f6gen, soweit diese die im Unternehmen \u00fcblichen Abschreibungen \u00fcbersteigen": {"account_type": "Depreciation"},
+            "7900 Aufwandsstellenrechnung": {"account_type": "Expense Account"},
+            "7770 Aus- und Fortbildung": {"account_type": "Expense Account"},
+            "7820 Buchwert abgegangener Anlagen, ausgenommen Finanzanlagen": {"account_type": "Expense Account"},
+            "7600 B\u00fcromaterial und Drucksorten": {"account_type": "Expense Account"},
+            "7630 Fachliteratur und Zeitungen ": {"account_type": "Expense Account"},
+            "7960 Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen": {"account_type": "Expense Account"},
+            "7780 Mitgliedsbeitr\u00e4ge": {"account_type": "Expense Account"},
+            "7880 Skontoertr\u00e4ge auf sonstige betriebliche Aufwendungen": {"account_type": "Expense Account"},
+            "7990 Sonstige betrieblichen Aufwendungen": {"account_type": "Expense Account"},
+            "7680 Spenden und Trinkgelder": {"account_type": "Expense Account"},
+            "7790 Spesen des Geldverkehrs": {"account_type": "Expense Account"},
+            "7830 Verluste aus dem Abgang vom Anlageverm\u00f6gen, ausgenommen Finanzanlagen": {"account_type": "Expense Account"},
+            "7970 Vertriebskosten": {"account_type": "Expense Account"},
+            "7980 Verwaltungskosten": {"account_type": "Expense Account"},
+            "root_type": "Expense"
+        },
+         "Klasse 8: Finanz- und ausserordentliche Ertr\u00e4ge und Aufwendungen": {
+            "8000 Ertr\u00e4ge aus Beteiligungen": {"account_type": "Income Account"},
+            "8050 Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens": {"account_type": "Income Account"},
+            "8100 Zinsen aus Bankguthaben": {"account_type": "Income Account"},
+            "8110 Zinsen aus gewaehrten Darlehen": {"account_type": "Income Account"},
+            "8130 Verzugszinsenertraege": {"account_type": "Income Account"},
+            "8220 Aufwendungen aus Beteiligungen": {"account_type": "Expense Account"},
+            "8260 Aufwendungen aus sonst. Fiananzanlagen und aus Wertpapieren des Umlaufverm\u00f6gens": {},
+            "8280 Zinsen und \u00e4hnliche Aufwendungem": {"account_type": "Expense Account"},
+            "8400 Au\u00dferordentliche Ertr\u00e4ge": {"account_type": "Income Account"},
+            "8450 Au\u00dferordentliche Aufwendungen": {"account_type": "Expense Account"},
+            "8500 Steuern vom Einkommen und vom Ertrag": {
+                "account_type": "Tax"
+            },
+            "8600 Aufl\u00f6sung unversteuerten R\u00fccklagen": {"account_type": "Income Account"},
+            "8700 Aufl\u00f6sung von Kapitalr\u00fccklagen": {"account_type": "Income Account"},
+            "8750 Aufl\u00f6sung von Gewinnr\u00fccklagen": {"account_type": "Income Account"},
+            "8800 Zuweisung zu unversteuerten R\u00fccklagen": {"account_type": "Expense Account"},
+            "8900 Zuweisung zu Gewinnr\u00fccklagen": {"account_type": "Expense Account"},
+            "8100 Buchwert abgegangener Beteiligungen": {"account_type": "Expense Account"},
+            "8130 Buchwert abgegangener Wertpapiere des Umlaufverm\u00f6gens": {"account_type": "Expense Account"},
+            "8120 Buchwert abgegangener sonstiger Finanzanlagen": {"account_type": "Expense Account"},
+            "8990 Gewinnabfuhr bzw. Verlust\u00fcberrechnung aus Ergebnisabf\u00fchrungsvertr\u00e4gen": {"account_type": "Expense Account"},
+            "8350 nicht ausgenutzte Lieferantenskonti": {"account_type": "Expense Account"},
+            "root_type": "Income"
+        },       
+        "Klasse 9 Passiva: Eigenkapital, R\u00fccklagen, stille Einlagen, Abschlusskonten": {
+            "9000 Gezeichnetes bzw. gewidmetes Kapital": {
+                "account_type": "Equity"
+            },
+            "9200 Kapitalr\u00fccklagen": {
+                "account_type": "Equity"
+            },
+            "9300 Gewinnr\u00fccklagen": {
+                "account_type": "Equity"
+            },
+            "9400 Bewertungsreserven uns sonst. unversteuerte R\u00fccklagen": {
+                "account_type": "Equity"
+            },
+            "9600 Private Entnahmen": {"account_type": "Equity"},
+            "9610 Privatsteuern": {"account_type": "Equity"},
+            "9700 Einlagen stiller Gesellschafter ": {"account_type": "Equity"},
+            "9900 Evidenzkonto": {"account_type": "Equity"},
+            "9800 Er\u00f6ffnungsbilanzkonto (EBK)": {"account_type": "Equity"},
+            "9880 Jahresergebnis laut Gewinn- und Verlustrechnung (G+V)": {"account_type": "Equity"},
+            "9850 Schlussbilanzkonto (SBK)": {"account_type": "Round Off"},
+            "9190 nicht eingeforderte ausstehende Einlagen und berechtigte Entnahmen von Gesellschaftern": {
+                "account_type": "Equity"
+            },
+            "root_type": "Equity"
         }
-    }
-}
+     }   
+  }

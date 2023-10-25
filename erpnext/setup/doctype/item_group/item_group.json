@@ -19,20 +19,9 @@
   "item_group_defaults",
   "sec_break_taxes",
   "taxes",
-  "sb9",
-  "show_in_website",
-  "route",
-  "weightage",
-  "slideshow",
-  "website_title",
-  "description",
-  "website_specifications",
-  "website_filters_section",
-  "filter_fields",
-  "filter_attributes",
   "lft",
-  "rgt",
-  "old_parent"
+  "old_parent",
+  "rgt"
  ],
  "fields": [
   {
@@ -105,52 +94,6 @@
    "options": "Item Tax"
   },
   {
-   "fieldname": "sb9",
-   "fieldtype": "Section Break",
-   "label": "Website Settings"
-  },
-  {
-   "default": "0",
-   "description": "Check this if you want to show in website",
-   "fieldname": "show_in_website",
-   "fieldtype": "Check",
-   "label": "Show in Website"
-  },
-  {
-   "depends_on": "show_in_website",
-   "fieldname": "route",
-   "fieldtype": "Data",
-   "label": "Route",
-   "unique": 1
-  },
-  {
-   "fieldname": "weightage",
-   "fieldtype": "Int",
-   "label": "Weightage"
-  },
-  {
-   "depends_on": "show_in_website",
-   "description": "Show this slideshow at the top of the page",
-   "fieldname": "slideshow",
-   "fieldtype": "Link",
-   "label": "Slideshow",
-   "options": "Website Slideshow"
-  },
-  {
-   "depends_on": "show_in_website",
-   "description": "HTML / Banner that will show on the top of product list.",
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "label": "Description"
-  },
-  {
-   "depends_on": "show_in_website",
-   "fieldname": "website_specifications",
-   "fieldtype": "Table",
-   "label": "Website Specifications",
-   "options": "Item Website Specification"
-  },
-  {
    "fieldname": "lft",
    "fieldtype": "Int",
    "hidden": 1,
@@ -184,28 +127,6 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
-  },
-  {
-   "fieldname": "website_filters_section",
-   "fieldtype": "Section Break",
-   "label": "Website Filters"
-  },
-  {
-   "fieldname": "filter_fields",
-   "fieldtype": "Table",
-   "label": "Item Fields",
-   "options": "Website Filter Field"
-  },
-  {
-   "fieldname": "filter_attributes",
-   "fieldtype": "Table",
-   "label": "Attributes",
-   "options": "Website Attribute"
-  },
-  {
-   "fieldname": "website_title",
-   "fieldtype": "Data",
-   "label": "Title"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -214,11 +135,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2021-02-18 13:40:30.049650",
+ "modified": "2023-10-12 13:44:13.611287",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
- "name_case": "Title Case",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_item_group",
  "owner": "Administrator",
  "permissions": [
@@ -247,7 +168,6 @@
    "read": 1,
    "report": 1,
    "role": "Item Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
@@ -277,7 +197,7 @@
    "export": 1,
    "print": 1,
    "report": 1,
-   "role": "All",
+   "role": "Desk User",
    "select": 1,
    "share": 1
   }
@@ -285,5 +205,6 @@
  "search_fields": "parent_item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

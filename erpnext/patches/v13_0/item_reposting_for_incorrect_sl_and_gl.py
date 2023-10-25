@@ -7,18 +7,21 @@ from erpnext.stock.stock_ledger import update_entries_after
 
 def execute():
 	doctypes_to_reload = [
-			("stock", "repost_item_valuation"),
-			("stock", "stock_entry_detail"),
-			("stock", "purchase_receipt_item"),
-			("stock", "delivery_note_item"),
-			("stock", "packed_item"),
-			("accounts", "sales_invoice_item"),
-			("accounts", "purchase_invoice_item"),
-			("buying", "purchase_receipt_item_supplied")
-		]
+		("setup", "company"),
+		("stock", "repost_item_valuation"),
+		("stock", "stock_entry_detail"),
+		("stock", "purchase_receipt_item"),
+		("stock", "delivery_note_item"),
+		("stock", "packed_item"),
+		("accounts", "sales_invoice_item"),
+		("accounts", "purchase_invoice_item"),
+		("buying", "purchase_receipt_item_supplied"),
+		("subcontracting", "subcontracting_receipt_item"),
+		("subcontracting", "subcontracting_receipt_supplied_item"),
+	]
 
 	for module, doctype in doctypes_to_reload:
-		frappe.reload_doc(module, 'doctype', doctype)
+		frappe.reload_doc(module, "doctype", doctype)
 
 	reposting_project_deployed_on = get_creation_time()
 	posting_date = getdate(reposting_project_deployed_on)
@@ -32,7 +35,8 @@ def execute():
 
 	company_list = []
 
-	data = frappe.db.sql('''
+	data = frappe.db.sql(
+		"""
 		SELECT
 			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
 		FROM
@@ -41,7 +45,10 @@ def execute():
 			creation > %s
 			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-	''', reposting_project_deployed_on, as_dict=1)
+	""",
+		reposting_project_deployed_on,
+		as_dict=1,
+	)
 
 	frappe.db.auto_commit_on_many_writes = 1
 	print("Reposting Stock Ledger Entries...")
@@ -51,30 +58,36 @@ def execute():
 		if d.company not in company_list:
 			company_list.append(d.company)
 
-		update_entries_after({
-			"item_code": d.item_code,
-			"warehouse": d.warehouse,
-			"posting_date": d.posting_date,
-			"posting_time": d.posting_time,
-			"voucher_type": d.voucher_type,
-			"voucher_no": d.voucher_no,
-			"sle_id": d.name
-		}, allow_negative_stock=True)
+		update_entries_after(
+			{
+				"item_code": d.item_code,
+				"warehouse": d.warehouse,
+				"posting_date": d.posting_date,
+				"posting_time": d.posting_time,
+				"voucher_type": d.voucher_type,
+				"voucher_no": d.voucher_no,
+				"sle_id": d.name,
+			},
+			allow_negative_stock=True,
+		)
 
 		i += 1
-		if i%100 == 0:
+		if i % 100 == 0:
 			print(i, "/", total_sle)
-
 
 	print("Reposting General Ledger Entries...")
 
 	if data:
-		for row in frappe.get_all('Company', filters= {'enable_perpetual_inventory': 1}):
+		for row in frappe.get_all("Company", filters={"enable_perpetual_inventory": 1}):
 			if row.name in company_list:
 				update_gl_entries_after(posting_date, posting_time, company=row.name)
 
 	frappe.db.auto_commit_on_many_writes = 0
 
+
 def get_creation_time():
-	return frappe.db.sql(''' SELECT create_time FROM
-		INFORMATION_SCHEMA.TABLES where TABLE_NAME = "tabRepost Item Valuation" ''', as_list=1)[0][0]
+	return frappe.db.sql(
+		""" SELECT create_time FROM
+		INFORMATION_SCHEMA.TABLES where TABLE_NAME = "tabRepost Item Valuation" """,
+		as_list=1,
+	)[0][0]

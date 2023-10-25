@@ -2,22 +2,25 @@ import frappe
 
 
 def execute():
-	frappe.reload_doc('stock', 'doctype', 'quality_inspection_parameter')
+	frappe.reload_doc("stock", "doctype", "quality_inspection_parameter")
+	params = set()
 
-	# get all distinct parameters from QI readigs table
-	reading_params = frappe.db.get_all("Quality Inspection Reading", fields=["distinct specification"])
-	reading_params = [d.specification for d in reading_params]
+	# get all parameters from QI readings table
+	for (p,) in frappe.db.get_all(
+		"Quality Inspection Reading", fields=["specification"], as_list=True
+	):
+		params.add(p.strip())
 
-	# get all distinct parameters from QI Template as some may be unused in QI
-	template_params = frappe.db.get_all("Item Quality Inspection Parameter", fields=["distinct specification"])
-	template_params = [d.specification for d in template_params]
+	# get all parameters from QI Template as some may be unused in QI
+	for (p,) in frappe.db.get_all(
+		"Item Quality Inspection Parameter", fields=["specification"], as_list=True
+	):
+		params.add(p.strip())
 
-	params = list(set(reading_params + template_params))
+	# because db primary keys are case insensitive, so duplicates will cause an exception
+	params = set({x.casefold(): x for x in params}.values())
 
 	for parameter in params:
-		if not frappe.db.exists("Quality Inspection Parameter", parameter):
-			frappe.get_doc({
-				"doctype": "Quality Inspection Parameter",
-				"parameter": parameter,
-				"description": parameter
-			}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{"doctype": "Quality Inspection Parameter", "parameter": parameter, "description": parameter}
+		).insert(ignore_permissions=True)

@@ -20,7 +20,7 @@ frappe.ui.form.on("Project", {
 	onload: function (frm) {
 		const so = frm.get_docfield("sales_order");
 		so.get_route_options_for_new_doc = () => {
-			if (frm.is_new()) return;
+			if (frm.is_new()) return {};
 			return {
 				"customer": frm.doc.customer,
 				"project_name": frm.doc.name
@@ -152,6 +152,7 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.parentfield = parentfield;
 		new_child_doc.parenttype = doctype;
 		new_doc[parentfield] = [new_child_doc];
+		new_doc.project = frm.doc.name;
 
 		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 	});

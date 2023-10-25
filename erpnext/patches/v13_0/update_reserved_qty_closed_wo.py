@@ -9,15 +9,12 @@ def execute():
 	wo_item = frappe.qb.DocType("Work Order Item")
 
 	incorrect_item_wh = (
-		frappe.qb
-			.from_(wo)
-			.join(wo_item).on(wo.name == wo_item.parent)
-			.select(wo_item.item_code, wo.source_warehouse).distinct()
-			.where(
-				(wo.status == "Closed")
-				& (wo.docstatus == 1)
-				& (wo.source_warehouse.notnull())
-			)
+		frappe.qb.from_(wo)
+		.join(wo_item)
+		.on(wo.name == wo_item.parent)
+		.select(wo_item.item_code, wo.source_warehouse)
+		.distinct()
+		.where((wo.status == "Closed") & (wo.docstatus == 1) & (wo.source_warehouse.notnull()))
 	).run()
 
 	for item_code, warehouse in incorrect_item_wh:

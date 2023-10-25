@@ -4,7 +4,9 @@
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
 		frappe.require("/assets/erpnext/js/projects/timer.js");
-		frm.add_fetch('employee', 'employee_name', 'employee_name');
+
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice'];
+
 		frm.fields_dict.employee.get_query = function() {
 			return {
 				filters:{
@@ -43,15 +45,15 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus==1) {
-			if(frm.doc.per_billed < 100 && frm.doc.total_billable_hours && frm.doc.total_billable_hours > frm.doc.total_billed_hours){
-				frm.add_custom_button(__('Create Sales Invoice'), function() { frm.trigger("make_invoice") },
-					"fa fa-file-text");
-			}
-
-			if(!frm.doc.salary_slip && frm.doc.employee){
-				frm.add_custom_button(__('Create Salary Slip'), function() { frm.trigger("make_salary_slip") },
-					"fa fa-file-text");
+		if (frm.doc.docstatus == 1) {
+			if (
+				(frm.doc.per_billed < 100)
+				&& (frm.doc.total_billable_hours)
+				&& (frm.doc.total_billable_hours > frm.doc.total_billed_hours)
+			) {
+				frm.add_custom_button(__("Create Sales Invoice"), function() {
+					frm.trigger("make_invoice");
+				});
 			}
 		}
 
@@ -92,18 +94,26 @@ frappe.ui.form.on("Timesheet", {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			frm.fields_dict["time_logs"].grid.toggle_enable("is_billable", false);
 		}
+
+		let filters = {
+			"status": "Open"
+		};
+
+		if (frm.doc.customer) {
+			filters["customer"] = frm.doc.customer;
+		}
+
+		frm.set_query('parent_project', function(doc) {
+			return {
+				filters: filters
+			};
+		});
+
 		frm.trigger('setup_filters');
 		frm.trigger('set_dynamic_field_label');
 	},
 
 	customer: function(frm) {
-		frm.set_query('parent_project', function(doc) {
-			return {
-				filters: {
-					"customer": doc.customer
-				}
-			};
-		});
 		frm.set_query('project', 'time_logs', function(doc) {
 			return {
 				filters: {
@@ -116,7 +126,7 @@ frappe.ui.form.on("Timesheet", {
 
 	currency: function(frm) {
 		let base_currency = frappe.defaults.get_global_default('currency');
-		if (base_currency != frm.doc.currency) {
+		if (frm.doc.currency && (base_currency != frm.doc.currency)) {
 			frappe.call({
 				method: "erpnext.setup.utils.get_exchange_rate",
 				args: {
@@ -208,13 +218,6 @@ frappe.ui.form.on("Timesheet", {
 			});
 		});
 		dialog.show();
-	},
-
-	make_salary_slip: function(frm) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.projects.doctype.timesheet.timesheet.make_salary_slip",
-			frm: frm
-		});
 	},
 
 	parent_project: function(frm) {

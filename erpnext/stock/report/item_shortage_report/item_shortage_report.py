@@ -8,8 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
-	conditions = get_conditions(filters)
-	data = get_data(conditions, filters)
+	data = get_data(filters)
 
 	if not data:
 		return [], [], None, []
@@ -18,42 +17,46 @@ def execute(filters=None):
 
 	return columns, data, None, chart_data
 
-def get_conditions(filters):
-	conditions = ""
 
-	if filters.get("warehouse"):
-		conditions += "AND warehouse in %(warehouse)s"
-	if filters.get("company"):
-		conditions += "AND company = %(company)s"
+def get_data(filters):
+	bin = frappe.qb.DocType("Bin")
+	wh = frappe.qb.DocType("Warehouse")
+	item = frappe.qb.DocType("Item")
 
-	return conditions
-
-def get_data(conditions, filters):
-	data = frappe.db.sql("""
-		SELECT
+	query = (
+		frappe.qb.from_(bin)
+		.from_(wh)
+		.from_(item)
+		.select(
 			bin.warehouse,
 			bin.item_code,
-			bin.actual_qty ,
-			bin.ordered_qty ,
-			bin.planned_qty ,
-			bin.reserved_qty ,
+			bin.actual_qty,
+			bin.ordered_qty,
+			bin.planned_qty,
+			bin.reserved_qty,
 			bin.reserved_qty_for_production,
-			bin.projected_qty ,
-			warehouse.company,
-			item.item_name ,
-			item.description
-		FROM
-			`tabBin` bin,
-			`tabWarehouse` warehouse,
-			`tabItem` item
-		WHERE
-			bin.projected_qty<0
-			AND warehouse.name = bin.warehouse
-			AND bin.item_code=item.name
-			{0}
-		ORDER BY bin.projected_qty;""".format(conditions), filters, as_dict=1)
+			bin.projected_qty,
+			wh.company,
+			item.item_name,
+			item.description,
+		)
+		.where(
+			(item.disabled == 0)
+			& (bin.projected_qty < 0)
+			& (wh.name == bin.warehouse)
+			& (bin.item_code == item.name)
+		)
+		.orderby(bin.projected_qty)
+	)
 
-	return data
+	if filters.get("warehouse"):
+		query = query.where(bin.warehouse.isin(filters.get("warehouse")))
+
+	if filters.get("company"):
+		query = query.where(wh.company == filters.get("company"))
+
+	return query.run(as_dict=True)
+
 
 def get_chart_data(data):
 	labels, datapoints = [], []
@@ -67,17 +70,10 @@ def get_chart_data(data):
 		datapoints = datapoints[:10]
 
 	return {
-		"data": {
-			"labels": labels,
-			"datasets":[
-				{
-					"name": _("Projected Qty"),
-					"values": datapoints
-				}
-			]
-		},
-		"type": "bar"
+		"data": {"labels": labels, "datasets": [{"name": _("Projected Qty"), "values": datapoints}]},
+		"type": "bar",
 	}
+
 
 def get_columns():
 	columns = [
@@ -86,76 +82,66 @@ def get_columns():
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
 			"options": "Warehouse",
-			"width": 150
+			"width": 150,
 		},
 		{
 			"label": _("Item"),
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 150
+			"width": 150,
 		},
 		{
 			"label": _("Actual Quantity"),
 			"fieldname": "actual_qty",
 			"fieldtype": "Float",
 			"width": 120,
-			"convertible": "qty"
+			"convertible": "qty",
 		},
 		{
 			"label": _("Ordered Quantity"),
 			"fieldname": "ordered_qty",
 			"fieldtype": "Float",
 			"width": 120,
-			"convertible": "qty"
+			"convertible": "qty",
 		},
 		{
 			"label": _("Planned Quantity"),
 			"fieldname": "planned_qty",
 			"fieldtype": "Float",
 			"width": 120,
-			"convertible": "qty"
+			"convertible": "qty",
 		},
 		{
 			"label": _("Reserved Quantity"),
 			"fieldname": "reserved_qty",
 			"fieldtype": "Float",
 			"width": 120,
-			"convertible": "qty"
+			"convertible": "qty",
 		},
 		{
 			"label": _("Reserved Quantity for Production"),
 			"fieldname": "reserved_qty_for_production",
 			"fieldtype": "Float",
 			"width": 120,
-			"convertible": "qty"
+			"convertible": "qty",
 		},
 		{
 			"label": _("Projected Quantity"),
 			"fieldname": "projected_qty",
 			"fieldtype": "Float",
 			"width": 120,
-			"convertible": "qty"
+			"convertible": "qty",
 		},
 		{
 			"label": _("Company"),
 			"fieldname": "company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"width": 120
+			"width": 120,
 		},
-		{
-			"label": _("Item Name"),
-			"fieldname": "item_name",
-			"fieldtype": "Data",
-			"width": 100
-		},
-		{
-			"label": _("Description"),
-			"fieldname": "description",
-			"fieldtype": "Data",
-			"width": 120
-		}
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
+		{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 120},
 	]
 
 	return columns

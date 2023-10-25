@@ -3,16 +3,18 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-03-25 10:53:52",
+ "creation": "2022-01-25 10:29:58.717206",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
   "entry_type_and_date",
+  "is_system_generated",
   "title",
   "voucher_type",
   "naming_series",
   "finance_book",
+  "process_deferred_accounting",
   "reversal_of",
   "tax_withholding_category",
   "column_break1",
@@ -87,7 +89,7 @@
    "label": "Entry Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation\nDeferred Revenue\nDeferred Expense",
+   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
    "reqd": 1,
    "search_index": 1
   },
@@ -136,7 +138,8 @@
    "fieldname": "finance_book",
    "fieldtype": "Link",
    "label": "Finance Book",
-   "options": "Finance Book"
+   "options": "Finance Book",
+   "read_only": 1
   },
   {
    "fieldname": "2_add_edit_gl_entries",
@@ -524,13 +527,29 @@
    "label": "Reversal Of",
    "options": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "process_deferred_accounting",
+   "fieldtype": "Link",
+   "label": "Process Deferred Accounting",
+   "options": "Process Deferred Accounting",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_system_generated == 1;",
+   "fieldname": "is_system_generated",
+   "fieldtype": "Check",
+   "label": "Is System Generated",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-04 13:39:36.485954",
+ "modified": "2023-08-10 14:32:22.366895",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -578,6 +597,7 @@
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

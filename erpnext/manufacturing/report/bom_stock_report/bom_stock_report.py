@@ -4,16 +4,20 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Floor, Sum
+from frappe.utils import cint
+from pypika.terms import ExistsCriterion
 
 
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	columns = get_columns()
-
 	data = get_bom_stock(filters)
 
 	return columns, data
+
 
 def get_columns():
 	"""return columns"""
@@ -29,54 +33,57 @@ def get_columns():
 
 	return columns
 
+
 def get_bom_stock(filters):
-	conditions = ""
-	bom = filters.get("bom")
-
-	table = "`tabBOM Item`"
-	qty_field = "stock_qty"
-
-	qty_to_produce = filters.get("qty_to_produce", 1)
-	if  int(qty_to_produce) <= 0:
-		frappe.throw(_("Quantity to Produce can not be less than Zero"))
+	qty_to_produce = filters.get("qty_to_produce")
+	if cint(qty_to_produce) <= 0:
+		frappe.throw(_("Quantity to Produce should be greater than zero."))
 
 	if filters.get("show_exploded_view"):
-		table = "`tabBOM Explosion Item`"
-
-	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
-		if warehouse_details:
-			conditions += " and exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and ledger.warehouse = wh.name)" % (warehouse_details.lft,
-				warehouse_details.rgt)
-		else:
-			conditions += " and ledger.warehouse = %s" % frappe.db.escape(filters.get("warehouse"))
-
+		bom_item_table = "BOM Explosion Item"
 	else:
-		conditions += ""
+		bom_item_table = "BOM Item"
 
-	return frappe.db.sql("""
-			SELECT
-				bom_item.item_code,
-				bom_item.description ,
-				bom_item.{qty_field},
-				bom_item.stock_uom,
-				bom_item.{qty_field} * {qty_to_produce} / bom.quantity,
-				sum(ledger.actual_qty) as actual_qty,
-				sum(FLOOR(ledger.actual_qty / (bom_item.{qty_field} * {qty_to_produce} / bom.quantity)))
-			FROM
-				`tabBOM` AS bom INNER JOIN {table} AS bom_item
-					ON bom.name = bom_item.parent
-				LEFT JOIN `tabBin` AS ledger
-					ON bom_item.item_code = ledger.item_code
-				{conditions}
-			WHERE
-				bom_item.parent = {bom} and bom_item.parenttype='BOM'
+	warehouse_details = frappe.db.get_value(
+		"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
+	)
 
-			GROUP BY bom_item.item_code""".format(
-				qty_field=qty_field,
-				table=table,
-				conditions=conditions,
-				bom=frappe.db.escape(bom),
-				qty_to_produce=qty_to_produce or 1)
+	BOM = frappe.qb.DocType("BOM")
+	BOM_ITEM = frappe.qb.DocType(bom_item_table)
+	BIN = frappe.qb.DocType("Bin")
+	WH = frappe.qb.DocType("Warehouse")
+	CONDITIONS = ()
+
+	if warehouse_details:
+		CONDITIONS = ExistsCriterion(
+			frappe.qb.from_(WH)
+			.select(WH.name)
+			.where(
+				(WH.lft >= warehouse_details.lft)
+				& (WH.rgt <= warehouse_details.rgt)
+				& (BIN.warehouse == WH.name)
 			)
+		)
+	else:
+		CONDITIONS = BIN.warehouse == filters.get("warehouse")
+
+	QUERY = (
+		frappe.qb.from_(BOM)
+		.inner_join(BOM_ITEM)
+		.on(BOM.name == BOM_ITEM.parent)
+		.left_join(BIN)
+		.on((BOM_ITEM.item_code == BIN.item_code) & (CONDITIONS))
+		.select(
+			BOM_ITEM.item_code,
+			BOM_ITEM.description,
+			BOM_ITEM.stock_qty,
+			BOM_ITEM.stock_uom,
+			BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity,
+			Sum(BIN.actual_qty).as_("actual_qty"),
+			Sum(Floor(BIN.actual_qty / (BOM_ITEM.stock_qty * qty_to_produce / BOM.quantity))),
+		)
+		.where((BOM_ITEM.parent == filters.get("bom")) & (BOM_ITEM.parenttype == "BOM"))
+		.groupby(BOM_ITEM.item_code)
+	)
+
+	return QUERY.run()

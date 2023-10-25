@@ -18,12 +18,8 @@ frappe.ui.form.on("Company", {
 		});
 	},
 	setup: function(frm) {
+		frm.__rename_queue = "long";
 		erpnext.company.setup_queries(frm);
-		frm.set_query("hra_component", function(){
-			return {
-				filters: {"type": "Earning"}
-			}
-		});
 
 		frm.set_query("parent_company", function() {
 			return {
@@ -85,8 +81,6 @@ frappe.ui.form.on("Company", {
 			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
 			disbale_coa_fields(frm);
 			frappe.contacts.render_address_and_contact(frm);
-
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
 
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
@@ -206,21 +200,19 @@ erpnext.company.setup_queries = function(frm) {
 	$.each([
 		["default_bank_account", {"account_type": "Bank"}],
 		["default_cash_account", {"account_type": "Cash"}],
-		["default_receivable_account", {"account_type": "Receivable"}],
-		["default_payable_account", {"account_type": "Payable"}],
+		["default_receivable_account", { "root_type": "Asset", "account_type": "Receivable" }],
+		["default_payable_account", { "root_type": "Liability", "account_type": "Payable" }],
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
-		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["default_deferred_expense_account", {}],
 		["default_deferred_revenue_account", {}],
-		["default_expense_claim_payable_account", {}],
 		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],
-		["exchange_gain_loss_account", {"root_type": "Expense"}],
-		["unrealized_exchange_gain_loss_account", {"root_type": "Expense"}],
+		["exchange_gain_loss_account", {"root_type": ["in", ["Expense", "Income"]]}],
+		["unrealized_exchange_gain_loss_account", {"root_type": ["in", ["Expense", "Income"]]}],
 		["accumulated_depreciation_account",
 			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
 		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
@@ -229,11 +221,12 @@ erpnext.company.setup_queries = function(frm) {
 		["cost_center", {}],
 		["round_off_cost_center", {}],
 		["depreciation_cost_center", {}],
-		["default_employee_advance_account", {"root_type": "Asset"}],
-		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
 		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
-		["unrealized_profit_loss_account", {"root_type": ["in", ["Liability", "Asset"]]}]
+		["unrealized_profit_loss_account", {"root_type": ["in", ["Liability", "Asset"]]}],
+		["default_provisional_account", {"root_type": ["in", ["Liability", "Asset"]]}],
+		["default_advance_received_account", {"root_type": "Liability", "account_type": "Receivable"}],
+		["default_advance_paid_account", {"root_type": "Asset", "account_type": "Payable"}],
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});
@@ -242,8 +235,6 @@ erpnext.company.setup_queries = function(frm) {
 		$.each([
 			["stock_adjustment_account",
 				{"root_type": "Expense", "account_type": "Stock Adjustment"}],
-			["expenses_included_in_valuation",
-				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
 			["stock_received_but_not_billed",
 				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}],
 			["service_received_but_not_billed",

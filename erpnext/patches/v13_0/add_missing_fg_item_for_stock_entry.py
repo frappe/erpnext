@@ -9,31 +9,34 @@ from erpnext.stock.stock_ledger import make_sl_entries
 
 
 def execute():
-	if not frappe.db.has_column('Work Order', 'has_batch_no'):
+	if not frappe.db.has_column("Work Order", "has_batch_no"):
 		return
 
-	frappe.reload_doc('manufacturing', 'doctype', 'manufacturing_settings')
-	if cint(frappe.db.get_single_value('Manufacturing Settings', 'make_serial_no_batch_from_work_order')):
+	frappe.reload_doc("manufacturing", "doctype", "manufacturing_settings")
+	if cint(
+		frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")
+	):
 		return
 
-	frappe.reload_doc('manufacturing', 'doctype', 'work_order')
+	frappe.reload_doc("manufacturing", "doctype", "work_order")
 	filters = {
-		'docstatus': 1,
-		'produced_qty': ('>', 0),
-		'creation': ('>=', '2021-06-29 00:00:00'),
-		'has_batch_no': 1
+		"docstatus": 1,
+		"produced_qty": (">", 0),
+		"creation": (">=", "2021-06-29 00:00:00"),
+		"has_batch_no": 1,
 	}
 
-	fields = ['name', 'production_item']
+	fields = ["name", "production_item"]
 
-	work_orders = [d.name for d in frappe.get_all('Work Order', filters = filters, fields=fields)]
+	work_orders = [d.name for d in frappe.get_all("Work Order", filters=filters, fields=fields)]
 
 	if not work_orders:
 		return
 
 	repost_stock_entries = []
 
-	stock_entries = frappe.db.sql_list('''
+	stock_entries = frappe.db.sql_list(
+		"""
 		SELECT
 			se.name
 		FROM
@@ -45,18 +48,19 @@ def execute():
 			)
 		ORDER BY
 			se.posting_date, se.posting_time
-	''',  (work_orders,))
+	""",
+		(work_orders,),
+	)
 
 	if stock_entries:
-		print('Length of stock entries', len(stock_entries))
+		print("Length of stock entries", len(stock_entries))
 
 	for stock_entry in stock_entries:
-		doc = frappe.get_doc('Stock Entry', stock_entry)
+		doc = frappe.get_doc("Stock Entry", stock_entry)
 		doc.set_work_order_details()
 		doc.load_items_from_bom()
 		doc.calculate_rate_and_amount()
 		set_expense_account(doc)
-		doc.make_batches('t_warehouse')
 
 		if doc.docstatus == 0:
 			doc.save()
@@ -67,10 +71,14 @@ def execute():
 	for repost_doc in repost_stock_entries:
 		repost_future_sle_and_gle(repost_doc)
 
+
 def set_expense_account(doc):
 	for row in doc.items:
 		if row.is_finished_item and not row.expense_account:
-			row.expense_account = frappe.get_cached_value('Company', doc.company, 'stock_adjustment_account')
+			row.expense_account = frappe.get_cached_value(
+				"Company", doc.company, "stock_adjustment_account"
+			)
+
 
 def repost_stock_entry(doc):
 	doc.db_update()
@@ -86,29 +94,35 @@ def repost_stock_entry(doc):
 		try:
 			make_sl_entries(sl_entries, True)
 		except Exception:
-			print(f'SLE entries not posted for the stock entry {doc.name}')
-			traceback = frappe.get_traceback()
-			frappe.log_error(traceback)
+			print(f"SLE entries not posted for the stock entry {doc.name}")
+			doc.log_error("Stock respost failed")
+
 
 def get_sle_for_target_warehouse(doc, sl_entries, finished_item_row):
-	for d in doc.get('items'):
+	for d in doc.get("items"):
 		if cstr(d.t_warehouse) and finished_item_row and d.name == finished_item_row.name:
-			sle = doc.get_sl_entries(d, {
-				"warehouse": cstr(d.t_warehouse),
-				"actual_qty": flt(d.transfer_qty),
-				"incoming_rate": flt(d.valuation_rate)
-			})
+			sle = doc.get_sl_entries(
+				d,
+				{
+					"warehouse": cstr(d.t_warehouse),
+					"actual_qty": flt(d.transfer_qty),
+					"incoming_rate": flt(d.valuation_rate),
+				},
+			)
 
 			sle.recalculate_rate = 1
 			sl_entries.append(sle)
 
+
 def repost_future_sle_and_gle(doc):
-	args = frappe._dict({
-		"posting_date": doc.posting_date,
-		"posting_time": doc.posting_time,
-		"voucher_type": doc.doctype,
-		"voucher_no": doc.name,
-		"company": doc.company
-	})
+	args = frappe._dict(
+		{
+			"posting_date": doc.posting_date,
+			"posting_time": doc.posting_time,
+			"voucher_type": doc.doctype,
+			"voucher_no": doc.name,
+			"company": doc.company,
+		}
+	)
 
 	create_repost_item_valuation_entry(args)

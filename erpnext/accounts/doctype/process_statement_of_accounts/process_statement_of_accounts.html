@@ -1,6 +1,6 @@
 <div class="page-break">
 	<div id="header-html" class="hidden-pdf">
-		{% if letter_head %}
+		{% if letter_head.content %}
 		<div class="letter-head text-center">{{ letter_head.content }}</div>
 		<hr style="height:2px;border-width:0;color:black;background-color:black;">
 		{% endif %}
@@ -15,7 +15,12 @@
 	</div>
 	<h2 class="text-center">{{ _("STATEMENTS OF ACCOUNTS") }}</h2>
 	<div>
-		<h5 style="float: left;">{{ _("Customer: ") }} <b>{{filters.party[0] }}</b></h5>
+		{% if filters.party[0] == filters.party_name[0] %}
+			<h5 style="float: left;">{{ _("Customer: ") }} <b>{{ filters.party_name[0] }}</b></h5>
+		{% else %}
+			<h5 style="float: left;">{{ _("Customer: ") }} <b>{{ filters.party[0] }}</b></h5>
+			<h5 style="float: left; margin-left:15px">{{ _("Customer Name: ") }} <b>{{filters.party_name[0] }}</b></h5>
+		{% endif %}
 		<h5 style="float: right;">
 			{{ _("Date: ") }}
 			<b>{{ frappe.format(filters.from_date, 'Date')}}
@@ -25,7 +30,7 @@
 	</div>
 	<br>
 
-	<table class="table table-bordered">
+	<table class="table table-bordered" style="font-size: 10px">
 		<thead>
 			<tr>
 				<th style="width: 12%">{{ _("Date") }}</th>
@@ -49,7 +54,6 @@
 						<br>
 					{% endif %}
 
-					{{ _("Against") }}: {{ row.against }}
 					<br>{{ _("Remarks") }}: {{ row.remarks }}
 					{% if row.bill_no %}
 						<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
@@ -64,10 +68,10 @@
 				<td></td>
 				<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
 				<td style="text-align: right">
-					{{ row.account and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
+					{{ row.get('account', '') and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
 				</td>
 				<td style="text-align: right">
-					{{ row.account and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
+					{{ row.get('account', '') and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
 				</td>
 			{% endif %}
 				<td style="text-align: right">

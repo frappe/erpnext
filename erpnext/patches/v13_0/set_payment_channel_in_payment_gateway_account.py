@@ -10,8 +10,11 @@ def execute():
 	frappe.reload_doc("Accounts", "doctype", "Payment Gateway Account")
 	set_payment_channel_as_email()
 
+
 def set_payment_channel_as_email():
-	frappe.db.sql("""
+	frappe.db.sql(
+		"""
 		UPDATE `tabPayment Gateway Account`
 		SET `payment_channel` = "Email"
-	""")
+	"""
+	)

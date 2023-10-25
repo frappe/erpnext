@@ -7,7 +7,7 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import Rece
 
 def execute(filters=None):
 	args = {
-		"party_type": "Supplier",
+		"account_type": "Payable",
 		"naming_by": ["Buying Settings", "supp_master_name"],
 	}
 	return ReceivablePayableReport(filters).run(args)

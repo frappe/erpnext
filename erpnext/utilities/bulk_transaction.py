@@ -9,7 +9,6 @@ from frappe import _
 def transaction_processing(data, from_doctype, to_doctype):
 	if isinstance(data, str):
 		deserialized_data = json.loads(data)
-
 	else:
 		deserialized_data = data
 
@@ -30,26 +29,29 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 
 def job(deserialized_data, from_doctype, to_doctype):
-	failed_history = []
-	i = 0
+	fail_count = 0
 	for d in deserialized_data:
-		failed = []
-
 		try:
-			i += 1
 			doc_name = d.get("name")
 			frappe.db.savepoint("before_creation_state")
 			task(doc_name, from_doctype, to_doctype)
-
 		except Exception as e:
 			frappe.db.rollback(save_point="before_creation_state")
-			failed_history.append(e)
-			failed.append(e)
-			update_logger(doc_name, e, from_doctype, to_doctype, status="Failed", log_date=str(date.today()))
-		if not failed:
-			update_logger(doc_name, None, from_doctype, to_doctype, status="Success", log_date=str(date.today()))
+			fail_count += 1
+			update_logger(
+				doc_name,
+				str(frappe.get_traceback()),
+				from_doctype,
+				to_doctype,
+				status="Failed",
+				log_date=str(date.today()),
+			)
+		else:
+			update_logger(
+				doc_name, None, from_doctype, to_doctype, status="Success", log_date=str(date.today())
+			)
 
-	show_job_status(failed_history, deserialized_data, to_doctype)
+	show_job_status(fail_count, len(deserialized_data), to_doctype)
 
 
 def task(doc_name, from_doctype, to_doctype):
@@ -67,11 +69,11 @@ def task(doc_name, from_doctype, to_doctype):
 		"Sales Order": {
 			"Sales Invoice": sales_order.make_sales_invoice,
 			"Delivery Note": sales_order.make_delivery_note,
-			"Advance Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Sales Invoice": {
 			"Delivery Note": sales_invoice.make_delivery_note,
-			"Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Delivery Note": {
 			"Sales Invoice": delivery_note.make_sales_invoice,
@@ -84,24 +86,25 @@ def task(doc_name, from_doctype, to_doctype):
 		"Supplier Quotation": {
 			"Purchase Order": supplier_quotation.make_purchase_order,
 			"Purchase Invoice": supplier_quotation.make_purchase_invoice,
-			"Advance Payment": payment_entry.get_payment_entry,
 		},
 		"Purchase Order": {
 			"Purchase Invoice": purchase_order.make_purchase_invoice,
 			"Purchase Receipt": purchase_order.make_purchase_receipt,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
-		"Purhcase Invoice": {
+		"Purchase Invoice": {
 			"Purchase Receipt": purchase_invoice.make_purchase_receipt,
-			"Payment": payment_entry.get_payment_entry,
+			"Payment Entry": payment_entry.get_payment_entry,
 		},
 		"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice},
 	}
-	if to_doctype in ['Advance Payment', 'Payment']:
+	if to_doctype in ["Payment Entry"]:
 		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)
 	else:
 		obj = mapper[from_doctype][to_doctype](doc_name)
 
 	obj.flags.ignore_validate = True
+	obj.set_title_field()
 	obj.insert(ignore_mandatory=True)
 
 
@@ -142,45 +145,41 @@ def update_logger(doc_name, e, from_doctype, to_doctype, status, log_date=None, 
 	else:
 		log_doc = get_logger_doc(log_date)
 		if record_exists(log_doc, doc_name, status):
-			append_data_to_logger(
-				log_doc, doc_name, e, from_doctype, to_doctype, status, restarted
-			)
+			append_data_to_logger(log_doc, doc_name, e, from_doctype, to_doctype, status, restarted)
 			log_doc.save()
 
 
-def show_job_status(failed_history, deserialized_data, to_doctype):
-	if not failed_history:
+def show_job_status(fail_count, deserialized_data_count, to_doctype):
+	if not fail_count:
 		frappe.msgprint(
-			_("Creation of {0} successful").format(to_doctype),
+			_("Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful").format(
+				to_doctype.lower().replace(" ", "-"), to_doctype
+			),
 			title="Successful",
 			indicator="green",
 		)
-
-	if len(failed_history) != 0 and len(failed_history) < len(deserialized_data):
+	elif fail_count != 0 and fail_count < deserialized_data_count:
 		frappe.msgprint(
-			_("""Creation of {0} partially successful.
-				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""").format(
-				to_doctype
-			),
+			_(
+				"""Creation of {0} partially successful.
+				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
+			).format(to_doctype),
 			title="Partially successful",
 			indicator="orange",
 		)
-
-	if len(failed_history) == len(deserialized_data):
+	else:
 		frappe.msgprint(
-			_("""Creation of {0} failed.
-				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""").format(
-				to_doctype
-			),
+			_(
+				"""Creation of {0} failed.
+				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>"""
+			).format(to_doctype),
 			title="Failed",
 			indicator="red",
 		)
 
 
 def record_exists(log_doc, doc_name, status):
-
 	record = mark_retrired_transaction(log_doc, doc_name)
-
 	if record and status == "Failed":
 		return False
 	elif record and status == "Success":

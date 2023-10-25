@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Work Order Consumed Materials"] = {
 	"filters": [
@@ -50,7 +50,7 @@ frappe.query_reports["Work Order Consumed Materials"] = {
 			label: __("Status"),
 			fieldname: "status",
 			fieldtype: "Select",
-			options: ["In Process", "Completed", "Stopped"]
+			options: ["", "In Process", "Completed", "Stopped"]
 		},
 		{
 			label: __("Excess Materials Consumed"),

@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty === 0) ? "red" : "green"; });
 
@@ -10,6 +12,7 @@ frappe.ui.form.on('Pick List', {
 			'Delivery Note': 'Delivery Note',
 			'Stock Entry': 'Stock Entry',
 		};
+
 		frm.set_query('parent_warehouse', () => {
 			return {
 				filters: {
@@ -18,6 +21,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('work_order', () => {
 			return {
 				query: 'erpnext.stock.doctype.pick_list.pick_list.get_pending_work_orders',
@@ -26,6 +30,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('material_request', () => {
 			return {
 				filters: {
@@ -33,9 +38,11 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+
 		frm.set_query('item_code', 'locations', () => {
 			return erpnext.queries.item({ "is_stock_item": 1 });
 		});
+
 		frm.set_query('batch_no', 'locations', (frm, cdt, cdn) => {
 			const row = locals[cdt][cdn];
 			return {
@@ -46,12 +53,32 @@ frappe.ui.form.on('Pick List', {
 				},
 			};
 		});
+
+		frm.set_query("serial_and_batch_bundle", "locations", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
 	},
 	set_item_locations:(frm, save) => {
 		if (!(frm.doc.locations && frm.doc.locations.length)) {
 			frappe.msgprint(__('Add items in the Item Locations table'));
 		} else {
-			frm.call('set_item_locations', {save: save});
+			frappe.call({
+				method: "set_item_locations",
+				doc: frm.doc,
+				args: {
+					"save": save,
+				},
+				freeze: 1,
+				freeze_message: __("Setting Item Locations..."),
+			});
 		}
 	},
 	get_item_locations: (frm) => {
@@ -77,6 +104,33 @@ frappe.ui.form.on('Pick List', {
 					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
 				}
 			});
+
+			if (frm.doc.purpose === 'Delivery' && frm.doc.status === 'Open') {
+				if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					frm.add_custom_button(__('Reserve'), () => frm.events.create_stock_reservation_entries(frm), __('Stock Reservation'));
+				}
+
+				if (frm.doc.__onload && frm.doc.__onload.has_reserved_stock) {
+					frm.add_custom_button(__('Unreserve'), () => {
+						frappe.confirm(
+							__('The reserved stock will be released. Are you certain you wish to proceed?'),
+							() => frm.events.cancel_stock_reservation_entries(frm)
+						)
+					}, __('Stock Reservation'));
+					frm.add_custom_button(__('Reserved Stock'), () => frm.events.show_reserved_stock(frm), __('Stock Reservation'));
+				}
+			}
+		}
+
+		let sbb_field = frm.get_docfield('locations', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'warehouse': row.doc.warehouse,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
 		}
 	},
 	work_order: (frm) => {
@@ -146,10 +200,6 @@ frappe.ui.form.on('Pick List', {
 			customer: frm.doc.customer
 		};
 		frm.get_items_btn = frm.add_custom_button(__('Get Items'), () => {
-			if (!frm.doc.customer) {
-				frappe.msgprint(__('Please select Customer first'));
-				return;
-			}
 			erpnext.utils.map_current_doc({
 				method: 'erpnext.selling.doctype.sales_order.sales_order.create_pick_list',
 				source_doctype: 'Sales Order',
@@ -162,6 +212,63 @@ frappe.ui.form.on('Pick List', {
 				get_query_filters: get_query_filters
 			});
 		});
+	},
+	scan_barcode: (frm) => {
+		const opts = {
+			frm,
+			items_table_name: 'locations',
+			qty_field: 'picked_qty',
+			max_qty_field: 'qty',
+			dont_allow_new_row: true,
+			prompt_qty: frm.doc.prompt_qty,
+			serial_no_field: "not_supported",  // doesn't make sense for picklist without a separate field.
+		};
+		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
+		barcode_scanner.process_scan();
+	},
+	create_stock_reservation_entries: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "create_stock_reservation_entries",
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __("Reserving Stock..."),
+			callback: (r) => {
+				frm.doc.__onload.has_unreserved_stock = false;
+				frm.reload_doc();
+			}
+		});
+	},
+	cancel_stock_reservation_entries: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "cancel_stock_reservation_entries",
+			args: {
+				notify: true
+			},
+			freeze: true,
+			freeze_message: __('Unreserving Stock...'),
+			callback: (r) => {
+				frm.doc.__onload.has_reserved_stock = false;
+				frm.reload_doc();
+			}
+		});
+	},
+	show_reserved_stock(frm) {
+		// Get the latest modified date from the locations table.
+		var to_date = moment(new Date(Math.max(...frm.doc.locations.map(e => new Date(e.modified))))).format('YYYY-MM-DD');
+
+		frappe.route_options = {
+			company: frm.doc.company,
+			from_date: moment(frm.doc.creation).format('YYYY-MM-DD'),
+			to_date: to_date,
+			voucher_type: "Sales Order",
+			from_voucher_type: "Pick List",
+			from_voucher_no: frm.doc.name,
+		}
+		frappe.set_route("query-report", "Reserved Stock");
 	}
 });
 

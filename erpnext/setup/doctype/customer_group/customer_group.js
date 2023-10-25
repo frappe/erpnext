@@ -16,23 +16,37 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 	}
 }
 
-//get query select Customer Group
-cur_frm.fields_dict['parent_customer_group'].get_query = function(doc,cdt,cdn) {
-	return {
-		filters: {
-			'is_group': 1,
-			'name': ['!=', cur_frm.doc.customer_group_name]
-		}
-	}
-}
+frappe.ui.form.on("Customer Group", {
+	setup: function(frm){
+		frm.set_query('parent_customer_group', function (doc) {
+			return {
+				filters: {
+					'is_group': 1,
+					'name': ['!=', cur_frm.doc.customer_group_name]
+				}
+			}
+		});
 
-cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
-	var d  = locals[cdt][cdn];
-	return {
-		filters: {
-			'account_type': 'Receivable',
-			'company': d.company,
-			"is_group": 0
-		}
+		frm.set_query('account', 'accounts', function (doc, cdt, cdn) {
+			return {
+				filters: {
+					'root_type': 'Asset',
+					"account_type": 'Receivable',
+					"company": locals[cdt][cdn].company,
+					"is_group": 0
+				}
+			}
+		});
+
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
+			return {
+				filters: {
+					"root_type": 'Liability',
+					"account_type": "Receivable",
+					"company": locals[cdt][cdn].company,
+					"is_group": 0
+				}
+			}
+		});
 	}
-}
+});

@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, today
+from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
 from erpnext.stock.utils import (
@@ -32,8 +33,9 @@ def execute(filters=None):
 			continue
 
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
-		company = warehouse_company.setdefault(bin.warehouse,
-			frappe.db.get_value("Warehouse", bin.warehouse, "company"))
+		company = warehouse_company.setdefault(
+			bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company")
+		)
 
 		if filters.brand and filters.brand != item.brand:
 			continue
@@ -59,10 +61,30 @@ def execute(filters=None):
 		if reserved_qty_for_pos:
 			bin.projected_qty -= reserved_qty_for_pos
 
-		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
-			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty,
-			bin.reserved_qty, bin.reserved_qty_for_production, bin.reserved_qty_for_sub_contract, reserved_qty_for_pos,
-			bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
+		data.append(
+			[
+				item.name,
+				item.item_name,
+				item.description,
+				item.item_group,
+				item.brand,
+				bin.warehouse,
+				item.stock_uom,
+				bin.actual_qty,
+				bin.planned_qty,
+				bin.indented_qty,
+				bin.ordered_qty,
+				bin.reserved_qty,
+				bin.reserved_qty_for_production,
+				bin.reserved_qty_for_production_plan,
+				bin.reserved_qty_for_sub_contract,
+				reserved_qty_for_pos,
+				bin.projected_qty,
+				re_order_level,
+				re_order_qty,
+				shortage_qty,
+			]
+		)
 
 		if include_uom:
 			conversion_factors.append(item.conversion_factor)
@@ -70,87 +92,227 @@ def execute(filters=None):
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
+
 def get_columns():
 	return [
-		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 140},
+		{
+			"label": _("Item Code"),
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 140,
+		},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
 		{"label": _("Description"), "fieldname": "description", "width": 200},
-		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
-		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
-		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
-		{"label": _("UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
-		{"label": _("Actual Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Planned Qty"), "fieldname": "planned_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Requested Qty"), "fieldname": "indented_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
-		{"label": _("Ordered Qty"), "fieldname": "ordered_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Reserved Qty"), "fieldname": "reserved_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Reserved for Production"), "fieldname": "reserved_qty_for_production", "fieldtype": "Float",
-			"width": 100, "convertible": "qty"},
-		{"label": _("Reserved for Sub Contracting"), "fieldname": "reserved_qty_for_sub_contract", "fieldtype": "Float",
-			"width": 100, "convertible": "qty"},
-		{"label": _("Reserved for POS Transactions"), "fieldname": "reserved_qty_for_pos", "fieldtype": "Float",
-			"width": 100, "convertible": "qty"},
-		{"label": _("Projected Qty"), "fieldname": "projected_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Reorder Level"), "fieldname": "re_order_level", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Reorder Qty"), "fieldname": "re_order_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Shortage Qty"), "fieldname": "shortage_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"}
+		{
+			"label": _("Item Group"),
+			"fieldname": "item_group",
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"width": 100,
+		},
+		{
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Link",
+			"options": "Brand",
+			"width": 100,
+		},
+		{
+			"label": _("Warehouse"),
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 120,
+		},
+		{
+			"label": _("UOM"),
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 100,
+		},
+		{
+			"label": _("Actual Qty"),
+			"fieldname": "actual_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Planned Qty"),
+			"fieldname": "planned_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Requested Qty"),
+			"fieldname": "indented_qty",
+			"fieldtype": "Float",
+			"width": 110,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Ordered Qty"),
+			"fieldname": "ordered_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved Qty"),
+			"fieldname": "reserved_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved for Production"),
+			"fieldname": "reserved_qty_for_production",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved for Production Plan"),
+			"fieldname": "reserved_qty_for_production_plan",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved for Sub Contracting"),
+			"fieldname": "reserved_qty_for_sub_contract",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved for POS Transactions"),
+			"fieldname": "reserved_qty_for_pos",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Projected Qty"),
+			"fieldname": "projected_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reorder Level"),
+			"fieldname": "re_order_level",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reorder Qty"),
+			"fieldname": "re_order_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Shortage Qty"),
+			"fieldname": "shortage_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+		},
 	]
 
+
 def get_bin_list(filters):
-	conditions = []
+	bin = frappe.qb.DocType("Bin")
+	query = (
+		frappe.qb.from_(bin)
+		.select(
+			bin.item_code,
+			bin.warehouse,
+			bin.actual_qty,
+			bin.planned_qty,
+			bin.indented_qty,
+			bin.ordered_qty,
+			bin.reserved_qty,
+			bin.reserved_qty_for_production,
+			bin.reserved_qty_for_sub_contract,
+			bin.reserved_qty_for_production_plan,
+			bin.projected_qty,
+		)
+		.orderby(bin.item_code, bin.warehouse)
+	)
 
 	if filters.item_code:
-		conditions.append("item_code = '%s' "%filters.item_code)
+		query = query.where(bin.item_code == filters.item_code)
 
 	if filters.warehouse:
-		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
+		warehouse_details = frappe.db.get_value(
+			"Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1
+		)
 
 		if warehouse_details:
-			conditions.append(" exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)"%(warehouse_details.lft,
-				warehouse_details.rgt))
+			wh = frappe.qb.DocType("Warehouse")
+			query = query.where(
+				ExistsCriterion(
+					frappe.qb.from_(wh)
+					.select(wh.name)
+					.where(
+						(wh.lft >= warehouse_details.lft)
+						& (wh.rgt <= warehouse_details.rgt)
+						& (bin.warehouse == wh.name)
+					)
+				)
+			)
 
-	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
-		ordered_qty, reserved_qty, reserved_qty_for_production, reserved_qty_for_sub_contract, projected_qty
-		from tabBin bin {conditions} order by item_code, warehouse
-		""".format(conditions=" where " + " and ".join(conditions) if conditions else ""), as_dict=1)
+	bin_list = query.run(as_dict=True)
 
 	return bin_list
+
 
 def get_item_map(item_code, include_uom):
 	"""Optimization: get only the item doc and re_order_levels table"""
 
-	condition = ""
-	if item_code:
-		condition = 'and item_code = {0}'.format(frappe.db.escape(item_code, percent=False))
+	bin = frappe.qb.DocType("Bin")
+	item = frappe.qb.DocType("Item")
 
-	cf_field = cf_join = ""
+	query = (
+		frappe.qb.from_(item)
+		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.where(
+			(item.is_stock_item == 1)
+			& (item.disabled == 0)
+			& (
+				(item.end_of_life > today()) | (item.end_of_life.isnull()) | (item.end_of_life == "0000-00-00")
+			)
+			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
+		)
+	)
+
+	if item_code:
+		query = query.where(item.item_code == item_code)
+
 	if include_uom:
-		cf_field = ", ucd.conversion_factor"
-		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+		ucd = frappe.qb.DocType("UOM Conversion Detail")
+		query = query.left_join(ucd).on((ucd.parent == item.name) & (ucd.uom == include_uom))
 
-	items = frappe.db.sql("""
-		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
-		from `tabItem` item
-		{cf_join}
-		where item.is_stock_item = 1
-		and item.disabled=0
-		{condition}
-		and (item.end_of_life > %(today)s or item.end_of_life is null or item.end_of_life='0000-00-00')
-		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\
-		.format(cf_field=cf_field, cf_join=cf_join, condition=condition),
-		{"today": today(), "include_uom": include_uom}, as_dict=True)
+	items = query.run(as_dict=True)
 
-	condition = ""
+	ir = frappe.qb.DocType("Item Reorder")
+	query = frappe.qb.from_(ir).select("*")
+
 	if item_code:
-		condition = 'where parent={0}'.format(frappe.db.escape(item_code, percent=False))
+		query = query.where(ir.parent == item_code)
 
 	reorder_levels = frappe._dict()
-	for ir in frappe.db.sql("""select * from `tabItem Reorder` {condition}""".format(condition=condition), as_dict=1):
-		if ir.parent not in reorder_levels:
-			reorder_levels[ir.parent] = []
+	for d in query.run(as_dict=True):
+		if d.parent not in reorder_levels:
+			reorder_levels[d.parent] = []
 
-		reorder_levels[ir.parent].append(ir)
+		reorder_levels[d.parent].append(d)
 
 	item_map = frappe._dict()
 	for item in items:

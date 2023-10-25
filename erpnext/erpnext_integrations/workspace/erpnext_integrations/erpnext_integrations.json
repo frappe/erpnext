@@ -1,30 +1,185 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Marketplace\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+ "content": "[{\"id\":\"e88ADOJ7WC\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Integrations</b></span>\",\"col\":12}},{\"id\":\"pZEYOOCdB0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Browse Apps\",\"col\":3}},{\"id\":\"St7AHbhVOr\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nu4oSjH5Rd\",\"type\":\"card\",\"data\":{\"card_name\":\"Authentication\",\"col\":4}},{\"id\":\"G0tyx9WOfm\",\"type\":\"card\",\"data\":{\"card_name\":\"Backup\",\"col\":4}},{\"id\":\"nG8cdkpzoc\",\"type\":\"card\",\"data\":{\"card_name\":\"Google Services\",\"col\":4}},{\"id\":\"4hwuQn6E95\",\"type\":\"card\",\"data\":{\"card_name\":\"Communication Channels\",\"col\":4}},{\"id\":\"sEGAzTJRmq\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}}]",
  "creation": "2020-08-20 19:30:48.138801",
+ "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
  "icon": "integration",
  "idx": 0,
+ "is_hidden": 0,
  "label": "ERPNext Integrations",
  "links": [
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Marketplace",
-   "link_count": 0,
+   "label": "Backup",
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Woocommerce Settings",
+   "label": "Dropbox Settings",
    "link_count": 0,
-   "link_to": "Woocommerce Settings",
+   "link_to": "Dropbox Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "S3 Backup Settings",
+   "link_count": 0,
+   "link_to": "S3 Backup Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Google Drive",
+   "link_count": 0,
+   "link_to": "Google Drive",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Authentication",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Social Login",
+   "link_count": 0,
+   "link_to": "Social Login Key",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "LDAP Settings",
+   "link_count": 0,
+   "link_to": "LDAP Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "OAuth Client",
+   "link_count": 0,
+   "link_to": "OAuth Client",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "OAuth Provider Settings",
+   "link_count": 0,
+   "link_to": "OAuth Provider Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Communication Channels",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Webhook",
+   "link_count": 0,
+   "link_to": "Webhook",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SMS Settings",
+   "link_count": 0,
+   "link_to": "SMS Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Slack Webhook URL",
+   "link_count": 0,
+   "link_to": "Slack Webhook URL",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Google Services",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Google Settings",
+   "link_count": 0,
+   "link_to": "Google Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Google Contacts",
+   "link_count": 0,
+   "link_to": "Google Contacts",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Google Calendar",
+   "link_count": 0,
+   "link_to": "Google Calendar",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Google Drive",
+   "link_count": 0,
+   "link_to": "Google Drive",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -33,12 +188,11 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payments",
-   "link_count": 0,
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "GoCardless Settings",
@@ -49,10 +203,9 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "M-Pesa Settings",
+   "label": "Mpesa Settings",
    "link_count": 0,
    "link_to": "Mpesa Settings",
    "link_type": "DocType",
@@ -62,44 +215,34 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Settings",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Plaid Settings",
    "link_count": 0,
    "link_to": "Plaid Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Exotel Settings",
-   "link_count": 0,
-   "link_to": "Exotel Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:35:35.508718",
+ "modified": "2023-08-29 15:48:59.010704",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
+ "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 10.0,
- "shortcuts": [],
+ "sequence_id": 21.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Browse Apps",
+   "type": "URL",
+   "url": "https://frappecloud.com/marketplace"
+  }
+ ],
  "title": "ERPNext Integrations"
 }

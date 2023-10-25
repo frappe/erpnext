@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Workstation", {
-	onload: function(frm) {
+	onload(frm) {
 		if(frm.is_new())
 		{
 			frappe.call({
@@ -12,6 +12,18 @@ frappe.ui.form.on("Workstation", {
 					if(!r.exe && r.message){
 						cur_frm.set_value("holiday_list", r.message);
 					}
+				}
+			})
+		}
+	},
+
+	workstation_type(frm) {
+		if (frm.doc.workstation_type) {
+			frm.call({
+				method: "set_data_based_on_workstation_type",
+				doc: frm.doc,
+				callback: function(r) {
+					frm.refresh_fields();
 				}
 			})
 		}

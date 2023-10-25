@@ -161,25 +161,32 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
 			const contact = frm.doc.contact_mobile;
-			const request_button = $(this.request_for_payment_field.$input[0]);
+			const request_button = $(this.request_for_payment_field?.$input[0]);
 			if (contact) {
 				request_button.removeClass('btn-default').addClass('btn-primary');
 			} else {
 				request_button.removeClass('btn-primary').addClass('btn-default');
-      }
-    });
+			}
+		});
 
 		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
-			if (!frm.doc.ignore_pricing_rule) {
-				if (frm.doc.coupon_code) {
+			if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {
+				if (!frm.doc.ignore_pricing_rule) {
+					frm.applying_pos_coupon_code = true;
 					frappe.run_serially([
 						() => frm.doc.ignore_pricing_rule=1,
 						() => frm.trigger('ignore_pricing_rule'),
 						() => frm.doc.ignore_pricing_rule=0,
 						() => frm.trigger('apply_pricing_rule'),
 						() => frm.save(),
-						() => this.update_totals_section(frm.doc)
+						() => this.update_totals_section(frm.doc),
+						() => (frm.applying_pos_coupon_code = false)
 					]);
+				} else if (frm.doc.ignore_pricing_rule) {
+					frappe.show_alert({
+						message: __("Ignore Pricing Rule is enabled. Cannot apply coupon code."),
+						indicator: "orange"
+					});
 				}
 			}
 		});
@@ -315,6 +322,11 @@ erpnext.PointOfSale.Payment = class {
 		this.focus_on_default_mop();
 	}
 
+	after_render() {
+		const frm = this.events.get_frm();
+		frm.script_manager.trigger("after_payment_render", frm.doc.doctype, frm.doc.docname);
+	}
+
 	edit_cart() {
 		this.events.toggle_other_sections(false);
 		this.toggle_component(false);
@@ -325,6 +337,7 @@ erpnext.PointOfSale.Payment = class {
 		this.toggle_component(true);
 
 		this.render_payment_section();
+		this.after_render();
 	}
 
 	toggle_remarks_control() {

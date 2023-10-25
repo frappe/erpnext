@@ -19,12 +19,14 @@
   "trial_period_end",
   "follow_calendar_months",
   "generate_new_invoices_past_due_date",
+  "submit_invoice",
   "column_break_11",
   "current_invoice_start",
   "current_invoice_end",
   "days_until_due",
+  "generate_invoice_at",
+  "number_of_days",
   "cancel_at_period_end",
-  "generate_invoice_at_period_start",
   "sb_4",
   "plans",
   "sb_1",
@@ -35,12 +37,8 @@
   "cb_2",
   "additional_discount_percentage",
   "additional_discount_amount",
-  "sb_3",
-  "submit_invoice",
-  "invoices",
   "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break"
+  "cost_center"
  ],
  "fields": [
   {
@@ -89,12 +87,14 @@
    "fieldname": "current_invoice_start",
    "fieldtype": "Date",
    "label": "Current Invoice Start Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "current_invoice_end",
    "fieldtype": "Date",
    "label": "Current Invoice End Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -109,12 +109,6 @@
    "fieldname": "cancel_at_period_end",
    "fieldtype": "Check",
    "label": "Cancel At End Of Period"
-  },
-  {
-   "default": "0",
-   "fieldname": "generate_invoice_at_period_start",
-   "fieldtype": "Check",
-   "label": "Generate Invoice At Beginning Of Period"
   },
   {
    "allow_on_submit": 1,
@@ -163,27 +157,10 @@
    "label": "Additional DIscount Amount"
   },
   {
-   "depends_on": "eval:doc.invoices",
-   "fieldname": "sb_3",
-   "fieldtype": "Section Break",
-   "label": "Invoices"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "invoices",
-   "fieldtype": "Table",
-   "label": "Invoices",
-   "options": "Subscription Invoice"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "party_type",
@@ -259,15 +236,42 @@
    "default": "1",
    "fieldname": "submit_invoice",
    "fieldtype": "Check",
-   "label": "Submit Invoice Automatically"
+   "label": "Submit Generated Invoices"
+  },
+  {
+   "default": "End of the current subscription period",
+   "fieldname": "generate_invoice_at",
+   "fieldtype": "Select",
+   "label": "Generate Invoice At",
+   "options": "End of the current subscription period\nBeginning of the current subscription period\nDays before the current subscription period",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\"",
+   "fieldname": "number_of_days",
+   "fieldtype": "Int",
+   "label": "Number of Days",
+   "mandatory_depends_on": "eval:doc.generate_invoice_at === \"Days before the current subscription period\""
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-04-19 15:24:27.550797",
+ "links": [
+  {
+   "group": "Buying",
+   "link_doctype": "Purchase Invoice",
+   "link_fieldname": "subscription"
+  },
+  {
+   "group": "Selling",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "subscription"
+  }
+ ],
+ "modified": "2023-09-18 17:48:21.900252",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -309,5 +313,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

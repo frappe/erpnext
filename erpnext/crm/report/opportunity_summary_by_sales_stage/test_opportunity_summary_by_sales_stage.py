@@ -27,68 +27,44 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 		self.check_all_filters()
 
 	def check_for_opportunity_owner(self):
-		filters = {
-			'based_on': "Opportunity Owner",
-			'data_based_on': "Number",
-			'company': "Best Test"
-		}
+		filters = {"based_on": "Opportunity Owner", "data_based_on": "Number", "company": "Best Test"}
 
 		report = execute(filters)
 
-		expected_data = [{
-			'opportunity_owner': "Not Assigned",
-			'Prospecting': 1
-		}]
+		expected_data = [{"opportunity_owner": "Not Assigned", "Prospecting": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
 	def check_for_source(self):
-		filters = {
-			'based_on': "Source",
-			'data_based_on': "Number",
-			'company': "Best Test"
-		}
+		filters = {"based_on": "Source", "data_based_on": "Number", "company": "Best Test"}
 
 		report = execute(filters)
 
-		expected_data = [{
-			'source': 'Cold Calling',
-			'Prospecting': 1
-		}]
+		expected_data = [{"source": "Cold Calling", "Prospecting": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
 	def check_for_opportunity_type(self):
-		filters = {
-			'based_on': "Opportunity Type",
-			'data_based_on': "Number",
-			'company': "Best Test"
-		}
+		filters = {"based_on": "Opportunity Type", "data_based_on": "Number", "company": "Best Test"}
 
 		report = execute(filters)
 
-		expected_data = [{
-			'opportunity_type': 'Sales',
-			'Prospecting': 1
-		}]
+		expected_data = [{"opportunity_type": "Sales", "Prospecting": 1}]
 
 		self.assertEqual(expected_data, report[1])
 
 	def check_all_filters(self):
 		filters = {
-			'based_on': "Opportunity Type",
-			'data_based_on': "Number",
-			'company': "Best Test",
-			'opportunity_source': "Cold Calling",
-			'opportunity_type': "Sales",
-			'status': ["Open"]
+			"based_on": "Opportunity Type",
+			"data_based_on": "Number",
+			"company": "Best Test",
+			"opportunity_source": "Cold Calling",
+			"opportunity_type": "Sales",
+			"status": ["Open"],
 		}
 
 		report = execute(filters)
 
-		expected_data = [{
-			'opportunity_type': 'Sales',
-			'Prospecting': 1
-		}]
+		expected_data = [{"opportunity_type": "Sales", "Prospecting": 1}]
 
 		self.assertEqual(expected_data, report[1])

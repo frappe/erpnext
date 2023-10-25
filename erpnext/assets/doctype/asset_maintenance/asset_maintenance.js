@@ -48,7 +48,7 @@ frappe.ui.form.on('Asset Maintenance', {
 							<div class='col-sm-3 small'>
 								<a onclick="frappe.set_route('List', 'Asset Maintenance Log',
 									{'asset_name': '${d.asset_name}','maintenance_status': '${d.maintenance_status}' });">
-									${d.maintenance_status} <span class="badge">${d.count}</span>
+									${__(d.maintenance_status)} <span class="badge">${d.count}</span>
 								</a>
 							</div>
 						</div>`).appendTo(rows);

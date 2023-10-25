@@ -20,9 +20,10 @@ frappe.ui.form.on("Customer", {
 		frm.set_query('customer_group', {'is_group': 0});
 		frm.set_query('default_price_list', { 'selling': 1});
 		frm.set_query('account', 'accounts', function(doc, cdt, cdn) {
-			var d  = locals[cdt][cdn];
-			var filters = {
+			let d  = locals[cdt][cdn];
+			let filters = {
 				'account_type': 'Receivable',
+				'root_type': 'Asset',
 				'company': d.company,
 				"is_group": 0
 			};
@@ -34,6 +35,19 @@ frappe.ui.form.on("Customer", {
 				filters: filters
 			}
 		});
+
+		frm.set_query('advance_account', 'accounts', function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					"account_type": 'Receivable',
+					"root_type": "Liability",
+					"company": d.company,
+					"is_group": 0
+				}
+			}
+		});
+
 
 		if (frm.doc.__islocal == 1) {
 			frm.set_value("represents_company", "");
@@ -62,6 +76,14 @@ frappe.ui.form.on("Customer", {
 					'is_company_account': 1
 				}
 			}
+		});
+
+		frm.set_query("user", "portal_users", function() {
+			return {
+				filters: {
+					"ignore_user_type": true,
+				}
+			};
 		});
 	},
 	customer_primary_address: function(frm){
@@ -110,20 +132,18 @@ frappe.ui.form.on("Customer", {
 			erpnext.toggle_naming_series();
 		}
 
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
-
 		if(!frm.doc.__islocal) {
 			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
 
 			frm.add_custom_button(__('Accounts Receivable'), function () {
-				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
+				frappe.set_route('query-report', 'Accounts Receivable', { party_type: "Customer", party: frm.doc.name });
 			}, __('View'));
 
 			frm.add_custom_button(__('Accounting Ledger'), function () {
 				frappe.set_route('query-report', 'General Ledger',
-					{party_type: 'Customer', party: frm.doc.name});
+					{party_type: 'Customer', party: frm.doc.name, party_name: frm.doc.customer_name});
 			}, __('View'));
 
 			frm.add_custom_button(__('Pricing Rule'), function () {

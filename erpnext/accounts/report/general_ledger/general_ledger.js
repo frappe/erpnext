@@ -58,9 +58,8 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Link",
-			"options": "Party Type",
-			"default": "",
+			"fieldtype": "Autocomplete",
+			options: Object.keys(frappe.boot.party_account_types),
 			on_change: function() {
 				frappe.query_report.set_filter_value('party', "");
 			}
@@ -177,7 +176,8 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname": "include_default_book_entries",
 			"label": __("Include Default Book Entries"),
-			"fieldtype": "Check"
+			"fieldtype": "Check",
+			"default": 1
 		},
 		{
 			"fieldname": "show_cancelled_entries",
@@ -187,6 +187,11 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname": "show_net_values_in_party_account",
 			"label": __("Show Net Values in Party Account"),
+			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "add_values_in_transaction_currency",
+			"label": __("Add Columns in Transaction Currency"),
 			"fieldtype": "Check"
 		}
 	]

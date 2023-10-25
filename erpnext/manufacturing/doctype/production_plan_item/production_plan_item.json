@@ -27,7 +27,8 @@
   "material_request",
   "material_request_item",
   "product_bundle_item",
-  "item_reference"
+  "item_reference",
+  "temporary_name"
  ],
  "fields": [
   {
@@ -82,7 +83,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "For Warehouse",
+   "label": "FG Warehouse",
    "options": "Warehouse"
   },
   {
@@ -204,17 +205,25 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Item Reference"
+  },
+  {
+   "fieldname": "temporary_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "temporary name"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-28 18:31:06.822168",
+ "modified": "2022-11-25 14:15:40.061514",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

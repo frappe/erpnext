@@ -3,6 +3,9 @@
 
 frappe.provide("erpnext.item");
 
+const SALES_DOCTYPES = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'];
+const PURCHASE_DOCTYPES = ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'];
+
 frappe.ui.form.on("Item", {
 	setup: function(frm) {
 		frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
@@ -10,6 +13,34 @@ frappe.ui.form.on("Item", {
 		frm.add_fetch('attribute', 'to_range', 'to_range');
 		frm.add_fetch('attribute', 'increment', 'increment');
 		frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');
+
+		frm.make_methods = {
+			'Sales Order': () => {
+				open_form(frm, "Sales Order", "Sales Order Item", "items");
+			},
+			'Delivery Note': () => {
+				open_form(frm, "Delivery Note", "Delivery Note Item", "items");
+			},
+			'Sales Invoice': () => {
+				open_form(frm, "Sales Invoice", "Sales Invoice Item", "items");
+			},
+			'Purchase Order': () => {
+				open_form(frm, "Purchase Order", "Purchase Order Item", "items");
+			},
+			'Purchase Receipt': () => {
+				open_form(frm, "Purchase Receipt", "Purchase Receipt Item", "items");
+			},
+			'Purchase Invoice': () => {
+				open_form(frm, "Purchase Invoice", "Purchase Invoice Item", "items");
+			},
+			'Material Request': () => {
+				open_form(frm, "Material Request", "Material Request Item", "items");
+			},
+			'Stock Entry': () => {
+				open_form(frm, "Stock Entry", "Stock Entry Detail", "items");
+			},
+		};
+
 	},
 	onload: function(frm) {
 		erpnext.item.setup_queries(frm);
@@ -55,8 +86,13 @@ frappe.ui.form.on("Item", {
 
 		if (frm.doc.has_variants) {
 			frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"), true);
+
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
+			}, __("View"));
+
+			frm.add_custom_button(__("Item Variant Settings"), function() {
+				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 
 			frm.add_custom_button(__("Variant Details Report"), function() {
@@ -89,29 +125,6 @@ frappe.ui.form.on("Item", {
 			erpnext.toggle_naming_series();
 		}
 
-		if (!frm.doc.published_in_website) {
-			frm.add_custom_button(__("Publish in Website"), function() {
-				frappe.call({
-					method: "erpnext.e_commerce.doctype.website_item.website_item.make_website_item",
-					args: {doc: frm.doc},
-					freeze: true,
-					freeze_message: __("Publishing Item ..."),
-					callback: function(result) {
-						frappe.msgprint({
-							message: __("Website Item {0} has been created.",
-								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
-									item_encoded: encodeURIComponent(result.message[0]),
-									item: result.message[1]
-								})]
-							),
-							title: __("Published"),
-							indicator: "green"
-						});
-					}
-				});
-			}, __('Actions'));
-		}
-
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
 
@@ -130,12 +143,6 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
-
-		if(frm.doc.has_variants) {
-			frm.add_custom_button(__("Item Variant Settings"), function() {
-				frappe.set_route("Form", "Item Variant Settings");
-			}, __("View"));
-		}
 
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
@@ -165,21 +172,21 @@ frappe.ui.form.on("Item", {
 		frm.set_value('has_batch_no', 0);
 		frm.toggle_enable(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
 
-		frm.call({
-			method: "set_asset_naming_series",
-			doc: frm.doc,
-			callback: function() {
+		frappe.call({
+			method: "erpnext.stock.doctype.item.item.get_asset_naming_series",
+			callback: function(r) {
 				frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
-				frm.trigger("set_asset_naming_series");
+				frm.events.set_asset_naming_series(frm, r.message);
 			}
 		});
 
 		frm.trigger('auto_create_assets');
 	},
 
-	set_asset_naming_series: function(frm) {
-		if (frm.doc.__onload && frm.doc.__onload.asset_naming_series) {
-			frm.set_df_property("asset_naming_series", "options", frm.doc.__onload.asset_naming_series);
+	set_asset_naming_series: function(frm, asset_naming_series) {
+		if ((frm.doc.__onload && frm.doc.__onload.asset_naming_series) || asset_naming_series) {
+			let naming_series = (frm.doc.__onload && frm.doc.__onload.asset_naming_series) || asset_naming_series;
+			frm.set_df_property("asset_naming_series", "options", naming_series);
 		}
 	},
 
@@ -313,18 +320,20 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.fields_dict['deferred_revenue_account'].get_query = function() {
+		frm.fields_dict["item_defaults"].grid.get_field("deferred_revenue_account").get_query = function(doc, cdt, cdn) {
 			return {
 				filters: {
+					"company": locals[cdt][cdn].company,
 					'root_type': 'Liability',
 					"is_group": 0
 				}
 			}
 		}
 
-		frm.fields_dict['deferred_expense_account'].get_query = function() {
+		frm.fields_dict["item_defaults"].grid.get_field("deferred_expense_account").get_query = function(doc, cdt, cdn) {
 			return {
 				filters: {
+					"company": locals[cdt][cdn].company,
 					'root_type': 'Asset',
 					"is_group": 0
 				}
@@ -370,6 +379,17 @@ $.extend(erpnext.item, {
 				filters: filters
 			}
 		}
+
+		frm.set_query('default_provisional_account', 'item_defaults', (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					"company": row.company,
+					"root_type": ["in", ["Liability", "Asset"]],
+					"is_group": 0
+				}
+			};
+		});
 
 	},
 
@@ -545,7 +565,7 @@ $.extend(erpnext.item, {
 			let selected_attributes = {};
 			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
 				if(i===0) return;
-				let attribute_name = $(col).find('label').html().trim();
+				let attribute_name = $(col).find('.column-label').html().trim();
 				selected_attributes[attribute_name] = [];
 				let checked_opts = $(col).find('.checkbox input');
 				checked_opts.each((i, opt) => {
@@ -569,8 +589,7 @@ $.extend(erpnext.item, {
 								["parent","=", d.attribute]
 							],
 							fields: ["attribute_value"],
-							limit_start: 0,
-							limit_page_length: 500,
+							limit_page_length: 0,
 							parent: "Item Attribute",
 							order_by: "idx"
 						}
@@ -728,12 +747,6 @@ $.extend(erpnext.item, {
 					if (modal) {
 						$(modal).removeClass("modal-dialog-scrollable");
 					}
-				})
-				.on("awesomplete-close", () => {
-					let modal = field.$input.parents('.modal-dialog')[0];
-					if (modal) {
-						$(modal).addClass("modal-dialog-scrollable");
-					}
 				});
 		});
 	},
@@ -842,3 +855,32 @@ frappe.tour['Item'] = [
 
 
 ];
+
+function open_form(frm, doctype, child_doctype, parentfield) {
+	frappe.model.with_doctype(doctype, () => {
+		let new_doc = frappe.model.get_new_doc(doctype);
+
+		let new_child_doc = frappe.model.add_child(new_doc, child_doctype, parentfield);
+		new_child_doc.item_code = frm.doc.name;
+		new_child_doc.item_name = frm.doc.item_name;
+		if (in_list(SALES_DOCTYPES, doctype) && frm.doc.sales_uom) {
+			new_child_doc.uom = frm.doc.sales_uom;
+		} else if (in_list(PURCHASE_DOCTYPES, doctype) && frm.doc.purchase_uom) {
+			new_child_doc.uom = frm.doc.purchase_uom;
+		} else {
+			new_child_doc.uom = frm.doc.stock_uom;
+		}
+		new_child_doc.description = frm.doc.description;
+		if (!new_child_doc.qty) {
+			new_child_doc.qty = 1.0;
+		}
+
+		frappe.run_serially([
+			() => frappe.ui.form.make_quick_entry(doctype, null, null, new_doc),
+			() => {
+				frappe.flags.ignore_company_party_validation = true;
+				frappe.model.trigger("item_code", frm.doc.name, new_child_doc);
+			}
+		])
+	});
+}

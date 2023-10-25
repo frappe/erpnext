@@ -4,6 +4,8 @@
 import json
 
 import frappe
+from frappe import _
+from frappe.utils import get_link_to_form, parse_json
 
 SLE_FIELDS = (
 	"name",
@@ -21,6 +23,7 @@ SLE_FIELDS = (
 	"stock_value",
 	"stock_value_difference",
 	"valuation_rate",
+	"voucher_detail_no",
 )
 
 
@@ -39,11 +42,7 @@ def get_stock_ledger_entries(filters):
 	return frappe.get_all(
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
-		filters={
-			"item_code": filters.item_code,
-			"warehouse": filters.warehouse,
-			"is_cancelled": 0
-		},
+		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
 		order_by="timestamp(posting_date, posting_time), creation",
 	)
 
@@ -61,12 +60,14 @@ def add_invariant_check_fields(sles):
 			fifo_value += qty * rate
 
 		if sle.actual_qty < 0:
-			sle.consumption_rate = sle.stock_value_difference  / sle.actual_qty
+			sle.consumption_rate = sle.stock_value_difference / sle.actual_qty
 
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
 		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
-			balance_qty = sle.qty_after_transaction
+			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
+			if balance_qty is None:
+				balance_qty = sle.qty_after_transaction
 
 		sle.fifo_queue_qty = fifo_qty
 		sle.fifo_stock_value = fifo_value
@@ -87,14 +88,16 @@ def add_invariant_check_fields(sles):
 		sle.valuation_diff = (
 			sle.valuation_rate - sle.balance_value_by_qty if sle.balance_value_by_qty else None
 		)
-		sle.diff_value_diff = sle.stock_value_from_diff -  sle.stock_value
+		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
 		if idx > 0:
 			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
 			sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
 
 		if sle.batch_no:
-			sle.use_batchwise_valuation = frappe.db.get_value("Batch", sle.batch_no, "use_batchwise_valuation", cache=True)
+			sle.use_batchwise_valuation = frappe.db.get_value(
+				"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
+			)
 
 	return sles
 
@@ -104,157 +107,187 @@ def get_columns():
 		{
 			"fieldname": "name",
 			"fieldtype": "Link",
-			"label": "Stock Ledger Entry",
+			"label": _("Stock Ledger Entry"),
 			"options": "Stock Ledger Entry",
 		},
 		{
 			"fieldname": "posting_date",
-			"fieldtype": "Date",
-			"label": "Posting Date",
+			"fieldtype": "Data",
+			"label": _("Posting Date"),
 		},
 		{
 			"fieldname": "posting_time",
-			"fieldtype": "Time",
-			"label": "Posting Time",
+			"fieldtype": "Data",
+			"label": _("Posting Time"),
 		},
 		{
 			"fieldname": "creation",
-			"fieldtype": "Datetime",
-			"label": "Creation",
+			"fieldtype": "Data",
+			"label": _("Creation"),
 		},
 		{
 			"fieldname": "voucher_type",
 			"fieldtype": "Link",
-			"label": "Voucher Type",
+			"label": _("Voucher Type"),
 			"options": "DocType",
 		},
 		{
 			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
-			"label": "Voucher No",
+			"label": _("Voucher No"),
 			"options": "voucher_type",
 		},
 		{
 			"fieldname": "batch_no",
 			"fieldtype": "Link",
-			"label": "Batch",
+			"label": _("Batch"),
 			"options": "Batch",
 		},
 		{
 			"fieldname": "use_batchwise_valuation",
 			"fieldtype": "Check",
-			"label": "Batchwise Valuation",
+			"label": _("Batchwise Valuation"),
 		},
 		{
 			"fieldname": "actual_qty",
 			"fieldtype": "Float",
-			"label": "Qty Change",
+			"label": _("Qty Change"),
 		},
 		{
 			"fieldname": "incoming_rate",
 			"fieldtype": "Float",
-			"label": "Incoming Rate",
+			"label": _("Incoming Rate"),
 		},
 		{
 			"fieldname": "consumption_rate",
 			"fieldtype": "Float",
-			"label": "Consumption Rate",
+			"label": _("Consumption Rate"),
 		},
 		{
 			"fieldname": "qty_after_transaction",
 			"fieldtype": "Float",
-			"label": "(A) Qty After Transaction",
+			"label": _("(A) Qty After Transaction"),
 		},
 		{
 			"fieldname": "expected_qty_after_transaction",
 			"fieldtype": "Float",
-			"label": "(B) Expected Qty After Transaction",
+			"label": _("(B) Expected Qty After Transaction"),
 		},
 		{
 			"fieldname": "difference_in_qty",
 			"fieldtype": "Float",
-			"label": "A - B",
+			"label": _("A - B"),
 		},
 		{
 			"fieldname": "stock_queue",
 			"fieldtype": "Data",
-			"label": "FIFO/LIFO Queue",
+			"label": _("FIFO/LIFO Queue"),
 		},
-
 		{
 			"fieldname": "fifo_queue_qty",
 			"fieldtype": "Float",
-			"label": "(C) Total qty in queue",
+			"label": _("(C) Total Qty in Queue"),
 		},
 		{
 			"fieldname": "fifo_qty_diff",
 			"fieldtype": "Float",
-			"label": "A - C",
+			"label": _("A - C"),
 		},
 		{
 			"fieldname": "stock_value",
 			"fieldtype": "Float",
-			"label": "(D) Balance Stock Value",
+			"label": _("(D) Balance Stock Value"),
 		},
 		{
 			"fieldname": "fifo_stock_value",
 			"fieldtype": "Float",
-			"label": "(E) Balance Stock Value in Queue",
+			"label": _("(E) Balance Stock Value in Queue"),
 		},
 		{
 			"fieldname": "fifo_value_diff",
 			"fieldtype": "Float",
-			"label": "D - E",
+			"label": _("D - E"),
 		},
 		{
 			"fieldname": "stock_value_difference",
 			"fieldtype": "Float",
-			"label": "(F) Stock Value Difference",
+			"label": _("(F) Change in Stock Value"),
 		},
 		{
 			"fieldname": "stock_value_from_diff",
 			"fieldtype": "Float",
-			"label": "Balance Stock Value using (F)",
+			"label": _("(G) Sum of Change in Stock Value"),
 		},
 		{
 			"fieldname": "diff_value_diff",
 			"fieldtype": "Float",
-			"label": "K - D",
+			"label": _("G - D"),
 		},
 		{
 			"fieldname": "fifo_stock_diff",
 			"fieldtype": "Float",
-			"label": "(G) Stock Value difference (FIFO queue)",
+			"label": _("(H) Change in Stock Value (FIFO Queue)"),
 		},
 		{
 			"fieldname": "fifo_difference_diff",
 			"fieldtype": "Float",
-			"label": "F - G",
+			"label": _("H - F"),
 		},
 		{
 			"fieldname": "valuation_rate",
 			"fieldtype": "Float",
-			"label": "(H) Valuation Rate",
+			"label": _("(I) Valuation Rate"),
 		},
 		{
 			"fieldname": "fifo_valuation_rate",
 			"fieldtype": "Float",
-			"label": "(I) Valuation Rate as per FIFO",
+			"label": _("(J) Valuation Rate as per FIFO"),
 		},
-
 		{
 			"fieldname": "fifo_valuation_diff",
 			"fieldtype": "Float",
-			"label": "H - I",
+			"label": _("I - J"),
 		},
 		{
 			"fieldname": "balance_value_by_qty",
 			"fieldtype": "Float",
-			"label": "(J) Valuation = Value (D) ÷ Qty (A)",
+			"label": _("(K) Valuation = Value (D) ÷ Qty (A)"),
 		},
 		{
 			"fieldname": "valuation_diff",
 			"fieldtype": "Float",
-			"label": "H - J",
+			"label": _("I - K"),
 		},
 	]
+
+
+@frappe.whitelist()
+def create_reposting_entries(rows, item_code=None, warehouse=None):
+	if isinstance(rows, str):
+		rows = parse_json(rows)
+
+	entries = []
+	for row in rows:
+		row = frappe._dict(row)
+
+		try:
+			doc = frappe.get_doc(
+				{
+					"doctype": "Repost Item Valuation",
+					"based_on": "Item and Warehouse",
+					"status": "Queued",
+					"item_code": item_code or row.item_code,
+					"warehouse": warehouse or row.warehouse,
+					"posting_date": row.posting_date,
+					"posting_time": row.posting_time,
+					"allow_nagative_stock": 1,
+				}
+			).submit()
+
+			entries.append(get_link_to_form("Repost Item Valuation", doc.name))
+		except frappe.DuplicateEntryError:
+			continue
+
+	if entries:
+		entries = ", ".join(entries)
+		frappe.msgprint(_("Reposting entries created: {0}").format(entries))

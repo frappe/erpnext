@@ -9,17 +9,22 @@
   "supplier_and_price_defaults_section",
   "supp_master_name",
   "supplier_group",
-  "column_break_4",
   "buying_price_list",
+  "column_break_4",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
   "transaction_settings_section",
   "po_required",
   "pr_required",
+  "blanket_order_allowance",
   "column_break_12",
   "maintain_same_rate",
+  "set_landed_cost_based_on_purchase_invoice_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
+  "disable_last_purchase_rate",
+  "show_pay_button",
+  "use_transaction_date_exchange_rate",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -71,11 +76,11 @@
   },
   {
    "fieldname": "subcontract",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Subcontracting Settings"
   },
   {
-   "default": "Material Transferred for Subcontract",
+   "default": "BOM",
    "fieldname": "backflush_raw_materials_of_subcontract_based_on",
    "fieldtype": "Select",
    "label": "Backflush Raw Materials of Subcontract Based On",
@@ -118,8 +123,8 @@
   },
   {
    "fieldname": "supplier_and_price_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Supplier and Price Defaults"
+   "fieldtype": "Tab Break",
+   "label": "Naming Series and Price Defaults"
   },
   {
    "fieldname": "column_break_4",
@@ -127,12 +132,46 @@
   },
   {
    "fieldname": "transaction_settings_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Transaction Settings"
   },
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_last_purchase_rate",
+   "fieldtype": "Check",
+   "label": "Disable Last Purchase Rate"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_pay_button",
+   "fieldtype": "Check",
+   "label": "Show Pay Button in Purchase Order Portal"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.maintain_same_rate",
+   "description": "Users can enable the checkbox If they want to adjust the incoming rate (set using purchase receipt) based on the purchase invoice rate.",
+   "fieldname": "set_landed_cost_based_on_purchase_invoice_rate",
+   "fieldtype": "Check",
+   "label": "Set Landed Cost Based on Purchase Invoice Rate"
+  },
+  {
+   "default": "0",
+   "description": "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate"
+  },
+  {
+   "default": "0",
+   "description": "Percentage you are allowed to order beyond the Blanket Order quantity.",
+   "fieldname": "blanket_order_allowance",
+   "fieldtype": "Float",
+   "label": "Blanket Order Allowance (%)"
   }
  ],
  "icon": "fa fa-cog",
@@ -140,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-27 17:57:58.367048",
+ "modified": "2023-10-25 14:03:32.520418",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -152,6 +191,16 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Purchase Manager",
    "share": 1,
    "write": 1
   }

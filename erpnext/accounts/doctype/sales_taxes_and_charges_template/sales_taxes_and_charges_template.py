@@ -21,13 +21,14 @@ class SalesTaxesandChargesTemplate(Document):
 
 	def autoname(self):
 		if self.company and self.title:
-			abbr = frappe.get_cached_value('Company',  self.company,  'abbr')
-			self.name = '{0} - {1}'.format(self.title, abbr)
+			abbr = frappe.get_cached_value("Company", self.company, "abbr")
+			self.name = "{0} - {1}".format(self.title, abbr)
 
 	def set_missing_values(self):
 		for data in self.taxes:
-			if data.charge_type == 'On Net Total' and flt(data.rate) == 0.0:
-				data.rate = frappe.db.get_value('Account', data.account_head, 'tax_rate')
+			if data.charge_type == "On Net Total" and flt(data.rate) == 0.0:
+				data.rate = frappe.get_cached_value("Account", data.account_head, "tax_rate")
+
 
 def valdiate_taxes_and_charges_template(doc):
 	# default should not be disabled
@@ -35,9 +36,13 @@ def valdiate_taxes_and_charges_template(doc):
 	# 	doc.is_default = 1
 
 	if doc.is_default == 1:
-		frappe.db.sql("""update `tab{0}` set is_default = 0
-			where is_default = 1 and name != %s and company = %s""".format(doc.doctype),
-			(doc.name, doc.company))
+		frappe.db.sql(
+			"""update `tab{0}` set is_default = 0
+			where is_default = 1 and name != %s and company = %s""".format(
+				doc.doctype
+			),
+			(doc.name, doc.company),
+		)
 
 	validate_disabled(doc)
 
@@ -46,14 +51,31 @@ def valdiate_taxes_and_charges_template(doc):
 
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
-		validate_account_head(tax, doc)
+		validate_account_head(tax.idx, tax.account_head, doc.company)
 		validate_cost_center(tax, doc)
 		validate_inclusive_tax(tax, doc)
+
 
 def validate_disabled(doc):
 	if doc.is_default and doc.disabled:
 		frappe.throw(_("Disabled template must not be default template"))
 
+
 def validate_for_tax_category(doc):
-	if frappe.db.exists(doc.doctype, {"company": doc.company, "tax_category": doc.tax_category, "disabled": 0, "name": ["!=", doc.name]}):
-		frappe.throw(_("A template with tax category {0} already exists. Only one template is allowed with each tax category").format(frappe.bold(doc.tax_category)))
+	if not doc.tax_category:
+		return
+
+	if frappe.db.exists(
+		doc.doctype,
+		{
+			"company": doc.company,
+			"tax_category": doc.tax_category,
+			"disabled": 0,
+			"name": ["!=", doc.name],
+		},
+	):
+		frappe.throw(
+			_(
+				"A template with tax category {0} already exists. Only one template is allowed with each tax category"
+			).format(frappe.bold(doc.tax_category))
+		)

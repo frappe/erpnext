@@ -10,7 +10,7 @@ from frappe.utils.data import fmt_money
 from frappe.utils.jinja import render_template
 from frappe.utils.pdf import get_pdf
 from frappe.utils.print_format import read_multi_pdf
-from PyPDF2 import PdfFileWriter
+from pypdf import PdfWriter
 
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -20,23 +20,21 @@ IRS_1099_FORMS_FILE_EXTENSION = ".pdf"
 def execute(filters=None):
 	filters = filters if isinstance(filters, frappe._dict) else frappe._dict(filters)
 	if not filters:
-		filters.setdefault('fiscal_year', get_fiscal_year(nowdate())[0])
-		filters.setdefault('company', frappe.db.get_default("company"))
+		filters.setdefault("fiscal_year", get_fiscal_year(nowdate())[0])
+		filters.setdefault("company", frappe.db.get_default("company"))
 
-	region = frappe.db.get_value("Company",
-		filters={"name": filters.company},
-		fieldname=["country"])
+	region = frappe.db.get_value("Company", filters={"name": filters.company}, fieldname=["country"])
 
-	if region != 'United States':
+	if region != "United States":
 		return [], []
 
-	data = []
 	columns = get_columns()
 	conditions = ""
 	if filters.supplier_group:
-		conditions += "AND s.supplier_group = %s" %frappe.db.escape(filters.get("supplier_group"))
+		conditions += "AND s.supplier_group = %s" % frappe.db.escape(filters.get("supplier_group"))
 
-	data = frappe.db.sql("""
+	data = frappe.db.sql(
+		"""
 		SELECT
 			s.supplier_group as "supplier_group",
 			gl.party AS "supplier",
@@ -49,7 +47,7 @@ def execute(filters=None):
 			s.name = gl.party
 				AND s.irs_1099 = 1
 				AND gl.fiscal_year = %(fiscal_year)s
-				AND gl.party_type = "Supplier"
+				AND gl.party_type = 'Supplier'
 				AND gl.company = %(company)s
 				{conditions}
 
@@ -57,10 +55,12 @@ def execute(filters=None):
 			gl.party
 
 		ORDER BY
-			gl.party DESC""".format(conditions=conditions), {
-				"fiscal_year": filters.fiscal_year,
-				"company": filters.company
-			}, as_dict=True)
+			gl.party DESC""".format(
+			conditions=conditions
+		),
+		{"fiscal_year": filters.fiscal_year, "company": filters.company},
+		as_dict=True,
+	)
 
 	return columns, data
 
@@ -72,37 +72,29 @@ def get_columns():
 			"label": _("Supplier Group"),
 			"fieldtype": "Link",
 			"options": "Supplier Group",
-			"width": 200
+			"width": 200,
 		},
 		{
 			"fieldname": "supplier",
 			"label": _("Supplier"),
 			"fieldtype": "Link",
 			"options": "Supplier",
-			"width": 200
+			"width": 200,
 		},
-		{
-			"fieldname": "tax_id",
-			"label": _("Tax ID"),
-			"fieldtype": "Data",
-			"width": 200
-		},
-		{
-			"fieldname": "payments",
-			"label": _("Total Payments"),
-			"fieldtype": "Currency",
-			"width": 200
-		}
+		{"fieldname": "tax_id", "label": _("Tax ID"), "fieldtype": "Data", "width": 200},
+		{"fieldname": "payments", "label": _("Total Payments"), "fieldtype": "Currency", "width": 200},
 	]
 
 
 @frappe.whitelist()
 def irs_1099_print(filters):
 	if not filters:
-		frappe._dict({
-			"company": frappe.db.get_default("Company"),
-			"fiscal_year": frappe.db.get_default("Fiscal Year")
-		})
+		frappe._dict(
+			{
+				"company": frappe.db.get_default("Company"),
+				"fiscal_year": frappe.db.get_default("Fiscal Year"),
+			}
+		)
 	else:
 		filters = frappe._dict(json.loads(filters))
 
@@ -114,7 +106,7 @@ def irs_1099_print(filters):
 
 	columns, data = execute(filters)
 	template = frappe.get_doc("Print Format", "IRS 1099 Form").html
-	output = PdfFileWriter()
+	output = PdfWriter()
 
 	for row in data:
 		row["fiscal_year"] = fiscal_year
@@ -122,17 +114,21 @@ def irs_1099_print(filters):
 		row["company_tin"] = company_tin
 		row["payer_street_address"] = company_address
 		row["recipient_street_address"], row["recipient_city_state"] = get_street_address_html(
-			"Supplier", row.supplier)
+			"Supplier", row.supplier
+		)
 		row["payments"] = fmt_money(row["payments"], precision=0, currency="USD")
 		pdf = get_pdf(render_template(template, row), output=output if output else None)
 
-	frappe.local.response.filename = f"{filters.fiscal_year} {filters.company} IRS 1099 Forms{IRS_1099_FORMS_FILE_EXTENSION}"
+	frappe.local.response.filename = (
+		f"{filters.fiscal_year} {filters.company} IRS 1099 Forms{IRS_1099_FORMS_FILE_EXTENSION}"
+	)
 	frappe.local.response.filecontent = read_multi_pdf(output)
 	frappe.local.response.type = "download"
 
 
 def get_payer_address_html(company):
-	address_list = frappe.db.sql("""
+	address_list = frappe.db.sql(
+		"""
 		SELECT
 			name
 		FROM
@@ -142,7 +138,10 @@ def get_payer_address_html(company):
 		ORDER BY
 			address_type="Postal" DESC, address_type="Billing" DESC
 		LIMIT 1
-	""", {"company": company}, as_dict=True)
+	""",
+		{"company": company},
+		as_dict=True,
+	)
 
 	address_display = ""
 	if address_list:
@@ -153,7 +152,8 @@ def get_payer_address_html(company):
 
 
 def get_street_address_html(party_type, party):
-	address_list = frappe.db.sql("""
+	address_list = frappe.db.sql(
+		"""
 		SELECT
 			link.parent
 		FROM
@@ -166,7 +166,10 @@ def get_street_address_html(party_type, party):
 			address.address_type="Postal" DESC,
 			address.address_type="Billing" DESC
 		LIMIT 1
-	""", {"party": party}, as_dict=True)
+	""",
+		{"party": party},
+		as_dict=True,
+	)
 
 	street_address = city_state = ""
 	if address_list:

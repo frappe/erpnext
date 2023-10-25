@@ -141,6 +141,14 @@ class CallPopup {
 				'fieldtype': 'Section Break',
 				'hide_border': 1,
 			}, {
+				'fieldname': 'call_type',
+				'label': 'Call Type',
+				'fieldtype': 'Link',
+				'options': 'Telephony Call Type',
+			}, {
+				'fieldtype': 'Section Break',
+				'hide_border': 1,
+			}, {
 				'fieldtype': 'Small Text',
 				'label': __('Call Summary'),
 				'fieldname': 'call_summary',
@@ -149,10 +157,12 @@ class CallPopup {
 				'label': __('Save'),
 				'click': () => {
 					const call_summary = this.call_details.get_value('call_summary');
+					const call_type = this.call_details.get_value('call_type');
 					if (!call_summary) return;
-					frappe.xcall('erpnext.telephony.doctype.call_log.call_log.add_call_summary', {
+					frappe.xcall('erpnext.telephony.doctype.call_log.call_log.add_call_summary_and_call_type', {
 						'call_log': this.call_log.name,
 						'summary': call_summary,
+						'call_type': call_type,
 					}).then(() => {
 						this.close_modal();
 						frappe.show_alert({

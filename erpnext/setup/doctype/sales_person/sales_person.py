@@ -2,8 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+from itertools import chain
+
 import frappe
 from frappe import _
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
 
@@ -11,13 +16,13 @@ from erpnext import get_default_currency
 
 
 class SalesPerson(NestedSet):
-	nsm_parent_field = 'parent_sales_person'
+	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):
 		if not self.parent_sales_person:
 			self.parent_sales_person = get_root_of("Sales Person")
 
-		for d in self.get('targets') or []:
+		for d in self.get("targets") or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory."))
 		self.validate_employee_id()
@@ -28,17 +33,28 @@ class SalesPerson(NestedSet):
 	def load_dashboard_info(self):
 		company_default_currency = get_default_currency()
 
-		allocated_amount = frappe.db.sql("""
-			select sum(allocated_amount)
-			from `tabSales Team`
-			where sales_person = %s and docstatus=1 and parenttype = 'Sales Order'
-		""",(self.sales_person_name))
+		allocated_amount_against_order = flt(
+			frappe.db.get_value(
+				"Sales Team",
+				{"docstatus": 1, "parenttype": "Sales Order", "sales_person": self.sales_person_name},
+				"sum(allocated_amount)",
+			)
+		)
+
+		allocated_amount_against_invoice = flt(
+			frappe.db.get_value(
+				"Sales Team",
+				{"docstatus": 1, "parenttype": "Sales Invoice", "sales_person": self.sales_person_name},
+				"sum(allocated_amount)",
+			)
+		)
 
 		info = {}
-		info["allocated_amount"] = flt(allocated_amount[0][0]) if allocated_amount else 0
+		info["allocated_amount_against_order"] = allocated_amount_against_order
+		info["allocated_amount_against_invoice"] = allocated_amount_against_invoice
 		info["currency"] = company_default_currency
 
-		self.set_onload('dashboard_info', info)
+		self.set_onload("dashboard_info", info)
 
 	def on_update(self):
 		super(SalesPerson, self).on_update()
@@ -57,49 +73,40 @@ class SalesPerson(NestedSet):
 			sales_person = frappe.db.get_value("Sales Person", {"employee": self.employee})
 
 			if sales_person and sales_person != self.name:
-				frappe.throw(_("Another Sales Person {0} exists with the same Employee id").format(sales_person))
+				frappe.throw(
+					_("Another Sales Person {0} exists with the same Employee id").format(sales_person)
+				)
+
 
 def on_doctype_update():
 	frappe.db.add_index("Sales Person", ["lft", "rgt"])
 
-def get_timeline_data(doctype, name):
 
-	out = {}
+def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
+	def _fetch_activity(doctype: str, date_field: str):
+		sales_team = frappe.qb.DocType("Sales Team")
+		transaction = frappe.qb.DocType(doctype)
 
-	out.update(dict(frappe.db.sql('''select
-			unix_timestamp(dt.transaction_date), count(st.parenttype)
-		from
-			`tabSales Order` dt, `tabSales Team` st
-		where
-			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(curdate(), interval 1 year)
-			group by dt.transaction_date ''', name)))
+		return dict(
+			frappe.qb.from_(transaction)
+			.join(sales_team)
+			.on(transaction.name == sales_team.parent)
+			.select(UnixTimestamp(transaction[date_field]), Count("*"))
+			.where(sales_team.sales_person == name)
+			.where(transaction[date_field] > CurDate() - Interval(years=1))
+			.groupby(transaction[date_field])
+			.run()
+		)
 
-	sales_invoice = dict(frappe.db.sql('''select
-			unix_timestamp(dt.posting_date), count(st.parenttype)
-		from
-			`tabSales Invoice` dt, `tabSales Team` st
-		where
-			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name))
+	sales_order_activity = _fetch_activity("Sales Order", "transaction_date")
+	sales_invoice_activity = _fetch_activity("Sales Invoice", "posting_date")
+	delivery_note_activity = _fetch_activity("Delivery Note", "posting_date")
 
-	for key in sales_invoice:
-		if out.get(key):
-			out[key] += sales_invoice[key]
-		else:
-			out[key] = sales_invoice[key]
+	merged_activities = defaultdict(int)
 
-	delivery_note = dict(frappe.db.sql('''select
-			unix_timestamp(dt.posting_date), count(st.parenttype)
-		from
-			`tabDelivery Note` dt, `tabSales Team` st
-		where
-			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name))
+	for ts, count in chain(
+		sales_order_activity.items(), sales_invoice_activity.items(), delivery_note_activity.items()
+	):
+		merged_activities[ts] += count
 
-	for key in delivery_note:
-		if out.get(key):
-			out[key] += delivery_note[key]
-		else:
-			out[key] = delivery_note[key]
-
-	return out
+	return merged_activities

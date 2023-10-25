@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Lost Opportunity"] = {
 	"filters": [
@@ -56,12 +56,6 @@ frappe.query_reports["Lost Opportunity"] = {
 			"label": __("Party"),
 			"fieldtype": "Dynamic Link",
 			"options": "opportunity_from"
-		},
-		{
-			"fieldname":"contact_by",
-			"label": __("Next Contact By"),
-			"fieldtype": "Link",
-			"options": "User"
 		},
 	]
 };

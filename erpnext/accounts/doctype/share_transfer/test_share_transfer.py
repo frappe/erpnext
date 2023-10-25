@@ -9,6 +9,7 @@ from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExis
 
 test_dependencies = ["Share Type", "Shareholder"]
 
+
 class TestShareTransfer(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabShare Transfer`")
@@ -26,7 +27,7 @@ class TestShareTransfer(unittest.TestCase):
 				"rate": 10,
 				"company": "_Test Company",
 				"asset_account": "Cash - _TC",
-				"equity_or_liability_account": "Creditors - _TC"
+				"equity_or_liability_account": "Creditors - _TC",
 			},
 			{
 				"doctype": "Share Transfer",
@@ -40,7 +41,7 @@ class TestShareTransfer(unittest.TestCase):
 				"no_of_shares": 100,
 				"rate": 15,
 				"company": "_Test Company",
-				"equity_or_liability_account": "Creditors - _TC"
+				"equity_or_liability_account": "Creditors - _TC",
 			},
 			{
 				"doctype": "Share Transfer",
@@ -54,7 +55,7 @@ class TestShareTransfer(unittest.TestCase):
 				"no_of_shares": 300,
 				"rate": 20,
 				"company": "_Test Company",
-				"equity_or_liability_account": "Creditors - _TC"
+				"equity_or_liability_account": "Creditors - _TC",
 			},
 			{
 				"doctype": "Share Transfer",
@@ -68,7 +69,7 @@ class TestShareTransfer(unittest.TestCase):
 				"no_of_shares": 200,
 				"rate": 15,
 				"company": "_Test Company",
-				"equity_or_liability_account": "Creditors - _TC"
+				"equity_or_liability_account": "Creditors - _TC",
 			},
 			{
 				"doctype": "Share Transfer",
@@ -82,42 +83,46 @@ class TestShareTransfer(unittest.TestCase):
 				"rate": 25,
 				"company": "_Test Company",
 				"asset_account": "Cash - _TC",
-				"equity_or_liability_account": "Creditors - _TC"
-			}
+				"equity_or_liability_account": "Creditors - _TC",
+			},
 		]
 		for d in share_transfers:
 			st = frappe.get_doc(d)
 			st.submit()
 
 	def test_invalid_share_transfer(self):
-		doc = frappe.get_doc({
-			"doctype": "Share Transfer",
-			"transfer_type": "Transfer",
-			"date": "2018-01-05",
-			"from_shareholder": "SH-00003",
-			"to_shareholder": "SH-00002",
-			"share_type": "Equity",
-			"from_no": 1,
-			"to_no": 100,
-			"no_of_shares": 100,
-			"rate": 15,
-			"company": "_Test Company",
-			"equity_or_liability_account": "Creditors - _TC"
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "Share Transfer",
+				"transfer_type": "Transfer",
+				"date": "2018-01-05",
+				"from_shareholder": "SH-00003",
+				"to_shareholder": "SH-00002",
+				"share_type": "Equity",
+				"from_no": 1,
+				"to_no": 100,
+				"no_of_shares": 100,
+				"rate": 15,
+				"company": "_Test Company",
+				"equity_or_liability_account": "Creditors - _TC",
+			}
+		)
 		self.assertRaises(ShareDontExists, doc.insert)
 
-		doc = frappe.get_doc({
-			"doctype": "Share Transfer",
-			"transfer_type": "Purchase",
-			"date": "2018-01-02",
-			"from_shareholder": "SH-00001",
-			"share_type": "Equity",
-			"from_no": 1,
-			"to_no": 200,
-			"no_of_shares": 200,
-			"rate": 15,
-			"company": "_Test Company",
-			"asset_account": "Cash - _TC",
-			"equity_or_liability_account": "Creditors - _TC"
-		})
+		doc = frappe.get_doc(
+			{
+				"doctype": "Share Transfer",
+				"transfer_type": "Purchase",
+				"date": "2018-01-02",
+				"from_shareholder": "SH-00001",
+				"share_type": "Equity",
+				"from_no": 1,
+				"to_no": 200,
+				"no_of_shares": 200,
+				"rate": 15,
+				"company": "_Test Company",
+				"asset_account": "Cash - _TC",
+				"equity_or_liability_account": "Creditors - _TC",
+			}
+		)
 		self.assertRaises(ShareDontExists, doc.insert)

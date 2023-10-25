@@ -1,5 +1,5 @@
 {% macro product_image_square(website_image, css_class="") %}
-<div class="product-image product-image-square
+<div class="product-image product-image-square h-100 rounded
 	{% if not website_image -%} missing-image {%- endif %} {{ css_class }}"
 	{% if website_image -%}
 	style="background-image: url('{{ frappe.utils.quoted(website_image) | abs_url }}');"
@@ -46,7 +46,7 @@
 		<div class="col-md-{{ section.column_value }} mb-4">
 			<div class="card h-100 justify-content-between">
 				{% if card.image %}
-				<div class="website-image-lazy" data-class="card-img-top h-75" data-src="{{ card.image }}" data-alt="{{ card.title }}"></div>
+				<img class="card-img-top h-75" src="{{ card.image }}" loading="lazy" alt="{{ card.title }}"></img>
 				{% endif %}
 				<div class="card-body">
 					<h5 class="card-title">{{ card.title }}</h5>
@@ -74,7 +74,7 @@
 {%- set col_size = 3 if is_full_width else 4 -%}
 {%- set title = item.web_item_name or item.item_name or item.item_code -%}
 {%- set title = title[:50] + "..." if title|len > 50 else title -%}
-{%- set image = item.website_image or item.image -%}
+{%- set image = item.website_image -%}
 {%- set description = item.website_description or item.description-%}
 
 {% if is_featured %}
@@ -300,13 +300,13 @@
 
 		{% if values | len > 20 %}
 		<!-- show inline filter if values more than 20 -->
-		<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
+		<input type="text" class="form-control form-control-sm mb-2 filter-lookup-input" placeholder="Search {{ item_field.label + 's' }}"/>
 		{% endif %}
 
 		{% if values %}
 		<div class="filter-options">
 			{% for value in values %}
-			<div class="checkbox" data-value="{{ value }}">
+			<div class="filter-lookup-wrapper checkbox" data-value="{{ value }}">
 				<label for="{{value}}">
 					<input type="checkbox"
 						class="product-filter field-filter"
@@ -329,16 +329,16 @@
 {%- macro attribute_filter_section(filters)-%}
 {% for attribute in filters %}
 	<div class="mb-4 filter-block pb-5">
-		<div class="filter-label mb-3">{{ attribute.name}}</div>
-		{% if values | len > 20 %}
+		<div class="filter-label mb-3">{{ attribute.name }}</div>
+		{% if attribute.item_attribute_values | len > 20 %}
 		<!-- show inline filter if values more than 20 -->
-		<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
+		<input type="text" class="form-control form-control-sm mb-2 filter-lookup-input" placeholder="Search {{ attribute.name + 's' }}"/>
 		{% endif %}
 
 		{% if attribute.item_attribute_values %}
 		<div class="filter-options">
 			{% for attr_value in attribute.item_attribute_values %}
-			<div class="checkbox">
+			<div class="filter-lookup-wrapper checkbox" data-value="{{ attr_value }}">
 				<label data-value="{{ attr_value }}">
 					<input type="checkbox"
 						class="product-filter attribute-filter"

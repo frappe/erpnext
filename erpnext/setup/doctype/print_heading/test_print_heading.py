@@ -3,4 +3,4 @@
 
 import frappe
 
-test_records = frappe.get_test_records('Print Heading')
+test_records = frappe.get_test_records("Print Heading")

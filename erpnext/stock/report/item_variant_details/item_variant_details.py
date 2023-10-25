@@ -11,25 +11,21 @@ def execute(filters=None):
 	data = get_data(filters.item)
 	return columns, data
 
+
 def get_data(item):
 	if not item:
 		return []
 	item_dicts = []
 
 	variant_results = frappe.db.get_all(
-		"Item",
-		fields=["name"],
-		filters={
-			"variant_of": ["=", item],
-			"disabled": 0
-		}
+		"Item", fields=["name"], filters={"variant_of": ["=", item], "disabled": 0}
 	)
 
 	if not variant_results:
 		frappe.msgprint(_("There aren't any item variants for the selected item"))
 		return []
 	else:
-		variant_list = [variant['name'] for variant in variant_results]
+		variant_list = [variant["name"] for variant in variant_results]
 
 	order_count_map = get_open_sales_orders_count(variant_list)
 	stock_details_map = get_stock_details_map(variant_list)
@@ -40,15 +36,13 @@ def get_data(item):
 	attributes = frappe.db.get_all(
 		"Item Variant Attribute",
 		fields=["attribute"],
-		filters={
-			"parent": ["in", variant_list]
-		},
-		group_by="attribute"
+		filters={"parent": ["in", variant_list]},
+		group_by="attribute",
 	)
 	attribute_list = [row.get("attribute") for row in attributes]
 
 	# Prepare dicts
-	variant_dicts = [{"variant_name": d['name']} for d in variant_results]
+	variant_dicts = [{"variant_name": d["name"]} for d in variant_results]
 	for item_dict in variant_dicts:
 		name = item_dict.get("variant_name")
 
@@ -72,73 +66,66 @@ def get_data(item):
 
 	return item_dicts
 
+
 def get_columns(item):
-	columns = [{
-		"fieldname": "variant_name",
-		"label": "Variant",
-		"fieldtype": "Link",
-		"options": "Item",
-		"width": 200
-	}]
+	columns = [
+		{
+			"fieldname": "variant_name",
+			"label": _("Variant"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 200,
+		}
+	]
 
 	item_doc = frappe.get_doc("Item", item)
 
 	for entry in item_doc.attributes:
-		columns.append({
-			"fieldname": frappe.scrub(entry.attribute),
-			"label": entry.attribute,
-			"fieldtype": "Data",
-			"width": 100
-		})
+		columns.append(
+			{
+				"fieldname": frappe.scrub(entry.attribute),
+				"label": entry.attribute,
+				"fieldtype": "Data",
+				"width": 100,
+			}
+		)
 
 	additional_columns = [
 		{
 			"fieldname": "avg_buying_price_list_rate",
 			"label": _("Avg. Buying Price List Rate"),
 			"fieldtype": "Currency",
-			"width": 150
+			"width": 150,
 		},
 		{
 			"fieldname": "avg_selling_price_list_rate",
 			"label": _("Avg. Selling Price List Rate"),
 			"fieldtype": "Currency",
-			"width": 150
+			"width": 150,
 		},
-		{
-			"fieldname": "current_stock",
-			"label": _("Current Stock"),
-			"fieldtype": "Float",
-			"width": 120
-		},
-		{
-			"fieldname": "in_production",
-			"label": _("In Production"),
-			"fieldtype": "Float",
-			"width": 150
-		},
+		{"fieldname": "current_stock", "label": _("Current Stock"), "fieldtype": "Float", "width": 120},
+		{"fieldname": "in_production", "label": _("In Production"), "fieldtype": "Float", "width": 150},
 		{
 			"fieldname": "open_orders",
 			"label": _("Open Sales Orders"),
 			"fieldtype": "Float",
-			"width": 150
-		}
+			"width": 150,
+		},
 	]
 	columns.extend(additional_columns)
 
 	return columns
 
+
 def get_open_sales_orders_count(variants_list):
 	open_sales_orders = frappe.db.get_list(
 		"Sales Order",
-		fields=[
-			"name",
-			"`tabSales Order Item`.item_code"
-		],
+		fields=["name", "`tabSales Order Item`.item_code"],
 		filters=[
 			["Sales Order", "docstatus", "=", 1],
-			["Sales Order Item", "item_code", "in", variants_list]
+			["Sales Order Item", "item_code", "in", variants_list],
 		],
-		distinct=1
+		distinct=1,
 	)
 
 	order_count_map = {}
@@ -151,6 +138,7 @@ def get_open_sales_orders_count(variants_list):
 
 	return order_count_map
 
+
 def get_stock_details_map(variant_list):
 	stock_details = frappe.db.get_all(
 		"Bin",
@@ -160,10 +148,8 @@ def get_stock_details_map(variant_list):
 			"sum(projected_qty) as projected_qty",
 			"item_code",
 		],
-		filters={
-			"item_code": ["in", variant_list]
-		},
-		group_by="item_code"
+		filters={"item_code": ["in", variant_list]},
+		group_by="item_code",
 	)
 
 	stock_details_map = {}
@@ -171,10 +157,11 @@ def get_stock_details_map(variant_list):
 		name = row.get("item_code")
 		stock_details_map[name] = {
 			"Inventory": row.get("actual_qty"),
-			"In Production": row.get("planned_qty")
+			"In Production": row.get("planned_qty"),
 		}
 
 	return stock_details_map
+
 
 def get_buying_price_map(variant_list):
 	buying = frappe.db.get_all(
@@ -183,11 +170,8 @@ def get_buying_price_map(variant_list):
 			"avg(price_list_rate) as avg_rate",
 			"item_code",
 		],
-		filters={
-			"item_code": ["in", variant_list],
-			"buying": 1
-		},
-		group_by="item_code"
+		filters={"item_code": ["in", variant_list], "buying": 1},
+		group_by="item_code",
 	)
 
 	buying_price_map = {}
@@ -196,6 +180,7 @@ def get_buying_price_map(variant_list):
 
 	return buying_price_map
 
+
 def get_selling_price_map(variant_list):
 	selling = frappe.db.get_all(
 		"Item Price",
@@ -203,11 +188,8 @@ def get_selling_price_map(variant_list):
 			"avg(price_list_rate) as avg_rate",
 			"item_code",
 		],
-		filters={
-			"item_code": ["in", variant_list],
-			"selling": 1
-		},
-		group_by="item_code"
+		filters={"item_code": ["in", variant_list], "selling": 1},
+		group_by="item_code",
 	)
 
 	selling_price_map = {}
@@ -216,17 +198,12 @@ def get_selling_price_map(variant_list):
 
 	return selling_price_map
 
+
 def get_attribute_values_map(variant_list):
 	attribute_list = frappe.db.get_all(
 		"Item Variant Attribute",
-		fields=[
-			"attribute",
-			"attribute_value",
-			"parent"
-		],
-		filters={
-			"parent": ["in", variant_list]
-		}
+		fields=["attribute", "attribute_value", "parent"],
+		filters={"parent": ["in", variant_list]},
 	)
 
 	attr_val_map = {}

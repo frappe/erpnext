@@ -12,6 +12,9 @@ frappe.ui.form.on("Authorization Rule", {
 		} else if(frm.doc.based_on==="Itemwise Discount") {
 			unhide_field("master_name");
 			frm.set_value("customer_or_item", "Item");
+		} else if(frm.doc.based_on==="Item Group wise Discount") {
+			unhide_field("master_name");
+			frm.set_value("customer_or_item", "Item Group");
 		} else {
 			frm.set_value("customer_or_item", "");
 			frm.set_value("master_name", "");
@@ -28,19 +31,8 @@ frappe.ui.form.on("Authorization Rule", {
 		}
 	},
 	transaction: function(frm) {
-		if (frm.doc.transaction == 'Appraisal') {
-			frm.set_value("based_on", "Not Applicable");
-			frm.set_value("master_name", "");
-			frm.set_value("system_role", "");
-			frm.set_value("system_user", "");
-			frm.set_value("value", 0);
-			hide_field(['based_on', 'system_role', 'system_user', 'value']);
-			unhide_field(['to_emp','to_designation']);
-		}
-		else {
-			unhide_field(['system_role', 'system_user','value', 'based_on']);
-			hide_field(['to_emp','to_designation']);
-		}
+		unhide_field(['system_role', 'system_user', 'value', 'based_on']);
+		hide_field(['to_emp', 'to_designation']);
 	}
 })
 
@@ -52,19 +44,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	else
 		unhide_field('value');
 
-	if (doc.transaction == 'Appraisal') {
-		hide_field(['system_role', 'system_user']);
-		unhide_field(['to_emp','to_designation']);
-
-		if (doc.transaction == 'Appraisal')
-			hide_field('value');
-		else
-			unhide_field('value');
-	}
-	else {
-		unhide_field(['system_role', 'system_user','value']);
-		hide_field(['to_emp','to_designation']);
-	}
+	unhide_field(['system_role', 'system_user', 'value']);
+	hide_field(['to_emp', 'to_designation']);
 }
 
 cur_frm.fields_dict.system_user.get_query = function(doc, cdt, cdn) {
@@ -102,6 +83,13 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 		return {
 			doctype: "Item",
 			query: "erpnext.controllers.queries.item_query"
+		}
+	else if (doc.based_on==="Item Group wise Discount")
+		return {
+			doctype: "Item Group",
+			filters: {
+				"is_group": 0
+			}
 		}
 	else
 		return {

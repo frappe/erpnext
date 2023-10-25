@@ -7,6 +7,19 @@ frappe.ui.form.on('Maintenance Schedule', {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
+
+		frm.set_query('serial_and_batch_bundle', 'items', (doc, cdt, cdn) => {
+			let item = locals[cdt][cdn];
+
+			return {
+				filters: {
+					'item_code': item.item_code,
+					'voucher_type': 'Maintenance Schedule',
+					'type_of_transaction': 'Maintenance',
+					'company': doc.company,
+				}
+			}
+		});
 	},
 	onload: function (frm) {
 		if (!frm.doc.status) {
@@ -140,26 +153,6 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 		}
 	}
 
-	start_date(doc, cdt, cdn) {
-		this.set_no_of_visits(doc, cdt, cdn);
-	}
-
-	end_date(doc, cdt, cdn) {
-		this.set_no_of_visits(doc, cdt, cdn);
-	}
-
-	periodicity(doc, cdt, cdn) {
-		this.set_no_of_visits(doc, cdt, cdn);
-	}
-
-	set_no_of_visits(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		let me = this;
-		if (item.start_date && item.periodicity) {
-			me.frm.call('validate_end_date_visits');
-
-		}
-	}
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));

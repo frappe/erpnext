@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import (
@@ -13,25 +14,19 @@ from erpnext.controllers.stock_controller import (
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase
 
 # test_records = frappe.get_test_records('Quality Inspection')
 
 
-class TestQualityInspection(ERPNextTestCase):
+class TestQualityInspection(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		create_item("_Test Item with QA")
-		frappe.db.set_value(
-			"Item", "_Test Item with QA", "inspection_required_before_delivery", 1
-		)
+		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_delivery", 1)
 
 	def test_qa_for_delivery(self):
 		make_stock_entry(
-			item_code="_Test Item with QA",
-			target="_Test Warehouse - _TC",
-			qty=1,
-			basic_rate=100
+			item_code="_Test Item with QA", target="_Test Warehouse - _TC", qty=1, basic_rate=100
 		)
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 
@@ -71,21 +66,18 @@ class TestQualityInspection(ERPNextTestCase):
 				"specification": "Iron Content",  # numeric reading
 				"min_value": 0.1,
 				"max_value": 0.9,
-				"reading_1": "0.4"
+				"reading_1": "0.4",
 			},
 			{
 				"specification": "Particle Inspection Needed",  # non-numeric reading
 				"numeric": 0,
 				"value": "Yes",
-				"reading_value": "Yes"
-			}
+				"reading_value": "Yes",
+			},
 		]
 
 		qa = create_quality_inspection(
-			reference_type="Delivery Note",
-			reference_name=dn.name,
-			readings=readings,
-			do_not_save=True
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
 		)
 
 		qa.save()
@@ -104,13 +96,13 @@ class TestQualityInspection(ERPNextTestCase):
 				"specification": "Iron Content",  # numeric reading
 				"formula_based_criteria": 1,
 				"acceptance_formula": "reading_1 > 0.35 and reading_1 < 0.50",
-				"reading_1": "0.4"
+				"reading_1": "0.4",
 			},
 			{
 				"specification": "Calcium Content",  # numeric reading
 				"formula_based_criteria": 1,
 				"acceptance_formula": "reading_1 > 0.20 and reading_1 < 0.50",
-				"reading_1": "0.7"
+				"reading_1": "0.7",
 			},
 			{
 				"specification": "Mg Content",  # numeric reading
@@ -118,22 +110,19 @@ class TestQualityInspection(ERPNextTestCase):
 				"acceptance_formula": "mean < 0.9",
 				"reading_1": "0.5",
 				"reading_2": "0.7",
-				"reading_3": "random text"  # check if random string input causes issues
+				"reading_3": "random text",  # check if random string input causes issues
 			},
 			{
 				"specification": "Calcium Content",  # non-numeric reading
 				"formula_based_criteria": 1,
 				"numeric": 0,
 				"acceptance_formula": "reading_value in ('Grade A', 'Grade B', 'Grade C')",
-				"reading_value": "Grade B"
-			}
+				"reading_value": "Grade B",
+			},
 		]
 
 		qa = create_quality_inspection(
-			reference_type="Delivery Note",
-			reference_name=dn.name,
-			readings=readings,
-			do_not_save=True
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
 		)
 
 		qa.save()
@@ -167,39 +156,100 @@ class TestQualityInspection(ERPNextTestCase):
 			qty=1,
 			basic_rate=100,
 			inspection_required=True,
-			do_not_submit=True
+			do_not_submit=True,
 		)
 
 		readings = [
-			{
-				"specification": "Iron Content",
-				"min_value": 0.1,
-				"max_value": 0.9,
-				"reading_1": "0.4"
-			}
+			{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "1.0"}
 		]
 
 		qa = create_quality_inspection(
-			reference_type="Stock Entry",
-			reference_name=se.name,
-			readings=readings,
-			status="Rejected"
+			reference_type="Stock Entry", reference_name=se.name, readings=readings, status="Rejected"
 		)
 
-		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Stop")
+		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Stop")
 		se.reload()
-		self.assertRaises(QualityInspectionRejectedError, se.submit) # when blocked in Stock settings, block rejected QI
+		self.assertRaises(
+			QualityInspectionRejectedError, se.submit
+		)  # when blocked in Stock settings, block rejected QI
 
-		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Warn")
+		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Warn")
 		se.reload()
-		se.submit() # when allowed in Stock settings, allow rejected QI
+		se.submit()  # when allowed in Stock settings, allow rejected QI
 
 		# teardown
 		qa.reload()
 		qa.cancel()
 		se.reload()
 		se.cancel()
-		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Stop")
+		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Stop")
+
+	def test_qi_status(self):
+		make_stock_entry(
+			item_code="_Test Item with QA", target="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, status="Accepted", do_not_save=True
+		)
+		qa.readings[0].manual_inspection = 1
+		qa.save()
+
+		# Case - 1: When there are one or more readings with rejected status and parent manual inspection is unchecked, then parent status should be set to rejected.
+		qa.status = "Accepted"
+		qa.manual_inspection = 0
+		qa.readings[0].status = "Rejected"
+		qa.save()
+		self.assertEqual(qa.status, "Rejected")
+
+		# Case - 2: When all readings have accepted status and parent manual inspection is unchecked, then parent status should be set to accepted.
+		qa.status = "Rejected"
+		qa.manual_inspection = 0
+		qa.readings[0].status = "Accepted"
+		qa.save()
+		self.assertEqual(qa.status, "Accepted")
+
+		# Case - 3: When parent manual inspection is checked, then parent status should not be changed.
+		qa.status = "Accepted"
+		qa.manual_inspection = 1
+		qa.readings[0].status = "Rejected"
+		qa.save()
+		self.assertEqual(qa.status, "Accepted")
+
+	@change_settings("System Settings", {"number_format": "#.###,##"})
+	def test_diff_number_format(self):
+		self.assertEqual(frappe.db.get_default("number_format"), "#.###,##")  # sanity check
+
+		# Test QI based on acceptance values (Non formula)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		readings = [
+			{
+				"specification": "Iron Content",  # numeric reading
+				"min_value": 60,
+				"max_value": 100,
+				"reading_1": "70,000",
+			},
+			{
+				"specification": "Iron Content",  # numeric reading
+				"min_value": 60,
+				"max_value": 100,
+				"reading_1": "1.100,00",
+			},
+		]
+
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		qa.save()
+
+		# status must be auto set as per formula
+		self.assertEqual(qa.readings[0].status, "Accepted")
+		self.assertEqual(qa.readings[1].status, "Rejected")
+
+		qa.delete()
+		dn.delete()
+
 
 def create_quality_inspection(**args):
 	args = frappe._dict(args)
@@ -238,8 +288,6 @@ def create_quality_inspection(**args):
 
 def create_quality_inspection_parameter(parameter):
 	if not frappe.db.exists("Quality Inspection Parameter", parameter):
-		frappe.get_doc({
-			"doctype": "Quality Inspection Parameter",
-			"parameter": parameter,
-			"description": parameter
-		}).insert()
+		frappe.get_doc(
+			{"doctype": "Quality Inspection Parameter", "parameter": parameter, "description": parameter}
+		).insert()

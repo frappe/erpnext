@@ -7,6 +7,7 @@ import frappe
 
 logger = frappe.logger("patch", allow_site=True, file_count=50)
 
+
 def execute():
 	affected_purchase_receipts = frappe.db.sql(
 		"""select name from `tabPurchase Receipt`
@@ -16,12 +17,12 @@ def execute():
 	if not affected_purchase_receipts:
 		return
 
-	logger.info("purchase_receipt_status: begin patch, PR count: {}"
-				.format(len(affected_purchase_receipts)))
+	logger.info(
+		"purchase_receipt_status: begin patch, PR count: {}".format(len(affected_purchase_receipts))
+	)
 
 	frappe.reload_doc("stock", "doctype", "Purchase Receipt")
 	frappe.reload_doc("stock", "doctype", "Purchase Receipt Item")
-
 
 	for pr in affected_purchase_receipts:
 		pr_name = pr[0]

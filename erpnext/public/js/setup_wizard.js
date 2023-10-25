@@ -13,114 +13,25 @@ frappe.setup.on("before_load", function () {
 
 erpnext.setup.slides_settings = [
 	{
-		// Domain
-		name: 'domain',
-		title: __('Select your Domains'),
+		// Organization
+		name: 'organization',
+		title: __("Setup your organization"),
+		icon: "fa fa-building",
 		fields: [
-			{
-				fieldname: 'domains',
-				label: __('Domains'),
-				fieldtype: 'MultiCheck',
-				options: [
-					{ "label": __("Distribution"), "value": "Distribution" },
-					{ "label": __("Education"), "value": "Education" },
-					{ "label": __("Manufacturing"), "value": "Manufacturing" },
-					{ "label": __("Retail"), "value": "Retail" },
-					{ "label": __("Services"), "value": "Services" },
-					{ "label": __("Healthcare (beta)"), "value": "Healthcare" },
-					{ "label": __("Non Profit (beta)"), "value": "Non Profit" }
-				], reqd: 1
-			},
-		],
-		// help: __('Select the nature of your business.'),
-		validate: function () {
-			if (this.values.domains.length === 0) {
-				frappe.msgprint(__("Please select at least one domain."));
-				return false;
-			}
-			frappe.setup.domains = this.values.domains;
-			return true;
-		},
-	},
-
-	{
-		// Brand
-		name: 'brand',
-		icon: "fa fa-bookmark",
-		title: __("The Brand"),
-		// help: __('Upload your letter head and logo. (you can edit them later).'),
-		fields: [
-			{
-				fieldtype: "Attach Image", fieldname: "attach_logo",
-				label: __("Attach Logo"),
-				description: __("100px by 100px"),
-				is_private: 0,
-				align: 'center'
-			},
 			{
 				fieldname: 'company_name',
-				label: frappe.setup.domains.includes('Education') ?
-					__('Institute Name') : __('Company Name'),
+				label: __('Company Name'),
 				fieldtype: 'Data',
 				reqd: 1
 			},
+			{ fieldtype: "Column Break" },
 			{
 				fieldname: 'company_abbr',
-				label: frappe.setup.domains.includes('Education') ?
-					__('Institute Abbreviation') : __('Company Abbreviation'),
-				fieldtype: 'Data'
-			}
-		],
-		onload: function(slide) {
-			this.bind_events(slide);
-		},
-		bind_events: function (slide) {
-			slide.get_input("company_name").on("change", function () {
-				var parts = slide.get_input("company_name").val().split(" ");
-				var abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
-				slide.get_field("company_abbr").set_value(abbr.slice(0, 5).toUpperCase());
-			}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
-
-			slide.get_input("company_abbr").on("change", function () {
-				if (slide.get_input("company_abbr").val().length > 5) {
-					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
-					slide.get_field("company_abbr").set_value("");
-				}
-			});
-		},
-		validate: function() {
-			if ((this.values.company_name || "").toLowerCase() == "company") {
-				frappe.msgprint(__("Company Name cannot be Company"));
-				return false;
-			}
-			if (!this.values.company_abbr) {
-				return false;
-			}
-			if (this.values.company_abbr.length > 5) {
-				return false;
-			}
-			return true;
-		}
-	},
-	{
-		// Organisation
-		name: 'organisation',
-		title: __("Your Organization"),
-		icon: "fa fa-building",
-		// help: frappe.setup.domains.includes('Education') ?
-		// 	__('The name of the institute for which you are setting up this system.') :
-		// 	__('The name of your company for which you are setting up this system.')),
-		fields: [
-			{
-				fieldname: 'company_tagline',
-				label: __('What does it do?'),
+				label: __('Company Abbreviation'),
 				fieldtype: 'Data',
-				placeholder: frappe.setup.domains.includes('Education') ?
-					__('e.g. "Primary School" or "University"') :
-					__('e.g. "Build tools for builders"'),
 				reqd: 1
 			},
-			{ fieldname: 'bank_account', label: __('Bank Name'), fieldtype: 'Data', reqd: 1 },
+			{ fieldtype: "Section Break" },
 			{
 				fieldname: 'chart_of_accounts', label: __('Chart of Accounts'),
 				options: "", fieldtype: 'Select'
@@ -129,43 +40,34 @@ erpnext.setup.slides_settings = [
 			{ fieldname: 'fy_start_date', label: __('Financial Year Begins On'), fieldtype: 'Date', reqd: 1 },
 			// end date should be hidden (auto calculated)
 			{ fieldname: 'fy_end_date', label: __('End Date'), fieldtype: 'Date', reqd: 1, hidden: 1 },
+			{ fieldtype: "Section Break" },
+			{
+				fieldname: 'setup_demo',
+				label: __('Generate Demo Data for Exploration'),
+				fieldtype: 'Check',
+				description: __('If checked, we will create demo data for you to explore the system. This demo data can be erased later.')
+			},
 		],
 
 		onload: function (slide) {
-			this.load_chart_of_accounts(slide);
 			this.bind_events(slide);
+			this.load_chart_of_accounts(slide);
 			this.set_fy_dates(slide);
 		},
-
 		validate: function () {
-			let me = this;
-			let exist;
-
 			if (!this.validate_fy_dates()) {
 				return false;
 			}
 
-			// Validate bank name
-			if(me.values.bank_account) {
-				frappe.call({
-					async: false,
-					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
-					args: {
-						"coa": me.values.chart_of_accounts,
-						"bank_account": me.values.bank_account
-					},
-					callback: function (r) {
-						if(r.message){
-							exist = r.message;
-							me.get_field("bank_account").set_value("");
-							let message = __('Account {0} already exists. Please enter a different name for your bank account.',
-								[me.values.bank_account]
-							);
-							frappe.msgprint(message);
-						}
-					}
-				});
-				return !exist; // Return False if exist = true
+			if ((this.values.company_name || "").toLowerCase() == "company") {
+				frappe.msgprint(__("Company Name cannot be Company"));
+				return false;
+			}
+			if (!this.values.company_abbr) {
+				return false;
+			}
+			if (this.values.company_abbr.length > 10) {
+				return false;
 			}
 
 			return true;
@@ -189,15 +91,15 @@ erpnext.setup.slides_settings = [
 			var country = frappe.wizard.values.country;
 
 			if (country) {
-				var fy = erpnext.setup.fiscal_years[country];
-				var current_year = moment(new Date()).year();
-				var next_year = current_year + 1;
+				let fy = erpnext.setup.fiscal_years[country];
+				let current_year = moment(new Date()).year();
+				let next_year = current_year + 1;
 				if (!fy) {
 					fy = ["01-01", "12-31"];
 					next_year = current_year;
 				}
 
-				var year_start_date = current_year + "-" + fy[0];
+				let year_start_date = current_year + "-" + fy[0];
 				if (year_start_date > frappe.datetime.get_today()) {
 					next_year = current_year;
 					current_year -= 1;
@@ -209,7 +111,7 @@ erpnext.setup.slides_settings = [
 
 
 		load_chart_of_accounts: function (slide) {
-			var country = frappe.wizard.values.country;
+			let country = frappe.wizard.values.country;
 
 			if (country) {
 				frappe.call({
@@ -240,12 +142,27 @@ erpnext.setup.slides_settings = [
 
 				me.charts_modal(slide, chart_template);
 			});
+
+			slide.get_input("company_name").on("input", function () {
+				let parts = slide.get_input("company_name").val().split(" ");
+				let abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
+				slide.get_field("company_abbr").set_value(abbr.slice(0, 10).toUpperCase());
+			}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
+
+			slide.get_input("company_abbr").on("change", function () {
+				let abbr = slide.get_input("company_abbr").val();
+				if (abbr.length > 10) {
+					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
+					abbr = abbr.slice(0, 10);
+				}
+				slide.get_field("company_abbr").set_value(abbr);
+			}).val(frappe.boot.sysdefaults.company_abbr || "").trigger("change");
 		},
 
 		charts_modal: function(slide, chart_template) {
 			let parent = __('All Accounts');
 
-			var dialog = new frappe.ui.Dialog({
+			let dialog = new frappe.ui.Dialog({
 				title: chart_template,
 				fields: [
 					{'fieldname': 'expand_all', 'label': __('Expand All'), 'fieldtype': 'Button',

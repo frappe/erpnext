@@ -16,6 +16,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_i
 
 # test_records = frappe.get_test_records('Maintenance Schedule')
 
+
 class TestMaintenanceSchedule(unittest.TestCase):
 	def test_events_should_be_created_and_deleted(self):
 		ms = make_maintenance_schedule()
@@ -42,15 +43,15 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		expected_end_date = add_days(i.start_date, i.no_of_visits * 7)
 		self.assertEqual(i.end_date, expected_end_date)
 
-		items = ms.get_pending_data(data_type = "items")
-		items = items.split('\n')
+		items = ms.get_pending_data(data_type="items")
+		items = items.split("\n")
 		items.pop(0)
-		expected_items = ['_Test Item']
+		expected_items = ["_Test Item"]
 		self.assertTrue(items, expected_items)
 
 		# "dates" contains all generated schedule dates
-		dates = ms.get_pending_data(data_type = "date", item_name = i.item_name)
-		dates = dates.split('\n')
+		dates = ms.get_pending_data(data_type="date", item_name=i.item_name)
+		dates = dates.split("\n")
 		dates.pop(0)
 		expected_dates.append(formatdate(add_days(i.start_date, 7), "dd-MM-yyyy"))
 		expected_dates.append(formatdate(add_days(i.start_date, 14), "dd-MM-yyyy"))
@@ -59,33 +60,38 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		self.assertEqual(dates, expected_dates)
 
 		ms.submit()
-		s_id = ms.get_pending_data(data_type = "id", item_name = i.item_name, s_date = expected_dates[1])
+		s_id = ms.get_pending_data(data_type="id", item_name=i.item_name, s_date=expected_dates[1])
 
 		# Check if item is mapped in visit.
-		test_map_visit = make_maintenance_visit(source_name = ms.name, item_name = "_Test Item", s_id = s_id)
+		test_map_visit = make_maintenance_visit(source_name=ms.name, item_name="_Test Item", s_id=s_id)
 		self.assertEqual(len(test_map_visit.purposes), 1)
 		self.assertEqual(test_map_visit.purposes[0].item_name, "_Test Item")
 
-		visit = frappe.new_doc('Maintenance Visit')
+		visit = frappe.new_doc("Maintenance Visit")
 		visit = test_map_visit
 		visit.maintenance_schedule = ms.name
 		visit.maintenance_schedule_detail = s_id
 		visit.completion_status = "Partially Completed"
-		visit.set('purposes', [{
-			'item_code': i.item_code,
-			'description': "test",
-			'work_done': "test",
-			'service_person': "Sales Team",
-		}])
+		visit.set(
+			"purposes",
+			[
+				{
+					"item_code": i.item_code,
+					"description": "test",
+					"work_done": "test",
+					"service_person": "Sales Team",
+				}
+			],
+		)
 		visit.save()
 		visit.submit()
-		ms = frappe.get_doc('Maintenance Schedule', ms.name)
+		ms = frappe.get_doc("Maintenance Schedule", ms.name)
 
-		#checks if visit status is back updated in schedule
+		# checks if visit status is back updated in schedule
 		self.assertTrue(ms.schedules[1].completion_status, "Partially Completed")
 		self.assertEqual(format_date(visit.mntc_date), format_date(ms.schedules[1].actual_date))
 
-		#checks if visit status is updated on cancel
+		# checks if visit status is updated on cancel
 		visit.cancel()
 		ms.reload()
 		self.assertTrue(ms.schedules[1].completion_status, "Pending")
@@ -117,22 +123,54 @@ class TestMaintenanceSchedule(unittest.TestCase):
 
 		frappe.db.rollback()
 
+	def test_schedule_with_serials(self):
+		# Checks whether serials are automatically updated when changing in items table.
+		# Also checks if other fields trigger generate schdeule if changed in items table.
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001, TEST002")
+		ms.save()
+
+		# Before Save
+		self.assertEqual(ms.schedules[0].serial_no, "TEST001, TEST002")
+		self.assertEqual(ms.schedules[0].sales_person, "Sales Team")
+		self.assertEqual(len(ms.schedules), 4)
+		self.assertFalse(ms.validate_items_table_change())
+		# After Save
+		ms.items[0].serial_no = "TEST001"
+		ms.items[0].sales_person = "_Test Sales Person"
+		ms.items[0].no_of_visits = 2
+		self.assertTrue(ms.validate_items_table_change())
+		ms.save()
+		self.assertEqual(ms.schedules[0].serial_no, "TEST001")
+		self.assertEqual(ms.schedules[0].sales_person, "_Test Sales Person")
+		self.assertEqual(len(ms.schedules), 2)
+		# When user manually deleted a row from schedules table.
+		ms.schedules.pop()
+		self.assertEqual(len(ms.schedules), 1)
+		ms.save()
+		self.assertEqual(len(ms.schedules), 2)
+
+		frappe.db.rollback()
+
+
 def make_serial_item_with_serial(item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
 	if not serial_item_doc.has_serial_no or not serial_item_doc.serial_no_series:
 		serial_item_doc.has_serial_no = 1
 		serial_item_doc.serial_no_series = "TEST.###"
 		serial_item_doc.save(ignore_permissions=True)
-	active_serials = frappe.db.get_all('Serial No', {"status": "Active", "item_code": item_code})
+	active_serials = frappe.db.get_all("Serial No", {"status": "Active", "item_code": item_code})
 	if len(active_serials) < 2:
 		make_serialized_item(item_code=item_code)
 
+
 def get_events(ms):
-	return frappe.get_all("Event Participants", filters={
-			"reference_doctype": ms.doctype,
-			"reference_docname": ms.name,
-			"parenttype": "Event"
-		})
+	return frappe.get_all(
+		"Event Participants",
+		filters={"reference_doctype": ms.doctype, "reference_docname": ms.name, "parenttype": "Event"},
+	)
+
 
 def make_maintenance_schedule(**args):
 	ms = frappe.new_doc("Maintenance Schedule")
@@ -140,14 +178,17 @@ def make_maintenance_schedule(**args):
 	ms.customer = "_Test Customer"
 	ms.transaction_date = today()
 
-	ms.append("items", {
-		"item_code": args.get("item_code") or "_Test Item",
-		"start_date": today(),
-		"periodicity": "Weekly",
-		"no_of_visits": 4,
-		"serial_no": args.get("serial_no"),
-		"sales_person": "Sales Team",
-	})
+	ms.append(
+		"items",
+		{
+			"item_code": args.get("item_code") or "_Test Item",
+			"start_date": today(),
+			"periodicity": "Weekly",
+			"no_of_visits": 4,
+			"serial_no": args.get("serial_no"),
+			"sales_person": "Sales Team",
+		},
+	)
 	ms.insert(ignore_permissions=True)
 
 	return ms

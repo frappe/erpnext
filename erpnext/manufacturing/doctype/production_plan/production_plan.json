@@ -35,8 +35,15 @@
   "section_break_25",
   "prod_plan_references",
   "section_break_24",
+  "combine_sub_items",
+  "section_break_ucc4",
+  "skip_available_sub_assembly_item",
+  "column_break_igxl",
   "get_sub_assembly_items",
+  "section_break_g4ip",
   "sub_assembly_items",
+  "download_materials_request_plan_section_section",
+  "download_materials_required",
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
@@ -44,8 +51,8 @@
   "ignore_existing_ordered_qty",
   "column_break_25",
   "for_warehouse",
-  "download_materials_required",
   "get_items_for_mr",
+  "transfer_materials",
   "section_break_27",
   "mr_items",
   "other_details",
@@ -189,7 +196,7 @@
    "label": "Select Items to Manufacture"
   },
   {
-   "depends_on": "get_items_from",
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
    "fieldname": "get_items",
    "fieldtype": "Button",
    "label": "Get Finished Goods for Manufacture"
@@ -197,6 +204,7 @@
   {
    "fieldname": "po_items",
    "fieldtype": "Table",
+   "label": "Assembly Items",
    "no_copy": 1,
    "options": "Production Plan Item",
    "reqd": 1
@@ -204,7 +212,7 @@
   {
    "fieldname": "material_request_planning",
    "fieldtype": "Section Break",
-   "label": "Material Requirement Planning"
+   "label": "Material Request Planning"
   },
   {
    "default": "1",
@@ -220,10 +228,10 @@
   },
   {
    "default": "0",
-   "description": "To know more about projected quantity, <a href=\"https://erpnext.com/docs/user/manual/en/stock/projected-quantity\" style=\"text-decoration: underline;\" target=\"_blank\">click here</a>.",
+   "description": "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
-   "label": "Ignore Existing Projected Quantity"
+   "label": "Ignore Available Stock"
   },
   {
    "fieldname": "column_break_25",
@@ -233,12 +241,12 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "download_materials_required",
    "fieldtype": "Button",
-   "label": "Download Required Materials"
+   "label": "Download Materials Request Plan"
   },
   {
    "fieldname": "get_items_for_mr",
    "fieldtype": "Button",
-   "label": "Get Raw Materials For Production"
+   "label": "Get Raw Materials for Purchase"
   },
   {
    "fieldname": "section_break_27",
@@ -302,7 +310,7 @@
   {
    "fieldname": "for_warehouse",
    "fieldtype": "Link",
-   "label": "Make Material Request for Warehouse",
+   "label": "Raw Materials Warehouse",
    "options": "Warehouse"
   },
   {
@@ -331,7 +339,7 @@
    "depends_on": "eval:doc.get_items_from == 'Sales Order'",
    "fieldname": "combine_items",
    "fieldtype": "Check",
-   "label": "Consolidate Items"
+   "label": "Consolidate Sales Order Items"
   },
   {
    "fieldname": "section_break_25",
@@ -347,16 +355,17 @@
   {
    "fieldname": "section_break_24",
    "fieldtype": "Section Break",
-   "hide_border": 1
+   "hide_border": 1,
+   "label": "Sub Assembly Items"
   },
   {
    "fieldname": "sub_assembly_items",
    "fieldtype": "Table",
-   "label": "Sub Assembly Items",
    "no_copy": 1,
    "options": "Production Plan Sub Assembly Item"
   },
   {
+   "depends_on": "eval:doc.po_items && doc.po_items.length && doc.docstatus == 0",
    "fieldname": "get_sub_assembly_items",
    "fieldtype": "Button",
    "label": "Get Sub Assembly Items"
@@ -370,16 +379,54 @@
    "fieldname": "to_delivery_date",
    "fieldtype": "Date",
    "label": "To Delivery Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "combine_sub_items",
+   "fieldtype": "Check",
+   "label": "Consolidate Sub Assembly Items"
+  },
+  {
+   "fieldname": "transfer_materials",
+   "fieldtype": "Button",
+   "label": "Get Raw Materials for Transfer"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "download_materials_request_plan_section_section",
+   "fieldtype": "Section Break",
+   "label": "Download Materials Request Plan Section"
+  },
+  {
+   "default": "0",
+   "description": "If this checkbox is enabled, then the system won\u2019t run the MRP for the available sub-assembly items.",
+   "fieldname": "skip_available_sub_assembly_item",
+   "fieldtype": "Check",
+   "label": "Skip Available Sub Assembly Items"
+  },
+  {
+   "fieldname": "section_break_ucc4",
+   "fieldtype": "Column Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_g4ip",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_igxl",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-06 18:35:59.642232",
+ "modified": "2023-09-29 11:41:03.246059",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -397,5 +444,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

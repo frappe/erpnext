@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "creation": "2023-03-13 13:51:27.351463",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_type",
+  "reference_name",
+  "reference_row",
+  "column_break_3",
+  "invoice_type",
+  "invoice_number",
+  "section_break_6",
+  "allocated_amount",
+  "unreconciled_amount",
+  "column_break_8",
+  "amount",
+  "is_advance",
+  "section_break_5",
+  "difference_amount",
+  "column_break_7",
+  "difference_account",
+  "exchange_rate",
+  "currency",
+  "reconciled"
+ ],
+ "fields": [
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "options": "reference_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_type",
+   "fieldtype": "Link",
+   "label": "Invoice Type",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Invoice Number",
+   "options": "invoice_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated Amount",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unreconciled_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Unreconciled Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_advance",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Is Advance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Difference Amount",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "difference_account",
+   "fieldtype": "Link",
+   "label": "Difference Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "reconciled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Reconciled"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2023-03-20 21:05:43.121945",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Process Payment Reconciliation Log Allocations",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

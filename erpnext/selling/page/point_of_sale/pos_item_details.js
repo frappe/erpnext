@@ -44,7 +44,8 @@ erpnext.PointOfSale.ItemDetails = class {
 				<div class="item-image"></div>
 			</div>
 			<div class="discount-section"></div>
-			<div class="form-container"></div>`
+			<div class="form-container"></div>
+			<div class="serial-batch-container"></div>`
 		)
 
 		this.$item_name = this.$component.find('.item-name');
@@ -53,6 +54,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_image = this.$component.find('.item-image');
 		this.$form_container = this.$component.find('.form-container');
 		this.$dicount_section = this.$component.find('.discount-section');
+		this.$serial_batch_container = this.$component.find('.serial-batch-container');
 	}
 
 	compare_with_current_item(item) {
@@ -60,11 +62,17 @@ erpnext.PointOfSale.ItemDetails = class {
 		return item && item.name == this.current_item.name;
 	}
 
-	toggle_item_details_section(item) {
+	async toggle_item_details_section(item) {
 		const current_item_changed = !this.compare_with_current_item(item);
 
 		// if item is null or highlighted cart item is clicked twice
 		const hide_item_details = !Boolean(item) || !current_item_changed;
+
+		if ((!hide_item_details && current_item_changed) || hide_item_details) {
+			// if item details is being closed OR if item details is opened but item is changed
+			// in both cases, if the current item is a serialized item, then validate and remove the item
+			await this.validate_serial_batch_item();
+		}
 
 		this.events.toggle_item_selector(!hide_item_details);
 		this.toggle_component(!hide_item_details);
@@ -83,7 +91,6 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.render_form(item);
 			this.events.highlight_cart_item(item);
 		} else {
-			this.validate_serial_batch_item();
 			this.current_item = {};
 		}
 	}
@@ -96,18 +103,15 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		const serialized = item_row.has_serial_no;
 		const batched = item_row.has_batch_no;
-		const no_serial_selected = !item_row.serial_no;
-		const no_batch_selected = !item_row.batch_no;
+		const no_bundle_selected = !item_row.serial_and_batch_bundle;
 
-		if ((serialized && no_serial_selected) || (batched && no_batch_selected) ||
-			(serialized && batched && (no_batch_selected || no_serial_selected))) {
-
+		if ((serialized && no_bundle_selected) || (batched && no_bundle_selected)) {
 			frappe.show_alert({
-				message: __("Item will be removed since no serial / batch no selected."),
+				message: __("Item is removed since no serial / batch no selected."),
 				indicator: 'orange'
 			});
 			frappe.utils.play_sound("cancel");
-			this.events.remove_item_from_cart();
+			return this.events.remove_item_from_cart();
 		}
 	}
 
@@ -195,13 +199,8 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	make_auto_serial_selection_btn(item) {
-		if (item.has_serial_no) {
-			if (!item.has_batch_no) {
-				this.$form_container.append(
-					`<div class="grid-filler no-select"></div>`
-				);
-			}
-			const label = __('Auto Fetch Serial Numbers');
+		if (item.has_serial_no || item.has_batch_no) {
+			const label = item.has_serial_no ? __('Select Serial No') : __('Select Batch No');
 			this.$form_container.append(
 				`<div class="btn btn-sm btn-secondary auto-fetch-btn">${label}</div>`
 			);
@@ -237,13 +236,14 @@ erpnext.PointOfSale.ItemDetails = class {
 				if (this.value) {
 					me.events.form_updated(me.current_item, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
-						const available_qty = me.item_stock_map[me.item_row.item_code] && me.item_stock_map[me.item_row.item_code][this.value];
+						const available_qty = me.item_stock_map[me.item_row.item_code][this.value][0];
+						const is_stock_item = Boolean(me.item_stock_map[me.item_row.item_code][this.value][1]);
 						if (available_qty === undefined) {
 							me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
 								// item stock map is updated now reset warehouse
 								me.warehouse_control.set_value(this.value);
 							})
-						} else if (available_qty === 0) {
+						} else if (available_qty === 0 && is_stock_item) {
 							me.warehouse_control.set_value('');
 							const bold_item_code = me.item_row.item_code.bold();
 							const bold_warehouse = this.value.bold();
@@ -376,40 +376,19 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
-			this.batch_no_control && this.batch_no_control.set_value('');
-			let qty = this.qty_control.get_value();
-			let conversion_factor = this.conversion_factor_control.get_value();
-			let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
+			frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", () => {
+				let frm = this.events.get_frm();
+				let item_row = this.item_row;
+				item_row.type_of_transaction = "Outward";
 
-			let numbers = frappe.call({
-				method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
-				args: {
-					qty: qty * conversion_factor,
-					item_code: this.current_item.item_code,
-					warehouse: this.warehouse_control.get_value() || '',
-					batch_nos: this.current_item.batch_no || '',
-					posting_date: expiry_date,
-					for_doctype: 'POS Invoice'
-				}
-			});
-
-			numbers.then((data) => {
-				let auto_fetched_serial_numbers = data.message;
-				let records_length = auto_fetched_serial_numbers.length;
-				if (!records_length) {
-					const warehouse = this.warehouse_control.get_value().bold();
-					const item_code = this.current_item.item_code.bold();
-					frappe.msgprint(
-						__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', [item_code, warehouse])
-					);
-				} else if (records_length < qty) {
-					frappe.msgprint(
-						__('Fetched only {0} available serial numbers.', [records_length])
-					);
-					this.qty_control.set_value(records_length);
-				}
-				numbers = auto_fetched_serial_numbers.join(`\n`);
-				this.serial_no_control.set_value(numbers);
+				new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+					if (r) {
+						frappe.model.set_value(item_row.doctype, item_row.name, {
+							"serial_and_batch_bundle": r.name,
+							"qty": Math.abs(r.total_qty)
+						});
+					}
+				});
 			});
 		})
 	}

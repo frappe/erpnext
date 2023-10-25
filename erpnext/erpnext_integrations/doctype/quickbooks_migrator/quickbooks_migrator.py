@@ -37,29 +37,26 @@ class QuickBooksMigrator(Document):
 	def __init__(self, *args, **kwargs):
 		super(QuickBooksMigrator, self).__init__(*args, **kwargs)
 		self.oauth = OAuth2Session(
-			client_id=self.client_id,
-			redirect_uri=self.redirect_url,
-			scope=self.scope
+			client_id=self.client_id, redirect_uri=self.redirect_url, scope=self.scope
 		)
 		if not self.authorization_url and self.authorization_endpoint:
 			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
 
-
 	def on_update(self):
 		if self.company:
 			# We need a Cost Center corresponding to the selected erpnext Company
-			self.default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
-			company_warehouses = frappe.get_all('Warehouse', filters={"company": self.company, "is_group": 0})
+			self.default_cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+			company_warehouses = frappe.get_all(
+				"Warehouse", filters={"company": self.company, "is_group": 0}
+			)
 			if company_warehouses:
 				self.default_warehouse = company_warehouses[0].name
 		if self.authorization_endpoint:
 			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
 
-
 	@frappe.whitelist()
 	def migrate(self):
 		frappe.enqueue_doc("QuickBooks Migrator", "QuickBooks Migrator", "_migrate", queue="long")
-
 
 	def _migrate(self):
 		try:
@@ -86,18 +83,33 @@ class QuickBooksMigrator(Document):
 			# Following entities are directly available from API
 			# Invoice can be an exception sometimes though (as explained above).
 			entities_for_normal_transform = [
-				"Customer", "Item", "Vendor",
+				"Customer",
+				"Item",
+				"Vendor",
 				"Preferences",
-				"JournalEntry", "Purchase", "Deposit",
-				"Invoice", "CreditMemo", "SalesReceipt", "RefundReceipt",
-				"Bill", "VendorCredit",
-				"Payment", "BillPayment",
+				"JournalEntry",
+				"Purchase",
+				"Deposit",
+				"Invoice",
+				"CreditMemo",
+				"SalesReceipt",
+				"RefundReceipt",
+				"Bill",
+				"VendorCredit",
+				"Payment",
+				"BillPayment",
 			]
 			for entity in entities_for_normal_transform:
 				self._migrate_entries(entity)
 
 			# Following entries are not available directly from API, Need to be regenrated from GeneralLedger Report
-			entities_for_gl_transform = ["Advance Payment", "Tax Payment", "Sales Tax Payment", "Purchase Tax Payment", "Inventory Qty Adjust"]
+			entities_for_gl_transform = [
+				"Advance Payment",
+				"Tax Payment",
+				"Sales Tax Payment",
+				"Purchase Tax Payment",
+				"Inventory Qty Adjust",
+			]
 			for entity in entities_for_gl_transform:
 				self._migrate_entries_from_gl(entity)
 			self.set_indicator("Complete")
@@ -107,17 +119,13 @@ class QuickBooksMigrator(Document):
 
 		frappe.db.commit()
 
-
 	def get_tokens(self):
 		token = self.oauth.fetch_token(
-			token_url=self.token_endpoint,
-			client_secret=self.client_secret,
-			code=self.code
+			token_url=self.token_endpoint, client_secret=self.client_secret, code=self.code
 		)
 		self.access_token = token["access_token"]
 		self.refresh_token = token["refresh_token"]
 		self.save()
-
 
 	def _refresh_tokens(self):
 		token = self.oauth.refresh_token(
@@ -125,15 +133,23 @@ class QuickBooksMigrator(Document):
 			client_id=self.client_id,
 			refresh_token=self.refresh_token,
 			client_secret=self.client_secret,
-			code=self.code
+			code=self.code,
 		)
 		self.access_token = token["access_token"]
 		self.refresh_token = token["refresh_token"]
 		self.save()
 
-
 	def _make_custom_fields(self):
-		doctypes_for_quickbooks_id_field = ["Account", "Customer", "Address", "Item", "Supplier", "Sales Invoice", "Journal Entry", "Purchase Invoice"]
+		doctypes_for_quickbooks_id_field = [
+			"Account",
+			"Customer",
+			"Address",
+			"Item",
+			"Supplier",
+			"Sales Invoice",
+			"Journal Entry",
+			"Purchase Invoice",
+		]
 		for doctype in doctypes_for_quickbooks_id_field:
 			self._make_custom_quickbooks_id_field(doctype)
 
@@ -143,52 +159,59 @@ class QuickBooksMigrator(Document):
 
 		frappe.db.commit()
 
-
 	def _make_custom_quickbooks_id_field(self, doctype):
 		if not frappe.get_meta(doctype).has_field("quickbooks_id"):
-			frappe.get_doc({
-				"doctype": "Custom Field",
-				"label": "QuickBooks ID",
-				"dt": doctype,
-				"fieldname": "quickbooks_id",
-				"fieldtype": "Data",
-			}).insert()
-
+			frappe.get_doc(
+				{
+					"doctype": "Custom Field",
+					"label": "QuickBooks ID",
+					"dt": doctype,
+					"fieldname": "quickbooks_id",
+					"fieldtype": "Data",
+				}
+			).insert()
 
 	def _make_custom_company_field(self, doctype):
 		if not frappe.get_meta(doctype).has_field("company"):
-			frappe.get_doc({
-				"doctype": "Custom Field",
-				"label": "Company",
-				"dt": doctype,
-				"fieldname": "company",
-				"fieldtype": "Link",
-				"options": "Company",
-			}).insert()
-
+			frappe.get_doc(
+				{
+					"doctype": "Custom Field",
+					"label": "Company",
+					"dt": doctype,
+					"fieldname": "company",
+					"fieldtype": "Link",
+					"options": "Company",
+				}
+			).insert()
 
 	def _migrate_accounts(self):
 		self._make_root_accounts()
 		for entity in ["Account", "TaxRate", "TaxCode"]:
 			self._migrate_entries(entity)
 
-
 	def _make_root_accounts(self):
 		roots = ["Asset", "Equity", "Expense", "Liability", "Income"]
 		for root in roots:
 			try:
-				if not frappe.db.exists({"doctype": "Account", "name": encode_company_abbr("{} - QB".format(root), self.company), "company": self.company}):
-					frappe.get_doc({
+				if not frappe.db.exists(
+					{
 						"doctype": "Account",
-						"account_name": "{} - QB".format(root),
-						"root_type": root,
-						"is_group": "1",
+						"name": encode_company_abbr("{} - QB".format(root), self.company),
 						"company": self.company,
-					}).insert(ignore_mandatory=True)
+					}
+				):
+					frappe.get_doc(
+						{
+							"doctype": "Account",
+							"account_name": "{} - QB".format(root),
+							"root_type": root,
+							"is_group": "1",
+							"company": self.company,
+						}
+					).insert(ignore_mandatory=True)
 			except Exception as e:
 				self._log_error(e, root)
 		frappe.db.commit()
-
 
 	def _migrate_entries(self, entity):
 		try:
@@ -198,22 +221,19 @@ class QuickBooksMigrator(Document):
 			)
 			max_result_count = 1000
 			# Count number of entries
-			response = self._get(query_uri,
-				params={
-					"query": """SELECT COUNT(*) FROM {}""".format(entity)
-				}
-			)
+			response = self._get(query_uri, params={"query": """SELECT COUNT(*) FROM {}""".format(entity)})
 			entry_count = response.json()["QueryResponse"]["totalCount"]
 
 			# fetch pages and accumulate
 			entries = []
 			for start_position in range(1, entry_count + 1, max_result_count):
-				response = self._get(query_uri,
+				response = self._get(
+					query_uri,
 					params={
 						"query": """SELECT * FROM {} STARTPOSITION {} MAXRESULTS {}""".format(
 							entity, start_position, max_result_count
 						)
-					}
+					},
 				)
 				entries.extend(response.json()["QueryResponse"][entity])
 			entries = self._preprocess_entries(entity, entries)
@@ -221,16 +241,18 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, response.text)
 
-
 	def _fetch_general_ledger(self):
 		try:
-			query_uri = "{}/company/{}/reports/GeneralLedger".format(self.api_endpoint, self.quickbooks_company_id)
-			response = self._get(query_uri,
+			query_uri = "{}/company/{}/reports/GeneralLedger".format(
+				self.api_endpoint, self.quickbooks_company_id
+			)
+			response = self._get(
+				query_uri,
 				params={
 					"columns": ",".join(["tx_date", "txn_type", "credit_amt", "debt_amt"]),
 					"date_macro": "All",
 					"minorversion": 3,
-				}
+				},
 			)
 			self.gl_entries = {}
 			for section in response.json()["Rows"]["Row"]:
@@ -250,7 +272,6 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, response.text)
 
-
 	def _create_fiscal_years(self):
 		try:
 			# Assumes that exactly one fiscal year has been created so far
@@ -258,10 +279,12 @@ class QuickBooksMigrator(Document):
 			from itertools import chain
 
 			from frappe.utils.data import add_years, getdate
-			smallest_ledger_entry_date = getdate(min(entry["date"] for entry in chain(*self.gl_entries.values()) if entry["date"]))
-			oldest_fiscal_year = frappe.get_all("Fiscal Year",
-				fields=["year_start_date", "year_end_date"],
-				order_by="year_start_date"
+
+			smallest_ledger_entry_date = getdate(
+				min(entry["date"] for entry in chain(*self.gl_entries.values()) if entry["date"])
+			)
+			oldest_fiscal_year = frappe.get_all(
+				"Fiscal Year", fields=["year_start_date", "year_end_date"], order_by="year_start_date"
 			)[0]
 			# Keep on creating fiscal years
 			# until smallest_ledger_entry_date is no longer smaller than the oldest fiscal year's start date
@@ -272,7 +295,9 @@ class QuickBooksMigrator(Document):
 				if new_fiscal_year.year_start_date.year == new_fiscal_year.year_end_date.year:
 					new_fiscal_year.year = new_fiscal_year.year_start_date.year
 				else:
-					new_fiscal_year.year = "{}-{}".format(new_fiscal_year.year_start_date.year, new_fiscal_year.year_end_date.year)
+					new_fiscal_year.year = "{}-{}".format(
+						new_fiscal_year.year_start_date.year, new_fiscal_year.year_end_date.year
+					)
 				new_fiscal_year.save()
 				oldest_fiscal_year = new_fiscal_year
 
@@ -280,40 +305,30 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e)
 
-
 	def _migrate_entries_from_gl(self, entity):
 		if entity in self.general_ledger:
 			self._save_entries(entity, self.general_ledger[entity].values())
-
 
 	def _save_entries(self, entity, entries):
 		entity_method_map = {
 			"Account": self._save_account,
 			"TaxRate": self._save_tax_rate,
 			"TaxCode": self._save_tax_code,
-
 			"Preferences": self._save_preference,
-
 			"Customer": self._save_customer,
 			"Item": self._save_item,
 			"Vendor": self._save_vendor,
-
 			"Invoice": self._save_invoice,
 			"CreditMemo": self._save_credit_memo,
 			"SalesReceipt": self._save_sales_receipt,
 			"RefundReceipt": self._save_refund_receipt,
-
 			"JournalEntry": self._save_journal_entry,
-
 			"Bill": self._save_bill,
 			"VendorCredit": self._save_vendor_credit,
-
 			"Payment": self._save_payment,
 			"BillPayment": self._save_bill_payment,
-
 			"Purchase": self._save_purchase,
 			"Deposit": self._save_deposit,
-
 			"Advance Payment": self._save_advance_payment,
 			"Tax Payment": self._save_tax_payment,
 			"Sales Tax Payment": self._save_tax_payment,
@@ -322,10 +337,16 @@ class QuickBooksMigrator(Document):
 		}
 		total = len(entries)
 		for index, entry in enumerate(entries, start=1):
-			self._publish({"event": "progress", "message": _("Saving {0}").format(entity), "count": index, "total": total})
+			self._publish(
+				{
+					"event": "progress",
+					"message": _("Saving {0}").format(entity),
+					"count": index,
+					"total": total,
+				}
+			)
 			entity_method_map[entity](entry)
 		frappe.db.commit()
-
 
 	def _preprocess_entries(self, entity, entries):
 		entity_method_map = {
@@ -337,7 +358,6 @@ class QuickBooksMigrator(Document):
 		if preprocessor:
 			entries = preprocessor(entries)
 		return entries
-
 
 	def _get_gl_entries_from_section(self, section, account=None):
 		if "Header" in section:
@@ -359,18 +379,19 @@ class QuickBooksMigrator(Document):
 		for row in section["Rows"]["Row"]:
 			if row["type"] == "Data":
 				data = row["ColData"]
-				entries.append({
-					"account": account,
-					"date": data[0]["value"],
-					"type": data[1]["value"],
-					"id": data[1].get("id"),
-					"credit": frappe.utils.flt(data[2]["value"]),
-					"debit": frappe.utils.flt(data[3]["value"]),
-				})
+				entries.append(
+					{
+						"account": account,
+						"date": data[0]["value"],
+						"type": data[1]["value"],
+						"id": data[1].get("id"),
+						"credit": frappe.utils.flt(data[2]["value"]),
+						"debit": frappe.utils.flt(data[3]["value"]),
+					}
+				)
 			if row["type"] == "Section":
 				self._get_gl_entries_from_section(row, account)
 		self.gl_entries.setdefault(account, []).extend(entries)
-
 
 	def _preprocess_accounts(self, accounts):
 		self.accounts = {account["Name"]: account for account in accounts}
@@ -381,7 +402,6 @@ class QuickBooksMigrator(Document):
 				account["is_group"] = 0
 		return sorted(accounts, key=lambda account: int(account["Id"]))
 
-
 	def _save_account(self, account):
 		mapping = {
 			"Bank": "Asset",
@@ -389,24 +409,22 @@ class QuickBooksMigrator(Document):
 			"Fixed Asset": "Asset",
 			"Other Asset": "Asset",
 			"Accounts Receivable": "Asset",
-
 			"Equity": "Equity",
-
 			"Expense": "Expense",
 			"Other Expense": "Expense",
 			"Cost of Goods Sold": "Expense",
-
 			"Accounts Payable": "Liability",
 			"Credit Card": "Liability",
 			"Long Term Liability": "Liability",
 			"Other Current Liability": "Liability",
-
 			"Income": "Income",
 			"Other Income": "Income",
 		}
 		# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
 		try:
-			if not frappe.db.exists({"doctype": "Account", "quickbooks_id": account["Id"], "company": self.company}):
+			if not frappe.db.exists(
+				{"doctype": "Account", "quickbooks_id": account["Id"], "company": self.company}
+			):
 				is_child = account["SubAccount"]
 				is_group = account["is_group"]
 				# Create Two Accounts for every Group Account
@@ -416,103 +434,125 @@ class QuickBooksMigrator(Document):
 					account_id = account["Id"]
 
 				if is_child:
-					parent_account = self._get_account_name_by_id("Group - {}".format(account["ParentRef"]["value"]))
+					parent_account = self._get_account_name_by_id(
+						"Group - {}".format(account["ParentRef"]["value"])
+					)
 				else:
-					parent_account = encode_company_abbr("{} - QB".format(mapping[account["AccountType"]]), self.company)
+					parent_account = encode_company_abbr(
+						"{} - QB".format(mapping[account["AccountType"]]), self.company
+					)
 
-				frappe.get_doc({
-					"doctype": "Account",
-					"quickbooks_id": account_id,
-					"account_name": self._get_unique_account_name(account["Name"]),
-					"root_type": mapping[account["AccountType"]],
-					"account_type": self._get_account_type(account),
-					"account_currency": account["CurrencyRef"]["value"],
-					"parent_account": parent_account,
-					"is_group": is_group,
-					"company": self.company,
-				}).insert()
-
-				if is_group:
-					# Create a Leaf account corresponding to the group account
-					frappe.get_doc({
+				frappe.get_doc(
+					{
 						"doctype": "Account",
-						"quickbooks_id": account["Id"],
+						"quickbooks_id": account_id,
 						"account_name": self._get_unique_account_name(account["Name"]),
 						"root_type": mapping[account["AccountType"]],
 						"account_type": self._get_account_type(account),
 						"account_currency": account["CurrencyRef"]["value"],
-						"parent_account": self._get_account_name_by_id(account_id),
-						"is_group": 0,
+						"parent_account": parent_account,
+						"is_group": is_group,
 						"company": self.company,
-					}).insert()
+					}
+				).insert()
+
+				if is_group:
+					# Create a Leaf account corresponding to the group account
+					frappe.get_doc(
+						{
+							"doctype": "Account",
+							"quickbooks_id": account["Id"],
+							"account_name": self._get_unique_account_name(account["Name"]),
+							"root_type": mapping[account["AccountType"]],
+							"account_type": self._get_account_type(account),
+							"account_currency": account["CurrencyRef"]["value"],
+							"parent_account": self._get_account_name_by_id(account_id),
+							"is_group": 0,
+							"company": self.company,
+						}
+					).insert()
 				if account.get("AccountSubType") == "UndepositedFunds":
 					self.undeposited_funds_account = self._get_account_name_by_id(account["Id"])
 					self.save()
 		except Exception as e:
 			self._log_error(e, account)
 
-
 	def _get_account_type(self, account):
 		account_subtype_mapping = {"UndepositedFunds": "Cash"}
 		account_type = account_subtype_mapping.get(account.get("AccountSubType"))
 		if account_type is None:
-			account_type_mapping = {"Accounts Payable": "Payable", "Accounts Receivable": "Receivable", "Bank": "Bank", "Credit Card": "Bank"}
+			account_type_mapping = {
+				"Accounts Payable": "Payable",
+				"Accounts Receivable": "Receivable",
+				"Bank": "Bank",
+				"Credit Card": "Bank",
+			}
 			account_type = account_type_mapping.get(account["AccountType"])
 		return account_type
-
 
 	def _preprocess_tax_rates(self, tax_rates):
 		self.tax_rates = {tax_rate["Id"]: tax_rate for tax_rate in tax_rates}
 		return tax_rates
 
-
 	def _save_tax_rate(self, tax_rate):
 		try:
-			if not frappe.db.exists({"doctype": "Account", "quickbooks_id": "TaxRate - {}".format(tax_rate["Id"]), "company": self.company}):
-				frappe.get_doc({
+			if not frappe.db.exists(
+				{
 					"doctype": "Account",
 					"quickbooks_id": "TaxRate - {}".format(tax_rate["Id"]),
-					"account_name": "{} - QB".format(tax_rate["Name"]),
-					"root_type": "Liability",
-					"parent_account": encode_company_abbr("{} - QB".format("Liability"), self.company),
-					"is_group": "0",
 					"company": self.company,
-				}).insert()
+				}
+			):
+				frappe.get_doc(
+					{
+						"doctype": "Account",
+						"quickbooks_id": "TaxRate - {}".format(tax_rate["Id"]),
+						"account_name": "{} - QB".format(tax_rate["Name"]),
+						"root_type": "Liability",
+						"parent_account": encode_company_abbr("{} - QB".format("Liability"), self.company),
+						"is_group": "0",
+						"company": self.company,
+					}
+				).insert()
 		except Exception as e:
 			self._log_error(e, tax_rate)
-
 
 	def _preprocess_tax_codes(self, tax_codes):
 		self.tax_codes = {tax_code["Id"]: tax_code for tax_code in tax_codes}
 		return tax_codes
 
-
 	def _save_tax_code(self, tax_code):
 		pass
 
-
 	def _save_customer(self, customer):
 		try:
-			if not frappe.db.exists({"doctype": "Customer", "quickbooks_id": customer["Id"], "company": self.company}):
+			if not frappe.db.exists(
+				{"doctype": "Customer", "quickbooks_id": customer["Id"], "company": self.company}
+			):
 				try:
-					receivable_account = frappe.get_all("Account", filters={
-						"account_type": "Receivable",
-						"account_currency": customer["CurrencyRef"]["value"],
-						"company": self.company,
-					})[0]["name"]
+					receivable_account = frappe.get_all(
+						"Account",
+						filters={
+							"account_type": "Receivable",
+							"account_currency": customer["CurrencyRef"]["value"],
+							"company": self.company,
+						},
+					)[0]["name"]
 				except Exception:
 					receivable_account = None
-				erpcustomer = frappe.get_doc({
-					"doctype": "Customer",
-					"quickbooks_id": customer["Id"],
-					"customer_name": encode_company_abbr(customer["DisplayName"], self.company),
-					"customer_type": "Individual",
-					"customer_group": "Commercial",
-					"default_currency": customer["CurrencyRef"]["value"],
-					"accounts": [{"company": self.company, "account": receivable_account}],
-					"territory": "All Territories",
-					"company": self.company,
-				}).insert()
+				erpcustomer = frappe.get_doc(
+					{
+						"doctype": "Customer",
+						"quickbooks_id": customer["Id"],
+						"customer_name": encode_company_abbr(customer["DisplayName"], self.company),
+						"customer_type": "Individual",
+						"customer_group": "Commercial",
+						"default_currency": customer["CurrencyRef"]["value"],
+						"accounts": [{"company": self.company, "account": receivable_account}],
+						"territory": "All Territories",
+						"company": self.company,
+					}
+				).insert()
 				if "BillAddr" in customer:
 					self._create_address(erpcustomer, "Customer", customer["BillAddr"], "Billing")
 				if "ShipAddr" in customer:
@@ -520,10 +560,11 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, customer)
 
-
 	def _save_item(self, item):
 		try:
-			if not frappe.db.exists({"doctype": "Item", "quickbooks_id": item["Id"], "company": self.company}):
+			if not frappe.db.exists(
+				{"doctype": "Item", "quickbooks_id": item["Id"], "company": self.company}
+			):
 				if item["Type"] in ("Service", "Inventory"):
 					item_dict = {
 						"doctype": "Item",
@@ -533,7 +574,7 @@ class QuickBooksMigrator(Document):
 						"is_stock_item": 0,
 						"item_group": "All Item Groups",
 						"company": self.company,
-						"item_defaults": [{"company": self.company, "default_warehouse": self.default_warehouse}]
+						"item_defaults": [{"company": self.company, "default_warehouse": self.default_warehouse}],
 					}
 					if "ExpenseAccountRef" in item:
 						expense_account = self._get_account_name_by_id(item["ExpenseAccountRef"]["value"])
@@ -545,28 +586,29 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, item)
 
-
 	def _allow_fraction_in_unit(self):
 		frappe.db.set_value("UOM", "Unit", "must_be_whole_number", 0)
 
-
 	def _save_vendor(self, vendor):
 		try:
-			if not frappe.db.exists({"doctype": "Supplier", "quickbooks_id": vendor["Id"], "company": self.company}):
-				erpsupplier = frappe.get_doc({
-					"doctype": "Supplier",
-					"quickbooks_id": vendor["Id"],
-					"supplier_name": encode_company_abbr(vendor["DisplayName"], self.company),
-					"supplier_group": "All Supplier Groups",
-					"company": self.company,
-				}).insert()
+			if not frappe.db.exists(
+				{"doctype": "Supplier", "quickbooks_id": vendor["Id"], "company": self.company}
+			):
+				erpsupplier = frappe.get_doc(
+					{
+						"doctype": "Supplier",
+						"quickbooks_id": vendor["Id"],
+						"supplier_name": encode_company_abbr(vendor["DisplayName"], self.company),
+						"supplier_group": "All Supplier Groups",
+						"company": self.company,
+					}
+				).insert()
 				if "BillAddr" in vendor:
 					self._create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
 				if "ShipAddr" in vendor:
 					self._create_address(erpsupplier, "Supplier", vendor["ShipAddr"], "Shipping")
 		except Exception as e:
 			self._log_error(e)
-
 
 	def _save_preference(self, preference):
 		try:
@@ -577,7 +619,6 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, preference)
 
-
 	def _save_invoice(self, invoice):
 		# Invoice can be Linked with Another Transactions
 		# If any of these transactions is a "StatementCharge" or "ReimburseCharge" then in the UI
@@ -585,59 +626,56 @@ class QuickBooksMigrator(Document):
 		# Also as of now there is no way of fetching the corresponding transaction from api
 		# We in order to correctly reflect account balance make an equivalent Journal Entry
 		quickbooks_id = "Invoice - {}".format(invoice["Id"])
-		if any(linked["TxnType"] in ("StatementCharge", "ReimburseCharge") for linked in invoice["LinkedTxn"]):
+		if any(
+			linked["TxnType"] in ("StatementCharge", "ReimburseCharge") for linked in invoice["LinkedTxn"]
+		):
 			self._save_invoice_as_journal_entry(invoice, quickbooks_id)
 		else:
 			self._save_sales_invoice(invoice, quickbooks_id)
-
 
 	def _save_credit_memo(self, credit_memo):
 		# Credit Memo is equivalent to a return Sales Invoice
 		quickbooks_id = "Credit Memo - {}".format(credit_memo["Id"])
 		self._save_sales_invoice(credit_memo, quickbooks_id, is_return=True)
 
-
 	def _save_sales_receipt(self, sales_receipt):
 		# Sales Receipt is equivalent to a POS Sales Invoice
 		quickbooks_id = "Sales Receipt - {}".format(sales_receipt["Id"])
 		self._save_sales_invoice(sales_receipt, quickbooks_id, is_pos=True)
-
 
 	def _save_refund_receipt(self, refund_receipt):
 		# Refund Receipt is equivalent to a return POS Sales Invoice
 		quickbooks_id = "Refund Receipt - {}".format(refund_receipt["Id"])
 		self._save_sales_invoice(refund_receipt, quickbooks_id, is_return=True, is_pos=True)
 
-
 	def _save_sales_invoice(self, invoice, quickbooks_id, is_return=False, is_pos=False):
 		try:
-			if not frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": quickbooks_id, "company": self.company}):
+			if not frappe.db.exists(
+				{"doctype": "Sales Invoice", "quickbooks_id": quickbooks_id, "company": self.company}
+			):
 				invoice_dict = {
 					"doctype": "Sales Invoice",
 					"quickbooks_id": quickbooks_id,
-
 					# Quickbooks uses ISO 4217 Code
 					# of course this gonna come back to bite me
 					"currency": invoice["CurrencyRef"]["value"],
-
 					# Exchange Rate is provided if multicurrency is enabled
 					# It is not provided if multicurrency is not enabled
 					"conversion_rate": invoice.get("ExchangeRate", 1),
 					"posting_date": invoice["TxnDate"],
-
 					# QuickBooks doesn't make Due Date a mandatory field this is a hack
 					"due_date": invoice.get("DueDate", invoice["TxnDate"]),
-					"customer": frappe.get_all("Customer",
+					"customer": frappe.get_all(
+						"Customer",
 						filters={
 							"quickbooks_id": invoice["CustomerRef"]["value"],
 							"company": self.company,
-						})[0]["name"],
+						},
+					)[0]["name"],
 					"items": self._get_si_items(invoice, is_return=is_return),
 					"taxes": self._get_taxes(invoice),
-
 					# Do not change posting_date upon submission
 					"set_posting_time": 1,
-
 					# QuickBooks doesn't round total
 					"disable_rounded_total": 1,
 					"is_return": is_return,
@@ -659,7 +697,6 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, [invoice, invoice_dict, json.loads(invoice_doc.as_json())])
 
-
 	def _get_si_items(self, invoice, is_return=False):
 		items = []
 		for line in invoice["Line"]:
@@ -672,47 +709,55 @@ class QuickBooksMigrator(Document):
 					else:
 						tax_code = "NON"
 				if line["SalesItemLineDetail"]["ItemRef"]["value"] != "SHIPPING_ITEM_ID":
-					item = frappe.db.get_all("Item",
+					item = frappe.db.get_all(
+						"Item",
 						filters={
 							"quickbooks_id": line["SalesItemLineDetail"]["ItemRef"]["value"],
 							"company": self.company,
 						},
-						fields=["name", "stock_uom"]
+						fields=["name", "stock_uom"],
 					)[0]
-					items.append({
-						"item_code": item["name"],
-						"conversion_factor": 1,
-						"uom": item["stock_uom"],
-						"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
-						"qty": line["SalesItemLineDetail"]["Qty"],
-						"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
-						"cost_center": self.default_cost_center,
-						"warehouse": self.default_warehouse,
-						"item_tax_rate": json.dumps(self._get_item_taxes(tax_code))
-					})
+					items.append(
+						{
+							"item_code": item["name"],
+							"conversion_factor": 1,
+							"uom": item["stock_uom"],
+							"description": line.get("Description", line["SalesItemLineDetail"]["ItemRef"]["name"]),
+							"qty": line["SalesItemLineDetail"]["Qty"],
+							"price_list_rate": line["SalesItemLineDetail"]["UnitPrice"],
+							"cost_center": self.default_cost_center,
+							"warehouse": self.default_warehouse,
+							"item_tax_rate": json.dumps(self._get_item_taxes(tax_code)),
+						}
+					)
 				else:
-					items.append({
-						"item_name": "Shipping",
-						"conversion_factor": 1,
-						"expense_account": self._get_account_name_by_id("TaxRate - {}".format(line["SalesItemLineDetail"]["TaxCodeRef"]["value"])),
-						"uom": "Unit",
-						"description": "Shipping",
-						"income_account": self.default_shipping_account,
-						"qty": 1,
-						"price_list_rate": line["Amount"],
-						"cost_center": self.default_cost_center,
-						"warehouse": self.default_warehouse,
-						"item_tax_rate": json.dumps(self._get_item_taxes(tax_code))
-					})
+					items.append(
+						{
+							"item_name": "Shipping",
+							"conversion_factor": 1,
+							"expense_account": self._get_account_name_by_id(
+								"TaxRate - {}".format(line["SalesItemLineDetail"]["TaxCodeRef"]["value"])
+							),
+							"uom": "Unit",
+							"description": "Shipping",
+							"income_account": self.default_shipping_account,
+							"qty": 1,
+							"price_list_rate": line["Amount"],
+							"cost_center": self.default_cost_center,
+							"warehouse": self.default_warehouse,
+							"item_tax_rate": json.dumps(self._get_item_taxes(tax_code)),
+						}
+					)
 				if is_return:
 					items[-1]["qty"] *= -1
 			elif line["DetailType"] == "DescriptionOnly":
-				items[-1].update({
-					"margin_type": "Percentage",
-					"margin_rate_or_amount": int(line["Description"].split("%")[0]),
-				})
+				items[-1].update(
+					{
+						"margin_type": "Percentage",
+						"margin_rate_or_amount": int(line["Description"].split("%")[0]),
+					}
+				)
 		return items
-
 
 	def _get_item_taxes(self, tax_code):
 		tax_rates = self.tax_rates
@@ -723,29 +768,30 @@ class QuickBooksMigrator(Document):
 				if rate_list_type in tax_code:
 					for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
 						if tax_rate_detail["TaxTypeApplicable"] == "TaxOnAmount":
-							tax_head = self._get_account_name_by_id("TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"]))
+							tax_head = self._get_account_name_by_id(
+								"TaxRate - {}".format(tax_rate_detail["TaxRateRef"]["value"])
+							)
 							tax_rate = tax_rates[tax_rate_detail["TaxRateRef"]["value"]]
 							item_taxes[tax_head] = tax_rate["RateValue"]
 		return item_taxes
-
 
 	def _get_invoice_payments(self, invoice, is_return=False, is_pos=False):
 		if is_pos:
 			amount = invoice["TotalAmt"]
 			if is_return:
 				amount = -amount
-			return [{
-				"mode_of_payment": "Cash",
-				"account": self._get_account_name_by_id(invoice["DepositToAccountRef"]["value"]),
-				"amount": amount,
-			}]
-
+			return [
+				{
+					"mode_of_payment": "Cash",
+					"account": self._get_account_name_by_id(invoice["DepositToAccountRef"]["value"]),
+					"amount": amount,
+				}
+			]
 
 	def _get_discount(self, lines):
 		for line in lines:
 			if line["DetailType"] == "DiscountLineDetail" and "Amount" in line["DiscountLineDetail"]:
 				return line
-
 
 	def _save_invoice_as_journal_entry(self, invoice, quickbooks_id):
 		try:
@@ -758,8 +804,9 @@ class QuickBooksMigrator(Document):
 					account_line["credit_in_account_currency"] = line["credit"]
 				if frappe.db.get_value("Account", line["account"], "account_type") == "Receivable":
 					account_line["party_type"] = "Customer"
-					account_line["party"] = frappe.get_all("Customer",
-						filters={"quickbooks_id": invoice["CustomerRef"]["value"], "company": self.company}
+					account_line["party"] = frappe.get_all(
+						"Customer",
+						filters={"quickbooks_id": invoice["CustomerRef"]["value"], "company": self.company},
 					)[0]["name"]
 
 				accounts.append(account_line)
@@ -768,7 +815,6 @@ class QuickBooksMigrator(Document):
 			self.__save_journal_entry(quickbooks_id, accounts, posting_date)
 		except Exception as e:
 			self._log_error(e, [invoice, accounts])
-
 
 	def _save_journal_entry(self, journal_entry):
 		# JournalEntry is equivalent to a Journal Entry
@@ -782,13 +828,17 @@ class QuickBooksMigrator(Document):
 			accounts = []
 			for line in lines:
 				if line["DetailType"] == "JournalEntryLineDetail":
-					account_name = self._get_account_name_by_id(line["JournalEntryLineDetail"]["AccountRef"]["value"])
+					account_name = self._get_account_name_by_id(
+						line["JournalEntryLineDetail"]["AccountRef"]["value"]
+					)
 					posting_type = line["JournalEntryLineDetail"]["PostingType"]
-					accounts.append({
-						"account": account_name,
-						posting_type_field_mapping[posting_type]: line["Amount"],
-						"cost_center": self.default_cost_center,
-					})
+					accounts.append(
+						{
+							"account": account_name,
+							posting_type_field_mapping[posting_type]: line["Amount"],
+							"cost_center": self.default_cost_center,
+						}
+					)
 			return accounts
 
 		quickbooks_id = "Journal Entry - {}".format(journal_entry["Id"])
@@ -796,39 +846,41 @@ class QuickBooksMigrator(Document):
 		posting_date = journal_entry["TxnDate"]
 		self.__save_journal_entry(quickbooks_id, accounts, posting_date)
 
-
 	def __save_journal_entry(self, quickbooks_id, accounts, posting_date):
 		try:
-			if not frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": quickbooks_id, "company": self.company}):
-				je = frappe.get_doc({
-					"doctype": "Journal Entry",
-					"quickbooks_id": quickbooks_id,
-					"company": self.company,
-					"posting_date": posting_date,
-					"accounts": accounts,
-					"multi_currency": 1,
-				})
+			if not frappe.db.exists(
+				{"doctype": "Journal Entry", "quickbooks_id": quickbooks_id, "company": self.company}
+			):
+				je = frappe.get_doc(
+					{
+						"doctype": "Journal Entry",
+						"quickbooks_id": quickbooks_id,
+						"company": self.company,
+						"posting_date": posting_date,
+						"accounts": accounts,
+						"multi_currency": 1,
+					}
+				)
 				je.insert()
 				je.submit()
 		except Exception as e:
 			self._log_error(e, [accounts, json.loads(je.as_json())])
-
 
 	def _save_bill(self, bill):
 		# Bill is equivalent to a Purchase Invoice
 		quickbooks_id = "Bill - {}".format(bill["Id"])
 		self.__save_purchase_invoice(bill, quickbooks_id)
 
-
 	def _save_vendor_credit(self, vendor_credit):
 		# Vendor Credit is equivalent to a return Purchase Invoice
 		quickbooks_id = "Vendor Credit - {}".format(vendor_credit["Id"])
 		self.__save_purchase_invoice(vendor_credit, quickbooks_id, is_return=True)
 
-
 	def __save_purchase_invoice(self, invoice, quickbooks_id, is_return=False):
 		try:
-			if not frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": quickbooks_id, "company": self.company}):
+			if not frappe.db.exists(
+				{"doctype": "Purchase Invoice", "quickbooks_id": quickbooks_id, "company": self.company}
+			):
 				credit_to_account = self._get_account_name_by_id(invoice["APAccountRef"]["value"])
 				invoice_dict = {
 					"doctype": "Purchase Invoice",
@@ -838,11 +890,13 @@ class QuickBooksMigrator(Document):
 					"posting_date": invoice["TxnDate"],
 					"due_date": invoice.get("DueDate", invoice["TxnDate"]),
 					"credit_to": credit_to_account,
-					"supplier": frappe.get_all("Supplier",
+					"supplier": frappe.get_all(
+						"Supplier",
 						filters={
 							"quickbooks_id": invoice["VendorRef"]["value"],
 							"company": self.company,
-						})[0]["name"],
+						},
+					)[0]["name"],
 					"items": self._get_pi_items(invoice, is_return=is_return),
 					"taxes": self._get_taxes(invoice),
 					"set_posting_time": 1,
@@ -857,7 +911,6 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, [invoice, invoice_dict, json.loads(invoice_doc.as_json())])
 
-
 	def _get_pi_items(self, purchase_invoice, is_return=False):
 		items = []
 		for line in purchase_invoice["Line"]:
@@ -869,24 +922,29 @@ class QuickBooksMigrator(Document):
 						tax_code = purchase_invoice["TxnTaxDetail"]["TxnTaxCodeRef"]["value"]
 					else:
 						tax_code = "NON"
-				item = frappe.db.get_all("Item",
+				item = frappe.db.get_all(
+					"Item",
 					filters={
 						"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"],
-						"company": self.company
+						"company": self.company,
 					},
-					fields=["name", "stock_uom"]
+					fields=["name", "stock_uom"],
 				)[0]
-				items.append({
-					"item_code": item["name"],
-					"conversion_factor": 1,
-					"uom": item["stock_uom"],
-					"description": line.get("Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]),
-					"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
-					"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
-					"warehouse": self.default_warehouse,
-					"cost_center": self.default_cost_center,
-					"item_tax_rate": json.dumps(self._get_item_taxes(tax_code)),
-				})
+				items.append(
+					{
+						"item_code": item["name"],
+						"conversion_factor": 1,
+						"uom": item["stock_uom"],
+						"description": line.get(
+							"Description", line["ItemBasedExpenseLineDetail"]["ItemRef"]["name"]
+						),
+						"qty": line["ItemBasedExpenseLineDetail"]["Qty"],
+						"price_list_rate": line["ItemBasedExpenseLineDetail"]["UnitPrice"],
+						"warehouse": self.default_warehouse,
+						"cost_center": self.default_cost_center,
+						"item_tax_rate": json.dumps(self._get_item_taxes(tax_code)),
+					}
+				)
 			elif line["DetailType"] == "AccountBasedExpenseLineDetail":
 				if line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"] != "TAX":
 					tax_code = line["AccountBasedExpenseLineDetail"]["TaxCodeRef"]["value"]
@@ -895,22 +953,29 @@ class QuickBooksMigrator(Document):
 						tax_code = purchase_invoice["TxnTaxDetail"]["TxnTaxCodeRef"]["value"]
 					else:
 						tax_code = "NON"
-				items.append({
-					"item_name": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
-					"conversion_factor": 1,
-					"expense_account": self._get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"]),
-					"uom": "Unit",
-					"description": line.get("Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]),
-					"qty": 1,
-					"price_list_rate": line["Amount"],
-					"warehouse": self.default_warehouse,
-					"cost_center": self.default_cost_center,
-					"item_tax_rate": json.dumps(self._get_item_taxes(tax_code)),
-				})
+				items.append(
+					{
+						"item_name": line.get(
+							"Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]
+						),
+						"conversion_factor": 1,
+						"expense_account": self._get_account_name_by_id(
+							line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"]
+						),
+						"uom": "Unit",
+						"description": line.get(
+							"Description", line["AccountBasedExpenseLineDetail"]["AccountRef"]["name"]
+						),
+						"qty": 1,
+						"price_list_rate": line["Amount"],
+						"warehouse": self.default_warehouse,
+						"cost_center": self.default_cost_center,
+						"item_tax_rate": json.dumps(self._get_item_taxes(tax_code)),
+					}
+				)
 			if is_return:
 				items[-1]["qty"] *= -1
 		return items
-
 
 	def _save_payment(self, payment):
 		try:
@@ -928,8 +993,11 @@ class QuickBooksMigrator(Document):
 				if linked_transaction["TxnType"] == "Invoice":
 					si_quickbooks_id = "Invoice - {}".format(linked_transaction["TxnId"])
 					# Invoice could have been saved as a Sales Invoice or a Journal Entry
-					if frappe.db.exists({"doctype": "Sales Invoice", "quickbooks_id": si_quickbooks_id, "company": self.company}):
-						sales_invoice = frappe.get_all("Sales Invoice",
+					if frappe.db.exists(
+						{"doctype": "Sales Invoice", "quickbooks_id": si_quickbooks_id, "company": self.company}
+					):
+						sales_invoice = frappe.get_all(
+							"Sales Invoice",
 							filters={
 								"quickbooks_id": si_quickbooks_id,
 								"company": self.company,
@@ -941,42 +1009,50 @@ class QuickBooksMigrator(Document):
 						party = sales_invoice["customer"]
 						party_account = sales_invoice["debit_to"]
 
-					if frappe.db.exists({"doctype": "Journal Entry", "quickbooks_id": si_quickbooks_id, "company": self.company}):
-						journal_entry = frappe.get_doc("Journal Entry",
+					if frappe.db.exists(
+						{"doctype": "Journal Entry", "quickbooks_id": si_quickbooks_id, "company": self.company}
+					):
+						journal_entry = frappe.get_doc(
+							"Journal Entry",
 							{
 								"quickbooks_id": si_quickbooks_id,
 								"company": self.company,
-							}
+							},
 						)
 						# Invoice saved as a Journal Entry must have party and party_type set on line containing Receivable Account
-						customer_account_line = list(filter(lambda acc: acc.party_type == "Customer", journal_entry.accounts))[0]
+						customer_account_line = list(
+							filter(lambda acc: acc.party_type == "Customer", journal_entry.accounts)
+						)[0]
 
 						reference_type = "Journal Entry"
 						reference_name = journal_entry.name
 						party = customer_account_line.party
 						party_account = customer_account_line.account
 
-					accounts.append({
-						"party_type": "Customer",
-						"party": party,
-						"reference_type": reference_type,
-						"reference_name": reference_name,
-						"account": party_account,
-						"credit_in_account_currency": line["Amount"],
-						"cost_center": self.default_cost_center,
-					})
+					accounts.append(
+						{
+							"party_type": "Customer",
+							"party": party,
+							"reference_type": reference_type,
+							"reference_name": reference_name,
+							"account": party_account,
+							"credit_in_account_currency": line["Amount"],
+							"cost_center": self.default_cost_center,
+						}
+					)
 
 			deposit_account = self._get_account_name_by_id(payment["DepositToAccountRef"]["value"])
-			accounts.append({
-				"account": deposit_account,
-				"debit_in_account_currency": payment["TotalAmt"],
-				"cost_center": self.default_cost_center,
-			})
+			accounts.append(
+				{
+					"account": deposit_account,
+					"debit_in_account_currency": payment["TotalAmt"],
+					"cost_center": self.default_cost_center,
+				}
+			)
 			posting_date = payment["TxnDate"]
 			self.__save_journal_entry(quickbooks_id, accounts, posting_date)
 		except Exception as e:
 			self._log_error(e, [payment, accounts])
-
 
 	def _save_bill_payment(self, bill_payment):
 		try:
@@ -987,8 +1063,11 @@ class QuickBooksMigrator(Document):
 				linked_transaction = line["LinkedTxn"][0]
 				if linked_transaction["TxnType"] == "Bill":
 					pi_quickbooks_id = "Bill - {}".format(linked_transaction["TxnId"])
-					if frappe.db.exists({"doctype": "Purchase Invoice", "quickbooks_id": pi_quickbooks_id, "company": self.company}):
-						purchase_invoice = frappe.get_all("Purchase Invoice",
+					if frappe.db.exists(
+						{"doctype": "Purchase Invoice", "quickbooks_id": pi_quickbooks_id, "company": self.company}
+					):
+						purchase_invoice = frappe.get_all(
+							"Purchase Invoice",
 							filters={
 								"quickbooks_id": pi_quickbooks_id,
 								"company": self.company,
@@ -999,15 +1078,17 @@ class QuickBooksMigrator(Document):
 						reference_name = purchase_invoice["name"]
 						party = purchase_invoice["supplier"]
 						party_account = purchase_invoice["credit_to"]
-					accounts.append({
-						"party_type": "Supplier",
-						"party": party,
-						"reference_type": reference_type,
-						"reference_name": reference_name,
-						"account": party_account,
-						"debit_in_account_currency": line["Amount"],
-						"cost_center": self.default_cost_center,
-					})
+					accounts.append(
+						{
+							"party_type": "Supplier",
+							"party": party,
+							"reference_type": reference_type,
+							"reference_name": reference_name,
+							"account": party_account,
+							"debit_in_account_currency": line["Amount"],
+							"cost_center": self.default_cost_center,
+						}
+					)
 
 			if bill_payment["PayType"] == "Check":
 				bank_account_id = bill_payment["CheckPayment"]["BankAccountRef"]["value"]
@@ -1015,49 +1096,68 @@ class QuickBooksMigrator(Document):
 				bank_account_id = bill_payment["CreditCardPayment"]["CCAccountRef"]["value"]
 
 			bank_account = self._get_account_name_by_id(bank_account_id)
-			accounts.append({
-				"account": bank_account,
-				"credit_in_account_currency": bill_payment["TotalAmt"],
-				"cost_center": self.default_cost_center,
-			})
+			accounts.append(
+				{
+					"account": bank_account,
+					"credit_in_account_currency": bill_payment["TotalAmt"],
+					"cost_center": self.default_cost_center,
+				}
+			)
 			posting_date = bill_payment["TxnDate"]
 			self.__save_journal_entry(quickbooks_id, accounts, posting_date)
 		except Exception as e:
 			self._log_error(e, [bill_payment, accounts])
 
-
 	def _save_purchase(self, purchase):
 		try:
 			quickbooks_id = "Purchase - {}".format(purchase["Id"])
 			# Credit Bank Account
-			accounts = [{
-				"account": self._get_account_name_by_id(purchase["AccountRef"]["value"]),
-				"credit_in_account_currency": purchase["TotalAmt"],
-				"cost_center": self.default_cost_center,
-			}]
+			accounts = [
+				{
+					"account": self._get_account_name_by_id(purchase["AccountRef"]["value"]),
+					"credit_in_account_currency": purchase["TotalAmt"],
+					"cost_center": self.default_cost_center,
+				}
+			]
 
 			# Debit Mentioned Accounts
 			for line in purchase["Line"]:
 				if line["DetailType"] == "AccountBasedExpenseLineDetail":
-					account = self._get_account_name_by_id(line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"])
+					account = self._get_account_name_by_id(
+						line["AccountBasedExpenseLineDetail"]["AccountRef"]["value"]
+					)
 				elif line["DetailType"] == "ItemBasedExpenseLineDetail":
-					account = frappe.get_doc("Item",
-						{"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"], "company": self.company}
-					).item_defaults[0].expense_account
-				accounts.append({
-					"account": account,
-					"debit_in_account_currency": line["Amount"],
-					"cost_center": self.default_cost_center,
-				})
+					account = (
+						frappe.get_doc(
+							"Item",
+							{
+								"quickbooks_id": line["ItemBasedExpenseLineDetail"]["ItemRef"]["value"],
+								"company": self.company,
+							},
+						)
+						.item_defaults[0]
+						.expense_account
+					)
+				accounts.append(
+					{
+						"account": account,
+						"debit_in_account_currency": line["Amount"],
+						"cost_center": self.default_cost_center,
+					}
+				)
 
 			# Debit Tax Accounts
 			if "TxnTaxDetail" in purchase:
 				for line in purchase["TxnTaxDetail"]["TaxLine"]:
-					accounts.append({
-						"account": self._get_account_name_by_id("TaxRate - {}".format(line["TaxLineDetail"]["TaxRateRef"]["value"])),
-						"debit_in_account_currency": line["Amount"],
-						"cost_center": self.default_cost_center,
-					})
+					accounts.append(
+						{
+							"account": self._get_account_name_by_id(
+								"TaxRate - {}".format(line["TaxLineDetail"]["TaxRateRef"]["value"])
+							),
+							"debit_in_account_currency": line["Amount"],
+							"cost_center": self.default_cost_center,
+						}
+					)
 
 			# If purchase["Credit"] is set to be True then it represents a refund
 			if purchase.get("Credit"):
@@ -1074,60 +1174,63 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, [purchase, accounts])
 
-
 	def _save_deposit(self, deposit):
 		try:
 			quickbooks_id = "Deposit - {}".format(deposit["Id"])
 			# Debit Bank Account
-			accounts = [{
-				"account": self._get_account_name_by_id(deposit["DepositToAccountRef"]["value"]),
-				"debit_in_account_currency": deposit["TotalAmt"],
-				"cost_center": self.default_cost_center,
-			}]
+			accounts = [
+				{
+					"account": self._get_account_name_by_id(deposit["DepositToAccountRef"]["value"]),
+					"debit_in_account_currency": deposit["TotalAmt"],
+					"cost_center": self.default_cost_center,
+				}
+			]
 
 			# Credit Mentioned Accounts
 			for line in deposit["Line"]:
 				if "LinkedTxn" in line:
-					accounts.append({
-						"account": self.undeposited_funds_account,
-						"credit_in_account_currency": line["Amount"],
-						"cost_center": self.default_cost_center,
-					})
+					accounts.append(
+						{
+							"account": self.undeposited_funds_account,
+							"credit_in_account_currency": line["Amount"],
+							"cost_center": self.default_cost_center,
+						}
+					)
 				else:
-					accounts.append({
-						"account": self._get_account_name_by_id(line["DepositLineDetail"]["AccountRef"]["value"]),
-						"credit_in_account_currency": line["Amount"],
-						"cost_center": self.default_cost_center,
-					})
+					accounts.append(
+						{
+							"account": self._get_account_name_by_id(line["DepositLineDetail"]["AccountRef"]["value"]),
+							"credit_in_account_currency": line["Amount"],
+							"cost_center": self.default_cost_center,
+						}
+					)
 
 			# Debit Cashback if mentioned
 			if "CashBack" in deposit:
-				accounts.append({
-					"account": self._get_account_name_by_id(deposit["CashBack"]["AccountRef"]["value"]),
-					"debit_in_account_currency": deposit["CashBack"]["Amount"],
-					"cost_center": self.default_cost_center,
-				})
+				accounts.append(
+					{
+						"account": self._get_account_name_by_id(deposit["CashBack"]["AccountRef"]["value"]),
+						"debit_in_account_currency": deposit["CashBack"]["Amount"],
+						"cost_center": self.default_cost_center,
+					}
+				)
 
 			posting_date = deposit["TxnDate"]
 			self.__save_journal_entry(quickbooks_id, accounts, posting_date)
 		except Exception as e:
 			self._log_error(e, [deposit, accounts])
 
-
 	def _save_advance_payment(self, advance_payment):
 		quickbooks_id = "Advance Payment - {}".format(advance_payment["id"])
 		self.__save_ledger_entry_as_je(advance_payment, quickbooks_id)
-
 
 	def _save_tax_payment(self, tax_payment):
 		quickbooks_id = "Tax Payment - {}".format(tax_payment["id"])
 		self.__save_ledger_entry_as_je(tax_payment, quickbooks_id)
 
-
 	def _save_inventory_qty_adjust(self, inventory_qty_adjust):
 		quickbooks_id = "Inventory Qty Adjust - {}".format(inventory_qty_adjust["id"])
 		self.__save_ledger_entry_as_je(inventory_qty_adjust, quickbooks_id)
-
 
 	def __save_ledger_entry_as_je(self, ledger_entry, quickbooks_id):
 		try:
@@ -1145,7 +1248,6 @@ class QuickBooksMigrator(Document):
 		except Exception as e:
 			self._log_error(e, ledger_entry)
 
-
 	def _get_taxes(self, entry):
 		taxes = []
 		if "TxnTaxDetail" not in entry or "TaxLine" not in entry["TxnTaxDetail"]:
@@ -1155,26 +1257,29 @@ class QuickBooksMigrator(Document):
 			account_head = self._get_account_name_by_id("TaxRate - {}".format(tax_rate))
 			tax_type_applicable = self._get_tax_type(tax_rate)
 			if tax_type_applicable == "TaxOnAmount":
-				taxes.append({
-					"charge_type": "On Net Total",
-					"account_head": account_head,
-					"description": account_head,
-					"cost_center": self.default_cost_center,
-					"rate": 0,
-				})
+				taxes.append(
+					{
+						"charge_type": "On Net Total",
+						"account_head": account_head,
+						"description": account_head,
+						"cost_center": self.default_cost_center,
+						"rate": 0,
+					}
+				)
 			else:
 				parent_tax_rate = self._get_parent_tax_rate(tax_rate)
 				parent_row_id = self._get_parent_row_id(parent_tax_rate, taxes)
-				taxes.append({
-					"charge_type": "On Previous Row Amount",
-					"row_id": parent_row_id,
-					"account_head": account_head,
-					"description": account_head,
-					"cost_center": self.default_cost_center,
-					"rate": line["TaxLineDetail"]["TaxPercent"],
-				})
+				taxes.append(
+					{
+						"charge_type": "On Previous Row Amount",
+						"row_id": parent_row_id,
+						"account_head": account_head,
+						"description": account_head,
+						"cost_center": self.default_cost_center,
+						"rate": line["TaxLineDetail"]["TaxPercent"],
+					}
+				)
 		return taxes
-
 
 	def _get_tax_type(self, tax_rate):
 		for tax_code in self.tax_codes.values():
@@ -1183,7 +1288,6 @@ class QuickBooksMigrator(Document):
 					for tax_rate_detail in tax_code[rate_list_type]["TaxRateDetail"]:
 						if tax_rate_detail["TaxRateRef"]["value"] == tax_rate:
 							return tax_rate_detail["TaxTypeApplicable"]
-
 
 	def _get_parent_tax_rate(self, tax_rate):
 		parent = None
@@ -1198,34 +1302,33 @@ class QuickBooksMigrator(Document):
 							if tax_rate_detail["TaxOrder"] == parent:
 								return tax_rate_detail["TaxRateRef"]["value"]
 
-
 	def _get_parent_row_id(self, tax_rate, taxes):
 		tax_account = self._get_account_name_by_id("TaxRate - {}".format(tax_rate))
 		for index, tax in enumerate(taxes):
 			if tax["account_head"] == tax_account:
 				return index + 1
 
-
 	def _create_address(self, entity, doctype, address, address_type):
 		try:
 			if not frappe.db.exists({"doctype": "Address", "quickbooks_id": address["Id"]}):
-				frappe.get_doc({
-					"doctype": "Address",
-					"quickbooks_address_id": address["Id"],
-					"address_title": entity.name,
-					"address_type": address_type,
-					"address_line1": address["Line1"],
-					"city": address["City"],
-					"links": [{"link_doctype": doctype, "link_name": entity.name}]
-				}).insert()
+				frappe.get_doc(
+					{
+						"doctype": "Address",
+						"quickbooks_address_id": address["Id"],
+						"address_title": entity.name,
+						"address_type": address_type,
+						"address_line1": address["Line1"],
+						"city": address["City"],
+						"links": [{"link_doctype": doctype, "link_name": entity.name}],
+					}
+				).insert()
 		except Exception as e:
 			self._log_error(e, address)
-
 
 	def _get(self, *args, **kwargs):
 		kwargs["headers"] = {
 			"Accept": "application/json",
-			"Authorization": "Bearer {}".format(self.access_token)
+			"Authorization": "Bearer {}".format(self.access_token),
 		}
 		response = requests.get(*args, **kwargs)
 		# HTTP Status code 401 here means that the access_token is expired
@@ -1236,14 +1339,13 @@ class QuickBooksMigrator(Document):
 			response = self._get(*args, **kwargs)
 		return response
 
-
 	def _get_account_name_by_id(self, quickbooks_id):
-		return frappe.get_all("Account", filters={"quickbooks_id": quickbooks_id, "company": self.company})[0]["name"]
-
+		return frappe.get_all(
+			"Account", filters={"quickbooks_id": quickbooks_id, "company": self.company}
+		)[0]["name"]
 
 	def _publish(self, *args, **kwargs):
-		frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs)
-
+		frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs, user=self.modified_by)
 
 	def _get_unique_account_name(self, quickbooks_name, number=0):
 		if number:
@@ -1251,27 +1353,26 @@ class QuickBooksMigrator(Document):
 		else:
 			quickbooks_account_name = "{} - QB".format(quickbooks_name)
 		company_encoded_account_name = encode_company_abbr(quickbooks_account_name, self.company)
-		if frappe.db.exists({"doctype": "Account", "name": company_encoded_account_name, "company": self.company}):
+		if frappe.db.exists(
+			{"doctype": "Account", "name": company_encoded_account_name, "company": self.company}
+		):
 			unique_account_name = self._get_unique_account_name(quickbooks_name, number + 1)
 		else:
 			unique_account_name = quickbooks_account_name
 		return unique_account_name
 
-
 	def _log_error(self, execption, data=""):
-		frappe.log_error(title="QuickBooks Migration Error",
-			message="\n".join([
-				"Data",
-				json.dumps(data,
-					sort_keys=True,
-					indent=4,
-					separators=(',', ': ')
-				),
-				"Exception",
-				traceback.format_exc()
-			])
+		frappe.log_error(
+			title="QuickBooks Migration Error",
+			message="\n".join(
+				[
+					"Data",
+					json.dumps(data, sort_keys=True, indent=4, separators=(",", ": ")),
+					"Exception",
+					traceback.format_exc(),
+				]
+			),
 		)
-
 
 	def set_indicator(self, status):
 		self.status = status

@@ -72,6 +72,14 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "Warehouse Type"
 		},
 		{
+			"fieldname": "valuation_field_type",
+			"label": __("Valuation Field Type"),
+			"fieldtype": "Select",
+			"width": "80",
+			"options": "Currency\nFloat",
+			"default": "Currency"
+		},
+		{
 			"fieldname":"include_uom",
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
@@ -86,6 +94,12 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldname": 'show_stock_ageing_data',
 			"label": __('Show Stock Ageing Data'),
 			"fieldtype": 'Check'
+		},
+		{
+			"fieldname": 'ignore_closing_balance',
+			"label": __('Ignore Closing Balance'),
+			"fieldtype": 'Check',
+			"default": 1
 		},
 	],
 
@@ -102,3 +116,5 @@ frappe.query_reports["Stock Balance"] = {
 		return value;
 	}
 };
+
+erpnext.utils.add_inventory_dimensions('Stock Balance', 8);

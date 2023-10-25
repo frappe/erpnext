@@ -16,5 +16,5 @@ class PurchaseTaxesandChargesTemplate(Document):
 
 	def autoname(self):
 		if self.company and self.title:
-			abbr = frappe.get_cached_value('Company',  self.company,  'abbr')
-			self.name = '{0} - {1}'.format(self.title, abbr)
+			abbr = frappe.get_cached_value("Company", self.company, "abbr")
+			self.name = "{0} - {1}".format(self.title, abbr)

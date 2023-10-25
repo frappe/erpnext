@@ -12,10 +12,12 @@ def execute():
 		if not (frappe.conf.plaid_client_id and frappe.conf.plaid_env and frappe.conf.plaid_secret):
 			plaid_settings.enabled = 0
 		else:
-			plaid_settings.update({
-				"plaid_client_id": frappe.conf.plaid_client_id,
-				"plaid_env": frappe.conf.plaid_env,
-				"plaid_secret": frappe.conf.plaid_secret
-			})
+			plaid_settings.update(
+				{
+					"plaid_client_id": frappe.conf.plaid_client_id,
+					"plaid_env": frappe.conf.plaid_env,
+					"plaid_secret": frappe.conf.plaid_secret,
+				}
+			)
 		plaid_settings.flags.ignore_mandatory = True
 		plaid_settings.save()

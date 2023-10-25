@@ -13,7 +13,7 @@
  "name": "Subcontracted Item To Be Received",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Purchase Order",
+ "ref_doctype": "Subcontracting Order",
  "report_name": "Subcontracted Item To Be Received",
  "report_type": "Script Report",
  "roles": [

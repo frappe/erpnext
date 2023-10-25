@@ -19,23 +19,30 @@ class ModeofPayment(Document):
 		for entry in self.accounts:
 			accounts_list.append(entry.company)
 
-		if len(accounts_list)!= len(set(accounts_list)):
+		if len(accounts_list) != len(set(accounts_list)):
 			frappe.throw(_("Same Company is entered more than once"))
 
 	def validate_accounts(self):
 		for entry in self.accounts:
 			"""Error when Company of Ledger account doesn't match with Company Selected"""
-			if frappe.db.get_value("Account", entry.default_account, "company") != entry.company:
-				frappe.throw(_("Account {0} does not match with Company {1} in Mode of Account: {2}")
-					.format(entry.default_account, entry.company, self.name))
+			if frappe.get_cached_value("Account", entry.default_account, "company") != entry.company:
+				frappe.throw(
+					_("Account {0} does not match with Company {1} in Mode of Account: {2}").format(
+						entry.default_account, entry.company, self.name
+					)
+				)
 
 	def validate_pos_mode_of_payment(self):
 		if not self.enabled:
-			pos_profiles = frappe.db.sql("""SELECT sip.parent FROM `tabSales Invoice Payment` sip
-				WHERE sip.parenttype = 'POS Profile' and sip.mode_of_payment = %s""", (self.name))
+			pos_profiles = frappe.db.sql(
+				"""SELECT sip.parent FROM `tabSales Invoice Payment` sip
+				WHERE sip.parenttype = 'POS Profile' and sip.mode_of_payment = %s""",
+				(self.name),
+			)
 			pos_profiles = list(map(lambda x: x[0], pos_profiles))
 
 			if pos_profiles:
-				message = "POS Profile " + frappe.bold(", ".join(pos_profiles)) + " contains \
-					Mode of Payment " + frappe.bold(str(self.name)) + ". Please remove them to disable this mode."
-				frappe.throw(_(message), title="Not Allowed")
+				message = _(
+					"POS Profile {} contains Mode of Payment {}. Please remove them to disable this mode."
+				).format(frappe.bold(", ".join(pos_profiles)), frappe.bold(str(self.name)))
+				frappe.throw(message, title=_("Not Allowed"))

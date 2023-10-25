@@ -20,14 +20,19 @@
   "editable_price_list_rate",
   "validate_selling_price",
   "editable_bundle_item_rates",
+  "allow_negative_rates_for_items",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
+  "blanket_order_allowance",
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "hide_tax_id"
+  "allow_sales_order_creation_for_expired_quotation",
+  "dont_reserve_sales_order_qty_on_sales_return",
+  "hide_tax_id",
+  "enable_discount_accounting"
  ],
  "fields": [
   {
@@ -81,7 +86,7 @@
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "Sales Update Frequency in Company and Project",
-   "options": "Each Transaction\nDaily\nMonthly",
+   "options": "Monthly\nEach Transaction\nDaily",
    "reqd": 1
   },
   {
@@ -164,6 +169,37 @@
    "fieldname": "editable_bundle_item_rates",
    "fieldtype": "Check",
    "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_sales_order_creation_for_expired_quotation",
+   "fieldtype": "Check",
+   "label": "Allow Sales Order Creation For Expired Quotation"
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_reserve_sales_order_qty_on_sales_return",
+   "fieldtype": "Check",
+   "label": "Don't Reserve Sales Order Qty on Sales Return"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_negative_rates_for_items",
+   "fieldtype": "Check",
+   "label": "Allow Negative rates for Items"
+  },
+  {
+   "description": "Percentage you are allowed to sell beyond the Blanket Order quantity.",
+   "fieldname": "blanket_order_allowance",
+   "fieldtype": "Float",
+   "label": "Blanket Order Allowance (%)"
   }
  ],
  "icon": "fa fa-cog",
@@ -171,7 +207,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-04 15:41:59.939261",
+ "modified": "2023-10-25 14:03:03.966701",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -183,6 +219,15 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }

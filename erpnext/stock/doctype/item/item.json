@@ -11,10 +11,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "name_and_description_section",
+  "details",
   "naming_series",
   "item_code",
-  "variant_of",
   "item_name",
   "item_group",
   "stock_uom",
@@ -22,7 +21,7 @@
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
-  "include_item_in_manufacturing",
+  "has_variants",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
@@ -35,11 +34,11 @@
   "over_billing_allowance",
   "image",
   "section_break_11",
-  "brand",
   "description",
-  "sb_barcodes",
-  "barcodes",
+  "brand",
+  "dashboard_tab",
   "inventory_section",
+  "inventory_settings_section",
   "shelf_life_in_days",
   "end_of_life",
   "default_material_request_type",
@@ -49,6 +48,8 @@
   "weight_per_unit",
   "weight_uom",
   "allow_negative_stock",
+  "sb_barcodes",
+  "barcodes",
   "reorder_section",
   "reorder_levels",
   "unit_of_measure_conversion",
@@ -64,16 +65,23 @@
   "has_serial_no",
   "serial_no_series",
   "variants_section",
-  "has_variants",
+  "variant_of",
   "variant_based_on",
   "attributes",
-  "defaults",
+  "accounting",
+  "deferred_accounting_section",
+  "enable_deferred_expense",
+  "no_of_months_exp",
+  "column_break_9s9o",
+  "enable_deferred_revenue",
+  "no_of_months",
+  "section_break_avcp",
   "item_defaults",
-  "purchase_details",
-  "is_purchase_item",
+  "purchasing_tab",
   "purchase_uom",
   "min_order_qty",
   "safety_stock",
+  "is_purchase_item",
   "purchase_details_cb",
   "lead_time_days",
   "last_purchase_rate",
@@ -89,46 +97,29 @@
   "customs_tariff_number",
   "sales_details",
   "sales_uom",
-  "is_sales_item",
   "grant_commission",
+  "is_sales_item",
   "column_break3",
   "max_discount",
-  "deferred_revenue",
-  "deferred_revenue_account",
-  "enable_deferred_revenue",
-  "column_break_85",
-  "no_of_months",
-  "deferred_expense_section",
-  "deferred_expense_account",
-  "enable_deferred_expense",
-  "column_break_88",
-  "no_of_months_exp",
   "customer_details",
   "customer_items",
   "item_tax_section_break",
   "taxes",
-  "inspection_criteria",
-  "quality_inspection_template",
+  "quality_tab",
   "inspection_required_before_purchase",
+  "quality_inspection_template",
   "inspection_required_before_delivery",
   "manufacturing",
-  "default_bom",
+  "include_item_in_manufacturing",
   "is_sub_contracted_item",
+  "default_bom",
   "column_break_74",
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "more_information_section",
-  "published_in_website",
   "total_projected_qty"
  ],
  "fields": [
-  {
-   "fieldname": "name_and_description_section",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-flag"
-  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -201,7 +192,8 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "label": "Disabled",
+   "search_index": 1
   },
   {
    "default": "0",
@@ -315,7 +307,7 @@
    "collapsible_depends_on": "is_stock_item",
    "depends_on": "is_stock_item",
    "fieldname": "inventory_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Inventory",
    "oldfieldtype": "Section Break",
    "options": "fa fa-truck"
@@ -387,7 +379,7 @@
    "options": "fa fa-rss"
   },
   {
-   "description": "Will also apply for variants unless overrridden",
+   "description": "Will also apply for variants unless overridden",
    "fieldname": "reorder_levels",
    "fieldtype": "Table",
    "label": "Reorder level based on Warehouse",
@@ -422,7 +414,6 @@
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
    "label": "Has Batch No",
-   "no_copy": 1,
    "oldfieldname": "has_batch_no",
    "oldfieldtype": "Select"
   },
@@ -472,7 +463,6 @@
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No",
-   "no_copy": 1,
    "oldfieldname": "has_serial_no",
    "oldfieldtype": "Select"
   },
@@ -488,7 +478,7 @@
    "collapsible_depends_on": "attributes",
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "variants_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Variants"
   },
   {
@@ -513,14 +503,9 @@
    "fieldname": "attributes",
    "fieldtype": "Table",
    "hidden": 1,
-   "label": "Attributes",
+   "label": "Variant Attributes",
+   "mandatory_depends_on": "has_variants",
    "options": "Item Variant Attribute"
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "defaults",
-   "fieldtype": "Section Break",
-   "label": "Sales, Purchase, Accounting Defaults"
   },
   {
    "fieldname": "item_defaults",
@@ -529,18 +514,10 @@
    "options": "Item Default"
   },
   {
-   "collapsible": 1,
-   "fieldname": "purchase_details",
-   "fieldtype": "Section Break",
-   "label": "Purchase, Replenishment Details",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-shopping-cart"
-  },
-  {
    "default": "1",
    "fieldname": "is_purchase_item",
    "fieldtype": "Check",
-   "label": "Is Purchase Item"
+   "label": "Allow Purchase"
   },
   {
    "fieldname": "purchase_uom",
@@ -647,10 +624,9 @@
   },
   {
    "collapsible": 1,
-   "default": "eval:!doc.is_fixed_asset",
    "fieldname": "sales_details",
-   "fieldtype": "Section Break",
-   "label": "Sales Details",
+   "fieldtype": "Tab Break",
+   "label": "Sales",
    "oldfieldtype": "Section Break",
    "options": "fa fa-tag"
   },
@@ -664,7 +640,7 @@
    "default": "1",
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
-   "label": "Is Sales Item"
+   "label": "Allow Sales"
   },
   {
    "fieldname": "column_break3",
@@ -680,48 +656,16 @@
    "oldfieldtype": "Currency"
   },
   {
-   "collapsible": 1,
-   "fieldname": "deferred_revenue",
-   "fieldtype": "Section Break",
-   "label": "Deferred Revenue"
-  },
-  {
-   "depends_on": "enable_deferred_revenue",
-   "fieldname": "deferred_revenue_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Deferred Revenue Account",
-   "options": "Account"
-  },
-  {
    "default": "0",
    "fieldname": "enable_deferred_revenue",
    "fieldtype": "Check",
    "label": "Enable Deferred Revenue"
   },
   {
-   "fieldname": "column_break_85",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "enable_deferred_revenue",
    "fieldname": "no_of_months",
    "fieldtype": "Int",
-   "label": "No of Months"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "deferred_expense_section",
-   "fieldtype": "Section Break",
-   "label": "Deferred Expense"
-  },
-  {
-   "depends_on": "enable_deferred_expense",
-   "fieldname": "deferred_expense_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Deferred Expense Account",
-   "options": "Account"
+   "label": "No of Months (Revenue)"
   },
   {
    "default": "0",
@@ -730,14 +674,10 @@
    "label": "Enable Deferred Expense"
   },
   {
-   "fieldname": "column_break_88",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "enable_deferred_expense",
    "fieldname": "no_of_months_exp",
    "fieldtype": "Int",
-   "label": "No of Months"
+   "label": "No of Months (Expense)"
   },
   {
    "collapsible": 1,
@@ -756,8 +696,8 @@
    "collapsible": 1,
    "collapsible_depends_on": "taxes",
    "fieldname": "item_tax_section_break",
-   "fieldtype": "Section Break",
-   "label": "Item Tax",
+   "fieldtype": "Tab Break",
+   "label": "Tax",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
@@ -769,15 +709,6 @@
    "oldfieldname": "item_tax",
    "oldfieldtype": "Table",
    "options": "Item Tax"
-  },
-  {
-   "collapsible": 1,
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "inspection_criteria",
-   "fieldtype": "Section Break",
-   "label": "Inspection Criteria",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-search"
   },
   {
    "default": "0",
@@ -804,7 +735,7 @@
    "collapsible": 1,
    "depends_on": "is_stock_item",
    "fieldname": "manufacturing",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Manufacturing",
    "oldfieldtype": "Section Break",
    "options": "fa fa-cogs"
@@ -835,7 +766,7 @@
   },
   {
    "fieldname": "customer_code",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Customer Code",
    "no_copy": 1,
@@ -872,28 +803,15 @@
   },
   {
    "fieldname": "default_item_manufacturer",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Default Item Manufacturer",
+   "options": "Manufacturer",
    "read_only": 1
   },
   {
    "fieldname": "default_manufacturer_part_no",
    "fieldtype": "Data",
    "label": "Default Manufacturer Part No",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "more_information_section",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
-   "default": "0",
-   "depends_on": "published_in_website",
-   "fieldname": "published_in_website",
-   "fieldtype": "Check",
-   "label": "Published in Website",
    "read_only": 1
   },
   {
@@ -914,6 +832,54 @@
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
+  },
+  {
+   "fieldname": "inventory_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Settings"
+  },
+  {
+   "fieldname": "purchasing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Purchasing"
+  },
+  {
+   "fieldname": "quality_tab",
+   "fieldtype": "Tab Break",
+   "label": "Quality"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-flag"
+  },
+  {
+   "fieldname": "dashboard_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dashboard",
+   "show_dashboard": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_fixed_asset",
+   "fieldname": "accounting",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "column_break_9s9o",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_avcp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "deferred_accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting"
   }
  ],
  "icon": "fa fa-tag",
@@ -921,7 +887,8 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-11 08:07:46.663220",
+ "make_attachments_public": 1,
+ "modified": "2023-09-11 13:46:32.688051",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -980,7 +947,7 @@
    "export": 1,
    "print": 1,
    "report": 1,
-   "role": "All",
+   "role": "Desk User",
    "select": 1,
    "share": 1
   }
