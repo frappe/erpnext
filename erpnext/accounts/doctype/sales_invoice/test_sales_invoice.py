@@ -2537,10 +2537,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 		# tear down
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
-<<<<<<< HEAD
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
-=======
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
 
 	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
@@ -2572,7 +2569,6 @@ class TestSalesInvoice(FrappeTestCase):
 		# tear down
 		si.cancel()
 		se.cancel()
->>>>>>> 72d32a4901 (chore: fixed test cases related to Internal Transfer (#37659))
 
 	def test_internal_transfer_gl_entry(self):
 		si = create_sales_invoice(
