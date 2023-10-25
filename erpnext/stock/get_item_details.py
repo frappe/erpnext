@@ -268,7 +268,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
-	if item.variant_of:
+	if item.variant_of and not item.taxes:
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
