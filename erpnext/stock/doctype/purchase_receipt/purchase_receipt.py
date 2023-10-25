@@ -314,11 +314,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries)
-<<<<<<< HEAD
-=======
-		self.get_asset_gl_entry(gl_entries)
 		update_regional_gl_entries(gl_entries, self)
->>>>>>> 77cc91d06b (fix: add regional support to extend purchase gl entries)
 
 		return process_gl_map(gl_entries)
 
@@ -764,7 +760,6 @@ class PurchaseReceipt(BuyingController):
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 
-<<<<<<< HEAD
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 	return frappe.db.get_value(
 		"Stock Ledger Entry",
@@ -779,10 +774,7 @@ def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 	)
 
 
-def update_billed_amount_based_on_po(po_details, update_modified=True):
-=======
 def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=None):
->>>>>>> ff7108a3b1 (fix: update existing doc if possible)
 	po_billed_amt_details = get_billed_amount_against_po(po_details)
 
 	# Get all Purchase Receipt Item rows against the Purchase Order Items
