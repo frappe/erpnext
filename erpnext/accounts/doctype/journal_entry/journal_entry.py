@@ -78,6 +78,25 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def before_save(self):
+		if self.voucher_type in ['Depreciation Entry', 'Exchange Rate Revaluation']:
+			self.transaction_currency = frappe.db.get_value('Company', self.company, 'default_currency')
+
+			self.exchange_rate = get_exchange_rate(self.transaction_currency, self.default_company_currency, self.posting_date)
+			for row in self.accounts:
+				row.transaction_exchange_rate = self.exchange_rate
+				row.local_currency = frappe.db.get_value('Company', self.company, 'tax_currency')
+				row.local_currency_exchange_rate = get_exchange_rate(self.default_company_currency, row.local_currency, self.posting_date)
+
+				if row.debit_in_account_currency and self.exchange_rate:
+					row.transaction_debit = row.debit_in_account_currency/self.exchange_rate
+				if row.credit_in_account_currency and self.exchange_rate:
+					row.transaction_credit = row.credit_in_account_currency/self.exchange_rate
+				if row.transaction_debit and self.exchange_rate and row.local_currency_exchange_rate:
+					row.debit_in_local_currency = (row.transaction_debit*self.exchange_rate)*row.local_currency_exchange_rate
+				if row.transaction_credit and self.exchange_rate and row.local_currency_exchange_rate:
+					row.credit_in_local_currency = (row.transaction_credit*self.exchange_rate)*row.local_currency_exchange_rate
+
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
@@ -1551,3 +1570,24 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+@frappe.whitelist()
+def get_transactions(doc, child, transaction_type):
+    child_doc = json.loads(child)
+    debit, debit_in_account_currency, debit_in_local_currency = 0.0, 0.0, 0.0
+    credit, credit_in_account_currency, credit_in_local_currency = 0.0, 0.0, 0.0
+    if 'account' in child_doc and 'exchange_rate' in child_doc and transaction_type == 'debit':
+        if child_doc['transaction_debit'] and child_doc['transaction_exchange_rate'] and child_doc['exchange_rate'] and child_doc['local_currency_exchange_rate']:
+            debit = child_doc['transaction_debit']*child_doc['transaction_exchange_rate']
+            debit_in_account_currency = debit/float(child_doc['exchange_rate'])
+            debit_in_local_currency = debit*child_doc['local_currency_exchange_rate']
+
+        return {'debit':debit, 'debit_in_account_currency': debit_in_account_currency, 'debit_in_local_currency': debit_in_local_currency}
+
+    if 'account' in child_doc  and 'exchange_rate' in child_doc and transaction_type == 'credit':
+        if child_doc['transaction_credit'] and child_doc['transaction_exchange_rate'] and child_doc['exchange_rate'] and child_doc['local_currency_exchange_rate']:
+            credit = child_doc['transaction_credit']*child_doc['transaction_exchange_rate']
+            credit_in_account_currency = credit/float(child_doc['exchange_rate'])
+            credit_in_local_currency = credit*child_doc['local_currency_exchange_rate']
+
+        return {'credit':credit, 'credit_in_account_currency': credit_in_account_currency, 'credit_in_local_currency': credit_in_local_currency}

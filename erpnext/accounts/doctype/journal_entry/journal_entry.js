@@ -351,20 +351,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				row.party_type = d.party_type;
 			}
 		});
-
-		// set difference
-		if(doc.difference) {
-			if(doc.difference > 0) {
-				row.credit_in_account_currency = doc.difference;
-				row.credit = doc.difference;
-			} else {
-				row.debit_in_account_currency = -doc.difference;
-				row.debit = -doc.difference;
-			}
-		}
-		cur_frm.cscript.update_totals(doc);
-
-		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, 'accounts');
 	}
 
 };
@@ -474,14 +460,6 @@ $.extend(erpnext.journal_entry, {
 	},
 
 	set_debit_credit_in_company_currency: function(frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-
-		frappe.model.set_value(cdt, cdn, "debit",
-			flt(flt(row.debit_in_account_currency)*row.exchange_rate, precision("debit", row)));
-
-		frappe.model.set_value(cdt, cdn, "credit",
-			flt(flt(row.credit_in_account_currency)*row.exchange_rate, precision("credit", row)));
-
 		cur_frm.cscript.update_totals(frm.doc);
 	},
 
