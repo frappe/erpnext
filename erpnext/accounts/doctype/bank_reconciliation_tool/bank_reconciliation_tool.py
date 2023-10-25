@@ -16,12 +16,8 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 	get_amounts_not_reflected_in_system,
 	get_entries,
 )
-<<<<<<< HEAD
 from erpnext.accounts.utils import get_balance_on
-=======
-from erpnext.accounts.utils import get_account_currency, get_balance_on
 from erpnext.setup.utils import get_exchange_rate
->>>>>>> 89f484282a (refactor: exc rate on foreign currency JE from Bank Reconciliation)
 
 
 class BankReconciliationTool(Document):
