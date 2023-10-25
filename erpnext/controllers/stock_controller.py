@@ -1057,8 +1057,3 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 		repost_entries.append(repost_entry)
 
 	return repost_entries
-
-
-@erpnext.allow_regional
-def update_regional_gl_entries(gl_list, doc):
-	return
