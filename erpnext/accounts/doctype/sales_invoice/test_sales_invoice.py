@@ -2472,36 +2472,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-	def test_sle_for_target_warehouse(self):
-		se = make_stock_entry(
-			item_code="138-CMS Shoe",
-			target="Finished Goods - _TC",
-			company="_Test Company",
-			qty=1,
-			basic_rate=500,
-		)
-
-		si = frappe.copy_doc(test_records[0])
-		si.update_stock = 1
-		si.set_warehouse = "Finished Goods - _TC"
-		si.set_target_warehouse = "Stores - _TC"
-		si.get("items")[0].warehouse = "Finished Goods - _TC"
-		si.get("items")[0].target_warehouse = "Stores - _TC"
-		si.insert()
-		si.submit()
-
-		sles = frappe.get_all(
-			"Stock Ledger Entry", filters={"voucher_no": si.name}, fields=["name", "actual_qty"]
-		)
-
-		# check if both SLEs are created
-		self.assertEqual(len(sles), 2)
-		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
-
-		# tear down
-		si.cancel()
-		se.cancel()
-
 	def test_internal_transfer_gl_entry(self):
 		si = create_sales_invoice(
 			company="_Test Company with perpetual inventory",

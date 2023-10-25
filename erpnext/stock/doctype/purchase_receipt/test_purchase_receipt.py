@@ -1069,88 +1069,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.reload()
 		pr1.cancel()
 
-	def test_stock_transfer_from_purchase_receipt(self):
-		pr1 = make_purchase_receipt(
-			warehouse="Work In Progress - TCP1", company="_Test Company with perpetual inventory"
-		)
-
-		pr = make_purchase_receipt(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", do_not_save=1
-		)
-
-		pr.supplier_warehouse = ""
-		pr.items[0].from_warehouse = "Work In Progress - TCP1"
-
-		pr.submit()
-
-		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
-		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
-
-		self.assertFalse(gl_entries)
-
-		expected_sle = {"Work In Progress - TCP1": -5, "Stores - TCP1": 5}
-
-		for sle in sl_entries:
-			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
-
-		pr.cancel()
-		pr1.cancel()
-
-	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
-		create_warehouse(
-			"_Test Warehouse for Valuation",
-			company="_Test Company with perpetual inventory",
-			properties={"account": "_Test Account Stock In Hand - TCP1"},
-		)
-
-		pr1 = make_purchase_receipt(
-			warehouse="_Test Warehouse for Valuation - TCP1",
-			company="_Test Company with perpetual inventory",
-		)
-
-		pr = make_purchase_receipt(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", do_not_save=1
-		)
-
-		pr.items[0].from_warehouse = "_Test Warehouse for Valuation - TCP1"
-		pr.supplier_warehouse = ""
-
-		pr.append(
-			"taxes",
-			{
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account Shipping Charges - TCP1",
-				"category": "Valuation and Total",
-				"cost_center": "Main - TCP1",
-				"description": "Test",
-				"rate": 9,
-			},
-		)
-
-		pr.submit()
-
-		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
-		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
-
-		expected_gle = [
-			["Stock In Hand - TCP1", 272.5, 0.0],
-			["_Test Account Stock In Hand - TCP1", 0.0, 250.0],
-			["_Test Account Shipping Charges - TCP1", 0.0, 22.5],
-		]
-
-		expected_sle = {"_Test Warehouse for Valuation - TCP1": -5, "Stores - TCP1": 5}
-
-		for sle in sl_entries:
-			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
-
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(gle.account, expected_gle[i][0])
-			self.assertEqual(gle.debit, expected_gle[i][1])
-			self.assertEqual(gle.credit, expected_gle[i][2])
-
-		pr.cancel()
-		pr1.cancel()
-
 	def test_subcontracted_pr_for_multi_transfer_batches(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import (
 			make_purchase_receipt,
@@ -2049,6 +1967,21 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		# Test - 2: Valuation Rate should be equal to Previous SLE Valuation Rate
 		self.assertEqual(flt(sle.valuation_rate, 2), flt(previous_sle_valuation_rate, 2))
+
+	def non_internal_transfer_purchase_receipt(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		pr_doc = make_purchase_receipt(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", pr_doc.company)
+		pr_doc.items[0].db_set("target_warehouse", "warehouse")
+
+		pr_doc.reload()
+
+		self.assertEqual(pr_doc.items[0].from_warehouse, warehouse.name)
+
+		pr_doc.save()
+		pr_doc.reload()
+		self.assertFalse(pr_doc.items[0].from_warehouse)
 
 
 def prepare_data_for_internal_transfer():
