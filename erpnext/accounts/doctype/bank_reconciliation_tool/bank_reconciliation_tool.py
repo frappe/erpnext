@@ -131,7 +131,7 @@ def create_journal_entry_bts(
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
-		fieldname=["name", "deposit", "withdrawal", "bank_account"],
+		fieldname=["name", "deposit", "withdrawal", "bank_account", "currency"],
 		as_dict=True,
 	)[0]
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
@@ -149,10 +149,12 @@ def create_journal_entry_bts(
 	company_account_currency = frappe.get_cached_value("Account", company_account, "account_currency")
 	second_account_currency = frappe.get_cached_value("Account", second_account, "account_currency")
 
+	# determine if multi-currency Journal or not
 	is_multi_currency = (
 		True
 		if company_default_currency != company_account_currency
 		or company_default_currency != second_account_currency
+		or company_default_currency != bank_transaction.currency
 		else False
 	)
 
@@ -176,11 +178,16 @@ def create_journal_entry_bts(
 		"cost_center": get_default_cost_center(company),
 	}
 
+	# convert transaction amount to company currency
 	if is_multi_currency:
-		exc_rate = get_exchange_rate(company_account_currency, company_default_currency, posting_date)
+		exc_rate = get_exchange_rate(bank_transaction.currency, company_default_currency, posting_date)
 		withdrawal_in_company_currency = flt(exc_rate * abs(bank_transaction.withdrawal))
 		deposit_in_company_currency = flt(exc_rate * abs(bank_transaction.deposit))
+	else:
+		withdrawal_in_company_currency = bank_transaction.withdrawal
+		deposit_in_company_currency = bank_transaction.deposit
 
+	# if second account is of foreign currency, convert and set debit and credit fields.
 	if second_account_currency != company_default_currency:
 		exc_rate = get_exchange_rate(second_account_currency, company_default_currency, posting_date)
 		second_account_dict.update(
@@ -188,6 +195,8 @@ def create_journal_entry_bts(
 				"exchange_rate": exc_rate,
 				"credit": deposit_in_company_currency,
 				"debit": withdrawal_in_company_currency,
+				"credit_in_account_currency": flt(deposit_in_company_currency / exc_rate) or 0,
+				"debit_in_account_currency": flt(withdrawal_in_company_currency / exc_rate) or 0,
 			}
 		)
 	else:
@@ -201,6 +210,7 @@ def create_journal_entry_bts(
 			}
 		)
 
+	# if company account is of foreign currency, convert and set debit and credit fields.
 	if company_account_currency != company_default_currency:
 		exc_rate = get_exchange_rate(company_account_currency, company_default_currency, posting_date)
 		company_account_dict.update(
@@ -208,6 +218,16 @@ def create_journal_entry_bts(
 				"exchange_rate": exc_rate,
 				"credit": withdrawal_in_company_currency,
 				"debit": deposit_in_company_currency,
+			}
+		)
+	else:
+		company_account_dict.update(
+			{
+				"exchange_rate": 1,
+				"credit": withdrawal_in_company_currency,
+				"debit": deposit_in_company_currency,
+				"credit_in_account_currency": withdrawal_in_company_currency,
+				"debit_in_account_currency": deposit_in_company_currency,
 			}
 		)
 
