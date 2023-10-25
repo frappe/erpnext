@@ -2539,6 +2539,37 @@ class TestSalesInvoice(FrappeTestCase):
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
 
+	def test_sle_for_target_warehouse(self):
+		se = make_stock_entry(
+			item_code="138-CMS Shoe",
+			target="Finished Goods - _TC",
+			company="_Test Company",
+			qty=1,
+			basic_rate=500,
+		)
+
+		si = frappe.copy_doc(test_records[0])
+		si.customer = "_Test Internal Customer 3"
+		si.update_stock = 1
+		si.set_warehouse = "Finished Goods - _TC"
+		si.set_target_warehouse = "Stores - _TC"
+		si.get("items")[0].warehouse = "Finished Goods - _TC"
+		si.get("items")[0].target_warehouse = "Stores - _TC"
+		si.insert()
+		si.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry", filters={"voucher_no": si.name}, fields=["name", "actual_qty"]
+		)
+
+		# check if both SLEs are created
+		self.assertEqual(len(sles), 2)
+		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
+
+		# tear down
+		si.cancel()
+		se.cancel()
+
 	def test_internal_transfer_gl_entry(self):
 		si = create_sales_invoice(
 			company="_Test Company with perpetual inventory",
@@ -3661,6 +3692,20 @@ def create_internal_parties():
 		represents_company="_Test Company with perpetual inventory",
 		allowed_to_interact_with="_Test Company with perpetual inventory",
 	)
+
+	create_internal_customer(
+		customer_name="_Test Internal Customer 3",
+		represents_company="_Test Company",
+		allowed_to_interact_with="_Test Company",
+	)
+
+	account = create_account(
+		account_name="Unrealized Profit",
+		parent_account="Current Liabilities - _TC",
+		company="_Test Company",
+	)
+
+	frappe.db.set_value("Company", "_Test Company", "unrealized_profit_loss_account", account)
 
 	create_internal_supplier(
 		supplier_name="_Test Internal Supplier",
