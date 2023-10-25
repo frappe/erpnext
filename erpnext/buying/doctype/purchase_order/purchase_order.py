@@ -558,7 +558,10 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"material_request_item": "material_request_item",
 					"sales_order": "sales_order",
 					"sales_order_item": "sales_order_item",
+<<<<<<< HEAD
 					"wip_composite_asset": "wip_composite_asset",
+=======
+>>>>>>> 80774e2da1 (fix: GL Entries for receiving non CWIP assets using Purchase Receipt (#37660))
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
