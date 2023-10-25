@@ -316,7 +316,7 @@ erpnext.patches.v14_0.update_closing_balances #14-07-2023
 execute:frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
 erpnext.patches.v14_0.update_reference_type_in_journal_entry_accounts
 erpnext.patches.v14_0.update_subscription_details
-execute:frappe.delete_doc_if_exists("Report", "Tax Detail")
+execute:frappe.delete_doc("Report", "Tax Detail", force=True)
 erpnext.patches.v15_0.enable_all_leads
 erpnext.patches.v14_0.update_company_in_ldc
 erpnext.patches.v14_0.set_packed_qty_in_draft_delivery_notes
