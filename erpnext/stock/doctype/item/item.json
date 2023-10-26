@@ -379,7 +379,7 @@
    "options": "fa fa-rss"
   },
   {
-   "description": "Will also apply for variants unless overrridden",
+   "description": "Will also apply for variants unless overridden",
    "fieldname": "reorder_levels",
    "fieldtype": "Table",
    "label": "Reorder level based on Warehouse",

@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import gzip
 import json
 from typing import Optional, Set, Tuple
 
@@ -10,17 +11,7 @@ from frappe import _, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import (
-	cint,
-	flt,
-	get_link_to_form,
-	getdate,
-	gzip_compress,
-	gzip_decompress,
-	now,
-	nowdate,
-	parse_json,
-)
+from frappe.utils import cint, flt, get_link_to_form, getdate, now, nowdate, parse_json
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -295,7 +286,7 @@ def get_reposting_data(file_path) -> dict:
 
 	attached_file = frappe.get_doc("File", file_name)
 
-	data = gzip_decompress(attached_file.get_content())
+	data = gzip.decompress(attached_file.get_content())
 	if data := json.loads(data.decode("utf-8")):
 		data = data
 
@@ -378,7 +369,7 @@ def get_reposting_file_name(dt, dn):
 
 def create_json_gz_file(data, doc, file_name=None) -> str:
 	encoded_content = frappe.safe_encode(frappe.as_json(data))
-	compressed_content = gzip_compress(encoded_content)
+	compressed_content = gzip.compress(encoded_content)
 
 	if not file_name:
 		json_filename = f"{scrub(doc.doctype)}-{scrub(doc.name)}.json.gz"
