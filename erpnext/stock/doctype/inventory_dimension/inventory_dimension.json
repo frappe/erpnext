@@ -17,6 +17,8 @@
   "target_fieldname",
   "applicable_for_documents_tab",
   "apply_to_all_doctypes",
+  "column_break_niy2u",
+  "validate_negative_stock",
   "column_break_13",
   "document_type",
   "type_of_transaction",
@@ -173,11 +175,21 @@
    "fieldname": "reqd",
    "fieldtype": "Check",
    "label": "Mandatory"
+  },
+  {
+   "fieldname": "column_break_niy2u",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_negative_stock",
+   "fieldtype": "Check",
+   "label": "Validate Negative Stock"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-31 13:44:38.507698",
+ "modified": "2023-10-05 12:52:18.705431",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

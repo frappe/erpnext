@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
-from frappe.tests.utils import change_settings
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 import erpnext
@@ -45,13 +45,17 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
 
 
-class TestSalesInvoice(unittest.TestCase):
+class TestSalesInvoice(FrappeTestCase):
 	def setUp(self):
 		from erpnext.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import create_items
 
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -179,6 +183,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
 		unlink_payment_on_cancel_of_invoice()
 
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_payment_entry_unlink_against_standalone_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -511,70 +516,72 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.grand_total, 5474.0)
 
 	def test_tax_calculation_with_item_tax_template(self):
+		import json
+
+		from erpnext.stock.get_item_details import get_item_details
+
+		# set tax template in item
+		item = frappe.get_cached_doc("Item", "_Test Item")
+		item.set(
+			"taxes",
+			[
+				{
+					"item_tax_template": "_Test Item Tax Template 1 - _TC",
+					"valid_from": add_days(nowdate(), -5),
+				}
+			],
+		)
+		item.save()
+
+		# create sales invoice with item
 		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
-		item_row = si.get("items")[0]
+		item_details = get_item_details(
+			doc=si,
+			args={
+				"item_code": item.item_code,
+				"company": si.company,
+				"doctype": "Sales Invoice",
+				"conversion_rate": 1.0,
+			},
+		)
+		tax_map = json.loads(item_details.item_tax_rate)
+		for tax in tax_map:
+			si.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": tax,
+					"rate": tax_map[tax],
+					"description": "Test",
+					"cost_center": "_Test Cost Center - _TC",
+				},
+			)
+		si.submit()
+		si.load_from_db()
 
-		add_items = [
-			(54, "_Test Account Excise Duty @ 12 - _TC"),
-			(288, "_Test Account Excise Duty @ 15 - _TC"),
-			(144, "_Test Account Excise Duty @ 20 - _TC"),
-			(430, "_Test Item Tax Template 1 - _TC"),
+		# check if correct tax values are applied from tax template
+		self.assertEqual(si.net_total, 386.4)
+
+		expected_taxes = [
+			{
+				"tax_amount": 19.32,
+				"total": 405.72,
+			},
+			{
+				"tax_amount": 38.64,
+				"total": 444.36,
+			},
+			{
+				"tax_amount": 57.96,
+				"total": 502.32,
+			},
 		]
-		for qty, item_tax_template in add_items:
-			item_row_copy = copy.deepcopy(item_row)
-			item_row_copy.qty = qty
-			item_row_copy.item_tax_template = item_tax_template
-			si.append("items", item_row_copy)
 
-		si.append(
-			"taxes",
-			{
-				"account_head": "_Test Account Excise Duty - _TC",
-				"charge_type": "On Net Total",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Excise Duty",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 11,
-			},
-		)
-		si.append(
-			"taxes",
-			{
-				"account_head": "_Test Account Education Cess - _TC",
-				"charge_type": "On Net Total",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Education Cess",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 0,
-			},
-		)
-		si.append(
-			"taxes",
-			{
-				"account_head": "_Test Account S&H Education Cess - _TC",
-				"charge_type": "On Net Total",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "S&H Education Cess",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 3,
-			},
-		)
-		si.insert()
+		for i in range(len(expected_taxes)):
+			for key in expected_taxes[i]:
+				self.assertEqual(expected_taxes[i][key], si.get("taxes")[i].get(key))
 
-		self.assertEqual(si.net_total, 4600)
-
-		self.assertEqual(si.get("taxes")[0].tax_amount, 502.41)
-		self.assertEqual(si.get("taxes")[0].total, 5102.41)
-
-		self.assertEqual(si.get("taxes")[1].tax_amount, 197.80)
-		self.assertEqual(si.get("taxes")[1].total, 5300.21)
-
-		self.assertEqual(si.get("taxes")[2].tax_amount, 375.36)
-		self.assertEqual(si.get("taxes")[2].total, 5675.57)
-
-		self.assertEqual(si.grand_total, 5675.57)
-		self.assertEqual(si.rounding_adjustment, 0.43)
-		self.assertEqual(si.rounded_total, 5676.0)
+		self.assertEqual(si.get("base_total_taxes_and_charges"), 115.92)
 
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
@@ -1300,6 +1307,7 @@ class TestSalesInvoice(unittest.TestCase):
 		dn.submit()
 		return dn
 
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
@@ -2492,12 +2500,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"stock_received_but_not_billed",
 			"Stock Received But Not Billed - _TC1",
 		)
-		frappe.db.set_value(
-			"Company",
-			"_Test Company 1",
-			"expenses_included_in_valuation",
-			"Expenses Included In Valuation - _TC1",
-		)
 
 		# begin test
 		si = create_sales_invoice(
@@ -2547,6 +2549,7 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 
 		si = frappe.copy_doc(test_records[0])
+		si.customer = "_Test Internal Customer 3"
 		si.update_stock = 1
 		si.set_warehouse = "Finished Goods - _TC"
 		si.set_target_warehouse = "Stores - _TC"
@@ -2772,6 +2775,13 @@ class TestSalesInvoice(unittest.TestCase):
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
+			company="_Test Company",
+		)
+
+		tds_payable_account = create_account(
+			account_name="TDS Payable",
+			account_type="Tax",
+			parent_account="Duties and Taxes - _TC",
 			company="_Test Company",
 		)
 
@@ -3073,8 +3083,8 @@ class TestSalesInvoice(unittest.TestCase):
 			si.commission_rate = commission_rate
 			self.assertRaises(frappe.ValidationError, si.save)
 
+	@change_settings("Accounts Settings", {"acc_frozen_upto": add_days(getdate(), 1)})
 	def test_sales_invoice_submission_post_account_freezing_date(self):
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", add_days(getdate(), 1))
 		si = create_sales_invoice(do_not_save=True)
 		si.posting_date = add_days(getdate(), 1)
 		si.save()
@@ -3082,8 +3092,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, si.submit)
 		si.posting_date = getdate()
 		si.submit()
-
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def test_over_billing_case_against_delivery_note(self):
 		"""
@@ -3113,17 +3121,19 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", over_billing_allowance)
 
+	@change_settings(
+		"Accounts Settings",
+		{
+			"book_deferred_entries_via_journal_entry": 1,
+			"submit_journal_entries": 1,
+		},
+	)
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC",
 			company="_Test Company",
 		)
-
-		acc_settings = frappe.get_single("Accounts Settings")
-		acc_settings.book_deferred_entries_via_journal_entry = 1
-		acc_settings.submit_journal_entries = 1
-		acc_settings.save()
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_expense = 1
@@ -3189,13 +3199,6 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.credit)
 			self.assertEqual(expected_gle[i][2], gle.debit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
-
-		acc_settings = frappe.get_single("Accounts Settings")
-		acc_settings.book_deferred_entries_via_journal_entry = 0
-		acc_settings.submit_journal_entries = 0
-		acc_settings.save()
-
-		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def test_standalone_serial_no_return(self):
 		si = create_sales_invoice(
@@ -3689,6 +3692,20 @@ def create_internal_parties():
 		represents_company="_Test Company with perpetual inventory",
 		allowed_to_interact_with="_Test Company with perpetual inventory",
 	)
+
+	create_internal_customer(
+		customer_name="_Test Internal Customer 3",
+		represents_company="_Test Company",
+		allowed_to_interact_with="_Test Company",
+	)
+
+	account = create_account(
+		account_name="Unrealized Profit",
+		parent_account="Current Liabilities - _TC",
+		company="_Test Company",
+	)
+
+	frappe.db.set_value("Company", "_Test Company", "unrealized_profit_loss_account", account)
 
 	create_internal_supplier(
 		supplier_name="_Test Internal Supplier",

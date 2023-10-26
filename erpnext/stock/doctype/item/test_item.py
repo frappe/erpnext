@@ -163,7 +163,7 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item With Item Tax Template",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 1",
@@ -178,7 +178,7 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 1",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 2",
@@ -193,7 +193,7 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item Inherit Group Item Tax Template 2",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 			{
 				"item_code": "_Test Item Override Group Item Tax Template",
@@ -208,12 +208,12 @@ class TestItem(FrappeTestCase):
 			{
 				"item_code": "_Test Item Override Group Item Tax Template",
 				"tax_category": "_Test Tax Category 2",
-				"item_tax_template": None,
+				"item_tax_template": "",
 			},
 		]
 
 		expected_item_tax_map = {
-			None: {},
+			"": {},
 			"_Test Account Excise Duty @ 10 - _TC": {"_Test Account Excise Duty - _TC": 10},
 			"_Test Account Excise Duty @ 12 - _TC": {"_Test Account Excise Duty - _TC": 12},
 			"_Test Account Excise Duty @ 15 - _TC": {"_Test Account Excise Duty - _TC": 15},
@@ -907,6 +907,8 @@ def create_item(
 	opening_stock=0,
 	is_fixed_asset=0,
 	asset_category=None,
+	buying_cost_center=None,
+	selling_cost_center=None,
 	company="_Test Company",
 ):
 	if not frappe.db.exists("Item", item_code):
@@ -924,7 +926,15 @@ def create_item(
 		item.is_purchase_item = is_purchase_item
 		item.is_customer_provided_item = is_customer_provided_item
 		item.customer = customer or ""
-		item.append("item_defaults", {"default_warehouse": warehouse, "company": company})
+		item.append(
+			"item_defaults",
+			{
+				"default_warehouse": warehouse,
+				"company": company,
+				"selling_cost_center": selling_cost_center,
+				"buying_cost_center": buying_cost_center,
+			},
+		)
 		item.save()
 	else:
 		item = frappe.get_doc("Item", item_code)
