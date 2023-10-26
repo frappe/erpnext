@@ -606,6 +606,7 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 
 	# all templates have validity and no template is valid
 	if not taxes_with_validity and (not taxes_with_no_validity):
+		out["item_tax_template"] = ""
 		return None
 
 	# do not change if already a valid template
@@ -737,6 +738,12 @@ def get_default_cost_center(args, item=None, item_group=None, brand=None, compan
 			data = frappe.get_attr(path)(args.get("item_code"), company)
 
 			if data and (data.selling_cost_center or data.buying_cost_center):
+				if args.get("customer") and data.selling_cost_center:
+					return data.selling_cost_center
+
+				elif args.get("supplier") and data.buying_cost_center:
+					return data.buying_cost_center
+
 				return data.selling_cost_center or data.buying_cost_center
 
 	if not cost_center and args.get("cost_center"):

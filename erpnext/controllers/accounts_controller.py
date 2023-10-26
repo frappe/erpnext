@@ -1178,7 +1178,9 @@ class AccountsController(TransactionBase):
 								self.name,
 								arg.get("referenced_row"),
 							):
-								posting_date = frappe.db.get_value(arg.voucher_type, arg.voucher_no, "posting_date")
+								posting_date = arg.get("difference_posting_date") or frappe.db.get_value(
+									arg.voucher_type, arg.voucher_no, "posting_date"
+								)
 								je = create_gain_loss_journal(
 									self.company,
 									posting_date,
@@ -1261,7 +1263,7 @@ class AccountsController(TransactionBase):
 
 						je = create_gain_loss_journal(
 							self.company,
-							self.posting_date,
+							args.get("difference_posting_date") if args else self.posting_date,
 							self.party_type,
 							self.party,
 							party_account,
