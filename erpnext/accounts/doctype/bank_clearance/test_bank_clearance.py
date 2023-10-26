@@ -43,6 +43,7 @@ class TestBankClearance(unittest.TestCase):
 		def create_loan_masters():
 			create_loan_product(
 				"Clearance Loan",
+				"Clearance Loan",
 				2000000,
 				13.5,
 				25,

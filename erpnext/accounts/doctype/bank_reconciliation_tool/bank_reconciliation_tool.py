@@ -18,6 +18,7 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 	get_entries,
 )
 from erpnext.accounts.utils import get_account_currency, get_balance_on
+from erpnext.setup.utils import get_exchange_rate
 
 
 class BankReconciliationTool(Document):
@@ -130,7 +131,7 @@ def create_journal_entry_bts(
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
-		fieldname=["name", "deposit", "withdrawal", "bank_account"],
+		fieldname=["name", "deposit", "withdrawal", "bank_account", "currency"],
 		as_dict=True,
 	)[0]
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
@@ -144,29 +145,94 @@ def create_journal_entry_bts(
 			)
 
 	company = frappe.get_value("Account", company_account, "company")
+	company_default_currency = frappe.get_cached_value("Company", company, "default_currency")
+	company_account_currency = frappe.get_cached_value("Account", company_account, "account_currency")
+	second_account_currency = frappe.get_cached_value("Account", second_account, "account_currency")
+
+	# determine if multi-currency Journal or not
+	is_multi_currency = (
+		True
+		if company_default_currency != company_account_currency
+		or company_default_currency != second_account_currency
+		or company_default_currency != bank_transaction.currency
+		else False
+	)
 
 	accounts = []
-	# Multi Currency?
-	accounts.append(
-		{
-			"account": second_account,
-			"credit_in_account_currency": bank_transaction.deposit,
-			"debit_in_account_currency": bank_transaction.withdrawal,
-			"party_type": party_type,
-			"party": party,
-			"cost_center": get_default_cost_center(company),
-		}
-	)
+	second_account_dict = {
+		"account": second_account,
+		"account_currency": second_account_currency,
+		"credit_in_account_currency": bank_transaction.deposit,
+		"debit_in_account_currency": bank_transaction.withdrawal,
+		"party_type": party_type,
+		"party": party,
+		"cost_center": get_default_cost_center(company),
+	}
 
-	accounts.append(
-		{
-			"account": company_account,
-			"bank_account": bank_transaction.bank_account,
-			"credit_in_account_currency": bank_transaction.withdrawal,
-			"debit_in_account_currency": bank_transaction.deposit,
-			"cost_center": get_default_cost_center(company),
-		}
-	)
+	company_account_dict = {
+		"account": company_account,
+		"account_currency": company_account_currency,
+		"bank_account": bank_transaction.bank_account,
+		"credit_in_account_currency": bank_transaction.withdrawal,
+		"debit_in_account_currency": bank_transaction.deposit,
+		"cost_center": get_default_cost_center(company),
+	}
+
+	# convert transaction amount to company currency
+	if is_multi_currency:
+		exc_rate = get_exchange_rate(bank_transaction.currency, company_default_currency, posting_date)
+		withdrawal_in_company_currency = flt(exc_rate * abs(bank_transaction.withdrawal))
+		deposit_in_company_currency = flt(exc_rate * abs(bank_transaction.deposit))
+	else:
+		withdrawal_in_company_currency = bank_transaction.withdrawal
+		deposit_in_company_currency = bank_transaction.deposit
+
+	# if second account is of foreign currency, convert and set debit and credit fields.
+	if second_account_currency != company_default_currency:
+		exc_rate = get_exchange_rate(second_account_currency, company_default_currency, posting_date)
+		second_account_dict.update(
+			{
+				"exchange_rate": exc_rate,
+				"credit": deposit_in_company_currency,
+				"debit": withdrawal_in_company_currency,
+				"credit_in_account_currency": flt(deposit_in_company_currency / exc_rate) or 0,
+				"debit_in_account_currency": flt(withdrawal_in_company_currency / exc_rate) or 0,
+			}
+		)
+	else:
+		second_account_dict.update(
+			{
+				"exchange_rate": 1,
+				"credit": deposit_in_company_currency,
+				"debit": withdrawal_in_company_currency,
+				"credit_in_account_currency": deposit_in_company_currency,
+				"debit_in_account_currency": withdrawal_in_company_currency,
+			}
+		)
+
+	# if company account is of foreign currency, convert and set debit and credit fields.
+	if company_account_currency != company_default_currency:
+		exc_rate = get_exchange_rate(company_account_currency, company_default_currency, posting_date)
+		company_account_dict.update(
+			{
+				"exchange_rate": exc_rate,
+				"credit": withdrawal_in_company_currency,
+				"debit": deposit_in_company_currency,
+			}
+		)
+	else:
+		company_account_dict.update(
+			{
+				"exchange_rate": 1,
+				"credit": withdrawal_in_company_currency,
+				"debit": deposit_in_company_currency,
+				"credit_in_account_currency": withdrawal_in_company_currency,
+				"debit_in_account_currency": deposit_in_company_currency,
+			}
+		)
+
+	accounts.append(second_account_dict)
+	accounts.append(company_account_dict)
 
 	journal_entry_dict = {
 		"voucher_type": entry_type,
@@ -176,6 +242,9 @@ def create_journal_entry_bts(
 		"cheque_no": reference_number,
 		"mode_of_payment": mode_of_payment,
 	}
+	if is_multi_currency:
+		journal_entry_dict.update({"multi_currency": True})
+
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.update(journal_entry_dict)
 	journal_entry.set("accounts", accounts)

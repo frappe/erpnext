@@ -161,15 +161,6 @@ class TestQuotation(FrappeTestCase):
 
 		make_sales_order(quotation.name)
 
-	def test_shopping_cart_without_website_item(self):
-		if frappe.db.exists("Website Item", {"item_code": "_Test Item Home Desktop 100"}):
-			frappe.get_last_doc("Website Item", {"item_code": "_Test Item Home Desktop 100"}).delete()
-
-		quotation = frappe.copy_doc(test_records[0])
-		quotation.order_type = "Shopping Cart"
-		quotation.valid_till = getdate()
-		self.assertRaises(frappe.ValidationError, quotation.validate)
-
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		from erpnext.selling.doctype.sales_order.sales_order import (

@@ -68,7 +68,11 @@ def get_result(
 				tax_amount += entry.credit - entry.debit
 
 			if net_total_map.get(name):
-				total_amount, grand_total, base_total = net_total_map.get(name)
+				if voucher_type == "Journal Entry":
+					# back calcalute total amount from rate and tax_amount
+					total_amount = grand_total = base_total = tax_amount / (rate / 100)
+				else:
+					total_amount, grand_total, base_total = net_total_map.get(name)
 			else:
 				total_amount += entry.credit
 

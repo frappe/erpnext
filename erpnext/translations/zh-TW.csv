@@ -712,7 +712,6 @@ Rate at which Price list currency is converted to company's base currency,價目
 Account {0} does not belong to company: {1},科目{0}不屬於公司：{1}
 Abbreviation already used for another company,另一家公司已使用此縮寫
 Default Customer Group,預設客戶群組
-IFSC Code,IFSC代碼
 "If disable, 'Rounded Total' field will not be visible in any transaction",如果禁用，“圓角總計”字段將不可見的任何交易
 Operating Cost,營業成本
 Produced Items,生產物品
@@ -4144,7 +4143,6 @@ Student Group: ,學生組：
 Finance Book Id,金融書籍ID,
 Safety Stock,安全庫存
 Healthcare Settings,醫療設置
-Total Allocated Leaves,總分配的葉子
 Progress % for a task cannot be more than 100.,為任務進度百分比不能超過100個。
 Before reconciliation,調整前
 Taxes and Charges Added (Company Currency),稅收和收費上架（公司貨幣）
@@ -4523,7 +4521,6 @@ Test Code,測試代碼
 Settings for website homepage,對網站的主頁設置
 {0} is on hold till {1},{0}一直保持到{1}
 RFQs are not allowed for {0} due to a scorecard standing of {1},由於{1}的記分卡，{0}不允許使用RFQ,
-Used Leaves,使用的葉子
 Link Options,鏈接選項
 Total Amount {0},總金額{0}
 Invalid attribute {0} {1},無效的屬性{0} {1}
@@ -4654,7 +4651,6 @@ Academic Year Name,學年名稱
 Contact Desc,聯絡倒序
 Send regular summary reports via Email.,使用電子郵件發送定期匯總報告。
 Please set default account in Expense Claim Type {0},請報銷類型設置默認科目{0}
-Available Leaves,可用的葉子
 Student Name,學生姓名
 Item Manager,項目經理
 Payroll Payable,應付職工薪酬
@@ -5975,3 +5971,4 @@ Looks like someone sent you to an incomplete URL. Please ask them to look into i
 Payment Gateway,支付網關
 Address and Contacts,地址和聯絡方式
 Plan Name,計劃名稱
+Reject,拒絕
