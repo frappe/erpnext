@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import (
 	add_days,
 	add_months,
@@ -21,11 +22,15 @@ from erpnext.accounts.doctype.subscription.subscription import get_prorata_facto
 test_dependencies = ("UOM", "Item Group", "Item")
 
 
-class TestSubscription(unittest.TestCase):
+class TestSubscription(FrappeTestCase):
 	def setUp(self):
 		make_plans()
 		create_parties()
 		reset_settings()
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_create_subscription_with_trial_with_correct_period(self):
 		subscription = create_subscription(

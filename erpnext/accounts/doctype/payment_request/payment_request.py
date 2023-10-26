@@ -1,13 +1,9 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
-# For license information, please see license.txt
-
-
 import json
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_url, nowdate
+from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -20,7 +16,6 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
-from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.utilities import payment_app_import_guard
 
 
@@ -249,7 +244,7 @@ class PaymentRequest(Document):
 		if (
 			party_account_currency == ref_doc.company_currency and party_account_currency != self.currency
 		):
-			party_amount = ref_doc.base_grand_total
+			party_amount = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
 		else:
 			party_amount = self.grand_total
 
@@ -364,35 +359,11 @@ class PaymentRequest(Document):
 	def get_payment_success_url(self):
 		return self.payment_success_url
 
-	def on_payment_authorized(self, status=None):
-		if not status:
-			return
-
-		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
-
-		if status in ["Authorized", "Completed"]:
-			redirect_to = None
-			self.set_as_paid()
-
-			# if shopping cart enabled and in session
-			if (
-				shopping_cart_settings.enabled
-				and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest"
-			) and self.payment_channel != "Phone":
-
-				success_url = shopping_cart_settings.payment_success_url
-				if success_url:
-					redirect_to = ({"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}).get(
-						success_url, "/me"
-					)
-				else:
-					redirect_to = get_url("/orders/{0}".format(self.reference_name))
-
-			return redirect_to
-
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
+			with payment_app_import_guard():
+				from payments.payment_gateways.stripe_integration import create_stripe_subscription
+
 			return create_stripe_subscription(gateway_controller, data)
 
 
@@ -544,13 +515,12 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 
 
 def get_gateway_details(args):  # nosemgrep
-	"""return gateway and payment account of default payment gateway"""
-	if args.get("payment_gateway_account"):
-		return get_payment_gateway_account(args.get("payment_gateway_account"))
-
-	if args.order_type == "Shopping Cart":
-		payment_gateway_account = frappe.get_doc("E Commerce Settings").payment_gateway_account
-		return get_payment_gateway_account(payment_gateway_account)
+	"""
+	Return gateway and payment account of default payment gateway
+	"""
+	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
+	if gateway_account:
+		return get_payment_gateway_account(gateway_account)
 
 	gateway_account = get_payment_gateway_account({"is_default": 1})
 

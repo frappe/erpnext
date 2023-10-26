@@ -33,6 +33,7 @@ def after_install():
 	add_app_name()
 	setup_log_settings()
 	hide_workspaces()
+	update_roles()
 	frappe.db.commit()
 
 
@@ -230,6 +231,12 @@ def setup_log_settings():
 def hide_workspaces():
 	for ws in ["Integration", "Settings"]:
 		frappe.db.set_value("Workspace", ws, "public", 0)
+
+
+def update_roles():
+	website_user_roles = ("Customer", "Supplier")
+	for role in website_user_roles:
+		frappe.db.set_value("Role", role, "desk_access", 0)
 
 
 def create_default_role_profiles():
