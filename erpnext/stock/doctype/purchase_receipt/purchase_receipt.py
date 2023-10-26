@@ -543,17 +543,19 @@ class PurchaseReceipt(BuyingController):
 					d, gl_entries, self.posting_date, d.get("provisional_expense_account")
 				)
 			elif flt(d.qty) and (flt(d.valuation_rate) or self.is_return):
-				is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
 				remarks = self.get("remarks") or _("Accounting Entry for {0}").format(
-					"Asset" if is_asset_pr else "Stock"
+					"Asset" if d.is_fixed_asset else "Stock"
 				)
 
-				if not (erpnext.is_perpetual_inventory_enabled(self.company) or is_asset_pr):
-					return
+				if not (
+					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
+					or d.is_fixed_asset
+				):
+					continue
 
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
-					if is_asset_pr
+					if d.is_fixed_asset
 					else self.get_company_default("stock_received_but_not_billed")
 				)
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
