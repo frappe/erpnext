@@ -19,6 +19,9 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_serial_nos_details,
+)
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -1719,22 +1722,22 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 
 		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
 
-	if not args.batch_no:
-		return
+	if args.batch_no:
+		neg_batch_sle = get_future_sle_with_negative_batch_qty(args)
+		if is_negative_with_precision(neg_batch_sle, is_batch=True):
+			message = _(
+				"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
+			).format(
+				abs(neg_batch_sle[0]["cumulative_total"]),
+				frappe.get_desk_link("Batch", args.batch_no),
+				frappe.get_desk_link("Warehouse", args.warehouse),
+				neg_batch_sle[0]["posting_date"],
+				neg_batch_sle[0]["posting_time"],
+				frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]),
+			)
+			frappe.throw(message, NegativeStockError, title=_("Insufficient Stock for Batch"))
 
-	neg_batch_sle = get_future_sle_with_negative_batch_qty(args)
-	if is_negative_with_precision(neg_batch_sle, is_batch=True):
-		message = _(
-			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
-		).format(
-			abs(neg_batch_sle[0]["cumulative_total"]),
-			frappe.get_desk_link("Batch", args.batch_no),
-			frappe.get_desk_link("Warehouse", args.warehouse),
-			neg_batch_sle[0]["posting_date"],
-			neg_batch_sle[0]["posting_time"],
-			frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]),
-		)
-		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock for Batch"))
+	validate_reserved_stock(args)
 
 
 def is_negative_with_precision(neg_sle, is_batch=False):
@@ -1799,6 +1802,47 @@ def get_future_sle_with_negative_batch_qty(args):
 		args,
 		as_dict=1,
 	)
+
+
+def validate_reserved_stock(kwargs):
+	if kwargs.serial_no:
+		serial_nos = kwargs.serial_no.split("\n")
+		validate_reserved_serial_nos(kwargs.item_code, kwargs.warehouse, serial_nos)
+
+	elif kwargs.serial_and_batch_bundle:
+		sbb_entries = frappe.db.get_all(
+			"Serial and Batch Entry",
+			{
+				"parenttype": "Serial and Batch Bundle",
+				"parent": kwargs.serial_and_batch_bundle,
+				"docstatus": 1,
+			},
+			["batch_no", "serial_no", "qty"],
+		)
+		serial_nos = [entry.serial_no for entry in sbb_entries if entry.serial_no]
+
+		if serial_nos:
+			validate_reserved_serial_nos(kwargs.item_code, kwargs.warehouse, serial_nos)
+
+
+def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
+	if reserved_serial_nos_details := get_sre_reserved_serial_nos_details(
+		item_code, warehouse, serial_nos
+	):
+		if common_serial_nos := list(
+			set(serial_nos).intersection(set(reserved_serial_nos_details.keys()))
+		):
+			msg = _(
+				"Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
+			)
+			msg += "<br />"
+			msg += _("Example: Serial No {0} reserved in {1}.").format(
+				frappe.bold(common_serial_nos[0]),
+				frappe.get_desk_link(
+					"Stock Reservation Entry", reserved_serial_nos_details[common_serial_nos[0]]
+				),
+			)
+			frappe.throw(msg, title=_("Reserved Serial No."))
 
 
 def is_negative_stock_allowed(*, item_code: Optional[str] = None) -> bool:
