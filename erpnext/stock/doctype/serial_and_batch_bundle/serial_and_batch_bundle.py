@@ -1301,6 +1301,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 		"POS Invoice",
 		fields=[
 			"`tabPOS Invoice Item`.batch_no",
+			"`tabPOS Invoice Item`.qty",
 			"`tabPOS Invoice`.is_return",
 			"`tabPOS Invoice Item`.warehouse",
 			"`tabPOS Invoice Item`.name as child_docname",
@@ -1321,9 +1322,6 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 		if pos_invoice.serial_and_batch_bundle
 	]
 
-	if not ids:
-		return {}
-
 	if ids:
 		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 			key = (d.batch_no, d.warehouse)
@@ -1337,6 +1335,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			else:
 				pos_batches[key].qty += d.qty
 
+	# POS invoices having batch without bundle (to handle old POS invoices)
 	for row in pos_invoices:
 		if not row.batch_no:
 			continue
@@ -1346,11 +1345,11 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 		key = (row.batch_no, row.warehouse)
 		if key in pos_batches:
-			pos_batches[key] -= row.qty * -1 if row.is_return else row.qty
+			pos_batches[key]["qty"] -= row.qty * -1 if row.is_return else row.qty
 		else:
 			pos_batches[key] = frappe._dict(
 				{
-					"qty": (row.qty * -1 if row.is_return else row.qty),
+					"qty": (row.qty * -1 if not row.is_return else row.qty),
 					"warehouse": row.warehouse,
 				}
 			)
