@@ -330,8 +330,12 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			),
 			"expense_account": expense_account
 			or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
-			"discount_account": get_default_discount_account(args, item_defaults),
-			"provisional_expense_account": get_provisional_account(args, item_defaults),
+			"discount_account": get_default_discount_account(
+				args, item_defaults, item_group_defaults, brand_defaults
+			),
+			"provisional_expense_account": get_provisional_account(
+				args, item_defaults, item_group_defaults, brand_defaults
+			),
 			"cost_center": get_default_cost_center(
 				args, item_defaults, item_group_defaults, brand_defaults
 			),
@@ -606,6 +610,7 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 
 	# all templates have validity and no template is valid
 	if not taxes_with_validity and (not taxes_with_no_validity):
+		out["item_tax_template"] = ""
 		return None
 
 	# do not change if already a valid template
@@ -685,12 +690,22 @@ def get_default_expense_account(args, item, item_group, brand):
 	)
 
 
-def get_provisional_account(args, item):
-	return item.get("default_provisional_account") or args.default_provisional_account
+def get_provisional_account(args, item, item_group, brand):
+	return (
+		item.get("default_provisional_account")
+		or item_group.get("default_provisional_account")
+		or brand.get("default_provisional_account")
+		or args.default_provisional_account
+	)
 
 
-def get_default_discount_account(args, item):
-	return item.get("default_discount_account") or args.discount_account
+def get_default_discount_account(args, item, item_group, brand):
+	return (
+		item.get("default_discount_account")
+		or item_group.get("default_discount_account")
+		or brand.get("default_discount_account")
+		or args.discount_account
+	)
 
 
 def get_default_deferred_account(args, item, fieldname=None):
@@ -737,6 +752,12 @@ def get_default_cost_center(args, item=None, item_group=None, brand=None, compan
 			data = frappe.get_attr(path)(args.get("item_code"), company)
 
 			if data and (data.selling_cost_center or data.buying_cost_center):
+				if args.get("customer") and data.selling_cost_center:
+					return data.selling_cost_center
+
+				elif args.get("supplier") and data.buying_cost_center:
+					return data.buying_cost_center
+
 				return data.selling_cost_center or data.buying_cost_center
 
 	if not cost_center and args.get("cost_center"):

@@ -556,6 +556,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"bom": "bom",
 					"material_request": "material_request",
 					"material_request_item": "material_request_item",
+					"sales_order": "sales_order",
+					"sales_order_item": "sales_order_item",
 					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
