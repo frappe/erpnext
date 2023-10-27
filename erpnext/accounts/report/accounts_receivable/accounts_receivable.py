@@ -824,7 +824,11 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get("customer_group"):
 			groups = get_customer_group_with_children(self.filters.customer_group)
-			customers = qb.from_(self.customer).select(self.customer.name).where(self.customer['customer_group'].isin(groups))
+			customers = (
+				qb.from_(self.customer)
+				.select(self.customer.name)
+				.where(self.customer["customer_group"].isin(groups))
+			)
 			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
 		if self.filters.get("territory"):
@@ -1117,6 +1121,7 @@ class ReceivablePayableReport(object):
 			.run()
 		)
 		self.err_journals = [x[0] for x in results] if results else []
+
 
 def get_customer_group_with_children(customer_groups):
 	if not isinstance(customer_groups, list):
