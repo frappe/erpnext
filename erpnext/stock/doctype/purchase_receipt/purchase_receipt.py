@@ -1039,6 +1039,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 					"is_fixed_asset": "is_fixed_asset",
 					"asset_location": "asset_location",
 					"asset_category": "asset_category",
+					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
 				"filter": lambda d: get_pending_qty(d)[0] <= 0
