@@ -18,6 +18,26 @@ from erpnext import get_default_currency
 class SalesPerson(NestedSet):
 	nsm_parent_field = "parent_sales_person"
 
+	def before_validate(self):
+		self.convert_commission_rate_to_float()
+
+	def convert_commission_rate_to_float(self):
+		# 'commission_rate' is a Data field. Due to the challenges in directly changing a field
+		# type from 'Data' to 'Float' in the Frappe Framework, this workaround ensures that,
+		# moving forward, the value is always a valid float.
+		try:
+			self.commission_rate = float(self.commission_rate)
+		except ValueError:
+			try:
+				modified_value = self.commission_rate.replace(",", ".")
+				self.commission_rate = float(modified_value)
+			except ValueError:
+				frappe.throw(
+					_(
+						"Commission Rate must be a number. Please avoid using characters other than digits and a decimal point."
+					)
+				)
+
 	def validate(self):
 		if not self.parent_sales_person:
 			self.parent_sales_person = get_root_of("Sales Person")
