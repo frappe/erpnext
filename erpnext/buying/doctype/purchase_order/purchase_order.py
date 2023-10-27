@@ -524,6 +524,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"material_request_item": "material_request_item",
 					"sales_order": "sales_order",
 					"sales_order_item": "sales_order_item",
+					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
@@ -600,6 +601,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"field_map": {
 				"name": "po_detail",
 				"parent": "purchase_order",
+				"wip_composite_asset": "wip_composite_asset",
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
