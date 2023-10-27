@@ -658,7 +658,7 @@ class SerialandBatchBundle(Document):
 		if not available_batches:
 			return
 
-		available_batches = get_availabel_batches_qty(available_batches)
+		available_batches = get_available_batches_qty(available_batches)
 		for batch_no in batches:
 			if batch_no not in available_batches or available_batches[batch_no] < 0:
 				self.throw_error_message(
@@ -1074,7 +1074,7 @@ def get_auto_data(**kwargs):
 		return get_auto_batch_nos(kwargs)
 
 
-def get_availabel_batches_qty(available_batches):
+def get_available_batches_qty(available_batches):
 	available_batches_qty = defaultdict(float)
 	for batch in available_batches:
 		available_batches_qty[batch.batch_no] += batch.qty
