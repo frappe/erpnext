@@ -556,12 +556,9 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"bom": "bom",
 					"material_request": "material_request",
 					"material_request_item": "material_request_item",
-<<<<<<< HEAD
 					"sales_order": "sales_order",
 					"sales_order_item": "sales_order_item",
-=======
 					"wip_composite_asset": "wip_composite_asset",
->>>>>>> 0e5bea33a3 (chore: allow wip_composite_asset in the MR PO PR PI flow)
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
