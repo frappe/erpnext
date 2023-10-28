@@ -698,14 +698,16 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
-				rate = get_rate_for_return(
-					sle.voucher_type,
-					sle.voucher_no,
-					sle.item_code,
-					voucher_detail_no=sle.voucher_detail_no,
-					sle=sle,
-				)
-
+				if self.valuation_method == "Moving Average":
+					rate = flt(self.data[self.args.warehouse].previous_sle.valuation_rate)
+				else:
+					rate = get_rate_for_return(
+						sle.voucher_type,
+						sle.voucher_no,
+						sle.item_code,
+						voucher_detail_no=sle.voucher_detail_no,
+						sle=sle,
+					)
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
@@ -1615,26 +1617,32 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
-		"""
-		select
-			qty_after_transaction, posting_date, posting_time,
-			voucher_type, voucher_no
-		from `tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
-			and is_cancelled = 0
-			and qty_after_transaction < 0
-		order by timestamp(posting_date, posting_time) asc
-		limit 1
-	""",
-		args,
-		as_dict=1,
+def get_future_sle_with_negative_qty(sle):
+	SLE = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(SLE)
+		.select(
+			SLE.qty_after_transaction, SLE.posting_date, SLE.posting_time, SLE.voucher_type, SLE.voucher_no
+		)
+		.where(
+			(SLE.item_code == sle.item_code)
+			& (SLE.warehouse == sle.warehouse)
+			& (SLE.voucher_no != sle.voucher_no)
+			& (
+				CombineDatetime(SLE.posting_date, SLE.posting_time)
+				>= CombineDatetime(sle.posting_date, sle.posting_time)
+			)
+			& (SLE.is_cancelled == 0)
+			& (SLE.qty_after_transaction < 0)
+		)
+		.orderby(CombineDatetime(SLE.posting_date, SLE.posting_time))
+		.limit(1)
 	)
+
+	if sle.voucher_type == "Stock Reconciliation" and sle.batch_no:
+		query = query.where(SLE.batch_no == sle.batch_no)
+
+	return query.run(as_dict=True)
 
 
 def get_future_sle_with_negative_batch_qty(args):

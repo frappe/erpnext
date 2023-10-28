@@ -62,9 +62,12 @@ class StockController(AccountsController):
 			)
 		)
 
+		is_asset_pr = any(d.get("is_fixed_asset") for d in self.get("items"))
+
 		if (
 			cint(erpnext.is_perpetual_inventory_enabled(self.company))
 			or provisional_accounting_for_non_stock_items
+			or is_asset_pr
 		):
 			warehouse_account = get_warehouse_account_map(self.company)
 
@@ -72,11 +75,6 @@ class StockController(AccountsController):
 				if not gl_entries:
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
-
-		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus == 1:
-			gl_entries = []
-			gl_entries = self.get_asset_gl_entry(gl_entries)
-			make_gl_entries(gl_entries, from_repost=from_repost)
 
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -670,13 +668,21 @@ class StockController(AccountsController):
 				d.stock_uom_rate = d.rate / (d.conversion_factor or 1)
 
 	def validate_internal_transfer(self):
-		if (
-			self.doctype in ("Sales Invoice", "Delivery Note", "Purchase Invoice", "Purchase Receipt")
-			and self.is_internal_transfer()
-		):
-			self.validate_in_transit_warehouses()
-			self.validate_multi_currency()
-			self.validate_packed_items()
+		if self.doctype in ("Sales Invoice", "Delivery Note", "Purchase Invoice", "Purchase Receipt"):
+			if self.is_internal_transfer():
+				self.validate_in_transit_warehouses()
+				self.validate_multi_currency()
+				self.validate_packed_items()
+			else:
+				self.validate_internal_transfer_warehouse()
+
+	def validate_internal_transfer_warehouse(self):
+		for row in self.items:
+			if row.get("target_warehouse"):
+				row.target_warehouse = None
+
+			if row.get("from_warehouse"):
+				row.from_warehouse = None
 
 	def validate_in_transit_warehouses(self):
 		if (

@@ -468,6 +468,7 @@
    "label": "Accounting"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "label": "Expense Head",

@@ -341,5 +341,8 @@ execute:frappe.defaults.clear_default("fiscal_year")
 execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for_items', 0)
 erpnext.patches.v14_0.correct_asset_value_if_je_with_workflow
 erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
+erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
+erpnext.patches.v14_0.rename_over_order_allowance_field
+erpnext.patches.v14_0.migrate_delivery_stop_lock_field
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

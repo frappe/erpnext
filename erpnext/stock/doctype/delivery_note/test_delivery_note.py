@@ -5,11 +5,12 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.utils import get_balance_on
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
 	automatically_fetch_payment_terms,
@@ -268,8 +269,6 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.items[0].returned_qty, 2)
 		self.assertEqual(dn.per_returned, 40)
 
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-
 		return_dn_2 = make_return_doc("Delivery Note", dn.name)
 
 		# Check if unreturned amount is mapped in 2nd return
@@ -360,8 +359,6 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn.submit()
 		self.assertEqual(dn.items[0].incoming_rate, 150)
-
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 		return_dn = make_return_doc(dn.doctype, dn.name)
 		return_dn.items[0].warehouse = return_warehouse
@@ -1182,7 +1179,6 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 
 	def test_batch_expiry_for_delivery_note(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		item = make_item(
@@ -1239,9 +1235,100 @@ class TestDeliveryNote(FrappeTestCase):
 		# Test - 1: ValidationError should be raised
 		self.assertRaises(frappe.ValidationError, dn.submit)
 
+	def test_packed_items_for_return_delivery_note(self):
+		# Step - 1: Create Items
+		product_bundle_item = make_item(properties={"is_stock_item": 0}).name
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-BATCH-.#####",
+			}
+		).name
+		serial_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TEST-SERIAL-.#####"}
+		).name
+
+		# Step - 2: Inward Stock
+		se1 = make_stock_entry(item_code=batch_item, target="_Test Warehouse - _TC", qty=3)
+		serial_nos = (
+			make_stock_entry(item_code=serial_item, target="_Test Warehouse - _TC", qty=3)
+			.items[0]
+			.serial_no
+		)
+
+		# Step - 3: Create a Product Bundle
+		from erpnext.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import (
+			create_product_bundle_item,
+		)
+
+		create_product_bundle_item(product_bundle_item, packed_items=[[batch_item, 1], [serial_item, 1]])
+
+		# Step - 4: Create a Delivery Note for the Product Bundle
+		dn = create_delivery_note(
+			item_code=product_bundle_item,
+			warehouse="_Test Warehouse - _TC",
+			qty=3,
+			do_not_submit=True,
+		)
+		dn.packed_items[1].serial_no = serial_nos
+		dn.save()
+		dn.submit()
+
+		# Step - 5: Create a Return Delivery Note(Sales Return)
+		return_dn = make_return_doc(dn.doctype, dn.name)
+		return_dn.save()
+		return_dn.submit()
+
+		self.assertEqual(return_dn.packed_items[0].batch_no, dn.packed_items[0].batch_no)
+		self.assertEqual(return_dn.packed_items[1].serial_no, dn.packed_items[1].serial_no)
+
+	@change_settings("Stock Settings", {"automatically_set_serial_nos_based_on_fifo": 1})
+	def test_delivery_note_for_repetitive_serial_item(self):
+		# Step - 1: Create Serial Item
+		item, warehouse = (
+			make_item(
+				properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TEST-SERIAL-.###"}
+			).name,
+			"_Test Warehouse - _TC",
+		)
+
+		# Step - 2: Inward Stock
+		make_stock_entry(item_code=item, target=warehouse, qty=5)
+
+		# Step - 3: Create Delivery Note with repetitive Serial Item
+		dn = create_delivery_note(item_code=item, warehouse=warehouse, qty=2, do_not_save=True)
+		dn.append("items", dn.items[0].as_dict())
+		dn.items[1].qty = 3
+		dn.save()
+		dn.submit()
+
+		# Test - 1: Serial Nos should be different for each line item
+		serial_nos = []
+		for item in dn.items:
+			for serial_no in item.serial_no.split("\n"):
+				self.assertNotIn(serial_no, serial_nos)
+				serial_nos.append(serial_no)
+
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
+
+	def test_non_internal_transfer_delivery_note(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		dn = create_delivery_note(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", company=dn.company)
+		dn.items[0].db_set("target_warehouse", warehouse)
+
+		dn.reload()
+
+		self.assertEqual(dn.items[0].target_warehouse, warehouse)
+
+		dn.save()
+		dn.reload()
+		self.assertFalse(dn.items[0].target_warehouse)
 
 
 def create_delivery_note(**args):
