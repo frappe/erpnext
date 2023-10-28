@@ -958,17 +958,33 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.cancel()
 
 	def test_stock_transfer_from_purchase_receipt(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
 		pr1 = make_purchase_receipt(
-			warehouse="Work In Progress - TCP1", company="_Test Company with perpetual inventory"
+			warehouse="Stores - TCP1", company="_Test Company with perpetual inventory"
 		)
 
-		pr = make_purchase_receipt(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", do_not_save=1
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
 		)
 
-		pr.supplier_warehouse = ""
+		pr = make_inter_company_purchase_receipt(dn1.name)
 		pr.items[0].from_warehouse = "Work In Progress - TCP1"
-
+		pr.items[0].warehouse = "Stores - TCP1"
 		pr.submit()
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -982,9 +998,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
 
 		pr.cancel()
-		pr1.cancel()
 
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
 		create_warehouse(
 			"_Test Warehouse for Valuation",
 			company="_Test Company with perpetual inventory",
@@ -992,16 +1012,28 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		pr1 = make_purchase_receipt(
-			warehouse="_Test Warehouse for Valuation - TCP1",
+			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
 
-		pr = make_purchase_receipt(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", do_not_save=1
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=50,
+			warehouse="Stores - TCP1",
+			target_warehouse="_Test Warehouse for Valuation - TCP1",
 		)
 
+		pr = make_inter_company_purchase_receipt(dn1.name)
 		pr.items[0].from_warehouse = "_Test Warehouse for Valuation - TCP1"
-		pr.supplier_warehouse = ""
+		pr.items[0].warehouse = "Stores - TCP1"
 
 		pr.append(
 			"taxes",
@@ -1037,7 +1069,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(gle.credit, expected_gle[i][2])
 
 		pr.cancel()
-		pr1.cancel()
 
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
