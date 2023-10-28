@@ -62,7 +62,7 @@ frappe.ui.form.on('Delivery Trip', {
 						company: frm.doc.company,
 					}
 				})
-			}, __("Get customers from"));
+			}, __("Get stops from"));
 		}
 	},
 

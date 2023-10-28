@@ -928,17 +928,33 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.cancel()
 
 	def test_stock_transfer_from_purchase_receipt(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
 		pr1 = make_purchase_receipt(
-			warehouse="Work In Progress - TCP1", company="_Test Company with perpetual inventory"
+			warehouse="Stores - TCP1", company="_Test Company with perpetual inventory"
 		)
 
-		pr = make_purchase_receipt(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", do_not_save=1
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
 		)
 
-		pr.supplier_warehouse = ""
+		pr = make_inter_company_purchase_receipt(dn1.name)
 		pr.items[0].from_warehouse = "Work In Progress - TCP1"
-
+		pr.items[0].warehouse = "Stores - TCP1"
 		pr.submit()
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -955,6 +971,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.cancel()
 
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
 		create_warehouse(
 			"_Test Warehouse for Valuation",
 			company="_Test Company with perpetual inventory",
@@ -962,16 +983,28 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		pr1 = make_purchase_receipt(
-			warehouse="_Test Warehouse for Valuation - TCP1",
+			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
 
-		pr = make_purchase_receipt(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", do_not_save=1
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		dn1 = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=50,
+			warehouse="Stores - TCP1",
+			target_warehouse="_Test Warehouse for Valuation - TCP1",
 		)
 
+		pr = make_inter_company_purchase_receipt(dn1.name)
 		pr.items[0].from_warehouse = "_Test Warehouse for Valuation - TCP1"
-		pr.supplier_warehouse = ""
+		pr.items[0].warehouse = "Stores - TCP1"
 
 		pr.append(
 			"taxes",
@@ -2146,6 +2179,77 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		# Test - 2: Valuation Rate should be equal to Previous SLE Valuation Rate
 		self.assertEqual(flt(sle.valuation_rate, 2), flt(previous_sle_valuation_rate, 2))
+
+	def test_purchase_return_with_zero_rate(self):
+		company = "_Test Company with perpetual inventory"
+
+		# Step - 1: Create Item
+		item, warehouse = (
+			make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name,
+			"Stores - TCP1",
+		)
+
+		# Step - 2: Create Stock Entry (Material Receipt)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		se = make_stock_entry(
+			purpose="Material Receipt",
+			item_code=item,
+			qty=100,
+			basic_rate=100,
+			to_warehouse=warehouse,
+			company=company,
+		)
+
+		# Step - 3: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=5,
+			rate=0,
+			warehouse=warehouse,
+			company=company,
+		)
+
+		# Step - 4: Create Purchase Return
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.save()
+		pr_return.submit()
+
+		sl_entries = get_sl_entries(pr_return.doctype, pr_return.name)
+		gl_entries = get_gl_entries(pr_return.doctype, pr_return.name)
+
+		# Test - 1: SLE Stock Value Difference should be equal to Qty * Average Rate
+		average_rate = (
+			(se.items[0].qty * se.items[0].basic_rate) + (pr.items[0].qty * pr.items[0].rate)
+		) / (se.items[0].qty + pr.items[0].qty)
+		expected_stock_value_difference = pr_return.items[0].qty * average_rate
+		self.assertEqual(
+			flt(sl_entries[0].stock_value_difference, 2), flt(expected_stock_value_difference, 2)
+		)
+
+		# Test - 2: GL Entries should be created for Stock Value Difference
+		self.assertEqual(len(gl_entries), 2)
+
+		# Test - 3: SLE Stock Value Difference should be equal to Debit or Credit of GL Entries.
+		for entry in gl_entries:
+			self.assertEqual(abs(entry.debit + entry.credit), abs(sl_entries[0].stock_value_difference))
+
+	def non_internal_transfer_purchase_receipt(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		pr_doc = make_purchase_receipt(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", pr_doc.company)
+		pr_doc.items[0].db_set("target_warehouse", "warehouse")
+
+		pr_doc.reload()
+
+		self.assertEqual(pr_doc.items[0].from_warehouse, warehouse.name)
+
+		pr_doc.save()
+		pr_doc.reload()
+		self.assertFalse(pr_doc.items[0].from_warehouse)
 
 
 def prepare_data_for_internal_transfer():

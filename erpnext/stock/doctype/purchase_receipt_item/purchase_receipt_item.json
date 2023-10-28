@@ -118,7 +118,9 @@
   "dimension_col_break",
   "cost_center",
   "section_break_80",
-  "page_break"
+  "page_break",
+  "sales_order",
+  "sales_order_item"
  ],
  "fields": [
   {
@@ -1025,12 +1027,32 @@
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
    "options": "Asset"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "no_copy": 1,
+   "options": "Sales Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Order Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-10-03 21:11:50.547261",
+ "modified": "2023-10-19 10:50:58.071735",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
