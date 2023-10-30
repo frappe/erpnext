@@ -29,7 +29,8 @@
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Posting Date",
+   "search_index": 1
   },
   {
    "fieldname": "account_type",
@@ -147,7 +148,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-22 15:32:56.629430",
+ "modified": "2023-10-30 16:15:00.470283",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",
