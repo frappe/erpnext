@@ -140,7 +140,7 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 
 		# if account_head is a dict, search or create the account and get it's name
 		if isinstance(account_data, dict):
-			tax_row_defaults["description"] = "{0} @ {1}".format(
+			tax_row_defaults["description"] = account_data.get("description") or "{0} @ {1}".format(
 				account_data.get("account_name"), account_data.get("tax_rate")
 			)
 			tax_row_defaults["rate"] = account_data.get("tax_rate")
