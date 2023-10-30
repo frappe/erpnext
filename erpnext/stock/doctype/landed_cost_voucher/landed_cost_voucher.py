@@ -204,10 +204,14 @@ class LandedCostVoucher(Document):
 					"purchase_invoice" if item.receipt_document_type == "Purchase Invoice" else "purchase_receipt"
 				)
 				docs = frappe.db.get_all(
-					"Asset",
-					filters={receipt_document_type: item.receipt_document, "item_code": item.item_code, "docstatus":['!=', 2]},
-					fields=["name", "docstatus"],
-				)
+ 					"Asset",
++					filters={
++						receipt_document_type: item.receipt_document,
++						"item_code": item.item_code,
++						"docstatus": ["!=", 2],
++					},
+ 					fields=["name", "docstatus"],
+ 				)
 				if not docs or len(docs) != item.qty:
 					frappe.throw(
 						_(
