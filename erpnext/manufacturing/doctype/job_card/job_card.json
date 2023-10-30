@@ -434,13 +434,11 @@
   {
    "fieldname": "expected_start_date",
    "fieldtype": "Datetime",
-   "in_list_view": 1,
    "label": "Expected Start Date"
   },
   {
    "fieldname": "expected_end_date",
    "fieldtype": "Datetime",
-   "in_list_view": 1,
    "label": "Expected End Date"
   },
   {
