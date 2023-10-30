@@ -647,7 +647,7 @@ class StockReconciliation(StockController):
 					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
 					"name",
 				)
-				and current_qty
+				and current_qty > 0
 			):
 				new_sle = self.get_sle_for_items(row)
 				new_sle.actual_qty = current_qty * -1
