@@ -85,13 +85,7 @@ class ReceivablePayableReport(object):
 			self.skip_total_row = 1
 
 	def get_data(self):
-		self.get_ple_entries()
 		self.get_sales_invoices_or_customers_based_on_sales_person()
-		self.voucher_balance = OrderedDict()
-		self.init_voucher_balance()  # invoiced, paid, credit_note, outstanding
-
-		# Build delivery note map against all sales invoices
-		self.build_delivery_note_map()
 
 		# Get invoice details like bill_no, due_date etc for all invoices
 		self.get_invoice_details()
@@ -105,11 +99,24 @@ class ReceivablePayableReport(object):
 		# Get Exchange Rate Revaluations
 		self.get_exchange_rate_revaluations()
 
+		self.batch_size = 5000
+		self.last_name = None
+		self.voucher_balance = OrderedDict()
+		while True:
+			self.get_ple_entries()
+			if self.ple_entries:
+				self.last_name = self.ple_entries[-1].name
+				self.init_voucher_balance()  # invoiced, paid, credit_note, outstanding
+
+				# Build delivery note map against all sales invoices
+				self.build_delivery_note_map()
+
+				for ple in self.ple_entries:
+					self.update_voucher_balance(ple)
+			else:
+				break
+
 		self.data = []
-
-		for ple in self.ple_entries:
-			self.update_voucher_balance(ple)
-
 		self.build_data()
 
 	def init_voucher_balance(self):
@@ -714,10 +721,14 @@ class ReceivablePayableReport(object):
 		else:
 			self.qb_selection_filter.append(self.ple.posting_date.lte(self.filters.report_date))
 
+		if self.last_name:
+			self.qb_selection_filter.append(self.ple.name.gt(self.last_name))
+
 		ple = qb.DocType("Payment Ledger Entry")
 		query = (
 			qb.from_(ple)
 			.select(
+				ple.name,
 				ple.account,
 				ple.voucher_type,
 				ple.voucher_no,
@@ -739,10 +750,11 @@ class ReceivablePayableReport(object):
 		)
 
 		if self.filters.get("group_by_party"):
-			query = query.orderby(self.ple.party, self.ple.posting_date)
+			query = query.orderby(self.ple.name, self.ple.party, self.ple.posting_date)
 		else:
-			query = query.orderby(self.ple.posting_date, self.ple.party)
+			query = query.orderby(self.ple.name, self.ple.posting_date, self.ple.party)
 
+		query = query.limit(self.batch_size)
 		self.ple_entries = query.run(as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
