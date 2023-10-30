@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import gzip
 import json
 from typing import Optional, Set, Tuple
 
@@ -10,20 +11,11 @@ from frappe import _, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import (
-	cint,
-	flt,
-	get_link_to_form,
-	getdate,
-	gzip_compress,
-	gzip_decompress,
-	now,
-	nowdate,
-	parse_json,
-)
+from frappe.utils import cint, flt, get_link_to_form, getdate, now, nowdate, parse_json
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
@@ -294,7 +286,7 @@ def get_reposting_data(file_path) -> dict:
 
 	attached_file = frappe.get_doc("File", file_name)
 
-	data = gzip_decompress(attached_file.get_content())
+	data = gzip.decompress(attached_file.get_content())
 	if data := json.loads(data.decode("utf-8")):
 		data = data
 
@@ -377,7 +369,7 @@ def get_reposting_file_name(dt, dn):
 
 def create_json_gz_file(data, doc, file_name=None) -> str:
 	encoded_content = frappe.safe_encode(frappe.as_json(data))
-	compressed_content = gzip_compress(encoded_content)
+	compressed_content = gzip.compress(encoded_content)
 
 	if not file_name:
 		json_filename = f"{scrub(doc.doctype)}-{scrub(doc.name)}.json.gz"
@@ -711,10 +703,17 @@ class update_entries_after(object):
 		):
 			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
+		dimensions = get_inventory_dimensions()
+		has_dimensions = False
+		if dimensions:
+			for dimension in dimensions:
+				if sle.get(dimension.get("fieldname")):
+					has_dimensions = True
+
 		if sle.serial_and_batch_bundle:
 			self.calculate_valuation_for_serial_batch_bundle(sle)
 		else:
-			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
+			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no and not has_dimensions:
 				# assert
 				self.wh_data.valuation_rate = sle.valuation_rate
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
@@ -1297,7 +1296,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	return sle[0] if sle else frappe._dict()
 
 
-def get_previous_sle(args, for_update=False):
+def get_previous_sle(args, for_update=False, extra_cond=None):
 	"""
 	get the last sle on or before the current time-bucket,
 	to get actual qty before transaction, this function
@@ -1312,7 +1311,9 @@ def get_previous_sle(args, for_update=False):
 	}
 	"""
 	args["name"] = args.get("sle", None) or ""
-	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
+	sle = get_stock_ledger_entries(
+		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond
+	)
 	return sle and sle[0] or {}
 
 
@@ -1324,6 +1325,7 @@ def get_stock_ledger_entries(
 	for_update=False,
 	debug=False,
 	check_serial_no=True,
+	extra_cond=None,
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(
@@ -1360,6 +1362,9 @@ def get_stock_ledger_entries(
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
+
+	if extra_cond:
+		conditions += f"{extra_cond}"
 
 	return frappe.db.sql(
 		"""

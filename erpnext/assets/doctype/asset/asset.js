@@ -9,7 +9,6 @@ frappe.ui.form.on('Asset', {
 		frm.set_query("item_code", function() {
 			return {
 				"filters": {
-					"disabled": 0,
 					"is_fixed_asset": 1,
 					"is_stock_item": 0
 				}
@@ -337,7 +336,7 @@ frappe.ui.form.on('Asset', {
 
 
 	item_code: function(frm) {
-		if(frm.doc.item_code && frm.doc.calculate_depreciation) {
+		if(frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.gross_purchase_amount) {
 			frm.trigger('set_finance_book');
 		} else {
 			frm.set_value('finance_books', []);
@@ -490,7 +489,7 @@ frappe.ui.form.on('Asset', {
 
 	calculate_depreciation: function(frm) {
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
-		if (frm.doc.item_code && frm.doc.calculate_depreciation ) {
+		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.gross_purchase_amount) {
 			frm.trigger("set_finance_book");
 		} else {
 			frm.set_value("finance_books", []);

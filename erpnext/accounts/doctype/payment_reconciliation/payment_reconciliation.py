@@ -328,6 +328,7 @@ class PaymentReconciliation(Document):
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
 				res.difference_account = default_exchange_gain_loss_account
 				res.exchange_rate = inv.get("exchange_rate")
+				res.update({"gain_loss_posting_date": pay.get("posting_date")})
 
 				if pay.get("amount") == 0:
 					entries.append(res)
@@ -434,6 +435,7 @@ class PaymentReconciliation(Document):
 				"allocated_amount": flt(row.get("allocated_amount")),
 				"difference_amount": flt(row.get("difference_amount")),
 				"difference_account": row.get("difference_account"),
+				"difference_posting_date": row.get("gain_loss_posting_date"),
 				"cost_center": row.get("cost_center"),
 			}
 		)

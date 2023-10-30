@@ -30,7 +30,6 @@ erpnext.accounts.taxes = {
 							filters: {
 								"account_type": account_type,
 								"company": doc.company,
-								"disabled": 0
 							}
 						}
 					});
@@ -116,7 +115,7 @@ erpnext.accounts.taxes = {
 			account_head: function(frm, cdt, cdn) {
 				let d = locals[cdt][cdn];
 
-				if (doc.docstatus == 1) {
+				if (d.docstatus == 1) {
 					// Should not trigger any changes on change post submit
 					return;
 				}
