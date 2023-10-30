@@ -1,0 +1,19 @@
+[
+  {
+    "doctype": "Payment Gateway",
+    "gateway": "_Test Gateway"
+  },
+  {
+    "doctype": "Payment Gateway Account",
+    "is_default": 1,
+    "payment_gateway": "_Test Gateway",
+    "payment_account": "_Test Bank - _TC",
+    "currency": "INR"
+  },
+  {
+    "doctype": "Payment Gateway Account",
+    "payment_gateway": "_Test Gateway",
+    "payment_account": "_Test Bank USD - _TC",
+    "currency": "USD"
+  }
+]

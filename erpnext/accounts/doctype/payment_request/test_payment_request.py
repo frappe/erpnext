@@ -13,38 +13,8 @@ from erpnext.setup.utils import get_exchange_rate
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
-payment_gateway = {"doctype": "Payment Gateway", "gateway": "_Test Gateway"}
-
-payment_method = [
-	{
-		"doctype": "Payment Gateway Account",
-		"is_default": 1,
-		"payment_gateway": "_Test Gateway",
-		"payment_account": "_Test Bank - _TC",
-		"currency": "INR",
-	},
-	{
-		"doctype": "Payment Gateway Account",
-		"payment_gateway": "_Test Gateway",
-		"payment_account": "_Test Bank USD - _TC",
-		"currency": "USD",
-	},
-]
-
 
 class TestPaymentRequest(unittest.TestCase):
-	def setUp(self):
-		if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
-			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
-
-		for method in payment_method:
-			if not frappe.db.get_value(
-				"Payment Gateway Account",
-				{"payment_gateway": method["payment_gateway"], "currency": method["currency"]},
-				"name",
-			):
-				frappe.get_doc(method).insert(ignore_permissions=True)
-
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
 		so_inr.disable_rounded_total = 1
