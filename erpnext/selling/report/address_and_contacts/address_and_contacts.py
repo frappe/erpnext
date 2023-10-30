@@ -78,7 +78,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 		field = 'partner_name'
 
 	fetch_party_list = frappe.get_list(
-		party_type, filters=query_filters, fields=["name", party_group , field], as_list=True
+		party_type, filters=query_filters, fields=["name", party_group, field], as_list=True
 	)
 	party_list = [d[0] for d in fetch_party_list]
 	party_groups = {}
