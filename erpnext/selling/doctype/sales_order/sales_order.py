@@ -831,6 +831,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 							"postprocess": update_dn_item,
 						}
 					},
+					ignore_permissions=True,
 				)
 
 				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
