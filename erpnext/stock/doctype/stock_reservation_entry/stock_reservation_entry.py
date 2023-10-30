@@ -195,6 +195,7 @@ class StockReservationEntry(Document):
 						"sb_entries",
 						{
 							"serial_no": serial_no,
+							"serial_no_name": frappe.db.get_value("Serial No", serial_no, "serial_no"),
 							"qty": 1,
 							"batch_no": serial_no_wise_batch.get(serial_no),
 							"warehouse": self.warehouse,
@@ -240,9 +241,9 @@ class StockReservationEntry(Document):
 					entry.qty = 1
 
 					key = (
-						(entry.serial_no, self.warehouse, entry.batch_no)
+						(entry.serial_no, entry.serial_no_name, self.warehouse, entry.batch_no)
 						if self.has_batch_no
-						else (entry.serial_no, self.warehouse)
+						else (entry.serial_no, entry.serial_no_name, self.warehouse)
 					)
 					if key not in available_serial_nos:
 						msg = _(
@@ -573,7 +574,7 @@ def get_available_serial_nos_to_reserve(
 			frappe.qb.from_(sre)
 			.left_join(sb_entry)
 			.on(sre.name == sb_entry.parent)
-			.select(sb_entry.serial_no, sre.warehouse)
+			.select(sb_entry.serial_no, sb_entry.serial_no_name, sre.warehouse)
 			.where(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
@@ -1065,6 +1066,7 @@ def create_stock_reservation_entries_for_so_items(
 					"sb_entries",
 					{
 						"serial_no": entry.serial_no,
+						"serial_no_name": entry.serial_no_name,
 						"batch_no": entry.batch_no,
 						"qty": qty,
 						"warehouse": entry.warehouse,
