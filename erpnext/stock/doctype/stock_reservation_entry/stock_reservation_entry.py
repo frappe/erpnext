@@ -241,7 +241,7 @@ class StockReservationEntry(Document):
 
 					if available_qty_to_reserve <= 0:
 						msg = _(
-							"Row #{0}: Stock not availabe to reserve for Item {1} against Batch {2} in Warehouse {3}."
+							"Row #{0}: Stock not available to reserve for Item {1} against Batch {2} in Warehouse {3}."
 						).format(
 							entry.idx,
 							frappe.bold(self.item_code),
