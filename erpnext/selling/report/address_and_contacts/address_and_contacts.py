@@ -59,10 +59,10 @@ def get_data(filters):
 	party = filters.get("party_name")
 	party_group = get_party_group(party_type)
 
-	return get_party_addresses_and_contact(party_type, party, party_group , filters)
+	return get_party_addresses_and_contact(party_type, party, party_group, filters)
 
 
-def get_party_addresses_and_contact(party_type, party, party_group , filters):
+def get_party_addresses_and_contact(party_type, party, party_group, filters):
 	data = []
 	query_filters = None
 	party_details = frappe._dict()
