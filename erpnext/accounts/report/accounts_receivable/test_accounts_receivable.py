@@ -557,6 +557,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"range2": 60,
 			"range3": 90,
 			"range4": 120,
+			"in_party_currency": 1,
 		}
 
 		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
