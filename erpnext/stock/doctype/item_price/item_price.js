@@ -6,7 +6,6 @@ frappe.ui.form.on("Item Price", {
 		frm.set_query("item_code", function() {
 			return {
 				filters: {
-					"disabled": 0,
 					"has_variants": 0
 				}
 			};
