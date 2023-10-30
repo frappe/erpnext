@@ -10,8 +10,8 @@ frappe.views.calendar["Job Card"] = {
 	},
 	gantt: {
 		field_map: {
-			"start": "started_time",
-			"end": "started_time",
+			"start": "expected_start_date",
+			"end": "expected_end_date",
 			"id": "name",
 			"title": "subject",
 			"color": "color",
