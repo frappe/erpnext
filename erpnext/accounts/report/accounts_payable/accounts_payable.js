@@ -143,6 +143,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname": "show_future_payments",
 			"label": __("Show Future Payments"),
 			"fieldtype": "Check",
+		},
+		{
+			"fieldname": "in_party_currency",
+			"label": __("In Party Currency"),
+			"fieldtype": "Check",
 		}
 	],
 
