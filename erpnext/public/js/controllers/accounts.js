@@ -5,7 +5,6 @@
 frappe.provide("erpnext.taxes");
 frappe.provide("erpnext.taxes.flags");
 
-<<<<<<< HEAD
 frappe.ui.form.on(cur_frm.doctype, {
 	setup: function(frm) {
 		// set conditional display for rate column in taxes
@@ -13,58 +12,6 @@ frappe.ui.form.on(cur_frm.doctype, {
 			if(in_list(['Sales Taxes and Charges', 'Purchase Taxes and Charges'], grid_row.doc.doctype)) {
 				erpnext.taxes.set_conditional_mandatory_rate_or_amount(grid_row);
 			}
-=======
-erpnext.accounts.taxes = {
-	setup_tax_validations: function(doctype) {
-		let me = this;
-		frappe.ui.form.on(doctype, {
-			setup: function(frm) {
-				// set conditional display for rate column in taxes
-				$(frm.wrapper).on('grid-row-render', function(e, grid_row) {
-					if(in_list(['Sales Taxes and Charges', 'Purchase Taxes and Charges'], grid_row.doc.doctype)) {
-						me.set_conditional_mandatory_rate_or_amount(grid_row);
-					}
-				});
-			},
-			onload: function(frm) {
-				if(frm.get_field("taxes")) {
-					frm.set_query("account_head", "taxes", function(doc) {
-						if(frm.cscript.tax_table == "Sales Taxes and Charges") {
-							var account_type = ["Tax", "Chargeable", "Expense Account"];
-						} else {
-							var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
-						}
-
-						return {
-							query: "erpnext.controllers.queries.tax_account_query",
-							filters: {
-								"account_type": account_type,
-								"company": doc.company,
-							}
-						}
-					});
-					frm.set_query("cost_center", "taxes", function(doc) {
-						return {
-							filters: {
-								"company": doc.company,
-								"is_group": 0
-							}
-						};
-					});
-				}
-			},
-			validate: function(frm) {
-				// neither is absolutely mandatory
-				if(frm.get_docfield("taxes")) {
-					frm.get_docfield("taxes", "rate").reqd = 0;
-					frm.get_docfield("taxes", "tax_amount").reqd = 0;
-				}
-
-			},
-			taxes_on_form_rendered: function(frm) {
-				me.set_conditional_mandatory_rate_or_amount(frm.open_grid_row());
-			},
->>>>>>> f276fbba4f (refactor: remove extraneous disabled filters)
 		});
 	},
 	onload: function(frm) {
@@ -81,7 +28,6 @@ erpnext.accounts.taxes = {
 					filters: {
 						"account_type": account_type,
 						"company": doc.company,
-						"disabled": 0
 					}
 				}
 			});

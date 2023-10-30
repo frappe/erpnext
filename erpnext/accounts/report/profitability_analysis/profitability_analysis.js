@@ -1,7 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-<<<<<<< HEAD
 frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	frappe.query_reports["Profitability Analysis"] = {
 		"filters": [
@@ -34,58 +33,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Accounting Dimension"),
 				"fieldtype": "Link",
 				"options": "Accounting Dimension",
-				"get_query": () =>{
-					return {
-						filters: {
-							"disabled": 0
-						}
-					}
-=======
-frappe.query_reports["Profitability Analysis"] = {
-	"filters": [
-		{
-			"fieldname": "company",
-			"label": __("Company"),
-			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company"),
-			"reqd": 1
-		},
-		{
-			"fieldname": "based_on",
-			"label": __("Based On"),
-			"fieldtype": "Select",
-			"options": ["Cost Center", "Project", "Accounting Dimension"],
-			"default": "Cost Center",
-			"reqd": 1,
-			"on_change": function(query_report){
-				let based_on = query_report.get_values().based_on;
-				if(based_on!='Accounting Dimension'){
-					frappe.query_report.set_filter_value({
-						accounting_dimension: ''
-					});
-				}
-			}
-		},
-		{
-			"fieldname": "accounting_dimension",
-			"label": __("Accounting Dimension"),
-			"fieldtype": "Link",
-			"options": "Accounting Dimension",
-		},
-		{
-			"fieldname": "fiscal_year",
-			"label": __("Fiscal Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
-			"reqd": 1,
-			"on_change": function(query_report) {
-				var fiscal_year = query_report.get_values().fiscal_year;
-				if (!fiscal_year) {
-					return;
->>>>>>> f276fbba4f (refactor: remove extraneous disabled filters)
-				}
 			},
 			{
 				"fieldname": "fiscal_year",
