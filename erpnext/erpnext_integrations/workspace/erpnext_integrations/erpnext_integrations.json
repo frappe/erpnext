@@ -195,26 +195,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "GoCardless Settings",
-   "link_count": 0,
-   "link_to": "GoCardless Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mpesa Settings",
-   "link_count": 0,
-   "link_to": "Mpesa Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Plaid Settings",
    "link_count": 0,
    "link_to": "Plaid Settings",
@@ -223,7 +203,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-08-29 15:48:59.010704",
+ "modified": "2023-10-31 19:57:32.748726",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
