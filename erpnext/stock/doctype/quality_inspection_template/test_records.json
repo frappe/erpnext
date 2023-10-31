@@ -1,5 +1,9 @@
 [
  {
+     "doctype": "Quality Inspection Parameter",
+     "parameter" : "_Test Param"
+ },
+ {
      "quality_inspection_template_name" : "_Test Quality Inspection Template",
      "doctype": "Quality Inspection Template",
      "item_quality_inspection_parameter" : [
