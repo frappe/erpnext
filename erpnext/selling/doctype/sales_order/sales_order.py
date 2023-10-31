@@ -759,6 +759,8 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
 
+		# set target items names to ensure proper linking with packed_items
+		target.set_new_name()
 		make_packing_list(target)
 
 	def condition(doc):
