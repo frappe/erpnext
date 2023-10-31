@@ -6,7 +6,7 @@ from typing import Optional
 import frappe
 from frappe import _, bold, msgprint
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, cstr, flt
+from frappe.utils import add_to_date, cint, cstr, flt
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -689,56 +689,69 @@ class StockReconciliation(StockController):
 		else:
 			self._cancel()
 
-	def recalculate_current_qty(self, item_code, batch_no):
+	def recalculate_current_qty(self, voucher_detail_no, sle_creation, add_new_sle=False):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
 		sl_entries = []
+
 		for row in self.items:
-			if (
-				not (row.item_code == item_code and row.batch_no == batch_no)
-				and not row.serial_and_batch_bundle
-			):
+			if voucher_detail_no != row.name:
 				continue
 
 			if row.current_serial_and_batch_bundle:
-				self.recalculate_qty_for_serial_and_batch_bundle(row)
-				continue
-
-			current_qty = get_batch_qty_for_stock_reco(
-				item_code, row.warehouse, batch_no, self.posting_date, self.posting_time, self.name
-			)
+				current_qty = self.get_qty_for_serial_and_batch_bundle(row)
+			else:
+				current_qty = get_batch_qty_for_stock_reco(
+					row.item_code, row.warehouse, row.batch_no, self.posting_date, self.posting_time, self.name
+				)
 
 			precesion = row.precision("current_qty")
-			if flt(current_qty, precesion) == flt(row.current_qty, precesion):
-				continue
+			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
+				val_rate = get_valuation_rate(
+					row.item_code,
+					row.warehouse,
+					self.doctype,
+					self.name,
+					company=self.company,
+					batch_no=row.batch_no,
+					serial_and_batch_bundle=row.current_serial_and_batch_bundle,
+				)
 
-			val_rate = get_valuation_rate(
-				item_code, row.warehouse, self.doctype, self.name, company=self.company, batch_no=batch_no
-			)
+				row.current_valuation_rate = val_rate
+				row.current_qty = current_qty
+				row.db_set(
+					{
+						"current_qty": row.current_qty,
+						"current_valuation_rate": row.current_valuation_rate,
+						"current_amount": flt(row.current_qty * row.current_valuation_rate),
+					}
+				)
 
-			row.current_valuation_rate = val_rate
-			if not row.current_qty and current_qty:
-				sle = self.get_sle_for_items(row)
-				sle.actual_qty = current_qty * -1
-				sle.valuation_rate = val_rate
-				sl_entries.append(sle)
-
-			row.current_qty = current_qty
-			row.db_set(
-				{
-					"current_qty": row.current_qty,
-					"current_valuation_rate": row.current_valuation_rate,
-					"current_amount": flt(row.current_qty * row.current_valuation_rate),
-				}
-			)
+			if (
+				add_new_sle
+				and not frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
+					"name",
+				)
+				and current_qty > 0
+			):
+				new_sle = self.get_sle_for_items(row)
+				new_sle.actual_qty = current_qty * -1
+				new_sle.valuation_rate = row.current_valuation_rate
+				new_sle.creation_time = add_to_date(sle_creation, seconds=-1)
+				sl_entries.append(new_sle)
 
 		if sl_entries:
-			self.make_sl_entries(sl_entries, allow_negative_stock=True)
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
+			if not frappe.db.exists("Repost Item Valuation", {"voucher_no": self.name, "status": "Queued"}):
+				self.repost_future_sle_and_gle(force=True)
 
-	def recalculate_qty_for_serial_and_batch_bundle(self, row):
+	def get_qty_for_serial_and_batch_bundle(self, row):
 		doc = frappe.get_doc("Serial and Batch Bundle", row.current_serial_and_batch_bundle)
 		precision = doc.entries[0].precision("qty")
 
+		current_qty = 0
 		for d in doc.entries:
 			qty = (
 				get_batch_qty(
@@ -751,10 +764,12 @@ class StockReconciliation(StockController):
 				or 0
 			) * -1
 
-			if flt(d.qty, precision) == flt(qty, precision):
-				continue
+			if flt(d.qty, precision) != flt(qty, precision):
+				d.db_set("qty", qty)
 
-			d.db_set("qty", qty)
+			current_qty += qty
+
+		return abs(current_qty)
 
 
 def get_batch_qty_for_stock_reco(
