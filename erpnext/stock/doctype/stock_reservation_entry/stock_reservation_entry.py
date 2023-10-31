@@ -710,6 +710,39 @@ def get_sre_reserved_serial_nos_details(
 	return frappe._dict(query.run())
 
 
+def get_sre_reserved_batch_nos_details(
+	item_code: str, warehouse: str, batch_nos: list = None
+) -> dict:
+	"""Returns a dict of `Batch Qty` reserved in Stock Reservation Entry. The dict is like {batch_no: qty, ...}"""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.batch_no,
+			Sum(sb_entry.qty - sb_entry.delivered_qty),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.warehouse == warehouse)
+			& ((sre.reserved_qty - sre.delivered_qty) > 0)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+			& (sre.reservation_based_on == "Serial and Batch")
+		)
+		.groupby(sb_entry.batch_no)
+		.orderby(sb_entry.creation)
+	)
+
+	if batch_nos:
+		query = query.where(sb_entry.batch_no.isin(batch_nos))
+
+	return frappe._dict(query.run())
+
+
 def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict]:
 	"""Returns a list of SREs for the provided voucher."""
 
