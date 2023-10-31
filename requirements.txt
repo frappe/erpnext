@@ -4,7 +4,7 @@ googlemaps  # used in ERPNext, but dependency is defined in Frappe
 pandas>=1.1.5,<2.0.0
 plaid-python~=7.2.1
 pycountry~=20.7.3
-PyGithub~=1.54.1
+PyGithub~=2.1.1
 python-stdnum~=1.16
 python-youtube~=0.8.0
 taxjar~=1.9.2
