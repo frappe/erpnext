@@ -95,13 +95,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 				fieldname: "item_code",
 				fieldtype: "Link",
 				options: "Item",
-				"get_query": function() {
-					return {
-						"filters": {
-							"disabled": 0,
-						}
-					};
-				}
 			},
 			{
 				label: __("Ignore Empty Stock"),

@@ -1734,7 +1734,10 @@ def get_raw_materials_of_sub_assembly_items(
 			if not item.conversion_factor and item.purchase_uom:
 				item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)
 
-			item_details.setdefault(item.get("item_code"), item)
+			if details := item_details.get(item.get("item_code")):
+				details.qty += item.get("qty")
+			else:
+				item_details.setdefault(item.get("item_code"), item)
 
 	return item_details
 
