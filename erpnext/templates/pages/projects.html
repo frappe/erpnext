@@ -14,18 +14,16 @@
 
 {% block style %}
   <style>
-    {
-      % include "templates/includes/projects.css"%
-    }
+    {% include "templates/includes/projects.css" %}
   </style>
 {% endblock %}
 
 {% block page_content %}
   <div class="web-list-item transaction-list-item">
     <div class="row align-items-center">
-      <div class="col-sm-4 "><b>Status: {{ doc.status }}</b></div>
-      <div class="col-sm-4 "><b>Progress: {{ doc.percent_complete }}%</b></div>
-      <div class="col-sm-4 "><b>Hours Spent: {{ doc.actual_time | round }}</b></div>
+      <div class="col-sm-4 "><b>{{ _("Status") }}: {{ _(doc.status) }}</b></div>
+      <div class="col-sm-4 "><b>{{ _("Progress") }}: {{ doc.get_formatted("percent_complete") }}</b></div>
+      <div class="col-sm-4 "><b>{{ _("Hours Spent") }}: {{ doc.get_formatted("actual_time") }}</b></div>
     </div>
   </div>
 
@@ -34,7 +32,7 @@
   <hr>
 
   <div class="row align-items-center">
-    <div class="col-sm-6 my-account-header"> <h4>Tasks</h4></div>
+    <div class="col-sm-6 my-account-header"> <h4>{{ _("Tasks") }}</h4></div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-secondary btn-light btn-sm" href='/tasks/new?project={{ doc.project_name }}'>{{ _("New task") }}</a>
     </div>
@@ -44,39 +42,39 @@
     <div class="result">
       <div class="web-list-item transaction-list-item">
         <div class="row align-items-center">
-          <div class="col-sm-4"><b>Tasks</b></div>
-          <div class="col-sm-2"><b>Status</b></div>
-          <div class="col-sm-2"><b>End Date</b></div>
-          <div class="col-sm-2"><b>Assignment</b></div>
-          <div class="col-sm-2"><b>Modified On</b></div>
+          <div class="col-sm-4"><b>{{ _("Tasks") }}</b></div>
+          <div class="col-sm-2"><b>{{ _("Status") }}</b></div>
+          <div class="col-sm-2"><b>{{ _("End Date") }}</b></div>
+          <div class="col-sm-2"><b>{{ _("Assignment") }}</b></div>
+          <div class="col-sm-2"><b>{{ _("Modified On") }}</b></div>
         </div>
       </div>
       {% include "erpnext/templates/includes/projects/project_tasks.html" %}
     </div>
   </div>
   {% else %}
-    {{ empty_state('Task')}}
+    {{ empty_state(_("Task")) }}
   {% endif %}
 
-  <h4 class="my-account-header">Timesheets</h4>
+  <h4 class="my-account-header">{{ _("Timesheets") }}</h4>
   {% if doc.timesheets %}
     <div class="website-list">
       <div class="result">
         <div class="web-list-item transaction-list-item">
           <div class="row align-items-center">
-            <div class="col-xs-2"><b>Timesheet</b></div>
-            <div class="col-xs-2"><b>Status</b></div>
-            <div class="col-xs-2"><b>From</b></div>
-            <div class="col-xs-2"><b>To</b></div>
-            <div class="col-xs-2"><b>Modified By</b></div>
-            <div class="col-xs-2"><b>Modified On</b></div>
+            <div class="col-xs-2"><b>{{ _("Timesheet") }}</b></div>
+            <div class="col-xs-2"><b>{{ _("Status") }}</b></div>
+            <div class="col-xs-2"><b>{{ _("From") }}</b></div>
+            <div class="col-xs-2"><b>{{ _("To") }}</b></div>
+            <div class="col-xs-2"><b>{{ _("Modified By") }}</b></div>
+            <div class="col-xs-2"><b>{{ _("Modified On") }}</b></div>
           </div>
         </div>
       {% include "erpnext/templates/includes/projects/project_timesheets.html" %}
       </div>
     </div>
   {% else %}
-    {{ empty_state('Timesheet')}}
+    {{ empty_state(_("Timesheet")) }}
   {% endif %}
 
   {% if doc.attachments %}
@@ -113,7 +111,7 @@
 
 {% macro progress_bar(percent_complete) %}
 {% if percent_complete %}
-  <span class="small py-2">Project Progress:</span>
+  <span class="small py-2">{{ _("Project Progress:") }}</span>
   <div class="progress progress-hg" style="height: 15px;">
     <div
       class="progress-bar progress-bar-{{ 'warning' if percent_complete|round < 100 else 'success' }} active"\
@@ -133,7 +131,7 @@
         <div>
           <img src="/assets/frappe/images/ui-states/list-empty-state.svg" alt="Generic Empty State" class="null-state">
         </div>
-        <p>You haven't created a {{ section_name }} yet</p>
+        <p>{{ _("You haven't created a {0} yet").format(section_name) }}</p>
       </div>
     </div>
   </div>
