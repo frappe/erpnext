@@ -718,6 +718,7 @@ class ReceivablePayableReport(object):
 		query = (
 			qb.from_(ple)
 			.select(
+				ple.name,
 				ple.account,
 				ple.voucher_type,
 				ple.voucher_no,
@@ -731,12 +732,14 @@ class ReceivablePayableReport(object):
 				ple.account_currency,
 				ple.amount,
 				ple.amount_in_account_currency,
-				ple.remarks,
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(self.qb_selection_filter))
 			.where(Criterion.any(self.or_filters))
 		)
+
+		if self.filters.get("show_remarks"):
+			query = query.select(ple.remarks)
 
 		if self.filters.get("group_by_party"):
 			query = query.orderby(self.ple.party, self.ple.posting_date)
