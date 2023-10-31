@@ -54,16 +54,24 @@ class TestAssetMaintenance(unittest.TestCase):
 		next_due_date = calculate_next_due_date(nowdate(), "Monthly")
 		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
 
-		asset_maintenance_log = frappe.get_doc(
+		asset_maintenance_log = frappe.db.get_value(
+			"Asset Maintenance Log",
+			{"asset_maintenance": asset_maintenance.name, "task_name": "Change Oil"},
+			"name",
+		)
+
+		asset_maintenance_log_doc = frappe.get_doc("Asset Maintenance Log", asset_maintenance_log)
+		asset_maintenance_log_doc.update(
 			{
-				"doctype": "Asset Maintenance Log",
-				"asset_maintenance": self.asset_name,
-				"task": "Change Oil",
 				"completion_date": add_days(nowdate(), 2),
 				"maintenance_status": "Completed",
 			}
-		).insert()
-		next_due_date = calculate_next_due_date(asset_maintenance_log.completion_date, "Monthly")
+		)
+
+		asset_maintenance_log_doc.save()
+		next_due_date = calculate_next_due_date(asset_maintenance_log_doc.completion_date, "Monthly")
+
+		asset_maintenance.reload()
 		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
 
 
