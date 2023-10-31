@@ -1,7 +1,6 @@
 from typing import Tuple, Union
 
 import frappe
-from frappe.core.utils import find
 from frappe.utils import flt
 from rapidfuzz import fuzz, process
 
@@ -135,7 +134,7 @@ class AutoMatchbyPartyNameDescription:
 		skip = False
 		result = process.extract(
 			query=self.get(field),
-			choices=[name.get("party_name") for name in names],
+			choices={row.get("name"): row.get("party_name") for row in names},
 			scorer=fuzz.token_set_ratio,
 		)
 		party_name, skip = self.process_fuzzy_result(result)
@@ -143,8 +142,6 @@ class AutoMatchbyPartyNameDescription:
 		if not party_name:
 			return None, skip
 
-		# Get Party Docname from the list of dicts
-		party_name = find(names, lambda x: x["party_name"] == party_name).get("name")
 		return (
 			party,
 			party_name,
@@ -157,14 +154,14 @@ class AutoMatchbyPartyNameDescription:
 
 		Returns: Result, Skip (whether or not to discontinue matching)
 		"""
-		PARTY, SCORE, CUTOFF = 0, 1, 80
+		SCORE, PARTY_ID, CUTOFF = 1, 2, 80
 
 		if not result or not len(result):
 			return None, False
 
 		first_result = result[0]
 		if len(result) == 1:
-			return (first_result[PARTY] if first_result[SCORE] > CUTOFF else None), True
+			return (first_result[PARTY_ID] if first_result[SCORE] > CUTOFF else None), True
 
 		second_result = result[1]
 		if first_result[SCORE] > CUTOFF:
@@ -173,7 +170,7 @@ class AutoMatchbyPartyNameDescription:
 			if first_result[SCORE] == second_result[SCORE]:
 				return None, True
 
-			return first_result[PARTY], True
+			return first_result[PARTY_ID], True
 		else:
 			return None, False
 
