@@ -11,11 +11,17 @@ from frappe import _, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, now, nowdate, parse_json
+from frappe.utils import cint, flt, get_link_to_form, getdate, now, nowdate, nowtime, parse_json
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_available_batches,
+)
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_batch_nos_details,
+)
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_item_and_warehouse as get_reserved_stock,
 )
@@ -1799,6 +1805,9 @@ def validate_reserved_stock(kwargs):
 		serial_nos = kwargs.serial_no.split("\n")
 		validate_reserved_serial_nos(kwargs.item_code, kwargs.warehouse, serial_nos)
 
+	elif kwargs.batch_no:
+		validate_reserved_batch_nos(kwargs.item_code, kwargs.warehouse, [kwargs.batch_no])
+
 	elif kwargs.serial_and_batch_bundle:
 		sbb_entries = frappe.db.get_all(
 			"Serial and Batch Entry",
@@ -1807,12 +1816,13 @@ def validate_reserved_stock(kwargs):
 				"parent": kwargs.serial_and_batch_bundle,
 				"docstatus": 1,
 			},
-			["batch_no", "serial_no", "qty"],
+			["batch_no", "serial_no"],
 		)
-		serial_nos = [entry.serial_no for entry in sbb_entries if entry.serial_no]
 
-		if serial_nos:
+		if serial_nos := [entry.serial_no for entry in sbb_entries if entry.serial_no]:
 			validate_reserved_serial_nos(kwargs.item_code, kwargs.warehouse, serial_nos)
+		elif batch_nos := [entry.batch_no for entry in sbb_entries if entry.batch_no]:
+			validate_reserved_batch_nos(kwargs.item_code, kwargs.warehouse, batch_nos)
 
 
 def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
@@ -1833,6 +1843,36 @@ def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
 				),
 			)
 			frappe.throw(msg, title=_("Reserved Serial No."))
+
+
+def validate_reserved_batch_nos(item_code, warehouse, batch_nos):
+	if reserved_batches_map := get_sre_reserved_batch_nos_details(item_code, warehouse, batch_nos):
+		available_batches = get_available_batches(
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"posting_date": nowdate(),
+					"posting_time": nowtime(),
+				}
+			)
+		)
+		available_batches_map = {row.batch_no: row.qty for row in available_batches}
+		precision = cint(frappe.db.get_default("float_precision")) or 2
+
+		for batch_no in batch_nos:
+			diff = flt(
+				available_batches_map.get(batch_no, 0) - reserved_batches_map.get(batch_no, 0), precision
+			)
+			if diff < 0 and abs(diff) > 0.0001:
+				msg = _("{0} units of {1} needed in {2} on {3} {4} to complete this transaction.").format(
+					abs(diff),
+					frappe.get_desk_link("Batch", batch_no),
+					frappe.get_desk_link("Warehouse", warehouse),
+					nowdate(),
+					nowtime(),
+				)
+				frappe.throw(msg, title=_("Reserved Stock for Batch"))
 
 
 def is_negative_stock_allowed(*, item_code: Optional[str] = None) -> bool:
