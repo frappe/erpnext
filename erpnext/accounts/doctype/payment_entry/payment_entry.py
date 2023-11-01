@@ -1549,13 +1549,42 @@ def get_outstanding_reference_documents(args):
 	return data
 
 
-def split_invoices_based_on_payment_terms(outstanding_invoices, company):
-	invoice_ref_based_on_payment_terms = {}
+def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list:
+	"""Split a list of invoices based on their payment terms."""
+	exc_rates = get_currency_data(outstanding_invoices, company)
 
+	outstanding_invoices_after_split = []
+	for entry in outstanding_invoices:
+		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+			if payment_term_template := frappe.db.get_value(
+				entry.voucher_type, entry.voucher_no, "payment_terms_template"
+			):
+				split_rows = get_split_invoice_rows(entry, payment_term_template, exc_rates)
+				if not split_rows:
+					continue
+
+				frappe.msgprint(
+					_("Spliting {} {} into {} row(s) as per Payment Terms").format(
+						split_rows[0]["voucher_type"], split_rows[0]["voucher_no"], len(split_rows)
+					),
+					alert=True,
+				)
+				outstanding_invoices_after_split += split_rows
+				continue
+
+		# If not an invoice or no payment terms template, add as it is
+		outstanding_invoices_after_split.append(entry)
+
+	return outstanding_invoices_after_split
+
+
+def get_currency_data(outstanding_invoices: list, company: str = None) -> dict:
+	"""Get currency and conversion data for a list of invoices."""
+	exc_rates = frappe._dict()
 	company_currency = (
 		frappe.db.get_value("Company", company, "default_currency") if company else None
 	)
-	exc_rates = frappe._dict()
+
 	for doctype in ["Sales Invoice", "Purchase Invoice"]:
 		invoices = [x.voucher_no for x in outstanding_invoices if x.voucher_type == doctype]
 		for x in frappe.db.get_all(
@@ -1570,11 +1599,52 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 				company_currency=company_currency,
 			)
 
-	for idx, d in enumerate(outstanding_invoices):
-		if d.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-			payment_term_template = frappe.db.get_value(
-				d.voucher_type, d.voucher_no, "payment_terms_template"
+	return exc_rates
+
+
+def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates: dict) -> list:
+	"""Split invoice based on its payment schedule table."""
+	split_rows = []
+	allocate_payment_based_on_payment_terms = frappe.db.get_value(
+		"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
+	)
+
+	if not allocate_payment_based_on_payment_terms:
+		return [invoice]
+
+	payment_schedule = frappe.get_all(
+		"Payment Schedule", filters={"parent": invoice.voucher_no}, fields=["*"], order_by="due_date"
+	)
+	for payment_term in payment_schedule:
+		if not payment_term.outstanding > 0.1:
+			continue
+
+		doc_details = exc_rates.get(payment_term.parent, None)
+		is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
+			doc_details.party_account_currency != doc_details.company_currency
+		)
+		payment_term_outstanding = flt(payment_term.outstanding)
+		if not is_multi_currency_acc:
+			payment_term_outstanding = doc_details.conversion_rate * flt(payment_term.outstanding)
+
+		split_rows.append(
+			frappe._dict(
+				{
+					"due_date": invoice.due_date,
+					"currency": invoice.currency,
+					"voucher_no": invoice.voucher_no,
+					"voucher_type": invoice.voucher_type,
+					"posting_date": invoice.posting_date,
+					"invoice_amount": flt(invoice.invoice_amount),
+					"outstanding_amount": payment_term_outstanding
+					if payment_term_outstanding
+					else invoice.outstanding_amount,
+					"payment_term_outstanding": payment_term_outstanding,
+					"payment_amount": payment_term.payment_amount,
+					"payment_term": payment_term.payment_term,
+				}
 			)
+<<<<<<< HEAD
 			if payment_term_template:
 				allocate_payment_based_on_payment_terms = frappe.db.get_value(
 					"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
@@ -1635,6 +1705,11 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 
 	outstanding_invoices_after_split += outstanding_invoices
 	return outstanding_invoices_after_split
+=======
+		)
+
+	return split_rows
+>>>>>>> 6bd56d2d5f (refactor: `split_invoices_based_on_payment_terms`)
 
 
 def get_orders_to_be_billed(
