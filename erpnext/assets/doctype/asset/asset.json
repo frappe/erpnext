@@ -221,11 +221,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!(doc.is_composite_asset && !doc.capitalized_in)",
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
    "options": "Company:company:default_currency",
-   "read_only": 1,
    "read_only_depends_on": "eval:!doc.is_existing_asset",
    "reqd": 1
   },
@@ -399,6 +399,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_composite_asset && !doc.is_existing_asset",
    "fieldname": "purchase_receipt",
    "fieldtype": "Link",
    "label": "Purchase Receipt",
@@ -416,6 +417,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_composite_asset && !doc.is_existing_asset",
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
@@ -479,10 +481,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval.doc.asset_quantity",
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
    "label": "Asset Quantity",
-   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
+   "read_only": 1
   },
   {
    "fieldname": "depr_entry_posting_status",
@@ -562,9 +565,14 @@
    "link_doctype": "Journal Entry",
    "link_fieldname": "reference_name",
    "table_fieldname": "accounts"
+  },
+  {
+   "group": "Asset Capitalization",
+   "link_doctype": "Asset Capitalization",
+   "link_fieldname": "target_asset"
   }
  ],
- "modified": "2023-10-03 23:28:26.732269",
+ "modified": "2023-10-27 17:03:46.629617",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

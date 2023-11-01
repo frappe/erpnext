@@ -585,7 +585,6 @@ class PurchaseInvoice(BuyingController):
 
 	def get_gl_entries(self, warehouse_account=None):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
-		self.asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
 
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
@@ -937,10 +936,11 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					stock_rbnb = (
-						self.asset_received_but_not_billed
+						self.get_company_default("asset_received_but_not_billed")
 						if item.is_fixed_asset
 						else self.stock_received_but_not_billed
 					)
+
 					if not negative_expense_booked_in_pr:
 						gl_entries.append(
 							self.get_gl_dict(
@@ -1664,6 +1664,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"po_detail": "purchase_order_item",
 					"material_request": "material_request",
 					"material_request_item": "material_request_item",
+					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty),
