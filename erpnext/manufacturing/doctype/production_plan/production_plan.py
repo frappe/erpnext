@@ -1617,18 +1617,25 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Material Request Plan Item")
 
+	non_completed_production_plans = get_non_completed_production_plans()
+
 	query = (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
-		.select(Sum(child.quantity * IfNull(child.conversion_factor, 1.0)))
+		.select(Sum(child.required_bom_qty))
 		.where(
 			(table.docstatus == 1)
 			& (child.item_code == item_code)
 			& (child.warehouse == warehouse)
 			& (table.status.notin(["Completed", "Closed"]))
 		)
-	).run()
+	)
+
+	if non_completed_production_plans:
+		query = query.where(table.name.isin(non_completed_production_plans))
+
+	query = query.run()
 
 	if not query:
 		return 0.0
@@ -1636,13 +1643,34 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	reserved_qty_for_production_plan = flt(query[0][0])
 
 	reserved_qty_for_production = flt(
-		get_reserved_qty_for_production(item_code, warehouse, check_production_plan=True)
+		get_reserved_qty_for_production(
+			item_code, warehouse, non_completed_production_plans, check_production_plan=True
+		)
 	)
 
 	if reserved_qty_for_production > reserved_qty_for_production_plan:
 		return 0.0
 
 	return reserved_qty_for_production_plan - reserved_qty_for_production
+
+
+def get_non_completed_production_plans():
+	table = frappe.qb.DocType("Production Plan")
+	child = frappe.qb.DocType("Production Plan Item")
+
+	query = (
+		frappe.qb.from_(table)
+		.inner_join(child)
+		.on(table.name == child.parent)
+		.select(table.name)
+		.where(
+			(table.docstatus == 1)
+			& (table.status.notin(["Completed", "Closed"]))
+			& (child.planned_qty > child.ordered_qty)
+		)
+	).run(as_dict=True)
+
+	return list(set([d.name for d in query]))
 
 
 def get_raw_materials_of_sub_assembly_items(
@@ -1707,7 +1735,10 @@ def get_raw_materials_of_sub_assembly_items(
 			if not item.conversion_factor and item.purchase_uom:
 				item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)
 
-			item_details.setdefault(item.get("item_code"), item)
+			if details := item_details.get(item.get("item_code")):
+				details.qty += item.get("qty")
+			else:
+				item_details.setdefault(item.get("item_code"), item)
 
 	return item_details
 

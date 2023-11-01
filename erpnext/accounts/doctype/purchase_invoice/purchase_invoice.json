@@ -36,6 +36,7 @@
   "currency_and_price_list",
   "currency",
   "conversion_rate",
+  "use_transaction_date_exchange_rate",
   "column_break2",
   "buying_price_list",
   "price_list_currency",
@@ -1588,13 +1589,20 @@
    "label": "Repost Required",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_transaction_date_exchange_rate",
+   "fieldtype": "Check",
+   "label": "Use Transaction Date Exchange Rate",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-01 21:01:47.282533",
+ "modified": "2023-10-16 16:24:51.886231",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

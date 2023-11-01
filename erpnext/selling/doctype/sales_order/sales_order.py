@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Literal
 
 import frappe
 import frappe.utils
@@ -216,7 +217,15 @@ class SalesOrder(SellingController):
 
 	def validate_with_previous_doc(self):
 		super(SalesOrder, self).validate_with_previous_doc(
-			{"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
+			{
+				"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]},
+				"Quotation Item": {
+					"ref_dn_field": "quotation_item",
+					"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
 		)
 
 		if cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")):
@@ -534,14 +543,24 @@ class SalesOrder(SellingController):
 		return False
 
 	@frappe.whitelist()
-	def create_stock_reservation_entries(self, items_details=None, notify=True) -> None:
+	def create_stock_reservation_entries(
+		self,
+		items_details: list[dict] = None,
+		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+		notify=True,
+	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		create_stock_reservation_entries(so=self, items_details=items_details, notify=notify)
+		create_stock_reservation_entries(
+			sales_order=self,
+			items_details=items_details,
+			from_voucher_type=from_voucher_type,
+			notify=notify,
+		)
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
@@ -606,29 +625,37 @@ def close_or_unclose_sales_orders(names, status):
 
 
 def get_requested_item_qty(sales_order):
-	return frappe._dict(
-		frappe.db.sql(
-			"""
-		select sales_order_item, sum(qty)
-		from `tabMaterial Request Item`
-		where docstatus = 1
-			and sales_order = %s
-		group by sales_order_item
-	""",
-			sales_order,
-		)
-	)
+	result = {}
+	for d in frappe.db.get_all(
+		"Material Request Item",
+		filters={"docstatus": 1, "sales_order": sales_order},
+		fields=["sales_order_item", "sum(qty) as qty", "sum(received_qty) as received_qty"],
+		group_by="sales_order_item",
+	):
+		result[d.sales_order_item] = frappe._dict({"qty": d.qty, "received_qty": d.received_qty})
+
+	return result
 
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
+	def get_remaining_qty(so_item):
+		return flt(
+			flt(so_item.qty)
+			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
+			- max(
+				flt(so_item.get("delivered_qty"))
+				- flt(requested_item_qty.get(so_item.name, {}).get("received_qty")),
+				0,
+			)
+		)
+
 	def update_item(source, target, source_parent):
 		# qty is for packed items, because packed items don't have stock_qty field
-		qty = source.get("qty")
 		target.project = source_parent.project
-		target.qty = qty - requested_item_qty.get(source.name, 0) - flt(source.get("delivered_qty"))
+		target.qty = get_remaining_qty(source)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
 		args = target.as_dict().copy()
@@ -661,8 +688,8 @@ def make_material_request(source_name, target_doc=None):
 			"Sales Order Item": {
 				"doctype": "Material Request Item",
 				"field_map": {"name": "sales_order_item", "parent": "sales_order"},
-				"condition": lambda doc: not frappe.db.exists("Product Bundle", doc.item_code)
-				and (doc.stock_qty - flt(doc.get("delivered_qty"))) > requested_item_qty.get(doc.name, 0),
+				"condition": lambda item: not frappe.db.exists("Product Bundle", item.item_code)
+				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},
 		},
@@ -740,6 +767,8 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
 
+		# set target items names to ensure proper linking with packed_items
+		target.set_new_name()
 		make_packing_list(target)
 
 	def condition(doc):
@@ -812,6 +841,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 							"postprocess": update_dn_item,
 						}
 					},
+					ignore_permissions=True,
 				)
 
 				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))

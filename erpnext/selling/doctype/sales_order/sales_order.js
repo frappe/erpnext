@@ -87,17 +87,13 @@ frappe.ui.form.on("Sales Order", {
 				frm.events.get_items_from_internal_purchase_order(frm);
 			}
 
-			if (frm.is_new()) {
+			if (frm.doc.docstatus === 0) {
 				frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
-					if (value) {
-						frappe.db.get_single_value("Stock Settings", "auto_reserve_stock_for_sales_order").then((value) => {
-							// If `Reserve Stock on Sales Order Submission` is enabled in Stock Settings, set Reserve Stock to 1 else 0.
-							frm.set_value("reserve_stock", value ? 1 : 0);
-						})
-					} else {
-						// If `Stock Reservation` is disabled in Stock Settings, set Reserve Stock to 0 and read only.
+					if (!value) {
+						// If `Stock Reservation` is disabled in Stock Settings, set Reserve Stock to 0 and make the field read-only and hidden.
 						frm.set_value("reserve_stock", 0);
 						frm.set_df_property("reserve_stock", "read_only", 1);
+						frm.set_df_property("reserve_stock", "hidden", 1);
 					}
 				})
 			}

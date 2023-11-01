@@ -14,6 +14,7 @@
   "asset_owner",
   "asset_owner_company",
   "is_existing_asset",
+  "is_composite_asset",
   "supplier",
   "customer",
   "image",
@@ -72,7 +73,8 @@
   "purchase_receipt_amount",
   "default_finance_book",
   "depr_entry_posting_status",
-  "amended_from"
+  "amended_from",
+  "capitalized_in"
  ],
  "fields": [
   {
@@ -199,7 +201,7 @@
    "fieldtype": "Date",
    "label": "Purchase Date",
    "read_only": 1,
-   "read_only_depends_on": "eval:!doc.is_existing_asset",
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
    "reqd": 1
   },
   {
@@ -219,11 +221,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!(doc.is_composite_asset && !doc.capitalized_in)",
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
    "options": "Company:company:default_currency",
-   "read_only": 1,
    "read_only_depends_on": "eval:!doc.is_existing_asset",
    "reqd": 1
   },
@@ -237,10 +239,12 @@
    "default": "0",
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
-   "label": "Calculate Depreciation"
+   "label": "Calculate Depreciation",
+   "read_only_depends_on": "eval:doc.is_composite_asset && !doc.gross_purchase_amount"
   },
   {
    "default": "0",
+   "depends_on": "eval:!doc.is_composite_asset",
    "fieldname": "is_existing_asset",
    "fieldtype": "Check",
    "label": "Is Existing Asset"
@@ -395,6 +399,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_composite_asset && !doc.is_existing_asset",
    "fieldname": "purchase_receipt",
    "fieldtype": "Link",
    "label": "Purchase Receipt",
@@ -412,6 +417,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.is_composite_asset && !doc.is_existing_asset",
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
@@ -475,10 +481,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval.doc.asset_quantity",
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
    "label": "Asset Quantity",
-   "read_only_depends_on": "eval:!doc.is_existing_asset"
+   "read_only": 1
   },
   {
    "fieldname": "depr_entry_posting_status",
@@ -507,6 +514,21 @@
    "fieldname": "is_fully_depreciated",
    "fieldtype": "Check",
    "label": "Is Fully Depreciated"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.is_existing_asset",
+   "fieldname": "is_composite_asset",
+   "fieldtype": "Check",
+   "label": "Is Composite Asset"
+  },
+  {
+   "fieldname": "capitalized_in",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Capitalized In",
+   "options": "Asset Capitalization",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -543,9 +565,14 @@
    "link_doctype": "Journal Entry",
    "link_fieldname": "reference_name",
    "table_fieldname": "accounts"
+  },
+  {
+   "group": "Asset Capitalization",
+   "link_doctype": "Asset Capitalization",
+   "link_fieldname": "target_asset"
   }
  ],
- "modified": "2023-07-28 20:12:44.819616",
+ "modified": "2023-10-27 17:03:46.629617",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

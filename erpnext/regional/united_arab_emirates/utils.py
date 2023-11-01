@@ -7,32 +7,32 @@ from erpnext.controllers.taxes_and_totals import get_itemised_tax
 
 
 def update_itemised_tax_data(doc):
+	# maybe this should be a standard function rather than a regional one
 	if not doc.taxes:
+		return
+
+	if not doc.items:
+		return
+
+	meta = frappe.get_meta(doc.items[0].doctype)
+	if not meta.has_field("tax_rate"):
 		return
 
 	itemised_tax = get_itemised_tax(doc.taxes)
 
 	for row in doc.items:
-		tax_rate = 0.0
-		item_tax_rate = 0.0
+		tax_rate, tax_amount = 0.0, 0.0
+		# dont even bother checking in item tax template as it contains both input and output accounts - double the tax rate
+		item_code = row.item_code or row.item_name
+		if itemised_tax.get(item_code):
+			for tax in itemised_tax.get(row.item_code).values():
+				_tax_rate = flt(tax.get("tax_rate", 0), row.precision("tax_rate"))
+				tax_amount += flt((row.net_amount * _tax_rate) / 100, row.precision("tax_amount"))
+				tax_rate += _tax_rate
 
-		if row.item_tax_rate:
-			item_tax_rate = frappe.parse_json(row.item_tax_rate)
-
-		# First check if tax rate is present
-		# If not then look up in item_wise_tax_detail
-		if item_tax_rate:
-			for account, rate in item_tax_rate.items():
-				tax_rate += rate
-		elif row.item_code and itemised_tax.get(row.item_code):
-			tax_rate = sum([tax.get("tax_rate", 0) for d, tax in itemised_tax.get(row.item_code).items()])
-
-		meta = frappe.get_meta(row.doctype)
-
-		if meta.has_field("tax_rate"):
-			row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
-			row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
-			row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
+		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
+		row.tax_amount = flt(tax_amount, row.precision("tax_amount"))
+		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
 
 
 def get_account_currency(account):

@@ -167,15 +167,14 @@
    "label": "Supplier Group",
    "oldfieldname": "supplier_type",
    "oldfieldtype": "Link",
-   "options": "Supplier Group",
-   "reqd": 1
+   "options": "Supplier Group"
   },
   {
    "default": "Company",
    "fieldname": "supplier_type",
    "fieldtype": "Select",
    "label": "Supplier Type",
-   "options": "Company\nIndividual",
+   "options": "Company\nIndividual\nProprietorship\nPartnership",
    "reqd": 1
   },
   {
@@ -486,7 +485,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-09-21 12:24:20.398889",
+ "modified": "2023-10-19 16:55:15.148325",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
