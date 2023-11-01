@@ -79,7 +79,6 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
-		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -947,40 +946,6 @@ class PaymentEntry(AccountsController):
 			where parent = %s and allocated_amount = 0""",
 			self.name,
 		)
-
-	def validate_payment_against_negative_invoice(self):
-		if (self.payment_type != "Pay" or self.party_type != "Customer") and (
-			self.payment_type != "Receive" or self.party_type != "Supplier"
-		):
-			return
-
-		total_negative_outstanding = flt(
-			sum(
-				abs(flt(d.outstanding_amount))
-				for d in self.get("references")
-				if flt(d.outstanding_amount) < 0
-			),
-			self.references[0].precision("outstanding_amount") if self.references else None,
-		)
-
-		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
-		additional_charges = sum(flt(d.amount) for d in self.deductions)
-
-		if not total_negative_outstanding:
-			if self.party_type == "Customer":
-				msg = _("Cannot pay to Customer without any negative outstanding invoice")
-			else:
-				msg = _("Cannot receive from Supplier without any negative outstanding invoice")
-
-			frappe.throw(msg, InvalidPaymentEntry)
-
-		elif paid_amount - additional_charges > total_negative_outstanding:
-			frappe.throw(
-				_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
-					fmt_money(total_negative_outstanding)
-				),
-				InvalidPaymentEntry,
-			)
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
