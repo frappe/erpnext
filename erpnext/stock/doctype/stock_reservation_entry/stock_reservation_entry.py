@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
+from erpnext.stock.utils import get_or_make_bin
+
 
 class StockReservationEntry(Document):
 	def validate(self) -> None:
@@ -31,6 +33,7 @@ class StockReservationEntry(Document):
 		self.update_reserved_qty_in_voucher()
 		self.update_reserved_qty_in_pick_list()
 		self.update_status()
+		self.update_reserved_stock_in_bin()
 
 	def on_update_after_submit(self) -> None:
 		self.can_be_updated()
@@ -40,12 +43,14 @@ class StockReservationEntry(Document):
 		self.validate_reservation_based_on_serial_and_batch()
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
+		self.update_reserved_stock_in_bin()
 		self.reload()
 
 	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
 		self.update_reserved_qty_in_pick_list()
 		self.update_status()
+		self.update_reserved_stock_in_bin()
 
 	def validate_amended_doc(self) -> None:
 		"""Raises an exception if document is amended."""
@@ -340,6 +345,13 @@ class StockReservationEntry(Document):
 				reserved_qty,
 				update_modified=update_modified,
 			)
+
+	def update_reserved_stock_in_bin(self) -> None:
+		"""Updates `Reserved Stock` in Bin."""
+
+		bin_name = get_or_make_bin(self.item_code, self.warehouse)
+		bin_doc = frappe.get_cached_doc("Bin", bin_name)
+		bin_doc.update_reserved_stock()
 
 	def update_status(self, status: str = None, update_modified: bool = True) -> None:
 		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""

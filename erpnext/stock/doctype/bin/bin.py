@@ -148,6 +148,17 @@ class Bin(Document):
 		self.set_projected_qty()
 		self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
+	def update_reserved_stock(self):
+		"""Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry"""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_for_item_and_warehouse,
+		)
+
+		reserved_stock = get_sre_reserved_qty_for_item_and_warehouse(self.item_code, self.warehouse)
+
+		self.db_set("reserved_stock", flt(reserved_stock), update_modified=True)
+
 
 def on_doctype_update():
 	frappe.db.add_unique("Bin", ["item_code", "warehouse"], constraint_name="unique_item_warehouse")
