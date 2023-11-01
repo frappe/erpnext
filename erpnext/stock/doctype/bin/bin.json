@@ -23,9 +23,7 @@
   "stock_uom",
   "column_break_0slj",
   "valuation_rate",
-  "stock_value",
-  "fcfs_rate",
-  "ma_rate"
+  "stock_value"
  ],
  "fields": [
   {
@@ -125,17 +123,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "ma_rate",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Moving Average Rate",
-   "oldfieldname": "ma_rate",
-   "oldfieldtype": "Currency",
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
-  },
-  {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -144,17 +131,6 @@
    "oldfieldtype": "Data",
    "options": "UOM",
    "read_only": 1
-  },
-  {
-   "fieldname": "fcfs_rate",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "FCFS Rate",
-   "oldfieldname": "fcfs_rate",
-   "oldfieldtype": "Currency",
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
   },
   {
    "fieldname": "valuation_rate",
@@ -203,7 +179,7 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2023-11-01 15:28:55.240522",
+ "modified": "2023-11-01 15:35:51.722534",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
