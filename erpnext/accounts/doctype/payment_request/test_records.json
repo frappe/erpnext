@@ -3,12 +3,12 @@
     "doctype": "DocType",
     "module": "Accounts",
     "custom": 1,
-    "fields": [{"label": "Name", "fieldname": "name", "fieldtype": "Data"}],
+    "fields": [{"label": "Name", "fieldname": "controller_name", "fieldtype": "Data"}],
     "name": "Test Gateway Settings"
   },
   {
     "doctype": "Test Gateway Settings",
-    "name": "_Test Gateway Controller"
+    "controller_name": "_Test Gateway Controller"
   },
   {
     "doctype": "Payment Gateway",
