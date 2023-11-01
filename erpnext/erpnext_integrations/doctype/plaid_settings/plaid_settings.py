@@ -238,11 +238,6 @@ def new_bank_transaction(transaction):
 		deposit = abs(amount)
 		withdrawal = 0.0
 
-<<<<<<< HEAD
-	status = "Pending" if transaction["pending"] == "True" else "Settled"
-
-=======
->>>>>>> 46ea868559 (fix(plaid): Do not sync pending transactions)
 	tags = []
 	try:
 		tags += transaction["category"]
