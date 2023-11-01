@@ -344,5 +344,7 @@ erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
 erpnext.patches.v15_0.update_sre_from_voucher_details
 erpnext.patches.v14_0.rename_over_order_allowance_field
 erpnext.patches.v14_0.migrate_delivery_stop_lock_field
+execute:frappe.db.set_single_value("Payment Reconciliation", "invoice_limit", 50)
+execute:frappe.db.set_single_value("Payment Reconciliation", "payment_limit", 50)
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

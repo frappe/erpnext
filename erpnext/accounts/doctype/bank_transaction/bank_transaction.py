@@ -89,7 +89,6 @@ class BankTransaction(StatusUpdater):
 		    - 0 > a: Error: already over-allocated
 		- clear means: set the latest transaction date as clearance date
 		"""
-		gl_bank_account = frappe.db.get_value("Bank Account", self.bank_account, "account")
 		remaining_amount = self.unallocated_amount
 		for payment_entry in self.payment_entries:
 			if payment_entry.allocated_amount == 0.0:

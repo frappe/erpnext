@@ -771,19 +771,28 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 
 		create_batch_item_with_batch("_BATCH ITEM Test For Reserve", "TestBatch-RS 02")
-		make_stock_entry(
+		se = make_stock_entry(
 			target="_Test Warehouse - _TC",
 			item_code="_BATCH ITEM Test For Reserve",
-			qty=20,
+			qty=30,
 			basic_rate=100,
-			batch_no="TestBatch-RS 02",
 		)
 
+		se.reload()
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		# POS Invoice 1, for the batch without bundle
 		pos_inv1 = create_pos_invoice(
-			item="_BATCH ITEM Test For Reserve", rate=300, qty=15, batch_no="TestBatch-RS 02"
+			item="_BATCH ITEM Test For Reserve", rate=300, qty=15, do_not_save=1
 		)
+
+		pos_inv1.items[0].batch_no = batch_no
 		pos_inv1.save()
 		pos_inv1.submit()
+		pos_inv1.reload()
+
+		self.assertFalse(pos_inv1.items[0].serial_and_batch_bundle)
 
 		batches = get_auto_batch_nos(
 			frappe._dict(
@@ -792,7 +801,24 @@ class TestPOSInvoice(unittest.TestCase):
 		)
 
 		for batch in batches:
-			if batch.batch_no == "TestBatch-RS 02" and batch.warehouse == "_Test Warehouse - _TC":
+			if batch.batch_no == batch_no and batch.warehouse == "_Test Warehouse - _TC":
+				self.assertEqual(batch.qty, 15)
+
+		# POS Invoice 2, for the batch with bundle
+		pos_inv2 = create_pos_invoice(
+			item="_BATCH ITEM Test For Reserve", rate=300, qty=10, batch_no=batch_no
+		)
+		pos_inv2.reload()
+		self.assertTrue(pos_inv2.items[0].serial_and_batch_bundle)
+
+		batches = get_auto_batch_nos(
+			frappe._dict(
+				{"item_code": "_BATCH ITEM Test For Reserve", "warehouse": "_Test Warehouse - _TC"}
+			)
+		)
+
+		for batch in batches:
+			if batch.batch_no == batch_no and batch.warehouse == "_Test Warehouse - _TC":
 				self.assertEqual(batch.qty, 5)
 
 	def test_pos_batch_item_qty_validation(self):

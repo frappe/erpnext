@@ -1991,7 +1991,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Datum z
 Actual End Date,Skutečné datum ukončen$1,
 Applicable To (Role),Vztahující se na (Role)
 Purpose,Účel,
-Will also apply for variants unless overrridden,"Bude platit i pro varianty, pokud nebude přepsáno"
+Will also apply for variants unless overridden,"Bude platit i pro varianty, pokud nebude přepsáno"
 Advances,Zálohy,
 Approving User cannot be same as user the rule is Applicable To,Schválení Uživatel nemůže být stejná jako uživatel pravidlo se vztahuje na,
 No of Requested SMS,Počet žádaným SMS,
