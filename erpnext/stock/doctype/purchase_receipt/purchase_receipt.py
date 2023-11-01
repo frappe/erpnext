@@ -373,6 +373,7 @@ class PurchaseReceipt(BuyingController):
 					):
 						continue
 
+<<<<<<< HEAD
 					self.add_gl_entry(
 						gl_entries=gl_entries,
 						account=warehouse_account_name,
@@ -384,6 +385,19 @@ class PurchaseReceipt(BuyingController):
 						account_currency=warehouse_account_currency,
 						item=d,
 					)
+=======
+				if (flt(d.valuation_rate) or self.is_return or d.is_fixed_asset) and flt(d.qty):
+					make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
+					outgoing_amount = make_stock_received_but_not_billed_entry(d)
+					make_landed_cost_gl_entries(d)
+					make_rate_difference_entry(d)
+					make_sub_contracting_gl_entries(d)
+					make_divisional_loss_gl_entry(d, outgoing_amount)
+			elif (d.warehouse and d.warehouse not in warehouse_with_no_account) or (
+				d.rejected_warehouse and d.rejected_warehouse not in warehouse_with_no_account
+			):
+				warehouse_with_no_account.append(d.warehouse or d.rejected_warehouse)
+>>>>>>> 028b3e2fbf (fix: `TypeError` in PR for non-stock item)
 
 					# GL Entry for from warehouse or Stock Received but not billed
 					# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
