@@ -125,8 +125,6 @@ class PaymentRequest(Document):
 			currency=self.currency,
 			payment_gateway=self.payment_gateway,
 		)
-
-		controller.validate_transaction_currency(self.currency)
 		controller.request_for_payment(**payment_record)
 
 	def get_request_amount(self):
@@ -163,9 +161,11 @@ class PaymentRequest(Document):
 	def payment_gateway_validation(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
 		if hasattr(controller, "on_payment_request_submission"):
-			return controller.on_payment_request_submission(self)
-		else:
-			return True
+			controller.on_payment_request_submission(self)
+		if hasattr(controller, "validate_minimum_transaction_amount"):
+			controller.validate_minimum_transaction_amount(self.currency, self.grand_total)
+		if hasattr(controller, "validate_transaction_currency"):
+			controller.validate_transaction_currency(self.currency)
 
 	def set_payment_request_url(self):
 		if self.payment_account and self.payment_channel != "Phone":
@@ -193,11 +193,6 @@ class PaymentRequest(Document):
 			data.update({"company": frappe.defaults.get_defaults().company})
 
 		controller = _get_payment_gateway_controller(self.payment_gateway)
-		controller.validate_transaction_currency(self.currency)
-
-		if hasattr(controller, "validate_minimum_transaction_amount"):
-			controller.validate_minimum_transaction_amount(self.currency, self.grand_total)
-
 		return controller.get_payment_url(
 			**{
 				"amount": flt(self.grand_total, self.precision("grand_total")),
