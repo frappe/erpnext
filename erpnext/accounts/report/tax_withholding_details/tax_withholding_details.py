@@ -47,6 +47,7 @@ def get_result(
 	out = []
 	for name, details in gle_map.items():
 		tax_amount, total_amount, grand_total, base_total = 0, 0, 0, 0
+		bill_no, bill_date = "", ""
 		tax_withholding_category = tax_category_map.get(name)
 		rate = tax_rate_map.get(tax_withholding_category)
 
@@ -70,7 +71,10 @@ def get_result(
 			if net_total_map.get(name):
 				if voucher_type == "Journal Entry" and tax_amount and rate:
 					# back calcalute total amount from rate and tax_amount
-					total_amount = grand_total = base_total = tax_amount / (rate / 100)
+					if rate:
+						total_amount = grand_total = base_total = tax_amount / (rate / 100)
+				elif voucher_type == "Purchase Invoice":
+					total_amount, grand_total, base_total, bill_no, bill_date = net_total_map.get(name)
 				else:
 					total_amount, grand_total, base_total = net_total_map.get(name)
 			else:
@@ -96,7 +100,7 @@ def get_result(
 
 			row.update(
 				{
-					"section_code": tax_withholding_category,
+					"section_code": tax_withholding_category or "",
 					"entity_type": party_map.get(party, {}).get(party_type),
 					"rate": rate,
 					"total_amount": total_amount,
@@ -106,9 +110,13 @@ def get_result(
 					"transaction_date": posting_date,
 					"transaction_type": voucher_type,
 					"ref_no": name,
+					"supplier_invoice_no": bill_no,
+					"supplier_invoice_date": bill_date,
 				}
 			)
 			out.append(row)
+
+	out.sort(key=lambda x: x["section_code"])
 
 	return out
 
@@ -157,14 +165,14 @@ def get_gle_map(documents):
 def get_columns(filters):
 	pan = "pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id"
 	columns = [
-		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
 		{
-			"label": _(filters.get("party_type")),
-			"fieldname": "party",
-			"fieldtype": "Dynamic Link",
-			"options": "party_type",
-			"width": 180,
+			"label": _("Section Code"),
+			"options": "Tax Withholding Category",
+			"fieldname": "section_code",
+			"fieldtype": "Link",
+			"width": 90,
 		},
+		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 60},
 	]
 
 	if filters.naming_series == "Naming Series":
@@ -179,57 +187,72 @@ def get_columns(filters):
 
 	columns.extend(
 		[
-			{
-				"label": _("Date of Transaction"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 100,
-			},
-			{
-				"label": _("Section Code"),
-				"options": "Tax Withholding Category",
-				"fieldname": "section_code",
-				"fieldtype": "Link",
-				"width": 90,
-			},
 			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 100},
-			{
-				"label": _("Total Amount"),
-				"fieldname": "total_amount",
-				"fieldtype": "Float",
-				"width": 90,
-			},
+		]
+	)
+	if filters.party_type == "Supplier":
+		columns.extend(
+			[
+				{
+					"label": _("Supplier Invoice No"),
+					"fieldname": "supplier_invoice_no",
+					"fieldtype": "Data",
+					"width": 120,
+				},
+				{
+					"label": _("Supplier Invoice Date"),
+					"fieldname": "supplier_invoice_date",
+					"fieldtype": "Date",
+					"width": 120,
+				},
+			]
+		)
+
+	columns.extend(
+		[
 			{
 				"label": _("TDS Rate %") if filters.get("party_type") == "Supplier" else _("TCS Rate %"),
 				"fieldname": "rate",
 				"fieldtype": "Percent",
-				"width": 90,
+				"width": 60,
 			},
 			{
-				"label": _("Tax Amount"),
-				"fieldname": "tax_amount",
+				"label": _("Total Amount"),
+				"fieldname": "total_amount",
 				"fieldtype": "Float",
-				"width": 90,
-			},
-			{
-				"label": _("Grand Total"),
-				"fieldname": "grand_total",
-				"fieldtype": "Float",
-				"width": 90,
+				"width": 120,
 			},
 			{
 				"label": _("Base Total"),
 				"fieldname": "base_total",
 				"fieldtype": "Float",
-				"width": 90,
+				"width": 120,
 			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 100},
+			{
+				"label": _("Tax Amount"),
+				"fieldname": "tax_amount",
+				"fieldtype": "Float",
+				"width": 120,
+			},
+			{
+				"label": _("Grand Total"),
+				"fieldname": "grand_total",
+				"fieldtype": "Float",
+				"width": 120,
+			},
+			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 130},
 			{
 				"label": _("Reference No."),
 				"fieldname": "ref_no",
 				"fieldtype": "Dynamic Link",
 				"options": "transaction_type",
 				"width": 180,
+			},
+			{
+				"label": _("Date of Transaction"),
+				"fieldname": "transaction_date",
+				"fieldtype": "Date",
+				"width": 100,
 			},
 		]
 	)
@@ -253,27 +276,7 @@ def get_tds_docs(filters):
 		"Tax Withholding Account", {"company": filters.get("company")}, pluck="account"
 	)
 
-	query_filters = {
-		"account": ("in", tds_accounts),
-		"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-		"is_cancelled": 0,
-		"against": ("not in", bank_accounts),
-	}
-
-	party = frappe.get_all(filters.get("party_type"), pluck="name")
-	or_filters.update({"against": ("in", party), "voucher_type": "Journal Entry"})
-
-	if filters.get("party"):
-		del query_filters["account"]
-		del query_filters["against"]
-		or_filters = {"against": filters.get("party"), "party": filters.get("party")}
-
-	tds_docs = frappe.get_all(
-		"GL Entry",
-		filters=query_filters,
-		or_filters=or_filters,
-		fields=["voucher_no", "voucher_type", "against", "party"],
-	)
+	tds_docs = get_tds_docs_query(filters, bank_accounts, tds_accounts).run(as_dict=True)
 
 	for d in tds_docs:
 		if d.voucher_type == "Purchase Invoice":
@@ -309,6 +312,47 @@ def get_tds_docs(filters):
 	)
 
 
+def get_tds_docs_query(filters, bank_accounts, tds_accounts):
+	if not tds_accounts:
+		frappe.throw(
+			_("No {0} Accounts found for this company.").format(frappe.bold("Tax Withholding")),
+			title="Accounts Missing Error",
+		)
+	gle = frappe.qb.DocType("GL Entry")
+	query = (
+		frappe.qb.from_(gle)
+		.select("voucher_no", "voucher_type", "against", "party")
+		.where((gle.is_cancelled == 0))
+	)
+
+	if filters.get("from_date"):
+		query = query.where(gle.posting_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		query = query.where(gle.posting_date <= filters.get("to_date"))
+
+	if bank_accounts:
+		query = query.where(gle.against.notin(bank_accounts))
+
+	if filters.get("party"):
+		party = [filters.get("party")]
+		query = query.where(
+			((gle.account.isin(tds_accounts) & gle.against.isin(party)))
+			| ((gle.voucher_type == "Journal Entry") & (gle.party == filters.get("party")))
+			| gle.party.isin(party)
+		)
+	else:
+		party = frappe.get_all(filters.get("party_type"), pluck="name")
+		query = query.where(
+			((gle.account.isin(tds_accounts) & gle.against.isin(party)))
+			| (
+				(gle.voucher_type == "Journal Entry")
+				& ((gle.party_type == filters.get("party_type")) | (gle.party_type == ""))
+			)
+			| gle.party.isin(party)
+		)
+	return query
+
+
 def get_journal_entry_party_map(journal_entries):
 	journal_entry_party_map = {}
 	for d in frappe.db.get_all(
@@ -335,6 +379,8 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 			"base_tax_withholding_net_total",
 			"grand_total",
 			"base_total",
+			"bill_no",
+			"bill_date",
 		],
 		"Sales Invoice": ["base_net_total", "grand_total", "base_total"],
 		"Payment Entry": [
@@ -353,7 +399,13 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 	for entry in entries:
 		tax_category_map.update({entry.name: entry.tax_withholding_category})
 		if doctype == "Purchase Invoice":
-			value = [entry.base_tax_withholding_net_total, entry.grand_total, entry.base_total]
+			value = [
+				entry.base_tax_withholding_net_total,
+				entry.grand_total,
+				entry.base_total,
+				entry.bill_no,
+				entry.bill_date,
+			]
 		elif doctype == "Sales Invoice":
 			value = [entry.base_net_total, entry.grand_total, entry.base_total]
 		elif doctype == "Payment Entry":
