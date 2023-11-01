@@ -286,6 +286,7 @@ class TestStockReservationEntry(FrappeTestCase):
 				self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
 				self.assertEqual(sre_details.status, "Partially Reserved")
 
+			cancel_stock_reservation_entries("Sales Order", so.name)
 			se.cancel()
 
 			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
