@@ -91,16 +91,30 @@ frappe.query_reports["Reserved Stock"] = {
 			},
 		},
 		{
-			fieldname: "against_pick_list",
-			label: __("Against Pick List"),
+			fieldname: "from_voucher_type",
+			label: __("From Voucher Type"),
 			fieldtype: "Link",
-			options: "Pick List",
+			options: "DocType",
+			get_query: () => ({
+				filters: {
+					name: ["in", ["Pick List", "Purchase Receipt"]],
+				}
+			}),
+		},
+		{
+			fieldname: "from_voucher_no",
+			label: __("From Voucher No"),
+			fieldtype: "Dynamic Link",
+			options: "from_voucher_type",
 			get_query: () => ({
 				filters: {
 					docstatus: 1,
 					company: frappe.query_report.get_filter_value("company"),
 				},
 			}),
+			get_options: function () {
+				return frappe.query_report.get_filter_value("from_voucher_type");
+			},
 		},
 		{
 			fieldname: "reservation_based_on",

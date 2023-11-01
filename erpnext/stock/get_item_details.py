@@ -268,7 +268,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
-	if item.variant_of:
+	if item.variant_of and not item.taxes:
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
@@ -330,8 +330,12 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			),
 			"expense_account": expense_account
 			or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
-			"discount_account": get_default_discount_account(args, item_defaults),
-			"provisional_expense_account": get_provisional_account(args, item_defaults),
+			"discount_account": get_default_discount_account(
+				args, item_defaults, item_group_defaults, brand_defaults
+			),
+			"provisional_expense_account": get_provisional_account(
+				args, item_defaults, item_group_defaults, brand_defaults
+			),
 			"cost_center": get_default_cost_center(
 				args, item_defaults, item_group_defaults, brand_defaults
 			),
@@ -685,12 +689,22 @@ def get_default_expense_account(args, item, item_group, brand):
 	)
 
 
-def get_provisional_account(args, item):
-	return item.get("default_provisional_account") or args.default_provisional_account
+def get_provisional_account(args, item, item_group, brand):
+	return (
+		item.get("default_provisional_account")
+		or item_group.get("default_provisional_account")
+		or brand.get("default_provisional_account")
+		or args.default_provisional_account
+	)
 
 
-def get_default_discount_account(args, item):
-	return item.get("default_discount_account") or args.discount_account
+def get_default_discount_account(args, item, item_group, brand):
+	return (
+		item.get("default_discount_account")
+		or item_group.get("default_discount_account")
+		or brand.get("default_discount_account")
+		or args.discount_account
+	)
 
 
 def get_default_deferred_account(args, item, fieldname=None):
