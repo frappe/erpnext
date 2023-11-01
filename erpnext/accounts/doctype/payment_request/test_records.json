@@ -3,6 +3,7 @@
     "doctype": "DocType",
     "module": "Accounts",
     "custom": 1,
+    "autoname": "field:controller_name",
     "fields": [{"label": "Name", "fieldname": "controller_name", "fieldtype": "Data"}],
     "name": "Test Gateway Settings"
   },
