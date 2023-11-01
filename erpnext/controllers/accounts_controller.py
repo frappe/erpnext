@@ -2270,7 +2270,8 @@ class AccountsController(TransactionBase):
 			repost_ledger.company = self.company
 			repost_ledger.append("vouchers", {"voucher_type": self.doctype, "voucher_no": self.name})
 			repost_ledger.insert(ignore_permissions=True)
-			repost_ledger.submit(ignore_permissions=True)
+			repost_ledger.save(ignore_permissions=True)
+			repost_ledger.submit()
 			self.db_set("repost_required", 0)
 		else:
 			frappe.throw(_("No updates pending for reposting"))
