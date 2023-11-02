@@ -88,9 +88,12 @@ class StockReconciliation(StockController):
 		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
 
-	def set_current_serial_and_batch_bundle(self):
+	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
 		for item in self.items:
+			if voucher_detail_no and voucher_detail_no != item.name:
+				continue
+
 			item_details = frappe.get_cached_value(
 				"Item", item.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
@@ -148,6 +151,7 @@ class StockReconciliation(StockController):
 							"warehouse": item.warehouse,
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
+							"ignore_voucher_nos": [self.name],
 						}
 					)
 				)
@@ -163,11 +167,36 @@ class StockReconciliation(StockController):
 					)
 
 			if not serial_and_batch_bundle.entries:
+				if voucher_detail_no:
+					return
+
 				continue
 
-			item.current_serial_and_batch_bundle = serial_and_batch_bundle.save().name
+			serial_and_batch_bundle.save()
+			item.current_serial_and_batch_bundle = serial_and_batch_bundle.name
 			item.current_qty = abs(serial_and_batch_bundle.total_qty)
 			item.current_valuation_rate = abs(serial_and_batch_bundle.avg_rate)
+			if save:
+				sle_creation = frappe.db.get_value(
+					"Serial and Batch Bundle", item.serial_and_batch_bundle, "creation"
+				)
+				creation = add_to_date(sle_creation, seconds=-1)
+				item.db_set(
+					{
+						"current_serial_and_batch_bundle": item.current_serial_and_batch_bundle,
+						"current_qty": item.current_qty,
+						"current_valuation_rate": item.current_valuation_rate,
+						"creation": creation,
+					}
+				)
+
+				serial_and_batch_bundle.db_set(
+					{
+						"creation": creation,
+						"voucher_no": self.name,
+						"voucher_detail_no": voucher_detail_no,
+					}
+				)
 
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
@@ -698,9 +727,10 @@ class StockReconciliation(StockController):
 			if voucher_detail_no != row.name:
 				continue
 
+			current_qty = 0.0
 			if row.current_serial_and_batch_bundle:
 				current_qty = self.get_qty_for_serial_and_batch_bundle(row)
-			else:
+			elif row.batch_no:
 				current_qty = get_batch_qty_for_stock_reco(
 					row.item_code, row.warehouse, row.batch_no, self.posting_date, self.posting_time, self.name
 				)
@@ -734,18 +764,32 @@ class StockReconciliation(StockController):
 					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
 					"name",
 				)
-				and current_qty > 0
+				and (not row.current_serial_and_batch_bundle and not row.batch_no)
 			):
-				new_sle = self.get_sle_for_items(row)
-				new_sle.actual_qty = current_qty * -1
-				new_sle.valuation_rate = row.current_valuation_rate
-				new_sle.creation_time = add_to_date(sle_creation, seconds=-1)
-				sl_entries.append(new_sle)
+				self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
+				row.reload()
+
+				if row.current_qty > 0 and row.current_serial_and_batch_bundle:
+					new_sle = self.get_sle_for_items(row)
+					new_sle.actual_qty = row.current_qty * -1
+					new_sle.valuation_rate = row.current_valuation_rate
+					new_sle.creation_time = add_to_date(sle_creation, seconds=-1)
+					new_sle.serial_and_batch_bundle = row.current_serial_and_batch_bundle
+					new_sle.qty_after_transaction = 0.0
+					sl_entries.append(new_sle)
 
 		if sl_entries:
 			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
 			if not frappe.db.exists("Repost Item Valuation", {"voucher_no": self.name, "status": "Queued"}):
 				self.repost_future_sle_and_gle(force=True)
+
+	def has_negative_stock_allowed(self):
+		allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
+		if all(d.serial_and_batch_bundle and flt(d.qty) == flt(d.current_qty) for d in self.items):
+			allow_negative_stock = True
+
+		return allow_negative_stock
 
 	def get_qty_for_serial_and_batch_bundle(self, row):
 		doc = frappe.get_doc("Serial and Batch Bundle", row.current_serial_and_batch_bundle)

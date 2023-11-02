@@ -121,7 +121,7 @@ class SerialandBatchBundle(Document):
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception, title=_("Error"))
 
-	def set_incoming_rate(self, row=None, save=False):
+	def set_incoming_rate(self, row=None, save=False, allow_negative_stock=False):
 		if self.type_of_transaction not in ["Inward", "Outward"] or self.voucher_type in [
 			"Installation Note",
 			"Job Card",
@@ -131,7 +131,9 @@ class SerialandBatchBundle(Document):
 			return
 
 		if self.type_of_transaction == "Outward":
-			self.set_incoming_rate_for_outward_transaction(row, save)
+			self.set_incoming_rate_for_outward_transaction(
+				row, save, allow_negative_stock=allow_negative_stock
+			)
 		else:
 			self.set_incoming_rate_for_inward_transaction(row, save)
 
@@ -152,7 +154,9 @@ class SerialandBatchBundle(Document):
 	def get_serial_nos(self):
 		return [d.serial_no for d in self.entries if d.serial_no]
 
-	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
+	def set_incoming_rate_for_outward_transaction(
+		self, row=None, save=False, allow_negative_stock=False
+	):
 		sle = self.get_sle_for_outward_transaction()
 
 		if self.has_serial_no:
@@ -181,7 +185,8 @@ class SerialandBatchBundle(Document):
 				if self.docstatus == 1:
 					available_qty += flt(d.qty)
 
-				self.validate_negative_batch(d.batch_no, available_qty)
+				if not allow_negative_stock:
+					self.validate_negative_batch(d.batch_no, available_qty)
 
 			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 

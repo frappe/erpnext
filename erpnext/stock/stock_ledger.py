@@ -203,6 +203,11 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.allow_negative_stock = allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
 	sle.submit()
+
+	# Added to handle the case when the stock ledger entry is created from the repostig
+	if args.get("creation_time") and args.get("voucher_type") == "Stock Reconciliation":
+		sle.db_set("creation", args.get("creation_time"))
+
 	return sle
 
 
@@ -689,8 +694,11 @@ class update_entries_after(object):
 
 		if (
 			sle.voucher_type == "Stock Reconciliation"
-			and (sle.batch_no or (sle.has_batch_no and sle.serial_and_batch_bundle))
+			and (
+				sle.batch_no or (sle.has_batch_no and sle.serial_and_batch_bundle and not sle.has_serial_no)
+			)
 			and sle.voucher_detail_no
+			and not self.args.get("sle_id")
 		):
 			self.reset_actual_qty_for_stock_reco(sle)
 
@@ -768,7 +776,7 @@ class update_entries_after(object):
 	def calculate_valuation_for_serial_batch_bundle(self, sle):
 		doc = frappe.get_cached_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
 
-		doc.set_incoming_rate(save=True)
+		doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
 		doc.calculate_qty_and_amount(save=True)
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
@@ -1465,19 +1473,23 @@ def get_valuation_rate(
 		company = frappe.get_cached_value("Warehouse", warehouse, "company")
 
 	if warehouse and batch_no and frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation"):
-		last_valuation_rate = frappe.db.sql(
-			"""
-			select sum(stock_value_difference) / sum(actual_qty)
-			from `tabStock Ledger Entry`
-			where
-				item_code = %s
-				AND warehouse = %s
-				AND batch_no = %s
-				AND is_cancelled = 0
-				AND NOT (voucher_no = %s AND voucher_type = %s)
-			""",
-			(item_code, warehouse, batch_no, voucher_no, voucher_type),
+		table = frappe.qb.DocType("Stock Ledger Entry")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.stock_value_difference) / Sum(table.actual_qty))
+			.where(
+				(table.item_code == item_code)
+				& (table.warehouse == warehouse)
+				& (table.batch_no == batch_no)
+				& (table.is_cancelled == 0)
+				& (table.voucher_no != voucher_no)
+				& (table.voucher_type != voucher_type)
+			)
 		)
+
+		last_valuation_rate = query.run()
+		if last_valuation_rate:
+			return flt(last_valuation_rate[0][0])
 
 	# Get moving average rate of a specific batch number
 	if warehouse and serial_and_batch_bundle:
