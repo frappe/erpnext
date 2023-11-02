@@ -213,7 +213,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "ACC-PINV-.YYYY.-\nACC-PINV-RET-.YYYY.-",
+   "options": "PINV-.YY.-\nPRET-.YY.-\nACC-PINV-.YYYY.-\nACC-PINV-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -255,7 +255,8 @@
    "fieldtype": "Date",
    "label": "Due Date",
    "oldfieldname": "due_date",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -384,7 +385,8 @@
    "label": "Supplier Invoice No",
    "oldfieldname": "bill_no",
    "oldfieldtype": "Data",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_15",
@@ -933,7 +935,6 @@
    "label": "Rounded Total",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -943,7 +944,6 @@
    "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1123,8 +1123,7 @@
    "fieldtype": "Table",
    "label": "Payment Schedule",
    "no_copy": 1,
-   "options": "Payment Schedule",
-   "print_hide": 1
+   "options": "Payment Schedule"
   },
   {
    "fieldname": "terms_section_break",
@@ -1602,7 +1601,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-16 16:24:51.886231",
+ "modified": "2023-11-02 18:46:16.810187",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
