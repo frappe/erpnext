@@ -4,8 +4,13 @@
 
 import frappe
 from frappe import ValidationError, _, msgprint
+<<<<<<< HEAD
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
+=======
+from frappe.contacts.doctype.address.address import render_address
+from frappe.utils import cint, flt, getdate
+>>>>>>> e019d43d0b (fix: permission error while creating Supplier Quotation from Portal)
 from frappe.utils.data import nowtime
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -219,7 +224,9 @@ class BuyingController(SubcontractingController):
 
 		for address_field, address_display_field in address_dict.items():
 			if self.get(address_field):
-				self.set(address_display_field, get_address_display(self.get(address_field)))
+				self.set(
+					address_display_field, render_address(self.get(address_field), check_permissions=False)
+				)
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
