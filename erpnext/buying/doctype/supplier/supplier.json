@@ -170,7 +170,7 @@
    "fieldname": "supplier_type",
    "fieldtype": "Select",
    "label": "Supplier Type",
-   "options": "Company\nIndividual",
+   "options": "Company\nIndividual\nProprietorship\nPartnership",
    "reqd": 1
   },
   {
@@ -457,7 +457,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-05-09 15:34:13.408932",
+ "modified": "2023-10-19 16:55:15.148325",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
