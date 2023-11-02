@@ -213,7 +213,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "PINV-.YY.-\nPRET-.YY.-\nACC-PINV-.YYYY.-\nACC-PINV-RET-.YYYY.-",
+   "options": "ACC-PINV-.YYYY.-\nACC-PINV-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -255,8 +255,7 @@
    "fieldtype": "Date",
    "label": "Due Date",
    "oldfieldname": "due_date",
-   "oldfieldtype": "Date",
-   "print_hide": 1
+   "oldfieldtype": "Date"
   },
   {
    "default": "0",
@@ -935,6 +934,7 @@
    "label": "Rounded Total",
    "no_copy": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -944,6 +944,7 @@
    "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1123,7 +1124,8 @@
    "fieldtype": "Table",
    "label": "Payment Schedule",
    "no_copy": 1,
-   "options": "Payment Schedule"
+   "options": "Payment Schedule",
+   "print_hide": 1
   },
   {
    "fieldname": "terms_section_break",
