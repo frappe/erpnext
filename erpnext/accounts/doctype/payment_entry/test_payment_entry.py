@@ -1262,6 +1262,39 @@ class TestPaymentEntry(FrappeTestCase):
 		so.reload()
 		self.assertEqual(so.advance_paid, so.rounded_total)
 
+	def test_receive_payment_from_payable_party_type(self):
+		pe = create_payment_entry(
+			party_type="Supplier",
+			party="_Test Supplier",
+			payment_type="Receive",
+			paid_from="Creditors - _TC",
+			paid_to="_Test Cash - _TC",
+			save=True,
+			submit=True,
+		)
+		self.voucher_no = pe.name
+		self.expected_gle = [
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+			{"account": "Creditors - _TC", "debit": 0.0, "credit": 1000.0},
+		]
+		self.check_gl_entries()
+
+	def check_gl_entries(self):
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(
+				gle.account,
+				gle.debit,
+				gle.credit,
+			)
+			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
+			.orderby(gle.account)
+		).run(as_dict=True)
+		for row in range(len(self.expected_gle)):
+			for field in ["account", "debit", "credit"]:
+				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
