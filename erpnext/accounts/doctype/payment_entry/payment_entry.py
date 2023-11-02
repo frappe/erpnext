@@ -1072,8 +1072,8 @@ class PaymentEntry(AccountsController):
 
 				gle.update(
 					{
-						dr_or_cr + "_in_account_currency": d.allocated_amount,
-						dr_or_cr: allocated_amount_in_company_currency,
+						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
+						dr_or_cr: abs(allocated_amount_in_company_currency),
 					}
 				)
 
