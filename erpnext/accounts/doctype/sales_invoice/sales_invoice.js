@@ -181,7 +181,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(me.frm);
 	}
 
-
 	make_maintenance_schedule() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
@@ -557,15 +556,6 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	}
 }
 
-// Income Account in Details Table
-// --------------------------------
-cur_frm.set_query("income_account", "items", function(doc) {
-	return{
-		query: "erpnext.controllers.queries.get_income_account",
-		filters: {'company': doc.company}
-	}
-});
-
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
@@ -658,6 +648,16 @@ frappe.ui.form.on('Sales Invoice', {
 					report_type: "Profit and Loss",
 				}
 			};
+		});
+
+		frm.set_query("income_account", "items", function() {
+			return{
+				query: "erpnext.controllers.queries.get_income_account",
+				filters: {
+					'company': frm.doc.company,
+					"disabled": 0
+				}
+			}
 		});
 
 		frm.custom_make_buttons = {
