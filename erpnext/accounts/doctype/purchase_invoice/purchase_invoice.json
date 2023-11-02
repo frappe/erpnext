@@ -384,7 +384,8 @@
    "label": "Supplier Invoice No",
    "oldfieldname": "bill_no",
    "oldfieldtype": "Data",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_15",
@@ -1602,7 +1603,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-16 16:24:51.886231",
+ "modified": "2023-11-02 18:46:16.810187",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
