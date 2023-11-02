@@ -110,7 +110,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-21 17:36:26.642617",
+ "modified": "2023-11-02 11:32:12.254018",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",
@@ -125,7 +125,19 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
    "share": 1,
    "write": 1
   }
