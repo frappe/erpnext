@@ -50,7 +50,11 @@ class TestGeneralAndPaymentLedger(FrappeTestCase, AccountsTestMixin):
 		self.assertEqual(len(data), 1)
 
 		expected = {
+			"company": sinv.company,
+			"account": sinv.debit_to,
+			"voucher_type": sinv.doctype,
 			"voucher_no": sinv.name,
+			"party_type": "Customer",
 			"party": sinv.customer,
 			"gl_balance": sinv.grand_total,
 			"pl_balance": sinv.grand_total - 1,
