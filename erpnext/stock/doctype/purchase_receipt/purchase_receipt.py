@@ -600,11 +600,10 @@ class PurchaseReceipt(BuyingController):
 					make_rate_difference_entry(d)
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
-			elif (
-				d.warehouse not in warehouse_with_no_account
-				or d.rejected_warehouse not in warehouse_with_no_account
+			elif (d.warehouse and d.warehouse not in warehouse_with_no_account) or (
+				d.rejected_warehouse and d.rejected_warehouse not in warehouse_with_no_account
 			):
-				warehouse_with_no_account.append(d.warehouse)
+				warehouse_with_no_account.append(d.warehouse or d.rejected_warehouse)
 
 			if d.is_fixed_asset:
 				self.update_assets(d, d.valuation_rate)
