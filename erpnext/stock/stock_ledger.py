@@ -1823,20 +1823,20 @@ def validate_reserved_stock(kwargs):
 		elif batch_nos := [entry.batch_no for entry in sbb_entries if entry.batch_no]:
 			validate_reserved_batch_nos(kwargs.item_code, kwargs.warehouse, batch_nos)
 
-	else:
-		precision = cint(frappe.db.get_default("float_precision")) or 2
-		balance_qty = get_stock_balance(kwargs.item_code, kwargs.warehouse)
+	# Qty based validation for non-serial-batch items OR SRE with Reservation Based On Qty.
+	precision = cint(frappe.db.get_default("float_precision")) or 2
+	balance_qty = get_stock_balance(kwargs.item_code, kwargs.warehouse)
 
-		diff = flt(balance_qty - kwargs.get("reserved_stock", 0), precision)
-		if diff < 0 and abs(diff) > 0.0001:
-			msg = _("{0} units of {1} needed in {2} on {3} {4} to complete this transaction.").format(
-				abs(diff),
-				frappe.get_desk_link("Item", kwargs.item_code),
-				frappe.get_desk_link("Warehouse", kwargs.warehouse),
-				nowdate(),
-				nowtime(),
-			)
-			frappe.throw(msg, title=_("Reserved Stock"))
+	diff = flt(balance_qty - kwargs.get("reserved_stock", 0), precision)
+	if diff < 0 and abs(diff) > 0.0001:
+		msg = _("{0} units of {1} needed in {2} on {3} {4} to complete this transaction.").format(
+			abs(diff),
+			frappe.get_desk_link("Item", kwargs.item_code),
+			frappe.get_desk_link("Warehouse", kwargs.warehouse),
+			nowdate(),
+			nowtime(),
+		)
+		frappe.throw(msg, title=_("Reserved Stock"))
 
 
 def validate_reserved_serial_nos(item_code, warehouse, serial_nos):
