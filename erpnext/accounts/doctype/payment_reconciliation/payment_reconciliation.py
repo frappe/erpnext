@@ -109,6 +109,8 @@ class PaymentReconciliation(Document):
 			"t2.against_account like %(bank_cash_account)s" if self.bank_cash_account else "1=1"
 		)
 
+		limit = f"limit {self.payment_limit}" if self.payment_limit else " "
+
 		# nosemgrep
 		journal_entries = frappe.db.sql(
 			"""
@@ -132,11 +134,13 @@ class PaymentReconciliation(Document):
 					ELSE {bank_account_condition}
 				END)
 			order by t1.posting_date
+			{limit}
 			""".format(
 				**{
 					"dr_or_cr": dr_or_cr,
 					"bank_account_condition": bank_account_condition,
 					"condition": condition,
+					"limit": limit,
 				}
 			),
 			{
@@ -162,7 +166,7 @@ class PaymentReconciliation(Document):
 		if self.payment_name:
 			conditions.append(doc.name.like(f"%{self.payment_name}%"))
 
-		self.return_invoices = (
+		self.return_invoices_query = (
 			qb.from_(doc)
 			.select(
 				ConstantColumn(voucher_type).as_("voucher_type"),
@@ -170,8 +174,11 @@ class PaymentReconciliation(Document):
 				doc.return_against,
 			)
 			.where(Criterion.all(conditions))
-			.run(as_dict=True)
 		)
+		if self.payment_limit:
+			self.return_invoices_query = self.return_invoices_query.limit(self.payment_limit)
+
+		self.return_invoices = self.return_invoices_query.run(as_dict=True)
 
 	def get_dr_or_cr_notes(self):
 
