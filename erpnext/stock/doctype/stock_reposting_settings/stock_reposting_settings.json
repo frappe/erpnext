@@ -50,7 +50,7 @@
    "label": "Limit timeslot for Stock Reposting"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "item_based_reposting",
    "fieldtype": "Check",
    "label": "Use Item based reposting"
@@ -70,7 +70,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-04 16:14:29.080697",
+ "modified": "2023-11-01 16:14:29.080697",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
