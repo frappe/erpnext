@@ -347,5 +347,6 @@ erpnext.patches.v14_0.migrate_delivery_stop_lock_field
 execute:frappe.db.set_single_value("Payment Reconciliation", "invoice_limit", 50)
 execute:frappe.db.set_single_value("Payment Reconciliation", "payment_limit", 50)
 erpnext.patches.v14_0.rename_daily_depreciation_to_depreciation_amount_based_on_num_days_in_month
+erpnext.patches.v14_0.rename_depreciation_amount_based_on_num_days_in_month_to_daily_prorata_based
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
