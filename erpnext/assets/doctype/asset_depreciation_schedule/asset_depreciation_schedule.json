@@ -19,7 +19,7 @@
   "depreciation_method",
   "total_number_of_depreciations",
   "rate_of_depreciation",
-  "depreciation_amount_based_on_num_days_in_month",
+  "daily_prorata_based",
   "column_break_8",
   "frequency_of_depreciation",
   "expected_value_after_useful_life",
@@ -179,9 +179,9 @@
   {
    "default": "0",
    "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
-   "fieldname": "depreciation_amount_based_on_num_days_in_month",
+   "fieldname": "daily_prorata_based",
    "fieldtype": "Check",
-   "label": "Depreciation amount based on number of days in the month",
+   "label": "Depreciate based on daily pro-rata",
    "print_hide": 1,
    "read_only": 1
   }

@@ -755,7 +755,7 @@ class TestDepreciationMethods(AssetSetup):
 
 		self.assertEqual(schedules, expected_schedules)
 
-	def test_schedule_for_straight_line_method_with_depreciation_amount_based_on_num_days_in_month(
+	def test_schedule_for_straight_line_method_with_daily_prorata_based(
 		self,
 	):
 		asset = create_asset(
@@ -766,7 +766,7 @@ class TestDepreciationMethods(AssetSetup):
 			depreciation_start_date="2023-01-31",
 			total_number_of_depreciations=12,
 			frequency_of_depreciation=1,
-			depreciation_amount_based_on_num_days_in_month=1,
+			daily_prorata_based=1,
 		)
 
 		expected_schedules = [
@@ -1762,8 +1762,7 @@ def create_asset(**args):
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
 				"depreciation_start_date": args.depreciation_start_date,
-				"depreciation_amount_based_on_num_days_in_month": args.depreciation_amount_based_on_num_days_in_month
-				or 0,
+				"daily_prorata_based": args.daily_prorata_based or 0,
 			},
 		)
 
