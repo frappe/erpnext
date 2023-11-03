@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Literal
 
 import frappe
 import frappe.utils
@@ -216,7 +217,15 @@ class SalesOrder(SellingController):
 
 	def validate_with_previous_doc(self):
 		super(SalesOrder, self).validate_with_previous_doc(
-			{"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
+			{
+				"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]},
+				"Quotation Item": {
+					"ref_dn_field": "quotation_item",
+					"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
 		)
 
 		if cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")):
@@ -534,14 +543,24 @@ class SalesOrder(SellingController):
 		return False
 
 	@frappe.whitelist()
-	def create_stock_reservation_entries(self, items_details=None, notify=True) -> None:
+	def create_stock_reservation_entries(
+		self,
+		items_details: list[dict] = None,
+		from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+		notify=True,
+	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		create_stock_reservation_entries(so=self, items_details=items_details, notify=notify)
+		create_stock_reservation_entries(
+			sales_order=self,
+			items_details=items_details,
+			from_voucher_type=from_voucher_type,
+			notify=notify,
+		)
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
@@ -748,6 +767,8 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
 
+		# set target items names to ensure proper linking with packed_items
+		target.set_new_name()
 		make_packing_list(target)
 
 	def condition(doc):
@@ -820,6 +841,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 							"postprocess": update_dn_item,
 						}
 					},
+					ignore_permissions=True,
 				)
 
 				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))

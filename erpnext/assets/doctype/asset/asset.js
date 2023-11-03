@@ -9,7 +9,6 @@ frappe.ui.form.on('Asset', {
 		frm.set_query("item_code", function() {
 			return {
 				"filters": {
-					"disabled": 0,
 					"is_fixed_asset": 1,
 					"is_stock_item": 0
 				}

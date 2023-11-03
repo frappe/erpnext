@@ -494,6 +494,7 @@ class TestWorkOrder(FrappeTestCase):
 						"from_time": row.from_time,
 						"to_time": row.to_time,
 						"time_in_mins": row.time_in_mins,
+						"completed_qty": 0,
 					},
 				)
 
