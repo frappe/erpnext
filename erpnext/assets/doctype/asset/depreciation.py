@@ -740,6 +740,12 @@ def get_disposal_account_and_cost_center(company):
 def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book=None):
 	asset_doc = frappe.get_doc("Asset", asset)
 
+	if str(asset_doc.available_for_use_date) > disposal_date:
+		frappe.throw("Posting Date can not be grater than asset purchase date")
+
+	if str(asset_doc.available_for_use_date) == disposal_date:
+		return flt(asset_doc.gross_purchase_amount)
+
 	if asset_doc.calculate_depreciation:
 		asset_doc.prepare_depreciation_data(getdate(disposal_date))
 
