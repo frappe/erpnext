@@ -181,7 +181,7 @@
    "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
    "fieldname": "depreciation_amount_based_on_num_days_in_month",
    "fieldtype": "Check",
-   "label": "Depreciation based on number of days in the month",
+   "label": "Depreciation amount based on number of days in the month",
    "print_hide": 1,
    "read_only": 1
   }
