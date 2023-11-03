@@ -172,7 +172,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname": "show_remarks",
 			"label": __("Show Remarks"),
 			"fieldtype": "Check",
+		},
+		{
+			"fieldname": "ignore_accounts",
+			"label": __("Group by Voucher"),
+			"fieldtype": "Check",
 		}
+
 	],
 
 	"formatter": function(value, row, column, data, default_formatter) {
