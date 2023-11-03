@@ -253,6 +253,7 @@ class SalesInvoice(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+
 		self.update_billing_status_in_dn()
 		self.clear_unallocated_mode_of_payments()
 
@@ -1429,6 +1430,8 @@ class SalesInvoice(SellingController):
 			)
 
 	def update_billing_status_in_dn(self, update_modified=True):
+		if self.is_return and not self.update_billed_amount_in_delivery_note:
+			return
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail:
