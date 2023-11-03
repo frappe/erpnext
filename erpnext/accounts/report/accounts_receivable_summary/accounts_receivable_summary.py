@@ -8,6 +8,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.utils import get_party_types_from_account_type
 
 
 def execute(filters=None):
@@ -22,9 +23,7 @@ def execute(filters=None):
 class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		self.account_type = args.get("account_type")
-		self.party_type = frappe.db.get_all(
-			"Party Type", {"account_type": self.account_type}, pluck="name"
-		)
+		self.party_type = get_party_types_from_account_type(self.account_type)
 		self.party_naming_by = frappe.db.get_value(
 			args.get("naming_by")[0], None, args.get("naming_by")[1]
 		)
