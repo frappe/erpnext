@@ -408,7 +408,8 @@
    "no_copy": 1,
    "options": "Purchase Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "section_addresses",
@@ -1603,7 +1604,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-02 18:46:16.810187",
+ "modified": "2023-11-03 15:47:30.319200",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
