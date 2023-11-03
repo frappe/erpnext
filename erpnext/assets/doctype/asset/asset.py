@@ -818,7 +818,7 @@ def get_item_details(item_code, asset_category, gross_purchase_amount):
 				"depreciation_method": d.depreciation_method,
 				"total_number_of_depreciations": d.total_number_of_depreciations,
 				"frequency_of_depreciation": d.frequency_of_depreciation,
-				"daily_depreciation": d.daily_depreciation,
+				"depreciation_amount_based_on_num_days_in_month": d.depreciation_amount_based_on_num_days_in_month,
 				"salvage_value_percentage": d.salvage_value_percentage,
 				"expected_value_after_useful_life": flt(gross_purchase_amount)
 				* flt(d.salvage_value_percentage / 100),
