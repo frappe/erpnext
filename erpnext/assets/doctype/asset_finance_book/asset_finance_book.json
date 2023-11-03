@@ -8,7 +8,7 @@
   "finance_book",
   "depreciation_method",
   "total_number_of_depreciations",
-  "depreciation_based_on_num_days_in_month",
+  "depreciation_amount_based_on_num_days_in_month",
   "column_break_5",
   "frequency_of_depreciation",
   "depreciation_start_date",
@@ -94,7 +94,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
-   "fieldname": "depreciation_based_on_num_days_in_month",
+   "fieldname": "depreciation_amount_based_on_num_days_in_month",
    "fieldtype": "Check",
    "label": "Depreciation based on number of days in the month"
   }

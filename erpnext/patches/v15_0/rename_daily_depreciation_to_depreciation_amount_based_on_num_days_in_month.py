@@ -8,10 +8,12 @@ from frappe.model.utils.rename_field import rename_field
 def execute():
 	try:
 		rename_field(
-			"Asset Finance Book", "daily_depreciation", "depreciation_based_on_num_days_in_month"
+			"Asset Finance Book", "daily_depreciation", "depreciation_amount_based_on_num_days_in_month"
 		)
 		rename_field(
-			"Asset Depreciation Schedule", "daily_depreciation", "depreciation_based_on_num_days_in_month"
+			"Asset Depreciation Schedule",
+			"daily_depreciation",
+			"depreciation_amount_based_on_num_days_in_month",
 		)
 
 	except Exception as e:

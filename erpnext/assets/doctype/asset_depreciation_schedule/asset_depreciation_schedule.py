@@ -153,7 +153,9 @@ class AssetDepreciationSchedule(Document):
 		self.frequency_of_depreciation = row.frequency_of_depreciation
 		self.rate_of_depreciation = row.rate_of_depreciation
 		self.expected_value_after_useful_life = row.expected_value_after_useful_life
-		self.depreciation_based_on_num_days_in_month = row.depreciation_based_on_num_days_in_month
+		self.depreciation_amount_based_on_num_days_in_month = (
+			row.depreciation_amount_based_on_num_days_in_month
+		)
 		self.status = "Draft"
 
 	def make_depr_schedule(
@@ -573,7 +575,7 @@ def get_straight_line_or_manual_depr_amount(
 		)
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
-		if row.depreciation_based_on_num_days_in_month:
+		if row.depreciation_amount_based_on_num_days_in_month:
 			daily_depr_amount = (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
 			) / date_diff(
@@ -618,7 +620,7 @@ def get_straight_line_or_manual_depr_amount(
 			) / number_of_pending_depreciations
 	# if the Depreciation Schedule is being prepared for the first time
 	else:
-		if row.depreciation_based_on_num_days_in_month:
+		if row.depreciation_amount_based_on_num_days_in_month:
 			daily_depr_amount = (
 				flt(asset.gross_purchase_amount)
 				- flt(asset.opening_accumulated_depreciation)
