@@ -2041,3 +2041,7 @@ def create_gain_loss_journal(
 	journal_entry.save()
 	journal_entry.submit()
 	return journal_entry.name
+
+
+def get_party_types_from_account_type(account_type):
+	return frappe.db.get_list("Party Type", {"account_type": account_type}, pluck="name")

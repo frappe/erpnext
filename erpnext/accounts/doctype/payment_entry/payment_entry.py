@@ -33,6 +33,7 @@ from erpnext.accounts.utils import (
 	get_account_currency,
 	get_balance_on,
 	get_outstanding_invoices,
+	get_party_types_from_account_type,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -1071,10 +1072,24 @@ class PaymentEntry(AccountsController):
 					against_voucher_type = d.reference_doctype
 					against_voucher = d.reference_name
 
+				reverse_dr_or_cr = 0
+				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
+					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
+					payable_party_types = get_party_types_from_account_type("Payable")
+					receivable_party_types = get_party_types_from_account_type("Receivable")
+					if is_return and self.party_type in receivable_party_types and self.payment_type == "Pay":
+						reverse_dr_or_cr = 1
+					elif is_return and self.party_type in payable_party_types and self.payment_type == "Receive":
+						reverse_dr_or_cr = 1
+
 				gle.update(
 					{
-						dr_or_cr: abs(allocated_amount_in_company_currency),
-						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
+						dr_or_cr: abs(allocated_amount_in_company_currency)
+						if reverse_dr_or_cr
+						else allocated_amount_in_company_currency,
+						dr_or_cr + "_in_account_currency": abs(d.allocated_amount)
+						if reverse_dr_or_cr
+						else d.allocated_amount,
 						"against_voucher_type": against_voucher_type,
 						"against_voucher": against_voucher,
 						"cost_center": cost_center,
