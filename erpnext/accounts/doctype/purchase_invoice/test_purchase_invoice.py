@@ -51,6 +51,16 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	def tearDown(self):
 		frappe.db.rollback()
 
+	def test_pi_zero_quantity_item(self):
+		pi = make_purchase_invoice(qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			pi.save()
+
+		# No error with qty=1
+		pi.items[0].qty = 1
+		pi.save()
+		self.assertEqual(pi.items[0].qty, 1)
+
 	def test_purchase_invoice_received_qty(self):
 		"""
 		1. Test if received qty is validated against accepted + rejected
@@ -2082,7 +2092,7 @@ def make_purchase_invoice(**args):
 	bundle_id = None
 	if args.get("batch_no") or args.get("serial_no"):
 		batches = {}
-		qty = args.qty or 5
+		qty = args.qty if args.qty is not None else 5
 		item_code = args.item or args.item_code or "_Test Item"
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -2110,7 +2120,7 @@ def make_purchase_invoice(**args):
 		{
 			"item_code": args.item or args.item_code or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 5,
+			"qty": args.qty if args.qty is not None else 5,
 			"received_qty": args.received_qty or 0,
 			"rejected_qty": args.rejected_qty or 0,
 			"rate": args.rate or 50,

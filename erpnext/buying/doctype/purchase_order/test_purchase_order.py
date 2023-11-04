@@ -27,6 +27,16 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 
 
 class TestPurchaseOrder(FrappeTestCase):
+	def test_po_zero_quantity_item(self):
+		po = create_purchase_order(qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			po.save()
+
+		# No error with qty=1
+		po.items[0].qty = 1
+		po.save()
+		self.assertEqual(po.items[0].qty, 1)
+
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
@@ -1061,7 +1071,7 @@ def create_purchase_order(**args):
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"from_warehouse": args.from_warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"rate": args.rate or 500,
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),

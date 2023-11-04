@@ -20,6 +20,17 @@ from erpnext.stock.doctype.material_request.material_request import (
 
 
 class TestMaterialRequest(FrappeTestCase):
+	def test_mr_zero_quantity_item(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.items[0].qty = 0
+		with self.assertRaises(frappe.ValidationError):
+			mr.insert()
+
+		# No error with qty=1
+		mr.items[0].qty = 1
+		mr.save()
+		self.assertEqual(mr.items[0].qty, 1)
+
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
 

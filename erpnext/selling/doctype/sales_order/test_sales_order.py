@@ -51,6 +51,16 @@ class TestSalesOrder(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
+	def test_so_zero_quantity_item(self):
+		so = make_sales_order(qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			so.save()
+
+		# No error with qty=1
+		so.items[0].qty = 1
+		so.save()
+		self.assertEqual(so.items[0].qty, 1)
+
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
 
@@ -1986,7 +1996,7 @@ def make_sales_order(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"uom": args.uom or None,
 				"price_list_rate": args.price_list_rate or None,
 				"discount_percentage": args.discount_percentage or None,

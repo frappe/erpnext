@@ -7,6 +7,17 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestPurchaseOrder(FrappeTestCase):
+	def test_sq_zero_quantity_item(self):
+		sq = frappe.copy_doc(test_records[0])
+		sq.items[0].qty = 0
+		with self.assertRaises(frappe.ValidationError):
+			sq.save()
+
+		# No error with qty=1
+		sq.items[0].qty = 1
+		sq.save()
+		self.assertEqual(sq.items[0].qty, 1)
+
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 

@@ -72,6 +72,16 @@ class TestSalesInvoice(FrappeTestCase):
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
+	def test_si_zero_quantity_item(self):
+		si = create_sales_invoice(qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			si.save()
+
+		# No error with qty=1
+		si.items[0].qty = 1
+		si.save()
+		self.assertEqual(si.items[0].qty, 1)
+
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])
 		w.docstatus = 0
@@ -3521,7 +3531,7 @@ def create_sales_invoice(**args):
 	bundle_id = None
 	if si.update_stock and (args.get("batch_no") or args.get("serial_no")):
 		batches = {}
-		qty = args.qty or 1
+		qty = args.qty if args.qty is not None else 1
 		item_code = args.item or args.item_code or "_Test Item"
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -3553,7 +3563,7 @@ def create_sales_invoice(**args):
 			"description": args.description or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"target_warehouse": args.target_warehouse,
-			"qty": args.qty or 1,
+			"qty": args.qty if args.qty is not None else 1,
 			"uom": args.uom or "Nos",
 			"stock_uom": args.uom or "Nos",
 			"rate": args.rate if args.get("rate") is not None else 100,

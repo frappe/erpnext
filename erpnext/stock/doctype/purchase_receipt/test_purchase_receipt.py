@@ -46,8 +46,24 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# teardown
 		pr.delete()
 
-	def test_reverse_purchase_receipt_sle(self):
+	def test_pr_zero_quantity_item(self):
+		pr = make_purchase_receipt(qty=0, rejected_qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			pr.save()
 
+		# No error with qty=1
+		pr.items[0].qty = 1
+		pr.save()
+		self.assertEqual(pr.items[0].qty, 1)
+
+		# No error with rejected_qty=1
+		pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.items[0].rejected_qty = 1
+		pr.items[0].qty = 0
+		pr.save()
+		self.assertEqual(pr.items[0].rejected_qty, 1)
+
+	def test_reverse_purchase_receipt_sle(self):
 		pr = make_purchase_receipt(qty=0.5, item_code="_Test Item Home Desktop 200")
 
 		sl_entry = frappe.db.get_all(
@@ -2348,7 +2364,8 @@ def make_purchase_receipt(**args):
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
 	pr.apply_putaway_rule = args.apply_putaway_rule
-	qty = args.qty or 5
+
+	qty = args.qty if args.qty is not None else 5
 	rejected_qty = args.rejected_qty or 0
 	received_qty = args.received_qty or flt(rejected_qty) + flt(qty)
 

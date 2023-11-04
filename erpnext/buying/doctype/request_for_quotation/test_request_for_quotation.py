@@ -21,6 +21,16 @@ from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
 class TestRequestforQuotation(FrappeTestCase):
+	def test_rfq_zero_quantity_item(self):
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			rfq.save()
+
+		# No error with qty=1
+		rfq.items[0].qty = 1
+		rfq.save()
+		self.assertEqual(rfq.items[0].qty, 1)
+
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
 
@@ -161,14 +171,17 @@ def make_request_for_quotation(**args) -> "RequestforQuotation":
 			"description": "_Test Item",
 			"uom": args.uom or "_Test UOM",
 			"stock_uom": args.stock_uom or "_Test UOM",
-			"qty": args.qty or 5,
+			"qty": args.qty if args.qty is not None else 5,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"schedule_date": nowdate(),
 		},
 	)
 
-	rfq.submit()
+	if not args.do_not_save:
+		rfq.insert()
+		if not args.do_not_submit:
+			rfq.submit()
 
 	return rfq
 

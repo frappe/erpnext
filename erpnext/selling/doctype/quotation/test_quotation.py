@@ -9,6 +9,16 @@ test_dependencies = ["Product Bundle"]
 
 
 class TestQuotation(FrappeTestCase):
+	def test_qo_zero_quantity_item(self):
+		qo = make_quotation(qty=0, do_not_save=True)
+		with self.assertRaises(frappe.ValidationError):
+			qo.save()
+
+		# No error with qty=1
+		qo.items[0].qty = 1
+		qo.save()
+		self.assertEqual(qo.items[0].qty, 1)
+
 	def test_make_quotation_without_terms(self):
 		quotation = make_quotation(do_not_save=1)
 		self.assertFalse(quotation.get("payment_schedule"))
@@ -629,7 +639,7 @@ def make_quotation(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"uom": args.uom or None,
 				"rate": args.rate or 100,
 			},
