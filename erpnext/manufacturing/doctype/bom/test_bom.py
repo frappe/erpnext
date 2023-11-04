@@ -9,6 +9,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, timeout
 from frappe.utils import cstr, flt
 
+from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	make_stock_in_entry,
 	set_backflush_based_on,

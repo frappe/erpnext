@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-from erpnext.controllers.accounts_controller import get_payment_terms
+from erpnext.controllers.accounts_controller import ZeroQuantityError, get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
@@ -53,7 +53,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_pi_zero_quantity_item(self):
 		pi = make_purchase_invoice(qty=0, do_not_save=True)
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			pi.save()
 
 		# No error with qty=1

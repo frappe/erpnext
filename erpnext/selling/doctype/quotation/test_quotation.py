@@ -5,13 +5,15 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
+from erpnext.controllers.accounts_controller import ZeroQuantityError
+
 test_dependencies = ["Product Bundle"]
 
 
 class TestQuotation(FrappeTestCase):
 	def test_qo_zero_quantity_item(self):
 		qo = make_quotation(qty=0, do_not_save=True)
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			qo.save()
 
 		# No error with qty=1

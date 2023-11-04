@@ -7,7 +7,7 @@ from frappe import _, bold, throw
 from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.accounts_controller import ZeroQuantityError, get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
@@ -296,7 +296,8 @@ class SellingController(StockController):
 		il = []
 		for d in self.get("items"):
 			if d.qty is None:
-				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
+				message = _("Row {0}: Qty is mandatory").format(d.idx)
+				frappe.throw(message, ZeroQuantityError)
 
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):

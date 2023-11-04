@@ -14,6 +14,7 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 	get_pdf,
 	make_supplier_quotation_from_rfq,
 )
+from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.stock.doctype.item.test_item import make_item
@@ -23,7 +24,7 @@ from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 class TestRequestforQuotation(FrappeTestCase):
 	def test_rfq_zero_quantity_item(self):
 		rfq = make_request_for_quotation(qty=0, do_not_save=True)
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			rfq.save()
 
 		# No error with qty=1

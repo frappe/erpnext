@@ -8,6 +8,7 @@ from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
@@ -48,7 +49,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_pr_zero_quantity_item(self):
 		pr = make_purchase_receipt(qty=0, rejected_qty=0, do_not_save=True)
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			pr.save()
 
 		# No error with qty=1

@@ -5,12 +5,14 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.controllers.accounts_controller import ZeroQuantityError
+
 
 class TestPurchaseOrder(FrappeTestCase):
 	def test_sq_zero_quantity_item(self):
 		sq = frappe.copy_doc(test_records[0])
 		sq.items[0].qty = 0
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			sq.save()
 
 		# No error with qty=1

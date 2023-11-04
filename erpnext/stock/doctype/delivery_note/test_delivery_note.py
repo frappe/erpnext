@@ -10,6 +10,7 @@ from frappe.utils import add_days, cstr, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.utils import get_balance_on
+from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
 	automatically_fetch_payment_terms,
@@ -44,7 +45,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 class TestDeliveryNote(FrappeTestCase):
 	def test_dn_zero_quantity_item(self):
 		dn = create_delivery_note(qty=0, do_not_save=True)
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			dn.save()
 
 		# No error with qty=1

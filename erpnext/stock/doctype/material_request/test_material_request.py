@@ -9,6 +9,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
+from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import (
 	make_in_transit_stock_entry,
@@ -23,7 +24,7 @@ class TestMaterialRequest(FrappeTestCase):
 	def test_mr_zero_quantity_item(self):
 		mr = frappe.copy_doc(test_records[0])
 		mr.items[0].qty = 0
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			mr.insert()
 
 		# No error with qty=1

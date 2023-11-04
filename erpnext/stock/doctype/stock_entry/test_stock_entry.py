@@ -8,6 +8,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.stock.doctype.item.test_item import (
 	create_item,
 	make_item,
@@ -58,7 +59,7 @@ class TestStockEntry(FrappeTestCase):
 		item_code = "_Test Item 2"
 		warehouse = "_Test Warehouse - _TC"
 		se = make_stock_entry(item_code=item_code, target=warehouse, qty=0, do_not_save=True)
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(ZeroQuantityError):
 			se.save()
 
 		# No error with qty=1

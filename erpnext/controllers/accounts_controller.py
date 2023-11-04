@@ -71,6 +71,10 @@ class AccountMissingError(frappe.ValidationError):
 	pass
 
 
+class ZeroQuantityError(frappe.ValidationError):
+	pass
+
+
 force_item_fields = (
 	"item_group",
 	"brand",
@@ -913,7 +917,7 @@ class AccountsController(TransactionBase):
 		if self.doctype != "Purchase Receipt":
 			for item in self.items:
 				if not item.qty:
-					frappe.throw(_("Item quantity can not be zero"))
+					frappe.throw(_("Item quantity can not be zero"), ZeroQuantityError)
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
