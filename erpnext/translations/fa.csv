@@ -632,7 +632,7 @@ Create Sample Retention Stock Entry,نمونه ورودی سهام را ایجا
 Create Student,ایجاد دانشجو,
 Create Student Batch,دسته دانشجویی ایجاد کنید,
 Create Student Groups,ایجاد گروه دانشجویی,
-Create Supplier Quotation,نقل قول ارائه دهنده را ایجاد کنید,
+Create Supplier Quotation,پیش فاکتور تامین کننده ایجاد کنید,
 Create Tax Template,ایجاد الگوی مالیات,
 Create Timesheet,برگه ایجاد کنید,
 Create User,ایجاد کاربر,
@@ -1035,7 +1035,7 @@ GSTR3B-Form,GSTR3B-فرم,
 Gain/Loss on Asset Disposal,کاهش / افزایش در دفع دارایی,
 Gantt Chart,نمودار گانت,
 Gantt chart of all tasks.,گانت چارت از همه وظایف.,
-Gender,جنس,
+Gender,جنسیت,
 General,عمومی,
 General Ledger,لجر عمومی,
 Generate Material Requests (MRP) and Work Orders.,درخواستهای مواد (MRP) و دستور کار را تولید کنید.,
@@ -2010,8 +2010,8 @@ Projected,بینی,
 Projected Qty,تعداد پیش بینی شده,
 Projected Quantity Formula,فرمول مقدار پیش بینی شده,
 Projects,پروژه,
-Proposal Writing,نوشتن طرح های پیشنهادی,
-Proposal/Price Quote,پیشنهاد / قیمت نقل قول,
+Proposal Writing,نوشتن پروپوزال,
+Proposal/Price Quote,پیشنهاد / پیش فاکتور قیمت,
 Prospecting,چشم انداز,
 Provisional Profit / Loss (Credit),موقت سود / زیان (اعتباری),
 Publications,انتشارات,
@@ -2074,15 +2074,15 @@ Queued for replacing the BOM. It may take a few minutes.,برای جایگزین
 Queued for updating latest price in all Bill of Materials. It may take a few minutes.,برای به روز رسانی آخرین قیمت در تمام بیل مواد. ممکن است چند دقیقه طول بکشد.,
 Quick Journal Entry,سریع دانشگاه علوم پزشکی ورودی,
 Quot Count,تعداد Quot و,
-Quot/Lead %,Quot و / سرب٪,
-Quotation,نقل قول,
-Quotation {0} is cancelled,نقل قول {0} لغو,
-Quotation {0} not of type {1},نقل قول {0} نمی از نوع {1},
-Quotations,نقل قول,
-"Quotations are proposals, bids you have sent to your customers",نقل قول پیشنهادات، مناقصه شما را به مشتریان خود ارسال,
-Quotations received from Suppliers.,نقل قول از تولید کنندگان دریافت کرد.,
-Quotations: ,نقل قول:,
-Quotes to Leads or Customers.,پیشنهاد قیمت برای مشتریان یا مشتریان بالقوه,
+Quot/Lead %,Quot و / سرنخ٪,
+Quotation,پیش فاکتور,
+Quotation {0} is cancelled,لغو {0} پیش فاکتور,
+Quotation {0} not of type {1},پیش فاکتور {0} از نوع {1} نیست ,
+Quotations,پیش فاکتور,
+"Quotations are proposals, bids you have sent to your customers",پیش فاکتورها پیشنهادات هستند، مناقصه‌هایی که برای مشتریانتان می‌فرستید,
+Quotations received from Suppliers.,پیش فاکتور از تامین‌کنندگان دریافت شد.,
+Quotations: ,پیش فاکتورها:,
+Quotes to Leads or Customers.,پیش فاکتور برای مشتریان یا مشتریان بالقوه,
 RFQs are not allowed for {0} due to a scorecard standing of {1},RFQ ها برای {0} مجاز نیستند چرا که یک کارت امتیازی از {1},
 Range,محدوده,
 Rate,نرخ,
@@ -2322,7 +2322,7 @@ Sales User,فروش کاربر,
 Sales and Returns,فروش و بازده,
 Sales campaigns.,کمپین فروش.,
 Sales orders are not available for production,سفارشات فروش برای تولید در دسترس نیست,
-Salutation,سلام,
+Salutation,عنوان,
 Same Company is entered more than once,همان شرکت است وارد بیش از یک بار,
 Same item cannot be entered multiple times.,آیتم همان نمی تواند وارد شود چند بار.,
 Same supplier has been entered multiple times,منبع همان وارد شده است چندین بار,
@@ -3491,7 +3491,7 @@ Max strength cannot be less than zero.,حداکثر قدرت نمی تواند �
 Maximum attempts for this quiz reached!,حداکثر تلاش برای این مسابقه رسید!,
 Message,پیام,
 Missing Values Required,از دست رفتن ارزش های مورد نیاز,
-Mobile No,موبایل بدون,
+Mobile No,شماره موبایل,
 Mobile Number,شماره موبایل,
 Month,ماه,
 Name,نام,
@@ -5266,7 +5266,7 @@ Channel Partner,کانال شریک,
 Consultant,مشاور,
 Market Segment,بخش بازار,
 Industry,صنعت,
-Request Type,درخواست نوع,
+Request Type,نوع درخواست,
 Product Enquiry,پرس و جو محصولات,
 Request for Information,درخواست اطلاعات,
 Suggestions,پیشنهادات,
@@ -5294,8 +5294,8 @@ To Discuss,به بحث در مورد,
 With Items,با اقلام,
 Probability (%),احتمال (٪),
 Contact Info,اطلاعات تماس,
-Customer / Lead Address,مشتری / سرب آدرس,
-Contact Mobile No,تماس با موبایل بدون,
+Customer / Lead Address,مشتری / آدرس سرنخ,
+Contact Mobile No,تماس با شماره موبایل,
 Enter name of campaign if source of enquiry is campaign,نام کمپین را وارد کنید اگر منبع تحقیق مبارزات انتخاباتی است,
 Opportunity Date,فرصت تاریخ,
 Opportunity Item,مورد فرصت,
@@ -6227,7 +6227,7 @@ Raw Material Cost (Company Currency),هزینه مواد اولیه (ارز شر
 Scrap Material Cost(Company Currency),هزینه ضایعات مواد (شرکت ارز),
 Total Cost,هزینه کل,
 Total Cost (Company Currency),هزینه کل (ارز شرکت),
-Materials Required (Exploded),مواد مورد نیاز (منفجر شد),
+Materials Required (Exploded),مواد مورد نیاز (انفجاری),
 Exploded Items,موارد منفجر شده,
 Show in Website,نمایش در وب سایت,
 Item Image (if not slideshow),مورد تصویر (در صورت اسلاید نمی شود),
@@ -7121,7 +7121,7 @@ Publish Item to hub.erpnext.com,مورد انتشار hub.erpnext.com,
 Hub Category to Publish,رده توزیع برای انتشار,
 Hub Warehouse,انبار هاب,
 "Publish ""In Stock"" or ""Not in Stock"" on Hub based on stock available in this warehouse.",&quot;انبار&quot; یا &quot;موجود در انبار&quot; را در هاب منتشر کنید براساس موجودی موجود در این انبار.,
-Synced With Hub,همگام سازی شده با توپی,
+Synced With Hub,همگام سازی شده با هاب,
 Item Alternative,مورد جایگزین,
 Alternative Item Code,کد مورد دیگر,
 Two-way,دو طرفه,
@@ -8751,3 +8751,7 @@ Your Shortcuts,میانبرها,
 Annual Revenue,درآمد سالیانه,
 Opportunity Summary by Sales Stage,خلاصه فرصت‌ها بر اساس مرحله فروش,
 Forecasting,پیش بینی تولید,
+Cost Configuration,پیکره بندی هزینه‌ها,
+Your Shortcuts,میانبرها,
+Annual Revenue,درآمد سالیانه,
+Opportunity Summary by Sales Stage,خلاصه فرصت‌ها بر اساس مرحله فروش,
