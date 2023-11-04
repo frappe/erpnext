@@ -48,6 +48,9 @@ class Employee(NestedSet):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
+				user = frappe.get_doc("User", existing_user_id)
+				validate_employee_role(user, ignore_emp_check=True)
+				user.save(ignore_permissions=True)
 				remove_user_permission("Employee", self.name, existing_user_id)
 
 	def after_rename(self, old, new, merge):
@@ -230,10 +233,11 @@ class Employee(NestedSet):
 			frappe.cache().hdel("employees_with_number", prev_number)
 
 
-def validate_employee_role(doc, method):
+def validate_employee_role(doc, method=None, ignore_emp_check=False):
 	# called via User hook
-	if frappe.db.get_value("Employee", {"user_id": doc.name}):
-		return
+	if not ignore_emp_check:
+		if frappe.db.get_value("Employee", {"user_id": doc.name}):
+			return
 
 	user_roles = [d.role for d in doc.get("roles")]
 	if "Employee" in user_roles:

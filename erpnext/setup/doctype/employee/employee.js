@@ -83,6 +83,7 @@ frappe.ui.form.on("Employee", {
 			},
 			callback: function (r) {
 				frm.set_value("user_id", r.message);
+				frm.save();
 			}
 		});
 	}
