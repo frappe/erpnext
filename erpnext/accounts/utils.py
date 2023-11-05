@@ -511,7 +511,7 @@ def check_if_advance_entry_modified(args):
 		party_account_field = (
 			"paid_from" if erpnext.get_party_account_type(args.party_type) == "Receivable" else "paid_to"
 		)
-
+		precision = frappe.get_precision("Payment Entry", "unallocated_amount")
 		if args.voucher_detail_no:
 			ret = frappe.db.sql(
 				"""select t1.name
@@ -533,9 +533,9 @@ def check_if_advance_entry_modified(args):
 				where
 					name = %(voucher_no)s and docstatus = 1
 					and party_type = %(party_type)s and party = %(party)s and {0} = %(account)s
-					and unallocated_amount = %(unreconciled_amount)s
+					and round(unallocated_amount, {1}) = %(unreconciled_amount)s
 			""".format(
-					party_account_field
+					party_account_field, precision
 				),
 				args,
 			)
