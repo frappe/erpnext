@@ -2164,11 +2164,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2023-06-19 16:02:05.309332",
-=======
  "modified": "2023-11-03 14:39:38.012346",
->>>>>>> a3191f1c8c (refactor: flag to toggle billed amy update in DN for Credit Note)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
