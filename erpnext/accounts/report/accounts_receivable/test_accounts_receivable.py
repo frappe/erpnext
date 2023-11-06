@@ -479,7 +479,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		si = self.create_sales_invoice()
 		cus_group = frappe.db.get_value("Customer", self.customer, "customer_group")
 		# Create a list of customer groups, e.g., ["Group1", "Group2"]
-		cus_groups_list = [cus_group, "Group2"]
+		cus_groups_list = [cus_group, "_Test Customer Group 1"]
 
 		filters = {
 			"company": self.company,
