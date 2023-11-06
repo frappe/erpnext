@@ -117,7 +117,7 @@ class ReceivablePayableReport(object):
 		for ple in self.ple_entries:
 			# get the balance object for voucher_type
 
-			if self.filters.get("ingore_accounts"):
+			if self.filters.get("ignore_accounts"):
 				key = (ple.voucher_type, ple.voucher_no, ple.party)
 			else:
 				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
@@ -188,7 +188,7 @@ class ReceivablePayableReport(object):
 			):
 				return
 
-		if self.filters.get("ingore_accounts"):
+		if self.filters.get("ignore_accounts"):
 			key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
 		else:
 			key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)
@@ -200,7 +200,7 @@ class ReceivablePayableReport(object):
 			if ple.against_voucher_no in self.return_entries:
 				return_against = self.return_entries.get(ple.against_voucher_no)
 				if return_against:
-					if self.filters.get("ingore_accounts"):
+					if self.filters.get("ignore_accounts"):
 						key = (ple.against_voucher_type, return_against, ple.party)
 					else:
 						key = (ple.account, ple.against_voucher_type, return_against, ple.party)
@@ -209,7 +209,7 @@ class ReceivablePayableReport(object):
 
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
-			if self.filters.get("ingore_accounts"):
+			if self.filters.get("ignore_accounts"):
 				row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
 			else:
 				row = self.voucher_balance.get((ple.account, ple.voucher_type, ple.voucher_no, ple.party))
