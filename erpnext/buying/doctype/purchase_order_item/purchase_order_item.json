@@ -86,6 +86,8 @@
   "billed_amt",
   "accounting_details",
   "expense_account",
+  "column_break_fyqr",
+  "wip_composite_asset",
   "manufacture_details",
   "manufacturer",
   "manufacturer_part_no",
@@ -180,7 +182,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -897,13 +898,23 @@
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Apply TDS"
+  },
+  {
+   "fieldname": "wip_composite_asset",
+   "fieldtype": "Link",
+   "label": "WIP Composite Asset",
+   "options": "Asset"
+  },
+  {
+   "fieldname": "column_break_fyqr",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-09-13 16:22:40.825092",
+ "modified": "2023-10-27 15:50:42.655573",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

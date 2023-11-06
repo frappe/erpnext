@@ -36,6 +36,7 @@
   "prod_plan_references",
   "section_break_24",
   "combine_sub_items",
+  "sub_assembly_warehouse",
   "section_break_ucc4",
   "skip_available_sub_assembly_item",
   "column_break_igxl",
@@ -228,7 +229,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled, the system won't create material requests for the available items.",
+   "description": "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
    "label": "Ignore Available Stock"
@@ -416,13 +417,19 @@
   {
    "fieldname": "column_break_igxl",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sub_assembly_warehouse",
+   "fieldtype": "Link",
+   "label": "Sub Assembly Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-28 13:37:43.926686",
+ "modified": "2023-11-03 14:08:11.928027",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

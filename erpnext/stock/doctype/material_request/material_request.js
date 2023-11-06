@@ -102,6 +102,12 @@ frappe.ui.form.on('Material Request', {
 
 		if (frm.doc.docstatus == 1 && frm.doc.status != 'Stopped') {
 			let precision = frappe.defaults.get_default("float_precision");
+
+			if (flt(frm.doc.per_received, precision) < 100) {
+				frm.add_custom_button(__('Stop'),
+					() => frm.events.update_status(frm, 'Stopped'));
+			}
+
 			if (flt(frm.doc.per_ordered, precision) < 100) {
 				let add_create_pick_list_button = () => {
 					frm.add_custom_button(__('Pick List'),
@@ -148,11 +154,6 @@ frappe.ui.form.on('Material Request', {
 				}
 
 				frm.page.set_inner_btn_group_as_primary(__('Create'));
-
-				// stop
-				frm.add_custom_button(__('Stop'),
-					() => frm.events.update_status(frm, 'Stopped'));
-
 			}
 		}
 

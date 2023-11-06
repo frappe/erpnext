@@ -804,7 +804,7 @@ class SubcontractingController(StockController):
 						{
 							"item_code": item.rm_item_code,
 							"warehouse": self.supplier_warehouse,
-							"actual_qty": -1 * flt(item.consumed_qty),
+							"actual_qty": -1 * flt(item.consumed_qty, item.precision("consumed_qty")),
 							"dependant_sle_voucher_detail_no": item.reference_name,
 						},
 					)

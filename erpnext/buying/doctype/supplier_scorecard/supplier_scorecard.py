@@ -334,6 +334,11 @@ def make_default_records():
 			"variable_label": "Total Ordered",
 			"path": "get_ordered_qty",
 		},
+		{
+			"param_name": "total_invoiced",
+			"variable_label": "Total Invoiced",
+			"path": "get_invoiced_qty",
+		},
 	]
 	install_standing_docs = [
 		{

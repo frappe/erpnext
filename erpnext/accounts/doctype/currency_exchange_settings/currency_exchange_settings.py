@@ -18,11 +18,21 @@ class CurrencyExchangeSettings(Document):
 
 	def set_parameters_and_result(self):
 		if self.service_provider == "exchangerate.host":
+
+			if not self.access_key:
+				frappe.throw(
+					_("Access Key is required for Service Provider: {0}").format(
+						frappe.bold(self.service_provider)
+					)
+				)
+
 			self.set("result_key", [])
 			self.set("req_params", [])
 
 			self.api_endpoint = "https://api.exchangerate.host/convert"
 			self.append("result_key", {"key": "result"})
+			self.append("req_params", {"key": "access_key", "value": self.access_key})
+			self.append("req_params", {"key": "amount", "value": "1"})
 			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
 			self.append("req_params", {"key": "from", "value": "{from_currency}"})
 			self.append("req_params", {"key": "to", "value": "{to_currency}"})

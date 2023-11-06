@@ -121,6 +121,7 @@ class TestCurrencyExchange(unittest.TestCase):
 		# Update Currency Exchange Rate
 		settings = frappe.get_single("Currency Exchange Settings")
 		settings.service_provider = "exchangerate.host"
+		settings.access_key = "12345667890"
 		settings.save()
 
 		# Update exchange

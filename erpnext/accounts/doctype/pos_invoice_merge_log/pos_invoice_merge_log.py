@@ -454,7 +454,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 	except Exception as e:
 		frappe.db.rollback()
 		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
-		error_message = safe_load_json(message_log)
+		error_message = get_error_message(message_log)
 
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Failed")
@@ -483,7 +483,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 	except Exception as e:
 		frappe.db.rollback()
 		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
-		error_message = safe_load_json(message_log)
+		error_message = get_error_message(message_log)
 
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
@@ -525,10 +525,8 @@ def check_scheduler_status():
 		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
 
 
-def safe_load_json(message):
+def get_error_message(message) -> str:
 	try:
-		json_message = json.loads(message).get("message")
+		return message["message"]
 	except Exception:
-		json_message = message
-
-	return json_message
+		return str(message)

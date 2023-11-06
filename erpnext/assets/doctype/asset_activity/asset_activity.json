@@ -75,13 +75,14 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-01 11:09:52.584482",
+ "modified": "2023-09-29 15:56:17.608643",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Activity",
  "owner": "Administrator",
  "permissions": [
   {
+   "delete": 1,
    "email": 1,
    "read": 1,
    "report": 1,
@@ -89,6 +90,7 @@
    "share": 1
   },
   {
+   "delete": 1,
    "email": 1,
    "read": 1,
    "report": 1,
@@ -96,6 +98,7 @@
    "share": 1
   },
   {
+   "delete": 1,
    "email": 1,
    "read": 1,
    "report": 1,

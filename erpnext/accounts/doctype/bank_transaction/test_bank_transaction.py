@@ -410,7 +410,7 @@ def add_vouchers():
 def create_loan_and_repayment():
 	from lending.loan_management.doctype.loan.test_loan import (
 		create_loan,
-		create_loan_type,
+		create_loan_product,
 		create_repayment_entry,
 		make_loan_disbursement_entry,
 	)
@@ -420,7 +420,8 @@ def create_loan_and_repayment():
 
 	from erpnext.setup.doctype.employee.test_employee import make_employee
 
-	create_loan_type(
+	create_loan_product(
+		"Personal Loan",
 		"Personal Loan",
 		500000,
 		8.4,
@@ -441,7 +442,7 @@ def create_loan_and_repayment():
 			"applicant_type": "Employee",
 			"company": "_Test Company",
 			"applicant": applicant,
-			"loan_type": "Personal Loan",
+			"loan_product": "Personal Loan",
 			"loan_amount": 5000,
 			"repayment_method": "Repay Fixed Amount per Period",
 			"monthly_repayment_amount": 500,

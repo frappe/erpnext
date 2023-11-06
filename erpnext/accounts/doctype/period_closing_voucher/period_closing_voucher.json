@@ -8,6 +8,7 @@
   "transaction_date",
   "posting_date",
   "fiscal_year",
+  "year_start_date",
   "amended_from",
   "company",
   "column_break1",
@@ -100,16 +101,22 @@
    "fieldtype": "Text",
    "label": "Error Message",
    "read_only": 1
+  },
+  {
+   "fieldname": "year_start_date",
+   "fieldtype": "Date",
+   "label": "Year Start Date"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-20 14:51:04.714154",
+ "modified": "2023-09-11 20:19:11.810533",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Period Closing Voucher",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -144,5 +151,6 @@
  "search_fields": "posting_date, fiscal_year",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "closing_account_head"
 }

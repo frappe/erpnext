@@ -177,7 +177,7 @@ class AssetRepair(AccountsController):
 					"item_code": stock_item.item_code,
 					"qty": stock_item.consumed_quantity,
 					"basic_rate": stock_item.valuation_rate,
-					"serial_no": stock_item.serial_and_batch_bundle,
+					"serial_and_batch_bundle": stock_item.serial_and_batch_bundle,
 					"cost_center": self.cost_center,
 					"project": self.project,
 				},

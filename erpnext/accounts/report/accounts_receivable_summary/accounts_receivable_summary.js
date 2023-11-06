@@ -72,10 +72,27 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			}
 		},
 		{
-			"fieldname":"customer",
-			"label": __("Customer"),
-			"fieldtype": "Link",
-			"options": "Customer"
+			"fieldname":"party_type",
+			"label": __("Party Type"),
+			"fieldtype": "Autocomplete",
+			options: get_party_type_options(),
+			on_change: function() {
+				frappe.query_report.set_filter_value('party', "");
+				frappe.query_report.toggle_filter_display('customer_group', frappe.query_report.get_filter_value('party_type') !== "Customer");
+			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				if (!frappe.query_report.filters) return;
+
+				let party_type = frappe.query_report.get_filter_value('party_type');
+				if (!party_type) return;
+
+				return frappe.db.get_link_options(party_type, txt);
+			},
 		},
 		{
 			"fieldname":"customer_group",
@@ -133,3 +150,15 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 }
 
 erpnext.utils.add_dimensions('Accounts Receivable Summary', 9);
+
+function get_party_type_options() {
+	let options = [];
+	frappe.db.get_list(
+		"Party Type", {filters:{"account_type": "Receivable"}, fields:['name']}
+	).then((res) => {
+		res.forEach((party_type) => {
+			options.push(party_type.name);
+		});
+	});
+	return options;
+}
