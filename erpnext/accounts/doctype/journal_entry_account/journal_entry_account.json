@@ -19,6 +19,14 @@
   "cost_center",
   "dimension_col_break",
   "project",
+  "transaction_details_section",
+  "transaction_debit",
+  "transaction_currency",
+  "actual_transaction_date",
+  "column_break_nt7c4",
+  "transaction_credit",
+  "transaction_exchange_rate",
+  "column_break_qc5nk",
   "currency_section",
   "account_currency",
   "column_break_10",
@@ -29,6 +37,13 @@
   "col_break2",
   "credit_in_account_currency",
   "credit",
+  "company_currency_exchange_rate",
+  "local_currency_section",
+  "local_currency",
+  "debit_in_local_currency",
+  "column_break_xlf1l",
+  "local_currency_exchange_rate",
+  "credit_in_local_currency",
   "reference",
   "reference_type",
   "reference_name",
@@ -279,12 +294,92 @@
    "hidden": 1,
    "label": "Reference Detail No",
    "no_copy": 1
+  },
+  {
+   "fieldname": "transaction_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Details"
+  },
+  {
+   "fieldname": "transaction_debit",
+   "fieldtype": "Currency",
+   "label": "Transaction Debit",
+   "options": "transaction_currency"
+  },
+  {
+   "fieldname": "transaction_currency",
+   "fieldtype": "Link",
+   "label": "Transaction Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "actual_transaction_date",
+   "fieldtype": "Data",
+   "label": "Actual Transaction Date"
+  },
+  {
+   "fieldname": "column_break_nt7c4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_credit",
+   "fieldtype": "Currency",
+   "label": "Transaction Credit",
+   "options": "transaction_currency"
+  },
+  {
+   "fieldname": "transaction_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Transaction Exchange Rate",
+   "precision": "5"
+  },
+  {
+   "fieldname": "column_break_qc5nk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company_currency_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Company Currency Exchange Rate",
+   "precision": "5"
+  },
+  {
+   "fieldname": "local_currency_section",
+   "fieldtype": "Section Break",
+   "label": "Local Currency"
+  },
+  {
+   "fieldname": "local_currency",
+   "fieldtype": "Link",
+   "label": "Local Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "debit_in_local_currency",
+   "fieldtype": "Currency",
+   "label": "Debit in Local Currency",
+   "options": "Company:company:tax_currency"
+  },
+  {
+   "fieldname": "column_break_xlf1l",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "local_currency_exchange_rate",
+   "fieldtype": "Currency",
+   "label": "Local Currency Exchange Rate"
+  },
+  {
+   "fieldname": "credit_in_local_currency",
+   "fieldtype": "Currency",
+   "label": "Credit in Local Currency",
+   "options": "Company:company:tax_currency"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-16 14:11:13.507807",
+ "modified": "2023-11-06 22:19:12.587125",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

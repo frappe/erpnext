@@ -1,12 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from erpnext.setup.utils import get_exchange_rate
 
+from frappe.model.meta import get_field_precision
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_checks_for_pl_and_bs_accounts,
+)
+from erpnext.assets.doctype.asset.depreciation import get_credit_and_debit_accounts, get_depreciation_accounts
 import json
-
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate, today, getdate, get_link_to_form
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -77,6 +82,25 @@ class JournalEntry(AccountsController):
 
 		if not self.title:
 			self.title = self.get_title()
+
+	def before_save(self):
+		if self.voucher_type in ['Depreciation Entry', 'Exchange Rate Revaluation']:
+			self.transaction_currency = frappe.db.get_value('Company', self.company, 'default_currency')
+
+			self.exchange_rate = get_exchange_rate(self.transaction_currency, self.default_company_currency, self.posting_date)
+			for row in self.accounts:
+				row.transaction_exchange_rate = self.exchange_rate
+				row.local_currency = frappe.db.get_value('Company', self.company, 'tax_currency')
+				row.local_currency_exchange_rate = get_exchange_rate(self.default_company_currency, row.local_currency, self.posting_date)
+
+				if row.debit_in_account_currency and self.exchange_rate:
+					row.transaction_debit = row.debit_in_account_currency/self.exchange_rate
+				if row.credit_in_account_currency and self.exchange_rate:
+					row.transaction_credit = row.credit_in_account_currency/self.exchange_rate
+				if row.transaction_debit and self.exchange_rate and row.local_currency_exchange_rate:
+					row.debit_in_local_currency = (row.transaction_debit*self.exchange_rate)*row.local_currency_exchange_rate
+				if row.transaction_credit and self.exchange_rate and row.local_currency_exchange_rate:
+					row.credit_in_local_currency = (row.transaction_credit*self.exchange_rate)*row.local_currency_exchange_rate
 
 	def on_submit(self):
 		self.validate_cheque_info()
@@ -1539,3 +1563,87 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+@frappe.whitelist()
+def get_transactions(doc, child, transaction_type):
+    child_doc = json.loads(child)
+    debit, debit_in_account_currency, debit_in_local_currency = 0.0, 0.0, 0.0
+    credit, credit_in_account_currency, credit_in_local_currency = 0.0, 0.0, 0.0
+    if 'account' in child_doc and 'exchange_rate' in child_doc and transaction_type == 'debit':
+        if child_doc['transaction_debit'] and child_doc['transaction_exchange_rate'] and child_doc['exchange_rate'] and child_doc['local_currency_exchange_rate']:
+            debit = child_doc['transaction_debit']*child_doc['transaction_exchange_rate']
+            debit_in_account_currency = debit/float(child_doc['exchange_rate'])
+            debit_in_local_currency = debit*child_doc['local_currency_exchange_rate']
+
+        return {'debit':debit, 'debit_in_account_currency': debit_in_account_currency, 'debit_in_local_currency': debit_in_local_currency}
+
+    if 'account' in child_doc  and 'exchange_rate' in child_doc and transaction_type == 'credit':
+        if child_doc['transaction_credit'] and child_doc['transaction_exchange_rate'] and child_doc['exchange_rate'] and child_doc['local_currency_exchange_rate']:
+            credit = child_doc['transaction_credit']*child_doc['transaction_exchange_rate']
+            credit_in_account_currency = credit/float(child_doc['exchange_rate'])
+            credit_in_local_currency = credit*child_doc['local_currency_exchange_rate']
+
+        return {'credit':credit, 'credit_in_account_currency': credit_in_account_currency, 'credit_in_local_currency': credit_in_local_currency}
+
+
+@frappe.whitelist()
+def create_pc_distribution(data, name):
+    content = json.loads(data)
+    pi = frappe.get_doc('Purchase Invoice', name)
+
+    create_je = frappe.new_doc("Journal Entry")
+    create_je.posting_date = pi.posting_date
+    create_je.multi_currency = 1
+    amount = 0.0
+    company_currency, local_currency = frappe.db.get_value('Company', pi.company, ['default_currency', 'tax_currency'])
+    t_rate = pi.conversion_rate
+    if content:
+        transaction_currency, cost_center = frappe.db.get_value("Purchase Invoice Item", {'parent': pi.name, 'item_code': content['item']}, ['transaction_currency', 'cost_center'])
+        create_je.company = pi.company
+        create_je.transaction_currency = transaction_currency
+        acc_curr = frappe.db.get_value("Account", {'name': content['account']}, 'account_currency')
+        acc_exchange_rate = get_exchange_rate(acc_curr, company_currency, pi.posting_date)
+        create_je.exchange_rate = t_rate
+        local_currency_exchange_rate = get_exchange_rate(company_currency, local_currency, pi.posting_date)        
+
+        for each in content['split']:
+            if 'account' in content and 'amount' in each and 'profit_center' in each:
+                debit = each['amount']*t_rate
+                create_je.append('accounts', {
+                    'account': content['account'] or None,
+                    'transaction_debit': each['amount'] or None,
+                    'profit_center': each['profit_center'] or None,
+        			'transaction_exchange_rate': t_rate,
+                    'transaction_currency': transaction_currency,
+                    'local_currency': local_currency,
+        			'local_currency_exchange_rate': local_currency_exchange_rate,
+                    'debit': debit,
+                    'debit_in_account_currency': debit/acc_exchange_rate,
+                    'debit_in_local_currency': debit*local_currency_exchange_rate,
+                    'cost_center': cost_center,
+                })
+                amount += each['amount']
+            else:
+                frappe.throw('Please add all the fields')
+
+        credit = amount*t_rate
+        create_je.append('accounts', {
+            'account': content['account']  or None,
+            'transaction_credit': amount  or None,
+            'transaction_exchange_rate': t_rate,
+            'transaction_currency': transaction_currency,
+            'local_currency': local_currency,
+    		'local_currency_exchange_rate': local_currency_exchange_rate,
+            'credit': credit,
+            'credit_in_account_currency': credit/acc_exchange_rate,
+            'credit_in_local_currency': credit*local_currency_exchange_rate,
+            'profit_center': frappe.db.get_value("Purchase Invoice Item",  {'parent': pi.name, 'item_code': content['item'], 'expense_account': content['account']}, 'profit_center'),
+            'cost_center': cost_center,
+        })
+
+        create_je.save()
+        create_je.submit()
+        frappe.db.set_value("Purchase Invoice Item",  {'parent': pi.name, 'item_code': content['item'], 'expense_account': content['account']}, 'distribute', 1)
+        frappe.msgprint(
+            f"Journal Entry: {get_link_to_form('Journal Entry', create_je.name)}"
+        )

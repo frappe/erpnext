@@ -22,6 +22,11 @@
   "company",
   "posting_date",
   "apply_tds",
+  "section_break_nq6lp",
+  "transaction_currency",
+  "column_break_uk9s7",
+  "exchange_rate",
+  "default_company_currency",
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
@@ -543,13 +548,39 @@
    "label": "Is System Generated",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_nq6lp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "transaction_currency",
+   "fieldtype": "Link",
+   "label": "Transaction Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_uk9s7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "5"
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fieldname": "default_company_currency",
+   "fieldtype": "Data",
+   "label": "Default Company Currency"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-10 14:32:22.366895",
+ "modified": "2023-11-06 22:12:18.295131",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
