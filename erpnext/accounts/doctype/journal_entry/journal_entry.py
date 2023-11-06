@@ -691,21 +691,13 @@ class JournalEntry(AccountsController):
 			self.get_against_accounts()
 
 	def get_against_accounts(self):
-		accounts_debited, accounts_credited, against_accounts = [], [], []
-		split_account = {}
-		separate_against_account_entries = 1
-		for d in self.get("accounts"):
-			if flt(d.debit) > 0 or flt(d.debit_in_account_currency) > 0:
-				accounts_debited.append(d)
-			elif flt(d.credit) > 0 or flt(d.credit_in_account_currency) > 0:
-				accounts_credited.append(d)
+		self.against_accounts = []
+		self.split_account = {}
+		self.get_debited_credited_accounts()
 
-			if d.against_account:
-				separate_against_account_entries = 0
-				break
-
-		if separate_against_account_entries:
-			if len(accounts_credited) > 1 and len(accounts_debited) > 1:
+		if self.separate_against_account_entries:
+			no_of_credited_acc, no_of_debited_acc = len(self.accounts_credited), len(self.accounts_debited)
+			if no_of_credited_acc > 1 and no_of_debited_acc > 1:
 				frappe.msgprint(
 					_(
 						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed.".format(
@@ -714,14 +706,37 @@ class JournalEntry(AccountsController):
 					),
 					alert=True,
 				)
-			elif len(accounts_credited) == 1:
-				against_accounts = accounts_debited
-				split_account = accounts_credited[0]
-			elif len(accounts_debited) == 1:
-				against_accounts = accounts_credited
-				split_account = accounts_debited[0]
+			elif no_of_credited_acc == 1 and no_of_debited_acc == 1:
+				self.set_against_accounts_for_single_dr_cr()
+				self.separate_against_account_entries = 0
+			elif no_of_credited_acc == 1:
+				self.against_accounts = self.accounts_debited
+				self.split_account = self.accounts_credited[0]
+			elif no_of_debited_acc == 1:
+				self.against_accounts = self.accounts_credited
+				self.split_account = self.accounts_debited[0]
 
-		return separate_against_account_entries, against_accounts, split_account
+	def get_debited_credited_accounts(self):
+		self.accounts_debited, self.accounts_credited = [], []
+		self.separate_against_account_entries = 1
+		for d in self.get("accounts"):
+			if has_debit_amount(d):
+				self.accounts_debited.append(d)
+			elif has_credit_amount(d):
+				self.accounts_credited.append(d)
+
+			if d.against_account:
+				self.separate_against_account_entries = 0
+				break
+
+	def set_against_accounts_for_single_dr_cr(self):
+		for d in self.accounts:
+			if has_debit_amount(d):
+				against_account = self.accounts_credited[0]
+			elif has_credit_amount(d):
+				against_account = self.accounts_debited[0]
+			d.against_type = against_account.party_type or "Account"
+			d.against_account = against_account.party or against_account.account
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
@@ -918,7 +933,7 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
-		separate_against_account_entries, against_accounts, split_account = self.get_against_accounts()
+		self.get_against_accounts()
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]
@@ -951,21 +966,21 @@ class JournalEntry(AccountsController):
 					item=d,
 				)
 
-				if not separate_against_account_entries:
-					gl_dict.update({"against_type": d.against_type, "against_account": d.against_account})
+				if not self.separate_against_account_entries:
+					gl_dict.update({"against_type": d.against_type, "against": d.against_account})
 					gl_map.append(gl_dict)
 
-				elif d in against_accounts:
+				elif d in self.against_accounts:
 					gl_dict.update(
 						{
-							"against_type": split_account.party_type or "Account",
-							"against_account": split_account.party or split_account.account,
+							"against_type": self.split_account.get("party_type") or "Account",
+							"against": self.split_account.get("party") or self.split_account.get("account"),
 						}
 					)
 					gl_map.append(gl_dict)
 
 				else:
-					for against_account in against_accounts:
+					for against_account in self.against_accounts:
 						against_account = against_account.as_dict()
 						debit = against_account.credit or against_account.credit_in_account_currency
 						credit = against_account.debit or against_account.debit_in_account_currency
@@ -1611,3 +1626,11 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+def has_credit_amount(account):
+	return flt(account.credit) > 0 or flt(account.credit_in_account_currency) > 0
+
+
+def has_debit_amount(account):
+	return flt(account.debit) > 0 or flt(account.debit_in_account_currency) > 0
