@@ -710,7 +710,7 @@ erpnext.work_order = {
 		return new Promise((resolve, reject) => {
 			frappe.prompt({
 				fieldtype: 'Float',
-				label: __('Qty for {0}', [purpose]),
+				label: __('Qty for {0}', [__(purpose)]),
 				fieldname: 'qty',
 				description: __('Max: {0}', [max]),
 				default: max
