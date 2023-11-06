@@ -920,7 +920,7 @@ class PurchaseInvoice(BuyingController):
 										item=item,
 									)
 								)
-                
+
 						# update gross amount of asset bought through this document
 						assets = frappe.db.get_all(
 							"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
