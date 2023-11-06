@@ -72,10 +72,10 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 
 	if party:
 		query_filters = {"name": party}
-	if filters.get('party_type') in ['Customer',"Supplier"]:
-		field = filters.get('party_type').lower() + '_name'
+	if filters.get("party_type") in ["Customer","Supplier"]:
+		field = filters.get("party_type").lower() + "_name"
 	else:
-		field = 'partner_name'
+		field = "partner_name"
 
 	fetch_party_list = frappe.get_list(
 		party_type, filters=query_filters, fields=["name", party_group, field], as_list=True
@@ -99,7 +99,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 		if not any([addresses, contacts]):
 			result = [party]
 			result.append(party_groups[party])
-			if filters.get('party_type') in ["Customer" , "Supplier"]:
+			if filters.get("party_type") in ["Customer" , "Supplier"]:
 				result.append(party_name_map[party])
 			result.extend(add_blank_columns_for("Contact"))
 			result.extend(add_blank_columns_for("Address"))
