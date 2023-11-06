@@ -5,10 +5,9 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 from frappe.utils.data import add_to_date, today
-from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
