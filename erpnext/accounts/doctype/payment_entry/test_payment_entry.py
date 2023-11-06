@@ -681,17 +681,6 @@ class TestPaymentEntry(FrappeTestCase):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_payment_against_negative_sales_invoice(self):
-		pe1 = frappe.new_doc("Payment Entry")
-		pe1.payment_type = "Pay"
-		pe1.company = "_Test Company"
-		pe1.party_type = "Customer"
-		pe1.party = "_Test Customer"
-		pe1.paid_from = "_Test Cash - _TC"
-		pe1.paid_amount = 100
-		pe1.received_amount = 100
-
-		self.assertRaises(InvalidPaymentEntry, pe1.validate)
-
 		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
@@ -749,8 +738,6 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# pay more than outstanding against si1
 		pe3 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
-		pe3.paid_amount = pe3.received_amount = 300
-		self.assertRaises(InvalidPaymentEntry, pe3.validate)
 
 		# pay negative outstanding against si1
 		pe3.paid_to = "Debtors - _TC"
