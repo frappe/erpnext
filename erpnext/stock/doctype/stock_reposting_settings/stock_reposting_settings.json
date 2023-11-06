@@ -57,11 +57,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-11-02 01:22:45.155841",
-=======
  "modified": "2023-11-01 16:14:29.080697",
->>>>>>> e19cade12d (fix: remove voucher type and no for Item and Warehouse based reposting (backport #37849) (#37850))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
