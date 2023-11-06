@@ -17,11 +17,10 @@
   "type_of_manufacturing",
   "supplier",
   "work_order_details_section",
-  "work_order",
+  "wo_produced_qty",
   "purchase_order",
   "production_plan_item",
   "column_break_7",
-  "produced_qty",
   "received_qty",
   "indent",
   "section_break_19",
@@ -53,13 +52,6 @@
    "label": "Reference"
   },
   {
-   "fieldname": "work_order",
-   "fieldtype": "Link",
-   "label": "Work Order",
-   "options": "Work Order",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
@@ -81,7 +73,8 @@
   {
    "fieldname": "received_qty",
    "fieldtype": "Float",
-   "label": "Received Qty"
+   "label": "Received Qty",
+   "read_only": 1
   },
   {
    "fieldname": "bom_no",
@@ -162,12 +155,6 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "produced_qty",
-   "fieldtype": "Data",
-   "label": "Produced Quantity",
-   "read_only": 1
-  },
-  {
    "default": "In House",
    "fieldname": "type_of_manufacturing",
    "fieldtype": "Select",
@@ -209,12 +196,18 @@
    "label": "Projected Qty",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "wo_produced_qty",
+   "fieldtype": "Float",
+   "label": "Produced Qty",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-22 17:52:34.708879",
+ "modified": "2023-11-03 13:33:42.959387",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",
