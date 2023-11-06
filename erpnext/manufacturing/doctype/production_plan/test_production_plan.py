@@ -1332,6 +1332,33 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertTrue(row.warehouse == mrp_warhouse)
 				self.assertEqual(row.quantity, 12)
 
+	def test_mr_qty_for_same_rm_with_different_sub_assemblies(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree = {
+			"Fininshed Goods2 For SUB Test": {
+				"SubAssembly2 For SUB Test": {"ChildPart2 For SUB Test": {}},
+				"SubAssembly3 For SUB Test": {"ChildPart2 For SUB Test": {}},
+			}
+		}
+
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=1,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			skip_available_sub_assembly_item=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		plan.get_sub_assembly_items()
+		plan.make_material_request()
+
+		for row in plan.mr_items:
+			if row.item_code == "ChildPart2 For SUB Test":
+				self.assertEqual(row.quantity, 2)
+
 
 def create_production_plan(**args):
 	"""

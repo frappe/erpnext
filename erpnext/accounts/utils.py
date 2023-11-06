@@ -10,7 +10,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	cint,
@@ -536,6 +536,8 @@ def check_if_advance_entry_modified(args):
 		)
 
 	else:
+		precision = frappe.get_precision("Payment Entry", "unallocated_amount")
+
 		payment_entry = frappe.qb.DocType("Payment Entry")
 		payment_ref = frappe.qb.DocType("Payment Entry Reference")
 
@@ -557,7 +559,10 @@ def check_if_advance_entry_modified(args):
 				.where(payment_ref.allocated_amount == args.get("unreconciled_amount"))
 			)
 		else:
-			q = q.where(payment_entry.unallocated_amount == args.get("unreconciled_amount"))
+			q = q.where(
+				Round(payment_entry.unallocated_amount, precision)
+				== Round(args.get("unreconciled_amount"), precision)
+			)
 
 	ret = q.run(as_dict=True)
 
