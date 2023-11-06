@@ -1071,24 +1071,27 @@ class PaymentEntry(AccountsController):
 
 				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
 
-				reverse_dr_or_cr = 0
+				reverse_dr_or_cr = standalone_note = 0
 				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
-					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
+					is_return, return_against = frappe.db.get_value(
+						d.reference_doctype, d.reference_name, ["is_return", "return_against"]
+					)
 					payable_party_types = get_party_types_from_account_type("Payable")
 					receivable_party_types = get_party_types_from_account_type("Receivable")
-					if is_return and self.party_type in receivable_party_types and self.payment_type == "Pay":
+					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
 						reverse_dr_or_cr = 1
-					elif is_return and self.party_type in payable_party_types and self.payment_type == "Receive":
+					elif (
+						is_return and self.party_type in payable_party_types and (self.payment_type == "Receive")
+					):
 						reverse_dr_or_cr = 1
+
+					if is_return and not return_against and not reverse_dr_or_cr:
+						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 				gle.update(
 					{
-						dr_or_cr: abs(allocated_amount_in_company_currency)
-						if reverse_dr_or_cr
-						else allocated_amount_in_company_currency,
-						dr_or_cr + "_in_account_currency": abs(d.allocated_amount)
-						if reverse_dr_or_cr
-						else d.allocated_amount,
+						dr_or_cr: abs(allocated_amount_in_company_currency),
+						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
 					}
 				)
 
