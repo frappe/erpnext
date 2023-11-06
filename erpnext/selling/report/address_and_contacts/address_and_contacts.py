@@ -99,7 +99,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 		if not any([addresses, contacts]):
 			result = [party]
 			result.append(party_groups[party])
-			if filters.get("party_type") in ["Customer" , "Supplier"]:
+			if filters.get("party_type") in ["Customer", "Supplier"]:
 				result.append(party_name_map[party])
 			result.extend(add_blank_columns_for("Contact"))
 			result.extend(add_blank_columns_for("Address"))
