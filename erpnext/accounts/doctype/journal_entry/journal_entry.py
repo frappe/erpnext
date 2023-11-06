@@ -676,7 +676,6 @@ class JournalEntry(AccountsController):
 					)
 
 	def set_against_account(self):
-		accounts_debited, accounts_credited = [], []
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			for d in self.get("accounts"):
 				if d.reference_type == "Sales Invoice":
@@ -689,30 +688,40 @@ class JournalEntry(AccountsController):
 					d.reference_type, d.reference_name, against_type.lower()
 				)
 		else:
-			for d in self.get("accounts"):
-				if flt(d.debit) > 0:
-					accounts_debited.append(d)
-				if flt(d.credit) > 0:
-					accounts_credited.append(d)
+			self.get_against_accounts()
 
-			for d in self.get("accounts"):
-				if d.exchange_rate != 1.0:
-					d.against_type = d.party_type
-					d.against_account = d.party
-				elif flt(d.debit) > 0:
-					for acc in accounts_credited:
-						if acc.party == d.party:
-							d.against_type = "Account"
-							d.against_account = d.account
-							d.party_type = ""
-							d.party = ""
-				elif flt(d.credit) > 0:
-					for acc in accounts_debited:
-						if acc.party == d.party:
-							d.against_type = "Account"
-							d.against_account = d.account
-							d.party_type = ""
-							d.party = ""
+	def get_against_accounts(self):
+		accounts_debited, accounts_credited, against_accounts = [], [], []
+		split_account = {}
+		separate_against_account_entries = 1
+		for d in self.get("accounts"):
+			if flt(d.debit) > 0 or flt(d.debit_in_account_currency) > 0:
+				accounts_debited.append(d)
+			elif flt(d.credit) > 0 or flt(d.credit_in_account_currency) > 0:
+				accounts_credited.append(d)
+
+			if d.against_account:
+				separate_against_account_entries = 0
+				break
+
+		if separate_against_account_entries:
+			if len(accounts_credited) > 1 and len(accounts_debited) > 1:
+				frappe.msgprint(
+					_(
+						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed.".format(
+							frappe.bold("against"), frappe.bold("Accounting Entries")
+						)
+					),
+					alert=True,
+				)
+			elif len(accounts_credited) == 1:
+				against_accounts = accounts_debited
+				split_account = accounts_credited[0]
+			elif len(accounts_debited) == 1:
+				against_accounts = accounts_credited
+				split_account = accounts_debited[0]
+
+		return separate_against_account_entries, against_accounts, split_account
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
@@ -909,41 +918,75 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
+		separate_against_account_entries, against_accounts, split_account = self.get_against_accounts()
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]
 				r = [x for x in r if x]
 				remarks = "\n".join(r)
 
-				gl_map.append(
-					self.get_gl_dict(
-						{
-							"account": d.account,
-							"party_type": d.party_type,
-							"due_date": self.due_date,
-							"party": d.party,
-							"against_type": d.against_type,
-							"against": d.against_account,
-							"debit": flt(d.debit, d.precision("debit")),
-							"credit": flt(d.credit, d.precision("credit")),
-							"account_currency": d.account_currency,
-							"debit_in_account_currency": flt(
-								d.debit_in_account_currency, d.precision("debit_in_account_currency")
-							),
-							"credit_in_account_currency": flt(
-								d.credit_in_account_currency, d.precision("credit_in_account_currency")
-							),
-							"against_voucher_type": d.reference_type,
-							"against_voucher": d.reference_name,
-							"remarks": remarks,
-							"voucher_detail_no": d.reference_detail_no,
-							"cost_center": d.cost_center,
-							"project": d.project,
-							"finance_book": self.finance_book,
-						},
-						item=d,
-					)
+				gl_dict = self.get_gl_dict(
+					{
+						"account": d.account,
+						"party_type": d.party_type,
+						"due_date": self.due_date,
+						"party": d.party,
+						"debit": flt(d.debit, d.precision("debit")),
+						"credit": flt(d.credit, d.precision("credit")),
+						"account_currency": d.account_currency,
+						"debit_in_account_currency": flt(
+							d.debit_in_account_currency, d.precision("debit_in_account_currency")
+						),
+						"credit_in_account_currency": flt(
+							d.credit_in_account_currency, d.precision("credit_in_account_currency")
+						),
+						"against_voucher_type": d.reference_type,
+						"against_voucher": d.reference_name,
+						"remarks": remarks,
+						"voucher_detail_no": d.reference_detail_no,
+						"cost_center": d.cost_center,
+						"project": d.project,
+						"finance_book": self.finance_book,
+					},
+					item=d,
 				)
+
+				if not separate_against_account_entries:
+					gl_dict.update({"against_type": d.against_type, "against_account": d.against_account})
+					gl_map.append(gl_dict)
+
+				elif d in against_accounts:
+					gl_dict.update(
+						{
+							"against_type": split_account.party_type or "Account",
+							"against_account": split_account.party or split_account.account,
+						}
+					)
+					gl_map.append(gl_dict)
+
+				else:
+					for against_account in against_accounts:
+						against_account = against_account.as_dict()
+						debit = against_account.credit or against_account.credit_in_account_currency
+						credit = against_account.debit or against_account.debit_in_account_currency
+						gl_dict = gl_dict.copy()
+						gl_dict.update(
+							{
+								"against_type": against_account.party_type or "Account",
+								"against": against_account.party or against_account.account,
+								"debit": flt(debit, d.precision("debit")),
+								"credit": flt(credit, d.precision("credit")),
+								"account_currency": d.account_currency,
+								"debit_in_account_currency": flt(
+									debit / d.exchange_rate, d.precision("debit_in_account_currency")
+								),
+								"credit_in_account_currency": flt(
+									credit / d.exchange_rate, d.precision("credit_in_account_currency")
+								),
+							}
+						)
+						gl_map.append(gl_dict)
+
 		return gl_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
