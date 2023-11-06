@@ -112,7 +112,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 			for idx in range(0, max_length):
 				result = [party]
 				result.append(party_groups[party])
-				if filters.get('party_type') in ["Customer" , "Supplier"]:
+				if filters.get("party_type") in ["Customer" , "Supplier"]:
 					result.append(party_name_map[party])
 				address = addresses[idx] if idx < len(addresses) else add_blank_columns_for("Address")
 				contact = contacts[idx] if idx < len(contacts) else add_blank_columns_for("Contact")
