@@ -52,6 +52,15 @@ frappe.ui.form.on("Journal Entry", {
 		}
 
 		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
+		//To preview the ledger in draft status
+		if(frm.doc.docstatus === 0){
+            frm.add_custom_button(__('View'), function(){
+                frappe.route_options = {
+    				"voucher_no": frm.doc.name,
+    			};
+                frappe.set_route("query-report", "Jiva Ledger View");
+            }, __("Preview"));
+        }
 	},
 	before_save: function(frm) {
 		if ((frm.doc.docstatus == 0) && (!frm.doc.is_system_generated)) {
@@ -133,8 +142,79 @@ frappe.ui.form.on("Journal Entry", {
 		});
 
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		frappe.db.get_value('Company', frm.doc.company, "default_currency", function(value) {
+			frm.set_value('transaction_currency', value.default_currency);
+		});
 	},
-
+    transaction_currency: function(frm){
+        if (frm.doc.transaction_currency && frm.doc.default_company_currency && frm.doc.docstatus === 0){
+            frappe.call({
+	            method: "erpnext.setup.utils.get_exchange_rate",
+            	args: {
+                    	from_currency: frm.doc.transaction_currency,
+                    	to_currency: frm.doc.default_company_currency,
+                    	transaction_date: frm.doc.posting_date,
+                    },
+            	callback: function(r){
+            	    frm.set_value("exchange_rate",r.message);refresh_field("exchange_rate");
+            	    for (var i in frm.doc.accounts) {
+                        frm.doc.accounts[i].transaction_currency = frm.doc.transaction_currency;
+                    	frm.doc.accounts[i].transaction_exchange_rate = frm.doc.exchange_rate;
+                        frm.script_manager.trigger("local_currency","Journal Entry Account",frm.doc.accounts[i].name );
+                        frm.script_manager.trigger("company_cuurency_erate","Journal Entry Account",frm.doc.accounts[i].name );
+                        frm.script_manager.trigger("transaction_credit","Journal Entry Account",frm.doc.accounts[i].name );
+                        frm.script_manager.trigger("transaction_debit","Journal Entry Account",frm.doc.accounts[i].name );
+                        refresh_field("accounts");
+            	    }
+	            }
+            });
+        }
+    },
+    branch: function(frm){
+		frm.set_query("profit_center", () => {
+		   return {
+			   filters: {
+				   company: frm.doc.company,
+				   branch: frm.doc.branch,
+			   }
+		   };
+	   });
+   },
+   profit_center: function(frm){
+		frm.set_query("cost_center", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+					profit_center: frm.doc.profit_center,
+				}
+			};
+		});
+	},
+    onload_post_render:function(frm){
+        frm.fields_dict['accounts'].grid.get_field('profit_center').get_query = function(frm, cdt, cdn) {
+          var child = locals[cdt][cdn];
+              var d = {};
+              if(child.branch){
+                d.branch = child.branch;
+              }
+              if(cur_frm.doc.company){
+                d.company = cur_frm.doc.company;
+              }
+              return{ filters: d };
+        };
+        frm.fields_dict['accounts'].grid.get_field('cost_center').get_query = function(frm, cdt, cdn) {
+          var child = locals[cdt][cdn];
+              var d = {};
+              if(child.branch){
+                d.profit_center = child.profit_center;
+                
+              }
+              if(cur_frm.doc.company){
+                d.company = cur_frm.doc.company;
+              }
+              return { filters: d };
+        };
+    },
 	voucher_type: function(frm){
 
 		if(!frm.doc.company) return null;
@@ -351,20 +431,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				row.party_type = d.party_type;
 			}
 		});
-
-		// set difference
-		if(doc.difference) {
-			if(doc.difference > 0) {
-				row.credit_in_account_currency = doc.difference;
-				row.credit = doc.difference;
-			} else {
-				row.debit_in_account_currency = -doc.difference;
-				row.debit = -doc.difference;
-			}
-		}
-		cur_frm.cscript.update_totals(doc);
-
-		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, 'accounts');
 	}
 
 };
@@ -474,14 +540,6 @@ $.extend(erpnext.journal_entry, {
 	},
 
 	set_debit_credit_in_company_currency: function(frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-
-		frappe.model.set_value(cdt, cdn, "debit",
-			flt(flt(row.debit_in_account_currency)*row.exchange_rate, precision("debit", row)));
-
-		frappe.model.set_value(cdt, cdn, "credit",
-			flt(flt(row.credit_in_account_currency)*row.exchange_rate, precision("credit", row)));
-
 		cur_frm.cscript.update_totals(frm.doc);
 	},
 
