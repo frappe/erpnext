@@ -5,9 +5,7 @@ frappe.ui.form.on("Repost Accounting Ledger", {
 	setup: function(frm) {
 		frm.fields_dict['vouchers'].grid.get_field('voucher_type').get_query = function(doc) {
 			return {
-				filters: {
-					name: ['in', ['Purchase Invoice', 'Sales Invoice', 'Payment Entry', 'Journal Entry']],
-				}
+				query: "erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.get_repost_allowed_types"
 			}
 		}
 
