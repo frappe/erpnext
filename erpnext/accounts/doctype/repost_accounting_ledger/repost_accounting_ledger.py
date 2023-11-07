@@ -13,7 +13,7 @@ class RepostAccountingLedger(Document):
 		self._allowed_types = [
 			x.document_type
 			for x in frappe.db.get_all(
-				"Repost Allowed Types", filters={"allowed": True}, fields=["document_type"]
+				"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
 			)
 		]
 
@@ -200,7 +200,7 @@ def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters
 		filters.update({"document_type": ("like", f"%{txt}%")})
 
 	if allowed_types := frappe.db.get_all(
-		"Repost Allowed Types", filters=filters, fields=["document_type"], as_list=1
+		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
 	):
 		return allowed_types
 	return []
