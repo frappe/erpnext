@@ -7,7 +7,7 @@ from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import add_days, cint, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -1239,9 +1239,7 @@ class SalesInvoice(SellingController):
 						"party_type": "Customer",
 						"party": self.customer,
 						"against_type": "Account",
-						"against": "Expense account - "
-						+ cstr(self.loyalty_redemption_account)
-						+ " for the Loyalty Program",
+						"against": self.loyalty_redemption_account,
 						"credit": self.loyalty_amount,
 						"against_voucher": self.return_against if cint(self.is_return) else self.name,
 						"against_voucher_type": self.doctype,
