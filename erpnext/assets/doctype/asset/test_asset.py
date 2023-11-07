@@ -256,7 +256,16 @@ class TestAsset(AssetSetup):
 				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
 				0.0,
 			),
-			("_Test Fixed Asset - _TC", 0.0, 100000.0),
+			(
+				"_Test Fixed Asset - _TC",
+				0.0,
+				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+			),
+			(
+				"_Test Fixed Asset - _TC",
+				0.0,
+				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+			),
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
 				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
@@ -267,7 +276,7 @@ class TestAsset(AssetSetup):
 		gle = frappe.db.sql(
 			"""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Journal Entry' and voucher_no = %s
-			order by account""",
+			order by account, credit""",
 			asset.journal_entry_for_scrap,
 		)
 		self.assertSequenceEqual(gle, expected_gle)
