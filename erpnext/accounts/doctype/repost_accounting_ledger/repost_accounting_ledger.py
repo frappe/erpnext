@@ -160,7 +160,7 @@ def start_repost(account_repost_doc=str) -> None:
 					doc.docstatus = 1
 					doc.make_gl_entries()
 
-				elif doc.doctype in ["Payment Entry", "Journal Entry"]:
+				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
 					if not repost_doc.delete_cancelled_entries:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
