@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "creation": "2023-11-07 09:57:20.619939",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -18,7 +17,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-07 10:12:07.519155",
+ "modified": "2023-11-07 14:24:13.321522",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger Settings",
@@ -30,12 +29,18 @@
    "email": 1,
    "print": 1,
    "read": 1,
-   "role": "System Manager",
+   "role": "Administrator",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "System Manager",
+   "select": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
