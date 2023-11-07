@@ -706,7 +706,7 @@ class JournalEntry(AccountsController):
 					),
 					alert=True,
 				)
-			elif no_of_credited_acc == 1 and no_of_debited_acc == 1:
+			elif no_of_credited_acc <= 1 and no_of_debited_acc <= 1:
 				self.set_against_accounts_for_single_dr_cr()
 				self.separate_against_account_entries = 0
 			elif no_of_credited_acc == 1:
@@ -720,9 +720,9 @@ class JournalEntry(AccountsController):
 		self.accounts_debited, self.accounts_credited = [], []
 		self.separate_against_account_entries = 1
 		for d in self.get("accounts"):
-			if has_debit_amount(d):
+			if flt(d.debit) > 0:
 				self.accounts_debited.append(d)
-			elif has_credit_amount(d):
+			elif flt(d.credit) > 0:
 				self.accounts_credited.append(d)
 
 			if d.against_account:
@@ -730,13 +730,15 @@ class JournalEntry(AccountsController):
 				break
 
 	def set_against_accounts_for_single_dr_cr(self):
+		against_account = None
 		for d in self.accounts:
-			if has_debit_amount(d):
+			if flt(d.debit) > 0:
 				against_account = self.accounts_credited[0]
-			elif has_credit_amount(d):
+			elif flt(d.credit) > 0:
 				against_account = self.accounts_debited[0]
-			d.against_type = against_account.party_type or "Account"
-			d.against_account = against_account.party or against_account.account
+			if against_account:
+				d.against_type = against_account.party_type or "Account"
+				d.against_account = against_account.party or against_account.account
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
@@ -1626,11 +1628,3 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-def has_credit_amount(account):
-	return flt(account.credit) > 0 or flt(account.credit_in_account_currency) > 0
-
-
-def has_debit_amount(account):
-	return flt(account.debit) > 0 or flt(account.debit_in_account_currency) > 0
