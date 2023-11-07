@@ -1898,6 +1898,12 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		disable_dimension()
 
 	def test_repost_accounting_entries(self):
+		# update repost settings
+		settings = frappe.get_doc("Repost Accounting Ledger Settings")
+		if not [x for x in settings.allowed_types if x.document_type == "Purchase Invoice"]:
+			settings.append("allowed_types", {"document_type": "Purchase Invoice", "allowed": True})
+		settings.save()
+
 		pi = make_purchase_invoice(
 			rate=1000,
 			price_list_rate=1000,
