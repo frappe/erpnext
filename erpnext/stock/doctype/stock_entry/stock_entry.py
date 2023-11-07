@@ -161,7 +161,7 @@ class StockEntry(StockController):
 		if self.is_enqueue_action():
 			frappe.msgprint(
 				_(
-					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Draft stage"
 				)
 			)
 			self.queue_action("submit", timeout=2000)
@@ -172,7 +172,7 @@ class StockEntry(StockController):
 		if self.is_enqueue_action():
 			frappe.msgprint(
 				_(
-					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Submitted stage"
 				)
 			)
 			self.queue_action("cancel", timeout=2000)
