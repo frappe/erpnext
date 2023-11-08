@@ -60,7 +60,9 @@ def get_data(filters):
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
 			if not asset_data.get("accumulated_depreciation_amount"):
-				asset_data.accumulated_depreciation_amount = d.debit
+				asset_data.accumulated_depreciation_amount = d.debit + asset_data.get(
+					"opening_accumulated_depreciation"
+				)
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit
 
@@ -70,9 +72,7 @@ def get_data(filters):
 					"depreciation_amount": d.debit,
 					"depreciation_date": d.posting_date,
 					"value_after_depreciation": (
-						flt(row.gross_purchase_amount)
-						- flt(row.opening_accumulated_depreciation)
-						- flt(row.accumulated_depreciation_amount)
+						flt(row.gross_purchase_amount) - flt(row.accumulated_depreciation_amount)
 					),
 					"depreciation_entry": d.voucher_no,
 				}
