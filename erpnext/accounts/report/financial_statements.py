@@ -524,6 +524,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("cost_center in %(cost_center)s")
 
 		if filters.get("include_default_book_entries"):
+<<<<<<< HEAD
 			if filters.get("finance_book"):
 				if filters.get("company_fb") and cstr(filters.get("finance_book")) != cstr(
 					filters.get("company_fb")
@@ -537,6 +538,17 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 					)
 			else:
 				additional_conditions.append("(finance_book in (%(company_fb)s, '') OR finance_book IS NULL)")
+=======
+			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+			if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+				frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+
+			query = query.where(
+				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
+				| (gl_entry.finance_book.isnull())
+			)
+>>>>>>> 9a171db97f (fix: asset depreciation ledger (#37991))
 		else:
 			if filters.get("finance_book"):
 				additional_conditions.append(

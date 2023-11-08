@@ -160,6 +160,7 @@ def get_rootwise_opening_balances(filters, report_type):
 	company_fb = frappe.db.get_value("Company", filters.company, "default_finance_book")
 
 	if filters.get("include_default_book_entries"):
+<<<<<<< HEAD
 		if filters.get("finance_book"):
 			if company_fb and cstr(filters.get("finance_book")) != cstr(company_fb):
 				frappe.throw(
@@ -171,6 +172,17 @@ def get_rootwise_opening_balances(filters, report_type):
 				)
 		else:
 			additional_conditions += " AND (finance_book in (%(company_fb)s, '') OR finance_book IS NULL)"
+=======
+		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+
+		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+
+		opening_balance = opening_balance.where(
+			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
+			| (closing_balance.finance_book.isnull())
+		)
+>>>>>>> 9a171db97f (fix: asset depreciation ledger (#37991))
 	else:
 		if filters.get("finance_book"):
 			additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
