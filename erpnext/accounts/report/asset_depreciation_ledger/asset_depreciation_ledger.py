@@ -94,6 +94,7 @@ def get_assets_details(assets):
 		"status",
 		"depreciation_method",
 		"purchase_date",
+		"cost_center",
 	]
 
 	for d in frappe.get_all("Asset", fields=fields, filters={"name": ("in", assets)}):
@@ -160,6 +161,13 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Asset Category",
 			"width": 120,
+		},
+		{
+			"label": _("Cost Center"),
+			"fieldtype": "Link",
+			"fieldname": "cost_center",
+			"options": "Cost Center",
+			"width": 100,
 		},
 		{"label": _("Current Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
 		{"label": _("Purchase Date"), "fieldname": "purchase_date", "fieldtype": "Date", "width": 120},
