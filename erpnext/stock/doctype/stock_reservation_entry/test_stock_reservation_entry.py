@@ -286,6 +286,7 @@ class TestStockReservationEntry(FrappeTestCase):
 				self.assertEqual(item.stock_reserved_qty, sre_details.reserved_qty)
 				self.assertEqual(sre_details.status, "Partially Reserved")
 
+			cancel_stock_reservation_entries("Sales Order", so.name)
 			se.cancel()
 
 			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
@@ -493,7 +494,7 @@ class TestStockReservationEntry(FrappeTestCase):
 			"pick_serial_and_batch_based_on": "FIFO",
 		},
 	)
-	def test_stock_reservation_from_pick_list(self):
+	def test_stock_reservation_from_pick_list(self) -> None:
 		items_details = create_items()
 		create_material_receipt(items_details, self.warehouse, qty=100)
 
@@ -575,7 +576,7 @@ class TestStockReservationEntry(FrappeTestCase):
 			"auto_reserve_stock_for_sales_order_on_purchase": 1,
 		},
 	)
-	def test_stock_reservation_from_purchase_receipt(self):
+	def test_stock_reservation_from_purchase_receipt(self) -> None:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
@@ -644,6 +645,40 @@ class TestStockReservationEntry(FrappeTestCase):
 
 				# Test - 3: Reserved Serial/Batch Nos should be equal to PR Item Serial/Batch Nos.
 				self.assertEqual(set(sb_details), set(reserved_sb_details))
+
+	@change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
+	def test_consider_reserved_stock_while_cancelling_an_inward_transaction(self) -> None:
+		items_details = create_items()
+		se = create_material_receipt(items_details, self.warehouse, qty=100)
+
+		item_list = []
+		for item_code, properties in items_details.items():
+			item_list.append(
+				{
+					"item_code": item_code,
+					"warehouse": self.warehouse,
+					"qty": randint(11, 100),
+					"uom": properties.stock_uom,
+					"rate": randint(10, 400),
+				}
+			)
+
+		so = make_sales_order(
+			item_list=item_list,
+			warehouse=self.warehouse,
+		)
+		so.create_stock_reservation_entries()
+
+		# Test - 1: ValidationError should be thrown as the inwarded stock is reserved.
+		self.assertRaises(frappe.ValidationError, se.cancel)
 
 	def tearDown(self) -> None:
 		cancel_all_stock_reservation_entries()

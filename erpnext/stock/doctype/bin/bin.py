@@ -34,9 +34,14 @@ class Bin(Document):
 			get_reserved_qty_for_production_plan,
 		)
 
-		self.reserved_qty_for_production_plan = get_reserved_qty_for_production_plan(
+		reserved_qty_for_production_plan = get_reserved_qty_for_production_plan(
 			self.item_code, self.warehouse
 		)
+
+		if reserved_qty_for_production_plan is None and not self.reserved_qty_for_production_plan:
+			return
+
+		self.reserved_qty_for_production_plan = flt(reserved_qty_for_production_plan)
 
 		self.db_set(
 			"reserved_qty_for_production_plan",
@@ -47,6 +52,29 @@ class Bin(Document):
 		if not skip_project_qty_update:
 			self.set_projected_qty()
 			self.db_set("projected_qty", self.projected_qty, update_modified=True)
+
+	def update_reserved_qty_for_for_sub_assembly(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_reserved_qty_for_sub_assembly,
+		)
+
+		reserved_qty_for_production_plan = get_reserved_qty_for_sub_assembly(
+			self.item_code, self.warehouse
+		)
+
+		if reserved_qty_for_production_plan is None and not self.reserved_qty_for_production_plan:
+			return
+
+		self.reserved_qty_for_production_plan = flt(reserved_qty_for_production_plan)
+		self.set_projected_qty()
+
+		self.db_set(
+			{
+				"projected_qty": self.projected_qty,
+				"reserved_qty_for_production_plan": flt(self.reserved_qty_for_production_plan),
+			},
+			update_modified=True,
+		)
 
 	def update_reserved_qty_for_production(self):
 		"""Update qty reserved for production from Production Item tables
@@ -147,6 +175,17 @@ class Bin(Document):
 		self.db_set("reserved_qty_for_sub_contract", reserved_qty_for_sub_contract, update_modified=True)
 		self.set_projected_qty()
 		self.db_set("projected_qty", self.projected_qty, update_modified=True)
+
+	def update_reserved_stock(self):
+		"""Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry"""
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_for_item_and_warehouse,
+		)
+
+		reserved_stock = get_sre_reserved_qty_for_item_and_warehouse(self.item_code, self.warehouse)
+
+		self.db_set("reserved_stock", flt(reserved_stock), update_modified=True)
 
 
 def on_doctype_update():

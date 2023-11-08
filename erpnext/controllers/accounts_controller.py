@@ -2267,6 +2267,7 @@ class AccountsController(TransactionBase):
 			repost_ledger = frappe.new_doc("Repost Accounting Ledger")
 			repost_ledger.company = self.company
 			repost_ledger.append("vouchers", {"voucher_type": self.doctype, "voucher_no": self.name})
+			repost_ledger.flags.ignore_permissions = True
 			repost_ledger.insert()
 			repost_ledger.submit()
 			self.db_set("repost_required", 0)
