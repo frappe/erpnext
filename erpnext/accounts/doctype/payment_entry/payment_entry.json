@@ -595,6 +595,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
+   "no_copy": 1,
    "options": "\nDraft\nSubmitted\nCancelled",
    "read_only": 1
   },
@@ -750,7 +751,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-23 18:07:38.023010",
+ "modified": "2023-11-08 21:51:03.482709",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
