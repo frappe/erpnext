@@ -17,7 +17,7 @@ frappe.query_reports["Cash Flow"]["filters"].splice(8, 1);
 frappe.query_reports["Cash Flow"]["filters"].push(
 	{
 		"fieldname": "include_default_book_entries",
-		"label": __("Include Default Book Entries"),
+		"label": __("Include Default FB Entries"),
 		"fieldtype": "Check",
 		"default": 1
 	}
