@@ -32,7 +32,6 @@ def get_data(filters):
 		filters_data.append(["against_voucher", "=", filters.get("asset")])
 
 	if filters.get("asset_category"):
-
 		assets = frappe.db.sql_list(
 			"""select name from tabAsset
 			where asset_category = %s and docstatus=1""",
@@ -70,8 +69,10 @@ def get_data(filters):
 				{
 					"depreciation_amount": d.debit,
 					"depreciation_date": d.posting_date,
-					"amount_after_depreciation": (
-						flt(row.gross_purchase_amount) - flt(row.accumulated_depreciation_amount)
+					"value_after_depreciation": (
+						flt(row.gross_purchase_amount)
+						- flt(row.opening_accumulated_depreciation)
+						- flt(row.accumulated_depreciation_amount)
 					),
 					"depreciation_entry": d.voucher_no,
 				}
@@ -88,6 +89,7 @@ def get_assets_details(assets):
 	fields = [
 		"name as asset",
 		"gross_purchase_amount",
+		"opening_accumulated_depreciation",
 		"asset_category",
 		"status",
 		"depreciation_method",
@@ -122,6 +124,12 @@ def get_columns():
 			"width": 120,
 		},
 		{
+			"label": _("Opening Accumulated Depreciation"),
+			"fieldname": "opening_accumulated_depreciation",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
 			"label": _("Depreciation Amount"),
 			"fieldname": "depreciation_amount",
 			"fieldtype": "Currency",
@@ -134,8 +142,8 @@ def get_columns():
 			"width": 210,
 		},
 		{
-			"label": _("Amount After Depreciation"),
-			"fieldname": "amount_after_depreciation",
+			"label": _("Value After Depreciation"),
+			"fieldname": "value_after_depreciation",
 			"fieldtype": "Currency",
 			"width": 180,
 		},
@@ -154,11 +162,5 @@ def get_columns():
 			"width": 120,
 		},
 		{"label": _("Current Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
-		{
-			"label": _("Depreciation Method"),
-			"fieldname": "depreciation_method",
-			"fieldtype": "Data",
-			"width": 130,
-		},
 		{"label": _("Purchase Date"), "fieldname": "purchase_date", "fieldtype": "Date", "width": 120},
 	]
