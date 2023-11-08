@@ -105,7 +105,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			},
 			{
 				"fieldname": "include_default_book_entries",
-				"label": __("Include Default Book Entries"),
+				"label": __("Include Default FB Entries"),
 				"fieldtype": "Check",
 				"default": 1
 			},
@@ -114,56 +114,10 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Show zero values"),
 				"fieldtype": "Check"
 			}
-<<<<<<< HEAD
 		],
 		"formatter": function(value, row, column, data, default_formatter) {
 			if (data && column.fieldname=="account") {
 				value = data.account_name || value;
-=======
-		},
-		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
-		},
-		{
-			"fieldname":"report",
-			"label": __("Report"),
-			"fieldtype": "Select",
-			"options": ["Profit and Loss Statement", "Balance Sheet", "Cash Flow"],
-			"default": "Balance Sheet",
-			"reqd": 1
-		},
-		{
-			"fieldname": "presentation_currency",
-			"label": __("Currency"),
-			"fieldtype": "Select",
-			"options": erpnext.get_presentation_currency_list(),
-			"default": frappe.defaults.get_user_default("Currency")
-		},
-		{
-			"fieldname":"accumulated_in_group_company",
-			"label": __("Accumulated Values in Group Company"),
-			"fieldtype": "Check",
-			"default": 0
-		},
-		{
-			"fieldname": "include_default_book_entries",
-			"label": __("Include Default FB Entries"),
-			"fieldtype": "Check",
-			"default": 1
-		},
-		{
-			"fieldname": "show_zero_values",
-			"label": __("Show zero values"),
-			"fieldtype": "Check"
-		}
-	],
-	"formatter": function(value, row, column, data, default_formatter) {
-		if (data && column.fieldname=="account") {
-			value = data.account_name || value;
->>>>>>> 9a171db97f (fix: asset depreciation ledger (#37991))
 
 				column.link_onclick =
 				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
