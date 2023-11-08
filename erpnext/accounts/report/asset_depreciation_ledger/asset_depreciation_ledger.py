@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 def execute(filters=None):
@@ -40,12 +40,27 @@ def get_data(filters):
 
 		filters_data.append(["against_voucher", "in", assets])
 
-	if filters.get("finance_book"):
-		filters_data.append(["finance_book", "in", ["", filters.get("finance_book")]])
+	company_fb = frappe.get_cached_value("Company", filters.get("company"), "default_finance_book")
+
+	if filters.get("include_default_book_assets") and company_fb:
+		if filters.get("finance_book") and cstr(filters.get("finance_book")) != cstr(company_fb):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Assets'"))
+		else:
+			finance_book = company_fb
+	elif filters.get("finance_book"):
+		finance_book = filters.get("finance_book")
+	else:
+		finance_book = None
+
+	if finance_book:
+		or_filters_data = [["finance_book", "in", ["", finance_book]], ["finance_book", "is", "not set"]]
+	else:
+		or_filters_data = [["finance_book", "in", [""]], ["finance_book", "is", "not set"]]
 
 	gl_entries = frappe.get_all(
 		"GL Entry",
 		filters=filters_data,
+		or_filters=or_filters_data,
 		fields=["against_voucher", "debit_in_account_currency as debit", "voucher_no", "posting_date"],
 		order_by="against_voucher, posting_date",
 	)

@@ -49,5 +49,11 @@ frappe.query_reports["Asset Depreciation Ledger"] = {
 			"fieldtype": "Link",
 			"options": "Finance Book"
 		},
+		{
+			"fieldname": "include_default_book_assets",
+			"label": __("Include Default FB Assets"),
+			"fieldtype": "Check",
+			"default": 1
+		},
 	]
 }
