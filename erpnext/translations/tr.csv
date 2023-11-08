@@ -1260,17 +1260,10 @@ In Value,Değer,
 "In the case of multi-tier program, Customers will be auto assigned to the concerned tier as per their spent","Çok katmanlı program söz konusu olduğunda, Müşteriler harcanan esasa göre ilgili kademeye otomatik olarak atanacaktır.",
 Inactive,etkisiz,
 Incentives,Teşvikler,
-<<<<<<< HEAD
-Include Default Book Entries,Varsayılan Kitap Girişlerini Dahil Et,
+Include Default FB Entries,Varsayılan Kitap Girişlerini Dahil Et,
 Include Exploded Items,Patlatılmış Öğeleri Dahil Et,
 Include POS Transactions,POS İşlemlerini Dahil Et,
 Include UOM,UOM&#39;yi dahil et,
-=======
-Include Default FB Entries,Varsayılan Defter Girişlerini Dahil et,
-Include Exploded Items,Patlatılmış Öğeleri Dahil et,
-Include POS Transactions,POS İşlemlerini Dahil et,
-Include UOM,Birimi Dahil et,
->>>>>>> 9a171db97f (fix: asset depreciation ledger (#37991))
 Included in Gross Profit,Brüt Kâr Dahil,
 Income,Gelir,
 Income Account,Gelir Hesabı,
