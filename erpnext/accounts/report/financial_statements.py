@@ -561,9 +561,7 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
 			if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
-				frappe.throw(
-					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-				)
+				frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
 
 			query = query.where(
 				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
