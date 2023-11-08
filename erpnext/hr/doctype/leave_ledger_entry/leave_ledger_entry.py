@@ -20,7 +20,6 @@ class LeaveLedgerEntry(Document):
 		else:
 			frappe.throw(_("Only expired allocation can be cancelled"))
 
-
 def validate_leave_allocation_against_leave_application(ledger):
 	"""Checks that leave allocation has no leave application against it"""
 	leave_application_records = frappe.db.sql_list(

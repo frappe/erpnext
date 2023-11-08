@@ -159,7 +159,23 @@ frappe.ui.form.on('Employee', {
 cur_frm.cscript = new erpnext.hr.EmployeeController({
 	frm: cur_frm
 });
+frappe.ui.form.on('Employee', {
+    probation_period_month: function(frm) {
+        // Get the probation period months from the field
+        var probationMonths = frm.doc.probation_period_month;
 
+        // Get the date of joining
+        var dateOfJoining = frm.doc.date_of_joining;
+
+        if (dateOfJoining && probationMonths) {
+            // Calculate the confirmation date
+            var confirmationDate = frappe.datetime.add_months(dateOfJoining, probationMonths);
+
+            // Set the confirmation date field
+            frm.set_value('confimation_date', confirmationDate);
+        }
+    }
+});
 
 frappe.tour['Employee'] = [
 	// {

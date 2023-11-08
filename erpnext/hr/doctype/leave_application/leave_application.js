@@ -131,6 +131,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	refresh: function(frm) {
+		frm.dashboard.links_area.hide();
 		if (frm.is_new()) {
 			frm.trigger("calculate_total_days");
 		}
@@ -186,7 +187,7 @@ frappe.ui.form.on("Leave Application", {
 		frm.trigger("make_dashboard");
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
-		frm.toggle_display('half_day_session', frm.doc.from_date && frm.doc.to_date && frm.doc.from_date === frm.doc.to_date && frm.doc.half_day === 1);
+		
 	},
 
 	half_day_date(frm) {
@@ -255,8 +256,8 @@ frappe.ui.form.on("Leave Application", {
 				callback: function(r) {
 					if (r && r.message) {
 						frm.set_value('total_leave_days', r.message);
-						frm.trigger("get_leave_balance");
-				
+						frm.trigger("get_leave_balance").then(function () {
+						var leave_balance = frm.doc.leave_balance;
 	
 						var total_available = frm.doc.total_available || 0;
 						var total_leave_days = frm.doc.total_leave_days || 0;
@@ -275,14 +276,15 @@ frappe.ui.form.on("Leave Application", {
 						if (current_leave_type_count < 0) {
 							current_leave_type_count = 0;
 						}
-						if (current_leave_type_count > frm.doc.leave_balance) {
-						    var excess_leave = current_leave_type_count - frm.doc.leave_balance;
+						if (current_leave_type_count > leave_balance) {
+						    var excess_leave = current_leave_type_count - leave_balance;
 						    current_leave_type_count -= excess_leave;
 						    frm.set_value('lwp_count', frm.doc.lwp_count + excess_leave);
 						}
 						
 						frm.doc.current_leave_type_count = current_leave_type_count;
 						frm.refresh_field('current_leave_type_count');
+					});
 
 					}
 				}
@@ -308,59 +310,136 @@ frappe.ui.form.on("Leave Application", {
 		}
 	}
 });
-
-
 frappe.ui.form.on('Leave Application', {
-	refresh: function(frm) {
-		if (frm.doc.status == 'Open') {
-			// Check if the current user is the administrator
-			if (frappe.user.has_role("Administrator")) {
-				// User has the 'Administrator' role, so display the buttons
-				frm.add_custom_button(__('Approved'), function(){
-					frm.set_value('status', 'Approved');
-					frm.save();
-				}, __("Status"));
+    employee: function (frm) {
+        var employee_input = frm.doc.employee;
+        if (employee_input) {
+            frappe.call({
+                method: 'erpnext.hr.doctype.leave_application.leave_application.get_allowed_leave_types',
+                args: { employee_input: employee_input },
+                callback: function (r) {
+                    if (r.message) {
+                        var allowed_leave_types_for_employee = r.message;
+						
+                        // Clear existing options in the leave_type dropdown
+                        frm.fields_dict['leave_type'].get_query = function () {
+                            return {
+                                filters: [
+                                    ['Leave Type', 'name', 'in', allowed_leave_types_for_employee]
+                                ]
+                            };
+                        };
 
-				frm.add_custom_button(__('Rejected'), function(){    
-					frm.set_value('status', 'Rejected');
-					frm.save();
-				}, __("Status"));
-			}
-
-			// Always show the "Cancelled" button
-			frm.add_custom_button(__('Cancelled'), function(){
-				frm.set_value('status', 'Cancelled');
-				frm.save();    
-			}, __("Status"));
-		}
-	}
+                        frm.fields_dict['leave_type'].refresh();
+                    }
+                }
+            });
+        }
+    }
 });
 
+frappe.ui.form.on('Leave Application', {
+    refresh: function(frm) {
+		const cancelButton = document.querySelector('.btn.btn-secondary.btn-default.btn-sm');
+		if (cancelButton) {
+			cancelButton.style.display = 'none';
+		}
 
-// frappe.ui.form.on('Leave Application', {
-//     before_save: function(frm) {
-//         var maxDays = parseFloat(frm.doc.total_available);
 
-//         if (maxDays && (frm.doc.total_leave_days > maxDays)) {
-//             var message = __('You have {0} available leave days this month. Considering {1} days as Leave Without Pay (LWP). Do you want to proceed?')
-//                 .replace('{0}', frm.doc.total_available)
-//                 .replace('{1}', frm.doc.lwp_count);
-
-//             frappe.confirm(message, function(result) {
-//                 if (!result) {
-//                     // User selected "No," so prevent the form from being submitted
-//                     frappe.throw(__('Form submission cancelled.'));
-//                 } else {
-//                     // User selected "Yes," so continue with the submission
-//                     frm.save();
-//                 }
-//             });
-
-//             // Return false to prevent the form from being submitted immediately
-//             return false;
-//         }
-//     }
-// });
+        if (!frm.doc.__islocal) {
+            if (frm.doc.status === 'Cancelled' ) {
+                // If status is 'Cancelled', don't add any buttons
+                return;
+            }
+            
+            if ((frm.doc.status == 'Open' || frm.doc.status == 'Approved') && frappe.session.user == frm.doc.leave_approver) {
+                if (frm.doc.status == 'Approved') {
+					frm.add_custom_button(__('Rejected'), function() {
+                        frappe.confirm(
+                            __('Are you sure you want to reject this leave application?'),
+                            function() {
+                                frm.set_value('status', 'Rejected');
+                                frm.save();
+                            }
+                        );
+                    }, __("Status"));
+                } else {
+                    frm.add_custom_button(__('Approved'), function(){
+                        frm.set_value('status', 'Approved');
+                        frm.save();
+                    }, __("Status"));
+                    frm.add_custom_button(__('Rejected'), function() {
+                        frappe.confirm(
+                            __('Are you sure you want to reject this leave application?'),
+                            function() {
+                                frm.set_value('status', 'Rejected');
+                                frm.save();
+                            }
+                        );
+                    }, __("Status"));
+                }
+            } else {
+                frm.add_custom_button(__('Cancelled'), function() {
+					frappe.confirm(
+						__('Are you sure you want to Cancel this leave application?'),
+						function() {
+								if (frm.doc.docstatus === 1) {
+									// Document status is 1 (Submitted), proceed to cancel attendance records
+									frappe.call({
+										method: 'erpnext.hr.doctype.leave_application.leave_application.cancel_attendance_records',
+										args: {
+											leave_application: frm.doc.name
+										},
+										callback: function(response) {
+											response.message === 'success'
+											setTimeout(function() {
+												window.location.reload();
+											}, 4000);
+											frappe.msgprint(__('Your available leave days have been credited to your account.'));
+										}
+									});
+								} else {
+									frm.set_value('status', 'Cancelled');
+									frm.save();
+								}
+						}
+					);
+				}, __("Status"));
+				
+				
+            }
+        }
+    }
+});
+frappe.ui.form.on('Leave Application', {
+    refresh: function(frm) {
+        // Get the div element with the class "menu-btn-group" and hide it
+        var menuBtnGroup = document.querySelector('.menu-btn-group');
+        if (menuBtnGroup) {
+            menuBtnGroup.style.display = 'none';
+        }
+    }
+});
+frappe.ui.form.on('Leave Application', {
+    refresh: function(frm) {
+        // Get the form status (replace 'status' with the actual fieldname of your form status)
+        var formStatus = frm.doc.status;
+        // Check the form status and toggle the button's visibility
+        if (formStatus === 'Rejected' || formStatus === 'Approved') {
+            // Show the button if it's hidden
+            var submitButton = document.querySelector('[data-label="Submit"]');
+            if (submitButton.style.display === 'none') {
+                submitButton.style.display = 'block';
+            }
+        } else {
+            // Hide the button
+            var submitButton = document.querySelector('[data-label="Submit"]');
+            submitButton.style.display = 'none';
+			var saveButton = document.querySelector('[data-label="Save"]');
+			saveButton.style.display = 'block';
+        }
+    }
+});
 
 
 frappe.tour["Leave Application"] = [

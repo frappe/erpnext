@@ -10,7 +10,8 @@
   "column_break_2",
   "weekly_off",
   "section_break_4",
-  "description"
+  "description",
+  "description_for_holiday"
  ],
  "fields": [
   {
@@ -26,7 +27,7 @@
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "Description",
+   "label": "Day",
    "print_width": "300px",
    "reqd": 1,
    "width": "300px"
@@ -44,12 +45,19 @@
   {
    "fieldname": "section_break_4",
    "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "description_for_holiday",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-18 19:03:23.507845",
+ "modified": "2023-09-19 15:06:08.178500",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Holiday",

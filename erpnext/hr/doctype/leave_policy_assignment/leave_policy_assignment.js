@@ -49,11 +49,44 @@ frappe.ui.form.on('Leave Policy Assignment', {
 		} else if (frm.doc.assignment_based_on == "Joining Date" && frm.doc.employee) {
 			frappe.model.with_doc("Employee", frm.doc.employee, function () {
 				let from_date = frappe.model.get_value("Employee", frm.doc.employee, "date_of_joining");
-				frm.set_value("effective_from", from_date);
+				let from_date1 = frappe.model.get_value("Employee", frm.doc.employee, "confimation_date");
+				frm.set_value("effective_from", from_date1);
 				frm.set_value("effective_to", frappe.datetime.add_months(frm.doc.effective_from, 12));
 			});
 		}
 		frm.refresh();
 	}
 
+});
+// frappe.ui.form.on('Leave Policy Assignment', {
+//     before_save: function(frm) {
+//         frappe.call({
+//             method: "erpnext.hr.doctype.leave_allocation.leave_allocation.get_carry_forwarded_leaves",
+//             args: {
+//                 employee: frm.doc.employee,
+// 				date :frm.doc.effective_from,
+// 				leave_type: "Privilege Leave",
+// 				carry_forward : frm.doc.carry_forward
+//             },
+//             async: false, // Wait for the call to complete before saving
+//             callback: function(r) {
+//                 if (!r.exc && r.message) {
+//                     // Update the "joining_opening_balance" field with the response value
+//                     frm.doc.joining_opening_balance = r.message;
+//                 }
+//             }
+//         });
+//     }
+// });
+frappe.ui.form.on('Leave Policy Assignment', {
+    effective_from: function(frm) {
+        if (frm.doc.effective_from) {
+            // Extract the year from the effective_from date
+            var year = frm.doc.effective_from.split('-')[0];
+			console.log(year)
+            // Set the "year" field and refresh it
+            frm.set_value('year', year);
+            frm.refresh_field('year', year);
+        }
+    }
 });

@@ -38,30 +38,30 @@ def get_columns() -> List[Dict]:
 			"options": "Leave Type",
 		},
 		{
-			"label": _("Employee"),
-			"fieldtype": "Link",
+			"label": _("Employee ID"),
+			"fieldtype": "Data",
 			"fieldname": "employee",
-			"width": 100,
+			"width": 150,
 			"options": "Employee",
 		},
 		{
 			"label": _("Employee Name"),
 			"fieldtype": "Dynamic Link",
 			"fieldname": "employee_name",
-			"width": 100,
+			"width": 200,
 			"options": "employee",
 		},
 		{
 			"label": _("Opening Balance"),
 			"fieldtype": "float",
 			"fieldname": "opening_balance",
-			"width": 150,
+			"width": 120,
 		},
 		{
 			"label": _("New Leave(s) Allocated"),
 			"fieldtype": "float",
 			"fieldname": "leaves_allocated",
-			"width": 200,
+			"width": 150,
 		},
 		{
 			"label": _("Leave(s) Taken"),
@@ -73,13 +73,13 @@ def get_columns() -> List[Dict]:
 			"label": _("Leave(s) Expired"),
 			"fieldtype": "float",
 			"fieldname": "leaves_expired",
-			"width": 150,
+			"width": 120,
 		},
 		{
 			"label": _("Closing Balance"),
 			"fieldtype": "float",
 			"fieldname": "closing_balance",
-			"width": 150,
+			"width": 120,
 		},
 	]
 
@@ -125,7 +125,7 @@ def get_data(filters: Filters) -> List:
 					get_leaves_for_period(employee.name, leave_type, filters.from_date, filters.to_date) * -1
 				)
 
-				new_allocation, expired_leaves, carry_forwarded_leaves = get_allocated_and_expired_leaves(
+				new_allocation, expired_leaves, carry_forwarded_leaves, opening_used_leave = get_allocated_and_expired_leaves(
 					filters.from_date, filters.to_date, employee.name, leave_type
 				)
 				opening = get_opening_balance(employee.name, leave_type, filters, carry_forwarded_leaves)
@@ -133,7 +133,7 @@ def get_data(filters: Filters) -> List:
 				row.leaves_allocated = new_allocation
 				row.leaves_expired = expired_leaves
 				row.opening_balance = opening
-				row.leaves_taken = leaves_taken
+				row.leaves_taken = leaves_taken + opening_used_leave
 
 				# not be shown on the basis of days left it create in user mind for carry_forward leave
 				row.closing_balance = new_allocation + opening - (row.leaves_expired + leaves_taken)
@@ -215,6 +215,7 @@ def get_allocated_and_expired_leaves(
 	new_allocation = 0
 	expired_leaves = 0
 	carry_forwarded_leaves = 0
+	opening_used_leave = 0
 
 	records = get_leave_ledger_entries(from_date, to_date, employee, leave_type)
 
@@ -235,8 +236,8 @@ def get_allocated_and_expired_leaves(
 				carry_forwarded_leaves += record.leaves
 			else:
 				new_allocation += record.leaves
-
-	return new_allocation, expired_leaves, carry_forwarded_leaves
+		opening_used_leave = record.opening_used_leave
+	return new_allocation, expired_leaves, carry_forwarded_leaves, opening_used_leave
 
 
 def get_leave_ledger_entries(
@@ -255,6 +256,7 @@ def get_leave_ledger_entries(
 			ledger.transaction_type,
 			ledger.is_carry_forward,
 			ledger.is_expired,
+			ledger.opening_used_leave
 		)
 		.where(
 			(ledger.docstatus == 1)
@@ -305,3 +307,34 @@ def get_dataset_for_chart(employee_data: List, datasets: List, labels: List) -> 
 
 	for leave in leaves:
 		datasets.append({"name": leave.leave_type, "values": [leave.closing_balance]})
+@frappe.whitelist()
+def get_employee_leave_data(employee, from_date, to_date):
+    if not employee:
+        return {"error": "Employee identifier is required."}
+
+    data = {
+        "employee": employee,
+        "employee_name": frappe.get_value("Employee", employee, "employee_name"),
+    }
+
+    leave_types = frappe.db.get_list("Leave Type", pluck="name", order_by="name")
+
+    for leave_type in leave_types:
+        leaves_taken = get_leaves_for_period(employee, leave_type, from_date, to_date) * -1
+        new_allocation, expired_leaves, carry_forwarded_leaves , opening_used_leave = get_allocated_and_expired_leaves(
+            from_date, to_date, employee, leave_type
+        )
+        # opening = get_opening_balance(employee, leave_type, from_date, to_date, carry_forwarded_leaves)
+
+        data[leave_type] = {
+            "leaves_allocated": new_allocation,
+            "leaves_expired": expired_leaves,
+	    	"carry_forwarded_leaves":carry_forwarded_leaves,
+            # "opening_balance": opening,
+            "leaves_taken": leaves_taken,
+            # "closing_balance": new_allocation + opening - (expired_leaves + leaves_taken),
+            "carry_forwarded_leaves": carry_forwarded_leaves,
+            "indent": 1
+        }
+
+    return data

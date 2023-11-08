@@ -2,7 +2,7 @@
  "category": "Modules",
  "charts": [],
  "creation": "2020-03-02 15:48:58.322521",
- "developer_mode_only": 0,
+ "developer_mode_only": 1,
  "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
@@ -872,7 +872,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-08-09 14:53:59.724263",
+ "modified": "2023-10-09 10:42:14.580235",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -896,6 +896,18 @@
    "link_to": "Leave Application",
    "stats_filter": "{\"status\":\"Open\"}",
    "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Calendar View",
+   "link_to": "Calendar View",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Leave Dashboard",
+   "link_to": "leave-module",
+   "type": "Page"
   }
  ]
 }

@@ -16,11 +16,11 @@
 		{% for(const [key, value] of Object.entries(data)) { %}
 			<tr>
 				<td> {%= key %} </td>
-				<td class="text-right"> {%= value["total_leaves"] %} </td>
+				<td class="text-right"> {%= value["total_leaves"] + value["opening_used_leave"] %} </td>
 				<!-- <td class="text-right"> {%= value["expired_leaves"] %} </td> -->
-				<td class="text-right"> {%= value["leaves_taken"] + value["leaves_pending_approval"] %} </td>
+				<td class="text-right"> {%= value["leaves_taken"] + value["leaves_pending_approval"] + value["opening_used_leave"]%} </td>
 				<td class="text-right"> {%= value["leaves_pending_approval"]%} </td>
-				<td class="text-right"> {%= value["remaining_leaves"] - value["leaves_pending_approval"] %} </td>
+				<td class="text-right"> {%= value["remaining_leaves"] %} </td>
 				<!-- <td class="text-right"> {%= value["remaining_leaves"] - value["leaves_pending_approval"] %} </td>  -->
 			</tr>
 		{% } %}

@@ -17,7 +17,9 @@
   "effective_from",
   "effective_to",
   "leaves_allocated",
-  "amended_from"
+  "amended_from",
+  "joining_opening_balance",
+  "year"
  ],
  "fields": [
   {
@@ -109,15 +111,26 @@
    "label": "Leaves Allocated",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "joining_opening_balance",
+   "fieldtype": "Float",
+   "label": "Unused Leaves"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "year"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-13 13:37:11.218882",
+ "modified": "2023-10-18 14:58:02.593069",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy Assignment",
- "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -165,7 +178,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "title_field": "employee_name",
  "track_changes": 1
 }

@@ -291,3 +291,29 @@ def get_unmarked_days(employee, month, exclude_holidays=0):
 			unmarked_days.append(date)
 
 	return unmarked_days
+import json
+@frappe.whitelist()
+def get_employees_on_leave(date):
+    status_filter = ["On Leave" , "Half Day"]
+
+    # Query the Attendance doctype to filter employees with the specified statuses
+    employees_on_leave = frappe.get_all(
+        "Attendance",
+        filters={"attendance_date": date, "docstatus": 1, "status": ["in", status_filter]},
+        fields=["employee_name", "employee", "status"],
+    )
+    
+    # Create a dictionary to store unique records based on the 'employee' field
+    unique_records = {}
+    
+    for record in employees_on_leave:
+        employee_id = record.get("employee")
+        if employee_id not in unique_records:
+            unique_records[employee_id] = record
+
+    # Convert the unique records to a list
+    unique_records_list = list(unique_records.values())
+    
+    employees_on_leave_json = json.dumps(unique_records_list)
+
+    return employees_on_leave_json

@@ -14,6 +14,39 @@ frappe.ui.form.on("Holiday List", {
 		}
 	}
 });
+frappe.ui.form.on("Holiday List", {
+    refresh: function(frm) {
+        frm.fields_dict.holidays.grid.get_field("holiday_date").get_query = function(doc, cdt, cdn) {
+            return {
+                filters: [
+                    ["Holiday", "parent", "=", frm.docname]
+                ]
+            };
+        };
+    }
+});
+
+frappe.ui.form.on('Holiday', {
+    holiday_date: function(frm, cdt, cdn) {
+        var child = locals[cdt][cdn];
+        var selectedDate = child.holiday_date;
+        
+        // Parse the date string to a JavaScript Date object
+        var dateObj = new Date(selectedDate);
+        
+        // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+        var dayOfWeekIndex = dateObj.getDay();
+        
+        // Define an array of day names
+        var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        // Get the day name based on the index
+        var dayOfWeek = dayNames[dayOfWeekIndex];
+        
+        // Set the day of the week in the description field
+        frappe.model.set_value(cdt, cdn, 'description', dayOfWeek);
+    }
+});
 
 frappe.tour["Holiday List"] = [
 	{

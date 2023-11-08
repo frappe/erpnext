@@ -45,7 +45,8 @@
   "column_break_17",
   "company",
   "letter_head",
-  "amended_from"
+  "amended_from",
+  "application_number"
  ],
  "fields": [
   {
@@ -72,6 +73,8 @@
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Employee Name",
    "read_only": 1
   },
   {
@@ -184,6 +187,7 @@
    "no_copy": 1,
    "options": "Open\nApproved\nRejected\nCancelled",
    "permlevel": 1,
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -284,6 +288,7 @@
    "fieldname": "lwp_count",
    "fieldtype": "Float",
    "label": "LWP Count",
+   "precision": "1",
    "read_only": 1
   },
   {
@@ -295,14 +300,22 @@
   {
    "fieldname": "current_leave_type_count",
    "fieldtype": "Float",
-   "label": "Current Leave Type Count",
+   "label": "Paid Leaves",
+   "precision": "1",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.half_day == 1 && doc.from_date == doc.to_date",
    "fieldname": "half_day_session",
    "fieldtype": "Select",
    "label": "Half Day Session",
    "options": "\nSession 1\nSession 2"
+  },
+  {
+   "fieldname": "application_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Application Number"
   }
  ],
  "icon": "fa fa-calendar",
@@ -310,7 +323,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-09-14 14:20:26.864316",
+ "modified": "2023-11-08 00:58:38.864028",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
@@ -394,5 +407,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "employee",
- "title_field": "employee_name"
+ "title_field": "application_number"
 }

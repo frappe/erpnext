@@ -18,6 +18,9 @@
   "to_date",
   "section_break_6",
   "new_leaves_allocated",
+  "allocation_as_per_leave_type",
+  "opening_used_leave",
+  "accumulated_from_last_year",
   "carry_forward",
   "unused_leaves",
   "total_leaves_allocated",
@@ -230,6 +233,24 @@
    "options": "Company",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "allocation_as_per_leave_type",
+   "fieldtype": "Float",
+   "label": "Allocation as per Leave Type"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "opening_used_leave",
+   "fieldtype": "Float",
+   "label": "Opening Used leave"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "accumulated_from_last_year",
+   "fieldtype": "Float",
+   "label": "Accumulated from Last Year"
   }
  ],
  "icon": "fa fa-ok",
@@ -237,7 +258,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-07 09:50:33.145825",
+ "modified": "2023-09-29 15:19:02.478831",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",

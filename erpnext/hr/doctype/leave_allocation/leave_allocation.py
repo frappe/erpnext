@@ -91,6 +91,22 @@ class LeaveAllocation(Document):
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
 
 	def on_update_after_submit(self):
+		conditions = {
+	        "transaction_name": self.name,
+	        "leave_type": self.leave_type,
+	        "employee": self.employee
+	    }
+		update_data = {
+			"allocation_as_per_leave_type": self.allocation_as_per_leave_type,
+			"opening_used_leave": self.opening_used_leave,
+			"accumulated_from_last_year":self.accumulated_from_last_year
+		}
+		
+		matching_entries = frappe.get_all("Leave Ledger Entry", filters=conditions)
+		for entry in matching_entries:
+			entry_doc = frappe.get_doc("Leave Ledger Entry", entry.name)
+			entry_doc.update(update_data)
+			entry_doc.save()
 		if self.has_value_changed("new_leaves_allocated"):
 			self.validate_against_leave_applications()
 

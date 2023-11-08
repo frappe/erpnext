@@ -20,6 +20,9 @@
   "is_carry_forward",
   "is_expired",
   "is_lwp",
+  "allocation_as_per_leave_type",
+  "opening_used_leave",
+  "accumulated_from_last_year",
   "amended_from"
  ],
  "fields": [
@@ -129,6 +132,24 @@
    "fieldname": "if_half_day",
    "fieldtype": "Date",
    "label": "If Half Day"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "allocation_as_per_leave_type",
+   "fieldtype": "Float",
+   "label": "Allocation as per Leave Type"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "opening_used_leave",
+   "fieldtype": "Float",
+   "label": "Opening Used leave"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "accumulated_from_last_year",
+   "fieldtype": "Float",
+   "label": "Accumulated from Last Year"
   }
  ],
  "in_create": 1,

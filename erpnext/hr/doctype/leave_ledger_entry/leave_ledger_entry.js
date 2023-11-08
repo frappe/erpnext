@@ -2,7 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Leave Ledger Entry', {
-	// refresh: function(frm) {
-
-	// }
+    // refresh: function(frm) {
+        
+    // }
 });
+

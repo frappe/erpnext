@@ -273,6 +273,9 @@ class LeaveApplication(Document):
 				else:
 					leave_dates.append((self.from_date, "session1", "leave_type"))
 					leave_dates.append((self.from_date, "session2", "leave_type"))
+				if self.current_leave_type_count > 0:
+					leave_dates.append((self.from_date, "session1", "leave_type"))
+					leave_dates.append((self.from_date, "session2", "leave_type"))
 
 			#---------------------------------------------------------------------------
 		else:
@@ -1049,8 +1052,13 @@ class LeaveApplication(Document):
 
 	def validate_total_available(self):
 		max_days = self.total_available
-		max_days = float(max_days)
-		if max_days and (self.total_leave_days > max_days):
+		if max_days is None:
+			max_days = 0
+		else:
+			max_days = float(max_days)
+		if self.status == "Cancelled":
+			frappe.msgprint(_("Your available leave days Credited in your Leave Balance"))
+		elif max_days and (self.total_leave_days > max_days):
 			frappe.msgprint(_("You have {0} available leave days this month. considering {1} days as Leave Without Pay (LWP)").format(self.total_available, self.lwp_count))
 
 	
@@ -1207,6 +1215,9 @@ class LeaveApplication(Document):
 					leave_dates.append((self.from_date, "session1", "lwp"))
 					leave_dates.append((self.from_date, "session2", "lwp"))
 				else:
+					leave_dates.append((self.from_date, "session1", "leave_type"))
+					leave_dates.append((self.from_date, "session2", "leave_type"))
+				if self.current_leave_type_count > 0:
 					leave_dates.append((self.from_date, "session1", "leave_type"))
 					leave_dates.append((self.from_date, "session2", "leave_type"))
 
@@ -1898,13 +1909,14 @@ def get_leave_details(employee, date, to_date, leave_type):
 	to_date_month_end = from_date_month_start + relativedelta(day=31)
 	
 	allocation_records = get_leave_allocation_records(employee, date)
+	joining_opening_balance = get_employee_joining_opening_balance(employee)
 	
 	leave_allocation = {}
-	total_leaves_allocated = sum(allocation['total_leaves_allocated'] for allocation in allocation_records.values())
+	# total_leaves_allocated = sum(allocation['total_leaves_allocated'] for allocation in allocation_records.values())
 	
 	# Calculate monthly allocation value
-	monthly_allocation = calculate_monthly_allocation(total_leaves_allocated, from_date_obj, to_date_obj)
-	allocation_value = next(iter(monthly_allocation.values()))
+	# monthly_allocation = calculate_monthly_allocation(total_leaves_allocated, from_date_obj, to_date_obj)
+	allocation_value = get_monthly_adon_for_employee(leave_type)
 	current_year = datetime.now().year
 	current_month = datetime.now().month
 	
@@ -1916,9 +1928,11 @@ def get_leave_details(employee, date, to_date, leave_type):
 		allocation = allocation_records[d]
 		remaining_leaves = get_leave_balance_on(
             employee, d, date, to_date=allocation.to_date, consider_all_leaves_in_the_allocation_period=True
-        )
+        ) 
 		end_date = allocation.to_date
 		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
+		
+		
 		monthly_taken_leaves = get_leaves_for_period(employee, d, from_date_month_start, to_date_month_end)
 		now_taken_leave = get_leaves_for_period(employee, d, allocation.from_date, end_date)
 		now_taken_leave_positive = abs(now_taken_leave)
@@ -1937,6 +1951,9 @@ def get_leave_details(employee, date, to_date, leave_type):
             "monthly_taken_leaves": monthly_taken_leaves,
             "leaves_pending_approval": leaves_pending_approval,
             "remaining_leaves": remaining_leaves,
+			"allocation_as_per_leave_type":allocation.allocation_as_per_leave_type,
+			"opening_used_leave":allocation.opening_used_leave,
+			"accumulated_from_last_year":allocation.accumulated_from_last_year
         }
 
 	allocation_records = get_leave_allocation_records(employee, date, leave_type)
@@ -1948,26 +1965,36 @@ def get_leave_details(employee, date, to_date, leave_type):
 		assignment_date = allocation.get("from_date")
 		balance = 0
 		joining_date = frappe.db.get_value("Employee", {"name": employee}, "date_of_joining")
+		confimation_date = frappe.db.get_value("Employee", {"name": employee}, "confimation_date")
 		
 		if leave_type == "Apprentice leave":
 			
 			
 			if joining_date.year == current_year:
 				if joining_date.day <= 15:
-					balance = (current_month - joining_date.month) * 2 + 2
+					balance = (current_month - assignment_date.month) * allocation_value + allocation_value + float(joining_opening_balance)
 				else:
-					balance = (current_month - joining_date.month) * 2 + 1
+					balance = (current_month - assignment_date.month) * allocation_value + 1 + float(joining_opening_balance)
 			else:
-				balance = current_month * allocation_value
+				balance = (current_month - assignment_date.month) * allocation_value
 		else:
-			if current_month == assignment_date.month and current_year == assignment_date.year:
-				balance = (current_month - assignment_date.month) * allocation_value + allocation_value
+			if  current_year == assignment_date.year:
+				
+				if confimation_date.year == assignment_date.year:
+					if confimation_date.day <= 15:
+						balance = (current_month - assignment_date.month) * allocation_value + allocation_value + float(joining_opening_balance)
+					else:
+						balance = (current_month - assignment_date.month) * allocation_value + 1.5 + float(joining_opening_balance)
+				else:
+					balance = (current_month - assignment_date.month) * allocation_value + allocation_value + float(joining_opening_balance)
+
 			elif current_year > assignment_date.year:
 				balance = 0
 
 		
 	applied_leave = total_now_taken_leave_positive + total_pending_leaves_positive
 	total_available = balance - applied_leave
+	
 	
 
 	lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
@@ -1984,32 +2011,39 @@ def get_leave_details(employee, date, to_date, leave_type):
 
 from dateutil.relativedelta import relativedelta
 
-def calculate_monthly_allocation(total_leaves_allocated, from_date_obj, to_date_obj):
-    # Calculate the number of months between from_date and to_date
-    months_between = (to_date_obj.year - from_date_obj.year) * 12 + to_date_obj.month - from_date_obj.month + 1
-    
-    # Calculate monthly leave allocation
-    monthly_allocation = total_leaves_allocated / 12
-    
-    # Create a dictionary to store monthly allocations
-    monthly_allocations = {}
-    
-    
-    current_month = from_date_obj.month
-    current_year = from_date_obj.year
-    
-    for _ in range(months_between):
-        if current_month > 12:
-            current_month = 1
-            current_year += 1
-        
-        month_year_key = f"{current_year}-{current_month:02d}"
-        monthly_allocations[month_year_key] = monthly_allocation
-        
-        current_month += 1
-    
-    return monthly_allocations
+# def get_monthly_adon_for_employee(employee_id):
+#     current_year = datetime.now().year
+#     leave_policy_assignment = frappe.get_value("Leave Policy Assignment",filters={"employee": employee_id, "year":current_year},fieldname="leave_policy")
 
+#     if leave_policy_assignment:
+#         # Get the monthly_adon field from the Leave Policy doctype
+#         monthly_adon = frappe.get_value("Leave Policy",filters={"name": leave_policy_assignment},fieldname="monthly_adon")
+#         return monthly_adon
+
+#     return None
+def get_monthly_adon_for_employee(leave_type):
+    if leave_type == "Apprentice leave":
+        return 2
+    else:
+        return 2.5
+
+def get_employee_joining_opening_balance(employee_id):
+    try:
+        leave_policy_assignment = frappe.get_list("Leave Policy Assignment", filters={"employee": employee_id , "docstatus": 1}, fields=["joining_opening_balance"])
+        if leave_policy_assignment:
+            opening_balance = leave_policy_assignment[0].get("joining_opening_balance")
+            if opening_balance is not None:
+                # Check if opening_balance is a valid number
+                try:
+                    return float(opening_balance)
+                except ValueError:
+                    return 0  # Return zero if opening_balance is not a valid number
+            else:
+                return 0  # Return zero if opening_balance is None
+        else:
+            return 0  # Return zero if no leave_policy_assignment found
+    except frappe.DoesNotExistError:
+        return 0  # Return zero if an exception occurs
 @frappe.whitelist()
 def get_leave_balance_on(
 	employee: str,
@@ -2043,15 +2077,18 @@ def get_leave_balance_on(
 	cf_expiry = get_allocation_expiry_for_cf_leaves(employee, leave_type, to_date, date)
 
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, end_date)
+	leaves_pending_approval = get_leaves_pending_approval_for_period(
+            employee, leave_type, allocation.from_date, end_date
+        )
 	
 
 	remaining_leaves = get_remaining_leaves(allocation, leaves_taken, date, cf_expiry)
-	# frappe.msgprint('hello:' + str(remaining_leaves))
+	
 
 	if for_consumption:
 		return remaining_leaves
 	else:
-		return remaining_leaves.get("leave_balance")
+		return remaining_leaves.get("leave_balance") - leaves_pending_approval
 
 
 
@@ -2077,7 +2114,10 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 			Min(Ledger.from_date).as_("from_date"),
 			Max(Ledger.to_date).as_("to_date"),
 			Ledger.leave_type,
-			Ledger.transaction_name
+			Ledger.transaction_name,
+			Ledger.allocation_as_per_leave_type,
+			Ledger.opening_used_leave,
+			Ledger.accumulated_from_last_year
 		)
 		.where(
 			(Ledger.from_date <= date)
@@ -2109,7 +2149,10 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 					"new_leaves_allocated": d.new_leaves,
 					"leave_type": d.leave_type,
 					"leave_policy_assignment": d.leave_policy_assignment,
-					"transaction_name": d.transaction_name
+					"transaction_name": d.transaction_name,
+					"allocation_as_per_leave_type":d.allocation_as_per_leave_type,
+					"opening_used_leave":d.opening_used_leave,
+					"accumulated_from_last_year":d.accumulated_from_last_year
 				}
 			),
 		)
@@ -2514,3 +2557,35 @@ def get_leave_approver(employee):
 		)
 
 	return leave_approver
+	
+@frappe.whitelist()
+def get_allowed_leave_types(employee_input):
+	allowed_leave_types = []
+	leave_allocations = frappe.get_all(
+		'Leave Allocation',
+		filters={'employee': employee_input},
+		fields=['leave_type']
+	)
+	for allocation in leave_allocations:
+		allowed_leave_types.append(allocation.leave_type)
+		allowed_leave_types.append("Leave Without Pay")
+	if not allowed_leave_types:
+		allowed_leave_types.append("Leave Without Pay")
+	return allowed_leave_types
+
+@frappe.whitelist()
+def cancel_attendance_records(leave_application):
+    # Fetch and cancel all attendance records that match the Leave Application number
+    attendance_records = frappe.get_list("Attendance", filters={"leave_application": leave_application})
+    
+    if attendance_records:
+        for attendance in attendance_records:
+            attendance_doc = frappe.get_doc("Attendance", attendance.name)
+            if attendance_doc.docstatus == 1:
+                attendance_doc.cancel()
+    
+    # Set the status of the Leave Application to "Cancelled"
+    leave_app = frappe.get_doc("Leave Application", leave_application)
+    leave_app.docstatus = 2  # Set to Cancelled
+    leave_app.save(ignore_permissions=True)
+    return "Success"
