@@ -702,6 +702,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(flt(sl_entry.actual_qty), 1.0)
 		self.assertEqual(flt(sl_entry.qty_after_transaction), 1.0)
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_backdated_stock_reco_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 

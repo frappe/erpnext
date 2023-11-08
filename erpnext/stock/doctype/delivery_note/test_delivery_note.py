@@ -1056,6 +1056,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3)
 		si1 = make_sales_invoice(dn1.name)
+		si1.update_billed_amount_in_delivery_note = True
 		si1.insert()
 		si1.submit()
 		dn1.reload()
@@ -1064,6 +1065,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn2 = create_delivery_note(is_return=1, return_against=dn.name, qty=-4)
 		si2 = make_sales_invoice(dn2.name)
+		si2.update_billed_amount_in_delivery_note = True
 		si2.insert()
 		si2.submit()
 		dn2.reload()
