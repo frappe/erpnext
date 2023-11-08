@@ -1,5 +1,5 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "columns": [],
  "creation": "2016-04-08 14:49:58.133098",
  "disable_prepared_report": 0,
@@ -7,9 +7,14 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 2,
+ "idx": 6,
  "is_standard": "Yes",
+<<<<<<< HEAD
  "modified": "2023-06-06 09:00:07.435151",
+=======
+ "letterhead": null,
+ "modified": "2023-11-08 20:17:05.774211",
+>>>>>>> 043dc1b14b (fix: asset depreciation ledger (backport #37991) (#37992))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Asset Depreciation Ledger",
