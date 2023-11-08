@@ -533,6 +533,7 @@ Company currencies of both the companies should match for Inter Company Transact
 Company is manadatory for company account,Bitte gib ein Unternehmen für dieses Unternehmenskonto an.,
 Company name not same,Firma nicht gleich,
 Company {0} does not exist,Unternehmen {0} existiert nicht,
+Competitor,Konkurrent,
 Compensatory leave request days not in valid holidays,"Tage des Ausgleichsurlaubs, die nicht in den gültigen Feiertagen sind",
 Complaint,Beschwerde,
 Completion Date,Fertigstellungstermin,
