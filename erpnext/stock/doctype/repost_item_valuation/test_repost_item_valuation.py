@@ -5,7 +5,7 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 from frappe.utils.data import add_to_date, today
 
@@ -173,6 +173,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		riv.set_status("Skipped")
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
 
@@ -295,6 +296,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_create_repost_entry_for_cancelled_document(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
