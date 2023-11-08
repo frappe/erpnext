@@ -1098,6 +1098,7 @@ class AccountsController(TransactionBase):
 						"account": round_off_account,
 						"against_type": against_type,
 						"against": against,
+						"against_link": against,
 						credit_or_debit: precision_loss,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
@@ -1479,6 +1480,7 @@ class AccountsController(TransactionBase):
 								"account": item.discount_account,
 								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1498,6 +1500,7 @@ class AccountsController(TransactionBase):
 								"account": income_or_expense_account,
 								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1522,6 +1525,7 @@ class AccountsController(TransactionBase):
 						"account": self.additional_discount_account,
 						"against_type": against_type,
 						"against": supplier_or_customer,
+						"against_link": supplier_or_customer,
 						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},

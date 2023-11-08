@@ -432,6 +432,7 @@ class AssetCapitalization(StockController):
 								"account": account,
 								"against_type": "Account",
 								"against": target_account,
+								"against_link": target_account,
 								"cost_center": item_row.cost_center,
 								"project": item_row.get("project") or self.get("project"),
 								"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -474,6 +475,7 @@ class AssetCapitalization(StockController):
 			for gle in fixed_asset_gl_entries:
 				gle["against_type"] = "Account"
 				gle["against"] = target_account
+				gle["against_link"] = target_account
 				gl_entries.append(self.get_gl_dict(gle, item=item))
 				target_against.add(gle["account"])
 
@@ -491,6 +493,7 @@ class AssetCapitalization(StockController):
 						"account": item_row.expense_account,
 						"against_type": "Account",
 						"against": target_account,
+						"against_link": target_account,
 						"cost_center": item_row.cost_center,
 						"project": item_row.get("project") or self.get("project"),
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -510,6 +513,7 @@ class AssetCapitalization(StockController):
 							"account": self.target_fixed_asset_account,
 							"against_type": "Account",
 							"against": target_account,
+							"against_link": target_account,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 							"debit": flt(self.total_value, precision) / len(target_against),
 							"cost_center": self.get("cost_center"),
@@ -530,6 +534,7 @@ class AssetCapitalization(StockController):
 								"account": account,
 								"against_type": "Account",
 								"against": target_account,
+								"against_link": target_account,
 								"cost_center": self.cost_center,
 								"project": self.get("project"),
 								"remarks": self.get("remarks") or "Accounting Entry for Stock",

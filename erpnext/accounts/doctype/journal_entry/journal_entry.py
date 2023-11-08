@@ -683,10 +683,10 @@ class JournalEntry(AccountsController):
 				else:
 					against_type = "Supplier"
 
+				against_account = frappe.db.get_value(d.reference_type, d.reference_name, against_type.lower())
 				d.against_type = against_type
-				d.against_account = frappe.db.get_value(
-					d.reference_type, d.reference_name, against_type.lower()
-				)
+				d.against_account = against_account
+				d.against_account_link = against_account
 		else:
 			self.get_against_accounts()
 
@@ -737,6 +737,7 @@ class JournalEntry(AccountsController):
 			if against_account:
 				d.against_type = against_account.party_type or "Account"
 				d.against_account = against_account.party or against_account.account
+				d.against_account_link = against_account.party or against_account.account
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
@@ -967,7 +968,13 @@ class JournalEntry(AccountsController):
 				)
 
 				if not self.separate_against_account_entries:
-					gl_dict.update({"against_type": d.against_type, "against": d.against_account})
+					gl_dict.update(
+						{
+							"against_type": d.against_type,
+							"against": d.against_account,
+							"against_link": d.against_account,
+						}
+					)
 					gl_map.append(gl_dict)
 
 				elif d in self.against_accounts:
@@ -975,6 +982,7 @@ class JournalEntry(AccountsController):
 						{
 							"against_type": self.split_account.get("party_type") or "Account",
 							"against": self.split_account.get("party") or self.split_account.get("account"),
+							"against_link": self.split_account.get("party") or self.split_account.get("account"),
 						}
 					)
 					gl_map.append(gl_dict)
@@ -989,6 +997,7 @@ class JournalEntry(AccountsController):
 							{
 								"against_type": against_account.party_type or "Account",
 								"against": against_account.party or against_account.account,
+								"against_link": against_account.party or against_account.account,
 								"debit": flt(debit, d.precision("debit")),
 								"credit": flt(credit, d.precision("credit")),
 								"account_currency": d.account_currency,

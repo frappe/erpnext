@@ -1078,6 +1078,7 @@ class PaymentEntry(AccountsController):
 					"party": self.party,
 					"against_type": "Account",
 					"against": against_account,
+					"against_link": against_account,
 					"account_currency": self.party_account_currency,
 					"cost_center": self.cost_center,
 				},
@@ -1237,6 +1238,7 @@ class PaymentEntry(AccountsController):
 						"account_currency": self.paid_from_account_currency,
 						"against_type": self.party_type if self.payment_type == "Pay" else "Account",
 						"against": self.party if self.payment_type == "Pay" else self.paid_to,
+						"against_link": self.party if self.payment_type == "Pay" else self.paid_to,
 						"credit_in_account_currency": self.paid_amount,
 						"credit": self.base_paid_amount,
 						"cost_center": self.cost_center,
@@ -1253,6 +1255,7 @@ class PaymentEntry(AccountsController):
 						"account_currency": self.paid_to_account_currency,
 						"against_type": self.party_type if self.payment_type == "Receive" else "Account",
 						"against": self.party if self.payment_type == "Receive" else self.paid_from,
+						"against_link": self.party if self.payment_type == "Receive" else self.paid_from,
 						"debit_in_account_currency": self.received_amount,
 						"debit": self.base_received_amount,
 						"cost_center": self.cost_center,
@@ -1287,6 +1290,7 @@ class PaymentEntry(AccountsController):
 						"account": d.account_head,
 						"against_type": against_type,
 						"against": against,
+						"against_link": against,
 						dr_or_cr: tax_amount,
 						dr_or_cr + "_in_account_currency": base_tax_amount
 						if account_currency == self.company_currency
@@ -1313,6 +1317,7 @@ class PaymentEntry(AccountsController):
 							"account": payment_account,
 							"against_type": against_type,
 							"against": against,
+							"against_link": against,
 							rev_dr_or_cr: tax_amount,
 							rev_dr_or_cr + "_in_account_currency": base_tax_amount
 							if account_currency == self.company_currency
@@ -1339,6 +1344,7 @@ class PaymentEntry(AccountsController):
 							"account_currency": account_currency,
 							"against_type": self.party_type or "Account",
 							"against": self.party or self.paid_from,
+							"against_link": self.party or self.paid_from,
 							"debit_in_account_currency": d.amount,
 							"debit": d.amount,
 							"cost_center": d.cost_center,
