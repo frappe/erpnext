@@ -24,6 +24,7 @@ SLE_FIELDS = (
 	"stock_value_difference",
 	"valuation_rate",
 	"voucher_detail_no",
+	"serial_and_batch_bundle",
 )
 
 
@@ -64,7 +65,11 @@ def add_invariant_check_fields(sles):
 
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
-		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
+		if (
+			sle.voucher_type == "Stock Reconciliation"
+			and not sle.batch_no
+			and not sle.serial_and_batch_bundle
+		):
 			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
 			if balance_qty is None:
 				balance_qty = sle.qty_after_transaction
@@ -142,6 +147,12 @@ def get_columns():
 			"fieldtype": "Link",
 			"label": _("Batch"),
 			"options": "Batch",
+		},
+		{
+			"fieldname": "serial_and_batch_bundle",
+			"fieldtype": "Link",
+			"label": _("Serial and Batch Bundle"),
+			"options": "Serial and Batch Bundle",
 		},
 		{
 			"fieldname": "use_batchwise_valuation",

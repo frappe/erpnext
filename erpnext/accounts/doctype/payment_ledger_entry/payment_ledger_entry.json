@@ -30,7 +30,8 @@
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Posting Date",
+   "search_index": 1
   },
   {
    "fieldname": "account_type",
@@ -64,7 +65,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "voucher_no",
@@ -72,14 +74,16 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Voucher No",
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "search_index": 1
   },
   {
    "fieldname": "against_voucher_type",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Against Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "against_voucher_no",
@@ -87,7 +91,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Against Voucher No",
-   "options": "against_voucher_type"
+   "options": "against_voucher_type",
+   "search_index": 1
   },
   {
    "fieldname": "amount",
@@ -147,13 +152,14 @@
   {
    "fieldname": "voucher_detail_no",
    "fieldtype": "Data",
-   "label": "Voucher Detail No"
+   "label": "Voucher Detail No",
+   "search_index": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-29 12:24:20.500632",
+ "modified": "2023-11-03 16:39:58.904113",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",

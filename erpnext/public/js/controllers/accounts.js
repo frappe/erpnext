@@ -30,7 +30,6 @@ erpnext.accounts.taxes = {
 							filters: {
 								"account_type": account_type,
 								"company": doc.company,
-								"disabled": 0
 							}
 						}
 					});

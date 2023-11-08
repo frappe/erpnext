@@ -1042,13 +1042,14 @@ class TestProductionPlan(FrappeTestCase):
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 		self.assertEqual(after_qty - before_qty, 1)
-
 		pln = frappe.get_doc("Production Plan", pln.name)
 		pln.cancel()
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
+		pln.reload()
+		self.assertEqual(pln.docstatus, 2)
 		self.assertEqual(after_qty, before_qty)
 
 	def test_resered_qty_for_production_plan_for_work_order(self):
@@ -1332,6 +1333,120 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertTrue(row.warehouse == mrp_warhouse)
 				self.assertEqual(row.quantity, 12)
 
+	def test_mr_qty_for_same_rm_with_different_sub_assemblies(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree = {
+			"Fininshed Goods2 For SUB Test": {
+				"SubAssembly2 For SUB Test": {"ChildPart2 For SUB Test": {}},
+				"SubAssembly3 For SUB Test": {"ChildPart2 For SUB Test": {}},
+			}
+		}
+
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=1,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			skip_available_sub_assembly_item=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		plan.get_sub_assembly_items()
+		plan.make_material_request()
+
+		for row in plan.mr_items:
+			if row.item_code == "ChildPart2 For SUB Test":
+				self.assertEqual(row.quantity, 2)
+
+	def test_reserve_sub_assembly_items(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		bom_tree = {
+			"Fininshed Goods Bicycle": {
+				"Frame Assembly": {"Frame": {}},
+				"Chain Assembly": {"Chain": {}},
+			}
+		}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		warehouse = "_Test Warehouse - _TC"
+		company = "_Test Company"
+
+		sub_assembly_warehouse = create_warehouse("SUB ASSEMBLY WH", company=company)
+
+		for item_code in ["Frame", "Chain"]:
+			make_stock_entry(item_code=item_code, target=warehouse, qty=2, basic_rate=100)
+
+		before_qty = flt(
+			frappe.db.get_value(
+				"Bin",
+				{"item_code": "Frame Assembly", "warehouse": sub_assembly_warehouse},
+				"reserved_qty_for_production_plan",
+			)
+		)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=2,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			skip_available_sub_assembly_item=1,
+			warehouse=warehouse,
+			sub_assembly_warehouse=sub_assembly_warehouse,
+		)
+
+		plan.get_sub_assembly_items()
+		plan.submit()
+
+		after_qty = flt(
+			frappe.db.get_value(
+				"Bin",
+				{"item_code": "Frame Assembly", "warehouse": sub_assembly_warehouse},
+				"reserved_qty_for_production_plan",
+			)
+		)
+
+		self.assertEqual(after_qty, before_qty + 2)
+
+		plan.make_work_order()
+		work_orders = frappe.get_all(
+			"Work Order",
+			fields=["name", "production_item"],
+			filters={"production_plan": plan.name},
+			order_by="creation desc",
+		)
+
+		for d in work_orders:
+			wo_doc = frappe.get_doc("Work Order", d.name)
+			wo_doc.skip_transfer = 1
+			wo_doc.from_wip_warehouse = 1
+
+			wo_doc.wip_warehouse = (
+				warehouse
+				if d.production_item in ["Frame Assembly", "Chain Assembly"]
+				else sub_assembly_warehouse
+			)
+
+			wo_doc.submit()
+
+			if d.production_item == "Frame Assembly":
+				self.assertEqual(wo_doc.fg_warehouse, sub_assembly_warehouse)
+				se_doc = frappe.get_doc(make_se_from_wo(wo_doc.name, "Manufacture", 2))
+				se_doc.submit()
+
+		after_qty = flt(
+			frappe.db.get_value(
+				"Bin",
+				{"item_code": "Frame Assembly", "warehouse": sub_assembly_warehouse},
+				"reserved_qty_for_production_plan",
+			)
+		)
+
+		self.assertEqual(after_qty, before_qty)
+
 
 def create_production_plan(**args):
 	"""
@@ -1352,6 +1467,7 @@ def create_production_plan(**args):
 			"ignore_existing_ordered_qty": args.ignore_existing_ordered_qty or 0,
 			"get_items_from": "Sales Order",
 			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
+			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 		}
 	)
 
