@@ -52,7 +52,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 		},
 		{
 			"fieldname": "include_default_book_assets",
-			"label": __("Include Default Book Assets"),
+			"label": __("Include Default FB Assets"),
 			"fieldtype": "Check",
 			"default": 1
 		},
