@@ -230,6 +230,7 @@ class JournalEntry(AccountsController):
 					"account": tax_withholding_details.get("account_head"),
 					rev_debit_or_credit: tax_withholding_details.get("tax_amount"),
 					"against_account": parties[0],
+					"against_account_link": parties[0],
 				},
 			)
 
@@ -723,7 +724,7 @@ class JournalEntry(AccountsController):
 			elif flt(d.credit) > 0:
 				self.accounts_credited.append(d)
 
-			if d.against_account:
+			if d.against_account_link:
 				self.separate_against_account_entries = 0
 				break
 
