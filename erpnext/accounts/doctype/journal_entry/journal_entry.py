@@ -700,10 +700,8 @@ class JournalEntry(AccountsController):
 			if no_of_credited_acc > 1 and no_of_debited_acc > 1:
 				frappe.msgprint(
 					_(
-						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed.".format(
-							frappe.bold("against"), frappe.bold("Accounting Entries")
-						)
-					),
+						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed."
+					).format(frappe.bold("against"), frappe.bold("Accounting Entries")),
 					alert=True,
 				)
 			elif no_of_credited_acc <= 1 and no_of_debited_acc <= 1:
