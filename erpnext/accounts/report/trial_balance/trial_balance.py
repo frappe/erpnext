@@ -275,9 +275,7 @@ def get_opening_balance(
 		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
 		if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
-			frappe.throw(
-				_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-			)
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
 
 		opening_balance = opening_balance.where(
 			(closing_balance.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
