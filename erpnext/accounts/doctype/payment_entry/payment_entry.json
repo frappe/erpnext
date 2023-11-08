@@ -594,6 +594,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
+   "no_copy": 1,
    "options": "\nDraft\nSubmitted\nCancelled",
    "read_only": 1
   },
@@ -740,7 +741,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-06-19 11:38:04.387219",
+=======
+ "modified": "2023-11-08 21:51:03.482709",
+>>>>>>> a89afb65d7 (fix: Mark Status field in Payment Entry 'no_copy'.)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
