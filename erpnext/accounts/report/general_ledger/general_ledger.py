@@ -164,7 +164,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		credit_in_account_currency """
 
 	if filters.get("show_remarks"):
-		select_fields += """,remarks"""
+		select_fields += """, substr(remarks, 1, 1024) as remarks"""
 
 	order_by_statement = "order by posting_date, account, creation"
 
