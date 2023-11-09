@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
+from erpnext.stock.utils import get_or_make_bin
+
 
 class StockReservationEntry(Document):
 	def validate(self) -> None:
@@ -31,6 +33,7 @@ class StockReservationEntry(Document):
 		self.update_reserved_qty_in_voucher()
 		self.update_reserved_qty_in_pick_list()
 		self.update_status()
+		self.update_reserved_stock_in_bin()
 
 	def on_update_after_submit(self) -> None:
 		self.can_be_updated()
@@ -40,12 +43,14 @@ class StockReservationEntry(Document):
 		self.validate_reservation_based_on_serial_and_batch()
 		self.update_reserved_qty_in_voucher()
 		self.update_status()
+		self.update_reserved_stock_in_bin()
 		self.reload()
 
 	def on_cancel(self) -> None:
 		self.update_reserved_qty_in_voucher()
 		self.update_reserved_qty_in_pick_list()
 		self.update_status()
+		self.update_reserved_stock_in_bin()
 
 	def validate_amended_doc(self) -> None:
 		"""Raises an exception if document is amended."""
@@ -340,6 +345,13 @@ class StockReservationEntry(Document):
 				reserved_qty,
 				update_modified=update_modified,
 			)
+
+	def update_reserved_stock_in_bin(self) -> None:
+		"""Updates `Reserved Stock` in Bin."""
+
+		bin_name = get_or_make_bin(self.item_code, self.warehouse)
+		bin_doc = frappe.get_cached_doc("Bin", bin_name)
+		bin_doc.update_reserved_stock()
 
 	def update_status(self, status: str = None, update_modified: bool = True) -> None:
 		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
@@ -679,6 +691,68 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	reserved_qty = query.run(as_list=True)
 
 	return flt(reserved_qty[0][0])
+
+
+def get_sre_reserved_serial_nos_details(
+	item_code: str, warehouse: str, serial_nos: list = None
+) -> dict:
+	"""Returns a dict of `Serial No` reserved in Stock Reservation Entry. The dict is like {serial_no: sre_name, ...}"""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(sb_entry.serial_no, sre.name)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.warehouse == warehouse)
+			& (sre.reserved_qty > sre.delivered_qty)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+			& (sre.reservation_based_on == "Serial and Batch")
+		)
+		.orderby(sb_entry.creation)
+	)
+
+	if serial_nos:
+		query = query.where(sb_entry.serial_no.isin(serial_nos))
+
+	return frappe._dict(query.run())
+
+
+def get_sre_reserved_batch_nos_details(
+	item_code: str, warehouse: str, batch_nos: list = None
+) -> dict:
+	"""Returns a dict of `Batch Qty` reserved in Stock Reservation Entry. The dict is like {batch_no: qty, ...}"""
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.batch_no,
+			Sum(sb_entry.qty - sb_entry.delivered_qty),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.warehouse == warehouse)
+			& ((sre.reserved_qty - sre.delivered_qty) > 0)
+			& (sre.status.notin(["Delivered", "Cancelled"]))
+			& (sre.reservation_based_on == "Serial and Batch")
+		)
+		.groupby(sb_entry.batch_no)
+		.orderby(sb_entry.creation)
+	)
+
+	if batch_nos:
+		query = query.where(sb_entry.batch_no.isin(batch_nos))
+
+	return frappe._dict(query.run())
 
 
 def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict]:
