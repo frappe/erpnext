@@ -475,6 +475,30 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		report = execute(filters)[1]
 		self.assertEqual(len(report), 0)
 
+	def test_multi_customer_group_filter(self):
+		si = self.create_sales_invoice()
+		cus_group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		# Create a list of customer groups, e.g., ["Group1", "Group2"]
+		cus_groups_list = [cus_group, "_Test Customer Group 1"]
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"customer_group": cus_groups_list,  # Use the list of customer groups
+		}
+		report = execute(filters)[1]
+
+		# Assert that the report contains data for the specified customer groups
+		self.assertTrue(len(report) > 0)
+
+		for row in report:
+			# Assert that the customer group of each row is in the list of customer groups
+			self.assertIn(row.customer_group, cus_groups_list)
+
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
 		self.customer2 = (
