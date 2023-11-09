@@ -145,6 +145,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldtype": "Check",
 		},
 		{
+			"fieldname": "in_party_currency",
+			"label": __("In Party Currency"),
+			"fieldtype": "Check",
+		},
+		{
 			"fieldname": "ignore_accounts",
 			"label": __("Group by Voucher"),
 			"fieldtype": "Check",
