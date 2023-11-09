@@ -61,6 +61,7 @@
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
+   "read_only_depends_on": "eval:!doc.__islocal",
    "reqd": 1
   },
   {
@@ -207,7 +208,11 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
+<<<<<<< HEAD
  "modified": "2022-02-21 08:08:23.999236",
+=======
+ "modified": "2023-11-09 12:17:28.339975",
+>>>>>>> 779260fb49 (fix: make item field read-only in batch)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -224,7 +229,6 @@
    "read": 1,
    "report": 1,
    "role": "Item Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   }
