@@ -269,6 +269,10 @@ class StockReconciliation(StockController):
 			if item.has_batch_no:
 				has_batch_no = True
 
+			if not row.qty and not row.valuation_rate and not row.current_qty:
+				self.make_adjustment_entry(row, sl_entries)
+				continue
+
 			if item.has_serial_no or item.has_batch_no:
 				has_serial_no = True
 				self.get_sle_for_serialized_items(row, sl_entries, item)
@@ -401,6 +405,21 @@ class StockReconciliation(StockController):
 		if serial_nos == get_serial_nos(row.current_serial_no):
 			# update valuation rate
 			self.update_valuation_rate_for_serial_nos(row, serial_nos)
+
+	def make_adjustment_entry(self, row, sl_entries):
+		from erpnext.stock.stock_ledger import get_stock_value_difference
+
+		difference_amount = get_stock_value_difference(
+			row.item_code, row.warehouse, self.posting_date, self.posting_time
+		)
+
+		if not difference_amount:
+			return
+
+		args = self.get_sle_for_items(row)
+		args.update({"stock_value_difference": -1 * difference_amount, "is_adjustment_entry": 1})
+
+		sl_entries.append(args)
 
 	def update_valuation_rate_for_serial_no(self):
 		for d in self.items:

@@ -635,9 +635,11 @@ class update_entries_after(object):
 		sle.valuation_rate = self.wh_data.valuation_rate
 		sle.stock_value = self.wh_data.stock_value
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
-		sle.stock_value_difference = stock_value_difference
-		sle.doctype = "Stock Ledger Entry"
 
+		if not sle.is_adjustment_entry or not self.args.get("sle_id"):
+			sle.stock_value_difference = stock_value_difference
+
+		sle.doctype = "Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
 		if not self.args.get("sle_id"):
@@ -1711,3 +1713,27 @@ def is_internal_transfer(sle):
 
 	if data.is_internal_supplier and data.represents_company == data.company:
 		return True
+
+
+def get_stock_value_difference(item_code, warehouse, posting_date, posting_time, voucher_no=None):
+	table = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(table)
+		.select(Sum(table.stock_value_difference).as_("value"))
+		.where(
+			(table.is_cancelled == 0)
+			& (table.item_code == item_code)
+			& (table.warehouse == warehouse)
+			& (
+				(table.posting_date < posting_date)
+				| ((table.posting_date == posting_date) & (table.posting_time <= posting_time))
+			)
+		)
+	)
+
+	if voucher_no:
+		query = query.where(table.voucher_no != voucher_no)
+
+	difference_amount = query.run()
+	return flt(difference_amount[0][0]) if difference_amount else 0
