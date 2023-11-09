@@ -83,6 +83,7 @@
   "pricing_rule_details",
   "pricing_rules",
   "address_and_contact_tab",
+  "supplier_address_section",
   "supplier_address",
   "address_display",
   "column_break_72",
@@ -90,6 +91,14 @@
   "contact_display",
   "contact_mobile",
   "contact_email",
+  "shipping_address_section",
+  "shipping_address",
+  "column_break_zjaq",
+  "shipping_address_display",
+  "company_billing_address_section",
+  "billing_address",
+  "column_break_gcth",
+  "billing_address_display",
   "terms_tab",
   "tc_name",
   "terms",
@@ -843,6 +852,7 @@
    "label": "Named Place"
   },
   {
+<<<<<<< HEAD
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -862,6 +872,55 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
+=======
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Shipping Address",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_zjaq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Small Text",
+   "label": "Shipping Address Details",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Address"
+  },
+  {
+   "fieldname": "supplier_address_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Address"
+  },
+  {
+   "fieldname": "company_billing_address_section",
+   "fieldtype": "Section Break",
+   "label": "Company Billing Address"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Company Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "column_break_gcth",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address Details",
+   "read_only": 1
+>>>>>>> c2bda2c705 (fix: Supplier Quotation fields (#37963))
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -869,7 +928,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-11-17 12:34:30.083077",
+=======
+ "modified": "2023-11-03 13:21:40.172508",
+>>>>>>> c2bda2c705 (fix: Supplier Quotation fields (#37963))
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
