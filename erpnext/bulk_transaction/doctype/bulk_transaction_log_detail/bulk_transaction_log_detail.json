@@ -6,12 +6,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "from_doctype",
   "transaction_name",
   "date",
   "time",
   "transaction_status",
   "error_description",
-  "from_doctype",
   "to_doctype",
   "retried"
  ],
@@ -72,7 +72,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-09 15:29:33.013547",
+ "modified": "2023-11-09 15:33:26.828998",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
