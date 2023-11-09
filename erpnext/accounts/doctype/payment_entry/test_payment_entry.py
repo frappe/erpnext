@@ -1288,7 +1288,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(references[2].voucher_no, si2.name)
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
-    
+
 	def test_receive_payment_from_payable_party_type(self):
 		pe = create_payment_entry(
 			party_type="Supplier",
