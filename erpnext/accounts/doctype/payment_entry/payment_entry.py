@@ -1564,8 +1564,8 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list
 					continue
 
 				frappe.msgprint(
-					_("Spliting {} {} into {} row(s) as per Payment Terms").format(
-						split_rows[0]["voucher_type"], split_rows[0]["voucher_no"], len(split_rows)
+					_("Splitting {0} {1} as per Payment Terms").format(
+						_(entry.voucher_type), frappe.bold(entry.voucher_no)
 					),
 					alert=True,
 				)

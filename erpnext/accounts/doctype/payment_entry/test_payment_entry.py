@@ -1227,7 +1227,10 @@ class TestPaymentEntry(FrappeTestCase):
 		customer = create_customer("Max Mustermann", "INR")
 		create_payment_terms_template()
 
-		si = create_sales_invoice(qty=1, rate=100, customer=customer)
+		# SI has an earlier due date and SI2 has a later due date
+		si = create_sales_invoice(
+			qty=1, rate=100, customer=customer, posting_date=add_days(nowdate(), -4)
+		)
 		si2 = create_sales_invoice(do_not_save=1, qty=1, rate=100, customer=customer)
 		si2.payment_terms_template = "Test Receivable Template"
 		si2.submit()
@@ -1243,8 +1246,8 @@ class TestPaymentEntry(FrappeTestCase):
 		args.update(
 			{
 				"get_outstanding_invoices": True,
-				"from_posting_date": nowdate(),
-				"to_posting_date": add_days(nowdate(), 7),
+				"from_posting_date": add_days(nowdate(), -4),
+				"to_posting_date": add_days(nowdate(), 2),
 			}
 		)
 		references = get_outstanding_reference_documents(args)
