@@ -338,6 +338,7 @@ erpnext.patches.v15_0.delete_woocommerce_settings_doctype
 erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
 erpnext.patches.v14_0.update_invoicing_period_in_subscription
 execute:frappe.delete_doc("Page", "welcome-to-erpnext")
+erpnext.patches.v15_0.migrate_payment_request_status
 erpnext.patches.v15_0.delete_payment_gateway_doctypes
 erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
 erpnext.patches.v15_0.update_sre_from_voucher_details
