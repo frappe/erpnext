@@ -9,7 +9,6 @@
  "engine": "InnoDB",
  "field_order": [
   "payment_term_name",
-  "invoice_portion",
   "mode_of_payment",
   "column_break_3",
   "due_date_based_on",
@@ -31,12 +30,6 @@
    "fieldtype": "Data",
    "label": "Payment Term Name",
    "unique": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "invoice_portion",
-   "fieldtype": "Float",
-   "label": "Invoice Portion (%)"
   },
   {
    "fieldname": "mode_of_payment",
@@ -116,10 +109,11 @@
   }
  ],
  "links": [],
- "modified": "2021-02-15 20:30:56.256403",
+ "modified": "2023-11-09 18:51:00.761013",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Term",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -162,5 +156,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
