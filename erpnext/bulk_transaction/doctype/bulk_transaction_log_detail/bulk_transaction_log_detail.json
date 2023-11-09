@@ -23,6 +23,7 @@
    "in_standard_filter": 1,
    "label": "Name",
    "options": "from_doctype",
+   "read_only": 1,
    "search_index": 1
   },
   {
