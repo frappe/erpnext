@@ -22,7 +22,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Name",
-   "options": "from_doctype"
+   "options": "from_doctype",
+   "search_index": 1
   },
   {
    "fieldname": "transaction_status",
@@ -43,7 +44,8 @@
    "in_standard_filter": 1,
    "label": "From Doctype",
    "options": "DocType",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "to_doctype",
@@ -58,7 +60,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Date ",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "time",
@@ -76,7 +79,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-09 16:55:31.026064",
+ "modified": "2023-11-09 17:44:14.804836",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
