@@ -11,6 +11,7 @@
   "warehouse",
   "posting_date",
   "posting_time",
+  "is_adjustment_entry",
   "column_break_6",
   "voucher_type",
   "voucher_no",
@@ -333,6 +334,12 @@
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_adjustment_entry",
+   "fieldtype": "Check",
+   "label": "Is Adjustment Entry"
   }
  ],
  "hide_toolbar": 1,
@@ -341,7 +348,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-03 16:33:16.270722",
+ "modified": "2023-10-23 18:07:42.063615",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
