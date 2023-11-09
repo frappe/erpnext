@@ -265,6 +265,9 @@ class StockReconciliation(StockController):
 		has_serial_no = False
 		has_batch_no = False
 		for row in self.items:
+			item = frappe.get_doc("Item", row.item_code)
+			if item.has_batch_no:
+				has_batch_no = True
 
 			if not row.qty and not row.valuation_rate and not row.current_qty:
 				self.make_adjustment_entry(row, sl_entries)
@@ -315,6 +318,18 @@ class StockReconciliation(StockController):
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
+			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
+
+		if has_serial_no and sl_entries:
+			self.update_valuation_rate_for_serial_no()
+
+	def get_sle_for_serialized_items(self, row, sl_entries, item):
+		from erpnext.stock.stock_ledger import get_previous_sle
+
+		serial_nos = get_serial_nos(row.serial_no)
+
+		# To issue existing serial nos
+		if row.current_qty and (row.current_serial_no or row.batch_no):
 			args = self.get_sle_for_items(row)
 			args.update(
 				{
