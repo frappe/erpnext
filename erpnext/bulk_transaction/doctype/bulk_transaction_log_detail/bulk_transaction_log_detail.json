@@ -20,6 +20,7 @@
    "fieldname": "transaction_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Name",
    "options": "from_doctype"
   },
@@ -39,6 +40,7 @@
   {
    "fieldname": "from_doctype",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "From Doctype",
    "options": "DocType",
    "read_only": 1
@@ -54,6 +56,7 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date ",
    "read_only": 1
   },
@@ -70,9 +73,10 @@
    "read_only": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-09 15:33:26.828998",
+ "modified": "2023-11-09 16:55:31.026064",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
