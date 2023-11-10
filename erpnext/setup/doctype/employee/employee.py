@@ -241,12 +241,16 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 
 	user_roles = [d.role for d in doc.get("roles")]
 	if "Employee" in user_roles:
-		frappe.msgprint(_("Please set User ID field in an Employee record to set Employee Role"))
+		frappe.msgprint(
+			_("User {0}: Removed Employee role as there is no mapped employee.").format(doc.name)
+		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee"})[0])
 
 	if "Employee Self Service" in user_roles:
 		frappe.msgprint(
-			_("Please set User ID field in an Employee record to set Employee Self Service Role")
+			_("User {0}: Removed Employee Self Service role as there is no mapped employee.").format(
+				doc.name
+			)
 		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
 
@@ -360,6 +364,8 @@ def create_user(employee, user=None, email=None):
 		}
 	)
 	user.insert()
+	emp.user_id = user.name
+	emp.save()
 	return user.name
 
 
