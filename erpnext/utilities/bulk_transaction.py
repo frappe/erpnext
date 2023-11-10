@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 import frappe
 from frappe import _
-from frappe.utils import today
+from frappe.utils import get_link_to_form, today
 
 
 @frappe.whitelist()
@@ -30,7 +30,7 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 
 @frappe.whitelist()
-def retry_failed_transactions(date: str | None):
+def retry(date: str | None):
 	if date:
 		failed_docs = frappe.db.get_all(
 			"Bulk Transaction Log Detail",
@@ -38,9 +38,21 @@ def retry_failed_transactions(date: str | None):
 			fields=["name", "transaction_name", "from_doctype", "to_doctype"],
 		)
 		if not failed_docs:
-			frappe.msgprint("There are no Failed transactions")
-			return
+			frappe.msgprint(_("There are no Failed transactions"))
+		else:
+			job = frappe.enqueue(
+				retry_failed_transactions,
+				failed_docs=failed_docs,
+			)
+			frappe.msgprint(
+				_("Job: {0} has been triggered for processing failed transactions").format(
+					get_link_to_form("RQ Job", job.id)
+				)
+			)
 
+
+def retry_failed_transactions(failed_docs: list | None):
+	if failed_docs:
 		for log in failed_docs:
 			try:
 				frappe.db.savepoint("before_creation_state")
