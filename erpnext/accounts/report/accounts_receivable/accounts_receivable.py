@@ -281,11 +281,20 @@ class ReceivablePayableReport(object):
 
 			row.invoice_grand_total = row.invoiced
 
-			if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
-				(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
-				or (row.voucher_no in self.err_journals)
-			):
+			must_consider = False
+			if self.filters.get("for_revaluation_journals"):
+				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) or (
+					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+				):
+					must_consider = True
+			else:
+				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
+					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+					or (row.voucher_no in self.err_journals)
+				):
+					must_consider = True
 
+			if must_consider:
 				# non-zero oustanding, we must consider this row
 
 				if self.is_invoice(row) and self.filters.based_on_payment_terms:
