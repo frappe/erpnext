@@ -180,12 +180,18 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname": "in_party_currency",
 			"label": __("In Party Currency"),
 			"fieldtype": "Check",
-    },
-    {
+		},
+		{
+			"fieldname": "for_revaluation_journals",
+			"label": __("Revaluation Journals"),
+			"fieldtype": "Check",
+		},
+		{
 			"fieldname": "ignore_accounts",
 			"label": __("Group by Voucher"),
 			"fieldtype": "Check",
 		}
+
 
 	],
 
