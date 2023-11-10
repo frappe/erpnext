@@ -8,14 +8,13 @@ from frappe.query_builder.functions import Count
 from frappe.utils import cint
 from pypika import Order
 
-log_detail = qb.DocType("Bulk Transaction Log Detail")
-
 
 class BulkTransactionLog(Document):
 	def db_insert(self, *args, **kwargs):
 		pass
 
 	def load_from_db(self):
+		log_detail = qb.DocType("Bulk Transaction Log Detail")
 		succeeded_logs = (
 			qb.from_(log_detail)
 			.select(Count(log_detail.date).as_("count"))
@@ -41,6 +40,7 @@ class BulkTransactionLog(Document):
 
 	@staticmethod
 	def get_list(args):
+		log_detail = qb.DocType("Bulk Transaction Log Detail")
 		limit = cint(args.get("page_length")) or 20
 		dates = (
 			qb.from_(log_detail)
