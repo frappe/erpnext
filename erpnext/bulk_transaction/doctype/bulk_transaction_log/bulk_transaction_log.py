@@ -40,26 +40,33 @@ class BulkTransactionLog(Document):
 
 	@staticmethod
 	def get_list(args):
-		log_detail = qb.DocType("Bulk Transaction Log Detail")
+		filter_date = parse_list_filters(args)
 		limit = cint(args.get("page_length")) or 20
-		dates = (
+		log_detail = qb.DocType("Bulk Transaction Log Detail")
+
+		dates_query = (
 			qb.from_(log_detail)
 			.select(log_detail.date)
 			.distinct()
 			.orderby(log_detail.date, order=Order.desc)
 			.limit(limit)
-			.run()
 		)
+		if filter_date:
+			dates_query = dates_query.where(log_detail.date == filter_date)
+		dates = dates_query.run()
 
-		transaction_logs = (
-			qb.from_(log_detail)
-			.select(log_detail.date.as_("date"), Count(log_detail.date).as_("count"))
-			.where(log_detail.date.isin(dates))
-			.orderby(log_detail.date, order=Order.desc)
-			.groupby(log_detail.date)
-			.limit(limit)
-			.run(as_dict=True)
-		)
+		transaction_logs = []
+		if dates:
+			transaction_logs_query = (
+				qb.from_(log_detail)
+				.select(log_detail.date.as_("date"), Count(log_detail.date).as_("count"))
+				.where(log_detail.date.isin(dates))
+				.orderby(log_detail.date, order=Order.desc)
+				.groupby(log_detail.date)
+				.limit(limit)
+			)
+			transaction_logs = transaction_logs_query.run(as_dict=True)
+
 		return [serialize_transaction_log(x) for x in transaction_logs]
 
 	@staticmethod
@@ -85,3 +92,14 @@ def serialize_transaction_log(data):
 		succeeded=data.succeeded,
 		failed=data.failed,
 	)
+
+
+def parse_list_filters(args):
+	# parse date filter
+	filter_date = None
+	for fil in args.get("filters"):
+		if isinstance(fil, list):
+			for elem in fil:
+				if elem == "date":
+					filter_date = fil[3]
+	return filter_date
