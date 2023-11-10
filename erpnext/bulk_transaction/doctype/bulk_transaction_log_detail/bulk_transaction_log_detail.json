@@ -73,6 +73,7 @@
   {
    "fieldname": "retried",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Retried",
    "read_only": 1
   }
@@ -80,7 +81,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-09 17:44:14.804836",
+ "modified": "2023-11-10 11:44:10.758342",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
