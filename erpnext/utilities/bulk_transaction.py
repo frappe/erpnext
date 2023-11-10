@@ -29,6 +29,34 @@ def transaction_processing(data, from_doctype, to_doctype):
 		job(deserialized_data, from_doctype, to_doctype)
 
 
+@frappe.whitelist()
+def retry_failed_transactions(date: str | None):
+	if date:
+		failed_docs = frappe.db.get_all(
+			"Bulk Transaction Log Detail",
+			filters={"date": date, "transaction_status": "Failed", "retried": 0},
+			fields=["name", "transaction_name", "from_doctype", "to_doctype"],
+		)
+		if not failed_docs:
+			frappe.msgprint("There are no Failed transactions")
+			return
+
+		for log in failed_docs:
+			try:
+				frappe.db.savepoint("before_creation_state")
+				task(log.transaction_name, log.from_doctype, log.to_doctype)
+			except Exception as e:
+				frappe.db.rollback(save_point="before_creation_state")
+				update_log(log.name, "Failed", 1)
+			else:
+				update_log(log.name, "Success", 1)
+
+
+def update_log(log_name, status, retried):
+	frappe.db.set_value("Bulk Transaction Log Detail", log_name, "transaction_status", status)
+	frappe.db.set_value("Bulk Transaction Log Detail", log_name, "retried", retried)
+
+
 def job(deserialized_data, from_doctype, to_doctype):
 	fail_count = 0
 	for d in deserialized_data:
