@@ -186,6 +186,8 @@ class Customer(TransactionBase):
 				self.db_set("customer_primary_contact", contact.name)
 				self.db_set("mobile_no", self.mobile_no)
 				self.db_set("email_id", self.email_id)
+		elif self.customer_primary_contact:
+			frappe.set_value("Contact", self.customer_primary_contact, "is_primary_contact", 1)  # ensure
 
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display
@@ -196,6 +198,8 @@ class Customer(TransactionBase):
 
 			self.db_set("customer_primary_address", address.name)
 			self.db_set("primary_address", address_display)
+		elif self.customer_primary_address:
+			frappe.set_value("Address", self.customer_primary_address, "is_primary_address", 1)  # ensure
 
 	def update_lead_status(self):
 		"""If Customer created from Lead, update lead status to "Converted"
@@ -312,6 +316,7 @@ def create_contact(contact, party_type, party, email):
 			"doctype": "Contact",
 			"first_name": contact[0],
 			"last_name": len(contact) > 1 and contact[1] or "",
+			"is_primary_contact": 1,
 		}
 	)
 	contact.append("email_ids", dict(email_id=email, is_primary=1))
