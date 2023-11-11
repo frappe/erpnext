@@ -32,13 +32,6 @@ frappe.query_reports["Profitability Analysis"] = {
 			"label": __("Accounting Dimension"),
 			"fieldtype": "Link",
 			"options": "Accounting Dimension",
-			"get_query": () =>{
-				return {
-					filters: {
-						"disabled": 0
-					}
-				}
-			}
 		},
 		{
 			"fieldname": "fiscal_year",

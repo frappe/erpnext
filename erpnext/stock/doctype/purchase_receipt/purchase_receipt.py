@@ -7,7 +7,7 @@ from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import CombineDatetime
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 from pypika import functions as fn
 
 import erpnext
@@ -600,11 +600,10 @@ class PurchaseReceipt(BuyingController):
 					make_rate_difference_entry(d)
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
-			elif (
-				d.warehouse not in warehouse_with_no_account
-				or d.rejected_warehouse not in warehouse_with_no_account
+			elif (d.warehouse and d.warehouse not in warehouse_with_no_account) or (
+				d.rejected_warehouse and d.rejected_warehouse not in warehouse_with_no_account
 			):
-				warehouse_with_no_account.append(d.warehouse)
+				warehouse_with_no_account.append(d.warehouse or d.rejected_warehouse)
 
 			if d.is_fixed_asset:
 				self.update_assets(d, d.valuation_rate)
@@ -761,8 +760,12 @@ class PurchaseReceipt(BuyingController):
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 	def reserve_stock_for_sales_order(self):
-		if self.is_return or not cint(
-			frappe.db.get_single_value("Stock Settings", "auto_reserve_stock_for_sales_order_on_purchase")
+		if (
+			self.is_return
+			or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
+			or not frappe.db.get_single_value(
+				"Stock Settings", "auto_reserve_stock_for_sales_order_on_purchase"
+			)
 		):
 			return
 
@@ -783,6 +786,11 @@ class PurchaseReceipt(BuyingController):
 				so_items_details_map.setdefault(item.sales_order, []).append(item_details)
 
 		if so_items_details_map:
+			if get_datetime("{} {}".format(self.posting_date, self.posting_time)) > get_datetime():
+				return frappe.msgprint(
+					_("Cannot create Stock Reservation Entries for future dated Purchase Receipts.")
+				)
+
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_doc("Sales Order", so)
 				so_doc.create_stock_reservation_entries(
@@ -1069,6 +1077,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 					"is_fixed_asset": "is_fixed_asset",
 					"asset_location": "asset_location",
 					"asset_category": "asset_category",
+					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
 				"filter": lambda d: get_pending_qty(d)[0] <= 0

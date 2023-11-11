@@ -268,7 +268,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
-	if item.variant_of:
+	if item.variant_of and not item.taxes:
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
@@ -610,7 +610,6 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 
 	# all templates have validity and no template is valid
 	if not taxes_with_validity and (not taxes_with_no_validity):
-		out["item_tax_template"] = ""
 		return None
 
 	# do not change if already a valid template

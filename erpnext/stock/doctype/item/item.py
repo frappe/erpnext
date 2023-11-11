@@ -255,7 +255,7 @@ class Item(Document):
 
 		# add item taxes from template
 		for d in template.get("taxes"):
-			self.append("taxes", {"item_tax_template": d.item_tax_template})
+			self.append("taxes", d)
 
 		# copy re-order table if empty
 		if not self.get("reorder_levels"):
