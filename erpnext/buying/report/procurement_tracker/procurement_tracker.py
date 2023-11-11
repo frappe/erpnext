@@ -154,31 +154,35 @@ def get_data(filters):
 	procurement_record = []
 	if procurement_record_against_mr:
 		procurement_record += procurement_record_against_mr
+
 	for po in purchase_order_entry:
 		# fetch material records linked to the purchase order item
-		mr_record = mr_records.get(po.material_request_item, [{}])[0]
-		procurement_detail = {
-			"material_request_date": mr_record.get("transaction_date"),
-			"cost_center": po.cost_center,
-			"project": po.project,
-			"requesting_site": po.warehouse,
-			"requestor": po.owner,
-			"material_request_no": po.material_request,
-			"item_code": po.item_code,
-			"quantity": flt(po.qty),
-			"unit_of_measurement": po.stock_uom,
-			"status": po.status,
-			"purchase_order_date": po.transaction_date,
-			"purchase_order": po.parent,
-			"supplier": po.supplier,
-			"estimated_cost": flt(mr_record.get("amount")),
-			"actual_cost": flt(pi_records.get(po.name)),
-			"purchase_order_amt": flt(po.amount),
-			"purchase_order_amt_in_company_currency": flt(po.base_amount),
-			"expected_delivery_date": po.schedule_date,
-			"actual_delivery_date": pr_records.get(po.name),
-		}
-		procurement_record.append(procurement_detail)
+		material_requests = mr_records.get(po.material_request_item, [{}])
+
+		for mr_record in material_requests:
+			procurement_detail = {
+				"material_request_date": mr_record.get("transaction_date"),
+				"cost_center": po.cost_center,
+				"project": po.project,
+				"requesting_site": po.warehouse,
+				"requestor": po.owner,
+				"material_request_no": po.material_request,
+				"item_code": po.item_code,
+				"quantity": flt(po.qty),
+				"unit_of_measurement": po.stock_uom,
+				"status": po.status,
+				"purchase_order_date": po.transaction_date,
+				"purchase_order": po.parent,
+				"supplier": po.supplier,
+				"estimated_cost": flt(mr_record.get("amount")),
+				"actual_cost": flt(pi_records.get(po.name)),
+				"purchase_order_amt": flt(po.amount),
+				"purchase_order_amt_in_company_currency": flt(po.base_amount),
+				"expected_delivery_date": po.schedule_date,
+				"actual_delivery_date": pr_records.get(po.name),
+			}
+			procurement_record.append(procurement_detail)
+
 	return procurement_record
 
 
@@ -301,7 +305,7 @@ def get_po_entries(filters):
 			& (parent.name == child.parent)
 			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
 		)
-		.groupby(parent.name, child.item_code)
+		.groupby(parent.name, child.material_request_item)
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
 

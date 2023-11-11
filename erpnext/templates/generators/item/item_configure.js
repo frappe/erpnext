@@ -219,7 +219,8 @@ class ItemConfigure {
 						: ''
 					}
 
-					${available_qty === 0 ? '<span class="text-danger">(' + __('Out of Stock') + ')</span>' : ''}
+					${available_qty === 0 && product_info && product_info?.is_stock_item
+						? '<span class="text-danger">(' + __('Out of Stock') + ')</span>' : ''}
 
 				</div></div>
 				<a href data-action="btn_clear_values" data-item-code="${one_item}">
@@ -236,7 +237,8 @@ class ItemConfigure {
 			</div>`;
 		/* eslint-disable indent */
 
-		if (!product_info?.allow_items_not_in_stock && available_qty === 0) {
+		if (!product_info?.allow_items_not_in_stock && available_qty === 0
+			&& product_info && product_info?.is_stock_item) {
 			item_add_to_cart = '';
 		}
 

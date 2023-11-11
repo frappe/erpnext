@@ -104,6 +104,8 @@ def get_attributes_and_values(item_code):
 
 @frappe.whitelist(allow_guest=True)
 def get_next_attribute_and_values(item_code, selected_attributes):
+	from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
 	"""Find the count of Items that match the selected attributes.
 	Also, find the attribute values that are not applicable for further searching.
 	If less than equal to 10 items are found, return item_codes of those items.
@@ -162,12 +164,13 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		product_info = get_item_variant_price_dict(exact_match[0], cart_settings)
 
 		if product_info:
+			product_info["is_stock_item"] = frappe.get_cached_value("Item", exact_match[0], "is_stock_item")
 			product_info["allow_items_not_in_stock"] = cint(cart_settings.allow_items_not_in_stock)
 	else:
 		product_info = None
 
 	product_id = ""
-	website_warehouse = ""
+	warehouse = ""
 	if exact_match or filtered_items:
 		if exact_match and len(exact_match) == 1:
 			product_id = exact_match[0]
@@ -175,16 +178,19 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 			product_id = list(filtered_items)[0]
 
 	if product_id:
-		website_warehouse = frappe.get_cached_value(
+		warehouse = frappe.get_cached_value(
 			"Website Item", {"item_code": product_id}, "website_warehouse"
 		)
 
 	available_qty = 0.0
-	if website_warehouse:
-		available_qty = flt(
-			frappe.db.get_value(
-				"Bin", {"item_code": product_id, "warehouse": website_warehouse}, "actual_qty"
-			)
+	if warehouse and frappe.get_cached_value("Warehouse", warehouse, "is_group") == 1:
+		warehouses = get_child_warehouses(warehouse)
+	else:
+		warehouses = [warehouse] if warehouse else []
+
+	for warehouse in warehouses:
+		available_qty += flt(
+			frappe.db.get_value("Bin", {"item_code": product_id, "warehouse": warehouse}, "actual_qty")
 		)
 
 	return {

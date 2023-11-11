@@ -114,7 +114,7 @@ class Workstation(Document):
 
 		if schedule_date in tuple(get_holidays(self.holiday_list)):
 			schedule_date = add_days(schedule_date, 1)
-			self.validate_workstation_holiday(schedule_date, skip_holiday_list_check=True)
+			return self.validate_workstation_holiday(schedule_date, skip_holiday_list_check=True)
 
 		return schedule_date
 

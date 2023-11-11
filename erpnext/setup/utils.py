@@ -81,6 +81,11 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if entries:
 		return flt(entries[0].exchange_rate)
 
+	if frappe.get_cached_value(
+		"Currency Exchange Settings", "Currency Exchange Settings", "disabled"
+	):
+		return 0.00
+
 	try:
 		cache = frappe.cache()
 		key = "currency_exchange_rate_{0}:{1}:{2}".format(transaction_date, from_currency, to_currency)

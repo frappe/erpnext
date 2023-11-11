@@ -15,6 +15,17 @@ frappe.ui.form.on('Accounting Dimension', {
 			};
 		});
 
+		frm.set_query("offsetting_account", "dimension_defaults", function(doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					company: d.company,
+					root_type: ["in", ["Asset", "Liability"]],
+					is_group: 0
+				}
+			}
+		});
+
 		if (!frm.is_new()) {
 			frm.add_custom_button(__('Show {0}', [frm.doc.document_type]), function () {
 				frappe.set_route("List", frm.doc.document_type);

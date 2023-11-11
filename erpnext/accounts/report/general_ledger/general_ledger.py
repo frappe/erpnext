@@ -163,6 +163,9 @@ def get_gl_entries(filters, accounting_dimensions):
 	select_fields = """, debit, credit, debit_in_account_currency,
 		credit_in_account_currency """
 
+	if filters.get("show_remarks"):
+		select_fields += """,remarks"""
+
 	order_by_statement = "order by posting_date, account, creation"
 
 	if filters.get("include_dimensions"):
@@ -189,7 +192,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			voucher_type, voucher_no, {dimension_fields}
 			cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening, creation {select_fields}
+			against, is_opening, creation {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{order_by_statement}
@@ -204,7 +207,7 @@ def get_gl_entries(filters, accounting_dimensions):
 	)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters.get("company"))
+		return convert_to_presentation_currency(gl_entries, currency_map)
 	else:
 		return gl_entries
 
@@ -249,9 +252,7 @@ def get_conditions(filters):
 			if filters.get("company_fb") and cstr(filters.get("finance_book")) != cstr(
 				filters.get("company_fb")
 			):
-				frappe.throw(
-					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-				)
+				frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
 			else:
 				conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 		else:
@@ -272,20 +273,19 @@ def get_conditions(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	if filters.get("include_dimensions"):
-		accounting_dimensions = get_accounting_dimensions(as_list=False)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
-		if accounting_dimensions:
-			for dimension in accounting_dimensions:
-				if not dimension.disabled:
-					if filters.get(dimension.fieldname):
-						if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-							filters[dimension.fieldname] = get_dimension_with_children(
-								dimension.document_type, filters.get(dimension.fieldname)
-							)
-							conditions.append("{0} in %({0})s".format(dimension.fieldname))
-						else:
-							conditions.append("{0} in %({0})s".format(dimension.fieldname))
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if not dimension.disabled:
+				if filters.get(dimension.fieldname):
+					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+						filters[dimension.fieldname] = get_dimension_with_children(
+							dimension.document_type, filters.get(dimension.fieldname)
+						)
+						conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					else:
+						conditions.append("{0} in %({0})s".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -594,8 +594,10 @@ def get_columns(filters):
 				"width": 100,
 			},
 			{"label": _("Supplier Invoice No"), "fieldname": "bill_no", "fieldtype": "Data", "width": 100},
-			{"label": _("Remarks"), "fieldname": "remarks", "width": 400},
 		]
 	)
+
+	if filters.get("show_remarks"):
+		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
 
 	return columns

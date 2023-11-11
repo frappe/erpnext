@@ -464,6 +464,37 @@ class TestPOSInvoice(unittest.TestCase):
 		pos2.insert()
 		self.assertRaises(frappe.ValidationError, pos2.submit)
 
+	def test_pos_invoice_with_duplicate_serial_no(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		se = make_serialized_item(
+			company="_Test Company",
+			target_warehouse="Stores - _TC",
+			cost_center="Main - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+		)
+
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		pos = create_pos_invoice(
+			company="_Test Company",
+			debit_to="Debtors - _TC",
+			account_for_change_amount="Cash - _TC",
+			warehouse="Stores - _TC",
+			income_account="Sales - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			item=se.get("items")[0].item_code,
+			rate=1000,
+			qty=2,
+			do_not_save=1,
+		)
+
+		pos.get("items")[0].has_serial_no = 1
+		pos.get("items")[0].serial_no = serial_nos[0] + "\n" + serial_nos[0]
+		self.assertRaises(frappe.ValidationError, pos.submit)
+
 	def test_invalid_serial_no_validation(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 

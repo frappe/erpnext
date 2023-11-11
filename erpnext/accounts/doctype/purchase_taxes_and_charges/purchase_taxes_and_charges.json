@@ -86,6 +86,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
    "fieldname": "account_head",
    "fieldtype": "Link",
@@ -97,6 +98,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": ":Company",
    "fieldname": "cost_center",
    "fieldtype": "Link",

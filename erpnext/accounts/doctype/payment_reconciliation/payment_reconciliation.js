@@ -85,25 +85,29 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
-			frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments").then((enabled) => {
- 				if(enabled) {
-					this.frm.call({
-						'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
-						"args": {
-							for_filter: {
-								company: this.frm.doc.company,
-								party_type: this.frm.doc.party_type,
-								party: this.frm.doc.party,
-								receivable_payable_account: this.frm.doc.receivable_payable_account
+			this.frm.call({
+				doc: this.frm.doc,
+				method: 'is_auto_process_enabled',
+				callback: (r) => {
+					if (r.message) {
+						this.frm.call({
+							'method': "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.is_any_doc_running",
+							"args": {
+								for_filter: {
+									company: this.frm.doc.company,
+									party_type: this.frm.doc.party_type,
+									party: this.frm.doc.party,
+									receivable_payable_account: this.frm.doc.receivable_payable_account
+								}
 							}
-						}
-					}).then(r => {
-						if (r.message) {
-							let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message, true);
-							let msg = __("Payment Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
-							this.frm.dashboard.add_comment(msg, "yellow");
-						}
-					});
+						}).then(r => {
+							if (r.message) {
+								let doc_link = frappe.utils.get_form_link("Process Payment Reconciliation", r.message, true);
+								let msg = __("Payment Reconciliation Job: {0} is running for this party. Can't reconcile now.", [doc_link]);
+								this.frm.dashboard.add_comment(msg, "yellow");
+							}
+						});
+					}
 				}
 			});
 		}
@@ -146,6 +150,15 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.trigger("clear_child_tables");
 		this.frm.refresh();
 	}
+
+	invoice_name() {
+		this.frm.trigger("get_unreconciled_entries");
+	}
+
+	payment_name() {
+		this.frm.trigger("get_unreconciled_entries");
+	}
+
 
 	clear_child_tables() {
 		this.frm.clear_table("invoices");
@@ -203,6 +216,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.data = [];
 			const dialog = new frappe.ui.Dialog({
 				title: __("Select Difference Account"),
+				size: 'extra-large',
 				fields: [
 					{
 						fieldname: "allocation",
@@ -226,6 +240,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							in_list_view: 1,
 							read_only: 1
 						}, {
+							fieldtype:'Date',
+							fieldname:"gain_loss_posting_date",
+							label: __("Posting Date"),
+							in_list_view: 1,
+							reqd: 1,
+						}, {
+
 							fieldtype:'Link',
 							options: 'Account',
 							in_list_view: 1,
@@ -259,6 +280,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 					args.forEach(d => {
 						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
 							"difference_account", d.difference_account);
+						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
+							"gain_loss_posting_date", d.gain_loss_posting_date);
+
 					});
 
 					this.reconcile_payment_entries();
@@ -274,6 +298,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						'reference_name': d.reference_name,
 						'difference_amount': d.difference_amount,
 						'difference_account': d.difference_account,
+						'gain_loss_posting_date': d.gain_loss_posting_date
 					});
 				}
 			});

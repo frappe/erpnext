@@ -4,9 +4,9 @@
 
 import frappe
 from frappe import _, bold, throw
-from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime
 
+from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
@@ -282,7 +282,9 @@ class SellingController(StockController):
 			last_valuation_rate_in_sales_uom = last_valuation_rate * (item.conversion_factor or 1)
 
 			if flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom):
-				throw_message(item.idx, item.item_name, last_valuation_rate_in_sales_uom, "valuation rate")
+				throw_message(
+					item.idx, item.item_name, last_valuation_rate_in_sales_uom, "valuation rate (Moving Average)"
+				)
 
 	def get_item_list(self):
 		il = []
@@ -388,7 +390,7 @@ class SellingController(StockController):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
-				if status in ("Closed", "On Hold"):
+				if status in ("Closed", "On Hold") and not self.is_return:
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
 
 	def update_reserved_qty(self):
@@ -404,7 +406,9 @@ class SellingController(StockController):
 			if so and so_item_rows:
 				sales_order = frappe.get_doc("Sales Order", so)
 
-				if sales_order.status in ["Closed", "Cancelled"]:
+				if (sales_order.status == "Closed" and not self.is_return) or sales_order.status in [
+					"Cancelled"
+				]:
 					frappe.throw(
 						_("{0} {1} is cancelled or closed").format(_("Sales Order"), so), frappe.InvalidStatusError
 					)
@@ -587,7 +591,9 @@ class SellingController(StockController):
 
 		for address_field, address_display_field in address_dict.items():
 			if self.get(address_field):
-				self.set(address_display_field, get_address_display(self.get(address_field)))
+				self.set(
+					address_display_field, render_address(self.get(address_field), check_permissions=False)
+				)
 
 	def validate_for_duplicate_items(self):
 		check_list, chk_dupl_itm = [], []

@@ -39,13 +39,6 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		total_amount = 103000
 
-		# Create assets
-		target_asset = create_asset(
-			asset_name="Asset Capitalization Target Asset",
-			submit=1,
-			warehouse="Stores - TCP1",
-			company=company,
-		)
 		consumed_asset = create_asset(
 			asset_name="Asset Capitalization Consumable Asset",
 			asset_value=consumed_asset_value,
@@ -57,7 +50,9 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Capitalization",
-			target_asset=target_asset.name,
+			capitalization_method="Create a new composite asset",
+			target_item_code="Macbook Pro",
+			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
 			consumed_asset=consumed_asset.name,
@@ -86,7 +81,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(asset_capitalization.target_incoming_rate, total_amount)
 
 		# Test Target Asset values
-		target_asset.reload()
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
 
@@ -134,13 +129,6 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		total_amount = 103000
 
-		# Create assets
-		target_asset = create_asset(
-			asset_name="Asset Capitalization Target Asset",
-			submit=1,
-			warehouse="Stores - _TC",
-			company=company,
-		)
 		consumed_asset = create_asset(
 			asset_name="Asset Capitalization Consumable Asset",
 			asset_value=consumed_asset_value,
@@ -152,7 +140,9 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Capitalization",
-			target_asset=target_asset.name,
+			capitalization_method="Create a new composite asset",
+			target_item_code="Macbook Pro",
+			target_asset_location="Test Location",
 			stock_qty=stock_qty,
 			stock_rate=stock_rate,
 			consumed_asset=consumed_asset.name,
@@ -181,7 +171,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(asset_capitalization.target_incoming_rate, total_amount)
 
 		# Test Target Asset values
-		target_asset.reload()
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
 		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
 
@@ -212,6 +202,77 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Cancel Asset Capitalization and make test entries and status are reversed
 		asset_capitalization.cancel()
 		self.assertEqual(consumed_asset.db_get("status"), "Submitted")
+		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
+		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
+
+	def test_capitalization_with_wip_composite_asset(self):
+		company = "_Test Company with perpetual inventory"
+		set_depreciation_settings_in_company(company=company)
+
+		stock_rate = 1000
+		stock_qty = 2
+		stock_amount = 2000
+
+		total_amount = 2000
+
+		wip_composite_asset = create_asset(
+			asset_name="Asset Capitalization WIP Composite Asset",
+			is_composite_asset=1,
+			warehouse="Stores - TCP1",
+			company=company,
+		)
+
+		# Create and submit Asset Captitalization
+		asset_capitalization = create_asset_capitalization(
+			entry_type="Capitalization",
+			capitalization_method="Choose a WIP composite asset",
+			target_asset=wip_composite_asset.name,
+			target_asset_location="Test Location",
+			stock_qty=stock_qty,
+			stock_rate=stock_rate,
+			service_expense_account="Expenses Included In Asset Valuation - TCP1",
+			company=company,
+			submit=1,
+		)
+
+		# Test Asset Capitalization values
+		self.assertEqual(asset_capitalization.entry_type, "Capitalization")
+		self.assertEqual(asset_capitalization.capitalization_method, "Choose a WIP composite asset")
+		self.assertEqual(asset_capitalization.target_qty, 1)
+
+		self.assertEqual(asset_capitalization.stock_items[0].valuation_rate, stock_rate)
+		self.assertEqual(asset_capitalization.stock_items[0].amount, stock_amount)
+		self.assertEqual(asset_capitalization.stock_items_total, stock_amount)
+
+		self.assertEqual(asset_capitalization.total_value, total_amount)
+		self.assertEqual(asset_capitalization.target_incoming_rate, total_amount)
+
+		# Test Target Asset values
+		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
+		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
+		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
+
+		# Test General Ledger Entries
+		expected_gle = {
+			"_Test Fixed Asset - TCP1": 2000,
+			"_Test Warehouse - TCP1": -2000,
+		}
+		actual_gle = get_actual_gle_dict(asset_capitalization.name)
+
+		self.assertEqual(actual_gle, expected_gle)
+
+		# Test Stock Ledger Entries
+		expected_sle = {
+			("Capitalization Source Stock Item", "_Test Warehouse - TCP1"): {
+				"actual_qty": -stock_qty,
+				"stock_value_difference": -stock_amount,
+			}
+		}
+		actual_sle = get_actual_sle_dict(asset_capitalization.name)
+		self.assertEqual(actual_sle, expected_sle)
+
+		# Cancel Asset Capitalization and make test entries and status are reversed
+		asset_capitalization.cancel()
 		self.assertFalse(get_actual_gle_dict(asset_capitalization.name))
 		self.assertFalse(get_actual_sle_dict(asset_capitalization.name))
 
@@ -338,11 +399,13 @@ def create_asset_capitalization(**args):
 	asset_capitalization.update(
 		{
 			"entry_type": args.entry_type or "Capitalization",
+			"capitalization_method": args.capitalization_method or None,
 			"company": company,
 			"posting_date": args.posting_date or now.strftime("%Y-%m-%d"),
 			"posting_time": args.posting_time or now.strftime("%H:%M:%S.%f"),
 			"target_item_code": target_item_code,
 			"target_asset": target_asset.name,
+			"target_asset_location": "Test Location",
 			"target_warehouse": target_warehouse,
 			"target_qty": flt(args.target_qty) or 1,
 			"target_batch_no": args.target_batch_no,

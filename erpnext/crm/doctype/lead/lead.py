@@ -185,7 +185,7 @@ class Lead(SellingController, CRMNote):
 				"last_name": self.last_name,
 				"salutation": self.salutation,
 				"gender": self.gender,
-				"job_title": self.job_title,
+				"designation": self.job_title,
 				"company_name": self.company_name,
 			}
 		)
@@ -382,7 +382,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 		}
 	)
 
-	set_address_details(out, lead, "Lead")
+	set_address_details(out, lead, "Lead", company=company)
 
 	taxes_and_charges = set_taxes(
 		None,

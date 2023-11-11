@@ -135,7 +135,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 				else {
 					// allow for '0' qty on Credit/Debit notes
-					let qty = item.qty || (me.frm.doc.is_debit_note ? 1 : -1);
+					let qty = flt(item.qty);
+					if (!qty) {
+						qty = (me.frm.doc.is_debit_note ? 1 : -1);
+						if (me.frm.doc.doctype !== "Purchase Receipt" && me.frm.doc.is_return === 1) {
+							// In case of Purchase Receipt, qty can be 0 if all items are rejected
+							qty = flt(item.qty);
+						}
+					}
+
 					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
 				}
 

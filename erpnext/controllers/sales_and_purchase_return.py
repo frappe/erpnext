@@ -345,6 +345,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
+			if source.tax_withholding_category:
+				doc.set_onload("supplier_tds", source.tax_withholding_category)
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
@@ -616,6 +618,13 @@ def get_filters(
 
 	if reference_voucher_detail_no:
 		filters["voucher_detail_no"] = reference_voucher_detail_no
+
+	if (
+		voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+		and item_row
+		and item_row.get("warehouse")
+	):
+		filters["warehouse"] = item_row.get("warehouse")
 
 	return filters
 

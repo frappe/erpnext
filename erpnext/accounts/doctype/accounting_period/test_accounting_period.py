@@ -6,9 +6,11 @@ import unittest
 import frappe
 from frappe.utils import add_months, nowdate
 
-from erpnext.accounts.doctype.accounting_period.accounting_period import OverlapError
+from erpnext.accounts.doctype.accounting_period.accounting_period import (
+	ClosedAccountingPeriod,
+	OverlapError,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.general_ledger import ClosedAccountingPeriod
 
 test_dependencies = ["Item"]
 
@@ -33,9 +35,9 @@ class TestAccountingPeriod(unittest.TestCase):
 		ap1.save()
 
 		doc = create_sales_invoice(
-			do_not_submit=1, cost_center="_Test Company - _TC", warehouse="Stores - _TC"
+			do_not_save=1, cost_center="_Test Company - _TC", warehouse="Stores - _TC"
 		)
-		self.assertRaises(ClosedAccountingPeriod, doc.submit)
+		self.assertRaises(ClosedAccountingPeriod, doc.save)
 
 	def tearDown(self):
 		for d in frappe.get_all("Accounting Period"):

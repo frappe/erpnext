@@ -107,7 +107,7 @@ def validate_against_blanket_order(order_doc):
 			allowance = flt(
 				frappe.db.get_single_value(
 					"Selling Settings" if order_doc.doctype == "Sales Order" else "Buying Settings",
-					"over_order_allowance",
+					"blanket_order_allowance",
 				)
 			)
 			for bo_name, item_data in order_data.items():

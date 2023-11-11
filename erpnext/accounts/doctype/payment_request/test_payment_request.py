@@ -144,8 +144,7 @@ class TestPaymentRequest(unittest.TestCase):
 			(d[0], d)
 			for d in [
 				["_Test Receivable USD - _TC", 0, 5000, si_usd.name],
-				[pr.payment_account, 6290.0, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 0, 1290, None],
+				[pr.payment_account, 5000.0, 0, None],
 			]
 		)
 

@@ -1657,6 +1657,61 @@ class TestWorkOrder(FrappeTestCase):
 		job_card2.time_logs = []
 		job_card2.save()
 
+	def test_make_serial_no_batch_from_work_order_for_serial_no(self):
+		item_code = "Test Serial No Item For Work Order"
+		warehouse = "_Test Warehouse - _TC"
+		raw_materials = [
+			"Test RM Item 1 for Serial No Item In Work Order",
+		]
+
+		make_item(
+			item_code,
+			{
+				"has_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TSNIFWO-.#####",
+			},
+		)
+
+		for rm_item in raw_materials:
+			make_item(
+				rm_item,
+				{
+					"has_stock_item": 1,
+				},
+			)
+
+			test_stock_entry.make_stock_entry(item_code=rm_item, target=warehouse, qty=10, basic_rate=100)
+
+		bom = make_bom(item=item_code, raw_materials=raw_materials)
+
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 1)
+
+		wo_order = make_wo_order_test_record(
+			item=item_code,
+			bom_no=bom.name,
+			qty=5,
+			skip_transfer=1,
+			from_wip_warehouse=1,
+		)
+
+		serial_nos = frappe.get_all(
+			"Serial No",
+			filters={"item_code": item_code, "work_order": wo_order.name},
+		)
+
+		serial_nos = [d.name for d in serial_nos]
+		self.assertEqual(len(serial_nos), 5)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+
+		stock_entry.submit()
+		for row in stock_entry.items:
+			if row.is_finished_item:
+				self.assertEqual(sorted(get_serial_nos(row.serial_no)), sorted(get_serial_nos(serial_nos)))
+
+		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
+
 
 def prepare_data_for_workstation_type_check():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -1886,6 +1941,7 @@ def make_wo_order_test_record(**args):
 	wo_order.sales_order = args.sales_order or None
 	wo_order.planned_start_date = args.planned_start_date or now()
 	wo_order.transfer_material_against = args.transfer_material_against or "Work Order"
+	wo_order.from_wip_warehouse = args.from_wip_warehouse or None
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):

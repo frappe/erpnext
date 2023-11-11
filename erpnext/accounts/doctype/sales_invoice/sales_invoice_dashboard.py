@@ -17,6 +17,9 @@ def get_data():
 			"Sales Order": ["items", "sales_order"],
 			"Timesheet": ["timesheets", "time_sheet"],
 		},
+		"internal_and_external_links": {
+			"Delivery Note": ["items", "delivery_note"],
+		},
 		"transactions": [
 			{
 				"label": _("Payment"),

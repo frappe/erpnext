@@ -79,17 +79,19 @@
   "column_break_32",
   "stock_received_but_not_billed",
   "default_provisional_account",
-  "expenses_included_in_valuation",
   "fixed_asset_defaults",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
   "series_for_depreciation_entry",
-  "expenses_included_in_asset_valuation",
   "column_break_40",
   "disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
+  "exchange_rate_revaluation_settings_section",
+  "auto_exchange_rate_revaluation",
+  "auto_err_frequency",
+  "submit_err_jv",
   "budget_detail",
   "exception_budget_approver_role",
   "registration_info",
@@ -463,14 +465,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "expenses_included_in_valuation",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Expenses Included In Valuation",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "label": "Accumulated Depreciation Account",
@@ -488,12 +482,6 @@
    "fieldname": "series_for_depreciation_entry",
    "fieldtype": "Data",
    "label": "Series for Asset Depreciation Entry (Journal Entry)"
-  },
-  {
-   "fieldname": "expenses_included_in_asset_valuation",
-   "fieldtype": "Link",
-   "label": "Expenses Included In Asset Valuation",
-   "options": "Account"
   },
   {
    "fieldname": "column_break_40",
@@ -694,6 +682,29 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "fieldname": "exchange_rate_revaluation_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Exchange Rate Revaluation Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_exchange_rate_revaluation",
+   "fieldtype": "Check",
+   "label": "Auto Create Exchange Rate Revaluation"
+  },
+  {
+   "fieldname": "auto_err_frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Daily\nWeekly"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_err_jv",
+   "fieldtype": "Check",
+   "label": "Submit ERR Journals?"
   }
  ],
  "icon": "fa fa-building",
@@ -701,7 +712,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-08-16 16:09:02.327724",
+ "modified": "2023-10-23 10:19:24.322898",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

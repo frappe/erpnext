@@ -10,22 +10,25 @@
   "warehouse",
   "item_name",
   "material_request_type",
-  "actual_qty",
-  "ordered_qty",
+  "quantity",
   "required_bom_qty",
   "column_break_4",
-  "quantity",
+  "schedule_date",
   "uom",
   "conversion_factor",
-  "projected_qty",
-  "reserved_qty_for_production",
-  "safety_stock",
   "item_details",
   "description",
   "min_order_qty",
   "section_break_8",
   "sales_order",
-  "requested_qty"
+  "bin_qty_section",
+  "actual_qty",
+  "requested_qty",
+  "reserved_qty_for_production",
+  "column_break_yhelv",
+  "ordered_qty",
+  "projected_qty",
+  "safety_stock"
  ],
  "fields": [
   {
@@ -65,7 +68,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -80,12 +83,12 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "default": "0",
    "fieldname": "actual_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Available Qty",
+   "label": "Qty In Stock",
    "no_copy": 1,
    "read_only": 1
   },
@@ -176,11 +179,27 @@
    "fieldtype": "Float",
    "label": "Conversion Factor",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Required By"
+  },
+  {
+   "fieldname": "bin_qty_section",
+   "fieldtype": "Section Break",
+   "label": "BIN Qty"
+  },
+  {
+   "fieldname": "column_break_yhelv",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-05-03 12:43:29.895754",
+ "modified": "2023-09-12 12:09:08.358326",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",

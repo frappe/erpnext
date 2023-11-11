@@ -68,7 +68,7 @@ frappe.ui.form.on("Supplier", {
 			}, __("View"));
 
 			frm.add_custom_button(__('Accounts Payable'), function () {
-				frappe.set_route('query-report', 'Accounts Payable', { supplier: frm.doc.name });
+				frappe.set_route('query-report', 'Accounts Payable', { party_type: "Supplier", party: frm.doc.name });
 			}, __("View"));
 
 			frm.add_custom_button(__('Bank Account'), function () {

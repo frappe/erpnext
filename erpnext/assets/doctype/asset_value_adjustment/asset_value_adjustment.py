@@ -5,15 +5,12 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, date_diff, flt, formatdate, getdate
+from frappe.utils import flt, formatdate, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.assets.doctype.asset.asset import (
-	get_asset_value_after_depreciation,
-	get_depreciation_amount,
-)
+from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 
 
@@ -25,10 +22,10 @@ class AssetValueAdjustment(Document):
 
 	def on_submit(self):
 		self.make_depreciation_entry()
-		self.reschedule_depreciations(self.new_asset_value)
+		self.update_asset(self.new_asset_value)
 
 	def on_cancel(self):
-		self.reschedule_depreciations(self.current_asset_value)
+		self.update_asset(self.current_asset_value)
 
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
@@ -50,10 +47,10 @@ class AssetValueAdjustment(Document):
 	def make_depreciation_entry(self):
 		asset = frappe.get_doc("Asset", self.asset)
 		(
-			fixed_asset_account,
+			_,
 			accumulated_depreciation_account,
 			depreciation_expense_account,
-		) = get_depreciation_accounts(asset)
+		) = get_depreciation_accounts(asset.asset_category, asset.company)
 
 		depreciation_cost_center, depreciation_series = frappe.get_cached_value(
 			"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
@@ -71,12 +68,16 @@ class AssetValueAdjustment(Document):
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": asset.name,
 		}
 
 		debit_entry = {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": asset.name,
 		}
 
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
@@ -106,44 +107,11 @@ class AssetValueAdjustment(Document):
 
 		self.db_set("journal_entry", je.name)
 
-	def reschedule_depreciations(self, asset_value):
+	def update_asset(self, asset_value):
 		asset = frappe.get_doc("Asset", self.asset)
-		country = frappe.get_value("Company", self.company, "country")
 
-		for d in asset.finance_books:
-			d.value_after_depreciation = asset_value
+		asset.flags.decrease_in_asset_value_due_to_value_adjustment = True
 
-			if d.depreciation_method in ("Straight Line", "Manual"):
-				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
-				total_days = date_diff(end_date, self.date)
-				rate_per_day = flt(d.value_after_depreciation - d.expected_value_after_useful_life) / flt(
-					total_days
-				)
-				from_date = self.date
-			else:
-				no_of_depreciations = len(
-					[
-						s.name for s in asset.schedules if (cint(s.finance_book_id) == d.idx and not s.journal_entry)
-					]
-				)
-
-			value_after_depreciation = d.value_after_depreciation
-			for data in asset.schedules:
-				if cint(data.finance_book_id) == d.idx and not data.journal_entry:
-					if d.depreciation_method in ("Straight Line", "Manual"):
-						days = date_diff(data.schedule_date, from_date)
-						depreciation_amount = days * rate_per_day
-						from_date = data.schedule_date
-					else:
-						depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
-
-					if depreciation_amount:
-						value_after_depreciation -= flt(depreciation_amount)
-						data.depreciation_amount = depreciation_amount
-
-			d.db_update()
-
-		asset.set_accumulated_depreciation(ignore_booked_entry=True)
-		for asset_data in asset.schedules:
-			if not asset_data.journal_entry:
-				asset_data.db_update()
+		asset.prepare_depreciation_data(value_after_depreciation=asset_value, ignore_booked_entry=True)
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.save()

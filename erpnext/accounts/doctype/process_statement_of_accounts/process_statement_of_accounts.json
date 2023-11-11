@@ -6,17 +6,24 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "report",
   "section_break_11",
   "from_date",
+  "posting_date",
   "company",
   "account",
   "group_by",
   "cost_center",
+  "territory",
   "column_break_14",
   "to_date",
   "finance_book",
   "currency",
   "project",
+  "payment_terms_template",
+  "sales_partner",
+  "sales_person",
+  "based_on_payment_terms",
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -42,6 +49,7 @@
   "column_break_21",
   "start_date",
   "section_break_33",
+  "pdf_name",
   "subject",
   "column_break_28",
   "cc_to",
@@ -65,14 +73,14 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.enable_auto_email == 0;",
+   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
    "mandatory_depends_on": "eval:doc.frequency == '';"
   },
   {
-   "depends_on": "eval:doc.enable_auto_email == 0;",
+   "depends_on": "eval:(doc.enable_auto_email == 0 && doc.report == 'General Ledger');",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
@@ -85,6 +93,7 @@
    "options": "PSOA Cost Center"
   },
   {
+   "depends_on": "eval: (doc.report == 'General Ledger');",
    "fieldname": "project",
    "fieldtype": "Table MultiSelect",
    "label": "Project",
@@ -102,7 +111,7 @@
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "label": "General Ledger Filters"
+   "label": "Report Filters"
   },
   {
    "fieldname": "column_break_14",
@@ -162,12 +171,14 @@
   },
   {
    "default": "Group by Voucher (Consolidated)",
+   "depends_on": "eval:(doc.report == 'General Ledger');",
    "fieldname": "group_by",
    "fieldtype": "Select",
    "label": "Group By",
    "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)"
   },
   {
+   "depends_on": "eval: (doc.report == 'General Ledger');",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -263,7 +274,7 @@
    "fieldname": "help_text",
    "fieldtype": "HTML",
    "label": "Help Text",
-   "options": "<br>\n<h4>Note</h4>\n<ul>\n<li>\nYou can use <a href=\"https://jinja.palletsprojects.com/en/2.11.x/\" target=\"_blank\">Jinja tags</a> in <b>Subject</b> and <b>Body</b> fields for dynamic values.\n</li><li>\n    All fields in this doctype are available under the <b>doc</b> object and all fields for the customer to whom the mail will go to is available under the  <b>customer</b> object.\n</li></ul>\n<h4> Examples</h4>\n<!-- {% raw %} -->\n<ul>\n    <li><b>Subject</b>:<br><br><pre><code>Statement Of Accounts for {{ customer.name }}</code></pre><br></li>\n    <li><b>Body</b>: <br><br>\n<pre><code>Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>\n</ul>\n<!-- {% endraw %} -->"
+   "options": "<br>\n<h4>Note</h4>\n<ul>\n<li>\nYou can use <a href=\"https://jinja.palletsprojects.com/en/2.11.x/\" target=\"_blank\">Jinja tags</a> in <b>Subject</b> and <b>Body</b> fields for dynamic values.\n</li><li>\n    All fields in this doctype are available under the <b>doc</b> object and all fields for the customer to whom the mail will go to is available under the  <b>customer</b> object.\n</li></ul>\n<h4> Examples</h4>\n<!-- {% raw %} -->\n<ul>\n    <li><b>Subject</b>:<br><br><pre><code>Statement Of Accounts for {{ customer.customer_name }}</code></pre><br></li>\n    <li><b>Body</b>: <br><br>\n<pre><code>Hello {{ customer.customer_name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>\n</ul>\n<!-- {% endraw %} -->"
   },
   {
    "fieldname": "subject",
@@ -295,6 +306,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: (doc.report == 'General Ledger');",
    "fieldname": "show_net_values_in_party_account",
    "fieldtype": "Check",
    "label": "Show Net Values in Party Account"
@@ -308,10 +320,64 @@
   {
    "fieldname": "column_break_ocfq",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report",
+   "fieldtype": "Select",
+   "label": "Report",
+   "options": "General Ledger\nAccounts Receivable",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "sales_partner",
+   "fieldtype": "Link",
+   "label": "Sales Partner",
+   "options": "Sales Partner"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "depends_on": "eval: (doc.report == 'Accounts Receivable');",
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
+   "fieldname": "based_on_payment_terms",
+   "fieldtype": "Check",
+   "label": "Based On Payment Terms"
+  },
+  {
+   "fieldname": "pdf_name",
+   "fieldtype": "Data",
+   "label": "PDF Name"
   }
  ],
  "links": [],
- "modified": "2023-04-26 12:46:43.645455",
+ "modified": "2023-08-28 12:59:53.071334",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

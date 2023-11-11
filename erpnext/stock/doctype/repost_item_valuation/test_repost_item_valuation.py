@@ -5,7 +5,7 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -200,6 +200,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		riv.set_status("Skipped")
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
 
@@ -377,6 +378,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_create_repost_entry_for_cancelled_document(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -392,3 +394,33 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		pr.cancel()
 		self.assertTrue(pr.docstatus == 2)
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
+
+	def test_repost_item_valuation_for_closing_stock_balance(self):
+		from erpnext.stock.doctype.closing_stock_balance.closing_stock_balance import (
+			prepare_closing_stock_balance,
+		)
+
+		doc = frappe.new_doc("Closing Stock Balance")
+		doc.company = "_Test Company"
+		doc.from_date = today()
+		doc.to_date = today()
+		doc.submit()
+
+		prepare_closing_stock_balance(doc.name)
+		doc.load_from_db()
+		self.assertEqual(doc.docstatus, 1)
+		self.assertEqual(doc.status, "Completed")
+
+		riv = frappe.new_doc("Repost Item Valuation")
+		riv.update(
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"based_on": "Item and Warehouse",
+				"posting_date": today(),
+				"posting_time": "00:01:00",
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, riv.save)
+		doc.cancel()

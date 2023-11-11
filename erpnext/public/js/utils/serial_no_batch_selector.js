@@ -510,30 +510,41 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 					if(!list_value) {
 						new_line = '';
 					} else {
-						me.serial_list = list_value.replace(/\n/g, ' ').match(/\S+/g) || [];
+						me.serial_list = list_value.split(/\n/g) || [];
 					}
 
 					if(!me.serial_list.includes(new_number)) {
 						this.set_new_description('');
 						serial_no_list_field.set_value(me.serial_list.join('\n') + new_line + new_number);
-						me.serial_list = serial_no_list_field.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
+						me.serial_list = serial_no_list_field.get_value().split(/\n/g) || [];
 					} else {
 						this.set_new_description(new_number + ' is already selected.');
 					}
+
+					me.serial_list = me.serial_list.filter(serial => {
+						if (serial) {
+							return true;
+						}
+					});
 
 					qty_field.set_input(me.serial_list.length);
 					this.$input.val("");
 					this.in_local_change = 0;
 				}
 			},
-			{fieldtype: 'Column Break'},
+			{fieldtype: 'Section Break'},
 			{
 				fieldname: 'serial_no',
-				fieldtype: 'Small Text',
+				fieldtype: 'Text',
 				label: __(me.has_batch && !me.has_serial_no ? 'Selected Batch Numbers' : 'Selected Serial Numbers'),
 				onchange: function() {
-					me.serial_list = this.get_value()
-						.replace(/\n/g, ' ').match(/\S+/g) || [];
+					me.serial_list = this.get_value().split(/\n/g);
+					me.serial_list = me.serial_list.filter(serial => {
+						if (serial) {
+							return true;
+						}
+					});
+
 					this.layout.fields_dict.qty.set_input(me.serial_list.length);
 				}
 			}

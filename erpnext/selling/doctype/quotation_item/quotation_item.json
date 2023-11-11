@@ -236,6 +236,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -667,7 +668,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-06 11:00:07.042364",
+ "modified": "2023-09-27 14:02:12.332407",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

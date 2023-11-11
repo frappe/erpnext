@@ -50,20 +50,20 @@ def get_pos_entries(filters, group_by_field):
 	order_by = "p.posting_date"
 	select_mop_field, from_sales_invoice_payment, group_by_mop_condition = "", "", ""
 	if group_by_field == "mode_of_payment":
-		select_mop_field = ", sip.mode_of_payment"
+		select_mop_field = ", sip.mode_of_payment, sip.base_amount - IF(sip.type='Cash', p.change_amount, 0) as paid_amount"
 		from_sales_invoice_payment = ", `tabSales Invoice Payment` sip"
-		group_by_mop_condition = "sip.parent = p.name AND ifnull(sip.base_amount, 0) != 0 AND"
+		group_by_mop_condition = "sip.parent = p.name AND ifnull(sip.base_amount - IF(sip.type='Cash', p.change_amount, 0), 0) != 0 AND"
 		order_by += ", sip.mode_of_payment"
 
 	elif group_by_field:
 		order_by += ", p.{}".format(group_by_field)
+		select_mop_field = ", p.base_paid_amount - p.change_amount  as paid_amount "
 
 	return frappe.db.sql(
 		"""
 		SELECT
 			p.posting_date, p.name as pos_invoice, p.pos_profile,
-			p.owner, p.base_grand_total as grand_total, p.base_paid_amount - p.change_amount  as paid_amount,
-			p.customer, p.is_return {select_mop_field}
+			p.owner, p.customer, p.is_return, p.base_grand_total as grand_total {select_mop_field}
 		FROM
 			`tabPOS Invoice` p {from_sales_invoice_payment}
 		WHERE

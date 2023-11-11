@@ -25,6 +25,8 @@ def execute(filters=None):
 		company=filters.company,
 	)
 
+	filters.period_start_date = period_list[0]["year_start_date"]
+
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
@@ -96,7 +98,7 @@ def execute(filters=None):
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
 	report_summary = get_report_summary(
-		period_list, asset, liability, equity, provisional_profit_loss, total_credit, currency, filters
+		period_list, asset, liability, equity, provisional_profit_loss, currency, filters
 	)
 
 	return columns, data, message, chart, report_summary
@@ -174,7 +176,6 @@ def get_report_summary(
 	liability,
 	equity,
 	provisional_profit_loss,
-	total_credit,
 	currency,
 	filters,
 	consolidated=False,

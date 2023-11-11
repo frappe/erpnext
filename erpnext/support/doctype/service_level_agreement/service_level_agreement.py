@@ -21,6 +21,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 	to_timedelta,
 )
+from frappe.utils.caching import redis_cache
 from frappe.utils.nestedset import get_ancestors_of
 from frappe.utils.safe_exec import get_safe_globals
 
@@ -208,6 +209,10 @@ class ServiceLevelAgreement(Document):
 
 	def on_update(self):
 		set_documents_with_active_service_level_agreement()
+
+	def clear_cache(self):
+		get_sla_doctypes.clear_cache()
+		return super().clear_cache()
 
 	def create_docfields(self, meta, service_level_agreement_fields):
 		last_index = len(meta.fields)
@@ -990,6 +995,7 @@ def get_user_time(user, to_string=False):
 
 
 @frappe.whitelist()
+@redis_cache()
 def get_sla_doctypes():
 	doctypes = []
 	data = frappe.get_all("Service Level Agreement", {"enabled": 1}, ["document_type"], distinct=1)
@@ -998,3 +1004,7 @@ def get_sla_doctypes():
 		doctypes.append(entry.document_type)
 
 	return doctypes
+
+
+def add_sla_doctypes(bootinfo):
+	bootinfo.service_level_agreement_doctypes = get_sla_doctypes()

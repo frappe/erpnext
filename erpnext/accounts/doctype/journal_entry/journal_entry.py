@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
+	cancel_exchange_gain_loss_journal,
 	get_account_currency,
 	get_balance_on,
 	get_stock_accounts,
@@ -87,15 +88,16 @@ class JournalEntry(AccountsController):
 		self.update_invoice_discounting()
 
 	def on_cancel(self):
-		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-
-		unlink_ref_doc_from_payment_entries(self)
+		# References for this Journal are removed on the `on_cancel` event in accounts_controller
+		super(JournalEntry, self).on_cancel()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Payment Ledger Entry",
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -326,12 +328,10 @@ class JournalEntry(AccountsController):
 				d.db_update()
 
 	def unlink_asset_reference(self):
-		if self.voucher_type != "Depreciation Entry":
-			return
-
 		for d in self.get("accounts"):
 			if (
-				d.reference_type == "Asset"
+				self.voucher_type == "Depreciation Entry"
+				and d.reference_type == "Asset"
 				and d.reference_name
 				and d.account_type == "Depreciation"
 				and d.debit
@@ -358,6 +358,15 @@ class JournalEntry(AccountsController):
 				else:
 					asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 				asset.set_status()
+			elif self.voucher_type == "Journal Entry" and d.reference_type == "Asset" and d.reference_name:
+				journal_entry_for_scrap = frappe.db.get_value(
+					"Asset", d.reference_name, "journal_entry_for_scrap"
+				)
+
+				if journal_entry_for_scrap == self.name:
+					frappe.throw(
+						_("Journal Entry for Asset scrapping cannot be cancelled. Please restore the Asset.")
+					)
 
 	def unlink_inter_company_jv(self):
 		if (
@@ -387,6 +396,15 @@ class JournalEntry(AccountsController):
 					frappe.throw(
 						_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(
 							d.idx, d.account
+						)
+					)
+				elif (
+					d.party_type
+					and frappe.db.get_value("Party Type", d.party_type, "account_type") != account_type
+				):
+					frappe.throw(
+						_("Row {0}: Account {1} and Party Type {2} have different account types").format(
+							d.idx, d.account, d.party_type
 						)
 					)
 
@@ -471,11 +489,12 @@ class JournalEntry(AccountsController):
 				)
 
 				if not against_entries:
-					frappe.throw(
-						_(
-							"Journal Entry {0} does not have account {1} or already matched against other voucher"
-						).format(d.reference_name, d.account)
-					)
+					if self.voucher_type != "Exchange Gain Or Loss":
+						frappe.throw(
+							_(
+								"Journal Entry {0} does not have account {1} or already matched against other voucher"
+							).format(d.reference_name, d.account)
+						)
 				else:
 					dr_or_cr = "debit" if d.credit > 0 else "credit"
 					valid = False
@@ -558,7 +577,9 @@ class JournalEntry(AccountsController):
 						else:
 							party_account = against_voucher[1]
 
-					if against_voucher[0] != cstr(d.party) or party_account != d.account:
+					if (
+						against_voucher[0] != cstr(d.party) or party_account != d.account
+					) and self.voucher_type != "Exchange Gain Or Loss":
 						frappe.throw(
 							_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}").format(
 								d.idx,
@@ -740,24 +761,32 @@ class JournalEntry(AccountsController):
 				)
 			):
 
-				# Modified to include the posting date for which to retreive the exchange rate
-				d.exchange_rate = get_exchange_rate(
-					self.posting_date,
-					d.account,
-					d.account_currency,
-					self.company,
-					d.reference_type,
-					d.reference_name,
-					d.debit,
-					d.credit,
-					d.exchange_rate,
-				)
+				ignore_exchange_rate = False
+				if self.get("flags") and self.flags.get("ignore_exchange_rate"):
+					ignore_exchange_rate = True
+
+				if not ignore_exchange_rate:
+					# Modified to include the posting date for which to retreive the exchange rate
+					d.exchange_rate = get_exchange_rate(
+						self.posting_date,
+						d.account,
+						d.account_currency,
+						self.company,
+						d.reference_type,
+						d.reference_name,
+						d.debit,
+						d.credit,
+						d.exchange_rate,
+					)
 
 			if not d.exchange_rate:
 				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
 
 	def create_remarks(self):
 		r = []
+
+		if self.flags.skip_remarks_creation:
+			return
 
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))
@@ -907,6 +936,8 @@ class JournalEntry(AccountsController):
 				merge_entries=merge_entries,
 				update_outstanding=update_outstanding,
 			)
+			if cancel:
+				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 
 	@frappe.whitelist()
 	def get_balance(self, difference_account=None):

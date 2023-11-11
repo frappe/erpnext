@@ -17,7 +17,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Fiscal Year"),
 				"fieldtype": "Link",
 				"options": "Fiscal Year",
-				"default": frappe.defaults.get_user_default("fiscal_year"),
+				"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 				"reqd": 1,
 				"on_change": function(query_report) {
 					var fiscal_year = query_report.get_values().fiscal_year;
@@ -96,7 +96,13 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			},
 			{
 				"fieldname": "include_default_book_entries",
-				"label": __("Include Default Book Entries"),
+				"label": __("Include Default FB Entries"),
+				"fieldtype": "Check",
+				"default": 1
+			},
+			{
+				"fieldname": "show_net_values",
+				"label": __("Show net values in opening and closing columns"),
 				"fieldtype": "Check",
 				"default": 1
 			}

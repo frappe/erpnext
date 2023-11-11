@@ -125,7 +125,8 @@
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
    "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -577,7 +578,8 @@
    "fieldtype": "Link",
    "label": "Pick List",
    "options": "Pick List",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "print_settings_col_break",
@@ -677,7 +679,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-09 15:46:28.418339",
+ "modified": "2023-06-19 18:23:40.748114",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -738,7 +740,6 @@
    "read": 1,
    "report": 1,
    "role": "Stock Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "submit": 1,
    "write": 1

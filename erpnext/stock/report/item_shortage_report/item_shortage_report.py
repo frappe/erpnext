@@ -40,7 +40,12 @@ def get_data(filters):
 			item.item_name,
 			item.description,
 		)
-		.where((bin.projected_qty < 0) & (wh.name == bin.warehouse) & (bin.item_code == item.name))
+		.where(
+			(item.disabled == 0)
+			& (bin.projected_qty < 0)
+			& (wh.name == bin.warehouse)
+			& (bin.item_code == item.name)
+		)
 		.orderby(bin.projected_qty)
 	)
 

@@ -13,12 +13,9 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.utils import create_payment_ledger_entry
-
-
-class ClosedAccountingPeriod(frappe.ValidationError):
-	pass
 
 
 def make_gl_entries(
@@ -31,6 +28,7 @@ def make_gl_entries(
 ):
 	if gl_map:
 		if not cancel:
+			make_acc_dimensions_offsetting_entry(gl_map)
 			validate_accounting_period(gl_map)
 			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
@@ -43,7 +41,7 @@ def make_gl_entries(
 					from_repost=from_repost,
 				)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
-			# Post GL Map proccess there may no be any GL Entries
+			# Post GL Map process there may no be any GL Entries
 			elif gl_map:
 				frappe.throw(
 					_(
@@ -52,6 +50,63 @@ def make_gl_entries(
 				)
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
+
+def make_acc_dimensions_offsetting_entry(gl_map):
+	accounting_dimensions_to_offset = get_accounting_dimensions_for_offsetting_entry(
+		gl_map, gl_map[0].company
+	)
+	no_of_dimensions = len(accounting_dimensions_to_offset)
+	if no_of_dimensions == 0:
+		return
+
+	offsetting_entries = []
+
+	for gle in gl_map:
+		for dimension in accounting_dimensions_to_offset:
+			offsetting_entry = gle.copy()
+			debit = flt(gle.credit) / no_of_dimensions if gle.credit != 0 else 0
+			credit = flt(gle.debit) / no_of_dimensions if gle.debit != 0 else 0
+			offsetting_entry.update(
+				{
+					"account": dimension.offsetting_account,
+					"debit": debit,
+					"credit": credit,
+					"debit_in_account_currency": debit,
+					"credit_in_account_currency": credit,
+					"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension.name),
+					"against_voucher": None,
+				}
+			)
+			offsetting_entry["against_voucher_type"] = None
+			offsetting_entries.append(offsetting_entry)
+
+	gl_map += offsetting_entries
+
+
+def get_accounting_dimensions_for_offsetting_entry(gl_map, company):
+	acc_dimension = frappe.qb.DocType("Accounting Dimension")
+	dimension_detail = frappe.qb.DocType("Accounting Dimension Detail")
+
+	acc_dimensions = (
+		frappe.qb.from_(acc_dimension)
+		.inner_join(dimension_detail)
+		.on(acc_dimension.name == dimension_detail.parent)
+		.select(acc_dimension.fieldname, acc_dimension.name, dimension_detail.offsetting_account)
+		.where(
+			(acc_dimension.disabled == 0)
+			& (dimension_detail.company == company)
+			& (dimension_detail.automatically_post_balancing_accounting_entry == 1)
+		)
+	).run(as_dict=True)
+
+	accounting_dimensions_to_offset = []
+	for acc_dimension in acc_dimensions:
+		values = set([entry.get(acc_dimension.fieldname) for entry in gl_map])
+		if len(values) > 1:
+			accounting_dimensions_to_offset.append(acc_dimension)
+
+	return accounting_dimensions_to_offset
 
 
 def validate_disabled_accounts(gl_map):
@@ -108,7 +163,8 @@ def process_gl_map(gl_map, merge_entries=True, precision=None):
 	if not gl_map:
 		return []
 
-	gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
+	if gl_map[0].voucher_type != "Period Closing Voucher":
+		gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
 
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map, precision)
@@ -300,6 +356,9 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 	if gl_map:
 		check_freezing_date(gl_map[0]["posting_date"], adv_adj)
+		is_opening = any(d.get("is_opening") == "Yes" for d in gl_map)
+		if gl_map[0]["voucher_type"] != "Period Closing Voucher":
+			validate_against_pcv(is_opening, gl_map[0]["posting_date"], gl_map[0]["company"])
 
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
@@ -521,6 +580,9 @@ def make_reverse_gl_entries(
 		)
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+
+		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
+		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
 		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
@@ -566,6 +628,28 @@ def check_freezing_date(posting_date, adv_adj=False):
 						formatdate(acc_frozen_upto)
 					)
 				)
+
+
+def validate_against_pcv(is_opening, posting_date, company):
+	if is_opening and frappe.db.exists(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}
+	):
+		frappe.throw(
+			_("Opening Entry can not be created after Period Closing Voucher is created."),
+			title=_("Invalid Opening Entry"),
+		)
+
+	last_pcv_date = frappe.db.get_value(
+		"Period Closing Voucher", {"docstatus": 1, "company": company}, "max(posting_date)"
+	)
+
+	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):
+		message = _("Books have been closed till the period ending on {0}").format(
+			formatdate(last_pcv_date)
+		)
+		message += "</br >"
+		message += _("You cannot create/amend any accounting entries till this date.")
+		frappe.throw(message, title=_("Period Closed"))
 
 
 def set_as_cancel(voucher_type, voucher_no):

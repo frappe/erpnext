@@ -1,7 +1,7 @@
 {%- macro slide(image, title, subtitle, action, label, index, align="Left", theme="Dark") -%}
 {%- set align_class = resolve_class({
 	'text-right': align == 'Right',
-	'text-centre': align == 'Centre',
+	'text-center': align == 'Centre',
 	'text-left': align == 'Left',
 }) -%}
 

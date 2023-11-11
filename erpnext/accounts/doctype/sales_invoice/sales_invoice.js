@@ -34,7 +34,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		super.onload();
 
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log',
-							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger"];
+							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payments", "Unreconcile Payment Entries"];
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -177,6 +177,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				}, __('Create'));
 			}
 		}
+
+		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(me.frm);
 	}
 
 	make_maintenance_schedule() {
@@ -554,15 +556,6 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	}
 }
 
-// Income Account in Details Table
-// --------------------------------
-cur_frm.set_query("income_account", "items", function(doc) {
-	return{
-		query: "erpnext.controllers.queries.get_income_account",
-		filters: {'company': doc.company}
-	}
-});
-
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
@@ -657,6 +650,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("income_account", "items", function() {
+			return{
+				query: "erpnext.controllers.queries.get_income_account",
+				filters: {
+					'company': frm.doc.company,
+					"disabled": 0
+				}
+			}
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Return / Credit Note',
@@ -667,19 +670,6 @@ frappe.ui.form.on('Sales Invoice', {
 			return{
 				query: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet",
 				filters: {'project': doc.project}
-			}
-		}
-
-		// expense account
-		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
-			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
-				return {
-					filters: {
-						'report_type': 'Profit and Loss',
-						'company': doc.company,
-						"is_group": 0
-					}
-				}
 			}
 		}
 
@@ -900,6 +890,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
+		frm.refresh_field("timesheets");
+		frm.trigger("calculate_timesheet_totals");
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {
@@ -939,9 +931,6 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
 		row.project_name = time_log.project_name;
-
-		frm.refresh_field("timesheets");
-		frm.trigger("calculate_timesheet_totals");
 	},
 
 	calculate_timesheet_totals: function(frm) {

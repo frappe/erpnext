@@ -323,8 +323,10 @@ class StockBalanceReport(object):
 		for field in ["item_code", "brand"]:
 			if not self.filters.get(field):
 				continue
-
-			query = query.where(item_table[field] == self.filters.get(field))
+			elif field == "item_code":
+				query = query.where(item_table.name == self.filters.get(field))
+			else:
+				query = query.where(item_table[field] == self.filters.get(field))
 
 		return query
 
@@ -430,10 +432,12 @@ class StockBalanceReport(object):
 				{
 					"label": _("Valuation Rate"),
 					"fieldname": "val_rate",
-					"fieldtype": "Currency",
+					"fieldtype": self.filters.valuation_field_type or "Currency",
 					"width": 90,
 					"convertible": "rate",
-					"options": "currency",
+					"options": "Company:company:default_currency"
+					if self.filters.valuation_field_type == "Currency"
+					else None,
 				},
 				{
 					"label": _("Company"),

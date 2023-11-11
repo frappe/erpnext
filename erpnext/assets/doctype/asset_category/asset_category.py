@@ -53,7 +53,7 @@ class AssetCategory(Document):
 		account_type_map = {
 			"fixed_asset_account": {"account_type": ["Fixed Asset"]},
 			"accumulated_depreciation_account": {"account_type": ["Accumulated Depreciation"]},
-			"depreciation_expense_account": {"root_type": ["Expense", "Income"]},
+			"depreciation_expense_account": {"account_type": ["Depreciation"]},
 			"capital_work_in_progress_account": {"account_type": ["Capital Work in Progress"]},
 		}
 		for d in self.accounts:
