@@ -155,9 +155,9 @@
    "dependencies": "Project",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Project Billing Summary",
+   "label": "Timesheet Billing Summary",
    "link_count": 0,
-   "link_to": "Project Billing Summary",
+   "link_to": "Timesheet Billing Summary",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -192,7 +192,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-07-04 14:39:08.935853",
+ "modified": "2023-10-10 23:54:33.082108",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
@@ -234,8 +234,8 @@
    "type": "DocType"
   },
   {
-   "label": "Project Billing Summary",
-   "link_to": "Project Billing Summary",
+   "label": "Timesheet Billing Summary",
+   "link_to": "Timesheet Billing Summary",
    "type": "Report"
   },
   {

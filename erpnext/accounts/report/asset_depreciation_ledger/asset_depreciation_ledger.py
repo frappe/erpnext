@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 def execute(filters=None):
@@ -32,7 +32,6 @@ def get_data(filters):
 		filters_data.append(["against_voucher", "=", filters.get("asset")])
 
 	if filters.get("asset_category"):
-
 		assets = frappe.db.sql_list(
 			"""select name from tabAsset
 			where asset_category = %s and docstatus=1""",
@@ -41,12 +40,27 @@ def get_data(filters):
 
 		filters_data.append(["against_voucher", "in", assets])
 
-	if filters.get("finance_book"):
-		filters_data.append(["finance_book", "in", ["", filters.get("finance_book")]])
+	company_fb = frappe.get_cached_value("Company", filters.get("company"), "default_finance_book")
+
+	if filters.get("include_default_book_assets") and company_fb:
+		if filters.get("finance_book") and cstr(filters.get("finance_book")) != cstr(company_fb):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Assets'"))
+		else:
+			finance_book = company_fb
+	elif filters.get("finance_book"):
+		finance_book = filters.get("finance_book")
+	else:
+		finance_book = None
+
+	if finance_book:
+		or_filters_data = [["finance_book", "in", ["", finance_book]], ["finance_book", "is", "not set"]]
+	else:
+		or_filters_data = [["finance_book", "in", [""]], ["finance_book", "is", "not set"]]
 
 	gl_entries = frappe.get_all(
 		"GL Entry",
 		filters=filters_data,
+		or_filters=or_filters_data,
 		fields=["against_voucher", "debit_in_account_currency as debit", "voucher_no", "posting_date"],
 		order_by="against_voucher, posting_date",
 	)
@@ -61,7 +75,9 @@ def get_data(filters):
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
 			if not asset_data.get("accumulated_depreciation_amount"):
-				asset_data.accumulated_depreciation_amount = d.debit
+				asset_data.accumulated_depreciation_amount = d.debit + asset_data.get(
+					"opening_accumulated_depreciation"
+				)
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit
 
@@ -70,7 +86,7 @@ def get_data(filters):
 				{
 					"depreciation_amount": d.debit,
 					"depreciation_date": d.posting_date,
-					"amount_after_depreciation": (
+					"value_after_depreciation": (
 						flt(row.gross_purchase_amount) - flt(row.accumulated_depreciation_amount)
 					),
 					"depreciation_entry": d.voucher_no,
@@ -88,10 +104,12 @@ def get_assets_details(assets):
 	fields = [
 		"name as asset",
 		"gross_purchase_amount",
+		"opening_accumulated_depreciation",
 		"asset_category",
 		"status",
 		"depreciation_method",
 		"purchase_date",
+		"cost_center",
 	]
 
 	for d in frappe.get_all("Asset", fields=fields, filters={"name": ("in", assets)}):
@@ -122,6 +140,12 @@ def get_columns():
 			"width": 120,
 		},
 		{
+			"label": _("Opening Accumulated Depreciation"),
+			"fieldname": "opening_accumulated_depreciation",
+			"fieldtype": "Currency",
+			"width": 140,
+		},
+		{
 			"label": _("Depreciation Amount"),
 			"fieldname": "depreciation_amount",
 			"fieldtype": "Currency",
@@ -134,8 +158,8 @@ def get_columns():
 			"width": 210,
 		},
 		{
-			"label": _("Amount After Depreciation"),
-			"fieldname": "amount_after_depreciation",
+			"label": _("Value After Depreciation"),
+			"fieldname": "value_after_depreciation",
 			"fieldtype": "Currency",
 			"width": 180,
 		},
@@ -153,12 +177,13 @@ def get_columns():
 			"options": "Asset Category",
 			"width": 120,
 		},
-		{"label": _("Current Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
 		{
-			"label": _("Depreciation Method"),
-			"fieldname": "depreciation_method",
-			"fieldtype": "Data",
-			"width": 130,
+			"label": _("Cost Center"),
+			"fieldtype": "Link",
+			"fieldname": "cost_center",
+			"options": "Cost Center",
+			"width": 100,
 		},
+		{"label": _("Current Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
 		{"label": _("Purchase Date"), "fieldname": "purchase_date", "fieldtype": "Date", "width": 120},
 	]

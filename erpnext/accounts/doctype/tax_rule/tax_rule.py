@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
-from frappe.utils import cint, cstr
+from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
@@ -34,7 +34,6 @@ class TaxRule(Document):
 		self.validate_tax_template()
 		self.validate_from_to_dates("from_date", "to_date")
 		self.validate_filters()
-		self.validate_use_for_shopping_cart()
 
 	def validate_tax_template(self):
 		if self.tax_type == "Sales":
@@ -105,21 +104,6 @@ class TaxRule(Document):
 		if tax_rule:
 			if tax_rule[0].priority == self.priority:
 				frappe.throw(_("Tax Rule Conflicts with {0}").format(tax_rule[0].name), ConflictingTaxRule)
-
-	def validate_use_for_shopping_cart(self):
-		"""If shopping cart is enabled and no tax rule exists for shopping cart, enable this one"""
-		if (
-			not self.use_for_shopping_cart
-			and cint(frappe.db.get_single_value("E Commerce Settings", "enabled"))
-			and not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart": 1, "name": ["!=", self.name]})
-		):
-
-			self.use_for_shopping_cart = 1
-			frappe.msgprint(
-				_(
-					"Enabling 'Use for Shopping Cart', as Shopping Cart is enabled and there should be at least one Tax Rule for Shopping Cart"
-				)
-			)
 
 
 @frappe.whitelist()

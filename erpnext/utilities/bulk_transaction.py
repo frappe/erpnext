@@ -192,9 +192,7 @@ def mark_retrired_transaction(log_doc, doc_name):
 	record = 0
 	for d in log_doc.get("logger_data"):
 		if d.transaction_name == doc_name and d.transaction_status == "Failed":
-			d.retried = 1
+			frappe.db.set_value("Bulk Transaction Log Detail", d.name, "retried", 1)
 			record = record + 1
-
-	log_doc.save()
 
 	return record

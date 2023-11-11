@@ -32,6 +32,7 @@
   "column_break_19",
   "add_taxes_from_item_tax_template",
   "book_tax_discount_loss",
+  "round_row_wise_tax",
   "print_settings",
   "show_inclusive_tax_in_print",
   "show_taxes_as_table_in_print",
@@ -414,6 +415,13 @@
    "fieldname": "ignore_account_closing_balance",
    "fieldtype": "Check",
    "label": "Ignore Account Closing Balance"
+  },
+  {
+   "default": "0",
+   "description": "Tax Amount will be rounded on a row(items) level",
+   "fieldname": "round_row_wise_tax",
+   "fieldtype": "Check",
+   "label": "Round Tax Amount Row-wise"
   }
  ],
  "icon": "icon-cog",
@@ -421,7 +429,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-07-27 15:05:34.000264",
+ "modified": "2023-08-28 00:12:02.740633",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

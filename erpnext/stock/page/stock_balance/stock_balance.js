@@ -11,6 +11,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		label: __('Warehouse'),
 		fieldtype:'Link',
 		options:'Warehouse',
+		default: frappe.route_options && frappe.route_options.warehouse,
 		change: function() {
 			page.item_dashboard.start = 0;
 			page.item_dashboard.refresh();
@@ -22,6 +23,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		label: __('Item'),
 		fieldtype:'Link',
 		options:'Item',
+		default: frappe.route_options && frappe.route_options.item_code,
 		change: function() {
 			page.item_dashboard.start = 0;
 			page.item_dashboard.refresh();
@@ -33,6 +35,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		label: __('Item Group'),
 		fieldtype:'Link',
 		options:'Item Group',
+		default: frappe.route_options && frappe.route_options.item_group,
 		change: function() {
 			page.item_dashboard.start = 0;
 			page.item_dashboard.refresh();

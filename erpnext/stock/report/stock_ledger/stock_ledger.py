@@ -249,6 +249,13 @@ def get_columns(filters):
 				"options": "Serial No",
 				"width": 100,
 			},
+			{
+				"label": _("Serial and Batch Bundle"),
+				"fieldname": "serial_and_batch_bundle",
+				"fieldtype": "Link",
+				"options": "Serial and Batch Bundle",
+				"width": 100,
+			},
 			{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 			{
 				"label": _("Project"),
@@ -287,6 +294,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.voucher_type,
 			sle.qty_after_transaction,
 			sle.stock_value_difference,
+			sle.serial_and_batch_bundle,
 			sle.voucher_no,
 			sle.stock_value,
 			sle.batch_no,

@@ -440,6 +440,23 @@ def get_ordered_qty(scorecard):
 	).run(as_list=True)[0][0] or 0
 
 
+def get_invoiced_qty(scorecard):
+	"""Returns the total number of invoiced quantity (based on Purchase Invoice)"""
+
+	pi = frappe.qb.DocType("Purchase Invoice")
+
+	return (
+		frappe.qb.from_(pi)
+		.select(Sum(pi.total_qty))
+		.where(
+			(pi.supplier == scorecard.supplier)
+			& (pi.docstatus == 1)
+			& (pi.posting_date >= scorecard.get("start_date"))
+			& (pi.posting_date <= scorecard.get("end_date"))
+		)
+	).run(as_list=True)[0][0] or 0
+
+
 def get_rfq_total_number(scorecard):
 	"""Gets the total number of RFQs sent to supplier"""
 	supplier = frappe.get_doc("Supplier", scorecard.supplier)

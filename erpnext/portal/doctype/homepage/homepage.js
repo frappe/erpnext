@@ -19,12 +19,3 @@ frappe.ui.form.on('Homepage', {
 		});
 	},
 });
-
-frappe.ui.form.on('Homepage Featured Product', {
-	view: function(frm, cdt, cdn) {
-		var child= locals[cdt][cdn];
-		if (child.item_code && child.route) {
-			window.open('/' + child.route, '_blank');
-		}
-	}
-});

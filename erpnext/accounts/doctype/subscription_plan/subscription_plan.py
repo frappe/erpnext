@@ -22,7 +22,7 @@ class SubscriptionPlan(Document):
 
 @frappe.whitelist()
 def get_plan_rate(
-	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1
+	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1, party=None
 ):
 	plan = frappe.get_doc("Subscription Plan", plan)
 	if plan.price_determination == "Fixed Rate":
@@ -40,6 +40,7 @@ def get_plan_rate(
 			customer_group=customer_group,
 			company=None,
 			qty=quantity,
+			party=party,
 		)
 		if not price:
 			return 0

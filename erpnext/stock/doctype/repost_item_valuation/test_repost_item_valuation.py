@@ -5,7 +5,7 @@
 from unittest.mock import MagicMock, call
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -137,8 +137,6 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			item_code="_Test Item",
 			warehouse="_Test Warehouse - _TC",
 			based_on="Item and Warehouse",
-			voucher_type="Sales Invoice",
-			voucher_no="SI-1",
 			posting_date="2021-01-02",
 			posting_time="00:01:00",
 		)
@@ -148,8 +146,6 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		riv1.flags.dont_run_in_test = True
 		riv1.submit()
 		_assert_status(riv1, "Queued")
-		self.assertEqual(riv1.voucher_type, "Sales Invoice")  # traceability
-		self.assertEqual(riv1.voucher_no, "SI-1")
 
 		# newer than existing duplicate - riv1
 		riv2 = frappe.get_doc(riv_args.update({"posting_date": "2021-01-03"}))
@@ -200,6 +196,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		riv.set_status("Skipped")
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
 
@@ -377,6 +374,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_create_repost_entry_for_cancelled_document(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",

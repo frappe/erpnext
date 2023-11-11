@@ -13,9 +13,6 @@ class PriceList(Document):
 		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
 
-		if not self.is_new():
-			self.check_impact_on_shopping_cart()
-
 	def on_update(self):
 		self.set_default_if_missing()
 		self.update_item_price()
@@ -36,19 +33,6 @@ class PriceList(Document):
 			buying=%s, selling=%s, modified=NOW() where price_list=%s""",
 			(self.currency, cint(self.buying), cint(self.selling), self.name),
 		)
-
-	def check_impact_on_shopping_cart(self):
-		"Check if Price List currency change impacts E Commerce Cart."
-		from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
-			validate_cart_settings,
-		)
-
-		doc_before_save = self.get_doc_before_save()
-		currency_changed = self.currency != doc_before_save.currency
-		affects_cart = self.name == frappe.db.get_single_value("E Commerce Settings", "price_list")
-
-		if currency_changed and affects_cart:
-			validate_cart_settings()
 
 	def on_trash(self):
 		self.delete_price_list_details_key()
