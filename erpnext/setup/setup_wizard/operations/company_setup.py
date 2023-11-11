@@ -33,20 +33,6 @@ def create_fiscal_year_and_company(args):
 		).insert()
 
 
-def enable_shopping_cart(args):  # nosemgrep
-	# Needs price_lists
-	frappe.get_doc(
-		{
-			"doctype": "E Commerce Settings",
-			"enabled": 1,
-			"company": args.get("company_name"),
-			"price_list": frappe.db.get_value("Price List", {"selling": 1}),
-			"default_customer_group": _("Individual"),
-			"quotation_series": "QTN-",
-		}
-	).insert()
-
-
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year
 	if start_year == getdate(fy_end_date).year:

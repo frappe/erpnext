@@ -17,9 +17,6 @@
 			<h3 class="d-block d-sm-none">{{ homepage.description }}</h3>
 		</div>
 
-		<div class="container">
-			<a href="{{ explore_link }}" class="mb-5 btn btn-primary">{{ _('Explore') }}</a>
-		</div>
 	</section>
 	{% elif homepage.hero_section_based_on == 'Slideshow' and slideshow %}
 	<section class="hero-section">
@@ -27,26 +24,6 @@
 	</section>
 	{% elif homepage.hero_section_based_on == 'Homepage Section' %}
 		{{ render_homepage_section(homepage.hero_section_doc) }}
-	{% endif %}
-
-	{% if homepage.products %}
-	<section class="container section-products my-5">
-		<h3>{{ _('Products') }}</h3>
-
-		<div class="row">
-			{% for item in homepage.products %}
-			<div class="col-md-4 mb-4">
-				<div class="card h-100 justify-content-between">
-					<img class="card-img-top website-image-extra-large" src="{{ item.image }}" loading="lazy" alt="{{ item.item_name }}"></img>
-					<div class="card-body flex-grow-0">
-						<h5 class="card-title">{{ item.item_name }}</h5>
-						<a href="{{ item.route }}" class="card-link">{{ _('More details') }}</a>
-					</div>
-				</div>
-			</div>
-			{% endfor %}
-		</div>
-	</section>
 	{% endif %}
 
 	{% if blogs %}

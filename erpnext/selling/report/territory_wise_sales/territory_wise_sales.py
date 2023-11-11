@@ -80,7 +80,7 @@ def get_data(filters=None):
 
 		territory_orders = []
 		if t_quotation_names and sales_orders:
-			list(filter(lambda x: x.quotation in t_quotation_names, sales_orders))
+			territory_orders = list(filter(lambda x: x.quotation in t_quotation_names, sales_orders))
 		t_order_names = []
 		if territory_orders:
 			t_order_names = [t.name for t in territory_orders]

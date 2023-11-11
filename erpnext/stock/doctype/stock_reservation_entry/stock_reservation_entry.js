@@ -92,7 +92,7 @@ frappe.ui.form.on('Stock Reservation Entry', {
 			'qty', 'read_only', frm.doc.has_serial_no
 		);
 
-		frm.set_df_property('sb_entries', 'allow_on_submit', frm.doc.against_pick_list ? 0 : 1);
+		frm.set_df_property('sb_entries', 'allow_on_submit', frm.doc.from_voucher_type == "Pick List" ? 0 : 1);
 	},
 
 	hide_rate_related_fields(frm) {

@@ -207,11 +207,14 @@ def create_supplier(**args):
 			"doctype": "Supplier",
 			"supplier_name": args.supplier_name,
 			"default_currency": args.default_currency,
-			"supplier_group": args.supplier_group or "Services",
 			"supplier_type": args.supplier_type or "Company",
 			"tax_withholding_category": args.tax_withholding_category,
 		}
-	).insert()
+	)
+	if not args.without_supplier_group:
+		doc.supplier_group = args.supplier_group or "Services"
+
+	doc.insert()
 
 	return doc
 

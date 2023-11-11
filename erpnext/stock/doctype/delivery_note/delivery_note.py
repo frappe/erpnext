@@ -365,6 +365,9 @@ class DeliveryNote(SellingController):
 					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
 					sre_doc.update_status()
 
+					# Update Reserved Stock in Bin.
+					sre_doc.update_reserved_stock_in_bin()
+
 					qty_to_deliver -= qty_can_be_deliver
 
 		if self._action == "cancel":
@@ -426,6 +429,9 @@ class DeliveryNote(SellingController):
 
 					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
 					sre_doc.update_status()
+
+					# Update Reserved Stock in Bin.
+					sre_doc.update_reserved_stock_in_bin()
 
 					qty_to_undelivered -= qty_can_be_undelivered
 

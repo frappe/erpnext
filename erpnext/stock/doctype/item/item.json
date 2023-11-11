@@ -117,7 +117,6 @@
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "published_in_website",
   "total_projected_qty"
  ],
  "fields": [
@@ -380,7 +379,7 @@
    "options": "fa fa-rss"
   },
   {
-   "description": "Will also apply for variants unless overrridden",
+   "description": "Will also apply for variants unless overridden",
    "fieldname": "reorder_levels",
    "fieldtype": "Table",
    "label": "Reorder level based on Warehouse",
@@ -813,14 +812,6 @@
    "fieldname": "default_manufacturer_part_no",
    "fieldtype": "Data",
    "label": "Default Manufacturer Part No",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "published_in_website",
-   "fieldname": "published_in_website",
-   "fieldtype": "Check",
-   "label": "Published in Website",
    "read_only": 1
   },
   {

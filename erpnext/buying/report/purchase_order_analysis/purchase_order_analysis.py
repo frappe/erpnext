@@ -6,7 +6,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
 
 
@@ -57,7 +57,7 @@ def get_data(filters):
 			po_item.qty,
 			po_item.received_qty,
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
-			IfNull(pi_item.qty, 0).as_("billed_qty"),
+			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
 			(po_item.received_qty * po_item.base_rate).as_("received_qty_amount"),
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),

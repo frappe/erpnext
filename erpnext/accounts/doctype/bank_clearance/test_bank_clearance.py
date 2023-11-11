@@ -35,13 +35,14 @@ class TestBankClearance(unittest.TestCase):
 		from lending.loan_management.doctype.loan.test_loan import (
 			create_loan,
 			create_loan_accounts,
-			create_loan_type,
+			create_loan_product,
 			create_repayment_entry,
 			make_loan_disbursement_entry,
 		)
 
 		def create_loan_masters():
-			create_loan_type(
+			create_loan_product(
+				"Clearance Loan",
 				"Clearance Loan",
 				2000000,
 				13.5,
