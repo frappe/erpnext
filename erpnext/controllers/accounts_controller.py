@@ -1941,7 +1941,7 @@ class AccountsController(TransactionBase):
 				)
 				self.append("payment_schedule", data)
 
-		if not automatically_fetch_payment_terms:
+		if self.get("payment_schedule"):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
