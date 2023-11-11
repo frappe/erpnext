@@ -8,6 +8,7 @@ from functools import reduce
 
 import frappe
 from frappe import _
+from frappe.desk.form.linked_with import get_linked_fields
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.csvutils import UnicodeWriter
@@ -433,13 +434,10 @@ def get_mandatory_account_types():
 
 
 def unset_existing_data(company):
-	linked = frappe.db.sql(
-		'''select fieldname from tabDocField
-		where fieldtype="Link" and options="Account" and parent="Company"''',
-		as_dict=True,
-	)
-
 	# remove accounts data from company
+
+	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
+	linked = [{"fieldname": name} for name in fieldnames]
 	update_values = {d.fieldname: "" for d in linked}
 	frappe.db.set_value("Company", company, update_values, update_values)
 
@@ -461,7 +459,6 @@ def set_default_accounts(company):
 	from erpnext.setup.doctype.company.company import install_country_fixtures
 
 	company = frappe.get_doc("Company", company)
-	unset_app_based_default_accounts(company)
 	company.update(
 		{
 			"default_receivable_account": frappe.db.get_value(
@@ -480,8 +477,3 @@ def set_default_accounts(company):
 	company.save()
 	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()
-
-
-def unset_app_based_default_accounts(company):
-	for account in frappe.get_hooks("default_company_account_fields"):
-		company.update({account: None})
