@@ -438,7 +438,7 @@ def unset_existing_data(company):
 
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
 	linked = [{"fieldname": name} for name in fieldnames]
-	update_values = {d.fieldname: "" for d in linked}
+	update_values = {d.get("fieldname"): "" for d in linked}
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
