@@ -16,7 +16,7 @@
   "transaction_settings_section",
   "po_required",
   "pr_required",
-  "over_order_allowance",
+  "blanket_order_allowance",
   "column_break_12",
   "maintain_same_rate",
   "set_landed_cost_based_on_purchase_invoice_rate",
@@ -161,17 +161,17 @@
   },
   {
    "default": "0",
-   "description": "Percentage you are allowed to order more against the Blanket Order Quantity. For example: If you have a Blanket Order of Quantity 100 units. and your Allowance is 10% then you are allowed to order 110 units.",
-   "fieldname": "over_order_allowance",
-   "fieldtype": "Float",
-   "label": "Over Order Allowance (%)"
-  },
-  {
-   "default": "0",
    "description": "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.",
    "fieldname": "use_transaction_date_exchange_rate",
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate"
+  },
+  {
+   "default": "0",
+   "description": "Percentage you are allowed to order beyond the Blanket Order quantity.",
+   "fieldname": "blanket_order_allowance",
+   "fieldtype": "Float",
+   "label": "Blanket Order Allowance (%)"
   }
  ],
  "icon": "fa fa-cog",
@@ -179,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-16 16:22:03.201078",
+ "modified": "2023-10-25 14:03:32.520418",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

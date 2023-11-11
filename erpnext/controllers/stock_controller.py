@@ -1043,8 +1043,6 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
 		repost_entry.based_on = "Item and Warehouse"
-		repost_entry.voucher_type = voucher_type
-		repost_entry.voucher_no = voucher_no
 
 		repost_entry.item_code = sle.item_code
 		repost_entry.warehouse = sle.warehouse

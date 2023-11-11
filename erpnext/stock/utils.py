@@ -95,6 +95,7 @@ def get_stock_balance(
 	with_valuation_rate=False,
 	with_serial_no=False,
 	inventory_dimensions_dict=None,
+	batch_no=None,
 ):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
@@ -124,6 +125,9 @@ def get_stock_balance(
 
 	if with_valuation_rate:
 		if with_serial_no:
+			if batch_no:
+				args["batch_no"] = batch_no
+
 			serial_nos = get_serial_nos_data_after_transactions(args)
 
 			return (
@@ -140,26 +144,29 @@ def get_stock_balance(
 
 
 def get_serial_nos_data_after_transactions(args):
-
 	serial_nos = set()
 	args = frappe._dict(args)
-	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	stock_ledger_entries = (
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
 		frappe.qb.from_(sle)
-		.select("serial_no", "actual_qty")
+		.select(sle.serial_no, sle.actual_qty)
 		.where(
-			(sle.item_code == args.item_code)
+			(sle.is_cancelled == 0)
+			& (sle.item_code == args.item_code)
 			& (sle.warehouse == args.warehouse)
 			& (
 				CombineDatetime(sle.posting_date, sle.posting_time)
 				< CombineDatetime(args.posting_date, args.posting_time)
 			)
-			& (sle.is_cancelled == 0)
 		)
 		.orderby(sle.posting_date, sle.posting_time, sle.creation)
-		.run(as_dict=1)
 	)
+
+	if args.batch_no:
+		query = query.where(sle.batch_no == args.batch_no)
+
+	stock_ledger_entries = query.run(as_dict=True)
 
 	for stock_ledger_entry in stock_ledger_entries:
 		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)

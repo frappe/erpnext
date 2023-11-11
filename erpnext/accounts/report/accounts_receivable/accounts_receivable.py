@@ -116,7 +116,12 @@ class ReceivablePayableReport(object):
 		# build all keys, since we want to exclude vouchers beyond the report date
 		for ple in self.ple_entries:
 			# get the balance object for voucher_type
-			key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
+
+			if self.filters.get("ignore_accounts"):
+				key = (ple.voucher_type, ple.voucher_no, ple.party)
+			else:
+				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
+
 			if not key in self.voucher_balance:
 				self.voucher_balance[key] = frappe._dict(
 					voucher_type=ple.voucher_type,
@@ -183,7 +188,10 @@ class ReceivablePayableReport(object):
 			):
 				return
 
-		key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)
+		if self.filters.get("ignore_accounts"):
+			key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
+		else:
+			key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)
 
 		# If payment is made against credit note
 		# and credit note is made against a Sales Invoice
@@ -192,13 +200,19 @@ class ReceivablePayableReport(object):
 			if ple.against_voucher_no in self.return_entries:
 				return_against = self.return_entries.get(ple.against_voucher_no)
 				if return_against:
-					key = (ple.account, ple.against_voucher_type, return_against, ple.party)
+					if self.filters.get("ignore_accounts"):
+						key = (ple.against_voucher_type, return_against, ple.party)
+					else:
+						key = (ple.account, ple.against_voucher_type, return_against, ple.party)
 
 		row = self.voucher_balance.get(key)
 
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
-			row = self.voucher_balance.get((ple.account, ple.voucher_type, ple.voucher_no, ple.party))
+			if self.filters.get("ignore_accounts"):
+				row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
+			else:
+				row = self.voucher_balance.get((ple.account, ple.voucher_type, ple.voucher_no, ple.party))
 
 		row.party_type = ple.party_type
 		return row
@@ -267,11 +281,20 @@ class ReceivablePayableReport(object):
 
 			row.invoice_grand_total = row.invoiced
 
-			if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
-				(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
-				or (row.voucher_no in self.err_journals)
-			):
+			must_consider = False
+			if self.filters.get("for_revaluation_journals"):
+				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) or (
+					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+				):
+					must_consider = True
+			else:
+				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
+					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+					or (row.voucher_no in self.err_journals)
+				):
+					must_consider = True
 
+			if must_consider:
 				# non-zero oustanding, we must consider this row
 
 				if self.is_invoice(row) and self.filters.based_on_payment_terms:
@@ -718,6 +741,7 @@ class ReceivablePayableReport(object):
 		query = (
 			qb.from_(ple)
 			.select(
+				ple.name,
 				ple.account,
 				ple.voucher_type,
 				ple.voucher_no,
@@ -731,12 +755,14 @@ class ReceivablePayableReport(object):
 				ple.account_currency,
 				ple.amount,
 				ple.amount_in_account_currency,
-				ple.remarks,
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(self.qb_selection_filter))
 			.where(Criterion.any(self.or_filters))
 		)
+
+		if self.filters.get("show_remarks"):
+			query = query.select(ple.remarks)
 
 		if self.filters.get("group_by_party"):
 			query = query.orderby(self.ple.party, self.ple.posting_date)

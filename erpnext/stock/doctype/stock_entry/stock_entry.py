@@ -168,7 +168,7 @@ class StockEntry(StockController):
 		if self.is_enqueue_action():
 			frappe.msgprint(
 				_(
-					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Draft stage"
 				)
 			)
 			self.queue_action("submit", timeout=2000)
@@ -179,7 +179,7 @@ class StockEntry(StockController):
 		if self.is_enqueue_action():
 			frappe.msgprint(
 				_(
-					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
+					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Submitted stage"
 				)
 			)
 			self.queue_action("cancel", timeout=2000)
@@ -988,14 +988,34 @@ class StockEntry(StockController):
 						& (se.docstatus == 1)
 						& (se_detail.item_code == se_item.item_code)
 						& (
-							(se.purchase_order == self.purchase_order)
+							((se.purchase_order == self.purchase_order) & (se_detail.po_detail == se_item.po_detail))
 							if self.subcontract_data.order_doctype == "Purchase Order"
-							else (se.subcontracting_order == self.subcontracting_order)
+							else (
+								(se.subcontracting_order == self.subcontracting_order)
+								& (se_detail.sco_rm_detail == se_item.sco_rm_detail)
+							)
 						)
 					)
-				).run()[0][0]
+				).run()[0][0] or 0
 
-				if flt(total_supplied, precision) > flt(total_allowed, precision):
+				total_returned = 0
+				if self.subcontract_data.order_doctype == "Subcontracting Order":
+					total_returned = (
+						frappe.qb.from_(se)
+						.inner_join(se_detail)
+						.on(se.name == se_detail.parent)
+						.select(Sum(se_detail.transfer_qty))
+						.where(
+							(se.purpose == "Material Transfer")
+							& (se.docstatus == 1)
+							& (se.is_return == 1)
+							& (se_detail.item_code == se_item.item_code)
+							& (se_detail.sco_rm_detail == se_item.sco_rm_detail)
+							& (se.subcontracting_order == self.subcontracting_order)
+						)
+					).run()[0][0] or 0
+
+				if flt(total_supplied - total_returned, precision) > flt(total_allowed, precision):
 					frappe.throw(
 						_("Row {0}# Item {1} cannot be transferred more than {2} against {3} {4}").format(
 							se_item.idx,

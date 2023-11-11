@@ -342,5 +342,12 @@ execute:frappe.db.set_single_value('Selling Settings', 'allow_negative_rates_for
 erpnext.patches.v14_0.correct_asset_value_if_je_with_workflow
 erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
 erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
+erpnext.patches.v14_0.rename_over_order_allowance_field
+erpnext.patches.v14_0.migrate_delivery_stop_lock_field
+execute:frappe.db.set_single_value("Payment Reconciliation", "invoice_limit", 50)
+execute:frappe.db.set_single_value("Payment Reconciliation", "payment_limit", 50)
+erpnext.patches.v14_0.rename_daily_depreciation_to_depreciation_amount_based_on_num_days_in_month
+erpnext.patches.v14_0.rename_depreciation_amount_based_on_num_days_in_month_to_daily_prorata_based
+erpnext.patches.v14_0.add_default_for_repost_settings
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

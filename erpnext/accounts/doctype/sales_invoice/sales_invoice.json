@@ -26,6 +26,7 @@
   "is_return",
   "return_against",
   "update_billed_amount_in_sales_order",
+  "update_billed_amount_in_delivery_note",
   "is_debit_note",
   "amended_from",
   "accounting_dimensions_section",
@@ -2144,6 +2145,13 @@
    "fieldname": "use_company_roundoff_cost_center",
    "fieldtype": "Check",
    "label": "Use Company default Cost Center for Round off"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.is_return",
+   "fieldname": "update_billed_amount_in_delivery_note",
+   "fieldtype": "Check",
+   "label": "Update Billed Amount in Delivery Note"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2156,7 +2164,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-06-19 16:02:05.309332",
+ "modified": "2023-11-03 14:39:38.012346",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

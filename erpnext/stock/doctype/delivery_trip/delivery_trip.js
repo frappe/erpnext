@@ -64,6 +64,11 @@ frappe.ui.form.on('Delivery Trip', {
 				})
 			}, __("Get stops from"));
 		}
+		frm.add_custom_button(__("Delivery Notes"), function () {
+			frappe.set_route("List", "Delivery Note",
+					{'name': ["in", frm.doc.delivery_stops.map((stop) => {return stop.delivery_note;})]}
+			);
+		}, __("View"));
 	},
 
 	calculate_arrival_time: function (frm) {

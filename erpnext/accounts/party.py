@@ -5,7 +5,7 @@
 from typing import Optional
 
 import frappe
-from frappe import _, msgprint, scrub
+from frappe import _, msgprint, qb, scrub
 from frappe.contacts.doctype.address.address import get_company_address, get_default_address
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
@@ -459,11 +459,19 @@ def get_party_account_currency(party_type, party, company):
 
 def get_party_gle_currency(party_type, party, company):
 	def generator():
-		existing_gle_currency = frappe.db.sql(
-			"""select account_currency from `tabGL Entry`
-			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
-			limit 1""",
-			{"company": company, "party_type": party_type, "party": party},
+		gl = qb.DocType("GL Entry")
+		existing_gle_currency = (
+			qb.from_(gl)
+			.select(gl.account_currency)
+			.where(
+				(gl.docstatus == 1)
+				& (gl.company == company)
+				& (gl.party_type == party_type)
+				& (gl.party == party)
+				& (gl.is_cancelled == 0)
+			)
+			.limit(1)
+			.run()
 		)
 
 		return existing_gle_currency[0][0] if existing_gle_currency else None

@@ -8,7 +8,7 @@
   "finance_book",
   "depreciation_method",
   "total_number_of_depreciations",
-  "daily_depreciation",
+  "daily_prorata_based",
   "column_break_5",
   "frequency_of_depreciation",
   "depreciation_start_date",
@@ -83,22 +83,22 @@
    "label": "Rate of Depreciation"
   },
   {
-   "default": "0",
-   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
-   "fieldname": "daily_depreciation",
-   "fieldtype": "Check",
-   "label": "Daily Depreciation"
-  },
-  {
    "fieldname": "salvage_value_percentage",
    "fieldtype": "Percent",
    "label": "Salvage Value Percentage"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
+   "fieldname": "daily_prorata_based",
+   "fieldtype": "Check",
+   "label": "Depreciate based on daily pro-rata"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-09-29 15:39:52.740594",
+ "modified": "2023-11-03 22:21:52.090191",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
