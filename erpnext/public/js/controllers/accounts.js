@@ -28,7 +28,6 @@ frappe.ui.form.on(cur_frm.doctype, {
 					filters: {
 						"account_type": account_type,
 						"company": doc.company,
-						"disabled": 0
 					}
 				}
 			});

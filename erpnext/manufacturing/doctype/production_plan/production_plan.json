@@ -36,6 +36,7 @@
   "prod_plan_references",
   "section_break_24",
   "combine_sub_items",
+  "sub_assembly_warehouse",
   "section_break_ucc4",
   "skip_available_sub_assembly_item",
   "column_break_igxl",
@@ -416,13 +417,19 @@
   {
    "fieldname": "column_break_igxl",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sub_assembly_warehouse",
+   "fieldtype": "Link",
+   "label": "Sub Assembly Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-29 11:41:03.246059",
+ "modified": "2023-11-03 14:08:11.928027",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

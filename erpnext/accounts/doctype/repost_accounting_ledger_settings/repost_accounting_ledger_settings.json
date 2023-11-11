@@ -1,0 +1,46 @@
+{
+ "actions": [],
+ "creation": "2023-11-07 09:57:20.619939",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "allowed_types"
+ ],
+ "fields": [
+  {
+   "fieldname": "allowed_types",
+   "fieldtype": "Table",
+   "label": "Allowed Doctypes",
+   "options": "Repost Allowed Types"
+  }
+ ],
+ "in_create": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-11-07 14:24:13.321522",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Repost Accounting Ledger Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "System Manager",
+   "select": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

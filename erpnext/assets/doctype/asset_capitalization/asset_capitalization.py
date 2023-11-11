@@ -832,12 +832,8 @@ def get_items_tagged_to_wip_composite_asset(asset):
 		"amount",
 	]
 
-	pi_items = frappe.get_all(
-		"Purchase Invoice Item", filters={"wip_composite_asset": asset}, fields=fields
-	)
-
 	pr_items = frappe.get_all(
 		"Purchase Receipt Item", filters={"wip_composite_asset": asset}, fields=fields
 	)
 
-	return pi_items + pr_items
+	return pr_items

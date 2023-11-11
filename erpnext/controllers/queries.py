@@ -560,6 +560,8 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("company"):
 		condition += "and tabAccount.company = %(company)s"
 
+	condition += f"and tabAccount.disabled = {filters.get('disabled', 0)}"
+
 	return frappe.db.sql(
 		"""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"

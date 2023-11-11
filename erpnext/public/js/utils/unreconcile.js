@@ -17,9 +17,9 @@ erpnext.accounts.unreconcile_payments = {
 				},
 				callback: function(r) {
 					if (r.message) {
-						frm.add_custom_button(__("Un-Reconcile"), function() {
+						frm.add_custom_button(__("UnReconcile"), function() {
 							erpnext.accounts.unreconcile_payments.build_unreconcile_dialog(frm);
-						});
+						}, __('Actions'));
 					}
 				}
 			});
@@ -87,11 +87,11 @@ erpnext.accounts.unreconcile_payments = {
 						unreconcile_dialog_fields[0].get_data = function(){ return r.message};
 
 						let d = new frappe.ui.Dialog({
-							title: 'Un-Reconcile Allocations',
+							title: 'UnReconcile Allocations',
 							fields: unreconcile_dialog_fields,
 							size: 'large',
 							cannot_add_rows: true,
-							primary_action_label: 'Un-Reconcile',
+							primary_action_label: 'UnReconcile',
 							primary_action(values) {
 
 								let selected_allocations = values.allocations.filter(x=>x.__checked);

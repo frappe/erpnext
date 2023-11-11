@@ -61,6 +61,7 @@
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
+   "read_only_depends_on": "eval:!doc.__islocal",
    "reqd": 1
   },
   {
@@ -207,7 +208,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2022-02-21 08:08:23.999236",
+ "modified": "2023-11-09 12:17:28.339975",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
