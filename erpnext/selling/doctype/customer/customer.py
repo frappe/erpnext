@@ -310,15 +310,10 @@ def create_contact(contact, party_type, party, email):
 	contact = frappe.get_doc(
 		{
 			"doctype": "Contact",
-<<<<<<< HEAD
-			"first_name": contact[0],
-			"last_name": len(contact) > 1 and contact[1] or "",
-=======
 			"first_name": names[0],
 			"middle_name": len(names) > 2 and " ".join(names[1:-1]) or "",
 			"last_name": len(names) > 1 and names[-1] or "",
 			"is_primary_contact": 1,
->>>>>>> 9fde782403 (fix(customer): contact creation for companies (#38055))
 		}
 	)
 	contact.append("email_ids", dict(email_id=email, is_primary=1))
