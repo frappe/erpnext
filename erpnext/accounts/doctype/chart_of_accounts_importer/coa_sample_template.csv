@@ -1,0 +1,17 @@
+Application Of Funds(Assets),,,,1,,Asset
+Sources Of Funds(Liabilities),,,,1,,Liability
+Equity,,,,1,,Equity
+Expenses,,,,1,Expense Account,Expense
+Income,,,,1,Income Account,Income
+Bank Accounts,Application Of Funds(Assets),,,1,Bank,Asset
+Cash In Hand,Application Of Funds(Assets),,,1,Cash,Asset
+Stock Assets,Application Of Funds(Assets),,,1,Stock,Asset
+Cost Of Goods Sold,Expenses,,,0,Cost of Goods Sold,Expense
+Asset Depreciation,Expenses,,,0,Depreciation,Expense
+Fixed Assets,Application Of Funds(Assets),,,0,Fixed Asset,Asset
+Accounts Payable,Sources Of Funds(Liabilities),,,0,Payable,Liability
+Accounts Receivable,Application Of Funds(Assets),,,1,Receivable,Asset
+Stock Expenses,Expenses,,,0,Stock Adjustment,Expense
+Sample Bank,Bank Accounts,,,0,Bank,Asset
+Cash,Cash In Hand,,,0,Cash,Asset
+Stores,Stock Assets,,,0,Stock,Asset

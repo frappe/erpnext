@@ -8,6 +8,7 @@ from functools import reduce
 
 import frappe
 from frappe import _
+from frappe.desk.form.linked_with import get_linked_fields
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.csvutils import UnicodeWriter
@@ -294,10 +295,8 @@ def build_response_as_excel(writer):
 
 
 @frappe.whitelist()
-def download_template(file_type, template_type):
-	data = frappe._dict(frappe.local.form_dict)
-
-	writer = get_template(template_type)
+def download_template(file_type, template_type, company):
+	writer = get_template(template_type, company)
 
 	if file_type == "CSV":
 		# download csv file
@@ -308,8 +307,7 @@ def download_template(file_type, template_type):
 		build_response_as_excel(writer)
 
 
-def get_template(template_type):
-
+def get_template(template_type, company):
 	fields = [
 		"Account Name",
 		"Parent Account",
@@ -335,34 +333,17 @@ def get_template(template_type):
 				["", "", "", "", 0, account_type.get("account_type"), account_type.get("root_type")]
 			)
 	else:
-		writer = get_sample_template(writer)
+		writer = get_sample_template(writer, company)
 
 	return writer
 
 
-def get_sample_template(writer):
-	template = [
-		["Application Of Funds(Assets)", "", "", "", 1, "", "Asset"],
-		["Sources Of Funds(Liabilities)", "", "", "", 1, "", "Liability"],
-		["Equity", "", "", "", 1, "", "Equity"],
-		["Expenses", "", "", "", 1, "", "Expense"],
-		["Income", "", "", "", 1, "", "Income"],
-		["Bank Accounts", "Application Of Funds(Assets)", "", "", 1, "Bank", "Asset"],
-		["Cash In Hand", "Application Of Funds(Assets)", "", "", 1, "Cash", "Asset"],
-		["Stock Assets", "Application Of Funds(Assets)", "", "", 1, "Stock", "Asset"],
-		["Cost Of Goods Sold", "Expenses", "", "", 0, "Cost of Goods Sold", "Expense"],
-		["Asset Depreciation", "Expenses", "", "", 0, "Depreciation", "Expense"],
-		["Fixed Assets", "Application Of Funds(Assets)", "", "", 0, "Fixed Asset", "Asset"],
-		["Accounts Payable", "Sources Of Funds(Liabilities)", "", "", 0, "Payable", "Liability"],
-		["Accounts Receivable", "Application Of Funds(Assets)", "", "", 1, "Receivable", "Asset"],
-		["Stock Expenses", "Expenses", "", "", 0, "Stock Adjustment", "Expense"],
-		["Sample Bank", "Bank Accounts", "", "", 0, "Bank", "Asset"],
-		["Cash", "Cash In Hand", "", "", 0, "Cash", "Asset"],
-		["Stores", "Stock Assets", "", "", 0, "Stock", "Asset"],
-	]
-
-	for row in template:
-		writer.writerow(row)
+def get_sample_template(writer, company):
+	currency = frappe.db.get_value("Company", company, "default_currency")
+	with open(os.path.join(os.path.dirname(__file__), "coa_sample_template.csv"), "r") as f:
+		for row in f:
+			row = row.strip().split(",") + [currency]
+			writer.writerow(row)
 
 	return writer
 
@@ -453,14 +434,11 @@ def get_mandatory_account_types():
 
 
 def unset_existing_data(company):
-	linked = frappe.db.sql(
-		'''select fieldname from tabDocField
-		where fieldtype="Link" and options="Account" and parent="Company"''',
-		as_dict=True,
-	)
-
 	# remove accounts data from company
-	update_values = {d.fieldname: "" for d in linked}
+
+	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
+	linked = [{"fieldname": name} for name in fieldnames]
+	update_values = {d.get("fieldname"): "" for d in linked}
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
