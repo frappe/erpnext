@@ -6,11 +6,14 @@ from frappe import _
 
 
 @frappe.whitelist()
-def transaction_processing(data, from_doctype, to_doctype):
+def transaction_processing(data, from_doctype, to_doctype, args=None):
 	if isinstance(data, str):
 		deserialized_data = json.loads(data)
 	else:
 		deserialized_data = data
+
+	if isinstance(args, str):
+		args = frappe._dict(json.loads(args))
 
 	length_of_data = len(deserialized_data)
 
@@ -23,13 +26,18 @@ def transaction_processing(data, from_doctype, to_doctype):
 			deserialized_data=deserialized_data,
 			from_doctype=from_doctype,
 			to_doctype=to_doctype,
+			args=args,
 		)
 	else:
-		job(deserialized_data, from_doctype, to_doctype)
+		job(deserialized_data, from_doctype, to_doctype, args)
 
 
-def job(deserialized_data, from_doctype, to_doctype):
+def job(deserialized_data, from_doctype, to_doctype, args):
 	fail_count = 0
+
+	if args:
+		frappe.flags.args = args
+
 	for d in deserialized_data:
 		try:
 			doc_name = d.get("name")
