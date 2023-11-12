@@ -10,7 +10,11 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
-from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+from erpnext.selling.doctype.customer.customer import (
+	get_credit_limit,
+	get_customer_outstanding,
+	parse_full_name,
+)
 from erpnext.tests.utils import create_test_contact_and_address
 
 test_ignore = ["Price List"]
@@ -372,6 +376,22 @@ class TestCustomer(FrappeTestCase):
 		self.assertTrue("territory" in data[0])
 
 		frappe.db.set_value("Selling Settings", None, "cust_master_name", "Customer Name")
+
+	def test_parse_full_name(self):
+		first, middle, last = parse_full_name("John")
+		self.assertEqual(first, "John")
+		self.assertEqual(middle, None)
+		self.assertEqual(last, None)
+
+		first, middle, last = parse_full_name("John Doe")
+		self.assertEqual(first, "John")
+		self.assertEqual(middle, None)
+		self.assertEqual(last, "Doe")
+
+		first, middle, last = parse_full_name("John Michael Doe")
+		self.assertEqual(first, "John")
+		self.assertEqual(middle, "Michael")
+		self.assertEqual(last, "Doe")
 
 
 def get_customer_dict(customer_name):
