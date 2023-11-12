@@ -15,6 +15,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
+from frappe.utils.deprecations import deprecated
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import get_dashboard_info, validate_party_accounts  # noqa
@@ -303,20 +304,22 @@ class Customer(TransactionBase):
 			)
 
 
+@deprecated
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""
-	contact = contact.split(" ")
-
-	contact = frappe.get_doc(
+	first, middle, last = parse_full_name(contact)
+	doc = frappe.get_doc(
 		{
 			"doctype": "Contact",
-			"first_name": contact[0],
-			"last_name": len(contact) > 1 and contact[1] or "",
+			"first_name": first,
+			"middle_name": middle,
+			"last_name": last,
+			"is_primary_contact": 1,
 		}
 	)
-	contact.append("email_ids", dict(email_id=email, is_primary=1))
-	contact.append("links", dict(link_doctype=party_type, link_name=party))
-	contact.insert()
+	doc.append("email_ids", dict(email_id=email, is_primary=1))
+	doc.append("links", dict(link_doctype=party_type, link_name=party))
+	return doc.insert()
 
 
 @frappe.whitelist()
@@ -636,14 +639,28 @@ def get_credit_limit(customer, company):
 
 
 def make_contact(args, is_primary_contact=1):
-	contact = frappe.get_doc(
-		{
-			"doctype": "Contact",
-			"first_name": args.get("customer_name"),
-			"is_primary_contact": is_primary_contact,
-			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
-		}
-	)
+	values = {
+		"doctype": "Contact",
+		"is_primary_contact": is_primary_contact,
+		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
+	}
+	if args.customer_type == "Individual":
+		first, middle, last = parse_full_name(args.get("customer_name"))
+		values.update(
+			{
+				"first_name": first,
+				"middle_name": middle,
+				"last_name": last,
+			}
+		)
+	else:
+		values.update(
+			{
+				"company_name": args.get("customer_name"),
+			}
+		)
+	contact = frappe.get_doc(values)
+
 	if args.get("email_id"):
 		contact.add_email(args.get("email_id"), is_primary=True)
 	if args.get("mobile_no"):
@@ -710,3 +727,13 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
 		.run()
 	)
+
+
+def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:
+	"""Parse full name into first name, middle name and last name"""
+	names = full_name.split()
+	first_name = names[0]
+	middle_name = " ".join(names[1:-1]) if len(names) > 2 else None
+	last_name = names[-1] if len(names) > 1 else None
+
+	return first_name, middle_name, last_name
