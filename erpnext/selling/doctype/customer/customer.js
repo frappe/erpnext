@@ -161,10 +161,9 @@ frappe.ui.form.on("Customer", {
 					{party_type: 'Customer', party: frm.doc.name, party_name: frm.doc.customer_name});
 			}, __('View'));
 
-			frm.add_custom_button(__("Opportunity"), frm.make_methods["Opportunity"], __("Create"));
-			frm.add_custom_button(__("Quotation"), frm.make_methods["Quotation"], __("Create"));
-			frm.add_custom_button(__("Sales Order"), frm.make_methods["Sales Order"], __("Create"));
-			frm.add_custom_button(__("Pricing Rule"), frm.make_methods["Pricing Rule"], __("Create"));
+			for (const doctype in frm.make_methods) {
+				frm.add_custom_button(__(doctype), frm.make_methods[doctype], __("Create"));
+			}
 
 			frm.add_custom_button(__('Get Customer Group Details'), function () {
 				frm.trigger("get_customer_group_details");
