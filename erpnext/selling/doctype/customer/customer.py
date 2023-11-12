@@ -305,13 +305,20 @@ class Customer(TransactionBase):
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""
-	contact = contact.split(" ")
+	names = contact.split(" ")
 
 	contact = frappe.get_doc(
 		{
 			"doctype": "Contact",
+<<<<<<< HEAD
 			"first_name": contact[0],
 			"last_name": len(contact) > 1 and contact[1] or "",
+=======
+			"first_name": names[0],
+			"middle_name": len(names) > 2 and " ".join(names[1:-1]) or "",
+			"last_name": len(names) > 1 and names[-1] or "",
+			"is_primary_contact": 1,
+>>>>>>> 9fde782403 (fix(customer): contact creation for companies (#38055))
 		}
 	)
 	contact.append("email_ids", dict(email_id=email, is_primary=1))
@@ -636,14 +643,28 @@ def get_credit_limit(customer, company):
 
 
 def make_contact(args, is_primary_contact=1):
-	contact = frappe.get_doc(
-		{
-			"doctype": "Contact",
-			"first_name": args.get("customer_name"),
-			"is_primary_contact": is_primary_contact,
-			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
-		}
-	)
+	values = {
+		"doctype": "Contact",
+		"is_primary_contact": is_primary_contact,
+		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
+	}
+	if args.customer_type == "Individual":
+		names = args.get("customer_name").split(" ")
+		values.update(
+			{
+				"first_name": names[0],
+				"middle_name": len(names) > 2 and " ".join(names[1:-1]) or "",
+				"last_name": len(names) > 1 and names[-1] or "",
+			}
+		)
+	else:
+		values.update(
+			{
+				"company_name": args.get("customer_name"),
+			}
+		)
+	contact = frappe.get_doc(values)
+
 	if args.get("email_id"):
 		contact.add_email(args.get("email_id"), is_primary=True)
 	if args.get("mobile_no"):
