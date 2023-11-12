@@ -307,20 +307,19 @@ class Customer(TransactionBase):
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""
-	names = contact.split(" ")
-
-	contact = frappe.get_doc(
+	first, middle, last = parse_full_name(contact)
+	doc = frappe.get_doc(
 		{
 			"doctype": "Contact",
-			"first_name": names[0],
-			"middle_name": len(names) > 2 and " ".join(names[1:-1]) or "",
-			"last_name": len(names) > 1 and names[-1] or "",
+			"first_name": first,
+			"middle_name": middle,
+			"last_name": last,
 			"is_primary_contact": 1,
 		}
 	)
-	contact.append("email_ids", dict(email_id=email, is_primary=1))
-	contact.append("links", dict(link_doctype=party_type, link_name=party))
-	contact.insert()
+	doc.append("email_ids", dict(email_id=email, is_primary=1))
+	doc.append("links", dict(link_doctype=party_type, link_name=party))
+	return doc.insert()
 
 
 @frappe.whitelist()
@@ -692,12 +691,12 @@ def make_contact(args, is_primary_contact=1):
 		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 	}
 	if args.customer_type == "Individual":
-		names = args.get("customer_name").split(" ")
+		first, middle, last = parse_full_name(args.get("customer_name"))
 		values.update(
 			{
-				"first_name": names[0],
-				"middle_name": len(names) > 2 and " ".join(names[1:-1]) or "",
-				"last_name": len(names) > 1 and names[-1] or "",
+				"first_name": first,
+				"middle_name": middle,
+				"last_name": last,
 			}
 		)
 	else:
@@ -763,3 +762,13 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
 		.run()
 	)
+
+
+def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:
+	"""Parse full name into first name, middle name and last name"""
+	names = full_name.split()
+	first_name = names[0]
+	middle_name = " ".join(names[1:-1]) if len(names) > 2 else None
+	last_name = names[-1] if len(names) > 1 else None
+
+	return first_name, middle_name, last_name
