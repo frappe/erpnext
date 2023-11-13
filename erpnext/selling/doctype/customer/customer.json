@@ -134,7 +134,7 @@
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual",
+   "options": "Company\nIndividual\nProprietorship\nPartnership",
    "reqd": 1
   },
   {
@@ -181,7 +181,6 @@
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
    "options": "Customer Group",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -193,8 +192,7 @@
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
    "options": "Territory",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "tax_id",
@@ -586,7 +584,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-09-21 12:23:20.706020",
+ "modified": "2023-10-19 16:56:27.327035",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

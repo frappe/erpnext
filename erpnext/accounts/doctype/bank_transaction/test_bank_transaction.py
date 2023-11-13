@@ -422,6 +422,7 @@ def create_loan_and_repayment():
 
 	create_loan_product(
 		"Personal Loan",
+		"Personal Loan",
 		500000,
 		8.4,
 		is_term_loan=1,

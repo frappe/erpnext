@@ -907,6 +907,8 @@ def create_item(
 	opening_stock=0,
 	is_fixed_asset=0,
 	asset_category=None,
+	buying_cost_center=None,
+	selling_cost_center=None,
 	company="_Test Company",
 ):
 	if not frappe.db.exists("Item", item_code):
@@ -924,7 +926,15 @@ def create_item(
 		item.is_purchase_item = is_purchase_item
 		item.is_customer_provided_item = is_customer_provided_item
 		item.customer = customer or ""
-		item.append("item_defaults", {"default_warehouse": warehouse, "company": company})
+		item.append(
+			"item_defaults",
+			{
+				"default_warehouse": warehouse,
+				"company": company,
+				"selling_cost_center": selling_cost_center,
+				"buying_cost_center": buying_cost_center,
+			},
+		)
 		item.save()
 	else:
 		item = frappe.get_doc("Item", item_code)

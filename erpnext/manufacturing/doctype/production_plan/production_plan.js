@@ -89,10 +89,6 @@ frappe.ui.form.on('Production Plan', {
 			frm.trigger("show_progress");
 
 			if (frm.doc.status !== "Completed") {
-				frm.add_custom_button(__("Work Order Tree"), ()=> {
-					frappe.set_route('Tree', 'Work Order', {production_plan: frm.doc.name});
-				}, __('View'));
-
 				frm.add_custom_button(__("Production Plan Summary"), ()=> {
 					frappe.set_route('query-report', 'Production Plan Summary', {production_plan: frm.doc.name});
 				}, __('View'));

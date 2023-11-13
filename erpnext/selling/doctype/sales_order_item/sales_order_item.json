@@ -68,6 +68,7 @@
   "total_weight",
   "column_break_21",
   "weight_uom",
+  "accounting_dimensions_section",
   "warehouse_and_reference",
   "warehouse",
   "target_warehouse",
@@ -162,7 +163,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -890,12 +890,18 @@
    "label": "Production Plan Qty",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-28 14:56:42.031636",
+ "modified": "2023-10-17 18:18:26.475259",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

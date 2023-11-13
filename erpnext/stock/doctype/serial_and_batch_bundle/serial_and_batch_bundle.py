@@ -121,7 +121,7 @@ class SerialandBatchBundle(Document):
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception, title=_("Error"))
 
-	def set_incoming_rate(self, row=None, save=False):
+	def set_incoming_rate(self, row=None, save=False, allow_negative_stock=False):
 		if self.type_of_transaction not in ["Inward", "Outward"] or self.voucher_type in [
 			"Installation Note",
 			"Job Card",
@@ -131,7 +131,9 @@ class SerialandBatchBundle(Document):
 			return
 
 		if self.type_of_transaction == "Outward":
-			self.set_incoming_rate_for_outward_transaction(row, save)
+			self.set_incoming_rate_for_outward_transaction(
+				row, save, allow_negative_stock=allow_negative_stock
+			)
 		else:
 			self.set_incoming_rate_for_inward_transaction(row, save)
 
@@ -152,7 +154,9 @@ class SerialandBatchBundle(Document):
 	def get_serial_nos(self):
 		return [d.serial_no for d in self.entries if d.serial_no]
 
-	def set_incoming_rate_for_outward_transaction(self, row=None, save=False):
+	def set_incoming_rate_for_outward_transaction(
+		self, row=None, save=False, allow_negative_stock=False
+	):
 		sle = self.get_sle_for_outward_transaction()
 
 		if self.has_serial_no:
@@ -181,7 +185,8 @@ class SerialandBatchBundle(Document):
 				if self.docstatus == 1:
 					available_qty += flt(d.qty)
 
-				self.validate_negative_batch(d.batch_no, available_qty)
+				if not allow_negative_stock:
+					self.validate_negative_batch(d.batch_no, available_qty)
 
 			d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 
@@ -658,7 +663,7 @@ class SerialandBatchBundle(Document):
 		if not available_batches:
 			return
 
-		available_batches = get_availabel_batches_qty(available_batches)
+		available_batches = get_available_batches_qty(available_batches)
 		for batch_no in batches:
 			if batch_no not in available_batches or available_batches[batch_no] < 0:
 				self.throw_error_message(
@@ -1074,7 +1079,7 @@ def get_auto_data(**kwargs):
 		return get_auto_batch_nos(kwargs)
 
 
-def get_availabel_batches_qty(available_batches):
+def get_available_batches_qty(available_batches):
 	available_batches_qty = defaultdict(float)
 	for batch in available_batches:
 		available_batches_qty[batch.batch_no] += batch.qty
@@ -1301,6 +1306,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 		"POS Invoice",
 		fields=[
 			"`tabPOS Invoice Item`.batch_no",
+			"`tabPOS Invoice Item`.qty",
 			"`tabPOS Invoice`.is_return",
 			"`tabPOS Invoice Item`.warehouse",
 			"`tabPOS Invoice Item`.name as child_docname",
@@ -1321,9 +1327,6 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 		if pos_invoice.serial_and_batch_bundle
 	]
 
-	if not ids:
-		return {}
-
 	if ids:
 		for d in get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
 			key = (d.batch_no, d.warehouse)
@@ -1337,6 +1340,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			else:
 				pos_batches[key].qty += d.qty
 
+	# POS invoices having batch without bundle (to handle old POS invoices)
 	for row in pos_invoices:
 		if not row.batch_no:
 			continue
@@ -1346,11 +1350,11 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 		key = (row.batch_no, row.warehouse)
 		if key in pos_batches:
-			pos_batches[key] -= row.qty * -1 if row.is_return else row.qty
+			pos_batches[key]["qty"] -= row.qty * -1 if row.is_return else row.qty
 		else:
 			pos_batches[key] = frappe._dict(
 				{
-					"qty": (row.qty * -1 if row.is_return else row.qty),
+					"qty": (row.qty * -1 if not row.is_return else row.qty),
 					"warehouse": row.warehouse,
 				}
 			)
