@@ -60,6 +60,7 @@ class InventoryDimension(Document):
 			"fetch_from_parent",
 			"type_of_transaction",
 			"condition",
+			"validate_negative_stock",
 		]
 
 		for field in frappe.get_meta("Inventory Dimension").fields:
@@ -160,6 +161,7 @@ class InventoryDimension(Document):
 				insert_after="inventory_dimension",
 				options=self.reference_document,
 				label=label,
+				search_index=1,
 				reqd=self.reqd,
 				mandatory_depends_on=self.mandatory_depends_on,
 			),
@@ -255,7 +257,7 @@ def field_exists(doctype, fieldname) -> str or None:
 def get_inventory_documents(
 	doctype=None, txt=None, searchfield=None, start=None, page_len=None, filters=None
 ):
-	and_filters = [["DocField", "parent", "not in", ["Batch", "Serial No"]]]
+	and_filters = [["DocField", "parent", "not in", ["Batch", "Serial No", "Item Price"]]]
 	or_filters = [
 		["DocField", "options", "in", ["Batch", "Serial No"]],
 		["DocField", "parent", "in", ["Putaway Rule"]],
@@ -340,6 +342,7 @@ def get_inventory_dimensions():
 			fields=[
 				"distinct target_fieldname as fieldname",
 				"reference_document as doctype",
+				"validate_negative_stock",
 			],
 			filters={"disabled": 0},
 		)

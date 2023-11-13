@@ -134,7 +134,7 @@
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual",
+   "options": "Company\nIndividual\nProprietorship\nPartnership",
    "reqd": 1
   },
   {
@@ -584,7 +584,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-09-21 12:23:20.706020",
+ "modified": "2023-10-19 16:56:27.327035",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

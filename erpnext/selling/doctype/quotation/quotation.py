@@ -26,7 +26,6 @@ class Quotation(SellingController):
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_valid_till()
-		self.validate_shopping_cart_items()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -41,26 +40,6 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
-
-	def validate_shopping_cart_items(self):
-		if self.order_type != "Shopping Cart":
-			return
-
-		for item in self.items:
-			has_web_item = frappe.db.exists("Website Item", {"item_code": item.item_code})
-
-			# If variant is unpublished but template is published: valid
-			template = frappe.get_cached_value("Item", item.item_code, "variant_of")
-			if template and not has_web_item:
-				has_web_item = frappe.db.exists("Website Item", {"item_code": template})
-
-			if not has_web_item:
-				frappe.throw(
-					_("Row #{0}: Item {1} must have a Website Item for Shopping Cart Quotations").format(
-						item.idx, frappe.bold(item.item_code)
-					),
-					title=_("Unpublished Item"),
-				)
 
 	def set_has_alternative_item(self):
 		"""Mark 'Has Alternative Item' for rows."""
@@ -263,8 +242,8 @@ def make_sales_order(source_name: str, target_doc=None):
 	return _make_sales_order(source_name, target_doc)
 
 
-def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
-	customer = _make_customer(source_name, ignore_permissions)
+def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_permissions=False):
+	customer = _make_customer(source_name, ignore_permissions, customer_group)
 	ordered_items = frappe._dict(
 		frappe.db.get_all(
 			"Sales Order Item",
@@ -428,7 +407,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 
-def _make_customer(source_name, ignore_permissions=False):
+def _make_customer(source_name, ignore_permissions=False, customer_group=None):
 	quotation = frappe.db.get_value(
 		"Quotation", source_name, ["order_type", "party_name", "customer_name"], as_dict=1
 	)
@@ -445,10 +424,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 				customer = frappe.get_doc(customer_doclist)
 				customer.flags.ignore_permissions = ignore_permissions
-				if quotation.get("party_name") == "Shopping Cart":
-					customer.customer_group = frappe.db.get_value(
-						"E Commerce Settings", None, "default_customer_group"
-					)
+				customer.customer_group = customer_group
 
 				try:
 					customer.insert()

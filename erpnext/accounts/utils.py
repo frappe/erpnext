@@ -10,7 +10,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	cint,
@@ -536,6 +536,8 @@ def check_if_advance_entry_modified(args):
 		)
 
 	else:
+		precision = frappe.get_precision("Payment Entry", "unallocated_amount")
+
 		payment_entry = frappe.qb.DocType("Payment Entry")
 		payment_ref = frappe.qb.DocType("Payment Entry Reference")
 
@@ -557,7 +559,10 @@ def check_if_advance_entry_modified(args):
 				.where(payment_ref.allocated_amount == args.get("unreconciled_amount"))
 			)
 		else:
-			q = q.where(payment_entry.unallocated_amount == args.get("unreconciled_amount"))
+			q = q.where(
+				Round(payment_entry.unallocated_amount, precision)
+				== Round(args.get("unreconciled_amount"), precision)
+			)
 
 	ret = q.run(as_dict=True)
 
@@ -645,7 +650,7 @@ def update_reference_in_payment_entry(
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
 		"exchange_rate": d.exchange_rate if d.exchange_gain_loss else payment_entry.get_exchange_rate(),
-		"exchange_gain_loss": d.exchange_gain_loss,  # only populated from invoice in case of advance allocation
+		"exchange_gain_loss": d.exchange_gain_loss,
 		"account": d.account,
 	}
 
@@ -658,28 +663,29 @@ def update_reference_in_payment_entry(
 				existing_row.reference_doctype, existing_row.reference_name
 			).set_total_advance_paid()
 
-		original_row = existing_row.as_dict().copy()
-		existing_row.update(reference_details)
+		if d.allocated_amount <= existing_row.allocated_amount:
+			existing_row.allocated_amount -= d.allocated_amount
 
-		if d.allocated_amount < original_row.allocated_amount:
 			new_row = payment_entry.append("references")
 			new_row.docstatus = 1
 			for field in list(reference_details):
-				new_row.set(field, original_row[field])
+				new_row.set(field, reference_details[field])
 
-			new_row.allocated_amount = original_row.allocated_amount - d.allocated_amount
 	else:
 		new_row = payment_entry.append("references")
 		new_row.docstatus = 1
 		new_row.update(reference_details)
 
 	payment_entry.flags.ignore_validate_update_after_submit = True
+	payment_entry.clear_unallocated_reference_document_rows()
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
-	payment_entry.make_exchange_gain_loss_journal()
+	payment_entry.make_exchange_gain_loss_journal(
+		frappe._dict({"difference_posting_date": d.difference_posting_date})
+	)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
@@ -2040,3 +2046,7 @@ def create_gain_loss_journal(
 	journal_entry.save()
 	journal_entry.submit()
 	return journal_entry.name
+
+
+def get_party_types_from_account_type(account_type):
+	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")

@@ -186,6 +186,8 @@ class Customer(TransactionBase):
 				self.db_set("customer_primary_contact", contact.name)
 				self.db_set("mobile_no", self.mobile_no)
 				self.db_set("email_id", self.email_id)
+		elif self.customer_primary_contact:
+			frappe.set_value("Contact", self.customer_primary_contact, "is_primary_contact", 1)  # ensure
 
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display
@@ -196,6 +198,8 @@ class Customer(TransactionBase):
 
 			self.db_set("customer_primary_address", address.name)
 			self.db_set("primary_address", address_display)
+		elif self.customer_primary_address:
+			frappe.set_value("Address", self.customer_primary_address, "is_primary_address", 1)  # ensure
 
 	def update_lead_status(self):
 		"""If Customer created from Lead, update lead status to "Converted"
@@ -301,22 +305,6 @@ class Customer(TransactionBase):
 					frappe.bold(self.customer_name)
 				)
 			)
-
-
-def create_contact(contact, party_type, party, email):
-	"""Create contact based on given contact name"""
-	contact = contact.split(" ")
-
-	contact = frappe.get_doc(
-		{
-			"doctype": "Contact",
-			"first_name": contact[0],
-			"last_name": len(contact) > 1 and contact[1] or "",
-		}
-	)
-	contact.append("email_ids", dict(email_id=email, is_primary=1))
-	contact.append("links", dict(link_doctype=party_type, link_name=party))
-	contact.insert()
 
 
 @frappe.whitelist()
@@ -495,6 +483,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				primary_action={
 					"label": "Send Email",
 					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
+					"hide_on_success": True,
 					"args": {
 						"customer": customer,
 						"customer_outstanding": customer_outstanding,
@@ -635,24 +624,42 @@ def get_credit_limit(customer, company):
 
 
 def make_contact(args, is_primary_contact=1):
-	contact = frappe.get_doc(
-		{
-			"doctype": "Contact",
-			"first_name": args.get("name"),
-			"is_primary_contact": is_primary_contact,
-			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
-		}
-	)
+	values = {
+		"doctype": "Contact",
+		"is_primary_contact": is_primary_contact,
+		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
+	}
+	if args.customer_type == "Individual":
+		first, middle, last = parse_full_name(args.get("customer_name"))
+		values.update(
+			{
+				"first_name": first,
+				"middle_name": middle,
+				"last_name": last,
+			}
+		)
+	else:
+		values.update(
+			{
+				"company_name": args.get("customer_name"),
+			}
+		)
+	contact = frappe.get_doc(values)
+
 	if args.get("email_id"):
 		contact.add_email(args.get("email_id"), is_primary=True)
 	if args.get("mobile_no"):
 		contact.add_phone(args.get("mobile_no"), is_primary_mobile_no=True)
-	contact.insert()
+
+	if flags := args.get("flags"):
+		contact.insert(ignore_permissions=flags.get("ignore_permissions"))
+	else:
+		contact.insert()
 
 	return contact
 
 
-def make_address(args, is_primary_address=1):
+def make_address(args, is_primary_address=1, is_shipping_address=1):
 	reqd_fields = []
 	for field in ["city", "country"]:
 		if not args.get(field):
@@ -668,16 +675,23 @@ def make_address(args, is_primary_address=1):
 	address = frappe.get_doc(
 		{
 			"doctype": "Address",
-			"address_title": args.get("name"),
+			"address_title": args.get("customer_name"),
 			"address_line1": args.get("address_line1"),
 			"address_line2": args.get("address_line2"),
 			"city": args.get("city"),
 			"state": args.get("state"),
 			"pincode": args.get("pincode"),
 			"country": args.get("country"),
+			"is_primary_address": is_primary_address,
+			"is_shipping_address": is_shipping_address,
 			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 		}
-	).insert()
+	)
+
+	if flags := args.get("flags"):
+		address.insert(ignore_permissions=flags.get("ignore_permissions"))
+	else:
+		address.insert()
 
 	return address
 
@@ -698,3 +712,13 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
 		.run()
 	)
+
+
+def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:
+	"""Parse full name into first name, middle name and last name"""
+	names = full_name.split()
+	first_name = names[0]
+	middle_name = " ".join(names[1:-1]) if len(names) > 2 else None
+	last_name = names[-1] if len(names) > 1 else None
+
+	return first_name, middle_name, last_name

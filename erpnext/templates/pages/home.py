@@ -10,11 +10,6 @@ no_cache = 1
 def get_context(context):
 	homepage = frappe.get_cached_doc("Homepage")
 
-	for item in homepage.products:
-		route = frappe.db.get_value("Website Item", {"item_code": item.item_code}, "route")
-		if route:
-			item.route = "/" + route
-
 	homepage.title = homepage.title or homepage.company
 	context.title = homepage.title
 	context.homepage = homepage
@@ -52,5 +47,3 @@ def get_context(context):
 	context.metatags = context.metatags or frappe._dict({})
 	context.metatags.image = homepage.hero_image or None
 	context.metatags.description = homepage.description or None
-
-	context.explore_link = "/all-products"
