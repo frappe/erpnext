@@ -828,8 +828,6 @@ class ProductionPlan(Document):
 			# Combine subassembly items
 			sub_assembly_items_store = self.combine_subassembly_items(sub_assembly_items_store)
 
-		sub_assembly_items_store.sort(key=lambda d: d.bom_level, reverse=True)  # sort by bom level
-
 		for idx, row in enumerate(sub_assembly_items_store):
 			row.idx = idx + 1
 			self.append("sub_assembly_items", row)

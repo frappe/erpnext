@@ -664,49 +664,6 @@ class TestProductionPlan(FrappeTestCase):
 
 		frappe.db.rollback()
 
-	def test_subassmebly_sorting(self):
-		"Test subassembly sorting in case of multiple items with nested BOMs."
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-
-		prefix = "_TestLevel_"
-		boms = {
-			"Assembly": {
-				"SubAssembly1": {
-					"ChildPart1": {},
-					"ChildPart2": {},
-				},
-				"ChildPart6": {},
-				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
-			},
-			"MegaDeepAssy": {
-				"SecretSubassy": {
-					"SecretPart": {"VerySecret": {"SuperSecret": {"Classified": {}}}},
-				},
-				# ^ assert that this is
-				# first item in subassy table
-			},
-		}
-		create_nested_bom(boms, prefix=prefix)
-
-		items = [prefix + item_code for item_code in boms.keys()]
-		plan = create_production_plan(item_code=items[0], do_not_save=True)
-		plan.append(
-			"po_items",
-			{
-				"use_multi_level_bom": 1,
-				"item_code": items[1],
-				"bom_no": frappe.db.get_value("Item", items[1], "default_bom"),
-				"planned_qty": 1,
-				"planned_start_date": now_datetime(),
-			},
-		)
-		plan.get_sub_assembly_items()
-
-		bom_level_order = [d.bom_level for d in plan.sub_assembly_items]
-		self.assertEqual(bom_level_order, sorted(bom_level_order, reverse=True))
-		# lowest most level of subassembly should be first
-		self.assertIn("SuperSecret", plan.sub_assembly_items[0].production_item)
-
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
