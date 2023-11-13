@@ -365,7 +365,7 @@ class BuyingController(SubcontractingController):
 						{
 							"item_code": d.item_code,
 							"warehouse": d.get("from_warehouse"),
-							"posting_date": self.get("posting_date") or self.get("transation_date"),
+							"posting_date": self.get("posting_date") or self.get("transaction_date"),
 							"posting_time": posting_time,
 							"qty": -1 * flt(d.get("stock_qty")),
 							"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
