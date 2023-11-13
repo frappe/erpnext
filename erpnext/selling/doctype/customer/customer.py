@@ -307,23 +307,6 @@ class Customer(TransactionBase):
 			)
 
 
-def create_contact(contact, party_type, party, email):
-	"""Create contact based on given contact name"""
-	first, middle, last = parse_full_name(contact)
-	doc = frappe.get_doc(
-		{
-			"doctype": "Contact",
-			"first_name": first,
-			"middle_name": middle,
-			"last_name": last,
-			"is_primary_contact": 1,
-		}
-	)
-	doc.append("email_ids", dict(email_id=email, is_primary=1))
-	doc.append("links", dict(link_doctype=party_type, link_name=party))
-	return doc.insert()
-
-
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
