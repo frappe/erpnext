@@ -14,7 +14,7 @@ frappe.ui.form.on("Bulk Transaction Log", {
 				frappe.call({
 					method: "erpnext.utilities.bulk_transaction.retry",
 					args: {date: frm.doc.date}
-				}).then(()=> {	});
+				});
 			});
 		}
 	},
