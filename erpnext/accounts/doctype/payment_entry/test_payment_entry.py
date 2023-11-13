@@ -6,10 +6,11 @@ import unittest
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import flt, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	InvalidPaymentEntry,
+	get_outstanding_reference_documents,
 	get_payment_entry,
 	get_reference_details,
 )
@@ -683,17 +684,6 @@ class TestPaymentEntry(FrappeTestCase):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_payment_against_negative_sales_invoice(self):
-		pe1 = frappe.new_doc("Payment Entry")
-		pe1.payment_type = "Pay"
-		pe1.company = "_Test Company"
-		pe1.party_type = "Customer"
-		pe1.party = "_Test Customer"
-		pe1.paid_from = "_Test Cash - _TC"
-		pe1.paid_amount = 100
-		pe1.received_amount = 100
-
-		self.assertRaises(InvalidPaymentEntry, pe1.validate)
-
 		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
@@ -751,8 +741,6 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# pay more than outstanding against si1
 		pe3 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
-		pe3.paid_amount = pe3.received_amount = 300
-		self.assertRaises(InvalidPaymentEntry, pe3.validate)
 
 		# pay negative outstanding against si1
 		pe3.paid_to = "Debtors - _TC"
@@ -1262,6 +1250,78 @@ class TestPaymentEntry(FrappeTestCase):
 		so.reload()
 		self.assertEqual(so.advance_paid, so.rounded_total)
 
+	def test_outstanding_invoices_api(self):
+		"""
+		Test if `get_outstanding_reference_documents` fetches invoices in the right order.
+		"""
+		customer = create_customer("Max Mustermann", "INR")
+		create_payment_terms_template()
+
+		# SI has an earlier due date and SI2 has a later due date
+		si = create_sales_invoice(
+			qty=1, rate=100, customer=customer, posting_date=add_days(nowdate(), -4)
+		)
+		si2 = create_sales_invoice(do_not_save=1, qty=1, rate=100, customer=customer)
+		si2.payment_terms_template = "Test Receivable Template"
+		si2.submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"payment_type": "Pay",
+			"party": customer,
+			"party_account": "Debtors - _TC",
+		}
+		args.update(
+			{
+				"get_outstanding_invoices": True,
+				"from_posting_date": add_days(nowdate(), -4),
+				"to_posting_date": add_days(nowdate(), 2),
+			}
+		)
+		references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(len(references), 3)
+		self.assertEqual(references[0].voucher_no, si.name)
+		self.assertEqual(references[1].voucher_no, si2.name)
+		self.assertEqual(references[2].voucher_no, si2.name)
+		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
+		self.assertEqual(references[2].payment_term, "Tax Receivable")
+
+	def test_receive_payment_from_payable_party_type(self):
+		pe = create_payment_entry(
+			party_type="Supplier",
+			party="_Test Supplier",
+			payment_type="Receive",
+			paid_from="Creditors - _TC",
+			paid_to="_Test Cash - _TC",
+			save=True,
+			submit=True,
+		)
+		self.voucher_no = pe.name
+		self.expected_gle = [
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+			{"account": "Creditors - _TC", "debit": 0.0, "credit": 1000.0},
+		]
+		self.check_gl_entries()
+
+	def check_gl_entries(self):
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(
+				gle.account,
+				gle.debit,
+				gle.credit,
+			)
+			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
+			.orderby(gle.account)
+		).run(as_dict=True)
+		for row in range(len(self.expected_gle)):
+			for field in ["account", "debit", "credit"]:
+				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
@@ -1322,6 +1382,9 @@ def create_payment_terms_template():
 def create_payment_terms_template_with_discount(
 	name=None, discount_type=None, discount=None, template_name=None
 ):
+	"""
+	Create a Payment Terms Template with %  or amount discount.
+	"""
 	create_payment_term(name or "30 Credit Days with 10% Discount")
 	template_name = template_name or "Test Discount Template"
 

@@ -548,6 +548,14 @@ erpnext.PointOfSale.Controller = class {
 				if (!item_code)
 					return;
 
+				if (rate == undefined || rate == 0) {
+					frappe.show_alert({
+						message: __('Price is not set for the item.'),
+						indicator: 'orange'
+					});
+					frappe.utils.play_sound("error");
+					return;
+				}
 				const new_item = { item_code, batch_no, rate, uom, [field]: value };
 
 				if (serial_no) {

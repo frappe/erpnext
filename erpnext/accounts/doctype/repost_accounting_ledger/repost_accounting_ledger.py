@@ -10,9 +10,12 @@ from frappe.utils.data import comma_and
 class RepostAccountingLedger(Document):
 	def __init__(self, *args, **kwargs):
 		super(RepostAccountingLedger, self).__init__(*args, **kwargs)
-		self._allowed_types = set(
-			["Purchase Invoice", "Sales Invoice", "Payment Entry", "Journal Entry"]
-		)
+		self._allowed_types = [
+			x.document_type
+			for x in frappe.db.get_all(
+				"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
+			)
+		]
 
 	def validate(self):
 		self.validate_vouchers()
@@ -157,7 +160,7 @@ def start_repost(account_repost_doc=str) -> None:
 					doc.docstatus = 1
 					doc.make_gl_entries()
 
-				elif doc.doctype in ["Payment Entry", "Journal Entry"]:
+				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
 					if not repost_doc.delete_cancelled_entries:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
@@ -186,3 +189,18 @@ def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
 				frappe.bold(comma_and([x[0] for x in docs_with_deferred_expense + docs_with_deferred_revenue]))
 			)
 		)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_repost_allowed_types(doctype, txt, searchfield, start, page_len, filters):
+	filters = {"allowed": True}
+
+	if txt:
+		filters.update({"document_type": ("like", f"%{txt}%")})
+
+	if allowed_types := frappe.db.get_all(
+		"Repost Allowed Types", filters=filters, fields=["distinct(document_type)"], as_list=1
+	):
+		return allowed_types
+	return []
