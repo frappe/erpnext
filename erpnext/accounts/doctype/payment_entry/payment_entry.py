@@ -1074,9 +1074,7 @@ class PaymentEntry(AccountsController):
 
 				reverse_dr_or_cr, standalone_note = 0, 0
 				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
-					is_return, return_against = frappe.db.get_value(
-						d.reference_doctype, d.reference_name, ["is_return", "return_against"]
-					)
+					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
 					payable_party_types = get_party_types_from_account_type("Payable")
 					receivable_party_types = get_party_types_from_account_type("Receivable")
 					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
@@ -1086,7 +1084,7 @@ class PaymentEntry(AccountsController):
 					):
 						reverse_dr_or_cr = 1
 
-					if is_return and not return_against and not reverse_dr_or_cr:
+					if is_return and not reverse_dr_or_cr:
 						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 				gle.update(
