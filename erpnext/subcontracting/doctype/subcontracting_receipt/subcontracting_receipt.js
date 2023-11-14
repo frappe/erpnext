@@ -13,6 +13,16 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		frm.trigger('set_queries');
 	},
 
+	on_submit(frm) {
+		frm.events.refresh_serial_batch_bundle_field(frm);
+	},
+
+	refresh_serial_batch_bundle_field(frm) {
+		frappe.route_hooks.after_submit = (frm_obj) => {
+			frm_obj.reload_doc();
+		}
+	},
+
 	refresh: (frm) => {
 		if (frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Stock Ledger'), () => {
