@@ -114,10 +114,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname": "customer_group",
+			"fieldname":"customer_group",
 			"label": __("Customer Group"),
-			"fieldtype": "Link",
-			"options": "Customer Group"
+			"fieldtype": "MultiSelectList",
+			"options": "Customer Group",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Customer Group', txt);
+			}
 		},
 		{
 			"fieldname": "payment_terms_template",
