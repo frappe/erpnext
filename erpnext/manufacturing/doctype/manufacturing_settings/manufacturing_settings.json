@@ -31,6 +31,7 @@
   "job_card_excess_transfer",
   "other_settings_section",
   "update_bom_costs_automatically",
+  "update_default_bom_automatically",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
  ],
@@ -194,13 +195,20 @@
    "fieldname": "job_card_excess_transfer",
    "fieldtype": "Check",
    "label": "Allow Excess Material Transfer"
+  },
+  {
+   "default": "0",
+   "description": "Run an update task in the background to update related BOMs every time the default BOM is changed for an Item",
+   "fieldname": "update_default_bom_automatically",
+   "fieldtype": "Check",
+   "label": "Update Default BOM Automatically"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 22:09:09.401559",
+ "modified": "2023-11-13 20:51:57.136958",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
@@ -216,5 +224,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
