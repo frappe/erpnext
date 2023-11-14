@@ -137,6 +137,7 @@
    "width": "300px"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -668,7 +669,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-09-27 14:02:12.332407",
+ "modified": "2023-11-14 18:24:24.619832",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",
