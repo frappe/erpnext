@@ -129,7 +129,9 @@ class SerialBatchBundle:
 			frappe.throw(_(error_msg))
 
 	def set_serial_and_batch_bundle(self, sn_doc):
-		self.sle.db_set("serial_and_batch_bundle", sn_doc.name)
+		self.sle.db_set(
+			{"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1}
+		)
 
 		if sn_doc.is_rejected:
 			frappe.db.set_value(
@@ -143,6 +145,12 @@ class SerialBatchBundle:
 	@property
 	def child_doctype(self):
 		child_doctype = self.sle.voucher_type + " Item"
+
+		if (
+			self.sle.voucher_type == "Subcontracting Receipt" and self.sle.dependant_sle_voucher_detail_no
+		):
+			child_doctype = "Subcontracting Receipt Supplied Item"
+
 		if self.sle.voucher_type == "Stock Entry":
 			child_doctype = "Stock Entry Detail"
 
