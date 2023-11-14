@@ -156,6 +156,7 @@
    "width": "300px"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -890,7 +891,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-10-03 21:01:01.824892",
+ "modified": "2023-11-14 18:33:48.547297",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
