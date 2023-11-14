@@ -576,6 +576,97 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
 
+	def test_subcontracting_receipt_valuation_with_auto_created_serial_batch_bundle(self):
+		set_backflush_based_on("BOM")
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item1 = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BNGS-.####",
+			}
+		).name
+
+		rm_item2 = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"has_serial_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BNGS-.####",
+				"serial_no_series": "BNSS-.####",
+			}
+		).name
+
+		rm_item3 = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "BSSSS-.####",
+			}
+		).name
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2, rm_item3])
+
+		rm_batch_no = None
+		for row in bom.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				qty=1,
+				target="_Test Warehouse 1 - _TC",
+				rate=300,
+			)
+
+			make_stock_entry(
+				item_code=row.item_code,
+				qty=1,
+				target="_Test Warehouse 1 - _TC",
+				rate=400,
+			)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 1,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		for row in scr.supplied_items:
+			self.assertNotEqual(row.rate, 300.00)
+			self.assertFalse(row.serial_and_batch_bundle)
+
+		scr.submit()
+		scr.reload()
+
+		for row in scr.supplied_items:
+			self.assertEqual(row.rate, 300.00)
+			self.assertTrue(row.serial_and_batch_bundle)
+			auto_created_serial_batch = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": scr.name, "voucher_detail_no": row.name},
+				"auto_created_serial_and_batch_bundle",
+			)
+
+			self.assertTrue(auto_created_serial_batch)
+
+		self.assertEqual(scr.items[0].rm_cost_per_qty, 900)
+		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0
+		)
+
 	def test_subcontracting_receipt_raw_material_rate(self):
 		# Step - 1: Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")
