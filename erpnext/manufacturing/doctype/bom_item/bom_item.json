@@ -111,6 +111,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -289,7 +290,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-28 10:20:51.559010",
+ "modified": "2023-11-14 18:35:51.378513",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
