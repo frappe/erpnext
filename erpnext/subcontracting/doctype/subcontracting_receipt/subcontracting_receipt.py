@@ -148,6 +148,8 @@ class SubcontractingReceipt(SubcontractingController):
 		if (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "BOM"
+			and self.supplied_items
+			and not any(item.serial_and_batch_bundle for item in self.supplied_items)
 		):
 			self.supplied_items = []
 
