@@ -98,6 +98,7 @@ def task(doc_name, from_doctype, to_doctype):
 		},
 		"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice},
 	}
+	frappe.flags.bulk_transaction = True
 	if to_doctype in ["Payment Entry"]:
 		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)
 	else:
@@ -106,6 +107,7 @@ def task(doc_name, from_doctype, to_doctype):
 	obj.flags.ignore_validate = True
 	obj.set_title_field()
 	obj.insert(ignore_mandatory=True)
+	del frappe.flags.bulk_transaction
 
 
 def check_logger_doc_exists(log_date):
