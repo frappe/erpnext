@@ -626,6 +626,18 @@ class SubcontractingController(StockController):
 						(row.item_code, row.get(self.subcontract_data.order_field))
 					] -= row.qty
 
+	def __set_rate_for_serial_and_batch_bundle(self):
+		if self.doctype != "Subcontracting Receipt":
+			return
+
+		for row in self.get(self.raw_material_table):
+			if not row.get("serial_and_batch_bundle"):
+				continue
+
+			row.rate = frappe.get_cached_value(
+				"Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"
+			)
+
 	def __modify_serial_and_batch_bundle(self):
 		if self.is_new():
 			return
@@ -681,6 +693,7 @@ class SubcontractingController(StockController):
 		self.__remove_changed_rows()
 		self.__set_supplied_items()
 		self.__modify_serial_and_batch_bundle()
+		self.__set_rate_for_serial_and_batch_bundle()
 
 	def __validate_batch_no(self, row, key):
 		if row.get("batch_no") and row.get("batch_no") not in self.__transferred_items.get(key).get(
