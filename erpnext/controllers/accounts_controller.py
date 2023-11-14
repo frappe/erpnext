@@ -914,10 +914,14 @@ class AccountsController(TransactionBase):
 			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_qty_is_not_zero(self):
-		if self.doctype != "Purchase Receipt":
-			for item in self.items:
-				if not item.qty:
-					frappe.throw(_("Item quantity can not be zero"), ZeroQuantityError)
+		for item in self.items:
+			if self.doctype == "Purchase Receipt" and item.rejected_qty:
+				continue
+			if not item.qty:
+				message = _("Row # {0}: Quantity for Item {1} cannot be zero").format(
+					item.idx, frappe.bold(item.item_code)
+				)
+				frappe.throw(message, ZeroQuantityError, title=_("Invalid Quantity"))
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]

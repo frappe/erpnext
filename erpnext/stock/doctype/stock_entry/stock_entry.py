@@ -24,7 +24,6 @@ from frappe.utils import (
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
-from erpnext.controllers.accounts_controller import ZeroQuantityError
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, validate_bom_no
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -313,10 +312,8 @@ class StockEntry(StockController):
 				frappe.delete_doc("Stock Entry", d.name)
 
 	def set_transfer_qty(self):
+		self.validate_qty_is_not_zero()
 		for item in self.get("items"):
-			if not flt(item.qty):
-				message = _("Row {0}: Qty is mandatory").format(item.idx)
-				frappe.throw(message, ZeroQuantityError, title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(
