@@ -348,13 +348,13 @@ class Item(Document):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
 								item_barcode.barcode, item_barcode.barcode_type), InvalidBarcode)
 
-					if item_barcode.barcode != item_barcode.name:
-						# if barcode is getting updated , the row name has to reset.
-						# Delete previous old row doc and re-enter row as if new to reset name in db.
-						item_barcode.set("__islocal", True)
-						item_barcode_entry_name = item_barcode.name
-						item_barcode.name = None
-						frappe.delete_doc("Item Barcode", item_barcode_entry_name)
+					# if item_barcode.barcode != item_barcode.name:
+					# 	# if barcode is getting updated , the row name has to reset.
+					# 	# Delete previous old row doc and re-enter row as if new to reset name in db.
+					# 	item_barcode.set("__islocal", True)
+					# 	item_barcode_entry_name = item_barcode.name
+					# 	item_barcode.name = None
+					# 	frappe.delete_doc("Item Barcode", item_barcode_entry_name)
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
