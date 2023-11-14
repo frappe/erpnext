@@ -143,6 +143,24 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
+
+	def show_create_job_card_button(self):
+		operation_details = frappe._dict(
+			frappe.get_all(
+				"Job Card",
+				fields=["operation", "for_quantity"],
+				filters={"docstatus": ("<", 2), "work_order": self.name},
+				as_list=1,
+			)
+		)
+
+		for d in self.operations:
+			job_card_qty = self.qty - flt(operation_details.get(d.operation))
+			if job_card_qty > 0:
+				return True
+
+		return False
 
 	def validate(self):
 		self.validate_production_item()
@@ -422,15 +440,20 @@ class WorkOrder(Document):
 		self.update_status()
 		production_plan.run_method("update_produced_pending_qty", produced_qty, self.production_plan_item)
 
-	def before_submit(self):
-		self.create_serial_no_batch_no()
+	def validate_warehouse(self):
+		if self.make_finished_good_against_job_card:
+			return
 
-	def on_submit(self):
 		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
 
+	def before_submit(self):
+		self.create_serial_no_batch_no()
+
+	def on_submit(self):
+		self.validate_warehouse()
 		if self.production_plan and frappe.db.exists(
 			"Production Plan Item Reference", {"parent": self.production_plan}
 		):
@@ -667,6 +690,9 @@ class WorkOrder(Document):
 			)
 
 	def update_planned_qty(self):
+		if self.make_finished_good_against_job_card:
+			return
+
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_reserved_qty_for_sub_assembly,
 		)
@@ -811,10 +837,16 @@ class WorkOrder(Document):
 					"description",
 					"workstation",
 					"idx",
+					"finished_good",
+					"is_subcontracted",
+					"wip_warehouse",
+					"source_warehouse",
+					"fg_warehouse",
 					"workstation_type",
 					"base_hour_rate as hour_rate",
 					"time_in_mins",
 					"parent as bom",
+					"bom_no",
 					"batch_size",
 					"sequence_id",
 					"fixed_time",
@@ -1084,6 +1116,7 @@ class WorkOrder(Document):
 							"required_qty": item.qty,
 							"source_warehouse": item.source_warehouse or item.default_warehouse,
 							"include_item_in_manufacturing": item.include_item_in_manufacturing,
+							"operation_row_id": item.operation_row_id,
 						},
 					)
 
@@ -1284,6 +1317,9 @@ def make_work_order(bom_no, item, qty=0, project=None, variant_items=None):
 	item_details = get_item_details(item, project)
 
 	wo_doc = frappe.new_doc("Work Order")
+	wo_doc.make_finished_good_against_job_card = frappe.db.get_value(
+		"BOM", bom_no, "make_finished_good_against_job_card"
+	)
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
 	wo_doc.bom_no = bom_no
@@ -1450,12 +1486,29 @@ def make_job_card(work_order, operations):
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
 		row = frappe._dict(row)
+		row.update(get_operation_details(row.name, work_order))
+
 		validate_operation_data(row)
 		qty = row.get("qty")
 		while qty > 0:
 			qty = split_qty_based_on_batch_size(work_order, row, qty)
 			if row.job_card_qty > 0:
 				create_job_card(work_order, row, auto_create=True)
+
+
+def get_operation_details(name, work_order):
+	for row in work_order.operations:
+		if row.name == name:
+			return {
+				"workstation": row.workstation,
+				"workstation_type": row.workstation_type,
+				"source_warehouse": row.source_warehouse,
+				"fg_warehouse": row.fg_warehouse,
+				"wip_warehouse": row.wip_warehouse,
+				"finished_good": row.finished_good,
+				"bom_no": row.get("bom_no"),
+				"is_subcontracted": row.get("is_subcontracted"),
+			}
 
 
 @frappe.whitelist()
@@ -1558,6 +1611,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"workstation_type": row.get("workstation_type"),
 			"operation": row.get("operation"),
 			"workstation": row.get("workstation"),
+			"operation_row_id": cint(row.idx),
 			"posting_date": nowdate(),
 			"for_quantity": row.job_card_qty or work_order.get("qty", 0),
 			"operation_id": row.get("name"),
@@ -1565,13 +1619,20 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"project": work_order.project,
 			"company": work_order.company,
 			"sequence_id": row.get("sequence_id"),
-			"wip_warehouse": work_order.wip_warehouse,
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
+			"source_warehouse": row.get("source_warehouse"),
+			"target_warehouse": row.get("fg_warehouse"),
+			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse"),
+			"finished_good": row.get("finished_good"),
+			"semi_fg_bom": row.get("bom_no"),
+			"is_subcontracted": row.get("is_subcontracted"),
 		}
 	)
 
-	if work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer:
+	if work_order.make_finished_good_against_job_card or (
+		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
+	):
 		doc.get_required_items()
 
 	if auto_create:

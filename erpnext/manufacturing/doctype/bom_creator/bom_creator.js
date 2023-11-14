@@ -88,6 +88,34 @@ frappe.ui.form.on("BOM Creator", {
 					reqd: 1,
 					default: 1.0,
 				},
+				{ fieldtype: "Section Break" },
+				{
+					label: __("Track Operations"),
+					fieldtype: "Check",
+					fieldname: "track_operations",
+					onchange: (r) => {
+						let track_operations = dialog.get_value("track_operations");
+						if (r.type === "input" && !track_operations) {
+							dialog.set_value("make_finished_good_against_job_card", 0);
+						}
+					}
+				},
+				{
+					label: __("Make Finished Good Against Job Card"),
+					fieldtype: "Check",
+					fieldname: "make_finished_good_against_job_card",
+					depends_on: "eval:doc.track_operations"
+				},
+				{ fieldtype: "Column Break" },
+				{
+					label: __("Final Operation"),
+					fieldtype: "Link",
+					fieldname: "final_operation",
+					options: "Operation",
+					default: "Assembly",
+					mandatory_depends_on: "eval:doc.make_finished_good_against_job_card",
+					depends_on: "eval:doc.make_finished_good_against_job_card"
+				},
 			],
 			primary_action_label: __("Create"),
 			primary_action: (values) => {

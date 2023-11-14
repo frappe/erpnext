@@ -369,7 +369,7 @@ class PurchaseOrder(BuyingController):
 									item.idx, item.fg_item
 								)
 							)
-						elif not frappe.get_value("Item", item.fg_item, "default_bom"):
+						elif not item.bom and not frappe.get_value("Item", item.fg_item, "default_bom"):
 							frappe.throw(
 								_("Row #{0}: Default BOM not found for FG Item {1}").format(
 									item.idx, item.fg_item
@@ -918,6 +918,14 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 		else:
 			for idx, item in enumerate(target_doc.items):
 				item.warehouse = source_doc.items[idx].warehouse
+
+	for idx, item in enumerate(target_doc.items):
+		item.job_card = source_doc.items[idx].job_card
+		if not target_doc.supplier_warehouse:
+			# WIP warehouse is set as Supplier Warehouse in Job Card
+			target_doc.supplier_warehouse = frappe.get_cached_value(
+				"Job Card", item.job_card, "wip_warehouse"
+			)
 
 	return target_doc
 

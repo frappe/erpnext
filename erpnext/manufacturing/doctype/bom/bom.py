@@ -245,6 +245,7 @@ class BOM(WebsiteGenerator):
 		self.clear_inspection()
 		self.validate_main_item()
 		self.validate_currency()
+		self.set_materials_based_on_operation_bom()
 		self.set_conversion_rate()
 		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
@@ -544,6 +545,9 @@ class BOM(WebsiteGenerator):
 		if not self.with_operations:
 			self.set("operations", [])
 
+		if not self.with_operations and self.make_finished_good_against_job_card:
+			self.make_finished_good_against_job_card = 0
+
 	def clear_inspection(self):
 		if not self.inspection_required:
 			self.quality_inspection_template = None
@@ -644,6 +648,33 @@ class BOM(WebsiteGenerator):
 
 		if self.name in {d.bom_no for d in self.items}:
 			_throw_error(self.name)
+
+	def set_materials_based_on_operation_bom(self):
+		if not self.make_finished_good_against_job_card:
+			return
+
+		for row in self.get("operations"):
+			if row.bom_no and row.finished_good:
+				self.add_materials_from_bom(row.finished_good, row.bom_no, row.idx, qty=row.finished_good_qty)
+
+	@frappe.whitelist()
+	def add_materials_from_bom(self, finished_good, bom_no, operation_row_id, qty=None):
+		if not frappe.db.exists("BOM", {"item": finished_good, "name": bom_no, "docstatus": 1}):
+			frappe.throw(_("BOM {0} not found for the item {1}").format(bom_no, finished_good))
+
+		if not qty:
+			qty = 1
+
+		for row in self.items:
+			if row.operation_row_id == operation_row_id:
+				return
+
+		bom_items = get_bom_items(bom_no, self.company, qty=qty, fetch_exploded=0)
+		for row in bom_items:
+			row.uom = row.stock_uom
+			row.operation_row_id = operation_row_id
+			row.idx = None
+			self.append("items", row)
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
@@ -1094,6 +1125,11 @@ def get_bom_items_as_dict(
 ):
 	item_dict = {}
 
+	group_by_cond = "group by item_code, stock_uom"
+	if frappe.get_cached_value("BOM", bom, "make_finished_good_against_job_card"):
+		fetch_exploded = 0
+		group_by_cond = "group by item_code, operation_row_id, stock_uom"
+
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
 				bom_item.item_code,
@@ -1122,7 +1158,7 @@ def get_bom_items_as_dict(
 				and bom.name = %(bom)s
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
-				group by item_code, stock_uom
+				{group_by_cond}
 				order by idx"""
 
 	is_stock_item = 0 if include_non_stock_items else 1
@@ -1132,6 +1168,7 @@ def get_bom_items_as_dict(
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
+			group_by_cond=group_by_cond,
 			select_columns=""", bom_item.source_warehouse, bom_item.operation,
 				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""",
@@ -1147,6 +1184,7 @@ def get_bom_items_as_dict(
 			select_columns=", item.description",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
+			group_by_cond=group_by_cond,
 		)
 
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
@@ -1158,15 +1196,20 @@ def get_bom_items_as_dict(
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """,
+				bom_item.description, bom_item.base_rate as rate, bom_item.operation_row_id """,
+			group_by_cond=group_by_cond,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 
 	for item in items:
-		if item.item_code in item_dict:
-			item_dict[item.item_code]["qty"] += flt(item.qty)
+		key = item.item_code
+		if item.operation_row_id:
+			key = (item.item_code, item.operation_row_id)
+
+		if key in item_dict:
+			item_dict[key]["qty"] += flt(item.qty)
 		else:
-			item_dict[item.item_code] = item
+			item_dict[key] = item
 
 	for item, item_details in item_dict.items():
 		for d in [
@@ -1178,6 +1221,7 @@ def get_bom_items_as_dict(
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
 
+	print(item_dict)
 	return item_dict
 
 

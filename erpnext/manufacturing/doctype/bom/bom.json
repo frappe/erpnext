@@ -26,19 +26,22 @@
   "column_break_ivyw",
   "currency",
   "conversion_rate",
-  "materials_section",
-  "items",
-  "section_break_21",
   "operations_section_section",
   "with_operations",
+  "make_finished_good_against_job_card",
   "column_break_23",
   "transfer_material_against",
   "routing",
   "fg_based_operating_cost",
+  "column_break_joxb",
+  "default_source_warehouse",
+  "default_target_warehouse",
   "fg_based_section_section",
   "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
+  "materials_section",
+  "items",
   "scrap_section",
   "scrap_items_section",
   "scrap_items",
@@ -211,7 +214,7 @@
   },
   {
    "default": "Work Order",
-   "depends_on": "with_operations",
+   "depends_on": "eval: doc.with_operations === 1 && doc.make_finished_good_against_job_card === 0",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -486,11 +489,6 @@
    "label": "Show Operations"
   },
   {
-   "fieldname": "section_break_21",
-   "fieldtype": "Tab Break",
-   "label": "Operations"
-  },
-  {
    "fieldname": "column_break_23",
    "fieldtype": "Column Break"
   },
@@ -534,6 +532,8 @@
    "show_dashboard": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.with_operations",
    "fieldname": "operations_section_section",
    "fieldtype": "Section Break",
    "label": "Operations"
@@ -630,6 +630,30 @@
   {
    "fieldname": "column_break_oxbz",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "with_operations",
+   "description": "User can consume the raw materials, Add Semi Finished Goods /  Final Finished Good against the Operation using Job Cards",
+   "fieldname": "make_finished_good_against_job_card",
+   "fieldtype": "Check",
+   "label": "Make Finished Good Against Job Card"
+  },
+  {
+   "fieldname": "column_break_joxb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_source_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_target_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Target Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -637,7 +661,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-04-02 16:22:47.518411",
+ "modified": "2024-04-02 16:23:47.518411",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

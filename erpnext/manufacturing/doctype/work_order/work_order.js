@@ -143,19 +143,10 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		if (frm.doc.status != "Closed") {
-			if (
-				frm.doc.docstatus === 1 &&
-				frm.doc.status !== "Completed" &&
-				frm.doc.operations &&
-				frm.doc.operations.length
-			) {
-				const not_completed = frm.doc.operations.filter((d) => {
-					if (d.status != "Completed") {
-						return true;
-					}
-				});
+			if (frm.doc.docstatus === 1 && frm.doc.status !== "Completed"
+				&& frm.doc.operations && frm.doc.operations.length) {
 
-				if (not_completed && not_completed.length) {
+				if (frm.doc.__onload?.show_create_job_card_button) {
 					frm.add_custom_button(__("Create Job Card"), () => {
 						frm.trigger("make_job_card");
 					}).addClass("btn-primary");
@@ -615,22 +606,25 @@ erpnext.work_order = {
 				);
 			}
 
-			const show_start_btn =
-				frm.doc.skip_transfer || frm.doc.transfer_material_against == "Job Card" ? 0 : 1;
+			if (!frm.doc.make_finished_good_against_job_card) {
+				const show_start_btn = (frm.doc.skip_transfer
+					|| frm.doc.transfer_material_against == "Job Card") ? 0 : 1;
 
-			if (show_start_btn) {
-				let pending_to_transfer = frm.doc.required_items.some(
-					(item) => flt(item.transferred_qty) < flt(item.required_qty)
-				);
-				if (pending_to_transfer && frm.doc.status != "Stopped") {
-					frm.has_start_btn = true;
-					frm.add_custom_button(__("Create Pick List"), function () {
-						erpnext.work_order.create_pick_list(frm);
-					});
-					var start_btn = frm.add_custom_button(__("Start"), function () {
-						erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
-					});
-					start_btn.addClass("btn-primary");
+				if (show_start_btn) {
+					let pending_to_transfer = frm.doc.required_items.some(
+						item => flt(item.transferred_qty) < flt(item.required_qty)
+					);
+					if (pending_to_transfer && frm.doc.status != "Stopped") {
+						frm.has_start_btn = true;
+						frm.add_custom_button(__("Create Pick List"), function() {
+							erpnext.work_order.create_pick_list(frm);
+						});
+
+						var start_btn = frm.add_custom_button(__("Start"), function() {
+							erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
+						});
+						start_btn.addClass("btn-primary");
+					}
 				}
 			}
 

@@ -207,7 +207,8 @@ class BOMCreator(Document):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(label, self.name))
 
 	def on_submit(self):
-		self.enqueue_create_boms()
+		pass
+		# self.enqueue_create_boms()
 
 	@frappe.whitelist()
 	def enqueue_create_boms(self):
@@ -260,6 +261,9 @@ class BOMCreator(Document):
 				fg_item_data = production_item_wise_rm.get(d).fg_item_data
 				self.create_bom(fg_item_data, production_item_wise_rm)
 
+			if self.track_operations and self.make_finished_good_against_job_card:
+				self.make_bom_for_final_product(production_item_wise_rm)
+
 			frappe.msgprint(_("BOMs created successfully"))
 		except Exception:
 			traceback = frappe.get_traceback(with_context=True)
@@ -271,6 +275,55 @@ class BOMCreator(Document):
 			)
 
 			frappe.msgprint(_("BOMs creation failed"))
+
+	def make_bom_for_final_product(self, production_item_wise_rm):
+		bom = frappe.new_doc("BOM")
+		bom.update(
+			{
+				"item": self.item_code,
+				"bom_type": "Production",
+				"quantity": self.qty,
+				"allow_alternative_item": 1,
+				"bom_creator": self.name,
+				"bom_creator_item": self.name,
+				"rm_cost_as_per": "Manual",
+				"with_operations": 1,
+				"make_finished_good_against_job_card": 1,
+			}
+		)
+
+		for field in BOM_FIELDS:
+			if self.get(field):
+				bom.set(field, self.get(field))
+
+		for item in self.items:
+			if not item.is_expandable or not item.operation:
+				continue
+
+			bom.append(
+				"operations",
+				{
+					"operation": item.operation,
+					"finished_good": item.item_code,
+					"finished_good_qty": item.qty,
+					"bom_no": production_item_wise_rm[(item.item_code, item.name)].bom_no,
+					"workstation_type": item.workstation_type,
+					"time_in_mins": item.operation_time,
+				},
+			)
+
+		bom.append(
+			"operations",
+			{
+				"operation": self.final_operation,
+				"finished_good": self.item_code,
+				"finished_good_qty": self.qty,
+				"bom_no": production_item_wise_rm[(self.item_code, self.name)].bom_no,
+			},
+		)
+
+		bom.save(ignore_permissions=True)
+		bom.submit()
 
 	def create_bom(self, row, production_item_wise_rm):
 		bom_creator_item = row.name if row.name != self.name else ""
@@ -296,6 +349,22 @@ class BOMCreator(Document):
 				"bom_creator_item": bom_creator_item,
 			}
 		)
+
+		if self.track_operations and not self.make_finished_good_against_job_card:
+			if row.item_code == self.item_code:
+				bom.with_operations = 1
+				for item in self.items:
+					if not item.operation:
+						continue
+
+					bom.append(
+						"operations",
+						{
+							"operation": item.operation,
+							"workstation_type": item.workstation_type,
+							"time_in_mins": item.operation_time,
+						},
+					)
 
 		for field in BOM_FIELDS:
 			if self.get(field):
@@ -402,6 +471,7 @@ def add_sub_assembly(**kwargs):
 
 	name = kwargs.fg_reference_id
 	parent_row_no = ""
+	print(kwargs)
 	if not kwargs.convert_to_sub_assembly:
 		item_info = get_item_details(bom_item.item_code)
 		item_row = doc.append(
@@ -417,6 +487,9 @@ def add_sub_assembly(**kwargs):
 				"do_not_explode": 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
+				"operation": bom_item.operation,
+				"workstation_type": bom_item.workstation_type,
+				"operation_time": bom_item.operation_time,
 			},
 		)
 

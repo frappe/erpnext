@@ -19,6 +19,21 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
+		frm.set_query("bom_no", "operations", function(doc, cdt, cdn) {
+			let row = locals[cdt][cdn];
+			return {
+				query: "erpnext.controllers.queries.bom",
+				filters: {
+					'currency': frm.doc.currency,
+					'company': frm.doc.company,
+					'item': row.finished_good,
+					'is_active': 1,
+					'docstatus': 1,
+					'make_finished_good_against_job_card': 0
+				}
+			};
+		});
+
 		frm.set_query("source_warehouse", "items", function () {
 			return {
 				filters: {
@@ -83,6 +98,22 @@ frappe.ui.form.on("BOM", {
 
 	onload_post_render: function (frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
+	default_source_warehouse(frm) {
+		if (frm.doc.default_source_warehouse) {
+			frm.doc.operations.forEach((d) => {
+				frappe.model.set_value(d.doctype, d.name, "source_warehouse", frm.doc.default_source_warehouse);
+			});
+		}
+	},
+
+	default_target_warehouse(frm) {
+		if (frm.doc.default_source_warehouse) {
+			frm.doc.operations.forEach((d) => {
+				frappe.model.set_value(d.doctype, d.name, "fg_warehouse", frm.doc.default_target_warehouse);
+			});
+		}
 	},
 
 	refresh(frm) {
@@ -431,6 +462,29 @@ frappe.ui.form.on("BOM", {
 		frm.set_value("process_loss_qty", qty);
 	},
 });
+
+
+frappe.ui.form.on('BOM Operation', {
+	bom_no(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.bom_no && row.finished_good) {
+			frappe.call({
+				method: "add_materials_from_bom",
+				doc: frm.doc,
+				args: {
+					finished_good: row.finished_good,
+					bom_no: row.bom_no,
+					operation_row_id: row.idx,
+					qty: row.finished_good_qty,
+				},
+				callback(r) {
+					refresh_field("items");
+				}
+			})
+		}
+	}
+})
 
 erpnext.bom.BomController = class BomController extends erpnext.TransactionController {
 	conversion_rate(doc) {

@@ -37,6 +37,11 @@
   "items",
   "costing_detail",
   "raw_material_cost",
+  "configuration_section",
+  "track_operations",
+  "make_finished_good_against_job_card",
+  "column_break_obzr",
+  "final_operation",
   "remarks_tab",
   "remarks",
   "section_break_yixm",
@@ -278,6 +283,34 @@
    "fieldtype": "Text",
    "label": "Error Log",
    "read_only": 1
+  },
+  {
+   "fieldname": "configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Operation"
+  },
+  {
+   "default": "0",
+   "depends_on": "track_operations",
+   "fieldname": "make_finished_good_against_job_card",
+   "fieldtype": "Check",
+   "label": "Make Finished Good Against Job Card"
+  },
+  {
+   "fieldname": "column_break_obzr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "final_operation",
+   "fieldtype": "Link",
+   "label": "Final Operation",
+   "options": "Operation"
+  },
+  {
+   "default": "0",
+   "fieldname": "track_operations",
+   "fieldtype": "Check",
+   "label": "Track Operations"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -288,7 +321,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2024-04-02 16:30:59.779190",
+ "modified": "2024-04-02 16:31:59.779190",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",

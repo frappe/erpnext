@@ -6,24 +6,33 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "sequence_id",
   "operation",
+  "sequence_id",
+  "finished_good",
+  "finished_good_qty",
+  "bom_no",
   "col_break1",
   "workstation_type",
   "workstation",
   "time_in_mins",
   "fixed_time",
+  "is_subcontracted",
+  "is_final_finished_good",
+  "set_cost_based_on_bom_qty",
+  "warehouse_section",
+  "source_warehouse",
+  "wip_warehouse",
+  "column_break_lbhy",
+  "fg_warehouse",
   "costing_section",
   "hour_rate",
   "base_hour_rate",
-  "column_break_9",
-  "operating_cost",
-  "base_operating_cost",
-  "column_break_11",
   "batch_size",
-  "set_cost_based_on_bom_qty",
+  "column_break_11",
   "cost_per_unit",
   "base_cost_per_unit",
+  "operating_cost",
+  "base_operating_cost",
   "more_information_section",
   "description",
   "column_break_18",
@@ -71,6 +80,7 @@
    "precision": "2"
   },
   {
+   "columns": 1,
    "description": "In minutes",
    "fetch_from": "operation.total_operation_time",
    "fetch_if_empty": 1,
@@ -87,7 +97,6 @@
    "description": "Operation time does not depend on quantity to produce",
    "fieldname": "fixed_time",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Fixed Time"
   },
   {
@@ -173,28 +182,91 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "set_cost_based_on_bom_qty",
    "fieldtype": "Check",
    "label": "Set Operating Cost Based On BOM Quantity"
   },
   {
+   "columns": 1,
    "fieldname": "workstation_type",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Workstation Type",
    "options": "Workstation Type"
+  },
+  {
+   "fieldname": "finished_good",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "FG / Semi FG Item",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BOM No",
+   "options": "BOM"
+  },
+  {
+   "columns": 1,
+   "default": "1",
+   "fieldname": "finished_good_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "FG Qty"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_final_finished_good",
+   "fieldtype": "Check",
+   "label": "Is Final Finished Good"
+  },
+  {
+   "fieldname": "warehouse_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
+  },
+  {
+   "fieldname": "wip_warehouse",
+   "fieldtype": "Link",
+   "label": "WIP WH",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_lbhy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "FG WH",
+   "options": "Warehouse"
+  },
+  {
+   "columns": 1,
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source WH",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:41.248462",
+ "modified": "2024-03-27 13:07:41.248462",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",
