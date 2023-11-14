@@ -167,6 +167,7 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -901,7 +902,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-26 12:53:22.404057",
+ "modified": "2023-11-14 18:34:10.479329",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
