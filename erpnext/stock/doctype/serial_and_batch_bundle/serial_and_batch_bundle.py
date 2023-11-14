@@ -1599,6 +1599,9 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> List[frappe._dict]:
 	)
 
 	for key, val in kwargs.items():
+		if not val:
+			continue
+
 		if key in ["get_subcontracted_item"]:
 			continue
 
