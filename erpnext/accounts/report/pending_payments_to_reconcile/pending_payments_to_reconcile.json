@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-11-14 15:55:40.927913",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "Fdfsdf",
+ "letterhead": null,
+ "modified": "2023-11-14 15:55:50.093163",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pending Payments To Reconcile",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Payment Ledger Entry",
+ "report_name": "Pending Payments To Reconcile",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts User"
+  }
+ ]
+}
