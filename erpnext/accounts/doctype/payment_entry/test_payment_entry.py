@@ -1307,6 +1307,8 @@ class TestPaymentEntry(FrappeTestCase):
 		)
 		pe.save()
 		pe.submit()
+		self.assertEqual(pe.total_allocated_amount, 60)
+		self.assertEqual(pe.unallocated_amount, 940)
 		self.voucher_no = pe.name
 		self.expected_gle = [
 			{"account": "Debtors - _TC", "debit": 40.0, "credit": 0.0},
