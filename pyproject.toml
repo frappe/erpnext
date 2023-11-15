@@ -6,7 +6,7 @@ authors = [
 description = "Open Source ERP"
 requires-python = ">=3.10"
 readme = "README.md"
-dynamic = ["version"]
+version = "15.0.0-dev"
 dependencies = [
     # Core dependencies
     "pycountry~=22.3.5",
