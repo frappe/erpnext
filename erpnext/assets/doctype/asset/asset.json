@@ -495,11 +495,10 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval.doc.asset_quantity",
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
    "label": "Asset Quantity",
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
   },
   {
    "fieldname": "depr_entry_posting_status",
@@ -565,7 +564,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2023-10-27 17:03:46.629617",
+ "modified": "2023-11-15 17:40:17.315203",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
