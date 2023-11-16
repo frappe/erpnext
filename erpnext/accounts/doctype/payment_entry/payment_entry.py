@@ -1054,9 +1054,9 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 
-			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
-
 			for d in self.get("references"):
+				# re-defining dr_or_cr for every reference in order to avoid the last value affecting calculation of reverse
+				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 				cost_center = self.cost_center
 				if d.reference_doctype == "Sales Invoice" and not cost_center:
 					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
@@ -1072,11 +1072,9 @@ class PaymentEntry(AccountsController):
 					against_voucher_type = d.reference_doctype
 					against_voucher = d.reference_name
 
-				reverse_dr_or_cr, standalone_note = 0, 0
+				reverse_dr_or_cr = 0
 				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
-					is_return, return_against = frappe.db.get_value(
-						d.reference_doctype, d.reference_name, ["is_return", "return_against"]
-					)
+					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
 					payable_party_types = get_party_types_from_account_type("Payable")
 					receivable_party_types = get_party_types_from_account_type("Receivable")
 					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
@@ -1086,7 +1084,7 @@ class PaymentEntry(AccountsController):
 					):
 						reverse_dr_or_cr = 1
 
-					if is_return and not return_against and not reverse_dr_or_cr:
+					if is_return and not reverse_dr_or_cr:
 						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 				gle.update(
@@ -1100,6 +1098,7 @@ class PaymentEntry(AccountsController):
 				)
 				gl_entries.append(gle)
 
+			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 			if self.unallocated_amount:
 				exchange_rate = self.get_exchange_rate()
 				base_unallocated_amount = self.unallocated_amount * exchange_rate

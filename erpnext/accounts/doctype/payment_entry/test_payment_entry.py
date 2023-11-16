@@ -1290,6 +1290,9 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
 
 	def test_receive_payment_from_payable_party_type(self):
+		"""
+		Checks GL entries generated while receiving payments from a Payable Party Type.
+		"""
 		pe = create_payment_entry(
 			party_type="Supplier",
 			party="_Test Supplier",
@@ -1301,8 +1304,57 @@ class TestPaymentEntry(FrappeTestCase):
 		)
 		self.voucher_no = pe.name
 		self.expected_gle = [
-			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
 			{"account": "Creditors - _TC", "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.check_gl_entries()
+
+	def test_payment_against_partial_return_invoice(self):
+		"""
+		Checks GL entries generated for partial return invoice payments.
+		"""
+		si = create_sales_invoice(qty=10, rate=10, customer="_Test Customer")
+		credit_note = create_sales_invoice(
+			qty=-4, rate=10, customer="_Test Customer", is_return=1, return_against=si.name
+		)
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		pe.set(
+			"references",
+			[
+				{
+					"reference_doctype": "Sales Invoice",
+					"reference_name": si.name,
+					"due_date": si.get("due_date"),
+					"total_amount": si.grand_total,
+					"outstanding_amount": si.outstanding_amount,
+					"allocated_amount": si.outstanding_amount,
+				},
+				{
+					"reference_doctype": "Sales Invoice",
+					"reference_name": credit_note.name,
+					"due_date": credit_note.get("due_date"),
+					"total_amount": credit_note.grand_total,
+					"outstanding_amount": credit_note.outstanding_amount,
+					"allocated_amount": credit_note.outstanding_amount,
+				},
+			],
+		)
+		pe.save()
+		pe.submit()
+		self.assertEqual(pe.total_allocated_amount, 60)
+		self.assertEqual(pe.unallocated_amount, 940)
+		self.voucher_no = pe.name
+		self.expected_gle = [
+			{"account": "Debtors - _TC", "debit": 40.0, "credit": 0.0},
+			{"account": "Debtors - _TC", "debit": 0.0, "credit": 940.0},
+			{"account": "Debtors - _TC", "debit": 0.0, "credit": 100.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
 		]
 		self.check_gl_entries()
 
@@ -1316,7 +1368,7 @@ class TestPaymentEntry(FrappeTestCase):
 				gle.credit,
 			)
 			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
-			.orderby(gle.account)
+			.orderby(gle.account, gle.debit, gle.credit, order=frappe.qb.desc)
 		).run(as_dict=True)
 		for row in range(len(self.expected_gle)):
 			for field in ["account", "debit", "credit"]:
