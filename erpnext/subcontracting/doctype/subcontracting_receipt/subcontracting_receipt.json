@@ -11,6 +11,7 @@
   "naming_series",
   "supplier",
   "supplier_name",
+  "supplier_delivery_note",
   "column_break1",
   "company",
   "posting_date",
@@ -625,12 +626,31 @@
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
    "print_hide": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "depends_on": "eval: (!doc.__islocal && doc.docstatus == 0)",
+   "fieldname": "get_scrap_items",
+   "fieldtype": "Button",
+   "label": "Get Scrap Items",
+   "options": "get_scrap_items"
+  },
+  {
+   "fieldname": "supplier_delivery_note",
+   "fieldtype": "Data",
+   "label": "Supplier Delivery Note"
+>>>>>>> da80e4dbce (feat: add `Supplier Delivery Note` field in SCR)
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-07-06 18:44:16.171842",
+=======
+ "modified": "2023-11-16 13:04:00.710534",
+>>>>>>> da80e4dbce (feat: add `Supplier Delivery Note` field in SCR)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
