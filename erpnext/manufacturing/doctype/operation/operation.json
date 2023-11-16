@@ -11,6 +11,7 @@
   "workstation",
   "data_2",
   "is_corrective_operation",
+  "is_subcontractor_operation",
   "job_card_section",
   "create_job_card_based_on_batch_size",
   "quality_inspection_template",
@@ -89,6 +90,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
+   "fieldname": "is_subcontractor_operation",
+   "fieldtype": "Check",
+   "label": "Is Subcontractor Operation"
+  },
+    {
    "default": "0",
    "fieldname": "is_corrective_operation",
    "fieldtype": "Check",
