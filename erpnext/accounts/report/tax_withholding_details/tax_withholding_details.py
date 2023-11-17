@@ -184,6 +184,16 @@ def get_columns(filters):
 				"width": 180,
 			}
 		)
+	else:
+		columns.append(
+			{
+				"label": _(filters.get("party_type")),
+				"fieldname": "party",
+				"fieldtype": "Dynamic Link",
+				"options": "party_type",
+				"width": 180,
+			}
+		)
 
 	columns.extend(
 		[
