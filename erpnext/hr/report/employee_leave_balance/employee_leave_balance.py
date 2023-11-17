@@ -3,7 +3,6 @@
 
 
 from itertools import groupby
-from typing import Dict, List, Optional, Tuple
 
 import frappe
 from frappe import _
@@ -18,7 +17,7 @@ from erpnext.hr.doctype.leave_application.leave_application import (
 Filters = frappe._dict
 
 
-def execute(filters: Optional[Filters] = None) -> Tuple:
+def execute(filters: Filters | None = None) -> tuple:
 	if filters.to_date <= filters.from_date:
 		frappe.throw(_('"From Date" can not be greater than or equal to "To Date"'))
 
@@ -28,7 +27,7 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 	return columns, data, None, charts
 
 
-def get_columns() -> List[Dict]:
+def get_columns() -> list[dict]:
 	return [
 		{
 			"label": _("Leave Type"),
@@ -84,8 +83,8 @@ def get_columns() -> List[Dict]:
 	]
 
 
-def get_data(filters: Filters) -> List:
-	leave_types = frappe.get_all("Leave Type", pluck="name", order_by="name")
+def get_data(filters: Filters) -> list:
+	leave_types = get_leave_types()
 	active_employees = get_employees(filters)
 
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
@@ -129,6 +128,13 @@ def get_data(filters: Filters) -> List:
 			data.append(row)
 
 	return data
+
+
+def get_leave_types() -> list[str]:
+	LeaveType = frappe.qb.DocType("Leave Type")
+	return (frappe.qb.from_(LeaveType).select(LeaveType.name).orderby(LeaveType.name)).run(
+		pluck="name"
+	)
 
 
 def get_employees(filters: Filters) -> list[dict]:
@@ -178,7 +184,7 @@ def get_opening_balance(
 
 def get_allocated_and_expired_leaves(
 	from_date: str, to_date: str, employee: str, leave_type: str
-) -> Tuple[float, float, float]:
+) -> tuple[float, float, float]:
 	new_allocation = 0
 	expired_leaves = 0
 	carry_forwarded_leaves = 0
@@ -208,9 +214,9 @@ def get_allocated_and_expired_leaves(
 
 def get_leave_ledger_entries(
 	from_date: str, to_date: str, employee: str, leave_type: str
-) -> List[Dict]:
+) -> list[dict]:
 	ledger = frappe.qb.DocType("Leave Ledger Entry")
-	records = (
+	return (
 		frappe.qb.from_(ledger)
 		.select(
 			ledger.employee,
@@ -236,10 +242,8 @@ def get_leave_ledger_entries(
 		)
 	).run(as_dict=True)
 
-	return records
 
-
-def get_chart_data(data: List, filters: Filters) -> Dict:
+def get_chart_data(data: list, filters: Filters) -> dict:
 	labels = []
 	datasets = []
 	employee_data = data
@@ -259,7 +263,7 @@ def get_chart_data(data: List, filters: Filters) -> Dict:
 	return chart
 
 
-def get_dataset_for_chart(employee_data: List, datasets: List, labels: List) -> List:
+def get_dataset_for_chart(employee_data: list, datasets: list, labels: list) -> list:
 	leaves = []
 	employee_data = sorted(employee_data, key=lambda k: k["employee_name"])
 
