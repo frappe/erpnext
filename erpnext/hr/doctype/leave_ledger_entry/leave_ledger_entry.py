@@ -225,3 +225,7 @@ def expire_carried_forward_allocation(allocation):
 			to_date=allocation.to_date,
 		)
 		create_leave_ledger_entry(allocation, args)
+
+
+def on_doctype_update():
+	frappe.db.add_index("Leave Ledger Entry", ["transaction_type", "transaction_name"])

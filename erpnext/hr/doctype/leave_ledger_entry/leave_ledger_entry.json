@@ -27,7 +27,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Employee",
-   "options": "Employee"
+   "options": "Employee",
+   "search_index": 1
   },
   {
    "fetch_from": "employee.employee_name",
@@ -57,13 +58,15 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Transaction Type",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "transaction_name",
    "fieldtype": "Dynamic Link",
    "label": "Transaction Name",
-   "options": "transaction_type"
+   "options": "transaction_type",
+   "search_index": 1
   },
   {
    "fieldname": "leaves",
@@ -123,7 +126,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-04 18:47:45.146652",
+ "modified": "2023-11-17 12:36:36.963697",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",
@@ -186,5 +189,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "employee"
 }
