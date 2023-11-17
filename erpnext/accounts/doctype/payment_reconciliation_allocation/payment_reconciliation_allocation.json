@@ -153,9 +153,14 @@
    "options": "Cost Center"
   }
  ],
+ "is_virtual": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-09-03 07:52:33.684217",
+=======
+ "modified": "2023-11-17 17:33:38.612615",
+>>>>>>> 3a51a3f37e (refactor: convert payment reconciliation tool to virtual doctype)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",
