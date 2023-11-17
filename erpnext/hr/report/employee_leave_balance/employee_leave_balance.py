@@ -85,19 +85,19 @@ def get_columns() -> List[Dict]:
 
 
 def get_data(filters: Filters) -> List:
-	leave_types = frappe.db.get_list("Leave Type", pluck="name", order_by="name")
+	leave_types = frappe.get_all("Leave Type", pluck="name", order_by="name")
 	conditions = get_conditions(filters)
 
 	user = frappe.session.user
 	department_approver_map = get_department_leave_approver_map(filters.department)
 
-	active_employees = frappe.get_list(
+	active_employees = frappe.get_all(
 		"Employee",
 		filters=conditions,
 		fields=["name", "employee_name", "department", "user_id", "leave_approver"],
 	)
 
-	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 	consolidate_leave_types = len(active_employees) > 1 and filters.consolidate_leave_types
 	row = None
 
@@ -188,7 +188,7 @@ def get_conditions(filters: Filters) -> Dict:
 
 def get_department_leave_approver_map(department: Optional[str] = None):
 	# get current department and all its child
-	department_list = frappe.get_list(
+	department_list = frappe.get_all(
 		"Department",
 		filters={"disabled": 0},
 		or_filters={"name": department, "parent_department": department},
