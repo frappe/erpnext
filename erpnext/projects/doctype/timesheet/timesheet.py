@@ -69,7 +69,7 @@ class Timesheet(Document):
 
 	def update_billing_hours(self, args):
 		if args.is_billable:
-			if flt(args.billing_hours) == 0.0:
+			if flt(args.billing_hours) == 0.0 or flt(args.billing_hours) > flt(args.hours):
 				args.billing_hours = args.hours
 		else:
 			args.billing_hours = 0
