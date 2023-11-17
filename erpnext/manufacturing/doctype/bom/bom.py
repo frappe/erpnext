@@ -207,6 +207,10 @@ class BOM(WebsiteGenerator):
 	def on_submit(self):
 		self.manage_default_bom()
 		self.update_bom_creator_status()
+		for item in self.get("items"):
+			if item.item_code == self.item:
+				frappe.throw(_("child item cannot be same as parent item"))
+
 
 	def on_cancel(self):
 		self.db_set("is_active", 0)
