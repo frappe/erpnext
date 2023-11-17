@@ -297,7 +297,7 @@ class LeaveAllocation(Document):
 def get_previous_allocation(from_date, leave_type, employee):
 	"""Returns document properties of previous allocation"""
 	Allocation = frappe.qb.DocType("Leave Allocation")
-	return (
+	allocations = (
 		frappe.qb.from_(Allocation)
 		.select(
 			Allocation.name,
@@ -313,7 +313,10 @@ def get_previous_allocation(from_date, leave_type, employee):
 			& (Allocation.docstatus == 1)
 		)
 		.orderby(Allocation.to_date, order=frappe.qb.desc)
+		.limit(1)
 	).run(as_dict=True)
+
+	return allocations[0] if allocations else None
 
 
 def get_leave_allocation_for_period(
