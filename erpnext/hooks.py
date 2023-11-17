@@ -539,6 +539,8 @@ accounting_dimension_doctypes = [
 	"Subcontracting Receipt",
 	"Subcontracting Receipt Item",
 	"Account Closing Balance",
+	"Supplier Quotation",
+	"Supplier Quotation Item",
 ]
 
 get_matching_queries = (
