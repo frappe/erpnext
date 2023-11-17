@@ -6,9 +6,6 @@ import frappe
 from frappe import _
 
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_details
-from erpnext.hr.report.employee_leave_balance.employee_leave_balance import (
-	get_department_leave_approver_map,
-)
 
 
 def execute(filters=None):
@@ -54,17 +51,11 @@ def get_data(filters, leave_types):
 	active_employees = frappe.get_all(
 		"Employee",
 		filters=conditions,
-		fields=["name", "employee_name", "department", "user_id", "leave_approver"],
+		fields=["name", "employee_name", "department", "user_id"],
 	)
-
-	department_approver_map = get_department_leave_approver_map(filters.get("department"))
 
 	data = []
 	for employee in active_employees:
-		leave_approvers = department_approver_map.get(employee.department_name, [])
-		if employee.leave_approver:
-			leave_approvers.append(employee.leave_approver)
-
 		row = [employee.name, employee.employee_name, employee.department]
 		available_leave = get_leave_details(employee.name, filters.date)
 		for leave_type in leave_types:

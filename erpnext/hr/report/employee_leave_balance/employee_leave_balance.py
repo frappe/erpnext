@@ -85,19 +85,10 @@ def get_columns() -> List[Dict]:
 
 
 def get_data(filters: Filters) -> List:
-	leave_types = frappe.db.get_list("Leave Type", pluck="name", order_by="name")
-	conditions = get_conditions(filters)
+	leave_types = get_leave_types()
+	active_employees = get_employees(filters)
 
-	user = frappe.session.user
-	department_approver_map = get_department_leave_approver_map(filters.department)
-
-	active_employees = frappe.get_list(
-		"Employee",
-		filters=conditions,
-		fields=["name", "employee_name", "department", "user_id", "leave_approver"],
-	)
-
-	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 	consolidate_leave_types = len(active_employees) > 1 and filters.consolidate_leave_types
 	row = None
 
@@ -110,10 +101,6 @@ def get_data(filters: Filters) -> List:
 			row = frappe._dict({"leave_type": leave_type})
 
 		for employee in active_employees:
-			leave_approvers = department_approver_map.get(employee.department_name, []).append(
-				employee.leave_approver
-			)
-
 			if consolidate_leave_types:
 				row = frappe._dict()
 			else:
@@ -144,6 +131,35 @@ def get_data(filters: Filters) -> List:
 	return data
 
 
+def get_leave_types() -> List[str]:
+	LeaveType = frappe.qb.DocType("Leave Type")
+	leave_types = (frappe.qb.from_(LeaveType).select(LeaveType.name).orderby(LeaveType.name)).run(
+		as_dict=True
+	)
+	return [leave_type.name for leave_type in leave_types]
+
+
+def get_employees(filters: Filters) -> List[Dict]:
+	Employee = frappe.qb.DocType("Employee")
+	query = frappe.qb.from_(Employee).select(
+		Employee.name,
+		Employee.employee_name,
+		Employee.department,
+	)
+
+	for field in ["company", "department"]:
+		if filters.get(field):
+			query = query.where((getattr(Employee, field) == filters.get(field)))
+
+	if filters.get("employee"):
+		query = query.where(Employee.name == filters.get("employee"))
+
+	if filters.get("employee_status"):
+		query = query.where(Employee.status == filters.get("employee_status"))
+
+	return query.run(as_dict=True)
+
+
 def get_opening_balance(
 	employee: str, leave_type: str, filters: Filters, carry_forwarded_leaves: float
 ) -> float:
@@ -166,48 +182,6 @@ def get_opening_balance(
 		opening_balance = get_leave_balance_on(employee, leave_type, opening_balance_date)
 
 	return opening_balance
-
-
-def get_conditions(filters: Filters) -> Dict:
-	conditions = {}
-
-	if filters.employee:
-		conditions["name"] = filters.employee
-
-	if filters.company:
-		conditions["company"] = filters.company
-
-	if filters.department:
-		conditions["department"] = filters.department
-
-	if filters.employee_status:
-		conditions["status"] = filters.employee_status
-
-	return conditions
-
-
-def get_department_leave_approver_map(department: Optional[str] = None):
-	# get current department and all its child
-	department_list = frappe.get_list(
-		"Department",
-		filters={"disabled": 0},
-		or_filters={"name": department, "parent_department": department},
-		pluck="name",
-	)
-	# retrieve approvers list from current department and from its subsequent child departments
-	approver_list = frappe.get_all(
-		"Department Approver",
-		filters={"parentfield": "leave_approvers", "parent": ("in", department_list)},
-		fields=["parent", "approver"],
-		as_list=True,
-	)
-
-	approvers = {}
-
-	for k, v in approver_list:
-		approvers.setdefault(k, []).append(v)
-
-	return approvers
 
 
 def get_allocated_and_expired_leaves(
@@ -244,7 +218,7 @@ def get_leave_ledger_entries(
 	from_date: str, to_date: str, employee: str, leave_type: str
 ) -> List[Dict]:
 	ledger = frappe.qb.DocType("Leave Ledger Entry")
-	records = (
+	return (
 		frappe.qb.from_(ledger)
 		.select(
 			ledger.employee,
@@ -269,8 +243,6 @@ def get_leave_ledger_entries(
 			)
 		)
 	).run(as_dict=True)
-
-	return records
 
 
 def get_chart_data(data: List, filters: Filters) -> Dict:
