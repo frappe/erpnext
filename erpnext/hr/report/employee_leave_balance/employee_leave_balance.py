@@ -133,9 +133,10 @@ def get_data(filters: Filters) -> List:
 
 def get_leave_types() -> List[str]:
 	LeaveType = frappe.qb.DocType("Leave Type")
-	return (frappe.qb.from_(LeaveType).select(LeaveType.name).orderby(LeaveType.name)).run(
-		pluck="name"
+	leave_types = (frappe.qb.from_(LeaveType).select(LeaveType.name).orderby(LeaveType.name)).run(
+		as_dict=True
 	)
+	return [leave_type.name for leave_type in leave_types]
 
 
 def get_employees(filters: Filters) -> List[Dict]:
