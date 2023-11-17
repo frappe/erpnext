@@ -278,7 +278,7 @@ class calculate_taxes_and_totals(object):
 			):
 				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
 
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction))
+				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(item.discount_percentage, item.precision("discount_percentage"))
 
