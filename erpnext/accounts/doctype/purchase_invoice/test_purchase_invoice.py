@@ -1718,9 +1718,14 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertTrue(return_pi.docstatus == 1)
 
 	def test_gl_entries_for_standalone_debit_note(self):
-		make_purchase_invoice(qty=5, rate=500, update_stock=True)
+		from erpnext.stock.doctype.item.test_item import make_item
 
-		returned_inv = make_purchase_invoice(qty=-5, rate=5, update_stock=True, is_return=True)
+		item_code = make_item(properties={"is_stock_item": 1})
+		make_purchase_invoice(item_code=item_code, qty=5, rate=500, update_stock=True)
+
+		returned_inv = make_purchase_invoice(
+			item_code=item_code, qty=-5, rate=5, update_stock=True, is_return=True
+		)
 
 		# override the rate with valuation rate
 		sle = frappe.get_all(
@@ -1730,7 +1735,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		)[0]
 
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
-		self.assertAlmostEqual(returned_inv.items[0].rate, rate)
+		self.assertAlmostEqual(rate, 500)
 
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
@@ -1833,6 +1838,12 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		disable_dimension()
 
 	def test_repost_accounting_entries(self):
+		# update repost settings
+		settings = frappe.get_doc("Repost Accounting Ledger Settings")
+		if not [x for x in settings.allowed_types if x.document_type == "Purchase Invoice"]:
+			settings.append("allowed_types", {"document_type": "Purchase Invoice", "allowed": True})
+		settings.save()
+
 		pi = make_purchase_invoice(
 			rate=1000,
 			price_list_rate=1000,
@@ -1857,6 +1868,30 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 		pi.load_from_db()
 		self.assertFalse(pi.repost_required)
+
+	def test_default_cost_center_for_purchase(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+		for c_center in ["_Test Cost Center Selling", "_Test Cost Center Buying"]:
+			create_cost_center(cost_center_name=c_center)
+
+		item = create_item(
+			"_Test Cost Center Item For Purchase",
+			is_stock_item=1,
+			buying_cost_center="_Test Cost Center Buying - _TC",
+			selling_cost_center="_Test Cost Center Selling - _TC",
+		)
+
+		pi = make_purchase_invoice(
+			item=item.name, qty=1, rate=1000, update_stock=True, do_not_submit=True, cost_center=""
+		)
+
+		pi.items[0].cost_center = ""
+		pi.set_missing_values()
+		pi.calculate_taxes_and_totals()
+		pi.save()
+
+		self.assertEqual(pi.items[0].cost_center, "_Test Cost Center Buying - _TC")
 
 
 def check_gl_entries(

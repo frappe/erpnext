@@ -299,7 +299,6 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		warehouse_with_no_account = []
 
@@ -371,10 +370,7 @@ class SubcontractingReceipt(SubcontractingController):
 					divisional_loss = flt(item.amount - stock_value_diff, item.precision("amount"))
 
 					if divisional_loss:
-						if self.is_return:
-							loss_account = expenses_included_in_valuation
-						else:
-							loss_account = item.expense_account
+						loss_account = item.expense_account
 
 						self.add_gl_entry(
 							gl_entries=gl_entries,

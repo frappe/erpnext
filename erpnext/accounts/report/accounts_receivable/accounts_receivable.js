@@ -114,10 +114,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname": "customer_group",
+			"fieldname":"customer_group",
 			"label": __("Customer Group"),
-			"fieldtype": "Link",
-			"options": "Customer Group"
+			"fieldtype": "MultiSelectList",
+			"options": "Customer Group",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Customer Group', txt);
+			}
 		},
 		{
 			"fieldname": "payment_terms_template",
@@ -172,7 +175,19 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname": "show_remarks",
 			"label": __("Show Remarks"),
 			"fieldtype": "Check",
+		},
+		{
+			"fieldname": "for_revaluation_journals",
+			"label": __("Revaluation Journals"),
+			"fieldtype": "Check",
+		},
+		{
+			"fieldname": "ignore_accounts",
+			"label": __("Group by Voucher"),
+			"fieldtype": "Check",
 		}
+
+
 	],
 
 	"formatter": function(value, row, column, data, default_formatter) {

@@ -86,6 +86,8 @@
   "billed_amt",
   "accounting_details",
   "expense_account",
+  "column_break_fyqr",
+  "wip_composite_asset",
   "manufacture_details",
   "manufacturer",
   "manufacturer_part_no",
@@ -188,6 +190,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -469,6 +472,7 @@
    "fieldname": "material_request",
    "fieldtype": "Link",
    "label": "Material Request",
+   "mandatory_depends_on": "eval: doc.material_request_item",
    "no_copy": 1,
    "oldfieldname": "prevdoc_docname",
    "oldfieldtype": "Link",
@@ -484,6 +488,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Material Request Item",
+   "mandatory_depends_on": "eval: doc.material_request",
    "no_copy": 1,
    "oldfieldname": "prevdoc_detail_docname",
    "oldfieldtype": "Data",
@@ -897,13 +902,23 @@
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Apply TDS"
+  },
+  {
+   "fieldname": "wip_composite_asset",
+   "fieldtype": "Link",
+   "label": "WIP Composite Asset",
+   "options": "Asset"
+  },
+  {
+   "fieldname": "column_break_fyqr",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-09-13 16:22:40.825092",
+ "modified": "2023-11-14 18:34:27.267382",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

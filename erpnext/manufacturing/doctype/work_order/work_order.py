@@ -297,6 +297,7 @@ class WorkOrder(Document):
 				update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
 
 		if self.production_plan:
+			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
 
 	def get_transferred_or_manufactured_qty(self, purpose):
@@ -544,15 +545,48 @@ class WorkOrder(Document):
 			)
 
 	def update_planned_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_reserved_qty_for_sub_assembly,
+		)
+
+		qty_dict = {"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)}
+
+		if self.production_plan_sub_assembly_item and self.production_plan:
+			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
+				self.production_item, self.fg_warehouse
+			)
+
 		update_bin_qty(
 			self.production_item,
 			self.fg_warehouse,
-			{"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)},
+			qty_dict,
 		)
 
 		if self.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.material_request)
 			mr_obj.update_requested_qty([self.material_request_item])
+
+	def set_produced_qty_for_sub_assembly_item(self):
+		table = frappe.qb.DocType("Work Order")
+
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.produced_qty))
+			.where(
+				(table.production_plan == self.production_plan)
+				& (table.production_plan_sub_assembly_item == self.production_plan_sub_assembly_item)
+				& (table.docstatus == 1)
+			)
+		).run()
+
+		produced_qty = flt(query[0][0]) if query else 0
+
+		frappe.db.set_value(
+			"Production Plan Sub Assembly Item",
+			self.production_plan_sub_assembly_item,
+			"wo_produced_qty",
+			produced_qty,
+		)
 
 	def update_ordered_qty(self):
 		if (

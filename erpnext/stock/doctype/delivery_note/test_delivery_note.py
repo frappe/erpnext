@@ -1056,6 +1056,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3)
 		si1 = make_sales_invoice(dn1.name)
+		si1.update_billed_amount_in_delivery_note = True
 		si1.insert()
 		si1.submit()
 		dn1.reload()
@@ -1064,6 +1065,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn2 = create_delivery_note(is_return=1, return_against=dn.name, qty=-4)
 		si2 = make_sales_invoice(dn2.name)
+		si2.update_billed_amount_in_delivery_note = True
 		si2.insert()
 		si2.submit()
 		dn2.reload()
@@ -1314,6 +1316,21 @@ class TestDeliveryNote(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
+
+	def test_non_internal_transfer_delivery_note(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		dn = create_delivery_note(do_not_submit=True)
+		warehouse = create_warehouse("Internal Transfer Warehouse", company=dn.company)
+		dn.items[0].db_set("target_warehouse", warehouse)
+
+		dn.reload()
+
+		self.assertEqual(dn.items[0].target_warehouse, warehouse)
+
+		dn.save()
+		dn.reload()
+		self.assertFalse(dn.items[0].target_warehouse)
 
 
 def create_delivery_note(**args):

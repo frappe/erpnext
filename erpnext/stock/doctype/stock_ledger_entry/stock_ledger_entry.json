@@ -11,6 +11,7 @@
   "warehouse",
   "posting_date",
   "posting_time",
+  "is_adjustment_entry",
   "column_break_6",
   "voucher_type",
   "voucher_no",
@@ -309,6 +310,12 @@
    "label": "Recalculate Incoming/Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_adjustment_entry",
+   "fieldtype": "Check",
+   "label": "Is Adjustment Entry"
   }
  ],
  "hide_toolbar": 1,
@@ -317,7 +324,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-21 06:25:30.040801",
+ "modified": "2023-10-23 18:07:42.063615",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

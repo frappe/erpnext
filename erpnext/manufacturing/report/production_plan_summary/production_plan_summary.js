@@ -22,9 +22,9 @@ frappe.query_reports["Production Plan Summary"] = {
 	"formatter": function(value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 
-		if (column.fieldname == "document_name") {
+		if (column.fieldname == "item_code") {
 			var color = data.pending_qty > 0 ? 'red': 'green';
-			value = `<a style='color:${color}' href="#Form/${data['document_type']}/${data['document_name']}" data-doctype="${data['document_type']}">${data['document_name']}</a>`;
+			value = `<a style='color:${color}' href="/app/item/${data['item_code']}" data-doctype="Item">${data['item_code']}</a>`;
 		}
 
 		return value;
