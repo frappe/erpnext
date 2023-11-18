@@ -633,7 +633,7 @@ def make_contact(args, is_primary_contact=1):
 	party_type = args.customer_type if args.doctype == "Customer" else args.supplier_type
 	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
 
-	if party_type  == "Individual":
+	if party_type == "Individual":
 		first, middle, last = parse_full_name(args.get(party_name_key))
 		values.update(
 			{
@@ -648,7 +648,7 @@ def make_contact(args, is_primary_contact=1):
 				"company_name": args.get(party_name_key),
 			}
 		)
-		
+
 	contact = frappe.get_doc(values)
 
 	if args.get("email_id"):
