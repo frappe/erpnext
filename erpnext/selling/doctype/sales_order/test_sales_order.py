@@ -106,7 +106,7 @@ class TestSalesOrder(FrappeTestCase):
 		so.load_from_db()
 		self.assertEqual(so.per_billed, 0)
 
-	def test_make_sales_invoice_with_terms(self):
+	def test_make_sales_invoice_with_terms_template(self):
 		so = make_sales_order(do_not_submit=True)
 
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, so.name)
@@ -135,6 +135,31 @@ class TestSalesOrder(FrappeTestCase):
 
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
+
+	def test_make_sales_invoice_with_individual_terms(self):
+		so = make_sales_order(do_not_submit=True)
+
+		so.update({"payment_terms_template": "_Test Payment Term Template"})
+		so.save()
+
+		so.payment_schedule[0].invoice_portion = 25
+		so.payment_schedule[1].invoice_portion = 75
+		so.save()
+
+		so.submit()
+		si = make_sales_invoice(so.name)
+
+		si.insert()
+		si.save()
+
+		self.assertEqual(si.payment_schedule[0].payment_amount, 250.0)
+		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(so.transaction_date))
+		self.assertEqual(si.payment_schedule[1].payment_amount, 750.0)
+		self.assertEqual(
+			getdate(si.payment_schedule[1].due_date), getdate(add_days(so.transaction_date, 30))
+		)
+
+		si.submit()
 
 	def test_update_qty(self):
 		so = make_sales_order()
@@ -1218,13 +1243,19 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertTrue(so.get("payment_schedule"))
 
 	def test_terms_not_copied(self):
+		restore = automatically_fetch_payment_terms(enable=0)
+
 		so = make_sales_order()
 		self.assertTrue(so.get("payment_schedule"))
 
 		si = make_sales_invoice(so.name)
 		self.assertFalse(si.get("payment_schedule"))
 
+		automatically_fetch_payment_terms(enable=restore)
+
 	def test_terms_copied(self):
+		restore = automatically_fetch_payment_terms()
+
 		so = make_sales_order(do_not_copy=1, do_not_save=1)
 		so.payment_terms_template = "_Test Payment Term Template"
 		so.insert()
@@ -1234,6 +1265,8 @@ class TestSalesOrder(FrappeTestCase):
 		si = make_sales_invoice(so.name)
 		si.insert()
 		self.assertTrue(si.get("payment_schedule"))
+
+		automatically_fetch_payment_terms(enable=restore)
 
 	def test_make_work_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
@@ -1560,7 +1593,7 @@ class TestSalesOrder(FrappeTestCase):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		automatically_fetch_payment_terms()
+		restore = automatically_fetch_payment_terms()
 
 		so = make_sales_order(uom="Nos", do_not_save=1)
 		create_payment_terms_template()
@@ -1575,7 +1608,7 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
-		automatically_fetch_payment_terms(enable=0)
+		automatically_fetch_payment_terms(enable=restore)
 
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -1949,8 +1982,10 @@ class TestSalesOrder(FrappeTestCase):
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
+	previous = accounts_settings.automatically_fetch_payment_terms
 	accounts_settings.automatically_fetch_payment_terms = enable
 	accounts_settings.save()
+	return previous
 
 
 def compare_payment_schedules(doc, doc1, doc2):

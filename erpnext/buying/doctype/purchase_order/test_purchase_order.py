@@ -511,12 +511,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, pr.submit)
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
-	def test_make_purchase_invoice_with_terms(self):
-		from erpnext.selling.doctype.sales_order.test_sales_order import (
-			automatically_fetch_payment_terms,
-		)
-
-		automatically_fetch_payment_terms()
+	def test_make_purchase_invoice_with_terms_template(self):
 		po = create_purchase_order(do_not_save=True)
 
 		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
@@ -544,7 +539,34 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(
 			getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30)
 		)
-		automatically_fetch_payment_terms(enable=0)
+
+	def test_make_purchase_invoice_with_individual_terms(self):
+		po = create_purchase_order(do_not_save=True)
+
+		po.update({"payment_terms_template": "_Test Payment Term Template"})
+		po.save()
+
+		po.payment_schedule[0].invoice_portion = 25
+		po.payment_schedule[1].invoice_portion = 75
+		po.save()
+
+		self.assertEqual(po.payment_schedule[0].payment_amount, 1250.0)
+		self.assertEqual(getdate(po.payment_schedule[0].due_date), getdate(po.transaction_date))
+		self.assertEqual(po.payment_schedule[1].payment_amount, 3750.0)
+		self.assertEqual(
+			getdate(po.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30)
+		)
+
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.save()
+
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 1250.0)
+		self.assertEqual(getdate(pi.payment_schedule[0].due_date), getdate(po.transaction_date))
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 3750.0)
+		self.assertEqual(
+			getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30)
+		)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -693,6 +715,12 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(due_date, "2023-03-31")
 
 	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+		)
+
+		restore = automatically_fetch_payment_terms(enable=0)
+
 		po = create_purchase_order(do_not_save=1)
 		po.payment_terms_template = "_Test Payment Term Template"
 		po.save()
@@ -704,6 +732,8 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(pi.get("payment_terms_template"), "_Test Payment Term Template 1")
 		frappe.db.set_value("Company", "_Test Company", "payment_terms", "")
+
+		automatically_fetch_payment_terms(enable=restore)
 
 	def test_terms_copied(self):
 		po = create_purchase_order(do_not_save=1)
@@ -809,7 +839,7 @@ class TestPurchaseOrder(FrappeTestCase):
 			compare_payment_schedules,
 		)
 
-		automatically_fetch_payment_terms()
+		restore = automatically_fetch_payment_terms()
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
@@ -824,7 +854,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		# self.assertEqual(po.payment_terms_template, pi.payment_terms_template)
 		compare_payment_schedules(self, po, pi)
 
-		automatically_fetch_payment_terms(enable=0)
+		automatically_fetch_payment_terms(enable=restore)
 
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
