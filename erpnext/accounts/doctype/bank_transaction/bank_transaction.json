@@ -13,6 +13,7 @@
   "status",
   "bank_account",
   "company",
+  "amended_from",
   "section_break_4",
   "deposit",
   "withdrawal",
@@ -25,10 +26,10 @@
   "transaction_id",
   "transaction_type",
   "section_break_14",
+  "column_break_oufv",
   "payment_entries",
   "section_break_18",
   "allocated_amount",
-  "amended_from",
   "column_break_17",
   "unallocated_amount",
   "party_section",
@@ -138,10 +139,12 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "allocated_amount",
    "fieldtype": "Currency",
    "label": "Allocated Amount",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -157,10 +160,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "unallocated_amount",
    "fieldtype": "Currency",
    "label": "Unallocated Amount",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "party_section",
@@ -225,11 +230,15 @@
    "fieldname": "bank_party_account_number",
    "fieldtype": "Data",
    "label": "Party Account No. (Bank Statement)"
+  },
+  {
+   "fieldname": "column_break_oufv",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-06 13:58:12.821411",
+ "modified": "2023-11-18 18:32:47.203694",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
