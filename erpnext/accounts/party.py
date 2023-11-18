@@ -224,19 +224,13 @@ def set_address_details(
 	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
 		if shipping_address:
 			party_details.update(
-<<<<<<< HEAD
 				{
 					"shipping_address": shipping_address,
-					"shipping_address_display": render_address(shipping_address),
+					"shipping_address_display": render_address(
+						shipping_address, check_permissions=not ignore_permissions
+					),
 					**get_fetch_values(doctype, "shipping_address", shipping_address),
 				}
-=======
-				shipping_address=shipping_address,
-				shipping_address_display=render_address(
-					shipping_address, check_permissions=not ignore_permissions
-				),
-				**get_fetch_values(doctype, "shipping_address", shipping_address)
->>>>>>> 45299fe4b3 (fix: pass check permission in render_address)
 			)
 
 		if party_details.company_address:
