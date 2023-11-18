@@ -125,9 +125,11 @@ class TestSalesOrder(FrappeTestCase):
 		si.save()
 
 		self.assertEqual(si.payment_schedule[0].payment_amount, 500.0)
-		self.assertEqual(si.payment_schedule[0].due_date, so.transaction_date)
+		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(so.transaction_date))
 		self.assertEqual(si.payment_schedule[1].payment_amount, 500.0)
-		self.assertEqual(si.payment_schedule[1].due_date, add_days(so.transaction_date, 30))
+		self.assertEqual(
+			getdate(si.payment_schedule[1].due_date), getdate(add_days(so.transaction_date, 30))
+		)
 
 		si.submit()
 
