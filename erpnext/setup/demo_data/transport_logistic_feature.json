@@ -1,0 +1,29 @@
+[
+ {
+  "description": "Transport can reach Zone A",
+  "docstatus": 0,
+  "doctype": "Transport Logistic Feature",
+  "modified": "2023-11-18 14:37:04.835369",
+  "name": "Zone A",
+  "taint": 0,
+  "title": "Zone A"
+ },
+ {
+  "description": "Transport can reach Zone B",
+  "docstatus": 0,
+  "doctype": "Transport Logistic Feature",
+  "modified": "2023-11-18 14:37:10.701509",
+  "name": "Zone B",
+  "taint": 0,
+  "title": "Zone B"
+ },
+ {
+  "description": "Transport has freezer capacity installed.",
+  "docstatus": 0,
+  "doctype": "Transport Logistic Feature",
+  "modified": "2023-11-18 14:36:42.553773",
+  "name": "Freezer",
+  "taint": 0,
+  "title": "Freezer"
+ }
+]

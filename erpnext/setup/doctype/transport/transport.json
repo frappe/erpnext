@@ -195,9 +195,9 @@
   {
    "description": "to be used as positive/negative constraints in a VRP solver",
    "fieldname": "logistic_features",
-   "fieldtype": "Select",
+   "fieldtype": "Table MultiSelect",
    "label": "Features",
-   "options": "Transport Logistic Feature"
+   "options": "Transport Features"
   },
   {
    "description": "liter",
@@ -218,7 +218,7 @@
   }
  ],
  "links": [],
- "modified": "2023-11-18 14:06:33.808886",
+ "modified": "2023-11-18 14:35:38.312539",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transport",
