@@ -504,7 +504,7 @@
    "fieldtype": "Table",
    "hidden": 1,
    "label": "Variant Attributes",
-   "mandatory_depends_on": "has_variants",
+   "mandatory_depends_on": "eval:(doc.has_variants || doc.variant_of) && doc.variant_based_on==='Item Attribute'",
    "options": "Item Variant Attribute"
   },
   {
