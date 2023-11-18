@@ -20,7 +20,7 @@
   "acquisition_date",
   "last_odometer",
   "transport_value",
-  "employee",
+  "driver",
   "routing_problem_parameters_section",
   "avg_speed",
   "avg_cost",
@@ -83,13 +83,6 @@
    "in_list_view": 1,
    "label": "Value",
    "print_hide_if_no_value": 1
-  },
-  {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Employee",
-   "options": "Employee"
   },
   {
    "collapsible": 1,
@@ -215,10 +208,17 @@
    "fieldname": "routing_problem_parameters_section",
    "fieldtype": "Section Break",
    "label": "Routing Problem Parameters"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Driver"
   }
  ],
  "links": [],
- "modified": "2023-11-18 14:35:38.312539",
+ "modified": "2023-11-18 14:49:37.025512",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transport",
