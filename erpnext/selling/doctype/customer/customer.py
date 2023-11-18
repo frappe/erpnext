@@ -644,8 +644,17 @@ def make_contact(args, is_primary_contact=1):
 		"is_primary_contact": is_primary_contact,
 		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 	}
+<<<<<<< HEAD
 	if args.customer_type == "Individual":
 		first, middle, last = parse_full_name(args.get("customer_name"))
+=======
+
+	party_type = args.customer_type if args.doctype == "Customer" else args.supplier_type
+	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
+
+	if party_type == "Individual":
+		first, middle, last = parse_full_name(args.get(party_name_key))
+>>>>>>> ff5b1b7ded (style: remove trailing whitespace (#38183))
 		values.update(
 			{
 				"first_name": first,
@@ -659,6 +668,10 @@ def make_contact(args, is_primary_contact=1):
 				"company_name": args.get("customer_name"),
 			}
 		)
+<<<<<<< HEAD
+=======
+
+>>>>>>> ff5b1b7ded (style: remove trailing whitespace (#38183))
 	contact = frappe.get_doc(values)
 
 	if args.get("email_id"):
