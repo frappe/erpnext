@@ -14,14 +14,13 @@ class TestVehicle(unittest.TestCase):
 		vehicle = frappe.get_doc(
 			{
 				"doctype": "Vehicle",
-				"license_plate": random_string(10).upper(),
-				"make": "Maruti",
+				"idenifier": random_string(10).upper(),
+				"manufacturer": "Maruti",
 				"model": "PCM",
 				"last_odometer": 5000,
 				"acquisition_date": frappe.utils.nowdate(),
 				"location": "Mumbai",
-				"chassis_no": "1234ABCD",
-				"uom": "Litre",
+				"serial_no": "1234ABCD",
 				"vehicle_value": frappe.utils.flt(500000),
 			}
 		)
