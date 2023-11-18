@@ -9,11 +9,11 @@ from frappe.utils import random_string
 # test_records = frappe.get_test_records('Vehicle')
 
 
-class TestVehicle(unittest.TestCase):
-	def test_make_vehicle(self):
+class TestTransport(unittest.TestCase):
+	def test_make_transport(self):
 		vehicle = frappe.get_doc(
 			{
-				"doctype": "Vehicle",
+				"doctype": "Transport",
 				"idenifier": random_string(10).upper(),
 				"manufacturer": "Maruti",
 				"model": "PCM",

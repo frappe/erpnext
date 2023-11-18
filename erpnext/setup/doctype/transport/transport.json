@@ -1,0 +1,257 @@
+{
+ "actions": [],
+ "autoname": "field:identifier",
+ "creation": "2016-09-03 03:33:27.680331",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "identifier",
+  "transport_mode",
+  "propulsion",
+  "location",
+  "column_break_3",
+  "manufacturer",
+  "model",
+  "serial_no",
+  "fuel_type",
+  "column_break_8",
+  "acquisition_date",
+  "last_odometer",
+  "transport_value",
+  "employee",
+  "routing_problem_parameters_section",
+  "avg_speed",
+  "avg_cost",
+  "trip_setup_cost",
+  "column_break_kqde",
+  "logistic_features",
+  "volume_capacity",
+  "weight_capacity",
+  "insurance_details",
+  "insurance_company",
+  "policy_no",
+  "column_break_15",
+  "start_date",
+  "end_date"
+ ],
+ "fields": [
+  {
+   "depends_on": "doc.transport_mode !== \"Pipeline\"",
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Model"
+  },
+  {
+   "depends_on": "eval: [\"Engine\", \"Hybride\"].includes(doc.propulsion)",
+   "fieldname": "last_odometer",
+   "fieldtype": "Int",
+   "label": "Odometer Value (Last)",
+   "no_copy": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "acquisition_date",
+   "fieldtype": "Date",
+   "label": "Acquisition Date"
+  },
+  {
+   "depends_on": "doc.transport_mode !== \"Pipeline\"",
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Address"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transport_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Value",
+   "print_hide_if_no_value": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "insurance_details",
+   "fieldtype": "Section Break",
+   "label": "Insurance Details"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Data",
+   "label": "Insurance Company"
+  },
+  {
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "label": "Policy No"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "depends_on": "eval: [\"Engine\", \"Hybride\"].includes(doc.propulsion)",
+   "fieldname": "fuel_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fuel Type",
+   "options": "\nGasoline\nDiesel\nNatural Gas\nElectric\nHeavy Fuel\nKerosene\nOther"
+  },
+  {
+   "description": "e.g. license plate for motor vehicles",
+   "fieldname": "identifier",
+   "fieldtype": "Data",
+   "label": "Identifier",
+   "no_copy": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "Road",
+   "documentation_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Glossary:Transport_mode",
+   "fieldname": "transport_mode",
+   "fieldtype": "Select",
+   "label": "Mode",
+   "options": "Road\nRail\nMaritime\nInland Waterways\nAir\nPipeline",
+   "reqd": 1
+  },
+  {
+   "default": "Engine",
+   "depends_on": "doc.transport_mode !== \"Pipeline\"",
+   "fieldname": "propulsion",
+   "fieldtype": "Select",
+   "label": "Propulsion",
+   "options": "\nEngine\nElectric\nHuman\nAnimal\nHybrid"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Data",
+   "label": "Manufacturer"
+  },
+  {
+   "description": "e.g. chassis number",
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial"
+  },
+  {
+   "description": "meter / second",
+   "fieldname": "avg_speed",
+   "fieldtype": "Float",
+   "label": "Average Speed",
+   "non_negative": 1
+  },
+  {
+   "description": "cost unit / km",
+   "fieldname": "avg_cost",
+   "fieldtype": "Float",
+   "label": "Average Cost"
+  },
+  {
+   "fieldname": "column_break_kqde",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "cost unit",
+   "fieldname": "trip_setup_cost",
+   "fieldtype": "Float",
+   "label": "Trip Setup Cost"
+  },
+  {
+   "description": "to be used as positive/negative constraints in a VRP solver",
+   "fieldname": "logistic_features",
+   "fieldtype": "Select",
+   "label": "Features",
+   "options": "Transport Logistic Feature"
+  },
+  {
+   "description": "liter",
+   "fieldname": "volume_capacity",
+   "fieldtype": "Float",
+   "label": "Volume Capacity"
+  },
+  {
+   "description": "kg",
+   "fieldname": "weight_capacity",
+   "fieldtype": "Float",
+   "label": "Weight Capacity"
+  },
+  {
+   "fieldname": "routing_problem_parameters_section",
+   "fieldtype": "Section Break",
+   "label": "Routing Problem Parameters"
+  }
+ ],
+ "links": [],
+ "modified": "2023-11-18 13:21:42.163907",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Transport",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Delivery User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Delivery Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "identifier,location,model",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

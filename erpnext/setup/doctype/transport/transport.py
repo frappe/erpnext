@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate
 
 
-class Vehicle(Document):
+class Transport(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -20,7 +20,7 @@ class Vehicle(Document):
 		acquisition_date: DF.Date | None
 		amended_from: DF.Link | None
 		carbon_check_date: DF.Date | None
-		chassis_no: DF.Data | None
+		serial_no: DF.Data | None
 		color: DF.Data | None
 		doors: DF.Int
 		employee: DF.Link | None
@@ -28,14 +28,14 @@ class Vehicle(Document):
 		fuel_type: DF.Literal["Petrol", "Diesel", "Natural Gas", "Electric"]
 		insurance_company: DF.Data | None
 		last_odometer: DF.Int
-		license_plate: DF.Data
+		identifier: DF.Data
 		location: DF.Data | None
-		make: DF.Data
+		manufacturer: DF.Data
 		model: DF.Data
 		policy_no: DF.Data | None
 		start_date: DF.Date | None
 		uom: DF.Link
-		vehicle_value: DF.Currency
+		transport_value: DF.Currency
 		wheels: DF.Int
 	# end: auto-generated types
 
