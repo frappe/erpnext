@@ -38,11 +38,12 @@
  ],
  "fields": [
   {
-   "depends_on": "doc.transport_mode !== \"Pipeline\"",
+   "depends_on": "eval: doc.transport_mode !== \"Pipeline\"",
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "model",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -63,9 +64,12 @@
    "label": "Acquisition Date"
   },
   {
-   "depends_on": "doc.transport_mode !== \"Pipeline\"",
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval: doc.transport_mode !== \"Pipeline\";",
    "fieldname": "location",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Location",
    "options": "Address"
   },
@@ -140,13 +144,15 @@
    "documentation_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Glossary:Transport_mode",
    "fieldname": "transport_mode",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Mode",
    "options": "Road\nRail\nMaritime\nInland Waterways\nAir\nPipeline",
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "default": "Engine",
-   "depends_on": "doc.transport_mode !== \"Pipeline\"",
+   "depends_on": "eval: doc.transport_mode !== \"Pipeline\"",
    "fieldname": "propulsion",
    "fieldtype": "Select",
    "label": "Propulsion",
@@ -212,7 +218,7 @@
   }
  ],
  "links": [],
- "modified": "2023-11-18 13:21:42.163907",
+ "modified": "2023-11-18 14:06:33.808886",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transport",
