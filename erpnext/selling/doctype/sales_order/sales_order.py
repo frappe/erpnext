@@ -941,11 +941,12 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		ignore_permissions=ignore_permissions,
 	)
 
-	automatically_fetch_payment_terms = cint(
-		frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
-	)
-	if automatically_fetch_payment_terms:
-		doclist.set_payment_schedule()
+	if doclist.get("items"):
+		automatically_fetch_payment_terms = cint(
+			frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+		)
+		if automatically_fetch_payment_terms:
+			doclist.set_payment_schedule()
 
 	doclist.set_onload("ignore_price_list", True)
 
