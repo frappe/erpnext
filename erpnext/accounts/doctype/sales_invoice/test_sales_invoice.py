@@ -669,7 +669,7 @@ class TestSalesInvoice(FrappeTestCase):
 				190.66,
 				953.3,
 				150,
-				749.99,
+				750,
 			],
 		}
 
@@ -683,20 +683,20 @@ class TestSalesInvoice(FrappeTestCase):
 
 		# check net total
 		self.assertEqual(si.base_net_total, si.net_total)
-		self.assertEqual(si.net_total, 1249.97)
+		self.assertEqual(si.net_total, 1249.98)
 		self.assertEqual(si.total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "total"],
-			"_Test Account Excise Duty - _TC": [140, 1389.97],
-			"_Test Account Education Cess - _TC": [2.8, 1392.77],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1394.17],
-			"_Test Account CST - _TC": [27.88, 1422.05],
-			"_Test Account VAT - _TC": [156.25, 1578.30],
-			"_Test Account Customs Duty - _TC": [125, 1703.30],
-			"_Test Account Shipping Charges - _TC": [100, 1803.30],
-			"_Test Account Discount - _TC": [-180.33, 1622.97],
+			"_Test Account Excise Duty - _TC": [140, 1389.98],
+			"_Test Account Education Cess - _TC": [2.8, 1392.78],
+			"_Test Account S&H Education Cess - _TC": [1.4, 1394.18],
+			"_Test Account CST - _TC": [27.88, 1422.06],
+			"_Test Account VAT - _TC": [156.25, 1578.31],
+			"_Test Account Customs Duty - _TC": [125, 1703.31],
+			"_Test Account Shipping Charges - _TC": [100, 1803.31],
+			"_Test Account Discount - _TC": [-180.33, 1622.98],
 		}
 
 		for d in si.get("taxes"):
@@ -2087,7 +2087,7 @@ class TestSalesInvoice(FrappeTestCase):
 			["_Test Account Service Tax - _TC", 0.0, 114.50],
 			["_Test Account VAT - _TC", 0.0, 114.50],
 			[si.debit_to, 1501, 0.0],
-			["Round Off - _TC", 0.01, 0.20],
+			["Round Off - _TC", 0.20, 0.0],
 			["Sales - _TC", 0.0, 1272.20],
 		]
 
@@ -2150,7 +2150,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.net_total, 4007.15)
 		self.assertEqual(si.grand_total, 4488.02)
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
-		self.assertEqual(si.rounding_adjustment, -0.02)
+		self.assertEqual(si.rounding_adjustment, -0.01)
 
 		expected_values = dict(
 			(d[0], d)
@@ -2159,7 +2159,7 @@ class TestSalesInvoice(FrappeTestCase):
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
-				["Round Off - _TC", 0.02, 0.0],
+				["Round Off - _TC", 0.01, 0.0],
 			]
 		)
 
