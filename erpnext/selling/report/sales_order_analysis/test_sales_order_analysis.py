@@ -32,6 +32,7 @@ class TestSalesOrderAnalysis(FrappeTestCase):
 
 	def create_sales_invoice(self, so, do_not_save=False, do_not_submit=False):
 		sinv = make_sales_invoice(so.name)
+		sinv.set_posting_time = True
 		sinv.posting_date = so.transaction_date
 		sinv.taxes_and_charges = ""
 		sinv.taxes = ""
