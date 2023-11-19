@@ -252,3 +252,14 @@ class TestSalesOrderAnalysis(FrappeTestCase):
 		for key, val in expected_value.items():
 			with self.subTest(key=key, val=val):
 				self.assertEqual(data[0][key], val)
+
+	def test_08_so_autofetch_payment_terms(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			automatically_fetch_payment_terms,
+		)
+
+		automatically_fetch_payment_terms()
+		try:
+			self.test_02_so_to_deliver()
+		finally:
+			automatically_fetch_payment_terms(enable=0)
