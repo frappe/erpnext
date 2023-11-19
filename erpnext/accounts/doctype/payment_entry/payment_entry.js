@@ -829,7 +829,6 @@ frappe.ui.form.on('Payment Entry', {
 			else
 				total_negative_outstanding += Math.abs(flt(row.outstanding_amount));
 		})
-
 		var allocated_negative_outstanding = 0;
 		if (
 				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
@@ -844,6 +843,7 @@ frappe.ui.form.on('Payment Entry', {
 
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
 		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
+			total_negative_outstanding = flt(total_negative_outstanding, precision("outstanding_amount"))
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
 					frappe.msgprint(
