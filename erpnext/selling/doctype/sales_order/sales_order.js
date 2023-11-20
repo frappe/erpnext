@@ -214,7 +214,6 @@ frappe.ui.form.on("Sales Order", {
 					label: __("Items to Reserve"),
 					allow_bulk_edit: false,
 					cannot_add_rows: true,
-					cannot_delete_rows: true,
 					data: [],
 					fields: [
 						{
@@ -260,7 +259,7 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Reserve Stock"),
 			primary_action: () => {
-				var data = {items: dialog.fields_dict.items.grid.get_selected_children()};
+				var data = {items: dialog.fields_dict.items.grid.data};
 
 				if (data.items && data.items.length > 0) {
 					frappe.call({
@@ -277,9 +276,6 @@ frappe.ui.form.on("Sales Order", {
 							frm.reload_doc();
 						}
 					});
-				}
-				else {
-					frappe.msgprint(__("Please select items to reserve."));
 				}
 
 				dialog.hide();
@@ -316,7 +312,6 @@ frappe.ui.form.on("Sales Order", {
 					label: __("Reserved Stock"),
 					allow_bulk_edit: false,
 					cannot_add_rows: true,
-					cannot_delete_rows: true,
 					in_place_edit: true,
 					data: [],
 					fields: [
@@ -360,7 +355,7 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Unreserve Stock"),
 			primary_action: () => {
-				var data = {sr_entries: dialog.fields_dict.sr_entries.grid.get_selected_children()};
+				var data = {sr_entries: dialog.fields_dict.sr_entries.grid.data};
 
 				if (data.sr_entries && data.sr_entries.length > 0) {
 					frappe.call({
@@ -376,9 +371,6 @@ frappe.ui.form.on("Sales Order", {
 							frm.reload_doc();
 						}
 					});
-				}
-				else {
-					frappe.msgprint(__("Please select items to unreserve."));
 				}
 
 				dialog.hide();
