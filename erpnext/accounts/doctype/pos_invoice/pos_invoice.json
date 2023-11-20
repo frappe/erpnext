@@ -1562,11 +1562,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-09-30 03:49:50.455199",
-=======
  "modified": "2023-11-20 12:27:12.848149",
->>>>>>> 83a13e22b7 (refactor: add flag to POS Invoice)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
