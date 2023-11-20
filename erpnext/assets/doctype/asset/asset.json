@@ -481,6 +481,7 @@
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
    "label": "Asset Quantity",
@@ -571,7 +572,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2023-11-15 17:40:17.315203",
+ "modified": "2023-11-20 20:57:37.010467",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
