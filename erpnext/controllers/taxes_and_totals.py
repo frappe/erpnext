@@ -516,6 +516,9 @@ class calculate_taxes_and_totals(object):
 			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
 
 	def manipulate_grand_total_for_inclusive_tax(self):
+		if not frappe.db.get_single_value("Accounts Settings", "manipulate_grand_total_for_inclusive_tax"):
+			return
+	
 		# if fully inclusive taxes and diff
 		if self.doc.get("taxes") and any(cint(t.included_in_print_rate) for t in self.doc.get("taxes")):
 			last_tax = self.doc.get("taxes")[-1]

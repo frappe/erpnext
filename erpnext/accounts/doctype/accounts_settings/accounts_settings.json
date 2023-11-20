@@ -29,6 +29,7 @@
   "submit_journal_entries",
   "tax_settings_section",
   "determine_address_tax_category_from",
+  "manipulate_grand_total_for_inclusive_tax",
   "column_break_19",
   "add_taxes_from_item_tax_template",
   "book_tax_discount_loss",
@@ -422,6 +423,13 @@
    "fieldname": "round_row_wise_tax",
    "fieldtype": "Check",
    "label": "Round Tax Amount Row-wise"
+  },
+  {
+   "default": "1",
+   "description": "For tax inclusive rate, due to precision loss while calculating the net total and the taxes, sometimes it doesn't add up to match with the total. If you would like to force it to match, enable this setting.",
+   "fieldname": "manipulate_grand_total_for_inclusive_tax",
+   "fieldtype": "Check",
+   "label": "Manipulate Grand Total for Inclusive Tax"
   }
  ],
  "icon": "icon-cog",
@@ -429,7 +437,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-28 00:12:02.740633",
+ "modified": "2023-11-19 23:43:06.129368",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
