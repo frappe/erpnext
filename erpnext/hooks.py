@@ -421,7 +421,7 @@ scheduler_events = {
 	"hourly_long": [
 		"erpnext.accounts.doctype.process_subscription.process_subscription.create_subscription_process",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
-		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction",
+		"erpnext.utilities.bulk_transaction.retry",
 	],
 	"daily": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
