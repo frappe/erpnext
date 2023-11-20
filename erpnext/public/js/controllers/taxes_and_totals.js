@@ -4,6 +4,10 @@
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
+		frappe.db.get_single_value("Accounts Settings", "manipulate_grand_total_for_inclusive_tax")
+			.then((manipulate_grand_total_for_inclusive_tax) => {
+				frappe.flags.manipulate_grand_total_for_inclusive_tax = manipulate_grand_total_for_inclusive_tax;
+			})
 	}
 
 	apply_pricing_rule_on_item(item) {
@@ -523,6 +527,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	manipulate_grand_total_for_inclusive_tax() {
 		var me = this;
+		if (!frappe.flags.manipulate_grand_total_for_inclusive_tax) {
+			me.frm.doc.grand_total_diff = 0;
+			return;
+		}
 		// if fully inclusive taxes and diff
 		if (this.frm.doc["taxes"] && this.frm.doc["taxes"].length) {
 			var any_inclusive_tax = false;
@@ -548,7 +556,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				diff = flt(diff, precision("rounding_adjustment"));
 
 				if ( diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
-					me.frm.doc.rounding_adjustment = diff;
+					me.frm.doc.grand_total_diff = diff;
+				} else {
+					me.frm.doc.grand_total_diff = 0;
 				}
 			}
 		}
@@ -559,7 +569,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var me = this;
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
 		this.frm.doc.grand_total = flt(tax_count
-			? this.frm.doc["taxes"][tax_count - 1].total + flt(this.frm.doc.rounding_adjustment)
+			? this.frm.doc["taxes"][tax_count - 1].total + flt(this.frm.doc.grand_total_diff)
 			: this.frm.doc.net_total);
 
 		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"], this.frm.doc.doctype)) {
@@ -619,7 +629,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
 			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(this.frm.doc.grand_total,
 				this.frm.doc.currency, precision("rounded_total"));
-			this.frm.doc.rounding_adjustment += flt(this.frm.doc.rounded_total - this.frm.doc.grand_total,
+			this.frm.doc.rounding_adjustment = flt(this.frm.doc.rounded_total - this.frm.doc.grand_total,
 				precision("rounding_adjustment"));
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);

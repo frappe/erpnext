@@ -518,6 +518,7 @@ class calculate_taxes_and_totals(object):
 
 	def manipulate_grand_total_for_inclusive_tax(self):
 		if not frappe.db.get_single_value("Accounts Settings", "manipulate_grand_total_for_inclusive_tax"):
+			self.doc.grand_total_diff = 0
 			return
 	
 		# if fully inclusive taxes and diff
@@ -541,17 +542,19 @@ class calculate_taxes_and_totals(object):
 			diff = flt(diff, self.doc.precision("rounding_adjustment"))
 
 			if diff and abs(diff) <= (5.0 / 10 ** last_tax.precision("tax_amount")):
-				self.doc.rounding_adjustment = diff
+				self.doc.grand_total_diff = diff
+			else:
+				self.doc.grand_total_diff = 0
 
 	def calculate_totals(self):
 		if self.doc.get("taxes"):
-			self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment)
+			self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.get("grand_total_diff"))
 		else:
 			self.doc.grand_total = flt(self.doc.net_total)
 
 		if self.doc.get("taxes"):
 			self.doc.total_taxes_and_charges = flt(
-				self.doc.grand_total - self.doc.net_total - flt(self.doc.rounding_adjustment),
+				self.doc.grand_total - self.doc.net_total - flt(self.doc.get("grand_total_diff")),
 				self.doc.precision("total_taxes_and_charges"),
 			)
 		else:
@@ -616,8 +619,8 @@ class calculate_taxes_and_totals(object):
 				self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
 			)
 
-			# if print_in_rate is set, we would have already calculated rounding adjustment
-			self.doc.rounding_adjustment += flt(
+			# rounding adjustment should always be the difference vetween grand and rounded total
+			self.doc.rounding_adjustment = flt(
 				self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
 			)
 
