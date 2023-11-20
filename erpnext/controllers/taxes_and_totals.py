@@ -358,12 +358,25 @@ class calculate_taxes_and_totals(object):
 				):
 					tax.tax_amount += current_tax_amount
 
+				tax_amount_with_precision = flt(abs(tax.tax_amount), tax.precision("tax_amount"))
+				tax.tax_amount = (
+					-tax_amount_with_precision if tax.tax_amount < 0 else tax_amount_with_precision
+				)
+
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
 				tax.tax_amount_for_current_item = current_tax_amount
 
 				# set tax after discount
 				tax.tax_amount_after_discount_amount += current_tax_amount
+				tax_after_discount_with_precision = flt(
+					abs(tax.tax_amount_after_discount_amount), tax.precision("tax_amount_after_discount_amount")
+				)
+				tax.tax_amount_after_discount_amount = (
+					-tax_after_discount_with_precision
+					if tax.tax_amount_after_discount_amount < 0
+					else tax_after_discount_with_precision
+				)
 
 				current_tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(current_tax_amount, tax)
 
