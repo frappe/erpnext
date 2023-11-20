@@ -350,6 +350,7 @@ erpnext.patches.v14_0.add_default_for_repost_settings
 erpnext.patches.v15_0.rename_daily_depreciation_to_depreciation_amount_based_on_num_days_in_month
 erpnext.patches.v15_0.rename_depreciation_amount_based_on_num_days_in_month_to_daily_prorata_based
 erpnext.patches.v15_0.set_reserved_stock_in_bin
+erpnext.patches.v14_0.create_accounting_dimensions_in_supplier_quotation
 erpnext.patches.v14_0.update_zero_asset_quantity_field
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

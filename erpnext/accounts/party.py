@@ -236,7 +236,9 @@ def set_address_details(
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
-				shipping_address_display=render_address(shipping_address),
+				shipping_address_display=render_address(
+					shipping_address, check_permissions=not ignore_permissions
+				),
 				**get_fetch_values(doctype, "shipping_address", shipping_address)
 			)
 
