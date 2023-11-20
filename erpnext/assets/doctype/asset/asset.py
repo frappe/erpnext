@@ -46,12 +46,28 @@ class Asset(AccountsController):
 		self.validate_item()
 		self.validate_cost_center()
 		self.set_missing_values()
-		self.validate_finance_books()
-		if not self.split_from:
-			self.prepare_depreciation_data()
-			update_draft_asset_depr_schedules(self)
 		self.validate_gross_and_purchase_amount()
 		self.validate_expected_value_after_useful_life()
+		self.validate_finance_books()
+
+		if not self.split_from:
+			self.prepare_depreciation_data()
+
+			if self.calculate_depreciation:
+				update_draft_asset_depr_schedules(self)
+
+				if frappe.db.exists("Asset", self.name):
+					asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
+
+					if asset_depr_schedules_names:
+						asset_depr_schedules_links = get_comma_separated_links(
+							asset_depr_schedules_names, "Asset Depreciation Schedule"
+						)
+						frappe.msgprint(
+							_(
+								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
+							).format(asset_depr_schedules_links)
+						)
 
 		self.status = self.get_status()
 
@@ -61,17 +77,7 @@ class Asset(AccountsController):
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 		if self.calculate_depreciation and not self.split_from:
-			asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
 			convert_draft_asset_depr_schedules_into_active(self)
-			if asset_depr_schedules_names:
-				asset_depr_schedules_links = get_comma_separated_links(
-					asset_depr_schedules_names, "Asset Depreciation Schedule"
-				)
-				frappe.msgprint(
-					_(
-						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
-					).format(asset_depr_schedules_links)
-				)
 		self.set_status()
 		add_asset_activity(self.name, _("Asset submitted"))
 
