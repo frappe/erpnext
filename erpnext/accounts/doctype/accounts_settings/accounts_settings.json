@@ -67,16 +67,13 @@
   "banking_tab",
   "enable_party_matching",
   "enable_fuzzy_matching",
-<<<<<<< HEAD
   "tab_break_dpet",
-  "show_balance_in_coa"
-=======
+  "show_balance_in_coa",
   "reports_tab",
   "remarks_section",
   "general_ledger_remarks_length",
   "column_break_lvjk",
   "receivable_payable_remarks_length"
->>>>>>> 97090ff367 (refactor: provision to set `remarks` length in accounts settings)
  ],
  "fields": [
   {
@@ -436,10 +433,7 @@
    "default": "1",
    "fieldname": "show_balance_in_coa",
    "fieldtype": "Check",
-<<<<<<< HEAD
    "label": "Show Balances in Chart Of Accounts"
-=======
-   "label": "Round Tax Amount Row-wise"
   },
   {
    "fieldname": "reports_tab",
@@ -468,7 +462,6 @@
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
    "label": "Remarks Column Length"
->>>>>>> 97090ff367 (refactor: provision to set `remarks` length in accounts settings)
   }
  ],
  "icon": "icon-cog",
@@ -476,11 +469,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-07-27 15:05:34.000264",
-=======
  "modified": "2023-11-20 09:37:47.650347",
->>>>>>> 97090ff367 (refactor: provision to set `remarks` length in accounts settings)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
