@@ -4,7 +4,7 @@
 frappe.provide("erpnext.utils");
 
 const SALES_DOCTYPES = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'];
-const PURCHASE_DOCTYPES = ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'];
+const PURCHASE_DOCTYPES = ['Supplier Quotation','Purchase Order', 'Purchase Receipt', 'Purchase Invoice'];
 
 erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if (!method) {
