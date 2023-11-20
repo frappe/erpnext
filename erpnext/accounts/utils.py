@@ -237,7 +237,6 @@ def get_balance_on(
 			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False),))
 
 	if account:
-
 		if not (frappe.flags.ignore_account_permission or ignore_account_permission):
 			acc.check_permission("read")
 
@@ -283,11 +282,11 @@ def get_balance_on(
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party) or account_type:
-
+		precision = get_currency_precision()
 		if in_account_currency:
-			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
+			select_field = f"sum(round(debit_in_account_currency, {precision})) - sum(round(credit_in_account_currency, {precision}))"
 		else:
-			select_field = "sum(debit) - sum(credit)"
+			select_field = f"sum(round(debit, {precision})) - sum(round(credit, {precision}))"
 		bal = frappe.db.sql(
 			"""
 			SELECT {0}
