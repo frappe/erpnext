@@ -401,7 +401,7 @@ class SerialandBatchBundle(Document):
 
 		if abs(abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision))) > 0.01:
 			self.throw_error_message(
-				f"Total quantity {abs(self.total_qty)} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {abs(row.get(qty_field))} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
+				f"Total quantity {abs(flt(self.total_qty))} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {abs(flt(row.get(qty_field)))} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
 
 	def set_is_outward(self):
