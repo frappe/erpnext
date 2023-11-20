@@ -1617,6 +1617,7 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 					due_date=gle.due_date,
 					voucher_type=gle.voucher_type,
 					voucher_no=gle.voucher_no,
+					voucher_detail_no=gle.voucher_detail_no,
 					against_voucher_type=gle.against_voucher_type
 					if gle.against_voucher_type
 					else gle.voucher_type,
@@ -1638,7 +1639,7 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 
 
 def create_payment_ledger_entry(
-	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0
+	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0, partial_cancel=False
 ):
 	if gl_entries:
 		ple_map = get_payment_ledger_entries(gl_entries, cancel=cancel)
@@ -1648,7 +1649,7 @@ def create_payment_ledger_entry(
 			ple = frappe.get_doc(entry)
 
 			if cancel:
-				delink_original_entry(ple)
+				delink_original_entry(ple, partial_cancel=partial_cancel)
 
 			ple.flags.ignore_permissions = 1
 			ple.flags.adv_adj = adv_adj
@@ -1695,7 +1696,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		ref_doc.set_status(update=True)
 
 
-def delink_original_entry(pl_entry):
+def delink_original_entry(pl_entry, partial_cancel=False):
 	if pl_entry:
 		ple = qb.DocType("Payment Ledger Entry")
 		query = (
@@ -1715,6 +1716,10 @@ def delink_original_entry(pl_entry):
 				& (ple.against_voucher_no == pl_entry.against_voucher_no)
 			)
 		)
+
+		if partial_cancel:
+			query = query.where(ple.voucher_detail_no == pl_entry.voucher_detail_no)
+
 		query.run()
 
 
