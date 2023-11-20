@@ -853,27 +853,6 @@
    "label": "Named Place"
   },
   {
-<<<<<<< HEAD
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-=======
    "fieldname": "shipping_address",
    "fieldtype": "Link",
    "label": "Shipping Address",
@@ -881,8 +860,8 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_zjaq",
-   "fieldtype": "Column Break"
+    "fieldname": "column_break_zjaq",
+    "fieldtype": "Column Break"
   },
   {
    "fieldname": "shipping_address_display",
@@ -921,7 +900,27 @@
    "fieldtype": "Small Text",
    "label": "Billing Address Details",
    "read_only": 1
->>>>>>> c2bda2c705 (fix: Supplier Quotation fields (#37963))
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -929,11 +928,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-17 12:34:30.083077",
-=======
- "modified": "2023-11-03 13:21:40.172508",
->>>>>>> c2bda2c705 (fix: Supplier Quotation fields (#37963))
+ "modified": "2023-11-20 11:15:30.083077",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
