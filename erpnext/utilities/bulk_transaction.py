@@ -30,7 +30,10 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 
 @frappe.whitelist()
-def retry(date: str | None):
+def retry(date: str | None = None):
+	if not date:
+		date = today()
+
 	if date:
 		failed_docs = frappe.db.get_all(
 			"Bulk Transaction Log Detail",
