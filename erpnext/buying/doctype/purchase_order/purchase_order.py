@@ -570,8 +570,6 @@ def make_purchase_receipt(source_name, target_doc=None):
 		set_missing_values,
 	)
 
-	doc.set_onload("ignore_price_list", True)
-
 	return doc
 
 
@@ -651,7 +649,6 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		postprocess,
 		ignore_permissions=ignore_permissions,
 	)
-	doc.set_onload("ignore_price_list", True)
 
 	return doc
 

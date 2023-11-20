@@ -1674,6 +1674,4 @@ def make_purchase_receipt(source_name, target_doc=None):
 		target_doc,
 	)
 
-	doc.set_onload("ignore_price_list", True)
-
 	return doc
