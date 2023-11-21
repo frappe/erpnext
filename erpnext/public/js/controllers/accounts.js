@@ -160,7 +160,7 @@ erpnext.accounts.taxes = {
 				let tax = frappe.get_doc(cdt, cdn);
 				try {
 					me.validate_taxes_and_charges(cdt, cdn);
-					me.validate_inclusive_tax(tax);
+					me.validate_inclusive_tax(tax, frm);
 				} catch(e) {
 					tax.included_in_print_rate = 0;
 					refresh_field("included_in_print_rate", tax.name, tax.parentfield);
@@ -170,7 +170,8 @@ erpnext.accounts.taxes = {
 		});
 	},
 
-	validate_inclusive_tax: function(tax) {
+	validate_inclusive_tax: function(tax, frm) {
+		this.frm = this.frm || frm;
 		let actual_type_error = function() {
 			var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
 			frappe.throw(msg);
