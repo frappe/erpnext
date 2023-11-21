@@ -285,18 +285,22 @@ def get_balance_on(
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party) or account_type:
-		precision = get_currency_precision()
+		precision = frappe.db.escape(get_currency_precision())
 		if in_account_currency:
-			select_field = f"sum(round(debit_in_account_currency, {precision})) - sum(round(credit_in_account_currency, {precision}))"
+			select_field = (
+				"sum(round(debit_in_account_currency, %s)) - sum(round(credit_in_account_currency, %s))"
+			)
 		else:
-			select_field = f"sum(round(debit, {precision})) - sum(round(credit, {precision}))"
+			select_field = "sum(round(debit, %s)) - sum(round(credit, %s))"
+
 		bal = frappe.db.sql(
 			"""
 			SELECT {0}
 			FROM `tabGL Entry` gle
 			WHERE {1}""".format(
 				select_field, " and ".join(cond)
-			)
+			),
+			(precision, precision),
 		)[0][0]
 		# if bal is None, return 0
 		return flt(bal)
