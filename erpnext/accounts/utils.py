@@ -533,7 +533,7 @@ def check_if_advance_entry_modified(args):
 				where
 					name = %(voucher_no)s and docstatus = 1
 					and party_type = %(party_type)s and party = %(party)s and {0} = %(account)s
-					and round(unallocated_amount, {1}) = %(unreconciled_amount)s
+					and round(unallocated_amount, {1}) = round(%(unreconciled_amount)s, {1})
 			""".format(
 					party_account_field, precision
 				),
