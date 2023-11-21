@@ -919,13 +919,13 @@ class AccountsController(TransactionBase):
 
 		title = _("Invalid Quantity")
 		for item in self.items:
-			if not item.qty:
+			if not flt(item.qty):
 				frappe.throw(
 					msg=_("Row #{0}: Item quantity can not be zero").format(item.idx),
 					title=title,
 					exc=InvalidQtyError,
 				)
-			if item.qty < 0 and self.doctype in ["Purchase Order", "Sales Order"]:
+			if flt(item.qty) < 0.0 and self.doctype in ["Purchase Order", "Sales Order"]:
 				frappe.throw(
 					msg=_("Row #{0}: Item quantity can not be negative").format(item.idx),
 					title=title,
