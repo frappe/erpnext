@@ -10,12 +10,7 @@ from frappe.utils.data import comma_and
 class RepostAccountingLedger(Document):
 	def __init__(self, *args, **kwargs):
 		super(RepostAccountingLedger, self).__init__(*args, **kwargs)
-		self._allowed_types = [
-			x.document_type
-			for x in frappe.db.get_all(
-				"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
-			)
-		]
+		self._allowed_types = get_allowed_types_from_settings()
 
 	def validate(self):
 		self.validate_vouchers()
@@ -56,15 +51,7 @@ class RepostAccountingLedger(Document):
 
 	def validate_vouchers(self):
 		if self.vouchers:
-			# Validate voucher types
-			voucher_types = set([x.voucher_type for x in self.vouchers])
-			if disallowed_types := voucher_types.difference(self._allowed_types):
-				frappe.throw(
-					_("{0} types are not allowed. Only {1} are.").format(
-						frappe.bold(comma_and(list(disallowed_types))),
-						frappe.bold(comma_and(list(self._allowed_types))),
-					)
-				)
+			validate_docs_for_voucher_types([x.voucher_type for x in self.vouchers])
 
 	def get_existing_ledger_entries(self):
 		vouchers = [x.voucher_no for x in self.vouchers]
@@ -168,6 +155,15 @@ def start_repost(account_repost_doc=str) -> None:
 				frappe.db.commit()
 
 
+def get_allowed_types_from_settings():
+	return [
+		x.document_type
+		for x in frappe.db.get_all(
+			"Repost Allowed Types", filters={"allowed": True}, fields=["distinct(document_type)"]
+		)
+	]
+
+
 def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
 	docs_with_deferred_revenue = frappe.db.get_all(
 		"Sales Invoice Item",
@@ -187,6 +183,25 @@ def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
 		frappe.throw(
 			_("Documents: {0} have deferred revenue/expense enabled for them. Cannot repost.").format(
 				frappe.bold(comma_and([x[0] for x in docs_with_deferred_expense + docs_with_deferred_revenue]))
+			)
+		)
+
+
+def validate_docs_for_voucher_types(doc_voucher_types):
+	allowed_types = get_allowed_types_from_settings()
+	# Validate voucher types
+	voucher_types = set(doc_voucher_types)
+	if disallowed_types := voucher_types.difference(allowed_types):
+		message = "are" if len(disallowed_types) > 1 else "is"
+		frappe.throw(
+			_("{0} {1} not allowed to be reposted. Modify {2} to enable reposting.").format(
+				frappe.bold(comma_and(list(disallowed_types))),
+				message,
+				frappe.bold(
+					frappe.utils.get_link_to_form(
+						"Repost Accounting Ledger Settings", "Repost Accounting Ledger Settings"
+					)
+				),
 			)
 		)
 
