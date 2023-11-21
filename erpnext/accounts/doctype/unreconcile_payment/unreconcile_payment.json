@@ -21,7 +21,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Unreconcile Payments",
+   "options": "Unreconcile Payment",
    "print_hide": 1,
    "read_only": 1
   },

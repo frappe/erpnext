@@ -51,7 +51,7 @@ frappe.ui.form.on("Journal Entry", {
 				}, __('Make'));
 		}
 
-		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
+		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 	},
 	before_save: function(frm) {
 		if ((frm.doc.docstatus == 0) && (!frm.doc.is_system_generated)) {
