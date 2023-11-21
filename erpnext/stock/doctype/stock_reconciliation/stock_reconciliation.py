@@ -413,6 +413,11 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		for row in self.items:
+
+			if not row.qty and not row.valuation_rate and not row.current_qty:
+				self.make_adjustment_entry(row, sl_entries)
+				continue
+
 			item = frappe.get_cached_value(
 				"Item", row.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
@@ -462,6 +467,21 @@ class StockReconciliation(StockController):
 				frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
 			)
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+
+	def make_adjustment_entry(self, row, sl_entries):
+		from erpnext.stock.stock_ledger import get_stock_value_difference
+
+		difference_amount = get_stock_value_difference(
+			row.item_code, row.warehouse, self.posting_date, self.posting_time
+		)
+
+		if not difference_amount:
+			return
+
+		args = self.get_sle_for_items(row)
+		args.update({"stock_value_difference": -1 * difference_amount, "is_adjustment_entry": 1})
+
+		sl_entries.append(args)
 
 	def get_sle_for_serialized_items(self, row, sl_entries):
 		if row.current_serial_and_batch_bundle:

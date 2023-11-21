@@ -139,6 +139,11 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"label": __("Show GL Balance"),
 			"fieldtype": "Check",
 		},
+		{
+			"fieldname": "for_revaluation_journals",
+			"label": __("Revaluation Journals"),
+			"fieldtype": "Check",
+		}
 	],
 
 	onload: function(report) {

@@ -53,6 +53,9 @@ GL_REPOSTING_CHUNK = 100
 def get_fiscal_year(
 	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
+	if isinstance(boolean, str):
+		boolean = frappe.json.loads(boolean)
+
 	fiscal_years = get_fiscal_years(
 		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
 	)
@@ -2040,3 +2043,7 @@ def create_gain_loss_journal(
 	journal_entry.save()
 	journal_entry.submit()
 	return journal_entry.name
+
+
+def get_party_types_from_account_type(account_type):
+	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")

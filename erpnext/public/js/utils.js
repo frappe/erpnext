@@ -404,7 +404,7 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function(date, with_dates=false) {
+	get_fiscal_year: function(date, with_dates=false, boolean=false) {
 		if(!date) {
 			date = frappe.datetime.get_today();
 		}
@@ -413,7 +413,8 @@ $.extend(erpnext.utils, {
 		frappe.call({
 			method: "erpnext.accounts.utils.get_fiscal_year",
 			args: {
-				date: date
+				date: date,
+				boolean: boolean
 			},
 			async: false,
 			callback: function(r) {

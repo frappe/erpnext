@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestBulkTransactionLog(FrappeTestCase):
+class TestBulkTransactionLogDetail(FrappeTestCase):
 	pass
