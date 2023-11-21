@@ -15,7 +15,7 @@ from erpnext.accounts.utils import (
 )
 
 
-class UnreconcilePayments(Document):
+class UnreconcilePayment(Document):
 	def validate(self):
 		self.supported_types = ["Payment Entry", "Journal Entry"]
 		if not self.voucher_type in self.supported_types:
