@@ -74,7 +74,7 @@ class calculate_taxes_and_totals(object):
 		self.calculate_net_total()
 		self.calculate_tax_withholding_net_total()
 		self.calculate_taxes()
-		self.manipulate_grand_total_for_inclusive_tax()
+		self.adjust_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
 		self.calculate_total_net_weight()
@@ -517,9 +517,11 @@ class calculate_taxes_and_totals(object):
 			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
 
 	def manipulate_grand_total_for_inclusive_tax(self):
-		if not frappe.db.get_single_value(
-			"Accounts Settings", "manipulate_grand_total_for_inclusive_tax"
-		):
+		# for backward compatablility - if in case used by an external application
+		return self.adjust_grand_total_for_inclusive_tax()
+
+	def adjust_grand_total_for_inclusive_tax(self):
+		if not frappe.db.get_single_value("Accounts Settings", "adjust_grand_total_for_inclusive_tax"):
 			self.doc.grand_total_diff = 0
 			return
 
