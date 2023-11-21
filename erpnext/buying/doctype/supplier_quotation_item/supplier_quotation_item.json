@@ -136,6 +136,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
