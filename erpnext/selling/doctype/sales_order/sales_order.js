@@ -304,7 +304,7 @@ frappe.ui.form.on("Sales Order", {
 	cancel_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Unreservation"),
-			size: "large",
+			size: "extra-large",
 			fields: [
 				{
 					fieldname: "sr_entries",
@@ -316,9 +316,9 @@ frappe.ui.form.on("Sales Order", {
 					data: [],
 					fields: [
 						{
-							fieldname: "name",
+							fieldname: "sre",
 							fieldtype: "Link",
-							label: __("SRE"),
+							label: __("Stock Reservation Entry"),
 							options: "Stock Reservation Entry",
 							reqd: 1,
 							read_only: 1,
@@ -362,7 +362,7 @@ frappe.ui.form.on("Sales Order", {
 						doc: frm.doc,
 						method: "cancel_stock_reservation_entries",
 						args: {
-							sre_list: data.sr_entries,
+							sre_list: data.sr_entries.map(item => item.sre),
 						},
 						freeze: true,
 						freeze_message: __('Unreserving Stock...'),
@@ -388,7 +388,7 @@ frappe.ui.form.on("Sales Order", {
 					r.message.forEach(sre => {
 						if (flt(sre.reserved_qty) > flt(sre.delivered_qty)) {
 							dialog.fields_dict.sr_entries.df.data.push({
-								'name': sre.name,
+								'sre': sre.name,
 								'item_code': sre.item_code,
 								'warehouse': sre.warehouse,
 								'qty': (flt(sre.reserved_qty) - flt(sre.delivered_qty))
