@@ -16,7 +16,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
 )
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
@@ -27,6 +27,10 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 
 
 class TestPurchaseOrder(FrappeTestCase):
+	def test_purchase_order_qty(self):
+		po = create_purchase_order(qty=-1, do_not_save=True)
+		self.assertRaises(InvalidQtyError, po.save)
+
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
