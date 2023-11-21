@@ -8,6 +8,7 @@ import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
+from frappe.utils.deprecations import deprecated
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
@@ -516,6 +517,7 @@ class calculate_taxes_and_totals(object):
 			tax.base_tax_amount = round(tax.base_tax_amount, 0)
 			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
 
+	@deprecated
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# for backward compatablility - if in case used by an external application
 		return self.adjust_grand_total_for_inclusive_tax()
@@ -844,7 +846,6 @@ class calculate_taxes_and_totals(object):
 				self.calculate_paid_amount()
 
 	def calculate_paid_amount(self):
-
 		paid_amount = base_paid_amount = 0.0
 
 		if self.doc.is_pos:

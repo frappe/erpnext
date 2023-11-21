@@ -527,6 +527,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
+	/**
+	* @deprecated Use adjust_grand_total_for_inclusive_tax instead.
+	*/
 	manipulate_grand_total_for_inclusive_tax() {
 		// for backward compatablility - if in case used by an external application
 		this.adjust_grand_total_for_inclusive_tax()
