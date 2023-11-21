@@ -246,7 +246,7 @@ class SerialandBatchBundle(Document):
 				valuation_field = "rate"
 				child_table = "Subcontracting Receipt Supplied Item"
 			else:
-				valuation_field = "rm_supp_cost"
+				valuation_field = "rate"
 				child_table = "Subcontracting Receipt Item"
 
 		precision = frappe.get_precision(child_table, valuation_field) or 2
