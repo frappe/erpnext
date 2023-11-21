@@ -706,19 +706,22 @@ def get_allocation_expiry_for_cf_leaves(
 	employee: str, leave_type: str, to_date: str, from_date: str
 ) -> str:
 	"""Returns expiry of carry forward allocation in leave ledger entry"""
-	expiry = frappe.get_all(
-		"Leave Ledger Entry",
-		filters={
-			"employee": employee,
-			"leave_type": leave_type,
-			"is_carry_forward": 1,
-			"transaction_type": "Leave Allocation",
-			"to_date": ["between", (from_date, to_date)],
-			"docstatus": 1,
-		},
-		fields=["to_date"],
-	)
-	return expiry[0]["to_date"] if expiry else ""
+	Ledger = frappe.qb.DocType("Leave Ledger Entry")
+	expiry = (
+		frappe.qb.from_(Ledger)
+		.select(Ledger.to_date)
+		.where(
+			(Ledger.employee == employee)
+			& (Ledger.leave_type == leave_type)
+			& (Ledger.is_carry_forward == 1)
+			& (Ledger.transaction_type == "Leave Allocation")
+			& (Ledger.to_date.between(from_date, to_date))
+			& (Ledger.docstatus == 1)
+		)
+		.limit(1)
+	).run()
+
+	return expiry[0][0] if expiry else ""
 
 
 @frappe.whitelist()
@@ -1017,7 +1020,7 @@ def get_leaves_for_period(
 			if leave_entry.leaves % 1:
 				half_day = 1
 				half_day_date = frappe.db.get_value(
-					"Leave Application", {"name": leave_entry.transaction_name}, ["half_day_date"]
+					"Leave Application", leave_entry.transaction_name, "half_day_date"
 				)
 
 			leave_days += (
