@@ -63,8 +63,14 @@ class Timesheet(Document):
 
 	def update_billing_hours(self, args):
 		if args.is_billable:
-			if flt(args.billing_hours) == 0.0 or flt(args.billing_hours) > flt(args.hours):
+			if flt(args.billing_hours) == 0.0:
 				args.billing_hours = args.hours
+			elif flt(args.billing_hours) > flt(args.hours):
+				frappe.msgprint(
+					_("Warning - Row {0}: Billing Hours are more than Actual Hours").format(args.idx),
+					indicator="orange",
+					alert=True,
+				)
 		else:
 			args.billing_hours = 0
 
