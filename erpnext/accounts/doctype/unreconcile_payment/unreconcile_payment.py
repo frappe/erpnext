@@ -142,7 +142,7 @@ def create_unreconcile_doc_for_selection(selections=None):
 		selections = frappe.json.loads(selections)
 		# assuming each row is a unique voucher
 		for row in selections:
-			unrecon = frappe.new_doc("Unreconcile Payments")
+			unrecon = frappe.new_doc("Unreconcile Payment")
 			unrecon.company = row.get("company")
 			unrecon.voucher_type = row.get("voucher_type")
 			unrecon.voucher_no = row.get("voucher_no")

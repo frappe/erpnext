@@ -73,7 +73,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe.doctype,
 				"voucher_no": pe.name,
@@ -138,7 +138,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe2.doctype,
 				"voucher_no": pe2.name,
@@ -196,7 +196,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe.doctype,
 				"voucher_no": pe.name,
@@ -281,7 +281,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe2.doctype,
 				"voucher_no": pe2.name,
