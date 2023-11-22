@@ -179,6 +179,11 @@ def get_balance_on(
 	in_account_currency=True,
 	cost_center=None,
 	ignore_account_permission=False,
+<<<<<<< HEAD
+=======
+	account_type=None,
+	start_date=None,
+>>>>>>> 52305e3000 (fix: annual income and expenses in digest)
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -192,6 +197,8 @@ def get_balance_on(
 		cost_center = frappe.form_dict.get("cost_center")
 
 	cond = ["is_cancelled=0"]
+	if start_date:
+		cond.append("posting_date >= %s" % frappe.db.escape(cstr(start_date)))
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:

@@ -382,9 +382,10 @@ class EmailDigest(Document):
 		"""Get income to date"""
 		balance = 0.0
 		count = 0
+		fy_start_date = get_fiscal_year().get("year_start_date")
 
 		for account in self.get_root_type_accounts(root_type):
-			balance += get_balance_on(account, date=self.future_to_date)
+			balance += get_balance_on(account, date=self.future_to_date, start_date=fy_start_date)
 			count += get_count_on(account, fieldname, date=self.future_to_date)
 
 		if fieldname == "income":
