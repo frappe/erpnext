@@ -509,6 +509,9 @@ def restore_asset(asset_name):
 
 
 def depreciate_asset(asset_doc, date, notes):
+	if not asset_doc.calculate_depreciation:
+		return
+
 	asset_doc.flags.ignore_validate_update_after_submit = True
 
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(
@@ -521,6 +524,9 @@ def depreciate_asset(asset_doc, date, notes):
 
 
 def reset_depreciation_schedule(asset_doc, date, notes):
+	if not asset_doc.calculate_depreciation:
+		return
+
 	asset_doc.flags.ignore_validate_update_after_submit = True
 
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(
