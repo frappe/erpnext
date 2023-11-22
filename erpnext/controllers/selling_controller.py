@@ -352,7 +352,7 @@ class SellingController(StockController):
 	def has_product_bundle(self, item_code):
 		return frappe.db.sql(
 			"""select name from `tabProduct Bundle`
-			where new_item_code=%s and docstatus != 2""",
+			where new_item_code=%s and disabled=0""",
 			item_code,
 		)
 
