@@ -7,7 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date, Sum
+from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -762,7 +762,12 @@ class ReceivablePayableReport(object):
 		)
 
 		if self.filters.get("show_remarks"):
-			query = query.select(ple.remarks)
+			if remarks_length := frappe.db.get_single_value(
+				"Accounts Settings", "receivable_payable_remarks_length"
+			):
+				query = query.select(Substring(ple.remarks, 1, remarks_length).as_("remarks"))
+			else:
+				query = query.select(ple.remarks)
 
 		if self.filters.get("group_by_party"):
 			query = query.orderby(self.ple.party, self.ple.posting_date)

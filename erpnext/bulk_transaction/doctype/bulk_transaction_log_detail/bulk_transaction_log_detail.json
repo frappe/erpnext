@@ -6,12 +6,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "from_doctype",
   "transaction_name",
   "date",
   "time",
   "transaction_status",
   "error_description",
-  "from_doctype",
   "to_doctype",
   "retried"
  ],
@@ -20,8 +20,11 @@
    "fieldname": "transaction_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Name",
-   "options": "from_doctype"
+   "options": "from_doctype",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "transaction_status",
@@ -39,9 +42,11 @@
   {
    "fieldname": "from_doctype",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "From Doctype",
    "options": "DocType",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "to_doctype",
@@ -54,8 +59,10 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date ",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "time",
@@ -66,19 +73,33 @@
   {
    "fieldname": "retried",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Retried",
    "read_only": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
- "istable": 1,
  "links": [],
- "modified": "2022-02-03 19:57:31.650359",
+ "modified": "2023-11-10 11:44:10.758342",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
  "owner": "Administrator",
- "permissions": [],
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

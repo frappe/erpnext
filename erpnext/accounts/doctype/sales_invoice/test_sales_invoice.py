@@ -782,6 +782,28 @@ class TestSalesInvoice(FrappeTestCase):
 		w = self.make()
 		self.assertEqual(w.outstanding_amount, w.base_rounded_total)
 
+	def test_rounded_total_with_cash_discount(self):
+		si = frappe.copy_doc(test_records[2])
+
+		item = copy.deepcopy(si.get("items")[0])
+		item.update(
+			{
+				"qty": 1,
+				"rate": 14960.66,
+			}
+		)
+
+		si.set("items", [item])
+		si.set("taxes", [])
+		si.apply_discount_on = "Grand Total"
+		si.is_cash_or_non_trade_discount = 1
+		si.discount_amount = 1
+		si.insert()
+
+		self.assertEqual(si.grand_total, 14959.66)
+		self.assertEqual(si.rounded_total, 14960)
+		self.assertEqual(si.rounding_adjustment, 0.34)
+
 	def test_payment(self):
 		w = self.make()
 
