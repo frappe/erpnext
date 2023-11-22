@@ -8,14 +8,20 @@
   "finance_book",
   "depreciation_method",
   "total_number_of_depreciations",
+  "frequency_of_depreciation",
   "daily_prorata_based",
   "column_break_5",
-  "frequency_of_depreciation",
   "depreciation_start_date",
   "salvage_value_percentage",
   "expected_value_after_useful_life",
   "value_after_depreciation",
-  "rate_of_depreciation"
+  "rate_of_depreciation",
+  "shift_details_section",
+  "single_shift_factor",
+  "triple_shift_factor",
+  "column_break_lblvb",
+  "double_shift_factor",
+  "no_shift_factor"
  ],
  "fields": [
   {
@@ -30,7 +36,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Depreciation Method",
-   "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual",
+   "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual\nShift",
    "reqd": 1
   },
   {
@@ -93,12 +99,44 @@
    "fieldname": "daily_prorata_based",
    "fieldtype": "Check",
    "label": "Depreciate based on daily pro-rata"
+  },
+  {
+   "depends_on": "eval:doc.depreciation_method == 'Shift'",
+   "fieldname": "shift_details_section",
+   "fieldtype": "Section Break",
+   "label": "Shift Details"
+  },
+  {
+   "fieldname": "single_shift_factor",
+   "fieldtype": "Float",
+   "label": "Single Shift Factor"
+  },
+  {
+   "fieldname": "double_shift_factor",
+   "fieldtype": "Float",
+   "label": "Double Shift Factor"
+  },
+  {
+   "fieldname": "triple_shift_factor",
+   "fieldtype": "Float",
+   "label": "Triple Shift Factor"
+  },
+  {
+   "fieldname": "column_break_lblvb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_shift_factor",
+   "fieldtype": "Float",
+   "label": "No Shift Factor",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-03 22:21:52.090191",
+ "modified": "2023-11-22 17:51:34.617136",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
