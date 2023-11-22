@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import json
 import unittest
 
 import frappe
@@ -21,6 +22,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
+from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
@@ -1218,6 +1220,76 @@ class TestPaymentEntry(FrappeTestCase):
 
 		so.reload()
 		self.assertEqual(so.advance_paid, so.rounded_total)
+
+	def test_partial_cancel_for_payment_entry(self):
+		si = create_sales_invoice()
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save()
+		pe.submit()
+
+		# Additional GL Entry
+		tax_amount = 10
+		reference_row = pe.references[0]
+		gl_args = {
+			"party_type": pe.party_type,
+			"party": pe.party,
+			"against_voucher_type": reference_row.reference_doctype,
+			"against_voucher": reference_row.reference_name,
+			"voucher_detail_no": reference_row.name,
+		}
+
+		gl_dicts = []
+
+		gl_dicts.extend(
+			[
+				pe.get_gl_dict(
+					{
+						"account": pe.paid_to,
+						"credit": tax_amount,
+						"credit_in_account_currency": tax_amount,
+						**gl_args,
+					}
+				),
+				pe.get_gl_dict(
+					{
+						"account": pe.paid_from,
+						"debit": tax_amount,
+						"debit_in_account_currency": tax_amount,
+						**gl_args,
+					}
+				),
+			]
+		)
+
+		make_gl_entries(gl_dicts)
+
+		# Assert PLEs Before
+		self.assertPLEntries(
+			pe,
+			[
+				{"amount": -100.0, "against_voucher_no": si.name},
+				{"amount": 10.0, "against_voucher_no": si.name},
+			],
+		)
+
+		# Partially cancel Payment Entry
+		make_reverse_gl_entries(gl_dicts, partial_cancel=True)
+		self.assertPLEntries(pe, [{"amount": -100.0, "against_voucher_no": si.name}])
+
+	def assertPLEntries(self, payment_doc, expected_pl_entries):
+		pl_entries = frappe.get_all(
+			"Payment Ledger Entry",
+			filters={
+				"voucher_type": payment_doc.doctype,
+				"voucher_no": payment_doc.name,
+				"delinked": 0,
+			},
+			fields=["amount", "against_voucher_no"],
+		)
+		out_str = json.dumps(sorted(pl_entries, key=json.dumps))
+		expected_out_str = json.dumps(sorted(expected_pl_entries, key=json.dumps))
+		self.assertEqual(out_str, expected_out_str)
 
 
 def create_payment_entry(**args):
