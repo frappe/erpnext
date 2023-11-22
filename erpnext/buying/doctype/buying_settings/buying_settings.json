@@ -31,7 +31,9 @@
   "column_break_11",
   "over_transfer_allowance",
   "section_break_xcug",
-  "action_on_purchase_order_submission"
+  "action_on_purchase_order_submission",
+  "column_break_izrr",
+  "action_on_subcontracting_receipt_submission"
  ],
  "fields": [
   {
@@ -193,7 +195,20 @@
    "fieldtype": "Select",
    "label": "Action on Purchase Order Submission",
    "options": "\nCreate Subcontracting Order\nCreate and Submit Subcontracting Order"
+<<<<<<< HEAD
 >>>>>>> 628ea42b63 (feat: add field `Action on Purchase Order Submission`)
+=======
+  },
+  {
+   "fieldname": "column_break_izrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "action_on_subcontracting_receipt_submission",
+   "fieldtype": "Select",
+   "label": "Action on Subcontracting Receipt Submission",
+   "options": "\nCreate Purchase Receipt\nCreate and Submit Purchase Receipt"
+>>>>>>> 762906f240 (feat: add field `Action on Subcontracting Receipt Submission`)
   }
  ],
  "icon": "fa fa-cog",
@@ -203,6 +218,7 @@
  "links": [],
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2023-11-24 10:55:51.287327",
 =======
  "modified": "2023-11-22 16:05:33.262940",
@@ -210,6 +226,9 @@
 =======
  "modified": "2023-11-22 17:42:28.978582",
 >>>>>>> 9ec6f1e1d6 (feat: auto create SCO on PO submission)
+=======
+ "modified": "2023-11-22 17:46:26.474708",
+>>>>>>> 762906f240 (feat: add field `Action on Subcontracting Receipt Submission`)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
