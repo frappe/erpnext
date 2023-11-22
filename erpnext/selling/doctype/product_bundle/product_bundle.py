@@ -64,7 +64,7 @@ class ProductBundle(Document):
 
 	def validate_child_items(self):
 		for item in self.items:
-			if frappe.db.exists("Product Bundle", item.item_code):
+			if frappe.db.exists("Product Bundle", {"name": item.item_code, "disabled": 0}):
 				frappe.throw(
 					_(
 						"Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
@@ -75,7 +75,7 @@ class ProductBundle(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
-	product_bundles = frappe.db.get_list("Product Bundle", pluck="name")
+	product_bundles = frappe.db.get_list("Product Bundle", {"disabled": 0}, pluck="name")
 	item = frappe.qb.DocType("Item")
 	return (
 		frappe.qb.from_(item)
