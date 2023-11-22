@@ -438,9 +438,9 @@ def update_included_uom_in_report(
 				columns.insert(
 					idx + 1,
 					{
-						"label": "{0} ({1})".format(d.get("label"), type_conversion_factors[0][2]),
+						"label": "{0} ({1})".format(d.get("label"), type_conversion_factors[0][3]),
 						"fieldname": "{0}_{1}_qty".format(
-							d.get("fieldname"), frappe.scrub(type_conversion_factors[0][2])
+							d.get("fieldname"), frappe.scrub(type_conversion_factors[0][3])
 						),
 						"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
 						"width": 120,
@@ -470,7 +470,7 @@ def update_included_uom_in_report(
 					new_value = flt(value) / conversion_factors[row_idx]
 			if type_conversion_factors:
 				new_value = flt(value) / (
-					type_conversion_factors[0][0] if type_conversion_factors[0][0] else 1
+					type_conversion_factors[0][0][row_idx] if type_conversion_factors[0][0][row_idx] else 1
 				)
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
@@ -478,7 +478,7 @@ def update_included_uom_in_report(
 				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
 				update_dict_values.append([row, new_key, new_value])
 			else:
-				new_key1 = "{0}_{1}_qty".format(key, frappe.scrub(type_conversion_factors[0][2]))
+				new_key1 = "{0}_{1}_qty".format(key, frappe.scrub(type_conversion_factors[0][3]))
 				type_update_dict_values.append([row, new_key1, new_value])
 	if include_uom:
 		for data in update_dict_values:

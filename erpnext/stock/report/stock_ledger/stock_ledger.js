@@ -84,7 +84,7 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "UOM"
 		},
 		{
-			"fieldname": "type",
+			"fieldname": "select_uom",
 			"label": __("Select UOM"),
 			"fieldtype": "Select",
 			"options": ["Default UOM","Purchase UOM", "Sales UOM"] ,

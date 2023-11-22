@@ -19,11 +19,9 @@ from erpnext.stock.utils import (
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
-	if filters.get("include_uom") and filters.get("type") != "Default UOM":
+	if filters.get("include_uom") and (filters.get("select_uom")) != "Default UOM":
 		frappe.throw(
-			_(
-				f"Cannot select filters {frappe.bold ('Include UOM')} and {frappe.bold('Select UOM')} together!"
-			)
+			_("Cannot select filters {0} and {1} together!").format(frappe.bold ('Include UOM'), frappe.bold('Select UOM'))
 		)
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -77,9 +75,10 @@ def execute(filters=None):
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
-		if filters.get("type") == "Sales UOM" or filters.get("type") == "Purchase UOM":
+		if filters.get("select_uom") in ["Sales UOM", "Purchase UOM"]:
+			conversion_factors.append(item_detail.conversion_factor)
 			type_conversion_factors.append(
-				(item_detail.conversion_factor, item_detail.uom, filters.get("type"))
+				(conversion_factors,item_detail.conversion_factor, item_detail.uom, filters.get("select_uom"))
 			)
 	update_included_uom_in_report(
 		columns, data, include_uom, conversion_factors, type_conversion_factors
@@ -380,24 +379,32 @@ def get_item_details(items, sl_entries, include_uom, filters):
 	query = (
 		frappe.qb.from_(item)
 		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
-		.select(ucd.conversion_factor)
 		.where(item.name.isin(items))
 	)
+	ucd = frappe.qb.DocType("UOM Conversion Detail")
 	if include_uom:
-		query = query.left_join(ucd).on((ucd.parent == item.name) & (ucd.uom == include_uom))
-	if filters.get("type") == "Sales UOM":
+		query = (
+			query.left_join(ucd)
+			.on((ucd.parent == item.name) & (ucd.uom == include_uom))
+			.select(ucd.conversion_factor)
+		)
+	if filters.get("select_uom") == "Sales UOM":
 		query = (
 			query.left_join(ucd)
 			.on((ucd.parent == item.name) & (ucd.uom == item.sales_uom))
 			.select(ucd.uom)
 			.as_("sales_uom")
+			.select(ucd.conversion_factor)
+			.as_("sales_uom_con")
 		)
-	elif filters.get("type") == "Purchase UOM":
+	elif filters.get("select_uom") == "Purchase UOM":
 		query = (
 			query.left_join(ucd)
 			.on((ucd.parent == item.name) & (ucd.uom == item.purchase_uom))
 			.select(ucd.uom)
 			.as_("purchase_uom")
+			.select(ucd.conversion_factor)
+			.as_("purchase_uom_con")
 		)
 
 	res = query.run(as_dict=True)
