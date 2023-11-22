@@ -1644,72 +1644,9 @@ def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates:
 					"payment_term": payment_term.payment_term,
 				}
 			)
-<<<<<<< HEAD
-			if payment_term_template:
-				allocate_payment_based_on_payment_terms = frappe.db.get_value(
-					"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
-				)
-				if allocate_payment_based_on_payment_terms:
-					payment_schedule = frappe.get_all(
-						"Payment Schedule", filters={"parent": d.voucher_no}, fields=["*"]
-					)
-
-					for payment_term in payment_schedule:
-						if payment_term.outstanding > 0.1:
-							doc_details = exc_rates.get(payment_term.parent, None)
-							is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
-								doc_details.party_account_currency != doc_details.company_currency
-							)
-							payment_term_outstanding = flt(payment_term.outstanding)
-							if not is_multi_currency_acc:
-								payment_term_outstanding = doc_details.conversion_rate * flt(payment_term.outstanding)
-
-							invoice_ref_based_on_payment_terms.setdefault(idx, [])
-							invoice_ref_based_on_payment_terms[idx].append(
-								frappe._dict(
-									{
-										"due_date": d.due_date,
-										"currency": d.currency,
-										"voucher_no": d.voucher_no,
-										"voucher_type": d.voucher_type,
-										"posting_date": d.posting_date,
-										"invoice_amount": flt(d.invoice_amount),
-										"outstanding_amount": payment_term_outstanding
-										if payment_term_outstanding
-										else d.outstanding_amount,
-										"payment_term_outstanding": payment_term_outstanding,
-										"payment_amount": payment_term.payment_amount,
-										"payment_term": payment_term.payment_term,
-									}
-								)
-							)
-
-	outstanding_invoices_after_split = []
-	if invoice_ref_based_on_payment_terms:
-		for idx, ref in invoice_ref_based_on_payment_terms.items():
-			voucher_no = ref[0]["voucher_no"]
-			voucher_type = ref[0]["voucher_type"]
-
-			frappe.msgprint(
-				_("Spliting {} {} into {} row(s) as per Payment Terms").format(
-					voucher_type, voucher_no, len(ref)
-				),
-				alert=True,
-			)
-
-			outstanding_invoices_after_split += invoice_ref_based_on_payment_terms[idx]
-
-			existing_row = list(filter(lambda x: x.get("voucher_no") == voucher_no, outstanding_invoices))
-			index = outstanding_invoices.index(existing_row[0])
-			outstanding_invoices.pop(index)
-
-	outstanding_invoices_after_split += outstanding_invoices
-	return outstanding_invoices_after_split
-=======
 		)
 
 	return split_rows
->>>>>>> 6bd56d2d5f (refactor: `split_invoices_based_on_payment_terms`)
 
 
 def get_orders_to_be_billed(
