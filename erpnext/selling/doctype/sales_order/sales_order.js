@@ -217,9 +217,9 @@ frappe.ui.form.on("Sales Order", {
 					data: [],
 					fields: [
 						{
-							fieldname: "name",
+							fieldname: "sales_order_item",
 							fieldtype: "Data",
-							label: __("Name"),
+							label: __("Sales Order Item"),
 							reqd: 1,
 							read_only: 1,
 						},
@@ -288,7 +288,7 @@ frappe.ui.form.on("Sales Order", {
 
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
-						'name': item.name,
+						'sales_order_item': item.name,
 						'item_code': item.item_code,
 						'warehouse': item.warehouse,
 						'qty_to_reserve': (unreserved_qty / flt(item.conversion_factor))

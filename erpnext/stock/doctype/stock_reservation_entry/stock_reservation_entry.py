@@ -869,7 +869,7 @@ def create_stock_reservation_entries_for_so_items(
 	items = []
 	if items_details:
 		for item in items_details:
-			so_item = frappe.get_doc("Sales Order Item", item.get("name"))
+			so_item = frappe.get_doc("Sales Order Item", item.get("sales_order_item"))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
 				flt(item.get("qty_to_reserve"))
