@@ -55,7 +55,7 @@ def make_packing_list(doc):
 
 
 def is_product_bundle(item_code: str) -> bool:
-	return bool(frappe.db.exists("Product Bundle", {"new_item_code": item_code}))
+	return bool(frappe.db.exists("Product Bundle", {"new_item_code": item_code, "disabled": 0}))
 
 
 def get_indexed_packed_items_table(doc):
