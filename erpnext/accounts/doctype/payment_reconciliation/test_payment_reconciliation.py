@@ -1171,6 +1171,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.new_doc("Customer")
