@@ -54,6 +54,35 @@ class TestSalesOrder(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
+	def test_sales_order_with_negative_rate(self):
+		"""
+		Test if negative rate is allowed in Sales Order via doc submission and update items
+		"""
+		so = make_sales_order(qty=1, rate=100, do_not_save=True)
+		so.append("items", {"item_code": "_Test Item", "qty": 1, "rate": -10})
+		so.save()
+		so.submit()
+
+		first_item = so.get("items")[0]
+		second_item = so.get("items")[1]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": first_item.item_code,
+					"rate": first_item.rate,
+					"qty": first_item.qty,
+					"docname": first_item.name,
+				},
+				{
+					"item_code": second_item.item_code,
+					"rate": -20,
+					"qty": second_item.qty,
+					"docname": second_item.name,
+				},
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
 

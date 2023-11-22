@@ -3040,16 +3040,19 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, rate_precision) > flt(
-			flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision
-		):
+		# Amount cannot be lesser than billed amount, except for negative amounts
+		row_rate = flt(d.get("rate"), rate_precision)
+		amount_below_billed_amt = flt(child_item.billed_amt, rate_precision) > flt(
+			row_rate * flt(d.get("qty"), qty_precision), rate_precision
+		)
+		if amount_below_billed_amt and row_rate > 0.0:
 			frappe.throw(
 				_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.").format(
 					child_item.idx, child_item.item_code
 				)
 			)
 		else:
-			child_item.rate = flt(d.get("rate"), rate_precision)
+			child_item.rate = row_rate
 
 		if d.get("conversion_factor"):
 			if child_item.stock_uom == child_item.uom:
