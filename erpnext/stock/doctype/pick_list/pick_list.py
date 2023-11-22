@@ -233,7 +233,7 @@ class PickList(Document):
 		for location in self.locations:
 			if location.warehouse and location.sales_order and location.sales_order_item:
 				item_details = {
-					"name": location.sales_order_item,
+					"sales_order_item": location.sales_order_item,
 					"item_code": location.item_code,
 					"warehouse": location.warehouse,
 					"qty_to_reserve": (flt(location.picked_qty) - flt(location.stock_reserved_qty)),
