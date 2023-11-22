@@ -111,7 +111,7 @@ def get_product_bundle_items(item_code):
 			product_bundle_item.uom,
 			product_bundle_item.description,
 		)
-		.where(product_bundle.new_item_code == item_code)
+		.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
 		.orderby(product_bundle_item.idx)
 	)
 	return query.run(as_dict=True)
