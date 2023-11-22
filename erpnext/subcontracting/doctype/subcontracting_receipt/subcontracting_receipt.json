@@ -11,6 +11,7 @@
   "naming_series",
   "supplier",
   "supplier_name",
+  "supplier_delivery_note",
   "column_break1",
   "company",
   "posting_date",
@@ -625,12 +626,17 @@
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
    "print_hide": 1
+  },
+  {
+   "fieldname": "supplier_delivery_note",
+   "fieldtype": "Data",
+   "label": "Supplier Delivery Note"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-07-06 18:44:16.171842",
+ "modified": "2023-11-16 13:04:00.710534",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

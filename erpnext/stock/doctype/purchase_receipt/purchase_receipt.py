@@ -732,12 +732,18 @@ class PurchaseReceipt(BuyingController):
 
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all(
-			"Asset", filters={"purchase_receipt": self.name, "item_code": item.item_code}
+			"Asset",
+			filters={"purchase_receipt": self.name, "item_code": item.item_code},
+			fields=["name", "asset_quantity"],
 		)
 
 		for asset in assets:
-			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(valuation_rate))
-			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
+			frappe.db.set_value(
+				"Asset", asset.name, "gross_purchase_amount", flt(valuation_rate) * asset.asset_quantity
+			)
+			frappe.db.set_value(
+				"Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate) * asset.asset_quantity
+			)
 
 	def update_status(self, status):
 		self.set_status(update=True, status=status)

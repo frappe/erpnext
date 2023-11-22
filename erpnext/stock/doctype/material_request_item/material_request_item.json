@@ -111,6 +111,7 @@
    "width": "250px"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image",
@@ -479,7 +480,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-10-27 15:53:41.444236",
+ "modified": "2023-11-14 18:37:59.599115",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
