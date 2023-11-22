@@ -357,6 +357,8 @@ class PurchaseOrder(BuyingController):
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
+		self.auto_create_subcontracting_order()
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
 		super(PurchaseOrder, self).on_cancel()
@@ -483,6 +485,16 @@ class PurchaseOrder(BuyingController):
 				result = False
 
 		return result
+
+	def auto_create_subcontracting_order(self):
+		if self.is_subcontracted and not self.is_old_subcontracting_flow:
+			if action := frappe.db.get_single_value(
+				"Buying Settings", "action_on_purchase_order_submission"
+			):
+				if action == "Create Subcontracting Order":
+					make_subcontracting_order(self.name, save=True)
+				elif action == "Create and Submit Subcontracting Order":
+					make_subcontracting_order(self.name, submit=True)
 
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
@@ -686,8 +698,18 @@ def make_inter_company_sales_order(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_subcontracting_order(source_name, target_doc=None):
-	return get_mapped_subcontracting_order(source_name, target_doc)
+def make_subcontracting_order(source_name, target_doc=None, save=False, submit=False):
+	target_doc = get_mapped_subcontracting_order(source_name, target_doc)
+
+	if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
+		target_doc.save()
+		if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+			try:
+				target_doc.submit()
+			except Exception as e:
+				target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+
+	return target_doc
 
 
 def get_mapped_subcontracting_order(source_name, target_doc=None):
