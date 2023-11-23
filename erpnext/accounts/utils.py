@@ -1796,6 +1796,28 @@ class QueryPaymentLedger(object):
 					Table("outstanding").amount_in_account_currency >= self.max_outstanding
 				)
 
+		if self.limit and self.get_invoices:
+			outstanding_vouchers = (
+				qb.from_(ple)
+				.select(
+					ple.against_voucher_no.as_("voucher_no"),
+					Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
+				)
+				.where(ple.delinked == 0)
+				.where(Criterion.all(filter_on_against_voucher_no))
+				.where(Criterion.all(self.common_filter))
+				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+				.orderby(ple.posting_date, ple.voucher_no)
+				.having(qb.Field("amount_in_account_currency") > 0)
+				.limit(self.limit)
+				.run()
+			)
+			if outstanding_vouchers:
+				filter_on_voucher_no.append(ple.voucher_no.isin([x[0] for x in outstanding_vouchers]))
+				filter_on_against_voucher_no.append(
+					ple.against_voucher_no.isin([x[0] for x in outstanding_vouchers])
+				)
+
 		# build query for voucher amount
 		query_voucher_amount = (
 			qb.from_(ple)
