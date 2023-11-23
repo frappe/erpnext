@@ -76,9 +76,9 @@ def get_data(
 		& (q.company == company)
 	)
 
-	total_quotations = frappe.qb.from_(q).where(lost_quotation_condition).select(Count(q.name))
-
-	total_value = frappe.qb.from_(q).where(lost_quotation_condition).select(Sum(q.base_net_total))
+	from_lost_quotations = frappe.qb.from_(q).where(lost_quotation_condition)
+	total_quotations = from_lost_quotations.select(Count(q.name))
+	total_value = from_lost_quotations.select(Sum(q.base_net_total))
 
 	query = (
 		frappe.qb.from_(dimension)
