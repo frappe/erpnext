@@ -154,19 +154,11 @@ def update_qty(bin_name, args):
 		+ flt(indented_qty) + flt(planned_qty) - flt(reserved_qty)
 		- flt(bin_details.reserved_qty_for_production) - flt(bin_details.reserved_qty_for_sub_contract))
 
-	# frappe.db.set_value('Bin', bin_name, {
-	# 	'actual_qty': actual_qty,
-	# 	'ordered_qty': ordered_qty,
-	# 	'reserved_qty': reserved_qty,
-	# 	'indented_qty': indented_qty,
-	# 	'planned_qty': planned_qty,
-	# 	'projected_qty': projected_qty
-	# })
-	data=frappe.get_doc("Bin",bin_name)
-	data.actual_qty=actual_qty
-	data.ordered_qty=ordered_qty
-	data.reserved_qty: reserved_qty
-	data.indented_qty: indented_qty
-	data.planned_qty: planned_qty
-	data.projected_qty: projected_qty
-	data.save()
+	frappe.db.set_value('Bin', bin_name, {
+		'actual_qty': actual_qty,
+		'ordered_qty': ordered_qty,
+		'reserved_qty': reserved_qty,
+		'indented_qty': indented_qty,
+		'planned_qty': planned_qty,
+		'projected_qty': projected_qty
+	},update_modified=True,)
