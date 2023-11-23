@@ -464,6 +464,9 @@ def restore_asset(asset_name):
 
 
 def depreciate_asset(asset, date):
+	if not asset.calculate_depreciation:
+		return
+
 	asset.flags.ignore_validate_update_after_submit = True
 	asset.prepare_depreciation_data(date_of_disposal=date)
 	asset.save()
@@ -472,6 +475,9 @@ def depreciate_asset(asset, date):
 
 
 def reset_depreciation_schedule(asset, date):
+	if not asset.calculate_depreciation:
+		return
+
 	asset.flags.ignore_validate_update_after_submit = True
 
 	# recreate original depreciation schedule of the asset
