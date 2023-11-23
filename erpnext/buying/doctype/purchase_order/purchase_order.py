@@ -747,7 +747,9 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			},
 			"Purchase Order Item": {
 				"doctype": "Subcontracting Order Service Item",
-				"field_map": {},
+				"field_map": {
+					"name": "purchase_order_item",
+				},
 				"field_no_map": [],
 			},
 		},
