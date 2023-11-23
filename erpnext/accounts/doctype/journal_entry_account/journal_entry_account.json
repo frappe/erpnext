@@ -203,7 +203,8 @@
    "fieldtype": "Select",
    "label": "Reference Type",
    "no_copy": 1,
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nFull and Final Statement\nPayment Entry"
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nFull and Final Statement\nPayment Entry",
+   "search_index": 1
   },
   {
    "fieldname": "reference_name",
@@ -211,7 +212,8 @@
    "in_list_view": 1,
    "label": "Reference Name",
    "no_copy": 1,
-   "options": "reference_type"
+   "options": "reference_type",
+   "search_index": 1
   },
   {
    "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance'])",
@@ -278,13 +280,14 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Reference Detail No",
-   "no_copy": 1
+   "no_copy": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-16 14:11:13.507807",
+ "modified": "2023-11-23 11:44:25.841187",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
