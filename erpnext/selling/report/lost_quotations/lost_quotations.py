@@ -6,7 +6,7 @@ from typing import Literal
 import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
-from frappe.query_builder.functions import Count, Round, Sum
+from frappe.query_builder.functions import Coalesce, Count, Round, Sum
 from frappe.utils.data import get_timespan_date_range
 
 
@@ -81,15 +81,15 @@ def get_data(
 	total_value = from_lost_quotations.select(Sum(q.base_net_total))
 
 	query = (
-		frappe.qb.from_(dimension)
+		frappe.qb.from_(q)
 		.select(
-			dimension[fieldname],
+			Coalesce(dimension[fieldname], _("Not Specified")),
 			Count(q.name).distinct(),
 			Round((Count(q.name).distinct() / total_quotations * 100), 2),
 			Sum(q.base_net_total),
 			Round((Sum(q.base_net_total) / total_value * 100), 2),
 		)
-		.inner_join(q)
+		.left_join(dimension)
 		.on(dimension.parent == q.name)
 		.where(lost_quotation_condition)
 		.groupby(dimension[fieldname])
