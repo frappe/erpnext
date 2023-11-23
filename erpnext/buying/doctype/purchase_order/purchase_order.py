@@ -8,7 +8,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -492,9 +492,9 @@ class PurchaseOrder(BuyingController):
 				"Buying Settings", "action_on_purchase_order_submission"
 			):
 				if action == "Create Subcontracting Order":
-					make_subcontracting_order(self.name, save=True)
+					make_subcontracting_order(self.name, save=True, notify=True)
 				elif action == "Create and Submit Subcontracting Order":
-					make_subcontracting_order(self.name, submit=True)
+					make_subcontracting_order(self.name, submit=True, notify=True)
 
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
@@ -698,16 +698,28 @@ def make_inter_company_sales_order(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_subcontracting_order(source_name, target_doc=None, save=False, submit=False):
+def make_subcontracting_order(
+	source_name, target_doc=None, save=False, submit=False, notify=False
+):
 	target_doc = get_mapped_subcontracting_order(source_name, target_doc)
 
 	if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
 		target_doc.save()
+
 		if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
 			try:
 				target_doc.submit()
 			except Exception as e:
 				target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+
+		if notify:
+			frappe.msgprint(
+				_("Subcontracting Order {0} created.").format(
+					get_link_to_form(target_doc.doctype, target_doc.name)
+				),
+				indicator="green",
+				alert=True,
+			)
 
 	return target_doc
 
