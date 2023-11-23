@@ -29,8 +29,16 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-10-21 12:43:59.106807",
+ "links": [
+  {
+   "is_child_table": 1,
+   "link_doctype": "Competitor Detail",
+   "link_fieldname": "competitor",
+   "parent_doctype": "Quotation",
+   "table_fieldname": "competitors"
+  }
+ ],
+ "modified": "2023-11-23 19:33:54.284279",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Competitor",
@@ -64,5 +72,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
