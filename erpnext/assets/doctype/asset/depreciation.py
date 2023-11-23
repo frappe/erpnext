@@ -471,8 +471,16 @@ def depreciate_asset(asset, date):
 	make_depreciation_entry(asset.name, date)
 
 
+<<<<<<< HEAD
 def reset_depreciation_schedule(asset, date):
 	asset.flags.ignore_validate_update_after_submit = True
+=======
+def depreciate_asset(asset_doc, date, notes):
+	if not asset_doc.calculate_depreciation:
+		return
+
+	asset_doc.flags.ignore_validate_update_after_submit = True
+>>>>>>> 816b1b6bd5 (fix: don't depreciate assets with no schedule on scrapping (#38276))
 
 	# recreate original depreciation schedule of the asset
 	asset.prepare_depreciation_data(date_of_return=date)
@@ -481,7 +489,26 @@ def reset_depreciation_schedule(asset, date):
 	asset.save()
 
 
+<<<<<<< HEAD
 def modify_depreciation_schedule_for_asset_repairs(asset):
+=======
+def reset_depreciation_schedule(asset_doc, date, notes):
+	if not asset_doc.calculate_depreciation:
+		return
+
+	asset_doc.flags.ignore_validate_update_after_submit = True
+
+	make_new_active_asset_depr_schedules_and_cancel_current_ones(
+		asset_doc, notes, date_of_return=date
+	)
+
+	modify_depreciation_schedule_for_asset_repairs(asset_doc, notes)
+
+	asset_doc.save()
+
+
+def modify_depreciation_schedule_for_asset_repairs(asset, notes):
+>>>>>>> 816b1b6bd5 (fix: don't depreciate assets with no schedule on scrapping (#38276))
 	asset_repairs = frappe.get_all(
 		"Asset Repair", filters={"asset": asset.name}, fields=["name", "increase_in_asset_life"]
 	)
