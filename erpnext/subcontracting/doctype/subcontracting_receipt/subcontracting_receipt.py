@@ -3,7 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -80,6 +81,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
+		self.auto_create_purchase_receipt()
 
 	def on_update(self):
 		for table_field in ["items", "supplied_items"]:
@@ -528,9 +530,96 @@ class SubcontractingReceipt(SubcontractingController):
 				+ "\n".join(warehouse_with_no_account)
 			)
 
+	def auto_create_purchase_receipt(self):
+		if action := frappe.db.get_single_value(
+			"Buying Settings", "action_on_subcontracting_receipt_submission"
+		):
+			if action == "Create Purchase Receipt":
+				make_purchase_receipt(self, save=True, notify=True)
+			elif action == "Create and Submit Purchase Receipt":
+				make_purchase_receipt(self, submit=True, notify=True)
+
 
 @frappe.whitelist()
 def make_subcontract_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
+
+
+def make_purchase_receipt(subcontracting_receipt, save=False, submit=False, notify=False):
+	if isinstance(subcontracting_receipt, str):
+		subcontracting_receipt = frappe.get_doc("Subcontracting Receipt", subcontracting_receipt)
+
+	if not subcontracting_receipt.is_return:
+		purchase_receipt = frappe.new_doc("Purchase Receipt")
+		purchase_receipt.is_subcontracted = 1
+		purchase_receipt.is_old_subcontracting_flow = 0
+
+		purchase_receipt = get_mapped_doc(
+			"Subcontracting Receipt",
+			subcontracting_receipt.name,
+			{
+				"Subcontracting Receipt": {
+					"doctype": "Purchase Receipt",
+					"field_map": {
+						"posting_date": "posting_date",
+						"posting_time": "posting_time",
+						"supplier_warehouse": "supplier_warehouse",
+					},
+					"field_no_map": ["total_qty", "total"],
+				},
+			},
+			purchase_receipt,
+			ignore_child_tables=True,
+		)
+
+		po_items_details = {}
+		for item in subcontracting_receipt.items:
+			if item.purchase_order and item.purchase_order_item:
+				if item.purchase_order not in po_items_details:
+					po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
+					po_items_details[item.purchase_order] = {po_item.name: po_item for po_item in po_doc.items}
+
+				if po_item := po_items_details[item.purchase_order].get(item.purchase_order_item):
+					conversion_factor = flt(po_item.qty) / flt(po_item.fg_item_qty)
+					item_row = {
+						"item_code": po_item.item_code,
+						"item_name": po_item.item_name,
+						"qty": item.qty * conversion_factor,
+						"rejected_qty": item.rejected_qty * conversion_factor,
+						"uom": po_item.uom,
+						"rate": po_item.rate,
+						"warehouse": item.warehouse,
+						"rejected_warehouse": item.rejected_warehouse,
+						"purchase_order": item.purchase_order,
+						"purchase_order_item": item.purchase_order_item,
+					}
+					purchase_receipt.append("items", item_row)
+
+		if not purchase_receipt.items:
+			frappe.throw(
+				_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
+					subcontracting_receipt.name
+				)
+			)
+
+		if (save or submit) and frappe.has_permission(purchase_receipt.doctype, "create"):
+			purchase_receipt.save()
+
+			if submit and frappe.has_permission(purchase_receipt.doctype, "submit", purchase_receipt):
+				try:
+					purchase_receipt.submit()
+				except Exception as e:
+					purchase_receipt.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+
+			if notify:
+				frappe.msgprint(
+					_("Purchase Receipt {0} created.").format(
+						get_link_to_form(purchase_receipt.doctype, purchase_receipt.name)
+					),
+					indicator="green",
+					alert=True,
+				)
+
+		return purchase_receipt
