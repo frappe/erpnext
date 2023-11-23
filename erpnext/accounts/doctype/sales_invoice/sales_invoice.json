@@ -1613,7 +1613,8 @@
    "hide_seconds": 1,
    "label": "Inter Company Invoice Reference",
    "options": "Purchase Invoice",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "customer_group",
@@ -2164,7 +2165,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-11-20 11:51:43.555197",
+ "modified": "2023-11-23 16:56:29.679499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
