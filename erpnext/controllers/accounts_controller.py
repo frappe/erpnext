@@ -238,7 +238,7 @@ class AccountsController(TransactionBase):
 				references_map.setdefault(x.parent, []).append(x.name)
 
 			for doc, rows in references_map.items():
-				unreconcile_doc = frappe.get_doc("Unreconcile Payments", doc)
+				unreconcile_doc = frappe.get_doc("Unreconcile Payment", doc)
 				for row in rows:
 					unreconcile_doc.remove(unreconcile_doc.get("allocations", {"name": row})[0])
 
@@ -247,9 +247,9 @@ class AccountsController(TransactionBase):
 				unreconcile_doc.save(ignore_permissions=True)
 
 		# delete docs upon parent doc deletion
-		unreconcile_docs = frappe.db.get_all("Unreconcile Payments", filters={"voucher_no": self.name})
+		unreconcile_docs = frappe.db.get_all("Unreconcile Payment", filters={"voucher_no": self.name})
 		for x in unreconcile_docs:
-			_doc = frappe.get_doc("Unreconcile Payments", x.name)
+			_doc = frappe.get_doc("Unreconcile Payment", x.name)
 			if _doc.docstatus == 1:
 				_doc.cancel()
 			_doc.delete()
