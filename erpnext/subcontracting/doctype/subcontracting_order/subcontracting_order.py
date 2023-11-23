@@ -148,8 +148,6 @@ class SubcontractingOrder(SubcontractingController):
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
 	def populate_items_table(self):
-		items = []
-
 		for si in self.service_items:
 			if si.fg_item:
 				item = frappe.get_doc("Item", si.fg_item)
@@ -159,7 +157,8 @@ class SubcontractingOrder(SubcontractingController):
 					)
 					or item.default_bom
 				)
-				items.append(
+				self.append(
+					"items",
 					{
 						"item_code": item.item_code,
 						"item_name": item.item_name,
@@ -168,6 +167,7 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"stock_uom": item.stock_uom,
 						"bom": bom,
+						"purchase_order_item": si.purchase_order_item,
 					},
 				)
 			else:
@@ -176,11 +176,8 @@ class SubcontractingOrder(SubcontractingController):
 						si.item_name or si.item_code
 					)
 				)
-		else:
-			for item in items:
-				self.append("items", item)
-			else:
-				self.set_missing_values()
+
+		self.set_missing_values()
 
 	def update_status(self, status=None, update_modified=True):
 		if self.docstatus >= 1 and not status:
