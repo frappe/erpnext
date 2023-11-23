@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import datetime
 import gzip
 import json
 from typing import Optional, Set, Tuple
@@ -11,7 +12,17 @@ from frappe import _, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, now, nowdate, nowtime, parse_json
+from frappe.utils import (
+	cint,
+	flt,
+	get_link_to_form,
+	get_time,
+	getdate,
+	now,
+	nowdate,
+	nowtime,
+	parse_json,
+)
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -595,8 +606,22 @@ class update_entries_after(object):
 		for sle in sl_entries:
 			self.process_sle(sle)
 
+	def get_posting_datetime(self) -> datetime.datetime:
+		date = getdate(self.args["posting_date"])
+		time = get_time(self.args["posting_time"])
+
+		return datetime.datetime.combine(date, time)
+
 	def get_sle_against_current_voucher(self):
 		self.args["time_format"] = "%H:%i:%s"
+
+		posting_datetime = self.get_posting_datetime()
+
+		# PERF: Alternative to using time format to strip microseconds
+		# Stripping microseconds in db will ignore the index,
+		# so it's better to it into two separate condition
+		starting_time = posting_datetime.replace(microsecond=0)
+		ending_time = starting_time + datetime.timedelta(seconds=1)
 
 		return frappe.db.sql(
 			"""
@@ -608,15 +633,13 @@ class update_entries_after(object):
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and is_cancelled = 0
-				and (
-					posting_date = %(posting_date)s and
-					time_format(posting_time, %(time_format)s) = time_format(%(posting_time)s, %(time_format)s)
-				)
+				and timestamp(posting_date, posting_time) >= %(starting_time)s
+				and timestamp(posting_date, posting_time) < %(ending_time)s
 			order by
 				creation ASC
 			for update
 		""",
-			self.args,
+			{"starting_time": starting_time, "ending_time": ending_time, **self.args},
 			as_dict=1,
 		)
 
