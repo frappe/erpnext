@@ -1287,13 +1287,21 @@ class PurchaseInvoice(BuyingController):
 		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
-		project_list = []
+		projects = frappe._dict()
 		for d in self.items:
-			if d.project and d.project not in project_list:
-				project = frappe.get_doc("Project", d.project)
-				project.update_purchase_costing()
-				project.db_update()
-				project_list.append(d.project)
+			if d.project:
+				if self.docstatus == 1:
+					projects[d.project] = projects.get(d.project, 0) + d.base_net_amount
+				elif self.docstatus == 2:
+					projects[d.project] = projects.get(d.project, 0) - d.base_net_amount
+
+		pj = frappe.qb.DocType("Project")
+		for proj, value in projects.items():
+			res = (
+				frappe.qb.from_(pj).select(pj.total_purchase_cost).where(pj.name == proj).for_update().run()
+			)
+			current_purchase_cost = res and res[0][0] or 0
+			frappe.db.set_value("Project", proj, "total_purchase_cost", current_purchase_cost + value)
 
 	def validate_supplier_invoice(self):
 		if self.bill_date:
