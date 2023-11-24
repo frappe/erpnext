@@ -64,7 +64,7 @@ def get_data(
 		fieldname = "competitor"
 		dimension = frappe.qb.DocType("Competitor Detail")
 	else:
-		frappe.throw(frappe._("Invalid Group By"))
+		frappe.throw(_("Invalid Group By"))
 
 	q = frappe.qb.DocType("Quotation")
 
