@@ -67,6 +67,7 @@ class SalesOrder(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
+		self.validate_reserved_stock()
 		self.validate_serial_no_based_delivery()
 		validate_against_blanket_order(self)
 		validate_inter_company_party(
@@ -526,6 +527,15 @@ class SalesOrder(SellingController):
 						"Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
 					).format(item.item_code)
 				)
+
+	def validate_reserved_stock(self):
+		"""Clean reserved stock flag for not stocked Item"""
+
+		for item in self.items:
+			if not cint(
+				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+			) or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+				item.reserve_stock = 0
 
 	def has_unreserved_stock(self) -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
