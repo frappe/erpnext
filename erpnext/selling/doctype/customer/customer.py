@@ -541,6 +541,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				primary_action={
 					"label": "Send Email",
 					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
+					"hide_on_success": True,
 					"args": {
 						"customer": customer,
 						"customer_outstanding": customer_outstanding,

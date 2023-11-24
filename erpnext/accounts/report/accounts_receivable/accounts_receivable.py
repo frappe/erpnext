@@ -7,7 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date, Sum
+from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -762,7 +762,12 @@ class ReceivablePayableReport(object):
 		)
 
 		if self.filters.get("show_remarks"):
-			query = query.select(ple.remarks)
+			if remarks_length := frappe.db.get_single_value(
+				"Accounts Settings", "receivable_payable_remarks_length"
+			):
+				query = query.select(Substring(ple.remarks, 1, remarks_length).as_("remarks"))
+			else:
+				query = query.select(ple.remarks)
 
 		if self.filters.get("group_by_party"):
 			query = query.orderby(self.ple.party, self.ple.posting_date)
@@ -849,7 +854,13 @@ class ReceivablePayableReport(object):
 		self.customer = qb.DocType("Customer")
 
 		if self.filters.get("customer_group"):
-			self.get_hierarchical_filters("Customer Group", "customer_group")
+			groups = get_customer_group_with_children(self.filters.customer_group)
+			customers = (
+				qb.from_(self.customer)
+				.select(self.customer.name)
+				.where(self.customer["customer_group"].isin(groups))
+			)
+			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
 		if self.filters.get("territory"):
 			self.get_hierarchical_filters("Territory", "territory")
@@ -1141,3 +1152,19 @@ class ReceivablePayableReport(object):
 			.run()
 		)
 		self.err_journals = [x[0] for x in results] if results else []
+
+
+def get_customer_group_with_children(customer_groups):
+	if not isinstance(customer_groups, list):
+		customer_groups = [d.strip() for d in customer_groups.strip().split(",") if d]
+
+	all_customer_groups = []
+	for d in customer_groups:
+		if frappe.db.exists("Customer Group", d):
+			lft, rgt = frappe.db.get_value("Customer Group", d, ["lft", "rgt"])
+			children = frappe.get_all("Customer Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+			all_customer_groups += [c.name for c in children]
+		else:
+			frappe.throw(_("Customer Group: {0} does not exist").format(d))
+
+	return list(set(all_customer_groups))

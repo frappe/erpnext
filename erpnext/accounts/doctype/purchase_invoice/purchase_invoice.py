@@ -532,7 +532,11 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		self.update_project()
+		if (
+			frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction"
+		):
+			self.update_project()
+
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.update_advance_tax_references()
 
@@ -1269,7 +1273,10 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		self.update_project()
+		if (
+			frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction"
+		):
+			self.update_project()
 		self.db_set("status", "Cancelled")
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
@@ -1287,13 +1294,21 @@ class PurchaseInvoice(BuyingController):
 		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
-		project_list = []
+		projects = frappe._dict()
 		for d in self.items:
-			if d.project and d.project not in project_list:
-				project = frappe.get_doc("Project", d.project)
-				project.update_purchase_costing()
-				project.db_update()
-				project_list.append(d.project)
+			if d.project:
+				if self.docstatus == 1:
+					projects[d.project] = projects.get(d.project, 0) + d.base_net_amount
+				elif self.docstatus == 2:
+					projects[d.project] = projects.get(d.project, 0) - d.base_net_amount
+
+		pj = frappe.qb.DocType("Project")
+		for proj, value in projects.items():
+			res = (
+				frappe.qb.from_(pj).select(pj.total_purchase_cost).where(pj.name == proj).for_update().run()
+			)
+			current_purchase_cost = res and res[0][0] or 0
+			frappe.db.set_value("Project", proj, "total_purchase_cost", current_purchase_cost + value)
 
 	def validate_supplier_invoice(self):
 		if self.bill_date:

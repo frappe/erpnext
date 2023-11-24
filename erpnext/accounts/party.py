@@ -31,7 +31,12 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 from erpnext.utilities.regional import temporary_flag
 
-PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
+PURCHASE_TRANSACTION_TYPES = {
+	"Supplier Quotation",
+	"Purchase Order",
+	"Purchase Receipt",
+	"Purchase Invoice",
+}
 SALES_TRANSACTION_TYPES = {
 	"Quotation",
 	"Sales Order",
@@ -231,7 +236,9 @@ def set_address_details(
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
-				shipping_address_display=render_address(shipping_address),
+				shipping_address_display=render_address(
+					shipping_address, check_permissions=not ignore_permissions
+				),
 				**get_fetch_values(doctype, "shipping_address", shipping_address)
 			)
 

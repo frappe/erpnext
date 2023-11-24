@@ -7,7 +7,7 @@ cur_frm.cscript.tax_table = "Advance Taxes and Charges";
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payments', 'Unreconcile Payment Entries'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries'];
 
 		if(frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
@@ -158,7 +158,7 @@ frappe.ui.form.on('Payment Entry', {
 			}, __('Actions'));
 
 		}
-		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
+		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 	},
 
 	validate_company: (frm) => {
@@ -829,7 +829,6 @@ frappe.ui.form.on('Payment Entry', {
 			else
 				total_negative_outstanding += Math.abs(flt(row.outstanding_amount));
 		})
-
 		var allocated_negative_outstanding = 0;
 		if (
 				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
@@ -844,6 +843,7 @@ frappe.ui.form.on('Payment Entry', {
 
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
 		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
+			total_negative_outstanding = flt(total_negative_outstanding, precision("outstanding_amount"))
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
 					frappe.msgprint(

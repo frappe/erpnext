@@ -107,7 +107,7 @@ class PaymentEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
-			"Unreconcile Payments",
+			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 		)
 		super(PaymentEntry, self).on_cancel()
@@ -913,8 +913,11 @@ class PaymentEntry(AccountsController):
 		):
 			return
 
-		total_negative_outstanding = sum(
-			abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+		total_negative_outstanding = flt(
+			sum(
+				abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+			),
+			self.references[0].precision("outstanding_amount") if self.references else None,
 		)
 
 		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
