@@ -179,11 +179,7 @@ def get_balance_on(
 	in_account_currency=True,
 	cost_center=None,
 	ignore_account_permission=False,
-<<<<<<< HEAD
-=======
-	account_type=None,
 	start_date=None,
->>>>>>> 52305e3000 (fix: annual income and expenses in digest)
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
