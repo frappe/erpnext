@@ -11,6 +11,8 @@
   "warehouse",
   "posting_date",
   "posting_time",
+  "is_adjustment_entry",
+  "auto_created_serial_and_batch_bundle",
   "column_break_6",
   "voucher_type",
   "voucher_no",
@@ -333,6 +335,19 @@
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
    "label": "Has Serial No"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_adjustment_entry",
+   "fieldtype": "Check",
+   "label": "Is Adjustment Entry"
+  },
+  {
+   "default": "0",
+   "depends_on": "serial_and_batch_bundle",
+   "fieldname": "auto_created_serial_and_batch_bundle",
+   "fieldtype": "Check",
+   "label": "Auto Created Serial and Batch Bundle"
   }
  ],
  "hide_toolbar": 1,
@@ -341,7 +356,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-03 16:33:16.270722",
+ "modified": "2023-11-14 16:47:39.791967",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

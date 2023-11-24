@@ -73,8 +73,6 @@ New passwords will be created for the ERPNext "Administrator" user, the MariaDB 
 1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
 1. [Report Security Vulnerabilities](https://erpnext.com/security)
 1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
-1. [Translations](https://translate.erpnext.com)
-
 
 ## License
 

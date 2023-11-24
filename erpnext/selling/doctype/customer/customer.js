@@ -3,17 +3,32 @@
 
 frappe.ui.form.on("Customer", {
 	setup: function(frm) {
-
+		frm.custom_make_buttons = {
+			"Opportunity": "Opportunity",
+			"Quotation": "Quotation",
+			"Sales Order": "Sales Order",
+			"Pricing Rule": "Pricing Rule",
+		};
 		frm.make_methods = {
-			'Quotation': () => frappe.model.open_mapped_doc({
-				method: "erpnext.selling.doctype.customer.customer.make_quotation",
-				frm: cur_frm
-			}),
-			'Opportunity': () => frappe.model.open_mapped_doc({
-				method: "erpnext.selling.doctype.customer.customer.make_opportunity",
-				frm: cur_frm
-			})
-		}
+			"Quotation": () =>
+				frappe.model.open_mapped_doc({
+					method: "erpnext.selling.doctype.customer.customer.make_quotation",
+					frm: frm,
+				}),
+			"Sales Order": () =>
+				frappe.model.with_doctype("Sales Order", function () {
+					var so = frappe.model.get_new_doc("Sales Order");
+					so.customer = frm.doc.name; // Set the current customer as the SO customer
+					frappe.set_route("Form", "Sales Order", so.name);
+				}),
+			"Opportunity": () =>
+				frappe.model.open_mapped_doc({
+					method: "erpnext.selling.doctype.customer.customer.make_opportunity",
+					frm: frm,
+				}),
+			"Pricing Rule": () =>
+				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
+		};
 
 		frm.add_fetch('lead_name', 'company_name', 'customer_name');
 		frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
@@ -146,9 +161,9 @@ frappe.ui.form.on("Customer", {
 					{party_type: 'Customer', party: frm.doc.name, party_name: frm.doc.customer_name});
 			}, __('View'));
 
-			frm.add_custom_button(__('Pricing Rule'), function () {
-				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
-			}, __('Create'));
+			for (const doctype in frm.make_methods) {
+				frm.add_custom_button(__(doctype), frm.make_methods[doctype], __("Create"));
+			}
 
 			frm.add_custom_button(__('Get Customer Group Details'), function () {
 				frm.trigger("get_customer_group_details");

@@ -33,6 +33,7 @@ from erpnext.accounts.utils import (
 	get_account_currency,
 	get_balance_on,
 	get_outstanding_invoices,
+	get_party_types_from_account_type,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -83,7 +84,6 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
-		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -148,7 +148,7 @@ class PaymentEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
-			"Unreconcile Payments",
+			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 		)
 		super(PaymentEntry, self).on_cancel()
@@ -952,35 +952,6 @@ class PaymentEntry(AccountsController):
 			self.name,
 		)
 
-	def validate_payment_against_negative_invoice(self):
-		if (self.payment_type != "Pay" or self.party_type != "Customer") and (
-			self.payment_type != "Receive" or self.party_type != "Supplier"
-		):
-			return
-
-		total_negative_outstanding = sum(
-			abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
-		)
-
-		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
-		additional_charges = sum(flt(d.amount) for d in self.deductions)
-
-		if not total_negative_outstanding:
-			if self.party_type == "Customer":
-				msg = _("Cannot pay to Customer without any negative outstanding invoice")
-			else:
-				msg = _("Cannot receive from Supplier without any negative outstanding invoice")
-
-			frappe.throw(msg, InvalidPaymentEntry)
-
-		elif paid_amount - additional_charges > total_negative_outstanding:
-			frappe.throw(
-				_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
-					fmt_money(total_negative_outstanding)
-				),
-				InvalidPaymentEntry,
-			)
-
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
 			# do not set title dynamically if title exists during data import.
@@ -1051,6 +1022,7 @@ class PaymentEntry(AccountsController):
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
+		add_regional_gl_entries(gl_entries, self)
 		return gl_entries
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
@@ -1085,11 +1057,9 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 
-			dr_or_cr = (
-				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
-			)
-
 			for d in self.get("references"):
+				# re-defining dr_or_cr for every reference in order to avoid the last value affecting calculation of reverse
+				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 				cost_center = self.cost_center
 				if d.reference_doctype == "Sales Invoice" and not cost_center:
 					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
@@ -1105,10 +1075,25 @@ class PaymentEntry(AccountsController):
 					against_voucher_type = d.reference_doctype
 					against_voucher = d.reference_name
 
+				reverse_dr_or_cr = 0
+				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
+					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
+					payable_party_types = get_party_types_from_account_type("Payable")
+					receivable_party_types = get_party_types_from_account_type("Receivable")
+					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
+						reverse_dr_or_cr = 1
+					elif (
+						is_return and self.party_type in payable_party_types and (self.payment_type == "Receive")
+					):
+						reverse_dr_or_cr = 1
+
+					if is_return and not reverse_dr_or_cr:
+						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
 				gle.update(
 					{
-						dr_or_cr: allocated_amount_in_company_currency,
-						dr_or_cr + "_in_account_currency": d.allocated_amount,
+						dr_or_cr: abs(allocated_amount_in_company_currency),
+						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
 						"against_voucher_type": against_voucher_type,
 						"against_voucher": against_voucher,
 						"cost_center": cost_center,
@@ -1116,6 +1101,7 @@ class PaymentEntry(AccountsController):
 				)
 				gl_entries.append(gle)
 
+			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 			if self.unallocated_amount:
 				exchange_rate = self.get_exchange_rate()
 				base_unallocated_amount = self.unallocated_amount * exchange_rate
@@ -1711,13 +1697,42 @@ def get_outstanding_reference_documents(args, validate=False):
 	return data
 
 
-def split_invoices_based_on_payment_terms(outstanding_invoices, company):
-	invoice_ref_based_on_payment_terms = {}
+def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list:
+	"""Split a list of invoices based on their payment terms."""
+	exc_rates = get_currency_data(outstanding_invoices, company)
 
+	outstanding_invoices_after_split = []
+	for entry in outstanding_invoices:
+		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+			if payment_term_template := frappe.db.get_value(
+				entry.voucher_type, entry.voucher_no, "payment_terms_template"
+			):
+				split_rows = get_split_invoice_rows(entry, payment_term_template, exc_rates)
+				if not split_rows:
+					continue
+
+				frappe.msgprint(
+					_("Splitting {0} {1} into {2} rows as per Payment Terms").format(
+						_(entry.voucher_type), frappe.bold(entry.voucher_no), len(split_rows)
+					),
+					alert=True,
+				)
+				outstanding_invoices_after_split += split_rows
+				continue
+
+		# If not an invoice or no payment terms template, add as it is
+		outstanding_invoices_after_split.append(entry)
+
+	return outstanding_invoices_after_split
+
+
+def get_currency_data(outstanding_invoices: list, company: str = None) -> dict:
+	"""Get currency and conversion data for a list of invoices."""
+	exc_rates = frappe._dict()
 	company_currency = (
 		frappe.db.get_value("Company", company, "default_currency") if company else None
 	)
-	exc_rates = frappe._dict()
+
 	for doctype in ["Sales Invoice", "Purchase Invoice"]:
 		invoices = [x.voucher_no for x in outstanding_invoices if x.voucher_type == doctype]
 		for x in frappe.db.get_all(
@@ -1732,72 +1747,54 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 				company_currency=company_currency,
 			)
 
-	for idx, d in enumerate(outstanding_invoices):
-		if d.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-			payment_term_template = frappe.db.get_value(
-				d.voucher_type, d.voucher_no, "payment_terms_template"
+	return exc_rates
+
+
+def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates: dict) -> list:
+	"""Split invoice based on its payment schedule table."""
+	split_rows = []
+	allocate_payment_based_on_payment_terms = frappe.db.get_value(
+		"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
+	)
+
+	if not allocate_payment_based_on_payment_terms:
+		return [invoice]
+
+	payment_schedule = frappe.get_all(
+		"Payment Schedule", filters={"parent": invoice.voucher_no}, fields=["*"], order_by="due_date"
+	)
+	for payment_term in payment_schedule:
+		if not payment_term.outstanding > 0.1:
+			continue
+
+		doc_details = exc_rates.get(payment_term.parent, None)
+		is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
+			doc_details.party_account_currency != doc_details.company_currency
+		)
+		payment_term_outstanding = flt(payment_term.outstanding)
+		if not is_multi_currency_acc:
+			payment_term_outstanding = doc_details.conversion_rate * flt(payment_term.outstanding)
+
+		split_rows.append(
+			frappe._dict(
+				{
+					"due_date": invoice.due_date,
+					"currency": invoice.currency,
+					"voucher_no": invoice.voucher_no,
+					"voucher_type": invoice.voucher_type,
+					"posting_date": invoice.posting_date,
+					"invoice_amount": flt(invoice.invoice_amount),
+					"outstanding_amount": payment_term_outstanding
+					if payment_term_outstanding
+					else invoice.outstanding_amount,
+					"payment_term_outstanding": payment_term_outstanding,
+					"payment_amount": payment_term.payment_amount,
+					"payment_term": payment_term.payment_term,
+				}
 			)
-			if payment_term_template:
-				allocate_payment_based_on_payment_terms = frappe.get_cached_value(
-					"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
-				)
-				if allocate_payment_based_on_payment_terms:
-					payment_schedule = frappe.get_all(
-						"Payment Schedule", filters={"parent": d.voucher_no}, fields=["*"]
-					)
+		)
 
-					for payment_term in payment_schedule:
-						if payment_term.outstanding > 0.1:
-							doc_details = exc_rates.get(payment_term.parent, None)
-							is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
-								doc_details.party_account_currency != doc_details.company_currency
-							)
-							payment_term_outstanding = flt(payment_term.outstanding)
-							if not is_multi_currency_acc:
-								payment_term_outstanding = doc_details.conversion_rate * flt(payment_term.outstanding)
-
-							invoice_ref_based_on_payment_terms.setdefault(idx, [])
-							invoice_ref_based_on_payment_terms[idx].append(
-								frappe._dict(
-									{
-										"due_date": d.due_date,
-										"currency": d.currency,
-										"voucher_no": d.voucher_no,
-										"voucher_type": d.voucher_type,
-										"posting_date": d.posting_date,
-										"invoice_amount": flt(d.invoice_amount),
-										"outstanding_amount": payment_term_outstanding
-										if payment_term_outstanding
-										else d.outstanding_amount,
-										"payment_term_outstanding": payment_term_outstanding,
-										"payment_amount": payment_term.payment_amount,
-										"payment_term": payment_term.payment_term,
-										"account": d.account,
-									}
-								)
-							)
-
-	outstanding_invoices_after_split = []
-	if invoice_ref_based_on_payment_terms:
-		for idx, ref in invoice_ref_based_on_payment_terms.items():
-			voucher_no = ref[0]["voucher_no"]
-			voucher_type = ref[0]["voucher_type"]
-
-			frappe.msgprint(
-				_("Spliting {} {} into {} row(s) as per Payment Terms").format(
-					voucher_type, voucher_no, len(ref)
-				),
-				alert=True,
-			)
-
-			outstanding_invoices_after_split += invoice_ref_based_on_payment_terms[idx]
-
-			existing_row = list(filter(lambda x: x.get("voucher_no") == voucher_no, outstanding_invoices))
-			index = outstanding_invoices.index(existing_row[0])
-			outstanding_invoices.pop(index)
-
-	outstanding_invoices_after_split += outstanding_invoices
-	return outstanding_invoices_after_split
+	return split_rows
 
 
 def get_orders_to_be_billed(
@@ -2638,3 +2635,8 @@ def make_payment_order(source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+@erpnext.allow_regional
+def add_regional_gl_entries(gl_entries, doc):
+	return

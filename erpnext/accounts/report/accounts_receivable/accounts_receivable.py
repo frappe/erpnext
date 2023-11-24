@@ -7,14 +7,14 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date, Sum
+from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-from erpnext.accounts.utils import get_currency_precision
+from erpnext.accounts.utils import get_currency_precision, get_party_types_from_account_type
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -28,8 +28,8 @@ from erpnext.accounts.utils import get_currency_precision
 #  6. Configurable Ageing Groups (0-30, 30-60 etc) can be set via filters
 #  7. For overpayment against an invoice with payment terms, there will be an additional row
 #  8. Invoice details like Sales Persons, Delivery Notes are also fetched comma separated
-#  9. Report amounts are in "Party Currency" if party is selected, or company currency for multi-party
-# 10. This reports is based on all GL Entries that are made against account_type "Receivable" or "Payable"
+#  9. Report amounts are in party currency if in_party_currency is selected, otherwise company currency
+# 10. This report is based on Payment Ledger Entries
 
 
 def execute(filters=None):
@@ -72,9 +72,7 @@ class ReceivablePayableReport(object):
 		self.currency_precision = get_currency_precision() or 2
 		self.dr_or_cr = "debit" if self.filters.account_type == "Receivable" else "credit"
 		self.account_type = self.filters.account_type
-		self.party_type = frappe.db.get_all(
-			"Party Type", {"account_type": self.account_type}, pluck="name"
-		)
+		self.party_type = get_party_types_from_account_type(self.account_type)
 		self.party_details = {}
 		self.invoices = set()
 		self.skip_total_row = 0
@@ -82,6 +80,9 @@ class ReceivablePayableReport(object):
 		if self.filters.get("group_by_party"):
 			self.previous_party = ""
 			self.total_row_map = {}
+			self.skip_total_row = 1
+
+		if self.filters.get("in_party_currency"):
 			self.skip_total_row = 1
 
 	def get_data(self):
@@ -117,7 +118,7 @@ class ReceivablePayableReport(object):
 		for ple in self.ple_entries:
 			# get the balance object for voucher_type
 
-			if self.filters.get("ingore_accounts"):
+			if self.filters.get("ignore_accounts"):
 				key = (ple.voucher_type, ple.voucher_no, ple.party)
 			else:
 				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
@@ -145,7 +146,7 @@ class ReceivablePayableReport(object):
 			if self.filters.get("group_by_party"):
 				self.init_subtotal_row(ple.party)
 
-		if self.filters.get("group_by_party"):
+		if self.filters.get("group_by_party") and not self.filters.get("in_party_currency"):
 			self.init_subtotal_row("Total")
 
 	def get_invoices(self, ple):
@@ -188,7 +189,7 @@ class ReceivablePayableReport(object):
 			):
 				return
 
-		if self.filters.get("ingore_accounts"):
+		if self.filters.get("ignore_accounts"):
 			key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
 		else:
 			key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)
@@ -200,7 +201,7 @@ class ReceivablePayableReport(object):
 			if ple.against_voucher_no in self.return_entries:
 				return_against = self.return_entries.get(ple.against_voucher_no)
 				if return_against:
-					if self.filters.get("ingore_accounts"):
+					if self.filters.get("ignore_accounts"):
 						key = (ple.against_voucher_type, return_against, ple.party)
 					else:
 						key = (ple.account, ple.against_voucher_type, return_against, ple.party)
@@ -209,7 +210,7 @@ class ReceivablePayableReport(object):
 
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
-			if self.filters.get("ingore_accounts"):
+			if self.filters.get("ignore_accounts"):
 				row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
 			else:
 				row = self.voucher_balance.get((ple.account, ple.voucher_type, ple.voucher_no, ple.party))
@@ -224,8 +225,7 @@ class ReceivablePayableReport(object):
 		if not row:
 			return
 
-		# amount in "Party Currency", if its supplied. If not, amount in company currency
-		if self.filters.get("party_type") and self.filters.get("party"):
+		if self.filters.get("in_party_currency"):
 			amount = ple.amount_in_account_currency
 		else:
 			amount = ple.amount
@@ -256,8 +256,10 @@ class ReceivablePayableReport(object):
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)
 
-		for field in self.get_currency_fields():
-			total_row[field] += row.get(field, 0.0)
+		if total_row:
+			for field in self.get_currency_fields():
+				total_row[field] += row.get(field, 0.0)
+			total_row["currency"] = row.get("currency", "")
 
 	def append_subtotal_row(self, party):
 		sub_total_row = self.total_row_map.get(party)
@@ -281,11 +283,20 @@ class ReceivablePayableReport(object):
 
 			row.invoice_grand_total = row.invoiced
 
-			if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
-				(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
-				or (row.voucher_no in self.err_journals)
-			):
+			must_consider = False
+			if self.filters.get("for_revaluation_journals"):
+				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) or (
+					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+				):
+					must_consider = True
+			else:
+				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
+					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+					or (row.voucher_no in self.err_journals)
+				):
+					must_consider = True
 
+			if must_consider:
 				# non-zero oustanding, we must consider this row
 
 				if self.is_invoice(row) and self.filters.based_on_payment_terms:
@@ -309,7 +320,7 @@ class ReceivablePayableReport(object):
 		if self.filters.get("group_by_party"):
 			self.append_subtotal_row(self.previous_party)
 			if self.data:
-				self.data.append(self.total_row_map.get("Total"))
+				self.data.append(self.total_row_map.get("Total", {}))
 
 	def append_row(self, row):
 		self.allocate_future_payments(row)
@@ -440,7 +451,7 @@ class ReceivablePayableReport(object):
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
 
-		if self.filters.get("party_type") and self.filters.get("party"):
+		if self.filters.get("in_party_currency"):
 			row.currency = row.account_currency
 		else:
 			row.currency = self.company_currency
@@ -753,7 +764,12 @@ class ReceivablePayableReport(object):
 		)
 
 		if self.filters.get("show_remarks"):
-			query = query.select(ple.remarks)
+			if remarks_length := frappe.db.get_single_value(
+				"Accounts Settings", "receivable_payable_remarks_length"
+			):
+				query = query.select(Substring(ple.remarks, 1, remarks_length).as_("remarks"))
+			else:
+				query = query.select(ple.remarks)
 
 		if self.filters.get("group_by_party"):
 			query = query.orderby(self.ple.party, self.ple.posting_date)
@@ -840,7 +856,13 @@ class ReceivablePayableReport(object):
 		self.customer = qb.DocType("Customer")
 
 		if self.filters.get("customer_group"):
-			self.get_hierarchical_filters("Customer Group", "customer_group")
+			groups = get_customer_group_with_children(self.filters.customer_group)
+			customers = (
+				qb.from_(self.customer)
+				.select(self.customer.name)
+				.where(self.customer["customer_group"].isin(groups))
+			)
+			self.qb_selection_filter.append(self.ple.party.isin(customers))
 
 		if self.filters.get("territory"):
 			self.get_hierarchical_filters("Territory", "territory")
@@ -1132,3 +1154,19 @@ class ReceivablePayableReport(object):
 			.run()
 		)
 		self.err_journals = [x[0] for x in results] if results else []
+
+
+def get_customer_group_with_children(customer_groups):
+	if not isinstance(customer_groups, list):
+		customer_groups = [d.strip() for d in customer_groups.strip().split(",") if d]
+
+	all_customer_groups = []
+	for d in customer_groups:
+		if frappe.db.exists("Customer Group", d):
+			lft, rgt = frappe.db.get_value("Customer Group", d, ["lft", "rgt"])
+			children = frappe.get_all("Customer Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+			all_customer_groups += [c.name for c in children]
+		else:
+			frappe.throw(_("Customer Group: {0} does not exist").format(d))
+
+	return list(set(all_customer_groups))

@@ -7,6 +7,8 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
@@ -250,6 +252,13 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			target.customer_name = source.lead_name
 
 		target.customer_group = frappe.db.get_default("Customer Group")
+
+		address = get_default_address("Lead", source.name)
+		contact = get_default_contact("Lead", source.name)
+		if address:
+			target.customer_primary_address = address
+		if contact:
+			target.customer_primary_contact = contact
 
 	doclist = get_mapped_doc(
 		"Lead",

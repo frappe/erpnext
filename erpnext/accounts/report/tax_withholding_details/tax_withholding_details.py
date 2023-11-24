@@ -184,6 +184,16 @@ def get_columns(filters):
 				"width": 180,
 			}
 		)
+	else:
+		columns.append(
+			{
+				"label": _(filters.get("party_type")),
+				"fieldname": "party",
+				"fieldtype": "Dynamic Link",
+				"options": "party_type",
+				"width": 180,
+			}
+		)
 
 	columns.extend(
 		[
@@ -316,7 +326,7 @@ def get_tds_docs_query(filters, bank_accounts, tds_accounts):
 	if not tds_accounts:
 		frappe.throw(
 			_("No {0} Accounts found for this company.").format(frappe.bold("Tax Withholding")),
-			title="Accounts Missing Error",
+			title=_("Accounts Missing Error"),
 		)
 	gle = frappe.qb.DocType("GL Entry")
 	query = (

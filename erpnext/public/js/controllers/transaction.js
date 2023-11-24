@@ -1772,7 +1772,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) &&  !["Purchase Order","Purchase Invoice"].includes(me.frm.doc.doctype)) {
 				if (!me.frm.doc[fieldname]) {
 					frappe.msgprint(__("Please specify") + ": " +
-						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +
+						__(frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name)) +
 						". " + __("It is needed to fetch Item Details."));
 					valid = false;
 				}

@@ -149,7 +149,7 @@ def remove_standard_fields(details):
 
 
 def set_valuation_rate(out, args):
-	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
+	if frappe.db.exists("Product Bundle", {"name": args.item_code, "disabled": 0}, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
@@ -610,7 +610,6 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 
 	# all templates have validity and no template is valid
 	if not taxes_with_validity and (not taxes_with_no_validity):
-		out["item_tax_template"] = ""
 		return None
 
 	# do not change if already a valid template

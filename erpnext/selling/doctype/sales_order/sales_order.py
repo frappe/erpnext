@@ -688,7 +688,9 @@ def make_material_request(source_name, target_doc=None):
 			"Sales Order Item": {
 				"doctype": "Material Request Item",
 				"field_map": {"name": "sales_order_item", "parent": "sales_order"},
-				"condition": lambda item: not frappe.db.exists("Product Bundle", item.item_code)
+				"condition": lambda item: not frappe.db.exists(
+					"Product Bundle", {"name": item.item_code, "disabled": 0}
+				)
 				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},
@@ -767,8 +769,11 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", "company_address", target.company_address))
 
-		# set target items names to ensure proper linking with packed_items
-		target.set_new_name()
+		# if invoked in bulk creation, validations are ignored and thus this method is nerver invoked
+		if frappe.flags.bulk_transaction:
+			# set target items names to ensure proper linking with packed_items
+			target.set_new_name()
+
 		make_packing_list(target)
 
 	def condition(doc):
@@ -1306,7 +1311,7 @@ def set_delivery_date(items, sales_order):
 
 
 def is_product_bundle(item_code):
-	return frappe.db.exists("Product Bundle", item_code)
+	return frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0})
 
 
 @frappe.whitelist()
@@ -1518,7 +1523,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 		product_bundle_parents = [
 			pb.new_item_code
 			for pb in frappe.get_all(
-				"Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"]
+				"Product Bundle", {"new_item_code": ["in", item_codes], "disabled": 0}, ["new_item_code"]
 			)
 		]
 

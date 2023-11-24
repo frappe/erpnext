@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-07 09:58:03.595382",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "column_break_sfzb",
+  "allowed"
+ ],
+ "fields": [
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Doctype",
+   "options": "DocType"
+  },
+  {
+   "default": "0",
+   "fieldname": "allowed",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Allowed"
+  },
+  {
+   "fieldname": "column_break_sfzb",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-07 10:01:39.217861",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Repost Allowed Types",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

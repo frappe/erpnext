@@ -595,6 +595,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
+   "no_copy": 1,
    "options": "\nDraft\nSubmitted\nCancelled",
    "read_only": 1
   },
@@ -749,8 +750,16 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2023-06-23 18:07:38.023010",
+ "links": [
+  {
+   "is_child_table": 1,
+   "link_doctype": "Bank Transaction Payments",
+   "link_fieldname": "payment_entry",
+   "parent_doctype": "Bank Transaction",
+   "table_fieldname": "payment_entries"
+  }
+ ],
+ "modified": "2023-11-23 12:07:20.887885",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
