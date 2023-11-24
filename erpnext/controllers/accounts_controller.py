@@ -902,18 +902,11 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Purchase Receipt":
 			return
 
-		title = _("Invalid Quantity")
 		for item in self.items:
 			if not flt(item.qty):
 				frappe.throw(
 					msg=_("Row #{0}: Item quantity cannot be zero").format(item.idx),
-					title=title,
-					exc=InvalidQtyError,
-				)
-			if flt(item.qty) < 0.0 and self.doctype in ["Purchase Order", "Sales Order"]:
-				frappe.throw(
-					msg=_("Row #{0}: Item quantity cannot be negative").format(item.idx),
-					title=title,
+					title=_("Invalid Quantity"),
 					exc=InvalidQtyError,
 				)
 
