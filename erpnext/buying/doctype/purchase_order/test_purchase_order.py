@@ -28,7 +28,18 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 
 class TestPurchaseOrder(FrappeTestCase):
 	def test_purchase_order_qty(self):
-		po = create_purchase_order(qty=-1, do_not_save=True)
+		po = create_purchase_order(qty=1, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": -1,
+				"rate": 10,
+			},
+		)
+		self.assertRaises(frappe.NonNegativeError, po.save)
+
+		po.items[1].qty = 0
 		self.assertRaises(InvalidQtyError, po.save)
 
 	def test_make_purchase_receipt(self):
