@@ -739,8 +739,16 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2023-06-19 11:38:04.387219",
+ "links": [
+  {
+   "is_child_table": 1,
+   "link_doctype": "Bank Transaction Payments",
+   "link_fieldname": "payment_entry",
+   "parent_doctype": "Bank Transaction",
+   "table_fieldname": "payment_entries"
+  }
+ ],
+ "modified": "2023-11-23 12:07:20.887885",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
