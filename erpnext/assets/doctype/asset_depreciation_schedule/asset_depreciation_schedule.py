@@ -26,6 +26,7 @@ class AssetDepreciationSchedule(Document):
 			self.prepare_draft_asset_depr_schedule_data_from_asset_name_and_fb_name(
 				self.asset, self.finance_book
 			)
+		self.update_shift_depr_schedule()
 
 	def validate(self):
 		self.validate_another_asset_depr_schedule_does_not_exist()
@@ -72,6 +73,16 @@ class AssetDepreciationSchedule(Document):
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
+
+	def update_shift_depr_schedule(self):
+		if not self.depreciation_method == "Shift" or self.docstatus != 0:
+			return
+
+		asset_doc = frappe.get_doc("Asset", self.asset)
+		fb_row = asset_doc.finance_books[self.finance_book_id - 1]
+
+		self.make_depr_schedule(asset_doc, fb_row)
+		self.set_accumulated_depreciation(asset_doc, fb_row)
 
 	def prepare_draft_asset_depr_schedule_data_from_asset_name_and_fb_name(self, asset_name, fb_name):
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -154,13 +165,17 @@ class AssetDepreciationSchedule(Document):
 		self.rate_of_depreciation = row.rate_of_depreciation
 		self.expected_value_after_useful_life = row.expected_value_after_useful_life
 		self.daily_prorata_based = row.daily_prorata_based
+		self.single_shift_factor = row.single_shift_factor
+		self.double_shift_factor = row.double_shift_factor
+		self.triple_shift_factor = row.triple_shift_factor
+		self.no_shift_factor = row.no_shift_factor
 		self.status = "Draft"
 
 	def make_depr_schedule(
 		self,
 		asset_doc,
 		row,
-		date_of_disposal,
+		date_of_disposal=None,
 		update_asset_finance_book_row=True,
 		value_after_depreciation=None,
 	):
@@ -180,6 +195,8 @@ class AssetDepreciationSchedule(Document):
 		start = 0
 		num_of_depreciations_completed = 0
 		depr_schedule = []
+
+		self.schedules_before_clearing = self.get("depreciation_schedule")
 
 		for schedule in self.get("depreciation_schedule"):
 			if schedule.journal_entry:
@@ -246,6 +263,7 @@ class AssetDepreciationSchedule(Document):
 				prev_depreciation_amount = 0
 
 			depreciation_amount = get_depreciation_amount(
+				self,
 				asset_doc,
 				value_after_depreciation,
 				row,
@@ -282,10 +300,7 @@ class AssetDepreciationSchedule(Document):
 				)
 
 				if depreciation_amount > 0:
-					self.add_depr_schedule_row(
-						date_of_disposal,
-						depreciation_amount,
-					)
+					self.add_depr_schedule_row(date_of_disposal, depreciation_amount, n)
 
 				break
 
@@ -369,10 +384,7 @@ class AssetDepreciationSchedule(Document):
 				skip_row = True
 
 			if flt(depreciation_amount, asset_doc.precision("gross_purchase_amount")) > 0:
-				self.add_depr_schedule_row(
-					schedule_date,
-					depreciation_amount,
-				)
+				self.add_depr_schedule_row(schedule_date, depreciation_amount, n)
 
 	# to ensure that final accumulated depreciation amount is accurate
 	def get_adjusted_depreciation_amount(
@@ -394,16 +406,22 @@ class AssetDepreciationSchedule(Document):
 	def get_depreciation_amount_for_first_row(self):
 		return self.get("depreciation_schedule")[0].depreciation_amount
 
-	def add_depr_schedule_row(
-		self,
-		schedule_date,
-		depreciation_amount,
-	):
+	def add_depr_schedule_row(self, schedule_date, depreciation_amount, schedule_idx):
+		if self.depreciation_method == "Shift":
+			shift = (
+				self.schedules_before_clearing[schedule_idx].shift
+				if self.schedules_before_clearing and len(self.schedules_before_clearing) > schedule_idx
+				else "Single"
+			)
+		else:
+			shift = None
+
 		self.append(
 			"depreciation_schedule",
 			{
 				"schedule_date": schedule_date,
 				"depreciation_amount": depreciation_amount,
+				"shift": shift,
 			},
 		)
 
@@ -527,6 +545,7 @@ def get_total_days(date, frequency):
 
 
 def get_depreciation_amount(
+	asset_depr_schedule,
 	asset,
 	depreciable_value,
 	fb_row,
@@ -538,6 +557,10 @@ def get_depreciation_amount(
 	if fb_row.depreciation_method in ("Straight Line", "Manual"):
 		return get_straight_line_or_manual_depr_amount(
 			asset, fb_row, schedule_idx, number_of_pending_depreciations
+		)
+	elif fb_row.depreciation_method == "Shift":
+		return get_shift_depr_amount(
+			asset_depr_schedule, asset, fb_row, schedule_idx, number_of_pending_depreciations
 		)
 	else:
 		rate_of_depreciation = get_updated_rate_of_depreciation_for_wdv_and_dd(
@@ -684,6 +707,57 @@ def get_wdv_or_dd_depr_amount(
 				return prev_depreciation_amount
 
 
+def get_shift_depr_amount(
+	asset_depr_schedule, asset, row, schedule_idx, number_of_pending_depreciations
+):
+	if not asset_depr_schedule.get("__islocal") or asset_depr_schedule.flags.shift_adjustment:
+		asset_shift_factor_name_map = get_asset_shift_factor_name_map()
+		shift = (
+			asset_depr_schedule.schedules_before_clearing[schedule_idx].shift
+			if len(asset_depr_schedule.schedules_before_clearing) > schedule_idx
+			else "No"
+		)
+		shift_factor = row.get(asset_shift_factor_name_map.get(shift))
+
+		shift_factors_sum = sum(
+			flt(row.get(asset_shift_factor_name_map.get(schedule.shift)))
+			for schedule in asset_depr_schedule.schedules_before_clearing
+		)
+
+		a = (
+			(
+				flt(asset.gross_purchase_amount)
+				- flt(asset.opening_accumulated_depreciation)
+				- flt(row.expected_value_after_useful_life)
+			)
+			/ flt(shift_factors_sum)
+		) * shift_factor
+
+		return (
+			(
+				flt(asset.gross_purchase_amount)
+				- flt(asset.opening_accumulated_depreciation)
+				- flt(row.expected_value_after_useful_life)
+			)
+			/ flt(shift_factors_sum)
+		) * shift_factor
+	else:
+		return (
+			flt(asset.gross_purchase_amount)
+			- flt(asset.opening_accumulated_depreciation)
+			- flt(row.expected_value_after_useful_life)
+		) / flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
+
+
+def get_asset_shift_factor_name_map():
+	return {
+		"Single": "single_shift_factor",
+		"Double": "double_shift_factor",
+		"Triple": "triple_shift_factor",
+		"No": "no_shift_factor",
+	}
+
+
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
 	asset_depr_schedules_names = []
 
@@ -803,7 +877,13 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 
 
 def get_temp_asset_depr_schedule_doc(
-	asset_doc, row, date_of_disposal=None, date_of_return=None, update_asset_finance_book_row=False
+	asset_doc,
+	row,
+	date_of_disposal=None,
+	date_of_return=None,
+	update_asset_finance_book_row=False,
+	new_depr_schedule=False,
+	shift_adjustment=False,
 ):
 	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
 		asset_doc.name, "Active", row.finance_book
@@ -817,6 +897,23 @@ def get_temp_asset_depr_schedule_doc(
 		)
 
 	temp_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+
+	if new_depr_schedule:
+		temp_asset_depr_schedule_doc.depreciation_schedule = []
+
+		for schedule in new_depr_schedule:
+			temp_asset_depr_schedule_doc.append(
+				"depreciation_schedule",
+				{
+					"schedule_date": schedule.schedule_date,
+					"depreciation_amount": schedule.depreciation_amount,
+					"accumulated_depreciation_amount": schedule.accumulated_depreciation_amount,
+					"journal_entry": schedule.journal_entry,
+					"shift": schedule.shift,
+				},
+			)
+
+		temp_asset_depr_schedule_doc.flags.shift_adjustment = shift_adjustment
 
 	temp_asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
 		asset_doc,
@@ -839,6 +936,7 @@ def get_depr_schedule(asset_name, status, finance_book=None):
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
 
+@frappe.whitelist()
 def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
 	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, status, finance_book)
 
