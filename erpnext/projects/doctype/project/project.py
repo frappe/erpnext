@@ -4,9 +4,10 @@
 
 import frappe
 from email_reply_parser import EmailReplyParser
-from frappe import _
+from frappe import _, qb
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 
 from erpnext import get_default_company
@@ -246,12 +247,7 @@ class Project(Document):
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) * 100
 
 	def update_purchase_costing(self):
-		total_purchase_cost = frappe.db.sql(
-			"""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project = %s and docstatus=1""",
-			self.name,
-		)
-
+		total_purchase_cost = calculate_total_purchase_cost(self.name)
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 	def update_sales_amount(self):
@@ -671,3 +667,29 @@ def get_holiday_list(company=None):
 
 def get_users_email(doc):
 	return [d.email for d in doc.users if frappe.db.get_value("User", d.user, "enabled")]
+
+
+def calculate_total_purchase_cost(project: str | None = None):
+	if project:
+		pitem = qb.DocType("Purchase Invoice Item")
+		frappe.qb.DocType("Purchase Invoice Item")
+		total_purchase_cost = (
+			qb.from_(pitem)
+			.select(Sum(pitem.base_net_amount))
+			.where((pitem.project == project) & (pitem.docstatus == 1))
+			.run(as_list=True)
+		)
+		return total_purchase_cost
+	return None
+
+
+@frappe.whitelist()
+def recalculate_project_total_purchase_cost(project: str | None = None):
+	if project:
+		total_purchase_cost = calculate_total_purchase_cost(project)
+		frappe.db.set_value(
+			"Project",
+			project,
+			"total_purchase_cost",
+			(total_purchase_cost and total_purchase_cost[0][0] or 0),
+		)
