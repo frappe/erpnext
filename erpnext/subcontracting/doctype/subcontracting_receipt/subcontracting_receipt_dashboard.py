@@ -9,11 +9,15 @@ def get_data():
 		},
 		"internal_links": {
 			"Subcontracting Order": ["items", "subcontracting_order"],
+			"Purchase Order": ["items", "purchase_order"],
 			"Project": ["items", "project"],
 			"Quality Inspection": ["items", "quality_inspection"],
 		},
 		"transactions": [
-			{"label": _("Reference"), "items": ["Subcontracting Order", "Quality Inspection", "Project"]},
+			{
+				"label": _("Reference"),
+				"items": ["Subcontracting Order", "Purchase Order", "Quality Inspection", "Project"],
+			},
 			{"label": _("Returns"), "items": ["Subcontracting Receipt"]},
 		],
 	}
