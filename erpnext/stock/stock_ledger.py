@@ -1799,6 +1799,7 @@ def get_future_sle_with_negative_batch_qty(args):
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and batch_no=%(batch_no)s
+				and voucher_no != %(voucher_no)s
 				and is_cancelled = 0
 			order by posting_date, posting_time, creation
 		)
