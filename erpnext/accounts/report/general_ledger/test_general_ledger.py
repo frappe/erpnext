@@ -146,5 +146,5 @@ class TestGeneralLedger(FrappeTestCase):
 		self.assertEqual(data[1]["credit"], 0)
 		self.assertEqual(data[2]["debit"], 0)
 		self.assertEqual(data[2]["credit"], 900)
-		self.assertEqual(data[3]["debit"], 100)
 		self.assertEqual(data[3]["credit"], 100)
+		self.assertEqual(data[4]["debit"], 100)
