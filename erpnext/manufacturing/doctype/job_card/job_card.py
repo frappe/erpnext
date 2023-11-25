@@ -172,7 +172,7 @@ class JobCard(Document):
 
 		if not time_logs:
 			return {}
-
+		
 		time_logs = sorted(time_logs, key=lambda x: x.get("to_time"))
 
 		production_capacity = 1
@@ -187,6 +187,17 @@ class JobCard(Document):
 
 		if time_logs and production_capacity > len(time_logs):
 			return {}
+		else:
+			time_logs = sorted(time_logs,key = lambda x : x.get("from_time"))
+			sequentialjc_list = [[]]
+			temp = existing.copy()
+			while len(temp) > 0:
+				[seqtemp,temp1] = self.groupingjc(temp)
+				sequentialjc_list.append(seqtemp)
+				temp = temp1
+			sequentialjc_list.pop(0)
+			if sequentialjc_list and production_capacity > len(sequentialjc_list):
+				return {}
 
 		if self.workstation_type and time_logs:
 			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
@@ -195,6 +206,20 @@ class JobCard(Document):
 
 		return time_logs[-1]
 
+	def groupingjc(temp):
+		seqtemp = [temp[0]["name"]]
+		to_time1 = temp[0]["to_time"]
+		remove_list = [0]
+		for i in range(1,len(temp)):
+			if to_time1 <= temp[i]["from_time"]:
+				seqtemp.append(temp[i]["name"])
+				to_time1 = temp[i]["to_time"]
+				remove_list.append(i)
+		remove_list.reverse()
+		for j in remove_list:
+			temp.pop(j)
+		return [seqtemp,temp] #returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
+		
 	def get_time_logs(self, args, doctype, check_next_available_slot=False):
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType(doctype)
