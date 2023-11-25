@@ -349,7 +349,34 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 					data.append(acc_dict.totals.closing)
 		data.append({})
 	else:
-		data += entries
+		consolidate_voucher_entries = {}
+		for entry in entries:
+			voucher_data = consolidate_voucher_entries.get(
+				(entry.voucher_type, entry.voucher_no, entry.account)
+			)
+			if not voucher_data:
+				entry.pop("against_voucher_type", None)
+				entry.pop("against_voucher", None)
+				consolidate_voucher_entries[(entry.voucher_type, entry.voucher_no, entry.account)] = entry
+				continue
+
+			voucher_data["debit"] += entry.debit
+			voucher_data["credit"] += entry.credit
+			voucher_data["debit_in_account_currency"] += entry.debit_in_account_currency
+			voucher_data["credit_in_account_currency"] += entry.credit_in_account_currency
+
+		# split debit and credit into two lines if the same voucher had both entries on same account
+		for values in consolidate_voucher_entries.values():
+			if values.debit and values.credit:
+				credit_copy = values.copy()
+				credit_copy.update({"debit": 0, "debit_in_account_currency": 0})
+				data.append(credit_copy)
+
+				debit_copy = values.copy()
+				debit_copy.update({"credit": 0, "credit_in_account_currency": 0})
+				data.append(debit_copy)
+			else:
+				data.append(values)
 
 	# totals
 	data.append(totals.total)
