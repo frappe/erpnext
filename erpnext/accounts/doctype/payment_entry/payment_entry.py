@@ -773,13 +773,11 @@ class PaymentEntry(AccountsController):
 		self.base_paid_amount, self.base_received_amount, self.difference_amount = 0, 0, 0
 		if self.paid_amount:
 			self.base_paid_amount = flt(
-				flt(self.paid_amount) * flt(self.source_exchange_rate), self.precision("base_paid_amount")
+				flt(self.paid_amount) * flt(self.source_exchange_rate)
 			)
-
 		if self.received_amount:
 			self.base_received_amount = flt(
-				flt(self.received_amount) * flt(self.target_exchange_rate),
-				self.precision("base_received_amount"),
+				flt(self.received_amount) * flt(self.target_exchange_rate)
 			)
 
 	def calculate_base_allocated_amount_for_reference(self, d) -> float:
