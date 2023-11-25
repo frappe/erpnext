@@ -877,7 +877,6 @@ class PurchaseInvoice(BuyingController):
 									"account": expense_account,
 									"against": self.supplier,
 									"debit": amount,
-									"debit_in_account_currency": dummy,
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 								},
