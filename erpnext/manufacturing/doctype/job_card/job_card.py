@@ -190,7 +190,7 @@ class JobCard(Document):
 		else:
 			time_logs = sorted(time_logs,key = lambda x : x.get("from_time"))
 			sequentialjc_list = [[]]
-			temp = existing.copy()
+			temp = time_logs.copy()
 			while len(temp) > 0:
 				[seqtemp,temp1] = self.groupingjc(temp)
 				sequentialjc_list.append(seqtemp)
