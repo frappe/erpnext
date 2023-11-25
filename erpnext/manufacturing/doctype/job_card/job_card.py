@@ -221,7 +221,7 @@ class JobCard(Document):
 		return [
 				seqtemp,
 				temp
-		] #returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
+		]  # returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
 		
 	def get_time_logs(self, args, doctype, check_next_available_slot=False):
 		jc = frappe.qb.DocType("Job Card")
