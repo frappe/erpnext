@@ -211,11 +211,11 @@ class JobCard(Document):
 		if existing and production_capacity > len(existing):
 			return
 		else:
-			existing = sorted(existing,key = lambda x : x.get("from_time"))
+			existing = sorted(existing,key = lambda x: x.get("from_time"))
 			sequentialjc_list = [[]]
 			temp = existing.copy()
 			while len(temp) > 0:
-				[seqtemp,temp1] = self.groupingjc(temp)
+				[seqtemp, temp1] = self.groupingjc(temp)
 				sequentialjc_list.append(seqtemp)
 				temp = temp1
 			sequentialjc_list.pop(0)
@@ -233,7 +233,7 @@ class JobCard(Document):
 		seqtemp = [temp[0]["name"]]
 		to_time1 = temp[0]["to_time"]
 		remove_list = [0]
-		for i in range(1,len(temp)):
+		for i in range(1, len(temp)):
 			if to_time1 <= temp[i]["from_time"]:
 				seqtemp.append(temp[i]["name"])
 				to_time1 = temp[i]["to_time"]
@@ -241,7 +241,10 @@ class JobCard(Document):
 		remove_list.reverse()
 		for j in remove_list:
 			temp.pop(j)
-		return [seqtemp,temp] #returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
+		return (
+				seqtemp,
+				temp,
+		) #returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
 
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
 		workstations = get_workstations(self.workstation_type)
