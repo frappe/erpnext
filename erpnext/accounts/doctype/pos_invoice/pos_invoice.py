@@ -659,7 +659,7 @@ def get_stock_availability(item_code, warehouse):
 		return bin_qty - pos_sales_qty, is_stock_item
 	else:
 		is_stock_item = True
-		if frappe.db.exists("Product Bundle", item_code):
+		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
 			return get_bundle_availability(item_code, warehouse), is_stock_item
 		else:
 			is_stock_item = False

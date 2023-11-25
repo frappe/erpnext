@@ -349,5 +349,8 @@ execute:frappe.db.set_single_value("Payment Reconciliation", "payment_limit", 50
 erpnext.patches.v14_0.rename_daily_depreciation_to_depreciation_amount_based_on_num_days_in_month
 erpnext.patches.v14_0.rename_depreciation_amount_based_on_num_days_in_month_to_daily_prorata_based
 erpnext.patches.v14_0.add_default_for_repost_settings
+erpnext.patches.v14_0.create_accounting_dimensions_in_supplier_quotation
+erpnext.patches.v14_0.update_zero_asset_quantity_field
+execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency", "Each Transaction")
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

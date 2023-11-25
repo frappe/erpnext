@@ -1613,7 +1613,8 @@
    "hide_seconds": 1,
    "label": "Inter Company Invoice Reference",
    "options": "Purchase Invoice",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "customer_group",
@@ -2147,7 +2148,7 @@
    "label": "Use Company default Cost Center for Round off"
   },
   {
-   "default": "0",
+   "default": "1",
    "depends_on": "eval: doc.is_return",
    "fieldname": "update_billed_amount_in_delivery_note",
    "fieldtype": "Check",
@@ -2164,7 +2165,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-11-03 14:39:38.012346",
+ "modified": "2023-11-23 16:56:29.679499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
