@@ -188,7 +188,7 @@ class JobCard(Document):
 		if time_logs and production_capacity > len(time_logs):
 			return {}
 		else:
-			time_logs = sorted(time_logs,key = lambda x: x.get("from_time"))
+			time_logs = sorted(time_logs, key=lambda x: x.get("from_time"))
 			sequentialjc_list = [[]]
 			temp_time_logs = time_logs.copy()
 			while len(temp_time_logs) > 0:
@@ -220,7 +220,7 @@ class JobCard(Document):
 			temp_time_logs.pop(j)
 		return [
 				seqtemp,
-				temp_time_logs
+				temp_time_logs,
 		]  # returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
 		
 	def get_time_logs(self, args, doctype, check_next_available_slot=False):
