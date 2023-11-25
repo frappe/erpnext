@@ -215,7 +215,7 @@ class JobCard(Document):
 			sequentialjc_list = [[]]
 			temp = existing.copy()
 			while len(temp) > 0:
-				[seqtemp,temp1] = groupingjc(temp)
+				[seqtemp,temp1] = self.groupingjc(temp)
 				sequentialjc_list.append(seqtemp)
 				temp = temp1
 			sequentialjc_list.pop(0)
