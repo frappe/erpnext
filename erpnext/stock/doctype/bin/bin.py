@@ -169,4 +169,4 @@ def update_qty(bin_name, args):
 	bin_obj.indented_qty=indented_qty
 	bin_obj.planned_qty= planned_qty
 	bin_obj.projected_qty= projected_qty
-	bin_obj.save()
+	bin_obj.save(ignore_permissions = True)
