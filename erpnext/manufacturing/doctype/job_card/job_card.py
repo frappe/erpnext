@@ -190,11 +190,11 @@ class JobCard(Document):
 		else:
 			time_logs = sorted(time_logs,key = lambda x: x.get("from_time"))
 			sequentialjc_list = [[]]
-			temp = time_logs.copy()
-			while len(temp) > 0:
-				[seqtemp, temp1] = self.groupingjc(temp)
+			temp_time_logs = time_logs.copy()
+			while len(temp_time_logs) > 0:
+				[seqtemp, temp1] = self.groupingjc(temp_time_logs)
 				sequentialjc_list.append(seqtemp)
-				temp = temp1
+				temp_time_logs = temp1
 			sequentialjc_list.pop(0)
 			if sequentialjc_list and production_capacity > len(sequentialjc_list):
 				return {}
@@ -206,21 +206,21 @@ class JobCard(Document):
 
 		return time_logs[-1]
 
-	def groupingjc(temp):
-		seqtemp = [temp[0]["name"]]
-		to_time1 = temp[0]["to_time"]
+	def groupingjc(temp_time_logs):
+		seqtemp = [temp_time_logs[0]["name"]]
+		to_time1 = temp_time_logs[0]["to_time"]
 		remove_list = [0]
-		for i in range(1, len(temp)):
-			if to_time1 <= temp[i]["from_time"]:
-				seqtemp.append(temp[i]["name"])
-				to_time1 = temp[i]["to_time"]
+		for i in range(1, len(temp_time_logs)):
+			if to_time1 <= temp_time_logs[i]["from_time"]:
+				seqtemp.append(temp_time_logs[i]["name"])
+				to_time1 = temp_time_logs[i]["to_time"]
 				remove_list.append(i)
 		remove_list.reverse()
 		for j in remove_list:
-			temp.pop(j)
+			temp_time_logs.pop(j)
 		return [
 				seqtemp,
-				temp
+				temp_time_logs
 		]  # returns 1. grouped Non overlapped Job cards with respect to first Job card 2. remaining Job cards
 		
 	def get_time_logs(self, args, doctype, check_next_available_slot=False):
