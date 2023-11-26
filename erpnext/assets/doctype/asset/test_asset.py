@@ -1000,7 +1000,11 @@ class TestDepreciationBasics(AssetSetup):
 			},
 		)
 
-		depreciation_amount = get_depreciation_amount(asset, 100000, asset.finance_books[0])
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
+
+		depreciation_amount = get_depreciation_amount(
+			asset_depr_schedule_doc, asset, 100000, asset.finance_books[0]
+		)
 		self.assertEqual(depreciation_amount, 30000)
 
 	def test_make_depr_schedule(self):
