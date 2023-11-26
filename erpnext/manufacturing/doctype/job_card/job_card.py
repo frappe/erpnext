@@ -166,22 +166,65 @@ class JobCard(Document):
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
 
-<<<<<<< HEAD
-=======
+		jc = frappe.qb.DocType("Job Card")
+		jctl = frappe.qb.DocType("Job Card Time Log")
+
+		time_conditions = [
+			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
+			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
+			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
+		]
+
+		if check_next_available_slot:
+			time_conditions.append(((jctl.from_time >= args.from_time) & (jctl.to_time >= args.to_time)))
+
+		query = (
+			frappe.qb.from_(jctl)
+			.from_(jc)
+			.select(
+				jc.name.as_("name"),
+				jctl.name.as_("row_name"),
+				jctl.from_time,
+				jctl.to_time,
+				jc.workstation,
+				jc.workstation_type,
+			)
+			.where(
+				(jctl.parent == jc.name)
+				& (Criterion.any(time_conditions))
+				& (jctl.name != f"{args.name or 'No Name'}")
+				& (jc.name != f"{args.parent or 'No Name'}")
+				& (jc.docstatus < 2)
+			)
+			.orderby(jctl.to_time, order=frappe.qb.desc)
+		)
+
+		if self.workstation_type:
+			query = query.where(jc.workstation_type == self.workstation_type)
+
+		if self.workstation:
+			production_capacity = (
+				frappe.get_cached_value("Workstation", self.workstation, "production_capacity") or 1
+			)
+			query = query.where(jc.workstation == self.workstation)
+
 		if args.get("employee"):
 			# override capacity for employee
 			production_capacity = 1
+			query = query.where(jctl.employee == args.get("employee"))
 
-		overlap_count = self.get_overlap_count(time_logs)
-		if time_logs and production_capacity > overlap_count:
-			return {}
+		existing = query.run(as_dict=True)
 
-		if self.workstation_type and time_logs:
-			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
-				self.workstation = workstation_time.get("workstation")
-				return workstation_time
+		overlap_count = self.get_overlap_count(existing)
+		if existing and production_capacity > overlap_count:
+			return
 
-		return time_logs[-1]
+		if self.workstation_type:
+			if workstation := self.get_workstation_based_on_available_slot(existing):
+				self.workstation = workstation
+				return None
+
+		return existing[0] if existing else None
 
 	@staticmethod
 	def get_overlap_count(time_logs):
@@ -213,72 +256,7 @@ class JobCard(Document):
 					count += 1
 
 		return count
-
-	def get_time_logs(self, args, doctype, check_next_available_slot=False):
->>>>>>> d8245cef72 (fix: job card overlap validation (#38345))
-		jc = frappe.qb.DocType("Job Card")
-		jctl = frappe.qb.DocType("Job Card Time Log")
-
-		time_conditions = [
-			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
-			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
-			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
-		]
-
-		if check_next_available_slot:
-			time_conditions.append(((jctl.from_time >= args.from_time) & (jctl.to_time >= args.to_time)))
-
-		query = (
-			frappe.qb.from_(jctl)
-			.from_(jc)
-<<<<<<< HEAD
-			.select(jc.name.as_("name"), jctl.to_time, jc.workstation, jc.workstation_type)
-=======
-			.select(
-				jc.name.as_("name"),
-				jctl.name.as_("row_name"),
-				jctl.from_time,
-				jctl.to_time,
-				jc.workstation,
-				jc.workstation_type,
-			)
->>>>>>> d8245cef72 (fix: job card overlap validation (#38345))
-			.where(
-				(jctl.parent == jc.name)
-				& (Criterion.any(time_conditions))
-				& (jctl.name != f"{args.name or 'No Name'}")
-				& (jc.name != f"{args.parent or 'No Name'}")
-				& (jc.docstatus < 2)
-			)
-			.orderby(jctl.to_time, order=frappe.qb.desc)
-		)
-
-		if self.workstation_type:
-			query = query.where(jc.workstation_type == self.workstation_type)
-
-		if self.workstation:
-			production_capacity = (
-				frappe.get_cached_value("Workstation", self.workstation, "production_capacity") or 1
-			)
-			query = query.where(jc.workstation == self.workstation)
-
-		if args.get("employee"):
-			# override capacity for employee
-			production_capacity = 1
-			query = query.where(jctl.employee == args.get("employee"))
-
-		existing = query.run(as_dict=True)
-
-		if existing and production_capacity > len(existing):
-			return
-
-		if self.workstation_type:
-			if workstation := self.get_workstation_based_on_available_slot(existing):
-				self.workstation = workstation
-				return None
-
-		return existing[0] if existing else None
-
+	
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
 		workstations = get_workstations(self.workstation_type)
 		if workstations:
