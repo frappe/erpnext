@@ -244,7 +244,7 @@ frappe.ui.form.on('Asset', {
 
 		if (asset_depr_schedule_doc.depreciation_method === "Shift") {
 			columns.push({name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 245});
-			columns.push({name: __("Shift"), editable: false, resizable: false, width: 60});
+			columns.push({name: __("Shift"), editable: false, resizable: false, width: 59});
 		} else {
 			columns.push({name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 304});
 		}

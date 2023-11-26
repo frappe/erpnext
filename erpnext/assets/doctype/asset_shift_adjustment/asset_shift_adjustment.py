@@ -4,8 +4,9 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_asset_shift_factor_name_map,
@@ -18,6 +19,9 @@ class AssetShiftAdjustment(Document):
 		self.create_depr_schedule()
 		self.validate_depr_schedule()
 		self.update_depr_schedule()
+
+	def on_submit(self):
+		self.create_new_asset_depr_schedule()
 
 	def create_depr_schedule(self):
 		if self.depreciation_schedule:
@@ -122,3 +126,41 @@ class AssetShiftAdjustment(Document):
 					new_shift_factors_sum, inequality, shift_factors_sum
 				)
 			)
+
+	def create_new_asset_depr_schedule(self):
+		new_asset_depr_schedule_doc = frappe.copy_doc(self.asset_depr_schedule_doc)
+
+		new_asset_depr_schedule_doc.depreciation_schedule = []
+
+		for schedule in self.depreciation_schedule:
+			new_asset_depr_schedule_doc.append(
+				"depreciation_schedule",
+				{
+					"schedule_date": schedule.schedule_date,
+					"depreciation_amount": schedule.depreciation_amount,
+					"accumulated_depreciation_amount": schedule.accumulated_depreciation_amount,
+					"journal_entry": schedule.journal_entry,
+					"shift": schedule.shift,
+				},
+			)
+
+		notes = _(
+			"This schedule was created when Asset {0}'s shifts were adjusted through Asset Shift Adjustment {1}."
+		).format(
+			get_link_to_form("Asset", self.asset),
+			get_link_to_form(self.doctype, self.name),
+		)
+
+		new_asset_depr_schedule_doc.notes = notes
+
+		self.asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+		self.asset_depr_schedule_doc.cancel()
+
+		new_asset_depr_schedule_doc.submit()
+
+		add_asset_activity(
+			self.asset,
+			_("Asset's depreciation schedule updated after Asset Shift Adjustment {0}").format(
+				get_link_to_form("Asset Shift Adjustment", self.name)
+			),
+		)

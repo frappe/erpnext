@@ -1,12 +1,13 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2023-11-24 15:07:44.652133",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "section_break_esaa",
   "asset",
+  "naming_series",
   "column_break_tdae",
   "finance_book",
   "amended_from",
@@ -57,15 +58,23 @@
    "fieldtype": "Table",
    "label": "Depreciation Schedule",
    "options": "Depreciation Schedule"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ACC-ASA-.YYYY.-",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-24 15:25:30.705743",
+ "modified": "2023-11-26 17:46:45.128320",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Adjustment",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
