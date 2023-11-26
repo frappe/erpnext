@@ -15,23 +15,24 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 
 
 class AssetShiftAdjustment(Document):
+	def after_insert(self):
+		self.fetch_and_set_depr_schedule()
+
 	def validate(self):
-		self.create_depr_schedule()
+		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+			self.asset, "Active", self.finance_book
+		)
+
 		self.validate_depr_schedule()
 		self.update_depr_schedule()
 
 	def on_submit(self):
 		self.create_new_asset_depr_schedule()
 
-	def create_depr_schedule(self):
-		if self.depreciation_schedule:
-			return
-
-		asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
-
-		if asset_depr_schedule_doc:
-			if asset_depr_schedule_doc.depreciation_method == "Shift":
-				for schedule in asset_depr_schedule_doc.get("depreciation_schedule"):
+	def fetch_and_set_depr_schedule(self):
+		if self.asset_depr_schedule_doc:
+			if self.asset_depr_schedule_doc.depreciation_method == "Shift":
+				for schedule in self.asset_depr_schedule_doc.get("depreciation_schedule"):
 					self.append(
 						"depreciation_schedule",
 						{
@@ -42,6 +43,9 @@ class AssetShiftAdjustment(Document):
 							"shift": schedule.shift,
 						},
 					)
+
+				self.flags.ignore_validate = True
+				self.save()
 			else:
 				frappe.throw(
 					_(
@@ -56,12 +60,8 @@ class AssetShiftAdjustment(Document):
 			)
 
 	def validate_depr_schedule(self):
-		if self.get("__islocal"):
+		if not self.get("depreciation_schedule") or self.docstatus == 1:
 			return
-
-		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(
-			self.asset, "Active", self.finance_book
-		)
 
 		for i, sch in enumerate(self.depreciation_schedule):
 			if (
@@ -76,7 +76,7 @@ class AssetShiftAdjustment(Document):
 		self.validate_shift_factors_sum(self.depreciation_schedule)
 
 	def update_depr_schedule(self):
-		if self.get("__islocal"):
+		if not self.get("depreciation_schedule") or self.docstatus == 1:
 			return
 
 		asset_doc = frappe.get_doc("Asset", self.asset)
