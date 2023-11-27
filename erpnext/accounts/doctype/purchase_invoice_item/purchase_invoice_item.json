@@ -498,6 +498,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -505,6 +506,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "default": ":Company",
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "cost_center",
