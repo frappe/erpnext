@@ -1494,7 +1494,13 @@ class TestDepreciationBasics(AssetSetup):
 			("_Test Depreciations - _TC", 30000.0, 0.0),
 		)
 
-		gle = get_gl_entries("Asset", asset.name)
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where against_voucher_type='Asset' and against_voucher = %s
+			order by account""",
+			asset.name,
+		)
+
 		self.assertSequenceEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
 
