@@ -165,10 +165,6 @@ class AssetDepreciationSchedule(Document):
 		self.rate_of_depreciation = row.rate_of_depreciation
 		self.expected_value_after_useful_life = row.expected_value_after_useful_life
 		self.daily_prorata_based = row.daily_prorata_based
-		self.single_shift_factor = row.single_shift_factor
-		self.double_shift_factor = row.double_shift_factor
-		self.triple_shift_factor = row.triple_shift_factor
-		self.no_shift_factor = row.no_shift_factor
 		self.status = "Draft"
 
 	def make_depr_schedule(
@@ -411,7 +407,7 @@ class AssetDepreciationSchedule(Document):
 			shift = (
 				self.schedules_before_clearing[schedule_idx].shift
 				if self.schedules_before_clearing and len(self.schedules_before_clearing) > schedule_idx
-				else "Single"
+				else frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
 			)
 		else:
 			shift = None
@@ -710,52 +706,38 @@ def get_wdv_or_dd_depr_amount(
 def get_shift_depr_amount(
 	asset_depr_schedule, asset, row, schedule_idx, number_of_pending_depreciations
 ):
-	if not asset_depr_schedule.get("__islocal") or asset_depr_schedule.flags.shift_allocation:
-		asset_shift_factor_name_map = get_asset_shift_factor_name_map()
-		shift = (
-			asset_depr_schedule.schedules_before_clearing[schedule_idx].shift
-			if len(asset_depr_schedule.schedules_before_clearing) > schedule_idx
-			else "No"
-		)
-		shift_factor = row.get(asset_shift_factor_name_map.get(shift))
-
-		shift_factors_sum = sum(
-			flt(row.get(asset_shift_factor_name_map.get(schedule.shift)))
-			for schedule in asset_depr_schedule.schedules_before_clearing
-		)
-
-		a = (
-			(
-				flt(asset.gross_purchase_amount)
-				- flt(asset.opening_accumulated_depreciation)
-				- flt(row.expected_value_after_useful_life)
-			)
-			/ flt(shift_factors_sum)
-		) * shift_factor
-
-		return (
-			(
-				flt(asset.gross_purchase_amount)
-				- flt(asset.opening_accumulated_depreciation)
-				- flt(row.expected_value_after_useful_life)
-			)
-			/ flt(shift_factors_sum)
-		) * shift_factor
-	else:
+	if asset_depr_schedule.get("__islocal") and not asset.flags.shift_allocation:
 		return (
 			flt(asset.gross_purchase_amount)
 			- flt(asset.opening_accumulated_depreciation)
 			- flt(row.expected_value_after_useful_life)
 		) / flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
 
+	asset_shift_factors_map = get_asset_shift_factors_map()
+	shift = (
+		asset_depr_schedule.schedules_before_clearing[schedule_idx].shift
+		if len(asset_depr_schedule.schedules_before_clearing) > schedule_idx
+		else None
+	)
+	shift_factor = asset_shift_factors_map.get(shift) if shift else 0
 
-def get_asset_shift_factor_name_map():
-	return {
-		"Single": "single_shift_factor",
-		"Double": "double_shift_factor",
-		"Triple": "triple_shift_factor",
-		"No": "no_shift_factor",
-	}
+	shift_factors_sum = sum(
+		flt(asset_shift_factors_map.get(schedule.shift))
+		for schedule in asset_depr_schedule.schedules_before_clearing
+	)
+
+	return (
+		(
+			flt(asset.gross_purchase_amount)
+			- flt(asset.opening_accumulated_depreciation)
+			- flt(row.expected_value_after_useful_life)
+		)
+		/ flt(shift_factors_sum)
+	) * shift_factor
+
+
+def get_asset_shift_factors_map():
+	return dict(frappe.db.get_all("Asset Shift Factor", ["shift_name", "shift_factor"], as_list=True))
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
@@ -882,8 +864,7 @@ def get_temp_asset_depr_schedule_doc(
 	date_of_disposal=None,
 	date_of_return=None,
 	update_asset_finance_book_row=False,
-	new_depr_schedule=False,
-	shift_allocation=False,
+	new_depr_schedule=None,
 ):
 	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
 		asset_doc.name, "Active", row.finance_book
@@ -912,8 +893,6 @@ def get_temp_asset_depr_schedule_doc(
 					"shift": schedule.shift,
 				},
 			)
-
-		temp_asset_depr_schedule_doc.flags.shift_allocation = shift_allocation
 
 	temp_asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
 		asset_doc,

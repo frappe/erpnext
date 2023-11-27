@@ -20,13 +20,9 @@
   "total_number_of_depreciations",
   "rate_of_depreciation",
   "daily_prorata_based",
-  "single_shift_factor",
-  "triple_shift_factor",
   "column_break_8",
   "frequency_of_depreciation",
   "expected_value_after_useful_life",
-  "double_shift_factor",
-  "no_shift_factor",
   "depreciation_schedule_section",
   "depreciation_schedule",
   "details_section",
@@ -188,40 +184,12 @@
    "label": "Depreciate based on daily pro-rata",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.depreciation_method == 'Shift'",
-   "fieldname": "single_shift_factor",
-   "fieldtype": "Float",
-   "label": "Single Shift Factor",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.depreciation_method == 'Shift'",
-   "fieldname": "triple_shift_factor",
-   "fieldtype": "Float",
-   "label": "Triple Shift Factor",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.depreciation_method == 'Shift'",
-   "fieldname": "double_shift_factor",
-   "fieldtype": "Float",
-   "label": "Double Shift Factor",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.depreciation_method == 'Shift'",
-   "fieldname": "no_shift_factor",
-   "fieldtype": "Float",
-   "label": "No Shift Factor",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-24 14:45:58.184653",
+ "modified": "2023-11-27 18:26:44.341748",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",
