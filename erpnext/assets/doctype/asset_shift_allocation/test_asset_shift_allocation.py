@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestAssetShiftAdjustment(FrappeTestCase):
+class TestAssetShiftAllocation(FrappeTestCase):
 	pass

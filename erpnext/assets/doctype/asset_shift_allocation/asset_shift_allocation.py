@@ -14,7 +14,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 
 
-class AssetShiftAdjustment(Document):
+class AssetShiftAllocation(Document):
 	def after_insert(self):
 		self.fetch_and_set_depr_schedule()
 
@@ -83,7 +83,7 @@ class AssetShiftAdjustment(Document):
 		fb_row = asset_doc.finance_books[self.asset_depr_schedule_doc.finance_book_id - 1]
 
 		temp_depr_schedule = get_temp_asset_depr_schedule_doc(
-			asset_doc, fb_row, new_depr_schedule=self.depreciation_schedule, shift_adjustment=True
+			asset_doc, fb_row, new_depr_schedule=self.depreciation_schedule, shift_allocation=True
 		).get("depreciation_schedule")
 
 		if temp_depr_schedule:
@@ -145,7 +145,7 @@ class AssetShiftAdjustment(Document):
 			)
 
 		notes = _(
-			"This schedule was created when Asset {0}'s shifts were adjusted through Asset Shift Adjustment {1}."
+			"This schedule was created when Asset {0}'s shifts were adjusted through Asset Shift Allocation {1}."
 		).format(
 			get_link_to_form("Asset", self.asset),
 			get_link_to_form(self.doctype, self.name),
@@ -160,7 +160,7 @@ class AssetShiftAdjustment(Document):
 
 		add_asset_activity(
 			self.asset,
-			_("Asset's depreciation schedule updated after Asset Shift Adjustment {0}").format(
-				get_link_to_form("Asset Shift Adjustment", self.name)
+			_("Asset's depreciation schedule updated after Asset Shift Allocation {0}").format(
+				get_link_to_form(self.doctype, self.name)
 			),
 		)

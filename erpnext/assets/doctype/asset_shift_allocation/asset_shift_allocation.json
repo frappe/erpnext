@@ -24,7 +24,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Asset Shift Adjustment",
+   "options": "Asset Shift Allocation",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -73,7 +73,7 @@
  "modified": "2023-11-26 17:46:45.128320",
  "modified_by": "Administrator",
  "module": "Assets",
- "name": "Asset Shift Adjustment",
+ "name": "Asset Shift Allocation",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

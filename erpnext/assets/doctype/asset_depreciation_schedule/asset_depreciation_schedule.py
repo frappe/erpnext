@@ -710,7 +710,7 @@ def get_wdv_or_dd_depr_amount(
 def get_shift_depr_amount(
 	asset_depr_schedule, asset, row, schedule_idx, number_of_pending_depreciations
 ):
-	if not asset_depr_schedule.get("__islocal") or asset_depr_schedule.flags.shift_adjustment:
+	if not asset_depr_schedule.get("__islocal") or asset_depr_schedule.flags.shift_allocation:
 		asset_shift_factor_name_map = get_asset_shift_factor_name_map()
 		shift = (
 			asset_depr_schedule.schedules_before_clearing[schedule_idx].shift
@@ -883,7 +883,7 @@ def get_temp_asset_depr_schedule_doc(
 	date_of_return=None,
 	update_asset_finance_book_row=False,
 	new_depr_schedule=False,
-	shift_adjustment=False,
+	shift_allocation=False,
 ):
 	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
 		asset_doc.name, "Active", row.finance_book
@@ -913,7 +913,7 @@ def get_temp_asset_depr_schedule_doc(
 				},
 			)
 
-		temp_asset_depr_schedule_doc.flags.shift_adjustment = shift_adjustment
+		temp_asset_depr_schedule_doc.flags.shift_allocation = shift_allocation
 
 	temp_asset_depr_schedule_doc.prepare_draft_asset_depr_schedule_data(
 		asset_doc,
