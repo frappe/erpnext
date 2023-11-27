@@ -893,11 +893,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2023-11-14 18:33:48.547297",
-=======
- "modified": "2023-11-13 20:26:18.329983",
->>>>>>> 5fae2f6d57 (fix: allow on submit for child table fields)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
