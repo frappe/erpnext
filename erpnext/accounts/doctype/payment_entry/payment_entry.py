@@ -1976,7 +1976,8 @@ def get_outstanding_on_journal_entry(name):
 		"END as outstanding_amount "
 		"FROM `tabGL Entry` WHERE (voucher_no=%s OR against_voucher=%s) "
 		"AND party_type IS NOT NULL "
-		'AND party_type != ""',
+		'AND party_type != ""'
+		"AND is_cancelled = 0",
 		(name, name),
 		as_dict=1,
 	)
