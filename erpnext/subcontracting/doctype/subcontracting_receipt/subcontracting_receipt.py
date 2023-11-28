@@ -560,6 +560,7 @@ def make_purchase_receipt(subcontracting_receipt, save=False, submit=False, noti
 					"field_map": {
 						"posting_date": "posting_date",
 						"posting_time": "posting_time",
+						"name": "subcontracting_receipt",
 						"supplier_warehouse": "supplier_warehouse",
 					},
 					"field_no_map": ["total_qty", "total"],
