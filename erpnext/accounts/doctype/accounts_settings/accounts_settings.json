@@ -66,7 +66,12 @@
   "show_balance_in_coa",
   "banking_tab",
   "enable_party_matching",
-  "enable_fuzzy_matching"
+  "enable_fuzzy_matching",
+  "reports_tab",
+  "remarks_section",
+  "general_ledger_remarks_length",
+  "column_break_lvjk",
+  "receivable_payable_remarks_length"
  ],
  "fields": [
   {
@@ -422,6 +427,34 @@
    "fieldname": "round_row_wise_tax",
    "fieldtype": "Check",
    "label": "Round Tax Amount Row-wise"
+  },
+  {
+   "fieldname": "reports_tab",
+   "fieldtype": "Tab Break",
+   "label": "Reports"
+  },
+  {
+   "default": "0",
+   "description": "Truncates 'Remarks' column to set character length",
+   "fieldname": "general_ledger_remarks_length",
+   "fieldtype": "Int",
+   "label": "General Ledger"
+  },
+  {
+   "default": "0",
+   "description": "Truncates 'Remarks' column to set character length",
+   "fieldname": "receivable_payable_remarks_length",
+   "fieldtype": "Int",
+   "label": "Accounts Receivable/Payable"
+  },
+  {
+   "fieldname": "column_break_lvjk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks Column Length"
   }
  ],
  "icon": "icon-cog",
@@ -429,7 +462,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-28 00:12:02.740633",
+ "modified": "2023-11-20 09:37:47.650347",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

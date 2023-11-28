@@ -7,7 +7,7 @@ from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import CombineDatetime
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 from pypika import functions as fn
 
 import erpnext
@@ -571,7 +571,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					stock_value_diff = (
-						flt(d.net_amount)
+						flt(d.base_net_amount)
 						+ flt(d.item_tax_amount / self.conversion_rate)
 						+ flt(d.landed_cost_voucher_amount)
 					)
@@ -731,12 +731,18 @@ class PurchaseReceipt(BuyingController):
 
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all(
-			"Asset", filters={"purchase_receipt": self.name, "item_code": item.item_code}
+			"Asset",
+			filters={"purchase_receipt": self.name, "item_code": item.item_code},
+			fields=["name", "asset_quantity"],
 		)
 
 		for asset in assets:
-			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(valuation_rate))
-			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
+			frappe.db.set_value(
+				"Asset", asset.name, "gross_purchase_amount", flt(valuation_rate) * asset.asset_quantity
+			)
+			frappe.db.set_value(
+				"Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate) * asset.asset_quantity
+			)
 
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
@@ -760,8 +766,12 @@ class PurchaseReceipt(BuyingController):
 			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 	def reserve_stock_for_sales_order(self):
-		if self.is_return or not cint(
-			frappe.db.get_single_value("Stock Settings", "auto_reserve_stock_for_sales_order_on_purchase")
+		if (
+			self.is_return
+			or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
+			or not frappe.db.get_single_value(
+				"Stock Settings", "auto_reserve_stock_for_sales_order_on_purchase"
+			)
 		):
 			return
 
@@ -771,7 +781,7 @@ class PurchaseReceipt(BuyingController):
 		for item in self.items:
 			if item.sales_order and item.sales_order_item:
 				item_details = {
-					"name": item.sales_order_item,
+					"sales_order_item": item.sales_order_item,
 					"item_code": item.item_code,
 					"warehouse": item.warehouse,
 					"qty_to_reserve": item.stock_qty,
@@ -782,6 +792,11 @@ class PurchaseReceipt(BuyingController):
 				so_items_details_map.setdefault(item.sales_order, []).append(item_details)
 
 		if so_items_details_map:
+			if get_datetime("{} {}".format(self.posting_date, self.posting_time)) > get_datetime():
+				return frappe.msgprint(
+					_("Cannot create Stock Reservation Entries for future dated Purchase Receipts.")
+				)
+
 			for so, items_details in so_items_details_map.items():
 				so_doc = frappe.get_doc("Sales Order", so)
 				so_doc.create_stock_reservation_entries(

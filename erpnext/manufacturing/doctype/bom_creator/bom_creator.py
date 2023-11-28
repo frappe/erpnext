@@ -6,7 +6,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 
@@ -91,11 +91,19 @@ class BOMCreator(Document):
 		parent_reference = {row.idx: row.name for row in self.items}
 
 		for row in self.items:
-			if row.fg_reference_id:
+			ref_id = ""
+
+			if row.parent_row_no:
+				ref_id = parent_reference.get(cint(row.parent_row_no))
+
+			# Check whether the reference id of the FG Item has correct or not
+			if row.fg_reference_id and row.fg_reference_id == ref_id:
 				continue
 
 			if row.parent_row_no:
-				row.fg_reference_id = parent_reference.get(row.parent_row_no)
+				row.fg_reference_id = ref_id
+			elif row.fg_item == self.item_code:
+				row.fg_reference_id = self.name
 
 	@frappe.whitelist()
 	def add_boms(self):
