@@ -1089,9 +1089,10 @@ class PaymentEntry(AccountsController):
 
 				gl_entries.append(gle)
 
-			if self.unallocated_amount:
-				exchange_rate = self.get_exchange_rate()
-				base_unallocated_amount = self.unallocated_amount * exchange_rate
+				if self.unallocated_amount:
+					dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+					exchange_rate = self.get_exchange_rate()
+					base_unallocated_amount = self.unallocated_amount * exchange_rate
 
 				gle = party_gl_dict.copy()
 
