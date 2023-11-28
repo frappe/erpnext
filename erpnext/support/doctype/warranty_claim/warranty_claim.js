@@ -4,7 +4,7 @@
 frappe.provide("erpnext.support");
 
 frappe.ui.form.on("Warranty Claim", {
-	setup: function(frm) {
+	setup: (frm) => {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
@@ -20,18 +20,22 @@ frappe.ui.form.on("Warranty Claim", {
 		frm.add_fetch('item_code', 'item_name', 'item_name');
 		frm.add_fetch('item_code', 'description', 'description');
 	},
-	onload: function(frm) {
+
+	onload: (frm) => {
 		if(!frm.doc.status) {
 			frm.set_value('status', 'Open');
 		}
 	},
-	customer: function(frm) {
+
+	customer: (frm) => {
 		erpnext.utils.get_party_details(frm);
 	},
-	customer_address: function(frm) {
+
+	customer_address: (frm) => {
 		erpnext.utils.get_address_display(frm);
 	},
-	contact_person: function(frm) {
+
+	contact_person: (frm) => {
 		erpnext.utils.get_contact_details(frm);
 	}
 });
@@ -57,7 +61,7 @@ erpnext.support.WarrantyClaim = class WarrantyClaim extends frappe.ui.form.Contr
 
 extend_cscript(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
 
-cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['serial_no'].get_query = (doc, cdt, cdn) => {
 	var cond = [];
 	var filter = [
 		['Serial No', 'docstatus', '!=', 2]
@@ -75,7 +79,7 @@ cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['item_code'].get_query = (doc, cdt, cdn) => {
 	if(doc.serial_no) {
 		return{
 			doctype: "Serial No",
