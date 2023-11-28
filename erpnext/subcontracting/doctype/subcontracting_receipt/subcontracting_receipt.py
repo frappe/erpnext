@@ -590,6 +590,7 @@ def make_purchase_receipt(subcontracting_receipt, save=False, submit=False, noti
 						"rejected_warehouse": item.rejected_warehouse,
 						"purchase_order": item.purchase_order,
 						"purchase_order_item": item.purchase_order_item,
+						"subcontracting_receipt_item": item.name,
 					}
 					purchase_receipt.append("items", item_row)
 
