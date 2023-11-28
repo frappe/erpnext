@@ -491,7 +491,7 @@ class PurchaseOrder(BuyingController):
 		if not self.is_against_so():
 			return
 		for item in removed_items:
-			prev_ordered_qty = frappe.db.get_value(
+			prev_ordered_qty = frappe.get_cached_value(
 				"Sales Order Item", item.get("sales_order_item"), "ordered_qty"
 			)
 			frappe.db.set_value(
