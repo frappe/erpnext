@@ -1126,53 +1126,31 @@ class PaymentEntry(AccountsController):
 
 					gl_entries.append(gle)
 
-	def make_advance_gl_entries(self, against_voucher_type=None, against_voucher=None, cancel=0):
+	def make_advance_gl_entries(
+		self, entry: object | dict = None, cancel: bool = 0, update_outstanding: str = "Yes"
+	):
+		gl_entries = []
+		self.add_advance_gl_entries(gl_entries, entry)
+
+		if cancel:
+			make_reverse_gl_entries(gl_entries, partial_cancel=True)
+		else:
+			make_gl_entries(gl_entries, update_outstanding=update_outstanding)
+
+	def add_advance_gl_entries(self, gl_entries: list, entry: object | dict | None):
+		"""
+		If 'entry' is passed, GL enties only for that reference is added.
+		"""
 		if self.book_advance_payments_in_separate_party_account:
-			gl_entries = []
-			for d in self.get("references"):
-				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
-					if not (against_voucher_type and against_voucher) or (
-						d.reference_doctype == against_voucher_type and d.reference_name == against_voucher
-					):
-						self.make_invoice_liability_entry(gl_entries, d)
+			references = [x for x in self.get("references")]
+			if entry:
+				references = [x for x in self.get("references") if x.name == entry.name]
 
-			if cancel:
-				for entry in gl_entries:
-					frappe.db.set_value(
-						"GL Entry",
-						{
-							"voucher_no": self.name,
-							"voucher_type": self.doctype,
-							"voucher_detail_no": entry.voucher_detail_no,
-							"against_voucher_type": entry.against_voucher_type,
-							"against_voucher": entry.against_voucher,
-						},
-						"is_cancelled",
-						1,
-					)
+			for ref in references:
+				if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
+					self.add_advance_gl_for_reference(gl_entries, ref)
 
-				make_reverse_gl_entries(gl_entries=gl_entries, partial_cancel=True)
-				return
-
-			# same reference added to payment entry
-			for gl_entry in gl_entries.copy():
-				if frappe.db.exists(
-					"GL Entry",
-					{
-						"account": gl_entry.account,
-						"voucher_type": gl_entry.voucher_type,
-						"voucher_no": gl_entry.voucher_no,
-						"voucher_detail_no": gl_entry.voucher_detail_no,
-						"debit": gl_entry.debit,
-						"credit": gl_entry.credit,
-						"is_cancelled": 0,
-					},
-				):
-					gl_entries.remove(gl_entry)
-
-			make_gl_entries(gl_entries)
-
-	def make_invoice_liability_entry(self, gl_entries, invoice):
+	def add_advance_gl_for_reference(self, gl_entries, invoice):
 		args_dict = {
 			"party_type": self.party_type,
 			"party": self.party,
