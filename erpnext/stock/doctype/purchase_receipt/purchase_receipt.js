@@ -49,6 +49,14 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		});
 
+		frm.set_query("subcontracting_receipt", function() {
+			return {
+				filters: {
+					'docstatus': 1,
+					'supplier': frm.doc.supplier,
+				}
+			}
+		});
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
