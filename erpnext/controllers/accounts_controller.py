@@ -2958,6 +2958,9 @@ def validate_and_delete_children(parent, data) -> bool:
 		d.cancel()
 		d.delete()
 
+	if parent.doctype == "Purchase Order":
+		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
+
 	# need to update ordered qty in Material Request first
 	# bin uses Material Request Items to recalculate & update
 	parent.update_prevdoc_status()
