@@ -531,13 +531,8 @@ class SubcontractingReceipt(SubcontractingController):
 			)
 
 	def auto_create_purchase_receipt(self):
-		if action := frappe.db.get_single_value(
-			"Buying Settings", "action_on_subcontracting_receipt_submission"
-		):
-			if action == "Create Purchase Receipt":
-				make_purchase_receipt(self, save=True, notify=True)
-			elif action == "Create and Submit Purchase Receipt":
-				make_purchase_receipt(self, submit=True, notify=True)
+		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
+			make_purchase_receipt(self, save=True, notify=True)
 
 
 @frappe.whitelist()
