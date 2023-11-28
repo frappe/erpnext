@@ -33,7 +33,7 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 		for warehouse in warehouses:
 			stock_qty = frappe.db.sql(
 				"""
-				select GREATEST(S.actual_qty - S.reserved_qty - S.reserved_qty_for_production - S.reserved_qty_for_sub_contract, 0) / IFNULL(C.conversion_factor, 1)
+				select S.actual_qty / IFNULL(C.conversion_factor, 1)
 				from tabBin S
 				inner join `tabItem` I on S.item_code = I.Item_code
 				left join `tabUOM Conversion Detail` C on I.sales_uom = C.uom and C.parent = I.Item_code

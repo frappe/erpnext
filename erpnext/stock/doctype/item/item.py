@@ -542,8 +542,12 @@ class Item(Document):
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
 		"Block merge if both old and new items have product bundles."
-		old_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": old_name})
-		new_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": new_name})
+		old_bundle = frappe.get_value(
+			"Product Bundle", filters={"new_item_code": old_name, "disabled": 0}
+		)
+		new_bundle = frappe.get_value(
+			"Product Bundle", filters={"new_item_code": new_name, "disabled": 0}
+		)
 
 		if old_bundle and new_bundle:
 			bundle_link = get_link_to_form("Product Bundle", old_bundle)
