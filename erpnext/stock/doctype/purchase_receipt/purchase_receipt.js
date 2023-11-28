@@ -122,6 +122,20 @@ frappe.ui.form.on("Purchase Receipt", {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
+	subcontracting_receipt: (frm) => {
+		if (frm.doc.is_subcontracted === 1 && frm.doc.is_old_subcontracting_flow === 0 && frm.doc.subcontracting_receipt) {
+			frm.set_value('items', null);
+
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_purchase_receipt',
+				source_name: frm.doc.subcontracting_receipt,
+				target_doc: frm,
+				freeze: true,
+				freeze_message: __('Mapping Purchase Receipt ...'),
+			});
+		}
+	},
+
 	toggle_display_account_head: function(frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);

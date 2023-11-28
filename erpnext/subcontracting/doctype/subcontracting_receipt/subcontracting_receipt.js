@@ -26,27 +26,36 @@ frappe.ui.form.on('Subcontracting Receipt', {
 	refresh: (frm) => {
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('Stock Ledger'), () => {
-					frappe.route_options = {
-						voucher_no: frm.doc.name,
-						from_date: frm.doc.posting_date,
-						to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
-						company: frm.doc.company,
-						show_cancelled_entries: frm.doc.docstatus === 2
-					}
-					frappe.set_route('query-report', 'Stock Ledger');
-				}, __('View'));
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					from_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
+					company: frm.doc.company,
+					show_cancelled_entries: frm.doc.docstatus === 2
+				}
+				frappe.set_route('query-report', 'Stock Ledger');
+			}, __('View'));
 
 			frm.add_custom_button(__('Accounting Ledger'), () => {
-					frappe.route_options = {
-						voucher_no: frm.doc.name,
-						from_date: frm.doc.posting_date,
-						to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
-						company: frm.doc.company,
-						group_by: 'Group by Voucher (Consolidated)',
-						show_cancelled_entries: frm.doc.docstatus === 2
-					}
-					frappe.set_route('query-report', 'General Ledger');
-				}, __('View'));
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					from_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
+					company: frm.doc.company,
+					group_by: 'Group by Voucher (Consolidated)',
+					show_cancelled_entries: frm.doc.docstatus === 2
+				}
+				frappe.set_route('query-report', 'General Ledger');
+			}, __('View'));
+
+			frm.add_custom_button(__('Purchase Receipt'), () => {
+				frappe.model.open_mapped_doc({
+					method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_purchase_receipt',
+					frm: frm,
+					freeze: true,
+					freeze_message: __('Creating Purchase Receipt ...')
+				});
+			}, __('Create'));
 		}
 
 		if (!frm.doc.is_return && frm.doc.docstatus === 1 && frm.doc.per_returned < 100) {

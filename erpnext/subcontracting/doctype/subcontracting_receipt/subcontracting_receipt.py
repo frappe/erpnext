@@ -546,18 +546,20 @@ def make_subcontract_return(source_name, target_doc=None):
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
 
 
-def make_purchase_receipt(subcontracting_receipt, save=False, submit=False, notify=False):
-	if isinstance(subcontracting_receipt, str):
-		subcontracting_receipt = frappe.get_doc("Subcontracting Receipt", subcontracting_receipt)
+@frappe.whitelist()
+def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False, notify=False):
+	if isinstance(source_name, str):
+		source_name = frappe.get_doc("Subcontracting Receipt", source_name)
 
-	if not subcontracting_receipt.is_return:
-		purchase_receipt = frappe.new_doc("Purchase Receipt")
-		purchase_receipt.is_subcontracted = 1
-		purchase_receipt.is_old_subcontracting_flow = 0
+	if not source_name.is_return:
+		if not target_doc:
+			target_doc = frappe.new_doc("Purchase Receipt")
+			target_doc.is_subcontracted = 1
+			target_doc.is_old_subcontracting_flow = 0
 
-		purchase_receipt = get_mapped_doc(
+		target_doc = get_mapped_doc(
 			"Subcontracting Receipt",
-			subcontracting_receipt.name,
+			source_name.name,
 			{
 				"Subcontracting Receipt": {
 					"doctype": "Purchase Receipt",
@@ -570,12 +572,12 @@ def make_purchase_receipt(subcontracting_receipt, save=False, submit=False, noti
 					"field_no_map": ["total_qty", "total"],
 				},
 			},
-			purchase_receipt,
+			target_doc,
 			ignore_child_tables=True,
 		)
 
 		po_items_details = {}
-		for item in subcontracting_receipt.items:
+		for item in source_name.items:
 			if item.purchase_order and item.purchase_order_item:
 				if item.purchase_order not in po_items_details:
 					po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
@@ -596,31 +598,33 @@ def make_purchase_receipt(subcontracting_receipt, save=False, submit=False, noti
 						"purchase_order_item": item.purchase_order_item,
 						"subcontracting_receipt_item": item.name,
 					}
-					purchase_receipt.append("items", item_row)
+					target_doc.append("items", item_row)
 
-		if not purchase_receipt.items:
+		if not target_doc.items:
 			frappe.throw(
 				_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
-					subcontracting_receipt.name
+					source_name.name
 				)
 			)
 
-		if (save or submit) and frappe.has_permission(purchase_receipt.doctype, "create"):
-			purchase_receipt.save()
+		target_doc.set_missing_values()
 
-			if submit and frappe.has_permission(purchase_receipt.doctype, "submit", purchase_receipt):
+		if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
+			target_doc.save()
+
+			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
 				try:
-					purchase_receipt.submit()
+					target_doc.submit()
 				except Exception as e:
-					purchase_receipt.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 
 			if notify:
 				frappe.msgprint(
 					_("Purchase Receipt {0} created.").format(
-						get_link_to_form(purchase_receipt.doctype, purchase_receipt.name)
+						get_link_to_form(target_doc.doctype, target_doc.name)
 					),
 					indicator="green",
 					alert=True,
 				)
 
-		return purchase_receipt
+		return target_doc

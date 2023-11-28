@@ -3,7 +3,7 @@ from frappe import _
 
 def get_data():
 	return {
-		"fieldname": "subcontracting_receipt_no",
+		"fieldname": "subcontracting_receipt",
 		"non_standard_fieldnames": {
 			"Subcontracting Receipt": "return_against",
 		},
