@@ -663,7 +663,7 @@ def make_contact(args, is_primary_contact=1):
 				"company_name": args.get(party_name_key),
 			}
 		)
-		
+
 	contact = frappe.get_doc(values)
 
 	if args.get("email_id"):
