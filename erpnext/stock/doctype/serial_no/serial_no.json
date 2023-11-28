@@ -269,7 +269,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nActive\nInactive\nExpired",
+   "options": "\nActive\nInactive\nDelivered\nExpired",
    "read_only": 1
   },
   {
@@ -280,7 +280,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2023-04-16 15:58:46.139887",
+ "modified": "2023-11-28 15:37:59.489945",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
