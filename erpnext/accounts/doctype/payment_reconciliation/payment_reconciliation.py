@@ -29,6 +29,58 @@ class PaymentReconciliation(Document):
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 
+	def load_from_db(self):
+		# 'modified' attribute is required for `run_doc_method` to work properly.
+		doc_dict = frappe._dict(
+			{
+				"modified": None,
+				"company": None,
+				"party": None,
+				"party_type": None,
+				"receivable_payable_account": None,
+				"default_advance_account": None,
+				"from_invoice_date": None,
+				"to_invoice_date": None,
+				"invoice_limit": 50,
+				"from_payment_date": None,
+				"to_payment_date": None,
+				"payment_limit": 50,
+				"minimum_invoice_amount": None,
+				"minimum_payment_amount": None,
+				"maximum_invoice_amount": None,
+				"maximum_payment_amount": None,
+				"bank_cash_account": None,
+				"cost_center": None,
+				"payment_name": None,
+				"invoice_name": None,
+			}
+		)
+		super(Document, self).__init__(doc_dict)
+
+	def save(self):
+		return
+
+	@staticmethod
+	def get_list(args):
+		pass
+
+	@staticmethod
+	def get_count(args):
+		pass
+
+	@staticmethod
+	def get_stats(args):
+		pass
+
+	def db_insert(self, *args, **kwargs):
+		pass
+
+	def db_update(self, *args, **kwargs):
+		pass
+
+	def delete(self):
+		pass
+
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
 		self.get_nonreconciled_payment_entries()
