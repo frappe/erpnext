@@ -1736,6 +1736,7 @@ def create_asset(**args):
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
+				"shift_based": args.shift_based or 0,
 			},
 		)
 

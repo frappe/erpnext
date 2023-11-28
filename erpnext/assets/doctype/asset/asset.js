@@ -228,7 +228,7 @@ frappe.ui.form.on('Asset', {
 				sch['journal_entry'] || '',
 			];
 
-			if (asset_depr_schedule_doc.depreciation_method === "Shift") {
+			if (asset_depr_schedule_doc.shift_based) {
 				row.push(sch['shift']);
 			}
 
@@ -242,7 +242,7 @@ frappe.ui.form.on('Asset', {
 			{name: __("Accumulated Depreciation Amount"), editable: false, resizable: false, width: 164},
 		];
 
-		if (asset_depr_schedule_doc.depreciation_method === "Shift") {
+		if (asset_depr_schedule_doc.shift_based) {
 			columns.push({name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 245});
 			columns.push({name: __("Shift"), editable: false, resizable: false, width: 59});
 		} else {

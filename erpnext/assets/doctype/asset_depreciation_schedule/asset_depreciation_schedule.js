@@ -9,7 +9,7 @@ frappe.ui.form.on('Asset Depreciation Schedule', {
 
 	make_schedules_editable: function(frm) {
 		var is_manual_hence_editable = frm.doc.depreciation_method === "Manual" ? true : false;
-		var is_shift_hence_editable = frm.doc.depreciation_method === "Shift" ? true : false;
+		var is_shift_hence_editable = frm.doc.shift_based ? true : false;
 
 		frm.toggle_enable("depreciation_schedule", is_manual_hence_editable || is_shift_hence_editable);
 		frm.fields_dict["depreciation_schedule"].grid.toggle_enable("schedule_date", is_manual_hence_editable);

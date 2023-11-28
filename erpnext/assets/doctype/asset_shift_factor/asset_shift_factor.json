@@ -30,12 +30,13 @@
    "default": "0",
    "fieldname": "default",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Default"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-27 18:29:27.441224",
+ "modified": "2023-11-29 00:42:45.931722",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Factor",
