@@ -256,7 +256,7 @@ class JobCard(Document):
 					count += 1
 
 		return count
-	
+
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
 		workstations = get_workstations(self.workstation_type)
 		if workstations:
