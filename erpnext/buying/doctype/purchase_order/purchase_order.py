@@ -488,13 +488,8 @@ class PurchaseOrder(BuyingController):
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
-			if action := frappe.db.get_single_value(
-				"Buying Settings", "action_on_purchase_order_submission"
-			):
-				if action == "Create Subcontracting Order":
-					make_subcontracting_order(self.name, save=True, notify=True)
-				elif action == "Create and Submit Subcontracting Order":
-					make_subcontracting_order(self.name, submit=True, notify=True)
+			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
+				make_subcontracting_order(self.name, save=True, notify=True)
 
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):

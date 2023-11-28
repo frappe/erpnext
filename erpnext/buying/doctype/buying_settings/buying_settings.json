@@ -31,9 +31,9 @@
   "column_break_11",
   "over_transfer_allowance",
   "section_break_xcug",
-  "action_on_purchase_order_submission",
+  "auto_create_subcontracting_order",
   "column_break_izrr",
-  "action_on_subcontracting_receipt_submission"
+  "auto_create_purchase_receipt"
  ],
  "fields": [
   {
@@ -191,6 +191,7 @@
    "fieldtype": "Section Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "action_on_purchase_order_submission",
    "fieldtype": "Select",
    "label": "Action on Purchase Order Submission",
@@ -200,15 +201,32 @@
 =======
   },
   {
+=======
+>>>>>>> d366a91d9e (fix: use checkbox instead of select field)
    "fieldname": "column_break_izrr",
    "fieldtype": "Column Break"
   },
   {
+<<<<<<< HEAD
    "fieldname": "action_on_subcontracting_receipt_submission",
    "fieldtype": "Select",
    "label": "Action on Subcontracting Receipt Submission",
    "options": "\nCreate Purchase Receipt\nCreate and Submit Purchase Receipt"
 >>>>>>> 762906f240 (feat: add field `Action on Subcontracting Receipt Submission`)
+=======
+   "default": "0",
+   "description": "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order.",
+   "fieldname": "auto_create_subcontracting_order",
+   "fieldtype": "Check",
+   "label": "Auto Create Subcontracting Order"
+  },
+  {
+   "default": "0",
+   "description": "Purchase Receipt (Draft) will be auto-created on submission of Subcontracting Receipt.",
+   "fieldname": "auto_create_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Auto Create Purchase Receipt"
+>>>>>>> d366a91d9e (fix: use checkbox instead of select field)
   }
  ],
  "icon": "fa fa-cog",
@@ -216,6 +234,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -229,6 +248,9 @@
 =======
  "modified": "2023-11-22 17:46:26.474708",
 >>>>>>> 762906f240 (feat: add field `Action on Subcontracting Receipt Submission`)
+=======
+ "modified": "2023-11-28 13:01:18.403492",
+>>>>>>> d366a91d9e (fix: use checkbox instead of select field)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
