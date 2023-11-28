@@ -80,7 +80,7 @@ def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(item)
-		.select("*")
+		.select(item.item_code, item.item_name)
 		.where(
 			(item.is_stock_item == 0) & (item.is_fixed_asset == 0) & (item[searchfield].like(f"%{txt}%"))
 		)
