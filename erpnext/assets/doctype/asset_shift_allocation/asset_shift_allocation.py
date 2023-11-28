@@ -138,9 +138,9 @@ class AssetShiftAllocation(Document):
 					diff -= shift_factor
 				else:
 					try:
-						self.depreciation_schedule[i].shift = dict(
-							map(reversed, asset_shift_factors_map.items())
-						).get(shift_factor - diff)
+						self.depreciation_schedule[i].shift = reverse_asset_shift_factors_map.get(
+							shift_factor - diff
+						)
 						diff = 0
 					except Exception:
 						frappe.throw(_("Could not auto update shifts. Shift with shift factor {0} needed.")).format(
