@@ -494,6 +494,19 @@ def get_result_as_list(data, filters):
 		d["account_currency"] = filters.account_currency
 		d["bill_no"] = inv_details.get(d.get("against_voucher"), "")
 
+		if d.party_type and d.party:
+			if d.party_type == "Customer":
+				d["party_name"] = frappe.db.get_value(d.party_type, d.party, "customer_name")
+
+			elif d.party_type == "Supplier":
+				d["party_name"] = frappe.db.get_value(d.party_type, d.party, "supplier_name")
+			
+			elif d.party_type == "Employee":
+				d["party_name"] = frappe.db.get_value(d.party_type, d.party, "employee_name")
+			
+			elif d.party_type == "Shareholder":
+				d["party_name"] = frappe.db.get_value(d.party_type, d.party, "employee_name")
+				
 	return data
 
 
@@ -570,6 +583,7 @@ def get_columns(filters):
 		{"label": _("Against Account"), "fieldname": "against", "width": 120},
 		{"label": _("Party Type"), "fieldname": "party_type", "width": 100},
 		{"label": _("Party"), "fieldname": "party", "width": 100},
+		{"label": _("Party Name"), "fieldname": "party_name", "width": 100},
 		{"label": _("Project"), "options": "Project", "fieldname": "project", "width": 100},
 	]
 
