@@ -134,13 +134,14 @@
   {
    "fieldname": "currency",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Currency",
    "options": "Currency"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-11-28 15:37:42.336096",
+ "modified": "2023-11-28 15:50:42.336096",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",
