@@ -40,7 +40,7 @@ frappe.ui.form.on("Company", {
 				filters:{
 					'warehouse_type' : 'Transit',
 					'is_group': 0,
-					'company': frm.doc.company
+					'company': frm.doc.company_name
 				}
 			};
 		});

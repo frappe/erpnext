@@ -181,7 +181,14 @@ class JobCard(Document):
 		query = (
 			frappe.qb.from_(jctl)
 			.from_(jc)
-			.select(jc.name.as_("name"), jctl.to_time, jc.workstation, jc.workstation_type)
+			.select(
+				jc.name.as_("name"),
+				jctl.name.as_("row_name"),
+				jctl.from_time,
+				jctl.to_time,
+				jc.workstation,
+				jc.workstation_type,
+			)
 			.where(
 				(jctl.parent == jc.name)
 				& (Criterion.any(time_conditions))
@@ -208,7 +215,8 @@ class JobCard(Document):
 
 		existing = query.run(as_dict=True)
 
-		if existing and production_capacity > len(existing):
+		overlap_count = self.get_overlap_count(existing)
+		if existing and production_capacity > overlap_count:
 			return
 
 		if self.workstation_type:
@@ -218,6 +226,37 @@ class JobCard(Document):
 
 		return existing[0] if existing else None
 
+	@staticmethod
+	def get_overlap_count(time_logs):
+		count = 1
+
+		# Check overlap exists or not between the overlapping time logs with the current Job Card
+		for idx, row in enumerate(time_logs):
+			next_idx = idx
+			if idx + 1 < len(time_logs):
+				next_idx = idx + 1
+				next_row = time_logs[next_idx]
+				if row.name == next_row.name:
+					continue
+
+				if (
+					(
+						get_datetime(next_row.from_time) >= get_datetime(row.from_time)
+						and get_datetime(next_row.from_time) <= get_datetime(row.to_time)
+					)
+					or (
+						get_datetime(next_row.to_time) >= get_datetime(row.from_time)
+						and get_datetime(next_row.to_time) <= get_datetime(row.to_time)
+					)
+					or (
+						get_datetime(next_row.from_time) <= get_datetime(row.from_time)
+						and get_datetime(next_row.to_time) >= get_datetime(row.to_time)
+					)
+				):
+					count += 1
+
+		return count
+	
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
 		workstations = get_workstations(self.workstation_type)
 		if workstations:

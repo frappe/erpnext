@@ -1216,11 +1216,12 @@ def get_item_details(item_code, asset_category, gross_purchase_amount):
 				"depreciation_method": d.depreciation_method,
 				"total_number_of_depreciations": d.total_number_of_depreciations,
 				"frequency_of_depreciation": d.frequency_of_depreciation,
-				"daily_depreciation": d.daily_depreciation,
+				"daily_prorata_based": d.daily_prorata_based,
 				"salvage_value_percentage": d.salvage_value_percentage,
 				"expected_value_after_useful_life": flt(gross_purchase_amount)
 				* flt(d.salvage_value_percentage / 100),
 				"depreciation_start_date": d.depreciation_start_date or nowdate(),
+				"rate_of_depreciation": d.rate_of_depreciation,
 			}
 		)
 
@@ -1396,7 +1397,7 @@ def get_straight_line_or_manual_depr_amount(
 		)
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
-		if row.daily_depreciation:
+		if row.daily_prorata_based:
 			daily_depr_amount = (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
 			) / date_diff(
@@ -1441,7 +1442,7 @@ def get_straight_line_or_manual_depr_amount(
 			) / number_of_pending_depreciations
 	# if the Depreciation Schedule is being prepared for the first time
 	else:
-		if row.daily_depreciation:
+		if row.daily_prorata_based:
 			daily_depr_amount = (
 				flt(asset.gross_purchase_amount)
 				- flt(asset.opening_accumulated_depreciation)

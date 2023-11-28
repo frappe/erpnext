@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import ValidationError, _, msgprint
-from frappe.contacts.doctype.address.address import get_address_display
+from frappe.contacts.doctype.address.address import render_address
 from frappe.utils import cint, cstr, flt, getdate
 from frappe.utils.data import nowtime
 
@@ -78,26 +78,27 @@ class BuyingController(SubcontractingController):
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
 			for row in self.items:
+				if row.rate <= 0:
+					# override the rate with valuation rate
+					row.rate = get_incoming_rate(
+						{
+							"item_code": row.item_code,
+							"warehouse": row.warehouse,
+							"posting_date": self.get("posting_date"),
+							"posting_time": self.get("posting_time"),
+							"qty": row.qty,
+							"serial_no": row.serial_no,
+							"batch_no": row.batch_no,
+							"company": self.company,
+							"voucher_type": self.doctype,
+							"voucher_no": self.name,
+						},
+						raise_error_if_no_rate=False,
+					)
 
-				# override the rate with valuation rate
-				row.rate = get_incoming_rate(
-					{
-						"item_code": row.item_code,
-						"warehouse": row.warehouse,
-						"posting_date": self.get("posting_date"),
-						"posting_time": self.get("posting_time"),
-						"qty": row.qty,
-						"serial_and_batch_bundle": row.get("serial_and_batch_bundle"),
-						"company": self.company,
-						"voucher_type": self.doctype,
-						"voucher_no": self.name,
-					},
-					raise_error_if_no_rate=False,
-				)
-
-				row.discount_percentage = 0.0
-				row.discount_amount = 0.0
-				row.margin_rate_or_amount = 0.0
+					row.discount_percentage = 0.0
+					row.discount_amount = 0.0
+					row.margin_rate_or_amount = 0.0
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
@@ -219,7 +220,9 @@ class BuyingController(SubcontractingController):
 
 		for address_field, address_display_field in address_dict.items():
 			if self.get(address_field):
-				self.set(address_display_field, get_address_display(self.get(address_field)))
+				self.set(
+					address_display_field, render_address(self.get(address_field), check_permissions=False)
+				)
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -336,7 +339,7 @@ class BuyingController(SubcontractingController):
 						{
 							"item_code": d.item_code,
 							"warehouse": d.get("from_warehouse"),
-							"posting_date": self.get("posting_date") or self.get("transation_date"),
+							"posting_date": self.get("posting_date") or self.get("transaction_date"),
 							"posting_time": posting_time,
 							"qty": -1 * flt(d.get("stock_qty")),
 							"serial_no": d.get("serial_no"),
@@ -743,7 +746,7 @@ class BuyingController(SubcontractingController):
 				"calculate_depreciation": 1,
 				"purchase_receipt_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
-				"asset_quantity": row.qty if is_grouped_asset else 0,
+				"asset_quantity": row.qty if is_grouped_asset else 1,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
 				"cost_center": row.cost_center,

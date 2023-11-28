@@ -59,10 +59,12 @@ class ProductBundle(Document):
 		"""Validates, main Item is not a stock item"""
 		if frappe.db.get_value("Item", self.new_item_code, "is_stock_item"):
 			frappe.throw(_("Parent Item {0} must not be a Stock Item").format(self.new_item_code))
+		if frappe.db.get_value("Item", self.new_item_code, "is_fixed_asset"):
+			frappe.throw(_("Parent Item {0} must not be a Fixed Asset").format(self.new_item_code))
 
 	def validate_child_items(self):
 		for item in self.items:
-			if frappe.db.exists("Product Bundle", item.item_code):
+			if frappe.db.exists("Product Bundle", {"name": item.item_code, "disabled": 0}):
 				frappe.throw(
 					_(
 						"Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
@@ -73,12 +75,17 @@ class ProductBundle(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
-
-	return frappe.db.sql(
-		"""select name, item_name, description from tabItem
-		where is_stock_item=0 and name not in (select name from `tabProduct Bundle`)
-		and %s like %s %s limit %s offset %s"""
-		% (searchfield, "%s", get_match_cond(doctype), "%s", "%s"),
-		("%%%s%%" % txt, page_len, start),
-	)
+	product_bundles = frappe.db.get_list("Product Bundle", {"disabled": 0}, pluck="name")
+	item = frappe.qb.DocType("Item")
+	return (
+		frappe.qb.from_(item)
+		.select("*")
+		.where(
+			(item.is_stock_item == 0)
+			& (item.is_fixed_asset == 0)
+			& (item.name.notin(product_bundles))
+			& (item[searchfield].like(f"%{txt}%"))
+		)
+		.limit(page_len)
+		.offset(start)
+	).run()

@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 import frappe
 from frappe import _
+from frappe.utils import get_link_to_form, today
 
 
 @frappe.whitelist()
@@ -28,6 +29,51 @@ def transaction_processing(data, from_doctype, to_doctype):
 		job(deserialized_data, from_doctype, to_doctype)
 
 
+@frappe.whitelist()
+def retry(date: str | None = None):
+	if not date:
+		date = today()
+
+	if date:
+		failed_docs = frappe.db.get_all(
+			"Bulk Transaction Log Detail",
+			filters={"date": date, "transaction_status": "Failed", "retried": 0},
+			fields=["name", "transaction_name", "from_doctype", "to_doctype"],
+		)
+		if not failed_docs:
+			frappe.msgprint(_("There are no Failed transactions"))
+		else:
+			job = frappe.enqueue(
+				retry_failed_transactions,
+				failed_docs=failed_docs,
+			)
+			frappe.msgprint(
+				_("Job: {0} has been triggered for processing failed transactions").format(
+					get_link_to_form("RQ Job", job.id)
+				)
+			)
+
+
+def retry_failed_transactions(failed_docs: list | None):
+	if failed_docs:
+		for log in failed_docs:
+			try:
+				frappe.db.savepoint("before_creation_state")
+				task(log.transaction_name, log.from_doctype, log.to_doctype)
+			except Exception as e:
+				frappe.db.rollback(save_point="before_creation_state")
+				update_log(log.name, "Failed", 1, str(frappe.get_traceback()))
+			else:
+				update_log(log.name, "Success", 1)
+
+
+def update_log(log_name, status, retried, err=None):
+	frappe.db.set_value("Bulk Transaction Log Detail", log_name, "transaction_status", status)
+	frappe.db.set_value("Bulk Transaction Log Detail", log_name, "retried", retried)
+	if err:
+		frappe.db.set_value("Bulk Transaction Log Detail", log_name, "error_description", err)
+
+
 def job(deserialized_data, from_doctype, to_doctype):
 	fail_count = 0
 	for d in deserialized_data:
@@ -38,7 +84,7 @@ def job(deserialized_data, from_doctype, to_doctype):
 		except Exception as e:
 			frappe.db.rollback(save_point="before_creation_state")
 			fail_count += 1
-			update_logger(
+			create_log(
 				doc_name,
 				str(frappe.get_traceback()),
 				from_doctype,
@@ -47,7 +93,7 @@ def job(deserialized_data, from_doctype, to_doctype):
 				log_date=str(date.today()),
 			)
 		else:
-			update_logger(
+			create_log(
 				doc_name, None, from_doctype, to_doctype, status="Success", log_date=str(date.today())
 			)
 
@@ -108,45 +154,18 @@ def task(doc_name, from_doctype, to_doctype):
 	obj.insert(ignore_mandatory=True)
 
 
-def check_logger_doc_exists(log_date):
-	return frappe.db.exists("Bulk Transaction Log", log_date)
-
-
-def get_logger_doc(log_date):
-	return frappe.get_doc("Bulk Transaction Log", log_date)
-
-
-def create_logger_doc():
-	log_doc = frappe.new_doc("Bulk Transaction Log")
-	log_doc.set_new_name(set_name=str(date.today()))
-	log_doc.log_date = date.today()
-
-	return log_doc
-
-
-def append_data_to_logger(log_doc, doc_name, error, from_doctype, to_doctype, status, restarted):
-	row = log_doc.append("logger_data", {})
-	row.transaction_name = doc_name
-	row.date = date.today()
+def create_log(doc_name, e, from_doctype, to_doctype, status, log_date=None, restarted=0):
+	transaction_log = frappe.new_doc("Bulk Transaction Log Detail")
+	transaction_log.transaction_name = doc_name
+	transaction_log.date = today()
 	now = datetime.now()
-	row.time = now.strftime("%H:%M:%S")
-	row.transaction_status = status
-	row.error_description = str(error)
-	row.from_doctype = from_doctype
-	row.to_doctype = to_doctype
-	row.retried = restarted
-
-
-def update_logger(doc_name, e, from_doctype, to_doctype, status, log_date=None, restarted=0):
-	if not check_logger_doc_exists(log_date):
-		log_doc = create_logger_doc()
-		append_data_to_logger(log_doc, doc_name, e, from_doctype, to_doctype, status, restarted)
-		log_doc.insert()
-	else:
-		log_doc = get_logger_doc(log_date)
-		if record_exists(log_doc, doc_name, status):
-			append_data_to_logger(log_doc, doc_name, e, from_doctype, to_doctype, status, restarted)
-			log_doc.save()
+	transaction_log.time = now.strftime("%H:%M:%S")
+	transaction_log.transaction_status = status
+	transaction_log.error_description = str(e)
+	transaction_log.from_doctype = from_doctype
+	transaction_log.to_doctype = to_doctype
+	transaction_log.retried = restarted
+	transaction_log.save()
 
 
 def show_job_status(fail_count, deserialized_data_count, to_doctype):
@@ -176,25 +195,3 @@ def show_job_status(fail_count, deserialized_data_count, to_doctype):
 			title="Failed",
 			indicator="red",
 		)
-
-
-def record_exists(log_doc, doc_name, status):
-	record = mark_retrired_transaction(log_doc, doc_name)
-	if record and status == "Failed":
-		return False
-	elif record and status == "Success":
-		return True
-	else:
-		return True
-
-
-def mark_retrired_transaction(log_doc, doc_name):
-	record = 0
-	for d in log_doc.get("logger_data"):
-		if d.transaction_name == doc_name and d.transaction_status == "Failed":
-			d.retried = 1
-			record = record + 1
-
-	log_doc.save()
-
-	return record

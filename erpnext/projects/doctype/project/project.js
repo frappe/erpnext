@@ -68,6 +68,10 @@ frappe.ui.form.on("Project", {
 				frm.events.create_duplicate(frm);
 			}, __("Actions"));
 
+			frm.add_custom_button(__('Update Total Purchase Cost'), () => {
+				frm.events.update_total_purchase_cost(frm);
+			}, __("Actions"));
+
 			frm.trigger("set_project_status_button");
 
 
@@ -90,6 +94,22 @@ frappe.ui.form.on("Project", {
 		}
 
 
+	},
+
+	update_total_purchase_cost: function(frm) {
+		frappe.call({
+			method: "erpnext.projects.doctype.project.project.recalculate_project_total_purchase_cost",
+			args: {project: frm.doc.name},
+			freeze: true,
+			freeze_message: __('Recalculating Purchase Cost against this Project...'),
+			callback: function(r) {
+				if (r && !r.exc) {
+					frappe.msgprint(__('Total Purchase Cost has been updated'));
+					frm.refresh();
+				}
+			}
+
+		});
 	},
 
 	set_project_status_button: function(frm) {
