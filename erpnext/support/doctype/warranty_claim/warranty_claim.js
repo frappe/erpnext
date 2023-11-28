@@ -36,6 +36,26 @@ frappe.ui.form.on("Warranty Claim", {
 		}
 	},
 
+	refresh: (frm) => {
+		frappe.dynamic_link = {
+			doc: frm.doc,
+			fieldname: "customer",
+			doctype: "Customer",
+		};
+
+		if (
+			!frm.doc.__islocal &&
+			["Open", "Work In Progress"].includes(frm.doc.status)
+		) {
+			frm.add_custom_button(__("Maintenance Visit"), () => {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
+					frm: frm,
+				});
+			});
+		}
+	},
+
 	customer: (frm) => {
 		erpnext.utils.get_party_details(frm);
 	},
@@ -48,38 +68,3 @@ frappe.ui.form.on("Warranty Claim", {
 		erpnext.utils.get_contact_details(frm);
 	},
 });
-
-erpnext.support.WarrantyClaim = class WarrantyClaim extends (
-	frappe.ui.form.Controller
-) {
-	refresh() {
-		frappe.dynamic_link = {
-			doc: this.frm.doc,
-			fieldname: "customer",
-			doctype: "Customer",
-		};
-
-		if (
-			!cur_frm.doc.__islocal &&
-			(cur_frm.doc.status == "Open" ||
-				cur_frm.doc.status == "Work In Progress")
-		) {
-			cur_frm.add_custom_button(
-				__("Maintenance Visit"),
-				this.make_maintenance_visit
-			);
-		}
-	}
-
-	make_maintenance_visit() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
-			frm: cur_frm,
-		});
-	}
-};
-
-extend_cscript(
-	cur_frm.cscript,
-	new erpnext.support.WarrantyClaim({ frm: cur_frm })
-);
