@@ -323,12 +323,15 @@ frappe.ui.form.on('Asset', {
 
 	make_schedules_editable: function(frm) {
 		if (frm.doc.finance_books) {
-			var is_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
+			var is_manual_hence_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
+				? true : false;
+			var is_shift_hence_editable = frm.doc.finance_books.filter(d => d.shift_based).length > 0
 				? true : false;
 
-			frm.toggle_enable("schedules", is_editable);
-			frm.fields_dict["schedules"].grid.toggle_enable("schedule_date", is_editable);
-			frm.fields_dict["schedules"].grid.toggle_enable("depreciation_amount", is_editable);
+			frm.toggle_enable("depreciation_schedule", is_manual_hence_editable || is_shift_hence_editable);
+			frm.fields_dict["depreciation_schedule"].grid.toggle_enable("schedule_date", is_manual_hence_editable);
+			frm.fields_dict["depreciation_schedule"].grid.toggle_enable("depreciation_amount", is_manual_hence_editable);
+			frm.fields_dict["depreciation_schedule"].grid.toggle_enable("shift", is_shift_hence_editable);
 		}
 	},
 
