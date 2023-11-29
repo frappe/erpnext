@@ -869,7 +869,7 @@ def create_stock_reservation_entries_for_so_items(
 	items = []
 	if items_details:
 		for item in items_details:
-			so_item = frappe.get_doc("Sales Order Item", item.get("name"))
+			so_item = frappe.get_doc("Sales Order Item", item.get("sales_order_item"))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
 				flt(item.get("qty_to_reserve"))
@@ -1053,12 +1053,14 @@ def cancel_stock_reservation_entries(
 	from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 	from_voucher_no: str = None,
 	from_voucher_detail_no: str = None,
-	sre_list: list[dict] = None,
+	sre_list: list = None,
 	notify: bool = True,
 ) -> None:
 	"""Cancel Stock Reservation Entries."""
 
 	if not sre_list:
+		sre_list = {}
+
 		if voucher_type and voucher_no:
 			sre_list = get_stock_reservation_entries_for_voucher(
 				voucher_type, voucher_no, voucher_detail_no, fields=["name"]
@@ -1082,9 +1084,11 @@ def cancel_stock_reservation_entries(
 
 			sre_list = query.run(as_dict=True)
 
+		sre_list = [d.name for d in sre_list]
+
 	if sre_list:
 		for sre in sre_list:
-			frappe.get_doc("Stock Reservation Entry", sre["name"]).cancel()
+			frappe.get_doc("Stock Reservation Entry", sre).cancel()
 
 		if notify:
 			msg = _("Stock Reservation Entries Cancelled")

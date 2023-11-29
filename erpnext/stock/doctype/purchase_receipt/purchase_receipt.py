@@ -573,7 +573,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					stock_value_diff = (
-						flt(d.net_amount)
+						flt(d.base_net_amount)
 						+ flt(d.item_tax_amount / self.conversion_rate)
 						+ flt(d.landed_cost_voucher_amount)
 					)
@@ -784,7 +784,7 @@ class PurchaseReceipt(BuyingController):
 		for item in self.items:
 			if item.sales_order and item.sales_order_item:
 				item_details = {
-					"name": item.sales_order_item,
+					"sales_order_item": item.sales_order_item,
 					"item_code": item.item_code,
 					"warehouse": item.warehouse,
 					"qty_to_reserve": item.stock_qty,

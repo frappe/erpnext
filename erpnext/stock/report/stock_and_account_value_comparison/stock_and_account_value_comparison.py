@@ -166,4 +166,4 @@ def create_reposting_entries(rows, company):
 
 	if entries:
 		entries = ", ".join(entries)
-		frappe.msgprint(_(f"Reposting entries created: {entries}"))
+		frappe.msgprint(_("Reposting entries created: {0}").format(entries))

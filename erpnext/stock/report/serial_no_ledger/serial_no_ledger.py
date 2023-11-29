@@ -36,26 +36,38 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"fieldname": "company",
 			"options": "Company",
-			"width": 150,
+			"width": 120,
 		},
 		{
 			"label": _("Warehouse"),
 			"fieldtype": "Link",
 			"fieldname": "warehouse",
 			"options": "Warehouse",
-			"width": 150,
+			"width": 120,
+		},
+		{
+			"label": _("Status"),
+			"fieldtype": "Data",
+			"fieldname": "status",
+			"width": 120,
 		},
 		{
 			"label": _("Serial No"),
 			"fieldtype": "Link",
 			"fieldname": "serial_no",
 			"options": "Serial No",
-			"width": 150,
+			"width": 130,
 		},
 		{
 			"label": _("Valuation Rate"),
 			"fieldtype": "Float",
 			"fieldname": "valuation_rate",
+			"width": 150,
+		},
+		{
+			"label": _("Qty"),
+			"fieldtype": "Float",
+			"fieldname": "qty",
 			"width": 150,
 		},
 	]
@@ -83,12 +95,16 @@ def get_data(filters):
 				"posting_time": row.posting_time,
 				"voucher_type": row.voucher_type,
 				"voucher_no": row.voucher_no,
+				"status": "Active" if row.actual_qty > 0 else "Delivered",
 				"company": row.company,
 				"warehouse": row.warehouse,
+				"qty": 1 if row.actual_qty > 0 else -1,
 			}
 		)
 
-		serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle, [])
+		serial_nos = [{"serial_no": row.serial_no, "valuation_rate": row.valuation_rate}]
+		if row.serial_and_batch_bundle:
+			serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle, [])
 
 		for index, bundle_data in enumerate(serial_nos):
 			if index == 0:
