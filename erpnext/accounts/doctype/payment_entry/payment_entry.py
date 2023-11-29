@@ -9,6 +9,8 @@ import frappe
 from frappe import ValidationError, _, qb, scrub, throw
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money
+from pypika import Case
+from pypika.functions import Coalesce, Sum
 
 import erpnext
 from erpnext.accounts.doctype.bank_account.bank_account import (
@@ -1854,19 +1856,24 @@ def get_company_defaults(company):
 
 
 def get_outstanding_on_journal_entry(name):
-	res = frappe.db.sql(
-		"SELECT "
-		'CASE WHEN party_type IN ("Customer") '
-		"THEN ifnull(sum(debit_in_account_currency - credit_in_account_currency), 0) "
-		"ELSE ifnull(sum(credit_in_account_currency - debit_in_account_currency), 0) "
-		"END as outstanding_amount "
-		"FROM `tabGL Entry` WHERE (voucher_no=%s OR against_voucher=%s) "
-		"AND party_type IS NOT NULL "
-		'AND party_type != ""'
-		"AND is_cancelled = 0",
-		(name, name),
-		as_dict=1,
-	)
+	gl = frappe.qb.DocType("GL Entry")
+	res = (
+		frappe.qb.from_(gl)
+		.select(
+			Case()
+			.when(
+				gl.party_type == "Customer",
+				Coalesce(Sum(gl.debit_in_account_currency - gl.credit_in_account_currency), 0),
+			)
+			.else_(Coalesce(Sum(gl.credit_in_account_currency - gl.debit_in_account_currency), 0))
+			.as_("outstanding_amount")
+		)
+		.where(
+			(Coalesce(gl.party_type, "") != "")
+			& (gl.is_cancelled == 0)
+			& ((gl.voucher_no == name) | (gl.against_voucher == name))
+		)
+	).run(as_dict=True)
 
 	outstanding_amount = res[0].get("outstanding_amount", 0) if res else 0
 
