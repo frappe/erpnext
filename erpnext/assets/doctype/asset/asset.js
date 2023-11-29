@@ -214,30 +214,43 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
-	render_depreciation_schedule_view: function(frm, depr_schedule) {
+	render_depreciation_schedule_view: function(frm, asset_depr_schedule_doc) {
 		let wrapper = $(frm.fields_dict["depreciation_schedule_view"].wrapper).empty();
 
 		let data = [];
 
-		depr_schedule.forEach((sch) => {
+		asset_depr_schedule_doc.depreciation_schedule.forEach((sch) => {
 			const row = [
 				sch['idx'],
 				frappe.format(sch['schedule_date'], { fieldtype: 'Date' }),
 				frappe.format(sch['depreciation_amount'], { fieldtype: 'Currency' }),
 				frappe.format(sch['accumulated_depreciation_amount'], { fieldtype: 'Currency' }),
-				sch['journal_entry'] || ''
+				sch['journal_entry'] || '',
 			];
+
+			if (asset_depr_schedule_doc.shift_based) {
+				row.push(sch['shift']);
+			}
+
 			data.push(row);
 		});
 
+		let columns = [
+			{name: __("No."), editable: false, resizable: false, format: value => value, width: 60},
+			{name: __("Schedule Date"), editable: false, resizable: false, width: 270},
+			{name: __("Depreciation Amount"), editable: false, resizable: false, width: 164},
+			{name: __("Accumulated Depreciation Amount"), editable: false, resizable: false, width: 164},
+		];
+
+		if (asset_depr_schedule_doc.shift_based) {
+			columns.push({name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 245});
+			columns.push({name: __("Shift"), editable: false, resizable: false, width: 59});
+		} else {
+			columns.push({name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 304});
+		}
+
 		let datatable = new frappe.DataTable(wrapper.get(0), {
-			columns: [
-				{name: __("No."), editable: false, resizable: false, format: value => value, width: 60},
-				{name: __("Schedule Date"), editable: false, resizable: false, width: 270},
-				{name: __("Depreciation Amount"), editable: false, resizable: false, width: 164},
-				{name: __("Accumulated Depreciation Amount"), editable: false, resizable: false, width: 164},
-				{name: __("Journal Entry"), editable: false, resizable: false, format: value => `<a href="/app/journal-entry/${value}">${value}</a>`, width: 304}
-			],
+			columns: columns,
 			data: data,
 			layout: "fluid",
 			serialNoColumn: false,
@@ -272,8 +285,8 @@ frappe.ui.form.on('Asset', {
 				asset_values.push(flt(frm.doc.gross_purchase_amount - frm.doc.opening_accumulated_depreciation, precision('gross_purchase_amount')));
 			}
 
-			let depr_schedule = (await frappe.call(
-				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule",
+			let asset_depr_schedule_doc = (await frappe.call(
+				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_asset_depr_schedule_doc",
 				{
 					asset_name: frm.doc.name,
 					status: "Active",
@@ -281,7 +294,7 @@ frappe.ui.form.on('Asset', {
 				}
 			)).message;
 
-			$.each(depr_schedule || [], function(i, v) {
+			$.each(asset_depr_schedule_doc.depreciation_schedule || [], function(i, v) {
 				x_intervals.push(frappe.format(v.schedule_date, { fieldtype: 'Date' }));
 				var asset_value = flt(frm.doc.gross_purchase_amount - v.accumulated_depreciation_amount, precision('gross_purchase_amount'));
 				if(v.journal_entry) {
@@ -296,7 +309,7 @@ frappe.ui.form.on('Asset', {
 			});
 
 			frm.toggle_display(["depreciation_schedule_view"], 1);
-			frm.events.render_depreciation_schedule_view(frm, depr_schedule);
+			frm.events.render_depreciation_schedule_view(frm, asset_depr_schedule_doc);
 		} else {
 			if(frm.doc.opening_accumulated_depreciation) {
 				x_intervals.push(frappe.format(frm.doc.creation.split(" ")[0], { fieldtype: 'Date' }));

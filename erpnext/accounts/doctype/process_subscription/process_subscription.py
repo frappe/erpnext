@@ -17,11 +17,10 @@ class ProcessSubscription(Document):
 
 
 def create_subscription_process(
-	subscription: str | None, posting_date: Union[str, datetime.date] | None
+	subscription: str | None = None, posting_date: Union[str, datetime.date] | None = None
 ):
 	"""Create a new Process Subscription document"""
 	doc = frappe.new_doc("Process Subscription")
 	doc.subscription = subscription
 	doc.posting_date = getdate(posting_date)
-	doc.insert(ignore_permissions=True)
 	doc.submit()

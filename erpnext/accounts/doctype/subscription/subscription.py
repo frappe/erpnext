@@ -676,7 +676,7 @@ def get_prorata_factor(
 
 
 def process_all(
-	subscription: str | None, posting_date: Optional["DateTimeLikeObject"] = None
+	subscription: str | None = None, posting_date: Optional["DateTimeLikeObject"] = None
 ) -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
