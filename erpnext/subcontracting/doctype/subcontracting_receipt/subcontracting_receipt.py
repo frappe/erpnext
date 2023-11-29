@@ -574,6 +574,8 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 			ignore_child_tables=True,
 		)
 
+		target_doc.currency = frappe.get_cached_value("Company", target_doc.company, "default_currency")
+
 		po_items_details = {}
 		for item in source_doc.items:
 			if item.purchase_order and item.purchase_order_item:
@@ -586,6 +588,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 					item_row = {
 						"item_code": po_item.item_code,
 						"item_name": po_item.item_name,
+						"conversion_factor": conversion_factor,
 						"qty": flt(item.qty) * conversion_factor,
 						"rejected_qty": flt(item.rejected_qty) * conversion_factor,
 						"uom": po_item.uom,
