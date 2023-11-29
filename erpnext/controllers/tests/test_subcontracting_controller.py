@@ -957,12 +957,8 @@ def make_raw_materials():
 			"batch_number_series": "BAT.####",
 		},
 		"Subcontracted SRM Item 4": {"has_serial_no": 1, "serial_no_series": "SRII.####"},
-<<<<<<< HEAD
 		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRII.####"},
-=======
-		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRIID.####"},
 		"Subcontracted SRM Item 8": {},
->>>>>>> fddf341f44 (fix: incorrect ordered qty for Subcontracting Order (#38415))
 	}
 
 	for item, properties in raw_materials.items():
