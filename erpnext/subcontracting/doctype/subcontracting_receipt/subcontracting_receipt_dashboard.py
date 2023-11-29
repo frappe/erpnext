@@ -16,7 +16,13 @@ def get_data():
 		"transactions": [
 			{
 				"label": _("Reference"),
-				"items": ["Subcontracting Order", "Purchase Order", "Quality Inspection", "Project"],
+				"items": [
+					"Purchase Order",
+					"Purchase Receipt",
+					"Subcontracting Order",
+					"Quality Inspection",
+					"Project",
+				],
 			},
 			{"label": _("Returns"), "items": ["Subcontracting Receipt"]},
 		],
