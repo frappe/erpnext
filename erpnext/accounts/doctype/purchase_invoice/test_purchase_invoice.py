@@ -1747,6 +1747,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			paid_to="Creditors - _TC",
 			paid_amount=500,
 		)
+		pe.save()  # save trigger is needed for set_liability_account() to be executed
 		pe.submit()
 
 		pi = make_purchase_invoice(
