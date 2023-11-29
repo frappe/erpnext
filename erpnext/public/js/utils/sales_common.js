@@ -369,6 +369,11 @@ erpnext.sales_common = {
 					}
 				}
 			}
+
+			coupon_code() {
+				this.frm.set_value("discount_amount", 0);
+				this.frm.set_value("additional_discount_percentage", 0);
+			}
 		};
 	}
 }
