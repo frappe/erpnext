@@ -229,32 +229,21 @@ class JobCard(Document):
 	@staticmethod
 	def get_overlap_count(time_logs):
 		count = 1
-
-		# Check overlap exists or not between the overlapping time logs with the current Job Card
-		for idx, row in enumerate(time_logs):
-			next_idx = idx
-			if idx + 1 < len(time_logs):
-				next_idx = idx + 1
-				next_row = time_logs[next_idx]
-				if row.name == next_row.name:
-					continue
-
-				if (
-					(
-						get_datetime(next_row.from_time) >= get_datetime(row.from_time)
-						and get_datetime(next_row.from_time) <= get_datetime(row.to_time)
-					)
-					or (
-						get_datetime(next_row.to_time) >= get_datetime(row.from_time)
-						and get_datetime(next_row.to_time) <= get_datetime(row.to_time)
-					)
-					or (
-						get_datetime(next_row.from_time) <= get_datetime(row.from_time)
-						and get_datetime(next_row.to_time) >= get_datetime(row.to_time)
-					)
-				):
-					count += 1
-
+		time_logs = sorted(time_logs, key=lambda x: x.get("from_time"))
+		alloted_capacity = {1:time_logs[0]['to_time']}
+		sequential_found = False
+		#Create New key for alloted capacity if not sequential (Overlapping) job card found
+		for idx in range(1,len(time_logs)):
+			
+			for key in alloted_capacity.keys():
+				if alloted_capacity[key] <= time_logs[idx]['from_time']:
+					alloted_capacity[key] = time_logs[idx]['to_time']
+					sequential_found = True
+					break
+			if not sequential_found:
+				key = key + 1
+				alloted_capacity[key] = time_logs[i]['to_time']
+		count = len(alloted_capacity)
 		return count
 
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
