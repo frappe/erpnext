@@ -241,7 +241,7 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		}
 
-		if (frm.doc.docstatus===0) {
+		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__('Purchase Invoice'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_stock_entry",
@@ -294,7 +294,8 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			}, __("Get Items From"));
 		}
-		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
+
+		if (frm.doc.docstatus === 0 && frm.doc.purpose == "Material Issue") {
 			frm.add_custom_button(__('Expired Batches'), function() {
 				frappe.call({
 					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_expired_batch_items",
@@ -379,6 +380,10 @@ frappe.ui.form.on('Stock Entry', {
 		frm.remove_custom_button('Bill of Materials', "Get Items From");
 		frm.events.show_bom_custom_button(frm);
 		frm.trigger('add_to_transit');
+
+		frm.fields_dict.items.grid.update_docfield_property(
+			'basic_rate', 'read_only', frm.doc.purpose == "Material Receipt" ? 0 : 1
+		);
 	},
 
 	purpose: function(frm) {
