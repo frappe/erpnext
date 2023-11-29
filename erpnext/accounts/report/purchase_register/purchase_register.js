@@ -24,7 +24,7 @@ frappe.query_reports["Purchase Register"] = {
 		},
 		{
 			"fieldname":"supplier_group",
-			"label": __("Supplier"),
+			"label": __("Supplier Group"),
 			"fieldtype": "Link",
 			"options": "Supplier Group"
 		},
