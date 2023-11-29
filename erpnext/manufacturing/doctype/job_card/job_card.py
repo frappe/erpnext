@@ -185,8 +185,7 @@ class JobCard(Document):
 			# override capacity for employee
 			production_capacity = 1
 
-		overlap_count = self.get_overlap_count(time_logs)
-		if time_logs and production_capacity > overlap_count:
+		if not self.has_overlap(production_capacity, time_logs):
 			return {}
 
 		if self.workstation_type and time_logs:
@@ -196,16 +195,15 @@ class JobCard(Document):
 
 		return time_logs[-1]
 
-	@staticmethod
-	def get_overlap_count(time_logs):
-		count = 1
+	def has_overlap(self, production_capacity, time_logs):
+		overlap = False
+		if production_capacity == 1 and len(time_logs) > 0:
+			return True
 
 		# Check overlap exists or not between the overlapping time logs with the current Job Card
-		for idx, row in enumerate(time_logs):
-			next_idx = idx
-			if idx + 1 < len(time_logs):
-				next_idx = idx + 1
-				next_row = time_logs[next_idx]
+		for row in time_logs:
+			count = 1
+			for next_row in time_logs:
 				if row.name == next_row.name:
 					continue
 
@@ -225,7 +223,10 @@ class JobCard(Document):
 				):
 					count += 1
 
-		return count
+			if count > production_capacity:
+				return True
+
+		return overlap
 
 	def get_time_logs(self, args, doctype, check_next_available_slot=False):
 		jc = frappe.qb.DocType("Job Card")
