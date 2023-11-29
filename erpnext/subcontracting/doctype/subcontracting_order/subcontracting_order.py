@@ -8,7 +8,7 @@ from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
+from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
 
 
@@ -114,7 +114,32 @@ class SubcontractingOrder(SubcontractingController):
 			):
 				item_wh_list.append([item.item_code, item.warehouse])
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(item_code, warehouse, {"ordered_qty": get_ordered_qty(item_code, warehouse)})
+			update_bin_qty(
+				item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)}
+			)
+
+	@staticmethod
+	def get_ordered_qty(item_code, warehouse):
+		table = frappe.qb.DocType("Subcontracting Order")
+		child = frappe.qb.DocType("Subcontracting Order Item")
+
+		query = (
+			frappe.qb.from_(table)
+			.inner_join(child)
+			.on(table.name == child.parent)
+			.select((child.qty - child.received_qty) * child.conversion_factor)
+			.where(
+				(table.docstatus == 1)
+				& (child.item_code == item_code)
+				& (child.warehouse == warehouse)
+				& (child.qty > child.received_qty)
+				& (table.status != "Completed")
+			)
+		)
+
+		query = query.run()
+
+		return flt(query[0][0]) if query else 0
 
 	def update_reserved_qty_for_subcontracting(self):
 		for item in self.supplied_items:
@@ -134,6 +159,7 @@ class SubcontractingOrder(SubcontractingController):
 					)
 					or item.default_bom
 				)
+
 				items.append(
 					{
 						"item_code": item.item_code,
@@ -143,7 +169,8 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"stock_uom": item.stock_uom,
 						"bom": bom,
-					},
+						"purchase_order_item": si.purchase_order_item,
+					}
 				)
 			else:
 				frappe.throw(
@@ -151,11 +178,12 @@ class SubcontractingOrder(SubcontractingController):
 						si.item_name or si.item_code
 					)
 				)
-		else:
+
+		if items:
 			for item in items:
 				self.append("items", item)
-			else:
-				self.set_missing_values()
+
+		self.set_missing_values()
 
 	def update_status(self, status=None, update_modified=True):
 		if self.docstatus >= 1 and not status:
@@ -197,9 +225,11 @@ def make_subcontracting_receipt(source_name, target_doc=None):
 
 
 def get_mapped_subcontracting_receipt(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.received_qty)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+	def update_item(source, target, source_parent):
+		target.purchase_order = source_parent.purchase_order
+		target.purchase_order_item = source.purchase_order_item
+		target.qty = flt(source.qty) - flt(source.received_qty)
+		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",

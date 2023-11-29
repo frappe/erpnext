@@ -23,6 +23,12 @@ frappe.query_reports["Sales Register"] = {
 			"options": "Customer"
 		},
 		{
+			"fieldname":"customer_group",
+			"label": __("Customer Group"),
+			"fieldtype": "Link",
+			"options": "Customer Group"
+		},
+		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",

@@ -255,11 +255,15 @@ class SerialBatchBundle:
 		if not serial_nos:
 			return
 
+		status = "Inactive"
+		if self.sle.actual_qty < 0:
+			status = "Delivered"
+
 		sn_table = frappe.qb.DocType("Serial No")
 		(
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
-			.set(sn_table.status, "Active" if warehouse else "Inactive")
+			.set(sn_table.status, "Active" if warehouse else status)
 			.where(sn_table.name.isin(serial_nos))
 		).run()
 

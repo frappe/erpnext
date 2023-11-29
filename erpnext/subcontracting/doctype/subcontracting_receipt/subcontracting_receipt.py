@@ -3,7 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -80,6 +81,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
+		self.auto_create_purchase_receipt()
 
 	def on_update(self):
 		for table_field in ["items", "supplied_items"]:
@@ -95,12 +97,12 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-		self.update_stock_ledger()
-		self.make_gl_entries_on_cancel()
-		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 		self.set_subcontracting_order_status()
+		self.update_stock_ledger()
+		self.make_gl_entries_on_cancel()
+		self.repost_future_sle_and_gle()
 		self.update_status()
 
 	def validate_items_qty(self):
@@ -528,9 +530,102 @@ class SubcontractingReceipt(SubcontractingController):
 				+ "\n".join(warehouse_with_no_account)
 			)
 
+	def auto_create_purchase_receipt(self):
+		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
+			make_purchase_receipt(self, save=True, notify=True)
+
 
 @frappe.whitelist()
 def make_subcontract_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
+
+
+@frappe.whitelist()
+def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False, notify=False):
+	if isinstance(source_name, str):
+		source_doc = frappe.get_doc("Subcontracting Receipt", source_name)
+	else:
+		source_doc = source_name
+
+	if not source_doc.is_return:
+		if not target_doc:
+			target_doc = frappe.new_doc("Purchase Receipt")
+			target_doc.is_subcontracted = 1
+			target_doc.is_old_subcontracting_flow = 0
+
+		target_doc = get_mapped_doc(
+			"Subcontracting Receipt",
+			source_doc.name,
+			{
+				"Subcontracting Receipt": {
+					"doctype": "Purchase Receipt",
+					"field_map": {
+						"posting_date": "posting_date",
+						"posting_time": "posting_time",
+						"name": "subcontracting_receipt",
+						"supplier_warehouse": "supplier_warehouse",
+					},
+					"field_no_map": ["total_qty", "total"],
+				},
+			},
+			target_doc,
+			ignore_child_tables=True,
+		)
+
+		target_doc.currency = frappe.get_cached_value("Company", target_doc.company, "default_currency")
+
+		po_items_details = {}
+		for item in source_doc.items:
+			if item.purchase_order and item.purchase_order_item:
+				if item.purchase_order not in po_items_details:
+					po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
+					po_items_details[item.purchase_order] = {po_item.name: po_item for po_item in po_doc.items}
+
+				if po_item := po_items_details[item.purchase_order].get(item.purchase_order_item):
+					conversion_factor = flt(po_item.qty) / flt(po_item.fg_item_qty)
+					item_row = {
+						"item_code": po_item.item_code,
+						"item_name": po_item.item_name,
+						"conversion_factor": conversion_factor,
+						"qty": flt(item.qty) * conversion_factor,
+						"rejected_qty": flt(item.rejected_qty) * conversion_factor,
+						"uom": po_item.uom,
+						"rate": po_item.rate,
+						"warehouse": item.warehouse,
+						"rejected_warehouse": item.rejected_warehouse,
+						"purchase_order": item.purchase_order,
+						"purchase_order_item": item.purchase_order_item,
+						"subcontracting_receipt_item": item.name,
+					}
+					target_doc.append("items", item_row)
+
+		if not target_doc.items:
+			frappe.throw(
+				_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
+					source_doc.name
+				)
+			)
+
+		target_doc.set_missing_values()
+
+		if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
+			target_doc.save()
+
+			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+				try:
+					target_doc.submit()
+				except Exception as e:
+					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+
+			if notify:
+				frappe.msgprint(
+					_("Purchase Receipt {0} created.").format(
+						get_link_to_form(target_doc.doctype, target_doc.name)
+					),
+					indicator="green",
+					alert=True,
+				)
+
+		return target_doc
