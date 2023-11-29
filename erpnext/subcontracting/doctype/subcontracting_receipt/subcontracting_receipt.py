@@ -549,9 +549,11 @@ def make_subcontract_return(source_name, target_doc=None):
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False, notify=False):
 	if isinstance(source_name, str):
-		source_name = frappe.get_doc("Subcontracting Receipt", source_name)
+		source_doc = frappe.get_doc("Subcontracting Receipt", source_name)
+	else:
+		source_doc = source_name
 
-	if not source_name.is_return:
+	if not source_doc.is_return:
 		if not target_doc:
 			target_doc = frappe.new_doc("Purchase Receipt")
 			target_doc.is_subcontracted = 1
@@ -559,7 +561,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 
 		target_doc = get_mapped_doc(
 			"Subcontracting Receipt",
-			source_name.name,
+			source_doc.name,
 			{
 				"Subcontracting Receipt": {
 					"doctype": "Purchase Receipt",
@@ -577,7 +579,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 		)
 
 		po_items_details = {}
-		for item in source_name.items:
+		for item in source_doc.items:
 			if item.purchase_order and item.purchase_order_item:
 				if item.purchase_order not in po_items_details:
 					po_doc = frappe.get_doc("Purchase Order", item.purchase_order)
@@ -603,7 +605,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 		if not target_doc.items:
 			frappe.throw(
 				_("Purchase Order Item reference is missing in Subcontracting Receipt {0}").format(
-					source_name.name
+					source_doc.name
 				)
 			)
 
