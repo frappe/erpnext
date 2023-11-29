@@ -13,6 +13,7 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdat
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -521,7 +522,7 @@ class update_entries_after(object):
 
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)
-		val = frappe._dict({"sle": dependant_sle, "dependent_voucher_detail_nos": []})
+		val = frappe._dict({"sle": dependant_sle})
 
 		if key not in self.distinct_item_warehouses:
 			self.distinct_item_warehouses[key] = val
@@ -535,6 +536,8 @@ class update_entries_after(object):
 
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
 				val.sle_changed = True
+				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
+				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
 			elif dependant_sle.voucher_detail_no not in set(dependent_voucher_detail_nos):
@@ -580,6 +583,13 @@ class update_entries_after(object):
 		):
 			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
+		dimensions = get_inventory_dimensions()
+		has_dimensions = False
+		if dimensions:
+			for dimension in dimensions:
+				if sle.get(dimension.get("fieldname")):
+					has_dimensions = True
+
 		if get_serial_nos(sle.serial_no):
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -594,7 +604,7 @@ class update_entries_after(object):
 		):
 			self.update_batched_values(sle)
 		else:
-			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
+			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no and not has_dimensions:
 				# assert
 				self.wh_data.valuation_rate = sle.valuation_rate
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
@@ -625,9 +635,11 @@ class update_entries_after(object):
 		sle.valuation_rate = self.wh_data.valuation_rate
 		sle.stock_value = self.wh_data.stock_value
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
-		sle.stock_value_difference = stock_value_difference
-		sle.doctype = "Stock Ledger Entry"
 
+		if not sle.is_adjustment_entry or not self.args.get("sle_id"):
+			sle.stock_value_difference = stock_value_difference
+
+		sle.doctype = "Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
 		if not self.args.get("sle_id"):
@@ -688,14 +700,16 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
-				rate = get_rate_for_return(
-					sle.voucher_type,
-					sle.voucher_no,
-					sle.item_code,
-					voucher_detail_no=sle.voucher_detail_no,
-					sle=sle,
-				)
-
+				if self.valuation_method == "Moving Average":
+					rate = flt(self.data[self.args.warehouse].previous_sle.valuation_rate)
+				else:
+					rate = get_rate_for_return(
+						sle.voucher_type,
+						sle.voucher_no,
+						sle.item_code,
+						voucher_detail_no=sle.voucher_detail_no,
+						sle=sle,
+					)
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
@@ -1184,7 +1198,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	return sle[0] if sle else frappe._dict()
 
 
-def get_previous_sle(args, for_update=False):
+def get_previous_sle(args, for_update=False, extra_cond=None):
 	"""
 	get the last sle on or before the current time-bucket,
 	to get actual qty before transaction, this function
@@ -1199,7 +1213,9 @@ def get_previous_sle(args, for_update=False):
 	}
 	"""
 	args["name"] = args.get("sle", None) or ""
-	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
+	sle = get_stock_ledger_entries(
+		args, "<=", "desc", "limit 1", for_update=for_update, extra_cond=extra_cond
+	)
 	return sle and sle[0] or {}
 
 
@@ -1211,6 +1227,7 @@ def get_stock_ledger_entries(
 	for_update=False,
 	debug=False,
 	check_serial_no=True,
+	extra_cond=None,
 ):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(
@@ -1247,6 +1264,9 @@ def get_stock_ledger_entries(
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
+
+	if extra_cond:
+		conditions += f"{extra_cond}"
 
 	return frappe.db.sql(
 		"""
@@ -1599,26 +1619,32 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
-		"""
-		select
-			qty_after_transaction, posting_date, posting_time,
-			voucher_type, voucher_no
-		from `tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
-			and is_cancelled = 0
-			and qty_after_transaction < 0
-		order by timestamp(posting_date, posting_time) asc
-		limit 1
-	""",
-		args,
-		as_dict=1,
+def get_future_sle_with_negative_qty(sle):
+	SLE = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(SLE)
+		.select(
+			SLE.qty_after_transaction, SLE.posting_date, SLE.posting_time, SLE.voucher_type, SLE.voucher_no
+		)
+		.where(
+			(SLE.item_code == sle.item_code)
+			& (SLE.warehouse == sle.warehouse)
+			& (SLE.voucher_no != sle.voucher_no)
+			& (
+				CombineDatetime(SLE.posting_date, SLE.posting_time)
+				>= CombineDatetime(sle.posting_date, sle.posting_time)
+			)
+			& (SLE.is_cancelled == 0)
+			& (SLE.qty_after_transaction < 0)
+		)
+		.orderby(CombineDatetime(SLE.posting_date, SLE.posting_time))
+		.limit(1)
 	)
+
+	if sle.voucher_type == "Stock Reconciliation" and sle.batch_no:
+		query = query.where(SLE.batch_no == sle.batch_no)
+
+	return query.run(as_dict=True)
 
 
 def get_future_sle_with_negative_batch_qty(args):
@@ -1687,3 +1713,27 @@ def is_internal_transfer(sle):
 
 	if data.is_internal_supplier and data.represents_company == data.company:
 		return True
+
+
+def get_stock_value_difference(item_code, warehouse, posting_date, posting_time, voucher_no=None):
+	table = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(table)
+		.select(Sum(table.stock_value_difference).as_("value"))
+		.where(
+			(table.is_cancelled == 0)
+			& (table.item_code == item_code)
+			& (table.warehouse == warehouse)
+			& (
+				(table.posting_date < posting_date)
+				| ((table.posting_date == posting_date) & (table.posting_time <= posting_time))
+			)
+		)
+	)
+
+	if voucher_no:
+		query = query.where(table.voucher_no != voucher_no)
+
+	difference_amount = query.run()
+	return flt(difference_amount[0][0]) if difference_amount else 0

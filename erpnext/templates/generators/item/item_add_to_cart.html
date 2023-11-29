@@ -49,7 +49,7 @@
 				<span class="in-green has-stock">
 					{{ _('In stock') }}
 					{% if product_info.show_stock_qty and product_info.stock_qty %}
-						({{ product_info.stock_qty[0][0] }})
+						({{ product_info.stock_qty }})
 					{% endif %}
 				</span>
 			{% endif %}

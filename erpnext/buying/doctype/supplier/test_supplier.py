@@ -195,6 +195,9 @@ class TestSupplier(FrappeTestCase):
 def create_supplier(**args):
 	args = frappe._dict(args)
 
+	if not args.supplier_name:
+		args.supplier_name = frappe.generate_hash()
+
 	if frappe.db.exists("Supplier", args.supplier_name):
 		return frappe.get_doc("Supplier", args.supplier_name)
 
@@ -202,6 +205,7 @@ def create_supplier(**args):
 		{
 			"doctype": "Supplier",
 			"supplier_name": args.supplier_name,
+			"default_currency": args.default_currency,
 			"supplier_group": args.supplier_group or "Services",
 			"supplier_type": args.supplier_type or "Company",
 			"tax_withholding_category": args.tax_withholding_category,

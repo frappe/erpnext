@@ -139,6 +139,12 @@ erpnext.ProductList = class {
 					<br>
 					<span class="out-of-stock mt-2">${ __("Out of stock") }</span>
 				`;
+			} else if (item.is_stock) {
+				return `
+					<br>
+					<span class="in-stock in-green has-stock mt-2"
+						style="font-size: 14px;">${ __("In stock") }</span>
+				`;
 			}
 		}
 		return ``;

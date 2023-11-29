@@ -447,9 +447,7 @@ class TestStockEntry(FrappeTestCase):
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
 
-		expenses_included_in_valuation = frappe.get_value(
-			"Company", company, "expenses_included_in_valuation"
-		)
+		default_expense_account = frappe.get_value("Company", company, "default_expense_account")
 
 		items = get_multiple_items()
 		repack.items = []
@@ -460,12 +458,12 @@ class TestStockEntry(FrappeTestCase):
 			"additional_costs",
 			[
 				{
-					"expense_account": expenses_included_in_valuation,
+					"expense_account": default_expense_account,
 					"description": "Actual Operating Cost",
 					"amount": 1000,
 				},
 				{
-					"expense_account": expenses_included_in_valuation,
+					"expense_account": default_expense_account,
 					"description": "Additional Operating Cost",
 					"amount": 200,
 				},
@@ -504,9 +502,7 @@ class TestStockEntry(FrappeTestCase):
 		self.check_gl_entries(
 			"Stock Entry",
 			repack.name,
-			sorted(
-				[[stock_in_hand_account, 1200, 0.0], ["Expenses Included In Valuation - TCP1", 0.0, 1200.0]]
-			),
+			sorted([[stock_in_hand_account, 1200, 0.0], ["Cost of Goods Sold - TCP1", 0.0, 1200.0]]),
 		)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
@@ -1508,6 +1504,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(se.items[0].item_name, item.item_name)
 		self.assertEqual(se.items[0].stock_uom, item.stock_uom)
 
+	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_reposting_for_depedent_warehouse(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse

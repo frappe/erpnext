@@ -297,6 +297,7 @@ class WorkOrder(Document):
 				update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
 
 		if self.production_plan:
+			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
 
 	def get_transferred_or_manufactured_qty(self, purpose):
@@ -362,10 +363,10 @@ class WorkOrder(Document):
 		else:
 			self.update_work_order_qty_in_so()
 
+		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
-		self.update_ordered_qty()
 		self.create_job_card()
 
 	def on_cancel(self):
@@ -544,15 +545,48 @@ class WorkOrder(Document):
 			)
 
 	def update_planned_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_reserved_qty_for_sub_assembly,
+		)
+
+		qty_dict = {"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)}
+
+		if self.production_plan_sub_assembly_item and self.production_plan:
+			qty_dict["reserved_qty_for_production_plan"] = get_reserved_qty_for_sub_assembly(
+				self.production_item, self.fg_warehouse
+			)
+
 		update_bin_qty(
 			self.production_item,
 			self.fg_warehouse,
-			{"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)},
+			qty_dict,
 		)
 
 		if self.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.material_request)
 			mr_obj.update_requested_qty([self.material_request_item])
+
+	def set_produced_qty_for_sub_assembly_item(self):
+		table = frappe.qb.DocType("Work Order")
+
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.produced_qty))
+			.where(
+				(table.production_plan == self.production_plan)
+				& (table.production_plan_sub_assembly_item == self.production_plan_sub_assembly_item)
+				& (table.docstatus == 1)
+			)
+		).run()
+
+		produced_qty = flt(query[0][0]) if query else 0
+
+		frappe.db.set_value(
+			"Production Plan Sub Assembly Item",
+			self.production_plan_sub_assembly_item,
+			"wo_produced_qty",
+			produced_qty,
+		)
 
 	def update_ordered_qty(self):
 		if (
@@ -1075,7 +1109,7 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_item_details(item, project=None, skip_bom_info=False):
+def get_item_details(item, project=None, skip_bom_info=False, throw=True):
 	res = frappe.db.sql(
 		"""
 		select stock_uom, description, item_name, allow_alternative_item,
@@ -1111,12 +1145,15 @@ def get_item_details(item, project=None, skip_bom_info=False):
 
 	if not res["bom_no"]:
 		if project:
-			res = get_item_details(item)
+			res = get_item_details(item, throw=throw)
 			frappe.msgprint(
 				_("Default BOM not found for Item {0} and Project {1}").format(item, project), alert=1
 			)
 		else:
-			frappe.throw(_("Default BOM for {0} not found").format(item))
+			msg = _("Default BOM for {0} not found").format(item)
+			frappe.msgprint(msg, raise_exception=throw, indicator="yellow", alert=(not throw))
+
+			return res
 
 	bom_data = frappe.db.get_value(
 		"BOM",
@@ -1488,37 +1525,47 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 
 
 def get_reserved_qty_for_production(
-	item_code: str, warehouse: str, check_production_plan: bool = False
+	item_code: str,
+	warehouse: str,
+	non_completed_production_plans: list = None,
+	check_production_plan: bool = False,
 ) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
 
+	if check_production_plan:
+		qty_field = wo_item.required_qty
+	else:
+		qty_field = Case()
+		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+
 	query = (
 		frappe.qb.from_(wo)
 		.from_(wo_item)
-		.select(
-			Sum(
-				Case()
-				.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-				.else_(wo_item.required_qty - wo_item.consumed_qty)
-			)
-		)
+		.select(Sum(qty_field))
 		.where(
 			(wo_item.item_code == item_code)
 			& (wo_item.parent == wo.name)
 			& (wo.docstatus == 1)
 			& (wo_item.source_warehouse == warehouse)
-			& (wo.status.notin(["Stopped", "Completed", "Closed"]))
-			& (
-				(wo_item.required_qty > wo_item.transferred_qty)
-				| (wo_item.required_qty > wo_item.consumed_qty)
-			)
 		)
 	)
 
 	if check_production_plan:
 		query = query.where(wo.production_plan.isnotnull())
+	else:
+		query = query.where(
+			(wo.status.notin(["Stopped", "Completed", "Closed"]))
+			& (
+				(wo_item.required_qty > wo_item.transferred_qty)
+				| (wo_item.required_qty > wo_item.consumed_qty)
+			)
+		)
+
+	if non_completed_production_plans:
+		query = query.where(wo.production_plan.isin(non_completed_production_plans))
 
 	return query.run()[0][0] or 0.0
 

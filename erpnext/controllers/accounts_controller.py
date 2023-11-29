@@ -12,6 +12,7 @@ from frappe.utils import (
 	add_days,
 	add_months,
 	cint,
+	comma_and,
 	flt,
 	fmt_money,
 	formatdate,
@@ -66,6 +67,10 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class AccountMissingError(frappe.ValidationError):
+	pass
+
+
+class InvalidQtyError(frappe.ValidationError):
 	pass
 
 
@@ -168,7 +173,6 @@ class AccountsController(TransactionBase):
 				self.validate_value("base_grand_total", ">=", 0)
 
 			validate_return(self)
-			self.set_total_in_words()
 
 		self.validate_all_documents_schedule()
 
@@ -181,6 +185,17 @@ class AccountsController(TransactionBase):
 		self.validate_party_account_currency()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
+			if invalid_advances := [
+				x for x in self.advances if not x.reference_type or not x.reference_name
+			]:
+				frappe.throw(
+					_(
+						"Rows: {0} in {1} section are Invalid. Reference Name should point to a valid Payment Entry or Journal Entry."
+					).format(
+						frappe.bold(comma_and([x.idx for x in invalid_advances])), frappe.bold(_("Advance Payments"))
+					)
+				)
+
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
@@ -200,22 +215,82 @@ class AccountsController(TransactionBase):
 			# apply tax withholding only if checked and applicable
 			self.set_tax_withholding()
 
-		validate_regional(self)
-
-		validate_einvoice_fields(self)
+		with temporary_flag("company", self.company):
+			validate_regional(self)
+			validate_einvoice_fields(self)
 
 		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
 			apply_pricing_rule_on_transaction(self)
 
+		self.set_total_in_words()
+
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
+	def _remove_references_in_unreconcile(self):
+		upe = frappe.qb.DocType("Unreconcile Payment Entries")
+		rows = (
+			frappe.qb.from_(upe)
+			.select(upe.name, upe.parent)
+			.where((upe.reference_doctype == self.doctype) & (upe.reference_name == self.name))
+			.run(as_dict=True)
+		)
+
+		if rows:
+			references_map = frappe._dict()
+			for x in rows:
+				references_map.setdefault(x.parent, []).append(x.name)
+
+			for doc, rows in references_map.items():
+				unreconcile_doc = frappe.get_doc("Unreconcile Payment", doc)
+				for row in rows:
+					unreconcile_doc.remove(unreconcile_doc.get("allocations", {"name": row})[0])
+
+				unreconcile_doc.flags.ignore_validate_update_after_submit = True
+				unreconcile_doc.flags.ignore_links = True
+				unreconcile_doc.save(ignore_permissions=True)
+
+		# delete docs upon parent doc deletion
+		unreconcile_docs = frappe.db.get_all("Unreconcile Payment", filters={"voucher_no": self.name})
+		for x in unreconcile_docs:
+			_doc = frappe.get_doc("Unreconcile Payment", x.name)
+			if _doc.docstatus == 1:
+				_doc.cancel()
+			_doc.delete()
+
+	def _remove_references_in_repost_doctypes(self):
+		repost_doctypes = ["Repost Payment Ledger Items", "Repost Accounting Ledger Items"]
+
+		for _doctype in repost_doctypes:
+			dt = frappe.qb.DocType(_doctype)
+			rows = (
+				frappe.qb.from_(dt)
+				.select(dt.name, dt.parent, dt.parenttype)
+				.where((dt.voucher_type == self.doctype) & (dt.voucher_no == self.name))
+				.run(as_dict=True)
+			)
+
+			if rows:
+				references_map = frappe._dict()
+				for x in rows:
+					references_map.setdefault((x.parenttype, x.parent), []).append(x.name)
+
+				for doc, rows in references_map.items():
+					repost_doc = frappe.get_doc(doc[0], doc[1])
+
+					for row in rows:
+						if _doctype == "Repost Payment Ledger Items":
+							repost_doc.remove(repost_doc.get("repost_vouchers", {"name": row})[0])
+						else:
+							repost_doc.remove(repost_doc.get("vouchers", {"name": row})[0])
+
+					repost_doc.flags.ignore_validate_update_after_submit = True
+					repost_doc.flags.ignore_links = True
+					repost_doc.save(ignore_permissions=True)
+
 	def on_trash(self):
-		# delete references in 'Repost Payment Ledger'
-		rpi = frappe.qb.DocType("Repost Payment Ledger Items")
-		frappe.qb.from_(rpi).delete().where(
-			(rpi.voucher_type == self.doctype) & (rpi.voucher_no == self.name)
-		).run()
+		self._remove_references_in_repost_doctypes()
+		self._remove_references_in_unreconcile()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
@@ -512,6 +587,17 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
+			if (
+				self.currency
+				and buying_or_selling == "Buying"
+				and frappe.db.get_single_value("Buying Settings", "use_transaction_date_exchange_rate")
+				and self.doctype == "Purchase Invoice"
+			):
+				self.use_transaction_date_exchange_rate = True
+				self.conversion_rate = get_exchange_rate(
+					self.currency, self.company_currency, transaction_date, args
+				)
+
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -535,6 +621,7 @@ class AccountsController(TransactionBase):
 
 			self.pricing_rules = []
 
+			selected_serial_nos_map = {}
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -546,6 +633,7 @@ class AccountsController(TransactionBase):
 					args["ignore_pricing_rule"] = (
 						self.ignore_pricing_rule if hasattr(self, "ignore_pricing_rule") else 0
 					)
+					args["ignore_serial_nos"] = selected_serial_nos_map.get(item.get("item_code"))
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
@@ -602,6 +690,11 @@ class AccountsController(TransactionBase):
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
 						self.set_pricing_rule_details(item, ret)
+
+					if ret.get("serial_no"):
+						selected_serial_nos_map.setdefault(item.get("item_code"), []).extend(
+							ret.get("serial_no").split("\n")
+						)
 				else:
 					# Transactions line item without item code
 
@@ -806,10 +899,16 @@ class AccountsController(TransactionBase):
 		return gl_dict
 
 	def validate_qty_is_not_zero(self):
-		if self.doctype != "Purchase Receipt":
-			for item in self.items:
-				if not item.qty:
-					frappe.throw(_("Item quantity can not be zero"))
+		if self.doctype == "Purchase Receipt":
+			return
+
+		for item in self.items:
+			if not flt(item.qty):
+				frappe.throw(
+					msg=_("Row #{0}: Item quantity cannot be zero").format(item.idx),
+					title=_("Invalid Quantity"),
+					exc=InvalidQtyError,
+				)
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
@@ -908,7 +1007,7 @@ class AccountsController(TransactionBase):
 			party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated
 		)
 
-		payment_entries = get_advance_payment_entries(
+		payment_entries = get_advance_payment_entries_for_regional(
 			party_type, party, party_account, order_doctype, order_list, include_unallocated
 		)
 
@@ -969,6 +1068,44 @@ class AccountsController(TransactionBase):
 
 				d.exchange_gain_loss = difference
 
+	def gain_loss_journal_already_booked(
+		self,
+		gain_loss_account,
+		exc_gain_loss,
+		ref2_dt,
+		ref2_dn,
+		ref2_detail_no,
+	) -> bool:
+		"""
+		Check if gain/loss is booked
+		"""
+		if res := frappe.db.get_all(
+			"Journal Entry Account",
+			filters={
+				"docstatus": 1,
+				"account": gain_loss_account,
+				"reference_type": ref2_dt,  # this will be Journal Entry
+				"reference_name": ref2_dn,
+				"reference_detail_no": ref2_detail_no,
+			},
+			pluck="parent",
+		):
+			# deduplicate
+			res = list({x for x in res})
+			if exc_vouchers := frappe.db.get_all(
+				"Journal Entry",
+				filters={"name": ["in", res], "voucher_type": "Exchange Gain Or Loss"},
+				fields=["voucher_type", "total_debit", "total_credit"],
+			):
+				booked_voucher = exc_vouchers[0]
+				if (
+					booked_voucher.total_debit == exc_gain_loss
+					and booked_voucher.total_credit == exc_gain_loss
+					and booked_voucher.voucher_type == "Exchange Gain Or Loss"
+				):
+					return True
+		return False
+
 	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
@@ -997,27 +1134,39 @@ class AccountsController(TransactionBase):
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-							je = create_gain_loss_journal(
-								self.company,
-								arg.get("party_type"),
-								arg.get("party"),
-								party_account,
+							if not self.gain_loss_journal_already_booked(
 								gain_loss_account,
 								difference_amount,
-								dr_or_cr,
-								reverse_dr_or_cr,
-								arg.get("against_voucher_type"),
-								arg.get("against_voucher"),
-								arg.get("idx"),
 								self.doctype,
 								self.name,
-								arg.get("idx"),
-							)
-							frappe.msgprint(
-								_("Exchange Gain/Loss amount has been booked through {0}").format(
-									get_link_to_form("Journal Entry", je)
+								arg.get("referenced_row"),
+							):
+								posting_date = arg.get("difference_posting_date") or frappe.db.get_value(
+									arg.voucher_type, arg.voucher_no, "posting_date"
 								)
-							)
+								je = create_gain_loss_journal(
+									self.company,
+									posting_date,
+									arg.get("party_type"),
+									arg.get("party"),
+									party_account,
+									gain_loss_account,
+									difference_amount,
+									dr_or_cr,
+									reverse_dr_or_cr,
+									arg.get("against_voucher_type"),
+									arg.get("against_voucher"),
+									arg.get("idx"),
+									self.doctype,
+									self.name,
+									arg.get("referenced_row"),
+									arg.get("cost_center"),
+								)
+								frappe.msgprint(
+									_("Exchange Gain/Loss amount has been booked through {0}").format(
+										get_link_to_form("Journal Entry", je)
+									)
+								)
 
 			if self.get("doctype") == "Payment Entry":
 				# For Payment Entry, exchange_gain_loss field in the `references` table is the trigger for journal creation
@@ -1077,6 +1226,7 @@ class AccountsController(TransactionBase):
 
 						je = create_gain_loss_journal(
 							self.company,
+							args.get("difference_posting_date") if args else self.posting_date,
 							self.party_type,
 							self.party,
 							party_account,
@@ -1090,6 +1240,7 @@ class AccountsController(TransactionBase):
 							self.doctype,
 							self.name,
 							d.idx,
+							self.cost_center,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1354,8 +1505,8 @@ class AccountsController(TransactionBase):
 					{
 						"account": self.additional_discount_account,
 						"against": supplier_or_customer,
-						dr_or_cr: self.discount_amount,
-						"cost_center": self.cost_center,
+						dr_or_cr: self.base_discount_amount,
+						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},
 					item=self,
 				)
@@ -1626,6 +1777,7 @@ class AccountsController(TransactionBase):
 					and party_account_currency != self.company_currency
 					and self.currency != party_account_currency
 				):
+
 					frappe.throw(
 						_("Accounting Entry for {0}: {1} can only be made in currency: {2}").format(
 							party_type, party, party_account_currency
@@ -2074,6 +2226,46 @@ class AccountsController(TransactionBase):
 				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
 			)
 
+	def check_if_fields_updated(self, fields_to_check, child_tables):
+		# Check if any field affecting accounting entry is altered
+		doc_before_update = self.get_doc_before_save()
+		accounting_dimensions = get_accounting_dimensions() + ["cost_center", "project"]
+
+		# Check if opening entry check updated
+		needs_repost = doc_before_update.get("is_opening") != self.is_opening
+
+		if not needs_repost:
+			# Parent Level Accounts excluding party account
+			fields_to_check += accounting_dimensions
+			for field in fields_to_check:
+				if doc_before_update.get(field) != self.get(field):
+					needs_repost = 1
+					break
+
+			if not needs_repost:
+				# Check for child tables
+				for table in child_tables:
+					needs_repost = check_if_child_table_updated(
+						doc_before_update.get(table), self.get(table), child_tables[table]
+					)
+					if needs_repost:
+						break
+
+		return needs_repost
+
+	@frappe.whitelist()
+	def repost_accounting_entries(self):
+		if self.repost_required:
+			repost_ledger = frappe.new_doc("Repost Accounting Ledger")
+			repost_ledger.company = self.company
+			repost_ledger.append("vouchers", {"voucher_type": self.doctype, "voucher_no": self.name})
+			repost_ledger.flags.ignore_permissions = True
+			repost_ledger.insert()
+			repost_ledger.submit()
+			self.db_set("repost_required", 0)
+		else:
+			frappe.throw(_("No updates pending for reposting"))
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
@@ -2295,6 +2487,11 @@ def get_advance_journal_entries(
 	)
 
 	return list(journal_entries)
+
+
+@erpnext.allow_regional
+def get_advance_payment_entries_for_regional(*args, **kwargs):
+	return get_advance_payment_entries(*args, **kwargs)
 
 
 def get_advance_payment_entries(
@@ -2836,16 +3033,19 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, rate_precision) > flt(
-			flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision
-		):
+		# Amount cannot be lesser than billed amount, except for negative amounts
+		row_rate = flt(d.get("rate"), rate_precision)
+		amount_below_billed_amt = flt(child_item.billed_amt, rate_precision) > flt(
+			row_rate * flt(d.get("qty"), qty_precision), rate_precision
+		)
+		if amount_below_billed_amt and row_rate > 0.0:
 			frappe.throw(
 				_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.").format(
 					child_item.idx, child_item.item_code
 				)
 			)
 		else:
-			child_item.rate = flt(d.get("rate"), rate_precision)
+			child_item.rate = row_rate
 
 		if d.get("conversion_factor"):
 			if child_item.stock_uom == child_item.uom:
@@ -2952,6 +3152,23 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.update_blanket_order()
 	parent.update_billing_percentage()
 	parent.set_status()
+
+
+def check_if_child_table_updated(
+	child_table_before_update, child_table_after_update, fields_to_check
+):
+	accounting_dimensions = get_accounting_dimensions() + ["cost_center", "project"]
+	# Check if any field affecting accounting entry is altered
+	for index, item in enumerate(child_table_after_update):
+		for field in fields_to_check:
+			if child_table_before_update[index].get(field) != item.get(field):
+				return True
+
+		for dimension in accounting_dimensions:
+			if child_table_before_update[index].get(dimension) != item.get(dimension):
+				return True
+
+	return False
 
 
 @erpnext.allow_regional

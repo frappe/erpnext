@@ -1,9 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
@@ -15,7 +14,7 @@ test_records = frappe.get_test_records("Project")
 test_ignore = ["Sales Order"]
 
 
-class TestProject(unittest.TestCase):
+class TestProject(FrappeTestCase):
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"
 		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
@@ -154,6 +153,50 @@ class TestProject(unittest.TestCase):
 
 		so.reload()
 		self.assertFalse(so.project)
+
+	def test_project_with_template_tasks_having_common_name(self):
+		# Step - 1: Create Template Parent Tasks
+		template_parent_task1 = create_task(subject="Parent Task - 1", is_template=1, is_group=1)
+		template_parent_task2 = create_task(subject="Parent Task - 2", is_template=1, is_group=1)
+		template_parent_task3 = create_task(subject="Parent Task - 1", is_template=1, is_group=1)
+
+		# Step - 2: Create Template Child Tasks
+		template_task1 = create_task(
+			subject="Task - 1", is_template=1, parent_task=template_parent_task1.name
+		)
+		template_task2 = create_task(
+			subject="Task - 2", is_template=1, parent_task=template_parent_task2.name
+		)
+		template_task3 = create_task(
+			subject="Task - 1", is_template=1, parent_task=template_parent_task3.name
+		)
+
+		# Step - 3: Create Project Template
+		template_tasks = [
+			template_parent_task1,
+			template_task1,
+			template_parent_task2,
+			template_task2,
+			template_parent_task3,
+			template_task3,
+		]
+		project_template = make_project_template(
+			"Project template with common Task Subject", template_tasks
+		)
+
+		# Step - 4: Create Project against the Project Template
+		project = get_project("Project with common Task Subject", project_template)
+		project_tasks = frappe.get_all(
+			"Task", {"project": project.name}, ["subject", "parent_task", "is_group"]
+		)
+
+		# Test - 1: No. of Project Tasks should be equal to No. of Template Tasks
+		self.assertEquals(len(project_tasks), len(template_tasks))
+
+		# Test - 2: All child Project Tasks should have Parent Task linked
+		for pt in project_tasks:
+			if not pt.is_group:
+				self.assertIsNotNone(pt.parent_task)
 
 
 def get_project(name, template):

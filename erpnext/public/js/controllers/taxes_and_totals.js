@@ -43,6 +43,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
 			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
 			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
+			this.frm.doc.rounding_adjustment = 0;
+			this.frm.doc.base_rounding_adjustment = 0;
+			this.set_rounded_total();
 		}
 
 		await this.calculate_shipping_charges();
@@ -135,7 +138,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 				else {
 					// allow for '0' qty on Credit/Debit notes
-					let qty = item.qty || (me.frm.doc.is_debit_note ? 1 : -1);
+					let qty = flt(item.qty);
+					if (!qty) {
+						qty = (me.frm.doc.is_debit_note ? 1 : -1);
+						if (me.frm.doc.doctype !== "Purchase Receipt" && me.frm.doc.is_return === 1) {
+							// In case of Purchase Receipt, qty can be 0 if all items are rejected
+							qty = flt(item.qty);
+						}
+					}
+
 					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
 				}
 

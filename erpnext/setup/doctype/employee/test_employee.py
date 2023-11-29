@@ -25,6 +25,15 @@ class TestEmployee(unittest.TestCase):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_user_has_employee(self):
+		employee = make_employee("test_emp_user_creation@company.com")
+		employee_doc = frappe.get_doc("Employee", employee)
+		user = employee_doc.user_id
+		self.assertTrue("Employee" in frappe.get_roles(user))
+		employee_doc.user_id = ""
+		employee_doc.save()
+		self.assertTrue("Employee" not in frappe.get_roles(user))
+
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -66,5 +75,8 @@ def make_employee(user, company=None, **kwargs):
 		employee.insert()
 		return employee.name
 	else:
-		frappe.db.set_value("Employee", {"employee_name": user}, "status", "Active")
-		return frappe.get_value("Employee", {"employee_name": user}, "name")
+		employee = frappe.get_doc("Employee", {"employee_name": user})
+		employee.update(kwargs)
+		employee.status = "Active"
+		employee.save()
+		return employee.name

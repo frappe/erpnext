@@ -143,16 +143,17 @@ class Supplier(TransactionBase):
 @frappe.validate_and_sanitize_search_inputs
 def get_supplier_primary_contact(doctype, txt, searchfield, start, page_len, filters):
 	supplier = filters.get("supplier")
-	return frappe.db.sql(
-		"""
-		SELECT
-			`tabContact`.name from `tabContact`,
-			`tabDynamic Link`
-		WHERE
-			`tabContact`.name = `tabDynamic Link`.parent
-			and `tabDynamic Link`.link_name = %(supplier)s
-			and `tabDynamic Link`.link_doctype = 'Supplier'
-			and `tabContact`.name like %(txt)s
-		""",
-		{"supplier": supplier, "txt": "%%%s%%" % txt},
-	)
+	contact = frappe.qb.DocType("Contact")
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+
+	return (
+		frappe.qb.from_(contact)
+		.join(dynamic_link)
+		.on(contact.name == dynamic_link.parent)
+		.select(contact.name, contact.email_id)
+		.where(
+			(dynamic_link.link_name == supplier)
+			& (dynamic_link.link_doctype == "Supplier")
+			& (contact.name.like("%{0}%".format(txt)))
+		)
+	).run(as_dict=False)

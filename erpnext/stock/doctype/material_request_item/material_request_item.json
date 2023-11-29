@@ -37,6 +37,10 @@
   "rate",
   "col_break3",
   "amount",
+  "accounting_details_section",
+  "expense_account",
+  "column_break_glru",
+  "wip_composite_asset",
   "manufacture_details",
   "manufacturer",
   "manufacturer_part_no",
@@ -50,11 +54,10 @@
   "lead_time_date",
   "sales_order",
   "sales_order_item",
+  "col_break4",
   "production_plan",
   "material_request_plan_item",
   "job_card_item",
-  "col_break4",
-  "expense_account",
   "section_break_46",
   "page_break"
  ],
@@ -108,6 +111,7 @@
    "width": "250px"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image",
@@ -455,13 +459,28 @@
    "label": "Job Card Item",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "column_break_glru",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wip_composite_asset",
+   "fieldtype": "Link",
+   "label": "WIP Composite Asset",
+   "options": "Asset"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-07 20:23:31.250252",
+ "modified": "2023-11-14 18:37:59.599115",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

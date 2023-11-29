@@ -81,7 +81,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		self.create_item("_Test Internet Subscription", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
 		item.enable_deferred_revenue = 1
-		item.deferred_revenue_account = self.deferred_revenue_account
+		item.item_defaults[0].deferred_revenue_account = self.deferred_revenue_account
 		item.no_of_months = 3
 		item.save()
 
@@ -150,7 +150,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		self.create_item("_Test Office Desk", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
 		item.enable_deferred_expense = 1
-		item.deferred_expense_account = self.deferred_expense_account
+		item.item_defaults[0].deferred_expense_account = self.deferred_expense_account
 		item.no_of_months_exp = 3
 		item.save()
 

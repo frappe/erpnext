@@ -196,17 +196,21 @@ def get_columns(filters):
 			{
 				"label": _("Avg Rate (Balance Stock)"),
 				"fieldname": "valuation_rate",
-				"fieldtype": "Float",
+				"fieldtype": filters.valuation_field_type,
 				"width": 180,
-				"options": "Company:company:default_currency",
+				"options": "Company:company:default_currency"
+				if filters.valuation_field_type == "Currency"
+				else None,
 				"convertible": "rate",
 			},
 			{
 				"label": _("Valuation Rate"),
 				"fieldname": "in_out_rate",
-				"fieldtype": "Float",
+				"fieldtype": filters.valuation_field_type,
 				"width": 140,
-				"options": "Company:company:default_currency",
+				"options": "Company:company:default_currency"
+				if filters.valuation_field_type == "Currency"
+				else None,
 				"convertible": "rate",
 			},
 			{

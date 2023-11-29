@@ -71,7 +71,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Periodicity",
-   "options": "\nDaily\nWeekly\nMonthly\nQuarterly\nYearly\n2 Yearly\n3 Yearly",
+   "options": "\nDaily\nWeekly\nMonthly\nQuarterly\nHalf-yearly\nYearly\n2 Yearly\n3 Yearly",
    "reqd": 1
   },
   {

@@ -5,16 +5,11 @@
 from typing import Optional
 
 import frappe
-from frappe import _, msgprint, scrub
-from frappe.contacts.doctype.address.address import (
-	get_address_display,
-	get_company_address,
-	get_default_address,
-)
-from frappe.contacts.doctype.contact.contact import get_contact_details
+from frappe import _, msgprint, qb, scrub
+from frappe.contacts.doctype.address.address import get_company_address, get_default_address
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
-from frappe.query_builder.functions import Date, Sum
+from frappe.query_builder.functions import Abs, Date, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -36,7 +31,12 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 from erpnext.utilities.regional import temporary_flag
 
-PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
+PURCHASE_TRANSACTION_TYPES = {
+	"Supplier Quotation",
+	"Purchase Order",
+	"Purchase Receipt",
+	"Purchase Invoice",
+}
 SALES_TRANSACTION_TYPES = {
 	"Quotation",
 	"Sales Order",
@@ -133,6 +133,7 @@ def _get_party_details(
 		party_address,
 		company_address,
 		shipping_address,
+		ignore_permissions=ignore_permissions,
 	)
 	set_contact_details(party_details, party, party_type)
 	set_other_values(party_details, party, party_type)
@@ -193,6 +194,8 @@ def set_address_details(
 	party_address=None,
 	company_address=None,
 	shipping_address=None,
+	*,
+	ignore_permissions=False
 ):
 	billing_address_field = (
 		"customer_address" if party_type == "Lead" else party_type.lower() + "_address"
@@ -205,13 +208,17 @@ def set_address_details(
 			get_fetch_values(doctype, billing_address_field, party_details[billing_address_field])
 		)
 	# address display
-	party_details.address_display = get_address_display(party_details[billing_address_field])
+	party_details.address_display = render_address(
+		party_details[billing_address_field], check_permissions=not ignore_permissions
+	)
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
 		party_details.shipping_address_name = shipping_address or get_party_shipping_address(
 			party_type, party.name
 		)
-		party_details.shipping_address = get_address_display(party_details["shipping_address_name"])
+		party_details.shipping_address = render_address(
+			party_details["shipping_address_name"], check_permissions=not ignore_permissions
+		)
 		if doctype:
 			party_details.update(
 				get_fetch_values(doctype, "shipping_address_name", party_details.shipping_address_name)
@@ -229,7 +236,9 @@ def set_address_details(
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
-				shipping_address_display=get_address_display(shipping_address),
+				shipping_address_display=render_address(
+					shipping_address, check_permissions=not ignore_permissions
+				),
 				**get_fetch_values(doctype, "shipping_address", shipping_address)
 			)
 
@@ -238,7 +247,8 @@ def set_address_details(
 			party_details.update(
 				billing_address=party_details.company_address,
 				billing_address_display=(
-					party_details.company_address_display or get_address_display(party_details.company_address)
+					party_details.company_address_display
+					or render_address(party_details.company_address, check_permissions=False)
 				),
 				**get_fetch_values(doctype, "billing_address", party_details.company_address)
 			)
@@ -290,7 +300,34 @@ def set_contact_details(party_details, party, party_type):
 			}
 		)
 	else:
-		party_details.update(get_contact_details(party_details.contact_person))
+		fields = [
+			"name as contact_person",
+			"salutation",
+			"first_name",
+			"last_name",
+			"email_id as contact_email",
+			"mobile_no as contact_mobile",
+			"phone as contact_phone",
+			"designation as contact_designation",
+			"department as contact_department",
+		]
+
+		contact_details = frappe.db.get_value(
+			"Contact", party_details.contact_person, fields, as_dict=True
+		)
+
+		contact_details.contact_display = " ".join(
+			filter(
+				None,
+				[
+					contact_details.get("salutation"),
+					contact_details.get("first_name"),
+					contact_details.get("last_name"),
+				],
+			)
+		)
+
+		party_details.update(contact_details)
 
 
 def set_other_values(party_details, party, party_type):
@@ -429,11 +466,19 @@ def get_party_account_currency(party_type, party, company):
 
 def get_party_gle_currency(party_type, party, company):
 	def generator():
-		existing_gle_currency = frappe.db.sql(
-			"""select account_currency from `tabGL Entry`
-			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
-			limit 1""",
-			{"company": company, "party_type": party_type, "party": party},
+		gl = qb.DocType("GL Entry")
+		existing_gle_currency = (
+			qb.from_(gl)
+			.select(gl.account_currency)
+			.where(
+				(gl.docstatus == 1)
+				& (gl.company == company)
+				& (gl.party_type == party_type)
+				& (gl.party == party)
+				& (gl.is_cancelled == 0)
+			)
+			.limit(1)
+			.run()
 		)
 
 		return existing_gle_currency[0][0] if existing_gle_currency else None
@@ -884,35 +929,34 @@ def get_party_shipping_address(doctype: str, name: str) -> Optional[str]:
 
 
 def get_partywise_advanced_payment_amount(
-	party_type, posting_date=None, future_payment=0, company=None, party=None, account_type=None
+	party_type, posting_date=None, future_payment=0, company=None, party=None
 ):
-	gle = frappe.qb.DocType("GL Entry")
+	ple = frappe.qb.DocType("Payment Ledger Entry")
 	query = (
-		frappe.qb.from_(gle)
-		.select(gle.party)
+		frappe.qb.from_(ple)
+		.select(ple.party, Abs(Sum(ple.amount).as_("amount")))
 		.where(
-			(gle.party_type.isin(party_type)) & (gle.against_voucher.isnull()) & (gle.is_cancelled == 0)
+			(ple.party_type.isin(party_type))
+			& (ple.amount < 0)
+			& (ple.against_voucher_no == ple.voucher_no)
+			& (ple.delinked == 0)
 		)
-		.groupby(gle.party)
+		.groupby(ple.party)
 	)
-	if account_type == "Receivable":
-		query = query.select(Sum(gle.credit).as_("amount"))
-	else:
-		query = query.select(Sum(gle.debit).as_("amount"))
 
 	if posting_date:
 		if future_payment:
-			query = query.where((gle.posting_date <= posting_date) | (Date(gle.creation) <= posting_date))
+			query = query.where((ple.posting_date <= posting_date) | (Date(ple.creation) <= posting_date))
 		else:
-			query = query.where(gle.posting_date <= posting_date)
+			query = query.where(ple.posting_date <= posting_date)
 
 	if company:
-		query = query.where(gle.company == company)
+		query = query.where(ple.company == company)
 
 	if party:
-		query = query.where(gle.party == party)
+		query = query.where(ple.party == party)
 
-	data = query.run(as_dict=True)
+	data = query.run()
 	if data:
 		return frappe._dict(data)
 
@@ -958,3 +1002,13 @@ def add_party_account(party_type, party, company, account):
 		doc.append("accounts", accounts)
 
 		doc.save()
+
+
+def render_address(address, check_permissions=True):
+	try:
+		from frappe.contacts.doctype.address.address import render_address as _render
+	except ImportError:
+		# Older frappe versions where this function is not available
+		from frappe.contacts.doctype.address.address import get_address_display as _render
+
+	return frappe.call(_render, address, check_permissions=check_permissions)

@@ -405,6 +405,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 					["uom", "uom"],
 					["sales_order", "sales_order"],
 					["sales_order_item", "sales_order_item"],
+					["wip_composite_asset", "wip_composite_asset"],
 				],
 				"postprocess": update_item,
 				"condition": select_item,
@@ -660,7 +661,10 @@ def make_stock_entry(source_name, target_doc=None):
 					"job_card_item": "job_card_item",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.stock_qty,
+				"condition": lambda doc: (
+					flt(doc.ordered_qty, doc.precision("ordered_qty"))
+					< flt(doc.stock_qty, doc.precision("ordered_qty"))
+				),
 			},
 		},
 		target_doc,
@@ -703,6 +707,7 @@ def raise_work_orders(material_request):
 				)
 
 				wo_order.set_work_order_operations()
+				wo_order.flags.ignore_mandatory = True
 				wo_order.save()
 
 				work_orders.append(wo_order.name)

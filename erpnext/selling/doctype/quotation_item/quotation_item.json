@@ -137,6 +137,7 @@
    "width": "300px"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -236,6 +237,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -667,7 +669,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-06 11:00:07.042364",
+ "modified": "2023-11-14 18:24:24.619832",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

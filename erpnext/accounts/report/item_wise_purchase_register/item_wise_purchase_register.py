@@ -287,7 +287,7 @@ def get_conditions(filters):
 	conditions = ""
 
 	for opts in (
-		("company", " and company=%(company)s"),
+		("company", " and `tabPurchase Invoice`.company=%(company)s"),
 		("supplier", " and `tabPurchase Invoice`.supplier = %(supplier)s"),
 		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),

@@ -23,6 +23,7 @@ class TestBankReconciliationStatement(FrappeTestCase):
 			"Payment Entry",
 		]:
 			frappe.db.delete(dt)
+		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
 	def test_loan_entries_in_bank_reco_statement(self):
 		create_loan_accounts()

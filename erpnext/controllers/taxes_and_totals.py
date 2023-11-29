@@ -51,6 +51,7 @@ class calculate_taxes_and_totals(object):
 		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
 			self.doc.grand_total -= self.doc.discount_amount
 			self.doc.base_grand_total -= self.doc.base_discount_amount
+			self.doc.rounding_adjustment = self.doc.base_rounding_adjustment = 0.0
 			self.set_rounded_total()
 
 		self.calculate_shipping_charges()
@@ -190,7 +191,9 @@ class calculate_taxes_and_totals(object):
 
 				item.net_rate = item.rate
 
-				if not item.qty and self.doc.get("is_return"):
+				if (
+					not item.qty and self.doc.get("is_return") and self.doc.get("doctype") != "Purchase Receipt"
+				):
 					item.amount = flt(-1 * item.rate, item.precision("amount"))
 				elif not item.qty and self.doc.get("is_debit_note"):
 					item.amount = flt(item.rate, item.precision("amount"))

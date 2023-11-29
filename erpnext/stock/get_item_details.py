@@ -160,6 +160,7 @@ def update_stock(args, out):
 		and out.warehouse
 		and out.stock_qty > 0
 	):
+		out["ignore_serial_nos"] = args.get("ignore_serial_nos")
 
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
@@ -181,7 +182,7 @@ def update_stock(args, out):
 
 
 def set_valuation_rate(out, args):
-	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
+	if frappe.db.exists("Product Bundle", {"name": args.item_code, "disabled": 0}, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
@@ -301,7 +302,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
-	if item.variant_of:
+	if item.variant_of and not item.taxes:
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
@@ -363,8 +364,12 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			),
 			"expense_account": expense_account
 			or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
-			"discount_account": get_default_discount_account(args, item_defaults),
-			"provisional_expense_account": get_provisional_account(args, item_defaults),
+			"discount_account": get_default_discount_account(
+				args, item_defaults, item_group_defaults, brand_defaults
+			),
+			"provisional_expense_account": get_provisional_account(
+				args, item_defaults, item_group_defaults, brand_defaults
+			),
 			"cost_center": get_default_cost_center(
 				args, item_defaults, item_group_defaults, brand_defaults
 			),
@@ -718,18 +723,32 @@ def get_default_expense_account(args, item, item_group, brand):
 	)
 
 
-def get_provisional_account(args, item):
-	return item.get("default_provisional_account") or args.default_provisional_account
+def get_provisional_account(args, item, item_group, brand):
+	return (
+		item.get("default_provisional_account")
+		or item_group.get("default_provisional_account")
+		or brand.get("default_provisional_account")
+		or args.default_provisional_account
+	)
 
 
-def get_default_discount_account(args, item):
-	return item.get("default_discount_account") or args.discount_account
+def get_default_discount_account(args, item, item_group, brand):
+	return (
+		item.get("default_discount_account")
+		or item_group.get("default_discount_account")
+		or brand.get("default_discount_account")
+		or args.discount_account
+	)
 
 
 def get_default_deferred_account(args, item, fieldname=None):
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		return (
-			item.get(fieldname)
+			frappe.get_cached_value(
+				"Item Default",
+				{"parent": args.item_code, "company": args.get("company")},
+				fieldname,
+			)
 			or args.get(fieldname)
 			or frappe.get_cached_value("Company", args.company, "default_" + fieldname)
 		)
@@ -766,6 +785,12 @@ def get_default_cost_center(args, item=None, item_group=None, brand=None, compan
 			data = frappe.get_attr(path)(args.get("item_code"), company)
 
 			if data and (data.selling_cost_center or data.buying_cost_center):
+				if args.get("customer") and data.selling_cost_center:
+					return data.selling_cost_center
+
+				elif args.get("supplier") and data.buying_cost_center:
+					return data.buying_cost_center
+
 				return data.selling_cost_center or data.buying_cost_center
 
 	if not cost_center and args.get("cost_center"):
@@ -1136,6 +1161,8 @@ def get_serial_nos_by_fifo(args, sales_order=None):
 			query = query.where(sn.sales_order == sales_order)
 		if args.batch_no:
 			query = query.where(sn.batch_no == args.batch_no)
+		if args.ignore_serial_nos:
+			query = query.where(sn.name.notin(args.ignore_serial_nos))
 
 		serial_nos = query.run(as_list=True)
 		serial_nos = [s[0] for s in serial_nos]
@@ -1388,6 +1415,9 @@ def get_default_bom(item_code=None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code, company, warehouse=None):
+	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
+		return {"valuation_rate": 0.0}
+
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)
 	brand = get_brand_defaults(item_code, company)
@@ -1443,6 +1473,7 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 					"item_code": args.get("item_code"),
 					"warehouse": args.get("warehouse"),
 					"stock_qty": args.get("stock_qty"),
+					"ignore_serial_nos": args.get("ignore_serial_nos"),
 				}
 			)
 			args = process_args(args)

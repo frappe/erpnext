@@ -25,18 +25,15 @@
    "label": "Department",
    "oldfieldname": "department_name",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "parent_department",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Parent Department",
-   "options": "Department",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Department"
   },
   {
    "fieldname": "company",
@@ -44,9 +41,7 @@
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "bold": 1,
@@ -54,17 +49,13 @@
    "fieldname": "is_group",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Group",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Is Group"
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Disabled"
   },
   {
    "fieldname": "lft",
@@ -72,9 +63,7 @@
    "hidden": 1,
    "label": "lft",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "rgt",
@@ -82,9 +71,7 @@
    "hidden": 1,
    "label": "rgt",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "old_parent",
@@ -92,22 +79,18 @@
    "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Old Parent",
-   "print_hide": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_3",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-06-10 12:28:00.563272",
+ "modified": "2023-08-28 17:26:46.826501",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Department",
@@ -147,12 +130,12 @@
    "read": 1,
    "report": 1,
    "role": "HR Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   }
  ],
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

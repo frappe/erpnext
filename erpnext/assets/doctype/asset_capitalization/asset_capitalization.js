@@ -15,8 +15,14 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	refresh() {
 		this.show_general_ledger();
+
 		if ((this.frm.doc.stock_items && this.frm.doc.stock_items.length) || !this.frm.doc.target_is_fixed_asset) {
 			this.show_stock_ledger();
+		}
+
+		if (this.frm.doc.stock_items && !this.frm.doc.stock_items.length && this.frm.doc.target_asset && this.frm.doc.capitalization_method === "Choose a WIP composite asset") {
+			this.set_consumed_stock_items_tagged_to_wip_composite_asset(this.frm.doc.target_asset);
+			this.get_target_asset_details();
 		}
 	}
 
@@ -34,18 +40,9 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		});
 
 		me.frm.set_query("target_asset", function() {
-			var filters = {};
-
-			if (me.frm.doc.target_item_code) {
-				filters['item_code'] = me.frm.doc.target_item_code;
-			}
-
-			filters['status'] = ["not in", ["Draft", "Scrapped", "Sold", "Capitalized", "Decapitalized"]];
-			filters['docstatus'] = 1;
-
 			return {
-				filters: filters
-			};
+				filters: {'is_composite_asset': 1, 'docstatus': 0 }
+			}
 		});
 
 		me.frm.set_query("asset", "asset_items", function() {
@@ -102,6 +99,39 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	target_item_code() {
 		return this.get_target_item_details();
+	}
+
+	target_asset() {
+		if (this.frm.doc.target_asset && this.frm.doc.capitalization_method === "Choose a WIP composite asset") {
+			this.set_consumed_stock_items_tagged_to_wip_composite_asset(this.frm.doc.target_asset);
+			this.get_target_asset_details();
+		}
+	}
+
+	set_consumed_stock_items_tagged_to_wip_composite_asset(asset) {
+		var me = this;
+
+		if (asset) {
+			return me.frm.call({
+				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_items_tagged_to_wip_composite_asset",
+				args: {
+					asset: asset,
+				},
+				callback: function (r) {
+					if (!r.exc && r.message) {
+						me.frm.clear_table("stock_items");
+
+						for (let item of r.message) {
+							me.frm.add_child("stock_items", item);
+						}
+
+						refresh_field("stock_items");
+
+						me.calculate_totals();
+					}
+				}
+			});
+		}
 	}
 
 	item_code(doc, cdt, cdn) {
@@ -207,6 +237,26 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				child: me.frm.doc,
 				args: {
 					item_code: me.frm.doc.target_item_code,
+					company: me.frm.doc.company,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.refresh_fields();
+					}
+				}
+			});
+		}
+	}
+
+	get_target_asset_details() {
+		var me = this;
+
+		if (me.frm.doc.target_asset) {
+			return me.frm.call({
+				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_target_asset_details",
+				child: me.frm.doc,
+				args: {
+					asset: me.frm.doc.target_asset,
 					company: me.frm.doc.company,
 				},
 				callback: function (r) {

@@ -23,6 +23,7 @@
   {
    "fieldname": "parent_quality_procedure",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Parent Procedure",
    "options": "Quality Procedure"
   },
@@ -115,7 +116,7 @@
    "link_fieldname": "procedure"
   }
  ],
- "modified": "2020-10-26 15:25:39.316088",
+ "modified": "2023-08-29 12:49:53.963370",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",
@@ -149,5 +150,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

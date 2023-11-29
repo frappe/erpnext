@@ -37,6 +37,15 @@ class Lead(SellingController, CRMNote):
 	def before_insert(self):
 		self.contact_doc = None
 		if frappe.db.get_single_value("CRM Settings", "auto_creation_of_contact"):
+			if self.source == "Existing Customer" and self.customer:
+				contact = frappe.db.get_value(
+					"Dynamic Link",
+					{"link_doctype": "Customer", "link_name": self.customer},
+					"parent",
+				)
+				if contact:
+					self.contact_doc = frappe.get_doc("Contact", contact)
+					return
 			self.contact_doc = self.create_contact()
 
 	def after_insert(self):
@@ -382,7 +391,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 		}
 	)
 
-	set_address_details(out, lead, "Lead")
+	set_address_details(out, lead, "Lead", company=company)
 
 	taxes_and_charges = set_taxes(
 		None,

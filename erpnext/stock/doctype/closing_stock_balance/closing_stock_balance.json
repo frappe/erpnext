@@ -104,15 +104,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Closing Stock Balance",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "include_uom",
    "fieldtype": "Link",
    "label": "Include UOM",

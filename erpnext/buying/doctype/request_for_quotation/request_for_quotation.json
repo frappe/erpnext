@@ -9,6 +9,8 @@
  "field_order": [
   "naming_series",
   "company",
+  "billing_address",
+  "billing_address_display",
   "vendor",
   "column_break1",
   "transaction_date",
@@ -25,6 +27,7 @@
   "col_break_email_1",
   "html_llwp",
   "send_attached_files",
+  "send_document_print",
   "sec_break_email_2",
   "message_for_supplier",
   "terms_section_break",
@@ -283,13 +286,33 @@
    "fieldname": "send_attached_files",
    "fieldtype": "Check",
    "label": "Send Attached Files"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, a print of this document will be attached to each email",
+   "fieldname": "send_document_print",
+   "fieldtype": "Check",
+   "label": "Send Document Print",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Company Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address Details",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-08 16:30:10.870429",
+ "modified": "2023-11-06 12:45:28.898706",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

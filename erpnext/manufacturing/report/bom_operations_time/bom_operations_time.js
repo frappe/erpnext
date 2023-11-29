@@ -12,7 +12,7 @@ frappe.query_reports["BOM Operations Time"] = {
 			"options": "Item",
 			"get_query": () =>{
 				return {
-					filters: { "disabled": 0, "is_stock_item": 1 }
+					filters: { "is_stock_item": 1 }
 				}
 			}
 		},

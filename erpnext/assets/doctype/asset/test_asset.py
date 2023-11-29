@@ -142,12 +142,7 @@ class TestAsset(AssetSetup):
 			("Creditors - _TC", 0.0, 100000.0),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Purchase Invoice' and voucher_no = %s
-			order by account""",
-			pi.name,
-		)
+		gle = get_gl_entries("Purchase Invoice", pi.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
 		pi.cancel()
@@ -186,6 +181,7 @@ class TestAsset(AssetSetup):
 	def test_is_fixed_asset_set(self):
 		asset = create_asset(is_existing_asset=1)
 		doc = frappe.new_doc("Purchase Invoice")
+		doc.company = "_Test Company"
 		doc.supplier = "_Test Supplier"
 		doc.append("items", {"item_code": "Macbook Pro", "qty": 1, "asset": asset.name})
 
@@ -248,12 +244,7 @@ class TestAsset(AssetSetup):
 			),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Journal Entry' and voucher_no = %s
-			order by account""",
-			asset.journal_entry_for_scrap,
-		)
+		gle = get_gl_entries("Journal Entry", asset.journal_entry_for_scrap)
 		self.assertSequenceEqual(gle, expected_gle)
 
 		restore_asset(asset.name)
@@ -315,13 +306,7 @@ class TestAsset(AssetSetup):
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no = %s
-			order by account""",
-			si.name,
-		)
-
+		gle = get_gl_entries("Sales Invoice", si.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
 		si.cancel()
@@ -391,13 +376,7 @@ class TestAsset(AssetSetup):
 			("Debtors - _TC", 40000.0, 0.0),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no = %s
-			order by account""",
-			si.name,
-		)
-
+		gle = get_gl_entries("Sales Invoice", si.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
 	def test_asset_with_maintenance_required_status_after_sale(self):
@@ -487,7 +466,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual("Asset Received But Not Billed - _TC", doc.items[0].expense_account)
 
-	# CWIP: Capital Work In Progress
+	# Capital Work In Progress
 	def test_cwip_accounting(self):
 		pr = make_purchase_receipt(
 			item_code="Macbook Pro", qty=1, rate=5000, do_not_submit=True, location="Test Location"
@@ -520,17 +499,12 @@ class TestAsset(AssetSetup):
 		pr.submit()
 
 		expected_gle = (
-			("Asset Received But Not Billed - _TC", 0.0, 5250.0),
+			("_Test Account Shipping Charges - _TC", 0.0, 250.0),
+			("Asset Received But Not Billed - _TC", 0.0, 5000.0),
 			("CWIP Account - _TC", 5250.0, 0.0),
 		)
 
-		pr_gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Purchase Receipt' and voucher_no = %s
-			order by account""",
-			pr.name,
-		)
-
+		pr_gle = get_gl_entries("Purchase Receipt", pr.name)
 		self.assertSequenceEqual(pr_gle, expected_gle)
 
 		pi = make_invoice(pr.name)
@@ -539,18 +513,11 @@ class TestAsset(AssetSetup):
 		expected_gle = (
 			("_Test Account Service Tax - _TC", 250.0, 0.0),
 			("_Test Account Shipping Charges - _TC", 250.0, 0.0),
-			("Asset Received But Not Billed - _TC", 5250.0, 0.0),
+			("Asset Received But Not Billed - _TC", 5000.0, 0.0),
 			("Creditors - _TC", 0.0, 5500.0),
-			("Expenses Included In Asset Valuation - _TC", 0.0, 250.0),
 		)
 
-		pi_gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Purchase Invoice' and voucher_no = %s
-			order by account""",
-			pi.name,
-		)
-
+		pi_gle = get_gl_entries("Purchase Invoice", pi.name)
 		self.assertSequenceEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
@@ -577,13 +544,7 @@ class TestAsset(AssetSetup):
 
 		expected_gle = (("_Test Fixed Asset - _TC", 5250.0, 0.0), ("CWIP Account - _TC", 0.0, 5250.0))
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Asset' and voucher_no = %s
-			order by account""",
-			asset_doc.name,
-		)
-
+		gle = get_gl_entries("Asset", asset_doc.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
 	def test_asset_cwip_toggling_cases(self):
@@ -606,10 +567,7 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
-			asset_doc.name,
-		)
+		gle = get_gl_entries("Asset", asset_doc.name)
 		self.assertFalse(gle)
 
 		# case 1 -- PR with cwip disabled, Asset with cwip enabled
@@ -623,10 +581,7 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
-			asset_doc.name,
-		)
+		gle = get_gl_entries("Asset", asset_doc.name)
 		self.assertFalse(gle)
 
 		# case 2 -- PR with cwip enabled, Asset with cwip disabled
@@ -639,10 +594,7 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
-			asset_doc.name,
-		)
+		gle = get_gl_entries("Asset", asset_doc.name)
 		self.assertTrue(gle)
 
 		# case 3 -- PI with cwip disabled, Asset with cwip enabled
@@ -655,10 +607,7 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
-			asset_doc.name,
-		)
+		gle = get_gl_entries("Asset", asset_doc.name)
 		self.assertFalse(gle)
 
 		# case 4 -- PI with cwip enabled, Asset with cwip disabled
@@ -671,10 +620,7 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
-			asset_doc.name,
-		)
+		gle = get_gl_entries("Asset", asset_doc.name)
 		self.assertTrue(gle)
 
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", cwip)
@@ -730,7 +676,9 @@ class TestDepreciationMethods(AssetSetup):
 
 		self.assertEqual(schedules, expected_schedules)
 
-	def test_schedule_for_straight_line_method_with_daily_depreciation(self):
+	def test_schedule_for_straight_line_method_with_daily_prorata_based(
+		self,
+	):
 		asset = create_asset(
 			calculate_depreciation=1,
 			available_for_use_date="2023-01-01",
@@ -739,22 +687,22 @@ class TestDepreciationMethods(AssetSetup):
 			depreciation_start_date="2023-01-31",
 			total_number_of_depreciations=12,
 			frequency_of_depreciation=1,
-			daily_depreciation=1,
+			daily_prorata_based=1,
 		)
 
 		expected_schedules = [
-			["2023-01-31", 1019.18, 1019.18],
-			["2023-02-28", 920.55, 1939.73],
-			["2023-03-31", 1019.18, 2958.91],
-			["2023-04-30", 986.3, 3945.21],
-			["2023-05-31", 1019.18, 4964.39],
-			["2023-06-30", 986.3, 5950.69],
-			["2023-07-31", 1019.18, 6969.87],
-			["2023-08-31", 1019.18, 7989.05],
-			["2023-09-30", 986.3, 8975.35],
-			["2023-10-31", 1019.18, 9994.53],
-			["2023-11-30", 986.3, 10980.83],
-			["2023-12-31", 1019.17, 12000.0],
+			["2023-01-31", 1021.98, 1021.98],
+			["2023-02-28", 923.08, 1945.06],
+			["2023-03-31", 1021.98, 2967.04],
+			["2023-04-30", 989.01, 3956.05],
+			["2023-05-31", 1021.98, 4978.03],
+			["2023-06-30", 989.01, 5967.04],
+			["2023-07-31", 1021.98, 6989.02],
+			["2023-08-31", 1021.98, 8011.0],
+			["2023-09-30", 989.01, 9000.01],
+			["2023-10-31", 1021.98, 10021.99],
+			["2023-11-30", 989.01, 11011.0],
+			["2023-12-31", 989.0, 12000.0],
 		]
 
 		schedules = [
@@ -1332,6 +1280,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 1",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 1,
 				"total_number_of_depreciations": 3,
@@ -1342,6 +1291,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 2",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 1,
 				"total_number_of_depreciations": 6,
@@ -1352,6 +1302,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 3",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 3,
@@ -1381,6 +1332,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 1",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 3,
@@ -1391,6 +1343,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset.append(
 			"finance_books",
 			{
+				"finance_book": "Test Finance Book 2",
 				"depreciation_method": "Straight Line",
 				"frequency_of_depreciation": 12,
 				"total_number_of_depreciations": 6,
@@ -1636,6 +1589,30 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, jv.insert)
 
+	def test_multi_currency_asset_pr_creation(self):
+		pr = make_purchase_receipt(
+			item_code="Macbook Pro",
+			qty=1,
+			rate=100.0,
+			location="Test Location",
+			supplier="_Test Supplier USD",
+			currency="USD",
+		)
+
+		pr.submit()
+		self.assertTrue(get_gl_entries("Purchase Receipt", pr.name))
+
+
+def get_gl_entries(doctype, docname):
+	gl_entry = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gl_entry)
+		.select(gl_entry.account, gl_entry.debit, gl_entry.credit)
+		.where((gl_entry.voucher_type == doctype) & (gl_entry.voucher_no == docname))
+		.orderby(gl_entry.account)
+		.run()
+	)
+
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -1646,6 +1623,15 @@ def create_asset_data():
 
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 1"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 1"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 2"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 2"}).insert()
+
+	if not frappe.db.exists("Finance Book", "Test Finance Book 3"):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "Test Finance Book 3"}).insert()
 
 
 def create_asset(**args):
@@ -1672,6 +1658,7 @@ def create_asset(**args):
 			"location": args.location or "Test Location",
 			"asset_owner": args.asset_owner or "Company",
 			"is_existing_asset": args.is_existing_asset or 1,
+			"is_composite_asset": args.is_composite_asset or 0,
 			"asset_quantity": args.get("asset_quantity") or 1,
 			"depr_entry_posting_status": args.depr_entry_posting_status or "",
 		}
@@ -1687,7 +1674,8 @@ def create_asset(**args):
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
 				"depreciation_start_date": args.depreciation_start_date,
-				"daily_depreciation": args.daily_depreciation or 0,
+				"daily_prorata_based": args.daily_prorata_based or 0,
+				"shift_based": args.shift_based or 0,
 			},
 		)
 
@@ -1716,6 +1704,7 @@ def create_asset_category():
 			"fixed_asset_account": "_Test Fixed Asset - _TC",
 			"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
 			"depreciation_expense_account": "_Test Depreciations - _TC",
+			"capital_work_in_progress_account": "CWIP Account - _TC",
 		},
 	)
 	asset_category.append(

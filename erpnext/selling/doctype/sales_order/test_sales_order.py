@@ -54,6 +54,35 @@ class TestSalesOrder(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
+	def test_sales_order_with_negative_rate(self):
+		"""
+		Test if negative rate is allowed in Sales Order via doc submission and update items
+		"""
+		so = make_sales_order(qty=1, rate=100, do_not_save=True)
+		so.append("items", {"item_code": "_Test Item", "qty": 1, "rate": -10})
+		so.save()
+		so.submit()
+
+		first_item = so.get("items")[0]
+		second_item = so.get("items")[1]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": first_item.item_code,
+					"rate": first_item.rate,
+					"qty": first_item.qty,
+					"docname": first_item.name,
+				},
+				{
+					"item_code": second_item.item_code,
+					"rate": -20,
+					"qty": second_item.qty,
+					"docname": second_item.name,
+				},
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
 
@@ -1893,10 +1922,10 @@ class TestSalesOrder(FrappeTestCase):
 		si.submit()
 		pe.load_from_db()
 
-		self.assertEqual(pe.references[0].reference_name, si.name)
-		self.assertEqual(pe.references[0].allocated_amount, 200)
-		self.assertEqual(pe.references[1].reference_name, so.name)
-		self.assertEqual(pe.references[1].allocated_amount, 300)
+		self.assertEqual(pe.references[0].reference_name, so.name)
+		self.assertEqual(pe.references[0].allocated_amount, 300)
+		self.assertEqual(pe.references[1].reference_name, si.name)
+		self.assertEqual(pe.references[1].allocated_amount, 200)
 
 	def test_delivered_item_material_request(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
@@ -1997,6 +2026,61 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(len(dn.items), 1)
 		self.assertEqual(len(dn.packed_items), 1)
 		self.assertEqual(dn.items[0].item_code, "_Test Product Bundle Item Partial 2")
+
+	@change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+	def test_expired_rate_for_packed_item(self):
+		bundle = "_Test Product Bundle 1"
+		packed_item = "_Packed Item 1"
+
+		# test Update Items with product bundle
+		for product_bundle in [bundle]:
+			if not frappe.db.exists("Item", product_bundle):
+				bundle_item = make_item(product_bundle, {"is_stock_item": 0})
+				bundle_item.append(
+					"item_defaults", {"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+				)
+				bundle_item.save(ignore_permissions=True)
+
+		for product_bundle in [packed_item]:
+			if not frappe.db.exists("Item", product_bundle):
+				make_item(product_bundle, {"is_stock_item": 0, "stock_uom": "Nos"})
+
+		make_product_bundle(bundle, [packed_item], 1)
+
+		for scenario in [
+			{"valid_upto": add_days(nowdate(), -1), "expected_rate": 0.0},
+			{"valid_upto": add_days(nowdate(), 1), "expected_rate": 111.0},
+		]:
+			with self.subTest(scenario=scenario):
+				frappe.get_doc(
+					{
+						"doctype": "Item Price",
+						"item_code": packed_item,
+						"selling": 1,
+						"price_list": "_Test Price List",
+						"valid_from": add_days(nowdate(), -1),
+						"valid_upto": scenario.get("valid_upto"),
+						"price_list_rate": 111,
+					}
+				).save()
+
+				so = frappe.new_doc("Sales Order")
+				so.transaction_date = nowdate()
+				so.delivery_date = nowdate()
+				so.set_warehouse = ""
+				so.company = "_Test Company"
+				so.customer = "_Test Customer"
+				so.currency = "INR"
+				so.selling_price_list = "_Test Price List"
+				so.append("items", {"item_code": bundle, "qty": 1})
+				so.save()
+
+				self.assertEqual(len(so.items), 1)
+				self.assertEqual(len(so.packed_items), 1)
+				self.assertEqual(so.items[0].item_code, bundle)
+				self.assertEqual(so.packed_items[0].item_code, packed_item)
+				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
+				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
 
 
 def automatically_fetch_payment_terms(enable=1):

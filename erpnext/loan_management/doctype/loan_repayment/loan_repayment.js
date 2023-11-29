@@ -6,7 +6,14 @@
 frappe.ui.form.on('Loan Repayment', {
 	// refresh: function(frm) {
 
-	// }
+	// },
+
+	setup: function(frm) {
+		if (frappe.meta.has_field("Loan Repayment", "repay_from_salary")) {
+			frm.add_fetch("against_loan", "repay_from_salary", "repay_from_salary");
+		}
+	},
+
 	onload: function(frm) {
 		frm.set_query('against_loan', function() {
 			return {
