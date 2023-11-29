@@ -1018,7 +1018,7 @@ def update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=Non
 		doc.append(
 			"entries",
 			{
-				"qty": d.get("qty") * (1 if doc.type_of_transaction == "Inward" else -1),
+				"qty": (d.get("qty") or 1.0) * (1 if doc.type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse or d.get("warehouse"),
 				"batch_no": d.get("batch_no"),
 				"serial_no": d.get("serial_no"),
