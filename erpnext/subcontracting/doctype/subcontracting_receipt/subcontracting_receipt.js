@@ -11,6 +11,10 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		frm.get_field('supplied_items').grid.cannot_add_rows = true;
 		frm.get_field('supplied_items').grid.only_sortable();
 		frm.trigger('set_queries');
+
+		frm.custom_make_buttons = {
+			'Purchase Receipt': 'Purchase Receipt',
+		}
 	},
 
 	on_submit(frm) {
