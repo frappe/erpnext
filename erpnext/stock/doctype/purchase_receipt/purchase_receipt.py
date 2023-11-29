@@ -572,7 +572,7 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					stock_value_diff = (
-						flt(d.net_amount)
+						flt(d.base_net_amount)
 						+ flt(d.item_tax_amount / self.conversion_rate)
 						+ flt(d.landed_cost_voucher_amount)
 					)
