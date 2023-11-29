@@ -17,6 +17,7 @@
   "first_name",
   "middle_name",
   "last_name",
+  "second_last_name",
   "employee_name",
   "column_break_9",
   "gender",
@@ -616,8 +617,8 @@
    "fieldname": "relieving_date",
    "fieldtype": "Date",
    "label": "Relieving Date",
-   "no_copy": 1,
    "mandatory_depends_on": "eval:doc.status == \"Left\"",
+   "no_copy": 1,
    "oldfieldname": "relieving_date",
    "oldfieldtype": "Date"
   },
@@ -817,13 +818,19 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "second_last_name",
+   "fieldtype": "Data",
+   "label": "Second Last Name"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-10-04 10:57:05.174592",
+ "modified": "2023-11-29 16:18:53.983770",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
