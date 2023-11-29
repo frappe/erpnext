@@ -586,8 +586,8 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 					item_row = {
 						"item_code": po_item.item_code,
 						"item_name": po_item.item_name,
-						"qty": item.qty * conversion_factor,
-						"rejected_qty": item.rejected_qty * conversion_factor,
+						"qty": flt(item.qty) * conversion_factor,
+						"rejected_qty": flt(item.rejected_qty) * conversion_factor,
 						"uom": po_item.uom,
 						"rate": po_item.rate,
 						"warehouse": item.warehouse,
