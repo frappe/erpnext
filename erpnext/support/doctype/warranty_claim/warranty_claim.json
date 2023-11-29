@@ -375,12 +375,8 @@
  ],
  "icon": "fa fa-bug",
  "idx": 1,
-<<<<<<< HEAD
- "modified": "2021-11-09 17:26:09.703215",
-=======
  "links": [],
  "modified": "2023-11-28 17:30:35.676410",
->>>>>>> 01044ca8e9 (refactor: use DocType `Fetch From` instead of `frm.add_fetch`)
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",
