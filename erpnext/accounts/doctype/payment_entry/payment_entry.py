@@ -1687,6 +1687,38 @@ def get_outstanding_reference_documents(args, validate=False):
 def split_invoices_based_on_payment_terms(outstanding_invoices, company):
 	invoice_ref_based_on_payment_terms = {}
 
+<<<<<<< HEAD
+=======
+	outstanding_invoices_after_split = []
+	for entry in outstanding_invoices:
+		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+			if payment_term_template := frappe.db.get_value(
+				entry.voucher_type, entry.voucher_no, "payment_terms_template"
+			):
+				split_rows = get_split_invoice_rows(entry, payment_term_template, exc_rates)
+				if not split_rows:
+					continue
+
+				if len(split_rows) > 1:
+					frappe.msgprint(
+						_("Splitting {0} {1} into {2} rows as per Payment Terms").format(
+							_(entry.voucher_type), frappe.bold(entry.voucher_no), len(split_rows)
+						),
+						alert=True,
+					)
+				outstanding_invoices_after_split += split_rows
+				continue
+
+		# If not an invoice or no payment terms template, add as it is
+		outstanding_invoices_after_split.append(entry)
+
+	return outstanding_invoices_after_split
+
+
+def get_currency_data(outstanding_invoices: list, company: str = None) -> dict:
+	"""Get currency and conversion data for a list of invoices."""
+	exc_rates = frappe._dict()
+>>>>>>> 96b13c59c1 (fix(pe): show split alert only on splitting)
 	company_currency = (
 		frappe.db.get_value("Company", company, "default_currency") if company else None
 	)
