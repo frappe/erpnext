@@ -13,6 +13,43 @@ from erpnext.stock.utils import get_or_make_bin
 
 
 class StockReservationEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import (
+			SerialandBatchEntry,
+		)
+
+		amended_from: DF.Link | None
+		available_qty: DF.Float
+		company: DF.Link | None
+		delivered_qty: DF.Float
+		from_voucher_detail_no: DF.Data | None
+		from_voucher_no: DF.DynamicLink | None
+		from_voucher_type: DF.Literal["", "Pick List", "Purchase Receipt"]
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		item_code: DF.Link | None
+		project: DF.Link | None
+		reservation_based_on: DF.Literal["Qty", "Serial and Batch"]
+		reserved_qty: DF.Float
+		sb_entries: DF.Table[SerialandBatchEntry]
+		status: DF.Literal[
+			"Draft", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered", "Cancelled"
+		]
+		stock_uom: DF.Link | None
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_qty: DF.Float
+		voucher_type: DF.Literal["", "Sales Order"]
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self) -> None:
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 

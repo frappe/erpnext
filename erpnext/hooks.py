@@ -643,3 +643,5 @@ extend_bootinfo = [
 default_log_clearing_doctypes = {
 	"Repost Item Valuation": 60,
 }
+
+export_python_type_annotations = True

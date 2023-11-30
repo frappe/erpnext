@@ -7,6 +7,22 @@ from frappe.model.document import Document
 
 
 class PaymentGatewayAccount(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		currency: DF.ReadOnly | None
+		is_default: DF.Check
+		message: DF.SmallText | None
+		payment_account: DF.Link
+		payment_channel: DF.Literal["", "Email", "Phone"]
+		payment_gateway: DF.Link
+	# end: auto-generated types
+
 	def autoname(self):
 		self.name = self.payment_gateway + " - " + self.currency
 
