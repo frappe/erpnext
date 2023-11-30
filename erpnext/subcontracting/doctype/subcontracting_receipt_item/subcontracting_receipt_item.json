@@ -42,6 +42,7 @@
   "column_break_40",
   "rejected_warehouse",
   "bom",
+  "include_exploded_items",
   "quality_inspection",
   "schedule_date",
   "reference_name",
@@ -538,12 +539,19 @@
    "options": "Purchase Order",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "include_exploded_items",
+   "fieldtype": "Check",
+   "label": "Include Exploded Items",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-23 17:38:55.134685",
+ "modified": "2023-11-30 12:05:51.920705",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
