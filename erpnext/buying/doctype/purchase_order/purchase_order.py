@@ -670,15 +670,10 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			},
 			"Purchase Order Item": {
 				"doctype": "Subcontracting Order Service Item",
-<<<<<<< HEAD
-				"field_map": {},
-=======
 				"field_map": {
-					"name": "purchase_order_item",
 					"material_request": "material_request",
 					"material_request_item": "material_request_item",
 				},
->>>>>>> 691e3bb24f (fix: incorrect requested quantity for the subcontracting order)
 				"field_no_map": [],
 			},
 		},
