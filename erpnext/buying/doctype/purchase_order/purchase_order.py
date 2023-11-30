@@ -705,8 +705,8 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def is_subcontracting_order_created(po_name) -> bool:
-	count = frappe.db.count(
-		"Subcontracting Order", {"purchase_order": po_name, "status": ["not in", ["Draft", "Cancelled"]]}
+	return (
+		True
+		if frappe.db.exists("Subcontracting Order", {"purchase_order": po_name, "docstatus": ["=", 1]})
+		else False
 	)
-
-	return True if count else False
