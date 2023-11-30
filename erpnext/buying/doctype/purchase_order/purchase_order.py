@@ -86,6 +86,10 @@ class PurchaseOrder(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
+		mri_compare_fields = [["project", "="], ["item_code", "="]]
+		if self.is_subcontracted:
+			mri_compare_fields = [["project", "="]]
+
 		super(PurchaseOrder, self).validate_with_previous_doc(
 			{
 				"Supplier Quotation": {
@@ -108,7 +112,7 @@ class PurchaseOrder(BuyingController):
 				},
 				"Material Request Item": {
 					"ref_dn_field": "material_request_item",
-					"compare_fields": [["project", "="], ["item_code", "="]],
+					"compare_fields": mri_compare_fields,
 					"is_child_table": True,
 				},
 			}
@@ -282,23 +286,6 @@ class PurchaseOrder(BuyingController):
 				check_list.append(d.material_request)
 				check_on_hold_or_closed_status("Material Request", d.material_request)
 
-	def update_requested_qty(self):
-		material_request_map = {}
-		for d in self.get("items"):
-			if d.material_request_item:
-				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
-
-		for mr, mr_item_rows in material_request_map.items():
-			if mr and mr_item_rows:
-				mr_obj = frappe.get_doc("Material Request", mr)
-
-				if mr_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(
-						_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError
-					)
-
-				mr_obj.update_requested_qty(mr_item_rows)
-
 	def update_ordered_qty(self, po_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
@@ -340,7 +327,9 @@ class PurchaseOrder(BuyingController):
 			self.update_status_updater()
 
 		self.update_prevdoc_status()
-		self.update_requested_qty()
+		if not self.is_subcontracted or self.is_old_subcontracting_flow:
+			self.update_requested_qty()
+
 		self.update_ordered_qty()
 		self.validate_budget()
 		self.update_reserved_qty_for_subcontract()
@@ -372,7 +361,9 @@ class PurchaseOrder(BuyingController):
 
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
-		self.update_requested_qty()
+		if not self.is_subcontracted or self.is_old_subcontracting_flow:
+			self.update_requested_qty()
+
 		self.update_ordered_qty()
 
 		self.update_blanket_order()
@@ -679,7 +670,15 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			},
 			"Purchase Order Item": {
 				"doctype": "Subcontracting Order Service Item",
+<<<<<<< HEAD
 				"field_map": {},
+=======
+				"field_map": {
+					"name": "purchase_order_item",
+					"material_request": "material_request",
+					"material_request_item": "material_request_item",
+				},
+>>>>>>> 691e3bb24f (fix: incorrect requested quantity for the subcontracting order)
 				"field_no_map": [],
 			},
 		},
