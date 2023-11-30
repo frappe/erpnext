@@ -72,9 +72,6 @@ def _execute(filters=None, additional_table_columns=None):
 
 	data = []
 	for inv in invoice_list:
-		if filters.get("supplier_group"):
-			if filters.get("supplier_group") != supplier_details.get(inv.supplier).get("supplier_group"):
-				continue
 		# invoice details
 		purchase_order = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", [])))
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
