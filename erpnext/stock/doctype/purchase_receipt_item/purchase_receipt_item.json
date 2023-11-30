@@ -1055,11 +1055,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-14 18:38:15.251994",
-=======
  "modified": "2023-11-30 16:12:02.364608",
->>>>>>> ae294ee470 (fix(ux): make PR `rate` field read-only having PO ref)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
