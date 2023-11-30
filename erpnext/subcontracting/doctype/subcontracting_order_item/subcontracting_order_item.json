@@ -45,7 +45,8 @@
   "dimension_col_break",
   "project",
   "section_break_34",
-  "page_break"
+  "page_break",
+  "purchase_order_item"
  ],
  "fields": [
   {
@@ -332,13 +333,22 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Order Item",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-14 18:38:37.640677",
+ "modified": "2023-11-23 16:56:22.182698",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",

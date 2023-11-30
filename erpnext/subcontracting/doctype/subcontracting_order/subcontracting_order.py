@@ -159,6 +159,7 @@ class SubcontractingOrder(SubcontractingController):
 					)
 					or item.default_bom
 				)
+
 				items.append(
 					{
 						"item_code": item.item_code,
@@ -168,7 +169,8 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"stock_uom": item.stock_uom,
 						"bom": bom,
-					},
+						"purchase_order_item": si.purchase_order_item,
+					}
 				)
 			else:
 				frappe.throw(
@@ -176,11 +178,12 @@ class SubcontractingOrder(SubcontractingController):
 						si.item_name or si.item_code
 					)
 				)
-		else:
+
+		if items:
 			for item in items:
 				self.append("items", item)
-			else:
-				self.set_missing_values()
+
+		self.set_missing_values()
 
 	def update_status(self, status=None, update_modified=True):
 		if self.docstatus >= 1 and not status:
@@ -222,9 +225,11 @@ def make_subcontracting_receipt(source_name, target_doc=None):
 
 
 def get_mapped_subcontracting_receipt(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.received_qty)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+	def update_item(source, target, source_parent):
+		target.purchase_order = source_parent.purchase_order
+		target.purchase_order_item = source.purchase_order_item
+		target.qty = flt(source.qty) - flt(source.received_qty)
+		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
