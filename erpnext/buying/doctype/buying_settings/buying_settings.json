@@ -179,41 +179,14 @@
    "label": "Blanket Order Allowance (%)"
   },
   {
-<<<<<<< HEAD
-   "default": "Each Transaction",
-   "description": "How often should Project be updated of Total Purchase Cost ?",
-   "fieldname": "project_update_frequency",
-   "fieldtype": "Select",
-   "label": "Update frequency of Project",
-   "options": "Each Transaction\nManual"
-=======
    "fieldname": "section_break_xcug",
    "fieldtype": "Section Break"
   },
   {
-<<<<<<< HEAD
-   "fieldname": "action_on_purchase_order_submission",
-   "fieldtype": "Select",
-   "label": "Action on Purchase Order Submission",
-   "options": "\nCreate Subcontracting Order\nCreate and Submit Subcontracting Order"
-<<<<<<< HEAD
->>>>>>> 628ea42b63 (feat: add field `Action on Purchase Order Submission`)
-=======
-  },
-  {
-=======
->>>>>>> d366a91d9e (fix: use checkbox instead of select field)
    "fieldname": "column_break_izrr",
    "fieldtype": "Column Break"
   },
   {
-<<<<<<< HEAD
-   "fieldname": "action_on_subcontracting_receipt_submission",
-   "fieldtype": "Select",
-   "label": "Action on Subcontracting Receipt Submission",
-   "options": "\nCreate Purchase Receipt\nCreate and Submit Purchase Receipt"
->>>>>>> 762906f240 (feat: add field `Action on Subcontracting Receipt Submission`)
-=======
    "default": "0",
    "description": "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order.",
    "fieldname": "auto_create_subcontracting_order",
@@ -226,7 +199,14 @@
    "fieldname": "auto_create_purchase_receipt",
    "fieldtype": "Check",
    "label": "Auto Create Purchase Receipt"
->>>>>>> d366a91d9e (fix: use checkbox instead of select field)
+  },
+  {
+   "default": "Each Transaction",
+   "description": "How often should Project be updated of Total Purchase Cost ?",
+   "fieldname": "project_update_frequency",
+   "fieldtype": "Select",
+   "label": "Update frequency of Project",
+   "options": "Each Transaction\nManual"
   }
  ],
  "icon": "fa fa-cog",
@@ -234,23 +214,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2023-11-24 10:55:51.287327",
-=======
- "modified": "2023-11-22 16:05:33.262940",
->>>>>>> 628ea42b63 (feat: add field `Action on Purchase Order Submission`)
-=======
- "modified": "2023-11-22 17:42:28.978582",
->>>>>>> 9ec6f1e1d6 (feat: auto create SCO on PO submission)
-=======
- "modified": "2023-11-22 17:46:26.474708",
->>>>>>> 762906f240 (feat: add field `Action on Subcontracting Receipt Submission`)
-=======
  "modified": "2023-11-28 13:01:18.403492",
->>>>>>> d366a91d9e (fix: use checkbox instead of select field)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
