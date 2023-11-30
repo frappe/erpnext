@@ -19,7 +19,11 @@
   "fg_item",
   "column_break_12",
   "fg_item_qty",
-  "purchase_order_item"
+  "purchase_order_item",
+  "section_break_kphn",
+  "material_request",
+  "column_break_piqi",
+  "material_request_item"
  ],
  "fields": [
   {
@@ -122,11 +126,36 @@
    "no_copy": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_kphn",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "no_copy": 1,
+   "options": "Material Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_piqi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-11-23 17:05:04.561948",
+ "modified": "2023-11-30 13:29:31.017440",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Service Item",
