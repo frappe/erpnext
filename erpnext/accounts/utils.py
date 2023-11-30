@@ -1846,6 +1846,8 @@ class QueryPaymentLedger(object):
 				.where(ple.delinked == 0)
 				.where(Criterion.all(filter_on_against_voucher_no))
 				.where(Criterion.all(self.common_filter))
+				.where(Criterion.all(self.dimensions_filter))
+				.where(Criterion.all(self.voucher_posting_date))
 				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
 				.orderby(ple.posting_date, ple.voucher_no)
 				.having(qb.Field("amount_in_account_currency") > 0)
