@@ -14,6 +14,25 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 
 
 class OpeningInvoiceCreationTool(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.opening_invoice_creation_tool_item.opening_invoice_creation_tool_item import (
+			OpeningInvoiceCreationToolItem,
+		)
+
+		company: DF.Link
+		cost_center: DF.Link | None
+		create_missing_party: DF.Check
+		invoice_type: DF.Literal["Sales", "Purchase"]
+		invoices: DF.Table[OpeningInvoiceCreationToolItem]
+	# end: auto-generated types
+
 	def onload(self):
 		"""Load the Opening Invoice summary"""
 		summary, max_count = self.get_opening_invoice_summary()
