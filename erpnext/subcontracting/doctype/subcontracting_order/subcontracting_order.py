@@ -13,6 +13,23 @@ from erpnext.stock.utils import get_bin
 
 
 class SubcontractingOrder(SubcontractingController):
+	def __init__(self, *args, **kwargs):
+		super(SubcontractingOrder, self).__init__(*args, **kwargs)
+
+		self.status_updater = [
+			{
+				"source_dt": "Subcontracting Order Item",
+				"target_dt": "Material Request Item",
+				"join_field": "material_request_item",
+				"target_field": "ordered_qty",
+				"target_parent_dt": "Material Request",
+				"target_parent_field": "per_ordered",
+				"target_ref_field": "stock_qty",
+				"source_field": "qty",
+				"percent_join_field": "material_request",
+			}
+		]
+
 	def before_validate(self):
 		super(SubcontractingOrder, self).before_validate()
 
@@ -26,11 +43,15 @@ class SubcontractingOrder(SubcontractingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def on_submit(self):
+		self.update_prevdoc_status()
+		self.update_requested_qty()
 		self.update_ordered_qty_for_subcontracting()
 		self.update_reserved_qty_for_subcontracting()
 		self.update_status()
 
 	def on_cancel(self):
+		self.update_prevdoc_status()
+		self.update_requested_qty()
 		self.update_ordered_qty_for_subcontracting()
 		self.update_reserved_qty_for_subcontracting()
 		self.update_status()
@@ -164,7 +185,9 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"stock_uom": item.stock_uom,
 						"bom": bom,
-					},
+						"material_request": si.material_request,
+						"material_request_item": si.material_request_item,
+					}
 				)
 			else:
 				frappe.throw(
