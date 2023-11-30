@@ -43,6 +43,16 @@
   "quality_inspection",
   "subcontracting_order_item",
   "subcontracting_receipt_item",
+<<<<<<< HEAD
+=======
+  "column_break_40",
+  "rejected_warehouse",
+  "bom",
+  "include_exploded_items",
+  "quality_inspection",
+  "schedule_date",
+  "reference_name",
+>>>>>>> 62b4a263f8 (fix: exploded items in Subcontracting Receipt)
   "section_break_45",
   "bom",
   "serial_no",
@@ -465,12 +475,89 @@
    "fieldname": "accounting_details_section",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "rejected_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Rejected Serial and Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.bom",
+   "fieldname": "is_scrap_item",
+   "fieldtype": "Check",
+   "label": "Is Scrap Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only_depends_on": "eval: doc.bom"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.is_scrap_item",
+   "fieldname": "scrap_cost_per_qty",
+   "fieldtype": "Float",
+   "label": "Scrap Cost Per Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Order Item",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Order",
+   "no_copy": 1,
+   "options": "Purchase Order",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "include_exploded_items",
+   "fieldtype": "Check",
+   "label": "Include Exploded Items",
+   "print_hide": 1
+>>>>>>> 62b4a263f8 (fix: exploded items in Subcontracting Receipt)
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-11-14 18:38:26.459669",
+=======
+ "modified": "2023-11-30 12:05:51.920705",
+>>>>>>> 62b4a263f8 (fix: exploded items in Subcontracting Receipt)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
