@@ -16,6 +16,21 @@ class VariablePathNotFound(frappe.ValidationError):
 
 
 class SupplierScorecardVariable(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		description: DF.SmallText | None
+		is_custom: DF.Check
+		param_name: DF.Data
+		path: DF.Data
+		variable_label: DF.Data
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_path_exists()
 

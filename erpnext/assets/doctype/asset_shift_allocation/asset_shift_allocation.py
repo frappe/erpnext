@@ -22,6 +22,25 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 
 
 class AssetShiftAllocation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
+			DepreciationSchedule,
+		)
+
+		amended_from: DF.Link | None
+		asset: DF.Link
+		depreciation_schedule: DF.Table[DepreciationSchedule]
+		finance_book: DF.Link | None
+		naming_series: DF.Literal["ACC-ASA-.YYYY.-"]
+	# end: auto-generated types
+
 	def after_insert(self):
 		self.fetch_and_set_depr_schedule()
 
