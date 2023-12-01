@@ -880,6 +880,7 @@ class SubcontractingController(StockController):
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
 							"qty": -1 * item.consumed_qty,
+							"voucher_detail_no": item.name,
 							"serial_and_batch_bundle": item.serial_and_batch_bundle,
 						}
 					)

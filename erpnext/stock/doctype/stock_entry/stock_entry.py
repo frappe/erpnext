@@ -877,6 +877,7 @@ class StockEntry(StockController):
 				"company": self.company,
 				"allow_zero_valuation": item.allow_zero_valuation_rate,
 				"serial_and_batch_bundle": item.serial_and_batch_bundle,
+				"voucher_detail_no": item.name,
 			}
 		)
 
