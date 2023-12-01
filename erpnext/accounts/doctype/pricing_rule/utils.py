@@ -622,8 +622,6 @@ def apply_pricing_rule_on_transaction(doc):
 				# Break out of the main loop if the condition is met
 				if condition_met:
 					break
-
-
 			elif d.price_or_product_discount == "Product":
 				item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
 				get_product_discount_rule(d, item_details, doc=doc)
