@@ -1055,112 +1055,105 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 
-			for d in self.get("references"):
-				# re-defining dr_or_cr for every reference in order to avoid the last value affecting calculation of reverse
-				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
-				cost_center = self.cost_center
-				if d.reference_doctype == "Sales Invoice" and not cost_center:
-					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
-
-				gle = party_gl_dict.copy()
-
-				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
-
-				if self.book_advance_payments_in_separate_party_account:
-					against_voucher_type = "Payment Entry"
-					against_voucher = self.name
-				else:
-					against_voucher_type = d.reference_doctype
-					against_voucher = d.reference_name
-
-				reverse_dr_or_cr = 0
-				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
-					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
-					payable_party_types = get_party_types_from_account_type("Payable")
-					receivable_party_types = get_party_types_from_account_type("Receivable")
-					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
-						reverse_dr_or_cr = 1
-					elif (
-						is_return and self.party_type in payable_party_types and (self.payment_type == "Receive")
-					):
-						reverse_dr_or_cr = 1
-
-					if is_return and not reverse_dr_or_cr:
-						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
-
-				gle.update(
-					{
-						dr_or_cr: abs(allocated_amount_in_company_currency),
-						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
-						"against_voucher_type": against_voucher_type,
-						"against_voucher": against_voucher,
-						"cost_center": cost_center,
-					}
-				)
-				gl_entries.append(gle)
-
 			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
-			if self.unallocated_amount:
-				exchange_rate = self.get_exchange_rate()
-				base_unallocated_amount = self.unallocated_amount * exchange_rate
-
+			if self.book_advance_payments_in_separate_party_account:
 				gle = party_gl_dict.copy()
+
+				if self.payment_type == "Receive":
+					amount = self.base_paid_amount
+				else:
+					amount = self.base_received_amount
+
+				exchange_rate = self.get_exchange_rate()
+				amount_in_account_currency = amount * exchange_rate
 				gle.update(
 					{
-						dr_or_cr + "_in_account_currency": self.unallocated_amount,
-						dr_or_cr: base_unallocated_amount,
+						dr_or_cr: amount,
+						dr_or_cr + "_in_account_currency": amount_in_account_currency,
+						"against_voucher_type": "Payment Entry",
+						"against_voucher": self.name,
+						"cost_center": self.cost_center,
 					}
 				)
-
 				gl_entries.append(gle)
+			else:
+				for d in self.get("references"):
+					# re-defining dr_or_cr for every reference in order to avoid the last value affecting calculation of reverse
+					dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+					cost_center = self.cost_center
+					if d.reference_doctype == "Sales Invoice" and not cost_center:
+						cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
 
-	def make_advance_gl_entries(self, against_voucher_type=None, against_voucher=None, cancel=0):
-		if self.book_advance_payments_in_separate_party_account:
-			gl_entries = []
-			for d in self.get("references"):
-				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
-					if not (against_voucher_type and against_voucher) or (
-						d.reference_doctype == against_voucher_type and d.reference_name == against_voucher
-					):
-						self.make_invoice_liability_entry(gl_entries, d)
+					gle = party_gl_dict.copy()
 
-			if cancel:
-				for entry in gl_entries:
-					frappe.db.set_value(
-						"GL Entry",
+					allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
+					reverse_dr_or_cr = 0
+
+					if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
+						is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
+						payable_party_types = get_party_types_from_account_type("Payable")
+						receivable_party_types = get_party_types_from_account_type("Receivable")
+						if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
+							reverse_dr_or_cr = 1
+						elif (
+							is_return and self.party_type in payable_party_types and (self.payment_type == "Receive")
+						):
+							reverse_dr_or_cr = 1
+
+						if is_return and not reverse_dr_or_cr:
+							dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+
+					gle.update(
 						{
-							"voucher_no": self.name,
-							"voucher_type": self.doctype,
-							"voucher_detail_no": entry.voucher_detail_no,
-							"against_voucher_type": entry.against_voucher_type,
-							"against_voucher": entry.against_voucher,
-						},
-						"is_cancelled",
-						1,
+							dr_or_cr: abs(allocated_amount_in_company_currency),
+							dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
+							"against_voucher_type": d.reference_doctype,
+							"against_voucher": d.reference_name,
+							"cost_center": cost_center,
+						}
+					)
+					gl_entries.append(gle)
+
+				if self.unallocated_amount:
+					dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+					exchange_rate = self.get_exchange_rate()
+					base_unallocated_amount = self.unallocated_amount * exchange_rate
+
+					gle = party_gl_dict.copy()
+					gle.update(
+						{
+							dr_or_cr + "_in_account_currency": self.unallocated_amount,
+							dr_or_cr: base_unallocated_amount,
+						}
 					)
 
-				make_reverse_gl_entries(gl_entries=gl_entries, partial_cancel=True)
-				return
+					gl_entries.append(gle)
 
-			# same reference added to payment entry
-			for gl_entry in gl_entries.copy():
-				if frappe.db.exists(
-					"GL Entry",
-					{
-						"account": gl_entry.account,
-						"voucher_type": gl_entry.voucher_type,
-						"voucher_no": gl_entry.voucher_no,
-						"voucher_detail_no": gl_entry.voucher_detail_no,
-						"debit": gl_entry.debit,
-						"credit": gl_entry.credit,
-						"is_cancelled": 0,
-					},
-				):
-					gl_entries.remove(gl_entry)
+	def make_advance_gl_entries(
+		self, entry: object | dict = None, cancel: bool = 0, update_outstanding: str = "Yes"
+	):
+		gl_entries = []
+		self.add_advance_gl_entries(gl_entries, entry)
 
-			make_gl_entries(gl_entries)
+		if cancel:
+			make_reverse_gl_entries(gl_entries, partial_cancel=True)
+		else:
+			make_gl_entries(gl_entries, update_outstanding=update_outstanding)
 
-	def make_invoice_liability_entry(self, gl_entries, invoice):
+	def add_advance_gl_entries(self, gl_entries: list, entry: object | dict | None):
+		"""
+		If 'entry' is passed, GL enties only for that reference is added.
+		"""
+		if self.book_advance_payments_in_separate_party_account:
+			references = [x for x in self.get("references")]
+			if entry:
+				references = [x for x in self.get("references") if x.name == entry.name]
+
+			for ref in references:
+				if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
+					self.add_advance_gl_for_reference(gl_entries, ref)
+
+	def add_advance_gl_for_reference(self, gl_entries, invoice):
 		args_dict = {
 			"party_type": self.party_type,
 			"party": self.party,
