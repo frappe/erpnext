@@ -409,6 +409,14 @@ class BuyingController(SubcontractingController):
 						d.conversion_factor, d.precision("conversion_factor")
 					)
 
+<<<<<<< HEAD
+=======
+				if allow_to_edit_stock_qty:
+					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
+					if d.get("received_stock_qty") and d.meta.get_field("received_stock_qty"):
+						d.received_stock_qty = flt(d.received_stock_qty, d.precision("received_stock_qty"))
+
+>>>>>>> 60a81a563e (fix: `AttributeError` while saving Purchase Invoice)
 	def validate_purchase_return(self):
 		for d in self.get("items"):
 			if self.is_return and flt(d.rejected_qty) != 0:
