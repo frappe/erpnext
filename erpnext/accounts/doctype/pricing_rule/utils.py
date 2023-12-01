@@ -581,7 +581,6 @@ def apply_pricing_rule_on_transaction(doc):
 			if d.price_or_product_discount == "Price":
 				if d.apply_discount_on:
 					doc.set("apply_discount_on", d.apply_discount_on)
-				
 				# Variable to track whether the condition has been met
 				condition_met = False
 
