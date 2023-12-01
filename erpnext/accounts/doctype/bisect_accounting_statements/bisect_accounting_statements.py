@@ -154,6 +154,13 @@ class BisectAccountingStatements(Document):
 		self.b_s_summary = bs_summary.execute_script_report(filters=filters)[5]
 		self.difference = abs(self.p_l_summary - self.b_s_summary)
 
+	def update_node(self):
+		current_node = frappe.get_doc("Bisect Nodes", self.current_node)
+		current_node.balance_sheet_summary = self.b_s_summary
+		current_node.profit_loss_summary = self.p_l_summary
+		current_node.difference = self.difference
+		current_node.save()
+
 	@frappe.whitelist()
 	def bisect_left(self):
 		if self.current_node is not None:
@@ -164,6 +171,7 @@ class BisectAccountingStatements(Document):
 				self.current_from_date = lft_node.period_from_date
 				self.current_to_date = lft_node.period_to_date
 				self.get_report_summary()
+				self.update_node()
 				self.save()
 			else:
 				frappe.msgprint("No more children on Left")
@@ -178,6 +186,7 @@ class BisectAccountingStatements(Document):
 				self.current_from_date = rgt_node.period_from_date
 				self.current_to_date = rgt_node.period_to_date
 				self.get_report_summary()
+				self.update_node()
 				self.save()
 			else:
 				frappe.msgprint("No more children on Right")
@@ -192,6 +201,7 @@ class BisectAccountingStatements(Document):
 				self.current_from_date = root.period_from_date
 				self.current_to_date = root.period_to_date
 				self.get_report_summary()
+				self.update_node()
 				self.save()
 			else:
 				frappe.msgprint("Reached Root")
