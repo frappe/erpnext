@@ -444,6 +444,7 @@ class SellingController(StockController):
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
+							"voucher_detail_no": d.name,
 							"allow_zero_valuation": d.get("allow_zero_valuation"),
 						},
 						raise_error_if_no_rate=False,

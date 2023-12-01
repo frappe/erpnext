@@ -940,6 +940,42 @@ class TestStockEntry(FrappeTestCase):
 		stock_entry.insert()
 		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
 
+	def test_nagative_stock_for_batch(self):
+		item = make_item(
+			"_Test Batch Negative Item",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "B-BATCH-.##",
+				"is_stock_item": 1,
+			},
+		)
+
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+
+		ste = frappe.new_doc("Stock Entry")
+		ste.purpose = "Material Issue"
+		ste.company = "_Test Company"
+		for qty in [50, 20, 30]:
+			ste.append(
+				"items",
+				{
+					"item_code": item.name,
+					"s_warehouse": "_Test Warehouse - _TC",
+					"qty": qty,
+					"uom": item.stock_uom,
+					"stock_uom": item.stock_uom,
+					"conversion_factor": 1,
+					"transfer_qty": qty,
+				},
+			)
+
+		ste.set_stock_entry_type()
+		ste.insert()
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+
+		self.assertRaises(frappe.ValidationError, ste.submit)
+
 	def test_same_serial_nos_in_repack_or_manufacture_entries(self):
 		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(s1.get("items")[0].serial_and_batch_bundle)
