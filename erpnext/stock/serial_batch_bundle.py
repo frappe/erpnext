@@ -539,9 +539,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			.groupby(child.batch_no)
 		)
 
-		# Important to exclude the current voucher detail no to calculate correct the stock value difference
+		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
 		if self.sle.voucher_detail_no:
 			query = query.where(parent.voucher_detail_no != self.sle.voucher_detail_no)
+		elif self.sle.voucher_no:
+			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
 		if timestamp_condition:
 			query = query.where(timestamp_condition)

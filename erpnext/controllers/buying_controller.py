@@ -118,6 +118,7 @@ class BuyingController(SubcontractingController):
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
+							"voucher_detail_no": row.name,
 						},
 						raise_error_if_no_rate=False,
 					)
@@ -373,6 +374,7 @@ class BuyingController(SubcontractingController):
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"allow_zero_valuation": d.get("allow_zero_valuation"),
+							"voucher_detail_no": d.name,
 						},
 						raise_error_if_no_rate=False,
 					)
