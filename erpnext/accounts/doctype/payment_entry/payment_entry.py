@@ -1057,17 +1057,19 @@ class PaymentEntry(AccountsController):
 
 			dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 			if self.book_advance_payments_in_separate_party_account:
+				gle = party_gl_dict.copy()
+
 				if self.payment_type == "Receive":
 					amount = self.base_paid_amount
 				else:
 					amount = self.base_received_amount
 
-				gle = party_gl_dict.copy()
+				exchange_rate = self.get_exchange_rate()
+				amount_in_account_currency = amount * exchange_rate
 				gle.update(
 					{
 						dr_or_cr: amount,
-						# TODO: handle multi currency payments
-						dr_or_cr + "_in_account_currency": amount,
+						dr_or_cr + "_in_account_currency": amount_in_account_currency,
 						"against_voucher_type": "Payment Entry",
 						"against_voucher": self.name,
 						"cost_center": self.cost_center,
