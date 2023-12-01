@@ -1691,12 +1691,13 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list
 				if not split_rows:
 					continue
 
-				frappe.msgprint(
-					_("Splitting {0} {1} into {2} rows as per Payment Terms").format(
-						_(entry.voucher_type), frappe.bold(entry.voucher_no), len(split_rows)
-					),
-					alert=True,
-				)
+				if len(split_rows) > 1:
+					frappe.msgprint(
+						_("Splitting {0} {1} into {2} rows as per Payment Terms").format(
+							_(entry.voucher_type), frappe.bold(entry.voucher_no), len(split_rows)
+						),
+						alert=True,
+					)
 				outstanding_invoices_after_split += split_rows
 				continue
 
