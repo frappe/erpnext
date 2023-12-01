@@ -406,7 +406,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			.orderby(bundle.posting_date, bundle.posting_time, bundle.creation)
 		)
 
-		# Important to exclude the current voucher
+		# Important to exclude the current voucher to calculate correct the stock value difference
 		if self.sle.voucher_no:
 			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
@@ -539,9 +539,9 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			.groupby(child.batch_no)
 		)
 
-		# Important to exclude the current voucher
-		if self.sle.voucher_no:
-			query = query.where(parent.voucher_no != self.sle.voucher_no)
+		# Important to exclude the current voucher detail no to calculate correct the stock value difference
+		if self.sle.voucher_detail_no:
+			query = query.where(parent.voucher_detail_no != self.sle.voucher_detail_no)
 
 		if timestamp_condition:
 			query = query.where(timestamp_condition)
