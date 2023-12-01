@@ -540,7 +540,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		)
 
 		# Important to exclude the current voucher
-		if self.sle.voucher_no:
+		if self.sle.voucher_no and self.sle.actual_qty > 0:
 			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
 		if timestamp_condition:
