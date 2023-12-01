@@ -252,6 +252,7 @@ class SerialandBatchBundle(Document):
 				"serial_nos": [row.serial_no for row in self.entries if row.serial_no],
 				"batch_nos": {row.batch_no: row for row in self.entries if row.batch_no},
 				"voucher_type": self.voucher_type,
+				"voucher_detail_no": self.voucher_detail_no,
 			}
 		)
 

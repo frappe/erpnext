@@ -2629,6 +2629,7 @@ class TestSalesInvoice(FrappeTestCase):
 					"voucher_type": "Sales Invoice",
 					"voucher_no": si.name,
 					"allow_zero_valuation": d.get("allow_zero_valuation"),
+					"voucher_detail_no": d.name,
 				},
 				raise_error_if_no_rate=False,
 			)
