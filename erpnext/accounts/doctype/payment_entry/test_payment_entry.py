@@ -1419,6 +1419,8 @@ class TestPaymentEntry(FrappeTestCase):
 		pr.party = "_Test Customer"
 		pr.receivable_payable_account = si.debit_to
 		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
 		pr.get_unreconciled_entries()
 
 		self.assertEqual(len(pr.invoices), 1)
