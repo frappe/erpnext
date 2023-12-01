@@ -63,7 +63,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-27 15:09:27.715523",
+ "modified": "2023-12-01 16:49:57.146867",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Nodes",
@@ -78,11 +78,12 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Administrator",
    "share": 1,
    "write": 1
   }
  ],
+ "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
