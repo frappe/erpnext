@@ -14,7 +14,8 @@
   "period_to_date",
   "difference",
   "balance_sheet_summary",
-  "profit_loss_summary"
+  "profit_loss_summary",
+  "generated"
  ],
  "fields": [
   {
@@ -59,11 +60,17 @@
    "fieldname": "profit_loss_summary",
    "fieldtype": "Float",
    "label": "Profit and Loss Summary"
+  },
+  {
+   "default": "0",
+   "fieldname": "generated",
+   "fieldtype": "Check",
+   "label": "Generated"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-01 16:49:57.146867",
+ "modified": "2023-12-01 17:46:12.437996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Nodes",
