@@ -66,6 +66,7 @@ class BisectAccountingStatements(Document):
 				left_node.period_from_date = cur_node.period_from_date
 				left_node.period_to_date = next_to_date
 				left_node.root = cur_node.name
+				left_node.generated = False
 				left_node.insert()
 				cur_node.left_child = left_node.name
 				period_queue.append(left_node)
@@ -75,6 +76,7 @@ class BisectAccountingStatements(Document):
 				right_node.period_from_date = next_from_date
 				right_node.period_to_date = cur_node.period_to_date
 				right_node.root = cur_node.name
+				right_node.generated = False
 				right_node.insert()
 				cur_node.right_child = right_node.name
 				period_queue.append(right_node)
@@ -102,6 +104,7 @@ class BisectAccountingStatements(Document):
 				left_node.period_from_date = cur_node.period_from_date
 				left_node.period_to_date = next_to_date
 				left_node.root = cur_node.name
+				left_node.generated = False
 				left_node.insert()
 				cur_node.left_child = left_node.name
 				period_stack.append(left_node)
@@ -111,6 +114,7 @@ class BisectAccountingStatements(Document):
 				right_node.period_from_date = next_from_date
 				right_node.period_to_date = cur_node.period_to_date
 				right_node.root = cur_node.name
+				right_node.generated = False
 				right_node.insert()
 				cur_node.right_child = right_node.name
 				period_stack.append(right_node)
@@ -159,7 +163,25 @@ class BisectAccountingStatements(Document):
 		current_node.balance_sheet_summary = self.b_s_summary
 		current_node.profit_loss_summary = self.p_l_summary
 		current_node.difference = self.difference
+		current_node.generated = True
 		current_node.save()
+
+	def current_node_has_summary_info(self):
+		"Assertion method"
+		return frappe.db.get_value("Bisect Nodes", self.current_node, "generated")
+
+	def fetch_summary_info_from_current_node(self):
+		current_node = frappe.get_doc("Bisect Nodes", self.current_node)
+		self.p_l_summary = current_node.balance_sheet_summary
+		self.b_s_summary = current_node.profit_loss_summary
+		self.difference = abs(self.p_l_summary - self.b_s_summary)
+
+	def fetch_or_calculate(self):
+		if self.current_node_has_summary_info():
+			self.fetch_summary_info_from_current_node()
+		else:
+			self.get_report_summary()
+			self.update_node()
 
 	@frappe.whitelist()
 	def bisect_left(self):
@@ -170,8 +192,7 @@ class BisectAccountingStatements(Document):
 				self.current_node = cur_node.left_child
 				self.current_from_date = lft_node.period_from_date
 				self.current_to_date = lft_node.period_to_date
-				self.get_report_summary()
-				self.update_node()
+				self.fetch_or_calculate()
 				self.save()
 			else:
 				frappe.msgprint("No more children on Left")
@@ -185,8 +206,7 @@ class BisectAccountingStatements(Document):
 				self.current_node = cur_node.right_child
 				self.current_from_date = rgt_node.period_from_date
 				self.current_to_date = rgt_node.period_to_date
-				self.get_report_summary()
-				self.update_node()
+				self.fetch_or_calculate()
 				self.save()
 			else:
 				frappe.msgprint("No more children on Right")
@@ -200,8 +220,7 @@ class BisectAccountingStatements(Document):
 				self.current_node = cur_node.root
 				self.current_from_date = root.period_from_date
 				self.current_to_date = root.period_to_date
-				self.get_report_summary()
-				self.update_node()
+				self.fetch_or_calculate()
 				self.save()
 			else:
 				frappe.msgprint("Reached Root")
