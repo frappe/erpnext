@@ -16,6 +16,7 @@ class BisectNodes(Document):
 
 		balance_sheet_summary: DF.Float
 		difference: DF.Float
+		generated: DF.Check
 		left_child: DF.Link | None
 		name: DF.Int | None
 		period_from_date: DF.Datetime | None
