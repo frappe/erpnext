@@ -14,6 +14,26 @@ from frappe.utils.data import guess_date_format
 
 
 class BisectAccountingStatements(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		algorithm: DF.Literal["BFS", "DFS"]
+		b_s_summary: DF.Float
+		company: DF.Link | None
+		current_from_date: DF.Datetime | None
+		current_node: DF.Link | None
+		current_to_date: DF.Datetime | None
+		difference: DF.Float
+		from_date: DF.Datetime | None
+		p_l_summary: DF.Float
+		to_date: DF.Datetime | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_dates()
 
