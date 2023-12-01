@@ -1328,7 +1328,7 @@ class TestPaymentEntry(FrappeTestCase):
 			parent_account="Current Assets - _TC",
 			account_name="Advances Received",
 			company=company,
-			account_type="Liability",
+			account_type="Receivable",
 		)
 
 		frappe.db.set_value(
