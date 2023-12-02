@@ -716,7 +716,54 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
+<<<<<<< HEAD
 	target_doc.set_onload("ignore_price_list", True)
+=======
+	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
+		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
+
+		if sre_list:
+
+			def update_dn_item(source, target, source_parent):
+				update_item(source, target, so)
+
+			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
+
+			for sre in sre_list:
+				if not condition(so_items[sre.voucher_detail_no]):
+					continue
+
+				dn_item = get_mapped_doc(
+					"Sales Order Item",
+					sre.voucher_detail_no,
+					{
+						"Sales Order Item": {
+							"doctype": "Delivery Note Item",
+							"field_map": {
+								"rate": "rate",
+								"name": "so_detail",
+								"parent": "against_sales_order",
+							},
+							"postprocess": update_dn_item,
+						}
+					},
+					ignore_permissions=True,
+				)
+
+				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+
+				target_doc.append("items", dn_item)
+			else:
+				# Correct rows index.
+				for idx, item in enumerate(target_doc.items):
+					item.idx = idx + 1
+
+	# Should be called after mapping items.
+	set_missing_values(so, target_doc)
+>>>>>>> b6a7549407 (fix: use predefined onload property `load_after_mapping` (#38209))
 
 	return target_doc
 
@@ -805,8 +852,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	)
 	if automatically_fetch_payment_terms:
 		doclist.set_payment_schedule()
-
-	doclist.set_onload("ignore_price_list", True)
 
 	return doclist
 
