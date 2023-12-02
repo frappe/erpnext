@@ -21,7 +21,9 @@ def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	if filters.get("include_uom") and (filters.get("select_uom")) != "Default UOM":
 		frappe.throw(
-			_("Cannot select filters {0} and {1} together!").format(frappe.bold ('Include UOM'), frappe.bold('Select UOM'))
+			_("Cannot select filters {0} and {1} together!").format(
+				frappe.bold("Include UOM"), frappe.bold("Select UOM")
+			)
 		)
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -78,7 +80,7 @@ def execute(filters=None):
 		if filters.get("select_uom") in ["Sales UOM", "Purchase UOM"]:
 			conversion_factors.append(item_detail.conversion_factor)
 			type_conversion_factors.append(
-				(conversion_factors,item_detail.conversion_factor, item_detail.uom, filters.get("select_uom"))
+				(conversion_factors, item_detail.conversion_factor, item_detail.uom, filters.get("select_uom"))
 			)
 	update_included_uom_in_report(
 		columns, data, include_uom, conversion_factors, type_conversion_factors
