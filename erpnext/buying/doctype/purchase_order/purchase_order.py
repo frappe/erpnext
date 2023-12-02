@@ -608,6 +608,20 @@ class PurchaseOrder(BuyingController):
 
 		return result
 
+	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
+		"""
+		Updates ordered_qty in linked SO when item rows are removed using Update Items
+		"""
+		if not self.is_against_so():
+			return
+		for item in removed_items:
+			prev_ordered_qty = frappe.get_cached_value(
+				"Sales Order Item", item.get("sales_order_item"), "ordered_qty"
+			)
+			frappe.db.set_value(
+				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
+			)
+
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
 			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
