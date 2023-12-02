@@ -441,38 +441,6 @@ class PurchaseOrder(BuyingController):
 		else:
 			self.db_set("per_received", 0, update_modified=False)
 
-<<<<<<< HEAD
-=======
-	def set_service_items_for_finished_goods(self):
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			return
-
-		finished_goods_without_service_item = {
-			d.fg_item for d in self.items if (not d.item_code and d.fg_item)
-		}
-
-		if subcontracting_boms := get_subcontracting_boms_for_finished_goods(
-			finished_goods_without_service_item
-		):
-			for item in self.items:
-				if not item.item_code and item.fg_item in subcontracting_boms:
-					subcontracting_bom = subcontracting_boms[item.fg_item]
-
-					item.item_code = subcontracting_bom.service_item
-					item.qty = flt(item.fg_item_qty) * flt(subcontracting_bom.conversion_factor)
-					item.uom = subcontracting_bom.service_item_uom
-
-	def can_update_items(self) -> bool:
-		result = True
-
-		if self.is_subcontracted and not self.is_old_subcontracting_flow:
-			if frappe.db.exists(
-				"Subcontracting Order", {"purchase_order": self.name, "docstatus": ["!=", 2]}
-			):
-				result = False
-
-		return result
-
 	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
 		"""
 		Updates ordered_qty in linked SO when item rows are removed using Update Items
@@ -487,12 +455,6 @@ class PurchaseOrder(BuyingController):
 				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
 			)
 
-	def auto_create_subcontracting_order(self):
-		if self.is_subcontracted and not self.is_old_subcontracting_flow:
-			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
-				make_subcontracting_order(self.name, save=True, notify=True)
-
->>>>>>> 9087e1443e (fix: SO ordered qty on PO item removal (#38378))
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
 	"""get last purchase rate for an item"""
