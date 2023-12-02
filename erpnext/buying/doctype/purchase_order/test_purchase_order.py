@@ -16,7 +16,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
 )
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
@@ -27,6 +27,21 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 
 
 class TestPurchaseOrder(FrappeTestCase):
+	def test_purchase_order_qty(self):
+		po = create_purchase_order(qty=1, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": -1,
+				"rate": 10,
+			},
+		)
+		self.assertRaises(frappe.NonNegativeError, po.save)
+
+		po.items[1].qty = 0
+		self.assertRaises(InvalidQtyError, po.save)
+
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
@@ -965,6 +980,38 @@ class TestPurchaseOrder(FrappeTestCase):
 		# Test - 3: Items should be updated as the Subcontracting Order is cancelled
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
+
+	@change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
+	def test_auto_create_subcontracting_order(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+		)
+
+		self.assertTrue(frappe.db.get_value("Subcontracting Order", {"purchase_order": po.name}))
 
 
 def prepare_data_for_internal_transfer():

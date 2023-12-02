@@ -44,6 +44,42 @@ class SerialNoWarehouseError(frappe.ValidationError):
 
 
 class SerialandBatchBundle(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import (
+			SerialandBatchEntry,
+		)
+
+		amended_from: DF.Link | None
+		avg_rate: DF.Float
+		company: DF.Link
+		entries: DF.Table[SerialandBatchEntry]
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		is_cancelled: DF.Check
+		is_rejected: DF.Check
+		item_code: DF.Link
+		item_group: DF.Link | None
+		item_name: DF.Data | None
+		naming_series: DF.Literal["SABB-.########"]
+		posting_date: DF.Date | None
+		posting_time: DF.Time | None
+		returned_against: DF.Data | None
+		total_amount: DF.Float
+		total_qty: DF.Float
+		type_of_transaction: DF.Literal["", "Inward", "Outward", "Maintenance", "Asset Repair"]
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
@@ -216,6 +252,7 @@ class SerialandBatchBundle(Document):
 				"serial_nos": [row.serial_no for row in self.entries if row.serial_no],
 				"batch_nos": {row.batch_no: row for row in self.entries if row.batch_no},
 				"voucher_type": self.voucher_type,
+				"voucher_detail_no": self.voucher_detail_no,
 			}
 		)
 
@@ -1018,7 +1055,7 @@ def update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=Non
 		doc.append(
 			"entries",
 			{
-				"qty": d.get("qty") * (1 if doc.type_of_transaction == "Inward" else -1),
+				"qty": (d.get("qty") or 1.0) * (1 if doc.type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse or d.get("warehouse"),
 				"batch_no": d.get("batch_no"),
 				"serial_no": d.get("serial_no"),

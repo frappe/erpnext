@@ -6,4 +6,31 @@ from frappe.model.document import Document
 
 
 class ProcessPaymentReconciliationLogAllocations(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		allocated_amount: DF.Currency
+		amount: DF.Currency
+		currency: DF.Link | None
+		difference_account: DF.Link | None
+		difference_amount: DF.Currency
+		exchange_rate: DF.Float
+		invoice_number: DF.DynamicLink
+		invoice_type: DF.Link
+		is_advance: DF.Data | None
+		parent: DF.Data
+		parentfield: DF.Data
+		parenttype: DF.Data
+		reconciled: DF.Check
+		reference_name: DF.DynamicLink
+		reference_row: DF.Data | None
+		reference_type: DF.Link
+		unreconciled_amount: DF.Currency
+	# end: auto-generated types
+
 	pass

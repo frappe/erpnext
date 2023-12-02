@@ -223,13 +223,12 @@ frappe.ui.form.on("Sales Order", {
 					label: __("Items to Reserve"),
 					allow_bulk_edit: false,
 					cannot_add_rows: true,
-					cannot_delete_rows: true,
 					data: [],
 					fields: [
 						{
-							fieldname: "name",
+							fieldname: "sales_order_item",
 							fieldtype: "Data",
-							label: __("Name"),
+							label: __("Sales Order Item"),
 							reqd: 1,
 							read_only: 1,
 						},
@@ -269,7 +268,7 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Reserve Stock"),
 			primary_action: () => {
-				var data = {items: dialog.fields_dict.items.grid.get_selected_children()};
+				var data = {items: dialog.fields_dict.items.grid.data};
 
 				if (data.items && data.items.length > 0) {
 					frappe.call({
@@ -287,9 +286,6 @@ frappe.ui.form.on("Sales Order", {
 						}
 					});
 				}
-				else {
-					frappe.msgprint(__("Please select items to reserve."));
-				}
 
 				dialog.hide();
 			},
@@ -301,7 +297,7 @@ frappe.ui.form.on("Sales Order", {
 
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
-						'name': item.name,
+						'sales_order_item': item.name,
 						'item_code': item.item_code,
 						'warehouse': item.warehouse,
 						'qty_to_reserve': (unreserved_qty / flt(item.conversion_factor))
@@ -317,7 +313,7 @@ frappe.ui.form.on("Sales Order", {
 	cancel_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Unreservation"),
-			size: "large",
+			size: "extra-large",
 			fields: [
 				{
 					fieldname: "sr_entries",
@@ -325,14 +321,13 @@ frappe.ui.form.on("Sales Order", {
 					label: __("Reserved Stock"),
 					allow_bulk_edit: false,
 					cannot_add_rows: true,
-					cannot_delete_rows: true,
 					in_place_edit: true,
 					data: [],
 					fields: [
 						{
-							fieldname: "name",
+							fieldname: "sre",
 							fieldtype: "Link",
-							label: __("SRE"),
+							label: __("Stock Reservation Entry"),
 							options: "Stock Reservation Entry",
 							reqd: 1,
 							read_only: 1,
@@ -369,14 +364,14 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Unreserve Stock"),
 			primary_action: () => {
-				var data = {sr_entries: dialog.fields_dict.sr_entries.grid.get_selected_children()};
+				var data = {sr_entries: dialog.fields_dict.sr_entries.grid.data};
 
 				if (data.sr_entries && data.sr_entries.length > 0) {
 					frappe.call({
 						doc: frm.doc,
 						method: "cancel_stock_reservation_entries",
 						args: {
-							sre_list: data.sr_entries,
+							sre_list: data.sr_entries.map(item => item.sre),
 						},
 						freeze: true,
 						freeze_message: __('Unreserving Stock...'),
@@ -385,9 +380,6 @@ frappe.ui.form.on("Sales Order", {
 							frm.reload_doc();
 						}
 					});
-				}
-				else {
-					frappe.msgprint(__("Please select items to unreserve."));
 				}
 
 				dialog.hide();
@@ -405,7 +397,7 @@ frappe.ui.form.on("Sales Order", {
 					r.message.forEach(sre => {
 						if (flt(sre.reserved_qty) > flt(sre.delivered_qty)) {
 							dialog.fields_dict.sr_entries.df.data.push({
-								'name': sre.name,
+								'sre': sre.name,
 								'item_code': sre.item_code,
 								'warehouse': sre.warehouse,
 								'qty': (flt(sre.reserved_qty) - flt(sre.delivered_qty))
