@@ -12,3 +12,6 @@ charset = utf-8
 [{*.py,*.js}]
 indent_style = tab
 indent_size = 4
+
+[*.json]
+insert_final_newline = false
