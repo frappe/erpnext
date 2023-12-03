@@ -686,10 +686,39 @@ class JournalEntry(AccountsController):
 
 				against_account = frappe.db.get_value(d.reference_type, d.reference_name, against_type.lower())
 				d.against_type = against_type
-				d.against_account = against_account
 				d.against_account_link = against_account
 		else:
+			self.get_debited_credited_accounts()
+			if len(self.accounts_credited) > 1 and len(self.accounts_debited) > 1:
+				self.auto_set_against_accounts()
+				return
 			self.get_against_accounts()
+
+	def auto_set_against_accounts(self):
+		for i in range(0, len(self.accounts), 2):
+			acc = self.accounts[i]
+			against_acc = self.accounts[i + 1]
+			if acc.debit_in_account_currency > 0:
+				current_val = acc.debit_in_account_currency * flt(acc.exchange_rate)
+				against_val = against_acc.credit_in_account_currency * flt(against_acc.exchange_rate)
+			else:
+				current_val = acc.credit_in_account_currency * flt(acc.exchange_rate)
+				against_val = against_acc.debit_in_account_currency * flt(against_acc.exchange_rate)
+
+			if current_val == against_val:
+				acc.against_type = against_acc.party_type or "Account"
+				against_acc.against_type = acc.party_type or "Account"
+
+				acc.against_account_link = against_acc.party or against_acc.account
+				against_acc.against_account_link = acc.party or acc.account
+			else:
+				frappe.msgprint(
+					_(
+						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed."
+					).format(frappe.bold("against"), frappe.bold("Accounting Entries")),
+					alert=True,
+				)
+				break
 
 	def get_against_accounts(self):
 		self.against_accounts = []
@@ -698,14 +727,7 @@ class JournalEntry(AccountsController):
 
 		if self.separate_against_account_entries:
 			no_of_credited_acc, no_of_debited_acc = len(self.accounts_credited), len(self.accounts_debited)
-			if no_of_credited_acc > 1 and no_of_debited_acc > 1:
-				frappe.msgprint(
-					_(
-						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed."
-					).format(frappe.bold("against"), frappe.bold("Accounting Entries")),
-					alert=True,
-				)
-			elif no_of_credited_acc <= 1 and no_of_debited_acc <= 1:
+			if no_of_credited_acc <= 1 and no_of_debited_acc <= 1:
 				self.set_against_accounts_for_single_dr_cr()
 				self.separate_against_account_entries = 0
 			elif no_of_credited_acc == 1:
@@ -972,8 +994,7 @@ class JournalEntry(AccountsController):
 					gl_dict.update(
 						{
 							"against_type": d.against_type,
-							"against": d.against_account,
-							"against_link": d.against_account,
+							"against_link": d.against_account_link,
 						}
 					)
 					gl_map.append(gl_dict)
