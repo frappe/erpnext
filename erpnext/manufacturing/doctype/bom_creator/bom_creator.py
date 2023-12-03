@@ -345,6 +345,8 @@ def get_children(doctype=None, parent=None, **kwargs):
 		"uom",
 		"rate",
 		"amount",
+		"fetched_from_bom",
+		"bom_created",
 	]
 
 	query_filters = {
@@ -433,6 +435,7 @@ def add_sub_assembly(**kwargs):
 					"idx": i,
 					"item_code": bom_i.item_code,
 					"qty": bom_i.qty * bom_item.qty,
+					"fetched_from_bom": True,
 				}
 			)	
 	elif bom_item.get("items"):
@@ -454,6 +457,7 @@ def add_sub_assembly(**kwargs):
 				"do_not_explode": 1,
 				"stock_qty": row.qty,
 				"stock_uom": item_info.stock_uom,
+				"fetched_from_bom": row.fetched_from_bom,
 			},
 		)
 

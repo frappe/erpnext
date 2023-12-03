@@ -21,6 +21,7 @@ class BOMCreatorItem(Document):
 		conversion_factor: DF.Float
 		description: DF.SmallText | None
 		do_not_explode: DF.Check
+		fetched_from_bom: DF.Check
 		fg_item: DF.Link
 		fg_reference_id: DF.Data | None
 		instruction: DF.SmallText | None

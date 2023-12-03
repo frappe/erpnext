@@ -110,6 +110,9 @@ class BOMConfigurator {
 						let view = frappe.views.trees["BOM Configurator"];
 						view.events.edit_qty(node, view);
 					},
+					condition: function (node) {
+						return !node.data.fetched_from_bom;
+					},
 					btnClass: "hidden-xs"
 				},
 				{
@@ -119,7 +122,7 @@ class BOMConfigurator {
 						view.events.add_item(node, view);
 					},
 					condition: function(node) {
-						return node.expandable;
+						return node.expandable && !node.data.bom_created;
 					},
 					btnClass: "hidden-xs"
 				},
@@ -130,7 +133,7 @@ class BOMConfigurator {
 						view.events.add_sub_assembly(node, view);
 					},
 					condition: function(node) {
-						return node.expandable;
+						return node.expandable && !node.data.bom_created;
 					},
 					btnClass: "hidden-xs"
 				},
@@ -171,7 +174,7 @@ class BOMConfigurator {
 						view.events.delete_node(node, view);
 					},
 					condition: function(node) {
-						return !node.is_root;
+						return !node.is_root && !node.data.fetched_from_bom;
 					},
 					btnClass: "hidden-xs"
 				},
@@ -304,7 +307,7 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					node.expandable = true;
-					view.events.load_tree(r, node);
+					view.events.load_tree(r, node.parent_node);
 				}
 			});
 
@@ -334,7 +337,7 @@ class BOMConfigurator {
 					docname: node.data.name,
 				},
 				callback: (r) => {
-					view.events.load_tree(r, node.parent_node);
+					view.events.load_tree(r, node.parent_node.is_root ? node.parent_node : node.parent_node.parent_node);
 				}
 			});
 		});
