@@ -247,6 +247,9 @@ class BOMCreator(Document):
 		try:
 			for d in reverse_tree:
 				fg_item_data = production_item_wise_rm.get(d).fg_item_data
+				if fg_item_data != self:
+					if fg_item_data.bom_created:
+						continue
 				self.create_bom(fg_item_data, production_item_wise_rm)
 
 			frappe.msgprint(_("BOMs created successfully"))
@@ -392,8 +395,9 @@ def add_sub_assembly(**kwargs):
 
 	name = kwargs.fg_reference_id
 	parent_row_no = ""
+	item_info = get_item_details(bom_item.item_code)
+	item_default_bom = item_info.default_bom if bom_item.use_existing_bom else None
 	if not kwargs.convert_to_sub_assembly:
-		item_info = get_item_details(bom_item.item_code)
 		item_row = doc.append(
 			"items",
 			{
@@ -413,8 +417,28 @@ def add_sub_assembly(**kwargs):
 
 		parent_row_no = item_row.idx
 		name = ""
+	if item_default_bom:
+		for i, item in enumerate(doc.items):
+			if item.item_code == bom_item.item_code:
+				doc.items[i].sub_assembly_bom = item_default_bom
+				doc.items[i].do_not_explode = 0
+				doc.items[i].bom_created = True
+				break
 
-	for row in bom_item.get("items"):
+	bom_items = []
+	if item_default_bom:
+		for i, bom_i in enumerate(frappe.get_doc('BOM', item_default_bom).items):
+			bom_items.append(
+				{
+					"idx": i,
+					"item_code": bom_i.item_code,
+					"qty": bom_i.qty * bom_item.qty,
+				}
+			)	
+	elif bom_item.get("items"):
+		bom_items = bom_item.get("items")
+
+	for row in bom_items:
 		row = frappe._dict(row)
 		item_info = get_item_details(row.item_code)
 		doc.append(

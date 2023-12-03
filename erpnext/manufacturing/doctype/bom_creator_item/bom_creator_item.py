@@ -38,6 +38,7 @@ class BOMCreatorItem(Document):
 		sourced_by_supplier: DF.Check
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
+		sub_assembly_bom: DF.Link | None
 		uom: DF.Link | None
 	# end: auto-generated types
 

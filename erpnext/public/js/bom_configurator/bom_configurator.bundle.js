@@ -262,10 +262,12 @@ class BOMConfigurator {
 	get_sub_assembly_modal_fields(read_only=false) {
 		return [
 			{ label: __("Sub Assembly Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, read_only: read_only },
+			{ label: __("Use existing BOM"), fieldname: "use_existing_bom", fieldtype: "Check", default: true },
 			{ fieldtype: "Column Break" },
 			{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, read_only: read_only },
 			{ fieldtype: "Section Break" },
-			{ label: __("Raw Materials"), fieldname: "items", fieldtype: "Table", reqd: 1,
+			{
+				label: __("Raw Materials"), fieldname: "items", fieldtype: "Table", reqd: 0,
 				fields: [
 					{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, in_list_view: 1 },
 					{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, in_list_view: 1 },
