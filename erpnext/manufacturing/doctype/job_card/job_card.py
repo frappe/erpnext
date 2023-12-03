@@ -213,17 +213,17 @@ class JobCard(Document):
 			production_capacity = 1
 			query = query.where(jctl.employee == args.get("employee"))
 
-		existing = query.run(as_dict=True)
+		existing_time_logs = query.run(as_dict=True)
 
 		if not self.has_overlap(production_capacity, existing_time_logs):
 			return {}
 
 		if self.workstation_type:
-			if workstation := self.get_workstation_based_on_available_slot(existing):
+			if workstation := self.get_workstation_based_on_available_slot(existing_time_logs):
 				self.workstation = workstation
 				return None
 
-		return existing[0] if existing else None
+		return existing_time_logs[0] if existing_time_logs else None
 
 	def has_overlap(self, production_capacity, time_logs):
 		overlap = False
