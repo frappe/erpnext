@@ -126,8 +126,8 @@
    "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nCurrent Asset\nCurrent Liability\nDepreciation\nDirect Expense\nDirect Income\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nIndirect Expense\nIndirect Income\nLiability\nPayable\nReceivable\nRound Off\nStock\nStock Adjustment\nStock Received But Not Billed\nService Received But Not Billed\nTax\nTemporary"
   },
   {
-   "description": " at which this tax is applied",
-   "fieldname": "tax_",
+   "description": "Rate at which this tax is applied",
+   "fieldname": "tax_rate",
    "fieldtype": "Float",
    "label": "Tax Rate",
    "oldfieldname": "tax_rate",
