@@ -42,12 +42,15 @@ def update_last_purchase_rate(doc, is_submit) -> None:
 
 
 def validate_for_items(doc) -> None:
+	from erpnext.controllers.accounts_controller import InvalidQtyError
+
 	items = []
 	for d in doc.get("items"):
 		if not d.qty:
 			if doc.doctype == "Purchase Receipt" and d.rejected_qty:
 				continue
-			frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
+			message = _("Please enter quantity for Item {0}").format(d.item_code)
+			frappe.throw(message, InvalidQtyError)
 
 		set_stock_levels(row=d)  # update with latest quantities
 		item = validate_item_and_get_basic_data(row=d)
