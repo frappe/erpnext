@@ -429,7 +429,7 @@ def add_sub_assembly(**kwargs):
 
 	bom_items = []
 	if item_default_bom:
-		for i, bom_i in enumerate(frappe.get_doc('BOM', item_default_bom).items):
+		for i, bom_i in enumerate(frappe.get_doc("BOM", item_default_bom).items):
 			bom_items.append(
 				{
 					"idx": i,
@@ -437,7 +437,7 @@ def add_sub_assembly(**kwargs):
 					"qty": bom_i.qty * bom_item.qty,
 					"fetched_from_bom": True,
 				}
-			)	
+			)
 	elif bom_item.get("items"):
 		bom_items = bom_item.get("items")
 
@@ -498,7 +498,7 @@ def delete_node(**kwargs):
 def _set_qty(doctype, name, parent, fg_item, conv):
 	# there has to be a better way to do this
 	_qty = frappe.db.get_value(doctype, name, "qty")
-	frappe.db.set_value(doctype, name, "qty", _qty*conv)
+	frappe.db.set_value(doctype, name, "qty", _qty * conv)
 	items = get_children(parent=fg_item, parent_id=parent)
 	for item in items:
 		_set_qty(item.doctype, item.name, parent, item.value, conv)
