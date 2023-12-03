@@ -294,16 +294,14 @@
   {
    "fieldname": "against_type",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Against Type",
-   "options": "DocType",
-   "print_hide": 1
+   "options": "DocType"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-23 11:44:25.841187",
+ "modified": "2023-12-02 23:21:22.205409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
