@@ -358,13 +358,15 @@ class BOMConfigurator {
 					doctype: doctype,
 					docname: docname,
 					qty: data.qty,
-					parent: node.data.parent_id,
+					parent: node.data.parent_id || this.frm.doc.name,
+					fg_item: node.data.value,
 				},
 				callback: (r) => {
-					node.data.qty = data.qty;
-					let uom = node.data.uom || this.frm.doc.uom;
-					$(node.parent.get(0)).find(`[data-bom-qty-docname='${docname}']`).html(data.qty + " " + uom);
-					view.events.load_tree(r, node);
+					if (node.is_root) {
+						// can't get this to work at all
+						// only a refresh of the entire webpage works
+					}
+					this.frm.trigger("build_tree");
 				}
 			});
 		},

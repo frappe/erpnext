@@ -495,9 +495,18 @@ def delete_node(**kwargs):
 
 	return doc
 
+def _set_qty(doctype, name, parent, fg_item, conv):
+	# there has to be a better way to do this
+	_qty = frappe.db.get_value(doctype, name, "qty")
+	frappe.db.set_value(doctype, name, "qty", _qty*conv)
+	items = get_children(parent=fg_item, parent_id=parent)
+	for item in items:
+		_set_qty(item.doctype, item.name, parent, item.value, conv)
 
 @frappe.whitelist()
-def edit_qty(doctype, docname, qty, parent):
+def edit_qty(doctype, docname, qty, parent, fg_item):
+	conv = flt(qty) / frappe.db.get_value(doctype, docname, "qty")
+	_set_qty(doctype, docname, parent, fg_item, conv)
 	frappe.db.set_value(doctype, docname, "qty", qty)
 	doc = frappe.get_doc("BOM Creator", parent)
 	doc.set_rate_for_items()
