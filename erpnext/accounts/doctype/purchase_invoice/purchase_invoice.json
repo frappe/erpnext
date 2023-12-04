@@ -189,6 +189,7 @@
   "additional_info_section",
   "is_internal_supplier",
   "represents_company",
+  "supplier_group",
   "column_break_147",
   "inter_company_invoice_reference",
   "is_old_subcontracting_flow",
@@ -1598,13 +1599,20 @@
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
    "read_only": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_group",
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "label": "Supplier Group",
+   "options": "Supplier Group"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-03 15:47:30.319200",
+ "modified": "2023-11-29 15:35:44.697496",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

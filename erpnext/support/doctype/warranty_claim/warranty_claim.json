@@ -92,7 +92,8 @@
    "fieldname": "serial_no",
    "fieldtype": "Link",
    "label": "Serial No",
-   "options": "Serial No"
+   "options": "Serial No",
+   "search_index": 1
   },
   {
    "fieldname": "customer",
@@ -128,6 +129,8 @@
    "options": "fa fa-ticket"
   },
   {
+   "fetch_from": "serial_no.item_code",
+   "fetch_if_empty": 1,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -140,6 +143,7 @@
   },
   {
    "depends_on": "eval:doc.item_code",
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
@@ -149,6 +153,7 @@
   },
   {
    "depends_on": "eval:doc.item_code",
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description",
@@ -164,17 +169,24 @@
    "width": "50%"
   },
   {
+   "fetch_from": "serial_no.maintenance_status",
+   "fetch_if_empty": 1,
    "fieldname": "warranty_amc_status",
    "fieldtype": "Select",
    "label": "Warranty / AMC Status",
-   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC"
+   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC",
+   "search_index": 1
   },
   {
+   "fetch_from": "serial_no.warranty_expiry_date",
+   "fetch_if_empty": 1,
    "fieldname": "warranty_expiry_date",
    "fieldtype": "Date",
    "label": "Warranty Expiry Date"
   },
   {
+   "fetch_from": "serial_no.amc_expiry_date",
+   "fetch_if_empty": 1,
    "fieldname": "amc_expiry_date",
    "fieldtype": "Date",
    "label": "AMC Expiry Date"
@@ -225,6 +237,7 @@
   {
    "bold": 1,
    "depends_on": "customer",
+   "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -366,7 +379,7 @@
  "icon": "fa fa-bug",
  "idx": 1,
  "links": [],
- "modified": "2023-06-03 16:17:07.694449",
+ "modified": "2023-11-28 17:30:35.676410",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",

@@ -15,7 +15,26 @@ from erpnext.accounts.utils import (
 )
 
 
-class UnreconcilePayments(Document):
+class UnreconcilePayment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.unreconcile_payment_entries.unreconcile_payment_entries import (
+			UnreconcilePaymentEntries,
+		)
+
+		allocations: DF.Table[UnreconcilePaymentEntries]
+		amended_from: DF.Link | None
+		company: DF.Link | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.supported_types = ["Payment Entry", "Journal Entry"]
 		if not self.voucher_type in self.supported_types:
@@ -142,7 +161,7 @@ def create_unreconcile_doc_for_selection(selections=None):
 		selections = frappe.json.loads(selections)
 		# assuming each row is a unique voucher
 		for row in selections:
-			unrecon = frappe.new_doc("Unreconcile Payments")
+			unrecon = frappe.new_doc("Unreconcile Payment")
 			unrecon.company = row.get("company")
 			unrecon.voucher_type = row.get("voucher_type")
 			unrecon.voucher_no = row.get("voucher_no")
