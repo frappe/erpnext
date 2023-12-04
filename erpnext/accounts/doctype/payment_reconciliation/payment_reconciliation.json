@@ -231,11 +231,5 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
-<<<<<<< HEAD
- "states": [],
- "track_changes": 1
-}
-=======
  "states": []
 }
->>>>>>> 3a51a3f37e (refactor: convert payment reconciliation tool to virtual doctype)
