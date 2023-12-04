@@ -127,7 +127,8 @@
   "section_break_80",
   "page_break",
   "sales_order",
-  "sales_order_item"
+  "sales_order_item",
+  "subcontracting_receipt_item"
  ],
  "fields": [
   {
@@ -358,6 +359,7 @@
    "oldfieldtype": "Currency",
    "options": "currency",
    "print_width": "100px",
+   "read_only_depends_on": "eval: (!parent.is_return && doc.purchase_order && doc.purchase_order_item)",
    "width": "100px"
   },
   {
@@ -1086,12 +1088,23 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "subcontracting_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Subcontracting Receipt Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-14 18:38:15.251994",
+ "modified": "2023-11-30 16:12:02.364608",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

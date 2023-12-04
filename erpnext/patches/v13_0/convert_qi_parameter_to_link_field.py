@@ -21,6 +21,9 @@ def execute():
 	params = set({x.casefold(): x for x in params}.values())
 
 	for parameter in params:
+		if frappe.db.exists("Quality Inspection Parameter", parameter):
+			continue
+
 		frappe.get_doc(
 			{"doctype": "Quality Inspection Parameter", "parameter": parameter, "description": parameter}
 		).insert(ignore_permissions=True)

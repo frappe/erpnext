@@ -7,6 +7,23 @@ from frappe.utils import flt
 
 
 class WorkstationType(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		description: DF.SmallText | None
+		hour_rate: DF.Currency
+		hour_rate_consumable: DF.Currency
+		hour_rate_electricity: DF.Currency
+		hour_rate_labour: DF.Currency
+		hour_rate_rent: DF.Currency
+		workstation_type: DF.Data
+	# end: auto-generated types
+
 	def before_save(self):
 		self.set_hour_rate()
 

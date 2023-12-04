@@ -9,6 +9,25 @@ from frappe.utils import cint
 
 
 class PriceList(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.price_list_country.price_list_country import PriceListCountry
+
+		buying: DF.Check
+		countries: DF.Table[PriceListCountry]
+		currency: DF.Link
+		enabled: DF.Check
+		price_list_name: DF.Data
+		price_not_uom_dependent: DF.Check
+		selling: DF.Check
+	# end: auto-generated types
+
 	def validate(self):
 		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
