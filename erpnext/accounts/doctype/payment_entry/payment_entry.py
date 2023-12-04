@@ -106,9 +106,17 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 
 	def set_liability_account(self):
-		if not self.book_advance_payments_in_separate_party_account:
+		# Auto setting liability account should only be done during 'draft' status
+		if self.docstatus > 0:
 			return
 
+		if not frappe.db.get_value(
+			"Company", self.company, "book_advance_payments_in_separate_party_account"
+		):
+			return
+
+		# Important to set this flag for the gl building logic to work properly
+		self.book_advance_payments_in_separate_party_account = True
 		account_type = frappe.get_value(
 			"Account", {"name": self.party_account, "company": self.company}, "account_type"
 		)
@@ -118,11 +126,13 @@ class PaymentEntry(AccountsController):
 		):
 			return
 
-		if self.unallocated_amount == 0:
-			for d in self.references:
-				if d.reference_doctype in ["Sales Order", "Purchase Order"]:
-					break
-			else:
+		if self.references:
+			allowed_types = frozenset(["Sales Order", "Purchase Order"])
+			reference_types = set([x.reference_doctype for x in self.references])
+
+			# If there are referencers other than `allowed_types`, treat this as a normal payment entry
+			if reference_types - allowed_types:
+				self.book_advance_payments_in_separate_party_account = False
 				return
 
 		liability_account = get_party_account(
