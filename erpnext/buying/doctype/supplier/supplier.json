@@ -39,7 +39,7 @@
   "column_break_27",
   "tax_category",
   "tax_withholding_category",
-  "contact_and_address_tab",
+  "address_and_contact_tab",
   "address_contacts",
   "address_html",
   "column_break1",
@@ -404,11 +404,6 @@
    "label": "Settings"
   },
   {
-   "fieldname": "contact_and_address_tab",
-   "fieldtype": "Tab Break",
-   "label": "Contact & Address"
-  },
-  {
    "fieldname": "accounting_tab",
    "fieldtype": "Tab Break",
    "label": "Accounting"
@@ -473,6 +468,11 @@
   {
    "fieldname": "column_break_mglr",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
   }
  ],
  "icon": "fa fa-user",
@@ -485,7 +485,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-10-19 16:55:15.148325",
+ "modified": "2023-12-04 00:52:51.388809",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

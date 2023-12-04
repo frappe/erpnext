@@ -140,7 +140,7 @@
   "loyalty_program",
   "loyalty_redemption_account",
   "loyalty_redemption_cost_center",
-  "contact_and_address_tab",
+  "address_and_contact_tab",
   "address_and_contact",
   "customer_address",
   "address_display",
@@ -2035,11 +2035,6 @@
    "label": "Is Cash or Non Trade Discount"
   },
   {
-   "fieldname": "contact_and_address_tab",
-   "fieldtype": "Tab Break",
-   "label": "Contact & Address"
-  },
-  {
    "fieldname": "payments_tab",
    "fieldtype": "Tab Break",
    "label": "Payments"
@@ -2162,6 +2157,11 @@
    "fieldname": "update_billed_amount_in_delivery_note",
    "fieldtype": "Check",
    "label": "Update Billed Amount in Delivery Note"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2174,7 +2174,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2023-11-23 16:56:29.679499",
+ "modified": "2023-12-04 00:50:32.263640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
