@@ -164,7 +164,12 @@ def get_gl_entries(filters, accounting_dimensions):
 		credit_in_account_currency """
 
 	if filters.get("show_remarks"):
-		select_fields += """,remarks"""
+		if remarks_length := frappe.db.get_single_value(
+			"Accounts Settings", "general_ledger_remarks_length"
+		):
+			select_fields += f",substr(remarks, 1, {remarks_length}) as 'remarks'"
+		else:
+			select_fields += """,remarks"""
 
 	order_by_statement = "order by posting_date, account, creation"
 

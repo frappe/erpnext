@@ -766,7 +766,9 @@ class update_entries_after(object):
 		sle.doctype = "Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
-		if not self.args.get("sle_id"):
+		if not self.args.get("sle_id") or (
+			sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle
+		):
 			self.update_outgoing_rate_on_transaction(sle)
 
 	def reset_actual_qty_for_stock_reco(self, sle):

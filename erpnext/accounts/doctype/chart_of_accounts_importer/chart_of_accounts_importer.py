@@ -24,6 +24,18 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 
 
 class ChartofAccountsImporter(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		company: DF.Link | None
+		import_file: DF.Attach | None
+	# end: auto-generated types
+
 	def validate(self):
 		if self.import_file:
 			get_coa(
@@ -113,7 +125,7 @@ def generate_data_from_csv(file_doc, as_dict=False):
 			if as_dict:
 				data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
 			else:
-				if not row[1]:
+				if not row[1] and len(row) > 1:
 					row[1] = row[0]
 					row[3] = row[2]
 				data.append(row)

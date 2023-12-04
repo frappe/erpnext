@@ -118,6 +118,7 @@ class BuyingController(SubcontractingController):
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
+							"voucher_detail_no": row.name,
 						},
 						raise_error_if_no_rate=False,
 					)
@@ -365,7 +366,7 @@ class BuyingController(SubcontractingController):
 						{
 							"item_code": d.item_code,
 							"warehouse": d.get("from_warehouse"),
-							"posting_date": self.get("posting_date") or self.get("transation_date"),
+							"posting_date": self.get("posting_date") or self.get("transaction_date"),
 							"posting_time": posting_time,
 							"qty": -1 * flt(d.get("stock_qty")),
 							"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
@@ -373,6 +374,7 @@ class BuyingController(SubcontractingController):
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"allow_zero_valuation": d.get("allow_zero_valuation"),
+							"voucher_detail_no": d.name,
 						},
 						raise_error_if_no_rate=False,
 					)
@@ -440,7 +442,7 @@ class BuyingController(SubcontractingController):
 
 				if allow_to_edit_stock_qty:
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
-					if d.get("received_stock_qty"):
+					if d.get("received_stock_qty") and d.meta.get_field("received_stock_qty"):
 						d.received_stock_qty = flt(d.received_stock_qty, d.precision("received_stock_qty"))
 
 	def validate_purchase_return(self):
@@ -758,7 +760,7 @@ class BuyingController(SubcontractingController):
 				"calculate_depreciation": 0,
 				"purchase_receipt_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
-				"asset_quantity": row.qty if is_grouped_asset else 0,
+				"asset_quantity": row.qty if is_grouped_asset else 1,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
 			}

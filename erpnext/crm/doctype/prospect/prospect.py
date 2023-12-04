@@ -12,6 +12,34 @@ from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_
 
 
 class Prospect(CRMNote):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.crm.doctype.crm_note.crm_note import CRMNote
+		from erpnext.crm.doctype.prospect_lead.prospect_lead import ProspectLead
+		from erpnext.crm.doctype.prospect_opportunity.prospect_opportunity import ProspectOpportunity
+
+		annual_revenue: DF.Currency
+		company: DF.Link
+		company_name: DF.Data | None
+		customer_group: DF.Link | None
+		fax: DF.Data | None
+		industry: DF.Link | None
+		leads: DF.Table[ProspectLead]
+		market_segment: DF.Link | None
+		no_of_employees: DF.Literal["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]
+		notes: DF.Table[CRMNote]
+		opportunities: DF.Table[ProspectOpportunity]
+		prospect_owner: DF.Link | None
+		territory: DF.Link | None
+		website: DF.Data | None
+	# end: auto-generated types
+
 	def onload(self):
 		load_address_and_contact(self)
 

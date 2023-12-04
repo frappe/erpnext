@@ -8,6 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
+from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
 
@@ -149,7 +150,7 @@ def remove_standard_fields(details):
 
 
 def set_valuation_rate(out, args):
-	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
+	if frappe.db.exists("Product Bundle", {"name": args.item_code, "disabled": 0}, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
@@ -570,6 +571,9 @@ def get_item_tax_template(args, item, out):
 			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
+
+	if args.child_doctype and item_tax_template:
+		out.update(get_fetch_values(args.child_doctype, "item_tax_template", item_tax_template))
 
 
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):

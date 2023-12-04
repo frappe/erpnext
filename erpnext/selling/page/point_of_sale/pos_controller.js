@@ -609,11 +609,12 @@ erpnext.PointOfSale.Controller = class {
 			// if item is clicked twice from item selector
 			// then "item_code, batch_no, uom, rate" will help in getting the exact item
 			// to increase the qty by one
-			const has_batch_no = batch_no;
+			const has_batch_no = (batch_no !== 'null' && batch_no !== null);
 			item_row = this.frm.doc.items.find(
 				i => i.item_code === item_code
 					&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 					&& (i.uom === uom)
+					&& (i.rate === flt(rate))
 			);
 		}
 
