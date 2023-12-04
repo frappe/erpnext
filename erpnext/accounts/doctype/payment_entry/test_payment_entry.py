@@ -1250,7 +1250,6 @@ class TestPaymentEntry(FrappeTestCase):
 		so.reload()
 		self.assertEqual(so.advance_paid, so.rounded_total)
 
-<<<<<<< HEAD
 	def test_receive_payment_from_payable_party_type(self):
 		"""
 		Checks GL entries generated while receiving payments from a Payable Party Type.
@@ -1335,7 +1334,7 @@ class TestPaymentEntry(FrappeTestCase):
 		for row in range(len(self.expected_gle)):
 			for field in ["account", "debit", "credit"]:
 				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
-=======
+
 	def test_outstanding_invoices_api(self):
 		"""
 		Test if `get_outstanding_reference_documents` fetches invoices in the right order.
@@ -1374,43 +1373,6 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(references[2].voucher_no, si2.name)
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
-<<<<<<< HEAD
->>>>>>> 162c0497d1 (test: `get_outstanding_reference_documents` (triggered via UI))
-=======
-
-	def test_receive_payment_from_payable_party_type(self):
-		pe = create_payment_entry(
-			party_type="Supplier",
-			party="_Test Supplier",
-			payment_type="Receive",
-			paid_from="Creditors - _TC",
-			paid_to="_Test Cash - _TC",
-			save=True,
-			submit=True,
-		)
-		self.voucher_no = pe.name
-		self.expected_gle = [
-			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
-			{"account": "Creditors - _TC", "debit": 0.0, "credit": 1000.0},
-		]
-		self.check_gl_entries()
-
-	def check_gl_entries(self):
-		gle = frappe.qb.DocType("GL Entry")
-		gl_entries = (
-			frappe.qb.from_(gle)
-			.select(
-				gle.account,
-				gle.debit,
-				gle.credit,
-			)
-			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
-			.orderby(gle.account)
-		).run(as_dict=True)
-		for row in range(len(self.expected_gle)):
-			for field in ["account", "debit", "credit"]:
-				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
->>>>>>> 4b4b176fcf (style: Remove spaces introduced via merge conflict)
 
 
 def create_payment_entry(**args):
