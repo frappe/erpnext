@@ -15,7 +15,7 @@ frappe.ui.form.on("BOM Creator", {
 				|| frappe.bom_configurator.bom_configurator !== frm.doc.name)) {
 				frm.trigger("build_tree");
 			}
-		} else {
+		} else if (!frm.doc.items?.length ) {
 			let $parent = $(frm.fields_dict["bom_creator"].wrapper);
 			$parent.empty();
 			frm.trigger("make_new_entry");

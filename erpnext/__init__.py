@@ -1,11 +1,10 @@
 import functools
-import inspect
 import importlib.metadata
+import inspect
 
 import frappe
 
 __version__ = importlib.metadata.version(__name__)
-
 
 
 def get_default_company(user=None):

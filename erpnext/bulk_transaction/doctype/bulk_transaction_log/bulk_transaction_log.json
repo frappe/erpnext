@@ -1,31 +1,64 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2021-11-30 13:41:16.343827",
+ "allow_copy": 1,
+ "creation": "2023-11-09 20:14:45.139593",
+ "default_view": "List",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "log_date",
-  "logger_data"
+  "date",
+  "column_break_bsan",
+  "log_entries",
+  "section_break_mdmv",
+  "succeeded",
+  "column_break_qryp",
+  "failed"
  ],
  "fields": [
   {
-   "fieldname": "log_date",
+   "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Log Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
    "read_only": 1
   },
   {
-   "fieldname": "logger_data",
-   "fieldtype": "Table",
-   "label": "Logger Data",
-   "options": "Bulk Transaction Log Detail"
+   "fieldname": "log_entries",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Log Entries",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bsan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_mdmv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "succeeded",
+   "fieldtype": "Int",
+   "label": "Succeeded",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qryp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "failed",
+   "fieldtype": "Int",
+   "label": "Failed",
+   "read_only": 1
   }
  ],
- "index_web_pages_for_search": 1,
+ "in_create": 1,
+ "is_virtual": 1,
  "links": [],
- "modified": "2022-02-03 17:23:02.935325",
+ "modified": "2023-11-11 04:52:49.347376",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log",
@@ -47,5 +80,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "title_field": "date"
 }

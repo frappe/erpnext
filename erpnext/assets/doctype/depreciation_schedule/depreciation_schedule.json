@@ -12,6 +12,7 @@
   "column_break_3",
   "accumulated_depreciation_amount",
   "journal_entry",
+  "shift",
   "make_depreciation_entry"
  ],
  "fields": [
@@ -57,11 +58,17 @@
    "fieldname": "make_depreciation_entry",
    "fieldtype": "Button",
    "label": "Make Depreciation Entry"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Asset Shift Factor"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-07-26 12:56:48.718736",
+ "modified": "2023-11-27 18:28:35.325376",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Depreciation Schedule",

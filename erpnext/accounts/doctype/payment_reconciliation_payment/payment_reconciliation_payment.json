@@ -107,9 +107,10 @@
    "options": "Cost Center"
   }
  ],
+ "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-09-03 07:43:29.965353",
+ "modified": "2023-11-17 17:33:34.818530",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Payment",
