@@ -225,6 +225,7 @@ frappe.ui.form.on("Sales Order", {
 							in_list_view: 1,
 							get_query: () => {
 								return {
+									query: "erpnext.controllers.queries.get_filtered_child_rows",
 									filters: {
 										"parenttype": frm.doc.doctype,
 										"parent": frm.doc.name,
