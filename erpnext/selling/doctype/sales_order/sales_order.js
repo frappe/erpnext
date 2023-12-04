@@ -182,7 +182,7 @@ frappe.ui.form.on("Sales Order", {
 	create_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Reservation"),
-			size: "large",
+			size: "extra-large",
 			fields: [
 				{
 					fieldname: "set_warehouse",
@@ -218,10 +218,33 @@ frappe.ui.form.on("Sales Order", {
 					fields: [
 						{
 							fieldname: "sales_order_item",
-							fieldtype: "Data",
+							fieldtype: "Link",
 							label: __("Sales Order Item"),
+							options: "Sales Order Item",
 							reqd: 1,
-							read_only: 1,
+							in_list_view: 1,
+							get_query: () => {
+								return {
+									filters: {
+										"parenttype": frm.doc.doctype,
+										"parent": frm.doc.name,
+										"reserve_stock": 1,
+									}
+								}
+							},
+							onchange: (event) => {
+								if (event) {
+									let name = $(event.currentTarget).closest(".grid-row").attr("data-name");
+									let item_row = dialog.fields_dict.items.grid.grid_rows_by_docname[name].doc;
+
+									frm.doc.items.forEach(item => {
+										if (item.name === item_row.sales_order_item) {
+											item_row.item_code = item.item_code;
+										}
+									});
+									dialog.fields_dict.items.grid.refresh();
+								}
+							}
 						},
 						{
 							fieldname: "item_code",
