@@ -17,6 +17,7 @@
   "po_required",
   "pr_required",
   "blanket_order_allowance",
+  "project_update_frequency",
   "column_break_12",
   "maintain_same_rate",
   "set_landed_cost_based_on_purchase_invoice_rate",
@@ -28,7 +29,11 @@
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
-  "over_transfer_allowance"
+  "over_transfer_allowance",
+  "section_break_xcug",
+  "auto_create_subcontracting_order",
+  "column_break_izrr",
+  "auto_create_purchase_receipt"
  ],
  "fields": [
   {
@@ -172,6 +177,36 @@
    "fieldname": "blanket_order_allowance",
    "fieldtype": "Float",
    "label": "Blanket Order Allowance (%)"
+  },
+  {
+   "fieldname": "section_break_xcug",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_izrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order.",
+   "fieldname": "auto_create_subcontracting_order",
+   "fieldtype": "Check",
+   "label": "Auto Create Subcontracting Order"
+  },
+  {
+   "default": "0",
+   "description": "Purchase Receipt (Draft) will be auto-created on submission of Subcontracting Receipt.",
+   "fieldname": "auto_create_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Auto Create Purchase Receipt"
+  },
+  {
+   "default": "Each Transaction",
+   "description": "How often should Project be updated of Total Purchase Cost ?",
+   "fieldname": "project_update_frequency",
+   "fieldtype": "Select",
+   "label": "Update frequency of Project",
+   "options": "Each Transaction\nManual"
   }
  ],
  "icon": "fa fa-cog",
@@ -179,7 +214,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-25 14:03:32.520418",
+ "modified": "2023-11-28 13:01:18.403492",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

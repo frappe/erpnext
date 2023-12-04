@@ -53,6 +53,9 @@ GL_REPOSTING_CHUNK = 100
 def get_fiscal_year(
 	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
+	if isinstance(boolean, str):
+		boolean = frappe.json.loads(boolean)
+
 	fiscal_years = get_fiscal_years(
 		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
 	)
@@ -180,6 +183,7 @@ def get_balance_on(
 	cost_center=None,
 	ignore_account_permission=False,
 	account_type=None,
+	start_date=None,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -193,6 +197,8 @@ def get_balance_on(
 		cost_center = frappe.form_dict.get("cost_center")
 
 	cond = ["is_cancelled=0"]
+	if start_date:
+		cond.append("posting_date >= %s" % frappe.db.escape(cstr(start_date)))
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
@@ -466,7 +472,11 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 		# cancel advance entry
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
-		_delete_pl_entries(voucher_type, voucher_no)
+
+		# For payments with `Advance` in separate account feature enabled, only new ledger entries are posted for each reference.
+		# No need to cancel/delete payment ledger entries
+		if not (voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account):
+			_delete_pl_entries(voucher_type, voucher_no)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -481,23 +491,26 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 				entry.update({"referenced_row": referenced_row})
 				doc.make_exchange_gain_loss_journal([entry])
 			else:
-				update_reference_in_payment_entry(
+				referenced_row = update_reference_in_payment_entry(
 					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
 				)
 
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
-		gl_map = doc.build_gl_map()
-		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
+
+		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
+			# both ledgers must be posted to for `Advance` in separate account feature
+			doc.make_advance_gl_entries(referenced_row, update_outstanding="No")
+		else:
+			gl_map = doc.build_gl_map()
+			create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
 			update_voucher_outstanding(
 				entry.against_voucher_type, entry.against_voucher, entry.account, entry.party_type, entry.party
 			)
-			if voucher_type == "Payment Entry":
-				doc.make_advance_gl_entries(entry.against_voucher_type, entry.against_voucher)
 
 		frappe.flags.ignore_party_validation = False
 
@@ -670,11 +683,12 @@ def update_reference_in_payment_entry(
 			new_row.docstatus = 1
 			for field in list(reference_details):
 				new_row.set(field, reference_details[field])
-
+			row = new_row
 	else:
 		new_row = payment_entry.append("references")
 		new_row.docstatus = 1
 		new_row.update(reference_details)
+		row = new_row
 
 	payment_entry.flags.ignore_validate_update_after_submit = True
 	payment_entry.clear_unallocated_reference_document_rows()
@@ -689,6 +703,7 @@ def update_reference_in_payment_entry(
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
+	return row
 
 
 def cancel_exchange_gain_loss_journal(
@@ -865,7 +880,13 @@ def remove_ref_doc_link_from_pe(
 			try:
 				pe_doc = frappe.get_doc("Payment Entry", pe)
 				pe_doc.set_amounts()
-				pe_doc.make_advance_gl_entries(against_voucher_type=ref_type, against_voucher=ref_no, cancel=1)
+
+				# Call cancel on only removed reference
+				references = [
+					x for x in pe_doc.references if x.reference_doctype == ref_type and x.reference_name == ref_no
+				]
+				[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
+
 				pe_doc.clear_unallocated_reference_document_rows()
 				pe_doc.validate_payment_type_with_outstanding()
 			except Exception as e:
@@ -1828,6 +1849,30 @@ class QueryPaymentLedger(object):
 			else:
 				filter_on_outstanding_amount.append(
 					Table("outstanding").amount_in_account_currency >= self.max_outstanding
+				)
+
+		if self.limit and self.get_invoices:
+			outstanding_vouchers = (
+				qb.from_(ple)
+				.select(
+					ple.against_voucher_no.as_("voucher_no"),
+					Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
+				)
+				.where(ple.delinked == 0)
+				.where(Criterion.all(filter_on_against_voucher_no))
+				.where(Criterion.all(self.common_filter))
+				.where(Criterion.all(self.dimensions_filter))
+				.where(Criterion.all(self.voucher_posting_date))
+				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+				.orderby(ple.posting_date, ple.voucher_no)
+				.having(qb.Field("amount_in_account_currency") > 0)
+				.limit(self.limit)
+				.run()
+			)
+			if outstanding_vouchers:
+				filter_on_voucher_no.append(ple.voucher_no.isin([x[0] for x in outstanding_vouchers]))
+				filter_on_against_voucher_no.append(
+					ple.against_voucher_no.isin([x[0] for x in outstanding_vouchers])
 				)
 
 		# build query for voucher amount

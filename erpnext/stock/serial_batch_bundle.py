@@ -129,7 +129,9 @@ class SerialBatchBundle:
 			frappe.throw(_(error_msg))
 
 	def set_serial_and_batch_bundle(self, sn_doc):
-		self.sle.db_set("serial_and_batch_bundle", sn_doc.name)
+		self.sle.db_set(
+			{"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1}
+		)
 
 		if sn_doc.is_rejected:
 			frappe.db.set_value(
@@ -143,6 +145,12 @@ class SerialBatchBundle:
 	@property
 	def child_doctype(self):
 		child_doctype = self.sle.voucher_type + " Item"
+
+		if (
+			self.sle.voucher_type == "Subcontracting Receipt" and self.sle.dependant_sle_voucher_detail_no
+		):
+			child_doctype = "Subcontracting Receipt Supplied Item"
+
 		if self.sle.voucher_type == "Stock Entry":
 			child_doctype = "Stock Entry Detail"
 
@@ -247,11 +255,15 @@ class SerialBatchBundle:
 		if not serial_nos:
 			return
 
+		status = "Inactive"
+		if self.sle.actual_qty < 0:
+			status = "Delivered"
+
 		sn_table = frappe.qb.DocType("Serial No")
 		(
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
-			.set(sn_table.status, "Active" if warehouse else "Inactive")
+			.set(sn_table.status, "Active" if warehouse else status)
 			.where(sn_table.name.isin(serial_nos))
 		).run()
 
@@ -394,7 +406,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			.orderby(bundle.posting_date, bundle.posting_time, bundle.creation)
 		)
 
-		# Important to exclude the current voucher
+		# Important to exclude the current voucher to calculate correct the stock value difference
 		if self.sle.voucher_no:
 			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
@@ -527,8 +539,10 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			.groupby(child.batch_no)
 		)
 
-		# Important to exclude the current voucher
-		if self.sle.voucher_no:
+		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
+		if self.sle.voucher_detail_no:
+			query = query.where(parent.voucher_detail_no != self.sle.voucher_detail_no)
+		elif self.sle.voucher_no:
 			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
 		if timestamp_condition:
