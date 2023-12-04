@@ -230,7 +230,12 @@ def get_item_warehouse_combinations(filters: dict = None) -> dict:
 			bin.item_code,
 			bin.warehouse,
 		)
-		.where((item.is_stock_item == 1) & (item.has_serial_no == 0) & (warehouse.is_group == 0))
+		.where(
+			(item.is_stock_item == 1)
+			& (item.has_serial_no == 0)
+			& (warehouse.is_group == 0)
+			& (warehouse.company == filters.company)
+		)
 	)
 
 	if filters.item_code:
