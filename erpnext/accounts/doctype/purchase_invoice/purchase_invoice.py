@@ -1463,7 +1463,6 @@ class PurchaseInvoice(BuyingController):
 
 		if self.bill_no:
 			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
-				fiscal_year = get_fiscal_year(self.posting_date, company=self.company, as_dict=True)
 
 				pi = frappe.db.sql(
 					"""select name from `tabPurchase Invoice`
@@ -1477,8 +1476,6 @@ class PurchaseInvoice(BuyingController):
 						"bill_no": self.bill_no,
 						"supplier": self.supplier,
 						"name": self.name,
-						"year_start_date": fiscal_year.year_start_date,
-						"year_end_date": fiscal_year.year_end_date,
 					},
 				)
 
