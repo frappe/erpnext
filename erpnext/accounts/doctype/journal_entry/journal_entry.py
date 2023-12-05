@@ -170,6 +170,8 @@ class JournalEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
