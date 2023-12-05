@@ -651,7 +651,7 @@
  "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC",
+ "sort_order": "DESC",
  "states": [],
  "title_field": "customer_name",
  "track_changes": 1

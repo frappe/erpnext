@@ -71,9 +71,10 @@
    "label": "Exchange Rate"
   }
  ],
+ "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-08 18:18:02.502149",
+ "modified": "2023-11-17 17:33:45.455166",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Invoice",

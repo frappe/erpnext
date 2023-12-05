@@ -15,6 +15,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 class TestAssetValueAdjustment(unittest.TestCase):
 	def setUp(self):
 		create_asset_data()
+		frappe.db.set_value(
+			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
+		)
 
 	def test_current_asset_value(self):
 		pr = make_purchase_receipt(

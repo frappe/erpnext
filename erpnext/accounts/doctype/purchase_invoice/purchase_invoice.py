@@ -1290,6 +1290,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 		)
@@ -1702,7 +1704,5 @@ def make_purchase_receipt(source_name, target_doc=None):
 		},
 		target_doc,
 	)
-
-	doc.set_onload("ignore_price_list", True)
 
 	return doc

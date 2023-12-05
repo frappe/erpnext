@@ -530,8 +530,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 		set_missing_values,
 	)
 
-	doclist.set_onload("ignore_price_list", True)
-
 	return doclist
 
 

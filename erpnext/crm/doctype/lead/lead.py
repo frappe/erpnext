@@ -40,7 +40,7 @@ class Lead(SellingController, CRMNote):
 			if self.source == "Existing Customer" and self.customer:
 				contact = frappe.db.get_value(
 					"Dynamic Link",
-					{"link_doctype": "Customer", "link_name": self.customer},
+					{"link_doctype": "Customer", "parenttype": "Contact", "link_name": self.customer},
 					"parent",
 				)
 				if contact:

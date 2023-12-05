@@ -56,6 +56,11 @@ def get_columns():
 			"options": "Warehouse",
 		},
 		{
+			"fieldname": "valuation_method",
+			"fieldtype": "Data",
+			"label": _("Valuation Method"),
+		},
+		{
 			"fieldname": "voucher_type",
 			"fieldtype": "Link",
 			"label": _("Voucher Type"),
@@ -194,6 +199,7 @@ def get_columns():
 def get_data(filters=None):
 	filters = frappe._dict(filters or {})
 	item_warehouse_map = get_item_warehouse_combinations(filters)
+	valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
 
 	data = []
 	if item_warehouse_map:
@@ -206,8 +212,17 @@ def get_data(filters=None):
 				continue
 
 			for row in report_data:
-				if has_difference(row, precision, filters.difference_in):
-					data.append(add_item_warehouse_details(row, item_warehouse))
+				if has_difference(
+					row, precision, filters.difference_in, item_warehouse.valuation_method or valuation_method
+				):
+					row.update(
+						{
+							"item_code": item_warehouse.item_code,
+							"warehouse": item_warehouse.warehouse,
+							"valuation_method": item_warehouse.valuation_method or valuation_method,
+						}
+					)
+					data.append(row)
 					break
 
 	return data
@@ -229,8 +244,14 @@ def get_item_warehouse_combinations(filters: dict = None) -> dict:
 		.select(
 			bin.item_code,
 			bin.warehouse,
+			item.valuation_method,
 		)
-		.where((item.is_stock_item == 1) & (item.has_serial_no == 0) & (warehouse.is_group == 0))
+		.where(
+			(item.is_stock_item == 1)
+			& (item.has_serial_no == 0)
+			& (warehouse.is_group == 0)
+			& (warehouse.company == filters.company)
+		)
 	)
 
 	if filters.item_code:
@@ -243,37 +264,27 @@ def get_item_warehouse_combinations(filters: dict = None) -> dict:
 	return query.run(as_dict=1)
 
 
-def has_difference(row, precision, difference_in):
-	has_qty_difference = flt(row.difference_in_qty, precision) or flt(row.fifo_qty_diff, precision)
-	has_value_difference = (
-		flt(row.diff_value_diff, precision)
-		or flt(row.fifo_value_diff, precision)
-		or flt(row.fifo_difference_diff, precision)
-	)
-	has_valuation_difference = flt(row.valuation_diff, precision) or flt(
-		row.fifo_valuation_diff, precision
-	)
+def has_difference(row, precision, difference_in, valuation_method):
+	if valuation_method == "Moving Average":
+		qty_diff = flt(row.difference_in_qty, precision)
+		value_diff = flt(row.diff_value_diff, precision)
+		valuation_diff = flt(row.valuation_diff, precision)
+	else:
+		qty_diff = flt(row.difference_in_qty, precision) or flt(row.fifo_qty_diff, precision)
+		value_diff = (
+			flt(row.diff_value_diff, precision)
+			or flt(row.fifo_value_diff, precision)
+			or flt(row.fifo_difference_diff, precision)
+		)
+		valuation_diff = flt(row.valuation_diff, precision) or flt(row.fifo_valuation_diff, precision)
 
-	if difference_in == "Qty" and has_qty_difference:
+	if difference_in == "Qty" and qty_diff:
 		return True
-	elif difference_in == "Value" and has_value_difference:
+	elif difference_in == "Value" and value_diff:
 		return True
-	elif difference_in == "Valuation" and has_valuation_difference:
+	elif difference_in == "Valuation" and valuation_diff:
 		return True
 	elif difference_in not in ["Qty", "Value", "Valuation"] and (
-		has_qty_difference or has_value_difference or has_valuation_difference
+		qty_diff or value_diff or valuation_diff
 	):
 		return True
-
-	return False
-
-
-def add_item_warehouse_details(row, item_warehouse):
-	row.update(
-		{
-			"item_code": item_warehouse.item_code,
-			"warehouse": item_warehouse.warehouse,
-		}
-	)
-
-	return row
