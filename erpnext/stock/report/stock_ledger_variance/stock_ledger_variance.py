@@ -56,6 +56,11 @@ def get_columns():
 			"options": "Warehouse",
 		},
 		{
+			"fieldname": "valuation_method",
+			"fieldtype": "Data",
+			"label": _("Valuation Method"),
+		},
+		{
 			"fieldname": "voucher_type",
 			"fieldtype": "Link",
 			"label": _("Voucher Type"),
@@ -210,7 +215,14 @@ def get_data(filters=None):
 				if has_difference(
 					row, precision, filters.difference_in, item_warehouse.valuation_method or valuation_method
 				):
-					data.append(add_item_warehouse_details(row, item_warehouse))
+					row.update(
+						{
+							"item_code": item_warehouse.item_code,
+							"warehouse": item_warehouse.warehouse,
+							"valuation_method": item_warehouse.valuation_method or valuation_method,
+						}
+					)
+					data.append(row)
 					break
 
 	return data
@@ -276,15 +288,3 @@ def has_difference(row, precision, difference_in, valuation_method):
 		qty_diff or value_diff or valuation_diff
 	):
 		return True
-
-
-def add_item_warehouse_details(row, item_warehouse):
-	row.update(
-		{
-			"item_code": item_warehouse.item_code,
-			"warehouse": item_warehouse.warehouse,
-			"valuation_method": item_warehouse.valuation_method,
-		}
-	)
-
-	return row
