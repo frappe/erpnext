@@ -27,13 +27,28 @@
 					{{ d.work_order_link }}
 				</div>
 			</div>
-			<div class="form-column col-sm-3">
-				<div class="frappe-control" title="{{__('Expected Start Date')}}">
-					{{ frappe.format(d.expected_start_date, { fieldtype: 'Datetime' }) }}
+			<div class="form-column col-sm-2">
+				<div class="frappe-control timer" title="{{__('Timer')}}" style="text-align:center;font-size:14px;" data-job-card = {{escape(d.name)}}>
+					<span class="hours">00</span>
+					<span class="colon">:</span>
+					<span class="minutes">00</span>
+					<span class="colon">:</span>
+					<span class="seconds">00</span>
 				</div>
+
+				{% if(d.status === "Open") { %}
+					<div class="frappe-control" title="{{__('Expected Start Date')}}" style="text-align:center;font-size:11px;padding-top: 4px;">
+						{{ frappe.format(d.expected_start_date, { fieldtype: 'Datetime' }) }}
+					</div>
+				{% } else { %}
+					<div class="frappe-control" title="{{__('Expected End Date')}}" style="text-align:center;font-size:11px;padding-top: 4px;">
+						{{ frappe.format(d.expected_end_date, { fieldtype: 'Datetime' }) }}
+					</div>
+				{% } %}
+
 			</div>
 			<div class="form-column col-sm-2">
-				<div class="frappe-control" title="{{__('Status')}}" style="background:{{d.status_color}};text-align:center;border-radius:var(--border-radius-full)">
+				<div class="frappe-control job-card-status" title="{{__('Status')}}" style="background:{{d.status_color}};text-align:center;border-radius:var(--border-radius-full)">
 					{{ d.status }}
 				</div>
 			</div>
@@ -48,11 +63,24 @@
 					{{ d.for_quantity }} / {{ d.total_completed_qty }}
 				</div>
 			</div>
+			<div class="form-column col-sm-2 text-center">
+				<button style="width: 85px;" class="btn btn-default btn-start {% if(d.status !== "Open") { %} hide {% } %}" job-card="{{d.name}}"> {{__("Start")}} </button>
+				<button style="width: 85px;" class="btn btn-default btn-complete {% if(d.status === "Open") { %} hide {% } %}" job-card="{{d.name}}" pending-qty="{{d.for_quantity - d.transferred_qty}}"> {{__("Complete")}} </button>
+			</div>
 		</div>
 
 		<div class="section-body section-body-job-card form-section hide">
 			<hr>
-			{{ __("Raw Materials") }}
+			<div class="row">
+				<div class="form-column col-sm-2">
+					{{ __("Raw Materials") }}
+				</div>
+				{% if(d.make_material_request) { %}
+					<div class="form-column col-sm-10 text-right">
+						<button class="btn btn-default btn-xs make-material-request" job-card="{{d.name}}">{{ __("Material Request") }}</button>
+					</div>
+				{% } %}
+			</div>
 
 			{% if(d.raw_materials) { %}
 			<table class="table table-bordered table-condensed">

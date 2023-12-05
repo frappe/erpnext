@@ -164,6 +164,28 @@ class Workstation(Document):
 
 		return schedule_date
 
+	@frappe.whitelist()
+	def start_job(self, job_card, from_time, employee):
+		doc = frappe.get_doc("Job Card", job_card)
+		doc.append("time_logs", {"from_time": from_time, "employee": employee})
+		doc.save(ignore_permissions=True)
+
+		return doc
+
+	@frappe.whitelist()
+	def complete_job(self, job_card, qty, to_time):
+		doc = frappe.get_doc("Job Card", job_card)
+		for row in doc.time_logs:
+			if not row.to_time:
+				row.to_time = to_time
+				row.time_in_mins = time_diff_in_hours(row.to_time, row.from_time) / 60
+				row.completed_qty = qty
+
+		doc.save(ignore_permissions=True)
+		doc.submit()
+
+		return doc
+
 
 @frappe.whitelist()
 def get_job_cards(workstation):
@@ -177,6 +199,7 @@ def get_job_cards(workstation):
 				"operation",
 				"total_completed_qty",
 				"for_quantity",
+				"transferred_qty",
 				"status",
 				"expected_start_date",
 				"expected_end_date",
@@ -193,6 +216,11 @@ def get_job_cards(workstation):
 
 		job_cards = [row.name for row in jc_data]
 		raw_materials = get_raw_materials(job_cards)
+		time_logs = get_time_logs(job_cards)
+
+		allow_excess_transfer = frappe.db.get_single_value(
+			"Manufacturing Settings", "job_card_excess_transfer"
+		)
 
 		for row in jc_data:
 			row.progress_percent = (
@@ -204,12 +232,16 @@ def get_job_cards(workstation):
 			row.work_order_link = get_link_to_form("Work Order", row.work_order)
 
 			row.raw_materials = raw_materials.get(row.name, [])
+			row.time_logs = time_logs.get(row.name, [])
+			row.make_material_request = False
+			if row.for_quantity > row.transferred_qty or allow_excess_transfer:
+				row.make_material_request = True
 
 		return jc_data
 
 
 def get_status_color(status):
-	colos_map = {
+	color_map = {
 		"Pending": "var(--bg-blue)",
 		"In Process": "var(--bg-yellow)",
 		"Submitted": "var(--bg-blue)",
@@ -218,7 +250,7 @@ def get_status_color(status):
 		"Work In Progress": "var(--bg-orange)",
 	}
 
-	return colos_map.get(status, "var(--bg-blue)")
+	return color_map.get(status, "var(--bg-blue)")
 
 
 def get_raw_materials(job_cards):
@@ -243,6 +275,29 @@ def get_raw_materials(job_cards):
 		raw_materials.setdefault(row.parent, []).append(row)
 
 	return raw_materials
+
+
+def get_time_logs(job_cards):
+	time_logs = {}
+
+	data = frappe.get_all(
+		"Job Card Time Log",
+		fields=[
+			"parent",
+			"name",
+			"employee",
+			"from_time",
+			"to_time",
+			"time_in_mins",
+		],
+		filters={"parent": ["in", job_cards], "parentfield": "time_logs"},
+		order_by="parent, idx",
+	)
+
+	for row in data:
+		time_logs.setdefault(row.parent, []).append(row)
+
+	return time_logs
 
 
 @frappe.whitelist()

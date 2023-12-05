@@ -510,7 +510,6 @@ body[data-route="pos"] {
 }
 
 .plant-floor-container {
-	padding-top: 10px;
 	display: grid;
 	grid-template-columns: repeat(6,minmax(0,1fr));
 	gap: var(--margin-xl);
@@ -530,7 +529,7 @@ body[data-route="pos"] {
 	width: 100%;
 	font-size: 50px;
 	margin: var(--margin-sm);
-	min-height: 11rem;
+	min-height: 9rem;
 }
 
 .workstation-abbr {
