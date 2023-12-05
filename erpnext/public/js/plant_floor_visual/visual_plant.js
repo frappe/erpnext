@@ -26,6 +26,7 @@ class VisualPlantFloor {
 			this.filter_wrapper = this.wrapper.find('.plant-floor-filter');
 			this.visualization_wrapper = this.wrapper.find('.plant-floor-visualization');
 		} else if(this.plant_floor) {
+			this.wrapper.find('.plant-floor').css('border', 'none');
 			this.prepare_data();
 		}
 	}
@@ -138,7 +139,6 @@ class VisualPlantFloor {
 	}
 
 	render_workstations() {
-		console.log(this.wrapper.find('.plant-floor-container'))
 		this.wrapper.find('.plant-floor-container').empty();
 		let template  = frappe.render_template("visual_plant_floor_template", {
 			workstations: this.workstations
