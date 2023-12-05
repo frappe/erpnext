@@ -990,7 +990,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
-		self.assertFalse(gl_entries)
+		self.assertEqual(len(gl_entries), 2)
 
 		expected_sle = {"Work In Progress - TCP1": -5, "Stores - TCP1": 5}
 
