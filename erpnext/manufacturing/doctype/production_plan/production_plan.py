@@ -33,6 +33,81 @@ from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
 class ProductionPlan(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.material_request_plan_item.material_request_plan_item import (
+			MaterialRequestPlanItem,
+		)
+		from erpnext.manufacturing.doctype.production_plan_item.production_plan_item import (
+			ProductionPlanItem,
+		)
+		from erpnext.manufacturing.doctype.production_plan_item_reference.production_plan_item_reference import (
+			ProductionPlanItemReference,
+		)
+		from erpnext.manufacturing.doctype.production_plan_material_request.production_plan_material_request import (
+			ProductionPlanMaterialRequest,
+		)
+		from erpnext.manufacturing.doctype.production_plan_material_request_warehouse.production_plan_material_request_warehouse import (
+			ProductionPlanMaterialRequestWarehouse,
+		)
+		from erpnext.manufacturing.doctype.production_plan_sales_order.production_plan_sales_order import (
+			ProductionPlanSalesOrder,
+		)
+		from erpnext.manufacturing.doctype.production_plan_sub_assembly_item.production_plan_sub_assembly_item import (
+			ProductionPlanSubAssemblyItem,
+		)
+
+		amended_from: DF.Link | None
+		combine_items: DF.Check
+		combine_sub_items: DF.Check
+		company: DF.Link
+		customer: DF.Link | None
+		for_warehouse: DF.Link | None
+		from_date: DF.Date | None
+		from_delivery_date: DF.Date | None
+		get_items_from: DF.Literal["", "Sales Order", "Material Request"]
+		ignore_existing_ordered_qty: DF.Check
+		include_non_stock_items: DF.Check
+		include_safety_stock: DF.Check
+		include_subcontracted_items: DF.Check
+		item_code: DF.Link | None
+		material_requests: DF.Table[ProductionPlanMaterialRequest]
+		mr_items: DF.Table[MaterialRequestPlanItem]
+		naming_series: DF.Literal["MFG-PP-.YYYY.-"]
+		po_items: DF.Table[ProductionPlanItem]
+		posting_date: DF.Date
+		prod_plan_references: DF.Table[ProductionPlanItemReference]
+		project: DF.Link | None
+		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
+		sales_orders: DF.Table[ProductionPlanSalesOrder]
+		skip_available_sub_assembly_item: DF.Check
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Submitted",
+			"Not Started",
+			"In Process",
+			"Completed",
+			"Closed",
+			"Cancelled",
+			"Material Requested",
+		]
+		sub_assembly_items: DF.Table[ProductionPlanSubAssemblyItem]
+		sub_assembly_warehouse: DF.Link | None
+		to_date: DF.Date | None
+		to_delivery_date: DF.Date | None
+		total_planned_qty: DF.Float
+		total_produced_qty: DF.Float
+		warehouse: DF.Link | None
+		warehouses: DF.TableMultiSelect[ProductionPlanMaterialRequestWarehouse]
+	# end: auto-generated types
+
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
 		self.calculate_total_planned_qty()
@@ -1522,18 +1597,22 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	)
 
 	locations = get_available_item_locations(
-		item.get("item_code"), warehouses, item.get("quantity"), company, ignore_validation=True
+		item.get("item_code"),
+		warehouses,
+		item.get("quantity") * item.get("conversion_factor"),
+		company,
+		ignore_validation=True,
 	)
 
 	required_qty = item.get("quantity")
+	if item.get("conversion_factor") and item.get("purchase_uom") != item.get("stock_uom"):
+		# Convert qty to stock UOM
+		required_qty = required_qty * item.get("conversion_factor")
+
 	# get available material by transferring to production warehouse
 	for d in locations:
 		if required_qty <= 0:
 			return
-
-		conversion_factor = 1.0
-		if purchase_uom != stock_uom and purchase_uom == item["uom"]:
-			conversion_factor = get_uom_conversion_factor(item["item_code"], item["uom"])
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
@@ -1544,10 +1623,11 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 				"material_request_type": "Material Transfer",
 				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse"),
+				"conversion_factor": 1.0,
 			}
 		)
 
-		required_qty -= quantity / conversion_factor
+		required_qty -= quantity
 		new_mr_items.append(new_dict)
 
 	# raise purchase request for remaining qty
@@ -1559,7 +1639,7 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
 
-		item["quantity"] = required_qty
+		item["quantity"] = required_qty / item.get("conversion_factor")
 
 		new_mr_items.append(item)
 

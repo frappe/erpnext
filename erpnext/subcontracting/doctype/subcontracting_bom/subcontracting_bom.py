@@ -8,6 +8,25 @@ from frappe.utils import flt
 
 
 class SubcontractingBOM(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		conversion_factor: DF.Float
+		finished_good: DF.Link
+		finished_good_bom: DF.Link
+		finished_good_qty: DF.Float
+		finished_good_uom: DF.Link | None
+		is_active: DF.Check
+		service_item: DF.Link
+		service_item_qty: DF.Float
+		service_item_uom: DF.Link
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_finished_good()
 		self.validate_service_item()
