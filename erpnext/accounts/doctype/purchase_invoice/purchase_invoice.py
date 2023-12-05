@@ -371,7 +371,7 @@ class PurchaseInvoice(BuyingController):
 		check_list = []
 
 		for d in self.get("items"):
-			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
+			if d.purchase_order and d.purchase_order not in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
 				check_on_hold_or_closed_status("Purchase Order", d.purchase_order)
 

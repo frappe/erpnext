@@ -185,7 +185,10 @@ class AuthorizationControl(TransactionBase):
 
 		# Remove user specific rules from global authorization rules
 		for r in based_on:
-			if r in final_based_on and not r in ["Itemwise Discount", "Item Group wise Discount"]:
+			if r in final_based_on and r not in [
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			]:
 				final_based_on.remove(r)
 
 		# Check for authorization set on particular roles
@@ -213,7 +216,10 @@ class AuthorizationControl(TransactionBase):
 
 		# Remove role specific rules from global authorization rules
 		for r in based_on:
-			if r in final_based_on and not r in ["Itemwise Discount", "Item Group wise Discount"]:
+			if r in final_based_on and r not in [
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			]:
 				final_based_on.remove(r)
 
 		# Check for global authorization

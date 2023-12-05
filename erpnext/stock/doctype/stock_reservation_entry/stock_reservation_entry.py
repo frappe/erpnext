@@ -931,7 +931,7 @@ def create_stock_reservation_entries_for_so_items(
 			continue
 
 		# Stock should be reserved from the Pick List if has Picked Qty.
-		if not from_voucher_type == "Pick List" and flt(item.picked_qty) > 0:
+		if from_voucher_type != "Pick List" and flt(item.picked_qty) > 0:
 			frappe.throw(
 				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
 					item.idx, frappe.bold(item.item_code)

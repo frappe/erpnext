@@ -286,7 +286,7 @@ class PricingRule(Document):
 	def validate_price_list_with_currency(self):
 		if self.currency and self.for_price_list:
 			price_list_currency = frappe.db.get_value("Price List", self.for_price_list, "currency", True)
-			if not self.currency == price_list_currency:
+			if self.currency != price_list_currency:
 				throw(_("Currency should be same as Price List Currency: {0}").format(price_list_currency))
 
 	def validate_dates(self):

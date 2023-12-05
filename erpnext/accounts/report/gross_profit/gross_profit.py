@@ -695,7 +695,7 @@ class GrossProfitGenerator(object):
 
 	def get_average_buying_rate(self, row, item_code):
 		args = row
-		if not item_code in self.average_buying_rate:
+		if item_code not in self.average_buying_rate:
 			args.update(
 				{
 					"voucher_type": row.parenttype,

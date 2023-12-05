@@ -775,7 +775,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 				frozen_accounts_modifier = frappe.db.get_single_value(
 					"Accounts Settings", "frozen_accounts_modifier"
 				)
-				if not frozen_accounts_modifier in frappe.get_roles():
+				if frozen_accounts_modifier not in frappe.get_roles():
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
