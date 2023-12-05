@@ -295,6 +295,7 @@ class PaymentReconciliation(Document):
 				"amount": pay.get("amount"),
 				"allocated_amount": allocated_amount,
 				"difference_amount": pay.get("difference_amount"),
+				"currency": inv.get("currency"),
 			}
 		)
 

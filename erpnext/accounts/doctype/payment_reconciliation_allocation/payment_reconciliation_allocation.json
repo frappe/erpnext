@@ -20,7 +20,8 @@
   "section_break_5",
   "difference_amount",
   "column_break_7",
-  "difference_account"
+  "difference_account",
+  "currency"
  ],
  "fields": [
   {
@@ -37,7 +38,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Allocated Amount",
-   "options": "Currency",
+   "options": "currency",
    "reqd": 1
   },
   {
@@ -112,7 +113,7 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Unreconciled Amount",
-   "options": "Currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -120,7 +121,7 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Amount",
-   "options": "Currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -129,11 +130,18 @@
    "hidden": 1,
    "label": "Reference Row",
    "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-10-06 11:48:59.616562",
+ "modified": "2023-11-28 16:30:43.344612",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",
