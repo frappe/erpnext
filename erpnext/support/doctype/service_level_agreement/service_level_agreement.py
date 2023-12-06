@@ -100,7 +100,7 @@ class ServiceLevelAgreement(Document):
 			priorities.append(priority.priority)
 
 		# Check if repeated priority
-		if not len(set(priorities)) == len(priorities):
+		if len(set(priorities)) != len(priorities):
 			repeated_priority = get_repeated(priorities)
 			frappe.throw(_("Priority {0} has been repeated.").format(repeated_priority))
 
@@ -128,7 +128,7 @@ class ServiceLevelAgreement(Document):
 				)
 
 		# Check for repeated workday
-		if not len(set(support_days)) == len(support_days):
+		if len(set(support_days)) != len(support_days):
 			repeated_days = get_repeated(support_days)
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
@@ -748,13 +748,13 @@ def change_service_level_agreement_and_priority(self):
 		and frappe.db.get_single_value("Support Settings", "track_service_level_agreement")
 	):
 
-		if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
+		if self.priority != frappe.db.get_value("Issue", self.name, "priority"):
 			self.set_response_and_resolution_time(
 				priority=self.priority, service_level_agreement=self.service_level_agreement
 			)
 			frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
 
-		if not self.service_level_agreement == frappe.db.get_value(
+		if self.service_level_agreement != frappe.db.get_value(
 			"Issue", self.name, "service_level_agreement"
 		):
 			self.set_response_and_resolution_time(

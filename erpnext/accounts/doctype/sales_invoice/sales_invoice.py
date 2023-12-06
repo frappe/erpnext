@@ -458,7 +458,7 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
 
-		if not cint(self.is_pos) == 1 and not self.is_return:
+		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
@@ -1960,9 +1960,9 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 	if inter_company_reference:
 		doc = frappe.get_doc(ref_doc, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
-		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
+		if frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") != party:
 			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(partytype)))
-		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
+		if frappe.get_cached_value(ref_partytype, ref_party, "represents_company") != company:
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
@@ -1972,7 +1972,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 			filters={"parenttype": partytype, "parent": party},
 		)
 		companies = [d.company for d in companies]
-		if not company in companies:
+		if company not in companies:
 			frappe.throw(
 				_("{0} not allowed to transact with {1}. Please change the Company.").format(
 					_(partytype), company

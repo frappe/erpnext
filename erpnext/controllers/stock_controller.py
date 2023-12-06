@@ -642,7 +642,7 @@ class StockController(AccountsController):
 		)
 		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
 
-		if not qa_docstatus == 1:
+		if qa_docstatus != 1:
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = (
 				f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}"

@@ -369,12 +369,12 @@ class PaymentEntry(AccountsController):
 				self.set(self.party_account_field, party_account)
 				self.party_account = party_account
 
-		if self.paid_from and not (self.paid_from_account_currency or self.paid_from_account_balance):
+		if self.paid_from and not self.paid_from_account_currency and not self.paid_from_account_balance:
 			acc = get_account_details(self.paid_from, self.posting_date, self.cost_center)
 			self.paid_from_account_currency = acc.account_currency
 			self.paid_from_account_balance = acc.account_balance
 
-		if self.paid_to and not (self.paid_to_account_currency or self.paid_to_account_balance):
+		if self.paid_to and not self.paid_to_account_currency and not self.paid_to_account_balance:
 			acc = get_account_details(self.paid_to, self.posting_date, self.cost_center)
 			self.paid_to_account_currency = acc.account_currency
 			self.paid_to_account_balance = acc.account_balance
@@ -390,8 +390,9 @@ class PaymentEntry(AccountsController):
 	) -> None:
 		for d in self.get("references"):
 			if d.allocated_amount:
-				if update_ref_details_only_for and (
-					not (d.reference_doctype, d.reference_name) in update_ref_details_only_for
+				if (
+					update_ref_details_only_for
+					and (d.reference_doctype, d.reference_name) not in update_ref_details_only_for
 				):
 					continue
 
@@ -702,7 +703,7 @@ class PaymentEntry(AccountsController):
 		self.db_set("status", self.status, update_modified=True)
 
 	def set_tax_withholding(self):
-		if not self.party_type == "Supplier":
+		if self.party_type != "Supplier":
 			return
 
 		if not self.apply_tax_withholding_amount:
@@ -793,7 +794,7 @@ class PaymentEntry(AccountsController):
 		self.base_received_amount = self.base_paid_amount
 		if (
 			self.paid_from_account_currency == self.paid_to_account_currency
-			and not self.payment_type == "Internal Transfer"
+			and self.payment_type != "Internal Transfer"
 		):
 			self.received_amount = self.paid_amount
 
@@ -1757,7 +1758,7 @@ def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates:
 		"Payment Schedule", filters={"parent": invoice.voucher_no}, fields=["*"], order_by="due_date"
 	)
 	for payment_term in payment_schedule:
-		if not payment_term.outstanding > 0.1:
+		if payment_term.outstanding <= 0.1:
 			continue
 
 		doc_details = exc_rates.get(payment_term.parent, None)

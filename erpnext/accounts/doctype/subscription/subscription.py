@@ -676,7 +676,7 @@ class Subscription(Document):
 		to_generate_invoice = (
 			True
 			if self.status == "Active"
-			and not self.generate_invoice_at == "Beginning of the current subscription period"
+			and self.generate_invoice_at != "Beginning of the current subscription period"
 			else False
 		)
 		self.status = "Cancelled"
@@ -694,7 +694,7 @@ class Subscription(Document):
 		subscription and the `Subscription` will lose all the history of generated invoices
 		it has.
 		"""
-		if not self.status == "Cancelled":
+		if self.status != "Cancelled":
 			frappe.throw(_("You cannot restart a Subscription that is not cancelled."), InvoiceNotCancelled)
 
 		self.status = "Active"
