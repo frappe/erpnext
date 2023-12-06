@@ -118,6 +118,7 @@ class BuyingController(SubcontractingController):
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
+							"voucher_detail_no": row.name,
 						},
 						raise_error_if_no_rate=False,
 					)
@@ -373,6 +374,7 @@ class BuyingController(SubcontractingController):
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"allow_zero_valuation": d.get("allow_zero_valuation"),
+							"voucher_detail_no": d.name,
 						},
 						raise_error_if_no_rate=False,
 					)
@@ -440,7 +442,7 @@ class BuyingController(SubcontractingController):
 
 				if allow_to_edit_stock_qty:
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
-					if d.get("received_stock_qty"):
+					if d.get("received_stock_qty") and d.meta.get_field("received_stock_qty"):
 						d.received_stock_qty = flt(d.received_stock_qty, d.precision("received_stock_qty"))
 
 	def validate_purchase_return(self):

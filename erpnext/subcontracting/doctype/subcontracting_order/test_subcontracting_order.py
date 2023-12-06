@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
 from erpnext.controllers.subcontracting_controller import (
@@ -565,6 +566,123 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertEqual(sco.status, "Closed")
 		self.assertEqual(sco.supplied_items[0].returned_qty, 5)
+
+	def test_ordered_qty_for_subcontracting_order(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA8",
+				"fg_item_qty": 10,
+			},
+		]
+
+		ordered_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="ordered_qty",
+		)
+		ordered_qty = flt(ordered_qty)
+
+		sco = get_subcontracting_order(service_items=service_items)
+		sco.reload()
+
+		new_ordered_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="ordered_qty",
+		)
+		new_ordered_qty = flt(new_ordered_qty)
+
+		self.assertEqual(ordered_qty + 10, new_ordered_qty)
+
+		for row in sco.supplied_items:
+			make_stock_entry(
+				target="_Test Warehouse 1 - _TC",
+				item_code=row.rm_item_code,
+				qty=row.required_qty,
+				basic_rate=100,
+			)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		new_ordered_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="ordered_qty",
+		)
+
+		self.assertEqual(ordered_qty, new_ordered_qty)
+
+		scr.reload()
+		scr.cancel()
+
+		new_ordered_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="ordered_qty",
+		)
+
+		self.assertEqual(ordered_qty + 10, new_ordered_qty)
+
+	def test_requested_qty_for_subcontracting_order(self):
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		requested_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="indented_qty",
+		)
+		requested_qty = flt(requested_qty)
+
+		mr = make_material_request(
+			item_code="Subcontracted Item SA8",
+			material_request_type="Purchase",
+			qty=10,
+		)
+
+		self.assertTrue(mr.docstatus == 1)
+
+		new_requested_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="indented_qty",
+		)
+		new_requested_qty = flt(new_requested_qty)
+
+		self.assertEqual(requested_qty + 10, new_requested_qty)
+
+		po = make_purchase_order(mr.name)
+		po.is_subcontracted = 1
+		po.supplier = "_Test Supplier"
+		po.items[0].fg_item = "Subcontracted Item SA8"
+		po.items[0].fg_item_qty = 10
+		po.items[0].item_code = "Subcontracted Service Item 8"
+		po.items[0].item_name = "Subcontracted Service Item 8"
+		po.items[0].qty = 10
+		po.supplier_warehouse = "_Test Warehouse 1 - _TC"
+		po.save()
+		po.submit()
+
+		self.assertTrue(po.items[0].material_request)
+		self.assertTrue(po.items[0].material_request_item)
+
+		sco = create_subcontracting_order(po_name=po.name)
+		self.assertTrue(sco.items[0].material_request)
+		self.assertTrue(sco.items[0].material_request_item)
+
+		new_requested_qty = frappe.db.get_value(
+			"Bin",
+			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "Subcontracted Item SA8"},
+			fieldname="indented_qty",
+		)
+		new_requested_qty = flt(new_requested_qty)
+
+		self.assertEqual(requested_qty, new_requested_qty)
 
 
 def create_subcontracting_order(**args):

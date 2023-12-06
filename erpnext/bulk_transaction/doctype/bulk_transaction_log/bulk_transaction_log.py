@@ -10,6 +10,20 @@ from pypika import Order
 
 
 class BulkTransactionLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		date: DF.Date | None
+		failed: DF.Int
+		log_entries: DF.Int
+		succeeded: DF.Int
+	# end: auto-generated types
+
 	def db_insert(self, *args, **kwargs):
 		pass
 

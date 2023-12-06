@@ -9,6 +9,32 @@ from frappe.utils import flt
 
 
 class CashierClosing(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.cashier_closing_payments.cashier_closing_payments import (
+			CashierClosingPayments,
+		)
+
+		amended_from: DF.Link | None
+		custody: DF.Float
+		date: DF.Date | None
+		expense: DF.Float
+		from_time: DF.Time
+		naming_series: DF.Literal["POS-CLO-"]
+		net_amount: DF.Float
+		outstanding_amount: DF.Float
+		payments: DF.Table[CashierClosingPayments]
+		returns: DF.Float
+		time: DF.Time
+		user: DF.Link
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_time()
 

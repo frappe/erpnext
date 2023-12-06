@@ -8,6 +8,24 @@ from frappe.model.document import Document
 
 
 class ModeofPayment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.mode_of_payment_account.mode_of_payment_account import (
+			ModeofPaymentAccount,
+		)
+
+		accounts: DF.Table[ModeofPaymentAccount]
+		enabled: DF.Check
+		mode_of_payment: DF.Data
+		type: DF.Literal["Cash", "Bank", "General", "Phone"]
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_accounts()
 		self.validate_repeating_companies()

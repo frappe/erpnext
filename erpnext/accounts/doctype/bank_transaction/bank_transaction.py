@@ -9,6 +9,41 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 
 class BankTransaction(StatusUpdater):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.bank_transaction_payments.bank_transaction_payments import (
+			BankTransactionPayments,
+		)
+
+		allocated_amount: DF.Currency
+		amended_from: DF.Link | None
+		bank_account: DF.Link | None
+		bank_party_account_number: DF.Data | None
+		bank_party_iban: DF.Data | None
+		bank_party_name: DF.Data | None
+		company: DF.Link | None
+		currency: DF.Link | None
+		date: DF.Date | None
+		deposit: DF.Currency
+		description: DF.SmallText | None
+		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+		payment_entries: DF.Table[BankTransactionPayments]
+		reference_number: DF.Data | None
+		status: DF.Literal["", "Pending", "Settled", "Unreconciled", "Reconciled", "Cancelled"]
+		transaction_id: DF.Data | None
+		transaction_type: DF.Data | None
+		unallocated_amount: DF.Currency
+		withdrawal: DF.Currency
+	# end: auto-generated types
+
 	def before_validate(self):
 		self.update_allocated_amount()
 
