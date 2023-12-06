@@ -232,6 +232,7 @@ class PickList(Document):
 				else:
 					updated_locations[key].qty += location.qty
 					updated_locations[key].stock_qty += location.stock_qty
+					updated_locations[key].batch_no = location.batch_no
 
 		for location in updated_locations.values():
 			if location.picked_qty > location.stock_qty:
@@ -472,7 +473,9 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	while flt(remaining_stock_qty) > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
-
+		if item_doc.batch_no and item_location.batch_no != item_doc.batch_no:
+			continue
+		
 		stock_qty = (
 			remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
 		)
