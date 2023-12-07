@@ -231,14 +231,14 @@
   {
    "fieldname": "sub_assembly_bom",
    "fieldtype": "Link",
-   "label": "BOM",
-   "options": "BOM"
+   "label": "Sub Assembly BOM",
+   "options": "BOM",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "fetched_from_bom",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Fetched from BOM",
    "read_only": 1
   }
@@ -246,7 +246,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-03 14:28:43.187116",
+ "modified": "2023-12-07 18:23:57.106508",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",

@@ -458,12 +458,12 @@ def get_item_details(item_code):
 def get_items_from_bom(bom, qty):
 	items = []
 	for i, item in enumerate(frappe.get_doc("BOM", bom).items):
-		items.append({
-			"idx": i,
-			'item_code': item.item_code,
-			'qty': item.qty * flt(qty),
-			"fetched_from_bom": True,
-		})
+		items.append(
+			{
+				'item_code': item.item_code,
+				'qty': item.qty * flt(qty),
+			}
+		)
 	return items
 
 
