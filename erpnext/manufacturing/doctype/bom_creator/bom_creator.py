@@ -394,12 +394,12 @@ def add_sub_assembly(**kwargs):
 
 	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	bom_item = frappe.parse_json(kwargs.bom_item)
+	print(bom_item)
 
 	name = kwargs.fg_reference_id
 	parent_row_no = ""
-	item_info = get_item_details(bom_item.item_code)
-	item_default_bom = item_info.default_bom if bom_item.use_existing_bom else None
 	if not kwargs.convert_to_sub_assembly:
+		item_info = get_item_details(bom_item.item_code)
 		item_row = doc.append(
 			"items",
 			{
@@ -411,35 +411,17 @@ def add_sub_assembly(**kwargs):
 				"fg_reference_id": name,
 				"stock_qty": bom_item.qty,
 				"fg_reference_id": name,
-				"do_not_explode": 1,
+				"do_not_explode": 0 if bom_item.bom_no else 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
+				"sub_assembly_bom": bom_item.bom_no,
+				"bom_created": 1 if bom_item.bom_no else 0,
 			},
 		)
 
 		parent_row_no = item_row.idx
 		name = ""
-	if item_default_bom:
-		for i, item in enumerate(doc.items):
-			if item.item_code == bom_item.item_code:
-				doc.items[i].sub_assembly_bom = item_default_bom
-				doc.items[i].do_not_explode = 0
-				doc.items[i].bom_created = True
-				break
-
-	bom_items = []
-	if item_default_bom:
-		for i, bom_i in enumerate(frappe.get_doc("BOM", item_default_bom).items):
-			bom_items.append(
-				{
-					"idx": i,
-					"item_code": bom_i.item_code,
-					"qty": bom_i.qty * bom_item.qty,
-					"fetched_from_bom": True,
-				}
-			)
-	elif bom_item.get("items"):
-		bom_items = bom_item.get("items")
+	bom_items = bom_item.get("items")
 
 	for row in bom_items:
 		row = frappe._dict(row)
@@ -470,6 +452,19 @@ def get_item_details(item_code):
 	return frappe.get_cached_value(
 		"Item", item_code, ["item_name", "description", "image", "stock_uom", "default_bom"], as_dict=1
 	)
+
+
+@frappe.whitelist()
+def get_items_from_bom(bom, qty):
+	items = []
+	for i, item in enumerate(frappe.get_doc("BOM", bom).items):
+		items.append({
+			"idx": i,
+			'item_code': item.item_code,
+			'qty': item.qty * flt(qty),
+			"fetched_from_bom": True,
+		})
+	return items
 
 
 @frappe.whitelist()

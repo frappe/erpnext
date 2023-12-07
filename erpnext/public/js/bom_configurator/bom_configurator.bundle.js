@@ -34,6 +34,7 @@ class BOMConfigurator {
 			add_item: this.add_item,
 			add_sub_assembly: this.add_sub_assembly,
 			get_sub_assembly_modal_fields: this.get_sub_assembly_modal_fields,
+			get_sub_assembly_dialog: this.get_sub_assembly_dialog,
 			convert_to_sub_assembly: this.convert_to_sub_assembly,
 			delete_node: this.delete_node,
 			edit_qty: this.edit_qty,
@@ -229,10 +230,7 @@ class BOMConfigurator {
 	}
 
 	add_sub_assembly(node, view) {
-		let dialog = new frappe.ui.Dialog({
-			fields: view.events.get_sub_assembly_modal_fields(),
-			title: __("Add Sub Assembly"),
-		});
+		let dialog = view.events.get_sub_assembly_dialog();
 
 		dialog.show();
 		view.events.set_default_qty(dialog);
@@ -262,34 +260,82 @@ class BOMConfigurator {
 
 	}
 
-	get_sub_assembly_modal_fields(read_only=false) {
-		return [
-			{ label: __("Sub Assembly Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, read_only: read_only },
-			{ label: __("Use existing BOM"), fieldname: "use_existing_bom", fieldtype: "Check", default: true },
-			{ fieldtype: "Column Break" },
-			{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, read_only: read_only },
-			{ fieldtype: "Section Break" },
-			{
-				label: __("Raw Materials"), fieldname: "items", fieldtype: "Table", reqd: 0,
-				fields: [
-					{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, in_list_view: 1 },
-					{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, in_list_view: 1 },
-				]
-			},
-		]
+	get_sub_assembly_dialog(read_only = false) {
+		let dialog = new frappe.ui.Dialog({
+			fields: [
+				{ label: __("Sub Assembly Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, read_only: read_only },
+				{
+					label: __("BOM"), fieldname: "bom_no", fieldtype: "Link", options: "BOM",
+					onchange: () => {
+						dialog.fields_dict.items.set_focus();
+						let bom_set = (dialog.get_value("bom_no") !== '');
+						function set_fields_read_only(bom_set) {
+							dialog.set_df_property("item_code", "read_only", bom_set);
+							dialog.set_df_property("qty", "read_only", bom_set);
+							// ref https://github.com/frappe/frappe/issues/23661
+							// dialog.set_df_property("items", "read_only", bom_set);	// this doesn't work
+							dialog.get_field("items").grid.toggle_enable("item_code", !bom_set);
+							dialog.get_field("items").grid.toggle_enable("qty", !bom_set);
+							dialog.get_field("items").grid.static_rows = bom_set;
+							dialog.fields_dict.items.grid.refresh();
+						}
+						if (bom_set) {
+							dialog.get_field("items").grid.remove_all();	// only removes alternate items for some reason. need to fix
+							frappe.call({
+								method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_items_from_bom",
+								args: {
+									bom: dialog.get_value("bom_no"),
+									qty: dialog.get_value("qty"),
+								},
+								callback: (r) => {
+									r.message.forEach((value, idx) => {
+										let row_idx = parseInt(idx) + 1;
+										dialog.fields_dict.items.grid.add_new_row();
+										let row = dialog.fields_dict.items.grid.grid_rows_by_docname["row " + row_idx].doc;
+										row.item_code = value.item_code;
+										row.qty = value.qty;
+										row.fetched_from_bom = 1;
+									});
+									set_fields_read_only(bom_set);
+								},
+							});
+						}
+						else {
+							set_fields_read_only(bom_set);
+						}
+					},
+					get_query() {
+						return {
+							"filters": {
+								"item": dialog.get_value("item_code")
+							}
+						}
+					}
+				},
+				{ fieldtype: "Column Break" },
+				{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, read_only: read_only },
+				{ fieldtype: "Section Break" },
+				{
+					label: __("Raw Materials"), fieldname: "items", fieldtype: "Table", reqd: 1,
+					fields: [
+						{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, in_list_view: 1 },
+						{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, in_list_view: 1 },
+						{ label: __("Fetched from BOM"), fieldname: "fetched_from_bom", fieldtype: "Check", read_only: 1 },
+					]
+				},
+			],
+			title: __("Add Sub Assembly"),
+		});
+		return dialog;
 	}
 
 	convert_to_sub_assembly(node, view) {
-		let dialog = new frappe.ui.Dialog({
-			fields: view.events.get_sub_assembly_modal_fields(true),
-			title: __("Add Sub Assembly"),
-		});
+		let dialog = view.events.get_sub_assembly_dialog(true);
 
 		dialog.set_values({
 			item_code: node.data.value,
 			qty: node.data.qty,
 		});
-
 		dialog.show();
 		view.events.set_default_qty(dialog);
 
@@ -321,7 +367,7 @@ class BOMConfigurator {
 				let name = $(event.currentTarget).closest('.grid-row').attr("data-name")
 				let item_row = dialog.fields_dict.items.grid.grid_rows_by_docname[name].doc;
 				item_row.qty = 1;
-				dialog.fields_dict.items.grid.refresh()
+				dialog.fields_dict.items.grid.refresh();
 			}
 		}
 	}
