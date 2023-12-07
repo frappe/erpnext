@@ -409,8 +409,7 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					if (node.is_root) {
-						// can't get this to work at all
-						// only a refresh of the entire webpage works
+						this.frm.set_value('qty', data.qty);
 					}
 					this.frm.trigger("build_tree");
 				}
