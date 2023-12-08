@@ -252,6 +252,7 @@ class SerialandBatchBundle(Document):
 				"serial_nos": [row.serial_no for row in self.entries if row.serial_no],
 				"batch_nos": {row.batch_no: row for row in self.entries if row.batch_no},
 				"voucher_type": self.voucher_type,
+				"voucher_detail_no": self.voucher_detail_no,
 			}
 		)
 
@@ -1744,3 +1745,8 @@ def get_stock_ledgers_batches(kwargs):
 			batches[key].qty += d.qty
 
 	return batches
+
+
+@frappe.whitelist()
+def get_batch_no_from_serial_no(serial_no):
+	return frappe.get_cached_value("Serial No", serial_no, "batch_no")

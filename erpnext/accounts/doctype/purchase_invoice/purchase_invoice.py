@@ -371,7 +371,7 @@ class PurchaseInvoice(BuyingController):
 		check_list = []
 
 		for d in self.get("items"):
-			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
+			if d.purchase_order and d.purchase_order not in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
 				check_on_hold_or_closed_status("Purchase Order", d.purchase_order)
 
@@ -1449,6 +1449,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 			"Serial and Batch Bundle",
@@ -1858,7 +1860,5 @@ def make_purchase_receipt(source_name, target_doc=None):
 		},
 		target_doc,
 	)
-
-	doc.set_onload("ignore_price_list", True)
 
 	return doc

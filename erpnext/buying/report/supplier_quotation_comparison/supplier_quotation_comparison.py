@@ -126,7 +126,7 @@ def prepare_data(supplier_quotation_data, filters):
 		# map for chart preparation of the form {'supplier1': {'qty': 'price'}}
 		supplier = data.get("supplier_name")
 		if filters.get("item_code"):
-			if not supplier in supplier_qty_price_map:
+			if supplier not in supplier_qty_price_map:
 				supplier_qty_price_map[supplier] = {}
 			supplier_qty_price_map[supplier][row["qty"]] = row["price"]
 
@@ -169,7 +169,7 @@ def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
 	for supplier in suppliers:
 		entry = supplier_qty_price_map[supplier]
 		for qty in qty_list:
-			if not qty in data_points_map:
+			if qty not in data_points_map:
 				data_points_map[qty] = []
 			if qty in entry:
 				data_points_map[qty].append(entry[qty])

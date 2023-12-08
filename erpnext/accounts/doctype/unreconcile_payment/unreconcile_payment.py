@@ -37,7 +37,7 @@ class UnreconcilePayment(Document):
 
 	def validate(self):
 		self.supported_types = ["Payment Entry", "Journal Entry"]
-		if not self.voucher_type in self.supported_types:
+		if self.voucher_type not in self.supported_types:
 			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
 
 	@frappe.whitelist()
